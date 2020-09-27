@@ -1,5 +1,4 @@
 using System;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.WebSessionState;
@@ -19,19 +18,20 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					throw new ApplicationException( "emailAddress" );
 			}
 
-			protected override AlternativeResourceMode createAlternativeMode() {
-				return FormsAuthStatics.PasswordResetEnabled ? null : new DisabledResourceMode( "Password reset is disabled." );
-			}
+			protected override AlternativeResourceMode createAlternativeMode() =>
+				FormsAuthStatics.PasswordResetEnabled ? null : new DisabledResourceMode( "Password reset is disabled." );
 		}
 
 		protected override void loadData() {
 			ph.AddControlsReturnThis(
-				new LegacyParagraph(
-					StringTools.ConcatenateWithDelimiter(
-						" ",
-						"Click \"Reset Password\" to email yourself a new password.",
-						"Upon receiving your new password, you may immediately use it to log in.",
-						"You will then be prompted to change your password to something you will remember, which you may use to log in from that point forward." ) ) );
+				new Paragraph(
+						StringTools.ConcatenateWithDelimiter(
+								" ",
+								"Click \"Reset Password\" to email yourself a new password.",
+								"Upon receiving your new password, you may immediately use it to log in.",
+								"You will then be prompted to change your password to something you will remember, which you may use to log in from that point forward." )
+							.ToComponents() ).ToCollection()
+					.GetControls() );
 
 			EwfUiStatics.SetContentFootActions(
 				new ButtonSetup(

@@ -25,7 +25,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		private static readonly ElementClass processingDialogTimeOutParagraphClass = new ElementClass( "ewfTimeOutP" );
 		private const string notificationSectionContainerNotificationClass = "ewfNotificationN";
 		private const string notificationSectionContainerDockedClass = "ewfNotificationD";
-		private const string notificationSpacerClass = "ewfNotificationSpacer";
+		private static readonly ElementClass notificationSpacerClass = new ElementClass( "ewfNotificationSpacer" );
 		private static readonly ElementClass infoMessageContainerClass = new ElementClass( "ewfInfoMsg" );
 		private static readonly ElementClass warningMessageContainerClass = new ElementClass( "ewfWarnMsg" );
 		private static readonly ElementClass statusMessageTextClass = new ElementClass( "ewfStatusText" );
@@ -94,7 +94,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 							new CssElement( "NotificationSectionContainerDockedState", containerDockedSelector )
 						} );
 
-				elements.Add( new CssElement( "NotificationSpacer", "div." + notificationSpacerClass ) );
+				elements.Add( new CssElement( "NotificationSpacer", "div." + notificationSpacerClass.ClassName ) );
 				elements.Add( new CssElement( "InfoMessageContainer", "div." + infoMessageContainerClass.ClassName ) );
 				elements.Add( new CssElement( "WarningMessageContainer", "div." + warningMessageContainerClass.ClassName ) );
 				elements.Add( new CssElement( "StatusMessageText", "span." + statusMessageTextClass.ClassName ) );
@@ -156,10 +156,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			form.Action = EwfPage.Instance.InfoAsBaseType.GetUrl();
 
 			ph.AddControlsReturnThis(
-				new NamingPlaceholder(
-					EwfPage.Instance.StatusMessages.Any() && statusMessagesDisplayAsNotification()
-						? new Block { CssClass = notificationSpacerClass }.ToCollection()
-						: Enumerable.Empty<Control>() ) );
+				new FlowIdContainer(
+						EwfPage.Instance.StatusMessages.Any() && statusMessagesDisplayAsNotification()
+							? new GenericFlowContainer( null, classes: notificationSpacerClass ).ToCollection()
+							: Enumerable.Empty<FlowComponent>() ).ToCollection()
+					.GetControls() );
 
 			var warningLines = new List<IReadOnlyCollection<PhrasingComponent>>();
 			if( !ConfigurationStatics.IsLiveInstallation ) {

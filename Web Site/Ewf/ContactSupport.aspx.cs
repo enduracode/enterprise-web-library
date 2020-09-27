@@ -1,7 +1,6 @@
 using System.Linq;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Email;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
@@ -18,7 +17,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		private readonly DataValue<string> body = new DataValue<string>();
 
 		protected override void loadData() {
-			ph.AddControlsReturnThis( new LegacyParagraph( "You may report any problems, make suggestions, or ask for help here." ) );
+			ph.AddControlsReturnThis(
+				new Paragraph( "You may report any problems, make suggestions, or ask for help here.".ToComponents() ).ToCollection().GetControls() );
 
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				PostBack.CreateFull( firstModificationMethod: modifyData, actionGetter: () => new PostBackAction( new ExternalResourceInfo( info.ReturnUrl ) ) )
