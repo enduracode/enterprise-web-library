@@ -24,18 +24,18 @@ div.ewfStandardDynamicTable:first-child, ewfControlStack:first-child, ewfUiEntit
 ewfUiTopErrorMessageListContainer,
 ewfUiGlobalNavListContainer,
 ewfUiEntityBlock,
-ewfUiTopTabBlock {
+ewfUiTopTabListContainer {
 	margin-top: 1rem;
 }
 ewfUiGlobalContainer {
 	padding-bottom: 1rem;
 }
-ewfUiTopTabBlock ewfActionComponentAllStylesAllStates {
+ewfUiTopTabListContainer ewfActionComponentAllStylesAllStates {
 	padding: .5rem 1rem;
 }
 
 /* borders */
-ewfUiGlobalContainer, ewfUiTopTabBlock {
+ewfUiGlobalContainer, ewfUiTopTabListContainer {
 	border-bottom-width: 1px;
 	border-bottom-style: solid;
 }
@@ -238,32 +238,29 @@ ewfUiEntityActionListContainer, ewfUiPageActionListContainer {
 ewfUiEntityActionListContainer > ewfUnorderedLineList, ewfUiPageActionListContainer > ewfUnorderedLineList {
 	justify-content: flex-end;
 }
-ewfUiTopTabBlock ewfActionComponentAllStylesAllStates, ewfUiSideTabBlock ewfActionComponentAllStylesAllStates {
+ewfUiTopTabListContainer ewfActionComponentAllStylesAllStates, ewfUiSideTabContainer ewfActionComponentAllStylesAllStates {
 	display: block;
 	font-weight: 600;
 	text-decoration: none;
 }
-ewfUiTopTabBlock {
+ewfUiTopTabListContainer {
 	font-size: 1.1em;
 }
-ewfUiTopTabBlock > ewfControlLine {
-	display: block;
-}
-ewfUiTopTabBlock > ewfControlLine > ewfControlLineItem {
-	padding-left: 0;
+ewfUiTopTabListContainer > ewfUnorderedLineList > ewfComponentListItem {
+	margin-left: 0;
 }
 ewfUiSideTabAndContentBlock {
 	width: 100%;
 	table-layout: fixed;
 }
-ewfUiSideTabBlockCell, ewfUiPageActionAndContentAndContentFootCell {
+ewfUiSideTabContainerCell, ewfUiPageActionAndContentAndContentFootCell {
 	vertical-align: top;
 }
-ewfUiSideTabBlockCell {
+ewfUiSideTabContainerCell {
 	padding-right: 1rem;
 	width: 12.5em;
 }
-ewfUiSideTabGroupHead, ewfUiSideTabBlock ewfActionComponentAllStylesAllStates {
+ewfUiSideTabGroupHead, ewfUiSideTabContainer ewfActionComponentAllStylesAllStates {
 	padding-top: .2rem;
 	padding-bottom: .2rem;
 }
@@ -273,7 +270,7 @@ ewfUiSideTabGroupHead {
 ewfUiSideTabGroupHead:not( :first-child ) {
 	padding-top: .5rem;
 }
-ewfUiSideTabBlock ewfActionComponentAllStylesAllStates {
+ewfUiSideTabContainer ewfActionComponentAllStylesAllStates {
 	font-size: .9em;
 }
 ewfUiPageActionListContainer {
@@ -292,7 +289,7 @@ ewfUiPoweredByEwlFooterBlock {
 	ewfUiTopErrorMessageListContainer,
 	ewfUiGlobalNavListContainer,
 	ewfUiEntityNavAndActionContainer,
-	ewfUiSideTabBlockCell,
+	ewfUiSideTabContainerCell,
 	ewfUiContentFootBlock {
 		display: none;
 	}

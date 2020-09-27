@@ -7,7 +7,7 @@
 ewfUiGlobalContainer {
 	border-color: hsla( 215, 33%, 85%, 1 );
 }
-ewfUiTopTabBlock {
+ewfUiTopTabListContainer {
 	border-color: hsl( 0, 0%, 75% );
 }
 
@@ -37,14 +37,14 @@ ewfHyperlinkStandardStyleAllNormalStates,
 ewfHyperlinkStandardStyleAllVisitedStates,
 ewfActionComponentAllStylesAllNormalStates.icon,
 ewfActionComponentAllStylesAllVisitedStates.icon,
-ewfUiTopTabBlock ewfUiCurrentTabActionControl,
-ewfUiSideTabBlock ewfUiCurrentTabActionControl {
+ewfUiTopTabListContainer ewfUiCurrentTabActionControl,
+ewfUiSideTabContainer ewfUiCurrentTabActionControl {
 	color: hsla( 211, 70%, 45%, 1 );
 }
 ewfActionComponentAllButtonStylesAllNormalStates, ewfActionComponentAllButtonStylesAllVisitedStates {
 	background-color: hsla( 211, 70%, 45%, 1 );
 }
-ewfUiTopTabBlock ewfUiCurrentTabActionControl {
+ewfUiTopTabListContainer ewfUiCurrentTabActionControl {
 	box-shadow: 0 3px hsla( 211, 70%, 45%, 1 );
 }
 ewfHyperlinkStandardStyleStatesWithHover,
@@ -69,21 +69,21 @@ ewfErrorMessageListContainer {
 ewfUiGlobalContainer {
 	background-color: white;
 }
-ewfUiTopTabBlock ewfActionComponentAllStylesAllNormalStates,
-ewfUiTopTabBlock ewfActionComponentAllStylesAllVisitedStates,
-ewfUiSideTabBlock ewfActionComponentAllStylesAllNormalStates,
-ewfUiSideTabBlock ewfActionComponentAllStylesAllVisitedStates {
+ewfUiTopTabListContainer ewfActionComponentAllStylesAllNormalStates,
+ewfUiTopTabListContainer ewfActionComponentAllStylesAllVisitedStates,
+ewfUiSideTabContainer ewfActionComponentAllStylesAllNormalStates,
+ewfUiSideTabContainer ewfActionComponentAllStylesAllVisitedStates {
 	color: inherit;
 }
-ewfUiTopTabBlock ewfUiDisabledTabActionControl, ewfUiSideTabBlock ewfUiDisabledTabActionControl {
+ewfUiTopTabListContainer ewfUiDisabledTabActionControl, ewfUiSideTabContainer ewfUiDisabledTabActionControl {
 	opacity: .2;
 }
 
 /* new content */
 ewfUiGlobalNavListContainer ewfActionComponentAllStylesAllNewContentActionStates,
 ewfUiEntityNavAndActionContainer ewfActionComponentAllStylesAllNewContentActionStates,
-ewfUiTopTabBlock ewfActionComponentAllStylesAllNewContentActionStates,
-ewfUiSideTabBlock ewfActionComponentAllStylesAllNewContentActionStates {
+ewfUiTopTabListContainer ewfActionComponentAllStylesAllNewContentActionStates,
+ewfUiSideTabContainer ewfActionComponentAllStylesAllNewContentActionStates {
 	font-weight: bold;
 }
 

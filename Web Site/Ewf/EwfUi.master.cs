@@ -32,11 +32,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			internal static readonly ElementClass EntityActionListContainerClass = new ElementClass( "ewfUiEntityActions" );
 			internal const string EntitySummaryBlockCssClass = "ewfUiEntitySummary";
 
-			internal const string TopTabCssClass = "ewfUiTopTab";
+			internal static readonly ElementClass TopTabListContainerClass = new ElementClass( "ewfUiTopTab" );
 
 			internal const string SideTabAndContentBlockCssClass = "ewfUiTabsAndContent";
 
-			internal const string SideTabCssClass = "ewfUiSideTab";
+			internal static readonly ElementClass SideTabContainerClass = new ElementClass( "ewfUiSideTab" );
 			internal static readonly ElementClass SideTabGroupHeadClass = new ElementClass( "ewfEditorTabSeparator" );
 
 			internal static readonly ElementClass CurrentTabClass = new ElementClass( "ewfEditorSelectedTab" );
@@ -88,7 +88,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 
 				elements.Add( new CssElement( "UiEntityAndTopTabBlock", entityAndTabAndContentBlockSelector + " > " + "div." + EntityAndTopTabBlockCssClass ) );
 				elements.AddRange( getEntityElements( entityAndTabAndContentBlockSelector ) );
-				elements.Add( new CssElement( "UiTopTabBlock", entityAndTabAndContentBlockSelector + " " + "div." + TopTabCssClass ) );
+				elements.Add( new CssElement( "UiTopTabListContainer", entityAndTabAndContentBlockSelector + " " + "div." + TopTabListContainerClass.ClassName ) );
 				elements.AddRange( getSideTabAndContentElements( entityAndTabAndContentBlockSelector ) );
 				elements.AddRange( getTabElements() );
 				return elements;
@@ -114,8 +114,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 							"UiSideTabAndContentBlock",
 							TableCssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " > " + i + "." + SideTabAndContentBlockCssClass )
 								.ToArray() ),
-						new CssElement( "UiSideTabBlockCell", entityAndTabAndContentBlockSelector + " td." + SideTabCssClass ),
-						new CssElement( "UiSideTabBlock", entityAndTabAndContentBlockSelector + " div." + SideTabCssClass ),
+						new CssElement( "UiSideTabContainerCell", entityAndTabAndContentBlockSelector + " td." + SideTabContainerClass.ClassName ),
+						new CssElement( "UiSideTabContainer", entityAndTabAndContentBlockSelector + " div." + SideTabContainerClass.ClassName ),
 						new CssElement( "UiSideTabGroupHead", entityAndTabAndContentBlockSelector + " div." + SideTabGroupHeadClass.ClassName ),
 						new CssElement( "UiPageActionAndContentAndContentFootCell", entityAndTabAndContentBlockSelector + " td." + ContentClass.ClassName ),
 						new CssElement( "UiPageActionListContainer", entityAndTabAndContentBlockSelector + " " + "div." + PageActionListContainerClass.ClassName ),
@@ -310,7 +310,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				var resourceGroups = EwfPage.Instance.InfoAsBaseType.EsInfoAsBaseType.Resources;
 				if( resourceGroups.Count > 1 )
 					throw new ApplicationException( "Top tabs are not supported with multiple resource groups." );
-				controls.Add( getTopTabBlock( resourceGroups.Single() ) );
+				controls.AddRange( getTopTabListContainer( resourceGroups.Single() ).ToCollection().GetControls() );
 			}
 			return new Block( controls.ToArray() ) { CssClass = CssElementCreator.EntityAndTopTabBlockCssClass };
 		}
@@ -381,13 +381,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			return Enumerable.Empty<Control>().Materialize();
 		}
 
-		private Control getTopTabBlock( ResourceGroup resourceGroup ) {
-			return new Block(
-				new ControlLine( getTabControlsForResources( resourceGroup, false ).ToArray() ) { VerticalAlignment = TableCellVerticalAlignment.Bottom } )
-				{
-					CssClass = CssElementCreator.TopTabCssClass
-				};
-		}
+		private FlowComponent getTopTabListContainer( ResourceGroup resourceGroup ) =>
+			new GenericFlowContainer(
+				new LineList(
+					getTabHyperlinksForResources( resourceGroup, false ).Select( i => (LineListItem)i.ToComponentListItem() ),
+					verticalAlignment: FlexboxVerticalAlignment.Bottom ).ToCollection(),
+				classes: CssElementCreator.TopTabListContainerClass );
 
 		private bool entityUsesTabMode( TabMode tabMode ) {
 			var entitySetupInfo = EwfPage.Instance.InfoAsBaseType.EsInfoAsBaseType;
@@ -396,34 +395,30 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 
 		private void setUpSideTabs() {
 			sideTabCell.Visible = true;
-			var controls = new List<Control>();
+			var components = new List<FlowComponent>();
 			foreach( var resourceGroup in EwfPage.Instance.InfoAsBaseType.EsInfoAsBaseType.Resources ) {
-				var tabs = getTabControlsForResources( resourceGroup, true );
+				var tabs = getTabHyperlinksForResources( resourceGroup, true );
 				if( tabs.Any() && resourceGroup.Name.Any() )
-					controls.AddRange(
-						new GenericFlowContainer( resourceGroup.Name.ToComponents(), classes: CssElementCreator.SideTabGroupHeadClass ).ToCollection().GetControls() );
-				controls.AddRange( tabs );
+					components.Add( new GenericFlowContainer( resourceGroup.Name.ToComponents(), classes: CssElementCreator.SideTabGroupHeadClass ) );
+				components.AddRange( tabs );
 			}
-			sideTabCell.AddControlsReturnThis( new Block( controls.ToArray() ) { CssClass = CssElementCreator.SideTabCssClass } );
+			sideTabCell.AddControlsReturnThis(
+				new GenericFlowContainer( components, classes: CssElementCreator.SideTabContainerClass ).ToCollection().GetControls() );
 		}
 
-		private IEnumerable<Control> getTabControlsForResources( ResourceGroup resourceGroup, bool includeIcons ) {
-			var tabs = new List<Control>();
+		private IReadOnlyCollection<PhrasingComponent> getTabHyperlinksForResources( ResourceGroup resourceGroup, bool includeIcons ) {
+			var hyperlinks = new List<PhrasingComponent>();
 			foreach( var resource in resourceGroup.Resources.Where( p => p.UserCanAccessResource ) ) {
-				tabs.Add(
-					new PlaceHolder().AddControlsReturnThis(
-						new EwfHyperlink(
-								resource.IsIdenticalToCurrent() ? null : resource,
-								new StandardHyperlinkStyle(
-									resource.ResourceName,
-									icon: includeIcons
-										      ? new ActionComponentIcon( new FontAwesomeIcon( resource.IsIdenticalToCurrent() ? "fa-circle" : "fa-circle-thin" ) )
-										      : null ),
-								classes: resource.IsIdenticalToCurrent() ? CssElementCreator.CurrentTabClass :
-								         resource.AlternativeMode is DisabledResourceMode ? CssElementCreator.DisabledTabClass : ElementClassSet.Empty ).ToCollection()
-							.GetControls() ) );
+				hyperlinks.Add(
+					new EwfHyperlink(
+						resource.IsIdenticalToCurrent() ? null : resource,
+						new StandardHyperlinkStyle(
+							resource.ResourceName,
+							icon: includeIcons ? new ActionComponentIcon( new FontAwesomeIcon( resource.IsIdenticalToCurrent() ? "fa-circle" : "fa-circle-thin" ) ) : null ),
+						classes: resource.IsIdenticalToCurrent() ? CssElementCreator.CurrentTabClass :
+						         resource.AlternativeMode is DisabledResourceMode ? CssElementCreator.DisabledTabClass : ElementClassSet.Empty ) );
 			}
-			return tabs;
+			return hyperlinks;
 		}
 
 		private IReadOnlyCollection<FlowComponent> getPageActionListContainer() {
