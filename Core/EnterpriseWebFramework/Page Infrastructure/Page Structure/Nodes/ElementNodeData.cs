@@ -8,6 +8,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// Data for an element node.
 	/// </summary>
 	internal sealed class ElementNodeData {
+		internal readonly string ClientSideIdOverride;
 		internal readonly IReadOnlyCollection<FlowComponentOrNode> Children;
 		internal readonly IReadOnlyCollection<EtherealComponentOrElement> EtherealChildren;
 		internal readonly Func<ElementNodeLocalData> LocalDataGetter;
@@ -16,8 +17,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Creates an element-node-data object.
 		/// </summary>
 		public ElementNodeData(
-			Func<ElementNodeLocalData> localDataGetter, IReadOnlyCollection<FlowComponentOrNode> children = null,
+			string clientSideIdOverride, Func<ElementNodeLocalData> localDataGetter, IReadOnlyCollection<FlowComponentOrNode> children = null,
 			IReadOnlyCollection<EtherealComponentOrElement> etherealChildren = null ) {
+			ClientSideIdOverride = clientSideIdOverride;
 			Children = children ?? Enumerable.Empty<FlowComponentOrNode>().Materialize();
 			EtherealChildren = etherealChildren ?? Enumerable.Empty<EtherealComponentOrElement>().Materialize();
 			LocalDataGetter = localDataGetter;

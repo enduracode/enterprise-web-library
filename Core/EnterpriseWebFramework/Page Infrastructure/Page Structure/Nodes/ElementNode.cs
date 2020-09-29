@@ -12,6 +12,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal readonly FormValue FormValue;
 
 		// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
+		private string clientSideIdOverride;
 		internal IReadOnlyCollection<ComponentStateItem> StateItems;
 		private Func<ElementNodeLocalData> webFormsLocalDataGetter;
 		private ElementNodeLocalData webFormsLocalData;
@@ -28,6 +29,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		void ControlTreeDataLoader.LoadData() {
 			var elementData = ElementDataGetter( new ElementContext( ClientID ) );
+			clientSideIdOverride = elementData.ClientSideIdOverride;
 			this.AddControlsReturnThis( elementData.Children.GetControls() );
 			elementData.EtherealChildren.AddEtherealControls( this );
 			StateItems = elementData.EtherealChildren.OfType<ComponentStateItem>().Materialize();
@@ -83,8 +85,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				throw new ApplicationException( "webFormsFocusDependentData not set" );
 			foreach( var i in webFormsFocusDependentData.Attributes )
 				writer.AddAttribute( i.Item1, i.Item2 );
-			if( webFormsFocusDependentData.Id != null )
-				writer.AddAttribute( HtmlTextWriterAttribute.Id, webFormsFocusDependentData.Id.Any() ? webFormsFocusDependentData.Id : ClientID );
+			if( webFormsFocusDependentData.IncludeIdAttribute )
+				writer.AddAttribute( HtmlTextWriterAttribute.Id, clientSideIdOverride.Any() ? clientSideIdOverride : ClientID );
 		}
 
 		protected override string TagName {

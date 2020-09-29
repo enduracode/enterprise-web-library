@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -8,20 +6,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// An invisible marker used in conjunction with fragment navigation.
 	/// </summary>
 	public sealed class FragmentMarker: PhrasingComponent {
-		private readonly IReadOnlyCollection<FlowComponentOrNode> children;
+		private readonly IReadOnlyCollection<FlowComponent> children;
 
 		/// <summary>
 		/// Creates a fragment marker.
 		/// </summary>
 		/// <param name="id">The ID of the marker, which should be unique on the page. Do not pass null or the empty string.</param>
 		public FragmentMarker( string id ) {
-			children = new ElementNode(
-				context => new ElementNodeData(
-					() => new ElementNodeLocalData( "span", new ElementNodeFocusDependentData( Enumerable.Empty<Tuple<string, string>>(), id, "" ) ) ) ).ToCollection();
+			children = new ElementComponent(
+				context => new ElementData(
+					() => new ElementLocalData( "span", focusDependentData: new ElementFocusDependentData( includeIdAttribute: true ) ),
+					clientSideIdOverride: id ) ).ToCollection();
 		}
 
-		IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() {
-			return children;
-		}
+		IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() => children;
 	}
 }

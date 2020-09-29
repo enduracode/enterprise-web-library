@@ -642,6 +642,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			Form.AddControlsReturnThis(
 				new ElementNode(
 						context => new ElementNodeData(
+							hiddenFieldName,
 							() => {
 								var attributes = new List<Tuple<string, string>>();
 								attributes.Add( Tuple.Create( "type", "hidden" ) );
@@ -664,7 +665,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 												"" ),
 											Formatting.None ) ) );
 
-								return new ElementNodeLocalData( "input", new ElementNodeFocusDependentData( attributes, hiddenFieldName, "" ) );
+								return new ElementNodeLocalData( "input", new ElementNodeFocusDependentData( attributes, true, "" ) );
 							} ) ).ToCollection()
 					.GetControls() );
 			using( MiniProfiler.Current.Step( "EWF - Load control data" ) )
