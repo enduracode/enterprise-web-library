@@ -11,7 +11,6 @@ using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
-using EnterpriseWebLibrary.EnterpriseWebFramework.DisplayLinking;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
@@ -141,7 +140,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly Dictionary<string, PostBack> postBacksById = new Dictionary<string, PostBack>();
 		private readonly List<FormValue> formValues = new List<FormValue>();
 		private readonly Dictionary<string, ComponentStateItem> componentStateItemsById = new Dictionary<string, ComponentStateItem>();
-		private readonly List<DisplayLink> displayLinks = new List<DisplayLink>();
 		private readonly List<LegacyUpdateRegionLinker> updateRegionLinkers = new List<LegacyUpdateRegionLinker>();
 		private readonly Dictionary<EwfValidation, List<string>> modErrorDisplaysByValidation = new Dictionary<EwfValidation, List<string>>();
 		internal readonly HashSet<EwfValidation> ValidationsWithErrors = new HashSet<EwfValidation>();
@@ -687,12 +685,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			foreach( var i in formValues )
 				i.SetPageModificationValues();
 
-			// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
-			foreach( var displayLink in displayLinks )
-				displayLink.SetInitialDisplay( AppRequestState.Instance.EwfPageRequestState.PostBackValues );
-			foreach( var displayLink in displayLinks )
-				displayLink.AddJavaScript();
-
 			// This must happen after LoadData and before modifications are executed.
 			statusMessages.Clear();
 		}
@@ -852,13 +844,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		internal PostBack GetPostBack( string id ) => postBacksById.TryGetValue( id, out var value ) ? value : null;
-
-		/// <summary>
-		/// Adds a display mapping to this page.
-		/// </summary>
-		internal void AddDisplayLink( DisplayLink displayLink ) {
-			displayLinks.Add( displayLink );
-		}
 
 		internal void AddUpdateRegionLinker( LegacyUpdateRegionLinker linker ) {
 			updateRegionLinkers.Add( linker );

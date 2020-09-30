@@ -3,11 +3,9 @@ using System.Drawing.Imaging;
 using System.Drawing.Text;
 using System.Linq;
 using System.Web;
-using System.Web.UI;
 using System.Web.UI.HtmlControls;
 using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
-using EnterpriseWebLibrary.EnterpriseWebFramework.DisplayLinking;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary {
@@ -19,8 +17,6 @@ namespace EnterpriseWebLibrary {
 		/// EWL use only.
 		/// </summary>
 		public const string HomeUrl = "~/";
-
-		private const string invisibleDisplayCssStyleName = "none";
 
 		/// <summary>
 		/// Encodes the given text as HTML, replacing instances of \n with &lt;br/&gt; and optionally replacing the empty string with a non-breaking space.
@@ -43,20 +39,6 @@ namespace EnterpriseWebLibrary {
 		/// </summary>
 		public static void Redirect( string url ) {
 			HttpContext.Current.Response.Redirect( url );
-		}
-
-		/// <summary>
-		/// Sets the initial visibility of a web control. This can be used in tandem with DisplayLinking.
-		/// </summary>
-		public static void SetInitialDisplay( this WebControl control, bool visible ) {
-			DisplayLinkingOps.SetControlDisplay( control, visible );
-		}
-
-		/// <summary>
-		/// Sets the initial visibility of the given control to the opposite of what it currently is.
-		/// </summary>
-		internal static void ToggleInitialDisplay( this WebControl control ) {
-			SetInitialDisplay( control, control.Style[ HtmlTextWriterStyle.Display ] == invisibleDisplayCssStyleName );
 		}
 
 		/// <summary>

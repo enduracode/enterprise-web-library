@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Web.UI.WebControls;
-using EnterpriseWebLibrary.EnterpriseWebFramework.DisplayLinking;
 using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -53,44 +49,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	}
 
 	public static class DisplaySetupExtensionCreators {
-		// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
-		private class DisplayLinkAdapter: DisplayLink {
-			private readonly IEnumerable<WebControl> controls;
-			private readonly Func<bool> controlsDisplayedPredicate;
-
-			internal DisplayLinkAdapter( IEnumerable<WebControl> controls, Func<bool> controlsDisplayedPredicate ) {
-				this.controls = controls;
-				this.controlsDisplayedPredicate = controlsDisplayedPredicate;
-			}
-
-			void DisplayLink.SetInitialDisplay( PostBackValueDictionary formControlValues ) {
-				foreach( var i in controls )
-					DisplayLinkingOps.SetControlDisplay( i, controlsDisplayedPredicate() );
-			}
-
-			void DisplayLink.AddJavaScript() {}
-		}
-
 		/// <summary>
 		/// Creates a display setup object for display that depends on this page-modification-value condition.
 		/// </summary>
-		public static DisplaySetup ToDisplaySetup( this PageModificationValueCondition pageModificationValueCondition ) {
-			return new DisplaySetup(
+		public static DisplaySetup ToDisplaySetup( this PageModificationValueCondition pageModificationValueCondition ) =>
+			new DisplaySetup(
 				Tuple.Create<Action<string>, Action<string>>(
-					statements => pageModificationValueCondition.AddJsModificationStatement( expression => "if( {0} )".FormatWith( expression ) + " { " + statements + " }" ),
+					statements => pageModificationValueCondition.AddJsModificationStatement(
+						expression => "if( {0} )".FormatWith( expression ) + " { " + statements + " }" ),
 					statements => pageModificationValueCondition.AddJsModificationStatement(
 						expression => "if( !( {0} ) )".FormatWith( expression ) + " { " + statements + " }" ) ),
 				() => pageModificationValueCondition.IsTrue );
-		}
-
-		// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
-		public static void AddDisplayLink( this PageModificationValueCondition pageModificationValueCondition, IEnumerable<WebControl> controls ) {
-			controls = controls.ToImmutableArray();
-
-			foreach( var control in controls )
-				pageModificationValueCondition.AddJsModificationStatement( expression => "setElementDisplay( '{0}', {1} );".FormatWith( control.ClientID, expression ) );
-
-			EwfPage.Instance.AddDisplayLink( new DisplayLinkAdapter( controls, () => pageModificationValueCondition.IsTrue ) );
-		}
 	}
 }

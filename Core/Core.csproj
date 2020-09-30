@@ -353,8 +353,6 @@
     <Compile Include="EnterpriseWebFramework\Component Display\DisplayableElementData.cs" />
     <Compile Include="EnterpriseWebFramework\Component Display\DisplayableElementFocusDependentData.cs" />
     <Compile Include="EnterpriseWebFramework\Component Display\DisplayableElementLocalData.cs" />
-    <Compile Include="EnterpriseWebFramework\Component Display\DisplayLinking\DisplayLink.cs" />
-    <Compile Include="EnterpriseWebFramework\Component Display\DisplayLinking\DisplayLinkingOps.cs" />
     <Compile Include="EnterpriseWebFramework\Component Display\DisplaySetup.cs" />
     <Compile Include="EnterpriseWebFramework\Core\AccessDeniedException.cs" />
     <Compile Include="EnterpriseWebFramework\Core\AppMetaLogicFactory.cs" />
