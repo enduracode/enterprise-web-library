@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 using System.Linq;
-using System.Web.UI;
-using System.Web.UI.HtmlControls;
-using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.IO;
 using Humanizer;
 using JetBrains.Annotations;
@@ -16,15 +12,15 @@ using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
-	/// A control capable of displaying chart data. Currently implemented with Chart.js.
+	/// A component capable of displaying chart data. Currently implemented with Chart.js.
 	/// </summary>
-	public sealed class Chart: WebControl, ControlWithJsInitLogic {
-		internal class CssElementCreator: ControlCssElementCreator {
-			internal const string CssClass = "ewfChart";
+	public sealed class Chart: FlowComponent {
+		private static readonly ElementClass elementClass = new ElementClass( "ewfChart" );
 
-			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
-				return new[] { new CssElement( "Chart", "div." + CssClass ) };
-			}
+		[ UsedImplicitly ]
+		private class CssElementCreator: ControlCssElementCreator {
+			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() =>
+				new CssElement( "Chart", "div.{0}".FormatWith( elementClass.ClassName ) ).ToCollection();
 		}
 
 		#region Chart.js configuration
@@ -121,8 +117,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		#endregion
 
-		private readonly ChartSetup setup;
-		private readonly Func<string> jsInitStatementGetter;
+		private readonly IReadOnlyCollection<FlowComponent> children;
 
 		/// <summary>
 		/// Creates a chart displaying a supported <see cref="ChartType"/> with the given data. Includes a chart and a table, and allows exporting the data to CSV.
@@ -141,16 +136,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="colors">The colors to use for the data series collection. Pass null for default colors. If you specify your own colors, the number of
 		/// colors does not need to match the number of series. If you pass fewer colors than series, the chart will use random colors for the remaining series.
 		/// </param>
-		public Chart( ChartSetup setup, [ NotNull ] IEnumerable<DataSeries> seriesCollection, IEnumerable<Color> colors = null ) {
-			seriesCollection = seriesCollection.ToArray();
-
+		public Chart( ChartSetup setup, [ NotNull ] IReadOnlyCollection<DataSeries> seriesCollection, IEnumerable<Color> colors = null ) {
 			var rand = new Random();
-			colors = ( colors ?? getDefaultColors() ).Take( seriesCollection.Count() )
-				.Pad( seriesCollection.Count(), () => Color.FromArgb( rand.Next( 256 ), rand.Next( 256 ), rand.Next( 256 ) ) );
-
-			this.setup = setup;
-
-			CssClass = CssClass.ConcatenateWithSpace( CssElementCreator.CssClass );
+			colors = ( colors ?? getDefaultColors() ).Take( seriesCollection.Count )
+				.Pad( seriesCollection.Count, () => Color.FromArgb( rand.Next( 256 ), rand.Next( 256 ), rand.Next( 256 ) ) );
 
 			Func<DataSeries, Color, BaseDataset> datasetSelector;
 			OptionsBase options;
@@ -172,29 +161,44 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				setup.Labels.TakeLast( setup.MaxXValues ),
 				seriesCollection.Zip( colors, ( series, color ) => datasetSelector( series, color ) ).ToArray() );
 
-			var canvas = new HtmlGenericControl( "canvas" );
-			switch( setup.ChartType ) {
-				case ChartType.Line:
-				case ChartType.Bar:
-					canvas.Attributes.Add( "height", "400" );
-					break;
-				default:
-					throw new UnexpectedValueException( setup.ChartType );
-			}
-			Controls.Add( canvas );
+			var canvas = new ElementComponent(
+				context => new ElementData(
+					() => {
+						var attributes = new List<Tuple<string, string>>();
+						switch( setup.ChartType ) {
+							case ChartType.Line:
+							case ChartType.Bar:
+								attributes.Add( Tuple.Create( "height", "400" ) );
+								break;
+							default:
+								throw new UnexpectedValueException( setup.ChartType );
+						}
 
-			if( seriesCollection.Count() > 1 )
-				this.AddControlsReturnThis(
-					new Section(
-							"Key",
-							new LineList(
-								chartData.datasets.Select(
-									( dataset, i ) => (LineListItem)new TrustedHtmlString(
-											"<div style='display: inline-block; vertical-align: middle; width: 20px; height: 20px; background-color: {0}; border: 1px solid {1};'>&nbsp;</div> {2}"
-												.FormatWith( dataset.fillColor, dataset.strokeColor, seriesCollection.ElementAt( i ).Name ) ).ToComponent()
-										.ToComponentListItem() ) ).ToCollection(),
-							style: SectionStyle.Box ).ToCollection()
-						.GetControls() );
+						var jsInitStatements = StringTools.ConcatenateWithDelimiter(
+							" ",
+							"var canvas = document.getElementById( '{0}' );".FormatWith( context.Id ),
+							"canvas.width = $( canvas ).parent().width();",
+							"new Chart( canvas.getContext( '2d' ) ).{0}( {1}, {2} );".FormatWith(
+								setup.ChartType,
+								JsonOps.SerializeObject( chartData ),
+								JsonOps.SerializeObject( options ) ) );
+
+						return new ElementLocalData(
+							"canvas",
+							focusDependentData: new ElementFocusDependentData( attributes: attributes, includeIdAttribute: true, jsInitStatements: jsInitStatements ) );
+					} ) );
+
+			var key = seriesCollection.Count > 1
+				          ? new Section(
+					          "Key",
+					          new LineList(
+						          chartData.datasets.Select(
+							          ( dataset, i ) => (LineListItem)new TrustedHtmlString(
+									          "<div style='display: inline-block; vertical-align: middle; width: 20px; height: 20px; background-color: {0}; border: 1px solid {1};'>&nbsp;</div> {2}"
+										          .FormatWith( dataset.fillColor, dataset.strokeColor, seriesCollection.ElementAt( i ).Name ) ).ToComponent()
+								          .ToComponentListItem() ) ).ToCollection(),
+					          style: SectionStyle.Box ).ToCollection()
+				          : Enumerable.Empty<FlowComponent>();
 
 			// Remove this when ColumnPrimaryTable supports Excel export.
 			var headers = setup.XAxisTitle.ToCollection().Concat( seriesCollection.Select( v => v.Name ) );
@@ -203,7 +207,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				var i1 = i;
 				tableData.Add( setup.Labels.ElementAt( i1 ).ToCollection().Concat( seriesCollection.Select( v => v.Values.ElementAt( i1 ).ToString() ) ) );
 			}
-			var exportAction = getExportAction( headers, tableData );
+			var exportAction = getExportAction( setup, headers, tableData );
 
 			var table = ColumnPrimaryTable.Create( tableActions: exportAction.ToCollection(), firstDataFieldIndex: 1 )
 				.AddItems(
@@ -213,20 +217,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							from series in seriesCollection
 							select EwfTableItem.Create( series.Name.ToCell().Concat( from i in series.Values select i.ToString().ToCell() ).Materialize() ) )
 						.Materialize() );
-			this.AddControlsReturnThis( table.ToCollection().GetControls() );
 
-			jsInitStatementGetter = () => {
-				using( var writer = new StringWriter() ) {
-					writer.WriteLine( "var canvas = document.getElementById( '{0}' );".FormatWith( canvas.ClientID ) );
-					writer.WriteLine( "canvas.width = $( canvas ).parent().width();" );
-					writer.WriteLine(
-						"new Chart( canvas.getContext( '2d' ) ).{0}( {1}, {2} );".FormatWith(
-							setup.ChartType,
-							JsonOps.SerializeObject( chartData ),
-							JsonOps.SerializeObject( options ) ) );
-					return writer.ToString();
-				}
-			};
+			children = new GenericFlowContainer( canvas.Concat( key ).Append( table ).Materialize(), classes: elementClass ).ToCollection();
 		}
 
 		private IEnumerable<Color> getDefaultColors() {
@@ -236,7 +228,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			yield return Color.FromArgb( 255, 230, 149 );
 		}
 
-		private ActionComponentSetup getExportAction( IEnumerable<object> headers, List<IEnumerable<object>> tableData ) =>
+		private ActionComponentSetup getExportAction( ChartSetup setup, IEnumerable<object> headers, List<IEnumerable<object>> tableData ) =>
 			new ButtonSetup(
 				"Export",
 				behavior: new PostBackBehavior(
@@ -262,13 +254,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 											      AppRequestState.RequestTime.InZone( DateTimeZoneProviders.Tzdb.GetSystemDefault() ).ToDateTimeUnspecified() ) +
 										      FileExtensions.Csv ) ) ) ) ) ) );
 
-		string ControlWithJsInitLogic.GetJsInitStatements() {
-			return jsInitStatementGetter();
-		}
-
-		/// <summary>
-		/// Returns the tag that represents this control in HTML.
-		/// </summary>
-		protected override HtmlTextWriterTag TagKey { get { return HtmlTextWriterTag.Div; } }
+		IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() => children;
 	}
 }
