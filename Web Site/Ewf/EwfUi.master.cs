@@ -16,7 +16,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 	public partial class EwfUi: MasterPage, ControlTreeDataLoader, AppEwfUiMasterPage {
 		internal class CssElementCreator: ControlCssElementCreator {
 			internal const string GlobalContainerId = "ewfUiGlobal";
-			internal static readonly ElementClass AppLogoAndUserInfoBlockClass = new ElementClass( "ewfUiAppLogoAndUserInfo" );
+			internal static readonly ElementClass AppLogoAndUserInfoClass = new ElementClass( "ewfUiAppLogoAndUserInfo" );
 			internal static readonly ElementClass AppLogoClass = new ElementClass( "ewfUiAppLogo" );
 			internal static readonly ElementClass UserInfoClass = new ElementClass( "ewfUiUserInfo" );
 			internal static readonly ElementClass TopErrorMessageListContainerClass = new ElementClass( "ewfUiStatus" );
@@ -47,7 +47,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			internal static readonly ElementClass ContentFootBlockClass = new ElementClass( "ewfButtons" );
 			internal static readonly ElementClass ContentFootActionListContainerClass = new ElementClass( "ewfUiCfActions" );
 
-			internal const string GlobalFootBlockId = "ewfUiGlobalFoot";
+			internal const string GlobalFootContainerId = "ewfUiGlobalFoot";
 			internal static readonly ElementClass PoweredByEwlFooterClass = new ElementClass( "ewfUiPoweredBy" );
 
 
@@ -68,8 +68,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					{
 						new CssElement( "UiGlobalContainer", globalContainerSelector ),
 						new CssElement(
-							"UiAppLogoAndUserInfoBlock",
-							TableCssElementCreator.Selectors.Select( i => globalContainerSelector + " " + i + "." + AppLogoAndUserInfoBlockClass.ClassName ).ToArray() ),
+							"UiAppLogoAndUserInfoContainer",
+							TableCssElementCreator.Selectors.Select( i => globalContainerSelector + " " + i + "." + AppLogoAndUserInfoClass.ClassName ).ToArray() ),
 						new CssElement( "UiAppLogoContainer", globalContainerSelector + " " + "div." + AppLogoClass.ClassName ),
 						new CssElement( "UiUserInfoContainer", globalContainerSelector + " " + "div." + UserInfoClass.ClassName ),
 						new CssElement(
@@ -143,11 +143,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			}
 
 			private IEnumerable<CssElement> getGlobalFootElements() {
-				const string globalFootBlockSelector = "div#" + GlobalFootBlockId;
+				const string globalFootContainerSelector = "div#" + GlobalFootContainerId;
 				return new[]
 					{
-						new CssElement( "UiGlobalFootBlock", globalFootBlockSelector ),
-						new CssElement( "UiPoweredByEwlFooterBlock", globalFootBlockSelector + " ." + PoweredByEwlFooterClass.ClassName )
+						new CssElement( "UiGlobalFootContainer", globalFootContainerSelector ),
+						new CssElement( "UiPoweredByEwlFooterContainer", globalFootContainerSelector + " ." + PoweredByEwlFooterClass.ClassName )
 					};
 			}
 		}
@@ -176,7 +176,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		}
 
 		void ControlTreeDataLoader.LoadData() {
-			globalPlace.AddControlsReturnThis( getGlobalContainer() );
+			globalPlace.AddControlsReturnThis( getGlobalContainer().ToCollection().GetControls() );
 			entityAndTopTabPlace.AddControlsReturnThis( getEntityAndTopTabBlock() );
 			if( entityUsesTabMode( TabMode.Vertical ) )
 				setUpSideTabs();
@@ -184,9 +184,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			if( !omitContentBox )
 				contentContainer.Attributes.Add( "class", CssElementCreator.ContentClass.ClassName );
 			contentFootPlace.AddControlsReturnThis( getContentFootBlock().GetControls() );
-			var globalFootBlock = getGlobalFootBlock();
-			if( globalFootBlock != null )
-				globalFootPlace.AddControlsReturnThis( globalFootBlock );
+			globalFootPlace.AddControlsReturnThis( getGlobalFootContainer().GetControls() );
 
 			if( !EwfUiStatics.AppProvider.BrowserWarningDisabled() ) {
 				if( AppRequestState.Instance.Browser.IsOldVersionOfMajorBrowser() && !StandardLibrarySessionState.Instance.HideBrowserWarningForRemainderOfSession )
@@ -212,25 +210,21 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			}
 		}
 
-		private Control getGlobalContainer() =>
-			new Block(
+		private FlowComponent getGlobalContainer() =>
+			new GenericFlowContainer(
 				new[]
 						{
-							// ReSharper disable once SuspiciousTypeConversion.Global
-							EwfUiStatics.AppProvider is AppLogoAndUserInfoControlOverrider appLogoAndUserInfoControlOverrider
-								? appLogoAndUserInfoControlOverrider.GetAppLogoAndUserInfoControl()
-								: new PlaceHolder().AddControlsReturnThis( getAppLogoAndUserInfoBlock().ToCollection().GetControls() ),
-							new PlaceHolder().AddControlsReturnThis(
-								new FlowErrorContainer(
-										new ErrorSourceSet( includeGeneralErrors: true ),
-										new ListErrorDisplayStyle( classes: CssElementCreator.TopErrorMessageListContainerClass ) ).ToCollection()
-									.GetControls() ),
+							getAppLogoAndUserInfoContainer(),
+							new FlowErrorContainer(
+								new ErrorSourceSet( includeGeneralErrors: true ),
+								new ListErrorDisplayStyle( classes: CssElementCreator.TopErrorMessageListContainerClass ) ),
 							getGlobalNavListContainer()
 						}.Where( i => i != null )
-					.ToArray() ) { ClientIDMode = ClientIDMode.Static, ID = CssElementCreator.GlobalContainerId };
+					.Materialize(),
+				clientSideIdOverride: CssElementCreator.GlobalContainerId );
 
-		private FlowComponent getAppLogoAndUserInfoBlock() {
-			var table = EwfTable.Create( style: EwfTableStyle.StandardLayoutOnly, classes: CssElementCreator.AppLogoAndUserInfoBlockClass );
+		private FlowComponent getAppLogoAndUserInfoContainer() {
+			var table = EwfTable.Create( style: EwfTableStyle.StandardLayoutOnly, classes: CssElementCreator.AppLogoAndUserInfoClass );
 
 			var appLogo = new GenericFlowContainer(
 				( !ConfigurationStatics.IsIntermediateInstallation || AppRequestState.Instance.IntermediateUserExists
@@ -277,7 +271,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			return components;
 		}
 
-		private Control getGlobalNavListContainer() {
+		private FlowComponent getGlobalNavListContainer() {
 			// This check exists to prevent the display of lookup boxes or other post back controls. With these controls we sometimes don't have a specific
 			// destination page to use for an authorization check, meaning that the system code has no way to prevent their display when there is no intermediate
 			// user.
@@ -293,15 +287,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			if( !listItems.Any() )
 				return null;
 
-			return new PlaceHolder().AddControlsReturnThis(
-				new GenericFlowContainer(
-						( EwfUiStatics.AppProvider.GlobalNavItemsSeparatedWithPipe()
-							  ? (FlowComponent)new InlineList( listItems )
-							  : new LineList( listItems.Select( i => (LineListItem)i ) ) ).Append(
-							new FlowErrorContainer( new ErrorSourceSet( validations: formItems.Select( i => i.Validation ) ), new ListErrorDisplayStyle() ) )
-						.Materialize(),
-						classes: CssElementCreator.GlobalNavListContainerClass ).ToCollection()
-					.GetControls() );
+			return new GenericFlowContainer(
+				( EwfUiStatics.AppProvider.GlobalNavItemsSeparatedWithPipe()
+					  ? (FlowComponent)new InlineList( listItems )
+					  : new LineList( listItems.Select( i => (LineListItem)i ) ) ).Append(
+					new FlowErrorContainer( new ErrorSourceSet( validations: formItems.Select( i => i.Validation ) ), new ListErrorDisplayStyle() ) )
+				.Materialize(),
+				classes: CssElementCreator.GlobalNavListContainerClass );
 		}
 
 		private Control getEntityAndTopTabBlock() {
@@ -475,28 +467,28 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			return table.ToCollection();
 		}
 
-		private Control getGlobalFootBlock() {
-			var controls = new List<Control>();
+		private IReadOnlyCollection<FlowComponent> getGlobalFootContainer() {
+			var components = new List<FlowComponent>();
 
 			// This check exists to prevent the display of post back controls. With these controls we sometimes don't have a specific destination page to use for an
 			// authorization check, meaning that the system code has no way to prevent their display when there is no intermediate user.
 			if( !ConfigurationStatics.IsIntermediateInstallation || AppRequestState.Instance.IntermediateUserExists )
-				controls.AddRange( EwfUiStatics.AppProvider.GetGlobalFootControls() );
+				components.AddRange( EwfUiStatics.AppProvider.GetGlobalFootComponents() );
 
 			var ewlWebSite = new ExternalResourceInfo( "http://enterpriseweblibrary.org/" );
 			if( ewlWebSite.UserCanAccessResource && !EwfUiStatics.AppProvider.PoweredByEwlFooterDisabled() )
-				controls.AddRange(
+				components.Add(
 					new Paragraph(
-							"Powered by the ".ToComponents()
-								.Append( new EwfHyperlink( ewlWebSite.ToHyperlinkNewTabBehavior(), new StandardHyperlinkStyle( EwlStatics.EwlName ) ) )
-								.Concat(
-									" ({0} version)".FormatWith( TimeZoneInfo.ConvertTime( EwlStatics.EwlBuildDateTime, TimeZoneInfo.Local ).ToMonthYearString() )
-										.ToComponents() )
-								.Materialize(),
-							classes: CssElementCreator.PoweredByEwlFooterClass ).ToCollection()
-						.GetControls() );
+						"Powered by the ".ToComponents()
+							.Append( new EwfHyperlink( ewlWebSite.ToHyperlinkNewTabBehavior(), new StandardHyperlinkStyle( EwlStatics.EwlName ) ) )
+							.Concat(
+								" ({0} version)".FormatWith( TimeZoneInfo.ConvertTime( EwlStatics.EwlBuildDateTime, TimeZoneInfo.Local ).ToMonthYearString() ).ToComponents() )
+							.Materialize(),
+						classes: CssElementCreator.PoweredByEwlFooterClass ) );
 
-			return controls.Any() ? new Block( controls.ToArray() ) { ClientIDMode = ClientIDMode.Static, ID = CssElementCreator.GlobalFootBlockId } : null;
+			return components.Any()
+				       ? new GenericFlowContainer( components, clientSideIdOverride: CssElementCreator.GlobalFootContainerId ).ToCollection()
+				       : Enumerable.Empty<FlowComponent>().Materialize();
 		}
 
 		private UiEntitySetupBase uiEntitySetup => EwfPage.Instance.EsAsBaseType as UiEntitySetupBase;

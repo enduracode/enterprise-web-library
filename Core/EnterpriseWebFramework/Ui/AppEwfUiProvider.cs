@@ -68,17 +68,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
-		/// Gets the global foot controls.
+		/// Gets the global foot components.
 		/// </summary>
-		public virtual IEnumerable<Control> GetGlobalFootControls() {
-			return new Control[ 0 ];
-		}
+		public virtual IReadOnlyCollection<FlowComponent> GetGlobalFootComponents() => Enumerable.Empty<FlowComponent>().Materialize();
 
 		/// <summary>
 		/// Gets whether the "Powered by the Enterprise Web Library" footer is disabled.
 		/// </summary>
-		public virtual bool PoweredByEwlFooterDisabled() {
-			return false;
-		}
+		public virtual bool PoweredByEwlFooterDisabled() => false;
 	}
 }
