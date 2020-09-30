@@ -47,8 +47,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			PageComponent = new ElementComponent(
 				context => {
-					id.AddId( context.Id );
-
 					var displaySetup = setup.DisplaySetup ?? new DisplaySetup( true );
 					displaySetup.AddJsShowStatements( getJsShowStatements( context.Id, false, setup.CkEditorConfiguration ) );
 					displaySetup.AddJsHideStatements( "CKEDITOR.instances.{0}.destroy(); $( '#{0}' ).css( 'display', 'none' );".FormatWith( context.Id ) );
@@ -71,6 +69,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									includeIdAttribute: true,
 									jsInitStatements: displaySetup.ComponentsDisplayed ? getJsShowStatements( context.Id, isFocused, setup.CkEditorConfiguration ) : "" ) );
 						},
+						clientSideIdReferences: id.ToCollection(),
 						children: new TextNode( () => TextControlSetup.GetTextareaValue( modificationValue.Value ) ).ToCollection() );
 				},
 				formValue: formValue );

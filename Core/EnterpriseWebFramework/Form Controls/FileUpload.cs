@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Web;
 using EnterpriseWebLibrary.IO;
 using Tewl.InputValidation;
@@ -39,11 +40,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			PageComponent = new CustomPhrasingComponent(
 				new DisplayableElement(
 					context => {
-						id.AddId( context.Id );
-						Labeler.AddControlId( context.Id );
-
 						EwfPage.Instance.Form.Enctype = "multipart/form-data";
-
 						return new DisplayableElementData(
 							displaySetup,
 							() => {
@@ -59,7 +56,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 											attributes.Add( Tuple.Create( "autofocus", "autofocus" ) );
 										return new DisplayableElementFocusDependentData( attributes: attributes );
 									} );
-							} );
+							},
+							clientSideIdReferences: id.ToCollection().Append( Labeler.ControlId ) );
 					},
 					formValue: formValue ).ToCollection() );
 

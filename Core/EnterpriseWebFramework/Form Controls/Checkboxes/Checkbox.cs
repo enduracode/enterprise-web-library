@@ -100,8 +100,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						classes: elementClass.Add( classes ?? ElementClassSet.Empty ),
 						children: new DisplayableElement(
 								context => {
-									id.AddId( context.Id );
-
 									if( !isReadOnly ) {
 										action?.AddToPageIfNecessary();
 										valueChangedAction?.AddToPageIfNecessary();
@@ -143,7 +141,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 														jsInitStatements: jsInitStatements );
 												} );
 										},
-										classes: elementClass );
+										classes: elementClass,
+										clientSideIdReferences: id.ToCollection() );
 								},
 								formValue: formValue ).ToCollection()
 							.Concat( label.Any() ? new GenericPhrasingContainer( label, classes: elementClass ).ToCollection() : Enumerable.Empty<FlowComponent>() )

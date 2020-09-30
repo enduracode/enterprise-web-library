@@ -251,9 +251,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				return ( labeler, new CustomPhrasingComponent(
 						       new DisplayableElement(
 							       context => {
-								       id.AddId( context.Id );
-								       labeler.AddControlId( context.Id );
-
 								       if( !isReadOnly ) {
 									       if( inputElementType.Any() || ( autoCompleteResource != null && triggersActionWhenItemSelected.Value ) )
 										       action?.AddToPageIfNecessary();
@@ -359,6 +356,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 											       } );
 									       },
 									       classes: ElementClass.Add( classes ?? ElementClassSet.Empty ),
+									       clientSideIdReferences: id.ToCollection().Append( labeler.ControlId ),
 									       children: inputElementType.Any() ? null : new TextNode( () => GetTextareaValue( pageModificationValue.Value ) ).ToCollection() );
 							       },
 							       formValue: formValue ).ToCollection() ), externalValidationMethod == null

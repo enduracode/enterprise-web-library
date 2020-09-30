@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
-	public sealed class ElementIdSet {
+	public sealed class ElementIdSet: ElementIdReference {
 		private readonly List<string> ids = new List<string>();
 
 		/// <summary>
@@ -10,15 +10,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public ElementIdSet() {}
 
 		/// <summary>
-		/// Adds an element ID to this set.
+		/// Adds an element’s client-side ID to this set. ElementData use only.
 		/// </summary>
-		public void AddId( string id ) {
+		internal override void AddId( string id ) {
 			EwfPage.AssertPageTreeNotBuilt();
 			ids.Add( id );
 		}
 
 		/// <summary>
-		/// Gets the element IDs in this set, which are not available until after the page tree has been built.
+		/// Gets the element client-side IDs in this set, which are not available until after the page tree has been built.
 		/// </summary>
 		public IReadOnlyCollection<string> Ids {
 			get {

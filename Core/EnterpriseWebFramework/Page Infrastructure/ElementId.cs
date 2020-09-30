@@ -1,18 +1,18 @@
 ﻿using System;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
-	public sealed class ElementId {
+	public sealed class ElementId: ElementIdReference {
 		private string id = "";
 
 		/// <summary>
-		/// Creates an element ID.
+		/// Creates an element-ID reference.
 		/// </summary>
 		public ElementId() {}
 
 		/// <summary>
-		/// Adds the element ID. This can only be called once.
+		/// Adds the element’s client-side ID. This can only be called once. ElementData use only.
 		/// </summary>
-		public void AddId( string id ) {
+		internal override void AddId( string id ) {
 			EwfPage.AssertPageTreeNotBuilt();
 			if( this.id.Length > 0 )
 				throw new ApplicationException( "The ID was already added." );
@@ -20,7 +20,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
-		/// Gets the element ID, or the empty string if no ID exists. Not available until after the page tree has been built.
+		/// Gets the element’s client-side ID, or the empty string if no ID exists. Not available until after the page tree has been built.
 		/// </summary>
 		public string Id {
 			get {

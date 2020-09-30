@@ -230,11 +230,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										                  .Surround( "$( '#{0}' ).keypress( function( e ) {{ ".FormatWith( containerContext.Id ), " } );" )
 									                  : "" ) ),
 						classes: SelectList.DropDownClass.Add( classes ?? ElementClassSet.Empty ),
+						clientSideIdReferences: id.ToCollection(),
 						children: new DisplayableElement(
 							context => {
-								id.AddId( containerContext.Id );
-								Labeler.AddControlId( context.Id );
-
 								if( !isReadOnly ) {
 									action?.AddToPageIfNecessary();
 									selectionChangedAction?.AddToPageIfNecessary();
@@ -284,6 +282,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 											} );
 									},
 									classes: SelectList.SelectCssClass,
+									clientSideIdReferences: Labeler.ControlId.ToCollection(),
 									children: items.Select(
 											i => getOption(
 												i.StringId,

@@ -65,29 +65,27 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="open"></param>
 		public ModalBox( ModalBoxId id, bool includeCloseButton, IReadOnlyCollection<FlowComponent> content, bool open = false ) {
 			children = new ElementComponent(
-				context => {
-					id.ElementId.AddId( context.Id );
-					return new ElementData(
-						() => new ElementLocalData(
-							"dialog",
-							focusDependentData: new ElementFocusDependentData(
-								includeIdAttribute: true,
-								jsInitStatements: ( includeCloseButton
-									                    ? "$( '#{0}' ).click( function( e ) {{ if( e.target.id === '{0}' ) e.target.close(); }} );".FormatWith( context.Id )
-									                    : "" ).ConcatenateWithSpace( open ? "document.getElementById( '{0}' ).showModal();".FormatWith( context.Id ) : "" ) ) ),
-						classes: boxClass,
-						children: new GenericFlowContainer(
-							( includeCloseButton
-								  ? new GenericFlowContainer(
-									  new EwfButton(
-										  new StandardButtonStyle( "Close", icon: new ActionComponentIcon( new FontAwesomeIcon( "fa-times" ) ) ),
-										  behavior: new CustomButtonBehavior( () => "document.getElementById( '{0}' ).close();".FormatWith( context.Id ) ) ).ToCollection(),
-									  classes: closeButtonContainerClass ).ToCollection<FlowComponent>()
-								  : Enumerable.Empty<FlowComponent>() ).Concat(
-								id == EwfPage.Instance.BrowsingModalBoxId ? content : new GenericFlowContainer( content, classes: contentContainerClass ).ToCollection() )
-							.Materialize(),
-							classes: boxClass ).ToCollection() );
-				} ).ToCollection();
+				context => new ElementData(
+					() => new ElementLocalData(
+						"dialog",
+						focusDependentData: new ElementFocusDependentData(
+							includeIdAttribute: true,
+							jsInitStatements: ( includeCloseButton
+								                    ? "$( '#{0}' ).click( function( e ) {{ if( e.target.id === '{0}' ) e.target.close(); }} );".FormatWith( context.Id )
+								                    : "" ).ConcatenateWithSpace( open ? "document.getElementById( '{0}' ).showModal();".FormatWith( context.Id ) : "" ) ) ),
+					classes: boxClass,
+					clientSideIdReferences: id.ElementId.ToCollection(),
+					children: new GenericFlowContainer(
+						( includeCloseButton
+							  ? new GenericFlowContainer(
+								  new EwfButton(
+									  new StandardButtonStyle( "Close", icon: new ActionComponentIcon( new FontAwesomeIcon( "fa-times" ) ) ),
+									  behavior: new CustomButtonBehavior( () => "document.getElementById( '{0}' ).close();".FormatWith( context.Id ) ) ).ToCollection(),
+								  classes: closeButtonContainerClass ).ToCollection<FlowComponent>()
+							  : Enumerable.Empty<FlowComponent>() ).Concat(
+							id == EwfPage.Instance.BrowsingModalBoxId ? content : new GenericFlowContainer( content, classes: contentContainerClass ).ToCollection() )
+						.Materialize(),
+						classes: boxClass ).ToCollection() ) ).ToCollection();
 		}
 
 		IReadOnlyCollection<EtherealComponentOrElement> EtherealComponent.GetChildren() {

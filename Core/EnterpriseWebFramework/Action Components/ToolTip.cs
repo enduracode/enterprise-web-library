@@ -10,13 +10,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal ToolTip( IReadOnlyCollection<FlowComponent> content, out Func<string, string> jsInitStatementGetter, string title = "" ) {
 			var id = new ElementId();
 			children = new DisplayableElement(
-				context => {
-					id.AddId( context.Id );
-					return new DisplayableElementData(
-						new DisplaySetup( false ),
-						() => new DisplayableElementLocalData( "div", focusDependentData: new DisplayableElementFocusDependentData( includeIdAttribute: true ) ),
-						children: content );
-				} ).ToCollection();
+				context => new DisplayableElementData(
+					new DisplaySetup( false ),
+					() => new DisplayableElementLocalData( "div", focusDependentData: new DisplayableElementFocusDependentData( includeIdAttribute: true ) ),
+					clientSideIdReferences: id.ToCollection(),
+					children: content ) ).ToCollection();
 			jsInitStatementGetter = targetId => id.Id.Any()
 				                                    // If changing this, note that the Basic style sheet may contain qTip2-specific rules.
 				                                    ? "$( '#" + targetId + "' ).qtip( { content: { text: $( '#" + id.Id + "' )" +

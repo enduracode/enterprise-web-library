@@ -139,9 +139,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				return ( labeler, new CustomPhrasingComponent(
 						       new DisplayableElement(
 							       context => {
-								       id.AddId( context.Id );
-								       labeler.AddControlId( context.Id );
-
 								       if( !isReadOnly ) {
 									       action?.AddToPageIfNecessary();
 									       valueChangedAction?.AddToPageIfNecessary();
@@ -228,7 +225,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 													       jsInitStatements: jsInitStatements );
 											       } );
 									       },
-									       classes: classes );
+									       classes: classes,
+									       clientSideIdReferences: id.ToCollection().Append( labeler.ControlId ) );
 							       },
 							       formValue: formValue ).ToCollection() ), validationMethod == null
 								                                                ? null

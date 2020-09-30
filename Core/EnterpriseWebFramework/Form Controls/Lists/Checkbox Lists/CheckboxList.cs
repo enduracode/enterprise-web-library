@@ -84,20 +84,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						  classes: CheckboxListCssElementCreator.ActionContainerClass ).ToCollection()
 					  : Enumerable.Empty<FlowComponent>() ).Append(
 					new DisplayableElement(
-						context => {
-							contentContainerId.AddId( context.Id );
-							return new DisplayableElementData(
-								null,
-								() => new DisplayableElementLocalData(
-									"div",
-									focusDependentData: new DisplayableElementFocusDependentData(
-										attributes: setup.MinColumnWidth != null
-											            ? Tuple.Create( "style", "column-width: {0}".FormatWith( ( (CssLength)setup.MinColumnWidth ).Value ) ).ToCollection()
-											            : null,
-										includeIdAttribute: true ) ),
-								classes: CheckboxListCssElementCreator.ContentContainerClass,
-								children: new RawList( from i in checkboxes select i.PageComponent.ToCollection().ToComponentListItem() ).ToCollection() );
-						} ) )
+						context => new DisplayableElementData(
+							null,
+							() => new DisplayableElementLocalData(
+								"div",
+								focusDependentData: new DisplayableElementFocusDependentData(
+									attributes: setup.MinColumnWidth != null
+										            ? Tuple.Create( "style", "column-width: {0}".FormatWith( ( (CssLength)setup.MinColumnWidth ).Value ) ).ToCollection()
+										            : null,
+									includeIdAttribute: true ) ),
+							classes: CheckboxListCssElementCreator.ContentContainerClass,
+							clientSideIdReferences: contentContainerId.ToCollection(),
+							children: new RawList( from i in checkboxes select i.PageComponent.ToComponentListItem() ).ToCollection() ) ) )
 				.Materialize(),
 				displaySetup: setup.DisplaySetup,
 				classes: CheckboxListCssElementCreator.ListClass );
