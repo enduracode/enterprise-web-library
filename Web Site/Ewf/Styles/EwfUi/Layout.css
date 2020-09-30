@@ -14,7 +14,9 @@ ewfUiGlobalContainer {
 	}
 }
 
+
 /* spacing */
+
 div.ewfStandardDynamicTable, ewfControlStack, ewfUiEntityBlock > *, ewfUiSideTabAndContentBlock, ewfUiGlobalFootContainer {
 	margin-top: 1em;
 }
@@ -33,6 +35,16 @@ ewfUiGlobalContainer {
 ewfUiTopTabListContainer ewfActionComponentAllStylesAllStates {
 	padding: .5rem 1rem;
 }
+
+ewfUiAppLogoAndUserInfoContainer {
+	margin-top: -.25rem;
+	margin-bottom: -.25rem;
+}
+ewfUiAppLogoAndUserInfoContainer > * {
+	margin-top: .25rem;
+	margin-bottom: .25rem;
+}
+
 
 /* borders */
 ewfUiGlobalContainer, ewfUiTopTabListContainer {
@@ -205,6 +217,12 @@ ewfUiAppLogoAndUserInfoContainer, ewfUiTopErrorMessageListContainer, ewfUiGlobal
 	margin-left: auto;
 	margin-right: auto;
 	max-width: 75rem;
+}
+ewfUiAppLogoAndUserInfoContainer {
+	display: flex;
+	flex-flow: row wrap;
+	justify-content: space-between;
+	align-items: center;
 }
 ewfUiUserInfoContainer {
 	text-align: right;

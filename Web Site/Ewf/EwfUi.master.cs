@@ -67,9 +67,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				return new[]
 					{
 						new CssElement( "UiGlobalContainer", globalContainerSelector ),
-						new CssElement(
-							"UiAppLogoAndUserInfoContainer",
-							TableCssElementCreator.Selectors.Select( i => globalContainerSelector + " " + i + "." + AppLogoAndUserInfoClass.ClassName ).ToArray() ),
+						new CssElement( "UiAppLogoAndUserInfoContainer", globalContainerSelector + " " + "div." + AppLogoAndUserInfoClass.ClassName ),
 						new CssElement( "UiAppLogoContainer", globalContainerSelector + " " + "div." + AppLogoClass.ClassName ),
 						new CssElement( "UiUserInfoContainer", globalContainerSelector + " " + "div." + UserInfoClass.ClassName ),
 						new CssElement(
@@ -224,8 +222,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				clientSideIdOverride: CssElementCreator.GlobalContainerId );
 
 		private FlowComponent getAppLogoAndUserInfoContainer() {
-			var table = EwfTable.Create( style: EwfTableStyle.StandardLayoutOnly, classes: CssElementCreator.AppLogoAndUserInfoClass );
-
 			var appLogo = new GenericFlowContainer(
 				( !ConfigurationStatics.IsIntermediateInstallation || AppRequestState.Instance.IntermediateUserExists
 					  ? EwfUiStatics.AppProvider.GetLogoComponent()
@@ -239,8 +235,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					userInfo.Add( new GenericFlowContainer( getUserInfo( changePasswordPage ), classes: CssElementCreator.UserInfoClass ) );
 			}
 
-			table.AddItem( () => EwfTableItem.Create( appLogo.ToCollection().ToCell(), userInfo.ToCell() ) );
-			return table;
+			return new GenericFlowContainer( appLogo.Concat( userInfo ).Materialize(), classes: CssElementCreator.AppLogoAndUserInfoClass );
 		}
 
 		private IReadOnlyCollection<FlowComponent> getUserInfo( PageInfo changePasswordPage ) {
