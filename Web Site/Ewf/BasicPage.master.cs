@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using System.Web.UI.HtmlControls;
-using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.Configuration;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.WebSessionState;
@@ -16,15 +14,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 	public partial class BasicPage: MasterPage, ControlTreeDataLoader, ControlWithJsInitLogic {
 		// Some of these are used by the EWF JavaScript file.
 		private static readonly ElementClass topWarningContainerClass = new ElementClass( "ewfTopWarning" );
-		private const string clickBlockerInactiveClass = "ewfClickBlockerI";
-		private const string clickBlockerActiveClass = "ewfClickBlockerA";
+		private static readonly ElementClass clickBlockerInactiveClass = new ElementClass( "ewfClickBlockerI" );
+		private static readonly ElementClass clickBlockerActiveClass = new ElementClass( "ewfClickBlockerA" );
 		private static readonly ElementClass processingDialogBlockInactiveClass = new ElementClass( "ewfProcessingDialogI" );
 		private static readonly ElementClass processingDialogBlockActiveClass = new ElementClass( "ewfProcessingDialogA" );
 		private static readonly ElementClass processingDialogBlockTimeOutClass = new ElementClass( "ewfProcessingDialogTo" );
 		private static readonly ElementClass processingDialogProcessingParagraphClass = new ElementClass( "ewfProcessingP" );
 		private static readonly ElementClass processingDialogTimeOutParagraphClass = new ElementClass( "ewfTimeOutP" );
-		private const string notificationSectionContainerNotificationClass = "ewfNotificationN";
-		private const string notificationSectionContainerDockedClass = "ewfNotificationD";
+		private static readonly ElementClass notificationSectionContainerNotificationClass = new ElementClass( "ewfNotificationN" );
+		private static readonly ElementClass notificationSectionContainerDockedClass = new ElementClass( "ewfNotificationD" );
 		private static readonly ElementClass notificationSpacerClass = new ElementClass( "ewfNotificationSpacer" );
 		private static readonly ElementClass infoMessageContainerClass = new ElementClass( "ewfInfoMsg" );
 		private static readonly ElementClass warningMessageContainerClass = new ElementClass( "ewfWarnMsg" );
@@ -35,8 +33,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				var elements = new List<CssElement>();
 				elements.Add( new CssElement( "TopWarningContainer", "div.{0}".FormatWith( topWarningContainerClass.ClassName ) ) );
 
-				const string clickBlockingBlockInactiveSelector = "div." + clickBlockerInactiveClass;
-				const string clickBlockingBlockActiveSelector = "div." + clickBlockerActiveClass;
+				var clickBlockingBlockInactiveSelector = "div." + clickBlockerInactiveClass.ClassName;
+				var clickBlockingBlockActiveSelector = "div." + clickBlockerActiveClass.ClassName;
 				elements.Add( new CssElement( "ClickBlockerBothStates", clickBlockingBlockInactiveSelector, clickBlockingBlockActiveSelector ) );
 				elements.Add( new CssElement( "ClickBlockerInactiveState", clickBlockingBlockInactiveSelector ) );
 				elements.Add( new CssElement( "ClickBlockerActiveState", clickBlockingBlockActiveSelector ) );
@@ -84,8 +82,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			private IEnumerable<CssElement> getNotificationElements() {
 				var elements = new List<CssElement>();
 
-				const string containerNotificationSelector = "div." + notificationSectionContainerNotificationClass;
-				const string containerDockedSelector = "div." + notificationSectionContainerDockedClass;
+				var containerNotificationSelector = "div." + notificationSectionContainerNotificationClass.ClassName;
+				var containerDockedSelector = "div." + notificationSectionContainerDockedClass.ClassName;
 				elements.AddRange(
 					new[]
 						{
@@ -258,12 +256,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			const string clickBlockerId = "ewfClickBlocker";
 
 			ph2.AddControlsReturnThis(
-				new Block { ClientIDMode = ClientIDMode.Static, ID = clickBlockerId, CssClass = clickBlockerInactiveClass },
-				new PlaceHolder().AddControlsReturnThis( getProcessingDialog().GetControls() ),
-				new NamingPlaceholder( getStatusMessageControl() ) );
+				new GenericFlowContainer( null, classes: clickBlockerInactiveClass, clientSideIdOverride: clickBlockerId ).Append( getProcessingDialog() )
+					.Append( new FlowIdContainer( getNotificationSectionContainer() ) )
+					.GetControls() );
 		}
 
-		private IReadOnlyCollection<FlowComponent> getProcessingDialog() {
+		private FlowComponent getProcessingDialog() {
 			// This is used by the EWF JavaScript file.
 			var dialogClass = new ElementClass( "ewfProcessingDialog" );
 
@@ -283,7 +281,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 								behavior: new CustomButtonBehavior( () => "stopPostBackRequest();" ) ).ToCollection(),
 							classes: processingDialogTimeOutParagraphClass ) )
 					.Materialize(),
-				classes: dialogClass.Add( processingDialogBlockInactiveClass ) ).ToCollection();
+				classes: dialogClass.Add( processingDialogBlockInactiveClass ) );
 		}
 
 		// This supports the animated ellipsis. Browsers that don't support CSS3 animations will still see the static dots.
@@ -294,7 +292,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			return new GenericPhrasingContainer( ".".ToComponents(), classes: dotClass ).ToCollection();
 		}
 
-		private IEnumerable<Control> getStatusMessageControl() {
+		private IReadOnlyCollection<FlowComponent> getNotificationSectionContainer() {
 			var messagesExist = EwfPage.Instance.StatusMessages.Any();
 			new ModalBox(
 					new ModalBoxId(),
@@ -312,15 +310,20 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			const string notificationSectionContainerId = "ewfNotification";
 
 			return messagesExist && statusMessagesDisplayAsNotification()
-				       ? new Block(
-					       new PlaceHolder().AddControlsReturnThis(
-						       new Section( null, SectionStyle.Box, null, "Messages", null, getStatusMessageComponentList().ToCollection(), false, true, null )
-							       .ToCollection()
-							       .GetControls() ) )
-					       {
-						       ClientIDMode = ClientIDMode.Static, ID = notificationSectionContainerId, CssClass = notificationSectionContainerNotificationClass
-					       }.ToCollection()
-				       : Enumerable.Empty<Control>();
+				       ? new GenericFlowContainer(
+					       new Section(
+						       null,
+						       SectionStyle.Box,
+						       null,
+						       "Messages",
+						       null,
+						       getStatusMessageComponentList().ToCollection(),
+						       false,
+						       true,
+						       null ).ToCollection(),
+					       classes: notificationSectionContainerNotificationClass,
+					       clientSideIdOverride: notificationSectionContainerId ).ToCollection()
+				       : Enumerable.Empty<FlowComponent>().Materialize();
 		}
 
 		private FlowComponent getStatusMessageComponentList() =>
