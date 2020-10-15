@@ -124,7 +124,6 @@
     <Compile Include="Operations\UpdateDependentLogic\CodeGeneration\WebMetaLogic\WebItems\EntitySetup.cs" />
     <Compile Include="Operations\UpdateDependentLogic\CodeGeneration\WebMetaLogic\WebItems\Page.cs" />
     <Compile Include="Operations\UpdateDependentLogic\CodeGeneration\WebMetaLogic\WebItems\StaticFile.cs" />
-    <Compile Include="Operations\UpdateDependentLogic\CodeGeneration\WebMetaLogic\WebItems\UserControl.cs" />
     <Compile Include="Operations\UpdateDependentLogic\CodeGeneration\WebMetaLogic\WebMetaLogicStatics.cs" />
     <Compile Include="Operations\UpdateDependentLogic\UpdateDependentLogic.cs" />
     <Compile Include="Program.cs" />

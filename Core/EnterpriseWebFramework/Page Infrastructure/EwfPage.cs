@@ -181,7 +181,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		protected sealed override void OnPreInit( EventArgs e ) {
 			// This logic should happen before the page gets the PreInit event in case it wants to determine the master based on parameters.
-			// NOTE: If the entity setup is a master page, we need to delay this call until after PreInit.
 			initEntitySetupAndCreateInfoObjects();
 
 			base.OnPreInit( e );
@@ -190,10 +189,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private void initEntitySetupAndCreateInfoObjects() {
 			AppRequestState.Instance.UserDisabledByPage = true;
 			try {
-				initEntitySetup();
-				if( EsAsBaseType != null )
-					using( MiniProfiler.Current.Step( "EWF - Create entity-setup info" ) )
-						EsAsBaseType.CreateInfoFromQueryString();
 				using( MiniProfiler.Current.Step( "EWF - Create page info" ) )
 					createInfoFromQueryString();
 
@@ -241,9 +236,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
-		/// Loads the entity display setup for the page, if one exists.
+		/// Creates the info object for this page based on the query parameters of the request.
 		/// </summary>
-		protected abstract void initEntitySetup();
+		protected abstract void createInfoFromQueryString();
 
 		/// <summary>
 		/// Gets the request handler for this page, which will override the page.
@@ -306,15 +301,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 				// Re-create info objects. A big reason to do this is that some info objects execute database queries or other code in order to prime the data-access
 				// cache. The code above resets the cache and we want to re-prime it right away.
-				EsAsBaseType?.ClearInfo();
-				clearInfo();
 				AppRequestState.Instance.UserDisabledByPage = true;
 				try {
-					if( EsAsBaseType != null )
-						using( MiniProfiler.Current.Step( "EWF - Create entity-setup info after page-view data modifications" ) )
-							EsAsBaseType.CreateInfoFromQueryString();
-					using( MiniProfiler.Current.Step( "EWF - Create page info after page-view data modifications" ) )
-						createInfoFromQueryString();
+					using( MiniProfiler.Current.Step( "EWF - Re-create page info after page-view data modifications" ) )
+						reCreateInfo();
 
 					bool connectionSecurityIncorrect;
 					using( MiniProfiler.Current.Step( "EWF - Check connection security after page-view data modifications" ) )
@@ -462,12 +452,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// EWF use only.
 		/// </summary>
-		protected abstract void clearInfo();
-
-		/// <summary>
-		/// Creates the info object for this page based on the query parameters of the request.
-		/// </summary>
-		protected abstract void createInfoFromQueryString();
+		protected abstract void reCreateInfo();
 
 		private bool getConnectionSecurityIncorrect() {
 			return InfoAsBaseType.ShouldBeSecureGivenCurrentRequest != EwfApp.Instance.RequestIsSecure( Request );
@@ -631,9 +616,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				DataUpdate.ToCollection(),
 				() => {
-					if( EsAsBaseType != null )
-						using( MiniProfiler.Current.Step( "EWF - Load entity-setup data" ) )
-							EsAsBaseType.LoadData();
 					using( MiniProfiler.Current.Step( "EWF - Load page data" ) )
 						loadData();
 				} );
@@ -1015,7 +997,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				else if( destination != null )
 					destination = destination.CloneAndReplaceDefaultsIfPossible( false );
 				else
-					destination = createInfoFromNewParameterValues();
+					destination = reCreateFromNewParameterValues();
 
 				// This GetUrl call is important even for the transfer case below for the same reason that we *actually create* a new page info object in every case
 				// above. We want to force developers to get an error email if a page modifies data to make itself unauthorized/disabled without specifying a different
@@ -1052,7 +1034,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates a page info object using the new parameter value fields in this page.
 		/// </summary>
-		protected abstract PageInfo createInfoFromNewParameterValues();
+		protected abstract PageInfo reCreateFromNewParameterValues();
 
 		private ApplicationException getPossibleDeveloperMistakeException( string messageSentence, Exception innerException = null ) {
 			var sentences = new[]

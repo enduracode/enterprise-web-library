@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
-using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Ui.Entity;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
@@ -150,6 +148,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			}
 		}
 
+		private EntityUiSetup entityUiSetup;
 		private bool omitContentBox;
 		private IReadOnlyCollection<ActionComponentSetup> pageActions = Enumerable.Empty<ActionComponentSetup>().Materialize();
 		private IReadOnlyCollection<ButtonSetup> contentFootActions = Enumerable.Empty<ButtonSetup>().Materialize();
@@ -175,6 +174,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 
 		void ControlTreeDataLoader.LoadData() {
 			globalPlace.AddControlsReturnThis( getGlobalContainer().ToCollection().GetControls() );
+			entityUiSetup = ( EwfPage.Instance.EsAsBaseType as UiEntitySetup )?.GetUiSetup();
 			entityAndTopTabPlace.AddControlsReturnThis( getEntityAndTopTabBlock() );
 			if( entityUsesTabMode( TabMode.Vertical ) )
 				setUpSideTabs();
@@ -294,7 +294,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		private Control getEntityAndTopTabBlock() {
 			var controls = new List<Control> { getEntityBlock() };
 			if( entityUsesTabMode( TabMode.Horizontal ) ) {
-				var resourceGroups = EwfPage.Instance.InfoAsBaseType.EsInfoAsBaseType.Resources;
+				var resourceGroups = EwfPage.Instance.EsAsBaseType.Resources;
 				if( resourceGroups.Count > 1 )
 					throw new ApplicationException( "Top tabs are not supported with multiple resource groups." );
 				controls.AddRange( getTopTabListContainer( resourceGroups.Single() ).ToCollection().GetControls() );
@@ -309,9 +309,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				};
 
 		private IReadOnlyCollection<FlowComponent> getPagePath() {
-			var entitySetupInfo = EwfPage.Instance.InfoAsBaseType.EsInfoAsBaseType;
+			var entitySetup = EwfPage.Instance.EsAsBaseType;
 			var pagePath = new PagePath(
-				currentPageBehavior: entitySetupInfo != null && EwfPage.Instance.InfoAsBaseType.ParentResource == null && entitySetupInfo.Resources.Any()
+				currentPageBehavior: entitySetup != null && EwfPage.Instance.InfoAsBaseType.ParentResource == null && entitySetup.Resources.Any()
 					                     ? PagePathCurrentPageBehavior.IncludeCurrentPageAndExcludePageNameIfEntitySetupExists
 					                     : PagePathCurrentPageBehavior.IncludeCurrentPage );
 			return pagePath.IsEmpty ? Enumerable.Empty<FlowComponent>().Materialize() : pagePath.ToCollection();
@@ -325,13 +325,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		}
 
 		private FlowComponent getEntityNavListContainer() {
-			if( uiEntitySetup == null )
+			if( entityUiSetup == null )
 				return null;
 
-			var formItems = uiEntitySetup.GetNavFormControls()
+			var formItems = entityUiSetup.NavFormControls
 				.Select( ( control, index ) => control.GetFormItem( PostBack.GetCompositeId( "entity", "nav", index.ToString() ) ) )
 				.Materialize();
-			var listItems = getActionListItems( uiEntitySetup.GetNavActions() ).Concat( formItems.Select( i => i.Content.ToComponentListItem() ) ).Materialize();
+			var listItems = getActionListItems( entityUiSetup.NavActions ).Concat( formItems.Select( i => i.Content.ToComponentListItem() ) ).Materialize();
 			if( !listItems.Any() )
 				return null;
 
@@ -345,9 +345,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		}
 
 		private FlowComponent getEntityActionListContainer() {
-			if( uiEntitySetup == null || EwfPage.Instance.InfoAsBaseType.ParentResource != null )
+			if( entityUiSetup == null || EwfPage.Instance.InfoAsBaseType.ParentResource != null )
 				return null;
-			var listItems = getActionListItems( uiEntitySetup.GetActions() ).Materialize();
+			var listItems = getActionListItems( entityUiSetup.Actions ).Materialize();
 			if( !listItems.Any() )
 				return null;
 			return new GenericFlowContainer(
@@ -358,13 +358,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		}
 
 		private IReadOnlyCollection<Control> getEntitySummaryBlock() {
-			// If the entity setup is a nonempty control, display it as an entity summary.
-			//
-			// It's a hack to call GetDescendants this early in the life cycle, but we should be able to fix it when we separate EWF from Web Forms. This is
-			// EnduraCode goal 790. What we are essentially doing here is determining whether there is at least one "component" in the entity summary.
-			if( EwfPage.Instance.EsAsBaseType is Control entitySummary && EwfPage.Instance.GetDescendants( entitySummary ).Any( i => !( i is PlaceHolder ) ) )
-				return new Block( entitySummary ) { CssClass = CssElementCreator.EntitySummaryBlockCssClass }.ToCollection();
-
+			if( entityUiSetup?.EntitySummaryContent != null )
+				return new Block( entityUiSetup.EntitySummaryContent.GetControls().ToArray() ) { CssClass = CssElementCreator.EntitySummaryBlockCssClass }
+					.ToCollection();
 			return Enumerable.Empty<Control>().Materialize();
 		}
 
@@ -375,15 +371,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					verticalAlignment: FlexboxVerticalAlignment.Bottom ).ToCollection(),
 				classes: CssElementCreator.TopTabListContainerClass );
 
-		private bool entityUsesTabMode( TabMode tabMode ) {
-			var entitySetupInfo = EwfPage.Instance.InfoAsBaseType.EsInfoAsBaseType;
-			return entitySetupInfo != null && EwfPage.Instance.InfoAsBaseType.ParentResource == null && entitySetupInfo.GetTabMode() == tabMode;
-		}
+		private bool entityUsesTabMode( TabMode tabMode ) =>
+			entityUiSetup != null && EwfPage.Instance.InfoAsBaseType.ParentResource == null && entityUiSetup.GetTabMode( EwfPage.Instance.EsAsBaseType ) == tabMode;
 
 		private void setUpSideTabs() {
 			sideTabCell.Visible = true;
 			var components = new List<FlowComponent>();
-			foreach( var resourceGroup in EwfPage.Instance.InfoAsBaseType.EsInfoAsBaseType.Resources ) {
+			foreach( var resourceGroup in EwfPage.Instance.EsAsBaseType.Resources ) {
 				var tabs = getTabHyperlinksForResources( resourceGroup, true );
 				if( tabs.Any() && resourceGroup.Name.Any() )
 					components.Add( new GenericFlowContainer( resourceGroup.Name.ToComponents(), classes: CssElementCreator.SideTabGroupHeadClass ) );
@@ -485,7 +479,5 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				       ? new GenericFlowContainer( components, clientSideIdOverride: CssElementCreator.GlobalFootContainerId ).ToCollection()
 				       : Enumerable.Empty<FlowComponent>().Materialize();
 		}
-
-		private UiEntitySetupBase uiEntitySetup => EwfPage.Instance.EsAsBaseType as UiEntitySetupBase;
 	}
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Humanizer;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic {
@@ -38,29 +39,29 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 		}
 
 		internal static void WriteConstructorAndHelperMethods(
-			TextWriter writer, List<VariableSpecification> requiredParameters, List<VariableSpecification> optionalParameters, bool includeEsInfoParameter,
-			bool isEsInfo ) {
+			TextWriter writer, IReadOnlyCollection<VariableSpecification> requiredParameters, IReadOnlyCollection<VariableSpecification> optionalParameters,
+			bool includeEsParameter, bool isEs ) {
 			// It's important to force the cache to be enabled in the constructor since info objects are often created in post-back-action getters.
 
 			writeConstructorDocComments( writer, requiredParameters );
-			var constructorAndInitialParameterArguments = "( " + StringTools.ConcatenateWithDelimiter(
-				                                              ", ",
-				                                              includeEsInfoParameter ? "EntitySetup.Info esInfo" : "",
-				                                              WebMetaLogicStatics.GetParameterDeclarations( requiredParameters ),
-				                                              optionalParameters.Count > 0 ? "OptionalParameterPackage optionalParameterPackage = null" : "",
-				                                              !isEsInfo ? "string uriFragmentIdentifier = \"\"" : "" ) + " ) {";
-			writer.WriteLine( "internal Info" + constructorAndInitialParameterArguments );
+			var constructorParameters = "( " + StringTools.ConcatenateWithDelimiter(
+				                            ", ",
+				                            includeEsParameter ? "EntitySetup es" : "",
+				                            WebMetaLogicStatics.GetParameterDeclarations( requiredParameters ),
+				                            optionalParameters.Count > 0 ? "OptionalParameterPackage optionalParameterPackage = null" : "",
+				                            !isEs ? "string uriFragmentIdentifier = \"\"" : "" ) + " ) {";
+			writer.WriteLine( "internal {0}".FormatWith( isEs ? "EntitySetup" : "Info" ) + constructorParameters );
 			writer.WriteLine( "DataAccessState.Current.ExecuteWithCache( () => {" );
 
-			// Initialize required parameter fields. We want to create and call this method even if there are no parameters so that non-generated Info constructors can still
-			// call it and remain resistant to changes.
+			// Initialize parameter fields. We want to create and call this method even if there are no parameters so that non-generated constructors can still call
+			// it and remain resistant to changes.
 			writer.WriteLine(
-				"initializeParameters( " + StringTools.ConcatenateWithDelimiter(
+				"initParameters( " + StringTools.ConcatenateWithDelimiter(
 					", ",
-					includeEsInfoParameter ? "esInfo" : "",
+					includeEsParameter ? "es" : "",
 					GetInfoConstructorArgumentsForRequiredParameters( requiredParameters, p => p.Name ),
 					optionalParameters.Count > 0 ? "optionalParameterPackage: optionalParameterPackage" : "",
-					!isEsInfo ? "uriFragmentIdentifier: uriFragmentIdentifier" : "" ) + " );" );
+					!isEs ? "uriFragmentIdentifier: uriFragmentIdentifier" : "" ) + " );" );
 
 			// Call init.
 			writer.WriteLine( "init();" );
@@ -69,7 +70,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			writer.WriteLine( "}" );
 
 			// Declare partial helper methods that will be called by the constructor.
-			writeInitParametersMethod( writer, requiredParameters, optionalParameters, includeEsInfoParameter, isEsInfo, constructorAndInitialParameterArguments );
+			writeInitParametersMethod( writer, requiredParameters, optionalParameters, includeEsParameter, isEs, constructorParameters );
 			if( optionalParameters.Any() ) {
 				CodeGenerationStatics.AddSummaryDocComment(
 					writer,
@@ -82,7 +83,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			}
 		}
 
-		private static void writeConstructorDocComments( TextWriter writer, List<VariableSpecification> requiredParameters ) {
+		private static void writeConstructorDocComments( TextWriter writer, IReadOnlyCollection<VariableSpecification> requiredParameters ) {
 			foreach( var parameter in requiredParameters ) {
 				var warning = "";
 				if( parameter.IsString || parameter.IsEnumerable )
@@ -92,15 +93,15 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 		}
 
 		private static void writeInitParametersMethod(
-			TextWriter writer, List<VariableSpecification> requiredParameters, List<VariableSpecification> optionalParameters, bool includeEsInfoParameter,
-			bool isEsInfo, string arguments ) {
+			TextWriter writer, IReadOnlyCollection<VariableSpecification> requiredParameters, IReadOnlyCollection<VariableSpecification> optionalParameters,
+			bool includeEsParameter, bool isEs, string constructorParameters ) {
 			CodeGenerationStatics.AddSummaryDocComment(
 				writer,
-				"Initializes required and optional parameters. A call to this should be the first line of every non-generated Info constructor." );
-			writer.WriteLine( "private void initializeParameters" + arguments );
+				"Initializes required and optional parameters. A call to this should be the first line of every non-generated constructor." );
+			writer.WriteLine( "private void initParameters" + constructorParameters );
 
-			if( includeEsInfoParameter )
-				writer.WriteLine( "this.esInfo = esInfo;" );
+			if( includeEsParameter )
+				writer.WriteLine( "Es = es;" );
 			foreach( var requiredParameter in requiredParameters ) {
 				if( requiredParameter.IsString || requiredParameter.IsEnumerable )
 					writer.WriteLine(
@@ -122,11 +123,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				}
 
 				// If the current info object is the same type, use it to initialize fields whose values have not been specified.
-				if( isEsInfo )
-					writer.WriteLine(
-						"var currentInfo = EwfPage.Instance != null && EwfPage.Instance.EsAsBaseType != null ? EwfPage.Instance.EsAsBaseType.InfoAsBaseType as Info : null;" );
+				if( isEs )
+					writer.WriteLine( "var currentInfo = EwfPage.Instance?.InfoAsBaseType != null ? EwfPage.Instance.EsAsBaseType as EntitySetup : null;" );
 				else
-					writer.WriteLine( "var currentInfo = Instance != null ? Instance.InfoAsBaseType as Info : null;" );
+					writer.WriteLine( "var currentInfo = Instance?.InfoAsBaseType as Info;" );
 				writer.WriteLine( "if( currentInfo != null ) {" );
 				foreach( var optionalParameter in optionalParameters ) {
 					writer.WriteLine( "if( !" + GetWasSpecifiedFieldName( optionalParameter ) + " )" );
@@ -172,13 +172,21 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				writer.WriteLine( "}" );
 			}
 
-			if( !isEsInfo )
+			if( !isEs )
 				writer.WriteLine( "base.uriFragmentIdentifier = uriFragmentIdentifier;" );
-			writer.WriteLine( "}" ); // initializeParameters method
+
+			if( isEs )
+				if( requiredParameters.Any() || optionalParameters.Any() ) {
+					writer.WriteLine( "parametersModification = new ParametersModification();" );
+					foreach( var parameter in requiredParameters.Concat( optionalParameters ) )
+						writer.WriteLine( "parametersModification.{0} = {0};".FormatWith( parameter.PropertyName ) );
+				}
+
+			writer.WriteLine( "}" ); // initParameters method
 		}
 
 		internal static string GetInfoConstructorArguments(
-			List<VariableSpecification> requiredParameters, List<VariableSpecification> optionalParameters,
+			IReadOnlyCollection<VariableSpecification> requiredParameters, IReadOnlyCollection<VariableSpecification> optionalParameters,
 			Func<VariableSpecification, string> requiredParameterToArgMapper, Func<VariableSpecification, string> optionalParameterToArgMapper ) {
 			var optionalParameterAssignments = "";
 			foreach( var optionalParameter in optionalParameters ) {
@@ -197,7 +205,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 		}
 
 		internal static string GetInfoConstructorArgumentsForRequiredParameters(
-			List<VariableSpecification> requiredParameters, Func<VariableSpecification, string> requiredParameterToArgMapper ) {
+			IReadOnlyCollection<VariableSpecification> requiredParameters, Func<VariableSpecification, string> requiredParameterToArgMapper ) {
 			var text = "";
 			foreach( var requiredParameter in requiredParameters )
 				text = StringTools.ConcatenateWithDelimiter( ", ", text, requiredParameterToArgMapper( requiredParameter ) );

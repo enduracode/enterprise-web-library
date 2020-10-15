@@ -144,14 +144,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			var webProjectFilesFolderPath = EwlStatics.CombinePaths( ConfigurationStatics.InstallationPath, AppStatics.WebProjectFilesFolderName );
 			var webProjectPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, webProject.name );
 
-			// Copy Ewf folder and customize namespaces in .aspx, .ascx, .master, and .cs files.
+			// Copy Ewf folder and customize namespaces in .aspx, .master, and .cs files.
 			var webProjectEwfFolderPath = EwlStatics.CombinePaths( webProjectPath, StaticFileHandler.EwfFolderName );
 			IoMethods.DeleteFolder( webProjectEwfFolderPath );
 			IoMethods.CopyFolder( EwlStatics.CombinePaths( webProjectFilesFolderPath, StaticFileHandler.EwfFolderName ), webProjectEwfFolderPath, false );
 			IoMethods.RecursivelyRemoveReadOnlyAttributeFromItem( webProjectEwfFolderPath );
 			var matchingFiles = new List<string>();
 			matchingFiles.AddRange( Directory.GetFiles( webProjectEwfFolderPath, "*.aspx", SearchOption.AllDirectories ) );
-			matchingFiles.AddRange( Directory.GetFiles( webProjectEwfFolderPath, "*.ascx", SearchOption.AllDirectories ) );
 			matchingFiles.AddRange( Directory.GetFiles( webProjectEwfFolderPath, "*.master", SearchOption.AllDirectories ) );
 			matchingFiles.AddRange( Directory.GetFiles( webProjectEwfFolderPath, "*.cs", SearchOption.AllDirectories ) );
 			foreach( var filePath in matchingFiles )

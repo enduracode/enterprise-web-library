@@ -11,7 +11,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// EWL use only.
 		/// </summary>
-		public override EntitySetupInfo EsInfoAsBaseType => null;
+		public override EntitySetupBase EsAsBaseType => null;
 
 		/// <summary>
 		/// EWL use only.
@@ -25,7 +25,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return info != null && info.appRelativeFilePath == appRelativeFilePath;
 		}
 
-		protected internal override ResourceInfo CloneAndReplaceDefaultsIfPossible( bool disableReplacementOfDefaults ) {
+		public override ResourceInfo CloneAndReplaceDefaultsIfPossible( bool disableReplacementOfDefaults ) {
 			return this;
 		}
 

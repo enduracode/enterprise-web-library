@@ -168,13 +168,7 @@
     <Compile Include="Ewf\Admin\EditUser.aspx.designer.cs">
       <DependentUpon>EditUser.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Ewf\Admin\EntitySetup.ascx.cs">
-      <DependentUpon>EntitySetup.ascx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Ewf\Admin\EntitySetup.ascx.designer.cs">
-      <DependentUpon>EntitySetup.ascx</DependentUpon>
-    </Compile>
+    <Compile Include="Ewf\Admin\EntitySetup.cs" />
     <Compile Include="Ewf\Admin\RequestProfiling.aspx.cs">
       <DependentUpon>RequestProfiling.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -302,6 +296,7 @@
     <Compile Include="TestPages\DateAndTimePickers.aspx.designer.cs">
       <DependentUpon>DateAndTimePickers.aspx</DependentUpon>
     </Compile>
+    <Compile Include="TestPages\EntitySetup.cs" />
     <Compile Include="TestPages\HtmlEditing.aspx.cs">
       <DependentUpon>HtmlEditing.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -329,13 +324,6 @@
     </Compile>
     <Compile Include="TestPages\GetImage.aspx.designer.cs">
       <DependentUpon>GetImage.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\EntitySetup.ascx.cs">
-      <DependentUpon>EntitySetup.ascx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="TestPages\EntitySetup.ascx.designer.cs">
-      <DependentUpon>EntitySetup.ascx</DependentUpon>
     </Compile>
     <Compile Include="TestPages\IntermediatePostBacks.aspx.cs">
       <DependentUpon>IntermediatePostBacks.aspx</DependentUpon>
@@ -421,13 +409,6 @@
     <Compile Include="Ewf\UserManagement\ChangePassword\Page.aspx.designer.cs">
       <DependentUpon>Page.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Ewf\UserManagement\ChangePassword\EntitySetup.ascx.cs">
-      <SubType>ASPXCodeBehind</SubType>
-      <DependentUpon>EntitySetup.ascx</DependentUpon>
-    </Compile>
-    <Compile Include="Ewf\UserManagement\ChangePassword\EntitySetup.ascx.designer.cs">
-      <DependentUpon>EntitySetup.ascx</DependentUpon>
-    </Compile>
     <Compile Include="Ewf\UserManagement\LogIn.aspx.cs">
       <SubType>ASPXCodeBehind</SubType>
       <DependentUpon>LogIn.aspx</DependentUpon>
@@ -474,13 +455,7 @@
     <Compile Include="TestPages\SubFolder\Disabled.aspx.designer.cs">
       <DependentUpon>Disabled.aspx</DependentUpon>
     </Compile>
-    <Compile Include="TestPages\SubFolder\EntitySetup.ascx.cs">
-      <DependentUpon>EntitySetup.ascx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="TestPages\SubFolder\EntitySetup.ascx.designer.cs">
-      <DependentUpon>EntitySetup.ascx</DependentUpon>
-    </Compile>
+    <Compile Include="TestPages\SubFolder\EntitySetup.cs" />
     <Compile Include="TestPages\SubFolder\General.aspx.cs">
       <DependentUpon>General.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -514,7 +489,6 @@
     <Content Include="CreateSystem.aspx" />
     <Content Include="Ewf\Admin\BasicTests.aspx" />
     <Content Include="Ewf\Admin\EditUser.aspx" />
-    <Content Include="Ewf\Admin\EntitySetup.ascx" />
     <Content Include="Ewf\Admin\RequestProfiling.aspx" />
     <Content Include="Ewf\Admin\SystemUsers.aspx" />
     <Content Include="Ewf\ContactSupport.aspx" />
@@ -566,7 +540,6 @@
     <Content Include="TestPages\ColumnPrimaryTableDemo.aspx" />
     <Content Include="TestPages\DateAndTimePickers.aspx" />
     <Content Include="TestPages\EwfTableDemo.aspx" />
-    <Content Include="TestPages\EntitySetup.ascx" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="TestPages\HtmlEditing.aspx" />
@@ -591,7 +564,6 @@
     <Content Include="TestPages\StatusMessages.aspx" />
     <Content Include="TestPages\SubFolder\Details.aspx" />
     <Content Include="TestPages\SubFolder\Disabled.aspx" />
-    <Content Include="TestPages\SubFolder\EntitySetup.ascx" />
     <Content Include="TestPages\SubFolder\General.aspx" />
     <Content Include="TestPages\SubFolder\New.aspx" />
     <Content Include="TestPages\TestService.aspx" />
@@ -599,7 +571,6 @@
     <Content Include="Web.config" />
     <Content Include="Ewf\JavaScript.js" />
     <Content Include="Ewf\UserManagement\ChangePassword\Page.aspx" />
-    <Content Include="Ewf\UserManagement\ChangePassword\EntitySetup.ascx" />
     <Content Include="Ewf\UserManagement\LogIn.aspx" />
     <Content Include="Test.css" />
   </ItemGroup>

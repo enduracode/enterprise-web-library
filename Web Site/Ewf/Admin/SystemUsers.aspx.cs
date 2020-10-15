@@ -12,14 +12,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			ph.AddControlsReturnThis(
 				EwfTable
 					.Create(
-						tableActions: new HyperlinkSetup( new EditUser.Info( es.info, null ), "Create User" ).ToCollection(),
+						tableActions: new HyperlinkSetup( new EditUser.Info( Es, null ), "Create User" ).ToCollection(),
 						headItems: EwfTableItem.Create( "Email".ToCell().Append( "Role".ToCell() ).Materialize() ).ToCollection() )
 					.AddData(
 						UserManagementStatics.GetUsers(),
 						user => EwfTableItem.Create(
 							user.Email.ToCell().Append( user.Role.Name.ToCell() ).Materialize(),
-							setup: EwfTableItemSetup.Create(
-								activationBehavior: ElementActivationBehavior.CreateRedirectScript( new EditUser.Info( es.info, user.UserId ) ) ) ) )
+							setup: EwfTableItemSetup.Create( activationBehavior: ElementActivationBehavior.CreateRedirectScript( new EditUser.Info( Es, user.UserId ) ) ) ) )
 					.ToCollection()
 					.GetControls() );
 		}

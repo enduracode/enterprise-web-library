@@ -72,7 +72,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets the entity setup info object if one exists.
 		/// </summary>
-		public abstract EntitySetupInfo EsInfoAsBaseType { get; }
+		public abstract EntitySetupBase EsAsBaseType { get; }
 
 		/// <summary>
 		/// Gets the resource info object for the parent resource of this resource. Returns null if there is no parent resource.
@@ -96,7 +96,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				var resource = this;
 				do
 					path.Add( resource );
-				while( ( resource = resource.ParentResource ?? resource.EsInfoAsBaseType?.ParentResource ) != null );
+				while( ( resource = resource.ParentResource ?? resource.EsAsBaseType?.ParentResource ) != null );
 				path.Reverse();
 				return path;
 			}
@@ -111,17 +111,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Returns the name of the resource, including the entity setup name if an entity setup exists.
 		/// </summary>
 		public string ResourceFullName =>
-			CombineResourcePathStrings(
-				EntityResourceSeparator,
-				EsInfoAsBaseType != null && ParentResource == null ? EsInfoAsBaseType.EntitySetupName : "",
-				ResourceName );
+			CombineResourcePathStrings( EntityResourceSeparator, EsAsBaseType != null && ParentResource == null ? EsAsBaseType.EntitySetupName : "", ResourceName );
 
 		/// <summary>
 		/// Returns the string representing the parent resource's path within the entity.
 		/// </summary>
 		internal string ParentResourceEntityPathString {
 			get {
-				if( EsInfoAsBaseType == null )
+				if( EsAsBaseType == null )
 					return "";
 				var pathString = "";
 				for( var i = 0; i < ResourcePath.Count - 1; i += 1 ) {
@@ -129,7 +126,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					var resource = ResourcePath[ ResourcePath.Count - 2 - i ];
 
 					// NOTE: There should be a third part of this condition that tests if all the parameters in the entity setups are the same.
-					if( resource.EsInfoAsBaseType == null || !resource.EsInfoAsBaseType.GetType().Equals( EsInfoAsBaseType.GetType() ) )
+					if( resource.EsAsBaseType == null || !resource.EsAsBaseType.GetType().Equals( EsAsBaseType.GetType() ) )
 						break;
 
 					pathString = CombineResourcePathStrings( ResourcePathSeparator, resource.ResourceFullName, pathString );
@@ -152,9 +149,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 				// It's important to do the entity setup check first so the resource doesn't have to repeat any of it. For example, if the entity setup verifies that
 				// the authenticated user is not null, the resource should be able to assume this when doing its own checks.
-				return ( EsInfoAsBaseType != null
-					         ? ( EsInfoAsBaseType.ParentResource != null ? EsInfoAsBaseType.ParentResource.UserCanAccessResource : true ) &&
-					           EsInfoAsBaseType.UserCanAccessEntitySetup
+				return ( EsAsBaseType != null
+					         ? ( EsAsBaseType.ParentResource != null ? EsAsBaseType.ParentResource.UserCanAccessResource : true ) && EsAsBaseType.UserCanAccessEntitySetup
 					         : true ) && ( ParentResource != null ? ParentResource.UserCanAccessResource : true ) && userCanAccessResource;
 			}
 		}
@@ -176,8 +172,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			get {
 				if( ParentResource != null )
 					return ParentResource.LogInPage;
-				if( EsInfoAsBaseType != null )
-					return EsInfoAsBaseType.LogInPage;
+				if( EsAsBaseType != null )
+					return EsAsBaseType.LogInPage;
 				return null;
 			}
 		}
@@ -189,8 +185,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public AlternativeResourceMode AlternativeMode {
 			get {
 				// It's important to do the entity setup and parent disabled checks first so the resource doesn't have to repeat any of them in its disabled check.
-				if( EsInfoAsBaseType != null && EsInfoAsBaseType.AlternativeMode is DisabledResourceMode )
-					return EsInfoAsBaseType.AlternativeMode;
+				if( EsAsBaseType != null && EsAsBaseType.AlternativeMode is DisabledResourceMode )
+					return EsAsBaseType.AlternativeMode;
 				if( ParentResource != null && ParentResource.AlternativeMode is DisabledResourceMode )
 					return ParentResource.AlternativeMode;
 				return AlternativeModeDirect;
@@ -249,8 +245,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			get {
 				if( ParentResource != null )
 					return ParentResource.ConnectionSecurity;
-				if( EsInfoAsBaseType != null )
-					return EsInfoAsBaseType.ConnectionSecurity;
+				if( EsAsBaseType != null )
+					return EsAsBaseType.ConnectionSecurity;
 				return ConnectionSecurity.SecureIfPossible;
 			}
 		}
@@ -259,8 +255,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			get {
 				if( ParentResource != null )
 					return ParentResource.AllowsSearchEngineIndexing;
-				if( EsInfoAsBaseType != null )
-					return EsInfoAsBaseType.AllowsSearchEngineIndexing;
+				if( EsAsBaseType != null )
+					return EsAsBaseType.AllowsSearchEngineIndexing;
 				return true;
 			}
 		}
@@ -279,10 +275,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		protected abstract bool isIdenticalTo( ResourceInfo infoAsBaseType );
 
 		/// <summary>
+		/// Framework use only.
 		/// If the type of this resource info object corresponds to the current resource or if the type of this resource info object's entity setup info corresponds
 		/// to the current entity setup, this method returns a clone of this object that uses values from the current resource and entity setup instead of defaults
 		/// whenever possible.
 		/// </summary>
-		protected internal abstract ResourceInfo CloneAndReplaceDefaultsIfPossible( bool disableReplacementOfDefaults );
+		public abstract ResourceInfo CloneAndReplaceDefaultsIfPossible( bool disableReplacementOfDefaults );
 	}
 }

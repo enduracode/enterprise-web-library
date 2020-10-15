@@ -18,7 +18,7 @@
 		/// <summary>
 		/// EWL use only.
 		/// </summary>
-		public override EntitySetupInfo EsInfoAsBaseType { get { return null; } }
+		public override EntitySetupBase EsAsBaseType { get { return null; } }
 
 		/// <summary>
 		/// EWL use only.
@@ -43,7 +43,7 @@
 		/// <summary>
 		/// EWL use only.
 		/// </summary>
-		protected internal override ResourceInfo CloneAndReplaceDefaultsIfPossible( bool disableReplacementOfDefaults ) {
+		public override ResourceInfo CloneAndReplaceDefaultsIfPossible( bool disableReplacementOfDefaults ) {
 			return new ExternalResourceInfo( url, uriFragmentIdentifier: uriFragmentIdentifier, name: name );
 		}
 	}

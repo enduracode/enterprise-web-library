@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic.WebItems {
 	internal class EntitySetup {
@@ -22,59 +23,59 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 
 		internal void GenerateCode( TextWriter writer ) {
 			writer.WriteLine( "namespace " + generalData.Namespace + " {" );
-			writer.WriteLine( "public partial class " + generalData.ClassName + " {" );
-			writeInfoClass( writer );
+			writer.WriteLine( "public sealed partial class {0}: EntitySetupBase {{".FormatWith( generalData.ClassName ) );
 			OptionalParameterPackageStatics.WriteClassIfNecessary( writer, optionalParameters );
 			ParametersModificationStatics.WriteClassIfNecessary( writer, requiredParameters.Concat( optionalParameters ) );
-			writer.WriteLine( "internal Info info { get; private set; }" );
+			InfoStatics.WriteParameterMembers( writer, requiredParameters, optionalParameters );
 			if( requiredParameters.Any() || optionalParameters.Any() )
 				writer.WriteLine( "internal ParametersModification parametersModification;" );
-			writer.WriteLine( "EntitySetupInfo EntitySetupBase.InfoAsBaseType { get { return info; } }" );
-			writer.WriteLine(
-				"ParametersModificationBase EntitySetupBase.ParametersModificationAsBaseType { get { return " +
-				( requiredParameters.Any() || optionalParameters.Any() ? "parametersModification" : "null" ) + "; } }" );
-			WebMetaLogicStatics.WriteClearInfoMethod( writer, "void EntitySetupBase." );
-			WebMetaLogicStatics.WriteCreateInfoFromQueryStringMethod( writer, requiredParameters, optionalParameters, "void EntitySetupBase.", "" );
-			WebMetaLogicStatics.WriteCreateInfoFromNewParameterValuesMethod( writer, requiredParameters, optionalParameters, "internal Info ", "" );
-			writer.WriteLine( "}" );
-			writer.WriteLine( "}" );
-		}
-
-		private void writeInfoClass( TextWriter writer ) {
-			writer.WriteLine(
-				"public sealed partial class Info: " + ( generalData.PathRelativeToProject.EndsWith( ".ascx" ) ? "EwfUiEntitySetupInfo" : "EntitySetupInfo" ) + " {" );
-			InfoStatics.WriteParameterMembers( writer, requiredParameters, optionalParameters );
 			InfoStatics.WriteConstructorAndHelperMethods( writer, requiredParameters, optionalParameters, false, true );
-			writeInfoIsIdenticalToMethod( writer );
-			writeInfoCloneAndReplaceDefaultsIfPossibleMethod( writer );
+			writer.WriteLine(
+				"public override ParametersModificationBase ParametersModificationAsBaseType { get { return " +
+				( requiredParameters.Any() || optionalParameters.Any() ? "parametersModification" : "null" ) + "; } }" );
+			writeIsIdenticalToMethod( writer );
+			WebMetaLogicStatics.WriteReCreateFromNewParameterValuesMethod(
+				writer,
+				requiredParameters,
+				optionalParameters,
+				"internal {0} ".FormatWith( generalData.ClassName ),
+				generalData.ClassName,
+				"" );
+			writeCloneAndReplaceDefaultsIfPossibleMethod( writer );
+			writer.WriteLine( "}" );
 			writer.WriteLine( "}" );
 		}
 
-		private void writeInfoIsIdenticalToMethod( TextWriter writer ) {
-			writer.WriteLine( "internal bool IsIdenticalTo( Info info ) {" );
+		private void writeIsIdenticalToMethod( TextWriter writer ) {
+			writer.WriteLine( "internal bool IsIdenticalTo( {0} info ) {{".FormatWith( generalData.ClassName ) );
 			InfoStatics.WriteIsIdenticalToParameterComparisons( writer, requiredParameters, optionalParameters );
 			writer.WriteLine( "}" );
 		}
 
-		private void writeInfoCloneAndReplaceDefaultsIfPossibleMethod( TextWriter writer ) {
-			writer.WriteLine( "internal Info CloneAndReplaceDefaultsIfPossible( bool disableReplacementOfDefaults ) {" );
+		private void writeCloneAndReplaceDefaultsIfPossibleMethod( TextWriter writer ) {
+			writer.WriteLine( "internal {0} CloneAndReplaceDefaultsIfPossible( bool disableReplacementOfDefaults ) {{".FormatWith( generalData.ClassName ) );
 			if( optionalParameters.Any() ) {
 				writer.WriteLine(
-					"var parametersModification = ( EwfPage.Instance.EsAsBaseType != null ? EwfPage.Instance.EsAsBaseType.ParametersModificationAsBaseType : null ) as ParametersModification;" );
+					"var parametersModification = ( EwfPage.Instance.InfoAsBaseType != null ? EwfPage.Instance.EsAsBaseType?.ParametersModificationAsBaseType : null ) as ParametersModification;" );
 				writer.WriteLine( "if( parametersModification != null && !disableReplacementOfDefaults )" );
 				writer.WriteLine(
-					"return new Info( " +
+					"return new {0}( {1} );".FormatWith(
+						generalData.ClassName,
+						InfoStatics.GetInfoConstructorArguments(
+							requiredParameters,
+							optionalParameters,
+							parameter => parameter.FieldName,
+							parameter => InfoStatics.GetWasSpecifiedFieldName( parameter ) + " ? " + parameter.FieldName + " : parametersModification." +
+							             parameter.PropertyName ) ) );
+			}
+			writer.WriteLine(
+				"return new {0}( {1} );".FormatWith(
+					generalData.ClassName,
 					InfoStatics.GetInfoConstructorArguments(
 						requiredParameters,
 						optionalParameters,
 						parameter => parameter.FieldName,
-						parameter => InfoStatics.GetWasSpecifiedFieldName( parameter ) + " ? " + parameter.FieldName + " : parametersModification." + parameter.PropertyName ) +
-					" );" );
-			}
-			writer.WriteLine(
-				"return new Info( " +
-				InfoStatics.GetInfoConstructorArguments( requiredParameters, optionalParameters, parameter => parameter.FieldName, parameter => parameter.FieldName ) +
-				" );" );
+						parameter => parameter.FieldName ) ) );
 			writer.WriteLine( "}" );
 		}
 	}

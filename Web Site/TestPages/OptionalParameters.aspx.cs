@@ -23,8 +23,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				new EwfButton(
 						new StandardButtonStyle( "Navigate and change Field 2" ),
 						behavior: new PostBackBehavior(
-							postBack: PostBack.CreateFull(
-								actionGetter: () => new PostBackAction( new Info( es.info, new OptionalParameterPackage { Field2 = "bob" } ) ) ) ) )
+							postBack: PostBack.CreateFull( actionGetter: () => new PostBackAction( new Info( Es, new OptionalParameterPackage { Field2 = "bob" } ) ) ) ) )
 					.ToCollection()
 					.GetControls() );
 

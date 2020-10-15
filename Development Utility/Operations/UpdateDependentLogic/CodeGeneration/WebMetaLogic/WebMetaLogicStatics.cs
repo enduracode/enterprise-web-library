@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using EnterpriseWebLibrary.Configuration.SystemDevelopment;
 using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic.WebItems;
+using Humanizer;
 using Tewl.IO;
 using Tewl.Tools;
 
@@ -18,7 +19,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 
 			// Generate code for the entity setup if one exists in this folder.
 			var entitySetupFileName = "";
-			foreach( var fileName in new[] { "EntitySetup.ascx", "EntitySetup.cs" } ) {
+			foreach( var fileName in new[] { "EntitySetup.cs" } ) {
 				if( File.Exists( EwlStatics.CombinePaths( folderPath, fileName ) ) ) {
 					entitySetupFileName = fileName;
 					break;
@@ -36,16 +37,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				if( !folderPathRelativeToProject.Any() && ( fileName.Contains( ".csproj" ) || fileName == AppStatics.StandardLibraryFilesFileName ) )
 					continue;
 				var fileExtension = Path.GetExtension( fileName ).ToLowerInvariant();
-				if( new[] { ".cs", ".asax", ".master", ".config", ".svc" }.Contains( fileExtension ) )
+				if( new[] { ".cs", ".ascx", ".asax", ".master", ".config", ".svc" }.Contains( fileExtension ) )
 					continue;
 
 				var filePathRelativeToProject = Path.Combine( folderPathRelativeToProject, fileName );
 				if( fileExtension == ".aspx" )
 					new Page( new WebItemGeneralData( webProjectPath, filePathRelativeToProject, false, webProjectConfiguration ), entitySetup ).GenerateCode( writer );
-				else if( fileExtension == ".ascx" ) {
-					if( fileName != entitySetupFileName )
-						new UserControl( new WebItemGeneralData( webProjectPath, filePathRelativeToProject, false, webProjectConfiguration ) ).GenerateCode( writer );
-				}
 				else
 					new StaticFile( new WebItemGeneralData( webProjectPath, filePathRelativeToProject, true, webProjectConfiguration ) ).GenerateCode( writer );
 			}
@@ -59,38 +56,47 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			}
 		}
 
-		internal static void WriteClearInfoMethod( TextWriter writer, string methodNamePrefix ) {
-			writer.WriteLine( methodNamePrefix + ( methodNamePrefix.Contains( "protected" ) ? "c" : "C" ) + "learInfo() {" );
-			writer.WriteLine( "info = null;" );
-			writer.WriteLine( "}" );
-		}
-
 		internal static void WriteCreateInfoFromQueryStringMethod(
-			TextWriter writer, List<VariableSpecification> requiredParameters, List<VariableSpecification> optionalParameters, string methodNamePrefix,
-			string infoConstructorArgPrefix ) {
-			writer.WriteLine( methodNamePrefix + ( methodNamePrefix.Contains( "protected" ) ? "c" : "C" ) + "reateInfoFromQueryString() {" );
+			TextWriter writer, EntitySetup es, List<VariableSpecification> requiredParameters, List<VariableSpecification> optionalParameters ) {
+			writer.WriteLine( "protected override void createInfoFromQueryString() {" );
 
 			writer.WriteLine( "try {" );
 			var allParameters = requiredParameters.Concat( optionalParameters );
 
 			// Create a local variable for all query parameters to hold their raw query value.
-			foreach( var parameter in allParameters ) {
+			foreach( var parameter in ( es != null ? es.RequiredParameters.Concat( es.OptionalParameters ) : Enumerable.Empty<VariableSpecification>() ).Concat(
+				allParameters ) ) {
 				// If a query parameter is not specified, Request.QueryString[it] returns null. If it is specified as blank (&it=), Request.QueryString[it] returns the empty string.
 				writer.WriteLine(
 					"var " + getLocalQueryValueVariableName( parameter ) + " = HttpContext.Current.Request.QueryString[ \"" + parameter.PropertyName + "\" ];" );
 			}
 
 			// Enforce specification of all required parameters.
-			foreach( var parameter in requiredParameters ) {
+			foreach( var parameter in ( es != null ? es.RequiredParameters : Enumerable.Empty<VariableSpecification>() ).Concat( requiredParameters ) ) {
 				// Blow up if a required parameter was not specified.
 				writer.WriteLine(
 					"if( " + getLocalQueryValueVariableName( parameter ) +
 					" == null ) throw new ApplicationException( \"Required parameter not included in query string: " + parameter.Name + "\" );" );
 			}
 
+			if( es != null ) {
+				var esCtorArguments = es.RequiredParameters.Select( getChangeTypeExpression ).ToList();
+				if( es.OptionalParameters.Any() ) {
+					esCtorArguments.Add( "optionalParameterPackage: esOptionalParameterPackage" );
+					writer.WriteLine( "var esOptionalParameterPackage = new EntitySetup.OptionalParameterPackage();" );
+					foreach( var parameter in es.OptionalParameters ) {
+						// If the optional parameter was not specified, do not set its value (let it remain its default value).
+						writer.WriteLine(
+							"if( " + getLocalQueryValueVariableName( parameter ) + " != null ) esOptionalParameterPackage." + parameter.PropertyName + " = " +
+							getChangeTypeExpression( parameter ) + ";" );
+					}
+				}
+				writer.WriteLine( "var es = new EntitySetup( {0} );".FormatWith( StringTools.ConcatenateWithDelimiter( ", ", esCtorArguments ) ) );
+			}
+
 			// Build up the call to the info constructor.
-			var infoCtorArguments = new List<string> { infoConstructorArgPrefix };
-			infoCtorArguments.AddRange( requiredParameters.Select( rp => getChangeTypeExpression( rp ) ) );
+			var infoCtorArguments = new List<string> { es != null ? "es" : "" };
+			infoCtorArguments.AddRange( requiredParameters.Select( getChangeTypeExpression ) );
 
 			// If there are optional parameters, build an optional paramater package, populate it, and include it in the call to the info constructor.
 			if( optionalParameters.Count > 0 ) {
@@ -112,7 +118,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			writer.WriteLine( "if( e is UserDisabledByPageException )" );
 			writer.WriteLine( "throw;" );
 			writer.WriteLine(
-				"throw new ResourceNotAvailableException( \"Query parameter values or non URL elements of the request prevented the creation of the page or entity setup info object.\", e );" );
+				"throw new ResourceNotAvailableException( \"Query parameter values or non URL elements of the request prevented the creation of the page info or entity setup object.\", e );" );
 			writer.WriteLine( "}" ); // Catch block
 
 			// Initialize the parameters modification object.
@@ -134,19 +140,19 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			return parameter.GetUrlDeserializationExpression( parameterName );
 		}
 
-		internal static string GetParameterDeclarations( List<VariableSpecification> parameters ) {
+		internal static string GetParameterDeclarations( IReadOnlyCollection<VariableSpecification> parameters ) {
 			var text = "";
 			foreach( var parameter in parameters )
 				text = StringTools.ConcatenateWithDelimiter( ", ", text, parameter.TypeName + " " + parameter.Name );
 			return text;
 		}
 
-		internal static void WriteCreateInfoFromNewParameterValuesMethod(
-			TextWriter writer, List<VariableSpecification> requiredParameters, List<VariableSpecification> optionalParameters, string methodNamePrefix,
-			string infoConstructorArgPrefix ) {
-			writer.WriteLine( methodNamePrefix + ( methodNamePrefix.Contains( "protected" ) ? "c" : "C" ) + "reateInfoFromNewParameterValues() {" );
+		internal static void WriteReCreateFromNewParameterValuesMethod(
+			TextWriter writer, IReadOnlyCollection<VariableSpecification> requiredParameters, IReadOnlyCollection<VariableSpecification> optionalParameters,
+			string methodNamePrefix, string className, string infoConstructorArgPrefix ) {
+			writer.WriteLine( methodNamePrefix + ( methodNamePrefix.Contains( "protected" ) ? "r" : "R" ) + "eCreateFromNewParameterValues() {" );
 			writer.WriteLine(
-				"return new Info( " + StringTools.ConcatenateWithDelimiter(
+				"return new {0}( ".FormatWith( className ) + StringTools.ConcatenateWithDelimiter(
 					", ",
 					infoConstructorArgPrefix,
 					InfoStatics.GetInfoConstructorArguments(

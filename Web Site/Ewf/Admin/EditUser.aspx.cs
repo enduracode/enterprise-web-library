@@ -15,9 +15,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					User = UserManagementStatics.GetUser( UserId.Value, true );
 			}
 
-			protected override ResourceInfo createParentResourceInfo() {
-				return new SystemUsers.Info( esInfo );
-			}
+			protected override ResourceInfo createParentResourceInfo() => new SystemUsers.Info( Es );
 
 			public override string ResourceName => User == null ? "New User" : User.Email;
 		}
@@ -31,7 +29,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 							postBack: PostBack.CreateFull(
 								id: "delete",
 								firstModificationMethod: deleteUser,
-								actionGetter: () => new PostBackAction( new SystemUsers.Info( es.info ) ) ) ) ).ToCollection() );
+								actionGetter: () => new PostBackAction( new SystemUsers.Info( Es ) ) ) ) ).ToCollection() );
 
 			Action userModMethod = null;
 			FormState.ExecuteWithDataModificationsAndDefaultAction(

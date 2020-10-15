@@ -17,7 +17,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public PageName( bool excludePageNameIfEntitySetupExists = false ) {
 			var es = EwfPage.Instance.EsAsBaseType;
 			var info = EwfPage.Instance.InfoAsBaseType;
-			pageName = excludePageNameIfEntitySetupExists && es != null && info.ParentResource == null ? es.InfoAsBaseType.EntitySetupName : info.ResourceFullName;
+			pageName = excludePageNameIfEntitySetupExists && es != null && info.ParentResource == null ? es.EntitySetupName : info.ResourceFullName;
 
 			children = new DisplayableElement(
 				context => new DisplayableElementData( null, () => new DisplayableElementLocalData( "h1" ), children: pageName.ToComponents() ) ).ToCollection();

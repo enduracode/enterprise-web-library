@@ -371,7 +371,6 @@
     <Compile Include="EnterpriseWebFramework\Core\Resource Meta Logic\Alternative Resource Modes\DisabledResourceMode.cs" />
     <Compile Include="EnterpriseWebFramework\Core\Resource Meta Logic\Alternative Resource Modes\NewContentResourceMode.cs" />
     <Compile Include="EnterpriseWebFramework\Core\Resource Meta Logic\AlternativeResourceMode.cs" />
-    <Compile Include="EnterpriseWebFramework\Core\Resource Meta Logic\EntitySetupInfo.cs" />
     <Compile Include="EnterpriseWebFramework\Core\Resource Meta Logic\ExternalResourceInfo.cs" />
     <Compile Include="EnterpriseWebFramework\Core\Resource Meta Logic\PageInfo.cs" />
     <Compile Include="EnterpriseWebFramework\Core\Resource Meta Logic\ResourceGroup.cs" />
@@ -556,7 +555,6 @@
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\ElementId.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\ElementIdReference.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\ElementIdSet.cs" />
-    <Compile Include="EnterpriseWebFramework\Page Infrastructure\EntitySetupBase.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\EwfPage.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
@@ -600,7 +598,6 @@
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Nodes\MarkupBlockNode.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Nodes\TextNode.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\PageState.cs" />
-    <Compile Include="EnterpriseWebFramework\Page Infrastructure\ParametersModificationBase.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Partial Updating\ModificationErrorDictionary.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Partial Updating\PreModificationUpdateRegion.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Partial Updating\UpdateRegionLinker.cs" />
@@ -611,8 +608,10 @@
     <Compile Include="EnterpriseWebFramework\PagePath.cs" />
     <Compile Include="EnterpriseWebFramework\PaymentProcessing\PaymentProcessingStatics.cs" />
     <Compile Include="EnterpriseWebFramework\PaymentProcessing\StatusMessageAndDestination.cs" />
+    <Compile Include="EnterpriseWebFramework\Request Handling\EntitySetupBase.cs" />
     <Compile Include="EnterpriseWebFramework\Request Handling\EwfSafeRequestHandler.cs" />
     <Compile Include="EnterpriseWebFramework\Request Handling\EwfSafeResponseWriter.cs" />
+    <Compile Include="EnterpriseWebFramework\Request Handling\ParametersModificationBase.cs" />
     <Compile Include="EnterpriseWebFramework\Request Handling\StaticFileHandler.cs" />
     <Compile Include="EnterpriseWebFramework\RevisionDisplayStatics.cs" />
     <Compile Include="EnterpriseWebFramework\Text\EmphasizedContent.cs" />
@@ -624,8 +623,8 @@
     <Compile Include="EnterpriseWebFramework\Text\TextComponent.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\AppEwfUiMasterPage.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\AppEwfUiProvider.cs" />
-    <Compile Include="EnterpriseWebFramework\Ui\Entity\EwfUiEntitySetupInfo.cs" />
-    <Compile Include="EnterpriseWebFramework\Ui\Entity\UiEntitySetupBase.cs" />
+    <Compile Include="EnterpriseWebFramework\Ui\Entity\EntityUiSetup.cs" />
+    <Compile Include="EnterpriseWebFramework\Ui\Entity\UiEntitySetup.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\EwfUiStatics.cs" />
     <Compile Include="EnterpriseWebFramework\EwfExtensionMethods.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\Entity\TabMode.cs" />

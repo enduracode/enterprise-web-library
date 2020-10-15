@@ -22,7 +22,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			string webProjectPath, string pathRelativeToProject, bool includeFileExtensionInClassName, WebProject webProjectConfiguration ) {
 			this.pathRelativeToProject = pathRelativeToProject;
 
-			// Get the URL for this item. "Plain old class" entity setups do not have URLs.
+			// Get the URL for this item. Entity setups do not have URLs.
 			urlRelativeToProject = pathRelativeToProject.EndsWith( ".cs" ) ? "" : pathRelativeToProject.Replace( System.IO.Path.DirectorySeparatorChar, '/' );
 
 			// Load this item's code if it exists.

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Web.UI;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Ui.Entity;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Ui {
 	/// <summary>
@@ -31,18 +29,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Ui {
 						@"Provider in ""Your Web Site\Providers"" that derives from App" + providerName + "Provider." );
 				return provider;
 			}
-		}
-
-		/// <summary>
-		/// EwfUiMaster use only. Returns the tab mode, or null for no tabs.
-		/// </summary>
-		public static TabMode? GetTabMode( this EntitySetupInfo esInfo ) {
-			if( !esInfo.Resources.Any() )
-				return null;
-			var mode = ( (EwfUiEntitySetupInfo)esInfo ).GetTabMode();
-			if( mode == TabMode.Automatic )
-				return ( esInfo.Resources.Count == 1 && esInfo.Resources.Single().Resources.Count() < 8 ) ? TabMode.Horizontal : TabMode.Vertical;
-			return mode;
 		}
 
 		/// <summary>

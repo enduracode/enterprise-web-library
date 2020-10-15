@@ -4,20 +4,24 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.WebSessionState;
 using Tewl.Tools;
 
+// Parameter: string returnAndDestinationUrl
+
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement.ChangePassword {
 	partial class Page: EwfPage {
 		partial class Info {
-			public override string ResourceName => "";
+			public override string ResourceName => "Change Password";
 			protected override bool userCanAccessResource => AppTools.User != null;
 		}
 
 		private DataValue<string> newPassword;
 
 		protected override void loadData() {
+			EwfUiStatics.SetPageActions( new HyperlinkSetup( new ExternalResourceInfo( info.ReturnAndDestinationUrl ), "Back" ).ToCollection() );
+
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				PostBack.CreateFull(
 						firstModificationMethod: modifyData,
-						actionGetter: () => new PostBackAction( new ExternalResourceInfo( es.info.ReturnAndDestinationUrl ) ) )
+						actionGetter: () => new PostBackAction( new ExternalResourceInfo( info.ReturnAndDestinationUrl ) ) )
 					.ToCollection(),
 				() => {
 					newPassword = new DataValue<string>();

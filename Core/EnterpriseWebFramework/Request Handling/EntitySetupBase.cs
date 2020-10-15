@@ -4,18 +4,18 @@ using System.Collections.ObjectModel;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
-	/// A base set of functionality that can be used to discover information about an entity setup before requesting a resource that uses it.
+	/// An object that allows several pages and resources to share query parameters, authorization logic, data, etc.
 	/// </summary>
-	public abstract class EntitySetupInfo {
+	public abstract class EntitySetupBase {
 		private bool parentResourceLoaded;
 		private ResourceInfo parentResource;
 		private ReadOnlyCollection<ResourceGroup> resources;
 		private readonly Lazy<AlternativeResourceMode> alternativeMode;
 
 		/// <summary>
-		/// Creates an entity setup info object.
+		/// Creates an entity setup object.
 		/// </summary>
-		protected EntitySetupInfo() {
+		protected EntitySetupBase() {
 			alternativeMode = new Lazy<AlternativeResourceMode>( createAlternativeMode );
 		}
 
@@ -99,5 +99,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		protected internal virtual ConnectionSecurity ConnectionSecurity => ParentResource?.ConnectionSecurity ?? ConnectionSecurity.SecureIfPossible;
 
 		protected internal virtual bool AllowsSearchEngineIndexing => ParentResource?.AllowsSearchEngineIndexing ?? true;
+
+		/// <summary>
+		/// Gets the parameters modification object for this entity setup.
+		/// </summary>
+		public abstract ParametersModificationBase ParametersModificationAsBaseType { get; }
 	}
 }
