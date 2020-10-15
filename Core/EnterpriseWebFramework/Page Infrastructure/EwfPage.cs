@@ -195,8 +195,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				// If the request doesn't match the page's specified security level, redirect with the proper level. Do this before ensuring that the user can access the
 				// page since in certificate authentication systems this can be affected by the connection security level.
 				//
-				// When goal 448 (Clean URLs) is complete, we want to do full URL normalization during request dispatching, like we do with shortcut URLs. We probably
-				// should only do this on GET requests since we don't want to wipe out post backs.
+				// When goal 448 (Clean URLs) is complete, we want to do full URL normalization during request dispatching, like we do with shortcut URLs.
 				bool connectionSecurityIncorrect;
 				using( MiniProfiler.Current.Step( "EWF - Check connection security" ) )
 					connectionSecurityIncorrect = getConnectionSecurityIncorrect();
