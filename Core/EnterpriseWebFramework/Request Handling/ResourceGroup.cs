@@ -4,12 +4,12 @@
 	/// </summary>
 	public class ResourceGroup {
 		private readonly string name;
-		private readonly ResourceInfo[] resources;
+		private readonly ResourceBase[] resources;
 
 		/// <summary>
 		/// Creates a resource group.
 		/// </summary>
-		public ResourceGroup( string name, params ResourceInfo[] resources ) {
+		public ResourceGroup( string name, params ResourceBase[] resources ) {
 			this.name = name;
 			this.resources = resources;
 		}
@@ -17,7 +17,7 @@
 		/// <summary>
 		/// Creates a resource group.
 		/// </summary>
-		public ResourceGroup( params ResourceInfo[] resources ): this( "", resources ) {}
+		public ResourceGroup( params ResourceBase[] resources ): this( "", resources ) {}
 
 		/// <summary>
 		/// Gets the name of the resource group.
@@ -27,6 +27,6 @@
 		/// <summary>
 		/// Gets the list of resources.
 		/// </summary>
-		public ResourceInfo[] Resources { get { return resources; } }
+		public ResourceBase[] Resources { get { return resources; } }
 	}
 }

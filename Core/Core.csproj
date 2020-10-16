@@ -373,9 +373,6 @@
     <Compile Include="EnterpriseWebFramework\Core\Resource Meta Logic\AlternativeResourceMode.cs" />
     <Compile Include="EnterpriseWebFramework\Core\Resource Meta Logic\ExternalResourceInfo.cs" />
     <Compile Include="EnterpriseWebFramework\Core\Resource Meta Logic\PageInfo.cs" />
-    <Compile Include="EnterpriseWebFramework\Core\Resource Meta Logic\ResourceGroup.cs" />
-    <Compile Include="EnterpriseWebFramework\Core\Resource Meta Logic\ResourceInfo.cs" />
-    <Compile Include="EnterpriseWebFramework\Core\Resource Meta Logic\StaticFileInfo.cs" />
     <Compile Include="EnterpriseWebFramework\Core\ResourceNotAvailableException.cs" />
     <Compile Include="EnterpriseWebFramework\Core\ShortcutUrlResolver.cs" />
     <Compile Include="EnterpriseWebFramework\Core\Translation.cs" />
@@ -612,7 +609,10 @@
     <Compile Include="EnterpriseWebFramework\Request Handling\EwfSafeRequestHandler.cs" />
     <Compile Include="EnterpriseWebFramework\Request Handling\EwfSafeResponseWriter.cs" />
     <Compile Include="EnterpriseWebFramework\Request Handling\ParametersModificationBase.cs" />
+    <Compile Include="EnterpriseWebFramework\Request Handling\ResourceBase.cs" />
+    <Compile Include="EnterpriseWebFramework\Request Handling\ResourceGroup.cs" />
     <Compile Include="EnterpriseWebFramework\Request Handling\StaticFileHandler.cs" />
+    <Compile Include="EnterpriseWebFramework\Request Handling\StaticFileInfo.cs" />
     <Compile Include="EnterpriseWebFramework\RevisionDisplayStatics.cs" />
     <Compile Include="EnterpriseWebFramework\Text\EmphasizedContent.cs" />
     <Compile Include="EnterpriseWebFramework\Text\ImportantContent.cs" />

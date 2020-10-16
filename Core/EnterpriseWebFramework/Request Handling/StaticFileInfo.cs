@@ -7,7 +7,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A base set of functionality that can be used to discover information about a static file before actually requesting it.
 	/// </summary>
-	public abstract class StaticFileInfo: ResourceInfo {
+	public abstract class StaticFileInfo: ResourceBase {
 		/// <summary>
 		/// EWL use only.
 		/// </summary>
@@ -20,12 +20,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		protected internal override ConnectionSecurity ConnectionSecurity => ConnectionSecurity.MatchingCurrentRequest;
 
-		protected override bool isIdenticalTo( ResourceInfo infoAsBaseType ) {
+		protected override bool isIdenticalTo( ResourceBase infoAsBaseType ) {
 			var info = infoAsBaseType as StaticFileInfo;
 			return info != null && info.appRelativeFilePath == appRelativeFilePath;
 		}
 
-		public override ResourceInfo CloneAndReplaceDefaultsIfPossible( bool disableReplacementOfDefaults ) {
+		public override ResourceBase CloneAndReplaceDefaultsIfPossible( bool disableReplacementOfDefaults ) {
 			return this;
 		}
 

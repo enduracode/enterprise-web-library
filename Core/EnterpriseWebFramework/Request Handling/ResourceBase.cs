@@ -9,7 +9,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A base set of functionality that can be used to discover information about a resource before actually requesting it.
 	/// </summary>
-	public abstract class ResourceInfo {
+	public abstract class ResourceBase {
 		internal const string ResourcePathSeparator = " > ";
 		internal const string EntityResourceSeparator = " / ";
 
@@ -21,14 +21,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		private string uriFragmentIdentifierField = "";
-		private readonly Lazy<ResourceInfo> parentResource;
+		private readonly Lazy<ResourceBase> parentResource;
 		private readonly Lazy<AlternativeResourceMode> alternativeMode;
 
 		/// <summary>
 		/// Creates a resource info object.
 		/// </summary>
-		protected ResourceInfo() {
-			parentResource = new Lazy<ResourceInfo>( createParentResourceInfo );
+		protected ResourceBase() {
+			parentResource = new Lazy<ResourceBase>( createParentResourceInfo );
 			alternativeMode = new Lazy<AlternativeResourceMode>( createAlternativeMode );
 		}
 
@@ -77,22 +77,22 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets the resource info object for the parent resource of this resource. Returns null if there is no parent resource.
 		/// </summary>
-		public ResourceInfo ParentResource => parentResource.Value;
+		public ResourceBase ParentResource => parentResource.Value;
 
 		/// <summary>
 		/// Creates a resource info object for the parent resource of this resource. Returns null if there is no parent resource.
 		/// </summary>
-		protected virtual ResourceInfo createParentResourceInfo() {
+		protected virtual ResourceBase createParentResourceInfo() {
 			return null;
 		}
 
 		/// <summary>
 		/// Gets the resource path from the root all the way down to the current resource.
 		/// </summary>
-		public List<ResourceInfo> ResourcePath {
+		public List<ResourceBase> ResourcePath {
 			get {
 				// NOTE: If we used recursion this would be much simpler.
-				var path = new List<ResourceInfo>();
+				var path = new List<ResourceBase>();
 				var resource = this;
 				do
 					path.Add( resource );
@@ -272,7 +272,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Returns true if this resource info object is identical to the specified resource info object.
 		/// </summary>
-		protected abstract bool isIdenticalTo( ResourceInfo infoAsBaseType );
+		protected abstract bool isIdenticalTo( ResourceBase infoAsBaseType );
 
 		/// <summary>
 		/// Framework use only.
@@ -280,6 +280,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// to the current entity setup, this method returns a clone of this object that uses values from the current resource and entity setup instead of defaults
 		/// whenever possible.
 		/// </summary>
-		public abstract ResourceInfo CloneAndReplaceDefaultsIfPossible( bool disableReplacementOfDefaults );
+		public abstract ResourceBase CloneAndReplaceDefaultsIfPossible( bool disableReplacementOfDefaults );
 	}
 }
