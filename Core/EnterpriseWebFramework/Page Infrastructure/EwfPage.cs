@@ -1027,6 +1027,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			if( destination.GetType() == InfoAsBaseType.GetType() )
 				StandardLibrarySessionState.Instance.EwfPageRequestState = requestState;
 
+			// When we separate EWF from Web Forms, we want this to become an HTTP 303 redirect, if it isn’t already.
 			NetTools.Redirect( destinationUrl );
 		}
 
