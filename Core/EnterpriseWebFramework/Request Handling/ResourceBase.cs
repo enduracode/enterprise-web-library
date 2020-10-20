@@ -207,20 +207,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return null;
 		}
 
-		/// <summary>
-		/// Returns an absolute URL that can be used to request the resource.
-		/// </summary>
-		/// <param name="disableAuthorizationCheck">Pass true to allow a URL to be returned that the authenticated user cannot access. Use with caution. Might be
-		/// useful if you are adding the URL to an email message or otherwise displaying it outside the application.</param>
-		/// <returns></returns>
-		public sealed override string GetUrl( bool disableAuthorizationCheck = false ) {
-			// App relative URLs can be a problem when stored in returnUrl query parameters or otherwise stored across requests since a stored resource might have a
-			// different security level than the current resource, and when redirecting to the stored resource we wouldn't switch. Therefore we always use absolute
-			// URLs.
-			return GetUrl( !disableAuthorizationCheck, true, true );
-		}
-
-		internal string GetUrl( bool ensureUserCanAccessResource, bool ensureResourceNotDisabled, bool makeAbsolute ) {
+		internal sealed override string GetUrl( bool ensureUserCanAccessResource, bool ensureResourceNotDisabled, bool makeAbsolute ) {
 			var url = buildUrl() + uriFragmentIdentifier.PrependDelimiter( "#" );
 			if( ensureUserCanAccessResource && !UserCanAccessResource )
 				throw new ApplicationException( "GetUrl was called for a resource that the authenticated user cannot access. The URL would have been " + url + "." );

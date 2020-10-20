@@ -15,7 +15,7 @@
 		public override bool UserCanAccessResource => true;
 		public override AlternativeResourceMode AlternativeMode => null;
 
-		public override string GetUrl( bool disableAuthorizationCheck = false ) =>
-			url.Replace( "~", EwfApp.GetDefaultBaseUrl( ConnectionSecurity.SecureIfPossible.ShouldBeSecureGivenCurrentRequest( false ) ) );
+		internal override string GetUrl( bool ensureUserCanAccessResource, bool ensureResourceNotDisabled, bool makeAbsolute ) =>
+			makeAbsolute ? url.Replace( "~", EwfApp.GetDefaultBaseUrl( ConnectionSecurity.SecureIfPossible.ShouldBeSecureGivenCurrentRequest( false ) ) ) : url;
 	}
 }
