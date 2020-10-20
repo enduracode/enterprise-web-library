@@ -20,7 +20,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			var logInPb = PostBack.CreateFull(
 				firstModificationMethod: () => user = logInHiddenFieldsAndMethod.Item2(),
 				actionGetter: () => new PostBackAction(
-					user.MustChangePassword ? ChangePassword.Page.GetInfo( info.ReturnUrl ) as ResourceInfo : new ExternalResourceInfo( info.ReturnUrl ) ) );
+					user.MustChangePassword ? ChangePassword.Page.GetInfo( info.ReturnUrl ) as ResourceInfo : new ExternalResource( info.ReturnUrl ) ) );
 			var newPasswordPb = PostBack.CreateFull( id: "newPw", actionGetter: getSendNewPasswordAction );
 
 			FormState.ExecuteWithDataModificationsAndDefaultAction(

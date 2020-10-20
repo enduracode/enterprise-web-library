@@ -41,15 +41,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		IEnumerable<ResourceInfo> AppMetaLogicFactory.CreateBasicCssInfos() {
 			var infos = new List<ResourceInfo>();
 			infos.Add(
-				new ExternalResourceInfo(
+				new ExternalResource(
 					"//fonts.googleapis.com/css2?family=Libre+Franklin:wght@500;600;700&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400&display=fallback" ) );
-			infos.Add( new ExternalResourceInfo( "//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" ) );
+			infos.Add( new ExternalResource( "//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" ) );
 			infos.Add( new VersionedStaticFiles.ThirdParty.JQueryUi.Jquery_ui_1114custom_v2.Jquery_uiminCss.Info() );
 			infos.Add( new ThirdParty.SelectCssCss.Info() );
 			infos.Add( new VersionedStaticFiles.ThirdParty.Chosen.Chosen_v187.ChosenminCss.Info() );
 			infos.Add( new ThirdParty.TimePicker.StylesCss.Info() );
-			infos.Add( new ExternalResourceInfo( "//cdn.jsdelivr.net/qtip2/2.2.1/jquery.qtip.min.css" ) );
-			infos.Add( new ExternalResourceInfo( "//cdnjs.cloudflare.com/ajax/libs/dialog-polyfill/0.4.9/dialog-polyfill.min.css" ) );
+			infos.Add( new ExternalResource( "//cdn.jsdelivr.net/qtip2/2.2.1/jquery.qtip.min.css" ) );
+			infos.Add( new ExternalResource( "//cdnjs.cloudflare.com/ajax/libs/dialog-polyfill/0.4.9/dialog-polyfill.min.css" ) );
 			infos.Add( new Styles.BasicCss.Info() );
 			return infos;
 		}
@@ -67,15 +67,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 
 		IEnumerable<ResourceInfo> AppMetaLogicFactory.CreateJavaScriptInfos() {
 			var infos = new List<ResourceInfo>();
-			infos.Add( new ExternalResourceInfo( "//code.jquery.com/jquery-1.12.3.min.js" ) );
+			infos.Add( new ExternalResource( "//code.jquery.com/jquery-1.12.3.min.js" ) );
 			infos.Add( new VersionedStaticFiles.ThirdParty.JQueryUi.Jquery_ui_1114custom_v2.Jquery_uiminJs.Info() );
 			infos.Add( new VersionedStaticFiles.ThirdParty.Chosen.Chosen_v187.ChosenjqueryminJs.Info() );
 			infos.Add( new ThirdParty.TimePicker.JavaScriptJs.Info() );
-			infos.Add( new ExternalResourceInfo( "//cdn.jsdelivr.net/qtip2/2.2.1/jquery.qtip.min.js" ) );
-			infos.Add( new ExternalResourceInfo( "//cdnjs.cloudflare.com/ajax/libs/dialog-polyfill/0.4.9/dialog-polyfill.min.js" ) );
+			infos.Add( new ExternalResource( "//cdn.jsdelivr.net/qtip2/2.2.1/jquery.qtip.min.js" ) );
+			infos.Add( new ExternalResource( "//cdnjs.cloudflare.com/ajax/libs/dialog-polyfill/0.4.9/dialog-polyfill.min.js" ) );
 			infos.Add( new ThirdParty.SpinJs.SpinminJs.Info() );
-			infos.Add( new ExternalResourceInfo( "//cdn.ckeditor.com/4.5.8/full/ckeditor.js" ) );
-			infos.Add( new ExternalResourceInfo( "//cdnjs.cloudflare.com/ajax/libs/Chart.js/1.1.1/Chart.min.js" ) );
+			infos.Add( new ExternalResource( "//cdn.ckeditor.com/4.5.8/full/ckeditor.js" ) );
+			infos.Add( new ExternalResource( "//cdnjs.cloudflare.com/ajax/libs/Chart.js/1.1.1/Chart.min.js" ) );
 			infos.Add( new JavaScriptJs.Info() );
 			return infos;
 		}

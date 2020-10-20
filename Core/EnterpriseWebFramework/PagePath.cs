@@ -52,7 +52,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var components = new List<FlowComponent>();
 			foreach( var resource in pagePath.Take( pagePath.Count - 1 ) ) {
 				components.Add( new EwfHyperlink( resource, new StandardHyperlinkStyle( resource.ResourceFullName ) ) );
-				components.AddRange( ResourceInfo.ResourcePathSeparator.ToComponents() );
+				components.AddRange( ResourceBase.ResourcePathSeparator.ToComponents() );
 			}
 			if( pageName != null )
 				components.Add( pageName );

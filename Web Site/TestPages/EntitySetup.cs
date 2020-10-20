@@ -10,9 +10,9 @@ using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	partial class EntitySetup: UiEntitySetup {
-		protected override ResourceInfo createParentResourceInfo() => null;
+		protected override ResourceBase createParentResource() => null;
 
-		protected override List<ResourceGroup> createResourceInfos() =>
+		protected override List<ResourceGroup> createResources() =>
 			new List<ResourceGroup>
 				{
 					new ResourceGroup( "Working Stuff", new ActionControls.Info( this ), new OptionalParameters.Info( this ), new OmniDemo.Info( this ) ),
@@ -42,19 +42,17 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			var two = new ModalBoxId();
 			return new EntityUiSetup(
 				navActions:
-				new HyperlinkSetup( new ExternalResourceInfo( "http://www.microsoft.com" ), "Go to Microsoft" )
+				new HyperlinkSetup( new ExternalResource( "http://www.microsoft.com" ), "Go to Microsoft" )
 					.Append<ActionComponentSetup>( new ButtonSetup( "Custom script", behavior: new CustomButtonBehavior( () => "alert('test');" ) ) )
 					.Append(
 						new ButtonSetup(
 							"Menu",
 							behavior: new MenuButtonBehavior(
 								new StackList(
-									new EwfHyperlink( new ExternalResourceInfo( "http://www.apple.com" ), new StandardHyperlinkStyle( "Apple" ) ).ToComponentListItem()
+									new EwfHyperlink( new ExternalResource( "http://www.apple.com" ), new StandardHyperlinkStyle( "Apple" ) ).ToComponentListItem()
 										.Append(
-											new EwfHyperlink( new ExternalResourceInfo( "http://www.microsoft.com" ), new StandardHyperlinkStyle( "Microsoft" ) )
-												.ToComponentListItem() )
-										.Append(
-											new EwfHyperlink( new ExternalResourceInfo( "http://www.google.com" ), new StandardHyperlinkStyle( "Google" ) ).ToComponentListItem() )
+											new EwfHyperlink( new ExternalResource( "http://www.microsoft.com" ), new StandardHyperlinkStyle( "Microsoft" ) ).ToComponentListItem() )
+										.Append( new EwfHyperlink( new ExternalResource( "http://www.google.com" ), new StandardHyperlinkStyle( "Google" ) ).ToComponentListItem() )
 										.Append(
 											new EwfButton( new StandardButtonStyle( "Custom script" ), behavior: new CustomButtonBehavior( () => "alert('test!');" ) )
 												.ToComponentListItem() )
@@ -76,7 +74,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 								etherealChildren: new ModalBox(
 									two,
 									true,
-									new EwfImage( new ImageSetup( "Houses in the mountains" ), new ExternalResourceInfo( "http://r0k.us/graphics/kodak/kodak/kodim08.png" ) )
+									new EwfImage( new ImageSetup( "Houses in the mountains" ), new ExternalResource( "http://r0k.us/graphics/kodak/kodak/kodim08.png" ) )
 										.ToCollection() ).ToCollection() ) ) )
 					.Materialize(),
 				navFormControls:
@@ -91,7 +89,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 								id: "delegate",
 								firstModificationMethod: () => EwfPage.AddStatusMessage( StatusMessageType.Info, "Did Something." ) ) ) )
 					.Append<ActionComponentSetup>(
-						new HyperlinkSetup( new ExternalResourceInfo( "http://www.google.com" ).ToHyperlinkNewTabBehavior(), "Go to Google in new window" ) )
+						new HyperlinkSetup( new ExternalResource( "http://www.google.com" ).ToHyperlinkNewTabBehavior(), "Go to Google in new window" ) )
 					.Append(
 						new ButtonSetup(
 							"Generate error",

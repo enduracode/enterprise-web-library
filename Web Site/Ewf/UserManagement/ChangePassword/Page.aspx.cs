@@ -16,12 +16,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		private DataValue<string> newPassword;
 
 		protected override void loadData() {
-			EwfUiStatics.SetPageActions( new HyperlinkSetup( new ExternalResourceInfo( info.ReturnAndDestinationUrl ), "Back" ).ToCollection() );
+			EwfUiStatics.SetPageActions( new HyperlinkSetup( new ExternalResource( info.ReturnAndDestinationUrl ), "Back" ).ToCollection() );
 
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				PostBack.CreateFull(
 						firstModificationMethod: modifyData,
-						actionGetter: () => new PostBackAction( new ExternalResourceInfo( info.ReturnAndDestinationUrl ) ) )
+						actionGetter: () => new PostBackAction( new ExternalResource( info.ReturnAndDestinationUrl ) ) )
 					.ToCollection(),
 				() => {
 					newPassword = new DataValue<string>();

@@ -399,7 +399,7 @@ namespace EnterpriseWebLibrary.Tests.IO {
 									"http://www.google.com/search?q=" + i,
 									i.ToString( "D3" ) + "-867-5309"
 								},
-							ActivationBehavior = ElementActivationBehavior.CreateRedirectScript( new ExternalResourceInfo( "http://google.com" ) ),
+							ActivationBehavior = ElementActivationBehavior.CreateRedirectScript( new ExternalResource( "http://google.com" ) ),
 							CssClass = "gibberish_string_for_testing",
 							IsHeader = false,
 							RankId = i,

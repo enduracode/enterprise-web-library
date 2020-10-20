@@ -15,9 +15,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			if( info.ShowHomeLink )
 				ph.AddControlsReturnThis(
 					new Paragraph(
-							new EwfHyperlink(
-								new ExternalResourceInfo( NetTools.HomeUrl ),
-								new StandardHyperlinkStyle( Translation.ClickHereToGoToHomePage ) ).ToCollection() )
+							new EwfHyperlink( new ExternalResource( NetTools.HomeUrl ), new StandardHyperlinkStyle( Translation.ClickHereToGoToHomePage ) ).ToCollection() )
 						.ToCollection()
 						.GetControls() );
 

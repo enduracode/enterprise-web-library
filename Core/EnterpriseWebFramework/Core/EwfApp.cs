@@ -214,9 +214,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				var resource = resolver.Function();
 				if( resource == null )
 					throw new AccessDeniedException( false, resolver.LogInPageGetter?.Invoke() );
-				if( resource is ExternalResourceInfo )
+				if( resource is ExternalResource )
 					NetTools.Redirect( resource.GetUrl() );
-				HttpContext.Current.RewritePath( getTransferPath( resource ), false );
+				HttpContext.Current.RewritePath( getTransferPath( (ResourceBase)resource ), false );
 				return;
 			}
 
@@ -504,7 +504,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				CompleteRequest();
 		}
 
-		private string getTransferPath( ResourceInfo resource ) {
+		private string getTransferPath( ResourceBase resource ) {
 			var url = resource.GetUrl( true, true, false );
 			if( resource.ShouldBeSecureGivenCurrentRequest != RequestIsSecure( Request ) )
 				throw new ApplicationException( url + " has a connection security setting that is incompatible with the current request." );

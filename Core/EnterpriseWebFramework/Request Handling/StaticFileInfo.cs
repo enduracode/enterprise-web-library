@@ -20,10 +20,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		protected internal override ConnectionSecurity ConnectionSecurity => ConnectionSecurity.MatchingCurrentRequest;
 
-		protected override bool isIdenticalTo( ResourceBase infoAsBaseType ) {
-			var info = infoAsBaseType as StaticFileInfo;
-			return info != null && info.appRelativeFilePath == appRelativeFilePath;
-		}
+		protected override bool isIdenticalTo( ResourceBase resourceAsBaseType ) =>
+			resourceAsBaseType is StaticFileInfo info && info.appRelativeFilePath == appRelativeFilePath;
 
 		public override ResourceBase CloneAndReplaceDefaultsIfPossible( bool disableReplacementOfDefaults ) {
 			return this;

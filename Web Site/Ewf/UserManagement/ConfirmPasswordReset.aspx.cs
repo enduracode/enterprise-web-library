@@ -42,7 +42,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 								FormsAuthStatics.ResetAndSendPassword( info.User.UserId );
 								AddStatusMessage( StatusMessageType.Info, "Your new password has been sent to your email address." );
 							},
-							actionGetter: () => new PostBackAction( new ExternalResourceInfo( info.ReturnUrl ) ) ) ) ).ToCollection() );
+							actionGetter: () => new PostBackAction( new ExternalResource( info.ReturnUrl ) ) ) ) ).ToCollection() );
 		}
 	}
 }

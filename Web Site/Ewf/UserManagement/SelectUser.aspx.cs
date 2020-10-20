@@ -46,7 +46,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					throw new ApplicationException( "Page-view data modifications did not execute." );
 
 				ph.AddControlsReturnThis( new Paragraph( "Please wait.".ToComponents() ).ToCollection().GetControls() );
-				StandardLibrarySessionState.Instance.SetInstantClientSideNavigation( new ExternalResourceInfo( info.ReturnUrl ).GetUrl() );
+				StandardLibrarySessionState.Instance.SetInstantClientSideNavigation( new ExternalResource( info.ReturnUrl ).GetUrl() );
 				return;
 			}
 
@@ -67,7 +67,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			var user = new DataValue<User>();
 			var pb = PostBack.CreateFull(
 				firstModificationMethod: () => UserImpersonationStatics.BeginImpersonation( user.Value ),
-				actionGetter: () => new PostBackAction( new ExternalResourceInfo( info.ReturnUrl.Any() ? info.ReturnUrl : NetTools.HomeUrl ) ) );
+				actionGetter: () => new PostBackAction( new ExternalResource( info.ReturnUrl.Any() ? info.ReturnUrl : NetTools.HomeUrl ) ) );
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				pb.ToCollection(),
 				() => {

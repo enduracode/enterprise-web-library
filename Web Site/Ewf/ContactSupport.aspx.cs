@@ -21,7 +21,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				new Paragraph( "You may report any problems, make suggestions, or ask for help here.".ToComponents() ).ToCollection().GetControls() );
 
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
-				PostBack.CreateFull( firstModificationMethod: modifyData, actionGetter: () => new PostBackAction( new ExternalResourceInfo( info.ReturnUrl ) ) )
+				PostBack.CreateFull( firstModificationMethod: modifyData, actionGetter: () => new PostBackAction( new ExternalResource( info.ReturnUrl ) ) )
 					.ToCollection(),
 				() => {
 					var list = FormItemList.CreateStack();

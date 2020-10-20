@@ -15,7 +15,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					User = UserManagementStatics.GetUser( UserId.Value, true );
 			}
 
-			protected override ResourceInfo createParentResourceInfo() => new SystemUsers.Info( Es );
+			protected override ResourceBase createParentResource() => new SystemUsers.Info( Es );
 
 			public override string ResourceName => User == null ? "New User" : User.Email;
 		}

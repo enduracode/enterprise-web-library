@@ -193,16 +193,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 							"We've detected that you are not using the latest version of your browser.",
 							"While most features of this site will work, and you will be safe browsing here, we strongly recommend using the newest version of your browser in order to provide a better experience on this site and a safer experience throughout the Internet." ) +
 						"<br/>" +
-						Tewl.Tools.NetTools.BuildBasicLink(
-							"Click here to get Firefox (it's free)",
-							new ExternalResourceInfo( "http://www.getfirefox.com" ).GetUrl(),
-							true ) + "<br />" +
+						Tewl.Tools.NetTools.BuildBasicLink( "Click here to get Firefox (it's free)", new ExternalResource( "http://www.getfirefox.com" ).GetUrl(), true ) +
+						"<br />" +
 						Tewl.Tools.NetTools.BuildBasicLink(
 							"Click here to get Chrome (it's free)",
-							new ExternalResourceInfo( "https://www.google.com/intl/en/chrome/browser/" ).GetUrl(),
+							new ExternalResource( "https://www.google.com/intl/en/chrome/browser/" ).GetUrl(),
 							true ) + "<br />" + Tewl.Tools.NetTools.BuildBasicLink(
 							"Click here to get the latest Internet Explorer (it's free)",
-							new ExternalResourceInfo( "http://www.beautyoftheweb.com/" ).GetUrl(),
+							new ExternalResource( "http://www.beautyoftheweb.com/" ).GetUrl(),
 							true ) );
 				StandardLibrarySessionState.Instance.HideBrowserWarningForRemainderOfSession = true;
 			}
@@ -259,7 +257,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 											firstModificationMethod: FormsAuthStatics.LogOutUser,
 											actionGetter: () => {
 												// NOTE: Is this the correct behavior if we are already on a public page?
-												return new PostBackAction( new ExternalResourceInfo( NetTools.HomeUrl ) );
+												return new PostBackAction( new ExternalResource( NetTools.HomeUrl ) );
 											} ) ) ).ToCollection()
 								.ToComponentListItem() ) ) );
 
@@ -464,7 +462,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			if( !ConfigurationStatics.IsIntermediateInstallation || AppRequestState.Instance.IntermediateUserExists )
 				components.AddRange( EwfUiStatics.AppProvider.GetGlobalFootComponents() );
 
-			var ewlWebSite = new ExternalResourceInfo( "http://enterpriseweblibrary.org/" );
+			var ewlWebSite = new ExternalResource( "http://enterpriseweblibrary.org/" );
 			if( ewlWebSite.UserCanAccessResource && !EwfUiStatics.AppProvider.PoweredByEwlFooterDisabled() )
 				components.Add(
 					new Paragraph(

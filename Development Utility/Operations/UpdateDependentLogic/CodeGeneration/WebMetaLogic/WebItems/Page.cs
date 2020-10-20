@@ -106,10 +106,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 		}
 
 		private void writeInfoIsIdenticalToMethod( TextWriter writer ) {
-			writer.WriteLine( "protected override bool isIdenticalTo( ResourceInfo infoAsBaseType ) {" );
-			writer.WriteLine( "if( !( infoAsBaseType is Info ) )" );
+			writer.WriteLine( "protected override bool isIdenticalTo( ResourceBase resourceAsBaseType ) {" );
+			writer.WriteLine( "if( !( resourceAsBaseType is Info ) )" );
 			writer.WriteLine( "return false;" );
-			writer.WriteLine( "var info = infoAsBaseType as Info;" );
+			writer.WriteLine( "var info = resourceAsBaseType as Info;" );
 			if( entitySetup != null ) {
 				writer.WriteLine( "if( !Es.IsIdenticalTo( info.Es ) )" );
 				writer.WriteLine( "return false;" );
@@ -119,7 +119,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 		}
 
 		private void writeInfoCloneAndReplaceDefaultsIfPossibleMethod( TextWriter writer ) {
-			writer.WriteLine( "public override ResourceInfo CloneAndReplaceDefaultsIfPossible( bool disableReplacementOfDefaults ) {" );
+			writer.WriteLine( "public override ResourceBase CloneAndReplaceDefaultsIfPossible( bool disableReplacementOfDefaults ) {" );
 			if( optionalParameters.Any() ) {
 				writer.WriteLine( "var parametersModification = Instance.ParametersModificationAsBaseType as ParametersModification;" );
 				writer.WriteLine( "if( parametersModification != null && !disableReplacementOfDefaults )" );

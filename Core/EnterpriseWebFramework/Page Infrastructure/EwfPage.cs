@@ -603,8 +603,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			Title = StringTools.ConcatenateWithDelimiter(
 				" - ",
 				EwfApp.Instance.AppDisplayName.Length > 0 ? EwfApp.Instance.AppDisplayName : ConfigurationStatics.SystemName,
-				ResourceInfo.CombineResourcePathStrings(
-					ResourceInfo.ResourcePathSeparator,
+				ResourceBase.CombineResourcePathStrings(
+					ResourceBase.ResourcePathSeparator,
 					InfoAsBaseType.ParentResourceEntityPathString,
 					InfoAsBaseType.ResourceFullName ) );
 
@@ -984,19 +984,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			try {
 				// Determine the final redirect destination. If a destination is already specified and it is the current page or a page with the same entity setup,
 				// replace any default optional parameter values it may have with new values from this post back. If a destination isn't specified, make it the current
-				// page with new parameter values from this post back. At the end of this block, redirectInfo is always newly created with fresh data that reflects any
-				// changes that may have occurred in EH methods. It's important that every case below *actually creates* a new page info object to guard against this
-				// scenario:
-				// 1. A page modifies data such that a previously created redirect destination page info object that is then used here is no longer valid because it
-				//    would throw an exception from init if it were re-created.
+				// page with new parameter values from this post back. At the end of this block, destination is always newly created with fresh data that reflects any
+				// changes that may have occurred in EH methods (except when the destination is an external resource). It's important that every case below *actually
+				// creates* a new resource object to guard against this scenario:
+				// 1. A page modifies data such that a previously-created destination resource object that is then used here is no longer valid because it would throw
+				//    an exception from init if it were re-created.
 				// 2. The page redirects, or transfers, to this destination, leading the user to an error page without developers being notified. This is bad behavior.
 				if( requestState.ModificationErrorsExist ||
 				    ( requestState.DmIdAndSecondaryOp != null && requestState.DmIdAndSecondaryOp.Item2 == SecondaryPostBackOperation.NoOperation ) )
 					destination = InfoAsBaseType.CloneAndReplaceDefaultsIfPossible( true );
-				else if( destination != null )
-					destination = destination.CloneAndReplaceDefaultsIfPossible( false );
-				else
+				else if( destination == null )
 					destination = reCreateFromNewParameterValues();
+				else if( destination is ResourceBase r )
+					destination = r.CloneAndReplaceDefaultsIfPossible( false );
 
 				// This GetUrl call is important even for the transfer case below for the same reason that we *actually create* a new page info object in every case
 				// above. We want to force developers to get an error email if a page modifies data to make itself unauthorized/disabled without specifying a different
@@ -1018,7 +1018,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 
 			// If the redirect destination is identical to the current page, do a transfer instead of a redirect.
-			if( destination.IsIdenticalToCurrent() ) {
+			if( destination is ResourceBase resource && resource.IsIdenticalToCurrent() ) {
 				AppRequestState.Instance.ClearUserAndImpersonator();
 				resetPage();
 			}

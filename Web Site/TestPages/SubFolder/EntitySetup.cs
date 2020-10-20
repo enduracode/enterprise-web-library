@@ -4,9 +4,9 @@ using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages.SubFolder {
 	partial class EntitySetup: UiEntitySetup {
-		protected override ResourceInfo createParentResourceInfo() => ActionControls.GetInfo();
+		protected override ResourceBase createParentResource() => ActionControls.GetInfo();
 
-		protected override List<ResourceGroup> createResourceInfos() =>
+		protected override List<ResourceGroup> createResources() =>
 			new List<ResourceGroup> { new ResourceGroup( new General.Info( this ), new Details.Info( this ), new Disabled.Info( this ), new New.Info( this ) ) };
 
 		public override string EntitySetupName => "Nested";

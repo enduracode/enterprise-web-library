@@ -173,7 +173,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 								postBack: PostBack.CreateFull(
 									id: "ewfIntermediateLogOut",
 									firstModificationMethod: NonLiveInstallationStatics.ClearIntermediateAuthenticationCookie,
-									actionGetter: () => new PostBackAction( new ExternalResourceInfo( NetTools.HomeUrl ) ) ) ) ).Concat( " ".ToComponents() ) );
+									actionGetter: () => new PostBackAction( new ExternalResource( NetTools.HomeUrl ) ) ) ) ).Concat( " ".ToComponents() ) );
 				components.Add(
 					new EwfButton(
 						new StandardButtonStyle(
@@ -241,7 +241,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 									postBack: PostBack.CreateFull(
 										id: "ewfEndImpersonation",
 										firstModificationMethod: UserImpersonationStatics.EndImpersonation,
-										actionGetter: () => new PostBackAction( new ExternalResourceInfo( NetTools.HomeUrl ) ) ) ) ) )
+										actionGetter: () => new PostBackAction( new ExternalResource( NetTools.HomeUrl ) ) ) ) ) )
 						.Materialize() );
 
 			if( warningLines.Any() )

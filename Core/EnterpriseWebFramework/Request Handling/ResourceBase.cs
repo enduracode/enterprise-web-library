@@ -28,7 +28,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Creates a resource info object.
 		/// </summary>
 		protected ResourceBase() {
-			parentResource = new Lazy<ResourceBase>( createParentResourceInfo );
+			parentResource = new Lazy<ResourceBase>( createParentResource );
 			alternativeMode = new Lazy<AlternativeResourceMode>( createAlternativeMode );
 		}
 
@@ -82,9 +82,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates a resource info object for the parent resource of this resource. Returns null if there is no parent resource.
 		/// </summary>
-		protected virtual ResourceBase createParentResourceInfo() {
-			return null;
-		}
+		protected virtual ResourceBase createParentResource() => null;
 
 		/// <summary>
 		/// Gets the resource path from the root all the way down to the current resource.
@@ -259,7 +257,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Returns true if this resource info object is identical to the specified resource info object.
 		/// </summary>
-		protected abstract bool isIdenticalTo( ResourceBase infoAsBaseType );
+		protected abstract bool isIdenticalTo( ResourceBase resourceAsBaseType );
 
 		/// <summary>
 		/// Framework use only.

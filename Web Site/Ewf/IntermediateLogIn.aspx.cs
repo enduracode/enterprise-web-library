@@ -40,14 +40,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					throw new ApplicationException( "Page-view data modifications did not execute." );
 
 				ph.AddControlsReturnThis( new Paragraph( "Please wait.".ToComponents() ).ToCollection().GetControls() );
-				StandardLibrarySessionState.Instance.SetInstantClientSideNavigation( new ExternalResourceInfo( info.ReturnUrl ).GetUrl() );
+				StandardLibrarySessionState.Instance.SetInstantClientSideNavigation( new ExternalResource( info.ReturnUrl ).GetUrl() );
 				return;
 			}
 
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
-				PostBack.CreateFull(
-						firstModificationMethod: () => logIn( false ),
-						actionGetter: () => new PostBackAction( new ExternalResourceInfo( info.ReturnUrl ) ) )
+				PostBack.CreateFull( firstModificationMethod: () => logIn( false ), actionGetter: () => new PostBackAction( new ExternalResource( info.ReturnUrl ) ) )
 					.ToCollection(),
 				() => {
 					ph.AddControlsReturnThis(
