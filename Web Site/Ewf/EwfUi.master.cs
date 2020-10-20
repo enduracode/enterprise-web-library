@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI;
 using EnterpriseWebLibrary.Configuration;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.WebSessionState;
@@ -22,13 +21,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 
 			internal const string EntityAndTabAndContentBlockId = "ewfUiEntityAndTabsAndContent";
 
-			internal const string EntityAndTopTabBlockCssClass = "ewfUiEntityAndTopTabs";
+			internal static readonly ElementClass EntityAndTopTabContainerClass = new ElementClass( "ewfUiEntityAndTopTabs" );
 
-			internal const string EntityBlockCssClass = "ewfUiEntity";
+			internal static readonly ElementClass EntityContainerClass = new ElementClass( "ewfUiEntity" );
 			internal static readonly ElementClass EntityNavAndActionContainerClass = new ElementClass( "ewfUiEntityNavAndActions" );
 			internal static readonly ElementClass EntityNavListContainerClass = new ElementClass( "ewfUiEntityNav" );
 			internal static readonly ElementClass EntityActionListContainerClass = new ElementClass( "ewfUiEntityActions" );
-			internal const string EntitySummaryBlockCssClass = "ewfUiEntitySummary";
+			internal static readonly ElementClass EntitySummaryContainerClass = new ElementClass( "ewfUiEntitySummary" );
 
 			internal static readonly ElementClass TopTabListContainerClass = new ElementClass( "ewfUiTopTab" );
 
@@ -82,7 +81,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				const string entityAndTabAndContentBlockSelector = "div#" + EntityAndTabAndContentBlockId;
 				elements.Add( new CssElement( "UiEntityAndTabAndContentBlock", entityAndTabAndContentBlockSelector ) );
 
-				elements.Add( new CssElement( "UiEntityAndTopTabBlock", entityAndTabAndContentBlockSelector + " > " + "div." + EntityAndTopTabBlockCssClass ) );
+				elements.Add(
+					new CssElement( "UiEntityAndTopTabContainer", entityAndTabAndContentBlockSelector + " > " + "div." + EntityAndTopTabContainerClass.ClassName ) );
 				elements.AddRange( getEntityElements( entityAndTabAndContentBlockSelector ) );
 				elements.Add( new CssElement( "UiTopTabListContainer", entityAndTabAndContentBlockSelector + " " + "div." + TopTabListContainerClass.ClassName ) );
 				elements.AddRange( getSideTabAndContentElements( entityAndTabAndContentBlockSelector ) );
@@ -93,13 +93,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			private IEnumerable<CssElement> getEntityElements( string entityAndTabAndContentBlockSelector ) {
 				return new[]
 					{
-						new CssElement( "UiEntityBlock", entityAndTabAndContentBlockSelector + " " + "div." + EntityBlockCssClass ),
+						new CssElement( "UiEntityContainer", entityAndTabAndContentBlockSelector + " " + "div." + EntityContainerClass.ClassName ),
 						new CssElement(
 							"UiEntityNavAndActionContainer",
 							entityAndTabAndContentBlockSelector + " " + "div." + EntityNavAndActionContainerClass.ClassName ),
 						new CssElement( "UiEntityNavListContainer", entityAndTabAndContentBlockSelector + " " + "div." + EntityNavListContainerClass.ClassName ),
 						new CssElement( "UiEntityActionListContainer", entityAndTabAndContentBlockSelector + " " + "div." + EntityActionListContainerClass.ClassName ),
-						new CssElement( "UiEntitySummaryBlock", entityAndTabAndContentBlockSelector + " " + "div." + EntitySummaryBlockCssClass )
+						new CssElement( "UiEntitySummaryContainer", entityAndTabAndContentBlockSelector + " " + "div." + EntitySummaryContainerClass.ClassName )
 					};
 			}
 
@@ -175,7 +175,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		void ControlTreeDataLoader.LoadData() {
 			globalPlace.AddControlsReturnThis( getGlobalContainer().ToCollection().GetControls() );
 			entityUiSetup = ( EwfPage.Instance.EsAsBaseType as UiEntitySetup )?.GetUiSetup();
-			entityAndTopTabPlace.AddControlsReturnThis( getEntityAndTopTabBlock() );
+			entityAndTopTabPlace.AddControlsReturnThis( getEntityAndTopTabContainer().ToCollection().GetControls() );
 			if( entityUsesTabMode( TabMode.Vertical ) )
 				setUpSideTabs();
 			pageActionPlace.AddControlsReturnThis( getPageActionListContainer().GetControls() );
@@ -289,22 +289,21 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				classes: CssElementCreator.GlobalNavListContainerClass );
 		}
 
-		private Control getEntityAndTopTabBlock() {
-			var controls = new List<Control> { getEntityBlock() };
+		private FlowComponent getEntityAndTopTabContainer() {
+			var components = new List<FlowComponent> { getEntityContainer() };
 			if( entityUsesTabMode( TabMode.Horizontal ) ) {
 				var resourceGroups = EwfPage.Instance.EsAsBaseType.Resources;
 				if( resourceGroups.Count > 1 )
 					throw new ApplicationException( "Top tabs are not supported with multiple resource groups." );
-				controls.AddRange( getTopTabListContainer( resourceGroups.Single() ).ToCollection().GetControls() );
+				components.Add( getTopTabListContainer( resourceGroups.Single() ) );
 			}
-			return new Block( controls.ToArray() ) { CssClass = CssElementCreator.EntityAndTopTabBlockCssClass };
+			return new GenericFlowContainer( components, classes: CssElementCreator.EntityAndTopTabContainerClass );
 		}
 
-		private Control getEntityBlock() =>
-			new Block( getPagePath().Concat( getEntityNavAndActionContainer() ).GetControls().Concat( getEntitySummaryBlock() ).ToArray() )
-				{
-					CssClass = CssElementCreator.EntityBlockCssClass
-				};
+		private FlowComponent getEntityContainer() =>
+			new GenericFlowContainer(
+				getPagePath().Concat( getEntityNavAndActionContainer() ).Concat( getEntitySummaryContainer() ).Materialize(),
+				classes: CssElementCreator.EntityContainerClass );
 
 		private IReadOnlyCollection<FlowComponent> getPagePath() {
 			var entitySetup = EwfPage.Instance.EsAsBaseType;
@@ -355,11 +354,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				classes: CssElementCreator.EntityActionListContainerClass );
 		}
 
-		private IReadOnlyCollection<Control> getEntitySummaryBlock() {
+		private IReadOnlyCollection<FlowComponent> getEntitySummaryContainer() {
 			if( entityUiSetup?.EntitySummaryContent != null )
-				return new Block( entityUiSetup.EntitySummaryContent.GetControls().ToArray() ) { CssClass = CssElementCreator.EntitySummaryBlockCssClass }
-					.ToCollection();
-			return Enumerable.Empty<Control>().Materialize();
+				return new GenericFlowContainer( entityUiSetup.EntitySummaryContent, classes: CssElementCreator.EntitySummaryContainerClass ).ToCollection();
+			return Enumerable.Empty<FlowComponent>().Materialize();
 		}
 
 		private FlowComponent getTopTabListContainer( ResourceGroup resourceGroup ) =>

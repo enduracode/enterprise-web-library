@@ -17,15 +17,15 @@ ewfUiGlobalContainer {
 
 /* spacing */
 
-div.ewfStandardDynamicTable, ewfControlStack, ewfUiEntityBlock > *, ewfUiSideTabAndContentBlock, ewfUiGlobalFootContainer {
+div.ewfStandardDynamicTable, ewfControlStack, ewfUiEntityContainer > *, ewfUiSideTabAndContentBlock, ewfUiGlobalFootContainer {
 	margin-top: 1em;
 }
-div.ewfStandardDynamicTable:first-child, ewfControlStack:first-child, ewfUiEntityBlock > *:first-child {
+div.ewfStandardDynamicTable:first-child, ewfControlStack:first-child, ewfUiEntityContainer > *:first-child {
 	margin-top: 0;
 }
 ewfUiTopErrorMessageListContainer,
 ewfUiGlobalNavListContainer,
-ewfUiEntityBlock,
+ewfUiEntityContainer,
 ewfUiTopTabListContainer {
 	margin-top: 1rem;
 }
@@ -234,12 +234,12 @@ ewfUiTopErrorMessageListContainer {
 	font-size: 1.4em;
 }
 @media print {
-	ewfUiEntityBlock {
+	ewfUiEntityContainer {
 		border-top: 1pt solid black;
 		border-bottom: 1pt solid black;
 	}
 }
-ewfUiEntityBlock ewfPagePath {
+ewfUiEntityContainer ewfPagePath {
 	margin: 0;
 }
 ewfUiEntityNavAndActionContainer {
