@@ -371,8 +371,8 @@
     <Compile Include="EnterpriseWebFramework\Core\Resource Meta Logic\Alternative Resource Modes\DisabledResourceMode.cs" />
     <Compile Include="EnterpriseWebFramework\Core\Resource Meta Logic\Alternative Resource Modes\NewContentResourceMode.cs" />
     <Compile Include="EnterpriseWebFramework\Core\Resource Meta Logic\AlternativeResourceMode.cs" />
-    <Compile Include="EnterpriseWebFramework\Core\Resource Meta Logic\ExternalResourceInfo.cs" />
-    <Compile Include="EnterpriseWebFramework\Core\Resource Meta Logic\PageInfo.cs" />
+    <Compile Include="EnterpriseWebFramework\Core\Resource Meta Logic\ExternalResource.cs" />
+    <Compile Include="EnterpriseWebFramework\Core\Resource Meta Logic\ResourceInfo.cs" />
     <Compile Include="EnterpriseWebFramework\Core\ResourceNotAvailableException.cs" />
     <Compile Include="EnterpriseWebFramework\Core\ShortcutUrlResolver.cs" />
     <Compile Include="EnterpriseWebFramework\Core\Translation.cs" />
@@ -594,6 +594,7 @@
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Nodes\ElementNodeLocalData.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Nodes\MarkupBlockNode.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Nodes\TextNode.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\PageInfo.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\PageState.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Partial Updating\ModificationErrorDictionary.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Partial Updating\PreModificationUpdateRegion.cs" />

@@ -9,7 +9,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A base set of functionality that can be used to discover information about a resource before actually requesting it.
 	/// </summary>
-	public abstract class ResourceBase {
+	public abstract class ResourceBase: ResourceInfo {
 		internal const string ResourcePathSeparator = " > ";
 		internal const string EntityResourceSeparator = " / ";
 
@@ -138,7 +138,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Returns true if the authenticated user is authorized to access the resource.
 		/// </summary>
-		public bool UserCanAccessResource {
+		public sealed override bool UserCanAccessResource {
 			get {
 				if( ConfigurationStatics.IsIntermediateInstallation ) {
 					if( IsIntermediateInstallationPublicResource )
@@ -182,7 +182,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Gets the alternative mode for this resource or null if it is in normal mode. Do not call this from the createAlternativeMode method of an ancestor;
 		/// doing so will result in a stack overflow.
 		/// </summary>
-		public AlternativeResourceMode AlternativeMode {
+		public sealed override AlternativeResourceMode AlternativeMode {
 			get {
 				// It's important to do the entity setup and parent disabled checks first so the resource doesn't have to repeat any of them in its disabled check.
 				if( EsAsBaseType != null && EsAsBaseType.AlternativeMode is DisabledResourceMode )
@@ -213,7 +213,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="disableAuthorizationCheck">Pass true to allow a URL to be returned that the authenticated user cannot access. Use with caution. Might be
 		/// useful if you are adding the URL to an email message or otherwise displaying it outside the application.</param>
 		/// <returns></returns>
-		public string GetUrl( bool disableAuthorizationCheck = false ) {
+		public sealed override string GetUrl( bool disableAuthorizationCheck = false ) {
 			// App relative URLs can be a problem when stored in returnUrl query parameters or otherwise stored across requests since a stored resource might have a
 			// different security level than the current resource, and when redirecting to the stored resource we wouldn't switch. Therefore we always use absolute
 			// URLs.

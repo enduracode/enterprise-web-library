@@ -8,7 +8,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// </summary>
 	public abstract class EntitySetupBase {
 		private bool parentResourceLoaded;
-		private ResourceInfo parentResource;
+		private ResourceBase parentResource;
 		private ReadOnlyCollection<ResourceGroup> resources;
 		private readonly Lazy<AlternativeResourceMode> alternativeMode;
 
@@ -25,31 +25,31 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		protected virtual void init() {}
 
 		/// <summary>
-		/// Creates a resource info object for the parent resource of this entity setup. Returns null if there is no parent resource.
+		/// Creates a resource object for the parent resource of this entity setup. Returns null if there is no parent resource.
 		/// </summary>
-		protected abstract ResourceInfo createParentResourceInfo();
+		protected abstract ResourceBase createParentResource();
 
 		/// <summary>
 		/// Creates a list of resource groups for the resources that are part of this entity setup.
 		/// </summary>
-		protected abstract List<ResourceGroup> createResourceInfos();
+		protected abstract List<ResourceGroup> createResources();
 
 		/// <summary>
-		/// Gets the resource info object for the parent resource of this entity setup. Returns null if there is no parent resource.
+		/// Gets the resource object for the parent resource of this entity setup. Returns null if there is no parent resource.
 		/// </summary>
-		public ResourceInfo ParentResource {
+		public ResourceBase ParentResource {
 			get {
 				if( parentResourceLoaded )
 					return parentResource;
 				parentResourceLoaded = true;
-				return parentResource = createParentResourceInfo();
+				return parentResource = createParentResource();
 			}
 		}
 
 		/// <summary>
-		/// Gets the list of resource info objects for the resources that are part of this entity setup.
+		/// Gets the list of resource objects for the resources that are part of this entity setup.
 		/// </summary>
-		public ReadOnlyCollection<ResourceGroup> Resources => resources ?? ( resources = createResourceInfos().AsReadOnly() );
+		public ReadOnlyCollection<ResourceGroup> Resources => resources ?? ( resources = createResources().AsReadOnly() );
 
 		/// <summary>
 		/// Returns the name of the entity setup.
