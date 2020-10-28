@@ -205,8 +205,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				// these.
 				var canonicalAbsoluteUrl = GetDefaultBaseUrl( resolver.ConnectionSecurity.ShouldBeSecureGivenCurrentRequest( false ) ) +
 				                           resolver.ShortcutUrl.PrependDelimiter( "/" );
-				if( canonicalAbsoluteUrl != RequestState.Url )
+				if( canonicalAbsoluteUrl != RequestState.Url ) {
+					if( !resolver.ConnectionSecurity.ShouldBeSecureGivenCurrentRequest( false ) && RequestIsSecure( Request ) )
+						Response.AppendHeader( "Strict-Transport-Security", "max-age=0" );
 					NetTools.Redirect( canonicalAbsoluteUrl );
+				}
 
 				if( ConfigurationStatics.IsIntermediateInstallation && !RequestState.IntermediateUserExists )
 					throw new AccessDeniedException( true, null );

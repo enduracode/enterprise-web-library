@@ -199,8 +199,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				bool connectionSecurityIncorrect;
 				using( MiniProfiler.Current.Step( "EWF - Check connection security" ) )
 					connectionSecurityIncorrect = getConnectionSecurityIncorrect();
-				if( connectionSecurityIncorrect )
+				if( connectionSecurityIncorrect ) {
+					if( !InfoAsBaseType.ShouldBeSecureGivenCurrentRequest && EwfApp.Instance.RequestIsSecure( Request ) )
+						Response.AppendHeader( "Strict-Transport-Security", "max-age=0" );
 					NetTools.Redirect( InfoAsBaseType.GetUrl( false, false, true ) );
+				}
 			}
 			finally {
 				AppRequestState.Instance.UserDisabledByPage = false;
