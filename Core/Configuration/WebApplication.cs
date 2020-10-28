@@ -41,8 +41,8 @@ namespace EnterpriseWebLibrary.Configuration {
 			// We must pass values for all components since we will not have defaults to fall back on when getting the URL string for this object.
 			DefaultBaseUrl = new BaseUrl(
 				"localhost",
-				iisExpress ? 8080 : 80,
-				iisExpress ? 44300 : 443,
+				iisExpress ? 44311 : 80,
+				iisExpress ? 44310 : 443,
 				systemShortName + ( systemHasMultipleWebApplications ? name.EnglishToPascal() : "" ) );
 
 			var cookieAttributes = configuration.DefaultCookieAttributes;
