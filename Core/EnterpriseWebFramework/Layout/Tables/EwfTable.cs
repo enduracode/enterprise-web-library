@@ -192,7 +192,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								children.AddRange( TableStatics.GetCaption( caption, subCaption ) );
 
 								// the maximum number of items that will be shown in this table
-								itemLimit = ComponentStateItem.Create( "itemLimit", (int)defaultItemLimit, value => Enum.IsDefined( typeof( DataRowLimit ), value ) );
+								itemLimit = ComponentStateItem.Create( "itemLimit", (int)defaultItemLimit, value => Enum.IsDefined( typeof( DataRowLimit ), value ), false );
 
 								var visibleItemGroupsAndItems = new List<( EwfTableItemGroup<ItemIdType>, IReadOnlyList<EwfTableItem<ItemIdType>> )>();
 								foreach( var itemGroup in itemGroups ) {

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json.Linq;
-using Tewl.InputValidation;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -31,14 +30,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// post-backs, pass the default value.</param>
 		/// <param name="valueValidator">A predicate that takes a value and returns true if it is valid for this state item. Used primarily to validate post-back
 		/// values.</param>
-		/// <param name="durableValueUpdateValidationMethod">The validation method, which you should use to update the durable value, if this is necessary. Pass
-		/// null for transient state that is used only to support intermediate post-backs.</param>
-		public static ComponentStateItem<T> Create<T>(
-			string id, T durableValue, Func<T, bool> valueValidator, Action<T, Validator> durableValueUpdateValidationMethod = null ) {
+		/// <param name="includeInChangeDetection">Pass true to include this state item in change detection for the current data modifications. This is necessary
+		/// when the value of this state item affects what will be persisted by the data modifications. For transient state that is used only to support
+		/// intermediate post-backs, pass false.</param>
+		public static ComponentStateItem<T> Create<T>( string id, T durableValue, Func<T, bool> valueValidator, bool includeInChangeDetection ) {
 			creationTimeAsserter();
 
 			id = elementOrIdentifiedComponentIdGetter().AppendDelimiter( "_" ) + id;
-			var item = new ComponentStateItem<T>( durableValue, valueGetter( id ), valueValidator, durableValueUpdateValidationMethod, dataModificationGetter() );
+			var item = new ComponentStateItem<T>(
+				durableValue,
+				valueGetter( id ),
+				valueValidator,
+				includeInChangeDetection ? dataModificationGetter() : Enumerable.Empty<DataModification>().Materialize() );
 			itemAdder( id, item );
 			return item;
 		}
@@ -54,12 +57,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly T durableValue;
 		private readonly DataValue<T> value;
 		private readonly bool valueIsInvalid;
-		private readonly EwfValidation durableValueUpdateValidation;
 		private readonly IReadOnlyCollection<DataModification> dataModifications;
 
-		internal ComponentStateItem(
-			T durableValue, JToken value, Func<T, bool> valueValidator, Action<T, Validator> durableValueUpdateValidationMethod,
-			IReadOnlyCollection<DataModification> dataModifications ) {
+		internal ComponentStateItem( T durableValue, JToken value, Func<T, bool> valueValidator, IReadOnlyCollection<DataModification> dataModifications ) {
 			if( !valueValidator( durableValue ) )
 				throw new ApplicationException( "The specified durable value is invalid according to the specified value validator." );
 			this.durableValue = durableValue;
@@ -71,12 +71,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				valueIsInvalid = value != null;
 			}
 
-			if( durableValueUpdateValidationMethod != null ) {
-				durableValueUpdateValidation = new EwfValidation( validator => durableValueUpdateValidationMethod( this.value.Value, validator ) );
-				this.dataModifications = dataModifications;
-			}
-			else
-				this.dataModifications = Enumerable.Empty<DataModification>().Materialize();
+			this.dataModifications = dataModifications;
 		}
 
 		private bool tryConvertValue( JToken valueAsJson, out T convertedValue ) {
@@ -94,11 +89,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Gets the <see cref="DataValue{T}"/> representing the state.
 		/// </summary>
 		public DataValue<T> Value => value;
-
-		/// <summary>
-		/// Gets the durable-value-update validation, or null if there isn’t one.
-		/// </summary>
-		public EwfValidation DurableValueUpdateValidation => durableValueUpdateValidation;
 
 		IReadOnlyCollection<EtherealComponentOrElement> EtherealComponent.GetChildren() => Enumerable.Empty<EtherealComponentOrElement>().Materialize();
 		internal override object DurableValue => durableValue;
