@@ -284,7 +284,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				( EwfUiStatics.AppProvider.GlobalNavItemsSeparatedWithPipe()
 					  ? (FlowComponent)new InlineList( listItems )
 					  : new LineList( listItems.Select( i => (LineListItem)i ) ) ).Append(
-					new FlowErrorContainer( new ErrorSourceSet( validations: formItems.Select( i => i.Validation ) ), new ListErrorDisplayStyle() ) )
+					new FlowErrorContainer( new ErrorSourceSet( validations: formItems.SelectMany( i => i.Validations ) ), new ListErrorDisplayStyle() ) )
 				.Materialize(),
 				classes: CssElementCreator.GlobalNavListContainerClass );
 		}
@@ -336,7 +336,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				( EwfUiStatics.AppProvider.EntityNavAndActionItemsSeparatedWithPipe()
 					  ? (FlowComponent)new InlineList( listItems )
 					  : new LineList( listItems.Select( i => (LineListItem)i ) ) ).Append(
-					new FlowErrorContainer( new ErrorSourceSet( validations: formItems.Select( i => i.Validation ) ), new ListErrorDisplayStyle() ) )
+					new FlowErrorContainer( new ErrorSourceSet( validations: formItems.SelectMany( i => i.Validations ) ), new ListErrorDisplayStyle() ) )
 				.Materialize(),
 				classes: CssElementCreator.EntityNavListContainerClass );
 		}

@@ -26,16 +26,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal readonly FormItemSetup Setup;
 		private readonly IReadOnlyCollection<PhrasingComponent> label;
 		private readonly IReadOnlyCollection<FlowComponent> content;
-		public readonly EwfValidation Validation;
+		public readonly IReadOnlyCollection<EwfValidation> Validations;
 		internal readonly ErrorSourceSet ErrorSourceSet;
 
 		internal FormItem(
-			FormItemSetup setup, IReadOnlyCollection<PhrasingComponent> label, IReadOnlyCollection<FlowComponent> content, EwfValidation validation ) {
+			FormItemSetup setup, IReadOnlyCollection<PhrasingComponent> label, IReadOnlyCollection<FlowComponent> content,
+			IReadOnlyCollection<EwfValidation> validations ) {
 			Setup = setup ?? new FormItemSetup();
 			this.label = label;
 			this.content = content;
-			Validation = validation;
-			ErrorSourceSet = validation != null ? new ErrorSourceSet( validations: validation.ToCollection() ) : null;
+			Validations = validations;
+			ErrorSourceSet = validations.Any() ? new ErrorSourceSet( validations: validations ) : null;
 		}
 
 		/// <summary>
@@ -108,6 +109,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private DisplayableElementLocalData getErrorFocusableElementLocalData(
 			ElementContext context, string elementName, IReadOnlyCollection<Tuple<string, string>> attributes ) =>
 			ListErrorDisplayStyle.GetErrorFocusableElementLocalData( context, elementName, ErrorSourceSet, attributes );
+
+		/// <summary>
+		/// Adds an extraneous validation to this form item. Useful when you have validation logic that needs to execute in a different set of data modifications
+		/// than the form item’s built-in validation. For example, you may have a form item that modifies a piece of component state during an intermediate
+		/// post-back. If you later need to update the state item’s durable value during a full post-back, and this involves additional validation, you can create a
+		/// separate <see cref="EwfValidation"/> and use this method to keep the errors within the form item.
+		/// </summary>
+		public FormItem AddExtraneousValidation( EwfValidation validation ) {
+			return new FormItem( Setup, label, content, Validations.Append( validation ).Materialize() );
+		}
 	}
 
 	public static class FormItemExtensionCreators {
@@ -138,7 +149,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			this IReadOnlyCollection<FlowComponent> content, FormItemSetup setup = null, IReadOnlyCollection<PhrasingComponent> label = null,
 			EwfValidation validation = null ) {
 			label = label ?? Enumerable.Empty<PhrasingComponent>().Materialize();
-			return new FormItem( setup, label, content, validation );
+			return new FormItem( setup, label, content, validation != null ? validation.ToCollection() : Enumerable.Empty<EwfValidation>().Materialize() );
 		}
 
 		/// <summary>
