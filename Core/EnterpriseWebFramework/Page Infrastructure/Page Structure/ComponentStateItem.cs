@@ -95,6 +95,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal override bool ValueIsInvalid() => valueIsInvalid;
 		internal override IReadOnlyCollection<DataModification> DataModifications => dataModifications;
 		internal override bool ValueChanged() => !EwlStatics.AreEqual( value.Value, durableValue );
-		internal override JToken ValueAsJson => JToken.FromObject( value.Value );
+		internal override JToken ValueAsJson => value.Value == null ? JValue.CreateNull() : JToken.FromObject( value.Value );
 	}
 }
