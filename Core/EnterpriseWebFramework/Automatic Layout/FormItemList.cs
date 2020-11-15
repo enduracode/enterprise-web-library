@@ -180,7 +180,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										classes: i.elementClass.Add( itemClassGetter( i.item ) ),
 										children: itemComponentGetter( i.item ) ) ).ToCollection(),
 								updateRegionSets: i.item.Setup.UpdateRegionSets ) )
-						.Materialize() ) ).ToCollection();
+						.Materialize(),
+					etherealChildren: setup.EtherealContent ) ).ToCollection();
 
 			this.items = ( items ?? Enumerable.Empty<FormItem>() ).ToList();
 		}

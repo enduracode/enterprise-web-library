@@ -11,6 +11,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal readonly DisplaySetup DisplaySetup;
 		internal readonly ElementClassSet Classes;
 		internal readonly Func<Func<DisplaySetup, FormItemSetup>, IReadOnlyCollection<FormItem>> ButtonItemGetter;
+		internal readonly IReadOnlyCollection<EtherealComponent> EtherealContent;
 
 		/// <summary>
 		/// Creates a form-item-list setup object.
@@ -19,8 +20,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="classes">The classes on the list.</param>
 		/// <param name="buttonSetup">Pass a value to have a button added as the last form item and formatted automatically.</param>
 		/// <param name="enableSubmitButton">Pass true to enable the button to be a a submit button if possible.</param>
+		/// <param name="etherealContent"></param>
 		public FormItemListSetup(
-			DisplaySetup displaySetup = null, ElementClassSet classes = null, ButtonSetup buttonSetup = null, bool enableSubmitButton = false ) {
+			DisplaySetup displaySetup = null, ElementClassSet classes = null, ButtonSetup buttonSetup = null, bool enableSubmitButton = false,
+			IReadOnlyCollection<EtherealComponent> etherealContent = null ) {
 			DisplaySetup = displaySetup;
 			Classes = classes;
 			ButtonItemGetter = setupGetter => buttonSetup == null
@@ -31,6 +34,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						                                  enableSubmitButton: enableSubmitButton )
 					                                  .ToFormItem( setup: setupGetter( buttonSetup.DisplaySetup ) )
 					                                  .ToCollection();
+			EtherealContent = etherealContent;
 		}
 	}
 }
