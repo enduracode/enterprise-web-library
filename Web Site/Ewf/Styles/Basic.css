@@ -221,8 +221,7 @@ ewfWrappingFormItemList {
 }
 ewfUnorderedLineList:not( .ewfFvaT ):not( .ewfFvaB ):not( .ewfFvaC ):not( .ewfFvaBl ),
 ewfUnorderedWrappingList:not( .ewfFvaT ):not( .ewfFvaB ):not( .ewfFvaC ):not( .ewfFvaBl ),
-ewfStackFormItemList > ewfFormItemListItem, ewfStackFormItemList > ewfFormItemListButtonItem,
-ewfWrappingFormItemList {
+ewfStackFormItemList > ewfFormItemListItem, ewfStackFormItemList > ewfFormItemListButtonItem {
 	align-items: center;
 }
 ewfUnorderedLineList {
