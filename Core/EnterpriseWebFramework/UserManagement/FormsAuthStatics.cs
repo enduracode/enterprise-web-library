@@ -21,7 +21,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		/// <summary>
 		/// The idle time required for a session to be erased.
 		/// </summary>
-		public static readonly TimeSpan SessionDuration = TimeSpan.FromHours( 10 );
+		public static readonly TimeSpan SessionDuration = TimeSpan.FromHours( 32 ); // persist across consecutive days of usage
 
 		private static Func<SystemUserManagementProvider> providerGetter;
 
