@@ -35,7 +35,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						new Charts.Info( this ) )
 				};
 
-		public override string EntitySetupName => "Customer #1";
+		public override string EntitySetupName => "Web Framework Demo";
 
 		EntityUiSetup UiEntitySetup.GetUiSetup() {
 			var one = new ModalBoxId();
