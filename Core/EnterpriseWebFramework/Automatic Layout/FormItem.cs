@@ -74,8 +74,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="visualOrderRank"></param>
 		/// <param name="etherealContent"></param>
 		public ComponentListItem ToListItem( int? visualOrderRank = null, IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
-			content.Concat( getErrorContainer() )
-				.Materialize()
+			getListItemContent()
 				.ToComponentListItem( Setup.DisplaySetup, null, visualOrderRank, Setup.UpdateRegionSets, etherealContent, getErrorFocusableElementLocalData );
 
 		/// <summary>
@@ -89,8 +88,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public ComponentListItem ToListItem(
 			string id, int? visualOrderRank = null, IEnumerable<UpdateRegionSet> removalUpdateRegionSets = null,
 			IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
-			content.Concat( getErrorContainer() )
-				.Materialize()
+			getListItemContent()
 				.ToComponentListItem(
 					id,
 					Setup.DisplaySetup,
@@ -100,6 +98,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					removalUpdateRegionSets,
 					etherealContent,
 					getErrorFocusableElementLocalData );
+
+		private IReadOnlyCollection<FlowComponent> getListItemContent() =>
+			new GenericFlowContainer( content.Concat( getErrorContainer() ).Materialize(), classes: itemClass ).ToCollection();
 
 		private IEnumerable<FlowComponent> getErrorContainer() =>
 			ErrorSourceSet != null
