@@ -22,7 +22,7 @@ namespace EnterpriseWebLibrary.WebSite {
 				"",
 				ConnectionSecurity.SecureIfPossible,
 				() => {
-					var page = ActionControls.GetInfo();
+					var page = BoxDemo.GetInfo();
 					return page.UserCanAccessResource ? page : null;
 				} );
 

@@ -289,6 +289,13 @@
     <Compile Include="TestPages\CheckboxListDemo.aspx.designer.cs">
       <DependentUpon>CheckboxListDemo.aspx</DependentUpon>
     </Compile>
+    <Compile Include="TestPages\ComponentLists.aspx.cs">
+      <DependentUpon>ComponentLists.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="TestPages\ComponentLists.aspx.designer.cs">
+      <DependentUpon>ComponentLists.aspx</DependentUpon>
+    </Compile>
     <Compile Include="TestPages\DateAndTimePickers.aspx.cs">
       <DependentUpon>DateAndTimePickers.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -538,6 +545,7 @@
     <Content Include="TestPages\Checkboxes.aspx" />
     <Content Include="TestPages\CheckboxListDemo.aspx" />
     <Content Include="TestPages\ColumnPrimaryTableDemo.aspx" />
+    <Content Include="TestPages\ComponentLists.aspx" />
     <Content Include="TestPages\DateAndTimePickers.aspx" />
     <Content Include="TestPages\EwfTableDemo.aspx" />
   </ItemGroup>

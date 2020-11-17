@@ -15,10 +15,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		protected override List<ResourceGroup> createResources() =>
 			new List<ResourceGroup>
 				{
-					new ResourceGroup( "Working Stuff", new ActionControls.Info( this ), new OptionalParameters.Info( this ), new OmniDemo.Info( this ) ),
-					new ResourceGroup( "First category", new HtmlEditing.Info( this ), new RegexHelper.Info( this ), new StatusMessages.Info( this ) ),
+					new ResourceGroup( "Layout", new BoxDemo.Info( this ), new ComponentLists.Info( this ) ),
 					new ResourceGroup( "Tables", new EwfTableDemo.Info( this ), new ColumnPrimaryTableDemo.Info( this ) ),
-					new ResourceGroup( "Layout", new BoxDemo.Info( this ) ),
 					new ResourceGroup(
 						"Form Controls",
 						new TextControlDemo.Info( this ),
@@ -27,6 +25,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						new SelectListDemo.Info( this ),
 						new CheckboxListDemo.Info( this ),
 						new DateAndTimePickers.Info( this ) ),
+					new ResourceGroup( "Working Stuff", new ActionControls.Info( this ), new OptionalParameters.Info( this ), new OmniDemo.Info( this ) ),
+					new ResourceGroup( "First category", new HtmlEditing.Info( this ), new RegexHelper.Info( this ), new StatusMessages.Info( this ) ),
 					new ResourceGroup(
 						"Other",
 						new IntermediatePostBacks.Info( this ),
