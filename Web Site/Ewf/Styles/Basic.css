@@ -164,7 +164,7 @@ ewfFormItem > ewfFormItemLabel {
 	margin-bottom: .25em;
 }
 ewfFormItemList > ewfFormItemListItem > ewfFormItemListItemContent > ewfErrorMessageListContainer > ewfUnorderedStackList > ewfComponentListItem,
-ewfFormItem > ewfFormItemContent > ewfErrorMessageListContainer > ewfUnorderedStackList > ewfComponentListItem {
+ewfFormItem > ewfErrorMessageListContainer > ewfUnorderedStackList > ewfComponentListItem {
 	margin-top: .25em;
 }
 
