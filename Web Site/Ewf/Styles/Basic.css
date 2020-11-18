@@ -30,18 +30,30 @@ ewfSectionAllStylesBothStates ewfSectionAllStylesBothStates ewfSectionNormalStyl
 	font-size: 1em;
 	margin-bottom: .5em;
 }
-ewfSectionNormalStyleBothStates:first-child, ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates:first-child, ewfSectionAllStylesBothStates ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates:first-child {
+ewfSectionNormalStyleBothStates:first-child,
+ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates:first-child,
+ewfSectionAllStylesBothStates ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates:first-child {
 	margin-top: 0;
 }
-ewfSectionNormalStyleBothStates:last-child, ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates:last-child, ewfSectionAllStylesBothStates ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates:last-child {
+ewfSectionNormalStyleBothStates:last-child,
+ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates:last-child,
+ewfSectionAllStylesBothStates ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates:last-child {
 	margin-bottom: 0;
+}
+ewfSectionBoxStyleBothStates {
+	margin-top: 1em;
+}
+ewfSectionBoxStyleBothStates:first-child {
+	margin-top: 0;
+}
+ewfSectionBoxStyleBothStates + ewfSectionBoxStyleBothStates {
+	margin-top: 1.5em;
 }
 
 
 /* other spacing */
 
 /* top */
-ewfSectionBoxStyleBothStates,
 p,
 ewfUnorderedLineList,
 ewfUnorderedStackList,
@@ -59,7 +71,6 @@ ewfChart,
 ewfHtmlBlock {
 	margin-top: 1em;
 }
-ewfSectionBoxStyleBothStates:first-child,
 p:first-child,
 ewfUnorderedLineList:first-child,
 ewfUnorderedStackList:first-child,
