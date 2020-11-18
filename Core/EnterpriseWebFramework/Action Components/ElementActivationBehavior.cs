@@ -31,7 +31,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										activationBehavior?.IsFocusable == true
 											? new[] { Tuple.Create( "tabindex", "0" ), Tuple.Create( "role", "button" ) }
 											: Enumerable.Empty<Tuple<string, string>>() ),
-								includeIdAttribute: activationBehavior?.IncludeIdAttribute == true || isFocused,
+								includeIdAttribute: activationBehavior?.IncludesIdAttribute() == true || isFocused,
 								jsInitStatements: ( activationBehavior != null ? activationBehavior.JsInitStatementGetter( context.Id ) : "" ).AppendDelimiter(
 									// This list of keys is duplicated in the JavaScript file.
 									" $( '#{0}' ).keypress( function( e ) {{ if( e.key === ' ' || e.key === 'Enter' ) {{ e.preventDefault(); $( this ).click(); }} }} );"
@@ -82,7 +82,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal readonly ElementClassSet Classes;
 		internal readonly Func<IReadOnlyCollection<Tuple<string, string>>> AttributeGetter;
-		internal readonly bool IncludeIdAttribute;
+		internal readonly Func<bool> IncludesIdAttribute;
 		internal readonly IReadOnlyCollection<EtherealComponent> EtherealChildren;
 		internal readonly Func<string, string> JsInitStatementGetter;
 		internal readonly bool IsFocusable;
@@ -96,7 +96,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private ElementActivationBehavior( HyperlinkBehavior hyperlinkBehavior ) {
 			Classes = hyperlinkBehavior.HasDestination() ? ActivatableClass : ElementClassSet.Empty;
 			AttributeGetter = () => hyperlinkBehavior.AttributeGetter( true );
-			IncludeIdAttribute = hyperlinkBehavior.IncludesIdAttribute( true );
+			IncludesIdAttribute = () => hyperlinkBehavior.IncludesIdAttribute( true );
 			EtherealChildren = hyperlinkBehavior.EtherealChildren;
 			JsInitStatementGetter = id => hyperlinkBehavior.JsInitStatementGetter( id, true );
 			IsFocusable = hyperlinkBehavior.IsFocusable;
@@ -106,7 +106,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private ElementActivationBehavior( ButtonBehavior buttonBehavior ) {
 			Classes = ActivatableClass;
 			AttributeGetter = () => buttonBehavior.GetAttributes().Materialize();
-			IncludeIdAttribute = buttonBehavior.IncludesIdAttribute();
+			IncludesIdAttribute = buttonBehavior.IncludesIdAttribute;
 			EtherealChildren = buttonBehavior.GetEtherealChildren();
 			JsInitStatementGetter = buttonBehavior.GetJsInitStatements;
 			IsFocusable = true;
@@ -120,7 +120,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 				Classes = hyperlinkBehavior.HasDestination() ? ActivatableClass : ElementClassSet.Empty;
 				AttributeGetter = () => hyperlinkBehavior.AttributeGetter( true );
-				IncludeIdAttribute = hyperlinkBehavior.IncludesIdAttribute( true );
+				IncludesIdAttribute = () => hyperlinkBehavior.IncludesIdAttribute( true );
 				EtherealChildren = hyperlinkBehavior.EtherealChildren;
 				JsInitStatementGetter = id => hyperlinkBehavior.JsInitStatementGetter( id, true );
 				IsFocusable = hyperlinkBehavior.IsFocusable;
@@ -131,7 +131,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 				Classes = ActivatableClass;
 				AttributeGetter = () => buttonBehavior.GetAttributes().Materialize();
-				IncludeIdAttribute = buttonBehavior.IncludesIdAttribute();
+				IncludesIdAttribute = buttonBehavior.IncludesIdAttribute;
 				EtherealChildren = buttonBehavior.GetEtherealChildren();
 				JsInitStatementGetter = buttonBehavior.GetJsInitStatements;
 				IsFocusable = true;

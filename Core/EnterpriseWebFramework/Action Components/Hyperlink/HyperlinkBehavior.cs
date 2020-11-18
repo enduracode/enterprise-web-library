@@ -44,8 +44,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						: Enumerable.Empty<Tuple<string, string>>() )
 				.Materialize();
 
-			var isPostBackHyperlink = destination != null && !( destination.AlternativeMode is DisabledResourceMode ) && !target.Any() &&
-			                          EwfPage.Instance.IsAutoDataUpdater;
+			var isPostBackHyperlink = new Lazy<bool>(
+				() => destination != null && !( destination.AlternativeMode is DisabledResourceMode ) && !target.Any() && EwfPage.Instance.IsAutoDataUpdater );
 			FormAction postBackAction = null;
 			string getActionInitStatements( string id, bool omitPreventDefaultStatement, string actionStatements ) =>
 				"$( '#{0}' ).click( function( e ) {{ {1} }} );".FormatWith(
@@ -61,10 +61,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 			else {
 				IncludesIdAttribute = forNonHyperlinkElement =>
-					isPostBackHyperlink || ( destination != null && ( actionStatementGetter != null || forNonHyperlinkElement ) );
+					isPostBackHyperlink.Value || ( destination != null && ( actionStatementGetter != null || forNonHyperlinkElement ) );
 				EtherealChildren = null;
 				JsInitStatementGetter = ( id, forNonHyperlinkElement ) => {
-					var actionStatements = isPostBackHyperlink ? postBackAction.GetJsStatements() :
+					var actionStatements = isPostBackHyperlink.Value ? postBackAction.GetJsStatements() :
 					                       destination != null && actionStatementGetter != null ? actionStatementGetter( Url.Value ) :
 					                       destination != null && forNonHyperlinkElement ? !target.Any()
 						                                                                       ? "window.location.href = '{0}';".FormatWith( Url.Value )
@@ -79,13 +79,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			IsFocusable = destination != null;
 
-			if( isPostBackHyperlink )
-				PostBackAdder = () => {
-					postBackAction = GetHyperlinkPostBackAction( destination );
-					postBackAction.AddToPageIfNecessary();
-				};
-			else
-				PostBackAdder = () => {};
+			PostBackAdder = () => {
+				if( !isPostBackHyperlink.Value )
+					return;
+				postBackAction = GetHyperlinkPostBackAction( destination );
+				postBackAction.AddToPageIfNecessary();
+			};
 		}
 
 		internal HyperlinkBehavior( string mailtoUri ) {
