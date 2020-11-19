@@ -96,6 +96,20 @@ ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
 	margin: 0;
 }
 
+/* hyperlinks */
+ewfHyperlinkStandardStyleAllStates {
+	text-decoration: underline;
+}
+ewfHyperlinkAllButtonStylesActionlessState,
+ewfHyperlinkAllButtonStylesAllNormalStates,
+ewfHyperlinkAllButtonStylesAllVisitedStates {
+	text-decoration: none;
+}
+ewfHyperlinkAllButtonStylesStatesWithFocus,
+ewfHyperlinkAllButtonStylesStatesWithHover {
+	text-decoration: underline;
+}
+
 /* tables */
 ewfThAndTd {
 	overflow-wrap: break-word;
@@ -151,11 +165,6 @@ div.ewfStandardDynamicTable > ewfTableStandardAndStandardExceptLayoutStyles {
 /* images */
 img {
 	display: block;
-}
-
-/* hyperlinks */
-ewfHyperlinkStandardStyleAllStates, ewfHyperlinkAllButtonStylesAllStates {
-	text-decoration: underline;
 }
 
 /* list controls */
