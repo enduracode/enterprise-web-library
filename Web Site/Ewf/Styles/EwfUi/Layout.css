@@ -66,13 +66,6 @@ ewfPagePath > h1 {
 	font-weight: 700;
 }
 
-/* lists */
-ewfHtmlBlock ul {
-	margin-left: 1em;
-	padding: 0;
-	list-style-type: circle;
-}
-
 /* boxes */
 ewfSectionBoxStyleBothStates, ewfUiContentBox {
 	padding: 1em;
@@ -96,6 +89,13 @@ ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
 	margin: 0;
 }
 
+/* lists */
+ewfHtmlBlock ul {
+	margin-left: 1em;
+	padding: 0;
+	list-style-type: circle;
+}
+
 /* hyperlinks */
 ewfHyperlinkStandardStyleAllStates {
 	text-decoration: underline;
@@ -108,6 +108,11 @@ ewfHyperlinkAllButtonStylesAllVisitedStates {
 ewfHyperlinkAllButtonStylesStatesWithFocus,
 ewfHyperlinkAllButtonStylesStatesWithHover {
 	text-decoration: underline;
+}
+
+/* images */
+img {
+	display: block;
 }
 
 /* tables */
@@ -160,11 +165,6 @@ table.ewfStandardDynamicTableCaption td.ewfAddItemLink {
 }
 div.ewfStandardDynamicTable > ewfTableStandardAndStandardExceptLayoutStyles {
 	margin-top: 0;
-}
-
-/* images */
-img {
-	display: block;
 }
 
 /* list controls */
