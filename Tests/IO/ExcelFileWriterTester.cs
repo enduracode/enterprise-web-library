@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using EnterpriseWebLibrary.EnterpriseWebFramework;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using Humanizer;
 using NUnit.Framework;
 using Tewl.IO;
@@ -360,62 +357,6 @@ namespace EnterpriseWebLibrary.Tests.IO {
 						oneToTen.Select( i => "The row above is the fourth header for the " + i + ordinalEnding( i ) + " column." ).ToArray() );
 
 					return "too_many_header_rows";
-				} );
-		}
-
-		[ Test ]
-		public void RealWorldDataTableTest() {
-			// This is what a dynamic table would output, a list of rowsetups.
-			var rowSetups = new List<RowSetup>();
-			rowSetups.Add(
-				new RowSetup
-					{
-						IsHeader = true,
-						CsvLine = new List<string>
-							{
-								"Name",
-								"Company",
-								"Location",
-								"Url",
-								"Phone"
-							}
-					} );
-
-			var names = new[] { "Sofeee", "Cathie", "Ann", "Jan", "Patty", "Cora" };
-			var surNames = new[] { "Norjaim", "Carbelt", "Wilson", "Middleberger", "Hewlett", "Taylor", "Danzen" };
-			var companies = new[] { "Synergy", "Enterprises", "Dancing", "Buzz", "Local", "of Rochester" };
-			var streets = new[] { "Broad Rd", "W Elm St", "Main", "James Ave", "Water Blvd", "West Way" };
-
-			for( var i = 0; i < 72; i++ ) {
-				rowSetups.Add(
-					new RowSetup
-						{
-							CsvLine = new List<string>
-								{
-									// Some random-looking values
-									names[ i % names.Count() ] + " " + surNames[ i % surNames.Count() ],
-									companies[ ( i + ( i / 2 ) ) % companies.Count() ] + " " + companies[ i % companies.Count() ],
-									i + " " + streets[ i % streets.Count() ],
-									"http://www.google.com/search?q=" + i,
-									i.ToString( "D3" ) + "-867-5309"
-								},
-							ActivationBehavior = ElementActivationBehavior.CreateRedirectScript( new ExternalResource( "http://google.com" ) ),
-							CssClass = "gibberish_string_for_testing",
-							IsHeader = false,
-							RankId = i,
-							UniqueIdentifier = "row" + i
-						} );
-			}
-
-			runTest(
-				writer => {
-					foreach( var rowSetup in rowSetups ) {
-						if( rowSetup.IsHeader )
-							writer.DefaultWorksheet.AddHeaderToWorksheet( rowSetup.CsvLine.ToArray() );
-						else
-							writer.DefaultWorksheet.AddRowToWorksheet( rowSetup.CsvLine.ToArray() );
-					}
-					return "data_table";
 				} );
 		}
 

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.UI.WebControls;
-using EnterpriseWebLibrary.JavaScriptWriting;
 using Humanizer;
 using Tewl.Tools;
 
@@ -141,32 +139,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			this.resource = resource;
 			this.action = action;
 			this.script = script;
-		}
-
-		// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
-		internal void SetUpClickableControl( WebControl clickableControl ) {
-			if( resource == null && action == null && script == "" )
-				return;
-
-			clickableControl.CssClass = clickableControl.CssClass.ConcatenateWithSpace( ActivatableClass.ClassName );
-
-			if( resource != null && EwfPage.Instance.IsAutoDataUpdater ) {
-				action = HyperlinkBehavior.GetHyperlinkPostBackAction( resource );
-				resource = null;
-			}
-
-			Func<string> scriptGetter;
-			if( resource != null )
-				scriptGetter = () => "location.href = '" + EwfPage.Instance.GetClientUrl( resource.GetUrl() ) + "'; return false";
-			else if( action != null ) {
-				action.AddToPageIfNecessary();
-				scriptGetter = () => action.GetJsStatements() + " return false";
-			}
-			else
-				scriptGetter = () => script;
-
-			// Defer script generation until after all controls have IDs.
-			EwfPage.Instance.PreRender += delegate { clickableControl.AddJavaScriptEventScript( JsWritingMethods.onclick, scriptGetter() ); };
 		}
 	}
 }

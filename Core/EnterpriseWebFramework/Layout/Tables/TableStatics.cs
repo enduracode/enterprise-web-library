@@ -2,9 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.DataAccess.Ranking;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Controls;
 using Humanizer;
 using Tewl.IO;
 using Tewl.Tools;
@@ -13,67 +11,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	internal static class TableStatics {
 		// This class name is used by EWF CSS and JavaScript files.
 		private static readonly ElementClass activatableElementContainerClass = new ElementClass( "ewfAec" );
-
-		internal static void DrawRow(
-			Table table, RowSetup rowSetup, List<CellPlaceholder> rowPlaceholder, List<ColumnSetup> columnSetups, bool tableIsColumnPrimary ) {
-			var row = new TableRow();
-			rowSetup.UnderlyingTableRow = row;
-			table.Rows.Add( row );
-
-			row.CssClass = rowSetup.CssClass;
-			if( rowSetup.ActivationBehavior != null )
-				rowSetup.ActivationBehavior.SetUpClickableControl( row );
-
-			for( var i = 0; i < rowPlaceholder.Count; i++ ) {
-				if( rowPlaceholder[ i ] is EwfTableCell )
-					row.Cells.Add( buildCell( rowPlaceholder[ i ] as EwfTableCell, rowSetup, columnSetups[ i ], tableIsColumnPrimary ) );
-			}
-		}
-
-		private static TableCell buildCell( EwfTableCell ewfCell, RowSetup rowSetup, ColumnSetup columnSetup, bool tableIsColumnPrimary ) {
-			var colSpan = tableIsColumnPrimary ? ewfCell.Setup.ItemSpan : ewfCell.Setup.FieldSpan;
-			var rowSpan = tableIsColumnPrimary ? ewfCell.Setup.FieldSpan : ewfCell.Setup.ItemSpan;
-
-			var underlyingCell = rowSetup.IsHeader || columnSetup.IsHeader ? new TableHeaderCell() : new TableCell();
-			underlyingCell.AddControlsReturnThis( ( ewfCell.Content ?? Enumerable.Empty<FlowComponent>() ).GetControls() );
-			if( colSpan == 1 )
-				underlyingCell.Width = columnSetup.Width;
-			underlyingCell.CssClass = StringTools.ConcatenateWithDelimiter(
-				" ",
-				TableCssElementCreator.AllCellAlignmentsClass.ClassName,
-				columnSetup.CssClassOnAllCells,
-				StringTools.ConcatenateWithDelimiter( " ", ewfCell.Setup.Classes.ToArray() ) );
-			if( ewfCell.Setup.ActivationBehavior != null )
-				ewfCell.Setup.ActivationBehavior.SetUpClickableControl( underlyingCell );
-
-			if( colSpan != 1 )
-				underlyingCell.ColumnSpan = colSpan;
-			if( rowSpan != 1 )
-				underlyingCell.RowSpan = rowSpan;
-
-			ewfCell.Setup.EtherealContent.AddEtherealControls( underlyingCell );
-
-			return underlyingCell;
-		}
-
-		internal static Table CreateUnderlyingTable() {
-			var table = new Table();
-			// using the CellSpacing property resulted in an automatic, unwanted insertion of the border-collapse CSS attribute.
-			table.Attributes.Add( "cellspacing", "0" );
-			return table;
-		}
-
-		internal static void AlternateRowColors( Table table, List<RowSetup> rowSetups ) {
-			var contrast = false;
-			for( var rowIndex = 0; rowIndex < rowSetups.Count; rowIndex++ ) {
-				var row = table.Rows[ rowIndex ];
-				if( contrast )
-					row.CssClass = row.CssClass.ConcatenateWithSpace( "ewfContrast" );
-				contrast = !contrast;
-				if( rowIndex == rowSetups.Count - 1 )
-					row.CssClass = row.CssClass.ConcatenateWithSpace( "ewfLast" );
-			}
-		}
 
 		internal static void AddCheckboxes<ItemIdType>(
 			string postBackIdBase, IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions, TableSelectedItemData<ItemIdType> selectedItemData,

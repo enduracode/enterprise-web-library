@@ -17,10 +17,10 @@ ewfUiGlobalContainer {
 
 /* spacing */
 
-div.ewfStandardDynamicTable, ewfControlStack, ewfUiEntityContainer > *, ewfUiSideTabAndContentBlock, ewfUiGlobalFootContainer {
+ewfUiEntityContainer > *, ewfUiSideTabAndContentBlock, ewfUiGlobalFootContainer {
 	margin-top: 1em;
 }
-div.ewfStandardDynamicTable:first-child, ewfControlStack:first-child, ewfUiEntityContainer > *:first-child {
+ewfUiEntityContainer > *:first-child {
 	margin-top: 0;
 }
 ewfUiTopErrorMessageListContainer,
@@ -147,24 +147,6 @@ ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTr
 }
 ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > ewfTh {
 	font-weight: 600;
-}
-table.ewfStandardDynamicTableCaption {
-	margin-bottom: .5em;
-	width: 100%;
-	table-layout: fixed;
-}
-table.ewfStandardDynamicTableCaption span.ewfCaption {
-	font-weight: bold;
-}
-table.ewfStandardDynamicTableCaption ewfControlLine {
-	margin-top: .25em;
-}
-table.ewfStandardDynamicTableCaption td.ewfAddItemLink {
-	vertical-align: bottom;
-	text-align: right;
-}
-div.ewfStandardDynamicTable > ewfTableStandardAndStandardExceptLayoutStyles {
-	margin-top: 0;
 }
 
 /* list controls */

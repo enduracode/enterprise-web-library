@@ -3,8 +3,6 @@ using System.Drawing.Imaging;
 using System.Drawing.Text;
 using System.Linq;
 using System.Web;
-using System.Web.UI.HtmlControls;
-using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using Tewl.Tools;
 
@@ -39,24 +37,6 @@ namespace EnterpriseWebLibrary {
 		/// </summary>
 		public static void Redirect( string url ) {
 			HttpContext.Current.Response.Redirect( url );
-		}
-
-		/// <summary>
-		/// Adds the specified JavaScript to the specified event handler of the specified control. Do not pass null for script. Use JsWritingMethods constants for events.
-		/// To add an onsubmit event, use ClientScript.RegisterOnSubmitStatement instead.
-		/// A semicolon will be added to the end of the script.
-		/// </summary>
-		public static void AddJavaScriptEventScript( this WebControl control, string jsEventConstant, string script ) {
-			control.Attributes[ jsEventConstant ] += script + ";";
-		}
-
-		/// <summary>
-		/// Adds the specified JavaScript to the specified event handler of the specified control. Do not pass null for script. Use JsWritingMethods constants for events.
-		/// To add an onsubmit event, use ClientScript.RegisterOnSubmitStatement instead.
-		/// A semicolon will be added to the end of the script.
-		/// </summary>
-		public static void AddJavaScriptEventScript( this HtmlControl control, string jsEventConstant, string script ) {
-			control.Attributes[ jsEventConstant ] += script + ";";
 		}
 
 		/// <summary>

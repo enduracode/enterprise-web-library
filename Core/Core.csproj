@@ -473,7 +473,6 @@
     <Compile Include="EnterpriseWebFramework\Image Embedding\FixedSizeImageSourceSet.cs" />
     <Compile Include="EnterpriseWebFramework\Image Embedding\FlexibleImageSourceSet.cs" />
     <Compile Include="EnterpriseWebFramework\Image Embedding\ImageSetup.cs" />
-    <Compile Include="EnterpriseWebFramework\Layout\Control List\ControlListItem.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Figure\EwfFigure.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Figure\FigureCaption.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\GenericFlowContainer.cs" />
@@ -513,22 +512,15 @@
     <Compile Include="EnterpriseWebFramework\Modal Boxes\OpenModalBehavior.cs" />
     <Compile Include="EnterpriseWebFramework\MvcStatics.cs" />
     <Compile Include="EnterpriseWebFramework\NamingPlaceholder.cs" />
-    <Compile Include="EnterpriseWebFramework\Controls\Block.cs" />
-    <Compile Include="EnterpriseWebFramework\Layout\Control List\ControlLine.cs" />
-    <Compile Include="EnterpriseWebFramework\Layout\Control List\ControlStack.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Text Box\AutoCompleteService.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="EnterpriseWebFramework\Controls\Paragraph.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\CellPlaceholder.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\ColumnPrimaryItemGroup.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\ColumnPrimaryTable.cs" />
-    <Compile Include="EnterpriseWebFramework\Layout\Tables\ColumnSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\DataRowLimit.cs" />
-    <Compile Include="EnterpriseWebFramework\Layout\Tables\DynamicTable.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\EwfTable.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\EwfTableCell.cs" />
-    <Compile Include="EnterpriseWebFramework\Layout\Tables\EwfTableColumn.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\EwfTableField.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\EwfTableFieldOrItemSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\EwfTableItem.cs" />
@@ -536,8 +528,6 @@
     <Compile Include="EnterpriseWebFramework\Layout\Tables\EwfTableItemGroupRemainingData.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\EwfTableItemSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\EwfTableStyle.cs" />
-    <Compile Include="EnterpriseWebFramework\Layout\Tables\RowMethod.cs" />
-    <Compile Include="EnterpriseWebFramework\Layout\Tables\RowSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\SpaceForMultiColOrRowCell.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\TableCellVerticalAlignment.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Autofocus\AutofocusCondition.cs" />
@@ -741,8 +731,6 @@
     <Compile Include="EnterpriseWebFramework\UserManagement\SystemUserManagementProvider.cs" />
     <Compile Include="Collections\ListSet.cs" />
     <Compile Include="InstallationFileStatics.cs" />
-    <Compile Include="JavaScriptWriting\JsWritingMethods.cs" />
-    <Compile Include="JavaScriptWriting\PopUpWindowSettings.cs" />
     <Compile Include="NetTools.cs" />
     <Compile Include="StreamMethod.cs" />
     <Compile Include="MailMerging\FieldImplementation\BasicMergeFieldImplementation.cs" />
@@ -783,7 +771,6 @@
       <SubType>
       </SubType>
     </None>
-    <None Include="EnterpriseWebFramework\Controls\Readme.txt" />
     <None Include="InstallationSupportUtility\SystemManagerInterface\Messages\BuildMessage\Build.xsd">
       <SubType>Designer</SubType>
     </None>
