@@ -33,20 +33,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public virtual IReadOnlyCollection<NavFormControl> GetGlobalNavFormControls() => Enumerable.Empty<NavFormControl>().Materialize();
 
 		/// <summary>
-		/// Gets whether items in the global nav control list are separated with a pipe character.
-		/// </summary>
-		public virtual bool GlobalNavItemsSeparatedWithPipe() {
-			return true;
-		}
-
-		/// <summary>
-		/// Gets whether items in the entity nav and entity action control lists are separated with a pipe character.
-		/// </summary>
-		public virtual bool EntityNavAndActionItemsSeparatedWithPipe() {
-			return true;
-		}
-
-		/// <summary>
 		/// Gets whether items in the page action control list are separated with a pipe character.
 		/// </summary>
 		public virtual bool PageActionItemsSeparatedWithPipe() {

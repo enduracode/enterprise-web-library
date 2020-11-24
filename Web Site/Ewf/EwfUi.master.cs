@@ -274,18 +274,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			var formItems = EwfUiStatics.AppProvider.GetGlobalNavFormControls()
 				.Select( ( control, index ) => control.GetFormItem( PostBack.GetCompositeId( "global", "nav", index.ToString() ) ) )
 				.Materialize();
-			var listItems = getActionListItems( EwfUiStatics.AppProvider.GetGlobalNavActions() )
-				.Concat( formItems.Select( i => i.Content.ToComponentListItem() ) )
-				.Materialize();
+			var listItems = getActionListItems( EwfUiStatics.AppProvider.GetGlobalNavActions() ).Concat( formItems.Select( i => i.ToListItem() ) ).Materialize();
 			if( !listItems.Any() )
 				return null;
 
 			return new GenericFlowContainer(
-				( EwfUiStatics.AppProvider.GlobalNavItemsSeparatedWithPipe()
-					  ? (FlowComponent)new InlineList( listItems )
-					  : new LineList( listItems.Select( i => (LineListItem)i ) ) ).Append(
-					new FlowErrorContainer( new ErrorSourceSet( validations: formItems.SelectMany( i => i.Validations ) ), new ListErrorDisplayStyle() ) )
-				.Materialize(),
+				new LineList( listItems.Select( i => (LineListItem)i ) ).ToCollection(),
 				classes: CssElementCreator.GlobalNavListContainerClass );
 		}
 
@@ -328,16 +322,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			var formItems = entityUiSetup.NavFormControls
 				.Select( ( control, index ) => control.GetFormItem( PostBack.GetCompositeId( "entity", "nav", index.ToString() ) ) )
 				.Materialize();
-			var listItems = getActionListItems( entityUiSetup.NavActions ).Concat( formItems.Select( i => i.Content.ToComponentListItem() ) ).Materialize();
+			var listItems = getActionListItems( entityUiSetup.NavActions ).Concat( formItems.Select( i => i.ToListItem() ) ).Materialize();
 			if( !listItems.Any() )
 				return null;
 
 			return new GenericFlowContainer(
-				( EwfUiStatics.AppProvider.EntityNavAndActionItemsSeparatedWithPipe()
-					  ? (FlowComponent)new InlineList( listItems )
-					  : new LineList( listItems.Select( i => (LineListItem)i ) ) ).Append(
-					new FlowErrorContainer( new ErrorSourceSet( validations: formItems.SelectMany( i => i.Validations ) ), new ListErrorDisplayStyle() ) )
-				.Materialize(),
+				new LineList( listItems.Select( i => (LineListItem)i ) ).ToCollection(),
 				classes: CssElementCreator.EntityNavListContainerClass );
 		}
 
@@ -348,9 +338,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			if( !listItems.Any() )
 				return null;
 			return new GenericFlowContainer(
-				( EwfUiStatics.AppProvider.EntityNavAndActionItemsSeparatedWithPipe()
-					  ? (FlowComponent)new InlineList( listItems )
-					  : new LineList( listItems.Select( i => (LineListItem)i ) ) ).ToCollection(),
+				new LineList( listItems.Select( i => (LineListItem)i ) ).ToCollection(),
 				classes: CssElementCreator.EntityActionListContainerClass );
 		}
 

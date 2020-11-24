@@ -26,7 +26,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal readonly FormItemSetup Setup;
 		private readonly IReadOnlyCollection<PhrasingComponent> label;
 		private readonly IReadOnlyCollection<FlowComponent> content;
-		public readonly IReadOnlyCollection<EwfValidation> Validations;
+		private readonly IReadOnlyCollection<EwfValidation> validations;
 		internal readonly ErrorSourceSet ErrorSourceSet;
 
 		internal FormItem(
@@ -35,7 +35,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			Setup = setup ?? new FormItemSetup();
 			this.label = label;
 			this.content = content;
-			Validations = validations;
+			this.validations = validations;
 			ErrorSourceSet = validations.Any() ? new ErrorSourceSet( validations: validations ) : null;
 		}
 
@@ -118,7 +118,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// separate <see cref="EwfValidation"/> and use this method to keep the errors within the form item.
 		/// </summary>
 		public FormItem AddExtraneousValidation( EwfValidation validation ) {
-			return new FormItem( Setup, label, content, Validations.Append( validation ).Materialize() );
+			return new FormItem( Setup, label, content, validations.Append( validation ).Materialize() );
 		}
 	}
 
