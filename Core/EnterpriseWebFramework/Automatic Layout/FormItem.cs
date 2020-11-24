@@ -127,12 +127,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Creates a form item with this form control.
 		/// </summary>
 		/// <param name="formControl">Do not pass null.</param>
-		/// <param name="label">The form-item label.</param>
 		/// <param name="setup"></param>
+		/// <param name="label">The form-item label.</param>
+		/// <param name="postControlContent">Additional form-item content that follows the form control.</param>
 		public static FormItem ToFormItem(
-			this FormControl<FlowComponent> formControl, FormItemSetup setup = null, IReadOnlyCollection<PhrasingComponent> label = null ) {
+			this FormControl<FlowComponent> formControl, FormItemSetup setup = null, IReadOnlyCollection<PhrasingComponent> label = null,
+			IReadOnlyCollection<FlowComponent> postControlContent = null ) {
 			label = label ?? Enumerable.Empty<PhrasingComponent>().Materialize();
-			return formControl.PageComponent.ToCollection()
+			return formControl.PageComponent.Concat( postControlContent ?? Enumerable.Empty<FlowComponent>() )
+				.Materialize()
 				.ToFormItem(
 					setup: setup,
 					label: label.Any() && formControl.Labeler != null ? formControl.Labeler.CreateLabel( label ) : label,
@@ -143,8 +146,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Creates a form item with these components.
 		/// </summary>
 		/// <param name="content">Do not pass null.</param>
-		/// <param name="label">The form-item label.</param>
 		/// <param name="setup"></param>
+		/// <param name="label">The form-item label.</param>
 		/// <param name="validation"></param>
 		public static FormItem ToFormItem(
 			this IReadOnlyCollection<FlowComponent> content, FormItemSetup setup = null, IReadOnlyCollection<PhrasingComponent> label = null,
@@ -157,8 +160,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Creates a form item with this component.
 		/// </summary>
 		/// <param name="content">Do not pass null.</param>
-		/// <param name="label">The form-item label.</param>
 		/// <param name="setup"></param>
+		/// <param name="label">The form-item label.</param>
 		/// <param name="validation"></param>
 		public static FormItem ToFormItem(
 			this FlowComponent content, FormItemSetup setup = null, IReadOnlyCollection<PhrasingComponent> label = null, EwfValidation validation = null ) =>
