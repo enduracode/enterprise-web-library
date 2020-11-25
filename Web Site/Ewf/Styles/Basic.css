@@ -619,6 +619,11 @@ ewfMergeFieldTreeChildContainer, ewfMergeRowTreeChildContainer {
 	margin-left: 2em;
 }
 
+/* chart */
+ewfChart > div:first-child {
+	position: relative;
+}
+
 /* error messages */
 *[tabindex="-1"]:focus {
 	outline: none;

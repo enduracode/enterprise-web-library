@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using EnterpriseWebLibrary.IO;
 using Humanizer;
 using JetBrains.Annotations;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -19,100 +20,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() =>
 				new CssElement( "Chart", "div.{0}".FormatWith( elementClass.ClassName ) ).ToCollection();
 		}
-
-		#region Chart.js configuration
-
-		// ReSharper disable All
-
-		/// <summary>
-		/// Used for Line graphs.
-		/// JSON object used to configure Chart.js.
-		/// </summary>
-		private class Dataset: BaseDataset {
-			public readonly string pointStrokeColor = "#fff";
-			public readonly string pointColor;
-
-			public Dataset( Color color, IEnumerable<double> data ): base( color, data ) {
-				pointColor = strokeColor;
-			}
-		}
-
-		/// <summary>
-		/// Used for Bar graphs.
-		/// JSON object used to configure Chart.js.
-		/// </summary>
-		private class BaseDataset {
-			private static string toRgbaString( Color color, string opacity ) {
-				return string.Format( "rgba({0},{1},{2},{3})", color.R, color.G, color.B, opacity );
-			}
-
-			public readonly string fillColor;
-			public readonly string strokeColor;
-			public readonly IEnumerable<double> data;
-
-			public BaseDataset( Color color, IEnumerable<double> data ) {
-				fillColor = toRgbaString( color, "0.5" );
-				strokeColor = toRgbaString( color, "1" );
-				this.data = data;
-			}
-		}
-
-		/// <summary>
-		/// JSON object used to configure Chart.js.
-		/// </summary>
-		private class ChartData {
-			public readonly IEnumerable<string> labels;
-			public readonly IEnumerable<BaseDataset> datasets;
-
-			public ChartData( IEnumerable<string> labels, IEnumerable<BaseDataset> datasets ) {
-				this.labels = labels;
-				this.datasets = datasets;
-			}
-		}
-
-		private class BarOptions: OptionsBase {
-			public bool barShowStroke = true;
-			public int barStrokeWidth = 1;
-			public int barValueSpacing = 5;
-			public int barDatasetSpacing = 1;
-		}
-
-		private class LineOptions: OptionsBase {
-			public bool bezierCurve = true;
-			public bool pointDot = true;
-			public int pointDotRadius = 3;
-			public int pointDotStrokeWidth = 1;
-			public bool datasetStroke = true;
-			public int datasetStrokeWidth = 2;
-			public bool datasetFill = true;
-		}
-
-		private class OptionsBase {
-			public bool scaleOverlay = false;
-			public bool scaleOverride = false;
-			public int? scaleSteps = null;
-			public int? scaleStepWidth = null;
-			public int? scaleStartValue = null;
-			public string scaleLineColor = "rgba(0,0,0,.1)";
-			public int scaleLineWidth = 1;
-			public bool scaleShowLabels = true;
-			//public string scaleLabel = ""; // 'null' breaks it; it needs to be "undefined"
-			public string scaleFontFamily = "'Arial'";
-			public int scaleFontSize = 12;
-			public string scaleFontStyle = "normal";
-			public string scaleFontColor = "#666";
-			public bool scaleShowGridLines = true;
-			public string scaleGridLineColor = "rgba(0,0,0,.05)";
-			public int scaleGridLineWidth = 1;
-			public bool animation = true;
-			public int animationSteps = 60;
-			public string animationEasing = "easeOutQuart";
-			public string onAnimationComplete = null;
-		}
-
-		// ReSharper restore All
-
-		#endregion
 
 		private readonly IReadOnlyCollection<FlowComponent> children;
 
@@ -138,64 +45,49 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			colors = ( colors ?? getDefaultColors() ).Take( dataSets.Count )
 				.Pad( dataSets.Count, () => Color.FromArgb( rand.Next( 256 ), rand.Next( 256 ), rand.Next( 256 ) ) );
 
-			Func<ChartDataSet, Color, BaseDataset> datasetSelector;
-			OptionsBase options;
+			string chartType;
+			string toRgbaString( Color color, string opacity ) => "rgba( {0}, {1}, {2}, {3} )".FormatWith( color.R, color.G, color.B, opacity );
+			Func<ChartDataSet, Color, JObject> datasetSelector;
+			JObject options;
 			switch( setup.ChartType ) {
 				case ChartType.Line:
-					datasetSelector = ( set, color ) => new Dataset( color, set.Values.TakeLast( setup.MaxXValues ) );
-					options = new LineOptions { bezierCurve = false };
+					chartType = "line";
+					datasetSelector = ( set, color ) => new JObject(
+						new JProperty( "label", set.Label ),
+						new JProperty( "data", new JArray( set.Values.TakeLast( setup.MaxXValues ) ) ),
+						new JProperty( "backgroundColor", toRgbaString( color, "0.5" ) ),
+						new JProperty( "borderColor", toRgbaString( color, "1" ) ) );
+					options = new JObject( new JProperty( "aspectRatio", 2 ), new JProperty( "legend", new JObject( new JProperty( "display", dataSets.Count > 1 ) ) ) );
 					break;
 				case ChartType.Bar:
-					datasetSelector = ( set, color ) => new BaseDataset( color, set.Values.TakeLast( setup.MaxXValues ) );
-					// ReSharper disable once RedundantEmptyObjectOrCollectionInitializer
-					options = new BarOptions {};
+					chartType = "bar";
+					datasetSelector = ( set, color ) => new JObject(
+						new JProperty( "label", set.Label ),
+						new JProperty( "data", new JArray( set.Values.TakeLast( setup.MaxXValues ) ) ),
+						new JProperty( "backgroundColor", toRgbaString( color, "1" ) ) );
+					options = new JObject( new JProperty( "aspectRatio", 2 ), new JProperty( "legend", new JObject( new JProperty( "display", dataSets.Count > 1 ) ) ) );
 					break;
 				default:
 					throw new UnexpectedValueException( setup.ChartType );
 			}
 
-			var chartData = new ChartData(
-				setup.Labels.TakeLast( setup.MaxXValues ),
-				dataSets.Zip( colors, ( set, color ) => datasetSelector( set, color ) ).ToArray() );
+			var canvas = new GenericFlowContainer(
+				new ElementComponent(
+					context => new ElementData(
+						() => {
+							var jsInitStatement = "new Chart( '{0}', {{ type: '{1}', data: {2}, options: {3} }} );".FormatWith(
+								context.Id,
+								chartType,
+								new JObject(
+									new JProperty( "labels", new JArray( setup.Labels.TakeLast( setup.MaxXValues ) ) ),
+									new JProperty( "datasets", new JArray( dataSets.Zip( colors, ( set, color ) => datasetSelector( set, color ) ) ) ) ).ToString(
+									Formatting.None ),
+								options.ToString( Formatting.None ) );
 
-			var canvas = new ElementComponent(
-				context => new ElementData(
-					() => {
-						var attributes = new List<Tuple<string, string>>();
-						switch( setup.ChartType ) {
-							case ChartType.Line:
-							case ChartType.Bar:
-								attributes.Add( Tuple.Create( "height", "400" ) );
-								break;
-							default:
-								throw new UnexpectedValueException( setup.ChartType );
-						}
-
-						var jsInitStatements = StringTools.ConcatenateWithDelimiter(
-							" ",
-							"var canvas = document.getElementById( '{0}' );".FormatWith( context.Id ),
-							"canvas.width = $( canvas ).parent().width();",
-							"new Chart( canvas.getContext( '2d' ) ).{0}( {1}, {2} );".FormatWith(
-								setup.ChartType,
-								JsonOps.SerializeObject( chartData ),
-								JsonOps.SerializeObject( options ) ) );
-
-						return new ElementLocalData(
-							"canvas",
-							focusDependentData: new ElementFocusDependentData( attributes: attributes, includeIdAttribute: true, jsInitStatements: jsInitStatements ) );
-					} ) );
-
-			var key = dataSets.Count > 1
-				          ? new Section(
-					          "Key",
-					          new LineList(
-						          chartData.datasets.Select(
-							          ( dataset, i ) => (LineListItem)new TrustedHtmlString(
-									          "<div style='display: inline-block; vertical-align: middle; width: 20px; height: 20px; background-color: {0}; border: 1px solid {1};'>&nbsp;</div> {2}"
-										          .FormatWith( dataset.fillColor, dataset.strokeColor, dataSets.ElementAt( i ).Label ) ).ToComponent()
-								          .ToComponentListItem() ) ).ToCollection(),
-					          style: SectionStyle.Box ).ToCollection()
-				          : Enumerable.Empty<FlowComponent>();
+							return new ElementLocalData(
+								"canvas",
+								focusDependentData: new ElementFocusDependentData( includeIdAttribute: true, jsInitStatements: jsInitStatement ) );
+						} ) ).ToCollection() );
 
 			var table = ColumnPrimaryTable.Create( postBackIdBase: setup.PostBackIdBase, allowExportToExcel: true, firstDataFieldIndex: 1 )
 				.AddItems(
@@ -206,7 +98,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							select EwfTableItem.Create( dataSet.Label.ToCell().Concat( from i in dataSet.Values select i.ToString().ToCell() ).Materialize() ) )
 						.Materialize() );
 
-			children = new GenericFlowContainer( canvas.Concat( key ).Append( table ).Materialize(), classes: elementClass ).ToCollection();
+			children = new GenericFlowContainer( canvas.Append<FlowComponent>( table ).Materialize(), classes: elementClass ).ToCollection();
 		}
 
 		private IEnumerable<Color> getDefaultColors() {
