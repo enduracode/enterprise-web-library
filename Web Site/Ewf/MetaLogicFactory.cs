@@ -75,7 +75,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			infos.Add( new ExternalResource( "//cdnjs.cloudflare.com/ajax/libs/dialog-polyfill/0.4.9/dialog-polyfill.min.js" ) );
 			infos.Add( new ThirdParty.SpinJs.SpinminJs.Info() );
 			infos.Add( new ExternalResource( "//cdn.ckeditor.com/4.5.8/full/ckeditor.js" ) );
-			infos.Add( new ExternalResource( "//cdnjs.cloudflare.com/ajax/libs/Chart.js/1.1.1/Chart.min.js" ) );
+			infos.Add( new ExternalResource( "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js" ) );
 			infos.Add( new JavaScriptJs.Info() );
 			return infos;
 		}
