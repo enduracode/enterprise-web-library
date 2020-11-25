@@ -5,9 +5,6 @@ using System.Linq;
 using EnterpriseWebLibrary.IO;
 using Humanizer;
 using JetBrains.Annotations;
-using NodaTime;
-using Tewl;
-using Tewl.IO;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -200,16 +197,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					          style: SectionStyle.Box ).ToCollection()
 				          : Enumerable.Empty<FlowComponent>();
 
-			// Remove this when ColumnPrimaryTable supports Excel export.
-			var headers = setup.XAxisTitle.ToCollection().Concat( seriesCollection.Select( v => v.Name ) );
-			var tableData = new List<IEnumerable<object>>( seriesCollection.First().Values.Count() );
-			for( var i = 0; i < tableData.Capacity; i++ ) {
-				var i1 = i;
-				tableData.Add( setup.Labels.ElementAt( i1 ).ToCollection().Concat( seriesCollection.Select( v => v.Values.ElementAt( i1 ).ToString() ) ) );
-			}
-			var exportAction = getExportAction( setup, headers, tableData );
-
-			var table = ColumnPrimaryTable.Create( tableActions: exportAction.ToCollection(), firstDataFieldIndex: 1 )
+			var table = ColumnPrimaryTable.Create( postBackIdBase: setup.PostBackIdBase, allowExportToExcel: true, firstDataFieldIndex: 1 )
 				.AddItems(
 					EwfTableItem.Create( setup.XAxisTitle.ToCollection().Concat( setup.Labels ).Select( i => i.ToCell() ).Materialize() )
 						.ToCollection()
@@ -227,32 +215,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			yield return Color.FromArgb( 170, 225, 149 );
 			yield return Color.FromArgb( 255, 230, 149 );
 		}
-
-		private ActionComponentSetup getExportAction( ChartSetup setup, IEnumerable<object> headers, List<IEnumerable<object>> tableData ) =>
-			new ButtonSetup(
-				"Export",
-				behavior: new PostBackBehavior(
-					postBack: PostBack.CreateFull(
-						id: PostBack.GetCompositeId( setup.PostBackIdBase, "export" ),
-						actionGetter: () => new PostBackAction(
-							new PageReloadBehavior(
-								secondaryResponse: new SecondaryResponse(
-									() => EwfResponse.Create(
-										ContentTypes.Csv,
-										new EwfResponseBodyCreator(
-											writer => {
-												var csv = new CsvFileWriter();
-												csv.AddValuesToLine( headers.ToArray() );
-												csv.WriteCurrentLineToFile( writer );
-												foreach( var td in tableData ) {
-													csv.AddValuesToLine( td.ToArray() );
-													csv.WriteCurrentLineToFile( writer );
-												}
-											} ),
-										() => "{0} {1}".FormatWith(
-											      setup.ExportFileName,
-											      AppRequestState.RequestTime.InZone( DateTimeZoneProviders.Tzdb.GetSystemDefault() ).ToDateTimeUnspecified() ) +
-										      FileExtensions.Csv ) ) ) ) ) ) );
 
 		IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() => children;
 	}
