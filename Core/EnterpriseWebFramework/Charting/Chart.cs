@@ -117,36 +117,36 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly IReadOnlyCollection<FlowComponent> children;
 
 		/// <summary>
-		/// Creates a chart displaying a supported <see cref="ChartType"/> with the given data. Includes a chart and a table, and allows exporting the data to CSV.
+		/// Creates a chart displaying a supported <see cref="ChartType"/> with the given data. Includes a chart and a table, and allows exporting the data to
+		/// Excel.
 		/// </summary>
 		/// <param name="setup">The setup object for the chart.</param>
-		/// <param name="series">The data series.</param>
-		/// <param name="color">The color to use for the data series.</param>
-		public Chart( ChartSetup setup, DataSeries series, Color? color = null ): this( setup, series.ToCollection(), colors: color?.ToCollection() ) {}
+		/// <param name="dataSet">The data set.</param>
+		/// <param name="color">The color to use for the data set.</param>
+		public Chart( ChartSetup setup, ChartDataSet dataSet, Color? color = null ): this( setup, dataSet.ToCollection(), colors: color?.ToCollection() ) {}
 
 		/// <summary>
-		/// Creates a chart displaying a supported <see cref="ChartType"/> with the given data. Includes a chart and a table, and allows exporting the data to CSV.
-		/// Assuming <paramref name="seriesCollection"/> has multiple elements, draws multiple sets of Y values on the same chart.
+		/// Creates a chart displaying a supported <see cref="ChartType"/> with the given data. Includes a chart and a table, and allows exporting the data to
+		/// Excel. Assuming <paramref name="dataSets"/> has multiple elements, draws multiple sets of Y values on the same chart.
 		/// </summary>
 		/// <param name="setup">The setup object for the chart.</param>
-		/// <param name="seriesCollection">The data series collection.</param>
-		/// <param name="colors">The colors to use for the data series collection. Pass null for default colors. If you specify your own colors, the number of
-		/// colors does not need to match the number of series. If you pass fewer colors than series, the chart will use random colors for the remaining series.
-		/// </param>
-		public Chart( ChartSetup setup, [ NotNull ] IReadOnlyCollection<DataSeries> seriesCollection, IEnumerable<Color> colors = null ) {
+		/// <param name="dataSets">The data sets.</param>
+		/// <param name="colors">The colors to use for the data sets. Pass null for default colors. If you specify your own colors, the number of colors does not
+		/// need to match the number of data sets. If you pass fewer colors than data sets, the chart will use random colors for the remaining data sets.</param>
+		public Chart( ChartSetup setup, [ NotNull ] IReadOnlyCollection<ChartDataSet> dataSets, IEnumerable<Color> colors = null ) {
 			var rand = new Random();
-			colors = ( colors ?? getDefaultColors() ).Take( seriesCollection.Count )
-				.Pad( seriesCollection.Count, () => Color.FromArgb( rand.Next( 256 ), rand.Next( 256 ), rand.Next( 256 ) ) );
+			colors = ( colors ?? getDefaultColors() ).Take( dataSets.Count )
+				.Pad( dataSets.Count, () => Color.FromArgb( rand.Next( 256 ), rand.Next( 256 ), rand.Next( 256 ) ) );
 
-			Func<DataSeries, Color, BaseDataset> datasetSelector;
+			Func<ChartDataSet, Color, BaseDataset> datasetSelector;
 			OptionsBase options;
 			switch( setup.ChartType ) {
 				case ChartType.Line:
-					datasetSelector = ( series, color ) => new Dataset( color, series.Values.TakeLast( setup.MaxXValues ) );
+					datasetSelector = ( set, color ) => new Dataset( color, set.Values.TakeLast( setup.MaxXValues ) );
 					options = new LineOptions { bezierCurve = false };
 					break;
 				case ChartType.Bar:
-					datasetSelector = ( series, color ) => new BaseDataset( color, series.Values.TakeLast( setup.MaxXValues ) );
+					datasetSelector = ( set, color ) => new BaseDataset( color, set.Values.TakeLast( setup.MaxXValues ) );
 					// ReSharper disable once RedundantEmptyObjectOrCollectionInitializer
 					options = new BarOptions {};
 					break;
@@ -156,7 +156,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			var chartData = new ChartData(
 				setup.Labels.TakeLast( setup.MaxXValues ),
-				seriesCollection.Zip( colors, ( series, color ) => datasetSelector( series, color ) ).ToArray() );
+				dataSets.Zip( colors, ( set, color ) => datasetSelector( set, color ) ).ToArray() );
 
 			var canvas = new ElementComponent(
 				context => new ElementData(
@@ -185,14 +185,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							focusDependentData: new ElementFocusDependentData( attributes: attributes, includeIdAttribute: true, jsInitStatements: jsInitStatements ) );
 					} ) );
 
-			var key = seriesCollection.Count > 1
+			var key = dataSets.Count > 1
 				          ? new Section(
 					          "Key",
 					          new LineList(
 						          chartData.datasets.Select(
 							          ( dataset, i ) => (LineListItem)new TrustedHtmlString(
 									          "<div style='display: inline-block; vertical-align: middle; width: 20px; height: 20px; background-color: {0}; border: 1px solid {1};'>&nbsp;</div> {2}"
-										          .FormatWith( dataset.fillColor, dataset.strokeColor, seriesCollection.ElementAt( i ).Name ) ).ToComponent()
+										          .FormatWith( dataset.fillColor, dataset.strokeColor, dataSets.ElementAt( i ).Label ) ).ToComponent()
 								          .ToComponentListItem() ) ).ToCollection(),
 					          style: SectionStyle.Box ).ToCollection()
 				          : Enumerable.Empty<FlowComponent>();
@@ -202,8 +202,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					EwfTableItem.Create( setup.XAxisTitle.ToCollection().Concat( setup.Labels ).Select( i => i.ToCell() ).Materialize() )
 						.ToCollection()
 						.Concat(
-							from series in seriesCollection
-							select EwfTableItem.Create( series.Name.ToCell().Concat( from i in series.Values select i.ToString().ToCell() ).Materialize() ) )
+							from dataSet in dataSets
+							select EwfTableItem.Create( dataSet.Label.ToCell().Concat( from i in dataSet.Values select i.ToString().ToCell() ).Materialize() ) )
 						.Materialize() );
 
 			children = new GenericFlowContainer( canvas.Concat( key ).Append( table ).Materialize(), classes: elementClass ).ToCollection();
