@@ -359,7 +359,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 													.Add( verticalAlignmentClass( rowSetup, columnSetup ) )
 													.Add( cellSetup.ContainsActivatableElements ? activatableElementContainerClass : ElementClassSet.Empty )
 													.Add( columnSetup.Classes )
-													.Add( cellSetup.Classes.Aggregate( ElementClassSet.Empty, ( set, i ) => set.Add( new ElementClass( i ) ) ) ),
+													.Add( cellSetup.Classes ),
 												attributes,
 												cellActivationBehavior,
 												cellAndIndex.Cell.Content,

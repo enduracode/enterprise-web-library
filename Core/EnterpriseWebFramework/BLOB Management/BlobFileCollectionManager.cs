@@ -102,7 +102,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					.ToCell() );
 
 			cells.Add( file.UploadedDate.ToDayMonthYearString( false ).ToCell() );
-			cells.Add( ( fileIsUnopened ? "New!" : "" ).ToCell( new TableCellSetup( classes: "ewfNewness".ToCollection() ) ) );
+			cells.Add( ( fileIsUnopened ? "New!" : "" ).ToCell() );
 
 			table.AddItem( EwfTableItem.Create( cells, setup: EwfTableItemSetup.Create( id: new SpecifiedValue<int>( file.FileId ) ) ) );
 		}

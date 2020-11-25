@@ -9,7 +9,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public class TableCellSetup {
 		internal readonly int FieldSpan;
 		internal readonly int ItemSpan;
-		internal readonly IEnumerable<string> Classes;
+		internal readonly ElementClassSet Classes;
 		internal readonly TextAlignment TextAlignment;
 		internal readonly ElementActivationBehavior ActivationBehavior;
 		internal readonly bool ContainsActivatableElements;
@@ -29,14 +29,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="activationBehavior">The activation behavior.</param>
 		/// <param name="containsActivatableElements">Pass true if the cell contains “activatable” elements, e.g. hyperlinks, buttons, or form controls.</param>
 		/// <param name="etherealContent"></param>
-		// NOTE: Change classes type to ElementClassSet when DynamicTable is gone.
 		public TableCellSetup(
-			int fieldSpan = 1, int itemSpan = 1, IEnumerable<string> classes = null, TextAlignment textAlignment = TextAlignment.NotSpecified,
+			int fieldSpan = 1, int itemSpan = 1, ElementClassSet classes = null, TextAlignment textAlignment = TextAlignment.NotSpecified,
 			ElementActivationBehavior activationBehavior = null, bool containsActivatableElements = false,
 			IReadOnlyCollection<EtherealComponent> etherealContent = null ) {
 			FieldSpan = fieldSpan;
 			ItemSpan = itemSpan;
-			Classes = classes ?? new string[ 0 ];
+			Classes = classes ?? ElementClassSet.Empty;
 			TextAlignment = textAlignment;
 			ActivationBehavior = activationBehavior;
 			ContainsActivatableElements = containsActivatableElements;
