@@ -2,6 +2,8 @@
 	public enum ChartType {
 		Line,
 		Bar,
-		StackedBar
+		StackedBar,
+		HorizontalBar,
+		HorizontalStackedBar
 	}
 }

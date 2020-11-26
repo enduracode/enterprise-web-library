@@ -15,8 +15,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		/// <param name="label">The data set label. Do not pass null.</param>
 		/// <param name="values">The Y values.</param>
-		/// <param name="stackedGroupName">Only applies to <see cref="ChartType.StackedBar"/>. The name of the group to which this data set belongs. Each group will
-		/// be a separate stack. Do not pass null.</param>
+		/// <param name="stackedGroupName">Only applies to <see cref="ChartType.StackedBar"/> and <see cref="ChartType.HorizontalStackedBar"/>. The name of the
+		/// group to which this data set belongs. Each group will be a separate stack. Do not pass null.</param>
 		public ChartDataSet( string label, IEnumerable<double> values, string stackedGroupName = "" ) {
 			Label = label;
 			StackedGroupName = stackedGroupName;
@@ -28,8 +28,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		/// <param name="label">The data set label. Do not pass null.</param>
 		/// <param name="values">The Y values.</param>
-		/// <param name="stackedGroupName">Only applies to <see cref="ChartType.StackedBar"/>. The name of the group to which this data set belongs. Each group will
-		/// be a separate stack. Do not pass null.</param>
+		/// <param name="stackedGroupName">Only applies to <see cref="ChartType.StackedBar"/> and <see cref="ChartType.HorizontalStackedBar"/>. The name of the
+		/// group to which this data set belongs. Each group will be a separate stack. Do not pass null.</param>
 		public ChartDataSet( string label, IEnumerable<int> values, string stackedGroupName = "" ): this(
 			label,
 			values.Select( i => (double)i ),
