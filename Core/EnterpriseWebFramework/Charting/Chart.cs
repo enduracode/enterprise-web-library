@@ -66,18 +66,27 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								new JProperty( "yAxes", new JArray( new JObject( new JProperty( "ticks", new JObject( new JProperty( "beginAtZero", true ) ) ) ) ) ) ) ) );
 					break;
 				case ChartType.Bar:
+				case ChartType.StackedBar:
 					chartType = "bar";
 					datasetSelector = ( set, color ) => new JObject(
-						new JProperty( "label", set.Label ),
-						new JProperty( "data", new JArray( set.Values.TakeLast( setup.MaxXValues ) ) ),
-						new JProperty( "backgroundColor", toRgbaString( color, "1" ) ) );
+						new JProperty( "label", set.Label ).ToCollection()
+							.Append( new JProperty( "data", new JArray( set.Values.TakeLast( setup.MaxXValues ) ) ) )
+							.Append( new JProperty( "backgroundColor", toRgbaString( color, "1" ) ) )
+							.Concat(
+								setup.ChartType == ChartType.StackedBar ? new JProperty( "stack", set.StackedGroupName ).ToCollection() : Enumerable.Empty<JProperty>() ) );
 					options = new JObject(
 						new JProperty( "aspectRatio", 2 ),
 						new JProperty( "legend", new JObject( new JProperty( "display", dataSets.Count > 1 ) ) ),
 						new JProperty(
 							"scales",
 							new JObject(
-								new JProperty( "yAxes", new JArray( new JObject( new JProperty( "ticks", new JObject( new JProperty( "beginAtZero", true ) ) ) ) ) ) ) ) );
+								new JProperty( "xAxes", new JArray( new JObject( new JProperty( "stacked", setup.ChartType == ChartType.StackedBar ) ) ) ),
+								new JProperty(
+									"yAxes",
+									new JArray(
+										new JObject(
+											new JProperty( "stacked", setup.ChartType == ChartType.StackedBar ),
+											new JProperty( "ticks", new JObject( new JProperty( "beginAtZero", true ) ) ) ) ) ) ) ) );
 					break;
 				default:
 					throw new UnexpectedValueException( setup.ChartType );

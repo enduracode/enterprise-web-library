@@ -1,6 +1,7 @@
 ﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public enum ChartType {
 		Line,
-		Bar
+		Bar,
+		StackedBar
 	}
 }
