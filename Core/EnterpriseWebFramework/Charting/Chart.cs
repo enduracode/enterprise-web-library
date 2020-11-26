@@ -57,7 +57,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						new JProperty( "data", new JArray( set.Values.TakeLast( setup.MaxXValues ) ) ),
 						new JProperty( "backgroundColor", toRgbaString( color, "0.5" ) ),
 						new JProperty( "borderColor", toRgbaString( color, "1" ) ) );
-					options = new JObject( new JProperty( "aspectRatio", 2 ), new JProperty( "legend", new JObject( new JProperty( "display", dataSets.Count > 1 ) ) ) );
+					options = new JObject(
+						new JProperty( "aspectRatio", 2 ),
+						new JProperty( "legend", new JObject( new JProperty( "display", dataSets.Count > 1 ) ) ),
+						new JProperty(
+							"scales",
+							new JObject(
+								new JProperty( "yAxes", new JArray( new JObject( new JProperty( "ticks", new JObject( new JProperty( "beginAtZero", true ) ) ) ) ) ) ) ) );
 					break;
 				case ChartType.Bar:
 					chartType = "bar";
@@ -65,7 +71,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						new JProperty( "label", set.Label ),
 						new JProperty( "data", new JArray( set.Values.TakeLast( setup.MaxXValues ) ) ),
 						new JProperty( "backgroundColor", toRgbaString( color, "1" ) ) );
-					options = new JObject( new JProperty( "aspectRatio", 2 ), new JProperty( "legend", new JObject( new JProperty( "display", dataSets.Count > 1 ) ) ) );
+					options = new JObject(
+						new JProperty( "aspectRatio", 2 ),
+						new JProperty( "legend", new JObject( new JProperty( "display", dataSets.Count > 1 ) ) ),
+						new JProperty(
+							"scales",
+							new JObject(
+								new JProperty( "yAxes", new JArray( new JObject( new JProperty( "ticks", new JObject( new JProperty( "beginAtZero", true ) ) ) ) ) ) ) ) );
 					break;
 				default:
 					throw new UnexpectedValueException( setup.ChartType );
