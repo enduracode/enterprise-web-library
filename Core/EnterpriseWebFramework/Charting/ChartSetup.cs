@@ -8,6 +8,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public class ChartSetup {
 		internal readonly string PostBackIdBase;
 		internal readonly ChartType ChartType;
+		internal readonly double AspectRatio;
 
 		[ NotNull ]
 		internal readonly string XAxisTitle;
@@ -23,6 +24,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Creates a chart setup object.
 		/// </summary>
 		/// <param name="chartType"></param>
+		/// <param name="aspectRatio">The aspect ratio (width divided by height) of the chart canvas.</param>
 		/// <param name="labels">The labels for the X axis. There must be exactly as many elements as there are in each data set.</param>
 		/// <param name="postBackIdBase">Do not pass null.</param>
 		/// <param name="xAxisTitle">The title of the X axis. Do not pass null.</param>
@@ -31,10 +33,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="yAxisTitle">The title of the Y axis. Do not pass null.</param>
 		/// <param name="omitTable">Pass true to omit the table containing the chart’s underlying data.</param>
 		public ChartSetup(
-			ChartType chartType, IEnumerable<string> labels, string postBackIdBase = "", string xAxisTitle = "", int maxXValues = 16, string yAxisTitle = "",
-			bool omitTable = false ) {
+			ChartType chartType, double aspectRatio, IEnumerable<string> labels, string postBackIdBase = "", string xAxisTitle = "", int maxXValues = 16,
+			string yAxisTitle = "", bool omitTable = false ) {
 			PostBackIdBase = PostBack.GetCompositeId( "ewfChart", postBackIdBase );
 			ChartType = chartType;
+			AspectRatio = aspectRatio;
 			XAxisTitle = xAxisTitle;
 			Labels = labels;
 			MaxXValues = maxXValues;

@@ -59,7 +59,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						new JProperty( "backgroundColor", toRgbaString( color, "0.5" ) ),
 						new JProperty( "borderColor", toRgbaString( color, "1" ) ) );
 					options = new JObject(
-						new JProperty( "aspectRatio", 2 ),
+						new JProperty( "aspectRatio", setup.AspectRatio ),
 						new JProperty( "legend", new JObject( new JProperty( "display", dataSets.Count > 1 ) ) ),
 						new JProperty(
 							"scales",
@@ -92,7 +92,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							.Append( new JProperty( "backgroundColor", toRgbaString( color, "1" ) ) )
 							.Concat( stacked ? new JProperty( "stack", set.StackedGroupName ).ToCollection() : Enumerable.Empty<JProperty>() ) );
 					options = new JObject(
-						new JProperty( "aspectRatio", 2 ),
+						new JProperty( "aspectRatio", setup.AspectRatio ),
 						new JProperty( "legend", new JObject( new JProperty( "display", dataSets.Count > 1 ) ) ),
 						new JProperty(
 							"scales",

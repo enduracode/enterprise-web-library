@@ -17,7 +17,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				getChart(
 						"Line",
 						new Chart(
-							new ChartSetup( ChartType.Line, new[] { "Three", "One", "Two", "Four", "Five" }, postBackIdBase: "1" ),
+							new ChartSetup( ChartType.Line, 4, new[] { "Three", "One", "Two", "Four", "Five" }, postBackIdBase: "1" ),
 							new ChartDataSet( "Value", new[] { 3, 1, 2, 4, 5 } ) ) )
 					.ToCollection()
 					.GetControls() );
@@ -28,7 +28,9 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			ph.AddControlsReturnThis(
 				getChart(
 						"Line of floating point numbers",
-						new Chart( new ChartSetup( ChartType.Line, floatData.Select( ( f, i ) => "" + i ), postBackIdBase: "2" ), new ChartDataSet( "Value", floatData ) ) )
+						new Chart(
+							new ChartSetup( ChartType.Line, 4, floatData.Select( ( f, i ) => "" + i ), postBackIdBase: "2" ),
+							new ChartDataSet( "Value", floatData ) ) )
 					.ToCollection()
 					.GetControls() );
 
@@ -39,7 +41,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				getChart(
 						"Two lines of floating point numbers",
 						new Chart(
-							new ChartSetup( ChartType.Line, floatData1.Select( ( f, i ) => "" + i ), postBackIdBase: "3" ),
+							new ChartSetup( ChartType.Line, 4, floatData1.Select( ( f, i ) => "" + i ), postBackIdBase: "3" ),
 							new[] { new ChartDataSet( "First value", floatData1 ), new ChartDataSet( "Second value", floatData2 ) } ) )
 					.ToCollection()
 					.GetControls() );
@@ -50,7 +52,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				getChart(
 						"Bar",
 						new Chart(
-							new ChartSetup( ChartType.Bar, floatData3.Select( ( f, i ) => "" + i ), postBackIdBase: "4" ),
+							new ChartSetup( ChartType.Bar, 4, floatData3.Select( ( f, i ) => "" + i ), postBackIdBase: "4" ),
 							new ChartDataSet( "Value", floatData3 ) ) )
 					.ToCollection()
 					.GetControls() );
@@ -63,7 +65,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				getChart(
 						"Two bars of floating point numbers",
 						new Chart(
-							new ChartSetup( ChartType.Bar, floatData4.Select( ( f, i ) => "" + i ), postBackIdBase: "5" ),
+							new ChartSetup( ChartType.Bar, 4, floatData4.Select( ( f, i ) => "" + i ), postBackIdBase: "5" ),
 							new[] { new ChartDataSet( "First value", floatData4 ), new ChartDataSet( "Second value", floatData5 ) } ) )
 					.ToCollection()
 					.GetControls() );
