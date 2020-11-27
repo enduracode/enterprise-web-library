@@ -1,18 +1,3 @@
-// This supports the DisplayLinking subsystem.
-function setElementDisplay( id, visible ) {
-	if( visible )
-		$( '#' + id ).show();
-	else
-		$( '#' + id ).hide();
-	// This forces IE8 to redraw the page, fixing an issue with nested display linking.
-	var body = $( 'body' );
-	body.attr( 'class', body.attr( 'class' ) );
-}
-
-function toggleElementDisplay( id ) {
-	setElementDisplay( id, !$( '#' + id ).is( ":visible" ) );
-}
-
 // Supports DurationControl
 // Formats numbers entered in the textbox to HH:MM and prevents input out of the range of TimeSpan.
 var maxValueLength = 6;
