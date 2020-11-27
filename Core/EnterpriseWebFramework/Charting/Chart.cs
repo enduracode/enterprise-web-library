@@ -55,6 +55,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					datasetSelector = ( set, color ) => new JObject(
 						new JProperty( "label", set.Label ),
 						new JProperty( "data", new JArray( set.Values.TakeLast( setup.MaxXValues ) ) ),
+						new JProperty( "pointBackgroundColor", toRgbaString( color, "1" ) ),
 						new JProperty( "backgroundColor", toRgbaString( color, "0.5" ) ),
 						new JProperty( "borderColor", toRgbaString( color, "1" ) ) );
 					options = new JObject(
