@@ -72,6 +72,7 @@ function NumericalOnly( evt, field ) {
 function OnDocumentReady() {
 	stopActivatableTableRowNestedEvents();
 	$( "dialog" ).each( function() { dialogPolyfill.registerDialog( this ); } );
+	Chart.defaults.global.defaultFontColor = $( "body" ).css( "color" );
 }
 
 function stopActivatableTableRowNestedEvents() {
