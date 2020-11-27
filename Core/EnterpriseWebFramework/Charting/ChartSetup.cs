@@ -17,6 +17,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal readonly int MaxXValues;
 		internal readonly string YAxisTitle;
+		internal readonly bool OmitTable;
 
 		/// <summary>
 		/// Creates a chart setup object.
@@ -28,14 +29,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="maxXValues">The number of values to display on the x axis. This menas only the last <paramref name="maxXValues"/> values are displayed.
 		/// </param>
 		/// <param name="yAxisTitle">The title of the Y axis. Do not pass null.</param>
+		/// <param name="omitTable">Pass true to omit the table containing the chart’s underlying data.</param>
 		public ChartSetup(
-			ChartType chartType, IEnumerable<string> labels, string postBackIdBase = "", string xAxisTitle = "", int maxXValues = 16, string yAxisTitle = "" ) {
+			ChartType chartType, IEnumerable<string> labels, string postBackIdBase = "", string xAxisTitle = "", int maxXValues = 16, string yAxisTitle = "",
+			bool omitTable = false ) {
 			PostBackIdBase = PostBack.GetCompositeId( "ewfChart", postBackIdBase );
 			ChartType = chartType;
 			XAxisTitle = xAxisTitle;
 			Labels = labels;
 			MaxXValues = maxXValues;
 			YAxisTitle = yAxisTitle;
+			OmitTable = omitTable;
 		}
 	}
 }

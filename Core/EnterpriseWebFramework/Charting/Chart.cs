@@ -136,16 +136,27 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								focusDependentData: new ElementFocusDependentData( includeIdAttribute: true, jsInitStatements: jsInitStatement ) );
 						} ) ).ToCollection() );
 
-			var table = ColumnPrimaryTable.Create( postBackIdBase: setup.PostBackIdBase, allowExportToExcel: true, firstDataFieldIndex: 1 )
-				.AddItems(
-					( setup.XAxisTitle.Any() || setup.Labels.Any( i => i.Any() )
-						  ? EwfTableItem.Create( setup.XAxisTitle.ToCollection().Concat( setup.Labels ).Select( i => i.ToCell() ).Materialize() ).ToCollection()
-						  : Enumerable.Empty<EwfTableItem>() ).Concat(
-						dataSets.Select(
-							dataSet => EwfTableItem.Create( dataSet.Label.ToCell().Concat( from i in dataSet.Values select i.ToString().ToCell() ).Materialize() ) ) )
-					.Materialize() );
+			var table = setup.OmitTable
+				            ? Enumerable.Empty<FlowComponent>()
+				            : new FlowCheckbox(
+						            false,
+						            "Show underlying data".ToComponents(),
+						            setup: FlowCheckboxSetup.Create(
+							            nestedContentGetter: () =>
+								            ColumnPrimaryTable.Create( postBackIdBase: setup.PostBackIdBase, allowExportToExcel: true, firstDataFieldIndex: 1 )
+									            .AddItems(
+										            ( setup.XAxisTitle.Any() || setup.Labels.Any( i => i.Any() )
+											              ? EwfTableItem.Create( setup.XAxisTitle.ToCollection().Concat( setup.Labels ).Select( i => i.ToCell() ).Materialize() )
+												              .ToCollection()
+											              : Enumerable.Empty<EwfTableItem>() ).Concat(
+											            dataSets.Select(
+												            dataSet => EwfTableItem.Create(
+													            dataSet.Label.ToCell().Concat( from i in dataSet.Values select i.ToString().ToCell() ).Materialize() ) ) )
+										            .Materialize() )
+									            .ToCollection() ) ).ToFormItem()
+					            .ToComponentCollection();
 
-			children = new GenericFlowContainer( canvas.Append<FlowComponent>( table ).Materialize(), classes: elementClass ).ToCollection();
+			children = new GenericFlowContainer( canvas.Concat( table ).Materialize(), classes: elementClass ).ToCollection();
 		}
 
 		private IEnumerable<Color> getDefaultColors() {
