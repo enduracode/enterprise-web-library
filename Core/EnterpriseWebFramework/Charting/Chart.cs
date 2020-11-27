@@ -63,7 +63,21 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						new JProperty(
 							"scales",
 							new JObject(
-								new JProperty( "yAxes", new JArray( new JObject( new JProperty( "ticks", new JObject( new JProperty( "beginAtZero", true ) ) ) ) ) ) ) ) );
+								new JProperty(
+									"xAxes",
+									new JArray(
+										new JObject(
+											new JProperty(
+												"scaleLabel",
+												new JObject( new JProperty( "display", setup.XAxisTitle.Any() ), new JProperty( "labelString", setup.XAxisTitle ) ) ) ) ) ),
+								new JProperty(
+									"yAxes",
+									new JArray(
+										new JObject(
+											new JProperty(
+												"scaleLabel",
+												new JObject( new JProperty( "display", setup.YAxisTitle.Any() ), new JProperty( "labelString", setup.YAxisTitle ) ) ),
+											new JProperty( "ticks", new JObject( new JProperty( "beginAtZero", true ) ) ) ) ) ) ) ) );
 					break;
 				case ChartType.Bar:
 				case ChartType.StackedBar:
@@ -82,11 +96,23 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						new JProperty(
 							"scales",
 							new JObject(
-								new JProperty( "xAxes", new JArray( new JObject( new JProperty( "stacked", stacked ) ) ) ),
+								new JProperty(
+									"xAxes",
+									new JArray(
+										new JObject(
+											new JProperty( "stacked", stacked ),
+											new JProperty(
+												"scaleLabel",
+												new JObject( new JProperty( "display", setup.XAxisTitle.Any() ), new JProperty( "labelString", setup.XAxisTitle ) ) ) ) ) ),
 								new JProperty(
 									"yAxes",
 									new JArray(
-										new JObject( new JProperty( "stacked", stacked ), new JProperty( "ticks", new JObject( new JProperty( "beginAtZero", true ) ) ) ) ) ) ) ) );
+										new JObject(
+											new JProperty( "stacked", stacked ),
+											new JProperty(
+												"scaleLabel",
+												new JObject( new JProperty( "display", setup.YAxisTitle.Any() ), new JProperty( "labelString", setup.YAxisTitle ) ) ),
+											new JProperty( "ticks", new JObject( new JProperty( "beginAtZero", true ) ) ) ) ) ) ) ) );
 					break;
 				default:
 					throw new UnexpectedValueException( setup.ChartType );
@@ -112,12 +138,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			var table = ColumnPrimaryTable.Create( postBackIdBase: setup.PostBackIdBase, allowExportToExcel: true, firstDataFieldIndex: 1 )
 				.AddItems(
-					EwfTableItem.Create( setup.XAxisTitle.ToCollection().Concat( setup.Labels ).Select( i => i.ToCell() ).Materialize() )
-						.ToCollection()
-						.Concat(
-							from dataSet in dataSets
-							select EwfTableItem.Create( dataSet.Label.ToCell().Concat( from i in dataSet.Values select i.ToString().ToCell() ).Materialize() ) )
-						.Materialize() );
+					( setup.XAxisTitle.Any() || setup.Labels.Any( i => i.Any() )
+						  ? EwfTableItem.Create( setup.XAxisTitle.ToCollection().Concat( setup.Labels ).Select( i => i.ToCell() ).Materialize() ).ToCollection()
+						  : Enumerable.Empty<EwfTableItem>() ).Concat(
+						dataSets.Select(
+							dataSet => EwfTableItem.Create( dataSet.Label.ToCell().Concat( from i in dataSet.Values select i.ToString().ToCell() ).Materialize() ) ) )
+					.Materialize() );
 
 			children = new GenericFlowContainer( canvas.Append<FlowComponent>( table ).Materialize(), classes: elementClass ).ToCollection();
 		}
