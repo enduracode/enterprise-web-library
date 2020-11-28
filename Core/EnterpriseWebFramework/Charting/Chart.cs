@@ -65,7 +65,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						new JProperty( "label", set.Label ),
 						new JProperty( "data", new JArray( set.Values.TakeLast( setup.MaxXValues ) ) ),
 						new JProperty( "pointBackgroundColor", toRgbaString( color, "1" ) ),
-						new JProperty( "backgroundColor", toRgbaString( color, "0.5" ) ),
+						new JProperty( "backgroundColor", toRgbaString( color, "0.25" ) ),
 						new JProperty( "borderColor", toRgbaString( color, "1" ) ) );
 					options = new JObject(
 						new JProperty( "aspectRatio", setup.AspectRatio ),
@@ -170,10 +170,23 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		private IEnumerable<Color> getDefaultColors() {
-			yield return Color.FromArgb( 120, 160, 195 );
-			yield return Color.FromArgb( 255, 182, 149 );
-			yield return Color.FromArgb( 170, 225, 149 );
-			yield return Color.FromArgb( 255, 230, 149 );
+			yield return Color.FromArgb( 69, 110, 232 );
+			yield return Color.FromArgb( 66, 129, 65 );
+			yield return Color.FromArgb( 135, 84, 176 );
+			yield return Color.FromArgb( 109, 123, 20 );
+			yield return Color.FromArgb( 42, 107, 172 );
+			yield return Color.FromArgb( 179, 89, 0 );
+			yield return Color.FromArgb( 76, 125, 126 );
+			yield return Color.FromArgb( 224, 46, 46 );
+			yield return Color.FromArgb( 4, 129, 102 );
+			yield return Color.FromArgb( 199, 80, 41 );
+			yield return Color.FromArgb( 89, 96, 204 );
+			yield return Color.FromArgb( 218, 43, 86 );
+			yield return Color.FromArgb( 106, 74, 156 );
+			yield return Color.FromArgb( 75, 101, 18 );
+			yield return Color.FromArgb( 10, 127, 163 );
+			yield return Color.FromArgb( 142, 113, 26 );
+			yield return Color.FromArgb( 42, 108, 131 );
 		}
 
 		IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() => children;
