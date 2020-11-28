@@ -6,6 +6,7 @@ using Humanizer;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Tewl;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -48,6 +49,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			string chartType;
 			string toRgbaString( Color color, string opacity ) => "rgba( {0}, {1}, {2}, {3} )".FormatWith( color.R, color.G, color.B, opacity );
 			Func<ChartDataSet, Color, JObject> datasetSelector;
+			var yAxisTicksCallbackProperty = setup.YAxisLabelFormatOptions != null
+				                                 ? new JProperty(
+					                                 "callback",
+					                                 new JRaw(
+						                                 "function( value, index, values ) {{ return new Intl.NumberFormat( '{0}', {1} ).format( value ); }}".FormatWith(
+							                                 Cultures.EnglishUnitedStates.Name,
+							                                 setup.YAxisLabelFormatOptions.ToString( Formatting.None ) ) ) ).ToCollection()
+				                                 : Enumerable.Empty<JProperty>();
 			JObject options;
 			switch( setup.ChartType ) {
 				case ChartType.Line:
@@ -78,7 +87,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 											new JProperty(
 												"scaleLabel",
 												new JObject( new JProperty( "display", setup.YAxisTitle.Any() ), new JProperty( "labelString", setup.YAxisTitle ) ) ),
-											new JProperty( "ticks", new JObject( new JProperty( "beginAtZero", true ) ) ) ) ) ) ) ) );
+											new JProperty(
+												"ticks",
+												new JObject( new JProperty( "beginAtZero", true ).ToCollection().Concat( yAxisTicksCallbackProperty ) ) ) ) ) ) ) ) );
 					break;
 				case ChartType.Bar:
 				case ChartType.StackedBar:
@@ -113,7 +124,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 											new JProperty(
 												"scaleLabel",
 												new JObject( new JProperty( "display", setup.YAxisTitle.Any() ), new JProperty( "labelString", setup.YAxisTitle ) ) ),
-											new JProperty( "ticks", new JObject( new JProperty( "beginAtZero", true ) ) ) ) ) ) ) ) );
+											new JProperty(
+												"ticks",
+												new JObject( new JProperty( "beginAtZero", true ).ToCollection().Concat( yAxisTicksCallbackProperty ) ) ) ) ) ) ) ) );
 					break;
 				default:
 					throw new UnexpectedValueException( setup.ChartType );
