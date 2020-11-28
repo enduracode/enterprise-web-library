@@ -95,38 +95,34 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				case ChartType.StackedBar:
 				case ChartType.HorizontalBar:
 				case ChartType.HorizontalStackedBar:
-					chartType = setup.ChartType == ChartType.HorizontalBar || setup.ChartType == ChartType.HorizontalStackedBar ? "horizontalBar" : "bar";
+					var horizontal = setup.ChartType == ChartType.HorizontalBar || setup.ChartType == ChartType.HorizontalStackedBar;
+					chartType = horizontal ? "horizontalBar" : "bar";
+
 					var stacked = setup.ChartType == ChartType.StackedBar || setup.ChartType == ChartType.HorizontalStackedBar;
 					datasetSelector = ( set, color ) => new JObject(
 						new JProperty( "label", set.Label ).ToCollection()
 							.Append( new JProperty( "data", new JArray( set.Values.TakeLast( setup.MaxXValues ) ) ) )
 							.Append( new JProperty( "backgroundColor", toRgbaString( color, "1" ) ) )
 							.Concat( stacked ? new JProperty( "stack", set.StackedGroupName ).ToCollection() : Enumerable.Empty<JProperty>() ) );
+
+					var xAxis = new JObject(
+						new JProperty( "stacked", stacked ),
+						new JProperty(
+							"scaleLabel",
+							new JObject( new JProperty( "display", setup.XAxisTitle.Any() ), new JProperty( "labelString", setup.XAxisTitle ) ) ) );
+					var yAxis = new JObject(
+						new JProperty( "stacked", stacked ),
+						new JProperty( "scaleLabel", new JObject( new JProperty( "display", setup.YAxisTitle.Any() ), new JProperty( "labelString", setup.YAxisTitle ) ) ),
+						new JProperty( "ticks", new JObject( new JProperty( "beginAtZero", true ).ToCollection().Concat( yAxisTicksCallbackProperty ) ) ) );
 					options = new JObject(
 						new JProperty( "aspectRatio", setup.AspectRatio ),
 						new JProperty( "legend", new JObject( new JProperty( "display", dataSets.Count > 1 ) ) ),
 						new JProperty(
 							"scales",
 							new JObject(
-								new JProperty(
-									"xAxes",
-									new JArray(
-										new JObject(
-											new JProperty( "stacked", stacked ),
-											new JProperty(
-												"scaleLabel",
-												new JObject( new JProperty( "display", setup.XAxisTitle.Any() ), new JProperty( "labelString", setup.XAxisTitle ) ) ) ) ) ),
-								new JProperty(
-									"yAxes",
-									new JArray(
-										new JObject(
-											new JProperty( "stacked", stacked ),
-											new JProperty(
-												"scaleLabel",
-												new JObject( new JProperty( "display", setup.YAxisTitle.Any() ), new JProperty( "labelString", setup.YAxisTitle ) ) ),
-											new JProperty(
-												"ticks",
-												new JObject( new JProperty( "beginAtZero", true ).ToCollection().Concat( yAxisTicksCallbackProperty ) ) ) ) ) ) ) ) );
+								new JProperty( "xAxes", new JArray( horizontal ? yAxis : xAxis ) ),
+								new JProperty( "yAxes", new JArray( horizontal ? xAxis : yAxis ) ) ) ) );
+
 					break;
 				default:
 					throw new UnexpectedValueException( setup.ChartType );
