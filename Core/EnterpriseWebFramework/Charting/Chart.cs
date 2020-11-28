@@ -170,23 +170,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		private IEnumerable<Color> getDefaultColors() {
-			yield return Color.FromArgb( 69, 110, 232 );
-			yield return Color.FromArgb( 66, 129, 65 );
-			yield return Color.FromArgb( 135, 84, 176 );
-			yield return Color.FromArgb( 109, 123, 20 );
-			yield return Color.FromArgb( 42, 107, 172 );
-			yield return Color.FromArgb( 179, 89, 0 );
-			yield return Color.FromArgb( 76, 125, 126 );
-			yield return Color.FromArgb( 224, 46, 46 );
-			yield return Color.FromArgb( 4, 129, 102 );
-			yield return Color.FromArgb( 199, 80, 41 );
-			yield return Color.FromArgb( 89, 96, 204 );
-			yield return Color.FromArgb( 218, 43, 86 );
-			yield return Color.FromArgb( 106, 74, 156 );
-			yield return Color.FromArgb( 75, 101, 18 );
-			yield return Color.FromArgb( 10, 127, 163 );
-			yield return Color.FromArgb( 142, 113, 26 );
-			yield return Color.FromArgb( 42, 108, 131 );
+			yield return Color.FromArgb( 68, 114, 196 );
+			yield return Color.FromArgb( 237, 125, 49 );
+			yield return Color.FromArgb( 165, 165, 165 );
+			yield return Color.FromArgb( 255, 192, 0 );
+			yield return Color.FromArgb( 91, 155, 213 );
+			yield return Color.FromArgb( 112, 173, 71 );
 		}
 
 		IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() => children;
