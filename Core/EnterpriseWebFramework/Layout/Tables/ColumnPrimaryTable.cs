@@ -169,13 +169,22 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						.Concat( itemGroups.Select( i => i.Items.Select( j => j.Setup.FieldOrItemSetup ).Materialize() ) )
 						.Materialize();
 					var allItemSetups = itemSetupLists.SelectMany( i => i ).ToImmutableArray();
-					var columnWidthFactor = TableStatics.GetColumnWidthFactor( allItemSetups );
-					foreach( var itemSetups in itemSetupLists.Where( i => i.Any() ) ) {
-						children.Add(
-							new ElementComponent(
-								context => new ElementData(
-									() => new ElementLocalData( "colgroup" ),
-									children: itemSetups.Select( i => TableStatics.GetColElement( i, columnWidthFactor ) ).Materialize() ) ) );
+					int columnCount;
+					if( !allItemSetups.Any() ) {
+						var columnSetup = new EwfTableField().FieldOrItemSetup;
+						children.Add( TableStatics.GetColElement( columnSetup, TableStatics.GetColumnWidthFactor( columnSetup.ToCollection() ) ) );
+						columnCount = 1;
+					}
+					else {
+						var columnWidthFactor = TableStatics.GetColumnWidthFactor( allItemSetups );
+						foreach( var itemSetups in itemSetupLists.Where( i => i.Any() ) ) {
+							children.Add(
+								new ElementComponent(
+									context => new ElementData(
+										() => new ElementLocalData( "colgroup" ),
+										children: itemSetups.Select( i => TableStatics.GetColElement( i, columnWidthFactor ) ).Materialize() ) ) );
+						}
+						columnCount = allItemSetups.Length;
 					}
 
 					var tHeadRows = new List<EwfTableItem>();
@@ -184,7 +193,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						tHeadRows.Add(
 							EwfTableItem.Create(
 								new GenericFlowContainer( tableLevelGeneralActionList, classes: TableCssElementCreator.ItemLimitingAndGeneralActionContainerClass ).ToCell(
-									new TableCellSetup( fieldSpan: allItemSetups.Length ) ) ) );
+									new TableCellSetup( fieldSpan: columnCount ) ) ) );
 					if( selectedItemData.ItemGroupData != null )
 						tHeadRows.Add(
 							EwfTableItem.Create(
@@ -192,55 +201,65 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										"$( this ).closest( 'thead' ).children( ':last-child' ).children()",
 										selectedItemData.Buttons,
 										selectedItemData.Validation )
-									.ToCell( new TableCellSetup( fieldSpan: allItemSetups.Length ) ) ) );
-					var groupHeadCells = itemGroups.Select( i => ( colSpan: i.Items.Count, content: i.GetHeadCellContent() ) ).Materialize();
-					if( groupHeadCells.Any( i => i.content.Any() ) )
-						tHeadRows.Add(
-							EwfTableItem.Create(
-								( headItems.Any() ? "".ToCell( setup: new TableCellSetup( fieldSpan: headItems.Count ) ).ToCollection() : Enumerable.Empty<EwfTableCell>() )
-								.Concat( groupHeadCells.Select( i => i.content.ToCell( setup: new TableCellSetup( fieldSpan: i.colSpan ) ) ) )
-								.Materialize() ) );
-					if( hasExplicitItemGroups == true && selectedItemData.ItemGroupData != null && selectedItemData.ItemGroupData.Any( i => i.HasValue ) )
-						tHeadRows.Add(
-							EwfTableItem.Create(
-								( headItems.Any() ? "".ToCell( setup: new TableCellSetup( fieldSpan: headItems.Count ) ).ToCollection() : Enumerable.Empty<EwfTableCell>() )
-								.Concat(
-									itemGroups.Select(
-										( group, index ) => {
-											var groupSelectedItemData = selectedItemData.ItemGroupData[ index ];
-											IReadOnlyCollection<FlowComponent> components = null;
-											if( groupSelectedItemData.HasValue ) {
-												var beginCell = ( headItems.Any() ? 1 : 0 ) + itemGroups.Take( index ).Sum( i => i.Items.Count );
-												var endCell = beginCell + group.Items.Count;
-												components = TableStatics.GetItemSelectionAndActionComponents(
-													"$( this ).closest( 'thead' ).children( ':last-child' ).children( ':nth-child( n + {0} ):nth-child( -n + {1} )' )".FormatWith(
-														beginCell + 1,
-														endCell ),
-													groupSelectedItemData.Value.buttons,
-													groupSelectedItemData.Value.validation );
-											}
-											return components.ToCell( setup: new TableCellSetup( fieldSpan: group.Items.Count ) );
-										} ) )
-								.Materialize() ) );
-					if( selectedItemData.ItemGroupData != null )
-						tHeadRows.Add(
-							EwfTableItem.Create(
-								( headItems.Any() ? "".ToCell( setup: new TableCellSetup( fieldSpan: headItems.Count ) ).ToCollection() : Enumerable.Empty<EwfTableCell>() )
-								.Concat(
-									itemGroups.EquiZip(
-											selectedItemData.ItemGroupData,
-											( group, groupSelectedItemData ) => groupSelectedItemData.HasValue
-												                                    ? group.Items.EquiZip(
-													                                    groupSelectedItemData.Value.checkboxes,
-													                                    ( item, checkbox ) => item.Setup.Id != null ? checkbox : null )
-												                                    : Enumerable.Repeat( (PhrasingComponent)null, group.Items.Count ) )
-										.SelectMany( i => i )
-										.Select( i => i.ToCell( setup: new TableCellSetup( containsActivatableElements: i != null ) ) ) )
-								.Materialize() ) );
+									.ToCell( new TableCellSetup( fieldSpan: columnCount ) ) ) );
+					var nonemptyGroupIndexes = itemGroups.Select( ( group, index ) => ( group, index ) )
+						.Where( i => i.group.Items.Any() )
+						.Select( i => i.index )
+						.Materialize();
+					if( nonemptyGroupIndexes.Any() ) {
+						var groupHeadCells = nonemptyGroupIndexes.Select( i => itemGroups[ i ] )
+							.Select( i => ( colSpan: i.Items.Count, content: i.GetHeadCellContent() ) )
+							.Materialize();
+						if( groupHeadCells.Any( i => i.content.Any() ) )
+							tHeadRows.Add(
+								EwfTableItem.Create(
+									( headItems.Any() ? "".ToCell( setup: new TableCellSetup( fieldSpan: headItems.Count ) ).ToCollection() : Enumerable.Empty<EwfTableCell>() )
+									.Concat( groupHeadCells.Select( i => i.content.ToCell( setup: new TableCellSetup( fieldSpan: i.colSpan ) ) ) )
+									.Materialize() ) );
+						if( hasExplicitItemGroups == true && selectedItemData.ItemGroupData != null &&
+						    nonemptyGroupIndexes.Any( i => selectedItemData.ItemGroupData[ i ].HasValue ) )
+							tHeadRows.Add(
+								EwfTableItem.Create(
+									( headItems.Any() ? "".ToCell( setup: new TableCellSetup( fieldSpan: headItems.Count ) ).ToCollection() : Enumerable.Empty<EwfTableCell>() )
+									.Concat(
+										nonemptyGroupIndexes.Select(
+											index => {
+												var group = itemGroups[ index ];
+												var groupSelectedItemData = selectedItemData.ItemGroupData[ index ];
+												IReadOnlyCollection<FlowComponent> components = null;
+												if( groupSelectedItemData.HasValue ) {
+													var beginCell = ( headItems.Any() ? 1 : 0 ) + itemGroups.Take( index ).Sum( i => i.Items.Count );
+													var endCell = beginCell + group.Items.Count;
+													components = TableStatics.GetItemSelectionAndActionComponents(
+														"$( this ).closest( 'thead' ).children( ':last-child' ).children( ':nth-child( n + {0} ):nth-child( -n + {1} )' )".FormatWith(
+															beginCell + 1,
+															endCell ),
+														groupSelectedItemData.Value.buttons,
+														groupSelectedItemData.Value.validation );
+												}
+												return components.ToCell( setup: new TableCellSetup( fieldSpan: group.Items.Count ) );
+											} ) )
+									.Materialize() ) );
+						if( selectedItemData.ItemGroupData != null )
+							tHeadRows.Add(
+								EwfTableItem.Create(
+									( headItems.Any() ? "".ToCell( setup: new TableCellSetup( fieldSpan: headItems.Count ) ).ToCollection() : Enumerable.Empty<EwfTableCell>() )
+									.Concat(
+										itemGroups.EquiZip(
+												selectedItemData.ItemGroupData,
+												( group, groupSelectedItemData ) => groupSelectedItemData.HasValue
+													                                    ? group.Items.EquiZip(
+														                                    groupSelectedItemData.Value.checkboxes,
+														                                    ( item, checkbox ) => item.Setup.Id != null ? checkbox : null )
+													                                    : Enumerable.Repeat( (PhrasingComponent)null, group.Items.Count ) )
+											.SelectMany( i => i )
+											.Select( i => i.ToCell( setup: new TableCellSetup( containsActivatableElements: i != null ) ) ) )
+									.Materialize() ) );
+					}
 					if( tHeadRows.Any() ) {
 						var cellPlaceholderListsForTHeadRows = TableStatics.BuildCellPlaceholderListsForItems(
 							tHeadRows.Select( i => i.Cells ).Materialize(),
-							allItemSetups.Length );
+							columnCount );
 						children.Add(
 							new ElementComponent(
 								context => new ElementData(
@@ -249,7 +268,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 											cellPlaceholderListsForTHeadRows,
 											tHeadRows.Select( i => i.Setup.FieldOrItemSetup ).ToImmutableArray(),
 											null,
-											Enumerable.Repeat( new EwfTableField().FieldOrItemSetup, allItemSetups.Length ).ToImmutableArray(),
+											Enumerable.Repeat( new EwfTableField().FieldOrItemSetup, columnCount ).ToImmutableArray(),
 											0,
 											false )
 										.Materialize() ) ) );
@@ -294,22 +313,24 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					TableStatics.AssertAtLeastOneCellPerField( fields.Count, cellPlaceholderListsForItems );
 
 					var tFootRows = new List<EwfTableItem>();
-					var reorderingControlCollections = itemGroups.Select(
-							i => TableStatics.GetReorderingControls( postBackIdBase, true, enableItemReordering, hasExplicitItemGroups.Value, i.Items ) )
-						.Materialize();
-					if( enableItemReordering )
-						tFootRows.Add(
-							EwfTableItem.Create(
-								( headItems.Any() ? "".ToCell( setup: new TableCellSetup( fieldSpan: headItems.Count ) ).ToCollection() : Enumerable.Empty<EwfTableCell>() )
-								.Concat(
-									reorderingControlCollections.SelectMany( i => i )
-										.Select( i => i.ToCell( setup: new TableCellSetup( containsActivatableElements: i != null ) ) ) )
-								.Materialize(),
-								setup: EwfTableItemSetup.Create( textAlignment: TextAlignment.Center ) ) );
+					if( nonemptyGroupIndexes.Any() ) {
+						var reorderingControlCollections = itemGroups.Select(
+								i => TableStatics.GetReorderingControls( postBackIdBase, true, enableItemReordering, hasExplicitItemGroups.Value, i.Items ) )
+							.Materialize();
+						if( enableItemReordering )
+							tFootRows.Add(
+								EwfTableItem.Create(
+									( headItems.Any() ? "".ToCell( setup: new TableCellSetup( fieldSpan: headItems.Count ) ).ToCollection() : Enumerable.Empty<EwfTableCell>() )
+									.Concat(
+										reorderingControlCollections.SelectMany( i => i )
+											.Select( i => i.ToCell( setup: new TableCellSetup( containsActivatableElements: i != null ) ) ) )
+									.Materialize(),
+									setup: EwfTableItemSetup.Create( textAlignment: TextAlignment.Center ) ) );
+					}
 					if( tFootRows.Any() ) {
 						var cellPlaceholderListsForTFootRows = TableStatics.BuildCellPlaceholderListsForItems(
 							tFootRows.Select( i => i.Cells ).Materialize(),
-							allItemSetups.Length );
+							columnCount );
 						children.Add(
 							new ElementComponent(
 								context => new ElementData(
@@ -318,7 +339,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 											cellPlaceholderListsForTFootRows,
 											tFootRows.Select( i => i.Setup.FieldOrItemSetup ).ToImmutableArray(),
 											null,
-											Enumerable.Repeat( new EwfTableField().FieldOrItemSetup, allItemSetups.Length ).ToImmutableArray(),
+											Enumerable.Repeat( new EwfTableField().FieldOrItemSetup, columnCount ).ToImmutableArray(),
 											0,
 											false )
 										.Materialize() ) ) );
