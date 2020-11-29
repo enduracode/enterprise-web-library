@@ -76,7 +76,10 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 									confirmationDialogContent: "Are you sure?".ToComponents() ) )
 							.Materialize(),
 						fields: new[] { new EwfTableField( size: 1.ToPercentage() ), new EwfTableField( size: 2.ToPercentage() ) },
-						headItems: EwfTableItem.Create( "First Column".ToCell(), "Second Column".ToCell() ).ToCollection() )
+						headItems: EwfTableItem.Create(
+								"First field".ToCell().Append( "Second field".ToCell() ).Materialize(),
+								setup: EwfTableItemSetup.Create( size: 10.ToEm() ) )
+							.ToCollection() )
 					.AddItemGroups( itemGroups )
 					.ToCollection()
 					.GetControls() );
