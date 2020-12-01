@@ -98,7 +98,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 					delegate {
 						try {
 							Policy.Handle<Exception>( e => filePath.Any() && e.Message.Contains( "ERROR at line 4: Unknown command '\\U'." ) )
-								.Retry( 3 )
+								.WaitAndRetry( 5, attemptNumber => TimeSpan.FromSeconds( Math.Pow( 2, attemptNumber + 7 ) ) )
 								.Execute(
 									() => TewlContrib.ProcessTools.RunProgram(
 										EwlStatics.CombinePaths( binFolderPath, "mysql" ),
