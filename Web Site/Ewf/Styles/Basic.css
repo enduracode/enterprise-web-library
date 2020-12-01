@@ -15,20 +15,20 @@ ewfSectionNormalStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading
 	font-weight: 600;
 }
 ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates {
-	margin-top: 1em;
-	margin-bottom: 1em;
+	margin-top: 1.75em;
+	margin-bottom: 1.75em;
 }
 ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
 	font-size: 1.1em;
-	margin-bottom: .5em;
+	margin-bottom: 1em;
 }
 ewfSectionAllStylesBothStates ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates {
-	margin-top: 1em;
-	margin-bottom: 1em;
+	margin-top: 1.5em;
+	margin-bottom: 1.5em;
 }
 ewfSectionAllStylesBothStates ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
 	font-size: 1em;
-	margin-bottom: .5em;
+	margin-bottom: 1em;
 }
 ewfSectionNormalStyleBothStates:first-child,
 ewfSectionAllStylesBothStates ewfSectionNormalStyleBothStates:first-child,
