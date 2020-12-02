@@ -5,9 +5,7 @@ Last updated for Enterprise Web Library version 65.
 
 ## Setup: creating a system and database
 
-To follow along step by step with this guide, you’ll need our example system and database.
-
-First follow the first two sections of the [Getting Started guide](GettingStarted.md): Creating a New System and Adding a Database. Name the system **Bicycle Service Manager** and use a base namespace of `ServiceManager`. Use SQL Server for the database.
+To follow along step by step with this guide, you’ll need our example system and database. First follow the first two sections of the [Getting Started guide](GettingStarted.md): Creating a New System and Adding a Database. Name the system **Bicycle Service Manager** and use a base namespace of `ServiceManager`. Use SQL Server for the database.
 
 Create a `Library/Configuration/Database Updates.sql` file, paste [this script](WebFrameworkSupplements/DatabaseScript.sql) into it, and save.
 
