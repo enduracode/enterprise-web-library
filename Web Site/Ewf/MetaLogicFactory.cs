@@ -76,6 +76,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			infos.Add( new ThirdParty.SpinJs.SpinminJs.Info() );
 			infos.Add( new ExternalResource( "//cdn.ckeditor.com/4.5.8/full/ckeditor.js" ) );
 			infos.Add( new ExternalResource( "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js" ) );
+			infos.Add( new ExternalResource( "https://instant.page/5.1.0" ) );
 			infos.Add( new JavaScriptJs.Info() );
 			return infos;
 		}

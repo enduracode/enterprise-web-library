@@ -151,6 +151,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 
 		void ControlTreeDataLoader.LoadData() {
 			basicBody.Attributes.Add( "onpagehide", "deactivateProcessingDialog();" );
+			basicBody.Attributes.Add( "data-instant-whitelist", "data-instant-whitelist" ); // for https://instant.page/
 			form.Action = EwfPage.Instance.InfoAsBaseType.GetUrl();
 
 			ph.AddControlsReturnThis(

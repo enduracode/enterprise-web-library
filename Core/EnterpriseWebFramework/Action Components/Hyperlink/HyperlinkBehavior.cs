@@ -36,16 +36,21 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			Classes = destination?.AlternativeMode is NewContentResourceMode ? ActionComponentCssElementCreator.NewContentClass : ElementClassSet.Empty;
 
 			Url = new Lazy<string>( () => destination != null ? destination.GetUrl( true, false, true ) : "" );
+			var isPostBackHyperlink = new Lazy<bool>(
+				() => destination != null && !( destination.AlternativeMode is DisabledResourceMode ) && !target.Any() && EwfPage.Instance.IsAutoDataUpdater );
 			AttributeGetter = forNonHyperlinkElement =>
 				( destination != null && !forNonHyperlinkElement ? Tuple.Create( "href", Url.Value ).ToCollection() : Enumerable.Empty<Tuple<string, string>>() )
 				.Concat(
 					destination != null && target.Any() && !forNonHyperlinkElement
 						? Tuple.Create( "target", target ).ToCollection()
 						: Enumerable.Empty<Tuple<string, string>>() )
+				.Concat(
+					// for https://instant.page/
+					!isPostBackHyperlink.Value && destination is ResourceBase && !( destination.AlternativeMode is DisabledResourceMode ) && !forNonHyperlinkElement
+						? Tuple.Create( "data-instant", "data-instant" ).ToCollection()
+						: Enumerable.Empty<Tuple<string, string>>() )
 				.Materialize();
 
-			var isPostBackHyperlink = new Lazy<bool>(
-				() => destination != null && !( destination.AlternativeMode is DisabledResourceMode ) && !target.Any() && EwfPage.Instance.IsAutoDataUpdater );
 			FormAction postBackAction = null;
 			string getActionInitStatements( string id, bool omitPreventDefaultStatement, string actionStatements ) =>
 				"$( '#{0}' ).click( function( e ) {{ {1} }} );".FormatWith(
