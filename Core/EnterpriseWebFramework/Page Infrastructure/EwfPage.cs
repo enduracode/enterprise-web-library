@@ -1154,24 +1154,27 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					clientSideNavigationStatements = "setTimeout( \"" + clientSideNavigationStatements + "\", " + clientSideNavigationDelay.Value * 1000 + " );";
 			}
 
-			ClientScript.RegisterClientScriptBlock(
-				GetType(),
-				"jQueryDocumentReadyBlock",
-				"$( document ).ready( function() { " + StringTools.ConcatenateWithDelimiter(
-					" ",
-					"OnDocumentReady();",
-					"$( '#aspnetForm' ).submit( function( e, postBackId ) {{ postBackRequestStarting( e, postBackId !== undefined ? postBackId : '{0}' ); }} );"
-						.FormatWith(
-							SubmitButtonPostBack != null
-								? SubmitButtonPostBack.Id
-								: "" /* This empty string we're using when no submit button exists is arbitrary and meaningless; it should never actually be submitted. */ ),
-					controlInitStatements,
-					EwfApp.Instance.JavaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
-					javaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
-					StringTools.ConcatenateWithDelimiter( " ", scrollStatement, clientSideNavigationStatements )
-						.PrependDelimiter( "window.onload = function() { " )
-						.AppendDelimiter( " };" ) ) + " } );",
-				true );
+			// When we separate from Web Forms, put this outside the form, right before the closing body tag.
+			Form.AddControlsReturnThis(
+				new LiteralControl(
+					"<script src=\"data:{0};charset=utf-8;base64,{1}\" defer></script>".FormatWith(
+						TewlContrib.ContentTypes.JavaScript,
+						Convert.ToBase64String(
+							Encoding.UTF8.GetBytes(
+								"window.addEventListener( 'DOMContentLoaded', function() { " + StringTools.ConcatenateWithDelimiter(
+									" ",
+									"OnDocumentReady();",
+									"$( '#aspnetForm' ).submit( function( e, postBackId ) {{ postBackRequestStarting( e, postBackId !== undefined ? postBackId : '{0}' ); }} );"
+										.FormatWith(
+											SubmitButtonPostBack != null
+												? SubmitButtonPostBack.Id
+												: "" /* This empty string we're using when no submit button exists is arbitrary and meaningless; it should never actually be submitted. */ ),
+									controlInitStatements,
+									EwfApp.Instance.JavaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
+									javaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
+									StringTools.ConcatenateWithDelimiter( " ", scrollStatement, clientSideNavigationStatements )
+										.PrependDelimiter( "window.onload = function() { " )
+										.AppendDelimiter( " };" ) ) + " } );" ) ) ) ) );
 		}
 
 		/// <summary>
