@@ -23,7 +23,7 @@ namespace EnterpriseWebLibrary.TewlContrib {
 		/// <summary>
 		/// Content type to be used for JavaScript files.
 		/// </summary>
-		public const string JavaScript = "application/javascript";
+		public const string JavaScript = "text/javascript";
 
 		/// <summary>
 		/// Content type to be used for JSON files.
