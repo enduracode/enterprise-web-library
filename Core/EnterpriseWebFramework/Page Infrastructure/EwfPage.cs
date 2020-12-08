@@ -754,11 +754,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		private void addJavaScriptIncludes() {
-			foreach( var url in from i in EwfApp.MetaLogicFactory.CreateJavaScriptInfos() select i.GetUrl( false, false, false ) )
-				ClientScript.RegisterClientScriptInclude( GetType(), "ewf" + url, this.GetClientUrl( url ) );
-			ClientScript.RegisterClientScriptBlock( GetType(), "stackExchangeMiniProfiler", MiniProfiler.RenderIncludes().ToHtmlString(), false );
-			foreach( var url in from i in EwfApp.Instance.GetJavaScriptFiles() select i.GetUrl( false, false, false ) )
-				ClientScript.RegisterClientScriptInclude( GetType(), "systemSpecificFile" + url, this.GetClientUrl( url ) );
+			Control getElement( ResourceInfo resource ) =>
+				new LiteralControl( "<script src=\"{0}\" defer></script>".FormatWith( this.GetClientUrl( resource.GetUrl( false, false, false ) ) ) );
+
+			Header.AddControlsReturnThis( EwfApp.MetaLogicFactory.CreateJavaScriptInfos().Select( getElement ) );
+			Header.AddControlsReturnThis( new LiteralControl( MiniProfiler.RenderIncludes().ToHtmlString() ) );
+			Header.AddControlsReturnThis( EwfApp.Instance.GetJavaScriptFiles().Select( getElement ) );
 		}
 
 		/// <summary>
