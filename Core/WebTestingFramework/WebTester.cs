@@ -110,6 +110,7 @@ namespace EnterpriseWebLibrary.WebTestingFramework {
 		/// Submits the form. Equivalent to hitting the ENTER key.
 		/// </summary>
 		public static void SubmitForm( ISelenium selenium ) {
+			// NOTE: This form ID is outdated.
 			selenium.Submit( "aspnetForm" );
 		}
 

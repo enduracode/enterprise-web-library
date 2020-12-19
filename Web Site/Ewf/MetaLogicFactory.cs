@@ -1,17 +1,27 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
 	internal class MetaLogicFactory: AppMetaLogicFactory {
-		PageInfo AppMetaLogicFactory.CreateIntermediateLogInPageInfo( string returnUrl ) {
-			return new IntermediateLogIn.Info( returnUrl );
+		PageInfo AppMetaLogicFactory.CreateIntermediateLogInPageInfo( string returnUrl, ( string, bool )? passwordAndHideWarnings ) {
+			return new IntermediateLogIn.Info(
+				returnUrl,
+				passwordAndHideWarnings != null
+					? new IntermediateLogIn.OptionalParameterPackage
+						{
+							Password = passwordAndHideWarnings.Value.Item1, HideWarnings = passwordAndHideWarnings.Value.Item2
+						}
+					: null );
 		}
 
 		PageInfo AppMetaLogicFactory.CreateLogInPageInfo( string returnUrl ) {
 			return new UserManagement.LogIn.Info( returnUrl );
 		}
 
-		PageInfo AppMetaLogicFactory.CreateSelectUserPageInfo( string returnUrl ) {
-			return new UserManagement.SelectUser.Info( returnUrl );
+		PageInfo AppMetaLogicFactory.CreateSelectUserPageInfo( string returnUrl, string user ) {
+			return new UserManagement.SelectUser.Info(
+				returnUrl,
+				optionalParameterPackage: user.Any() ? new UserManagement.SelectUser.OptionalParameterPackage { User = user } : null );
 		}
 
 		PageInfo AppMetaLogicFactory.CreatePreBuiltResponsePageInfo() {

@@ -1,17 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.UI;
-using System.Web.UI.HtmlControls;
 using EnterpriseWebLibrary.Configuration;
-using EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
+using JetBrains.Annotations;
 using Tewl.Tools;
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
-	public partial class BasicPage: MasterPage, ControlTreeDataLoader, ControlWithJsInitLogic {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+	internal static class BasicPage {
 		// Some of these are used by the EWF JavaScript file.
 		private static readonly ElementClass topWarningContainerClass = new ElementClass( "ewfTopWarning" );
 		private static readonly ElementClass clickBlockerInactiveClass = new ElementClass( "ewfClickBlockerI" );
@@ -28,7 +26,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		private static readonly ElementClass warningMessageContainerClass = new ElementClass( "ewfWarnMsg" );
 		private static readonly ElementClass statusMessageTextClass = new ElementClass( "ewfStatusText" );
 
-		internal class CssElementCreator: ControlCssElementCreator {
+		[ UsedImplicitly ]
+		private class CssElementCreator: ControlCssElementCreator {
 			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
 				var elements = new List<CssElement>();
 				elements.Add( new CssElement( "TopWarningContainer", "div.{0}".FormatWith( topWarningContainerClass.ClassName ) ) );
@@ -138,28 +137,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			}
 		}
 
-		/// <summary>
-		/// Gets the current BasicPage master page.
-		/// </summary>
-		public static BasicPage Instance => getTopMaster( EwfPage.Instance.Master ) as BasicPage;
+		internal static IReadOnlyCollection<FlowComponent> GetPreContentComponents() {
+			var outerComponents = new List<FlowComponent>();
 
-		private static MasterPage getTopMaster( MasterPage master ) {
-			return master.Master == null ? master : getTopMaster( master.Master );
-		}
-
-		public HtmlGenericControl Body => basicBody;
-
-		void ControlTreeDataLoader.LoadData() {
-			basicBody.Attributes.Add( "onpagehide", "deactivateProcessingDialog();" );
-			basicBody.Attributes.Add( "data-instant-whitelist", "data-instant-whitelist" ); // for https://instant.page/
-			form.Action = EwfPage.Instance.InfoAsBaseType.GetUrl();
-
-			ph.AddControlsReturnThis(
+			outerComponents.Add(
 				new FlowIdContainer(
-						EwfPage.Instance.StatusMessages.Any() && statusMessagesDisplayAsNotification()
-							? new GenericFlowContainer( null, classes: notificationSpacerClass ).ToCollection()
-							: Enumerable.Empty<FlowComponent>() ).ToCollection()
-					.GetControls() );
+					EwfPage.Instance.StatusMessages.Any() && statusMessagesDisplayAsNotification()
+						? new GenericFlowContainer( null, classes: notificationSpacerClass ).ToCollection()
+						: Enumerable.Empty<FlowComponent>() ) );
 
 			var warningLines = new List<IReadOnlyCollection<PhrasingComponent>>();
 			if( !ConfigurationStatics.IsLiveInstallation ) {
@@ -204,16 +189,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 															i => {
 																var url = AppRequestState.Instance.Url;
 																if( AppRequestState.Instance.UserAccessible && AppRequestState.Instance.ImpersonatorExists )
-																	url = SelectUser.GetInfo(
-																			url,
-																			optionalParameterPackage: new SelectUser.OptionalParameterPackage { User = AppTools.User.Email } )
-																		.GetUrl();
-																url = IntermediateLogIn.GetInfo(
+																	url = EwfApp.MetaLogicFactory.CreateSelectUserPageInfo( url, user: AppTools.User.Email ).GetUrl();
+																url = EwfApp.MetaLogicFactory.CreateIntermediateLogInPageInfo(
 																		url,
-																		new IntermediateLogIn.OptionalParameterPackage
-																			{
-																				Password = ConfigurationStatics.SystemGeneralProvider.IntermediateLogInPassword, HideWarnings = i
-																			} )
+																		passwordAndHideWarnings: ( ConfigurationStatics.SystemGeneralProvider.IntermediateLogInPassword, i ) )
 																	.GetUrl();
 																return new GenericPhrasingContainer(
 																	url.ToComponents(),
@@ -232,7 +211,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					"User impersonation is in effect. ".ToComponents()
 						.Append(
 							new EwfHyperlink(
-								SelectUser.GetInfo( AppRequestState.Instance.Url ),
+								EwfApp.MetaLogicFactory.CreateSelectUserPageInfo( AppRequestState.Instance.Url ),
 								new ButtonHyperlinkStyle( "Change user", buttonSize: ButtonSize.ShrinkWrap ) ) )
 						.Concat( " ".ToComponents() )
 						.Append(
@@ -246,23 +225,25 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 						.Materialize() );
 
 			if( warningLines.Any() )
-				ph.AddControlsReturnThis(
+				outerComponents.Add(
 					new GenericFlowContainer(
-							warningLines.Aggregate( ( components, line ) => components.Append( new LineBreak() ).Concat( line ).Materialize() ),
-							displaySetup: new DisplaySetup( ConfigurationStatics.IsLiveInstallation || !NonLiveInstallationStatics.WarningsHiddenCookieExists() ),
-							classes: topWarningContainerClass ).ToCollection()
-						.GetControls() );
+						warningLines.Aggregate( ( components, line ) => components.Append( new LineBreak() ).Concat( line ).Materialize() ),
+						displaySetup: new DisplaySetup( ConfigurationStatics.IsLiveInstallation || !NonLiveInstallationStatics.WarningsHiddenCookieExists() ),
+						classes: topWarningContainerClass ) );
 
+			return outerComponents;
+		}
+
+		internal static IReadOnlyCollection<FlowComponent> GetPostContentComponents() {
 			// This is used by the EWF JavaScript file.
 			const string clickBlockerId = "ewfClickBlocker";
 
-			ph2.AddControlsReturnThis(
-				new GenericFlowContainer( null, classes: clickBlockerInactiveClass, clientSideIdOverride: clickBlockerId ).Append( getProcessingDialog() )
-					.Append( new FlowIdContainer( getNotificationSectionContainer() ) )
-					.GetControls() );
+			return new GenericFlowContainer( null, classes: clickBlockerInactiveClass, clientSideIdOverride: clickBlockerId ).Append( getProcessingDialog() )
+				.Append( new FlowIdContainer( getNotificationSectionContainer() ) )
+				.Materialize();
 		}
 
-		private FlowComponent getProcessingDialog() {
+		private static FlowComponent getProcessingDialog() {
 			// This is used by the EWF JavaScript file.
 			var dialogClass = new ElementClass( "ewfProcessingDialog" );
 
@@ -286,14 +267,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		}
 
 		// This supports the animated ellipsis. Browsers that don't support CSS3 animations will still see the static dots.
-		private IReadOnlyCollection<PhrasingComponent> getProcessingDialogEllipsisDot( int dotNumber ) {
+		private static IReadOnlyCollection<PhrasingComponent> getProcessingDialogEllipsisDot( int dotNumber ) {
 			// This is used by EWF CSS files.
 			var dotClass = new ElementClass( $"ewfProcessingEllipsis{dotNumber}" );
 
 			return new GenericPhrasingContainer( ".".ToComponents(), classes: dotClass ).ToCollection();
 		}
 
-		private IReadOnlyCollection<FlowComponent> getNotificationSectionContainer() {
+		private static IReadOnlyCollection<FlowComponent> getNotificationSectionContainer() {
 			var messagesExist = EwfPage.Instance.StatusMessages.Any();
 			new ModalBox(
 					new ModalBoxId(),
@@ -305,7 +286,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 								? getStatusMessageComponentList().ToCollection()
 								: Enumerable.Empty<FlowComponent>().Materialize() ).ToCollection() ).ToCollection(),
 					open: messagesExist && !statusMessagesDisplayAsNotification() ).ToCollection()
-				.AddEtherealControls( this );
+				.AddEtherealControls( EwfPage.Instance.Form );
 
 			// This is used by the EWF JavaScript file.
 			const string notificationSectionContainerId = "ewfNotification";
@@ -327,7 +308,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				       : Enumerable.Empty<FlowComponent>().Materialize();
 		}
 
-		private FlowComponent getStatusMessageComponentList() =>
+		private static FlowComponent getStatusMessageComponentList() =>
 			new StackList(
 				EwfPage.Instance.StatusMessages.Select(
 					i => new GenericFlowContainer(
@@ -336,13 +317,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 							.Materialize(),
 						classes: i.Item1 == StatusMessageType.Info ? infoMessageContainerClass : warningMessageContainerClass ).ToComponentListItem() ) );
 
-		string ControlWithJsInitLogic.GetJsInitStatements() {
+		internal static string GetJsInitStatements() {
 			return EwfPage.Instance.StatusMessages.Any() && statusMessagesDisplayAsNotification()
 				       ? "setTimeout( 'dockNotificationSection();', " + EwfPage.Instance.StatusMessages.Count() * 1000 + " );"
 				       : "";
 		}
 
-		private bool statusMessagesDisplayAsNotification() {
+		private static bool statusMessagesDisplayAsNotification() {
 			return EwfPage.Instance.StatusMessages.All( i => i.Item1 == StatusMessageType.Info ) && EwfPage.Instance.StatusMessages.Count() <= 3;
 		}
 	}

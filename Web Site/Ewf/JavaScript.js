@@ -72,7 +72,7 @@ function stopActivatableTableRowNestedEvents() {
 }
 
 function postBack( postBackId ) {
-	$( "#aspnetForm" ).trigger( "submit", postBackId );
+	$( "#ewfForm" ).trigger( "submit", postBackId );
 }
 
 function postBackRequestStarting( e, postBackId ) {

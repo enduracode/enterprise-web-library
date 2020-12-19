@@ -191,6 +191,7 @@
       <DependentUpon>ContactSupport.aspx</DependentUpon>
     </Compile>
     <Compile Include="Ewf\CssElementCreator.cs" />
+    <Compile Include="Ewf\ErrorPages\ErrorPageContent.cs" />
     <Compile Include="Ewf\ErrorPages\PageDisabled.aspx.cs">
       <DependentUpon>PageDisabled.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -374,26 +375,12 @@
     <Compile Include="TestPages\OptionalParameters.aspx.designer.cs">
       <DependentUpon>OptionalParameters.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Ewf\BasicPage.master.cs">
-      <DependentUpon>BasicPage.master</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Ewf\BasicPage.master.designer.cs">
-      <DependentUpon>BasicPage.master</DependentUpon>
-    </Compile>
     <Compile Include="Ewf\ErrorPages\AccessDenied.aspx.cs">
       <DependentUpon>AccessDenied.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Ewf\ErrorPages\AccessDenied.aspx.designer.cs">
       <DependentUpon>AccessDenied.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Ewf\ErrorPages\ErrorPage.master.cs">
-      <DependentUpon>ErrorPage.master</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Ewf\ErrorPages\ErrorPage.master.designer.cs">
-      <DependentUpon>ErrorPage.master</DependentUpon>
     </Compile>
     <Compile Include="Ewf\ErrorPages\PageNotAvailable.aspx.cs">
       <DependentUpon>PageNotAvailable.aspx</DependentUpon>
@@ -560,8 +547,6 @@
     <Content Include="Ewf\ErrorPages\AccessDenied.aspx" />
     <Content Include="Ewf\ErrorPages\PageNotAvailable.aspx" />
     <Content Include="Ewf\ErrorPages\UnhandledException.aspx" />
-    <Content Include="Ewf\ErrorPages\ErrorPage.master" />
-    <Content Include="Ewf\BasicPage.master" />
     <Content Include="Ewf\EwfUi.master" />
     <Content Include="Service\Web.config" />
     <Content Include="packages.config" />

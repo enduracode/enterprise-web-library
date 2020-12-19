@@ -25,7 +25,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// A System.Web.UI.Page that contains special Red Stapler Enterprise Web Framework logic. Requires that view state and session state be enabled.
 	/// </summary>
 	public abstract class EwfPage: Page {
-		// This string is duplicated in the JavaScript file.
+		// These strings are duplicated in the JavaScript file.
+		private const string formId = "ewfForm";
 		private const string hiddenFieldName = "ewfData";
 
 		internal const string ButtonElementName = "ewfButton";
@@ -126,6 +127,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				throw new ApplicationException( "The page tree has not yet been built." );
 		}
 
+		private HtmlGenericControl body;
 		private Control etherealPlace;
 		private FormState formState;
 		private Func<string> elementOrIdentifiedComponentIdGetter = () => "";
@@ -592,6 +594,20 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// This needs to be called after the page state dictionary has been created or restored.
 		/// </summary>
 		private void onLoadData() {
+			if( HasControls() )
+				throw new ApplicationException( "ASPX content exists." );
+			body = new HtmlGenericControl( "body" );
+			body.Attributes.Add( "onpagehide", "deactivateProcessingDialog();" );
+			body.Attributes.Add( "data-instant-whitelist", "data-instant-whitelist" ); // for https://instant.page/
+			var form = new HtmlForm();
+			form.ID = formId;
+			form.Action = InfoAsBaseType.GetUrl();
+			form.Attributes.Add( "novalidate", "" );
+			body.AddControlsReturnThis( form );
+			this.AddControlsReturnThis( new LiteralControl( "<!DOCTYPE html><html>" ), new HtmlHead(), body );
+			this.AddControlsReturnThis( new LiteralControl( "</html>" ) );
+
+
 			// This can go anywhere in the lifecycle.
 
 			addMetadataAndFaviconLinks();
@@ -611,15 +627,24 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					InfoAsBaseType.ParentResourceEntityPathString,
 					InfoAsBaseType.ResourceFullName ) );
 
-			Form.Controls.Add( etherealPlace = new PlaceHolder() );
-
 			formState = new FormState();
 			browsingModalBoxCreator().AddEtherealControls( Form );
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				DataUpdate.ToCollection(),
 				() => {
-					using( MiniProfiler.Current.Step( "EWF - Load page data" ) )
-						loadData();
+					Form.AddControlsReturnThis( BasicPage.GetPreContentComponents().GetControls() );
+					PageContent content;
+					using( MiniProfiler.Current.Step( "EWF - Get page content" ) )
+						content = getContent();
+					while( !( content is BasicPageContent ) )
+						content = content.GetContent();
+					var basicContent = (BasicPageContent)content;
+					if( basicContent.HeadElements.Html.Any() )
+						Header.AddControlsReturnThis( new LiteralControl( basicContent.HeadElements.Html ) );
+					body.Attributes.Add( "class", StringTools.ConcatenateWithDelimiter( " ", basicContent.BodyClasses.ConditionsByClassName.Select( i => i.Key ) ) );
+					Form.AddControlsReturnThis( basicContent.BodyContent.GetControls() );
+					Form.AddControlsReturnThis( BasicPage.GetPostContentComponents().GetControls() );
+					Form.AddControlsReturnThis( etherealPlace = new PlaceHolder() );
 				} );
 			Form.AddControlsReturnThis(
 				new ElementNode(
@@ -763,6 +788,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
+		/// Returns the page content.
+		/// </summary>
+		protected virtual PageContent getContent() => null;
+
+		/// <summary>
 		/// Loads and displays data on the page. This is a replacement for the Init event that provides access to EWF page state.
 		/// </summary>
 		protected virtual void loadData() {}
@@ -772,12 +802,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			if( control is ControlTreeDataLoader controlTreeDataLoader ) {
 				FormState.Current.SetForNextElement();
-
-				// This master-page hack will go away when EnduraCode goal 790 is complete. At that point master pages will be nothing more than components.
-				if( control is MasterPage )
-					FormState.ExecuteWithDataModificationsAndDefaultAction( DataUpdate.ToCollection(), controlTreeDataLoader.LoadData );
-				else
-					controlTreeDataLoader.LoadData();
+				controlTreeDataLoader.LoadData();
 			}
 
 			foreach( var child in control.Controls.Cast<Control>().Where( i => i != etherealPlace ) )
@@ -1155,8 +1180,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					clientSideNavigationStatements = "setTimeout( \"" + clientSideNavigationStatements + "\", " + clientSideNavigationDelay.Value * 1000 + " );";
 			}
 
-			// When we separate from Web Forms, put this outside the form, right before the closing body tag.
-			Form.AddControlsReturnThis(
+			body.AddControlsReturnThis(
 				new LiteralControl(
 					"<script src=\"data:{0};charset=utf-8;base64,{1}\" defer></script>".FormatWith(
 						TewlContrib.ContentTypes.JavaScript,
@@ -1165,11 +1189,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								"window.addEventListener( 'DOMContentLoaded', function() { " + StringTools.ConcatenateWithDelimiter(
 									" ",
 									"OnDocumentReady();",
-									"$( '#aspnetForm' ).submit( function( e, postBackId ) {{ postBackRequestStarting( e, postBackId !== undefined ? postBackId : '{0}' ); }} );"
+									"$( '#{0}' ).submit( function( e, postBackId ) {{ postBackRequestStarting( e, postBackId !== undefined ? postBackId : '{1}' ); }} );"
 										.FormatWith(
+											formId,
 											SubmitButtonPostBack != null
 												? SubmitButtonPostBack.Id
 												: "" /* This empty string we're using when no submit button exists is arbitrary and meaningless; it should never actually be submitted. */ ),
+									BasicPage.GetJsInitStatements(),
 									controlInitStatements,
 									EwfApp.Instance.JavaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
 									javaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),

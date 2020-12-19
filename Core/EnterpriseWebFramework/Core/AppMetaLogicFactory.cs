@@ -8,7 +8,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// EWL use only.
 		/// </summary>
-		PageInfo CreateIntermediateLogInPageInfo( string returnUrl );
+		PageInfo CreateIntermediateLogInPageInfo( string returnUrl, ( string, bool )? passwordAndHideWarnings = null );
 
 		/// <summary>
 		/// EWL use only.
@@ -18,7 +18,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// EWL use only.
 		/// </summary>
-		PageInfo CreateSelectUserPageInfo( string returnUrl );
+		PageInfo CreateSelectUserPageInfo( string returnUrl, string user = "" );
 
 		/// <summary>
 		/// EWL use only.

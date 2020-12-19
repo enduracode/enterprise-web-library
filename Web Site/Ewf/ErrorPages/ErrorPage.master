@@ -1,6 +1,0 @@
-<%@ Master MasterPageFile="~/Ewf/BasicPage.master" Language="C#" CodeBehind="ErrorPage.master.cs" Inherits="EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ErrorPages.ErrorPage" %>
-
-<asp:Content runat="server" ContentPlaceHolderID="head"></asp:Content>
-<asp:Content runat="server" ContentPlaceHolderID="main">
-	<asp:ContentPlaceHolder runat="server" ID="contentPlace" />
-</asp:Content>
