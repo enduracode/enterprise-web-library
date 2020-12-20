@@ -32,10 +32,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			CookieStatics.ClearCookie( intermediateAuthenticationCookieName );
 		}
 
-		/// <summary>
-		/// BasicPage.master use only.
-		/// </summary>
-		public static bool WarningsHiddenCookieExists() => CookieStatics.GetCookie( warningsHiddenCookieName ) != null;
+		internal static bool WarningsHiddenCookieExists() => CookieStatics.GetCookie( warningsHiddenCookieName ) != null;
 
 		/// <summary>
 		/// EWF use only.

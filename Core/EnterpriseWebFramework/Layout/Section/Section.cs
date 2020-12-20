@@ -92,10 +92,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			false,
 			etherealContent ) {}
 
-		/// <summary>
-		/// BasicPage.master use only.
-		/// </summary>
-		public Section(
+		internal Section(
 			DisplaySetup displaySetup, SectionStyle style, ElementClassSet classes, string heading, IReadOnlyCollection<FlowComponent> postHeadingComponents,
 			IReadOnlyCollection<FlowComponent> content, bool? expanded, bool disableStatePersistence, IReadOnlyCollection<EtherealComponent> etherealContent ) {
 			children = new DisplayableElement(

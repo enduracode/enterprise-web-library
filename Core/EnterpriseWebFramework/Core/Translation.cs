@@ -72,21 +72,12 @@
 			get { return getCorrectTranslation( "Click here to replace the existing file.", "Chasque aquí para substituir el archivo existente." ); }
 		}
 
-		/// <summary>
-		/// BasicPage.master use only.
-		/// </summary>
-		public static string Processing { get { return getCorrectTranslation( "Processing", "Procesando" ); } }
+		internal static string Processing => getCorrectTranslation( "Processing", "Procesando" );
 
-		/// <summary>
-		/// BasicPage.master use only.
-		/// </summary>
-		public static string ThisSeemsToBeTakingAWhile {
-			get {
-				return getCorrectTranslation(
-					"Network traffic may be causing this delay. You can click here to stop waiting, but you may need to repeat your last action.",
-					"El tráfico de red puede ser la causa de este retraso. Puede hacer clic aquí para dejar de esperar, pero es posible que tenga que repetir la última acción." );
-			}
-		}
+		internal static string ThisSeemsToBeTakingAWhile =>
+			getCorrectTranslation(
+				"Network traffic may be causing this delay. You can click here to stop waiting, but you may need to repeat your last action.",
+				"El tráfico de red puede ser la causa de este retraso. Puede hacer clic aquí para dejar de esperar, pero es posible que tenga que repetir la última acción." );
 
 		/// <summary>
 		/// AccessDenied.aspx use only.

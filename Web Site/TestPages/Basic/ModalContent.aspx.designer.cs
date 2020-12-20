@@ -8,26 +8,8 @@
 //------------------------------------------------------------------------------
 
 namespace EnterpriseWebLibrary.WebSite.TestPages.Basic {
-    
-    
-    public partial class ModalContent {
-        
-        /// <summary>
-        /// headPh control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.PlaceHolder headPh;
-        
-        /// <summary>
-        /// ph control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.PlaceHolder ph;
-    }
+
+
+	public partial class ModalContent {
+	}
 }
