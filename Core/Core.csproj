@@ -622,6 +622,7 @@
     <Compile Include="EnterpriseWebFramework\Ui\EwfUiStatics.cs" />
     <Compile Include="EnterpriseWebFramework\EwfExtensionMethods.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\Entity\TabMode.cs" />
+    <Compile Include="EnterpriseWebFramework\Ui\UiPageContent.cs" />
     <Compile Include="EnterpriseWebFramework\UserEditor.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\FormsAuthStatics.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\StrictFormsAuthUserManagementProvider.cs" />

@@ -18,6 +18,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			return new UserManagement.LogIn.Info( returnUrl );
 		}
 
+		PageInfo AppMetaLogicFactory.CreateChangePasswordPageInfo( string returnAndDestinationUrl ) {
+			return new UserManagement.ChangePassword.Page.Info( returnAndDestinationUrl );
+		}
+
 		PageInfo AppMetaLogicFactory.CreateSelectUserPageInfo( string returnUrl, string user ) {
 			return new UserManagement.SelectUser.Info(
 				returnUrl,

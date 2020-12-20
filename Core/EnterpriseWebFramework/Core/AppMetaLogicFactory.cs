@@ -18,6 +18,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// EWL use only.
 		/// </summary>
+		PageInfo CreateChangePasswordPageInfo( string returnAndDestinationUrl );
+
+		/// <summary>
+		/// EWL use only.
+		/// </summary>
 		PageInfo CreateSelectUserPageInfo( string returnUrl, string user = "" );
 
 		/// <summary>

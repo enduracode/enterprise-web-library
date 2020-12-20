@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.UI;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
@@ -9,8 +8,8 @@ using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
 using Tewl.Tools;
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
-	public partial class EwfUi: MasterPage, ControlTreeDataLoader, AppEwfUiMasterPage {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+	public class UiPageContent: PageContent {
 		internal class CssElementCreator: ControlCssElementCreator {
 			internal const string GlobalContainerId = "ewfUiGlobal";
 			internal static readonly ElementClass AppLogoAndUserInfoClass = new ElementClass( "ewfUiAppLogoAndUserInfo" );
@@ -31,7 +30,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 
 			internal static readonly ElementClass TopTabListContainerClass = new ElementClass( "ewfUiTopTab" );
 
-			internal const string SideTabAndContentBlockCssClass = "ewfUiTabsAndContent";
+			internal static readonly ElementClass SideTabAndContentBlockClass = new ElementClass( "ewfUiTabsAndContent" );
 
 			internal static readonly ElementClass SideTabContainerClass = new ElementClass( "ewfUiSideTab" );
 			internal static readonly ElementClass SideTabGroupHeadClass = new ElementClass( "ewfEditorTabSeparator" );
@@ -108,7 +107,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					{
 						new CssElement(
 							"UiSideTabAndContentBlock",
-							TableCssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " > " + i + "." + SideTabAndContentBlockCssClass )
+							TableCssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " > " + i + "." + SideTabAndContentBlockClass.ClassName )
 								.ToArray() ),
 						new CssElement( "UiSideTabContainerCell", entityAndTabAndContentBlockSelector + " td." + SideTabContainerClass.ClassName ),
 						new CssElement( "UiSideTabContainer", entityAndTabAndContentBlockSelector + " div." + SideTabContainerClass.ClassName ),
@@ -148,41 +147,48 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			}
 		}
 
-		private EntityUiSetup entityUiSetup;
-		private bool omitContentBox;
-		private IReadOnlyCollection<ActionComponentSetup> pageActions = Enumerable.Empty<ActionComponentSetup>().Materialize();
-		private IReadOnlyCollection<ButtonSetup> contentFootActions = Enumerable.Empty<ButtonSetup>().Materialize();
-		private IReadOnlyCollection<FlowComponent> contentFootComponents;
+		private readonly BasicPageContent basicContent;
+		private readonly EntityUiSetup entityUiSetup;
+		private readonly List<FlowComponent> content = new List<FlowComponent>();
 
-		void AppEwfUiMasterPage.OmitContentBox() {
-			omitContentBox = true;
-		}
+		public UiPageContent(
+			bool omitContentBox = false, IReadOnlyCollection<ActionComponentSetup> pageActions = null, IReadOnlyCollection<ButtonSetup> contentFootActions = null,
+			IReadOnlyCollection<FlowComponent> contentFootComponents = null ) {
+			pageActions = pageActions ?? Enumerable.Empty<ActionComponentSetup>().Materialize();
+			if( contentFootActions != null && contentFootComponents != null )
+				throw new ApplicationException( "Either contentFootActions or contentFootComponents may be specified, but not both." );
+			if( contentFootActions == null && contentFootComponents == null )
+				contentFootActions = Enumerable.Empty<ButtonSetup>().Materialize();
 
-		void AppEwfUiMasterPage.SetPageActions( IReadOnlyCollection<ActionComponentSetup> actions ) {
-			pageActions = actions;
-		}
-
-		void AppEwfUiMasterPage.SetContentFootActions( IReadOnlyCollection<ButtonSetup> actions ) {
-			contentFootActions = actions;
-			contentFootComponents = null;
-		}
-
-		void AppEwfUiMasterPage.SetContentFootComponents( IReadOnlyCollection<FlowComponent> components ) {
-			contentFootActions = null;
-			contentFootComponents = components;
-		}
-
-		void ControlTreeDataLoader.LoadData() {
-			globalPlace.AddControlsReturnThis( getGlobalContainer().ToCollection().GetControls() );
 			entityUiSetup = ( EwfPage.Instance.EsAsBaseType as UiEntitySetup )?.GetUiSetup();
-			entityAndTopTabPlace.AddControlsReturnThis( getEntityAndTopTabContainer().ToCollection().GetControls() );
-			if( entityUsesTabMode( TabMode.Vertical ) )
-				setUpSideTabs();
-			pageActionPlace.AddControlsReturnThis( getPageActionListContainer().GetControls() );
-			if( !omitContentBox )
-				contentContainer.Attributes.Add( "class", CssElementCreator.ContentClass.ClassName );
-			contentFootPlace.AddControlsReturnThis( getContentFootBlock().GetControls() );
-			globalFootPlace.AddControlsReturnThis( getGlobalFootContainer().GetControls() );
+			basicContent = new BasicPageContent().Add(
+				getGlobalContainer()
+					.Append(
+						new GenericFlowContainer(
+							getEntityAndTopTabContainer()
+								.Append(
+									EwfTable.Create( style: EwfTableStyle.Raw, classes: CssElementCreator.SideTabAndContentBlockClass )
+										.AddItem(
+											EwfTableItem.Create(
+												( entityUsesTabMode( TabMode.Vertical )
+													  ? getSideTabContainer().ToCell( setup: new TableCellSetup( classes: CssElementCreator.SideTabContainerClass ) ).ToCollection()
+													  : Enumerable.Empty<EwfTableCell>() ).Append(
+													getPageActionListContainer( pageActions )
+														.Append(
+															new DisplayableElement(
+																context => new DisplayableElementData(
+																	null,
+																	() => new DisplayableElementLocalData( "div" ),
+																	classes: omitContentBox ? null : CssElementCreator.ContentClass,
+																	children: content ) ) )
+														.Concat( getContentFootBlock( contentFootActions, contentFootComponents ) )
+														.Materialize()
+														.ToCell( setup: new TableCellSetup( classes: CssElementCreator.ContentClass ) ) )
+												.Materialize() ) ) )
+								.Materialize(),
+							clientSideIdOverride: CssElementCreator.EntityAndTabAndContentBlockId ) )
+					.Concat( getGlobalFootContainer() )
+					.Materialize() );
 
 			if( !EwfUiStatics.AppProvider.BrowserWarningDisabled() ) {
 				if( AppRequestState.Instance.Browser.IsOldVersionOfMajorBrowser() && !StandardLibrarySessionState.Instance.HideBrowserWarningForRemainderOfSession )
@@ -228,7 +234,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 
 			var userInfo = new List<FlowComponent>();
 			if( AppRequestState.Instance.UserAccessible ) {
-				var changePasswordPage = UserManagement.ChangePassword.Page.GetInfo( EwfPage.Instance.InfoAsBaseType.GetUrl() );
+				var changePasswordPage = EwfApp.MetaLogicFactory.CreateChangePasswordPageInfo( EwfPage.Instance.InfoAsBaseType.GetUrl() );
 				if( changePasswordPage.UserCanAccessResource && AppTools.User != null )
 					userInfo.Add( new GenericFlowContainer( getUserInfo( changePasswordPage ), classes: CssElementCreator.UserInfoClass ) );
 			}
@@ -358,8 +364,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		private bool entityUsesTabMode( TabMode tabMode ) =>
 			entityUiSetup != null && EwfPage.Instance.InfoAsBaseType.ParentResource == null && entityUiSetup.GetTabMode( EwfPage.Instance.EsAsBaseType ) == tabMode;
 
-		private void setUpSideTabs() {
-			sideTabCell.Visible = true;
+		private FlowComponent getSideTabContainer() {
 			var components = new List<FlowComponent>();
 			foreach( var resourceGroup in EwfPage.Instance.EsAsBaseType.Resources ) {
 				var tabs = getTabHyperlinksForResources( resourceGroup, true );
@@ -367,13 +372,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					components.Add( new GenericFlowContainer( resourceGroup.Name.ToComponents(), classes: CssElementCreator.SideTabGroupHeadClass ) );
 				components.AddRange( tabs );
 			}
-			sideTabCell.AddControlsReturnThis(
-				new GenericFlowContainer( components, classes: CssElementCreator.SideTabContainerClass ).ToCollection().GetControls() );
+			return new GenericFlowContainer( components, classes: CssElementCreator.SideTabContainerClass );
 		}
 
 		private IReadOnlyCollection<PhrasingComponent> getTabHyperlinksForResources( ResourceGroup resourceGroup, bool includeIcons ) {
 			var hyperlinks = new List<PhrasingComponent>();
-			foreach( var resource in resourceGroup.Resources.Where( p => p.UserCanAccessResource ) ) {
+			foreach( var resource in resourceGroup.Resources.Where( p => p.UserCanAccessResource ) )
 				hyperlinks.Add(
 					new EwfHyperlink(
 						resource.IsIdenticalToCurrent() ? null : resource,
@@ -382,11 +386,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 							icon: includeIcons ? new ActionComponentIcon( new FontAwesomeIcon( resource.IsIdenticalToCurrent() ? "fa-circle" : "fa-circle-thin" ) ) : null ),
 						classes: resource.IsIdenticalToCurrent() ? CssElementCreator.CurrentTabClass :
 						         resource.AlternativeMode is DisabledResourceMode ? CssElementCreator.DisabledTabClass : ElementClassSet.Empty ) );
-			}
 			return hyperlinks;
 		}
 
-		private IReadOnlyCollection<FlowComponent> getPageActionListContainer() {
+		private IReadOnlyCollection<FlowComponent> getPageActionListContainer( IReadOnlyCollection<ActionComponentSetup> pageActions ) {
 			var listItems = getActionListItems( pageActions ).Materialize();
 			if( !listItems.Any() )
 				return Enumerable.Empty<FlowComponent>().Materialize();
@@ -405,7 +408,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			where actionComponent != null
 			select actionComponent.ToComponentListItem( displaySetup: action.DisplaySetup );
 
-		private IReadOnlyCollection<FlowComponent> getContentFootBlock() {
+		private IReadOnlyCollection<FlowComponent> getContentFootBlock(
+			IReadOnlyCollection<ButtonSetup> contentFootActions, IReadOnlyCollection<FlowComponent> contentFootComponents ) {
 			var components = new List<FlowComponent>();
 			if( contentFootActions != null ) {
 				if( contentFootActions.Any() )
@@ -463,5 +467,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				       ? new GenericFlowContainer( components, clientSideIdOverride: CssElementCreator.GlobalFootContainerId ).ToCollection()
 				       : Enumerable.Empty<FlowComponent>().Materialize();
 		}
+
+		public UiPageContent Add( IReadOnlyCollection<FlowComponent> components ) {
+			content.AddRange( components );
+			return this;
+		}
+
+		public UiPageContent Add( FlowComponent component ) {
+			content.Add( component );
+			return this;
+		}
+
+		protected internal override PageContent GetContent() => basicContent;
 	}
 }

@@ -199,13 +199,6 @@
     <Compile Include="Ewf\ErrorPages\PageDisabled.aspx.designer.cs">
       <DependentUpon>PageDisabled.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Ewf\EwfUi.master.cs">
-      <DependentUpon>EwfUi.master</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Ewf\EwfUi.master.designer.cs">
-      <DependentUpon>EwfUi.master</DependentUpon>
-    </Compile>
     <Compile Include="Ewf\IntermediateLogIn.aspx.cs">
       <DependentUpon>IntermediateLogIn.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -547,7 +540,6 @@
     <Content Include="Ewf\ErrorPages\AccessDenied.aspx" />
     <Content Include="Ewf\ErrorPages\PageNotAvailable.aspx" />
     <Content Include="Ewf\ErrorPages\UnhandledException.aspx" />
-    <Content Include="Ewf\EwfUi.master" />
     <Content Include="Service\Web.config" />
     <Content Include="packages.config" />
     <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Chosen\chosen_v1.8.7\LICENSE.md" />
