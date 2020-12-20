@@ -151,6 +151,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly EntityUiSetup entityUiSetup;
 		private readonly List<FlowComponent> content = new List<FlowComponent>();
 
+		/// <summary>
+		/// Creates a page content object that uses the EWF user interface.
+		/// </summary>
+		/// <param name="omitContentBox">Pass true to omit the box-style effect around the page content. Useful when all content is contained within multiple
+		/// box-style sections.</param>
+		/// <param name="pageActions">The page actions.</param>
+		/// <param name="contentFootActions">The content-foot actions. The first action, if it is a post-back, will produce a submit button.</param>
+		/// <param name="contentFootComponents">The content-foot components.</param>
 		public UiPageContent(
 			bool omitContentBox = false, IReadOnlyCollection<ActionComponentSetup> pageActions = null, IReadOnlyCollection<ButtonSetup> contentFootActions = null,
 			IReadOnlyCollection<FlowComponent> contentFootComponents = null ) {

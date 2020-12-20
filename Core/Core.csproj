@@ -615,7 +615,6 @@
     <Compile Include="EnterpriseWebFramework\Text\Subscript.cs" />
     <Compile Include="EnterpriseWebFramework\Text\Superscript.cs" />
     <Compile Include="EnterpriseWebFramework\Text\TextComponent.cs" />
-    <Compile Include="EnterpriseWebFramework\Ui\AppEwfUiMasterPage.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\AppEwfUiProvider.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\Entity\EntityUiSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\Entity\UiEntitySetup.cs" />
