@@ -1,6 +1,7 @@
-﻿// Parameter: bool showHomeLink
-
+﻿using System.Linq;
 using Tewl.Tools;
+
+// Parameter: bool showHomeLink
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ErrorPages {
 	partial class AccessDenied: EwfPage {
@@ -9,18 +10,22 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			protected override ConnectionSecurity ConnectionSecurity => ConnectionSecurity.MatchingCurrentRequest;
 		}
 
-		protected override void loadData() {
-			accessDenied.InnerText = Translation.AccessIsDenied;
-
-			if( info.ShowHomeLink )
-				ph.AddControlsReturnThis(
-					new Paragraph(
-							new EwfHyperlink( new ExternalResource( NetTools.HomeUrl ), new StandardHyperlinkStyle( Translation.ClickHereToGoToHomePage ) ).ToCollection() )
-						.ToCollection()
-						.GetControls() );
+		protected override PageContent getContent() {
+			var content = new ErrorPageContent(
+				new Paragraph( Translation.AccessIsDenied.ToComponents() ).Concat(
+						info.ShowHomeLink
+							? new Paragraph(
+									new EwfHyperlink(
+										new ExternalResource( NetTools.HomeUrl ),
+										new StandardHyperlinkStyle( Translation.ClickHereToGoToHomePage ) ).ToCollection() )
+								.ToCollection()
+							: Enumerable.Empty<FlowComponent>() )
+					.Materialize() );
 
 			Response.StatusCode = 403;
 			Response.TrySkipIisCustomErrors = true;
+
+			return content;
 		}
 	}
 }

@@ -8,26 +8,8 @@
 //------------------------------------------------------------------------------
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement {
-    
-    
-    public partial class SelectUser {
-        
-        /// <summary>
-        /// headPh control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.PlaceHolder headPh;
-        
-        /// <summary>
-        /// ph control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.PlaceHolder ph;
-    }
+
+
+	public partial class SelectUser {
+	}
 }

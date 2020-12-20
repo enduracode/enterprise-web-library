@@ -40,29 +40,27 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			return () => UserImpersonationStatics.BeginImpersonation( info.UserObject );
 		}
 
-		protected override void loadData() {
+		protected override PageContent getContent() {
+			var content = new BasicPageContent( bodyClasses: CssElementCreator.SelectUserPageBodyClass );
+
 			if( info.User.Any() ) {
 				if( !pageViewDataModificationsExecuted )
 					throw new ApplicationException( "Page-view data modifications did not execute." );
 
-				ph.AddControlsReturnThis( new Paragraph( "Please wait.".ToComponents() ).ToCollection().GetControls() );
+				content.Add( new Paragraph( "Please wait.".ToComponents() ) );
 				StandardLibrarySessionState.Instance.SetInstantClientSideNavigation( new ExternalResource( info.ReturnUrl ).GetUrl() );
-				return;
+				return content;
 			}
 
-			BasicPage.Instance.Body.Attributes[ "class" ] = CssElementCreator.SelectUserPageBodyCssClass;
-
-			ph.AddControlsReturnThis( new PageName().ToCollection().GetControls() );
+			content.Add( new PageName() );
 
 			if( ConfigurationStatics.IsLiveInstallation )
-				ph.AddControlsReturnThis(
+				content.Add(
 					new Paragraph(
-							new ImportantContent( "Warning:".ToComponents() ).ToCollection()
-								.Concat(
-									" Do not impersonate a user without permission. Your actions will be attributed to the user you are impersonating, not to you."
-										.ToComponents() )
-								.Materialize() ).ToCollection()
-						.GetControls() );
+						new ImportantContent( "Warning:".ToComponents() ).ToCollection()
+							.Concat(
+								" Do not impersonate a user without permission. Your actions will be attributed to the user you are impersonating, not to you.".ToComponents() )
+							.Materialize() ) );
 
 			var user = new DataValue<User>();
 			var pb = PostBack.CreateFull(
@@ -71,7 +69,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				pb.ToCollection(),
 				() => {
-					ph.AddControlsReturnThis(
+					content.Add(
 						new EmailAddressControl(
 								"",
 								true,
@@ -92,8 +90,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 												AppRequestState.Instance.ImpersonatorExists ? "Change User" : "Begin Impersonation",
 												buttonSize: ButtonSize.Large ) )
 										.ToCollection() ) )
-							.GetControls() );
+							.Materialize() );
 				} );
+
+			return content;
 		}
 	}
 }
