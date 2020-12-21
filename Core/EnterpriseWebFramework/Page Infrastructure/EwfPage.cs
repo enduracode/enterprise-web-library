@@ -634,6 +634,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					}
 					var basicContent = (BasicPageContent)content;
 
+					if( basicContent.TitleOverride.Any() )
+						Title = basicContent.TitleOverride;
 					addMetadataAndFaviconLinks();
 					addTypekitLogicIfNecessary();
 					Header.AddControlsReturnThis(
