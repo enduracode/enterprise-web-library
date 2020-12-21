@@ -607,17 +607,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			this.AddControlsReturnThis( new LiteralControl( "<!DOCTYPE html><html>" ), new HtmlHead(), body );
 			this.AddControlsReturnThis( new LiteralControl( "</html>" ) );
 
-
-			// This can go anywhere in the lifecycle.
-
-			addMetadataAndFaviconLinks();
-			addTypekitLogicIfNecessary();
-			Header.AddControlsReturnThis( from i in cssInfoCreator() select getStyleSheetLink( this.GetClientUrl( i.GetUrl( false, false, false ) ) ) );
-			addModernizrLogic();
-			addGoogleAnalyticsLogicIfNecessary();
-			addJavaScriptIncludes();
-
-
 			// Set the page title. This should be done before LoadData to support pages or entity setups that want to set their own title.
 			Title = StringTools.ConcatenateWithDelimiter(
 				" - ",
@@ -633,14 +622,23 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				DataUpdate.ToCollection(),
 				() => {
 					Form.AddControlsReturnThis( BasicPage.GetPreContentComponents().GetControls() );
+
 					PageContent content;
 					using( MiniProfiler.Current.Step( "EWF - Get page content" ) )
 						content = getContent();
 					while( !( content is BasicPageContent ) )
 						content = content.GetContent();
 					var basicContent = (BasicPageContent)content;
+
+					addMetadataAndFaviconLinks();
+					addTypekitLogicIfNecessary();
+					Header.AddControlsReturnThis( from i in cssInfoCreator() select getStyleSheetLink( this.GetClientUrl( i.GetUrl( false, false, false ) ) ) );
+					addModernizrLogic();
+					addGoogleAnalyticsLogicIfNecessary();
+					addJavaScriptIncludes();
 					if( basicContent.HeadElements.Html.Any() )
 						Header.AddControlsReturnThis( new LiteralControl( basicContent.HeadElements.Html ) );
+
 					body.Attributes.Add( "class", StringTools.ConcatenateWithDelimiter( " ", basicContent.BodyClasses.ConditionsByClassName.Select( i => i.Key ) ) );
 					Form.AddControlsReturnThis( basicContent.BodyContent.GetControls() );
 					Form.AddControlsReturnThis( BasicPage.GetPostContentComponents().GetControls() );
@@ -697,6 +695,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			// This must happen after LoadData and before modifications are executed.
 			statusMessages.Clear();
 		}
+
+		/// <summary>
+		/// Returns the page content.
+		/// </summary>
+		protected virtual PageContent getContent() => null;
 
 		private void addMetadataAndFaviconLinks() {
 			Header.Controls.Add(
@@ -786,11 +789,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			Header.AddControlsReturnThis( new LiteralControl( MiniProfiler.RenderIncludes().ToHtmlString() ) );
 			Header.AddControlsReturnThis( EwfApp.Instance.GetJavaScriptFiles().Select( getElement ) );
 		}
-
-		/// <summary>
-		/// Returns the page content.
-		/// </summary>
-		protected virtual PageContent getContent() => null;
 
 		/// <summary>
 		/// Loads and displays data on the page. This is a replacement for the Init event that provides access to EWF page state.
