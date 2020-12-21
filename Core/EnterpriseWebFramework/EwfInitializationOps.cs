@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Web;
 using System.Web.Compilation;
@@ -64,13 +65,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 						EwfPage.Init(
 							ModalBox.CreateBrowsingModalBox,
-							() => {
+							contentObjects => {
+								var contentUsesUi = contentObjects.Any( i => i is UiPageContent );
+
 								var cssInfos = new List<ResourceInfo>();
 								cssInfos.AddRange( EwfApp.MetaLogicFactory.CreateBasicCssInfos() );
-								if( EwfUiStatics.AppMasterPage != null )
+								if( contentUsesUi )
 									cssInfos.AddRange( EwfApp.MetaLogicFactory.CreateEwfUiCssInfos() );
 								cssInfos.AddRange( EwfApp.Instance.GetStyleSheets() );
-								if( EwfUiStatics.AppMasterPage != null )
+								if( contentUsesUi )
 									cssInfos.AddRange( EwfUiStatics.AppProvider.GetStyleSheets() );
 								return cssInfos;
 							} );

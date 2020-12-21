@@ -32,7 +32,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal const string ButtonElementName = "ewfButton";
 
 		private static Func<IEnumerable<EtherealComponent>> browsingModalBoxCreator;
-		private static Func<IEnumerable<ResourceInfo>> cssInfoCreator;
+		private static Func<IReadOnlyCollection<PageContent>, IEnumerable<ResourceInfo>> cssInfoCreator;
 
 		[ JsonObject( ItemRequired = Required.Always, MemberSerialization = MemberSerialization.Fields ) ]
 		private class HiddenFieldData {
@@ -58,7 +58,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 		}
 
-		internal new static void Init( Func<IEnumerable<EtherealComponent>> browsingModalBoxCreator, Func<IEnumerable<ResourceInfo>> cssInfoCreator ) {
+		internal new static void Init(
+			Func<IEnumerable<EtherealComponent>> browsingModalBoxCreator, Func<IReadOnlyCollection<PageContent>, IEnumerable<ResourceInfo>> cssInfoCreator ) {
 			EwfValidation.Init(
 				() => Instance.formState.ValidationPredicate,
 				() => Instance.formState.DataModifications,
@@ -626,13 +627,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					PageContent content;
 					using( MiniProfiler.Current.Step( "EWF - Get page content" ) )
 						content = getContent();
-					while( !( content is BasicPageContent ) )
+					var contentObjects = new List<PageContent>();
+					while( !( content is BasicPageContent ) ) {
+						contentObjects.Add( content );
 						content = content.GetContent();
+					}
 					var basicContent = (BasicPageContent)content;
 
 					addMetadataAndFaviconLinks();
 					addTypekitLogicIfNecessary();
-					Header.AddControlsReturnThis( from i in cssInfoCreator() select getStyleSheetLink( this.GetClientUrl( i.GetUrl( false, false, false ) ) ) );
+					Header.AddControlsReturnThis(
+						from i in cssInfoCreator( contentObjects ) select getStyleSheetLink( this.GetClientUrl( i.GetUrl( false, false, false ) ) ) );
 					addModernizrLogic();
 					addGoogleAnalyticsLogicIfNecessary();
 					addJavaScriptIncludes();
