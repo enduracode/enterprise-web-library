@@ -8,17 +8,8 @@
 //------------------------------------------------------------------------------
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement.ChangePassword {
-    
-    
-    public partial class Page {
-        
-        /// <summary>
-        /// ph control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.PlaceHolder ph;
-    }
+
+
+	public partial class Page {
+	}
 }

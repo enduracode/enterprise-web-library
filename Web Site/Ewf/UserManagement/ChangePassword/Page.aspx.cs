@@ -1,5 +1,4 @@
 using EnterpriseWebLibrary.Encryption;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.WebSessionState;
 using Tewl.Tools;
@@ -15,25 +14,20 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 
 		private DataValue<string> newPassword;
 
-		protected override void loadData() {
-			EwfUiStatics.SetPageActions( new HyperlinkSetup( new ExternalResource( info.ReturnAndDestinationUrl ), "Back" ).ToCollection() );
-
-			FormState.ExecuteWithDataModificationsAndDefaultAction(
+		protected override PageContent getContent() {
+			newPassword = new DataValue<string>();
+			return FormState.ExecuteWithDataModificationsAndDefaultAction(
 				PostBack.CreateFull(
 						firstModificationMethod: modifyData,
 						actionGetter: () => new PostBackAction( new ExternalResource( info.ReturnAndDestinationUrl ) ) )
 					.ToCollection(),
-				() => {
-					newPassword = new DataValue<string>();
-					ph.AddControlsReturnThis(
-						FormItemList.CreateStack(
-								items: newPassword.GetPasswordModificationFormItems(
-									firstLabel: "New password".ToComponents(),
-									secondLabel: "Re-type new password".ToComponents() ) )
-							.ToCollection()
-							.GetControls() );
-					EwfUiStatics.SetContentFootActions( new ButtonSetup( "Change Password" ).ToCollection() );
-				} );
+				() => new UiPageContent(
+					pageActions: new HyperlinkSetup( new ExternalResource( info.ReturnAndDestinationUrl ), "Back" ).ToCollection(),
+					contentFootActions: new ButtonSetup( "Change Password" ).ToCollection() ).Add(
+					FormItemList.CreateStack(
+						items: newPassword.GetPasswordModificationFormItems(
+							firstLabel: "New password".ToComponents(),
+							secondLabel: "Re-type new password".ToComponents() ) ) ) );
 		}
 
 		private void modifyData() {

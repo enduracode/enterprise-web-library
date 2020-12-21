@@ -9,12 +9,12 @@ using Tewl.Tools;
 // Parameter: string returnUrl
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement {
-	public partial class LogIn: EwfPage {
+	partial class LogIn: EwfPage {
 		private DataValue<string> emailAddress;
 		private FormsAuthCapableUser user;
 
-		protected override void loadData() {
-			EwfUiStatics.OmitContentBox();
+		protected override PageContent getContent() {
+			var content = new UiPageContent( omitContentBox: true );
 
 			Tuple<IReadOnlyCollection<EtherealComponent>, Func<FormsAuthCapableUser>> logInHiddenFieldsAndMethod = null;
 			var logInPb = PostBack.CreateFull(
@@ -58,11 +58,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 											behavior: new PostBackBehavior( postBack: newPasswordPb ) ) )
 									.Materialize() ) );
 
-					ph.AddControlsReturnThis(
+					content.Add(
 						new FlowAutofocusRegion(
-								AutofocusCondition.InitialRequest(),
-								new Section( "Registered users", registeredComponents, style: SectionStyle.Box ).ToCollection() ).ToCollection()
-							.GetControls() );
+							AutofocusCondition.InitialRequest(),
+							new Section( "Registered users", registeredComponents, style: SectionStyle.Box ).ToCollection() ) );
 
 					logInHiddenFieldsAndMethod = FormsAuthStatics.GetLogInHiddenFieldsAndMethod(
 						emailAddress,
@@ -73,14 +72,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 				} );
 
 			var specialInstructions = EwfUiStatics.AppProvider.GetSpecialInstructionsForLogInPage();
-			if( specialInstructions != null )
-				ph.AddControlsReturnThis( specialInstructions );
+			if( specialInstructions.Any() )
+				content.Add( specialInstructions );
 			else {
 				var unregisteredComponents = new List<FlowComponent>();
 				unregisteredComponents.Add(
 					new Paragraph( "If you have difficulty logging in, please {0}".FormatWith( FormsAuthStatics.SystemProvider.LogInHelpInstructions ).ToComponents() ) );
-				ph.AddControlsReturnThis( new Section( "Unregistered users", unregisteredComponents, style: SectionStyle.Box ).ToCollection().GetControls() );
+				content.Add( new Section( "Unregistered users", unregisteredComponents, style: SectionStyle.Box ) );
 			}
+
+			return content;
 		}
 
 		private PostBackAction getSendNewPasswordAction() {

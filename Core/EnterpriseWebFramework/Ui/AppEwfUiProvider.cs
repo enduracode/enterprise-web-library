@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Web.UI;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -47,11 +46,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
-		/// Gets the control to be shown at the bottom of the log in page for systems with forms authentication.
+		/// Gets the components to be shown at the bottom of the log-in page for systems with forms authentication.
 		/// </summary>
-		public virtual Control GetSpecialInstructionsForLogInPage() {
-			return null;
-		}
+		public virtual IReadOnlyCollection<FlowComponent> GetSpecialInstructionsForLogInPage() => Enumerable.Empty<FlowComponent>().Materialize();
 
 		/// <summary>
 		/// Gets the global foot components.

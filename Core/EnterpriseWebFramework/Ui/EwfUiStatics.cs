@@ -1,7 +1,10 @@
 ﻿using System;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Ui {
-	internal static class EwfUiStatics {
+	/// <summary>
+	/// EWL use only.
+	/// </summary>
+	public static class EwfUiStatics {
 		private const string providerName = "EwfUi";
 		private static AppEwfUiProvider provider;
 
