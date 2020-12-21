@@ -13,9 +13,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					: new DisabledResourceMode( "To prevent unauthorized profiling, this feature requires user management to be enabled." );
 		}
 
-		protected override void loadData() {
+		protected override PageContent getContent() {
+			var content = new UiPageContent();
+
 			var userIsProfiling = AppMemoryCache.UserIsProfilingRequests( AppRequestState.Instance.ProfilingUserId );
-			ph.AddControlsReturnThis(
+			content.Add(
 				new Paragraph( "Profiling is currently {0}.".FormatWith( userIsProfiling ? "ON" : "OFF" ).ToComponents() ).Append(
 						new Paragraph(
 							new EwfButton(
@@ -27,7 +29,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 											() => AppMemoryCache.SetRequestProfilingForUser(
 												AppRequestState.Instance.ProfilingUserId,
 												userIsProfiling ? TimeSpan.Zero : TimeSpan.FromHours( 1 ) ) ) ) ) ).ToCollection() ) )
-					.GetControls() );
+					.Materialize() );
+
+			return content;
 		}
 	}
 }

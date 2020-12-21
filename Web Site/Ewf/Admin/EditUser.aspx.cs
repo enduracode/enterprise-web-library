@@ -1,5 +1,4 @@
 using System;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using Tewl.Tools;
 
@@ -20,24 +19,21 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			public override string ResourceName => User == null ? "New User" : User.Email;
 		}
 
-		protected override void loadData() {
-			if( info.UserId.HasValue )
-				EwfUiStatics.SetPageActions(
-					new ButtonSetup(
-						"Delete User",
-						behavior: new PostBackBehavior(
-							postBack: PostBack.CreateFull(
-								id: "delete",
-								firstModificationMethod: deleteUser,
-								actionGetter: () => new PostBackAction( new SystemUsers.Info( Es ) ) ) ) ).ToCollection() );
-
+		protected override PageContent getContent() {
 			Action userModMethod = null;
-			FormState.ExecuteWithDataModificationsAndDefaultAction(
+			return FormState.ExecuteWithDataModificationsAndDefaultAction(
 				PostBack.CreateFull( firstModificationMethod: () => userModMethod(), actionGetter: () => new PostBackAction( info.ParentResource ) ).ToCollection(),
-				() => {
-					ph.AddControlsReturnThis( new UserEditor( info.UserId, out userModMethod ).ToCollection().GetControls() );
-					EwfUiStatics.SetContentFootActions( new ButtonSetup( "OK" ).ToCollection() );
-				} );
+				() => new UiPageContent(
+					pageActions: info.UserId.HasValue
+						             ? new ButtonSetup(
+							             "Delete User",
+							             behavior: new PostBackBehavior(
+								             postBack: PostBack.CreateFull(
+									             id: "delete",
+									             firstModificationMethod: deleteUser,
+									             actionGetter: () => new PostBackAction( new SystemUsers.Info( Es ) ) ) ) ).ToCollection()
+						             : null,
+					contentFootActions: new ButtonSetup( "OK" ).ToCollection() ).Add( new UserEditor( info.UserId, out userModMethod ) ) );
 		}
 
 		private void deleteUser() {
