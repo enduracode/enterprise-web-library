@@ -641,8 +641,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					addModernizrLogic();
 					addGoogleAnalyticsLogicIfNecessary();
 					addJavaScriptIncludes();
-					if( basicContent.HeadElements.Html.Any() )
-						Header.AddControlsReturnThis( new LiteralControl( basicContent.HeadElements.Html ) );
+					if( basicContent.CustomHeadElements.Html.Any() )
+						Header.AddControlsReturnThis( new LiteralControl( basicContent.CustomHeadElements.Html ) );
 
 					body.Attributes.Add( "class", StringTools.ConcatenateWithDelimiter( " ", basicContent.BodyClasses.ConditionsByClassName.Select( i => i.Key ) ) );
 					Form.AddControlsReturnThis( basicContent.BodyContent.GetControls() );

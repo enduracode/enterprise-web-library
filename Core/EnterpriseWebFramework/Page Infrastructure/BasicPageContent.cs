@@ -3,12 +3,12 @@ using System.Collections.Generic;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public sealed class BasicPageContent: PageContent {
-		internal readonly TrustedHtmlString HeadElements;
+		internal readonly TrustedHtmlString CustomHeadElements;
 		internal readonly ElementClassSet BodyClasses;
 		internal readonly List<FlowComponent> BodyContent = new List<FlowComponent>();
 
-		public BasicPageContent( TrustedHtmlString headElements = null, ElementClassSet bodyClasses = null ) {
-			HeadElements = headElements ?? new TrustedHtmlString( "" );
+		public BasicPageContent( TrustedHtmlString customHeadElements = null, ElementClassSet bodyClasses = null ) {
+			CustomHeadElements = customHeadElements ?? new TrustedHtmlString( "" );
 			BodyClasses = bodyClasses ?? ElementClassSet.Empty;
 		}
 
