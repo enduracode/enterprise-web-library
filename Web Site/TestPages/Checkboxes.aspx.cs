@@ -8,16 +8,13 @@ using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	partial class Checkboxes: EwfPage {
-		protected override void loadData() {
-			ph.AddControlsReturnThis(
-				FormState.ExecuteWithDataModificationsAndDefaultAction(
-					PostBack.CreateFull().ToCollection(),
-					() => FormItemList.CreateStack(
-							generalSetup: new FormItemListSetup( buttonSetup: new ButtonSetup( "Submit" ) ),
-							items: getControls().Select( ( getter, i ) => getter( ( i + 1 ).ToString() ) ).Materialize() )
-						.ToCollection()
-						.GetControls() ) );
-		}
+		protected override PageContent getContent() =>
+			FormState.ExecuteWithDataModificationsAndDefaultAction(
+				PostBack.CreateFull().ToCollection(),
+				() => new UiPageContent().Add(
+					FormItemList.CreateStack(
+						generalSetup: new FormItemListSetup( buttonSetup: new ButtonSetup( "Submit" ) ),
+						items: getControls().Select( ( getter, i ) => getter( ( i + 1 ).ToString() ) ).Materialize() ) ) );
 
 		private IReadOnlyCollection<Func<string, FormItem>> getControls() =>
 			new[]

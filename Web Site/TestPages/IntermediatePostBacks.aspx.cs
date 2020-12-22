@@ -20,7 +20,9 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			public override string ResourceName => "Intermediate Post-Backs";
 		}
 
-		protected override void loadData() {
+		protected override PageContent getContent() {
+			var content = new UiPageContent();
+
 			var staticFil = FormItemList.CreateStack( generalSetup: new FormItemListSetup( buttonSetup: new ButtonSetup( "Submit" ) ) );
 			staticFil.AddFormItems(
 				new TextControl( "Values here will be retained across post-backs", true ).ToFormItem( label: "Static Field".ToComponents() ),
@@ -31,9 +33,9 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					setup: TextControlSetup.Create( validationPredicate: valueChangedOnPostBack => valueChangedOnPostBack ),
 					validationMethod: ( postBackValue, validator ) => validator.NoteErrorAndAddMessage( "You can't change the value in this box!" ) ).ToFormItem(
 					label: "Static Field".ToComponents() ) );
-			ph.AddControlsReturnThis( staticFil.ToCollection().GetControls() );
+			content.Add( staticFil );
 
-			ph.AddControlsReturnThis( getBasicRegionComponents().GetControls() );
+			content.Add( getBasicRegionComponents().Materialize() );
 
 			var listTable = EwfTable.Create(
 				style: EwfTableStyle.StandardLayoutOnly,
@@ -44,7 +46,9 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					getNonIdListRegionComponents().ToCell(),
 					"".ToCell(),
 					getIdListRegionComponents().ToCell() ) );
-			ph.AddControlsReturnThis( listTable.ToCollection().GetControls() );
+			content.Add( listTable );
+
+			return content;
 		}
 
 		private IEnumerable<FlowComponent> getBasicRegionComponents() {

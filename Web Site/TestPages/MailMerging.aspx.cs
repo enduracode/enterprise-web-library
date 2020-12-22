@@ -6,8 +6,8 @@ using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	partial class MailMerging: EwfPage {
-		protected override void loadData() {
-			ph.AddControlsReturnThis(
+		protected override PageContent getContent() =>
+			new UiPageContent().Add(
 				MergeStatics.CreateEmptyPseudoTableRowTree()
 					.ToFieldTreeDisplay( "Merge Fields" )
 					.Append(
@@ -20,7 +20,6 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 										childNamesAndChildren: Tuple.Create( "Things", new MergeFieldNameTree( "Another".ToCollection() ) ).ToCollection() ),
 									omitListIfSingleRow: true )
 								.ToCollection() ) )
-					.GetControls() );
-		}
+					.Materialize() );
 	}
 }

@@ -4,7 +4,9 @@ using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	partial class OmniDemo: EwfPage {
-		protected override void loadData() {
+		protected override PageContent getContent() {
+			var content = new UiPageContent();
+
 			var omni = FormItemList.CreateGrid( numberOfColumns: 7 );
 
 			var boxId = new ModalBoxId();
@@ -21,7 +23,9 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				new TextControl( "", true ).ToFormItem( label: "Quantity".ToComponents() ),
 				"".ToComponents().ToFormItem( label: "Inventory".ToComponents() ),
 				"".ToComponents().ToFormItem( label: "Bill Number".ToComponents() ) );
-			ph.AddControlsReturnThis( omni.ToCollection().GetControls() );
+			content.Add( omni );
+
+			return content;
 		}
 
 		public override bool IsAutoDataUpdater => true;

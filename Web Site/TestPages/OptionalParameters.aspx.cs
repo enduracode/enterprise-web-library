@@ -14,41 +14,33 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			}
 		}
 
-		protected override void loadData() {
+		protected override PageContent getContent() {
+			var content = new UiPageContent();
+
 			var fil = FormItemList.CreateStack();
 			fil.AddFormItems( parametersModification.GetField1TextControlFormItem( true ), parametersModification.GetField2TextControlFormItem( true ) );
-			ph.AddControlsReturnThis( fil.ToCollection().GetControls() );
+			content.Add( fil );
 
-			ph.AddControlsReturnThis(
+			content.Add(
 				new EwfButton(
-						new StandardButtonStyle( "Navigate and change Field 2" ),
-						behavior: new PostBackBehavior(
-							postBack: PostBack.CreateFull( actionGetter: () => new PostBackAction( new Info( Es, new OptionalParameterPackage { Field2 = "bob" } ) ) ) ) )
-					.ToCollection()
-					.GetControls() );
+					new StandardButtonStyle( "Navigate and change Field 2" ),
+					behavior: new PostBackBehavior(
+						postBack: PostBack.CreateFull( actionGetter: () => new PostBackAction( new Info( Es, new OptionalParameterPackage { Field2 = "bob" } ) ) ) ) ) );
 
 			var table = EwfTable.Create( headItems: new[] { EwfTableItem.Create( "Url".ToCell(), "Valid?".ToCell() ) } );
-			ph.AddControlsReturnThis( table.ToCollection().GetControls() );
+			content.Add( table );
 
 			foreach( var scheme in new[] { "http://", "ftp://", "file://" } ) {
-				foreach( var userinfo in new[] { "", "user:pass@" } ) {
-					foreach( var subdomain in new[] { "", "subdomain." } ) {
-						foreach( var domain in new[] { "domain", "localhost" } ) {
-							foreach( var tld in new[] { "", ".com" } ) {
-								foreach( var port in new[] { "", ":80" } ) {
-									foreach( var folder in new[] { "", "/", "/folder/" } ) {
-										foreach( var file in new[] { "", "file.asp" } ) {
-											foreach( var query in new[] { "", "?here=go&there=yup" } ) {
-												foreach( var frag in new[] { "", "#fragment" } )
-													testUrl( table, scheme + userinfo + subdomain + domain + tld + port + folder + file + query + frag );
-											}
-										}
-									}
-								}
-							}
-						}
-					}
-				}
+				foreach( var userinfo in new[] { "", "user:pass@" } )
+				foreach( var subdomain in new[] { "", "subdomain." } )
+				foreach( var domain in new[] { "domain", "localhost" } )
+				foreach( var tld in new[] { "", ".com" } )
+				foreach( var port in new[] { "", ":80" } )
+				foreach( var folder in new[] { "", "/", "/folder/" } )
+				foreach( var file in new[] { "", "file.asp" } )
+				foreach( var query in new[] { "", "?here=go&there=yup" } )
+				foreach( var frag in new[] { "", "#fragment" } )
+					testUrl( table, scheme + userinfo + subdomain + domain + tld + port + folder + file + query + frag );
 
 				foreach( var additionalUrl in new[]
 					{
@@ -57,6 +49,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					} )
 					testUrl( table, additionalUrl );
 			}
+
+			return content;
 		}
 
 		private void testUrl( EwfTable<int> table, string url ) {

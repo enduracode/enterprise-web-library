@@ -2,7 +2,9 @@ using EnterpriseWebLibrary.EnterpriseWebFramework;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	public partial class RegexHelper: EwfPage {
-		protected override void loadData() {
+		protected override PageContent getContent() {
+			var content = new UiPageContent();
+
 			// NOTE: This was the markup:
 			//<ewf:ControlStack runat="server" IsStandard="true">
 			//  <p>This page can be used to help develop and test regular expressions.</p>
@@ -58,6 +60,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			//  if( IsPostBack )
 			//    StandardLibrarySessionState.AddStatusMessage( StatusMessageType.Warning, e.Message );
 			//}
+
+			return content;
 		}
 	}
 }

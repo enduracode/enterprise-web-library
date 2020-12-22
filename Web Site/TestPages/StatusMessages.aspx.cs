@@ -5,21 +5,17 @@ using System.Threading;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
-using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	partial class StatusMessages: EwfPage {
-		protected override void loadData() {
-			ph.AddControlsReturnThis(
+		protected override PageContent getContent() =>
+			new UiPageContent().Add(
 				EwfTable.Create()
 					.AddData(
 						getStatusTests(),
 						tests => EwfTableItem.Create(
 							tests.Item1.ToCell(),
-							new EwfButton( new StandardButtonStyle( "Test" ), behavior: new PostBackBehavior( postBack: tests.Item2 ) ).ToCell() ) )
-					.ToCollection()
-					.GetControls() );
-		}
+							new EwfButton( new StandardButtonStyle( "Test" ), behavior: new PostBackBehavior( postBack: tests.Item2 ) ).ToCell() ) ) );
 
 		private IEnumerable<Tuple<string, ActionPostBack>> getStatusTests() {
 			yield return Tuple.Create(

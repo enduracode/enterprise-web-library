@@ -11,7 +11,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			public override string ResourceName => "Column Primary";
 		}
 
-		protected override void loadData() {
+		protected override PageContent getContent() {
 			var itemGroups = Enumerable.Range( 1, 2 )
 				.Select(
 					group => ColumnPrimaryItemGroup.Create(
@@ -51,7 +51,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 									( ( i * 2 ) + Environment.NewLine + "extra stuff" ).ToCell() ) ) ) )
 				.Materialize();
 
-			place.AddControlsReturnThis(
+			return new UiPageContent().Add(
 				ColumnPrimaryTable.Create(
 						caption: "My table",
 						subCaption: "A new table implementation",
@@ -80,9 +80,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 								"First field".ToCell().Append( "Second field".ToCell() ).Materialize(),
 								setup: EwfTableItemSetup.Create( size: 10.ToEm() ) )
 							.ToCollection() )
-					.AddItemGroups( itemGroups )
-					.ToCollection()
-					.GetControls() );
+					.AddItemGroups( itemGroups ) );
 		}
 	}
 }

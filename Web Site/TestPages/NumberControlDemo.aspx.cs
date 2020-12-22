@@ -12,21 +12,19 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			public override string ResourceName => "Number Control";
 		}
 
-		protected override void loadData() {
-			ph.AddControlsReturnThis(
+		protected override PageContent getContent() =>
+			new UiPageContent().Add(
 				FormState.ExecuteWithDataModificationsAndDefaultAction(
 						PostBack.CreateFull().ToCollection(),
 						() => FormItemList.CreateStack(
 							generalSetup: new FormItemListSetup( buttonSetup: new ButtonSetup( "Submit" ) ),
 							items: getControls().Select( ( getter, i ) => getter( ( i + 1 ).ToString() ) ).Materialize() ) )
-					.ToCollection<FlowComponent>()
-					.Append(
+					.Append<FlowComponent>(
 						new Section(
 							"Independent Controls",
 							FormItemList.CreateStack( items: getIndependentControls().Select( ( getter, i ) => getter( "I-" + ( i + 1 ).ToString() ) ).Materialize() )
 								.ToCollection() ) )
-					.GetControls() );
-		}
+					.Materialize() );
 
 		private IReadOnlyCollection<Func<string, FormItem>> getControls() =>
 			new[]

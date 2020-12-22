@@ -20,9 +20,11 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			public override string ResourceName => "EWF Table";
 		}
 
-		protected override void loadData() {
+		protected override PageContent getContent() {
+			var content = new UiPageContent();
+
 			var updateRegionSet = new UpdateRegionSet();
-			place.AddControlsReturnThis(
+			content.Add(
 				EwfTable.Create(
 						caption: "Caption",
 						subCaption: "Sub caption",
@@ -54,9 +56,9 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						headItems: EwfTableItem.Create( "First Column".ToCell(), "Second Column".ToCell() ).ToCollection(),
 						defaultItemLimit: DataRowLimit.Fifty,
 						tailUpdateRegions: new TailUpdateRegion( updateRegionSet.ToCollection(), 1 ).ToCollection() )
-					.AddItemGroups( Enumerable.Range( 1, info.GroupCount ).Select( getItemGroup ).Materialize() )
-					.ToCollection()
-					.GetControls() );
+					.AddItemGroups( Enumerable.Range( 1, info.GroupCount ).Select( getItemGroup ).Materialize() ) );
+
+			return content;
 		}
 
 		private EwfTableItemGroup getItemGroup( int groupNumber ) {
