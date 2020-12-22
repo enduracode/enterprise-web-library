@@ -795,11 +795,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			Header.AddControlsReturnThis( EwfApp.Instance.GetJavaScriptFiles().Select( getElement ) );
 		}
 
-		/// <summary>
-		/// Loads and displays data on the page. This is a replacement for the Init event that provides access to EWF page state.
-		/// </summary>
-		protected virtual void loadData() {}
-
 		private void loadDataForControlAndChildren( Control control ) {
 			elementOrIdentifiedComponentIdGetter = () => control.ClientID;
 
