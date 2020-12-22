@@ -2,7 +2,6 @@ using System.IO;
 using System.Text;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.IO;
 using Humanizer;
 using Tewl.IO;
@@ -18,7 +17,7 @@ namespace EnterpriseWebLibrary.WebSite {
 		private readonly DataValue<string> systemShortName = new DataValue<string>();
 		private readonly DataValue<string> baseNamespace = new DataValue<string>();
 
-		protected override void loadData() {
+		protected override PageContent getContent() =>
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				PostBack.CreateFull(
 						actionGetter: () => new PostBackAction(
@@ -29,37 +28,30 @@ namespace EnterpriseWebLibrary.WebSite {
 										new EwfResponseBodyCreator( createAndZipSystem ),
 										fileNameCreator: () => "{0}.zip".FormatWith( systemShortName.Value ) ) ) ) ) )
 					.ToCollection(),
-				() => {
-					ph.AddControlsReturnThis(
-						FormItemList.CreateStack(
-								items: new[]
-									{
-										systemName.ToTextControl(
-												false,
-												value: "",
-												maxLength: 50,
-												additionalValidationMethod: validator => {
-													if( systemName.Value != systemName.Value.RemoveNonAlphanumericCharacters( preserveWhiteSpace: true ) )
-														validator.NoteErrorAndAddMessage( "The system name must consist of only alphanumeric characters and white space." );
-													systemShortName.Value = systemName.Value.EnglishToPascal();
-												} )
-											.ToFormItem( label: "System name".ToComponents() ),
-										baseNamespace.ToTextControl(
-												false,
-												value: "",
-												maxLength: 50,
-												additionalValidationMethod: validator => {
-													if( baseNamespace.Value != EwlStatics.GetCSharpIdentifier( baseNamespace.Value ) )
-														validator.NoteErrorAndAddMessage( "The base namespace must be a valid C# identifier." );
-												} )
-											.ToFormItem( label: "Base namespace".ToComponents() )
-									} )
-							.ToCollection()
-							.GetControls() );
-
-					EwfUiStatics.SetContentFootActions( new ButtonSetup( "Create System" ).ToCollection() );
-				} );
-		}
+				() => new UiPageContent( contentFootActions: new ButtonSetup( "Create System" ).ToCollection() ).Add(
+					FormItemList.CreateStack(
+						items: new[]
+							{
+								systemName.ToTextControl(
+										false,
+										value: "",
+										maxLength: 50,
+										additionalValidationMethod: validator => {
+											if( systemName.Value != systemName.Value.RemoveNonAlphanumericCharacters( preserveWhiteSpace: true ) )
+												validator.NoteErrorAndAddMessage( "The system name must consist of only alphanumeric characters and white space." );
+											systemShortName.Value = systemName.Value.EnglishToPascal();
+										} )
+									.ToFormItem( label: "System name".ToComponents() ),
+								baseNamespace.ToTextControl(
+										false,
+										value: "",
+										maxLength: 50,
+										additionalValidationMethod: validator => {
+											if( baseNamespace.Value != EwlStatics.GetCSharpIdentifier( baseNamespace.Value ) )
+												validator.NoteErrorAndAddMessage( "The base namespace must be a valid C# identifier." );
+										} )
+									.ToFormItem( label: "Base namespace".ToComponents() )
+							} ) ) );
 
 		private void createAndZipSystem( Stream stream ) {
 			IoMethods.ExecuteWithTempFolder(
