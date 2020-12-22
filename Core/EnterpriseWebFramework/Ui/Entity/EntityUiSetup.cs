@@ -26,32 +26,20 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			this.tabMode = tabMode;
 		}
 
-		/// <summary>
-		/// EwfUi.master use only.
-		/// </summary>
-		public IReadOnlyCollection<ActionComponentSetup> NavActions { get; }
+		internal IReadOnlyCollection<ActionComponentSetup> NavActions { get; }
 
-		/// <summary>
-		/// EwfUi.master use only.
-		/// </summary>
-		public IReadOnlyCollection<NavFormControl> NavFormControls { get; }
+		internal IReadOnlyCollection<NavFormControl> NavFormControls { get; }
 
-		/// <summary>
-		/// EwfUi.master use only.
-		/// </summary>
-		public IReadOnlyCollection<ActionComponentSetup> Actions { get; }
+		internal IReadOnlyCollection<ActionComponentSetup> Actions { get; }
 
-		/// <summary>
-		/// EwfUi.master use only.
-		/// </summary>
-		public IReadOnlyCollection<FlowComponent> EntitySummaryContent { get; }
+		internal IReadOnlyCollection<FlowComponent> EntitySummaryContent { get; }
 
 		private TabMode tabMode { get; }
 
 		/// <summary>
-		/// EwfUi.master use only. Returns the tab mode, or null for no tabs.
+		/// Returns the tab mode, or null for no tabs.
 		/// </summary>
-		public TabMode? GetTabMode( EntitySetupBase es ) {
+		internal TabMode? GetTabMode( EntitySetupBase es ) {
 			if( !es.Resources.Any() )
 				return null;
 			if( tabMode == TabMode.Automatic )

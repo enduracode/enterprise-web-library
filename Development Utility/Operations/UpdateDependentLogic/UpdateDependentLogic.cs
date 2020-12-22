@@ -124,14 +124,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				recognizedInstallation.KnownSystemLogic.DownloadAsposeLicenses( installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath );
 
 			if( installation.DevelopmentInstallationLogic.SystemIsEwl )
-				foreach( var fileName in GlobalStatics.ConfigurationXsdFileNames ) {
+				foreach( var fileName in GlobalStatics.ConfigurationXsdFileNames )
 					IoMethods.CopyFile(
 						EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.CoreProjectName, "Configuration", fileName + FileExtensions.Xsd ),
 						EwlStatics.CombinePaths(
 							InstallationFileStatics.GetGeneralFilesFolderPath( installation.GeneralLogic.Path, true ),
 							InstallationFileStatics.FilesFolderName,
 							fileName + FileExtensions.Xsd ) );
-				}
 			else {
 				// If web projects exist for this installation, copy appropriate files into them.
 				if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects != null )
@@ -144,14 +143,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			var webProjectFilesFolderPath = EwlStatics.CombinePaths( ConfigurationStatics.InstallationPath, AppStatics.WebProjectFilesFolderName );
 			var webProjectPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, webProject.name );
 
-			// Copy Ewf folder and customize namespaces in .aspx, .master, and .cs files.
+			// Copy Ewf folder and customize namespaces in .aspx and .cs files.
 			var webProjectEwfFolderPath = EwlStatics.CombinePaths( webProjectPath, StaticFileHandler.EwfFolderName );
 			IoMethods.DeleteFolder( webProjectEwfFolderPath );
 			IoMethods.CopyFolder( EwlStatics.CombinePaths( webProjectFilesFolderPath, StaticFileHandler.EwfFolderName ), webProjectEwfFolderPath, false );
 			IoMethods.RecursivelyRemoveReadOnlyAttributeFromItem( webProjectEwfFolderPath );
 			var matchingFiles = new List<string>();
 			matchingFiles.AddRange( Directory.GetFiles( webProjectEwfFolderPath, "*.aspx", SearchOption.AllDirectories ) );
-			matchingFiles.AddRange( Directory.GetFiles( webProjectEwfFolderPath, "*.master", SearchOption.AllDirectories ) );
 			matchingFiles.AddRange( Directory.GetFiles( webProjectEwfFolderPath, "*.cs", SearchOption.AllDirectories ) );
 			foreach( var filePath in matchingFiles )
 				File.WriteAllText( filePath, customizeNamespace( File.ReadAllText( filePath ), webProject ) );
@@ -244,12 +242,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					writer.WriteLine();
 					writer.WriteLine( "namespace " + installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName + " {" );
 					writer.WriteLine( "public static class EmailTemplates {" );
-					foreach( var i in IoMethods.GetFileNamesInFolder( emailTemplateFolderPath, searchPattern: "*.html" ) ) {
+					foreach( var i in IoMethods.GetFileNamesInFolder( emailTemplateFolderPath, searchPattern: "*.html" ) )
 						writer.WriteLine(
 							"public static readonly EmailTemplateName {0} = new EmailTemplateName( \"{1}\" );".FormatWith(
 								EwlStatics.GetCSharpIdentifier( Path.GetFileNameWithoutExtension( i ).EnglishToPascal() ),
 								i ) );
-					}
 					writer.WriteLine( "}" );
 					writer.WriteLine( "}" );
 				}
@@ -284,7 +281,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 		private void generateDataAccessCode( TextWriter writer, DevelopmentInstallation installation ) {
 			var baseNamespace = installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName + ".DataAccess";
-			foreach( var database in installation.DevelopmentInstallationLogic.DatabasesForCodeGeneration ) {
+			foreach( var database in installation.DevelopmentInstallationLogic.DatabasesForCodeGeneration )
 				try {
 					generateDataAccessCodeForDatabase(
 						database,
@@ -301,7 +298,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						"An exception occurred while generating data access logic for the {0}.".FormatWith( DatabaseOps.GetDatabaseNounPhrase( database ) ),
 						e );
 				}
-			}
 			if( installation.DevelopmentInstallationLogic.DatabasesForCodeGeneration.Any( d => d.SecondaryDatabaseName.Length > 0 ) ) {
 				writer.WriteLine();
 				writer.WriteLine( "namespace " + baseNamespace + " {" );
@@ -596,14 +592,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 		private void generateXmlSchemaLogicForOtherFiles( DevelopmentInstallation installation ) {
 			if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.xmlSchemas != null )
-				foreach( var xmlSchema in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.xmlSchemas ) {
+				foreach( var xmlSchema in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.xmlSchemas )
 					generateXmlSchemaLogic(
 						EwlStatics.CombinePaths( installation.GeneralLogic.Path, xmlSchema.project ),
 						xmlSchema.pathInProject,
 						xmlSchema.@namespace,
 						xmlSchema.codeFileName,
 						xmlSchema.useSvcUtil );
-				}
 		}
 
 		private void generateXmlSchemaLogic( string projectPath, string schemaPathInProject, string nameSpace, string codeFileName, bool useSvcUtil ) {

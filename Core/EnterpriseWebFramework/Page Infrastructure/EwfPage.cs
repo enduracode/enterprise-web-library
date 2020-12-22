@@ -183,9 +183,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Executes EWF logic in addition to the standard ASP.NET PreInit logic.
 		/// </summary>
 		protected sealed override void OnPreInit( EventArgs e ) {
-			// This logic should happen before the page gets the PreInit event in case it wants to determine the master based on parameters.
 			initEntitySetupAndCreateInfoObjects();
-
 			base.OnPreInit( e );
 		}
 
