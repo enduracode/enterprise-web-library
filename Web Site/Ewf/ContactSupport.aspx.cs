@@ -1,7 +1,6 @@
 using System.Linq;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Email;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
 using Tewl.Tools;
@@ -16,14 +15,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 
 		private readonly DataValue<string> body = new DataValue<string>();
 
-		protected override void loadData() {
-			ph.AddControlsReturnThis(
-				new Paragraph( "You may report any problems, make suggestions, or ask for help here.".ToComponents() ).ToCollection().GetControls() );
-
+		protected override PageContent getContent() =>
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				PostBack.CreateFull( firstModificationMethod: modifyData, actionGetter: () => new PostBackAction( new ExternalResource( info.ReturnUrl ) ) )
 					.ToCollection(),
 				() => {
+					var content = new UiPageContent( contentFootActions: new ButtonSetup( "Send Message" ).ToCollection() );
+
+					content.Add( new Paragraph( "You may report any problems, make suggestions, or ask for help here.".ToComponents() ) );
+
 					var list = FormItemList.CreateStack();
 					list.AddFormItems(
 						new EmailAddress( AppTools.User.Email, AppTools.User.FriendlyName ).ToMailAddress()
@@ -36,11 +36,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 							.ToComponents()
 							.ToFormItem( label: "To".ToComponents() ),
 						body.ToTextControl( false, setup: TextControlSetup.Create( numberOfRows: 10 ), value: "" ).ToFormItem( label: "Message".ToComponents() ) );
-					ph.AddControlsReturnThis( list.ToCollection().GetControls() );
+					content.Add( list );
 
-					EwfUiStatics.SetContentFootActions( new ButtonSetup( "Send Message" ).ToCollection() );
+					return content;
 				} );
-		}
 
 		private void modifyData() {
 			var message = new EmailMessage

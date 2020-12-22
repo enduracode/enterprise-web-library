@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using EnterpriseWebLibrary.Configuration;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.WebSessionState;
 using Tewl.Tools;
 
@@ -34,38 +33,33 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			return () => logIn( info.HideWarnings );
 		}
 
-		protected override void loadData() {
+		protected override PageContent getContent() {
 			if( info.Password.Any() ) {
 				if( !pageViewDataModificationsExecuted )
 					throw new ApplicationException( "Page-view data modifications did not execute." );
 
-				ph.AddControlsReturnThis( new Paragraph( "Please wait.".ToComponents() ).ToCollection().GetControls() );
+				var content = new UiPageContent();
+				content.Add( new Paragraph( "Please wait.".ToComponents() ) );
 				StandardLibrarySessionState.Instance.SetInstantClientSideNavigation( new ExternalResource( info.ReturnUrl ).GetUrl() );
-				return;
+				return content;
 			}
 
-			FormState.ExecuteWithDataModificationsAndDefaultAction(
+			return FormState.ExecuteWithDataModificationsAndDefaultAction(
 				PostBack.CreateFull( firstModificationMethod: () => logIn( false ), actionGetter: () => new PostBackAction( new ExternalResource( info.ReturnUrl ) ) )
 					.ToCollection(),
-				() => {
-					ph.AddControlsReturnThis(
-						FormItemList.CreateStack(
-								items: new TextControl(
-										"",
-										true,
-										setup: TextControlSetup.CreateObscured(),
-										validationMethod: ( postBackValue, validator ) => {
-											// NOTE: Using a single password here is a hack. The real solution is being able to use RSIS credentials, which is a goal.
-											var passwordMatch = postBackValue == ConfigurationStatics.SystemGeneralProvider.IntermediateLogInPassword;
-											if( !passwordMatch )
-												validator.NoteErrorAndAddMessage( "Incorrect password." );
-										} ).ToFormItem( label: "Enter your password for this non-live installation".ToComponents() )
-									.ToCollection() )
-							.ToCollection()
-							.GetControls() );
-
-					EwfUiStatics.SetContentFootActions( new ButtonSetup( "Log In" ).ToCollection() );
-				} );
+				() => new UiPageContent( contentFootActions: new ButtonSetup( "Log In" ).ToCollection() ).Add(
+					FormItemList.CreateStack(
+						items: new TextControl(
+								"",
+								true,
+								setup: TextControlSetup.CreateObscured(),
+								validationMethod: ( postBackValue, validator ) => {
+									// NOTE: Using a single password here is a hack. The real solution is being able to use RSIS credentials, which is a goal.
+									var passwordMatch = postBackValue == ConfigurationStatics.SystemGeneralProvider.IntermediateLogInPassword;
+									if( !passwordMatch )
+										validator.NoteErrorAndAddMessage( "Incorrect password." );
+								} ).ToFormItem( label: "Enter your password for this non-live installation".ToComponents() )
+							.ToCollection() ) ) );
 		}
 
 		private void logIn( bool hideWarnings ) {
