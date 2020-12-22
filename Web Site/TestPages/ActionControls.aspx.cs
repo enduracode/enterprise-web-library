@@ -1,35 +1,27 @@
-using System.Collections.Generic;
-using System.Web.UI;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	partial class ActionControls: EwfPage {
-		protected override void loadData() {
-			EwfUiStatics.OmitContentBox();
+		protected override PageContent getContent() =>
+			new UiPageContent( omitContentBox: true )
+				.Add(
+					getBox(
+						new EwfButton(
+							new StandardButtonStyle( "Tiny Post Back Button", buttonSize: ButtonSize.ShrinkWrap ),
+							behavior: new PostBackBehavior( postBack: PostBack.CreateFull( id: "tiny" ) ) ) ) )
+				.Add( getBox( new EwfHyperlink( SubFolder.General.GetInfo(), new ButtonHyperlinkStyle( "Tiny EWF Link", buttonSize: ButtonSize.ShrinkWrap ) ) ) )
+				.Add(
+					getBox(
+						new EwfButton( new StandardButtonStyle( "Post Back Button" ), behavior: new PostBackBehavior( postBack: PostBack.CreateFull( id: "normal" ) ) ) ) )
+				.Add( getBox( new EwfHyperlink( EwfTableDemo.GetInfo(), new ButtonHyperlinkStyle( "EWF Link" ) ) ) )
+				.Add(
+					getBox(
+						new EwfButton(
+							new StandardButtonStyle( "Large Post Back Button", buttonSize: ButtonSize.Large ),
+							behavior: new PostBackBehavior( postBack: PostBack.CreateFull( id: "large" ) ) ) ) )
+				.Add( getBox( new EwfHyperlink( EwfTableDemo.GetInfo(), new ButtonHyperlinkStyle( "Large EWF Link", ButtonSize.Large ) ) ) );
 
-			ph.AddControlsReturnThis(
-				getBox(
-					new EwfButton(
-						new StandardButtonStyle( "Tiny Post Back Button", buttonSize: ButtonSize.ShrinkWrap ),
-						behavior: new PostBackBehavior( postBack: PostBack.CreateFull( id: "tiny" ) ) ) ) );
-			ph.AddControlsReturnThis(
-				getBox( new EwfHyperlink( SubFolder.General.GetInfo(), new ButtonHyperlinkStyle( "Tiny EWF Link", buttonSize: ButtonSize.ShrinkWrap ) ) ) );
-
-			ph.AddControlsReturnThis(
-				getBox(
-					new EwfButton( new StandardButtonStyle( "Post Back Button" ), behavior: new PostBackBehavior( postBack: PostBack.CreateFull( id: "normal" ) ) ) ) );
-			ph.AddControlsReturnThis( getBox( new EwfHyperlink( EwfTableDemo.GetInfo(), new ButtonHyperlinkStyle( "EWF Link" ) ) ) );
-
-			ph.AddControlsReturnThis(
-				getBox(
-					new EwfButton(
-						new StandardButtonStyle( "Large Post Back Button", buttonSize: ButtonSize.Large ),
-						behavior: new PostBackBehavior( postBack: PostBack.CreateFull( id: "large" ) ) ) ) );
-			ph.AddControlsReturnThis( getBox( new EwfHyperlink( EwfTableDemo.GetInfo(), new ButtonHyperlinkStyle( "Large EWF Link", ButtonSize.Large ) ) ) );
-		}
-
-		private IEnumerable<Control> getBox( FlowComponent content ) => new Section( content.ToCollection(), style: SectionStyle.Box ).ToCollection().GetControls();
+		private FlowComponent getBox( FlowComponent content ) => new Section( content.ToCollection(), style: SectionStyle.Box );
 	}
 }

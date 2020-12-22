@@ -1,6 +1,5 @@
 using System.Linq;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
@@ -9,11 +8,9 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			public override string ResourceName => "Box";
 		}
 
-		protected override void loadData() {
-			EwfUiStatics.OmitContentBox();
-
-			ph.AddControlsReturnThis(
-				new Section( new Paragraph( "This is a basic box.".ToComponents() ).ToCollection(), style: SectionStyle.Box ).ToCollection()
+		protected override PageContent getContent() =>
+			new UiPageContent( omitContentBox: true ).Add(
+				new Section( new Paragraph( "This is a basic box.".ToComponents() ).ToCollection(), style: SectionStyle.Box )
 					.Append( new Section( "Heading Box", new Paragraph( "This is a box with heading.".ToComponents() ).ToCollection(), style: SectionStyle.Box ) )
 					.Append(
 						new Section(
@@ -34,7 +31,6 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 							style: SectionStyle.Box,
 							postHeadingComponents: new Paragraph( "Post-heading components.".ToComponents() ).ToCollection(),
 							expanded: false ) )
-					.GetControls() );
-		}
+					.Materialize() );
 	}
 }

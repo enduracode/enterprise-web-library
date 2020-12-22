@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
@@ -10,21 +9,15 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			public override string ResourceName => "Select List";
 		}
 
-		protected override void loadData() {
+		protected override PageContent getContent() =>
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				PostBack.CreateFull().ToCollection(),
-				() => {
-					ph.AddControlsReturnThis(
-						new Section( "Radio Button List, Vertical", FormItemList.CreateStack( items: getRadioItems( false ).Materialize() ).ToCollection() )
-							.ToCollection<FlowComponent>()
-							.Append( new Section( "Radio Button List, Horizontal", FormItemList.CreateStack( items: getRadioItems( true ).Materialize() ).ToCollection() ) )
-							.Append( getChosenUpgradeTestingInfo() )
-							.Append( new Section( "Drop-Down List", FormItemList.CreateStack( items: getDropDownItems().Materialize() ).ToCollection() ) )
-							.GetControls() );
-
-					EwfUiStatics.SetContentFootActions( new ButtonSetup( "Submit" ).ToCollection() );
-				} );
-		}
+				() => new UiPageContent( contentFootActions: new ButtonSetup( "Submit" ).ToCollection() ).Add(
+					new Section( "Radio Button List, Vertical", FormItemList.CreateStack( items: getRadioItems( false ).Materialize() ).ToCollection() )
+						.Append( new Section( "Radio Button List, Horizontal", FormItemList.CreateStack( items: getRadioItems( true ).Materialize() ).ToCollection() ) )
+						.Append( getChosenUpgradeTestingInfo() )
+						.Append( new Section( "Drop-Down List", FormItemList.CreateStack( items: getDropDownItems().Materialize() ).ToCollection() ) )
+						.Materialize() ) );
 
 		private IEnumerable<FormItem> getRadioItems( bool useHorizontalLayout ) {
 			foreach( var items in new[]
@@ -35,25 +28,22 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 							SelectListItem.Create( 3 as int?, "Three" )
 						},
 					new[] { SelectListItem.Create( 1 as int?, "One" ), SelectListItem.Create( 2 as int?, "Two" ), SelectListItem.Create( 3 as int?, "Three" ) }
-				} ) {
-				foreach( var selectedItemId in new int?[] { null, 1 } ) {
-					foreach( var defaultValueItemLabel in new[] { "", "None" } ) {
-						yield return SelectList
-							.CreateRadioList(
-								RadioListSetup.Create( items, useHorizontalLayout: useHorizontalLayout ),
-								selectedItemId,
-								defaultValueItemLabel: defaultValueItemLabel,
-								validationMethod: ( postBackValue, validator ) => {} )
-							.ToFormItem(
-								label: StringTools.ConcatenateWithDelimiter(
-										", ",
-										items.Length == 4 ? "Default in list" : "Default not in list",
-										selectedItemId.HasValue ? "One selected" : "default selected",
-										defaultValueItemLabel.Any() ? "default label" : "no default label" )
-									.ToComponents() );
-					}
-				}
-			}
+				} )
+			foreach( var selectedItemId in new int?[] { null, 1 } )
+			foreach( var defaultValueItemLabel in new[] { "", "None" } )
+				yield return SelectList
+					.CreateRadioList(
+						RadioListSetup.Create( items, useHorizontalLayout: useHorizontalLayout ),
+						selectedItemId,
+						defaultValueItemLabel: defaultValueItemLabel,
+						validationMethod: ( postBackValue, validator ) => {} )
+					.ToFormItem(
+						label: StringTools.ConcatenateWithDelimiter(
+								", ",
+								items.Length == 4 ? "Default in list" : "Default not in list",
+								selectedItemId.HasValue ? "One selected" : "default selected",
+								defaultValueItemLabel.Any() ? "default label" : "no default label" )
+							.ToComponents() );
 		}
 
 		private FlowComponent getChosenUpgradeTestingInfo() {
@@ -83,29 +73,25 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 							SelectListItem.Create( 1 as int?, "This is item One" ), SelectListItem.Create( 2 as int?, "This is item Two" ),
 							SelectListItem.Create( 3 as int?, "This is item Three" )
 						}
-				} ) {
-				foreach( var selectedItemId in new int?[] { null, 1 } ) {
-					foreach( var defaultValueItemLabel in new[] { "", "None" } ) {
-						foreach( var placeholderIsValid in new[] { false, true } ) {
-							yield return SelectList
-								.CreateDropDown(
-									DropDownSetup.Create( items ),
-									selectedItemId,
-									defaultValueItemLabel: defaultValueItemLabel,
-									placeholderIsValid: placeholderIsValid,
-									validationMethod: ( postBackValue, validator ) => {} )
-								.ToFormItem(
-									label: StringTools.ConcatenateWithDelimiter(
-											", ",
-											items.Length == 4 ? "Default in list" : "Default not in list",
-											selectedItemId.HasValue ? "One selected" : "default selected",
-											defaultValueItemLabel.Any() ? "default label" : "no default label",
-											placeholderIsValid ? "placeholder valid" : "placeholder not valid" )
-										.ToComponents() );
-						}
-					}
-				}
-			}
+				} )
+			foreach( var selectedItemId in new int?[] { null, 1 } )
+			foreach( var defaultValueItemLabel in new[] { "", "None" } )
+			foreach( var placeholderIsValid in new[] { false, true } )
+				yield return SelectList
+					.CreateDropDown(
+						DropDownSetup.Create( items ),
+						selectedItemId,
+						defaultValueItemLabel: defaultValueItemLabel,
+						placeholderIsValid: placeholderIsValid,
+						validationMethod: ( postBackValue, validator ) => {} )
+					.ToFormItem(
+						label: StringTools.ConcatenateWithDelimiter(
+								", ",
+								items.Length == 4 ? "Default in list" : "Default not in list",
+								selectedItemId.HasValue ? "One selected" : "default selected",
+								defaultValueItemLabel.Any() ? "default label" : "no default label",
+								placeholderIsValid ? "placeholder valid" : "placeholder not valid" )
+							.ToComponents() );
 		}
 	}
 }
