@@ -86,7 +86,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			Control ph = null;
 			ph = new PlaceholderControl(
 				() => {
-					foreach( var linker in componentData.UpdateRegionLinkers ) {
+					foreach( var linker in componentData.UpdateRegionLinkers )
 						EwfPage.Instance.AddUpdateRegionLinker(
 							new LegacyUpdateRegionLinker(
 								ph,
@@ -97,7 +97,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										() => region.ComponentGetter().SelectMany( i => EwfPage.Instance.ControlsByComponent[ i ] ),
 										region.ArgumentGetter ) ),
 								arg => linker.PostModificationRegionGetter( arg ).SelectMany( i => EwfPage.Instance.ControlsByComponent[ i ] ) ) );
-					}
 
 					var validationIndex = 0;
 					var errorDictionary = new Dictionary<EwfValidation, IReadOnlyCollection<string>>();
@@ -126,7 +125,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
-		public static IReadOnlyCollection<Control> AddEtherealControls( this IEnumerable<EtherealComponentOrElement> components, Control parent ) {
+		internal static IReadOnlyCollection<Control> AddEtherealControls( this IEnumerable<EtherealComponentOrElement> components, Control parent ) {
 			return components.SelectMany(
 					i => {
 						var controls = addEtherealControls( parent, i );
@@ -161,7 +160,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			Control ph = null;
 			ph = new PlaceholderControl(
 				() => {
-					foreach( var linker in componentData.UpdateRegionLinkers ) {
+					foreach( var linker in componentData.UpdateRegionLinkers )
 						EwfPage.Instance.AddUpdateRegionLinker(
 							new LegacyUpdateRegionLinker(
 								ph,
@@ -172,7 +171,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										() => region.ComponentGetter().SelectMany( i => EwfPage.Instance.ControlsByComponent[ i ] ),
 										region.ArgumentGetter ) ),
 								arg => linker.PostModificationRegionGetter( arg ).SelectMany( i => EwfPage.Instance.ControlsByComponent[ i ] ) ) );
-					}
 
 					var validationIndex = 0;
 					var errorDictionary = new Dictionary<EwfValidation, IReadOnlyCollection<string>>();

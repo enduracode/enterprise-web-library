@@ -68,7 +68,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 						password,
 						getUnregisteredEmailMessage(),
 						"Incorrect password. If you do not know your password, enter your email address and send yourself a new password using the link below." );
-					logInHiddenFieldsAndMethod.Item1.AddEtherealControls( this );
+					content.Add( logInHiddenFieldsAndMethod.Item1 );
 				} );
 
 			var specialInstructions = EwfUiStatics.AppProvider.GetSpecialInstructionsForLogInPage();

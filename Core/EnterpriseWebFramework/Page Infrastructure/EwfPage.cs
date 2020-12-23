@@ -633,6 +633,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 					body.Attributes.Add( "class", StringTools.ConcatenateWithDelimiter( " ", basicContent.BodyClasses.ConditionsByClassName.Select( i => i.Key ) ) );
 					Form.AddControlsReturnThis( basicContent.BodyContent.GetControls() );
+					basicContent.EtherealContent.AddEtherealControls( Form );
 					Form.AddControlsReturnThis( BasicPage.GetPostContentComponents().GetControls() );
 					Form.AddControlsReturnThis( etherealPlace = new PlaceHolder() );
 				} );

@@ -481,6 +481,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return this;
 		}
 
+		public UiPageContent Add( IReadOnlyCollection<EtherealComponent> components ) {
+			basicContent.Add( components );
+			return this;
+		}
+
+		public UiPageContent Add( EtherealComponent component ) {
+			basicContent.Add( component );
+			return this;
+		}
+
 		protected internal override PageContent GetContent() => basicContent;
 	}
 }

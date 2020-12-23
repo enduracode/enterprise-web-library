@@ -7,6 +7,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal readonly TrustedHtmlString CustomHeadElements;
 		internal readonly ElementClassSet BodyClasses;
 		internal readonly List<FlowComponent> BodyContent = new List<FlowComponent>();
+		internal readonly List<EtherealComponent> EtherealContent = new List<EtherealComponent>();
 
 		/// <summary>
 		/// Creates a basic page content object.
@@ -27,6 +28,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		public BasicPageContent Add( FlowComponent component ) {
 			BodyContent.Add( component );
+			return this;
+		}
+
+		public BasicPageContent Add( IReadOnlyCollection<EtherealComponent> components ) {
+			EtherealContent.AddRange( components );
+			return this;
+		}
+
+		public BasicPageContent Add( EtherealComponent component ) {
+			EtherealContent.Add( component );
 			return this;
 		}
 
