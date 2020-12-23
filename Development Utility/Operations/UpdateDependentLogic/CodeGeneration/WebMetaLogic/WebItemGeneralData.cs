@@ -66,35 +66,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			}
 		}
 
-		internal void ReadPageStateVariablesFromCodeAndWriteTypedPageStateMethods( TextWriter writer ) {
-			try {
-				foreach( var variable in getVariablesFromCode( code, "PageState" ) ) {
-					var methodArguments = "this, \"" + variable.Name + "\"";
-					writer.WriteLine( "/// <summary>" );
-					writer.WriteLine( "/// Returns the page state value of " + variable.Name + " if it has been set. Otherwise, returns the specified default value." );
-					writer.WriteLine( "/// </summary>" );
-					writer.WriteLine( "private " + variable.TypeName + " get" + variable.PropertyName + "( " + variable.TypeName + " defaultValue ) {" );
-					writer.WriteLine( "return EwfPage.Instance.PageState.GetValue( " + methodArguments + ", defaultValue );" );
-					writer.WriteLine( "}" );
-					writer.WriteLine( "/// <summary>" );
-					writer.WriteLine( "/// Sets the page state value of " + variable.Name + " to the specified value." );
-					writer.WriteLine( "/// </summary>" );
-					writer.WriteLine( "private void set" + variable.PropertyName + "( " + variable.TypeName + " value ) {" );
-					writer.WriteLine( "EwfPage.Instance.PageState.SetValue( " + methodArguments + ", value );" );
-					writer.WriteLine( "}" );
-					writer.WriteLine( "/// <summary>" );
-					writer.WriteLine( "/// Clears the page state value of " + variable.Name + "." );
-					writer.WriteLine( "/// </summary>" );
-					writer.WriteLine( "private void clear" + variable.PropertyName + "() {" );
-					writer.WriteLine( "EwfPage.Instance.PageState.ClearValue( " + methodArguments + " );" );
-					writer.WriteLine( "}" );
-				}
-			}
-			catch( Exception e ) {
-				throw UserCorrectableException.CreateSecondaryException( "Failed to read page state variables from \"" + pathRelativeToProject + "\".", e );
-			}
-		}
-
 		private IEnumerable<VariableSpecification> getVariablesFromCode( string code, string keyword ) {
 			var pattern = @"^//\s*" + keyword + @":\s(?<type>[a-zA-Z_0-9<>]*\??)\s(?<name>\w*)(\ *//(?<comment>[^\n]*))?";
 			return from Match match in Regex.Matches( code, pattern, RegexOptions.Multiline )

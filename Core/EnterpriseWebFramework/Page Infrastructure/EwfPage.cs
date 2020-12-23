@@ -167,11 +167,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public abstract ParametersModificationBase ParametersModificationAsBaseType { get; }
 
 		/// <summary>
-		/// Gets the page state for this page.
-		/// </summary>
-		public PageState PageState => AppRequestState.Instance.EwfPageRequestState.PageState;
-
-		/// <summary>
 		/// Creates a new page. Do not call this yourself.
 		/// </summary>
 		protected EwfPage() {
@@ -256,15 +251,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			if( IsPostBack )
 				return;
 
-			if( AppRequestState.Instance.EwfPageRequestState != null )
-				PageState.ClearCustomStateControlKeys();
-			else if( StandardLibrarySessionState.Instance.EwfPageRequestState != null ) {
-				AppRequestState.Instance.EwfPageRequestState = StandardLibrarySessionState.Instance.EwfPageRequestState;
-				StandardLibrarySessionState.Instance.EwfPageRequestState = null;
-				PageState.ClearCustomStateControlKeys();
+			if( AppRequestState.Instance.EwfPageRequestState == null ) {
+				if( StandardLibrarySessionState.Instance.EwfPageRequestState != null ) {
+					AppRequestState.Instance.EwfPageRequestState = StandardLibrarySessionState.Instance.EwfPageRequestState;
+					StandardLibrarySessionState.Instance.EwfPageRequestState = null;
+				}
+				else
+					AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( null, null );
 			}
-			else
-				AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( PageState.CreateForNewPage(), null, null );
 
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
 			var dmIdAndSecondaryOp = requestState.DmIdAndSecondaryOp;
@@ -472,20 +466,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					Request.Form[ hiddenFieldName ],
 					new JsonSerializerSettings { MissingMemberHandling = MissingMemberHandling.Error } );
 
-				// Based on our implementation of SavePageStateToPersistenceMedium, the base implementation of LoadPageStateFromPersistenceMedium will return a Pair
-				// with no First object.
-				var pair = base.LoadPageStateFromPersistenceMedium() as Pair;
-
-				AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState(
-					PageState.CreateFromViewState( (object[])pair.Second ),
-					Request.Form[ "__SCROLLPOSITIONX" ],
-					Request.Form[ "__SCROLLPOSITIONY" ] );
+				AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( Request.Form[ "__SCROLLPOSITIONX" ], Request.Form[ "__SCROLLPOSITIONY" ] );
 				AppRequestState.Instance.EwfPageRequestState.ComponentStateValuesById = hiddenFieldData.ComponentStateValuesById;
 			}
 			catch {
 				// Set a 400 status code if there are any problems loading hidden field state. We're assuming these problems are never the developers' fault.
 				if( AppRequestState.Instance.EwfPageRequestState == null )
-					AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( PageState.CreateForNewPage(), null, null );
+					AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( null, null );
 				Response.StatusCode = 400;
 				Response.TrySkipIisCustomErrors = true;
 				AppRequestState.Instance.EwfPageRequestState.FocusKey = "";
@@ -1248,8 +1235,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return base.SaveViewState();
 		}
 
-		protected sealed override void SavePageStateToPersistenceMedium( object state ) {
-			base.SavePageStateToPersistenceMedium( PageState.GetViewStateArray() );
-		}
+		protected sealed override void SavePageStateToPersistenceMedium( object state ) {}
 	}
 }

@@ -588,7 +588,6 @@
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Nodes\TextNode.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\PageContent.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\PageInfo.cs" />
-    <Compile Include="EnterpriseWebFramework\Page Infrastructure\PageState.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Partial Updating\ModificationErrorDictionary.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Partial Updating\PreModificationUpdateRegion.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Partial Updating\UpdateRegionLinker.cs" />

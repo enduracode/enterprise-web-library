@@ -43,7 +43,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			writer.WriteLine( "info = (Info)infoLocal.CloneAndReplaceDefaultsIfPossible( true );" );
 			writer.WriteLine( "}" );
 			writeGetInfoMethod( writer );
-			generalData.ReadPageStateVariablesFromCodeAndWriteTypedPageStateMethods( writer );
 			WebMetaLogicStatics.WriteReCreateFromNewParameterValuesMethod(
 				writer,
 				requiredParameters,

@@ -6,7 +6,6 @@ using Newtonsoft.Json.Linq;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	internal class EwfPageRequestState {
-		private readonly PageState pageState;
 		private readonly string scrollPositionX;
 		private readonly string scrollPositionY;
 
@@ -25,15 +24,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal string StaticRegionContents { get; private set; }
 		internal IEnumerable<Tuple<string, string>> UpdateRegionKeysAndArguments { get; private set; }
 
-		internal EwfPageRequestState( PageState pageState, string scrollPositionX, string scrollPositionY ) {
-			this.pageState = pageState;
+		internal EwfPageRequestState( string scrollPositionX, string scrollPositionY ) {
 			this.scrollPositionX = scrollPositionX;
 			this.scrollPositionY = scrollPositionY;
 			InLineModificationErrorsByDisplay = new Dictionary<string, IEnumerable<string>>();
 			GeneralModificationErrors = ImmutableArray<TrustedHtmlString>.Empty;
 		}
-
-		internal PageState PageState => pageState;
 
 		internal string ScrollPositionX => scrollPositionX;
 		internal string ScrollPositionY => scrollPositionY;
