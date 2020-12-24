@@ -40,7 +40,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 											.ToComponents() ).ToCollection(),
 									postBack: PostBack.CreateFull(
 										id: "action1",
-										firstModificationMethod: () => AddStatusMessage( StatusMessageType.Info, "Action performed." ) ) ) ) )
+										modificationMethod: () => AddStatusMessage( StatusMessageType.Info, "Action performed." ) ) ) ) )
 						.Select( i => i.ToCollection().ToComponentListItem().ToWrappingListItem() ) ) );
 
 			return content;

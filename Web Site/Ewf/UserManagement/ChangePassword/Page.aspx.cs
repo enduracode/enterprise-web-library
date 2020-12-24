@@ -17,9 +17,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		protected override PageContent getContent() {
 			newPassword = new DataValue<string>();
 			return FormState.ExecuteWithDataModificationsAndDefaultAction(
-				PostBack.CreateFull(
-						firstModificationMethod: modifyData,
-						actionGetter: () => new PostBackAction( new ExternalResource( info.ReturnAndDestinationUrl ) ) )
+				PostBack.CreateFull( modificationMethod: modifyData, actionGetter: () => new PostBackAction( new ExternalResource( info.ReturnAndDestinationUrl ) ) )
 					.ToCollection(),
 				() => new UiPageContent(
 					pageActions: new HyperlinkSetup( new ExternalResource( info.ReturnAndDestinationUrl ), "Back" ).ToCollection(),

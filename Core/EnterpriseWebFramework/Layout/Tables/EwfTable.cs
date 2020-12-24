@@ -185,7 +185,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 					var children = new List<FlowComponentOrNode>();
 					ComponentStateItem<int> itemLimit = null;
-					using( MiniProfiler.Current.Step( "EWF - Load table data" ) ) {
+					using( MiniProfiler.Current.Step( "EWF - Load table data" ) )
 						FormState.ExecuteWithDataModificationsAndDefaultAction(
 							dataModifications,
 							() => {
@@ -420,7 +420,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 											postBack: PostBack.CreateIntermediate(
 												itemLimitingUpdateRegionSet.ToCollection(),
 												id: PostBack.GetCompositeId( postBackIdBase, "showMore" ),
-												firstModificationMethod: () => itemLimit.Value.Value = (int)nextLimit ) ) );
+												modificationMethod: () => itemLimit.Value.Value = (int)nextLimit ) ) );
 									var item = EwfTableItem.Create( button.ToCollection().ToCell( new TableCellSetup( fieldSpan: fields.Count ) ) );
 									var useContrast = visibleItemGroupsAndItems.Sum( i => i.Item2.Count ) % 2 == 1;
 									itemLimitingRowGroup.Add(
@@ -454,7 +454,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								if( !disableEmptyFieldDetection )
 									TableStatics.AssertAtLeastOneCellPerField( fieldCount, cellPlaceholderListsForItems );
 							} );
-					}
 					return new DisplayableElementData(
 						displaySetup,
 						() => new DisplayableElementLocalData( "table" ),
@@ -612,7 +611,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					postBack: PostBack.CreateIntermediate(
 						updateRegionSet.ToCollection(),
 						id: PostBack.GetCompositeId( postBackIdBase, itemLimit.ToString() ),
-						firstModificationMethod: () => currentItemLimit.Value = (int)itemLimit ) ) ).ToComponentListItem();
+						modificationMethod: () => currentItemLimit.Value = (int)itemLimit ) ) ).ToComponentListItem();
 		}
 
 		private IEnumerable<FlowComponent> buildRows<IdType>(

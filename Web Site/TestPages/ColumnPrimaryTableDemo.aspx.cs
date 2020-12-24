@@ -23,14 +23,14 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 									postBack: PostBack.CreateIntermediate(
 										null,
 										id: PostBack.GetCompositeId( group.ToString(), "action1" ),
-										firstModificationMethod: () => AddStatusMessage( StatusMessageType.Info, "Action 1" ) ) ) ).Append(
+										modificationMethod: () => AddStatusMessage( StatusMessageType.Info, "Action 1" ) ) ) ).Append(
 								new ButtonSetup(
 									"Action 2",
 									behavior: new PostBackBehavior(
 										postBack: PostBack.CreateIntermediate(
 											null,
 											id: PostBack.GetCompositeId( group.ToString(), "action2" ),
-											firstModificationMethod: () => AddStatusMessage( StatusMessageType.Info, "Action 2" ) ) ) ) )
+											modificationMethod: () => AddStatusMessage( StatusMessageType.Info, "Action 2" ) ) ) ) )
 							.Materialize(),
 						selectedItemActions: group == 1
 							                     ? SelectedItemAction.CreateWithIntermediatePostBackBehavior<int>(
@@ -62,7 +62,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 								postBack: PostBack.CreateIntermediate(
 									null,
 									id: "action",
-									firstModificationMethod: () => AddStatusMessage( StatusMessageType.Info, "You clicked action." ) ) ) ).ToCollection(),
+									modificationMethod: () => AddStatusMessage( StatusMessageType.Info, "You clicked action." ) ) ) ).ToCollection(),
 						selectedItemActions: SelectedItemAction
 							.CreateWithIntermediatePostBackBehavior<int>(
 								"Echo IDs",

@@ -23,7 +23,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				( postBackIdBase, selectedItemIdGetter ) => {
 					var postBack = PostBack.CreateFull(
 						id: PostBack.GetCompositeId( postBackIdBase, text ),
-						firstModificationMethod: () => modificationMethod( selectedItemIdGetter() ),
+						modificationMethod: () => modificationMethod( selectedItemIdGetter() ),
 						actionGetter: actionGetter );
 					return ( postBack,
 						       new ButtonSetup(
@@ -62,7 +62,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						updateRegions,
 						forceFullPagePostBack: forceFullPagePostBack,
 						id: PostBack.GetCompositeId( postBackIdBase, text ),
-						firstModificationMethod: () => modificationMethod( selectedItemIdGetter() ),
+						modificationMethod: () => modificationMethod( selectedItemIdGetter() ),
 						reloadBehaviorGetter: reloadBehaviorGetter,
 						validationDm: validationDm );
 					return ( postBack,

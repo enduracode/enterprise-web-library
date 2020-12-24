@@ -42,21 +42,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			if( amountInDollars.HasValue && amountInDollars.Value.DollarValueHasFractionalCents() )
 				throw new ApplicationException( "Amount must not include fractional cents." );
 
+			var token = new DataValue<string>();
 			ResourceInfo successDestination = null;
 			var postBack = PostBack.CreateFull(
 				id: PostBack.GetCompositeId( "ewfCreditCardCollection", description ),
-				actionGetter: () => new PostBackAction( successDestination ) );
-			var token = new DataValue<string>();
-
-			var hiddenFieldId = new HiddenFieldId();
-			List<EtherealComponent> hiddenFields = new List<EtherealComponent>();
-			FormState.ExecuteWithDataModificationsAndDefaultAction(
-				postBack.ToCollection(),
-				() => hiddenFields.Add(
-					new EwfHiddenField( "", validationMethod: ( postBackValue, validator ) => token.Value = postBackValue.Value, id: hiddenFieldId ).PageComponent ) );
-
-			postBack.AddModificationMethod(
-				() => {
+				modificationMethod: () => {
 					// We can add support later for customer creation, subscriptions, etc. as needs arise.
 					if( !amountInDollars.HasValue )
 						throw new ApplicationException( "Only simple charges are supported at this time." );
@@ -84,7 +74,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					catch( Exception e ) {
 						throw new ApplicationException( "An exception occurred after a credit card was charged.", e );
 					}
-				} );
+				},
+				actionGetter: () => new PostBackAction( successDestination ) );
+
+			var hiddenFieldId = new HiddenFieldId();
+			List<EtherealComponent> hiddenFields = new List<EtherealComponent>();
+			FormState.ExecuteWithDataModificationsAndDefaultAction(
+				postBack.ToCollection(),
+				() => hiddenFields.Add(
+					new EwfHiddenField( "", validationMethod: ( postBackValue, validator ) => token.Value = postBackValue.Value, id: hiddenFieldId ).PageComponent ) );
 
 			FormAction action = new PostBackFormAction( postBack );
 			action.AddToPageIfNecessary();

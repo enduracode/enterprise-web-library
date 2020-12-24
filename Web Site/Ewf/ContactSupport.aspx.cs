@@ -17,8 +17,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 
 		protected override PageContent getContent() =>
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
-				PostBack.CreateFull( firstModificationMethod: modifyData, actionGetter: () => new PostBackAction( new ExternalResource( info.ReturnUrl ) ) )
-					.ToCollection(),
+				PostBack.CreateFull( modificationMethod: modifyData, actionGetter: () => new PostBackAction( new ExternalResource( info.ReturnUrl ) ) ).ToCollection(),
 				() => {
 					var content = new UiPageContent( contentFootActions: new ButtonSetup( "Send Message" ).ToCollection() );
 

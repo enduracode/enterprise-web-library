@@ -92,7 +92,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						behavior: new PostBackBehavior(
 							postBack: PostBack.CreateFull(
 								id: PostBack.GetCompositeId( postBackIdBase, file.FileId.ToString() ),
-								firstModificationMethod: () => {
+								modificationMethod: () => {
 									if( fileIsUnopened )
 										unopenedFileOpenedNotifier?.Invoke( file.FileId );
 								},
@@ -113,7 +113,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			RsFile file = null;
 			var dm = PostBack.CreateFull(
 				id: PostBack.GetCompositeId( postBackIdBase, "add" ),
-				firstModificationMethod: () => {
+				modificationMethod: () => {
 					if( file == null )
 						return;
 

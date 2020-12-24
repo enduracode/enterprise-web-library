@@ -53,12 +53,20 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 		private IEnumerable<FlowComponent> getBasicRegionComponents() {
 			var rs = new UpdateRegionSet();
-			var pb = PostBack.CreateIntermediate( rs.ToCollection(), id: "basic" );
+			var dynamicFieldValue = new DataValue<string>();
+			var pb = PostBack.CreateIntermediate(
+				rs.ToCollection(),
+				id: "basic",
+				modificationMethod: () => {
+					parametersModification.Toggled = !parametersModification.Toggled;
+					AddStatusMessage(
+						StatusMessageType.Info,
+						info.Toggled ? "Dynamic field value was '{0}'.".FormatWith( dynamicFieldValue.Value ) : "Dynamic field added." );
+				} );
 			yield return new Paragraph(
 				new EwfButton( new StandardButtonStyle( "Toggle Basic Region Below" ), behavior: new PostBackBehavior( postBack: pb ) ).ToCollection() );
 
 			var regionComponents = new List<FlowComponent>();
-			var dynamicFieldValue = new DataValue<string>();
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				pb.ToCollection(),
 				() => {
@@ -73,12 +81,6 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			yield return new FlowIdContainer(
 				new Section( "Basic Update Region", regionComponents, style: SectionStyle.Box ).ToCollection(),
 				updateRegionSets: rs.ToCollection() );
-
-			pb.AddModificationMethod( () => parametersModification.Toggled = !parametersModification.Toggled );
-			pb.AddModificationMethod(
-				() => AddStatusMessage(
-					StatusMessageType.Info,
-					info.Toggled ? "Dynamic field value was '{0}'.".FormatWith( dynamicFieldValue.Value ) : "Dynamic field added." ) );
 		}
 
 		private IReadOnlyCollection<FlowComponent> getNonIdListRegionComponents() {
@@ -94,7 +96,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 								postBack: PostBack.CreateIntermediate(
 									addRs.ToCollection(),
 									id: "nonIdAdd",
-									firstModificationMethod: () => parametersModification.NonIdItemStates = parametersModification.NonIdItemStates.Concat( new[] { 0, 0 } ) ) ) )
+									modificationMethod: () => parametersModification.NonIdItemStates = parametersModification.NonIdItemStates.Concat( new[] { 0, 0 } ) ) ) )
 						.ToCollection()
 						.Append(
 							new EwfButton(
@@ -103,7 +105,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 									postBack: PostBack.CreateIntermediate(
 										removeRs.ToCollection(),
 										id: "nonIdRemove",
-										firstModificationMethod: () =>
+										modificationMethod: () =>
 											parametersModification.NonIdItemStates =
 												parametersModification.NonIdItemStates.Take( parametersModification.NonIdItemStates.Count() - 2 ) ) ) ) )
 						.Select( i => (LineListItem)i.ToCollection().ToComponentListItem() ) ) );
@@ -132,9 +134,8 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 							postBack: PostBack.CreateIntermediate(
 								rs.ToCollection(),
 								id: PostBack.GetCompositeId( "nonId", i.ToString() ),
-								firstModificationMethod: () => parametersModification.NonIdItemStates =
-									                               parametersModification.NonIdItemStates.Select(
-										                               ( state, index ) => index == i ? ( state + 1 ) % 2 : state ) ) ) )
+								modificationMethod: () => parametersModification.NonIdItemStates =
+									                          parametersModification.NonIdItemStates.Select( ( state, index ) => index == i ? ( state + 1 ) % 2 : state ) ) ) )
 					.ToCollection()
 					.ToComponentListItem() );
 
@@ -153,7 +154,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 								postBack: PostBack.CreateIntermediate(
 									rs.ToCollection(),
 									id: "idAdd",
-									firstModificationMethod: () =>
+									modificationMethod: () =>
 										parametersModification.ItemIds = ( parametersModification.ItemIds.Any() ? parametersModification.ItemIds.Min() - 1 : 0 ).ToCollection()
 											.Concat( parametersModification.ItemIds ) ) ) ).ToCollection()
 						.ToComponentListItem()
@@ -181,8 +182,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 							postBack: PostBack.CreateIntermediate(
 								rs.ToCollection(),
 								id: PostBack.GetCompositeId( "id", id.ToString() ),
-								firstModificationMethod: () => parametersModification.ItemIds = parametersModification.ItemIds.Where( i => i != id ).ToArray() ) ) )
-					.ToCollection()
+								modificationMethod: () => parametersModification.ItemIds = parametersModification.ItemIds.Where( i => i != id ).ToArray() ) ) ).ToCollection()
 					.ToComponentListItem() );
 
 			return new StackList( items ).ToCollection().ToComponentListItem( id.ToString(), removalUpdateRegionSets: rs.ToCollection() );

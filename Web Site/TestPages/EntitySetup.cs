@@ -87,14 +87,14 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						behavior: new PostBackBehavior(
 							postBack: PostBack.CreateFull(
 								id: "delegate",
-								firstModificationMethod: () => EwfPage.AddStatusMessage( StatusMessageType.Info, "Did Something." ) ) ) )
+								modificationMethod: () => EwfPage.AddStatusMessage( StatusMessageType.Info, "Did Something." ) ) ) )
 					.Append<ActionComponentSetup>(
 						new HyperlinkSetup( new ExternalResource( "http://www.google.com" ).ToHyperlinkNewTabBehavior(), "Go to Google in new window" ) )
 					.Append(
 						new ButtonSetup(
 							"Generate error",
 							behavior: new PostBackBehavior(
-								postBack: PostBack.CreateFull( id: "error", firstModificationMethod: () => { throw new ApplicationException(); } ) ) ) )
+								postBack: PostBack.CreateFull( id: "error", modificationMethod: () => { throw new ApplicationException(); } ) ) ) )
 					.Materialize(),
 				entitySummaryContent: new Paragraph(
 					"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed quis semper dui. Aenean egestas dolor ac elementum lacinia. Vestibulum eget."

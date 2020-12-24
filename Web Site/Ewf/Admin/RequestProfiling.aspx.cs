@@ -25,7 +25,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 								behavior: new PostBackBehavior(
 									postBack: PostBack.CreateFull(
 										id: "toggle",
-										firstModificationMethod: () => AppRequestState.AddNonTransactionalModificationMethod(
+										modificationMethod: () => AppRequestState.AddNonTransactionalModificationMethod(
 											() => AppMemoryCache.SetRequestProfilingForUser(
 												AppRequestState.Instance.ProfilingUserId,
 												userIsProfiling ? TimeSpan.Zero : TimeSpan.FromHours( 1 ) ) ) ) ) ).ToCollection() ) )

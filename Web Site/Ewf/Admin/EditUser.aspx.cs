@@ -22,7 +22,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		protected override PageContent getContent() {
 			Action userModMethod = null;
 			return FormState.ExecuteWithDataModificationsAndDefaultAction(
-				PostBack.CreateFull( firstModificationMethod: () => userModMethod(), actionGetter: () => new PostBackAction( info.ParentResource ) ).ToCollection(),
+				PostBack.CreateFull( modificationMethod: () => userModMethod(), actionGetter: () => new PostBackAction( info.ParentResource ) ).ToCollection(),
 				() => new UiPageContent(
 					pageActions: info.UserId.HasValue
 						             ? new ButtonSetup(
@@ -30,7 +30,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 							             behavior: new PostBackBehavior(
 								             postBack: PostBack.CreateFull(
 									             id: "delete",
-									             firstModificationMethod: deleteUser,
+									             modificationMethod: deleteUser,
 									             actionGetter: () => new PostBackAction( new SystemUsers.Info( Es ) ) ) ) ).ToCollection()
 						             : null,
 					contentFootActions: new ButtonSetup( "OK" ).ToCollection() ).Add( new UserEditor( info.UserId, out userModMethod ) ) );

@@ -23,7 +23,7 @@ namespace EnterpriseWebLibrary.WebSite.Providers {
 							behavior: new PostBackBehavior(
 								postBack: PostBack.CreateFull(
 									id: "testMethod",
-									firstModificationMethod: () => EwfPage.AddStatusMessage( StatusMessageType.Info, "Successful method execution." ) ) ) ).ToCollection() ) ) );
+									modificationMethod: () => EwfPage.AddStatusMessage( StatusMessageType.Info, "Successful method execution." ) ) ) ).ToCollection() ) ) );
 
 			return navButtonSetups;
 		}

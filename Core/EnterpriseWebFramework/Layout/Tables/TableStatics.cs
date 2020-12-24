@@ -247,7 +247,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								behavior: new PostBackBehavior(
 									postBack: PostBack.CreateFull(
 										id: PostBack.GetCompositeId( postBackIdBase, item.Setup.RankId.Value.ToString(), "up" ),
-										firstModificationMethod: () => RankingMethods.SwapRanks( items[ index - 1 ].Setup.RankId.Value, item.Setup.RankId.Value ) ) ) ) );
+										modificationMethod: () => RankingMethods.SwapRanks( items[ index - 1 ].Setup.RankId.Value, item.Setup.RankId.Value ) ) ) ) );
 					if( index != 0 && index != items.Count - 1 )
 						components.AddRange( " ".ToComponents() );
 					if( index != items.Count - 1 )
@@ -257,7 +257,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								behavior: new PostBackBehavior(
 									postBack: PostBack.CreateFull(
 										id: PostBack.GetCompositeId( postBackIdBase, item.Setup.RankId.Value.ToString(), "down" ),
-										firstModificationMethod: () => RankingMethods.SwapRanks( item.Setup.RankId.Value, items[ index + 1 ].Setup.RankId.Value ) ) ) ) );
+										modificationMethod: () => RankingMethods.SwapRanks( item.Setup.RankId.Value, items[ index + 1 ].Setup.RankId.Value ) ) ) ) );
 					return components;
 				} );
 		}
@@ -401,10 +401,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				return;
 
 			// Enforce that there is at least one cell in each field by looking at array of all items.
-			for( var fieldIndex = 0; fieldIndex < fieldCount; fieldIndex += 1 ) {
+			for( var fieldIndex = 0; fieldIndex < fieldCount; fieldIndex += 1 )
 				if( !cellPlaceholderListsForItems.Select( i => i[ fieldIndex ] ).OfType<EwfTableCell>().Any() )
 					throw new ApplicationException( "The field with index " + fieldIndex + " does not have any cells." );
-			}
 		}
 	}
 }

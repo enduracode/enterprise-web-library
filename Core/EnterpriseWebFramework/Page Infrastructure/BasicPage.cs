@@ -158,7 +158,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							behavior: new PostBackBehavior(
 								postBack: PostBack.CreateFull(
 									id: "ewfIntermediateLogOut",
-									firstModificationMethod: NonLiveInstallationStatics.ClearIntermediateAuthenticationCookie,
+									modificationMethod: NonLiveInstallationStatics.ClearIntermediateAuthenticationCookie,
 									actionGetter: () => new PostBackAction( new ExternalResource( NetTools.HomeUrl ) ) ) ) ).Concat( " ".ToComponents() ) );
 				components.Add(
 					new EwfButton(
@@ -170,7 +170,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							postBack: PostBack.CreateIntermediate(
 								null,
 								id: "ewfHideNonLiveWarnings",
-								firstModificationMethod: NonLiveInstallationStatics.SetWarningsHiddenCookie ) ) ) );
+								modificationMethod: NonLiveInstallationStatics.SetWarningsHiddenCookie ) ) ) );
 				if( ConfigurationStatics.IsIntermediateInstallation && AppRequestState.Instance.IntermediateUserExists ) {
 					var boxId = new ModalBoxId();
 					components.AddRange(
@@ -220,7 +220,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								behavior: new PostBackBehavior(
 									postBack: PostBack.CreateFull(
 										id: "ewfEndImpersonation",
-										firstModificationMethod: UserImpersonationStatics.EndImpersonation,
+										modificationMethod: UserImpersonationStatics.EndImpersonation,
 										actionGetter: () => new PostBackAction( new ExternalResource( NetTools.HomeUrl ) ) ) ) ) )
 						.Materialize() );
 

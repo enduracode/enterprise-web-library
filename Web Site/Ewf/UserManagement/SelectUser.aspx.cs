@@ -64,7 +64,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 
 			var user = new DataValue<User>();
 			var pb = PostBack.CreateFull(
-				firstModificationMethod: () => UserImpersonationStatics.BeginImpersonation( user.Value ),
+				modificationMethod: () => UserImpersonationStatics.BeginImpersonation( user.Value ),
 				actionGetter: () => new PostBackAction( new ExternalResource( info.ReturnUrl.Any() ? info.ReturnUrl : NetTools.HomeUrl ) ) );
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				pb.ToCollection(),

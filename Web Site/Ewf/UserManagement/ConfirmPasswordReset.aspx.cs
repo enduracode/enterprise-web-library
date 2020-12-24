@@ -27,7 +27,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					"Reset Password",
 					behavior: new PostBackBehavior(
 						postBack: PostBack.CreateFull(
-							firstModificationMethod: () => {
+							modificationMethod: () => {
 								FormsAuthStatics.ResetAndSendPassword( info.User.UserId );
 								AddStatusMessage( StatusMessageType.Info, "Your new password has been sent to your email address." );
 							},

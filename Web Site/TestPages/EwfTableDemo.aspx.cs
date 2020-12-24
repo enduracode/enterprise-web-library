@@ -35,7 +35,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 								postBack: PostBack.CreateIntermediate(
 									updateRegionSet.ToCollection(),
 									id: "removeLastGroup",
-									firstModificationMethod: () => {
+									modificationMethod: () => {
 										if( info.GroupCount <= 0 )
 											throw new DataModificationException( "No groups to remove." );
 										parametersModification.GroupCount -= 1;
@@ -73,21 +73,21 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 									              postBack: PostBack.CreateIntermediate(
 										              null,
 										              id: PostBack.GetCompositeId( groupNumber.ToString(), "action1" ),
-										              firstModificationMethod: () => AddStatusMessage( StatusMessageType.Info, "Action 1" ) ) ) ).Append(
+										              modificationMethod: () => AddStatusMessage( StatusMessageType.Info, "Action 1" ) ) ) ).Append(
 								              new ButtonSetup(
 									              "Action 2",
 									              behavior: new PostBackBehavior(
 										              postBack: PostBack.CreateIntermediate(
 											              null,
 											              id: PostBack.GetCompositeId( groupNumber.ToString(), "action2" ),
-											              firstModificationMethod: () => AddStatusMessage( StatusMessageType.Info, "Action 2" ) ) ) ) )
+											              modificationMethod: () => AddStatusMessage( StatusMessageType.Info, "Action 2" ) ) ) ) )
 							              .Materialize()
 						              : null,
 					groupHeadActivationBehavior: ElementActivationBehavior.CreatePostBackScript(
 						PostBack.CreateIntermediate(
 							null,
 							id: "group{0}".FormatWith( groupNumber ),
-							firstModificationMethod: () => AddStatusMessage( StatusMessageType.Info, "You clicked group {0}.".FormatWith( groupNumber ) ) ) ),
+							modificationMethod: () => AddStatusMessage( StatusMessageType.Info, "You clicked group {0}.".FormatWith( groupNumber ) ) ) ),
 					tailUpdateRegions: groupNumber == 1 ? new TailUpdateRegion( updateRegionSet.ToCollection(), 1 ).ToCollection() : null ),
 				groupNumber == 1
 					? getItems( info.FirstGroupItemCount, true )
@@ -100,7 +100,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 												postBack: PostBack.CreateIntermediate(
 													updateRegionSet.ToCollection(),
 													id: "addRow",
-													firstModificationMethod: () => parametersModification.FirstGroupItemCount += 1 ) ) ).ToCollection()
+													modificationMethod: () => parametersModification.FirstGroupItemCount += 1 ) ) ).ToCollection()
 										.ToCell(),
 									"".ToCell() ) ).ToCollection() )
 					: getItems( 250, false ),

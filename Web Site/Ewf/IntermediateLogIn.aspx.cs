@@ -45,7 +45,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			}
 
 			return FormState.ExecuteWithDataModificationsAndDefaultAction(
-				PostBack.CreateFull( firstModificationMethod: () => logIn( false ), actionGetter: () => new PostBackAction( new ExternalResource( info.ReturnUrl ) ) )
+				PostBack.CreateFull( modificationMethod: () => logIn( false ), actionGetter: () => new PostBackAction( new ExternalResource( info.ReturnUrl ) ) )
 					.ToCollection(),
 				() => new UiPageContent( contentFootActions: new ButtonSetup( "Log In" ).ToCollection() ).Add(
 					FormItemList.CreateStack(
