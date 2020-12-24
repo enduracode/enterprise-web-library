@@ -37,7 +37,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			Url = new Lazy<string>( () => destination != null ? destination.GetUrl( true, false, true ) : "" );
 			var isPostBackHyperlink = new Lazy<bool>(
-				() => destination != null && !( destination.AlternativeMode is DisabledResourceMode ) && !target.Any() && EwfPage.Instance.IsAutoDataUpdater );
+				() => destination != null && !( destination.AlternativeMode is DisabledResourceMode ) && !target.Any() && EwfPage.Instance.IsAutoDataUpdater.Value );
 			AttributeGetter = forNonHyperlinkElement =>
 				( destination != null && !forNonHyperlinkElement ? Tuple.Create( "href", Url.Value ).ToCollection() : Enumerable.Empty<Tuple<string, string>>() )
 				.Concat(

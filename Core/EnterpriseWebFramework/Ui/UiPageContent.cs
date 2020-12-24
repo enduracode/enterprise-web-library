@@ -160,9 +160,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="pageActions">The page actions.</param>
 		/// <param name="contentFootActions">The content-foot actions. The first action, if it is a post-back, will produce a submit button.</param>
 		/// <param name="contentFootComponents">The content-foot components.</param>
+		/// <param name="dataUpdateModificationMethod">The modification method for the page’s data-update modification.</param>
+		/// <param name="isAutoDataUpdater">Pass true to force a post-back when a hyperlink is clicked.</param>
 		public UiPageContent(
 			bool omitContentBox = false, IReadOnlyCollection<ActionComponentSetup> pageActions = null, IReadOnlyCollection<ButtonSetup> contentFootActions = null,
-			IReadOnlyCollection<FlowComponent> contentFootComponents = null ) {
+			IReadOnlyCollection<FlowComponent> contentFootComponents = null, Action dataUpdateModificationMethod = null, bool isAutoDataUpdater = false ) {
 			pageActions = pageActions ?? Enumerable.Empty<ActionComponentSetup>().Materialize();
 			if( contentFootActions != null && contentFootComponents != null )
 				throw new ApplicationException( "Either contentFootActions or contentFootComponents may be specified, but not both." );
@@ -170,7 +172,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				contentFootActions = Enumerable.Empty<ButtonSetup>().Materialize();
 
 			entityUiSetup = ( EwfPage.Instance.EsAsBaseType as UiEntitySetup )?.GetUiSetup();
-			basicContent = new BasicPageContent().Add(
+			basicContent = new BasicPageContent( dataUpdateModificationMethod: dataUpdateModificationMethod, isAutoDataUpdater: isAutoDataUpdater ).Add(
 				getGlobalContainer()
 					.Append(
 						new GenericFlowContainer(
@@ -190,7 +192,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 																	() => new DisplayableElementLocalData( "div" ),
 																	classes: omitContentBox ? null : contentClass,
 																	children: content ) ) )
-														.Concat( getContentFootBlock( contentFootActions, contentFootComponents ) )
+														.Concat( getContentFootBlock( isAutoDataUpdater, contentFootActions, contentFootComponents ) )
 														.Materialize()
 														.ToCell( setup: new TableCellSetup( classes: contentClass ) ) )
 												.Materialize() ) ) )
@@ -412,7 +414,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			select actionComponent.ToComponentListItem( displaySetup: action.DisplaySetup );
 
 		private IReadOnlyCollection<FlowComponent> getContentFootBlock(
-			IReadOnlyCollection<ButtonSetup> contentFootActions, IReadOnlyCollection<FlowComponent> contentFootComponents ) {
+			bool isAutoDataUpdater, IReadOnlyCollection<ButtonSetup> contentFootActions, IReadOnlyCollection<FlowComponent> contentFootComponents ) {
 			var components = new List<FlowComponent>();
 			if( contentFootActions != null ) {
 				if( contentFootActions.Any() )
@@ -426,11 +428,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 											enableSubmitButton: index == 0 )
 										.ToComponentListItem( displaySetup: action.DisplaySetup ) ) ).ToCollection(),
 							classes: contentFootActionListContainerClass ) );
-				else if( EwfPage.Instance.IsAutoDataUpdater )
+				else if( isAutoDataUpdater )
 					components.Add( new SubmitButton( new StandardButtonStyle( "Update Now" ), postBack: EwfPage.Instance.DataUpdatePostBack ) );
 			}
 			else {
-				if( EwfPage.Instance.IsAutoDataUpdater )
+				if( isAutoDataUpdater )
 					throw new ApplicationException( "AutoDataUpdater is not currently compatible with custom content foot controls." );
 				components.AddRange( contentFootComponents );
 			}

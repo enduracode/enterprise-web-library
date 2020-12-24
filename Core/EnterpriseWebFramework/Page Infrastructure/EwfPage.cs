@@ -135,6 +135,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal readonly ModalBoxId BrowsingModalBoxId = new ModalBoxId();
 		private readonly BasicDataModification dataUpdate = new BasicDataModification();
 		private readonly PostBack dataUpdatePostBack = PostBack.CreateDataUpdate();
+		internal bool? IsAutoDataUpdater;
 
 		internal readonly Dictionary<PageComponent, IReadOnlyCollection<Control>> ControlsByComponent =
 			new Dictionary<PageComponent, IReadOnlyCollection<Control>>();
@@ -634,6 +635,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					body.Attributes.Add( "class", StringTools.ConcatenateWithDelimiter( " ", basicContent.BodyClasses.ConditionsByClassName.Select( i => i.Key ) ) );
 					Form.AddControlsReturnThis( basicContent.BodyContent.GetControls() );
 					basicContent.EtherealContent.AddEtherealControls( Form );
+					if( basicContent.DataUpdateModificationMethod != null )
+						DataUpdate.AddModificationMethod( basicContent.DataUpdateModificationMethod );
+					IsAutoDataUpdater = basicContent.IsAutoDataUpdater;
 					Form.AddControlsReturnThis( BasicPage.GetPostContentComponents().GetControls() );
 					Form.AddControlsReturnThis( etherealPlace = new PlaceHolder() );
 				} );
@@ -825,11 +829,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Gets a post-back that updates the page's data without performing any other actions.
 		/// </summary>
 		public PostBack DataUpdatePostBack => dataUpdatePostBack;
-
-		/// <summary>
-		/// Gets whether the page forces a post-back when a link is clicked.
-		/// </summary>
-		public virtual bool IsAutoDataUpdater => false;
 
 		internal void AddEtherealControl( Control parent, EtherealControl etherealControl ) {
 			if( !etherealControlsByControl.TryGetValue( parent, out var etherealControls ) ) {

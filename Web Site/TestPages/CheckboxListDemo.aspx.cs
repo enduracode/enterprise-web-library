@@ -8,7 +8,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		}
 
 		protected override PageContent getContent() =>
-			new UiPageContent().Add(
+			new UiPageContent( isAutoDataUpdater: true ).Add(
 				new CheckboxList<int>(
 						CheckboxListSetup.Create(
 							from i in Enumerable.Range( 1, 20 ) select SelectListItem.Create( i, "Item " + i ),
@@ -16,7 +16,5 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 							minColumnWidth: 20.ToEm() ),
 						new[] { 3, 9, 19 } ).ToFormItem()
 					.ToComponentCollection() );
-
-		public override bool IsAutoDataUpdater => true;
 	}
 }

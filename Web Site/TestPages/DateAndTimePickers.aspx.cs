@@ -14,9 +14,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 				new TimeControl( null, true, minuteInterval: 30 ).ToFormItem( label: "Drop-down time control".ToComponents() ),
 				new DateAndTimeControl( null, true ).ToFormItem( label: "Date and time control".ToComponents() ),
 				new DurationControl( null, true ).ToFormItem( label: "Duration control".ToComponents() ) );
-			return new UiPageContent().Add( list );
+			return new UiPageContent( isAutoDataUpdater: true ).Add( list );
 		}
-
-		public override bool IsAutoDataUpdater => true;
 	}
 }

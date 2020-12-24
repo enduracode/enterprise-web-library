@@ -5,7 +5,7 @@ using Tewl.Tools;
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	partial class OmniDemo: EwfPage {
 		protected override PageContent getContent() {
-			var content = new UiPageContent();
+			var content = new UiPageContent( isAutoDataUpdater: true );
 
 			var omni = FormItemList.CreateGrid( numberOfColumns: 7 );
 
@@ -28,7 +28,5 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 			return content;
 		}
-
-		public override bool IsAutoDataUpdater => true;
 	}
 }

@@ -15,7 +15,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		}
 
 		protected override PageContent getContent() {
-			var content = new UiPageContent();
+			var content = new UiPageContent( isAutoDataUpdater: true );
 
 			var fil = FormItemList.CreateStack();
 			fil.AddFormItems( parametersModification.GetField1TextControlFormItem( true ), parametersModification.GetField2TextControlFormItem( true ) );
@@ -62,7 +62,5 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					( !validator.ErrorsOccurred ).ToYesOrEmpty()
 					.ToCell( new TableCellSetup( classes: validator.ErrorsOccurred ? ElementClasses.Red : ElementClasses.Green ) ) ) );
 		}
-
-		public override bool IsAutoDataUpdater => true;
 	}
 }
