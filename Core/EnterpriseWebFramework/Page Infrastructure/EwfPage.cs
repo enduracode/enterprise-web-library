@@ -484,7 +484,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			onLoadData();
 
-			var requestState = AppRequestState.Instance.EwfPageRequestState;
 			ResourceInfo redirectInfo = null;
 			FullResponse fullSecondaryResponse = null;
 			executeWithDataModificationExceptionHandling(
@@ -505,6 +504,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						throw new DataModificationException( Translation.AnotherUserHasModifiedPageAndWeCouldNotInterpretAction );
 
 					// Execute the page's data update.
+					var requestState = AppRequestState.Instance.EwfPageRequestState;
 					bool changesExist( DataModification dataModification ) =>
 						componentStateItemsById.Values.Any( i => i.DataModifications.Contains( dataModification ) && i.ValueChanged() ) || formValues.Any(
 							i => i.DataModifications.Contains( dataModification ) && i.ValueChangedOnPostBack() );
@@ -567,13 +567,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							staticRegionContents.contents,
 							preModRegions.Select( i => Tuple.Create( i.Key, i.ArgumentGetter() ) ).ToArray() );
 					}
-					else {
-						requestState.ComponentStateValuesById = null;
-						requestState.PostBackValues = null;
-					}
+					else
+						AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( null, null );
 				} );
 
-			navigate( redirectInfo, requestState.ModificationErrorsExist ? null : fullSecondaryResponse );
+			navigate( redirectInfo, AppRequestState.Instance.EwfPageRequestState.ModificationErrorsExist ? null : fullSecondaryResponse );
 			return null;
 		}
 
