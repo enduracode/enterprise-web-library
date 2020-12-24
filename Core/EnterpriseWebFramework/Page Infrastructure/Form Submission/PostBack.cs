@@ -20,16 +20,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		/// <param name="id">The ID of this post-back, which must be unique on the page. Do not pass null or the empty string.</param>
 		/// <param name="forcePageDataUpdate">Pass true to force the page's data update to execute even if no form values changed.</param>
-		/// <param name="skipModificationIfNoChanges">Pass true to skip the validations and modification methods if no form or component-state values changed, or if
+		/// <param name="skipModificationIfNoChanges">Pass true to skip the validations and modification method if no form or component-state values changed, or if
 		/// no form controls or component-state items are included in this post-back.</param>
-		/// <param name="firstModificationMethod"></param>
+		/// <param name="modificationMethod">The modification method.</param>
 		/// <param name="actionGetter">A method that returns the action EWF will perform if there were no modification errors.</param>
 		public static ActionPostBack CreateFull(
-			string id = "main", bool forcePageDataUpdate = false, bool skipModificationIfNoChanges = false, Action firstModificationMethod = null,
+			string id = "main", bool forcePageDataUpdate = false, bool skipModificationIfNoChanges = false, Action modificationMethod = null,
 			Func<PostBackAction> actionGetter = null ) {
 			if( !id.Any() )
 				throw new ApplicationException( "The post-back must have an ID." );
-			return new ActionPostBack( true, null, id, forcePageDataUpdate, skipModificationIfNoChanges, firstModificationMethod, actionGetter, null );
+			return new ActionPostBack( true, null, id, forcePageDataUpdate, skipModificationIfNoChanges, modificationMethod, actionGetter, null );
 		}
 
 		/// <summary>
@@ -42,16 +42,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// automatically fall back to a full-page post-back if the page has changed in any way since it was last sent. This parameter currently has no effect since
 		/// async post-backs are not yet implemented; see RSIS goal 478.</param>
 		/// <param name="id">The ID of this post-back, which must be unique on the page. Do not pass null or the empty string.</param>
-		/// <param name="skipModificationIfNoChanges">Pass true to skip the validations and modification methods if no form or component-state values changed, or if
+		/// <param name="skipModificationIfNoChanges">Pass true to skip the validations and modification method if no form or component-state values changed, or if
 		/// no form controls or component-state items are included in this post-back.</param>
-		/// <param name="firstModificationMethod"></param>
+		/// <param name="modificationMethod">The modification method.</param>
 		/// <param name="reloadBehaviorGetter">A method that returns the reload behavior, if there were no modification errors. If you do pass a method, the page
 		/// will block interaction even for async post-backs. This prevents an abrupt focus change for the user when the page reloads.</param>
 		/// <param name="validationDm">The data modification that will have its validations executed if there were no errors in this post-back. Pass null to use the
 		/// first of the current data modifications.</param>
 		public static ActionPostBack CreateIntermediate(
 			IEnumerable<UpdateRegionSet> updateRegions, bool forceFullPagePostBack = false, string id = "main", bool skipModificationIfNoChanges = false,
-			Action firstModificationMethod = null, Func<PageReloadBehavior> reloadBehaviorGetter = null, DataModification validationDm = null ) {
+			Action modificationMethod = null, Func<PageReloadBehavior> reloadBehaviorGetter = null, DataModification validationDm = null ) {
 			if( !id.Any() )
 				throw new ApplicationException( "The post-back must have an ID." );
 			return new ActionPostBack(
@@ -60,7 +60,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				id,
 				null,
 				skipModificationIfNoChanges,
-				firstModificationMethod,
+				modificationMethod,
 				reloadBehaviorGetter != null ? new Func<PostBackAction>( () => new PostBackAction( reloadBehaviorGetter() ) ) : null,
 				validationDm ?? dataModificationGetter().First() );
 		}
@@ -94,14 +94,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal ActionPostBack(
 			bool forceFullPagePostBack, IEnumerable<UpdateRegionSet> updateRegions, string id, bool? forcePageDataUpdate, bool skipModificationIfNoChanges,
-			Action firstModificationMethod, Func<PostBackAction> actionGetter, DataModification validationDm ):
-			base( forceFullPagePostBack, id, forcePageDataUpdate ) {
+			Action modificationMethod, Func<PostBackAction> actionGetter, DataModification validationDm ): base( forceFullPagePostBack, id, forcePageDataUpdate ) {
 			this.updateRegions = updateRegions ?? new UpdateRegionSet[ 0 ];
 			this.skipModificationIfNoChanges = skipModificationIfNoChanges;
 
 			dataModification = new BasicDataModification();
-			if( firstModificationMethod != null )
-				dataModification.AddModificationMethod( firstModificationMethod );
+			if( modificationMethod != null )
+				dataModification.AddModificationMethod( modificationMethod );
 
 			this.actionGetter = actionGetter;
 			this.validationDm = validationDm;
@@ -111,20 +110,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		void ValidationList.AddValidation( EwfValidation validation ) {
 			( (ValidationList)dataModification ).AddValidation( validation );
-		}
-
-		/// <summary>
-		/// Adds a modification method. These only execute if all validation methods succeed.
-		/// </summary>
-		public void AddModificationMethod( Action modificationMethod ) {
-			dataModification.AddModificationMethod( modificationMethod );
-		}
-
-		/// <summary>
-		/// Adds a list of modification methods. These only execute if all validation methods succeed.
-		/// </summary>
-		public void AddModificationMethods( IEnumerable<Action> modificationMethods ) {
-			dataModification.AddModificationMethods( modificationMethods );
 		}
 
 		internal bool Execute( bool changesExist, Action<EwfValidation, IEnumerable<string>> validationErrorHandler, Action<PostBackAction> actionSetter ) {

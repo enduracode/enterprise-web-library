@@ -636,7 +636,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					Form.AddControlsReturnThis( basicContent.BodyContent.GetControls() );
 					basicContent.EtherealContent.AddEtherealControls( Form );
 					if( basicContent.DataUpdateModificationMethod != null )
-						DataUpdate.AddModificationMethod( basicContent.DataUpdateModificationMethod );
+						dataUpdate.AddModificationMethod( basicContent.DataUpdateModificationMethod );
 					IsAutoDataUpdater = basicContent.IsAutoDataUpdater;
 					Form.AddControlsReturnThis( BasicPage.GetPostContentComponents().GetControls() );
 					Form.AddControlsReturnThis( etherealPlace = new PlaceHolder() );

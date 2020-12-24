@@ -7,18 +7,19 @@ using Tewl.InputValidation;
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	internal class BasicDataModification: DataModification, ValidationList {
 		private readonly List<EwfValidation> validations = new List<EwfValidation>();
-		private readonly List<Action> modificationMethods = new List<Action>();
+		private Action modificationMethod;
 
 		void ValidationList.AddValidation( EwfValidation validation ) {
 			validations.Add( validation );
 		}
 
+		/// <summary>
+		/// Adds the modification method, which only executes if all validations succeed. This can only be called once.
+		/// </summary>
 		public void AddModificationMethod( Action modificationMethod ) {
-			modificationMethods.Add( modificationMethod );
-		}
-
-		public void AddModificationMethods( IEnumerable<Action> modificationMethods ) {
-			this.modificationMethods.AddRange( modificationMethods );
+			if( this.modificationMethod != null )
+				throw new ApplicationException( "The modification method was already added." );
+			this.modificationMethod = modificationMethod;
 		}
 
 		internal bool Execute(
@@ -41,15 +42,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					throw new DataModificationException();
 			}
 
-			var skipModification = !modificationMethods.Any() || ( skipIfNoChanges && !changesExist );
+			var skipModification = modificationMethod == null || ( skipIfNoChanges && !changesExist );
 			if( performValidationOnly || ( skipModification && actionMethodAndPostModificationMethod == null ) )
 				return validationNeeded;
 
 			DataAccessState.Current.DisableCache();
 			try {
 				if( !skipModification )
-					foreach( var method in modificationMethods )
-						method();
+					modificationMethod();
 				actionMethodAndPostModificationMethod?.Item1();
 				DataAccessState.Current.ResetCache();
 				AppRequestState.Instance.PreExecuteCommitTimeValidationMethodsForAllOpenConnections();

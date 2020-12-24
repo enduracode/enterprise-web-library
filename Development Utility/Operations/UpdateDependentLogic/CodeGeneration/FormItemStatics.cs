@@ -8,10 +8,10 @@ using Tewl.Tools;
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 	internal static class FormItemStatics {
 		internal static void WriteFormItemGetters( TextWriter writer, ModificationField field ) {
-			// Some of these form item getters need modification methods to be executed to work properly. They return these methods, as out parameters, instead of
-			// just adding them to the data modification. This allows client code on a page to specify the order of modification methods, which is important because
-			// there may be both child modifications (like file collections) and one-to-many modifications (like M+Vision references for an applicant) on the same
-			// page, and the main modification needs to execute between these.
+			// Some of these form item getters need modification methods to be executed to work properly. They return these methods, as out parameters. This allows
+			// client code on a page to specify the order of modification methods, which is important because there may be both child modifications (like file
+			// collections) and one-to-many modifications (like M+Vision references for an applicant) on the same page, and the main modification needs to execute
+			// between these.
 			writeTextFormItemGetters( writer, field );
 			writeNumericFormItemGetters( writer, field );
 			writeCheckboxFormItemGetters( writer, field );
