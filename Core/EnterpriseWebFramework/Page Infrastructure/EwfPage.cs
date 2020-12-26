@@ -49,12 +49,23 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			[ JsonProperty( PropertyName = "postBack" ) ]
 			public readonly string PostBackId;
 
+			// This property name is duplicated in the JavaScript file.
+			[ JsonProperty( PropertyName = "scrollPositionX" ) ]
+			public readonly string ScrollPositionX;
+
+			// This property name is duplicated in the JavaScript file.
+			[ JsonProperty( PropertyName = "scrollPositionY" ) ]
+			public readonly string ScrollPositionY;
+
 			public HiddenFieldData(
-				ImmutableDictionary<string, JToken> componentStateValuesById, string formValueHash, string lastPostBackFailingDmId, string postBackId ) {
+				ImmutableDictionary<string, JToken> componentStateValuesById, string formValueHash, string lastPostBackFailingDmId, string postBackId,
+				string scrollPositionX, string scrollPositionY ) {
 				ComponentStateValuesById = componentStateValuesById;
 				FormValueHash = formValueHash;
 				LastPostBackFailingDmId = lastPostBackFailingDmId;
 				PostBackId = postBackId;
+				ScrollPositionX = scrollPositionX;
+				ScrollPositionY = scrollPositionY;
 			}
 		}
 
@@ -467,7 +478,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					Request.Form[ hiddenFieldName ],
 					new JsonSerializerSettings { MissingMemberHandling = MissingMemberHandling.Error } );
 
-				AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( Request.Form[ "__SCROLLPOSITIONX" ], Request.Form[ "__SCROLLPOSITIONY" ] );
+				AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( hiddenFieldData.ScrollPositionX, hiddenFieldData.ScrollPositionY );
 				AppRequestState.Instance.EwfPageRequestState.ComponentStateValuesById = hiddenFieldData.ComponentStateValuesById;
 			}
 			catch {
@@ -662,6 +673,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 												componentStateItemsById.ToImmutableDictionary( i => i.Key, i => i.Value.ValueAsJson ),
 												generateFormValueHash(),
 												failingDmId,
+												"",
+												"",
 												"" ),
 											Formatting.None ) ) );
 
@@ -1134,17 +1147,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				.Select( i => i.Item2() )
 				.Aggregate( new StringBuilder(), ( builder, statements ) => builder.Append( statements ), i => i.ToString() );
 
-			MaintainScrollPositionOnPostBack = true;
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
 			var scroll = scrollPositionForThisResponse == ScrollPosition.LastPositionOrStatusBar &&
 			             ( !requestState.ModificationErrorsExist || ( requestState.DmIdAndSecondaryOp != null &&
 			                                                          new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }
 				                                                          .Contains( requestState.DmIdAndSecondaryOp.Item2 ) ) );
-
-			// If a transfer happened on this request and we're on the same page and we want to scroll, get coordinates from the per-request data in EwfApp.
 			var scrollStatement = "";
 			if( scroll && requestState.ScrollPositionX != null && requestState.ScrollPositionY != null )
-				scrollStatement = "window.scrollTo(" + requestState.ScrollPositionX + "," + requestState.ScrollPositionY + ");";
+				scrollStatement = "window.scroll(" + requestState.ScrollPositionX + "," + requestState.ScrollPositionY + ");";
 
 			// If the page has requested a client-side redirect, configure it now. The JavaScript solution is preferred over a meta tag since apparently it doesn't
 			// cause reload behavior by the browser. See http://josephsmarr.com/2007/06/06/the-hidden-cost-of-meta-refresh-tags.

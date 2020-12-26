@@ -83,6 +83,8 @@ function postBackRequestStarting( e, postBackId ) {
 
 	var ewfData = JSON.parse( $( "#ewfData" ).val() );
 	ewfData.postBack = postBackId;
+	ewfData.scrollPositionX = window.scrollX;
+	ewfData.scrollPositionY = window.scrollY;
 	$( "#ewfData" ).val( JSON.stringify( ewfData ) );
 
 	// see http://stackoverflow.com/a/9924844/35349
