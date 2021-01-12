@@ -108,7 +108,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 														attributes.Add( Tuple.Create( "enctype", "multipart/form-data" ) );
 													attributes.Add( Tuple.Create( "novalidate", "" ) );
 
-													return new ElementLocalData( "form", focusDependentData: new ElementFocusDependentData( attributes: attributes ) );
+													return new ElementLocalData(
+														"form",
+														focusDependentData: new ElementFocusDependentData( attributes: attributes, includeIdAttribute: true ) );
 												},
 												clientSideIdOverride: EwfPage.FormId,
 												children: preContentComponents.Concat( bodyContent )
