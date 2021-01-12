@@ -1088,10 +1088,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			StandardLibrarySessionState.Instance.StatusMessages.Clear();
 			StandardLibrarySessionState.Instance.ClearClientSideNavigation();
-
-			// Calling Response.End() is not a good practice; see http://stackoverflow.com/q/1087777/35349. We should be able to remove this call when we separate
-			// EWF from Web Forms. This is EnduraCode goal 790.
-			Response.End();
 		}
 
 		private string getJsInitStatements( string elementJsInitStatements ) {
