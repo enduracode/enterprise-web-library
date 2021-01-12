@@ -648,12 +648,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						inActiveAutofocusRegion = true;
 						activeAutofocusRegionsExist = true;
 					}
-					var isFocused = !elementFocused && inActiveAutofocusRegion && node.FocusabilityConditionGetter != null &&
+
+					var focusabilityCondition = node.FocusabilityConditionGetter?.Invoke();
+
+					var isFocused = !elementFocused && inActiveAutofocusRegion && focusabilityCondition != null &&
 					                isFocusablePredicate( node.FocusabilityConditionGetter() );
 					if( isFocused )
 						elementFocused = true;
 
-					node.JsInitStatementWriter( isFocused, jsInitStatementWriter );
+					node.JsInitStatementWriter?.Invoke( isFocused, jsInitStatementWriter );
 
 					foreach( var i in node.AllChildren )
 						prepareSubtreeForRendering( i, inActiveAutofocusRegion, jsInitStatementWriter );
