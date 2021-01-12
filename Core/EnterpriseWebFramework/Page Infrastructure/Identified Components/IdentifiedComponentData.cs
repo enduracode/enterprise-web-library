@@ -13,7 +13,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		/// <param name="id">The component ID. Pass a nonempty string to specify an ID and make the component an ID container. Pass the empty string for an
 		/// ID container only. Pass null for no ID and no container. A component with a specified ID cannot be used more than once in the same ID container.</param>
-		/// <param name="updateRegionLinkers"></param>
+		/// <param name="updateRegionLinkers">A collection of update-region linkers. Do not pass null. Since an identified component (or any component) can appear
+		/// multiple times on a page, the update regions of each instance are scoped to the instance. This prevents an instance from “reaching out” of itself and
+		/// selecting update regions inside other instances of the same component on the page.</param>
 		/// <param name="errorSources"></param>
 		/// <param name="childGetter"></param>
 		internal IdentifiedComponentData(
