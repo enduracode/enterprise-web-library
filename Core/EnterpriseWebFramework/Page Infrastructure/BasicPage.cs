@@ -274,24 +274,23 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return new GenericPhrasingContainer( ".".ToComponents(), classes: dotClass ).ToCollection();
 		}
 
-		private static IReadOnlyCollection<FlowComponent> getNotificationSectionContainer() {
-			var messagesExist = EwfPage.Instance.StatusMessages.Any();
+		internal static EtherealComponent GetStatusMessageModalBox() =>
 			new ModalBox(
-					new ModalBoxId(),
-					true,
-					new FlowIdContainer(
-						new Section(
-							"Messages",
-							messagesExist && !statusMessagesDisplayAsNotification()
-								? getStatusMessageComponentList().ToCollection()
-								: Enumerable.Empty<FlowComponent>().Materialize() ).ToCollection() ).ToCollection(),
-					open: messagesExist && !statusMessagesDisplayAsNotification() ).ToCollection()
-				.AddEtherealControls( EwfPage.Instance.Form );
+				new ModalBoxId(),
+				true,
+				new FlowIdContainer(
+					new Section(
+						"Messages",
+						EwfPage.Instance.StatusMessages.Any() && !statusMessagesDisplayAsNotification()
+							? getStatusMessageComponentList().ToCollection()
+							: Enumerable.Empty<FlowComponent>().Materialize() ).ToCollection() ).ToCollection(),
+				open: EwfPage.Instance.StatusMessages.Any() && !statusMessagesDisplayAsNotification() );
 
+		private static IReadOnlyCollection<FlowComponent> getNotificationSectionContainer() {
 			// This is used by the EWF JavaScript file.
 			const string notificationSectionContainerId = "ewfNotification";
 
-			return messagesExist && statusMessagesDisplayAsNotification()
+			return EwfPage.Instance.StatusMessages.Any() && statusMessagesDisplayAsNotification()
 				       ? new GenericFlowContainer(
 					       new Section(
 						       null,

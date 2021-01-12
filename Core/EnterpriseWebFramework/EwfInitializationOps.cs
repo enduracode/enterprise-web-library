@@ -63,8 +63,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							throw new ApplicationException( "Meta logic factory not found." );
 						EwfApp.Init( globalType, metaLogicFactory );
 
-						EwfPage.Init(
-							ModalBox.CreateBrowsingModalBox,
+						CssPreprocessingStatics.Init( globalInitializer.GetType().Assembly, globalType.Assembly );
+						EwfPage.Init( BasicPageContent.GetContent );
+						HyperlinkBehaviorExtensionCreators.Init( ModalBox.GetBrowsingModalBoxOpenStatements );
+						FileUpload.Init( () => ( (BasicPageContent)EwfPage.Instance.BasicContent ).FormUsesMultipartEncoding = true );
+						ModalBox.Init( () => ( (BasicPageContent)EwfPage.Instance.BasicContent ).BrowsingModalBoxId );
+						BasicPageContent.Init(
 							contentObjects => {
 								var contentUsesUi = contentObjects.Any( i => i is UiPageContent );
 
@@ -77,8 +81,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									cssInfos.AddRange( EwfUiStatics.AppProvider.GetStyleSheets() );
 								return cssInfos;
 							} );
-						CssPreprocessingStatics.Init( globalInitializer.GetType().Assembly, globalType.Assembly );
-						HyperlinkBehaviorExtensionCreators.Init( ModalBox.GetBrowsingModalBoxOpenStatements );
 						EwfUiStatics.Init( globalType );
 
 						EwfInitializationOps.appInitializer = appInitializer;

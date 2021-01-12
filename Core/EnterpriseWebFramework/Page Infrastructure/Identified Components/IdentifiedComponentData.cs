@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	internal class IdentifiedComponentData<ChildType> where ChildType: PageComponent {
 		internal readonly string Id;
-		internal readonly IEnumerable<UpdateRegionLinker> UpdateRegionLinkers;
+		internal readonly IReadOnlyCollection<UpdateRegionLinker> UpdateRegionLinkers;
 		internal readonly ErrorSourceSet ErrorSources;
 		internal readonly Func<ModificationErrorDictionary, IEnumerable<ChildType>> ChildGetter;
 
@@ -17,7 +17,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="errorSources"></param>
 		/// <param name="childGetter"></param>
 		internal IdentifiedComponentData(
-			string id, IEnumerable<UpdateRegionLinker> updateRegionLinkers, ErrorSourceSet errorSources,
+			string id, IReadOnlyCollection<UpdateRegionLinker> updateRegionLinkers, ErrorSourceSet errorSources,
 			Func<ModificationErrorDictionary, IEnumerable<ChildType>> childGetter ) {
 			Id = id;
 			UpdateRegionLinkers = updateRegionLinkers;

@@ -7,8 +7,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Web;
 using System.Web.UI;
-using System.Web.UI.HtmlControls;
-using System.Web.UI.WebControls;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
@@ -26,13 +24,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// </summary>
 	public abstract class EwfPage: Page {
 		// These strings are duplicated in the JavaScript file.
-		private const string formId = "ewfForm";
-		private const string hiddenFieldName = "ewfData";
+		internal const string FormId = "ewfForm";
+		internal const string HiddenFieldName = "ewfData";
 
 		internal const string ButtonElementName = "ewfButton";
 
-		private static Func<IEnumerable<EtherealComponent>> browsingModalBoxCreator;
-		private static Func<IReadOnlyCollection<PageContent>, IEnumerable<ResourceInfo>> cssInfoCreator;
+		private static Func<PageContent, Func<string>, Func<string>, ( PageContent basicContent, FlowComponent component, FlowComponent etherealContainer,
+			FlowComponent jsInitElement, Action dataUpdateModificationMethod, bool isAutoDataUpdater )> contentGetter;
 
 		[ JsonObject( ItemRequired = Required.Always, MemberSerialization = MemberSerialization.Fields ) ]
 		private class HiddenFieldData {
@@ -69,8 +67,26 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 		}
 
+		private class IdGenerator {
+			private readonly string idBase;
+			private int number;
+
+			public IdGenerator( string idBase ) {
+				// Prefix generated IDs with double underscore to avoid collisions with specified client-side IDs on the page.
+				this.idBase = "_" + idBase;
+
+				number = 1;
+			}
+
+			public string GenerateId() => idBase + "_" + number++;
+
+			public string GenerateLocallySpecifiedId( string localId ) =>
+				// Prefix specified local IDs with double underscore to avoid collisions with numbered IDs.
+				idBase + "__" + localId;
+		}
+
 		internal new static void Init(
-			Func<IEnumerable<EtherealComponent>> browsingModalBoxCreator, Func<IReadOnlyCollection<PageContent>, IEnumerable<ResourceInfo>> cssInfoCreator ) {
+			Func<PageContent, Func<string>, Func<string>, ( PageContent, FlowComponent, FlowComponent, FlowComponent, Action, bool )> contentGetter ) {
 			EwfValidation.Init(
 				() => Instance.formState.ValidationPredicate,
 				() => Instance.formState.DataModifications,
@@ -113,8 +129,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							"If the data-update modification is included, it is meaningless to include any full post-backs since these inherently update the page's data." );
 				},
 				dataModification => dataModification == Instance.dataUpdate ? Instance.dataUpdatePostBack : (ActionPostBack)dataModification );
-			EwfPage.browsingModalBoxCreator = browsingModalBoxCreator;
-			EwfPage.cssInfoCreator = cssInfoCreator;
+			EwfPage.contentGetter = contentGetter;
 		}
 
 		/// <summary>
@@ -139,26 +154,24 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				throw new ApplicationException( "The page tree has not yet been built." );
 		}
 
-		private HtmlGenericControl body;
-		private Control etherealPlace;
+		internal PageContent BasicContent;
+		private PageNode rootNode;
+		private Action<bool, Func<FocusabilityCondition, bool>> renderingPreparer;
+		private PageNode etherealContainerNode;
+		private int etherealComponentCount;
+		private int nodeCount;
+		private List<PageNode> allNodes;
 		private FormState formState;
 		private Func<string> elementOrIdentifiedComponentIdGetter = () => "";
-		internal readonly ModalBoxId BrowsingModalBoxId = new ModalBoxId();
 		private readonly BasicDataModification dataUpdate = new BasicDataModification();
 		private readonly PostBack dataUpdatePostBack = PostBack.CreateDataUpdate();
 		internal bool? IsAutoDataUpdater;
-
-		internal readonly Dictionary<PageComponent, IReadOnlyCollection<Control>> ControlsByComponent =
-			new Dictionary<PageComponent, IReadOnlyCollection<Control>>();
-
-		private readonly Dictionary<Control, List<EtherealControl>> etherealControlsByControl = new Dictionary<Control, List<EtherealControl>>();
 		private readonly Dictionary<string, PostBack> postBacksById = new Dictionary<string, PostBack>();
 		private readonly List<FormValue> formValues = new List<FormValue>();
 		private readonly Dictionary<string, ComponentStateItem> componentStateItemsById = new Dictionary<string, ComponentStateItem>();
-		private readonly List<LegacyUpdateRegionLinker> updateRegionLinkers = new List<LegacyUpdateRegionLinker>();
+		private IReadOnlyCollection<PageNode> updateRegionLinkerNodes;
 		private readonly Dictionary<EwfValidation, List<string>> modErrorDisplaysByValidation = new Dictionary<EwfValidation, List<string>>();
-		internal readonly HashSet<EwfValidation> ValidationsWithErrors = new HashSet<EwfValidation>();
-		internal readonly Dictionary<Control, List<AutofocusCondition>> AutofocusConditionsByControl = new Dictionary<Control, List<AutofocusCondition>>();
+		private readonly HashSet<EwfValidation> validationsWithErrors = new HashSet<EwfValidation>();
 		private readonly List<Action> controlTreeValidations = new List<Action>();
 		internal PostBack SubmitButtonPostBack;
 		private readonly List<Tuple<StatusMessageType, string>> statusMessages = new List<Tuple<StatusMessageType, string>>();
@@ -177,14 +190,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Gets the parameters modification object for this page. 
 		/// </summary>
 		public abstract ParametersModificationBase ParametersModificationAsBaseType { get; }
-
-		/// <summary>
-		/// Creates a new page. Do not call this yourself.
-		/// </summary>
-		protected EwfPage() {
-			// We suspect that this disables browser detection for the entire request, not just the page.
-			ClientTarget = "uplevel";
-		}
 
 		/// <summary>
 		/// Executes EWF logic in addition to the standard ASP.NET PreInit logic.
@@ -337,15 +342,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			onLoadData();
 
 			if( requestState.StaticRegionContents != null ) {
-				var updateRegionLinkersByKey = updateRegionLinkers.ToDictionary( i => i.Key );
-				var updateRegionControls = requestState.UpdateRegionKeysAndArguments.SelectMany(
+				var nodeUpdateRegionLinkersByKey = updateRegionLinkerNodes.SelectMany( i => i.KeyedUpdateRegionLinkers, ( node, keyedLinker ) => ( node, keyedLinker ) )
+					.ToImmutableDictionary( i => i.keyedLinker.key );
+				var updateRegions = requestState.UpdateRegionKeysAndArguments.Select(
 					keyAndArg => {
-						if( !updateRegionLinkersByKey.TryGetValue( keyAndArg.Item1, out var linker ) )
+						if( !nodeUpdateRegionLinkersByKey.TryGetValue( keyAndArg.Item1, out var nodeLinker ) )
 							throw getPossibleDeveloperMistakeException( "An update region linker with the key \"{0}\" does not exist.".FormatWith( keyAndArg.Item1 ) );
-						return linker.PostModificationRegionGetter( keyAndArg.Item2 );
+						return ( nodeLinker.node, nodeLinker.keyedLinker.linker.PostModificationRegionGetter( keyAndArg.Item2 ) );
 					} );
 
-				var staticRegionContents = getStaticRegionContents( updateRegionControls );
+				var staticRegionContents = getStaticRegionContents( updateRegions );
 				if( staticRegionContents.contents != requestState.StaticRegionContents || componentStateItemsById.Values.Any( i => i.ValueIsInvalid() ) ||
 				    formValues.Any( i => i.GetPostBackValueKey().Any() && i.PostBackValueIsInvalid() ) )
 					throw getPossibleDeveloperMistakeException(
@@ -375,7 +381,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 						if( navigationNeeded ) {
 							requestState.DmIdAndSecondaryOp = Tuple.Create( dmIdAndSecondaryOp.Item1, SecondaryPostBackOperation.NoOperation );
-							requestState.SetStaticAndUpdateRegionState( getStaticRegionContents( new Control[ 0 ] ).contents, new Tuple<string, string>[ 0 ] );
+							requestState.SetStaticAndUpdateRegionState( getStaticRegionContents( null ).contents, new Tuple<string, string>[ 0 ] );
 						}
 					} );
 				if( navigationNeeded )
@@ -475,7 +481,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			try {
 				// throws exception if field missing, because Request.Form returns null
 				hiddenFieldData = JsonConvert.DeserializeObject<HiddenFieldData>(
-					Request.Form[ hiddenFieldName ],
+					Request.Form[ HiddenFieldName ],
 					new JsonSerializerSettings { MissingMemberHandling = MissingMemberHandling.Error } );
 
 				AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( hiddenFieldData.ScrollPositionX, hiddenFieldData.ScrollPositionY );
@@ -560,13 +566,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					}
 
 					if( postBack.IsIntermediate ) {
-						var regionSets = new HashSet<UpdateRegionSet>( actionPostBack.UpdateRegions );
-						var preModRegions = updateRegionLinkers.SelectMany(
-								i => i.PreModificationRegions,
-								( linker, region ) => new { region.Sets, region.ControlGetter, linker.Key, region.ArgumentGetter } )
-							.Where( i => regionSets.Overlaps( i.Sets ) )
-							.ToArray();
-						var staticRegionContents = getStaticRegionContents( preModRegions.SelectMany( i => i.ControlGetter() ) );
+						var regionSets = actionPostBack.UpdateRegions.ToImmutableHashSet();
+						var updateRegions = updateRegionLinkerNodes.SelectMany( i => i.KeyedUpdateRegionLinkers, ( node, keyedLinker ) => ( node, keyedLinker ) )
+							.SelectMany(
+								nodeLinker => nodeLinker.keyedLinker.linker.PreModificationRegions.Where( i => regionSets.Overlaps( i.Sets ) ),
+								( nodeLinker, region ) => ( nodeLinker.node, nodeLinker.keyedLinker.key, region ) )
+							.Materialize();
+						var staticRegionContents = getStaticRegionContents( updateRegions.Select( i => ( i.node, i.region.ComponentGetter() ) ) );
 
 						requestState.ComponentStateValuesById = componentStateItemsById.Where( i => staticRegionContents.stateItems.Contains( i.Value ) )
 							.ToImmutableDictionary( i => i.Key, i => i.Value.ValueAsJson );
@@ -576,7 +582,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							actionPostBack.ValidationDm == lastPostBackFailingDm ? SecondaryPostBackOperation.Validate : SecondaryPostBackOperation.ValidateChangesOnly );
 						requestState.SetStaticAndUpdateRegionState(
 							staticRegionContents.contents,
-							preModRegions.Select( i => Tuple.Create( i.Key, i.ArgumentGetter() ) ).ToArray() );
+							updateRegions.Select( i => Tuple.Create( i.key, i.region.ArgumentGetter() ) ).Materialize() );
 					}
 					else
 						AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( null, null );
@@ -592,102 +598,84 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private void onLoadData() {
 			if( HasControls() )
 				throw new ApplicationException( "ASPX content exists." );
-			body = new HtmlGenericControl( "body" );
-			body.Attributes.Add( "onpagehide", "deactivateProcessingDialog();" );
-			body.Attributes.Add( "data-instant-whitelist", "data-instant-whitelist" ); // for https://instant.page/
-			var form = new HtmlForm();
-			form.ID = formId;
-			form.Action = InfoAsBaseType.GetUrl();
-			form.Attributes.Add( "novalidate", "" );
-			body.AddControlsReturnThis( form );
-			this.AddControlsReturnThis( new LiteralControl( "<!DOCTYPE html><html>" ), new HtmlHead(), body );
-			this.AddControlsReturnThis( new LiteralControl( "</html>" ) );
 
-			// Set the page title. This should be done before LoadData to support pages or entity setups that want to set their own title.
-			Title = StringTools.ConcatenateWithDelimiter(
-				" - ",
-				EwfApp.Instance.AppDisplayName.Length > 0 ? EwfApp.Instance.AppDisplayName : ConfigurationStatics.SystemName,
-				ResourceBase.CombineResourcePathStrings(
-					ResourceBase.ResourcePathSeparator,
-					InfoAsBaseType.ParentResourceEntityPathString,
-					InfoAsBaseType.ResourceFullName ) );
+			var elementJsInitStatements = new StringBuilder();
 
 			formState = new FormState();
-			browsingModalBoxCreator().AddEtherealControls( Form );
-			FormState.ExecuteWithDataModificationsAndDefaultAction(
-				DataUpdate.ToCollection(),
+			var content = contentGetter(
+				FormState.ExecuteWithDataModificationsAndDefaultAction(
+					DataUpdate.ToCollection(),
+					() => {
+						using( MiniProfiler.Current.Step( "EWF - Get page content" ) )
+							return getContent();
+					} ),
 				() => {
-					Form.AddControlsReturnThis( BasicPage.GetPreContentComponents().GetControls() );
+					var rs = AppRequestState.Instance.EwfPageRequestState;
+					var failingDmId =
+						rs.ModificationErrorsExist && rs.DmIdAndSecondaryOp != null && rs.DmIdAndSecondaryOp.Item2 != SecondaryPostBackOperation.ValidateChangesOnly
+							? rs.DmIdAndSecondaryOp.Item1
+							: null;
 
-					PageContent content;
-					using( MiniProfiler.Current.Step( "EWF - Get page content" ) )
-						content = getContent();
-					var contentObjects = new List<PageContent>();
-					while( !( content is BasicPageContent ) ) {
-						contentObjects.Add( content );
-						content = content.GetContent();
-					}
-					var basicContent = (BasicPageContent)content;
-
-					if( basicContent.TitleOverride.Any() )
-						Title = basicContent.TitleOverride;
-					addMetadataAndFaviconLinks();
-					addTypekitLogicIfNecessary();
-					Header.AddControlsReturnThis(
-						from i in cssInfoCreator( contentObjects ) select getStyleSheetLink( this.GetClientUrl( i.GetUrl( false, false, false ) ) ) );
-					addModernizrLogic();
-					addGoogleAnalyticsLogicIfNecessary();
-					addJavaScriptIncludes();
-					if( basicContent.CustomHeadElements.Html.Any() )
-						Header.AddControlsReturnThis( new LiteralControl( basicContent.CustomHeadElements.Html ) );
-
-					body.Attributes.Add( "class", StringTools.ConcatenateWithDelimiter( " ", basicContent.BodyClasses.ConditionsByClassName.Select( i => i.Key ) ) );
-					Form.AddControlsReturnThis( basicContent.BodyContent.GetControls() );
-					basicContent.EtherealContent.AddEtherealControls( Form );
-					if( basicContent.DataUpdateModificationMethod != null )
-						dataUpdate.AddModificationMethod( basicContent.DataUpdateModificationMethod );
-					IsAutoDataUpdater = basicContent.IsAutoDataUpdater;
-					Form.AddControlsReturnThis( BasicPage.GetPostContentComponents().GetControls() );
-					Form.AddControlsReturnThis( etherealPlace = new PlaceHolder() );
-				} );
-			Form.AddControlsReturnThis(
-				new ElementNode(
-						context => new ElementNodeData(
-							hiddenFieldName,
-							() => {
-								var attributes = new List<Tuple<string, string>>();
-								attributes.Add( Tuple.Create( "type", "hidden" ) );
-								attributes.Add( Tuple.Create( "name", hiddenFieldName ) );
-
-								var rs = AppRequestState.Instance.EwfPageRequestState;
-								var failingDmId =
-									rs.ModificationErrorsExist && rs.DmIdAndSecondaryOp != null && rs.DmIdAndSecondaryOp.Item2 != SecondaryPostBackOperation.ValidateChangesOnly
-										? rs.DmIdAndSecondaryOp.Item1
-										: null;
-
-								attributes.Add(
-									Tuple.Create(
-										"value",
-										JsonConvert.SerializeObject(
-											new HiddenFieldData(
-												componentStateItemsById.ToImmutableDictionary( i => i.Key, i => i.Value.ValueAsJson ),
-												generateFormValueHash(),
-												failingDmId,
-												"",
-												"",
-												"" ),
-											Formatting.None ) ) );
-
-								return new ElementNodeLocalData( "input", new ElementNodeFocusDependentData( attributes, true, "" ) );
-							} ) ).ToCollection()
-					.GetControls() );
-			using( MiniProfiler.Current.Step( "EWF - Load control data" ) )
-				loadDataForControlAndChildren( this );
+					return JsonConvert.SerializeObject(
+						new HiddenFieldData(
+							componentStateItemsById.ToImmutableDictionary( i => i.Key, i => i.Value.ValueAsJson ),
+							generateFormValueHash(),
+							failingDmId,
+							"",
+							"",
+							"" ),
+						Formatting.None );
+				},
+				() => getJsInitStatements( elementJsInitStatements.ToString() ) );
+			BasicContent = content.basicContent;
+			if( content.dataUpdateModificationMethod != null )
+				dataUpdate.AddModificationMethod( content.dataUpdateModificationMethod );
+			IsAutoDataUpdater = content.isAutoDataUpdater;
+			using( MiniProfiler.Current.Step( "EWF - Build page tree" ) )
+				rootNode = buildNode( content.component, new IdGenerator( "" ), content.etherealContainer, content.jsInitElement, false, false );
 			formState = null;
 
-			var activeStateItems = GetDescendants( this ).OfType<ElementNode>().SelectMany( i => i.StateItems ).ToImmutableHashSet();
+			renderingPreparer = ( modificationErrorsOccurred, isFocusablePredicate ) => {
+				var etherealChildren = new List<PageNode>( etherealComponentCount );
+
+				var activeAutofocusRegionsExist = false;
+				var elementFocused = false;
+
+				void prepareSubtreeForRendering( PageNode node, bool inActiveAutofocusRegion, TextWriter jsInitStatementWriter ) {
+					etherealChildren.AddRange( node.EtherealChildren );
+
+					if( !inActiveAutofocusRegion && node.AutofocusCondition?.IsTrue( AppRequestState.Instance.EwfPageRequestState.FocusKey ) == true ) {
+						inActiveAutofocusRegion = true;
+						activeAutofocusRegionsExist = true;
+					}
+					var isFocused = !elementFocused && inActiveAutofocusRegion && node.FocusabilityConditionGetter != null &&
+					                isFocusablePredicate( node.FocusabilityConditionGetter() );
+					if( isFocused )
+						elementFocused = true;
+
+					node.JsInitStatementWriter( isFocused, jsInitStatementWriter );
+
+					foreach( var i in node.AllChildren )
+						prepareSubtreeForRendering( i, inActiveAutofocusRegion, jsInitStatementWriter );
+				}
+
+				using( var jsInitStatementWriter = new StringWriter( elementJsInitStatements ) )
+					prepareSubtreeForRendering( rootNode, modificationErrorsOccurred, jsInitStatementWriter );
+
+				if( !modificationErrorsOccurred && activeAutofocusRegionsExist && !elementFocused )
+					throw new ApplicationException( "The active autofocus regions do not contain any focusable elements." );
+
+				etherealContainerNode.Children = etherealChildren;
+			};
+
+			allNodes = new List<PageNode>( nodeCount );
+			addTreeToAllNodes( rootNode );
+
+			var activeStateItems = allNodes.Select( i => i.StateItem ).Where( i => i != null ).ToImmutableHashSet();
 			foreach( var i in componentStateItemsById.Where( i => !activeStateItems.Contains( i.Value ) ).Select( i => i.Key ).Materialize() )
 				componentStateItemsById.Remove( i );
+
+			updateRegionLinkerNodes = allNodes.Where( i => i.KeyedUpdateRegionLinkers != null ).Materialize();
 
 			var duplicatePostBackValueKeys = formValues.Select( i => i.GetPostBackValueKey() ).Where( i => i.Any() ).GetDuplicates().ToArray();
 			if( duplicatePostBackValueKeys.Any() )
@@ -709,122 +697,119 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		protected virtual PageContent getContent() => null;
 
-		private void addMetadataAndFaviconLinks() {
-			Header.Controls.Add(
-				new HtmlMeta
-					{
-						Name = "application-name", Content = EwfApp.Instance.AppDisplayName.Length > 0 ? EwfApp.Instance.AppDisplayName : ConfigurationStatics.SystemName
-					} );
+		private PageNode buildNode(
+			PageComponent component, IdGenerator idGenerator, FlowComponent etherealContainer, FlowComponent jsInitElement, bool inEtherealContainer,
+			bool inJsInitElement ) {
+			nodeCount += 1;
 
-			// Chrome start URL
-			Header.Controls.Add( new HtmlMeta { Name = "application-url", Content = this.GetClientUrl( NetTools.HomeUrl ) } );
+			IReadOnlyCollection<PageNode> buildChildren( IEnumerable<PageComponent> children, IdGenerator g ) =>
+				children.Select( i => buildNode( i, g, etherealContainer, jsInitElement, inEtherealContainer, inJsInitElement ) ).Materialize();
 
-			// IE9 start URL
-			Header.Controls.Add( new HtmlMeta { Name = "msapplication-starturl", Content = this.GetClientUrl( NetTools.HomeUrl ) } );
-
-			var faviconPng48X48 = EwfApp.Instance.FaviconPng48X48;
-			if( faviconPng48X48 != null && faviconPng48X48.UserCanAccessResource ) {
-				var link = new HtmlLink { Href = this.GetClientUrl( faviconPng48X48.GetUrl( true, true, false ) ) };
-				link.Attributes.Add( "rel", "icon" );
-				link.Attributes.Add( "sizes", "48x48" );
-				Header.Controls.Add( link );
-			}
-
-			var favicon = EwfApp.Instance.Favicon;
-			if( favicon != null && favicon.UserCanAccessResource ) {
-				var link = new HtmlLink { Href = this.GetClientUrl( favicon.GetUrl( true, true, false ) ) };
-				link.Attributes.Add( "rel", "shortcut icon" ); // rel="shortcut icon" is deprecated and will be replaced with rel="icon".
-				Header.Controls.Add( link );
-			}
-
-			Header.Controls.Add( new HtmlMeta { Name = "viewport", Content = "initial-scale=1" } );
-		}
-
-		private void addTypekitLogicIfNecessary() {
-			if( EwfApp.Instance.TypekitId.Length > 0 ) {
-				Header.Controls.Add(
-					new Literal
-						{
-							Text = "<script type=\"text/javascript\" src=\"http" + ( EwfApp.Instance.RequestIsSecure( Request ) ? "s" : "" ) + "://use.typekit.com/" +
-							       EwfApp.Instance.TypekitId + ".js\"></script>"
-						} );
-				Header.Controls.Add( new Literal { Text = "<script type=\"text/javascript\">try{Typekit.load();}catch(e){}</script>" } );
-			}
-		}
-
-		private Control getStyleSheetLink( string url ) {
-			var l = new HtmlLink { Href = url };
-			l.Attributes.Add( "rel", "stylesheet" );
-			l.Attributes.Add( "type", "text/css" );
-			return l;
-		}
-
-		private void addModernizrLogic() {
-			Header.Controls.Add(
-				new Literal
-					{
-						Text = "<script type=\"text/javascript\" src=\"" +
-						       this.GetClientUrl( EwfApp.MetaLogicFactory.CreateModernizrJavaScriptInfo().GetUrl( false, false, false ) ) + "\"></script>"
-					} );
-		}
-
-		private void addGoogleAnalyticsLogicIfNecessary() {
-			if( EwfApp.Instance.GoogleAnalyticsWebPropertyId.Length == 0 )
-				return;
-			using( var sw = new StringWriter() ) {
-				sw.WriteLine( "<script>" );
-				sw.WriteLine( "(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){" );
-				sw.WriteLine( "(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o)," );
-				sw.WriteLine( "m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)" );
-				sw.WriteLine( "})(window,document,'script','//www.google-analytics.com/analytics.js','ga');" );
-
-				var userId = EwfApp.Instance.GetGoogleAnalyticsUserId();
-				sw.WriteLine(
-					"ga('create', '" + EwfApp.Instance.GoogleAnalyticsWebPropertyId + "', 'auto'{0});",
-					userId.Any() ? ", {{'userId': '{0}'}}".FormatWith( userId ) : "" );
-
-				sw.WriteLine( "ga('send', 'pageview');" );
-				sw.WriteLine( "</script>" );
-				Header.Controls.Add( new Literal { Text = sw.ToString() } );
-			}
-		}
-
-		private void addJavaScriptIncludes() {
-			Control getElement( ResourceInfo resource ) =>
-				new LiteralControl( "<script src=\"{0}\" defer></script>".FormatWith( this.GetClientUrl( resource.GetUrl( false, false, false ) ) ) );
-
-			Header.AddControlsReturnThis( EwfApp.MetaLogicFactory.CreateJavaScriptInfos().Select( getElement ) );
-			Header.AddControlsReturnThis( new LiteralControl( MiniProfiler.RenderIncludes().ToHtmlString() ) );
-			Header.AddControlsReturnThis( EwfApp.Instance.GetJavaScriptFiles().Select( getElement ) );
-		}
-
-		private void loadDataForControlAndChildren( Control control ) {
-			elementOrIdentifiedComponentIdGetter = () => control.ClientID;
-
-			if( control is ControlTreeDataLoader controlTreeDataLoader ) {
+			if( component is ElementNode elementNode ) {
 				FormState.Current.SetForNextElement();
-				controlTreeDataLoader.LoadData();
+
+				var id = idGenerator.GenerateId();
+				elementOrIdentifiedComponentIdGetter = () => id;
+
+				var data = elementNode.ElementDataGetter( new ElementContext( id ) );
+				ElementNodeLocalData localData = null;
+				ElementNodeFocusDependentData focusDependentData = null;
+				var node = new PageNode(
+					elementNode,
+					elementNode.FormValue,
+					buildChildren( data.Children, idGenerator ),
+					buildChildren( data.EtherealChildren, idGenerator ),
+					() => {
+						// Defer attribute creation for the JavaScript initialization element.
+						if( inJsInitElement )
+							return new FocusabilityCondition( false );
+
+						localData = data.LocalDataGetter();
+						return localData.FocusabilityCondition;
+					},
+					( isFocused, writer ) => {
+						// Defer attribute creation for the JavaScript initialization element.
+						if( inJsInitElement )
+							return;
+
+						focusDependentData = localData.FocusDependentDataGetter( isFocused );
+						writer.Write( focusDependentData.JsInitStatements );
+					},
+					() => {
+						if( inJsInitElement ) {
+							localData = data.LocalDataGetter();
+							focusDependentData = localData.FocusDependentDataGetter( false );
+						}
+
+						var attributes = focusDependentData.Attributes;
+						if( focusDependentData.IncludeIdAttribute )
+							attributes = attributes.Append( Tuple.Create( "id", data.ClientSideIdOverride.Any() ? data.ClientSideIdOverride : id ) );
+						return ( localData.ElementName, attributes );
+					} );
+
+				if( inEtherealContainer )
+					etherealContainerNode = node;
+				etherealComponentCount += node.EtherealChildren.Count;
+
+				return node;
+			}
+			if( component is TextNode textNode )
+				return new PageNode( textNode );
+			if( component is MarkupBlockNode markupBlockNode )
+				return new PageNode( markupBlockNode );
+
+			if( component is FlowComponent flowComponent ) {
+				if( component == etherealContainer )
+					inEtherealContainer = true;
+				if( component == jsInitElement )
+					inJsInitElement = true;
+				return new PageNode( flowComponent, buildChildren( flowComponent.GetChildren(), idGenerator ) );
+			}
+			if( component is EtherealComponent etherealComponent )
+				return new PageNode( etherealComponent, buildChildren( etherealComponent.GetChildren(), idGenerator ) );
+
+			PageNode buildIdentifiedComponentNode<ChildType>(
+				IdentifiedComponentData<ChildType> data, Func<ModificationErrorDictionary, IEnumerable<PageComponent>> childGetter ) where ChildType: PageComponent {
+				var id = string.IsNullOrEmpty( data.Id ) ? idGenerator.GenerateId() : idGenerator.GenerateLocallySpecifiedId( data.Id );
+				elementOrIdentifiedComponentIdGetter = () => id;
+
+				return new PageNode(
+					component,
+					id,
+					data.UpdateRegionLinkers,
+					buildChildren(
+						childGetter(
+							new ModificationErrorDictionary(
+								addModificationErrorDisplaysAndGetErrors( id, data ),
+								data.ErrorSources.IncludeGeneralErrors
+									? AppRequestState.Instance.EwfPageRequestState.GeneralModificationErrors
+									: ImmutableArray<TrustedHtmlString>.Empty ) ),
+						data.Id == null ? idGenerator : new IdGenerator( id ) ) );
+			}
+			if( component is IdentifiedFlowComponent identifiedFlowComponent ) {
+				var data = identifiedFlowComponent.ComponentDataGetter();
+				return buildIdentifiedComponentNode( data, data.ChildGetter );
+			}
+			if( component is IdentifiedEtherealComponent identifiedEtherealComponent ) {
+				var data = identifiedEtherealComponent.ComponentDataGetter();
+				return buildIdentifiedComponentNode( data, data.ChildGetter );
 			}
 
-			foreach( var child in control.Controls.Cast<Control>().Where( i => i != etherealPlace ) )
-				loadDataForControlAndChildren( child );
+			throw new UnexpectedValueException( "component", component );
+		}
 
-			if( !etherealControlsByControl.TryGetValue( control, out var etherealControls ) )
-				etherealControls = new List<EtherealControl>();
-			if( etherealControls.Any() ) {
-				var np = new NamingPlaceholder(
-					etherealControls.Select(
-						i => {
-							// This is kind of a hack, but it's an easy way to make sure ethereal controls are initially hidden.
-							i.Control.Style.Add( HtmlTextWriterStyle.Display, "none" );
-
-							return i.Control;
-						} ) ) { ID = "ethereal{0}".FormatWith( control.UniqueID.Replace( "$", "" ) ) };
-				etherealPlace.AddControlsReturnThis( np );
-				( (ControlTreeDataLoader)np ).LoadData();
+		private ImmutableDictionary<EwfValidation, IReadOnlyCollection<string>> addModificationErrorDisplaysAndGetErrors<ComponentChildType>(
+			string id, IdentifiedComponentData<ComponentChildType> componentData ) where ComponentChildType: PageComponent {
+			var validationIndex = 0;
+			var errorDictionary = new Dictionary<EwfValidation, IReadOnlyCollection<string>>();
+			foreach( var i in componentData.ErrorSources.Validations ) {
+				var errors = addModificationErrorDisplayAndGetErrors( id, validationIndex.ToString(), i );
+				errorDictionary.Add( i, errors );
+				if( errors.Any() )
+					validationsWithErrors.Add( i );
+				validationIndex += 1;
 			}
-			foreach( var child in etherealControls )
-				loadDataForControlAndChildren( child.Control );
+			return errorDictionary.ToImmutableDictionary();
 		}
 
 		/// <summary>
@@ -841,26 +826,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public PostBack DataUpdatePostBack => dataUpdatePostBack;
 
-		internal void AddEtherealControl( Control parent, EtherealControl etherealControl ) {
-			if( !etherealControlsByControl.TryGetValue( parent, out var etherealControls ) ) {
-				etherealControls = new List<EtherealControl>();
-				etherealControlsByControl.Add( parent, etherealControls );
-			}
-			etherealControls.Add( etherealControl );
-		}
-
 		internal PostBack GetPostBack( string id ) => postBacksById.TryGetValue( id, out var value ) ? value : null;
-
-		internal void AddUpdateRegionLinker( LegacyUpdateRegionLinker linker ) {
-			updateRegionLinkers.Add( linker );
-		}
 
 		/// <summary>
 		/// If you are using the results of this method to create controls, put them in a naming container so that when the controls differ before and after a
 		/// transfer, other parts of the page such as form control IDs do not get affected.
 		/// </summary>
-		internal IEnumerable<string> AddModificationErrorDisplayAndGetErrors( Control control, string keySuffix, EwfValidation validation ) {
-			var key = control.UniqueID + keySuffix;
+		private IReadOnlyCollection<string> addModificationErrorDisplayAndGetErrors( string id, string keySuffix, EwfValidation validation ) {
+			var key = id + keySuffix;
 			if( modErrorDisplaysByValidation.ContainsKey( validation ) )
 				modErrorDisplaysByValidation[ validation ].Add( key );
 			else
@@ -871,7 +844,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			//
 			// Avoid using exceptions here if possible. This method is sometimes called many times during a request, and we've seen exceptions take as long as 50 ms
 			// each when debugging.
-			return AppRequestState.Instance.EwfPageRequestState.InLineModificationErrorsByDisplay.TryGetValue( key, out var value ) ? value : new string[ 0 ];
+			return AppRequestState.Instance.EwfPageRequestState.InLineModificationErrorsByDisplay.TryGetValue( key, out var value )
+				       ? value.Materialize()
+				       : new string[ 0 ];
 		}
 
 		internal void AddControlTreeValidation( Action validation ) {
@@ -883,6 +858,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public IEnumerable<Tuple<StatusMessageType, string>> StatusMessages => StandardLibrarySessionState.Instance.StatusMessages.Concat( statusMessages );
 
+		private void addTreeToAllNodes( PageNode node ) {
+			allNodes.Add( node );
+			foreach( var child in node.AllChildren )
+				addTreeToAllNodes( child );
+		}
+
 		private void executeWithDataModificationExceptionHandling( Action method ) {
 			try {
 				method();
@@ -893,25 +874,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					throw;
 				AppRequestState.Instance.EwfPageRequestState.FocusKey = "";
 				AppRequestState.Instance.EwfPageRequestState.GeneralModificationErrors = dmException.HtmlMessages;
-				AppRequestState.Instance.EwfPageRequestState.SetStaticAndUpdateRegionState(
-					getStaticRegionContents( new Control[ 0 ] ).contents,
-					new Tuple<string, string>[ 0 ] );
+				AppRequestState.Instance.EwfPageRequestState.SetStaticAndUpdateRegionState( getStaticRegionContents( null ).contents, new Tuple<string, string>[ 0 ] );
 			}
 		}
 
 		private void validateFormSubmission( string formValueHash ) {
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
 
-			var webFormsHiddenFields = new[]
-				{
-					"__EVENTTARGET", "__EVENTARGUMENT", "__LASTFOCUS", "__VIEWSTATE", "__SCROLLPOSITIONX", "__SCROLLPOSITIONY", "__VIEWSTATEGENERATOR"
-				};
 			var activeFormValues = formValues.Where( i => i.GetPostBackValueKey().Any() ).ToArray();
 			var postBackValueKeys = new HashSet<string>( activeFormValues.Select( i => i.GetPostBackValueKey() ) );
 			requestState.PostBackValues = new PostBackValueDictionary();
 			var extraPostBackValuesExist = requestState.ComponentStateValuesById.Keys.Any( i => !componentStateItemsById.ContainsKey( i ) ) |
 			                               requestState.PostBackValues.AddFromRequest(
-				                               Request.Form.Cast<string>().Except( new[] { hiddenFieldName, ButtonElementName }.Concat( webFormsHiddenFields ) ),
+				                               Request.Form.Cast<string>().Except( new[] { HiddenFieldName, ButtonElementName } ),
 				                               postBackValueKeys.Contains,
 				                               key => Request.Form[ key ] ) | requestState.PostBackValues.AddFromRequest(
 				                               Request.Files.Cast<string>(),
@@ -964,17 +939,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		private ( string contents, ImmutableHashSet<ComponentStateItem> stateItems, IReadOnlyCollection<FormValue> formValues ) getStaticRegionContents(
-			IEnumerable<Control> updateRegionControls ) {
+			IEnumerable<( PageNode node, IEnumerable<PageComponent> components )> updateRegions ) {
 			var contents = new StringBuilder();
 
-			updateRegionControls = new HashSet<Control>( updateRegionControls );
-			var staticDescendants = GetDescendants( this, predicate: i => !updateRegionControls.Contains( i ) ).OfType<ElementNode>().Materialize();
-			var staticStateItems = staticDescendants.SelectMany( i => i.StateItems ).ToImmutableHashSet();
-			var staticFormValues = staticDescendants.Select( i => i.FormValue )
-				.Where( i => i != null )
-				.Distinct()
-				.OrderBy( i => i.GetPostBackValueKey() )
-				.Materialize();
+			var staticNodes = getStaticRegionNodes( updateRegions );
+			var staticStateItems = staticNodes.Select( i => i.StateItem ).Where( i => i != null ).ToImmutableHashSet();
+			var staticFormValues = staticNodes.Select( i => i.FormValue ).Where( i => i != null ).Distinct().OrderBy( i => i.GetPostBackValueKey() ).Materialize();
 
 			foreach( var pair in componentStateItemsById.Where( i => staticStateItems.Contains( i.Value ) ).OrderBy( i => i.Key ) ) {
 				contents.Append( pair.Key );
@@ -1077,9 +1047,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		protected sealed override void OnPreRender( EventArgs eventArgs ) {
 			base.OnPreRender( eventArgs );
 
-			foreach( var i in GetDescendants( this ) )
-				( i as ElementNode )?.InitLocalData();
-
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
 			var modificationErrorsOccurred = requestState.ModificationErrorsExist &&
 			                                 ( requestState.DmIdAndSecondaryOp == null ||
@@ -1088,20 +1055,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			Func<FocusabilityCondition, bool> isFocusablePredicate;
 			if( modificationErrorsOccurred )
-				isFocusablePredicate = condition => condition.ErrorFocusabilitySources.Validations.Any( i => ValidationsWithErrors.Contains( i ) ) ||
+				isFocusablePredicate = condition => condition.ErrorFocusabilitySources.Validations.Any( i => validationsWithErrors.Contains( i ) ) ||
 				                                    ( condition.ErrorFocusabilitySources.IncludeGeneralErrors &&
 				                                      AppRequestState.Instance.EwfPageRequestState.GeneralModificationErrors.Any() );
 			else
 				isFocusablePredicate = condition => condition.IsNormallyFocusable;
 
-			var autofocusInfo = getAutofocusInfo( this, modificationErrorsOccurred, isFocusablePredicate );
-			if( !modificationErrorsOccurred && autofocusInfo.activeRegionsExist && autofocusInfo.focusedElement == null )
-				throw new ApplicationException( "The active autofocus regions do not contain any focusable elements." );
-
-			addJavaScriptStartUpLogic( autofocusInfo.focusedElement );
+			renderingPreparer( modificationErrorsOccurred, isFocusablePredicate );
 
 
 			// Direct response object modifications. These should happen once per page view; they are not needed in redirect responses.
+
+			Response.ClearHeaders();
+			Response.ClearContent();
 
 			FormsAuthStatics.UpdateFormsAuthCookieIfNecessary();
 
@@ -1113,40 +1079,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			// Without this header, certain sites could be forced into compatibility mode due to the Compatibility View Blacklist maintained by Microsoft.
 			Response.AppendHeader( "X-UA-Compatible", "IE=edge" );
 
+			Response.Output.Write( "<!DOCTYPE html>" );
+			rootNode.MarkupWriter( Response.Output );
+
 
 			StandardLibrarySessionState.Instance.StatusMessages.Clear();
 			StandardLibrarySessionState.Instance.ClearClientSideNavigation();
+
+			// Calling Response.End() is not a good practice; see http://stackoverflow.com/q/1087777/35349. We should be able to remove this call when we separate
+			// EWF from Web Forms. This is EnduraCode goal 790.
+			Response.End();
 		}
 
-		private ( bool activeRegionsExist, ElementNode focusedElement ) getAutofocusInfo(
-			Control control, bool inActiveRegion, Func<FocusabilityCondition, bool> isFocusablePredicate ) {
-			if( !inActiveRegion && AutofocusConditionsByControl.TryGetValue( control, out var conditions ) )
-				inActiveRegion = conditions.Any( i => i.IsTrue( AppRequestState.Instance.EwfPageRequestState.FocusKey ) );
-
-			if( inActiveRegion && control is ElementNode element && isFocusablePredicate( element.FocusabilityCondition ) )
-				return ( true, element );
-
-			if( !etherealControlsByControl.TryGetValue( control, out var etherealControls ) )
-				etherealControls = new List<EtherealControl>();
-			var autofocusInfo = ( activeRegionsExist: inActiveRegion, focusedElement: (ElementNode)null );
-			foreach( var child in control.Controls.Cast<Control>().Where( i => i != etherealPlace ).Concat( from i in etherealControls select i.Control ) ) {
-				var childInfo = getAutofocusInfo( child, inActiveRegion, isFocusablePredicate );
-				autofocusInfo.activeRegionsExist = autofocusInfo.activeRegionsExist || childInfo.activeRegionsExist;
-				autofocusInfo.focusedElement = childInfo.focusedElement;
-				if( autofocusInfo.focusedElement != null )
-					break;
-			}
-
-			return autofocusInfo;
-		}
-
-		private void addJavaScriptStartUpLogic( ElementNode focusedElement ) {
-			focusedElement?.SetIsFocused();
-			var controlInitStatements = getDescendants( this, i => true )
-				.Where( i => i.Item2 != null )
-				.Select( i => i.Item2() )
-				.Aggregate( new StringBuilder(), ( builder, statements ) => builder.Append( statements ), i => i.ToString() );
-
+		private string getJsInitStatements( string elementJsInitStatements ) {
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
 			var scroll = scrollPositionForThisResponse == ScrollPosition.LastPositionOrStatusBar &&
 			             ( !requestState.ModificationErrorsExist || ( requestState.DmIdAndSecondaryOp != null &&
@@ -1173,53 +1118,43 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					clientSideNavigationStatements = "setTimeout( \"" + clientSideNavigationStatements + "\", " + clientSideNavigationDelay.Value * 1000 + " );";
 			}
 
-			body.AddControlsReturnThis(
-				new LiteralControl(
-					"<script src=\"data:{0};charset=utf-8;base64,{1}\" defer></script>".FormatWith(
-						TewlContrib.ContentTypes.JavaScript,
-						Convert.ToBase64String(
-							Encoding.UTF8.GetBytes(
-								"window.addEventListener( 'DOMContentLoaded', function() { " + StringTools.ConcatenateWithDelimiter(
-									" ",
-									"OnDocumentReady();",
-									"$( '#{0}' ).submit( function( e, postBackId ) {{ postBackRequestStarting( e, postBackId !== undefined ? postBackId : '{1}' ); }} );"
-										.FormatWith(
-											formId,
-											SubmitButtonPostBack != null
-												? SubmitButtonPostBack.Id
-												: "" /* This empty string we're using when no submit button exists is arbitrary and meaningless; it should never actually be submitted. */ ),
-									BasicPage.GetJsInitStatements(),
-									controlInitStatements,
-									EwfApp.Instance.JavaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
-									javaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
-									StringTools.ConcatenateWithDelimiter( " ", scrollStatement, clientSideNavigationStatements )
-										.PrependDelimiter( "window.onload = function() { " )
-										.AppendDelimiter( " };" ) ) + " } );" ) ) ) ) );
+			return StringTools.ConcatenateWithDelimiter(
+				" ",
+				"OnDocumentReady();",
+				"$( '#{0}' ).submit( function( e, postBackId ) {{ postBackRequestStarting( e, postBackId !== undefined ? postBackId : '{1}' ); }} );".FormatWith(
+					FormId,
+					SubmitButtonPostBack != null
+						? SubmitButtonPostBack.Id
+						: "" /* This empty string we're using when no submit button exists is arbitrary and meaningless; it should never actually be submitted. */ ),
+				BasicPage.GetJsInitStatements(),
+				elementJsInitStatements,
+				EwfApp.Instance.JavaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
+				javaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
+				StringTools.ConcatenateWithDelimiter( " ", scrollStatement, clientSideNavigationStatements )
+					.PrependDelimiter( "window.onload = function() { " )
+					.AppendDelimiter( " };" ) );
 		}
 
-		/// <summary>
-		/// Standard Library use only.
-		/// </summary>
-		public IEnumerable<Control> GetDescendants( Control control, Func<Control, bool> predicate = null ) {
-			return from i in getDescendants( control, predicate ?? ( i => true ) ) select i.Item1;
-		}
+		private IReadOnlyCollection<PageNode> getStaticRegionNodes( IEnumerable<( PageNode node, IEnumerable<PageComponent> components )> updateRegions ) {
+			if( updateRegions == null )
+				return allNodes;
 
-		private IEnumerable<Tuple<Control, Func<string>>> getDescendants( Control control, Func<Control, bool> predicate ) {
-			var normalChildren = from i in control.Controls.Cast<Control>()
-			                     where i != etherealPlace
-			                     let jsControl = i as ControlWithJsInitLogic
-			                     select Tuple.Create( i, jsControl != null ? new Func<string>( jsControl.GetJsInitStatements ) : null );
+			var nodes = new List<PageNode>( nodeCount );
 
-			if( !etherealControlsByControl.TryGetValue( control, out var etherealControls ) )
-				etherealControls = new List<EtherealControl>();
-			var etherealChildren = etherealControls.Select( i => Tuple.Create( (Control)i.Control, new Func<string>( i.GetJsInitStatements ) ) );
+			var updateRegionComponentsByNode = updateRegions.SelectMany( i => i.components, ( region, component ) => ( region.node, component ) )
+				.ToLookup( i => i.node, i => i.component );
+			void addNodes( PageNode node, ImmutableHashSet<PageComponent> updateRegionComponents ) {
+				updateRegionComponents = updateRegionComponents.Union( updateRegionComponentsByNode[ node ] );
+				if( updateRegionComponents.Contains( node.SourceComponent ) )
+					return;
 
-			var descendants = new List<Tuple<Control, Func<string>>>();
-			foreach( var child in normalChildren.Concat( etherealChildren ).Where( i => predicate( i.Item1 ) ) ) {
-				descendants.Add( child );
-				descendants.AddRange( getDescendants( child.Item1, predicate ) );
+				nodes.Add( node );
+				foreach( var child in node.AllChildren )
+					addNodes( child, updateRegionComponents );
 			}
-			return descendants;
+			addNodes( rootNode, ImmutableHashSet<PageComponent>.Empty );
+
+			return nodes;
 		}
 
 		/// <summary>

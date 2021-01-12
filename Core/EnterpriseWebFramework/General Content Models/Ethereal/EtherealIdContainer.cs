@@ -6,7 +6,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// An ethereal component that prevents its children from affecting the ID of any other component.
 	/// </summary>
 	public class EtherealIdContainer: EtherealComponent {
-		private readonly IReadOnlyCollection<EtherealComponentOrElement> children;
+		private readonly EtherealComponentOrElement identifiedComponent;
 
 		/// <summary>
 		/// Creates an ID container.
@@ -14,19 +14,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="children"></param>
 		/// <param name="updateRegionSets">The intermediate-post-back update-region sets that this component will be a part of.</param>
 		public EtherealIdContainer( IEnumerable<EtherealComponent> children, IEnumerable<UpdateRegionSet> updateRegionSets = null ) {
-			this.children = new IdentifiedEtherealComponent(
+			identifiedComponent = new IdentifiedEtherealComponent(
 				() => new IdentifiedComponentData<EtherealComponentOrElement>(
 					"",
 					new UpdateRegionLinker(
 						"",
-						new PreModificationUpdateRegion( updateRegionSets, this.ToCollection, () => "" ).ToCollection(),
-						arg => this.ToCollection() ).ToCollection(),
+						new PreModificationUpdateRegion( updateRegionSets, identifiedComponent.ToCollection, () => "" ).ToCollection(),
+						arg => identifiedComponent.ToCollection() ).ToCollection(),
 					new ErrorSourceSet(),
-					errorsBySource => children ) ).ToCollection();
+					errorsBySource => children ) );
 		}
 
-		IReadOnlyCollection<EtherealComponentOrElement> EtherealComponent.GetChildren() {
-			return children;
-		}
+		IReadOnlyCollection<EtherealComponentOrElement> EtherealComponent.GetChildren() => identifiedComponent.ToCollection();
 	}
 }

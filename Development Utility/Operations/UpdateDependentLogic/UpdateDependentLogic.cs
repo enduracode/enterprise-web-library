@@ -194,8 +194,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "using System.Linq;" );
 				writer.WriteLine( "using System.Reflection;" );
 				writer.WriteLine( "using System.Runtime.InteropServices;" );
-				writer.WriteLine( "using System.Web.UI;" );
-				writer.WriteLine( "using System.Web.UI.WebControls;" );
 				writer.WriteLine( "using EnterpriseWebLibrary;" );
 				writer.WriteLine( "using EnterpriseWebLibrary.Caching;" );
 				writer.WriteLine( "using EnterpriseWebLibrary.Collections;" ); // Necessary for row constants
@@ -411,9 +409,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "using System.Linq;" );
 				writer.WriteLine( "using System.Reflection;" );
 				writer.WriteLine( "using System.Runtime.InteropServices;" );
-				writer.WriteLine( "using System.Web;" );
-				writer.WriteLine( "using System.Web.UI;" );
-				writer.WriteLine( "using System.Web.UI.WebControls;" );
 				writer.WriteLine( "using EnterpriseWebLibrary;" );
 				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess;" );
 				writer.WriteLine( "using EnterpriseWebLibrary.EnterpriseWebFramework;" );

@@ -19,7 +19,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				                                    // If changing this, note that the Basic style sheet may contain qTip2-specific rules.
 				                                    ? "$( '#" + targetId + "' ).qtip( { content: { text: $( '#" + id.Id + "' )" +
 				                                      ( title.Any() ? ", title: { text: '" + title + "' }" : "" ) + " }, position: { container: $( '#" +
-				                                      EwfPage.Instance.Form.ClientID +
+				                                      EwfPage.FormId +
 				                                      "' ), viewport: $( window ), adjust: { method: 'flipinvert shift' } }, show: { event: 'click', delay: 0 }, hide: { event: 'unfocus' }, style: { classes: 'qtip-bootstrap' } } );"
 				                                    : "";
 		}

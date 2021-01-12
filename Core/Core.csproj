@@ -339,6 +339,7 @@
     <Compile Include="EnterpriseWebFramework\Automatic Layout\FormItemList.cs" />
     <Compile Include="EnterpriseWebFramework\Automatic Layout\FormItemListSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Automatic Layout\FormItemSetup.cs" />
+    <Compile Include="EnterpriseWebFramework\BasicPageContent.cs" />
     <Compile Include="EnterpriseWebFramework\BLOB Management\BlobFileCollectionManager.cs" />
     <Compile Include="EnterpriseWebFramework\BLOB Management\BlobFileManager.cs" />
     <Compile Include="EnterpriseWebFramework\BLOB Management\BlobFileManagerSetup.cs" />
@@ -511,7 +512,6 @@
     <Compile Include="EnterpriseWebFramework\Modal Boxes\ModalBox.cs" />
     <Compile Include="EnterpriseWebFramework\Modal Boxes\OpenModalBehavior.cs" />
     <Compile Include="EnterpriseWebFramework\MvcStatics.cs" />
-    <Compile Include="EnterpriseWebFramework\NamingPlaceholder.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Text Box\AutoCompleteService.cs">
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
@@ -534,7 +534,6 @@
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Autofocus\EtherealAutofocusRegion.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Autofocus\FlowAutofocusRegion.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\BasicPage.cs" />
-    <Compile Include="EnterpriseWebFramework\Page Infrastructure\BasicPageContent.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Data Modification\BasicDataModification.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Data Modification\DataModification.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Data Modification\DataModificationException.cs" />
@@ -559,7 +558,6 @@
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Identified Components\IdentifiedComponentData.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Identified Components\IdentifiedEtherealComponent.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Identified Components\IdentifiedFlowComponent.cs" />
-    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Identified Components\WebForms.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\ModalBoxId.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Modification\PageModificationValue.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Modification\PageModificationValueCondition.cs" />
@@ -569,10 +567,7 @@
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Components\FlowComponent.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Components\FlowComponentOrNode.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Components\PageComponent.cs" />
-    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\ControlTreeDataLoader.cs" />
-    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\ControlWithJsInitLogic.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\ErrorSourceSet.cs" />
-    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\EtherealControl.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\FocusabilityCondition.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Form Data\FormValue.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Form Data\PostBackValue.cs" />
@@ -588,6 +583,7 @@
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Nodes\TextNode.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\PageContent.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\PageInfo.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\PageNode.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Partial Updating\ModificationErrorDictionary.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Partial Updating\PreModificationUpdateRegion.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Partial Updating\UpdateRegionLinker.cs" />
@@ -736,10 +732,6 @@
     <Compile Include="StreamMethod.cs" />
     <Compile Include="MailMerging\FieldImplementation\BasicMergeFieldImplementation.cs" />
     <Compile Include="MailMerging\MergeOps.cs" />
-    <Compile Include="MultiColumnForms\CellLoadMethod.cs" />
-    <Compile Include="MultiColumnForms\CellValidationMethod.cs" />
-    <Compile Include="MultiColumnForms\MultiColumnLoader.cs" />
-    <Compile Include="MultiColumnForms\MultiColumnValidator.cs" />
     <Compile Include="WebApiStatics.cs" />
     <Compile Include="WebSessionState\StandardLibrarySessionState.cs" />
     <Compile Include="WebSessionState\StatusMessageType.cs" />

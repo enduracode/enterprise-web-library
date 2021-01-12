@@ -17,7 +17,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			children = new IdentifiedFlowComponent(
 				() => new IdentifiedComponentData<FlowComponentOrNode>(
 					"",
-					Enumerable.Empty<UpdateRegionLinker>(),
+					Enumerable.Empty<UpdateRegionLinker>().Materialize(),
 					errorSources,
 					errorsBySource => displayStyle.GetComponents(
 						errorSources,

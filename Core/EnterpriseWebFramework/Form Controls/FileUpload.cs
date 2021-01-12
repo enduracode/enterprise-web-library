@@ -12,6 +12,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// A file-upload control.
 	/// </summary>
 	public class FileUpload: FormControl<PhrasingComponent> {
+		private static Action formMultipartEncodingSetter;
+
+		internal static void Init( Action formMultipartEncodingSetter ) {
+			FileUpload.formMultipartEncodingSetter = formMultipartEncodingSetter;
+		}
+
 		public FormControlLabeler Labeler { get; }
 		public PhrasingComponent PageComponent { get; }
 		public EwfValidation Validation { get; }
@@ -40,7 +46,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			PageComponent = new CustomPhrasingComponent(
 				new DisplayableElement(
 					context => {
-						EwfPage.Instance.Form.Enctype = "multipart/form-data";
+						formMultipartEncodingSetter();
 						return new DisplayableElementData(
 							displaySetup,
 							() => {
