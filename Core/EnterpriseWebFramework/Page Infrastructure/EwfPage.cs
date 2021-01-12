@@ -72,11 +72,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			private int number;
 
 			public IdGenerator( string idBase ) {
-				// Prefix generated IDs with double underscore to avoid collisions with specified client-side IDs on the page.
-				this.idBase = "_" + idBase;
-
+				this.idBase = idBase;
 				number = 1;
 			}
+
+			public IdGenerator():
+				// Prefix generated IDs with double underscore to avoid collisions with specified client-side IDs on the page.
+				this( "_" ) {}
 
 			public string GenerateId() => idBase + "_" + number++;
 
@@ -632,7 +634,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				dataUpdate.AddModificationMethod( content.dataUpdateModificationMethod );
 			IsAutoDataUpdater = content.isAutoDataUpdater;
 			using( MiniProfiler.Current.Step( "EWF - Build page tree" ) )
-				rootNode = buildNode( content.component, new IdGenerator( "" ), content.etherealContainer, content.jsInitElement, false, false );
+				rootNode = buildNode( content.component, new IdGenerator(), content.etherealContainer, content.jsInitElement, false, false );
 			formState = null;
 
 			renderingPreparer = ( modificationErrorsOccurred, isFocusablePredicate ) => {
