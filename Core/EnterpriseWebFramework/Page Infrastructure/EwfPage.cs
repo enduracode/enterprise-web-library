@@ -1069,9 +1069,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			// Direct response object modifications. These should happen once per page view; they are not needed in redirect responses.
 
-			Response.ClearHeaders();
-			Response.ClearContent();
-
 			FormsAuthStatics.UpdateFormsAuthCookieIfNecessary();
 
 			if( !ConfigurationStatics.IsLiveInstallation )
