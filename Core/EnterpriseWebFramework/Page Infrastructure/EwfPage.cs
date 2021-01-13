@@ -1122,7 +1122,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					SubmitButtonPostBack != null
 						? SubmitButtonPostBack.Id
 						: "" /* This empty string we're using when no submit button exists is arbitrary and meaningless; it should never actually be submitted. */ ),
-				BasicPage.GetJsInitStatements(),
 				elementJsInitStatements,
 				EwfApp.Instance.JavaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
 				javaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),

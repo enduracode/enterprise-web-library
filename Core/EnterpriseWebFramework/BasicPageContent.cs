@@ -427,19 +427,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			const string notificationSectionContainerId = "ewfNotification";
 
 			return EwfPage.Instance.StatusMessages.Any() && statusMessagesDisplayAsNotification()
-				       ? new GenericFlowContainer(
-					       new Section(
+				       ? new DisplayableElement(
+					       context => new DisplayableElementData(
 						       null,
-						       SectionStyle.Box,
-						       null,
-						       "Messages",
-						       null,
-						       getStatusMessageComponentList().ToCollection(),
-						       false,
-						       true,
-						       null ).ToCollection(),
-					       classes: notificationSectionContainerNotificationClass,
-					       clientSideIdOverride: notificationSectionContainerId ).ToCollection()
+						       () => new DisplayableElementLocalData(
+							       "div",
+							       focusDependentData: new DisplayableElementFocusDependentData(
+								       includeIdAttribute: true,
+								       jsInitStatements: "setTimeout( 'dockNotificationSection();', " + EwfPage.Instance.StatusMessages.Count() * 1000 + " );" ) ),
+						       classes: notificationSectionContainerNotificationClass,
+						       clientSideIdOverride: notificationSectionContainerId,
+						       children: new Section( null, SectionStyle.Box, null, "Messages", null, getStatusMessageComponentList().ToCollection(), false, true, null )
+							       .ToCollection() ) ).ToCollection()
 				       : Enumerable.Empty<FlowComponent>().Materialize();
 		}
 
@@ -451,12 +450,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							.Append<PhrasingComponent>( new GenericPhrasingContainer( i.Item2.ToComponents(), classes: statusMessageTextClass ) )
 							.Materialize(),
 						classes: i.Item1 == StatusMessageType.Info ? infoMessageContainerClass : warningMessageContainerClass ).ToComponentListItem() ) );
-
-		internal static string GetJsInitStatements() {
-			return EwfPage.Instance.StatusMessages.Any() && statusMessagesDisplayAsNotification()
-				       ? "setTimeout( 'dockNotificationSection();', " + EwfPage.Instance.StatusMessages.Count() * 1000 + " );"
-				       : "";
-		}
 
 		private static bool statusMessagesDisplayAsNotification() {
 			return EwfPage.Instance.StatusMessages.All( i => i.Item1 == StatusMessageType.Info ) && EwfPage.Instance.StatusMessages.Count() <= 3;
