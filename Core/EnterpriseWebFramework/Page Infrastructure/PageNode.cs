@@ -49,7 +49,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				if( isVoidElement( tag.name ) )
 					return;
 
-				foreach( var i in children )
+				foreach( var i in Children )
 					i.MarkupWriter( writer );
 
 				writer.Write( '<' );
