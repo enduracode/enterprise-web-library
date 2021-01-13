@@ -195,10 +195,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public BasicPageContent(
 			string titleOverride = "", TrustedHtmlString customHeadElements = null, ElementClassSet bodyClasses = null, Action dataUpdateModificationMethod = null,
 			bool isAutoDataUpdater = false ) {
-			var preContentComponents = GetPreContentComponents();
-			var postContentComponents = GetPostContentComponents();
-
-			var statusMessageModalBox = GetStatusMessageModalBox();
+			var preContentComponents = getPreContentComponents();
+			var postContentComponents = getPostContentComponents();
+			var etherealComponents = getEtherealComponents();
 
 			componentGetter = ( contentObjects, hiddenFieldValueGetter, jsInitElement ) => new ElementComponent(
 				documentContext => new ElementData(
@@ -261,10 +260,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 																},
 																clientSideIdOverride: EwfPage.HiddenFieldName ) ) )
 													.Materialize(),
-												etherealChildren: ModalBox.CreateBrowsingModalBox( BrowsingModalBoxId )
-													.Append( statusMessageModalBox )
-													.Concat( etherealContent )
-													.Materialize() ) ).Append( jsInitElement )
+												etherealChildren: etherealComponents.Concat( etherealContent ).Materialize() ) ).Append( jsInitElement )
 										.Materialize() ) ) )
 						.Materialize() ) );
 
@@ -273,7 +269,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			this.isAutoDataUpdater = isAutoDataUpdater;
 		}
 
-		internal static IReadOnlyCollection<FlowComponent> GetPreContentComponents() {
+		private IReadOnlyCollection<FlowComponent> getPreContentComponents() {
 			var outerComponents = new List<FlowComponent>();
 
 			outerComponents.Add(
@@ -370,7 +366,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return outerComponents;
 		}
 
-		internal static IReadOnlyCollection<FlowComponent> GetPostContentComponents() {
+		private IReadOnlyCollection<FlowComponent> getPostContentComponents() {
 			// This is used by the EWF JavaScript file.
 			const string clickBlockerId = "ewfClickBlocker";
 
@@ -379,7 +375,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				.Materialize();
 		}
 
-		private static FlowComponent getProcessingDialog() {
+		private FlowComponent getProcessingDialog() {
 			// This is used by the EWF JavaScript file.
 			var dialogClass = new ElementClass( "ewfProcessingDialog" );
 
@@ -403,26 +399,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		// This supports the animated ellipsis. Browsers that don't support CSS3 animations will still see the static dots.
-		private static IReadOnlyCollection<PhrasingComponent> getProcessingDialogEllipsisDot( int dotNumber ) {
+		private IReadOnlyCollection<PhrasingComponent> getProcessingDialogEllipsisDot( int dotNumber ) {
 			// This is used by EWF CSS files.
 			var dotClass = new ElementClass( $"ewfProcessingEllipsis{dotNumber}" );
 
 			return new GenericPhrasingContainer( ".".ToComponents(), classes: dotClass ).ToCollection();
 		}
 
-		internal static EtherealComponent GetStatusMessageModalBox() =>
-			new ModalBox(
-				new ModalBoxId(),
-				true,
-				new FlowIdContainer(
-					new Section(
-						"Messages",
-						EwfPage.Instance.StatusMessages.Any() && !statusMessagesDisplayAsNotification()
-							? getStatusMessageComponentList().ToCollection()
-							: Enumerable.Empty<FlowComponent>().Materialize() ).ToCollection() ).ToCollection(),
-				open: EwfPage.Instance.StatusMessages.Any() && !statusMessagesDisplayAsNotification() );
-
-		private static IReadOnlyCollection<FlowComponent> getNotificationSectionContainer() {
+		private IReadOnlyCollection<FlowComponent> getNotificationSectionContainer() {
 			// This is used by the EWF JavaScript file.
 			const string notificationSectionContainerId = "ewfNotification";
 
@@ -442,7 +426,22 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				       : Enumerable.Empty<FlowComponent>().Materialize();
 		}
 
-		private static FlowComponent getStatusMessageComponentList() =>
+		private IReadOnlyCollection<EtherealComponent> getEtherealComponents() =>
+			ModalBox.CreateBrowsingModalBox( BrowsingModalBoxId )
+				.Append(
+					new ModalBox(
+						new ModalBoxId(),
+						true,
+						new FlowIdContainer(
+							new Section(
+								"Messages",
+								EwfPage.Instance.StatusMessages.Any() && !statusMessagesDisplayAsNotification()
+									? getStatusMessageComponentList().ToCollection()
+									: Enumerable.Empty<FlowComponent>().Materialize() ).ToCollection() ).ToCollection(),
+						open: EwfPage.Instance.StatusMessages.Any() && !statusMessagesDisplayAsNotification() ) )
+				.Materialize();
+
+		private FlowComponent getStatusMessageComponentList() =>
 			new StackList(
 				EwfPage.Instance.StatusMessages.Select(
 					i => new GenericFlowContainer(
@@ -451,7 +450,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							.Materialize(),
 						classes: i.Item1 == StatusMessageType.Info ? infoMessageContainerClass : warningMessageContainerClass ).ToComponentListItem() ) );
 
-		private static bool statusMessagesDisplayAsNotification() {
+		private bool statusMessagesDisplayAsNotification() {
 			return EwfPage.Instance.StatusMessages.All( i => i.Item1 == StatusMessageType.Info ) && EwfPage.Instance.StatusMessages.Count() <= 3;
 		}
 
