@@ -267,8 +267,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		protected sealed override void OnInitComplete( EventArgs e ) {
 			base.OnInitComplete( e );
-			if( IsPostBack )
+			if( Request.HttpMethod == "POST" && AppRequestState.Instance.EwfPageRequestState == null ) {
+				handlePostBack();
 				return;
+			}
 
 			if( AppRequestState.Instance.EwfPageRequestState == null ) {
 				if( StandardLibrarySessionState.Instance.EwfPageRequestState != null ) {
@@ -475,10 +477,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return InfoAsBaseType.ShouldBeSecureGivenCurrentRequest != EwfApp.Instance.RequestIsSecure( Request );
 		}
 
-		/// <summary>
-		/// We use this instead of LoadViewState because the latter doesn't get called during post backs on which the page structure changes.
-		/// </summary>
-		protected sealed override object LoadPageStateFromPersistenceMedium() {
+		private void handlePostBack() {
 			HiddenFieldData hiddenFieldData = null;
 			try {
 				// throws exception if field missing, because Request.Form returns null
@@ -591,7 +590,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				} );
 
 			navigate( redirectInfo, AppRequestState.Instance.EwfPageRequestState.ModificationErrorsExist ? null : fullSecondaryResponse );
-			return null;
 		}
 
 		/// <summary>
