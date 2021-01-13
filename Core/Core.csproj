@@ -533,7 +533,6 @@
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Autofocus\AutofocusCondition.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Autofocus\EtherealAutofocusRegion.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Autofocus\FlowAutofocusRegion.cs" />
-    <Compile Include="EnterpriseWebFramework\Page Infrastructure\BasicPage.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Data Modification\BasicDataModification.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Data Modification\DataModification.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Data Modification\DataModificationException.cs" />
