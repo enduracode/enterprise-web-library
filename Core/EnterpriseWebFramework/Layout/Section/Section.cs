@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Humanizer;
 using JetBrains.Annotations;
@@ -115,7 +114,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							       ElementActivationBehavior.GetActivatableElement(
 								       "div",
 								       ElementClassSet.Empty,
-								       Enumerable.Empty<Tuple<string, string>>().Materialize(),
+								       Enumerable.Empty<ElementAttribute>().Materialize(),
 								       ElementActivationBehavior.CreateButton(
 									       buttonBehavior: new CustomButtonBehavior(
 										       () => disableStatePersistence

@@ -133,7 +133,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								() => new DisplayableElementLocalData(
 									"span",
 									focusDependentData: new DisplayableElementFocusDependentData(
-										attributes: Tuple.Create( "style", "display: inline-block; width: {0}".FormatWith( ( (CssLength)setup.Width ).Value ) ).ToCollection() ) ),
+										attributes: new ElementAttribute(
+											"style",
+											"display: inline-block; width: {0}".FormatWith( ( (CssLength)setup.Width ).Value ) ).ToCollection() ) ),
 								children: formControl.PageComponent.ToCollection() ) ).ToFormItem( validation: formControl.Validation );
 					} );
 			};

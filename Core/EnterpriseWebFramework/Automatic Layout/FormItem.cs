@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Humanizer;
 using JetBrains.Annotations;
@@ -108,7 +107,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				: Enumerable.Empty<FlowComponent>();
 
 		private DisplayableElementLocalData getErrorFocusableElementLocalData(
-			ElementContext context, string elementName, IReadOnlyCollection<Tuple<string, string>> attributes ) =>
+			ElementContext context, string elementName, IReadOnlyCollection<ElementAttribute> attributes ) =>
 			ListErrorDisplayStyle.GetErrorFocusableElementLocalData( context, elementName, ErrorSourceSet, attributes );
 
 		/// <summary>

@@ -23,7 +23,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		private readonly ResourceInfo destination;
 		internal readonly ElementClassSet Classes;
-		internal readonly Func<bool, IReadOnlyCollection<Tuple<string, string>>> AttributeGetter;
+		internal readonly Func<bool, IReadOnlyCollection<ElementAttribute>> AttributeGetter;
 		internal readonly Lazy<string> Url;
 		internal readonly Func<bool, bool> IncludesIdAttribute;
 		internal readonly IReadOnlyCollection<EtherealComponent> EtherealChildren;
@@ -39,16 +39,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var isPostBackHyperlink = new Lazy<bool>(
 				() => destination != null && !( destination.AlternativeMode is DisabledResourceMode ) && !target.Any() && EwfPage.Instance.IsAutoDataUpdater.Value );
 			AttributeGetter = forNonHyperlinkElement =>
-				( destination != null && !forNonHyperlinkElement ? Tuple.Create( "href", Url.Value ).ToCollection() : Enumerable.Empty<Tuple<string, string>>() )
+				( destination != null && !forNonHyperlinkElement ? new ElementAttribute( "href", Url.Value ).ToCollection() : Enumerable.Empty<ElementAttribute>() )
 				.Concat(
 					destination != null && target.Any() && !forNonHyperlinkElement
-						? Tuple.Create( "target", target ).ToCollection()
-						: Enumerable.Empty<Tuple<string, string>>() )
+						? new ElementAttribute( "target", target ).ToCollection()
+						: Enumerable.Empty<ElementAttribute>() )
 				.Concat(
 					// for https://instant.page/
 					!isPostBackHyperlink.Value && destination is ResourceBase && !( destination.AlternativeMode is DisabledResourceMode ) && !forNonHyperlinkElement
-						? Tuple.Create( "data-instant", "data-instant" ).ToCollection()
-						: Enumerable.Empty<Tuple<string, string>>() )
+						? new ElementAttribute( "data-instant" ).ToCollection()
+						: Enumerable.Empty<ElementAttribute>() )
 				.Materialize();
 
 			FormAction postBackAction = null;
@@ -96,7 +96,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			Classes = ElementClassSet.Empty;
 			Url = new Lazy<string>( () => "mailto:{0}".FormatWith( mailtoUri ) );
 			AttributeGetter = forNonHyperlinkElement =>
-				forNonHyperlinkElement ? Enumerable.Empty<Tuple<string, string>>().Materialize() : Tuple.Create( "href", Url.Value ).ToCollection();
+				forNonHyperlinkElement ? Enumerable.Empty<ElementAttribute>().Materialize() : new ElementAttribute( "href", Url.Value ).ToCollection();
 			IncludesIdAttribute = forNonHyperlinkElement => forNonHyperlinkElement;
 			EtherealChildren = null;
 			JsInitStatementGetter = ( id, forNonHyperlinkElement ) => forNonHyperlinkElement ? "window.location.href = '{0}';".FormatWith( Url.Value ) : "";

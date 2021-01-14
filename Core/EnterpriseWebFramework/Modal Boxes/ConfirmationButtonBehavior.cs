@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Humanizer;
 using Tewl.Tools;
@@ -24,9 +23,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			confirmationAction = new ConfirmationFormAction( id );
 		}
 
-		IEnumerable<Tuple<string, string>> ButtonBehavior.GetAttributes() {
-			return Enumerable.Empty<Tuple<string, string>>();
-		}
+		IEnumerable<ElementAttribute> ButtonBehavior.GetAttributes() => Enumerable.Empty<ElementAttribute>();
 
 		bool ButtonBehavior.IncludesIdAttribute() {
 			return true;

@@ -241,22 +241,22 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								return new DisplayableElementData(
 									null,
 									() => {
-										var attributes = new List<Tuple<string, string>>();
+										var attributes = new List<ElementAttribute>();
 										if( isReadOnly )
-											attributes.Add( Tuple.Create( "disabled", "disabled" ) );
+											attributes.Add( new ElementAttribute( "disabled" ) );
 										else
-											attributes.Add( Tuple.Create( "name", containerContext.Id ) );
+											attributes.Add( new ElementAttribute( "name", containerContext.Id ) );
 										if( autoFillTokens.Any() )
-											attributes.Add( Tuple.Create( "autocomplete", autoFillTokens ) );
+											attributes.Add( new ElementAttribute( "autocomplete", autoFillTokens ) );
 										if( width != null )
-											attributes.Add( Tuple.Create( "style", "width: {0}".FormatWith( ( (CssLength)width ).Value ) ) );
+											attributes.Add( new ElementAttribute( "style", "width: {0}".FormatWith( ( (CssLength)width ).Value ) ) );
 
 										return new DisplayableElementLocalData(
 											"select",
 											new FocusabilityCondition( !isReadOnly ),
 											isFocused => {
 												if( isFocused )
-													attributes.Add( Tuple.Create( "autofocus", "autofocus" ) );
+													attributes.Add( new ElementAttribute( "autofocus" ) );
 												return new DisplayableElementFocusDependentData(
 													attributes: attributes,
 													includeIdAttribute: true,
@@ -373,10 +373,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			new ElementComponent(
 				context => new ElementData(
 					() => {
-						var attributes = new List<Tuple<string, string>>();
-						attributes.Add( Tuple.Create( "value", value ) );
+						var attributes = new List<ElementAttribute>();
+						attributes.Add( new ElementAttribute( "value", value ) );
 						if( selectedGetter() )
-							attributes.Add( Tuple.Create( "selected", "selected" ) );
+							attributes.Add( new ElementAttribute( "selected" ) );
 
 						return new ElementLocalData( "option", focusDependentData: new ElementFocusDependentData( attributes: attributes ) );
 					},

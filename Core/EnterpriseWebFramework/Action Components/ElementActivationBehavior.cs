@@ -14,7 +14,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal static readonly ElementClass ActivatableClass = new ElementClass( "ewfAc" );
 
 		internal static FlowComponent GetActivatableElement(
-			string elementName, ElementClassSet classes, IReadOnlyCollection<Tuple<string, string>> attributes, ElementActivationBehavior activationBehavior,
+			string elementName, ElementClassSet classes, IReadOnlyCollection<ElementAttribute> attributes, ElementActivationBehavior activationBehavior,
 			IReadOnlyCollection<FlowComponent> children, IReadOnlyCollection<EtherealComponent> etherealChildren ) =>
 			new ElementComponent(
 				context => {
@@ -24,11 +24,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							elementName,
 							new FocusabilityCondition( activationBehavior?.IsFocusable == true ),
 							isFocused => new ElementFocusDependentData(
-								attributes: attributes.Concat( activationBehavior != null ? activationBehavior.AttributeGetter() : Enumerable.Empty<Tuple<string, string>>() )
+								attributes: attributes.Concat( activationBehavior != null ? activationBehavior.AttributeGetter() : Enumerable.Empty<ElementAttribute>() )
 									.Concat(
 										activationBehavior?.IsFocusable == true
-											? new[] { Tuple.Create( "tabindex", "0" ), Tuple.Create( "role", "button" ) }
-											: Enumerable.Empty<Tuple<string, string>>() ),
+											? new[] { new ElementAttribute( "tabindex", "0" ), new ElementAttribute( "role", "button" ) }
+											: Enumerable.Empty<ElementAttribute>() ),
 								includeIdAttribute: activationBehavior?.IncludesIdAttribute() == true || isFocused,
 								jsInitStatements: ( activationBehavior != null ? activationBehavior.JsInitStatementGetter( context.Id ) : "" ).AppendDelimiter(
 									// This list of keys is duplicated in the JavaScript file.
@@ -79,7 +79,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		internal readonly ElementClassSet Classes;
-		internal readonly Func<IReadOnlyCollection<Tuple<string, string>>> AttributeGetter;
+		internal readonly Func<IReadOnlyCollection<ElementAttribute>> AttributeGetter;
 		internal readonly Func<bool> IncludesIdAttribute;
 		internal readonly IReadOnlyCollection<EtherealComponent> EtherealChildren;
 		internal readonly Func<string, string> JsInitStatementGetter;

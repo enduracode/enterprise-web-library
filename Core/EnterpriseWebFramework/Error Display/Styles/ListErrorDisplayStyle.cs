@@ -25,13 +25,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		internal static DisplayableElementLocalData GetErrorFocusableElementLocalData(
-			ElementContext context, string elementName, ErrorSourceSet errorSources, IReadOnlyCollection<Tuple<string, string>> attributes ) =>
+			ElementContext context, string elementName, ErrorSourceSet errorSources, IReadOnlyCollection<ElementAttribute> attributes ) =>
 			new DisplayableElementLocalData(
 				elementName,
 				new FocusabilityCondition( false, errorFocusabilitySources: errorSources ),
 				isFocused => {
 					if( isFocused )
-						attributes = ( attributes ?? Enumerable.Empty<Tuple<string, string>>() ).Append( Tuple.Create( "tabindex", "-1" ) ).Materialize();
+						attributes = ( attributes ?? Enumerable.Empty<ElementAttribute>() ).Append( new ElementAttribute( "tabindex", "-1" ) ).Materialize();
 					return new DisplayableElementFocusDependentData(
 						attributes: attributes,
 						includeIdAttribute: isFocused,

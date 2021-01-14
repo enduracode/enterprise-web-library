@@ -53,13 +53,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 					return new ElementData(
 						() => {
-							var attributes = new List<Tuple<string, string>>();
+							var attributes = new List<ElementAttribute>();
 							if( setup.IsReadOnly )
-								attributes.Add( Tuple.Create( "disabled", "disabled" ) );
+								attributes.Add( new ElementAttribute( "disabled" ) );
 							else
-								attributes.Add( Tuple.Create( "name", context.Id ) );
+								attributes.Add( new ElementAttribute( "name", context.Id ) );
 							if( !displaySetup.ComponentsDisplayed )
-								attributes.Add( Tuple.Create( "style", "display: none" ) );
+								attributes.Add( new ElementAttribute( "style", "display: none" ) );
 
 							return new ElementLocalData(
 								"textarea",

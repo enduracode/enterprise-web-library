@@ -260,45 +260,45 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								       return new DisplayableElementData(
 									       displaySetup,
 									       () => {
-										       var attributes = new List<Tuple<string, string>>();
+										       var attributes = new List<ElementAttribute>();
 										       if( inputElementType.Any() )
-											       attributes.Add( Tuple.Create( "type", inputElementType ) );
+											       attributes.Add( new ElementAttribute( "type", inputElementType ) );
 										       if( !isReadOnly )
-											       attributes.Add( Tuple.Create( "name", context.Id ) );
+											       attributes.Add( new ElementAttribute( "name", context.Id ) );
 
 										       if( inputElementType.Any() )
-											       attributes.Add( Tuple.Create( "size", ( maxLength.HasValue && maxLength.Value < 1000 ? maxLength : 1000 ).ToString() ) );
+											       attributes.Add( new ElementAttribute( "size", ( maxLength.HasValue && maxLength.Value < 1000 ? maxLength : 1000 ).ToString() ) );
 										       else
-											       attributes.Add( Tuple.Create( "rows", numberOfRows.Value.ToString() ) );
+											       attributes.Add( new ElementAttribute( "rows", numberOfRows.Value.ToString() ) );
 
 										       if( inputElementType.Any() )
-											       attributes.Add( Tuple.Create( "value", inputElementType != "password" ? pageModificationValue.Value : "" ) );
+											       attributes.Add( new ElementAttribute( "value", inputElementType != "password" ? pageModificationValue.Value : "" ) );
 										       if( isReadOnly )
-											       attributes.Add( Tuple.Create( "disabled", "disabled" ) );
+											       attributes.Add( new ElementAttribute( "disabled" ) );
 										       if( !isReadOnly ) {
 											       if( minLength.HasValue )
-												       attributes.Add( Tuple.Create( "minlength", minLength.Value.ToString() ) );
+												       attributes.Add( new ElementAttribute( "minlength", minLength.Value.ToString() ) );
 											       if( maxLength.HasValue )
-												       attributes.Add( Tuple.Create( "maxlength", maxLength.Value.ToString() ) );
+												       attributes.Add( new ElementAttribute( "maxlength", maxLength.Value.ToString() ) );
 										       }
 										       if( requiresNumericValue )
-											       attributes.Add( Tuple.Create( "pattern", "[0-9]*" ) );
+											       attributes.Add( new ElementAttribute( "pattern", "[0-9]*" ) );
 										       if( placeholder.Any() )
-											       attributes.Add( Tuple.Create( "placeholder", placeholder ) );
+											       attributes.Add( new ElementAttribute( "placeholder", placeholder ) );
 										       if( autoFillTokens.Any() )
-											       attributes.Add( Tuple.Create( "autocomplete", autoFillTokens ) );
+											       attributes.Add( new ElementAttribute( "autocomplete", autoFillTokens ) );
 										       if( !isReadOnly )
 											       attributes.Add(
-												       Tuple.Create(
+												       new ElementAttribute(
 													       "inputmode",
 													       inputElementType == "email" ? "email" :
 													       inputElementType == "tel" ? "tel" :
 													       inputElementType == "url" ? "url" :
 													       requiresNumericValue ? "numeric" : "text" ) );
 										       if( checksSpellingAndGrammar.HasValue )
-											       attributes.Add( Tuple.Create( "spellcheck", checksSpellingAndGrammar.Value ? "true" : "false" ) );
+											       attributes.Add( new ElementAttribute( "spellcheck", checksSpellingAndGrammar.Value ? "true" : "false" ) );
 										       if( widthOverride != null )
-											       attributes.Add( Tuple.Create( "style", "width: {0}".FormatWith( ( (CssLength)widthOverride ).Value ) ) );
+											       attributes.Add( new ElementAttribute( "style", "width: {0}".FormatWith( ( (CssLength)widthOverride ).Value ) ) );
 
 
 										       var autoCompleteStatements = "";
@@ -348,7 +348,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 											       new FocusabilityCondition( !isReadOnly ),
 											       isFocused => {
 												       if( isFocused )
-													       attributes.Add( Tuple.Create( "autofocus", "autofocus" ) );
+													       attributes.Add( new ElementAttribute( "autofocus" ) );
 												       return new DisplayableElementFocusDependentData(
 													       attributes: attributes,
 													       includeIdAttribute: true,

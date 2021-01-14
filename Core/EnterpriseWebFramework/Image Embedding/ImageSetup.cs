@@ -36,13 +36,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					context => new DisplayableElementData(
 						displaySetup,
 						() => {
-							var attributes = new List<Tuple<string, string>>();
-							attributes.Add( Tuple.Create( "src", srcGetter() ) );
+							var attributes = new List<ElementAttribute>();
+							attributes.Add( new ElementAttribute( "src", srcGetter() ) );
 							var srcset = srcsetGetter();
 							if( srcset.Any() )
-								attributes.Add( Tuple.Create( "srcset", srcset ) );
+								attributes.Add( new ElementAttribute( "srcset", srcset ) );
 							if( alternativeText != null )
-								attributes.Add( Tuple.Create( "alt", alternativeText ) );
+								attributes.Add( new ElementAttribute( "alt", alternativeText ) );
 
 							return new DisplayableElementLocalData( "img", focusDependentData: new DisplayableElementFocusDependentData( attributes: attributes ) );
 						},

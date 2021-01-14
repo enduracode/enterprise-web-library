@@ -20,9 +20,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			toolTip = new ToolTip( menuContent, out toolTipInitStatementGetter, title: menuTitle );
 		}
 
-		IEnumerable<Tuple<string, string>> ButtonBehavior.GetAttributes() {
-			return Enumerable.Empty<Tuple<string, string>>();
-		}
+		IEnumerable<ElementAttribute> ButtonBehavior.GetAttributes() => Enumerable.Empty<ElementAttribute>();
 
 		bool ButtonBehavior.IncludesIdAttribute() {
 			return true;

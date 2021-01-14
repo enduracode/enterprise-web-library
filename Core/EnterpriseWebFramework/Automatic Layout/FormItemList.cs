@@ -58,7 +58,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							() => new DisplayableElementLocalData(
 								"div",
 								focusDependentData: new DisplayableElementFocusDependentData(
-									attributes: Tuple.Create( "style", "flex-basis: {0}".FormatWith( ( (CssLength)minWidths.Value.label ).Value ) ).ToCollection() ) ),
+									attributes: new ElementAttribute( "style", "flex-basis: {0}".FormatWith( ( (CssLength)minWidths.Value.label ).Value ) ).ToCollection() ) ),
 							classes: labelClass,
 							children: i.Label ) ).ToCollection()
 					.Append(
@@ -68,7 +68,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								() => new DisplayableElementLocalData(
 									"div",
 									focusDependentData: new DisplayableElementFocusDependentData(
-										attributes: Tuple.Create( "style", "flex-basis: {0}".FormatWith( ( (CssLength)minWidths.Value.content ).Value ) ).ToCollection() ) ),
+										attributes: new ElementAttribute( "style", "flex-basis: {0}".FormatWith( ( (CssLength)minWidths.Value.content ).Value ) )
+											.ToCollection() ) ),
 								classes: contentClass.Add( TextAlignmentStatics.Class( i.Setup.TextAlignment ) ),
 								children: i.Content.Concat(
 										i.ErrorSourceSet == null
@@ -160,7 +161,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					() => new DisplayableElementLocalData(
 						"div",
 						focusDependentData: new DisplayableElementFocusDependentData(
-							attributes: listStyleAttribute.Any() ? Tuple.Create( "style", listStyleAttribute ).ToCollection() : null ) ),
+							attributes: listStyleAttribute.Any() ? new ElementAttribute( "style", listStyleAttribute ).ToCollection() : null ) ),
 					classes: allListsClass.Add( classes ).Add( setup.Classes ?? ElementClassSet.Empty ),
 					children: this.items.Select( i => ( item: i, elementClass: itemClass ) )
 						.Concat( buttonItem.Select( i => ( item: i, elementClass: buttonItemClass ) ) )
@@ -175,7 +176,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 												itemContext,
 												"div",
 												i.item.ErrorSourceSet,
-												styleAttribute.Any() ? Tuple.Create( "style", styleAttribute ).ToCollection() : null );
+												styleAttribute.Any() ? new ElementAttribute( "style", styleAttribute ).ToCollection() : null );
 										},
 										classes: i.elementClass.Add( itemClassGetter( i.item ) ),
 										children: itemComponentGetter( i.item ) ) ).ToCollection(),

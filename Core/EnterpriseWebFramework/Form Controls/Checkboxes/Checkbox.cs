@@ -108,18 +108,20 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									return new DisplayableElementData(
 										null,
 										() => {
-											var attributes = new List<Tuple<string, string>>();
+											var attributes = new List<ElementAttribute>();
 											var radioButtonFormValue = formValue as FormValue<ElementId>;
-											attributes.Add( Tuple.Create( "type", radioButtonFormValue != null ? "radio" : "checkbox" ) );
+											attributes.Add( new ElementAttribute( "type", radioButtonFormValue != null ? "radio" : "checkbox" ) );
 											if( radioButtonFormValue != null || !isReadOnly )
 												attributes.Add(
-													Tuple.Create( "name", radioButtonFormValue != null ? ( (FormValue)radioButtonFormValue ).GetPostBackValueKey() : context.Id ) );
+													new ElementAttribute(
+														"name",
+														radioButtonFormValue != null ? ( (FormValue)radioButtonFormValue ).GetPostBackValueKey() : context.Id ) );
 											if( radioButtonFormValue != null )
-												attributes.Add( Tuple.Create( "value", radioButtonListItemId ?? context.Id ) );
+												attributes.Add( new ElementAttribute( "value", radioButtonListItemId ?? context.Id ) );
 											if( pageModificationValue.Value )
-												attributes.Add( Tuple.Create( "checked", "checked" ) );
+												attributes.Add( new ElementAttribute( "checked" ) );
 											if( isReadOnly )
-												attributes.Add( Tuple.Create( "disabled", "disabled" ) );
+												attributes.Add( new ElementAttribute( "disabled" ) );
 
 											var jsInitStatements = StringTools.ConcatenateWithDelimiter(
 												" ",
@@ -134,7 +136,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 												new FocusabilityCondition( !isReadOnly ),
 												isFocused => {
 													if( isFocused )
-														attributes.Add( Tuple.Create( "autofocus", "autofocus" ) );
+														attributes.Add( new ElementAttribute( "autofocus" ) );
 													return new DisplayableElementFocusDependentData(
 														attributes: attributes,
 														includeIdAttribute: true,

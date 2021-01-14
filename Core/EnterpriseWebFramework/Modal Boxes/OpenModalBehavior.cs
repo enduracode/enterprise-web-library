@@ -21,7 +21,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			this.etherealChildren = etherealChildren;
 		}
 
-		IEnumerable<Tuple<string, string>> ButtonBehavior.GetAttributes() => Enumerable.Empty<Tuple<string, string>>();
+		IEnumerable<ElementAttribute> ButtonBehavior.GetAttributes() => Enumerable.Empty<ElementAttribute>();
 
 		bool ButtonBehavior.IncludesIdAttribute() => true;
 

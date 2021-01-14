@@ -34,7 +34,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								throw new ApplicationException( "The labeler must be associated with a form control that is on the page." );
 							return new DisplayableElementLocalData(
 								"label",
-								focusDependentData: new DisplayableElementFocusDependentData( attributes: Tuple.Create( "for", ControlId.Id ).ToCollection() ) );
+								focusDependentData: new DisplayableElementFocusDependentData( attributes: new ElementAttribute( "for", ControlId.Id ).ToCollection() ) );
 						},
 						classes: classes,
 						children: content ) ).ToCollection() ).ToCollection();

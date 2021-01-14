@@ -138,13 +138,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						"col",
 						focusDependentData: new ElementFocusDependentData(
 							attributes: width != null
-								            ? Tuple.Create(
-										            "style",
-										            "width: {0}".FormatWith(
-											            ( width is AncestorRelativeLength && width.Value.EndsWith( "%" )
-												              ? ( decimal.Parse( width.Value.Remove( width.Value.Length - 1 ) ) * columnWidthFactor ).ToPercentage()
-												              : width ).Value ) )
-									            .ToCollection()
+								            ? new ElementAttribute(
+									            "style",
+									            "width: {0}".FormatWith(
+										            ( width is AncestorRelativeLength && width.Value.EndsWith( "%" )
+											              ? ( decimal.Parse( width.Value.Remove( width.Value.Length - 1 ) ) * columnWidthFactor ).ToPercentage()
+											              : width ).Value ) ).ToCollection()
 								            : null ) ) ) );
 		}
 
@@ -333,8 +332,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									  ? TableCssElementCreator.ContrastClass
 									  : ElementClassSet.Empty ).Add( rowSetup.Classes ),
 								rowSetup.Size != null
-									? Tuple.Create( "style", "height: {0}".FormatWith( rowSetup.Size.Value ) ).ToCollection()
-									: Enumerable.Empty<Tuple<string, string>>().Materialize(),
+									? new ElementAttribute( "style", "height: {0}".FormatWith( rowSetup.Size.Value ) ).ToCollection()
+									: Enumerable.Empty<ElementAttribute>().Materialize(),
 								rowActivationBehavior,
 								row.Select( ( cell, colIndex ) => new { Cell = cell as EwfTableCell, ColumnIndex = colIndex } )
 									.Where( cellAndIndex => cellAndIndex.Cell != null )
@@ -343,13 +342,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 											var columnSetup = columns[ cellAndIndex.ColumnIndex ];
 											var cellSetup = cellAndIndex.Cell.Setup;
 
-											var attributes = new List<Tuple<string, string>>();
+											var attributes = new List<ElementAttribute>();
 											var rowSpan = tableIsColumnPrimary ? cellSetup.FieldSpan : cellSetup.ItemSpan;
 											if( rowSpan != 1 )
-												attributes.Add( Tuple.Create( "rowspan", rowSpan.ToString() ) );
+												attributes.Add( new ElementAttribute( "rowspan", rowSpan.ToString() ) );
 											var colSpan = tableIsColumnPrimary ? cellSetup.ItemSpan : cellSetup.FieldSpan;
 											if( colSpan != 1 )
-												attributes.Add( Tuple.Create( "colspan", colSpan.ToString() ) );
+												attributes.Add( new ElementAttribute( "colspan", colSpan.ToString() ) );
 
 											var cellActivationBehavior = cellSetup.ActivationBehavior ??
 											                             ( tableIsColumnPrimary || rowActivationBehavior == null ? columnSetup.ActivationBehavior : null );

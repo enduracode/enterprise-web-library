@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -31,10 +30,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							"button",
 							new FocusabilityCondition( true ),
 							isFocused => {
-								var attributes = new List<Tuple<string, string>> { Tuple.Create( "type", "button" ) };
+								var attributes = new List<ElementAttribute> { new ElementAttribute( "type", "button" ) };
 								attributes.AddRange( behavior.GetAttributes() );
 								if( isFocused )
-									attributes.Add( Tuple.Create( "autofocus", "autofocus" ) );
+									attributes.Add( new ElementAttribute( "autofocus" ) );
 
 								return new DisplayableElementFocusDependentData(
 									attributes: attributes,

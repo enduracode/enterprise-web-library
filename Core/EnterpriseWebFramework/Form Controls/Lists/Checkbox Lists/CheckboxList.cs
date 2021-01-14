@@ -90,7 +90,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								"div",
 								focusDependentData: new DisplayableElementFocusDependentData(
 									attributes: setup.MinColumnWidth != null
-										            ? Tuple.Create( "style", "column-width: {0}".FormatWith( ( (CssLength)setup.MinColumnWidth ).Value ) ).ToCollection()
+										            ? new ElementAttribute( "style", "column-width: {0}".FormatWith( ( (CssLength)setup.MinColumnWidth ).Value ) ).ToCollection()
 										            : null,
 									includeIdAttribute: true ) ),
 							classes: CheckboxListCssElementCreator.ContentContainerClass,

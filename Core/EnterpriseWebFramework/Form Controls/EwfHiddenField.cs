@@ -37,10 +37,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			component = new ElementComponent(
 				context => new ElementData(
 					() => {
-						var attributes = new List<Tuple<string, string>>();
-						attributes.Add( Tuple.Create( "type", "hidden" ) );
-						attributes.Add( Tuple.Create( "name", context.Id ) );
-						attributes.Add( Tuple.Create( "value", pageModificationValue.Value ) );
+						var attributes = new List<ElementAttribute>();
+						attributes.Add( new ElementAttribute( "type", "hidden" ) );
+						attributes.Add( new ElementAttribute( "name", context.Id ) );
+						attributes.Add( new ElementAttribute( "value", pageModificationValue.Value ) );
 
 						return new ElementLocalData(
 							"input",

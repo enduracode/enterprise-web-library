@@ -50,16 +50,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						return new DisplayableElementData(
 							displaySetup,
 							() => {
-								var attributes = new List<Tuple<string, string>>();
-								attributes.Add( Tuple.Create( "type", "file" ) );
-								attributes.Add( Tuple.Create( "name", context.Id ) );
+								var attributes = new List<ElementAttribute>();
+								attributes.Add( new ElementAttribute( "type", "file" ) );
+								attributes.Add( new ElementAttribute( "name", context.Id ) );
 
 								return new DisplayableElementLocalData(
 									"input",
 									new FocusabilityCondition( true ),
 									isFocused => {
 										if( isFocused )
-											attributes.Add( Tuple.Create( "autofocus", "autofocus" ) );
+											attributes.Add( new ElementAttribute( "autofocus" ) );
 										return new DisplayableElementFocusDependentData( attributes: attributes );
 									} );
 							},

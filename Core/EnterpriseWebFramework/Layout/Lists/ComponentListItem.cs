@@ -84,7 +84,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal static ComponentListItem ToComponentListItem(
 			this IReadOnlyCollection<FlowComponent> content, DisplaySetup displaySetup, ElementClassSet classes, int? visualOrderRank,
 			IEnumerable<UpdateRegionSet> updateRegionSets, IReadOnlyCollection<EtherealComponent> etherealContent,
-			Func<ElementContext, string, IReadOnlyCollection<Tuple<string, string>>, DisplayableElementLocalData> localDataGetter ) =>
+			Func<ElementContext, string, IReadOnlyCollection<ElementAttribute>, DisplayableElementLocalData> localDataGetter ) =>
 			content.ToComponentListItem( "", displaySetup, classes, visualOrderRank, updateRegionSets, null, etherealContent, localDataGetter );
 
 		/// <summary>
@@ -161,7 +161,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			this IReadOnlyCollection<FlowComponent> content, string id, DisplaySetup displaySetup, ElementClassSet classes, int? visualOrderRank,
 			IEnumerable<UpdateRegionSet> updateRegionSets, IEnumerable<UpdateRegionSet> removalUpdateRegionSets,
 			IReadOnlyCollection<EtherealComponent> etherealContent,
-			Func<ElementContext, string, IReadOnlyCollection<Tuple<string, string>>, DisplayableElementLocalData> localDataGetter ) {
+			Func<ElementContext, string, IReadOnlyCollection<ElementAttribute>, DisplayableElementLocalData> localDataGetter ) {
 			return new ComponentListItem(
 				( includeContentContainer, itemTypeClasses, width ) => {
 					FlowComponentOrNode component = null;
@@ -175,10 +175,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							new ErrorSourceSet(),
 							errorsBySource => new DisplayableElement(
 								context => {
-									var attributes = new List<Tuple<string, string>>();
+									var attributes = new List<ElementAttribute>();
 									if( visualOrderRank.HasValue || width != null )
 										attributes.Add(
-											Tuple.Create(
+											new ElementAttribute(
 												"style",
 												StringTools.ConcatenateWithDelimiter(
 													", ",

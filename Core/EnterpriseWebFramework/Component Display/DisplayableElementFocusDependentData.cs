@@ -15,10 +15,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Creates a displayable-element focus-dependent-data object.
 		/// </summary>
 		public DisplayableElementFocusDependentData(
-			IEnumerable<Tuple<string, string>> attributes = null, bool includeIdAttribute = false, string jsInitStatements = "" ) {
+			IEnumerable<ElementAttribute> attributes = null, bool includeIdAttribute = false, string jsInitStatements = "" ) {
 			BaseDataGetter = displaySetup => new ElementFocusDependentData(
-				( attributes ?? ImmutableArray<Tuple<string, string>>.Empty ).Concat(
-					!displaySetup.ComponentsDisplayed ? Tuple.Create( "style", "display: none" ).ToCollection() : ImmutableArray<Tuple<string, string>>.Empty ),
+				( attributes ?? ImmutableArray<ElementAttribute>.Empty ).Concat(
+					!displaySetup.ComponentsDisplayed ? new ElementAttribute( "style", "display: none" ).ToCollection() : ImmutableArray<ElementAttribute>.Empty ),
 				displaySetup.UsesJsStatements || includeIdAttribute,
 				jsInitStatements );
 		}

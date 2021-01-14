@@ -51,9 +51,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							"button",
 							new FocusabilityCondition( true ),
 							isFocused => {
-								var attributes = new List<Tuple<string, string>> { Tuple.Create( "name", EwfPage.ButtonElementName ), Tuple.Create( "value", "v" ) };
+								var attributes = new List<ElementAttribute> { new ElementAttribute( "name", EwfPage.ButtonElementName ), new ElementAttribute( "value", "v" ) };
 								if( isFocused )
-									attributes.Add( Tuple.Create( "autofocus", "autofocus" ) );
+									attributes.Add( new ElementAttribute( "autofocus" ) );
 
 								return new DisplayableElementFocusDependentData( attributes: attributes, jsInitStatements: style.GetJsInitStatements( context.Id ) );
 							} ),

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Humanizer;
 
@@ -21,9 +20,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			PostBackAction = new PostBackFormAction( postBack ?? FormState.Current.PostBack );
 		}
 
-		IEnumerable<Tuple<string, string>> ButtonBehavior.GetAttributes() {
-			return Enumerable.Empty<Tuple<string, string>>();
-		}
+		IEnumerable<ElementAttribute> ButtonBehavior.GetAttributes() => Enumerable.Empty<ElementAttribute>();
 
 		bool ButtonBehavior.IncludesIdAttribute() {
 			return true;

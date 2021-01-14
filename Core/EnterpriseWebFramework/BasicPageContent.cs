@@ -115,7 +115,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						() => new ElementLocalData(
 							"span",
 							focusDependentData: new ElementFocusDependentData(
-								attributes: Tuple.Create( "style", "position: relative; margin-left: 25px; margin-right: 40px" ).ToCollection(),
+								attributes: new ElementAttribute( "style", "position: relative; margin-left: 25px; margin-right: 40px" ).ToCollection(),
 								includeIdAttribute: true,
 								jsInitStatements: @"new Spinner( {
 	lines: 13, // The number of lines to draw
@@ -166,14 +166,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					() => new ElementLocalData(
 						"script",
 						focusDependentData: new ElementFocusDependentData(
-							attributes: Tuple.Create(
-									"src",
-									"data:{0};charset=utf-8;base64,{1}".FormatWith(
-										TewlContrib.ContentTypes.JavaScript,
-										Convert.ToBase64String(
-											Encoding.UTF8.GetBytes( "window.addEventListener( 'DOMContentLoaded', function() { " + jsInitStatementGetter() + " } );" ) ) ) )
-								.ToCollection()
-								.Append( Tuple.Create( "defer", "" ) ) ) ) ) );
+							attributes: new ElementAttribute(
+								"src",
+								"data:{0};charset=utf-8;base64,{1}".FormatWith(
+									TewlContrib.ContentTypes.JavaScript,
+									Convert.ToBase64String(
+										Encoding.UTF8.GetBytes( "window.addEventListener( 'DOMContentLoaded', function() { " + jsInitStatementGetter() + " } );" ) ) ) ).Append(
+								new ElementAttribute( "defer" ) ) ) ) ) );
 
 		private readonly Func<IReadOnlyCollection<PageContent>, Func<string>, FlowComponent, FlowComponent> componentGetter;
 		internal bool FormUsesMultipartEncoding;
@@ -220,9 +219,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							new ElementComponent(
 								bodyContext => new ElementData(
 									() => {
-										var attributes = new List<Tuple<string, string>>();
-										attributes.Add( Tuple.Create( "onpagehide", "deactivateProcessingDialog();" ) );
-										attributes.Add( Tuple.Create( "data-instant-whitelist", "data-instant-whitelist" ) ); // for https://instant.page/
+										var attributes = new List<ElementAttribute>();
+										attributes.Add( new ElementAttribute( "onpagehide", "deactivateProcessingDialog();" ) );
+										attributes.Add( new ElementAttribute( "data-instant-whitelist" ) ); // for https://instant.page/
 
 										return new ElementLocalData( "body", focusDependentData: new ElementFocusDependentData( attributes: attributes ) );
 									},
@@ -230,12 +229,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									children: new ElementComponent(
 											formContext => new ElementData(
 												() => {
-													var attributes = new List<Tuple<string, string>>();
-													attributes.Add( Tuple.Create( "action", EwfPage.Instance.InfoAsBaseType.GetUrl() ) );
-													attributes.Add( Tuple.Create( "method", "post" ) );
+													var attributes = new List<ElementAttribute>();
+													attributes.Add( new ElementAttribute( "action", EwfPage.Instance.InfoAsBaseType.GetUrl() ) );
+													attributes.Add( new ElementAttribute( "method", "post" ) );
 													if( FormUsesMultipartEncoding )
-														attributes.Add( Tuple.Create( "enctype", "multipart/form-data" ) );
-													attributes.Add( Tuple.Create( "novalidate", "" ) );
+														attributes.Add( new ElementAttribute( "enctype", "multipart/form-data" ) );
+													attributes.Add( new ElementAttribute( "novalidate" ) );
 
 													return new ElementLocalData(
 														"form",
@@ -249,10 +248,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 														new ElementComponent(
 															context => new ElementData(
 																() => {
-																	var attributes = new List<Tuple<string, string>>();
-																	attributes.Add( Tuple.Create( "type", "hidden" ) );
-																	attributes.Add( Tuple.Create( "name", EwfPage.HiddenFieldName ) );
-																	attributes.Add( Tuple.Create( "value", hiddenFieldValueGetter() ) );
+																	var attributes = new List<ElementAttribute>();
+																	attributes.Add( new ElementAttribute( "type", "hidden" ) );
+																	attributes.Add( new ElementAttribute( "name", EwfPage.HiddenFieldName ) );
+																	attributes.Add( new ElementAttribute( "value", hiddenFieldValueGetter() ) );
 
 																	return new ElementLocalData(
 																		"input",
@@ -481,7 +480,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					getLink(
 						EwfPage.Instance.GetClientUrl( faviconPng48X48.GetUrl( true, true, false ) ),
 						"icon",
-						attributes: Tuple.Create( "sizes", "48x48" ).ToCollection() ) );
+						attributes: new ElementAttribute( "sizes", "48x48" ).ToCollection() ) );
 
 			var favicon = EwfApp.Instance.Favicon;
 			if( favicon != null && favicon.UserCanAccessResource )
@@ -502,7 +501,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 		}
 
-		private FlowComponent getStyleSheetLink( string url ) => getLink( url, "stylesheet", attributes: Tuple.Create( "type", "text/css" ).ToCollection() );
+		private FlowComponent getStyleSheetLink( string url ) =>
+			getLink( url, "stylesheet", attributes: new ElementAttribute( "type", "text/css" ).ToCollection() );
 
 		private FlowComponent getModernizrLogic() =>
 			new TrustedHtmlString(
@@ -544,24 +544,22 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return components;
 		}
 
-		private FlowComponent getLink( string href, string rel, IReadOnlyCollection<Tuple<string, string>> attributes = null ) =>
+		private FlowComponent getLink( string href, string rel, IReadOnlyCollection<ElementAttribute> attributes = null ) =>
 			new ElementComponent(
 				context => new ElementData(
 					() => new ElementLocalData(
 						"link",
 						focusDependentData: new ElementFocusDependentData(
-							attributes: Tuple.Create( "href", href )
-								.ToCollection()
-								.Append( Tuple.Create( "rel", rel ) )
-								.Concat( attributes ?? Enumerable.Empty<Tuple<string, string>>() ) ) ) ) );
+							attributes: new ElementAttribute( "href", href ).Append( new ElementAttribute( "rel", rel ) )
+								.Concat( attributes ?? Enumerable.Empty<ElementAttribute>() ) ) ) ) );
 
 		private FlowComponent getMeta( string name, string content ) =>
 			new ElementComponent(
 				context => new ElementData(
 					() => {
-						var attributes = new List<Tuple<string, string>>();
-						attributes.Add( Tuple.Create( "name", name ) );
-						attributes.Add( Tuple.Create( "content", content ) );
+						var attributes = new List<ElementAttribute>();
+						attributes.Add( new ElementAttribute( "name", name ) );
+						attributes.Add( new ElementAttribute( "content", content ) );
 						return new ElementLocalData( "meta", focusDependentData: new ElementFocusDependentData( attributes: attributes ) );
 					} ) );
 

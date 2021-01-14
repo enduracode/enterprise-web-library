@@ -147,28 +147,28 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								       return new DisplayableElementData(
 									       displaySetup,
 									       () => {
-										       var attributes = new List<Tuple<string, string>>();
-										       attributes.Add( Tuple.Create( "type", isImprecise ? "range" : "number" ) );
+										       var attributes = new List<ElementAttribute>();
+										       attributes.Add( new ElementAttribute( "type", isImprecise ? "range" : "number" ) );
 										       if( !isReadOnly )
-											       attributes.Add( Tuple.Create( "name", context.Id ) );
+											       attributes.Add( new ElementAttribute( "name", context.Id ) );
 
 										       var pmvValue = isImprecise
 											                      ? ( (PageModificationValue<decimal>)pageModificationValue ).Value
 											                      : ( (PageModificationValue<decimal?>)pageModificationValue ).Value;
-										       attributes.Add( Tuple.Create( "value", getHtmlFloatingPointNumber( pmvValue ) ) );
+										       attributes.Add( new ElementAttribute( "value", getHtmlFloatingPointNumber( pmvValue ) ) );
 										       if( isReadOnly )
-											       attributes.Add( Tuple.Create( "disabled", "disabled" ) );
+											       attributes.Add( new ElementAttribute( "disabled" ) );
 										       if( !isReadOnly ) {
 											       if( minValue.HasValue )
-												       attributes.Add( Tuple.Create( "min", getHtmlFloatingPointNumber( minValue.Value ) ) );
+												       attributes.Add( new ElementAttribute( "min", getHtmlFloatingPointNumber( minValue.Value ) ) );
 											       if( maxValue.HasValue )
-												       attributes.Add( Tuple.Create( "max", getHtmlFloatingPointNumber( maxValue.Value ) ) );
-											       attributes.Add( Tuple.Create( "step", valueStep.HasValue ? getHtmlFloatingPointNumber( valueStep.Value ) : "any" ) );
+												       attributes.Add( new ElementAttribute( "max", getHtmlFloatingPointNumber( maxValue.Value ) ) );
+											       attributes.Add( new ElementAttribute( "step", valueStep.HasValue ? getHtmlFloatingPointNumber( valueStep.Value ) : "any" ) );
 										       }
 										       if( placeholder.Any() )
-											       attributes.Add( Tuple.Create( "placeholder", placeholder ) );
+											       attributes.Add( new ElementAttribute( "placeholder", placeholder ) );
 										       if( autoFillTokens.Any() )
-											       attributes.Add( Tuple.Create( "autocomplete", autoFillTokens ) );
+											       attributes.Add( new ElementAttribute( "autocomplete", autoFillTokens ) );
 
 
 										       var autoCompleteStatements = "";
@@ -218,7 +218,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 											       new FocusabilityCondition( !isReadOnly ),
 											       isFocused => {
 												       if( isFocused )
-													       attributes.Add( Tuple.Create( "autofocus", "autofocus" ) );
+													       attributes.Add( new ElementAttribute( "autofocus" ) );
 												       return new DisplayableElementFocusDependentData(
 													       attributes: attributes,
 													       includeIdAttribute: true,
