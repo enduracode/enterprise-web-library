@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -65,26 +64,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				ScrollPositionX = scrollPositionX;
 				ScrollPositionY = scrollPositionY;
 			}
-		}
-
-		private class IdGenerator {
-			private readonly string idBase;
-			private int number;
-
-			public IdGenerator( string idBase ) {
-				this.idBase = idBase;
-				number = 1;
-			}
-
-			public IdGenerator():
-				// Prefix generated IDs with double underscore to avoid collisions with specified client-side IDs on the page.
-				this( "_" ) {}
-
-			public string GenerateId() => idBase + "_" + number++;
-
-			public string GenerateLocallySpecifiedId( string localId ) =>
-				// Prefix specified local IDs with double underscore to avoid collisions with numbered IDs.
-				idBase + "__" + localId;
 		}
 
 		internal new static void Init(
@@ -156,14 +135,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				throw new ApplicationException( "The page tree has not yet been built." );
 		}
 
-		internal PageContent BasicContent;
-		private PageNode rootNode;
-		private Action<bool, Func<FocusabilityCondition, bool>> renderingPreparer;
-		private PageNode etherealContainerNode;
-		private int etherealComponentCount;
-		private int nodeCount;
-		private List<PageNode> allNodes;
 		private FormState formState;
+		internal PageContent BasicContent;
+		private PageTree pageTree;
 		private Func<string> elementOrIdentifiedComponentIdGetter = () => "";
 		private readonly BasicDataModification dataUpdate = new BasicDataModification();
 		private readonly PostBack dataUpdatePostBack = PostBack.CreateDataUpdate();
@@ -632,53 +606,20 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				dataUpdate.AddModificationMethod( content.dataUpdateModificationMethod );
 			IsAutoDataUpdater = content.isAutoDataUpdater;
 			using( MiniProfiler.Current.Step( "EWF - Build page tree" ) )
-				rootNode = buildNode( content.component, new IdGenerator(), content.etherealContainer, content.jsInitElement, false, false );
+				pageTree = new PageTree(
+					content.component,
+					id => elementOrIdentifiedComponentIdGetter = () => id,
+					addModificationErrorDisplaysAndGetErrors,
+					content.etherealContainer,
+					content.jsInitElement,
+					elementJsInitStatements );
 			formState = null;
 
-			renderingPreparer = ( modificationErrorsOccurred, isFocusablePredicate ) => {
-				var etherealChildren = new List<PageNode>( etherealComponentCount );
-
-				var activeAutofocusRegionsExist = false;
-				var elementFocused = false;
-
-				void prepareSubtreeForRendering( PageNode node, bool inActiveAutofocusRegion, TextWriter jsInitStatementWriter ) {
-					etherealChildren.AddRange( node.EtherealChildren );
-
-					if( !inActiveAutofocusRegion && node.AutofocusCondition?.IsTrue( AppRequestState.Instance.EwfPageRequestState.FocusKey ) == true ) {
-						inActiveAutofocusRegion = true;
-						activeAutofocusRegionsExist = true;
-					}
-
-					var focusabilityCondition = node.FocusabilityConditionGetter?.Invoke();
-
-					var isFocused = !elementFocused && inActiveAutofocusRegion && focusabilityCondition != null &&
-					                isFocusablePredicate( node.FocusabilityConditionGetter() );
-					if( isFocused )
-						elementFocused = true;
-
-					node.JsInitStatementWriter?.Invoke( isFocused, jsInitStatementWriter );
-
-					foreach( var i in node.AllChildren )
-						prepareSubtreeForRendering( i, inActiveAutofocusRegion, jsInitStatementWriter );
-				}
-
-				using( var jsInitStatementWriter = new StringWriter( elementJsInitStatements ) )
-					prepareSubtreeForRendering( rootNode, modificationErrorsOccurred, jsInitStatementWriter );
-
-				if( !modificationErrorsOccurred && activeAutofocusRegionsExist && !elementFocused )
-					throw new ApplicationException( "The active autofocus regions do not contain any focusable elements." );
-
-				etherealContainerNode.Children = etherealChildren;
-			};
-
-			allNodes = new List<PageNode>( nodeCount );
-			addTreeToAllNodes( rootNode );
-
-			var activeStateItems = allNodes.Select( i => i.StateItem ).Where( i => i != null ).ToImmutableHashSet();
+			var activeStateItems = pageTree.AllNodes.Select( i => i.StateItem ).Where( i => i != null ).ToImmutableHashSet();
 			foreach( var i in componentStateItemsById.Where( i => !activeStateItems.Contains( i.Value ) ).Select( i => i.Key ).Materialize() )
 				componentStateItemsById.Remove( i );
 
-			updateRegionLinkerNodes = allNodes.Where( i => i.KeyedUpdateRegionLinkers != null ).Materialize();
+			updateRegionLinkerNodes = pageTree.AllNodes.Where( i => i.KeyedUpdateRegionLinkers != null ).Materialize();
 
 			var duplicatePostBackValueKeys = formValues.Select( i => i.GetPostBackValueKey() ).Where( i => i.Any() ).GetDuplicates().ToArray();
 			if( duplicatePostBackValueKeys.Any() )
@@ -700,110 +641,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		protected virtual PageContent getContent() => null;
 
-		private PageNode buildNode(
-			PageComponent component, IdGenerator idGenerator, FlowComponent etherealContainer, FlowComponent jsInitElement, bool inEtherealContainer,
-			bool inJsInitElement ) {
-			nodeCount += 1;
-
-			IReadOnlyCollection<PageNode> buildChildren( IEnumerable<PageComponent> children, IdGenerator g ) =>
-				children.Select( i => buildNode( i, g, etherealContainer, jsInitElement, inEtherealContainer, inJsInitElement ) ).Materialize();
-
-			if( component is ElementNode elementNode ) {
-				FormState.Current.SetForNextElement();
-
-				var id = idGenerator.GenerateId();
-				elementOrIdentifiedComponentIdGetter = () => id;
-
-				var data = elementNode.ElementDataGetter( new ElementContext( id ) );
-				ElementNodeLocalData localData = null;
-				ElementNodeFocusDependentData focusDependentData = null;
-				var node = new PageNode(
-					elementNode,
-					elementNode.FormValue,
-					buildChildren( data.Children, idGenerator ),
-					buildChildren( data.EtherealChildren, idGenerator ),
-					() => {
-						// Defer attribute creation for the JavaScript initialization element.
-						if( inJsInitElement )
-							return new FocusabilityCondition( false );
-
-						localData = data.LocalDataGetter();
-						return localData.FocusabilityCondition;
-					},
-					( isFocused, writer ) => {
-						// Defer attribute creation for the JavaScript initialization element.
-						if( inJsInitElement )
-							return;
-
-						focusDependentData = localData.FocusDependentDataGetter( isFocused );
-						writer.Write( focusDependentData.JsInitStatements );
-					},
-					() => {
-						if( inJsInitElement ) {
-							localData = data.LocalDataGetter();
-							focusDependentData = localData.FocusDependentDataGetter( false );
-						}
-
-						var attributes = focusDependentData.Attributes;
-						if( focusDependentData.IncludeIdAttribute )
-							attributes = attributes.Append( new ElementAttribute( "id", data.ClientSideIdOverride.Any() ? data.ClientSideIdOverride : id ) );
-						return ( localData.ElementName, attributes );
-					} );
-
-				if( inEtherealContainer )
-					etherealContainerNode = node;
-				etherealComponentCount += node.EtherealChildren.Count;
-
-				return node;
-			}
-			if( component is TextNode textNode )
-				return new PageNode( textNode );
-			if( component is MarkupBlockNode markupBlockNode )
-				return new PageNode( markupBlockNode );
-
-			if( component is FlowComponent flowComponent ) {
-				if( component == etherealContainer )
-					inEtherealContainer = true;
-				if( component == jsInitElement )
-					inJsInitElement = true;
-				return new PageNode( flowComponent, buildChildren( flowComponent.GetChildren(), idGenerator ) );
-			}
-			if( component is EtherealComponent etherealComponent )
-				return new PageNode( etherealComponent, buildChildren( etherealComponent.GetChildren(), idGenerator ) );
-
-			PageNode buildIdentifiedComponentNode<ChildType>(
-				IdentifiedComponentData<ChildType> data, Func<ModificationErrorDictionary, IEnumerable<PageComponent>> childGetter ) where ChildType: PageComponent {
-				var id = string.IsNullOrEmpty( data.Id ) ? idGenerator.GenerateId() : idGenerator.GenerateLocallySpecifiedId( data.Id );
-				elementOrIdentifiedComponentIdGetter = () => id;
-
-				return new PageNode(
-					component,
-					id,
-					data.UpdateRegionLinkers,
-					buildChildren(
-						childGetter(
-							new ModificationErrorDictionary(
-								addModificationErrorDisplaysAndGetErrors( id, data ),
-								data.ErrorSources.IncludeGeneralErrors
-									? AppRequestState.Instance.EwfPageRequestState.GeneralModificationErrors
-									: ImmutableArray<TrustedHtmlString>.Empty ) ),
-						data.Id == null ? idGenerator : new IdGenerator( id ) ) );
-			}
-			if( component is IdentifiedFlowComponent identifiedFlowComponent ) {
-				var data = identifiedFlowComponent.ComponentDataGetter();
-				return buildIdentifiedComponentNode( data, data.ChildGetter );
-			}
-			if( component is IdentifiedEtherealComponent identifiedEtherealComponent ) {
-				var data = identifiedEtherealComponent.ComponentDataGetter();
-				return buildIdentifiedComponentNode( data, data.ChildGetter );
-			}
-
-			throw new UnexpectedValueException( "component", component );
-		}
-
-		private ImmutableDictionary<EwfValidation, IReadOnlyCollection<string>> addModificationErrorDisplaysAndGetErrors<ComponentChildType>(
-			string id, IdentifiedComponentData<ComponentChildType> componentData ) where ComponentChildType: PageComponent =>
-			componentData.ErrorSources.Validations.Select(
+		private ImmutableDictionary<EwfValidation, IReadOnlyCollection<string>> addModificationErrorDisplaysAndGetErrors(
+			string id, ErrorSourceSet errorSources ) =>
+			errorSources.Validations.Select(
 					( validation, index ) => {
 						var displayKey = id + index;
 						if( modErrorDisplaysByValidation.ContainsKey( validation ) )
@@ -851,12 +691,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// EWL use only. Gets the status messages.
 		/// </summary>
 		public IEnumerable<Tuple<StatusMessageType, string>> StatusMessages => StandardLibrarySessionState.Instance.StatusMessages.Concat( statusMessages );
-
-		private void addTreeToAllNodes( PageNode node ) {
-			allNodes.Add( node );
-			foreach( var child in node.AllChildren )
-				addTreeToAllNodes( child );
-		}
 
 		private void executeWithDataModificationExceptionHandling( Action method ) {
 			try {
@@ -936,7 +770,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			IEnumerable<( PageNode node, IEnumerable<PageComponent> components )> updateRegions ) {
 			var contents = new StringBuilder();
 
-			var staticNodes = getStaticRegionNodes( updateRegions );
+			var staticNodes = pageTree.GetStaticRegionNodes( updateRegions );
 			var staticStateItems = staticNodes.Select( i => i.StateItem ).Where( i => i != null ).ToImmutableHashSet();
 			var staticFormValues = staticNodes.Select( i => i.FormValue ).Where( i => i != null ).Distinct().OrderBy( i => i.GetPostBackValueKey() ).Materialize();
 
@@ -1055,7 +889,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			else
 				isFocusablePredicate = condition => condition.IsNormallyFocusable;
 
-			renderingPreparer( modificationErrorsOccurred, isFocusablePredicate );
+			pageTree.PrepareForRendering( modificationErrorsOccurred, isFocusablePredicate );
 
 
 			// Direct response object modifications. These should happen once per page view; they are not needed in redirect responses.
@@ -1070,8 +904,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			// Without this header, certain sites could be forced into compatibility mode due to the Compatibility View Blacklist maintained by Microsoft.
 			Response.AppendHeader( "X-UA-Compatible", "IE=edge" );
 
-			Response.Output.Write( "<!DOCTYPE html>" );
-			rootNode.MarkupWriter( Response.Output );
+			pageTree.WriteMarkup( Response.Output );
 
 
 			StandardLibrarySessionState.Instance.StatusMessages.Clear();
@@ -1119,28 +952,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				StringTools.ConcatenateWithDelimiter( " ", scrollStatement, clientSideNavigationStatements )
 					.PrependDelimiter( "window.onload = function() { " )
 					.AppendDelimiter( " };" ) );
-		}
-
-		private IReadOnlyCollection<PageNode> getStaticRegionNodes( IEnumerable<( PageNode node, IEnumerable<PageComponent> components )> updateRegions ) {
-			if( updateRegions == null )
-				return allNodes;
-
-			var nodes = new List<PageNode>( nodeCount );
-
-			var updateRegionComponentsByNode = updateRegions.SelectMany( i => i.components, ( region, component ) => ( region.node, component ) )
-				.ToLookup( i => i.node, i => i.component );
-			void addNodes( PageNode node, ImmutableHashSet<PageComponent> updateRegionComponents ) {
-				updateRegionComponents = updateRegionComponents.Union( updateRegionComponentsByNode[ node ] );
-				if( updateRegionComponents.Contains( node.SourceComponent ) )
-					return;
-
-				nodes.Add( node );
-				foreach( var child in node.AllChildren )
-					addNodes( child, updateRegionComponents );
-			}
-			addNodes( rootNode, ImmutableHashSet<PageComponent>.Empty );
-
-			return nodes;
 		}
 
 		/// <summary>
