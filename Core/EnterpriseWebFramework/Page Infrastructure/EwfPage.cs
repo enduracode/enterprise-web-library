@@ -802,18 +802,30 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		private ImmutableDictionary<EwfValidation, IReadOnlyCollection<string>> addModificationErrorDisplaysAndGetErrors<ComponentChildType>(
-			string id, IdentifiedComponentData<ComponentChildType> componentData ) where ComponentChildType: PageComponent {
-			var validationIndex = 0;
-			var errorDictionary = new Dictionary<EwfValidation, IReadOnlyCollection<string>>();
-			foreach( var i in componentData.ErrorSources.Validations ) {
-				var errors = addModificationErrorDisplayAndGetErrors( id, validationIndex.ToString(), i );
-				errorDictionary.Add( i, errors );
-				if( errors.Any() )
-					validationsWithErrors.Add( i );
-				validationIndex += 1;
-			}
-			return errorDictionary.ToImmutableDictionary();
-		}
+			string id, IdentifiedComponentData<ComponentChildType> componentData ) where ComponentChildType: PageComponent =>
+			componentData.ErrorSources.Validations.Select(
+					( validation, index ) => {
+						var displayKey = id + index;
+						if( modErrorDisplaysByValidation.ContainsKey( validation ) )
+							modErrorDisplaysByValidation[ validation ].Add( displayKey );
+						else
+							modErrorDisplaysByValidation.Add( validation, displayKey.ToCollection().ToList() );
+
+						// We want to ignore all of the problems that could happen, such as the key not existing in the dictionary. This problem will be shown in a more
+						// helpful way when we compare form control hashes after a transfer.
+						//
+						// Avoid using exceptions here if possible. This method is sometimes called many times during a request, and we've seen exceptions take as long as
+						// 50 ms each when debugging.
+						var errors = AppRequestState.Instance.EwfPageRequestState.InLineModificationErrorsByDisplay.TryGetValue( displayKey, out var value )
+							             ? value.Materialize()
+							             : new string[ 0 ];
+
+						if( errors.Any() )
+							validationsWithErrors.Add( validation );
+
+						return ( validation, errors );
+					} )
+				.ToImmutableDictionary( i => i.validation, i => i.errors );
 
 		/// <summary>
 		/// Gets the page's data-update modification, which executes on every full post-back prior to the post-back object. WARNING: Do *not* use this for
@@ -830,27 +842,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public PostBack DataUpdatePostBack => dataUpdatePostBack;
 
 		internal PostBack GetPostBack( string id ) => postBacksById.TryGetValue( id, out var value ) ? value : null;
-
-		/// <summary>
-		/// If you are using the results of this method to create controls, put them in a naming container so that when the controls differ before and after a
-		/// transfer, other parts of the page such as form control IDs do not get affected.
-		/// </summary>
-		private IReadOnlyCollection<string> addModificationErrorDisplayAndGetErrors( string id, string keySuffix, EwfValidation validation ) {
-			var key = id + keySuffix;
-			if( modErrorDisplaysByValidation.ContainsKey( validation ) )
-				modErrorDisplaysByValidation[ validation ].Add( key );
-			else
-				modErrorDisplaysByValidation.Add( validation, key.ToCollection().ToList() );
-
-			// We want to ignore all of the problems that could happen, such as the key not existing in the dictionary. This problem will be shown in a more helpful
-			// way when we compare form control hashes after a transfer.
-			//
-			// Avoid using exceptions here if possible. This method is sometimes called many times during a request, and we've seen exceptions take as long as 50 ms
-			// each when debugging.
-			return AppRequestState.Instance.EwfPageRequestState.InLineModificationErrorsByDisplay.TryGetValue( key, out var value )
-				       ? value.Materialize()
-				       : new string[ 0 ];
-		}
 
 		internal void AddControlTreeValidation( Action validation ) {
 			controlTreeValidations.Add( validation );

@@ -17,7 +17,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// multiple times on a page, the update regions of each instance are scoped to the instance. This prevents an instance from “reaching out” of itself and
 		/// selecting update regions inside other instances of the same component on the page.</param>
 		/// <param name="errorSources"></param>
-		/// <param name="childGetter"></param>
+		/// <param name="childGetter">If the child components depend on the modification error dictionary, do not pass null for the component ID. Having an ID
+		/// container is important so that when the components differ before and after a transfer, other parts of the page such as form controls do not get
+		/// affected.</param>
 		internal IdentifiedComponentData(
 			string id, IReadOnlyCollection<UpdateRegionLinker> updateRegionLinkers, ErrorSourceSet errorSources,
 			Func<ModificationErrorDictionary, IEnumerable<ChildType>> childGetter ) {
