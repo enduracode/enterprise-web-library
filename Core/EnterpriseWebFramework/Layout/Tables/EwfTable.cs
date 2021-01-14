@@ -301,51 +301,50 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 											allVisibleItems )
 										.Materialize();
 									var cachedVisibleGroupIndex = visibleGroupIndex;
-									FlowComponent rowGroup = new FlowIdContainer(
-										new ElementComponent(
-											context => new ElementData(
-												() => new ElementLocalData( "tbody" ),
-												children:
-												buildRows(
-														groupAndItems.Item1.GetHeadItem( fields.Count ),
+									FlowComponent rowGroup = new ElementComponent(
+										context => new ElementData(
+											() => new ElementLocalData( "tbody" ),
+											children:
+											buildRows(
+													groupAndItems.Item1.GetHeadItem( fields.Count ),
+													Enumerable.Repeat( new EwfTableField(), fields.Count ).Materialize(),
+													null,
+													null,
+													null,
+													true,
+													null )
+												.Concat(
+													buildRows(
+														hasExplicitItemGroups == true && groupSelectedItemData.HasValue
+															? EwfTableItem.Create(
+																	TableStatics.GetItemSelectionAndActionComponents(
+																			"$( this ).closest( 'tbody' ).children().children( ':first-child' )",
+																			groupSelectedItemData.Value.buttons,
+																			groupSelectedItemData.Value.validation )
+																		.ToCell( new TableCellSetup( fieldSpan: fields.Count ) ) )
+																.ToCollection()
+															: Enumerable.Empty<EwfTableItem>().Materialize(),
 														Enumerable.Repeat( new EwfTableField(), fields.Count ).Materialize(),
 														null,
 														null,
 														null,
-														true,
-														null )
-													.Concat(
-														buildRows(
-															hasExplicitItemGroups == true && groupSelectedItemData.HasValue
-																? EwfTableItem.Create(
-																		TableStatics.GetItemSelectionAndActionComponents(
-																				"$( this ).closest( 'tbody' ).children().children( ':first-child' )",
-																				groupSelectedItemData.Value.buttons,
-																				groupSelectedItemData.Value.validation )
-																			.ToCell( new TableCellSetup( fieldSpan: fields.Count ) ) )
-																	.ToCollection()
-																: Enumerable.Empty<EwfTableItem>().Materialize(),
-															Enumerable.Repeat( new EwfTableField(), fields.Count ).Materialize(),
-															null,
-															null,
-															null,
-															false,
-															null ) )
-													.Append<FlowComponentOrNode>(
-														new IdentifiedFlowComponent(
-															() => new IdentifiedComponentData<FlowComponentOrNode>(
-																"",
-																new UpdateRegionLinker(
-																	"tail",
-																	from region in hasExplicitItemGroups.Value
-																		               ? groupAndItems.Item1.RemainingData.Value.TailUpdateRegions
-																		               : groupAndItems.Item1.GetTailUpdateRegionsNotIncludingAllItems()
-																	let staticRowCount = itemGroups[ cachedVisibleGroupIndex ].Items.Count - region.UpdatingItemCount
-																	select new PreModificationUpdateRegion( region.Sets, () => groupBodyRows.Skip( staticRowCount ), staticRowCount.ToString ),
-																	arg => groupBodyRows.Skip( int.Parse( arg ) ) ).ToCollection(),
-																new ErrorSourceSet(),
-																errorsBySource => groupBodyRows ) ) )
-													.Materialize() ) ).ToCollection() );
+														false,
+														null ) )
+												.Append<FlowComponentOrNode>(
+													new IdentifiedFlowComponent(
+														() => new IdentifiedComponentData<FlowComponentOrNode>(
+															"",
+															new UpdateRegionLinker(
+																"tail",
+																from region in hasExplicitItemGroups.Value
+																	               ? groupAndItems.Item1.RemainingData.Value.TailUpdateRegions
+																	               : groupAndItems.Item1.GetTailUpdateRegionsNotIncludingAllItems()
+																let staticRowCount = itemGroups[ cachedVisibleGroupIndex ].Items.Count - region.UpdatingItemCount
+																select new PreModificationUpdateRegion( region.Sets, () => groupBodyRows.Skip( staticRowCount ), staticRowCount.ToString ),
+																arg => groupBodyRows.Skip( int.Parse( arg ) ) ).ToCollection(),
+															new ErrorSourceSet(),
+															errorsBySource => groupBodyRows ) ) )
+												.Materialize() ) );
 									bodyRowGroupsAndRows.Add( Tuple.Create( rowGroup, groupBodyRows ) );
 									excelRowAdders.AddRange( groupAndItems.Item2.Select( i => TableStatics.GetExcelRowAdder( false, i.Cells ) ) );
 
