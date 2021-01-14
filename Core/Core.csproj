@@ -571,6 +571,7 @@
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Form Data\FormValue.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Form Data\PostBackValue.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Form Data\PostBackValueValidationResult.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Nodes\ElementAttribute.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Nodes\ElementContext.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Nodes\ElementNode.cs">
       <SubType>Code</SubType>

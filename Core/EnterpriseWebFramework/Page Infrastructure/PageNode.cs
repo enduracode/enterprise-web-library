@@ -23,7 +23,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public PageNode(
 			ElementNode elementNode, FormValue formValue, IReadOnlyCollection<PageNode> children, IReadOnlyCollection<PageNode> etherealChildren,
 			Func<FocusabilityCondition> focusabilityConditionGetter, Action<bool, TextWriter> jsInitStatementWriter,
-			Func<( string name, IEnumerable<Tuple<string, string>> attributes )> tagGetter ) {
+			Func<( string name, IEnumerable<ElementAttribute> attributes )> tagGetter ) {
 			SourceComponent = elementNode;
 			FormValue = formValue;
 			Children = children;
@@ -38,11 +38,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				writer.Write( tag.name );
 				foreach( var i in tag.attributes ) {
 					writer.Write( ' ' );
-					writer.Write( i.Item1 );
-					writer.Write( '=' );
-					writer.Write( '"' );
-					writer.Write( HttpUtility.HtmlAttributeEncode( i.Item2 ) );
-					writer.Write( '"' );
+					writer.Write( i.Name );
+					if( i.Value != null ) {
+						writer.Write( '=' );
+						writer.Write( '"' );
+						writer.Write( HttpUtility.HtmlAttributeEncode( i.Value ) );
+						writer.Write( '"' );
+					}
 				}
 				writer.Write( '>' );
 

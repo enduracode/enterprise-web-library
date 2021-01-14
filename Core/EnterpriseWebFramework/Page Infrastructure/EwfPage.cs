@@ -746,7 +746,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 						var attributes = focusDependentData.Attributes;
 						if( focusDependentData.IncludeIdAttribute )
-							attributes = attributes.Append( Tuple.Create( "id", data.ClientSideIdOverride.Any() ? data.ClientSideIdOverride : id ) );
+							attributes = attributes.Append( new ElementAttribute( "id", data.ClientSideIdOverride.Any() ? data.ClientSideIdOverride : id ) );
 						return ( localData.ElementName, attributes );
 					} );
 
