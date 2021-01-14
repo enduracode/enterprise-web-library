@@ -534,8 +534,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var components = new List<FlowComponent>();
 
 			FlowComponent getElement( ResourceInfo resource ) =>
-				new TrustedHtmlString( "<script src=\"{0}\" defer></script>".FormatWith( EwfPage.Instance.GetClientUrl( resource.GetUrl( false, false, false ) ) ) )
-					.ToComponent();
+				new ElementComponent(
+					context => new ElementData(
+						() => new ElementLocalData(
+							"script",
+							focusDependentData: new ElementFocusDependentData(
+								attributes: new ElementAttribute( "src", EwfPage.Instance.GetClientUrl( resource.GetUrl( false, false, false ) ) ).Append(
+									new ElementAttribute( "defer" ) ) ) ) ) );
 
 			components.AddRange( EwfApp.MetaLogicFactory.CreateJavaScriptInfos().Select( getElement ) );
 			components.Add( new TrustedHtmlString( MiniProfiler.RenderIncludes().ToHtmlString() ).ToComponent() );
