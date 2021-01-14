@@ -45,7 +45,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 							.Select(
 								i => EwfTableItem.Create(
 									EwfTableItemSetup.Create(
-										activationBehavior: ElementActivationBehavior.CreateRedirectScript( ActionControls.GetInfo() ),
+										activationBehavior: ElementActivationBehavior.CreateHyperlink( ActionControls.GetInfo() ),
 										id: new SpecifiedValue<int>( group * 10 + i ) ),
 									i.ToString().ToCell(),
 									( ( i * 2 ) + Environment.NewLine + "extra stuff" ).ToCell() ) ) ) )

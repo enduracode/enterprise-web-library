@@ -17,7 +17,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 						UserManagementStatics.GetUsers(),
 						user => EwfTableItem.Create(
 							user.Email.ToCell().Append( user.Role.Name.ToCell() ).Materialize(),
-							setup: EwfTableItemSetup.Create(
-								activationBehavior: ElementActivationBehavior.CreateRedirectScript( new EditUser.Info( Es, user.UserId ) ) ) ) ) );
+							setup: EwfTableItemSetup.Create( activationBehavior: ElementActivationBehavior.CreateHyperlink( new EditUser.Info( Es, user.UserId ) ) ) ) ) );
 	}
 }

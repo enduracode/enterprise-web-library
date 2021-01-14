@@ -56,24 +56,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public static ElementActivationBehavior CreateButton( ButtonBehavior buttonBehavior = null ) =>
 			new ElementActivationBehavior( buttonBehavior ?? new FormActionBehavior( FormState.Current.DefaultAction ) );
 
-		/// <summary>
-		/// Creates a script that redirects to the specified resource. Passing null for resourceInfo will result in no script being added.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 15 April 2021." ) ]
 		public static ElementActivationBehavior CreateRedirectScript( ResourceInfo resource ) {
 			return new ElementActivationBehavior( resource: resource );
 		}
 
-		/// <summary>
-		/// Creates a script that performs a post-back.
-		/// </summary>
-		/// <param name="postBack">Pass null to use the post-back corresponding to the first of the current data modifications.</param>
+		[ Obsolete( "Guaranteed through 15 April 2021." ) ]
 		public static ElementActivationBehavior CreatePostBackScript( PostBack postBack = null ) {
 			return new ElementActivationBehavior( action: new PostBackFormAction( postBack ?? FormState.Current.PostBack ) );
 		}
 
-		/// <summary>
-		/// Creates a custom script. A semicolon will be added to the end of the script. Do not pass null for script.
-		/// </summary>
+		[ Obsolete( "Guaranteed through 15 April 2021." ) ]
 		public static ElementActivationBehavior CreateCustomScript( string script ) {
 			return new ElementActivationBehavior( script: script );
 		}
@@ -85,11 +78,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal readonly Func<string, string> JsInitStatementGetter;
 		internal readonly bool IsFocusable;
 		internal readonly Action PostBackAdder;
-
-		// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
-		private ResourceInfo resource;
-		private FormAction action;
-		private readonly string script;
 
 		private ElementActivationBehavior( HyperlinkBehavior hyperlinkBehavior ) {
 			Classes = hyperlinkBehavior.HasDestination() ? ActivatableClass : ElementClassSet.Empty;
@@ -111,7 +99,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			PostBackAdder = buttonBehavior.AddPostBack;
 		}
 
-		// Web Forms compatibility. Remove when EnduraCode goal 790 is complete.
+		[ Obsolete( "Guaranteed through 15 April 2021." ) ]
 		private ElementActivationBehavior( ResourceInfo resource = null, FormAction action = null, string script = "" ) {
 			if( action == null && !script.Any() ) {
 				HyperlinkBehavior hyperlinkBehavior = resource;
@@ -135,10 +123,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				IsFocusable = true;
 				PostBackAdder = buttonBehavior.AddPostBack;
 			}
-
-			this.resource = resource;
-			this.action = action;
-			this.script = script;
 		}
 	}
 }

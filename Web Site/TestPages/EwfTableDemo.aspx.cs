@@ -83,11 +83,12 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 											              modificationMethod: () => AddStatusMessage( StatusMessageType.Info, "Action 2" ) ) ) ) )
 							              .Materialize()
 						              : null,
-					groupHeadActivationBehavior: ElementActivationBehavior.CreatePostBackScript(
-						PostBack.CreateIntermediate(
-							null,
-							id: "group{0}".FormatWith( groupNumber ),
-							modificationMethod: () => AddStatusMessage( StatusMessageType.Info, "You clicked group {0}.".FormatWith( groupNumber ) ) ) ),
+					groupHeadActivationBehavior: ElementActivationBehavior.CreateButton(
+						new PostBackBehavior(
+							postBack: PostBack.CreateIntermediate(
+								null,
+								id: "group{0}".FormatWith( groupNumber ),
+								modificationMethod: () => AddStatusMessage( StatusMessageType.Info, "You clicked group {0}.".FormatWith( groupNumber ) ) ) ) ),
 					tailUpdateRegions: groupNumber == 1 ? new TailUpdateRegion( updateRegionSet.ToCollection(), 1 ).ToCollection() : null ),
 				groupNumber == 1
 					? getItems( info.FirstGroupItemCount, true )
@@ -120,7 +121,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 			       select new Func<EwfTableItem>(
 				       () => EwfTableItem.Create(
 					       EwfTableItemSetup.Create(
-						       activationBehavior: ElementActivationBehavior.CreateRedirectScript( ActionControls.GetInfo() ),
+						       activationBehavior: ElementActivationBehavior.CreateHyperlink( ActionControls.GetInfo() ),
 						       id: includeId ? new SpecifiedValue<int>( i ) : null ),
 					       i.ToString().ToCell(),
 					       ( ( i * 2 ) + Environment.NewLine + "extra stuff" ).ToCell() ) );
