@@ -480,8 +480,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// 
 		/// You can pass EwfTableItem wherever EwfTableItem&lt;int&gt; is expected.
 		/// </summary>
-		public EwfTable<ItemIdType> AddData<T>( IEnumerable<T> data, Func<T, EwfTableItem<ItemIdType>> itemSelector ) {
-			data.ToList().ForEach( d => AddItem( () => itemSelector( d ) ) );
+		/// <param name="data"></param>
+		/// <param name="itemSelector"></param>
+		/// <param name="createItemsImmediately">Pass true to create the table items during this call rather than deferring their creation. Use if you are directly
+		/// or indirectly creating validations inside the item selector that will be added to an outside data modification. Deferring item creation would likely
+		/// cause your validations to execute in the wrong order or be skipped.</param>
+		public EwfTable<ItemIdType> AddData<T>( IEnumerable<T> data, Func<T, EwfTableItem<ItemIdType>> itemSelector, bool createItemsImmediately = false ) {
+			if( createItemsImmediately )
+				foreach( var i in data )
+					AddItem( itemSelector( i ) );
+			else
+				foreach( var i in data )
+					AddItem( () => itemSelector( i ) );
 			return this;
 		}
 
@@ -496,8 +506,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
-		/// Adds an item to the table. Defers creation of the item. Do not directly or indirectly create validations inside the function if they will be added to a
-		/// validation list that exists outside the function; this will likely cause your validations to execute in the wrong order or be skipped.
+		/// Adds an item to the table. Defers creation of the item. Do not directly or indirectly create validations inside the function if they will be added to an
+		/// outside data modification; this will likely cause your validations to execute in the wrong order or be skipped.
 		/// 
 		/// You can pass EwfTableItem wherever EwfTableItem&lt;int&gt; is expected.
 		/// </summary>
