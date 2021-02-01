@@ -19,9 +19,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		/// <param name="testPublishableKey">Your test publishable API key. Will be used in non-live installations. Do not pass null.</param>
 		/// <param name="livePublishableKey">Your live publishable API key. Will be used in live installations. Do not pass null.</param>
-		/// <param name="name">See https://stripe.com/docs/checkout. Do not pass null.</param>
-		/// <param name="description">See https://stripe.com/docs/checkout. Do not pass null.</param>
-		/// <param name="amountInDollars">See https://stripe.com/docs/checkout, but note that this parameter is in dollars, not cents</param>
+		/// <param name="name">See https://stripe.com/docs/legacy-checkout. Do not pass null.</param>
+		/// <param name="description">See https://stripe.com/docs/legacy-checkout. Do not pass null.</param>
+		/// <param name="amountInDollars">See https://stripe.com/docs/legacy-checkout, but note that this parameter is in dollars, not cents</param>
 		/// <param name="testSecretKey">Your test secret API key. Will be used in non-live installations. Do not pass null.</param>
 		/// <param name="liveSecretKey">Your live secret API key. Will be used in live installations. Do not pass null.</param>
 		/// <param name="successHandler">A method that executes if the credit-card submission is successful. The first parameter is the charge ID and the second
