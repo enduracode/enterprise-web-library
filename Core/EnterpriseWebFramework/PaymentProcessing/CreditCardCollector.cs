@@ -10,13 +10,22 @@ using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
-	/// Methods for processing payments with Stripe.
+	/// A modal credit-card collector that is implemented with Stripe Checkout.
 	/// </summary>
-	public static class PaymentProcessingStatics {
+	public sealed class CreditCardCollector: EtherealComponent {
+		private static Action stripeCheckoutIncludeSetter;
+
+		internal static void Init( Action stripeCheckoutIncludeSetter ) {
+			CreditCardCollector.stripeCheckoutIncludeSetter = stripeCheckoutIncludeSetter;
+		}
+
+		private readonly Func<IReadOnlyCollection<EtherealComponent>> childGetter;
+
 		/// <summary>
-		/// Returns credit-card-collection hidden fields and a JavaScript function call getter that opens a Stripe Checkout modal window. If the window's submit
-		/// button is clicked, the credit card is charged or otherwise used. Do not execute the getter until after the page tree has been built.
+		/// Creates a modal credit-card collector that is implemented with Stripe Checkout. When the window’s submit button is clicked, the credit card is charged
+		/// or otherwise used.
 		/// </summary>
+		/// <param name="jsOpenStatements">The JavaScript statement list that will open this credit-card collector.</param>
 		/// <param name="testPublishableKey">Your test publishable API key. Will be used in non-live installations. Do not pass null.</param>
 		/// <param name="livePublishableKey">Your live publishable API key. Will be used in live installations. Do not pass null.</param>
 		/// <param name="name">See https://stripe.com/docs/legacy-checkout. Do not pass null.</param>
@@ -29,15 +38,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="prefilledEmailAddressOverride">By default, the email will be prefilled with AppTools.User.Email if AppTools.User is not null. You can
 		/// override this with either a specified email address (if user is paying on behalf of someone else) or the empty string (to force the user to type in the
 		/// email address).</param>
-		public static Tuple<IReadOnlyCollection<EtherealComponent>, Func<string>> GetCreditCardCollectionHiddenFieldsAndJsFunctionCall(
-			string testPublishableKey, string livePublishableKey, string name, string description, decimal? amountInDollars, string testSecretKey,
-			string liveSecretKey, Func<string, decimal, StatusMessageAndDestination> successHandler, string prefilledEmailAddressOverride = null ) {
+		public CreditCardCollector(
+			JsStatementList jsOpenStatements, string testPublishableKey, string livePublishableKey, string name, string description, decimal? amountInDollars,
+			string testSecretKey, string liveSecretKey, Func<string, decimal, StatusMessageAndDestination> successHandler,
+			string prefilledEmailAddressOverride = null ) {
 			if( !EwfApp.Instance.RequestIsSecure( HttpContext.Current.Request ) )
 				throw new ApplicationException( "Credit-card collection can only be done from secure pages." );
-			EwfPage.Instance.ClientScript.RegisterClientScriptInclude(
-				typeof( PaymentProcessingStatics ),
-				"Stripe Checkout",
-				"https://checkout.stripe.com/checkout.js" );
 
 			if( amountInDollars.HasValue && amountInDollars.Value.DollarValueHasFractionalCents() )
 				throw new ApplicationException( "Amount must not include fractional cents." );
@@ -78,24 +84,31 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				actionGetter: () => new PostBackAction( successDestination ) );
 
 			var hiddenFieldId = new HiddenFieldId();
-			List<EtherealComponent> hiddenFields = new List<EtherealComponent>();
+			var hiddenFields = new List<EtherealComponent>();
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				postBack.ToCollection(),
 				() => hiddenFields.Add(
 					new EwfHiddenField( "", validationMethod: ( postBackValue, validator ) => token.Value = postBackValue.Value, id: hiddenFieldId ).PageComponent ) );
 
 			FormAction action = new PostBackFormAction( postBack );
-			action.AddToPageIfNecessary();
-			return Tuple.Create<IReadOnlyCollection<EtherealComponent>, Func<string>>(
-				hiddenFields,
-				() => {
-					var jsTokenHandler = "function( token, args ) { " + hiddenFieldId.GetJsValueModificationStatements( "token.id" ) + " " + action.GetJsStatements() +
-					                     " }";
-					return "StripeCheckout.open( { key: '" + ( ConfigurationStatics.IsLiveInstallation ? livePublishableKey : testPublishableKey ) + "', token: " +
-					       jsTokenHandler + ", name: '" + name + "', description: '" + description + "', " +
-					       ( amountInDollars.HasValue ? "amount: " + amountInDollars.Value * 100 + ", " : "" ) + "email: '" +
-					       ( prefilledEmailAddressOverride ?? ( AppTools.User == null ? "" : AppTools.User.Email ) ) + "' } )";
-				} );
+			childGetter = () => {
+				stripeCheckoutIncludeSetter();
+				action.AddToPageIfNecessary();
+				jsOpenStatements.AddStatementGetter(
+					() => {
+						var jsTokenHandler = "function( token, args ) { " + hiddenFieldId.GetJsValueModificationStatements( "token.id" ) + " " + action.GetJsStatements() +
+						                     " }";
+						return "StripeCheckout.open( { key: '" + ( ConfigurationStatics.IsLiveInstallation ? livePublishableKey : testPublishableKey ) + "', token: " +
+						       jsTokenHandler + ", name: '" + name + "', description: '" + description + "', " +
+						       ( amountInDollars.HasValue ? "amount: " + amountInDollars.Value * 100 + ", " : "" ) + "email: '" +
+						       ( prefilledEmailAddressOverride ?? ( AppTools.User == null ? "" : AppTools.User.Email ) ) + "' } );";
+					} );
+				return hiddenFields;
+			};
+		}
+
+		IReadOnlyCollection<EtherealComponentOrElement> EtherealComponent.GetChildren() {
+			return childGetter();
 		}
 	}
 }

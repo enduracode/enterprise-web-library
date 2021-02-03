@@ -175,6 +175,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								new ElementAttribute( "defer" ) ) ) ) ) );
 
 		private readonly Func<IReadOnlyCollection<PageContent>, Func<string>, FlowComponent, FlowComponent> componentGetter;
+		internal bool IncludesStripeCheckout;
 		internal bool FormUsesMultipartEncoding;
 		private readonly List<FlowComponent> bodyContent = new List<FlowComponent>();
 		private readonly FlowComponent etherealContainer;
@@ -213,7 +214,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										from i in cssInfoCreator( contentObjects ) select getStyleSheetLink( EwfPage.Instance.GetClientUrl( i.GetUrl( false, false, false ) ) ) )
 									.Append( getModernizrLogic() )
 									.Concat( getGoogleAnalyticsLogicIfNecessary() )
-									.Concat( getJavaScriptIncludes() )
+									.Append( getJavaScriptIncludes() )
 									.Append( ( customHeadElements ?? new TrustedHtmlString( "" ) ).ToComponent() )
 									.Materialize() ) ).Append(
 							new ElementComponent(
@@ -530,24 +531,22 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 		}
 
-		private IReadOnlyCollection<FlowComponent> getJavaScriptIncludes() {
-			var components = new List<FlowComponent>();
+		private FlowComponentOrNode getJavaScriptIncludes() =>
+			new MarkupBlockNode(
+				() => {
+					var markup = new StringBuilder();
 
-			FlowComponent getElement( ResourceInfo resource ) =>
-				new ElementComponent(
-					context => new ElementData(
-						() => new ElementLocalData(
-							"script",
-							focusDependentData: new ElementFocusDependentData(
-								attributes: new ElementAttribute( "src", EwfPage.Instance.GetClientUrl( resource.GetUrl( false, false, false ) ) ).Append(
-									new ElementAttribute( "defer" ) ) ) ) ) );
+					string getElement( ResourceInfo resource ) =>
+						"<script src=\"{0}\" defer></script>".FormatWith( EwfPage.Instance.GetClientUrl( resource.GetUrl( false, false, false ) ) );
 
-			components.AddRange( EwfApp.MetaLogicFactory.CreateJavaScriptInfos().Select( getElement ) );
-			components.Add( new TrustedHtmlString( MiniProfiler.RenderIncludes().ToHtmlString() ).ToComponent() );
-			components.AddRange( EwfApp.Instance.GetJavaScriptFiles().Select( getElement ) );
+					foreach( var i in EwfApp.MetaLogicFactory.CreateJavaScriptInfos( IncludesStripeCheckout ).Select( getElement ) )
+						markup.Append( i );
+					markup.Append( MiniProfiler.RenderIncludes().ToHtmlString() );
+					foreach( var i in EwfApp.Instance.GetJavaScriptFiles().Select( getElement ) )
+						markup.Append( i );
 
-			return components;
-		}
+					return markup.ToString();
+				} );
 
 		private FlowComponent getLink( string href, string rel, IReadOnlyCollection<ElementAttribute> attributes = null ) =>
 			new ElementComponent(

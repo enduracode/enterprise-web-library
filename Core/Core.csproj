@@ -593,7 +593,8 @@
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\SecondaryPostBackOperation.cs" />
     <Compile Include="EnterpriseWebFramework\PageName.cs" />
     <Compile Include="EnterpriseWebFramework\PagePath.cs" />
-    <Compile Include="EnterpriseWebFramework\PaymentProcessing\PaymentProcessingStatics.cs" />
+    <Compile Include="EnterpriseWebFramework\PaymentProcessing\CreditCardCollector.cs" />
+    <Compile Include="EnterpriseWebFramework\PaymentProcessing\JsStatementList.cs" />
     <Compile Include="EnterpriseWebFramework\PaymentProcessing\StatusMessageAndDestination.cs" />
     <Compile Include="EnterpriseWebFramework\Request Handling\EntitySetupBase.cs" />
     <Compile Include="EnterpriseWebFramework\Request Handling\EwfSafeRequestHandler.cs" />

@@ -73,6 +73,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// EWL use only. Returns applicable JavaScript info objects, in the correct order.
 		/// </summary>
-		IEnumerable<ResourceInfo> CreateJavaScriptInfos();
+		IEnumerable<ResourceInfo> CreateJavaScriptInfos( bool includeStripeCheckout );
 	}
 }

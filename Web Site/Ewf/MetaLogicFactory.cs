@@ -79,7 +79,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			return new ModernizrJs.Info();
 		}
 
-		IEnumerable<ResourceInfo> AppMetaLogicFactory.CreateJavaScriptInfos() {
+		IEnumerable<ResourceInfo> AppMetaLogicFactory.CreateJavaScriptInfos( bool includeStripeCheckout ) {
 			var infos = new List<ResourceInfo>();
 			infos.Add( new ExternalResource( "//code.jquery.com/jquery-1.12.3.min.js" ) );
 			infos.Add( new VersionedStaticFiles.ThirdParty.JQueryUi.Jquery_ui_1114custom_v2.Jquery_uiminJs.Info() );
@@ -91,6 +91,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			infos.Add( new ExternalResource( "//cdn.ckeditor.com/4.5.8/full/ckeditor.js" ) );
 			infos.Add( new ExternalResource( "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js" ) );
 			infos.Add( new ExternalResource( "https://instant.page/5.1.0" ) );
+			if( includeStripeCheckout )
+				infos.Add( new ExternalResource( "https://checkout.stripe.com/checkout.js" ) );
 			infos.Add( new JavaScriptJs.Info() );
 			return infos;
 		}

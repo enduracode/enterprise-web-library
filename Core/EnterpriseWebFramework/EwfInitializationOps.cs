@@ -68,6 +68,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						HyperlinkBehaviorExtensionCreators.Init( ModalBox.GetBrowsingModalBoxOpenStatements );
 						FileUpload.Init( () => ( (BasicPageContent)EwfPage.Instance.BasicContent ).FormUsesMultipartEncoding = true );
 						ModalBox.Init( () => ( (BasicPageContent)EwfPage.Instance.BasicContent ).BrowsingModalBoxId );
+						CreditCardCollector.Init( () => ( (BasicPageContent)EwfPage.Instance.BasicContent ).IncludesStripeCheckout = true );
 						BasicPageContent.Init(
 							contentObjects => {
 								var contentUsesUi = contentObjects.Any( i => i is UiPageContent );
