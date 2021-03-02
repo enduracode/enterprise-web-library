@@ -322,11 +322,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				IoMethods.DeleteFile( EwlStatics.CombinePaths( webAppPath, AppStatics.StandardLibraryFilesFileName ) );
 
 				var webConfigPath = EwlStatics.CombinePaths( webAppPath, WebApplication.WebConfigFileName );
-				File.WriteAllText(
-					webConfigPath,
-					File.ReadAllText( webConfigPath )
-						.Replace( "debug=\"true\"", "debug=\"false\"" )
-						.Replace( "<!--<add name=\"HttpCacheModule\" />-->", "<add name=\"HttpCacheModule\" />" ) );
+				File.WriteAllText( webConfigPath, File.ReadAllText( webConfigPath ).Replace( "debug=\"true\"", "debug=\"false\"" ) );
 			}
 		}
 

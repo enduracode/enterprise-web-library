@@ -24,9 +24,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			Func<EwfResponse> responseCreator, string urlVersionString, string eTagBase, Func<DateTimeOffset> lastModificationDateAndTimeGetter,
 			Func<string> memoryCacheKeyGetter ) {
 			return ( aspNetRequest, aspNetResponse ) => {
-				// Disable ASP.NET output caching.
-				aspNetResponse.Cache.SetNoServerCaching();
-
 				var response = new Lazy<EwfResponse>( responseCreator );
 
 				// If we ever want to implement content negotiation, we can do so here. We can accept multiple response-creator functions instead of just one. Then, if
@@ -41,7 +38,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				// If we don't have caching information, the response is probably not shareable.
 				//
 				// Using ServerAndPrivate instead of just Private is a hack that is necessary because ASP.NET suppresses ETags with Private. But ASP.NET output caching
-				// (i.e. server caching) will still be disabled because of our SetNoServerCaching call above.
+				// (i.e. server caching) will still be disabled because we have removed the caching modules from IIS.
 				aspNetResponse.Cache.SetCacheability(
 					!EwfApp.Instance.RequestIsSecure( aspNetRequest ) && ( urlVersionString.Any() || eTagBase.Any() || lastModificationDateAndTimeGetter != null )
 						? HttpCacheability.Public
