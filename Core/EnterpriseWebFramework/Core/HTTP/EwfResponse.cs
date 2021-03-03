@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Web;
 using EnterpriseWebLibrary.MailMerging;
 using EnterpriseWebLibrary.MailMerging.RowTree;
-using EnterpriseWebLibrary.TewlContrib;
 using Tewl;
 using Tewl.IO;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -17,7 +19,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public static EwfResponse CreateExcelWorkbookResponse( Func<string> extensionlessFileNameCreator, Func<ExcelFileWriter> workbookCreator ) {
 			return Create(
-				ContentTypes.ExcelXlsx,
+				TewlContrib.ContentTypes.ExcelXlsx,
 				new EwfResponseBodyCreator( stream => workbookCreator().SaveToStream( stream ) ),
 				fileNameCreator: () => ExcelFileWriter.GetSafeFileName( extensionlessFileNameCreator() ) );
 		}
@@ -45,7 +47,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public static EwfResponse CreateMergedMsWordDocResponse(
 			Func<string> extensionlessFileNameCreator, MergeRowTree rowTree, bool ensureAllFieldsHaveValues, Action<Action<Stream>> inputStreamProvider ) {
 			return Create(
-				ContentTypes.WordDoc,
+				TewlContrib.ContentTypes.WordDoc,
 				new EwfResponseBodyCreator(
 					destinationStream =>
 						inputStreamProvider( inputStream => MergeOps.CreateMsWordDoc( rowTree, ensureAllFieldsHaveValues, inputStream, destinationStream ) ) ),
@@ -59,7 +61,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public static EwfResponse CreateMergedCsvResponse(
 			Func<string> extensionlessFileNameCreator, MergeRowTree rowTree, IEnumerable<string> fieldNames, bool omitHeaderRow = false ) {
 			return Create(
-				ContentTypes.Csv,
+				TewlContrib.ContentTypes.Csv,
 				new EwfResponseBodyCreator( writer => MergeOps.CreateTabularTextFile( rowTree, fieldNames, writer, omitHeaderRow: omitHeaderRow ) ),
 				fileNameCreator: () => extensionlessFileNameCreator() + FileExtensions.Csv );
 		}
@@ -71,7 +73,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public static EwfResponse CreateMergedTabSeparatedValuesResponse(
 			Func<string> extensionlessFileNameCreator, MergeRowTree rowTree, IEnumerable<string> fieldNames, bool omitHeaderRow = false ) {
 			return Create(
-				ContentTypes.TabSeparatedValues,
+				TewlContrib.ContentTypes.TabSeparatedValues,
 				new EwfResponseBodyCreator(
 					writer => MergeOps.CreateTabularTextFile( rowTree, fieldNames, writer, useTabAsSeparator: true, omitHeaderRow: omitHeaderRow ) ),
 				fileNameCreator: () => extensionlessFileNameCreator() + FileExtensions.Txt );
@@ -95,17 +97,28 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="bodyCreator">The response body creator.</param>
 		/// <param name="fileNameCreator">A function that creates the file name for saving the response. If you return a nonempty string, the response will be
 		/// processed as an attachment with the specified file name. Do not return null from the function.</param>
-		public static EwfResponse Create( string contentType, EwfResponseBodyCreator bodyCreator, Func<string> fileNameCreator = null ) {
-			return new EwfResponse( contentType, fileNameCreator ?? ( () => "" ), bodyCreator );
+		/// <param name="additionalHeaderFieldGetter">A function that gets additional HTTP header fields for the response.</param>
+		public static EwfResponse Create(
+			string contentType, EwfResponseBodyCreator bodyCreator, Func<string> fileNameCreator = null,
+			Func<IReadOnlyCollection<( string, string )>> additionalHeaderFieldGetter = null ) {
+			return new EwfResponse(
+				contentType,
+				fileNameCreator ?? ( () => "" ),
+				additionalHeaderFieldGetter ?? ( () => Enumerable.Empty<(string, string)>().Materialize() ),
+				bodyCreator );
 		}
 
 		internal readonly string ContentType;
 		internal readonly Func<string> FileNameCreator;
+		internal readonly Func<IReadOnlyCollection<( string, string )>> AdditionalHeaderFieldGetter;
 		internal readonly EwfResponseBodyCreator BodyCreator;
 
-		private EwfResponse( string contentType, Func<string> fileNameCreator, EwfResponseBodyCreator bodyCreator ) {
+		private EwfResponse(
+			string contentType, Func<string> fileNameCreator, Func<IReadOnlyCollection<( string, string )>> additionalHeaderFieldGetter,
+			EwfResponseBodyCreator bodyCreator ) {
 			ContentType = contentType;
 			FileNameCreator = fileNameCreator;
+			AdditionalHeaderFieldGetter = additionalHeaderFieldGetter;
 			BodyCreator = bodyCreator;
 		}
 
@@ -115,6 +128,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public EwfResponse( FullResponse fullResponse ) {
 			ContentType = fullResponse.ContentType;
 			FileNameCreator = () => fullResponse.FileName;
+			AdditionalHeaderFieldGetter = () => fullResponse.AdditionalHeaderFields;
 			BodyCreator = fullResponse.TextBody != null
 				              ? new EwfResponseBodyCreator( () => fullResponse.TextBody )
 				              : new EwfResponseBodyCreator( () => fullResponse.BinaryBody );
@@ -122,8 +136,23 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal FullResponse CreateFullResponse() {
 			return BodyCreator.BodyIsText
-				       ? new FullResponse( ContentType, FileNameCreator(), BodyCreator.TextBodyCreator() )
-				       : new FullResponse( ContentType, FileNameCreator(), BodyCreator.BinaryBodyCreator() );
+				       ? new FullResponse( ContentType, FileNameCreator(), AdditionalHeaderFieldGetter(), BodyCreator.TextBodyCreator() )
+				       : new FullResponse( ContentType, FileNameCreator(), AdditionalHeaderFieldGetter(), BodyCreator.BinaryBodyCreator() );
+		}
+
+		internal void WriteToAspNetResponse( HttpResponse aspNetResponse, bool omitBody = false ) {
+			if( ContentType.Length > 0 )
+				aspNetResponse.ContentType = ContentType;
+
+			var fileName = FileNameCreator();
+			if( fileName.Any() )
+				aspNetResponse.AppendHeader( "content-disposition", "attachment; filename=\"" + fileName + "\"" );
+
+			foreach( var i in AdditionalHeaderFieldGetter() )
+				aspNetResponse.AppendHeader( i.Item1, i.Item2 );
+
+			if( !omitBody )
+				BodyCreator.WriteToResponse( aspNetResponse );
 		}
 	}
 }

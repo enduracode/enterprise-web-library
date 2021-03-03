@@ -20,6 +20,20 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return dateAndTime.ToString( UrlVersionStringFormat, DateTimeFormatInfo.InvariantInfo );
 		}
 
+		internal static void AddCacheControlHeader( HttpResponse aspNetResponse, bool requestIsSecure, bool responseHasCachingInfo, bool? responseNeverExpires ) {
+			// Assume that all HTTPS responses are private. This isn’t true for CSS, JavaScript, etc. requests that are only secure in order to match the security of
+			// a page, but that’s not a big deal since most shared caches can't open and cache HTTPS anyway.
+			//
+			// If we don’t have caching information, the response is probably not shareable.
+			//
+			// Using ServerAndPrivate instead of just Private is a hack that is necessary because ASP.NET suppresses ETags with Private. But ASP.NET output caching
+			// (i.e. server caching) will still be disabled because we have removed the caching modules from IIS.
+			aspNetResponse.Cache.SetCacheability( !requestIsSecure && responseHasCachingInfo ? HttpCacheability.Public : HttpCacheability.ServerAndPrivate );
+
+			if( responseNeverExpires.HasValue )
+				aspNetResponse.Cache.SetMaxAge( responseNeverExpires.Value ? TimeSpan.FromDays( 365 ) : TimeSpan.Zero );
+		}
+
 		private static Action<HttpRequest, HttpResponse> createWriter(
 			Func<EwfResponse> responseCreator, string urlVersionString, string eTagBase, Func<DateTimeOffset> lastModificationDateAndTimeGetter,
 			Func<string> memoryCacheKeyGetter ) {
@@ -32,19 +46,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				// response-creator functions, we need to incorporate the chosen response's content type into the ETag if we want it to remain a strong ETag. We also
 				// need to incorporate the content type into the memory-cache key.
 
-				// Assume that all HTTPS responses are private. This isn't true for CSS, JavaScript, etc. requests that are only secure in order to match the security
-				// of a page, but that's not a big deal since most shared caches can't open and cache HTTPS anyway.
-				//
-				// If we don't have caching information, the response is probably not shareable.
-				//
-				// Using ServerAndPrivate instead of just Private is a hack that is necessary because ASP.NET suppresses ETags with Private. But ASP.NET output caching
-				// (i.e. server caching) will still be disabled because we have removed the caching modules from IIS.
-				aspNetResponse.Cache.SetCacheability(
-					!EwfApp.Instance.RequestIsSecure( aspNetRequest ) && ( urlVersionString.Any() || eTagBase.Any() || lastModificationDateAndTimeGetter != null )
-						? HttpCacheability.Public
-						: HttpCacheability.ServerAndPrivate );
-
-				aspNetResponse.Cache.SetMaxAge( urlVersionString.Any() ? TimeSpan.FromDays( 365 ) : TimeSpan.Zero );
+				AddCacheControlHeader(
+					aspNetResponse,
+					EwfApp.Instance.RequestIsSecure( aspNetRequest ),
+					urlVersionString.Any() || eTagBase.Any() || lastModificationDateAndTimeGetter != null,
+					urlVersionString.Any() );
 
 				var lastModificationDateAndTime = lastModificationDateAndTimeGetter != null ? new Lazy<DateTimeOffset>( lastModificationDateAndTimeGetter ) : null;
 				string eTag;
@@ -57,7 +63,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					var responseWithBufferedBody = EwfResponse.Create(
 						response.Value.ContentType,
 						response.Value.BodyCreator.GetBufferedBodyCreator(),
-						fileNameCreator: response.Value.FileNameCreator );
+						fileNameCreator: response.Value.FileNameCreator,
+						additionalHeaderFieldGetter: response.Value.AdditionalHeaderFieldGetter );
 					response = new Lazy<EwfResponse>( () => responseWithBufferedBody );
 
 					var bodyAsBinary = response.Value.BodyCreator.BodyIsText
@@ -92,15 +99,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					response = new Lazy<EwfResponse>( () => new EwfResponse( fullResponse ) );
 				}
 
-				if( response.Value.ContentType.Length > 0 )
-					aspNetResponse.ContentType = response.Value.ContentType;
-
-				var fileName = response.Value.FileNameCreator();
-				if( fileName.Any() )
-					aspNetResponse.AppendHeader( "content-disposition", "attachment; filename=\"" + fileName + "\"" );
-
-				if( aspNetRequest.HttpMethod != "HEAD" )
-					response.Value.BodyCreator.WriteToResponse( aspNetResponse );
+				response.Value.WriteToAspNetResponse( aspNetResponse, omitBody: aspNetRequest.HttpMethod == "HEAD" );
 			};
 		}
 

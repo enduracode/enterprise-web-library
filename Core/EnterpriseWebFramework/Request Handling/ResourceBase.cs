@@ -2,14 +2,16 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Web;
 using EnterpriseWebLibrary.Configuration;
+using Humanizer;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A base set of functionality that can be used to discover information about a resource before actually requesting it.
 	/// </summary>
-	public abstract class ResourceBase: ResourceInfo {
+	public abstract class ResourceBase: ResourceInfo, UrlHandler {
 		internal const string ResourcePathSeparator = " > ";
 		internal const string EntityResourceSeparator = " / ";
 
@@ -206,20 +208,28 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		internal sealed override string GetUrl( bool ensureUserCanAccessResource, bool ensureResourceNotDisabled, bool makeAbsolute ) {
-			var url = buildUrl() + uriFragmentIdentifier.PrependDelimiter( "#" );
+			var url = UrlHandlingStatics.GetCanonicalUrl( this, ShouldBeSecureGivenCurrentRequest ) + uriFragmentIdentifier.PrependDelimiter( "#" );
 			if( ensureUserCanAccessResource && !UserCanAccessResource )
 				throw new ApplicationException( "GetUrl was called for a resource that the authenticated user cannot access. The URL would have been " + url + "." );
 			if( ensureResourceNotDisabled && AlternativeMode is DisabledResourceMode )
 				throw new ApplicationException( "GetUrl was called for a resource that is disabled. The URL would have been " + url + "." );
-			if( makeAbsolute )
-				url = url.Replace( "~", EwfApp.GetDefaultBaseUrl( ShouldBeSecureGivenCurrentRequest ) );
 			return url;
 		}
 
+		UrlHandler UrlHandler.GetParent() => getUrlParent();
+
 		/// <summary>
-		/// Returns a URL that can be used to request the resource. Does not validate query parameters.
+		/// Returns the resource or entity setup that will determine this resource’s canonical URL. One reason to override is if <see cref="createParentResource"/>
+		/// depends on the authenticated user since the URL must not have this dependency.
 		/// </summary>
-		protected abstract string buildUrl();
+		protected virtual UrlHandler getUrlParent() => (UrlHandler)ParentResource ?? EsAsBaseType;
+
+		UrlEncoder BasicUrlHandler.GetEncoder() => getUrlEncoder();
+
+		/// <summary>
+		/// Returns a URL encoder for this resource. Framework use only.
+		/// </summary>
+		protected abstract UrlEncoder getUrlEncoder();
 
 		internal bool ShouldBeSecureGivenCurrentRequest => ConnectionSecurity.ShouldBeSecureGivenCurrentRequest( IsIntermediateInstallationPublicResource );
 
@@ -235,6 +245,99 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				return ConnectionSecurity.SecureIfPossible;
 			}
 		}
+
+		( UrlHandler, UrlEncoder ) UrlHandler.GetCanonicalHandler( UrlEncoder encoder ) => ( this, encoder );
+
+		IEnumerable<UrlPattern> UrlHandler.GetChildPatterns() => getChildUrlPatterns();
+
+		/// <summary>
+		/// Returns this resource’s child URL patterns.
+		/// </summary>
+		protected virtual IEnumerable<UrlPattern> getChildUrlPatterns() => Enumerable.Empty<UrlPattern>();
+
+		void BasicUrlHandler.HandleRequest( HttpContext context ) {
+			var canonicalUrl = GetUrl( false, false, true );
+			if( canonicalUrl != AppRequestState.Instance.Url ) {
+				if( !ShouldBeSecureGivenCurrentRequest && EwfApp.Instance.RequestIsSecure( context.Request ) )
+					context.Response.AppendHeader( "Strict-Transport-Security", "max-age=0" );
+				writeRedirectResponse( context, canonicalUrl, true );
+				return;
+			}
+
+			var redirect = getRedirect();
+			if( redirect != null ) {
+				writeRedirectResponse( context, redirect.Resource.GetUrl(), redirect.IsPermanent );
+				return;
+			}
+
+			if( context.Request.HttpMethod == "GET" || context.Request.HttpMethod == "HEAD" ) {
+				var requestHandler = getOrHead();
+				if( requestHandler != null )
+					requestHandler.WriteResponse();
+				else {
+					context.Response.StatusCode = 405;
+					EwfResponse.Create( "", new EwfResponseBodyCreator( () => "" ), additionalHeaderFieldGetter: () => ( "Allow", "" ).ToCollection() )
+						.WriteToAspNetResponse( context.Response );
+				}
+				return;
+			}
+
+			EwfResponse response;
+			switch( context.Request.HttpMethod ) {
+				case "PUT":
+					response = put();
+					break;
+				case "PATCH":
+					response = patch();
+					break;
+				case "DELETE":
+					response = delete();
+					break;
+				case "POST":
+					response = post();
+					break;
+				default:
+					context.Response.StatusCode = 501;
+					EwfResponse.Create( "", new EwfResponseBodyCreator( () => "" ) ).WriteToAspNetResponse( context.Response );
+					return;
+			}
+			if( response != null )
+				response.WriteToAspNetResponse( context.Response );
+			else {
+				context.Response.StatusCode = 405;
+				EwfResponse.Create( "", new EwfResponseBodyCreator( () => "" ), additionalHeaderFieldGetter: () => ( "Allow", "" ).ToCollection() )
+					.WriteToAspNetResponse( context.Response );
+			}
+		}
+
+		/// <summary>
+		/// Returns the redirect for the resource, if it is located outside of the application.
+		/// </summary>
+		protected virtual ExternalRedirect getRedirect() => null;
+
+		private void writeRedirectResponse( HttpContext context, string url, bool permanent ) {
+			context.Response.StatusCode = permanent ? 308 : 307;
+
+			if( context.Request.HttpMethod == "GET" || context.Request.HttpMethod == "HEAD" )
+				EwfSafeResponseWriter.AddCacheControlHeader(
+					context.Response,
+					EwfApp.Instance.RequestIsSecure( context.Request ),
+					false,
+					permanent ? (bool?)null : false );
+
+			EwfResponse.Create(
+					ContentTypes.PlainText,
+					new EwfResponseBodyCreator( writer => writer.Write( "{0} Redirect: {1}".FormatWith( permanent ? "Permanent" : "Temporary", url ) ) ),
+					additionalHeaderFieldGetter: () => ( "Location", url ).ToCollection() )
+				.WriteToAspNetResponse( context.Response, omitBody: context.Request.HttpMethod == "HEAD" );
+		}
+
+		protected virtual EwfSafeRequestHandler getOrHead() => null;
+
+		protected virtual EwfResponse put() => null;
+		protected virtual EwfResponse patch() => null;
+		protected virtual EwfResponse delete() => null;
+		protected virtual EwfResponse post() => null;
 
 		protected internal virtual bool AllowsSearchEngineIndexing {
 			get {

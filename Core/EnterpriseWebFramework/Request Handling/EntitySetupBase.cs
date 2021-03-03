@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
+using System.Web;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// An object that allows several pages and resources to share query parameters, authorization logic, data, etc.
 	/// </summary>
-	public abstract class EntitySetupBase {
+	public abstract class EntitySetupBase: UrlHandler {
 		private bool parentResourceLoaded;
 		private ResourceBase parentResource;
 		private ReadOnlyCollection<ResourceGroup> resources;
@@ -93,10 +95,38 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return null;
 		}
 
+		UrlHandler UrlHandler.GetParent() => getUrlParent();
+
+		/// <summary>
+		/// Returns the resource or entity setup that will determine this entity setup’s canonical URL. One reason to override is if
+		/// <see cref="createParentResource"/> depends on the authenticated user since the URL must not have this dependency.
+		/// </summary>
+		protected virtual UrlHandler getUrlParent() => ParentResource;
+
+		UrlEncoder BasicUrlHandler.GetEncoder() => getUrlEncoder();
+
+		/// <summary>
+		/// Returns a URL encoder for this entity setup. Framework use only.
+		/// </summary>
+		protected abstract UrlEncoder getUrlEncoder();
+
 		/// <summary>
 		/// Gets the desired security setting for requests to resources that are part of this entity setup.
 		/// </summary>
 		protected internal virtual ConnectionSecurity ConnectionSecurity => ParentResource?.ConnectionSecurity ?? ConnectionSecurity.SecureIfPossible;
+
+		( UrlHandler, UrlEncoder ) UrlHandler.GetCanonicalHandler( UrlEncoder encoder ) => ( this, encoder );
+
+		IEnumerable<UrlPattern> UrlHandler.GetChildPatterns() => getAdditionalChildUrlPatterns();
+
+		/// <summary>
+		/// Returns this entity setup’s child URL patterns. Do not include patterns that are implicitly provided by <see cref="createResources"/>.
+		/// </summary>
+		protected virtual IEnumerable<UrlPattern> getAdditionalChildUrlPatterns() => Enumerable.Empty<UrlPattern>();
+
+		void BasicUrlHandler.HandleRequest( HttpContext context ) {
+			throw new ResourceNotAvailableException( "An entity setup cannot handle a request.", null );
+		}
 
 		protected internal virtual bool AllowsSearchEngineIndexing => ParentResource?.AllowsSearchEngineIndexing ?? true;
 

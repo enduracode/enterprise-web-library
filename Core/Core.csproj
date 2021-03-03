@@ -367,6 +367,15 @@
     <Compile Include="EnterpriseWebFramework\Core\HTTP\EwfResponseBodyCreator.cs" />
     <Compile Include="EnterpriseWebFramework\Core\HTTP\FullResponse.cs" />
     <Compile Include="EnterpriseWebFramework\Core\HTTP\ResponseMemoryCachingSetup.cs" />
+    <Compile Include="EnterpriseWebFramework\Core\HTTP\URL Handling\BaseUrlPattern.cs" />
+    <Compile Include="EnterpriseWebFramework\Core\HTTP\URL Handling\BasicUrlHandler.cs" />
+    <Compile Include="EnterpriseWebFramework\Core\HTTP\URL Handling\DecodingUrlSegment.cs" />
+    <Compile Include="EnterpriseWebFramework\Core\HTTP\URL Handling\EncodingUrlSegment.cs" />
+    <Compile Include="EnterpriseWebFramework\Core\HTTP\URL Handling\UrlDecoder.cs" />
+    <Compile Include="EnterpriseWebFramework\Core\HTTP\URL Handling\UrlEncoder.cs" />
+    <Compile Include="EnterpriseWebFramework\Core\HTTP\URL Handling\UrlHandler.cs" />
+    <Compile Include="EnterpriseWebFramework\Core\HTTP\URL Handling\UrlHandlingStatics.cs" />
+    <Compile Include="EnterpriseWebFramework\Core\HTTP\URL Handling\UrlPattern.cs" />
     <Compile Include="EnterpriseWebFramework\Core\NonLiveInstallationStatics.cs" />
     <Compile Include="EnterpriseWebFramework\Core\PageDisabledException.cs" />
     <Compile Include="EnterpriseWebFramework\Core\Resource Meta Logic\Alternative Resource Modes\DisabledResourceMode.cs" />
@@ -599,6 +608,7 @@
     <Compile Include="EnterpriseWebFramework\Request Handling\EntitySetupBase.cs" />
     <Compile Include="EnterpriseWebFramework\Request Handling\EwfSafeRequestHandler.cs" />
     <Compile Include="EnterpriseWebFramework\Request Handling\EwfSafeResponseWriter.cs" />
+    <Compile Include="EnterpriseWebFramework\Request Handling\ExternalRedirect.cs" />
     <Compile Include="EnterpriseWebFramework\Request Handling\ParametersModificationBase.cs" />
     <Compile Include="EnterpriseWebFramework\Request Handling\ResourceBase.cs" />
     <Compile Include="EnterpriseWebFramework\Request Handling\ResourceGroup.cs" />
