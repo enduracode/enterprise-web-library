@@ -301,7 +301,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private FlowComponent getEntityAndTopTabContainer() {
 			var components = new List<FlowComponent> { getEntityContainer() };
 			if( entityUsesTabMode( TabMode.Horizontal ) ) {
-				var resourceGroups = EwfPage.Instance.EsAsBaseType.Resources;
+				var resourceGroups = EwfPage.Instance.EsAsBaseType.ListedResources;
 				if( resourceGroups.Count > 1 )
 					throw new ApplicationException( "Top tabs are not supported with multiple resource groups." );
 				components.Add( getTopTabListContainer( resourceGroups.Single() ) );
@@ -317,7 +317,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private IReadOnlyCollection<FlowComponent> getPagePath() {
 			var entitySetup = EwfPage.Instance.EsAsBaseType;
 			var pagePath = new PagePath(
-				currentPageBehavior: entitySetup != null && EwfPage.Instance.InfoAsBaseType.ParentResource == null && entitySetup.Resources.Any()
+				currentPageBehavior: entitySetup != null && EwfPage.Instance.InfoAsBaseType.ParentResource == null && entitySetup.ListedResources.Any()
 					                     ? PagePathCurrentPageBehavior.IncludeCurrentPageAndExcludePageNameIfEntitySetupExists
 					                     : PagePathCurrentPageBehavior.IncludeCurrentPage );
 			return pagePath.IsEmpty ? Enumerable.Empty<FlowComponent>().Materialize() : pagePath.ToCollection();
@@ -371,7 +371,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		private FlowComponent getSideTabContainer() {
 			var components = new List<FlowComponent>();
-			foreach( var resourceGroup in EwfPage.Instance.EsAsBaseType.Resources ) {
+			foreach( var resourceGroup in EwfPage.Instance.EsAsBaseType.ListedResources ) {
 				var tabs = getTabHyperlinksForResources( resourceGroup, true );
 				if( tabs.Any() && resourceGroup.Name.Any() )
 					components.Add( new GenericFlowContainer( resourceGroup.Name.ToComponents(), classes: sideTabGroupHeadClass ) );

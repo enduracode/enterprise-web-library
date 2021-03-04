@@ -40,10 +40,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Returns the tab mode, or null for no tabs.
 		/// </summary>
 		internal TabMode? GetTabMode( EntitySetupBase es ) {
-			if( !es.Resources.Any() )
+			if( !es.ListedResources.Any() )
 				return null;
 			if( tabMode == TabMode.Automatic )
-				return es.Resources.Count == 1 && es.Resources.Single().Resources.Count() < 8 ? TabMode.Horizontal : TabMode.Vertical;
+				return es.ListedResources.Count == 1 && es.ListedResources.Single().Resources.Count() < 8 ? TabMode.Horizontal : TabMode.Vertical;
 			return tabMode;
 		}
 	}

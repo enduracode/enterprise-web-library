@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Web;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -11,14 +11,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public abstract class EntitySetupBase: UrlHandler {
 		private bool parentResourceLoaded;
 		private ResourceBase parentResource;
-		private ReadOnlyCollection<ResourceGroup> resources;
 		private readonly Lazy<AlternativeResourceMode> alternativeMode;
+		private readonly Lazy<IReadOnlyCollection<ResourceGroup>> listedResources;
 
 		/// <summary>
 		/// Creates an entity setup object.
 		/// </summary>
 		protected EntitySetupBase() {
 			alternativeMode = new Lazy<AlternativeResourceMode>( createAlternativeMode );
+			listedResources = new Lazy<IReadOnlyCollection<ResourceGroup>>( () => createListedResources().Materialize() );
 		}
 
 		/// <summary>
@@ -32,11 +33,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		protected abstract ResourceBase createParentResource();
 
 		/// <summary>
-		/// Creates a list of resource groups for the resources that are part of this entity setup.
-		/// </summary>
-		protected abstract List<ResourceGroup> createResources();
-
-		/// <summary>
 		/// Gets the resource object for the parent resource of this entity setup. Returns null if there is no parent resource.
 		/// </summary>
 		public ResourceBase ParentResource {
@@ -47,11 +43,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				return parentResource = createParentResource();
 			}
 		}
-
-		/// <summary>
-		/// Gets the list of resource objects for the resources that are part of this entity setup.
-		/// </summary>
-		public ReadOnlyCollection<ResourceGroup> Resources => resources ?? ( resources = createResources().AsReadOnly() );
 
 		/// <summary>
 		/// Returns the name of the entity setup.
@@ -94,6 +85,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		protected virtual AlternativeResourceMode createAlternativeMode() {
 			return null;
 		}
+
+		/// <summary>
+		/// Gets a list of groups containing this entity setup’s listed resources.
+		/// </summary>
+		public IReadOnlyCollection<ResourceGroup> ListedResources => listedResources.Value;
+
+		/// <summary>
+		/// Creates a list of groups containing this entity setup’s listed resources.
+		/// </summary>
+		protected abstract IEnumerable<ResourceGroup> createListedResources();
 
 		UrlHandler UrlHandler.GetParent() => getUrlParent();
 
