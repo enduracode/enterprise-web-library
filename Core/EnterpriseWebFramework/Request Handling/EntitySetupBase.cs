@@ -114,7 +114,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		IEnumerable<UrlPattern> UrlHandler.GetChildPatterns() => getAdditionalChildUrlPatterns();
 
 		/// <summary>
-		/// Returns this entity setup’s child URL patterns. Do not include patterns that are implicitly provided by <see cref="createResources"/>.
+		/// Returns this entity setup’s child URL patterns. Do not include patterns that are implicitly provided by <see cref="createListedResources"/>.
 		/// </summary>
 		protected virtual IEnumerable<UrlPattern> getAdditionalChildUrlPatterns() => Enumerable.Empty<UrlPattern>();
 
