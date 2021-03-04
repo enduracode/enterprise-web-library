@@ -9,8 +9,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// An object that allows several pages and resources to share query parameters, authorization logic, data, etc.
 	/// </summary>
 	public abstract class EntitySetupBase: UrlHandler {
-		private bool parentResourceLoaded;
-		private ResourceBase parentResource;
+		private readonly Lazy<ResourceBase> parentResource;
 		private readonly Lazy<AlternativeResourceMode> alternativeMode;
 		private readonly Lazy<IReadOnlyCollection<ResourceGroup>> listedResources;
 
@@ -18,6 +17,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Creates an entity setup object.
 		/// </summary>
 		protected EntitySetupBase() {
+			parentResource = new Lazy<ResourceBase>( createParentResource );
 			alternativeMode = new Lazy<AlternativeResourceMode>( createAlternativeMode );
 			listedResources = new Lazy<IReadOnlyCollection<ResourceGroup>>( () => createListedResources().Materialize() );
 		}
@@ -28,21 +28,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		protected virtual void init() {}
 
 		/// <summary>
-		/// Creates a resource object for the parent resource of this entity setup. Returns null if there is no parent resource.
+		/// Gets the parent resource, or null if there is no parent.
 		/// </summary>
-		protected abstract ResourceBase createParentResource();
+		public ResourceBase ParentResource => parentResource.Value;
 
 		/// <summary>
-		/// Gets the resource object for the parent resource of this entity setup. Returns null if there is no parent resource.
+		/// Creates the parent resource. Returns null if there is no parent.
 		/// </summary>
-		public ResourceBase ParentResource {
-			get {
-				if( parentResourceLoaded )
-					return parentResource;
-				parentResourceLoaded = true;
-				return parentResource = createParentResource();
-			}
-		}
+		protected abstract ResourceBase createParentResource();
 
 		/// <summary>
 		/// Returns the name of the entity setup.

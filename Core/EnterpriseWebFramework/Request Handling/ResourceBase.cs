@@ -77,12 +77,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public abstract EntitySetupBase EsAsBaseType { get; }
 
 		/// <summary>
-		/// Gets the resource info object for the parent resource of this resource. Returns null if there is no parent resource.
+		/// Gets the parent resource, or null if there is no parent.
 		/// </summary>
 		public ResourceBase ParentResource => parentResource.Value;
 
 		/// <summary>
-		/// Creates a resource info object for the parent resource of this resource. Returns null if there is no parent resource.
+		/// Creates the parent resource. Returns null if there is no parent.
 		/// </summary>
 		protected virtual ResourceBase createParentResource() => null;
 
