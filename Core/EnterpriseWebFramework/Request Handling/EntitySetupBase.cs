@@ -111,12 +111,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		( UrlHandler, UrlEncoder ) UrlHandler.GetCanonicalHandler( UrlEncoder encoder ) => ( this, encoder );
 
-		IEnumerable<UrlPattern> UrlHandler.GetChildPatterns() => getAdditionalChildUrlPatterns();
+		IEnumerable<UrlPattern> UrlHandler.GetChildPatterns() => getChildUrlPatterns();
 
 		/// <summary>
-		/// Returns this entity setup’s child URL patterns. Do not include patterns that are implicitly provided by <see cref="createListedResources"/>.
+		/// Returns this entity setup’s child URL patterns.
 		/// </summary>
-		protected virtual IEnumerable<UrlPattern> getAdditionalChildUrlPatterns() => Enumerable.Empty<UrlPattern>();
+		protected virtual IEnumerable<UrlPattern> getChildUrlPatterns() => Enumerable.Empty<UrlPattern>();
 
 		void BasicUrlHandler.HandleRequest( HttpContext context ) {
 			throw new ResourceNotAvailableException( "An entity setup cannot handle a request.", null );
