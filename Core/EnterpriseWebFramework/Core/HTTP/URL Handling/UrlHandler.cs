@@ -11,9 +11,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		UrlHandler GetParent();
 
 		/// <summary>
-		/// Returns the URL handler and encoder that will determine the specified encoder’s canonical URL.
+		/// Returns the parent and child URL handlers that will determine the specified child handler’s canonical URL.
 		/// </summary>
-		( UrlHandler, UrlEncoder ) GetCanonicalHandler( UrlEncoder encoder );
+		( UrlHandler parent, UrlHandler child ) GetCanonicalHandlerPair( UrlHandler child );
 
 		/// <summary>
 		/// Returns this handler’s child URL patterns.

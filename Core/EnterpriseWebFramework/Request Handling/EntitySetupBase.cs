@@ -109,17 +109,35 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		protected internal virtual ConnectionSecurity ConnectionSecurity => ParentResource?.ConnectionSecurity ?? ConnectionSecurity.SecureIfPossible;
 
-		( UrlHandler, UrlEncoder ) UrlHandler.GetCanonicalHandler( UrlEncoder encoder ) => ( this, encoder );
+		( UrlHandler parent, UrlHandler child ) UrlHandler.GetCanonicalHandlerPair( UrlHandler child ) =>
+			EwlStatics.AreEqual( child, getRequestHandler() ) && canRepresentRequestHandler()
+				? ( (UrlHandler)this ).GetParent().GetCanonicalHandlerPair( this )
+				: ( this, child );
+
+		/// <summary>
+		/// Returns the resource or entity setup that will handle an HTTP request for this entity setup’s URL. Normally this should be the first of the listed
+		/// resources. We do not recommend returning null; doing so will make the entity setup URL unusable. Must not depend on the authenticated user.
+		/// </summary>
+		protected abstract UrlHandler getRequestHandler();
+
+		/// <summary>
+		/// Returns whether this entity setup’s canonical URL will be the canonical URL for the request handler, if the request handler specifies this entity setup
+		/// as its parent. Must not depend on the authenticated user.
+		/// </summary>
+		protected virtual bool canRepresentRequestHandler() => false;
 
 		IEnumerable<UrlPattern> UrlHandler.GetChildPatterns() => getChildUrlPatterns();
 
 		/// <summary>
-		/// Returns this entity setup’s child URL patterns.
+		/// Returns this entity setup’s child URL patterns. Must not depend on the authenticated user.
 		/// </summary>
 		protected virtual IEnumerable<UrlPattern> getChildUrlPatterns() => Enumerable.Empty<UrlPattern>();
 
 		void BasicUrlHandler.HandleRequest( HttpContext context ) {
-			throw new ResourceNotAvailableException( "An entity setup cannot handle a request.", null );
+			var requestHandler = getRequestHandler();
+			if( requestHandler == null )
+				throw new ResourceNotAvailableException( "An entity setup cannot handle a request.", null );
+			requestHandler.HandleRequest( context );
 		}
 
 		protected internal virtual bool AllowsSearchEngineIndexing => ParentResource?.AllowsSearchEngineIndexing ?? true;

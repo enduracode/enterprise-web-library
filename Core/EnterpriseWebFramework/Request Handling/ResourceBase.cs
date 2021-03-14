@@ -246,12 +246,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 		}
 
-		( UrlHandler, UrlEncoder ) UrlHandler.GetCanonicalHandler( UrlEncoder encoder ) => ( this, encoder );
+		( UrlHandler parent, UrlHandler child ) UrlHandler.GetCanonicalHandlerPair( UrlHandler child ) => ( this, child );
 
 		IEnumerable<UrlPattern> UrlHandler.GetChildPatterns() => getChildUrlPatterns();
 
 		/// <summary>
-		/// Returns this resource’s child URL patterns.
+		/// Returns this resource’s child URL patterns. Must not depend on the authenticated user.
 		/// </summary>
 		protected virtual IEnumerable<UrlPattern> getChildUrlPatterns() => Enumerable.Empty<UrlPattern>();
 
