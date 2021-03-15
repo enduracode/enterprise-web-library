@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// An object that defines a particular URL in the application and handles a request for it or any of its descendants.
 	/// </summary>
-	public interface UrlHandler: BasicUrlHandler {
+	public interface UrlHandler: BasicUrlHandler, IEquatable<UrlHandler> {
 		/// <summary>
 		/// Returns the URL handler that will determine this handler’s canonical URL.
 		/// </summary>
