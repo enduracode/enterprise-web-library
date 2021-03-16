@@ -3,6 +3,6 @@
 		/// <summary>
 		/// Framework use only.
 		/// </summary>
-		BasicUrlHandler GetUrlHandler( DecodingUrlSegment urlSegment );
+		BasicUrlHandler GetUrlHandler( DecodingUrlParameterCollection parameters );
 	}
 }

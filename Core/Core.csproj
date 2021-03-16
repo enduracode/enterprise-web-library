@@ -369,7 +369,11 @@
     <Compile Include="EnterpriseWebFramework\Core\HTTP\ResponseMemoryCachingSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Core\HTTP\URL Handling\BaseUrlPattern.cs" />
     <Compile Include="EnterpriseWebFramework\Core\HTTP\URL Handling\BasicUrlHandler.cs" />
+    <Compile Include="EnterpriseWebFramework\Core\HTTP\URL Handling\DecodingBaseUrl.cs" />
+    <Compile Include="EnterpriseWebFramework\Core\HTTP\URL Handling\DecodingUrlParameterCollection.cs" />
     <Compile Include="EnterpriseWebFramework\Core\HTTP\URL Handling\DecodingUrlSegment.cs" />
+    <Compile Include="EnterpriseWebFramework\Core\HTTP\URL Handling\EncodingBaseUrl.cs" />
+    <Compile Include="EnterpriseWebFramework\Core\HTTP\URL Handling\EncodingUrlParameterCollection.cs" />
     <Compile Include="EnterpriseWebFramework\Core\HTTP\URL Handling\EncodingUrlSegment.cs" />
     <Compile Include="EnterpriseWebFramework\Core\HTTP\URL Handling\UrlDecoder.cs" />
     <Compile Include="EnterpriseWebFramework\Core\HTTP\URL Handling\UrlEncoder.cs" />
