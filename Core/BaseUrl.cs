@@ -17,6 +17,11 @@ namespace EnterpriseWebLibrary {
 			return url.Scheme + "://" + url.Host + ( url.IsDefaultPort ? "" : ( ":" + url.Port ) ) + path.PrependDelimiter( "/" );
 		}
 
+		internal static ( bool secure, string host, int port, string path ) GetComponents( string urlString ) {
+			var url = new Uri( urlString );
+			return ( url.Scheme == "https", url.Host, url.Port, url.AbsolutePath.Substring( "/".Length ) );
+		}
+
 		private readonly string host;
 		private readonly int? nonsecurePort;
 		private readonly int? securePort;

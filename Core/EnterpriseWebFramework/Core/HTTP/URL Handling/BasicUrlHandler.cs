@@ -1,10 +1,11 @@
-﻿using System.Web;
+﻿using System;
+using System.Web;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// An object that defines a particular URL in the application and handles a request for it.
 	/// </summary>
-	public interface BasicUrlHandler {
+	public interface BasicUrlHandler: IEquatable<BasicUrlHandler> {
 		/// <summary>
 		/// Returns this handler’s URL encoder.
 		/// </summary>
