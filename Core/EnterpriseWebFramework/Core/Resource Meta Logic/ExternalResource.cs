@@ -16,6 +16,11 @@
 		public override AlternativeResourceMode AlternativeMode => null;
 
 		internal override string GetUrl( bool ensureUserCanAccessResource, bool ensureResourceNotDisabled, bool makeAbsolute ) =>
-			makeAbsolute ? url.Replace( "~", EwfApp.GetDefaultBaseUrl( ConnectionSecurity.SecureIfPossible.ShouldBeSecureGivenCurrentRequest( false ) ) ) : url;
+			makeAbsolute
+				? url.Replace(
+					"~",
+					EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString(
+						ConnectionSecurity.SecureIfPossible.ShouldBeSecureGivenCurrentRequest( false ) ) )
+				: url;
 	}
 }

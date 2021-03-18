@@ -40,7 +40,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		private static Tuple<string, string, string> getNameAndDomainAndPath( string name, string domain, string path, bool omitNamePrefix ) {
 			var defaultAttributes = EwfConfigurationStatics.AppConfiguration.DefaultCookieAttributes;
-			var defaultBaseUrl = new Uri( EwfApp.GetDefaultBaseUrl( false ) );
+			var defaultBaseUrl = new Uri( AppRequestState.Instance.BaseUrl );
 
 			domain = domain ?? defaultAttributes.Domain ?? "";
 

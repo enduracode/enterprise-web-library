@@ -23,8 +23,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		internal static bool FrameworkInitialized { get; set; }
 
-		// This is a hack that can be removed when goal 448 (Clean URLs) is complete. At that point resources will be able to have their own base URLs.
-		public static Func<BaseUrl> BaseUrlOverrideGetter;
+		private class HandlerAdapter: IHttpHandler {
+			private readonly BasicUrlHandler handler;
+
+			public HandlerAdapter( BasicUrlHandler handler ) {
+				this.handler = handler;
+			}
+
+			void IHttpHandler.ProcessRequest( HttpContext context ) => handler.HandleRequest( context );
+			bool IHttpHandler.IsReusable => false;
+		}
 
 		internal static void ExecuteWithBasicExceptionHandling( Action handler, bool setErrorInRequestState, bool set500StatusCode ) {
 			try {
@@ -70,15 +78,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			BeginRequest += handleBeginRequest;
 			AuthenticateRequest += handleAuthenticateRequest;
 			PostAuthenticateRequest += handlePostAuthenticateRequest;
+			PostResolveRequestCache += handlePostResolveRequestCache;
 			EndRequest += handleEndRequest;
 			Error += handleError;
-		}
-
-		internal static string GetDefaultBaseUrl( bool secure ) {
-			if( BaseUrlOverrideGetter != null )
-				return BaseUrlOverrideGetter().CompleteWithDefaults( EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl ).GetUrlString( secure );
-
-			return EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString( secure );
 		}
 
 		private void handleBeginRequest( object sender, EventArgs e ) {
@@ -125,7 +127,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					// This won't compile unless it is assigned to something, which is why it is unused.
 					var stream = Request.InputStream;
 
-					RequestState = new AppRequestState( url );
+					RequestState = new AppRequestState( url, baseUrl );
 				},
 				false,
 				true );
@@ -171,55 +173,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		private void handlePostAuthenticateRequest( object sender, EventArgs e ) {
 			RequestState.EnableUser();
-			using( MiniProfiler.Current.Step( "EWF - Get shortcut URL resolvers" ) )
-				rewritePathIfShortcutUrl();
 		}
 
-		private void rewritePathIfShortcutUrl() {
-			var ewfResolvers = new[]
-				{
-					new ShortcutUrlResolver(
-						"ewf",
-						ConnectionSecurity.SecureIfPossible,
-						() => {
-							var page = MetaLogicFactory.CreateBasicTestsPageInfo();
-							return page.UserCanAccessResource ? page : null;
-						} ),
-					new ShortcutUrlResolver(
-						"ewf/impersonate",
-						ConnectionSecurity.SecureIfPossible,
-						() => {
-							if( !UserManagementStatics.UserManagementEnabled )
-								return null;
-							var page = MetaLogicFactory.CreateSelectUserPageInfo( "" );
-							return page.UserCanAccessResource ? page : null;
-						} )
-				};
+		private void handlePostResolveRequestCache( object sender, EventArgs e ) {
+			using( MiniProfiler.Current.Step( "EWF - Resolve URL" ) )
+				resolveUrl();
+		}
 
-			var url = GetRequestAppRelativeUrl( Request );
-			foreach( var resolver in ewfResolvers.Concat( GetShortcutUrlResolvers() ) ) {
-				if( resolver.ShortcutUrl.ToLower() != url.ToLower() )
-					continue;
-
-				// Redirect to the same shortcut URL to fix the connection security, normalize the base URL, normalize the shortcut URL casing, or any combination of
-				// these.
-				var canonicalAbsoluteUrl = GetDefaultBaseUrl( resolver.ConnectionSecurity.ShouldBeSecureGivenCurrentRequest( false ) ) +
-				                           resolver.ShortcutUrl.PrependDelimiter( "/" );
-				if( canonicalAbsoluteUrl != RequestState.Url ) {
-					if( !resolver.ConnectionSecurity.ShouldBeSecureGivenCurrentRequest( false ) && RequestIsSecure( Request ) )
-						Response.AppendHeader( "Strict-Transport-Security", "max-age=0" );
-					NetTools.Redirect( canonicalAbsoluteUrl );
-				}
-
-				if( ConfigurationStatics.IsIntermediateInstallation && !RequestState.IntermediateUserExists )
-					throw new AccessDeniedException( true, null );
-
-				var resource = resolver.Function();
-				if( resource == null )
-					throw new AccessDeniedException( false, resolver.LogInPageGetter?.Invoke() );
-				if( resource is ExternalResource )
-					NetTools.Redirect( resource.GetUrl() );
-				HttpContext.Current.RewritePath( getTransferPath( (ResourceBase)resource ), false );
+		private void resolveUrl() {
+			var handler = UrlHandlingStatics.ResolveUrl( RequestState.BaseUrl, GetRequestAppRelativeUrl( Request ) );
+			if( handler != null ) {
+				HttpContext.Current.RemapHandler( new HandlerAdapter( handler ) );
 				return;
 			}
 
@@ -255,9 +219,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
-		/// Gets the shortcut URL resolvers for the application.
+		/// Returns the base URL patterns for the application.
 		/// </summary>
-		protected internal abstract IEnumerable<ShortcutUrlResolver> GetShortcutUrlResolvers();
+		protected internal abstract IEnumerable<BaseUrlPattern> GetBaseUrlPatterns();
 
 		// The warning below also appears on EwfPage.getPageViewDataModificationMethod.
 		/// <summary>

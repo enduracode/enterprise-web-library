@@ -33,6 +33,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		private readonly Instant beginInstant;
 		private readonly string url;
+		private readonly string baseUrl;
 		private readonly bool homeUrlRequest = HttpContext.Current.Request.AppRelativeCurrentExecutionFilePath == NetTools.HomeUrl;
 
 		private readonly DataAccessState dataAccessState;
@@ -60,10 +61,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public HttpBrowserCapabilities Browser { get; }
 
-		internal AppRequestState( string url ) {
+		internal AppRequestState( string url, string baseUrl ) {
 			beginInstant = SystemClock.Instance.GetCurrentInstant();
 			MiniProfiler.Start();
 			this.url = url;
+			this.baseUrl = baseUrl;
 
 			dataAccessState = new DataAccessState( databaseConnectionInitializer: initDatabaseConnection );
 			dataAccessState.ResetCache();
@@ -79,6 +81,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// EWF use only. This is the absolute URL for the request. Absolute means the entire URL, including the scheme, host, path, and query string.
 		/// </summary>
 		public string Url => url;
+
+		internal string BaseUrl => baseUrl;
 
 		internal bool HomeUrlRequest => homeUrlRequest;
 
