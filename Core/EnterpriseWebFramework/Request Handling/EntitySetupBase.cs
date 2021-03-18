@@ -146,5 +146,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Gets the parameters modification object for this entity setup.
 		/// </summary>
 		public abstract ParametersModificationBase ParametersModificationAsBaseType { get; }
+
+		public override bool Equals( object obj ) => Equals( obj as BasicUrlHandler );
+		public abstract bool Equals( BasicUrlHandler other );
+		public abstract override int GetHashCode();
 	}
 }
