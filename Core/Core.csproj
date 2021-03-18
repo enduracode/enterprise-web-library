@@ -388,7 +388,6 @@
     <Compile Include="EnterpriseWebFramework\Core\Resource Meta Logic\ExternalResource.cs" />
     <Compile Include="EnterpriseWebFramework\Core\Resource Meta Logic\ResourceInfo.cs" />
     <Compile Include="EnterpriseWebFramework\Core\ResourceNotAvailableException.cs" />
-    <Compile Include="EnterpriseWebFramework\Core\ShortcutUrlResolver.cs" />
     <Compile Include="EnterpriseWebFramework\Core\Translation.cs" />
     <Compile Include="EnterpriseWebFramework\Core\UserDisabledByPageException.cs" />
     <Compile Include="EnterpriseWebFramework\CSS Length\AncestorRelativeLength.cs" />
