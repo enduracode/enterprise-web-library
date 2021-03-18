@@ -57,13 +57,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				query = generateQuery( parameters.queryParameters );
 
 			var baseUrlString = baseUrl.BaseUrl.GetUrlString( secure );
-			var appRelativeUrl = generateAppRelativeUrl( generatePath( baseUrlParameters, segments ), query );
+			var path = generatePath( baseUrlParameters, segments );
+			var appRelativeUrl = generateAppRelativeUrl( path, query );
 
 			var resolvedHandler = ResolveUrl( baseUrlString, appRelativeUrl );
 			if( !EwlStatics.AreEqual( resolvedHandler, basicHandler ) )
 				throw new ApplicationException( "The handler’s canonical URL does not resolve back to the same handler." );
 
-			return baseUrlString + appRelativeUrl.PrependDelimiter( "/" );
+			return baseUrlString + ( path.Length > 0 ? "/" : "" ) + appRelativeUrl;
 		}
 
 		internal static BasicUrlHandler ResolveUrl( string baseUrlString, string appRelativeUrl ) {
