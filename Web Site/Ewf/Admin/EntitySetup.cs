@@ -1,12 +1,10 @@
 ﻿using System.Collections.Generic;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.Admin {
 	partial class EntitySetup: UiEntitySetup {
 		protected override ResourceBase createParentResource() => null;
-
-		protected override List<ResourceGroup> createResources() =>
-			new List<ResourceGroup> { new ResourceGroup( new BasicTests.Info( this ), new RequestProfiling.Info( this ), new SystemUsers.Info( this ) ) };
 
 		public override string EntitySetupName => "EWF Admin";
 
@@ -16,6 +14,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 					return true;
 				return AppTools.User != null && AppTools.User.Role.CanManageUsers;
 			}
+		}
+
+		protected override IEnumerable<ResourceGroup> createListedResources() =>
+			new ResourceGroup( new BasicTests.Info( this ), new RequestProfiling.Info( this ), new SystemUsers.Info( this ) ).ToCollection();
+
+		protected override UrlHandler getRequestHandler() => new BasicTests.Info( this );
+
+		protected override IEnumerable<UrlPattern> getChildUrlPatterns() {
+			return new UrlPattern( /* use impersonate as the segment to get to MetaLogicFactory.CreateSelectUserPageInfo( "" ) */ );
 		}
 
 		EntityUiSetup UiEntitySetup.GetUiSetup() => new EntityUiSetup();
