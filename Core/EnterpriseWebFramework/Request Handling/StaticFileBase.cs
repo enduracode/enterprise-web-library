@@ -5,9 +5,9 @@ using EnterpriseWebLibrary.Configuration;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
-	/// A base set of functionality that can be used to discover information about a static file before actually requesting it.
+	/// A static file in a web application.
 	/// </summary>
-	public abstract class StaticFileInfo: ResourceBase {
+	public abstract class StaticFileBase: ResourceBase {
 		/// <summary>
 		/// EWL use only.
 		/// </summary>
@@ -19,13 +19,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public override string ResourceName => "";
 
 		protected internal override ConnectionSecurity ConnectionSecurity => ConnectionSecurity.MatchingCurrentRequest;
-
-		protected override bool isIdenticalTo( ResourceBase resourceAsBaseType ) =>
-			resourceAsBaseType is StaticFileInfo info && info.appRelativeFilePath == appRelativeFilePath;
-
-		public override ResourceBase CloneAndReplaceDefaultsIfPossible( bool disableReplacementOfDefaults ) {
-			return this;
-		}
 
 		/// <summary>
 		/// Gets the last-modification date/time of the resource.
@@ -53,5 +46,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Gets the app relative path of the file.
 		/// </summary>
 		protected abstract string appRelativeFilePath { get; }
+
+		protected override bool isIdenticalTo( ResourceBase resourceAsBaseType ) =>
+			resourceAsBaseType is StaticFileBase staticFile && staticFile.appRelativeFilePath == appRelativeFilePath;
+
+		public override ResourceBase CloneAndReplaceDefaultsIfPossible( bool disableReplacementOfDefaults ) => this;
 	}
 }

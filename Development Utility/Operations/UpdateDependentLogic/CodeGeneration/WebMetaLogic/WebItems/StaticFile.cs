@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
-using Humanizer;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic.WebItems {
 	internal class StaticFile {
@@ -13,15 +13,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 
 		internal void GenerateCode( TextWriter writer ) {
 			writer.WriteLine( "namespace " + generalData.Namespace + " {" );
-			writer.WriteLine( "public class " + generalData.ClassName + " {" );
-			writer.WriteLine( "public sealed class Info: StaticFileInfo {" );
+			writer.WriteLine( "public sealed class {0}: StaticFileBase {{".FormatWith( generalData.ClassName ) );
 			writeBuildUrlMethod( writer );
 
 			writer.WriteLine(
 				"protected override DateTimeOffset getBuildDateAndTime() { return " + AppStatics.GetLiteralDateTimeExpression( DateTimeOffset.UtcNow ) + "; }" );
 
 			writeAppRelativeFilePathProperty( writer );
-			writer.WriteLine( "}" );
 			writer.WriteLine( "}" );
 			writer.WriteLine( "}" );
 		}
@@ -49,7 +47,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 		}
 
 		private void writeAppRelativeFilePathProperty( TextWriter writer ) {
-			writer.WriteLine( "protected override string appRelativeFilePath { get { return \"" + generalData.PathRelativeToProject.Replace( "\\", "\\\\" ) + "\"; } }" );
+			writer.WriteLine(
+				"protected override string appRelativeFilePath { get { return \"" + generalData.PathRelativeToProject.Replace( "\\", "\\\\" ) + "\"; } }" );
 		}
 	}
 }
