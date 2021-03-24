@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
-using System.Xml;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Configuration.SystemDevelopment;
 using EnterpriseWebLibrary.Configuration.SystemGeneral;
@@ -153,27 +152,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			matchingFiles.AddRange( Directory.GetFiles( webProjectEwfFolderPath, "*.cs", SearchOption.AllDirectories ) );
 			foreach( var filePath in matchingFiles )
 				File.WriteAllText( filePath, customizeNamespace( File.ReadAllText( filePath ), webProject ) );
-
-			IoMethods.CopyFile(
-				EwlStatics.CombinePaths( webProjectFilesFolderPath, AppStatics.StandardLibraryFilesFileName ),
-				EwlStatics.CombinePaths( webProjectPath, AppStatics.StandardLibraryFilesFileName ) );
-			IoMethods.RecursivelyRemoveReadOnlyAttributeFromItem( EwlStatics.CombinePaths( webProjectPath, AppStatics.StandardLibraryFilesFileName ) );
-
-			// Add the Import element to the project file if it's not already present.
-			var projectDocument = new XmlDocument { PreserveWhitespace = true };
-			var projectDocumentPath = EwlStatics.CombinePaths( webProjectPath, "{0}.csproj".FormatWith( webProject.name ) );
-			projectDocument.Load( projectDocumentPath );
-			var projectElement = projectDocument[ "Project" ];
-			const string webProjectFilesFileName = "Standard Library Files.xml";
-			var namespaceManager = new XmlNamespaceManager( projectDocument.NameTable );
-			const string ns = "http://schemas.microsoft.com/developer/msbuild/2003";
-			namespaceManager.AddNamespace( "p", ns );
-			if( projectElement.SelectSingleNode( "p:Import[ @Project = \"{0}\" ]".FormatWith( webProjectFilesFileName ), namespaceManager ) == null ) {
-				var importElement = projectDocument.CreateElement( "Import", ns );
-				importElement.SetAttribute( "Project", webProjectFilesFileName );
-				projectElement.AppendChild( importElement );
-				projectDocument.Save( projectDocumentPath );
-			}
 		}
 
 		private string customizeNamespace( string text, WebProject webProject ) {
@@ -668,7 +646,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					writer.WriteLine( webProject.name + "/bin/" );
 					writer.WriteLine( webProject.name + "/obj/" );
 					writer.WriteLine( webProject.name + "/" + StaticFileHandler.EwfFolderName + "/" );
-					writer.WriteLine( webProject.name + "/" + AppStatics.StandardLibraryFilesFileName );
 					writer.WriteLine( webProject.name + "/Generated Code/" );
 				}
 

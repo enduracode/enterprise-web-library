@@ -59,9 +59,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						EwlStatics.CombinePaths( webSitePath, StaticFileHandler.EwfFolderName ),
 						EwlStatics.CombinePaths( webProjectFilesFolderPath, StaticFileHandler.EwfFolderName ),
 						false );
-					IoMethods.CopyFile(
-						EwlStatics.CombinePaths( webSitePath, AppStatics.StandardLibraryFilesFileName ),
-						EwlStatics.CombinePaths( webProjectFilesFolderPath, AppStatics.StandardLibraryFilesFileName ) );
 
 					const string duProjectAndFolderName = "Development Utility";
 					IoMethods.CopyFolder(
@@ -226,7 +223,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				EwlStatics.CombinePaths(
 					installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath,
 					InstallationConfiguration.InstallationConfigurationFolderName,
-					InstallationConfiguration.InstallationsFolderName ) ) ) {
+					InstallationConfiguration.InstallationsFolderName ) ) )
 				if( !new[] { InstallationConfiguration.DevelopmentInstallationFolderName, AppStatics.MercurialRepositoryFolderName }.Contains(
 					Path.GetFileName( installationConfigurationFolderPath ) ) ) {
 					var buildMessageInstallation = new InstallationSupportUtility.SystemManagerInterface.Messages.BuildMessage.Installation();
@@ -255,7 +252,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					build.Installations.Add( buildMessageInstallation );
 					operationResult.NumberOfBytesTransferred += buildMessageInstallation.ConfigurationPackage.LongLength;
 				}
-			}
 
 			if( installation.DevelopmentInstallationLogic.SystemIsEwl )
 				build.NuGetPackages = packageEwl( installation, packagingConfiguration, logicPackagesFolderPath );
@@ -319,7 +315,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				IoMethods.DeleteFile( EwlStatics.CombinePaths( webAppPath, webProject.name + ".csproj" ) );
 				IoMethods.DeleteFile( EwlStatics.CombinePaths( webAppPath, webProject.name + ".csproj.user" ) );
 				IoMethods.DeleteFile( EwlStatics.CombinePaths( webAppPath, webProject.name + ".csproj.vspscc" ) );
-				IoMethods.DeleteFile( EwlStatics.CombinePaths( webAppPath, AppStatics.StandardLibraryFilesFileName ) );
 
 				var webConfigPath = EwlStatics.CombinePaths( webAppPath, WebApplication.WebConfigFileName );
 				File.WriteAllText( webConfigPath, File.ReadAllText( webConfigPath ).Replace( "debug=\"true\"", "debug=\"false\"" ) );
@@ -327,12 +322,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		}
 
 		private void packageWindowsServices( DevelopmentInstallation installation, string serverSideLogicFolderPath ) {
-			foreach( var service in installation.ExistingInstallationLogic.RuntimeConfiguration.WindowsServices ) {
+			foreach( var service in installation.ExistingInstallationLogic.RuntimeConfiguration.WindowsServices )
 				IoMethods.CopyFolder(
 					installation.ExistingInstallationLogic.GetWindowsServiceFolderPath( service, false ),
 					EwlStatics.CombinePaths( serverSideLogicFolderPath, service.Name ),
 					false );
-			}
 		}
 
 		private void packageServerSideConsoleApps( DevelopmentInstallation installation, string serverSideLogicFolderPath ) {

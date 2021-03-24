@@ -545,7 +545,6 @@
     <Content Include="Service\Web.config" />
     <Content Include="packages.config" />
     <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Chosen\chosen_v1.8.7\LICENSE.md" />
-    <None Include="Standard Library Files.xml" />
     <Content Include="TestPages\RegexHelper.aspx" />
     <Content Include="TestPages\SelectListDemo.aspx" />
     <Content Include="TestPages\StatusMessages.aspx" />
