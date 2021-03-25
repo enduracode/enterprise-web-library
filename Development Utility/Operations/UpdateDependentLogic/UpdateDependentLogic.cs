@@ -13,7 +13,6 @@ using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAcce
 using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems.StandardModification;
 using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebConfig;
 using EnterpriseWebLibrary.Email;
-using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
@@ -66,7 +65,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			if( installation.DevelopmentInstallationLogic.SystemIsEwl ) {
 				generateCodeForProject(
 					installation,
-					AppStatics.CoreProjectName,
+					EwlStatics.CoreProjectName,
 					writer => {
 						writer.WriteLine( "using System;" );
 						writer.WriteLine( "using System.Globalization;" );
@@ -125,37 +124,24 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			if( installation.DevelopmentInstallationLogic.SystemIsEwl )
 				foreach( var fileName in GlobalStatics.ConfigurationXsdFileNames )
 					IoMethods.CopyFile(
-						EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.CoreProjectName, "Configuration", fileName + FileExtensions.Xsd ),
+						EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.CoreProjectName, "Configuration", fileName + FileExtensions.Xsd ),
 						EwlStatics.CombinePaths(
 							InstallationFileStatics.GetGeneralFilesFolderPath( installation.GeneralLogic.Path, true ),
 							InstallationFileStatics.FilesFolderName,
 							fileName + FileExtensions.Xsd ) );
 			else {
-				// If web projects exist for this installation, copy appropriate files into them.
-				if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects != null )
-					foreach( var webProject in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects )
-						copyInWebProjectFiles( installation, webProject );
+				// If web projects exist for this installation, copy in web-framework static files.
+				if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects != null ) {
+					var webFrameworkStaticFilesFolderPath = EwlStatics.CombinePaths(
+						installation.GeneralLogic.Path,
+						InstallationFileStatics.WebFrameworkStaticFilesFolderName );
+					IoMethods.DeleteFolder( webFrameworkStaticFilesFolderPath );
+					IoMethods.CopyFolder(
+						EwlStatics.CombinePaths( ConfigurationStatics.InstallationPath, InstallationFileStatics.WebFrameworkStaticFilesFolderName ),
+						webFrameworkStaticFilesFolderPath,
+						false );
+				}
 			}
-		}
-
-		private void copyInWebProjectFiles( Installation installation, WebProject webProject ) {
-			var webProjectFilesFolderPath = EwlStatics.CombinePaths( ConfigurationStatics.InstallationPath, AppStatics.WebProjectFilesFolderName );
-			var webProjectPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, webProject.name );
-
-			// Copy Ewf folder and customize namespaces in .aspx and .cs files.
-			var webProjectEwfFolderPath = EwlStatics.CombinePaths( webProjectPath, StaticFileHandler.EwfFolderName );
-			IoMethods.DeleteFolder( webProjectEwfFolderPath );
-			IoMethods.CopyFolder( EwlStatics.CombinePaths( webProjectFilesFolderPath, StaticFileHandler.EwfFolderName ), webProjectEwfFolderPath, false );
-			IoMethods.RecursivelyRemoveReadOnlyAttributeFromItem( webProjectEwfFolderPath );
-			var matchingFiles = new List<string>();
-			matchingFiles.AddRange( Directory.GetFiles( webProjectEwfFolderPath, "*.aspx", SearchOption.AllDirectories ) );
-			matchingFiles.AddRange( Directory.GetFiles( webProjectEwfFolderPath, "*.cs", SearchOption.AllDirectories ) );
-			foreach( var filePath in matchingFiles )
-				File.WriteAllText( filePath, customizeNamespace( File.ReadAllText( filePath ), webProject ) );
-		}
-
-		private string customizeNamespace( string text, WebProject webProject ) {
-			return text.Replace( "EnterpriseWebLibrary.WebSite", webProject.NamespaceAndAssemblyName );
 		}
 
 		private void generateLibraryCode( DevelopmentInstallation installation ) {
@@ -629,6 +615,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( ".vs/{0}/v16/Server/sqlite3/".FormatWith( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName ) );
 				writer.WriteLine( "packages/" );
 				writer.WriteLine( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + ".sln.DotSettings.user" );
+				writer.WriteLine( "{0}/".FormatWith( InstallationFileStatics.WebFrameworkStaticFilesFolderName ) );
 				writer.WriteLine( "Error Log.txt" );
 				writer.WriteLine( "*.csproj.user" );
 				writer.WriteLine( "*" + CodeGeneration.DataAccess.DataAccessStatics.CSharpTemplateFileExtension );
@@ -645,7 +632,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					writer.WriteLine();
 					writer.WriteLine( webProject.name + "/bin/" );
 					writer.WriteLine( webProject.name + "/obj/" );
-					writer.WriteLine( webProject.name + "/" + StaticFileHandler.EwfFolderName + "/" );
 					writer.WriteLine( webProject.name + "/Generated Code/" );
 				}
 

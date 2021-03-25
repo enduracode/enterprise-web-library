@@ -43,7 +43,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				folderPath => {
 					var ewlOutputFolderPath = EwlStatics.CombinePaths(
 						installation.GeneralLogic.Path,
-						AppStatics.CoreProjectName,
+						EwlStatics.CoreProjectName,
 						EwlStatics.GetProjectOutputFolderPath( useDebugAssembly ) );
 					var libFolderPath = EwlStatics.CombinePaths( folderPath, @"lib\net472-full" );
 					foreach( var fileName in new[] { "dll", "pdb", "xml" }.Select( i => "EnterpriseWebLibrary." + i ) )
@@ -53,11 +53,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						EwlStatics.CombinePaths( installation.GeneralLogic.Path, @"Development Utility\Package Manager Console Commands.ps1" ),
 						EwlStatics.CombinePaths( folderPath, @"tools\init.ps1" ) );
 
-					var webSitePath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, "Web Site" );
-					var webProjectFilesFolderPath = EwlStatics.CombinePaths( folderPath, AppStatics.WebProjectFilesFolderName );
 					IoMethods.CopyFolder(
-						EwlStatics.CombinePaths( webSitePath, StaticFileHandler.EwfFolderName ),
-						EwlStatics.CombinePaths( webProjectFilesFolderPath, StaticFileHandler.EwfFolderName ),
+						EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.CoreProjectName, StaticFileBase.FrameworkStaticFilesSourceFolderPath ),
+						EwlStatics.CombinePaths( folderPath, InstallationFileStatics.WebFrameworkStaticFilesFolderName ),
 						false );
 
 					const string duProjectAndFolderName = "Development Utility";
@@ -150,7 +148,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			writer.WriteLine( "<requireLicenseAcceptance>false</requireLicenseAcceptance>" );
 			writer.WriteLine( "<dependencies>" );
 
-			var lines = from line in File.ReadAllLines( EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.CoreProjectName, "packages.config" ) )
+			var lines = from line in File.ReadAllLines( EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.CoreProjectName, "packages.config" ) )
 			            let trimmedLine = line.Trim()
 			            where trimmedLine.StartsWith( "<package " )
 			            select trimmedLine;
@@ -319,6 +317,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				var webConfigPath = EwlStatics.CombinePaths( webAppPath, WebApplication.WebConfigFileName );
 				File.WriteAllText( webConfigPath, File.ReadAllText( webConfigPath ).Replace( "debug=\"true\"", "debug=\"false\"" ) );
 			}
+
+			var frameworkStaticFilesFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, InstallationFileStatics.WebFrameworkStaticFilesFolderName );
+			if( Directory.Exists( frameworkStaticFilesFolderPath ) )
+				IoMethods.CopyFolder(
+					frameworkStaticFilesFolderPath,
+					EwlStatics.CombinePaths( serverSideLogicFolderPath, InstallationFileStatics.WebFrameworkStaticFilesFolderName ),
+					false );
 		}
 
 		private void packageWindowsServices( DevelopmentInstallation installation, string serverSideLogicFolderPath ) {

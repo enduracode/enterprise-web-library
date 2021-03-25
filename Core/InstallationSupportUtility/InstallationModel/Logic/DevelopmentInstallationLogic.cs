@@ -19,14 +19,13 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 			if( developmentConfiguration.database != null )
 				DatabasesForCodeGeneration.Add( existingInstallationLogic.Database );
 			if( developmentConfiguration.secondaryDatabases != null )
-				foreach( var secondaryDatabaseInDevelopmentConfiguration in developmentConfiguration.secondaryDatabases ) {
+				foreach( var secondaryDatabaseInDevelopmentConfiguration in developmentConfiguration.secondaryDatabases )
 					DatabasesForCodeGeneration.Add(
 						( recognizedInstallationLogic != null
 							  ? recognizedInstallationLogic.SecondaryDatabasesIncludedInDataPackages.SingleOrDefault(
 								  sd => sd.SecondaryDatabaseName == secondaryDatabaseInDevelopmentConfiguration.name )
 							  : null ) ?? DatabaseAbstraction.DatabaseOps.CreateDatabase(
 							this.existingInstallationLogic.RuntimeConfiguration.GetSecondaryDatabaseInfo( secondaryDatabaseInDevelopmentConfiguration.name ) ) );
-				}
 		}
 
 		public SystemDevelopmentConfiguration DevelopmentConfiguration {
@@ -37,6 +36,6 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 
 		public List<DatabaseAbstraction.Database> DatabasesForCodeGeneration { get { return databasesForCodeGeneration; } }
 
-		public bool SystemIsEwl => existingInstallationLogic.RuntimeConfiguration.SystemShortName == "Ewl";
+		public bool SystemIsEwl => existingInstallationLogic.RuntimeConfiguration.SystemIsEwl;
 	}
 }

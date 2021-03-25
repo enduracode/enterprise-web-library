@@ -222,6 +222,8 @@ namespace EnterpriseWebLibrary.Configuration {
 		public SystemGeneral.Database GetSecondaryDatabaseSystemConfiguration( string name ) =>
 			systemGeneralConfiguration.SecondaryDatabases.SingleOrDefault( i => i.Name == name )?.Database;
 
+		internal bool SystemIsEwl => SystemShortName == "Ewl";
+
 		/// <summary>
 		/// Gets the RSIS installation ID for the installation.
 		/// </summary>

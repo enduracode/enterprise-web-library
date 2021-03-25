@@ -9,6 +9,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// </summary>
 	public abstract class StaticFileBase: ResourceBase {
 		/// <summary>
+		/// Development Utility and private use only.
+		/// </summary>
+		public const string FrameworkStaticFilesSourceFolderPath = @"EnterpriseWebFramework\Static Files";
+
+		/// <summary>
+		/// Development Utility and private use only.
+		/// </summary>
+		public const string AppStaticFilesFolderName = "Static Files";
+
+		/// <summary>
 		/// EWL use only.
 		/// </summary>
 		public override EntitySetupBase EsAsBaseType => null;
@@ -28,7 +38,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			// expansion of a CSS element without changing the source file. And for non-development installations, we don't use the last write time at all because
 			// it's probably much slower (the build date/time is just a literal) and also because we don't expect files to be modified on servers.
 			if( ConfigurationStatics.IsDevelopmentInstallation ) {
-				var lastWriteTime = File.GetLastWriteTimeUtc( FilePath );
+				var lastWriteTime = File.GetLastWriteTimeUtc( filePath );
 				if( lastWriteTime > getBuildDateAndTime() )
 					return lastWriteTime;
 			}
@@ -40,15 +50,31 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets the path of the file.
 		/// </summary>
-		internal string FilePath => EwlStatics.CombinePaths( HttpRuntime.AppDomainAppPath, appRelativeFilePath );
+		private string filePath =>
+			isFrameworkFile
+				? ConfigurationStatics.InstallationConfiguration.SystemIsEwl && ConfigurationStatics.IsDevelopmentInstallation
+					  ?
+					  EwlStatics.CombinePaths(
+						  ConfigurationStatics.InstallationConfiguration.InstallationPath,
+						  EwlStatics.CoreProjectName,
+						  FrameworkStaticFilesSourceFolderPath )
+					  : EwlStatics.CombinePaths(
+						  ConfigurationStatics.InstallationConfiguration.InstallationPath,
+						  InstallationFileStatics.WebFrameworkStaticFilesFolderName )
+				: EwlStatics.CombinePaths( HttpRuntime.AppDomainAppPath, AppStaticFilesFolderName, relativeFilePath );
 
 		/// <summary>
-		/// Gets the app relative path of the file.
+		/// Gets whether the file is part of the framework.
 		/// </summary>
-		protected abstract string appRelativeFilePath { get; }
+		protected abstract bool isFrameworkFile { get; }
+
+		/// <summary>
+		/// Gets the relative path of the file.
+		/// </summary>
+		protected abstract string relativeFilePath { get; }
 
 		protected override bool isIdenticalTo( ResourceBase resourceAsBaseType ) =>
-			resourceAsBaseType is StaticFileBase staticFile && staticFile.appRelativeFilePath == appRelativeFilePath;
+			resourceAsBaseType is StaticFileBase staticFile && staticFile.isFrameworkFile == isFrameworkFile && staticFile.relativeFilePath == relativeFilePath;
 
 		public override ResourceBase CloneAndReplaceDefaultsIfPossible( bool disableReplacementOfDefaults ) => this;
 	}

@@ -9,11 +9,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility {
 	internal static class AppStatics {
 		internal const string MercurialRepositoryFolderName = ".hg";
 
-		internal const string CoreProjectName = "Core";
-
-		internal const string WebProjectFilesFolderName = "Web Project Files";
-		internal const string StandardLibraryFilesFileName = "Standard Library Files.xml";
-
 		internal static bool NDependIsPresent;
 
 		internal static void Init() {

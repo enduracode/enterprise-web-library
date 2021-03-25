@@ -1,10 +1,15 @@
 ﻿namespace EnterpriseWebLibrary {
 	/// <summary>
-	/// Internal and Red Stapler Information System use only.
+	/// Installation Support Utility and internal use only.
 	/// </summary>
 	public static class InstallationFileStatics {
 		/// <summary>
-		/// Internal and Red Stapler Information System use only.
+		/// Development Utility and internal use only.
+		/// </summary>
+		public const string WebFrameworkStaticFilesFolderName = "Web Framework Static Files";
+
+		/// <summary>
+		/// Development Utility and internal use only.
 		/// </summary>
 		public const string FilesFolderName = "Files";
 

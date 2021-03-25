@@ -24,12 +24,12 @@ namespace EnterpriseWebLibrary {
 		public const string EwlInitialism = "EWL";
 
 		/// <summary>
-		/// EWL Core and Development Utility use only.
+		/// Development Utility and internal use only.
 		/// </summary>
-		public const string EwfFolderBaseNamespace = "EnterpriseWebLibrary.EnterpriseWebFramework";
+		public const string CoreProjectName = "Core";
 
 		/// <summary>
-		/// EWL Core and ISU use only.
+		/// Installation Support Utility and internal use only.
 		/// </summary>
 		public const string TestRunnerProjectName = "Test Runner";
 
@@ -123,14 +123,13 @@ namespace EnterpriseWebLibrary {
 
 		internal static void CallEveryMethod( params Action[] methods ) {
 			var exceptions = new List<Exception>();
-			foreach( var method in methods ) {
+			foreach( var method in methods )
 				try {
 					method();
 				}
 				catch( Exception e ) {
 					exceptions.Add( e );
 				}
-			}
 			if( exceptions.Any() )
 				// This clears the stack trace in the exception. There's not much we can do about that since we want to preserve the type of exception.
 				throw exceptions.First();
