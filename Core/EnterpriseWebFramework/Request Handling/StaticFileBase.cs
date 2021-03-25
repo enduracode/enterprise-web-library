@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Web;
 using EnterpriseWebLibrary.Configuration;
+using MimeTypes;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -17,6 +19,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Development Utility and private use only.
 		/// </summary>
 		public const string AppStaticFilesFolderName = "Static Files";
+
+		private readonly bool isVersioned;
+
+		protected StaticFileBase( bool isVersioned ) {
+			this.isVersioned = isVersioned;
+		}
 
 		/// <summary>
 		/// EWL use only.
@@ -72,6 +80,50 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Gets the relative path of the file.
 		/// </summary>
 		protected abstract string relativeFilePath { get; }
+
+		protected override EwfSafeRequestHandler getOrHead() {
+			var extensionIndex = relativeFilePath.LastIndexOf( '.' );
+			if( extensionIndex < 0 )
+				throw new ResourceNotAvailableException( "Failed to find the extension in the file path.", null );
+			var extension = relativeFilePath.Substring( extensionIndex );
+
+			var mediaTypeOverride = EwfApp.Instance.GetMediaTypeOverrides().SingleOrDefault( i => i.FileExtension == extension );
+			var contentType = mediaTypeOverride != null ? mediaTypeOverride.MediaType : MimeTypeMap.GetMimeType( extension );
+
+			var urlVersionString = isVersioned ? "invariant" : "";
+			Func<string> cacheKeyGetter = () => GetUrl( false, false, false );
+			EwfSafeResponseWriter responseWriter;
+			if( contentType == TewlContrib.ContentTypes.Css ) {
+				Func<string> cssGetter = () => File.ReadAllText( filePath );
+				responseWriter = urlVersionString.Any()
+					                 ? new EwfSafeResponseWriter(
+						                 cssGetter,
+						                 urlVersionString,
+						                 () => new ResponseMemoryCachingSetup( cacheKeyGetter(), GetResourceLastModificationDateAndTime() ) )
+					                 : new EwfSafeResponseWriter(
+						                 () => EwfResponse.Create(
+							                 TewlContrib.ContentTypes.Css,
+							                 new EwfResponseBodyCreator( () => CssPreprocessor.TransformCssFile( cssGetter() ) ) ),
+						                 GetResourceLastModificationDateAndTime(),
+						                 memoryCacheKeyGetter: cacheKeyGetter );
+			}
+			else {
+				Func<EwfResponse> responseCreator = () => EwfResponse.Create(
+					contentType,
+					new EwfResponseBodyCreator(
+						responseStream => {
+							using( var fileStream = File.OpenRead( filePath ) )
+								fileStream.CopyTo( responseStream );
+						} ) );
+				responseWriter = urlVersionString.Any()
+					                 ? new EwfSafeResponseWriter(
+						                 responseCreator,
+						                 urlVersionString,
+						                 memoryCachingSetupGetter: () => new ResponseMemoryCachingSetup( cacheKeyGetter(), GetResourceLastModificationDateAndTime() ) )
+					                 : new EwfSafeResponseWriter( responseCreator, GetResourceLastModificationDateAndTime(), memoryCacheKeyGetter: cacheKeyGetter );
+			}
+			return responseWriter;
+		}
 
 		protected override bool isIdenticalTo( ResourceBase resourceAsBaseType ) =>
 			resourceAsBaseType is StaticFileBase staticFile && staticFile.isFrameworkFile == isFrameworkFile && staticFile.relativeFilePath == relativeFilePath;

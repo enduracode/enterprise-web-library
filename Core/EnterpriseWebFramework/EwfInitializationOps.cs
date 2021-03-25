@@ -61,7 +61,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						if( !( globalType.Assembly.CreateInstance( "EnterpriseWebLibrary.EnterpriseWebFramework." + globalType.Namespace + ".MetaLogicFactory" ) is
 							       AppMetaLogicFactory metaLogicFactory ) )
 							throw new ApplicationException( "Meta logic factory not found." );
-						EwfApp.Init( globalType, metaLogicFactory );
+						EwfApp.Init( metaLogicFactory );
 
 						CssPreprocessingStatics.Init( globalInitializer.GetType().Assembly, globalType.Assembly );
 						EwfPage.Init( BasicPageContent.GetContent );

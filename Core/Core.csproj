@@ -617,7 +617,6 @@
     <Compile Include="EnterpriseWebFramework\Request Handling\ResourceBase.cs" />
     <Compile Include="EnterpriseWebFramework\Request Handling\ResourceGroup.cs" />
     <Compile Include="EnterpriseWebFramework\Request Handling\StaticFileBase.cs" />
-    <Compile Include="EnterpriseWebFramework\Request Handling\StaticFileHandler.cs" />
     <Compile Include="EnterpriseWebFramework\RevisionDisplayStatics.cs" />
     <Compile Include="EnterpriseWebFramework\Text\EmphasizedContent.cs" />
     <Compile Include="EnterpriseWebFramework\Text\ImportantContent.cs" />

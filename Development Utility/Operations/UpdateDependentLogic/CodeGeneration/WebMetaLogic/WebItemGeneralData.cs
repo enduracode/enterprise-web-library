@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using EnterpriseWebLibrary.Configuration.SystemDevelopment;
-using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using Tewl.Tools;
 
@@ -45,9 +44,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 		private string getNamespaceFromFilePath( string projectNamespace, string filePathRelativeToProject ) {
 			var tokens = filePathRelativeToProject.Separate( System.IO.Path.DirectorySeparatorChar.ToString(), false );
 			tokens = tokens.Take( tokens.Count - 1 ).ToList();
-			return StaticFileHandler.CombineNamespacesAndProcessEwfIfNecessary(
-				projectNamespace,
-				StringTools.ConcatenateWithDelimiter( ".", tokens.Select( i => EwlStatics.GetCSharpIdentifier( i.CapitalizeString() ) ).ToArray() ) );
+			return projectNamespace + StringTools
+				       .ConcatenateWithDelimiter( ".", tokens.Select( i => EwlStatics.GetCSharpIdentifier( i.CapitalizeString() ) ).ToArray() )
+				       .PrependDelimiter( "." );
 		}
 
 		internal string PathRelativeToProject { get { return pathRelativeToProject; } }

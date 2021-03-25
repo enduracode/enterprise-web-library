@@ -15,7 +15,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// The HttpApplication class for a web site using EWF. Provides access to the authenticated user, handles errors, and performs other useful functions.
 	/// </summary>
 	public abstract class EwfApp: HttpApplication {
-		internal static Type GlobalType { get; private set; }
 		internal static AppMetaLogicFactory MetaLogicFactory { get; private set; }
 
 		/// <summary>
@@ -58,8 +57,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 		}
 
-		internal static void Init( Type globalType, AppMetaLogicFactory metaLogicFactory ) {
-			GlobalType = globalType;
+		internal static void Init( AppMetaLogicFactory metaLogicFactory ) {
 			MetaLogicFactory = metaLogicFactory;
 		}
 
