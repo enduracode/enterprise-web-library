@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using EnterpriseWebLibrary.Configuration.SystemDevelopment;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using Tewl.Tools;
 
@@ -15,17 +14,15 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 		private readonly string className;
 		private readonly string path;
 		private readonly string code;
-		private readonly WebProject webProjectConfiguration;
 
-		internal WebItemGeneralData(
-			string webProjectPath, string pathRelativeToProject, bool includeFileExtensionInClassName, WebProject webProjectConfiguration ) {
+		internal WebItemGeneralData( string projectPath, string projectNamespace, string pathRelativeToProject, bool includeFileExtensionInClassName ) {
 			this.pathRelativeToProject = pathRelativeToProject;
 
 			// Get the URL for this item. Entity setups do not have URLs.
 			urlRelativeToProject = pathRelativeToProject.EndsWith( ".cs" ) ? "" : pathRelativeToProject.Replace( System.IO.Path.DirectorySeparatorChar, '/' );
 
 			// Load this item's code if it exists.
-			path = EwlStatics.CombinePaths( webProjectPath, pathRelativeToProject );
+			path = EwlStatics.CombinePaths( projectPath, pathRelativeToProject );
 			var codePath = path.EndsWith( ".cs" ) ? path : path + ".cs";
 			code = File.Exists( codePath ) ? File.ReadAllText( codePath ) : "";
 
@@ -33,12 +30,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			foreach( Match match in Regex.Matches( code, @"namespace\s(?<namespace>.*)\s{" ) )
 				itemNamespace = match.Groups[ "namespace" ].Value;
 			if( itemNamespace == null )
-				itemNamespace = getNamespaceFromFilePath( webProjectConfiguration.NamespaceAndAssemblyName, pathRelativeToProject );
+				itemNamespace = getNamespaceFromFilePath( projectNamespace, pathRelativeToProject );
 
 			className = EwlStatics.GetCSharpIdentifier(
 				System.IO.Path.GetFileNameWithoutExtension( path ).CapitalizeString() +
 				( includeFileExtensionInClassName ? System.IO.Path.GetExtension( path ).CapitalizeString() : "" ) );
-			this.webProjectConfiguration = webProjectConfiguration;
 		}
 
 		private string getNamespaceFromFilePath( string projectNamespace, string filePathRelativeToProject ) {
@@ -54,7 +50,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 		internal string Namespace { get { return itemNamespace; } }
 		internal string ClassName { get { return className; } }
 		internal string Path { get { return path; } }
-		internal WebProject WebProjectConfiguration { get { return webProjectConfiguration; } }
 
 		internal List<VariableSpecification> ReadParametersFromCode( bool readOptionalParameters ) {
 			try {

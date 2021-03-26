@@ -81,6 +81,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 							"public static readonly DateTimeOffset EwlBuildDateTime = {0};".FormatWith( AppStatics.GetLiteralDateTimeExpression( DateTimeOffset.UtcNow ) ) );
 						writer.WriteLine( "}" );
 						writer.WriteLine( "}" );
+						writer.WriteLine();
+						CodeGeneration.WebMetaLogic.WebMetaLogicStatics.Generate(
+							writer,
+							EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.CoreProjectName ),
+							"EnterpriseWebLibrary" );
 					} );
 				generateCodeForProject(
 					installation,
@@ -212,6 +217,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					writer.WriteLine( "}" );
 					writer.WriteLine( "}" );
 				}
+
+				writer.WriteLine();
+				CodeGeneration.WebMetaLogic.WebMetaLogicStatics.Generate(
+					writer,
+					installation.DevelopmentInstallationLogic.LibraryPath,
+					installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName );
 			}
 		}
 
@@ -383,7 +394,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine();
 				writeAssemblyInfo( writer, installation, project.name );
 				writer.WriteLine();
-				CodeGeneration.WebMetaLogic.WebMetaLogicStatics.Generate( writer, application.Path, project );
+				CodeGeneration.WebMetaLogic.WebMetaLogicStatics.Generate( writer, application.Path, project.NamespaceAndAssemblyName );
 			}
 		}
 

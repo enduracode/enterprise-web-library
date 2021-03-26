@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using EnterpriseWebLibrary.Configuration.SystemDevelopment;
 using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic.WebItems;
 using Humanizer;
 using Tewl.IO;
@@ -9,32 +8,30 @@ using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic {
 	internal static class WebMetaLogicStatics {
-		internal static void Generate( TextWriter writer, string webProjectPath, WebProject configuration ) {
-			generateCodeForWebItemsInFolder( writer, webProjectPath, "", configuration );
+		internal static void Generate( TextWriter writer, string projectPath, string projectNamespace ) {
+			generateCodeForWebItemsInFolder( writer, projectPath, projectNamespace, "" );
 		}
 
-		private static void generateCodeForWebItemsInFolder(
-			TextWriter writer, string webProjectPath, string folderPathRelativeToProject, WebProject webProjectConfiguration ) {
-			var folderPath = EwlStatics.CombinePaths( webProjectPath, folderPathRelativeToProject );
+		private static void generateCodeForWebItemsInFolder( TextWriter writer, string projectPath, string projectNamespace, string folderPathRelativeToProject ) {
+			var folderPath = EwlStatics.CombinePaths( projectPath, folderPathRelativeToProject );
 
 			// Generate code for the entity setup if one exists in this folder.
 			var entitySetupFileName = "";
-			foreach( var fileName in new[] { "EntitySetup.cs" } ) {
+			foreach( var fileName in new[] { "EntitySetup.cs" } )
 				if( File.Exists( EwlStatics.CombinePaths( folderPath, fileName ) ) ) {
 					entitySetupFileName = fileName;
 					break;
 				}
-			}
 			EntitySetup entitySetup = null;
 			if( entitySetupFileName.Length > 0 ) {
 				var filePathRelativeToProject = Path.Combine( folderPathRelativeToProject, entitySetupFileName );
-				entitySetup = new EntitySetup( new WebItemGeneralData( webProjectPath, filePathRelativeToProject, false, webProjectConfiguration ) );
+				entitySetup = new EntitySetup( new WebItemGeneralData( projectPath, projectNamespace, filePathRelativeToProject, false ) );
 				entitySetup.GenerateCode( writer );
 			}
 
 			// Generate code for files in the current folder.
 			foreach( var fileName in IoMethods.GetFileNamesInFolder( folderPath ) ) {
-				if( !folderPathRelativeToProject.Any() && ( fileName.Contains( ".csproj" ) || fileName == AppStatics.StandardLibraryFilesFileName ) )
+				if( !folderPathRelativeToProject.Any() && fileName.Contains( ".csproj" ) )
 					continue;
 				var fileExtension = Path.GetExtension( fileName ).ToLowerInvariant();
 				if( new[] { ".cs", ".ascx", ".asax", ".master", ".config", ".svc" }.Contains( fileExtension ) )
@@ -42,9 +39,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 
 				var filePathRelativeToProject = Path.Combine( folderPathRelativeToProject, fileName );
 				if( fileExtension == ".aspx" )
-					new Page( new WebItemGeneralData( webProjectPath, filePathRelativeToProject, false, webProjectConfiguration ), entitySetup ).GenerateCode( writer );
+					new Page( new WebItemGeneralData( projectPath, projectNamespace, filePathRelativeToProject, false ), entitySetup ).GenerateCode( writer );
 				else
-					new StaticFile( new WebItemGeneralData( webProjectPath, filePathRelativeToProject, true, webProjectConfiguration ) ).GenerateCode( writer );
+					new StaticFile( new WebItemGeneralData( projectPath, projectNamespace, filePathRelativeToProject, true ) ).GenerateCode( writer );
 			}
 
 			// Delve into sub folders.
@@ -52,7 +49,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				var subFolderPath = Path.Combine( folderPathRelativeToProject, subFolderName );
 				if( subFolderPath == "bin" || subFolderPath == "obj" )
 					continue;
-				generateCodeForWebItemsInFolder( writer, webProjectPath, subFolderPath, webProjectConfiguration );
+				generateCodeForWebItemsInFolder( writer, projectPath, projectNamespace, subFolderPath );
 			}
 		}
 
