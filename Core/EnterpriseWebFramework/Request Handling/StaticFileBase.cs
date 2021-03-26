@@ -13,12 +13,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Development Utility and private use only.
 		/// </summary>
-		public const string FrameworkStaticFilesSourceFolderPath = @"EnterpriseWebFramework\Static Files";
+		public const string FrameworkStaticFilesSourceFolderPath = @"EnterpriseWebFramework\StaticFiles";
 
 		/// <summary>
 		/// Development Utility and private use only.
 		/// </summary>
-		public const string AppStaticFilesFolderName = "Static Files";
+		public const string AppStaticFilesFolderName = "StaticFiles";
 
 		private readonly bool isVersioned;
 
