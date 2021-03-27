@@ -8,11 +8,17 @@ using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic {
 	internal static class WebMetaLogicStatics {
-		internal static void Generate( TextWriter writer, string projectPath, string projectNamespace ) {
-			generateCodeForWebItemsInFolder( writer, projectPath, projectNamespace, "" );
+		internal static void Generate( TextWriter writer, string projectPath, string projectNamespace, string staticFilesFolderPath ) {
+			generateForFolder( writer, projectPath, projectNamespace, staticFilesFolderPath, "" );
 		}
 
-		private static void generateCodeForWebItemsInFolder( TextWriter writer, string projectPath, string projectNamespace, string folderPathRelativeToProject ) {
+		private static void generateForFolder(
+			TextWriter writer, string projectPath, string projectNamespace, string staticFilesFolderPath, string folderPathRelativeToProject ) {
+			if( folderPathRelativeToProject == staticFilesFolderPath ) {
+				generateStaticFileLogic( writer, projectPath, projectNamespace, null, folderPathRelativeToProject );
+				return;
+			}
+
 			var folderPath = EwlStatics.CombinePaths( projectPath, folderPathRelativeToProject );
 
 			// Generate code for the entity setup if one exists in this folder.
@@ -31,17 +37,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 
 			// Generate code for files in the current folder.
 			foreach( var fileName in IoMethods.GetFileNamesInFolder( folderPath ) ) {
-				if( !folderPathRelativeToProject.Any() && fileName.Contains( ".csproj" ) )
+				if( Path.GetExtension( fileName ).ToLowerInvariant() != ".cs" )
 					continue;
-				var fileExtension = Path.GetExtension( fileName ).ToLowerInvariant();
-				if( new[] { ".cs", ".ascx", ".asax", ".master", ".config", ".svc" }.Contains( fileExtension ) )
+				var generalData = new WebItemGeneralData( projectPath, projectNamespace, EwlStatics.CombinePaths( folderPathRelativeToProject, fileName ), false );
+				if( !generalData.IsPage() )
 					continue;
-
-				var filePathRelativeToProject = Path.Combine( folderPathRelativeToProject, fileName );
-				if( fileExtension == ".aspx" )
-					new Page( new WebItemGeneralData( projectPath, projectNamespace, filePathRelativeToProject, false ), entitySetup ).GenerateCode( writer );
-				else
-					new StaticFile( new WebItemGeneralData( projectPath, projectNamespace, filePathRelativeToProject, true ) ).GenerateCode( writer );
+				new Page( generalData, entitySetup ).GenerateCode( writer );
 			}
 
 			// Delve into sub folders.
@@ -49,8 +50,26 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				var subFolderPath = Path.Combine( folderPathRelativeToProject, subFolderName );
 				if( subFolderPath == "bin" || subFolderPath == "obj" )
 					continue;
-				generateCodeForWebItemsInFolder( writer, projectPath, projectNamespace, subFolderPath );
+				generateForFolder( writer, projectPath, projectNamespace, staticFilesFolderPath, subFolderPath );
 			}
+		}
+
+		private static void generateStaticFileLogic(
+			TextWriter writer, string projectPath, string projectNamespace, bool? inVersionedFolder, string folderPathRelativeToProject ) {
+			var folderPath = EwlStatics.CombinePaths( projectPath, folderPathRelativeToProject );
+
+			foreach( var fileName in IoMethods.GetFileNamesInFolder( folderPath ) )
+				new StaticFile(
+					new WebItemGeneralData( projectPath, projectNamespace, EwlStatics.CombinePaths( folderPathRelativeToProject, fileName ), true ),
+					inVersionedFolder == true ).GenerateCode( writer );
+
+			foreach( var subfolderName in IoMethods.GetFolderNamesInFolder( folderPath ) )
+				generateStaticFileLogic(
+					writer,
+					projectPath,
+					projectNamespace,
+					inVersionedFolder ?? subfolderName == "versioned",
+					EwlStatics.CombinePaths( folderPathRelativeToProject, subfolderName ) );
 		}
 
 		internal static void WriteCreateInfoFromQueryStringMethod(

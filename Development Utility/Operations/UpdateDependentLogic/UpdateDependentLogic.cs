@@ -13,6 +13,7 @@ using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAcce
 using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems.StandardModification;
 using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebConfig;
 using EnterpriseWebLibrary.Email;
+using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
@@ -85,7 +86,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						CodeGeneration.WebMetaLogic.WebMetaLogicStatics.Generate(
 							writer,
 							EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.CoreProjectName ),
-							"EnterpriseWebLibrary" );
+							"EnterpriseWebLibrary",
+							StaticFileBase.FrameworkStaticFilesSourceFolderPath );
 					} );
 				generateCodeForProject(
 					installation,
@@ -222,7 +224,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				CodeGeneration.WebMetaLogic.WebMetaLogicStatics.Generate(
 					writer,
 					installation.DevelopmentInstallationLogic.LibraryPath,
-					installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName );
+					installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName,
+					null );
 			}
 		}
 
@@ -394,7 +397,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine();
 				writeAssemblyInfo( writer, installation, project.name );
 				writer.WriteLine();
-				CodeGeneration.WebMetaLogic.WebMetaLogicStatics.Generate( writer, application.Path, project.NamespaceAndAssemblyName );
+				CodeGeneration.WebMetaLogic.WebMetaLogicStatics.Generate(
+					writer,
+					application.Path,
+					project.NamespaceAndAssemblyName,
+					StaticFileBase.AppStaticFilesFolderName );
 			}
 		}
 
