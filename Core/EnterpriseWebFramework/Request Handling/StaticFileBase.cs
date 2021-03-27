@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Web;
@@ -29,14 +30,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// EWL use only.
 		/// </summary>
-		public override EntitySetupBase EsAsBaseType => null;
-
-		/// <summary>
-		/// EWL use only.
-		/// </summary>
 		public override string ResourceName => "";
 
+		protected sealed override UrlHandler getUrlParent() => EsAsBaseType;
+
 		protected internal override ConnectionSecurity ConnectionSecurity => ConnectionSecurity.MatchingCurrentRequest;
+
+		protected sealed override IEnumerable<UrlPattern> getChildUrlPatterns() => base.getChildUrlPatterns();
 
 		/// <summary>
 		/// Gets the last-modification date/time of the resource.
@@ -80,6 +80,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Gets the relative path of the file.
 		/// </summary>
 		protected abstract string relativeFilePath { get; }
+
+		protected sealed override ExternalRedirect getRedirect() => base.getRedirect();
 
 		protected override EwfSafeRequestHandler getOrHead() {
 			var extensionIndex = relativeFilePath.LastIndexOf( '.' );
@@ -125,9 +127,20 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return responseWriter;
 		}
 
+		protected sealed override EwfResponse put() => base.put();
+		protected sealed override EwfResponse patch() => base.patch();
+		protected sealed override EwfResponse delete() => base.delete();
+		protected sealed override EwfResponse post() => base.post();
+
 		protected override bool isIdenticalTo( ResourceBase resourceAsBaseType ) =>
 			resourceAsBaseType is StaticFileBase staticFile && staticFile.isFrameworkFile == isFrameworkFile && staticFile.relativeFilePath == relativeFilePath;
 
 		public override ResourceBase CloneAndReplaceDefaultsIfPossible( bool disableReplacementOfDefaults ) => this;
+
+		public sealed override bool Equals( BasicUrlHandler other ) =>
+			other is StaticFileBase otherFile && otherFile.isFrameworkFile == isFrameworkFile && otherFile.relativeFilePath == relativeFilePath &&
+			otherFile.isVersioned == isVersioned;
+
+		public sealed override int GetHashCode() => new { isFrameworkFile, relativeFilePath, isVersioned }.GetHashCode();
 	}
 }
