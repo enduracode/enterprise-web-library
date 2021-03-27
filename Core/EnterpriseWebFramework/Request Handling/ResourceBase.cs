@@ -370,7 +370,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public abstract ResourceBase CloneAndReplaceDefaultsIfPossible( bool disableReplacementOfDefaults );
 
-		public override bool Equals( object obj ) => Equals( obj as BasicUrlHandler );
+		public sealed override bool Equals( object obj ) => Equals( obj as BasicUrlHandler );
 		public abstract bool Equals( BasicUrlHandler other );
 		public abstract override int GetHashCode();
 	}
