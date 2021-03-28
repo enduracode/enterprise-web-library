@@ -10,7 +10,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A static file in a web application.
 	/// </summary>
-	public abstract class StaticFileBase: ResourceBase {
+	public abstract class StaticFile: ResourceBase {
 		/// <summary>
 		/// Development Utility and private use only.
 		/// </summary>
@@ -23,7 +23,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		private readonly bool isVersioned;
 
-		protected StaticFileBase( bool isVersioned ) {
+		protected StaticFile( bool isVersioned ) {
 			this.isVersioned = isVersioned;
 		}
 
@@ -133,12 +133,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		protected sealed override EwfResponse post() => base.post();
 
 		protected override bool isIdenticalTo( ResourceBase resourceAsBaseType ) =>
-			resourceAsBaseType is StaticFileBase staticFile && staticFile.isFrameworkFile == isFrameworkFile && staticFile.relativeFilePath == relativeFilePath;
+			resourceAsBaseType is StaticFile staticFile && staticFile.isFrameworkFile == isFrameworkFile && staticFile.relativeFilePath == relativeFilePath;
 
 		public override ResourceBase CloneAndReplaceDefaultsIfPossible( bool disableReplacementOfDefaults ) => this;
 
 		public sealed override bool Equals( BasicUrlHandler other ) =>
-			other is StaticFileBase otherFile && otherFile.isFrameworkFile == isFrameworkFile && otherFile.relativeFilePath == relativeFilePath &&
+			other is StaticFile otherFile && otherFile.isFrameworkFile == isFrameworkFile && otherFile.relativeFilePath == relativeFilePath &&
 			otherFile.isVersioned == isVersioned;
 
 		public sealed override int GetHashCode() => new { isFrameworkFile, relativeFilePath, isVersioned }.GetHashCode();

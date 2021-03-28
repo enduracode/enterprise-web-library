@@ -519,7 +519,6 @@
     <Compile Include="EnterpriseWebFramework\Layout\TextAlignment.cs" />
     <Compile Include="EnterpriseWebFramework\MailMergingStatics.cs" />
     <Compile Include="EnterpriseWebFramework\MarkupBlockComponent.cs" />
-    <Compile Include="EnterpriseWebFramework\MediaTypeOverride.cs" />
     <Compile Include="EnterpriseWebFramework\Modal Boxes\ConfirmationButtonBehavior.cs" />
     <Compile Include="EnterpriseWebFramework\Modal Boxes\ConfirmationDialog.cs" />
     <Compile Include="EnterpriseWebFramework\Modal Boxes\ConfirmationDialogId.cs" />
@@ -616,8 +615,9 @@
     <Compile Include="EnterpriseWebFramework\Request Handling\ParametersModificationBase.cs" />
     <Compile Include="EnterpriseWebFramework\Request Handling\ResourceBase.cs" />
     <Compile Include="EnterpriseWebFramework\Request Handling\ResourceGroup.cs" />
-    <Compile Include="EnterpriseWebFramework\Request Handling\StaticFileBase.cs" />
     <Compile Include="EnterpriseWebFramework\RevisionDisplayStatics.cs" />
+    <Compile Include="EnterpriseWebFramework\Static File Handling\MediaTypeOverride.cs" />
+    <Compile Include="EnterpriseWebFramework\Static File Handling\StaticFile.cs" />
     <Compile Include="EnterpriseWebFramework\Text\EmphasizedContent.cs" />
     <Compile Include="EnterpriseWebFramework\Text\ImportantContent.cs" />
     <Compile Include="EnterpriseWebFramework\Text\LineBreak.cs" />
