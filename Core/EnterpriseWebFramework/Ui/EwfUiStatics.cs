@@ -5,28 +5,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Ui {
 	/// EWL use only.
 	/// </summary>
 	public static class EwfUiStatics {
-		private const string providerName = "EwfUi";
-		private static AppEwfUiProvider provider;
+		private static Func<AppEwfUiProvider> providerGetter;
 
-		internal static void Init( Type globalType ) {
-			var appAssembly = globalType.Assembly;
-			var typeName = globalType.Namespace + ".Providers." + providerName + "Provider";
-
-			if( appAssembly.GetType( typeName ) != null )
-				provider = appAssembly.CreateInstance( typeName ) as AppEwfUiProvider;
+		internal static void Init( Func<AppEwfUiProvider> providerGetter ) {
+			EwfUiStatics.providerGetter = providerGetter;
 		}
 
 		/// <summary>
 		/// EWL use only.
 		/// </summary>
-		public static AppEwfUiProvider AppProvider {
-			get {
-				if( provider == null )
-					throw new ApplicationException(
-						providerName + " provider not found in application. To implement, create a class named " + providerName +
-						@"Provider in ""Your Web Site\Providers"" that derives from App" + providerName + "Provider." );
-				return provider;
-			}
-		}
+		public static AppEwfUiProvider AppProvider => providerGetter();
 	}
 }

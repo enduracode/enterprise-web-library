@@ -63,6 +63,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							throw new ApplicationException( "Meta logic factory not found." );
 						EwfApp.Init( metaLogicFactory );
 
+						Func<ProviderType> getProviderGetter<ProviderType>( string providerName ) where ProviderType: class {
+							var appAssembly = globalType.Assembly;
+							var typeName = globalType.Namespace + ".Providers." + providerName + "Provider";
+							var provider = appAssembly.GetType( typeName ) != null ? appAssembly.CreateInstance( typeName ) as ProviderType : null;
+							return () => provider ?? throw new ApplicationException(
+								             providerName + " provider not found in application. To implement, create a class named " + providerName +
+								             @"Provider in ""Your Web Site\Providers"" that derives from App" + providerName + "Provider." );
+						}
+
 						CssPreprocessingStatics.Init( globalInitializer.GetType().Assembly, globalType.Assembly );
 						EwfPage.Init( BasicPageContent.GetContent );
 						HyperlinkBehaviorExtensionCreators.Init( ModalBox.GetBrowsingModalBoxOpenStatements );
@@ -82,7 +91,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									cssInfos.AddRange( EwfUiStatics.AppProvider.GetStyleSheets() );
 								return cssInfos;
 							} );
-						EwfUiStatics.Init( globalType );
+						EwfUiStatics.Init( getProviderGetter<AppEwfUiProvider>( "EwfUi" ) );
 
 						EwfInitializationOps.appInitializer = appInitializer;
 						appInitializer?.InitStatics();
