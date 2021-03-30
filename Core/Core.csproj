@@ -618,6 +618,7 @@
     <Compile Include="EnterpriseWebFramework\RevisionDisplayStatics.cs" />
     <Compile Include="EnterpriseWebFramework\Static File Handling\MediaTypeOverride.cs" />
     <Compile Include="EnterpriseWebFramework\Static File Handling\StaticFile.cs" />
+    <Compile Include="EnterpriseWebFramework\Static File Handling\StaticFileFolderSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Text\EmphasizedContent.cs" />
     <Compile Include="EnterpriseWebFramework\Text\ImportantContent.cs" />
     <Compile Include="EnterpriseWebFramework\Text\LineBreak.cs" />
