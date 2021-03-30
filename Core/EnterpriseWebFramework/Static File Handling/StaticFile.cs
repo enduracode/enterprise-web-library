@@ -34,8 +34,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		protected sealed override UrlHandler getUrlParent() => EsAsBaseType;
 
-		protected internal override ConnectionSecurity ConnectionSecurity => ConnectionSecurity.MatchingCurrentRequest;
-
 		protected sealed override IEnumerable<UrlPattern> getChildUrlPatterns() => base.getChildUrlPatterns();
 
 		/// <summary>
