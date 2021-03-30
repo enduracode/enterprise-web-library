@@ -65,11 +65,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 						Func<ProviderType> getProviderGetter<ProviderType>( string providerName ) where ProviderType: class {
 							var appAssembly = globalType.Assembly;
-							var typeName = globalType.Namespace + ".Providers." + providerName + "Provider";
+							var typeName = globalType.Namespace + ".Providers." + providerName;
 							var provider = appAssembly.GetType( typeName ) != null ? appAssembly.CreateInstance( typeName ) as ProviderType : null;
 							return () => provider ?? throw new ApplicationException(
 								             providerName + " provider not found in application. To implement, create a class named " + providerName +
-								             @"Provider in ""Your Web Site\Providers"" that derives from App" + providerName + "Provider." );
+								             @" in ""Your Web Site\Providers"" that derives from App" + providerName + "Provider." );
 						}
 
 						CssPreprocessingStatics.Init( globalInitializer.GetType().Assembly, globalType.Assembly );
