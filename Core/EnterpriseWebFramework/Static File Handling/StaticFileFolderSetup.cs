@@ -12,7 +12,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		protected sealed override void init() => base.init();
 
-		protected override ResourceBase createParentResource() => parentFolderSetup.Value?.createParentResource();
+		protected override ResourceBase createParentResource() => parentFolderSetup.Value?.ParentResource;
 
 		protected abstract StaticFileFolderSetup createParentFolderSetup();
 
