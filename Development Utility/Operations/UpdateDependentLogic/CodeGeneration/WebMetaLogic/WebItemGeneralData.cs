@@ -9,6 +9,14 @@ using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic {
 	internal class WebItemGeneralData {
+		internal static string GetNamespaceFromPath( string projectNamespace, string pathRelativeToProject, bool isFilePath ) {
+			var tokens = pathRelativeToProject.Separate( Path.DirectorySeparatorChar.ToString(), false );
+			var namespaceTokens = isFilePath ? tokens.Take( tokens.Count - 1 ) : tokens;
+			return projectNamespace + StringTools
+				       .ConcatenateWithDelimiter( ".", namespaceTokens.Select( i => EwlStatics.GetCSharpIdentifier( i.CapitalizeString() ) ) )
+				       .PrependDelimiter( "." );
+		}
+
 		private readonly string pathRelativeToProject;
 		private readonly string itemNamespace;
 		private readonly string className;
@@ -25,18 +33,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			foreach( Match match in Regex.Matches( code, @"namespace\s(?<namespace>.*)\s{" ) )
 				itemNamespace = match.Groups[ "namespace" ].Value;
 			if( itemNamespace == null )
-				itemNamespace = getNamespaceFromFilePath( projectNamespace, pathRelativeToProject );
+				itemNamespace = GetNamespaceFromPath( projectNamespace, pathRelativeToProject, true );
 
 			className = EwlStatics.GetCSharpIdentifier(
 				Path.GetFileNameWithoutExtension( path ).CapitalizeString() + ( includeFileExtensionInClassName ? Path.GetExtension( path ).CapitalizeString() : "" ) );
-		}
-
-		private string getNamespaceFromFilePath( string projectNamespace, string filePathRelativeToProject ) {
-			var tokens = filePathRelativeToProject.Separate( System.IO.Path.DirectorySeparatorChar.ToString(), false );
-			tokens = tokens.Take( tokens.Count - 1 ).ToList();
-			return projectNamespace + StringTools
-				       .ConcatenateWithDelimiter( ".", tokens.Select( i => EwlStatics.GetCSharpIdentifier( i.CapitalizeString() ) ).ToArray() )
-				       .PrependDelimiter( "." );
 		}
 
 		internal string PathRelativeToProject => pathRelativeToProject;

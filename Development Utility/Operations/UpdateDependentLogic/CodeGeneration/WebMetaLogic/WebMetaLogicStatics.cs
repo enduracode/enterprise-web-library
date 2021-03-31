@@ -8,14 +8,31 @@ using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic {
 	internal static class WebMetaLogicStatics {
-		internal static void Generate( TextWriter writer, string projectPath, string projectNamespace, string staticFilesFolderPath ) {
-			generateForFolder( writer, projectPath, projectNamespace, staticFilesFolderPath, "" );
+		internal static void Generate(
+			TextWriter writer, string projectPath, string projectNamespace, bool? staticFilesFolderIsInFramework, string staticFilesFolderPath,
+			string staticFilesFolderUrlParentExpression ) {
+			generateForFolder(
+				writer,
+				projectPath,
+				projectNamespace,
+				staticFilesFolderIsInFramework,
+				staticFilesFolderPath,
+				staticFilesFolderUrlParentExpression,
+				"" );
 		}
 
 		private static void generateForFolder(
-			TextWriter writer, string projectPath, string projectNamespace, string staticFilesFolderPath, string folderPathRelativeToProject ) {
+			TextWriter writer, string projectPath, string projectNamespace, bool? staticFilesFolderIsInFramework, string staticFilesFolderPath,
+			string staticFilesFolderUrlParentExpression, string folderPathRelativeToProject ) {
 			if( folderPathRelativeToProject == staticFilesFolderPath ) {
-				generateStaticFileLogic( writer, projectPath, projectNamespace, null, folderPathRelativeToProject );
+				generateStaticFileLogic(
+					writer,
+					projectPath,
+					projectNamespace,
+					staticFilesFolderIsInFramework.Value,
+					null,
+					folderPathRelativeToProject,
+					staticFilesFolderUrlParentExpression );
 				return;
 			}
 
@@ -50,13 +67,32 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				var subFolderPath = Path.Combine( folderPathRelativeToProject, subFolderName );
 				if( subFolderPath == "bin" || subFolderPath == "obj" )
 					continue;
-				generateForFolder( writer, projectPath, projectNamespace, staticFilesFolderPath, subFolderPath );
+				generateForFolder(
+					writer,
+					projectPath,
+					projectNamespace,
+					staticFilesFolderIsInFramework,
+					staticFilesFolderPath,
+					staticFilesFolderUrlParentExpression,
+					subFolderPath );
 			}
 		}
 
 		private static void generateStaticFileLogic(
-			TextWriter writer, string projectPath, string projectNamespace, bool? inVersionedFolder, string folderPathRelativeToProject ) {
+			TextWriter writer, string projectPath, string projectNamespace, bool inFramework, bool? inVersionedFolder, string folderPathRelativeToProject,
+			string folderParentExpression ) {
 			var folderPath = EwlStatics.CombinePaths( projectPath, folderPathRelativeToProject );
+
+			var folderNamespace = WebItemGeneralData.GetNamespaceFromPath( projectNamespace, folderPathRelativeToProject, false );
+			const string folderSetupClassName = "FolderSetup";
+			generateStaticFileFolderSetup(
+				writer,
+				inFramework,
+				!inVersionedFolder.HasValue,
+				folderPathRelativeToProject,
+				folderNamespace,
+				folderSetupClassName,
+				folderParentExpression );
 
 			foreach( var fileName in IoMethods.GetFileNamesInFolder( folderPath ) )
 				new StaticFile(
@@ -68,8 +104,28 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 					writer,
 					projectPath,
 					projectNamespace,
+					inFramework,
 					inVersionedFolder ?? subfolderName == "versioned",
-					EwlStatics.CombinePaths( folderPathRelativeToProject, subfolderName ) );
+					EwlStatics.CombinePaths( folderPathRelativeToProject, subfolderName ),
+					"new {0}.{1}()".FormatWith( folderNamespace.Separate( ".", false ).Last(), folderSetupClassName ) );
+		}
+
+		private static void generateStaticFileFolderSetup(
+			TextWriter writer, bool isFrameworkFolder, bool isRootFolder, string folderPathRelativeToProject, string folderNamespace, string className,
+			string parentExpression ) {
+			writer.WriteLine( "namespace {0} {{".FormatWith( folderNamespace ) );
+			writer.WriteLine( "public sealed partial class {0}: StaticFileFolderSetup {{".FormatWith( className ) );
+
+			writer.WriteLine( "protected override StaticFileFolderSetup createParentFolderSetup() => {0};".FormatWith( isRootFolder ? "null" : parentExpression ) );
+			if( !isRootFolder || parentExpression.Any() )
+				writer.WriteLine( "protected override UrlHandler getUrlParent() => {0};".FormatWith( isRootFolder ? parentExpression : "parentFolderSetup.Value" ) );
+			writer.WriteLine( "protected override UrlEncoder getUrlEncoder() => null;" );
+			writer.WriteLine( "protected override IEnumerable<UrlPattern> getChildUrlPatterns() => null;" );
+			writer.WriteLine( "protected override bool isFrameworkFolder => {0};".FormatWith( isFrameworkFolder ? "true" : "false" ) );
+			writer.WriteLine( "protected override string folderPath => @\"{0}\";".FormatWith( folderPathRelativeToProject ) );
+
+			writer.WriteLine( "}" );
+			writer.WriteLine( "}" );
 		}
 
 		internal static void WriteCreateInfoFromQueryStringMethod(
