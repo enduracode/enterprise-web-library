@@ -607,6 +607,7 @@
     <Compile Include="EnterpriseWebFramework\PaymentProcessing\CreditCardCollector.cs" />
     <Compile Include="EnterpriseWebFramework\PaymentProcessing\JsStatementList.cs" />
     <Compile Include="EnterpriseWebFramework\PaymentProcessing\StatusMessageAndDestination.cs" />
+    <Compile Include="EnterpriseWebFramework\Request Dispatching\AppRequestDispatchingProvider.cs" />
     <Compile Include="EnterpriseWebFramework\Request Dispatching\RequestDispatchingStatics.cs" />
     <Compile Include="EnterpriseWebFramework\Request Handling\EntitySetupBase.cs" />
     <Compile Include="EnterpriseWebFramework\Request Handling\EwfSafeRequestHandler.cs" />
