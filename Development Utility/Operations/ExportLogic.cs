@@ -54,7 +54,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						EwlStatics.CombinePaths( folderPath, @"tools\init.ps1" ) );
 
 					IoMethods.CopyFolder(
-						EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.CoreProjectName, StaticFileBase.FrameworkStaticFilesSourceFolderPath ),
+						EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.CoreProjectName, StaticFile.FrameworkStaticFilesSourceFolderPath ),
 						EwlStatics.CombinePaths( folderPath, InstallationFileStatics.WebFrameworkStaticFilesFolderName ),
 						false );
 

@@ -353,14 +353,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Returns true if this resource info object is identical to the current resource info object. The comparison excludes optional parameters that haven't
 		/// been explicitly set.
 		/// </summary>
-		public bool IsIdenticalToCurrent() {
-			return isIdenticalTo( EwfPage.Instance.InfoAsBaseType );
-		}
-
-		/// <summary>
-		/// Returns true if this resource info object is identical to the specified resource info object.
-		/// </summary>
-		protected abstract bool isIdenticalTo( ResourceBase resourceAsBaseType );
+		public bool IsIdenticalToCurrent() => Equals( EwfPage.Instance.InfoAsBaseType );
 
 		/// <summary>
 		/// Framework use only.

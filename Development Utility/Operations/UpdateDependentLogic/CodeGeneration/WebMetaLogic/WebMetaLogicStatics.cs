@@ -9,12 +9,13 @@ using Tewl.Tools;
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic {
 	internal static class WebMetaLogicStatics {
 		internal static void Generate(
-			TextWriter writer, string projectPath, string projectNamespace, bool? staticFilesFolderIsInFramework, string staticFilesFolderPath,
-			string staticFilesFolderUrlParentExpression ) {
+			TextWriter writer, string projectPath, string projectNamespace, string generatedCodeFolderPath, bool? staticFilesFolderIsInFramework,
+			string staticFilesFolderPath, string staticFilesFolderUrlParentExpression ) {
 			generateForFolder(
 				writer,
 				projectPath,
 				projectNamespace,
+				generatedCodeFolderPath,
 				staticFilesFolderIsInFramework,
 				staticFilesFolderPath,
 				staticFilesFolderUrlParentExpression,
@@ -22,8 +23,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 		}
 
 		private static void generateForFolder(
-			TextWriter writer, string projectPath, string projectNamespace, bool? staticFilesFolderIsInFramework, string staticFilesFolderPath,
-			string staticFilesFolderUrlParentExpression, string folderPathRelativeToProject ) {
+			TextWriter writer, string projectPath, string projectNamespace, string generatedCodeFolderPath, bool? staticFilesFolderIsInFramework,
+			string staticFilesFolderPath, string staticFilesFolderUrlParentExpression, string folderPathRelativeToProject ) {
+			if( folderPathRelativeToProject == generatedCodeFolderPath )
+				return;
+
 			if( folderPathRelativeToProject == staticFilesFolderPath ) {
 				generateStaticFileLogic(
 					writer,
@@ -71,6 +75,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 					writer,
 					projectPath,
 					projectNamespace,
+					generatedCodeFolderPath,
 					staticFilesFolderIsInFramework,
 					staticFilesFolderPath,
 					staticFilesFolderUrlParentExpression,

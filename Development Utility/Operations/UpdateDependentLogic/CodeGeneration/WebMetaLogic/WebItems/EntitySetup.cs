@@ -30,10 +30,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			if( requiredParameters.Any() || optionalParameters.Any() )
 				writer.WriteLine( "internal ParametersModification parametersModification;" );
 			InfoStatics.WriteConstructorAndHelperMethods( writer, requiredParameters, optionalParameters, false, true );
+			writer.WriteLine( "protected override UrlEncoder getUrlEncoder() => null;" );
 			writer.WriteLine(
 				"public override ParametersModificationBase ParametersModificationAsBaseType { get { return " +
 				( requiredParameters.Any() || optionalParameters.Any() ? "parametersModification" : "null" ) + "; } }" );
-			writeIsIdenticalToMethod( writer );
 			WebMetaLogicStatics.WriteReCreateFromNewParameterValuesMethod(
 				writer,
 				requiredParameters,
@@ -42,13 +42,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				generalData.ClassName,
 				"" );
 			writeCloneAndReplaceDefaultsIfPossibleMethod( writer );
+			writeEqualsMethod( writer );
+			InfoStatics.WriteGetHashCodeMethod( writer, generalData.PathRelativeToProject, requiredParameters, optionalParameters );
 			writer.WriteLine( "}" );
-			writer.WriteLine( "}" );
-		}
-
-		private void writeIsIdenticalToMethod( TextWriter writer ) {
-			writer.WriteLine( "internal bool IsIdenticalTo( {0} info ) {{".FormatWith( generalData.ClassName ) );
-			InfoStatics.WriteIsIdenticalToParameterComparisons( writer, requiredParameters, optionalParameters );
 			writer.WriteLine( "}" );
 		}
 
@@ -76,6 +72,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 						optionalParameters,
 						parameter => parameter.FieldName,
 						parameter => parameter.FieldName ) ) );
+			writer.WriteLine( "}" );
+		}
+
+		private void writeEqualsMethod( TextWriter writer ) {
+			writer.WriteLine( "public override bool Equals( BasicUrlHandler other ) {" );
+			writer.WriteLine( "if( !( other is {0} otherEs ) ) return false;".FormatWith( generalData.ClassName ) );
+			InfoStatics.WriteEqualsParameterComparisons( writer, requiredParameters, optionalParameters, "otherEs" );
 			writer.WriteLine( "}" );
 		}
 	}

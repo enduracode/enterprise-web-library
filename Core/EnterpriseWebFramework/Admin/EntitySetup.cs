@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using Tewl.Tools;
-using System.Linq;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin {
 	partial class EntitySetup: UiEntitySetup {
@@ -16,7 +16,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin {
 
 		public override string EntitySetupName => "EWF Admin";
 
-		protected override bool UserCanAccessEntitySetup {
+		protected internal override bool UserCanAccessEntitySetup {
 			get {
 				if( !UserManagementStatics.UserManagementEnabled )
 					return true;

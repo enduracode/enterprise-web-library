@@ -24,6 +24,8 @@ using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 	internal class UpdateDependentLogic: Operation {
+		private const string generatedCodeFolderName = "Generated Code";
+
 		private static readonly Operation instance = new UpdateDependentLogic();
 		public static Operation Instance => instance;
 		private UpdateDependentLogic() {}
@@ -69,9 +71,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					EwlStatics.CoreProjectName,
 					writer => {
 						writer.WriteLine( "using System;" );
+						writer.WriteLine( "using System.Collections.Generic;" );
 						writer.WriteLine( "using System.Globalization;" );
 						writer.WriteLine( "using System.Reflection;" );
 						writer.WriteLine( "using System.Runtime.InteropServices;" );
+						writer.WriteLine( "using EnterpriseWebLibrary.DataAccess;" );
 						writer.WriteLine();
 						writeAssemblyInfo( writer, installation, "" );
 						writer.WriteLine();
@@ -87,6 +91,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 							writer,
 							EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.CoreProjectName ),
 							"EnterpriseWebLibrary",
+							generatedCodeFolderName,
 							true,
 							StaticFile.FrameworkStaticFilesSourceFolderPath,
 							"" );
@@ -154,7 +159,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		}
 
 		private void generateLibraryCode( DevelopmentInstallation installation ) {
-			var libraryGeneratedCodeFolderPath = EwlStatics.CombinePaths( installation.DevelopmentInstallationLogic.LibraryPath, "Generated Code" );
+			var libraryGeneratedCodeFolderPath = EwlStatics.CombinePaths( installation.DevelopmentInstallationLogic.LibraryPath, generatedCodeFolderName );
 			Directory.CreateDirectory( libraryGeneratedCodeFolderPath );
 			var isuFilePath = EwlStatics.CombinePaths( libraryGeneratedCodeFolderPath, "ISU.cs" );
 			IoMethods.DeleteFile( isuFilePath );
@@ -227,6 +232,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					writer,
 					installation.DevelopmentInstallationLogic.LibraryPath,
 					installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName,
+					generatedCodeFolderName,
 					null,
 					null,
 					null );
@@ -379,7 +385,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			// This must be done before web meta logic generation, which can be affected by the contents of Web.config files.
 			WebConfigStatics.GenerateWebConfig( application, project );
 
-			var webProjectGeneratedCodeFolderPath = EwlStatics.CombinePaths( application.Path, "Generated Code" );
+			var webProjectGeneratedCodeFolderPath = EwlStatics.CombinePaths( application.Path, generatedCodeFolderName );
 			Directory.CreateDirectory( webProjectGeneratedCodeFolderPath );
 			var webProjectIsuFilePath = EwlStatics.CombinePaths( webProjectGeneratedCodeFolderPath, "ISU.cs" );
 			IoMethods.DeleteFile( webProjectIsuFilePath );
@@ -405,6 +411,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					writer,
 					application.Path,
 					project.NamespaceAndAssemblyName,
+					generatedCodeFolderName,
 					false,
 					StaticFile.AppStaticFilesFolderName,
 					"RequestDispatchingStatics.AppProvider.GetFrameworkUrlParent()" );
@@ -412,7 +419,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		}
 
 		private void generateWindowsServiceCode( DevelopmentInstallation installation, WindowsService service ) {
-			var serviceProjectGeneratedCodeFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, service.Name, "Generated Code" );
+			var serviceProjectGeneratedCodeFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, service.Name, generatedCodeFolderName );
 			Directory.CreateDirectory( serviceProjectGeneratedCodeFolderPath );
 			var isuFilePath = EwlStatics.CombinePaths( serviceProjectGeneratedCodeFolderPath, "ISU.cs" );
 			IoMethods.DeleteFile( isuFilePath );
@@ -490,7 +497,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		}
 
 		private void generateServerSideConsoleProjectCode( DevelopmentInstallation installation, ServerSideConsoleProject project ) {
-			var projectGeneratedCodeFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, project.Name, "Generated Code" );
+			var projectGeneratedCodeFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, project.Name, generatedCodeFolderName );
 			Directory.CreateDirectory( projectGeneratedCodeFolderPath );
 			var isuFilePath = EwlStatics.CombinePaths( projectGeneratedCodeFolderPath, "ISU.cs" );
 			IoMethods.DeleteFile( isuFilePath );
@@ -541,7 +548,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		}
 
 		private void generateCodeForProject( DevelopmentInstallation installation, string projectName, Action<TextWriter> codeWriter ) {
-			var generatedCodeFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, projectName, "Generated Code" );
+			var generatedCodeFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, projectName, generatedCodeFolderName );
 			Directory.CreateDirectory( generatedCodeFolderPath );
 			var isuFilePath = EwlStatics.CombinePaths( generatedCodeFolderPath, "ISU.cs" );
 			IoMethods.DeleteFile( isuFilePath );
@@ -586,7 +593,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		}
 
 		private void generateXmlSchemaLogic( string projectPath, string schemaPathInProject, string nameSpace, string codeFileName, bool useSvcUtil ) {
-			var projectGeneratedCodeFolderPath = EwlStatics.CombinePaths( projectPath, "Generated Code" );
+			var projectGeneratedCodeFolderPath = EwlStatics.CombinePaths( projectPath, generatedCodeFolderName );
 			if( useSvcUtil )
 				try {
 					TewlContrib.ProcessTools.RunProgram(

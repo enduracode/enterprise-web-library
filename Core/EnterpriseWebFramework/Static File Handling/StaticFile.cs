@@ -130,15 +130,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		protected sealed override EwfResponse delete() => base.delete();
 		protected sealed override EwfResponse post() => base.post();
 
-		protected override bool isIdenticalTo( ResourceBase resourceAsBaseType ) =>
-			resourceAsBaseType is StaticFile staticFile && staticFile.isFrameworkFile == isFrameworkFile && staticFile.relativeFilePath == relativeFilePath;
-
 		public override ResourceBase CloneAndReplaceDefaultsIfPossible( bool disableReplacementOfDefaults ) => this;
 
 		public sealed override bool Equals( BasicUrlHandler other ) =>
 			other is StaticFile otherFile && otherFile.isFrameworkFile == isFrameworkFile && otherFile.relativeFilePath == relativeFilePath &&
 			otherFile.isVersioned == isVersioned;
 
-		public sealed override int GetHashCode() => new { isFrameworkFile, relativeFilePath, isVersioned }.GetHashCode();
+		public sealed override int GetHashCode() => ( isFrameworkFile, relativeFilePath, isVersioned ).GetHashCode();
 	}
 }

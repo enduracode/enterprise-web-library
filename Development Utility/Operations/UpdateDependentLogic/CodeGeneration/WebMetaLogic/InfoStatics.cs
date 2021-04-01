@@ -189,12 +189,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			IReadOnlyCollection<VariableSpecification> requiredParameters, IReadOnlyCollection<VariableSpecification> optionalParameters,
 			Func<VariableSpecification, string> requiredParameterToArgMapper, Func<VariableSpecification, string> optionalParameterToArgMapper ) {
 			var optionalParameterAssignments = "";
-			foreach( var optionalParameter in optionalParameters ) {
+			foreach( var optionalParameter in optionalParameters )
 				optionalParameterAssignments = StringTools.ConcatenateWithDelimiter(
 					", ",
 					optionalParameterAssignments,
 					optionalParameter.PropertyName + " = " + optionalParameterToArgMapper( optionalParameter ) );
-			}
 			if( optionalParameterAssignments.Length > 0 )
 				optionalParameterAssignments = "optionalParameterPackage: new OptionalParameterPackage { " + optionalParameterAssignments + " }";
 
@@ -212,13 +211,21 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			return text;
 		}
 
-		internal static void WriteIsIdenticalToParameterComparisons(
-			TextWriter writer, List<VariableSpecification> requiredParameters, List<VariableSpecification> optionalParameters ) {
-			foreach( var parameter in requiredParameters.Concat( optionalParameters ) ) {
-				writer.WriteLine( "if( " + parameter.PropertyName + " != info." + parameter.PropertyName + " )" );
-				writer.WriteLine( "return false;" );
-			}
+		internal static void WriteEqualsParameterComparisons(
+			TextWriter writer, List<VariableSpecification> requiredParameters, List<VariableSpecification> optionalParameters, string otherObjectName ) {
+			foreach( var parameter in requiredParameters.Concat( optionalParameters ) )
+				writer.WriteLine( "if( !EwlStatics.AreEqual( {0}.{1}, {1} ) ) return false;".FormatWith( otherObjectName, parameter.PropertyName ) );
 			writer.WriteLine( "return true;" );
+		}
+
+		internal static void WriteGetHashCodeMethod(
+			TextWriter writer, string pathRelativeToProject, IReadOnlyCollection<VariableSpecification> requiredParameters,
+			IReadOnlyCollection<VariableSpecification> optionalParameters ) {
+			writer.WriteLine(
+				"public override int GetHashCode() => ( {0} ).GetHashCode();".FormatWith(
+					"@\"{0}\"".FormatWith( pathRelativeToProject ) + StringTools
+						.ConcatenateWithDelimiter( ", ", requiredParameters.Concat( optionalParameters ).Select( i => i.PropertyName ) )
+						.PrependDelimiter( ", " ) ) );
 		}
 	}
 }

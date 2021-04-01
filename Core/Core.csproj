@@ -335,19 +335,11 @@
     <Compile Include="EnterpriseWebFramework\Action Components\Hyperlink\Styles\StandardHyperlinkStyle.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\SubmitButton.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\ToolTip.cs" />
-    <Compile Include="EnterpriseWebFramework\Admin\BasicTests.cs">
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
+    <Compile Include="EnterpriseWebFramework\Admin\BasicTests.cs" />
     <Compile Include="EnterpriseWebFramework\Admin\EntitySetup.cs" />
-    <Compile Include="EnterpriseWebFramework\Admin\RequestProfiling.cs">
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="EnterpriseWebFramework\Admin\SystemUser.cs">
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="EnterpriseWebFramework\Admin\SystemUsers.cs">
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
+    <Compile Include="EnterpriseWebFramework\Admin\RequestProfiling.cs" />
+    <Compile Include="EnterpriseWebFramework\Admin\SystemUser.cs" />
+    <Compile Include="EnterpriseWebFramework\Admin\SystemUsers.cs" />
     <Compile Include="EnterpriseWebFramework\Automatic Layout\FormItem.cs" />
     <Compile Include="EnterpriseWebFramework\Automatic Layout\FormItemList.cs" />
     <Compile Include="EnterpriseWebFramework\Automatic Layout\FormItemListSetup.cs" />
