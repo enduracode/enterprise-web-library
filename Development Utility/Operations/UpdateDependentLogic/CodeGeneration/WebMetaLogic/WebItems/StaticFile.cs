@@ -5,14 +5,14 @@ using Humanizer;
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic.WebItems {
 	internal class StaticFile {
 		private readonly WebItemGeneralData generalData;
-		private readonly bool isFrameworkFile;
-		private readonly bool isVersioned;
+		private readonly bool inFramework;
+		private readonly bool inVersionedFolder;
 		private readonly string folderSetupClassName;
 
-		internal StaticFile( WebItemGeneralData generalData, bool isFrameworkFile, bool isVersioned, string folderSetupClassName ) {
+		internal StaticFile( WebItemGeneralData generalData, bool inFramework, bool inVersionedFolder, string folderSetupClassName ) {
 			this.generalData = generalData;
-			this.isFrameworkFile = isFrameworkFile;
-			this.isVersioned = isVersioned;
+			this.inFramework = inFramework;
+			this.inVersionedFolder = inVersionedFolder;
 			this.folderSetupClassName = folderSetupClassName;
 		}
 
@@ -20,7 +20,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			writer.WriteLine( "namespace {0} {{".FormatWith( generalData.Namespace ) );
 			writer.WriteLine( "public sealed partial class {0}: StaticFileBase {{".FormatWith( generalData.ClassName ) );
 
-			if( isVersioned )
+			if( inVersionedFolder )
 				writer.WriteLine( "public {0}(): base( true ) {{}}".FormatWith( generalData.ClassName ) );
 			else
 				writer.WriteLine( "public {0}( bool disableVersioning = false ): base( !disableVersioning ) {{}}".FormatWith( generalData.ClassName ) );
@@ -29,7 +29,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			writer.WriteLine( "protected override UrlEncoder getUrlEncoder() => null;" );
 			writer.WriteLine(
 				"protected override DateTimeOffset getBuildDateAndTime() => {0};".FormatWith( AppStatics.GetLiteralDateTimeExpression( DateTimeOffset.UtcNow ) ) );
-			writer.WriteLine( "protected override bool isFrameworkFile => {0};".FormatWith( isFrameworkFile ? "true" : "false" ) );
+			writer.WriteLine( "protected override bool isFrameworkFile => {0};".FormatWith( inFramework ? "true" : "false" ) );
 			writer.WriteLine( "protected override string relativeFilePath => @\"{0}\";".FormatWith( generalData.PathRelativeToProject ) );
 
 			writer.WriteLine( "}" );

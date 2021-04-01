@@ -113,7 +113,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 		}
 
 		private static void generateStaticFileFolderSetup(
-			TextWriter writer, bool isFrameworkFolder, bool isRootFolder, string folderPathRelativeToProject, string folderNamespace, string className,
+			TextWriter writer, bool inFramework, bool isRootFolder, string folderPathRelativeToProject, string folderNamespace, string className,
 			string parentExpression ) {
 			writer.WriteLine( "namespace {0} {{".FormatWith( folderNamespace ) );
 			writer.WriteLine( "public sealed partial class {0}: StaticFileFolderSetup {{".FormatWith( className ) );
@@ -123,7 +123,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				writer.WriteLine( "protected override UrlHandler getUrlParent() => {0};".FormatWith( isRootFolder ? parentExpression : "parentFolderSetup.Value" ) );
 			writer.WriteLine( "protected override UrlEncoder getUrlEncoder() => null;" );
 			writer.WriteLine( "protected override IEnumerable<UrlPattern> getChildUrlPatterns() => null;" );
-			writer.WriteLine( "protected override bool isFrameworkFolder => {0};".FormatWith( isFrameworkFolder ? "true" : "false" ) );
+			writer.WriteLine( "protected override bool isFrameworkFolder => {0};".FormatWith( inFramework ? "true" : "false" ) );
 			writer.WriteLine( "protected override string folderPath => @\"{0}\";".FormatWith( folderPathRelativeToProject ) );
 
 			writer.WriteLine( "}" );
