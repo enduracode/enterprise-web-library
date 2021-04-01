@@ -1,9 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using Tewl.Tools;
+using System.Linq;
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.Admin {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin {
 	partial class EntitySetup: UiEntitySetup {
+		private static Func<UrlHandler> frameworkUrlParentGetter;
+
+		internal static void Init( Func<UrlHandler> frameworkUrlParentGetter ) {
+			EntitySetup.frameworkUrlParentGetter = frameworkUrlParentGetter;
+		}
+
 		protected override ResourceBase createParentResource() => null;
 
 		public override string EntitySetupName => "EWF Admin";
@@ -19,10 +27,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 		protected override IEnumerable<ResourceGroup> createListedResources() =>
 			new ResourceGroup( new BasicTests.Info( this ), new RequestProfiling.Info( this ), new SystemUsers.Info( this ) ).ToCollection();
 
+		protected override UrlHandler getUrlParent() => frameworkUrlParentGetter();
+
 		protected override UrlHandler getRequestHandler() => new BasicTests.Info( this );
 
 		protected override IEnumerable<UrlPattern> getChildUrlPatterns() {
-			return new UrlPattern( /* use impersonate as the segment to get to MetaLogicFactory.CreateSelectUserPageInfo( "" ) */ );
+			return new UrlPattern( /* use static as the segment to get to framework static files */ ).ToCollection()
+				.Append( new UrlPattern( /* use impersonate as the segment to get to MetaLogicFactory.CreateSelectUserPageInfo( "" ) */ ) );
 		}
 
 		EntityUiSetup UiEntitySetup.GetUiSetup() => new EntityUiSetup();

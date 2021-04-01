@@ -335,6 +335,7 @@
     <Compile Include="EnterpriseWebFramework\Action Components\Hyperlink\Styles\StandardHyperlinkStyle.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\SubmitButton.cs" />
     <Compile Include="EnterpriseWebFramework\Action Components\ToolTip.cs" />
+    <Compile Include="EnterpriseWebFramework\Admin\EntitySetup.cs" />
     <Compile Include="EnterpriseWebFramework\Automatic Layout\FormItem.cs" />
     <Compile Include="EnterpriseWebFramework\Automatic Layout\FormItemList.cs" />
     <Compile Include="EnterpriseWebFramework\Automatic Layout\FormItemListSetup.cs" />
@@ -617,6 +618,7 @@
     <Compile Include="EnterpriseWebFramework\Request Handling\ResourceBase.cs" />
     <Compile Include="EnterpriseWebFramework\Request Handling\ResourceGroup.cs" />
     <Compile Include="EnterpriseWebFramework\RevisionDisplayStatics.cs" />
+    <Compile Include="EnterpriseWebFramework\Static File Handling\FrameworkStaticFilesFolderSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Static File Handling\MediaTypeOverride.cs" />
     <Compile Include="EnterpriseWebFramework\Static File Handling\StaticFile.cs" />
     <Compile Include="EnterpriseWebFramework\Static File Handling\StaticFileFolderSetup.cs" />

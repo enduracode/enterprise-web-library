@@ -168,7 +168,6 @@
     <Compile Include="Ewf\Admin\EditUser.aspx.designer.cs">
       <DependentUpon>EditUser.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Ewf\Admin\EntitySetup.cs" />
     <Compile Include="Ewf\Admin\RequestProfiling.aspx.cs">
       <DependentUpon>RequestProfiling.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>

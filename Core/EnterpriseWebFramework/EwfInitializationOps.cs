@@ -92,6 +92,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								return cssInfos;
 							} );
 						EwfUiStatics.Init( getProviderGetter<AppEwfUiProvider>( "EwfUi" ) );
+						Admin.EntitySetup.Init( () => RequestDispatchingStatics.AppProvider.GetFrameworkUrlParent() );
 						RequestDispatchingStatics.Init( getProviderGetter<AppRequestDispatchingProvider>( "RequestDispatching" ) );
 
 						EwfInitializationOps.appInitializer = appInitializer;
