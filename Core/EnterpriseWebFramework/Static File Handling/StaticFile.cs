@@ -81,7 +81,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		protected sealed override ExternalRedirect getRedirect() => base.getRedirect();
 
-		protected override EwfSafeRequestHandler getOrHead() {
+		protected sealed override EwfSafeRequestHandler getOrHead() {
 			var extensionIndex = relativeFilePath.LastIndexOf( '.' );
 			if( extensionIndex < 0 )
 				throw new ResourceNotAvailableException( "Failed to find the extension in the file path.", null );
