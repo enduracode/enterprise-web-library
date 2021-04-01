@@ -97,7 +97,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			foreach( var fileName in IoMethods.GetFileNamesInFolder( folderPath ) )
 				new StaticFile(
 					new WebItemGeneralData( projectPath, projectNamespace, EwlStatics.CombinePaths( folderPathRelativeToProject, fileName ), true ),
-					inVersionedFolder == true ).GenerateCode( writer );
+					inFramework,
+					inVersionedFolder == true,
+					folderSetupClassName ).GenerateCode( writer );
 
 			foreach( var subfolderName in IoMethods.GetFolderNamesInFolder( folderPath ) )
 				generateStaticFileLogic(
