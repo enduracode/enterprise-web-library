@@ -1,7 +1,7 @@
-using System;
+﻿using System;
 using Humanizer;
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.Admin {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin {
 	partial class BasicTests: EwfPage {
 		protected override PageContent getContent() =>
 			new UiPageContent().Add(

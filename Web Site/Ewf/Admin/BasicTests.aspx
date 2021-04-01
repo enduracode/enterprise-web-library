@@ -1,1 +1,0 @@
-<%@ Page Language="C#" CodeBehind="BasicTests.aspx.cs" Inherits="EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.Admin.BasicTests" %>

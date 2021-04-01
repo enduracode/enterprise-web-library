@@ -154,34 +154,6 @@
     <Compile Include="CreateSystem.aspx.designer.cs">
       <DependentUpon>CreateSystem.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Ewf\Admin\BasicTests.aspx.cs">
-      <DependentUpon>BasicTests.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Ewf\Admin\BasicTests.aspx.designer.cs">
-      <DependentUpon>BasicTests.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Ewf\Admin\EditUser.aspx.cs">
-      <DependentUpon>EditUser.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Ewf\Admin\EditUser.aspx.designer.cs">
-      <DependentUpon>EditUser.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Ewf\Admin\RequestProfiling.aspx.cs">
-      <DependentUpon>RequestProfiling.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Ewf\Admin\RequestProfiling.aspx.designer.cs">
-      <DependentUpon>RequestProfiling.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Ewf\Admin\SystemUsers.aspx.cs">
-      <DependentUpon>SystemUsers.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Ewf\Admin\SystemUsers.aspx.designer.cs">
-      <DependentUpon>SystemUsers.aspx</DependentUpon>
-    </Compile>
     <Compile Include="Ewf\ContactSupport.aspx.cs">
       <DependentUpon>ContactSupport.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -475,10 +447,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="CreateSystem.aspx" />
-    <Content Include="Ewf\Admin\BasicTests.aspx" />
-    <Content Include="Ewf\Admin\EditUser.aspx" />
-    <Content Include="Ewf\Admin\RequestProfiling.aspx" />
-    <Content Include="Ewf\Admin\SystemUsers.aspx" />
     <Content Include="Ewf\ContactSupport.aspx" />
     <Content Include="Ewf\ErrorPages\PageDisabled.aspx" />
     <Content Include="Ewf\Modernizr.js" />

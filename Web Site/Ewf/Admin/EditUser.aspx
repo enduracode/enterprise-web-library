@@ -1,1 +1,0 @@
-<%@ Page Language="C#" CodeBehind="EditUser.aspx.cs" Inherits="EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.Admin.EditUser" %>

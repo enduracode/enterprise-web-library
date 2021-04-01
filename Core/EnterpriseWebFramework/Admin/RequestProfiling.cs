@@ -1,10 +1,10 @@
-using System;
+﻿using System;
 using EnterpriseWebLibrary.Caching;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using Humanizer;
 using Tewl.Tools;
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.Admin {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin {
 	partial class RequestProfiling: EwfPage {
 		partial class Info {
 			protected override AlternativeResourceMode createAlternativeMode() =>

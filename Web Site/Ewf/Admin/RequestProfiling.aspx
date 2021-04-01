@@ -1,1 +1,0 @@
-<%@ Page Language="C#" CodeBehind="RequestProfiling.aspx.cs" Inherits="EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.Admin.RequestProfiling" %>

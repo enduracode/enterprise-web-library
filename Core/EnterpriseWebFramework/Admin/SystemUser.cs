@@ -1,11 +1,11 @@
-using System;
+﻿using System;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using Tewl.Tools;
 
 // Parameter: int? userId
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.Admin {
-	partial class EditUser: EwfPage {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin {
+	partial class SystemUser: EwfPage {
 		partial class Info {
 			internal User User { get; private set; }
 
