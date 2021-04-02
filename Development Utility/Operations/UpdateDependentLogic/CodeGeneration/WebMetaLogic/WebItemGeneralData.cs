@@ -43,8 +43,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 		internal string Namespace => itemNamespace;
 		internal string ClassName => className;
 
-		internal bool IsResource() => Regex.IsMatch( code, "^// {0}Resource$".FormatWith( EwlStatics.EwlInitialism.EnglishToPascal() ), RegexOptions.Multiline );
-		internal bool IsPage() => Regex.IsMatch( code, "^// {0}Page$".FormatWith( EwlStatics.EwlInitialism.EnglishToPascal() ), RegexOptions.Multiline );
+		internal bool IsResource() => Regex.IsMatch( code, "^// {0}Resource\r?$".FormatWith( EwlStatics.EwlInitialism.EnglishToPascal() ), RegexOptions.Multiline );
+		internal bool IsPage() => Regex.IsMatch( code, "^// {0}Page\r?$".FormatWith( EwlStatics.EwlInitialism.EnglishToPascal() ), RegexOptions.Multiline );
 
 		internal List<VariableSpecification> ReadParametersFromCode( bool readOptionalParameters ) {
 			try {
