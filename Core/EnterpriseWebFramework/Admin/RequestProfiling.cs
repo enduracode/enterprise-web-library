@@ -4,8 +4,10 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using Humanizer;
 using Tewl.Tools;
 
+// EwlPage
+
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin {
-	partial class RequestProfiling: EwfPage {
+	partial class RequestProfiling {
 		partial class Info {
 			protected override AlternativeResourceMode createAlternativeMode() =>
 				UserManagementStatics.UserManagementEnabled

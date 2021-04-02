@@ -1,8 +1,10 @@
 ﻿using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using Tewl.Tools;
 
+// EwlPage
+
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin {
-	partial class SystemUsers: EwfPage {
+	partial class SystemUsers {
 		partial class Info {
 			protected override AlternativeResourceMode createAlternativeMode() =>
 				UserManagementStatics.UserManagementEnabled ? null : new DisabledResourceMode( "User management is not enabled in this system." );

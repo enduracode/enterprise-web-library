@@ -1,8 +1,10 @@
 ﻿using System;
 using Humanizer;
 
+// EwlPage
+
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin {
-	partial class BasicTests: EwfPage {
+	partial class BasicTests {
 		protected override PageContent getContent() =>
 			new UiPageContent().Add(
 				new StackList(
