@@ -68,54 +68,54 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal static void Init(
 			Func<PageContent, Func<string>, Func<string>, ( PageContent, FlowComponent, FlowComponent, FlowComponent, Action, bool )> contentGetter ) {
 			EwfValidation.Init(
-				() => Instance.formState.ValidationPredicate,
-				() => Instance.formState.DataModifications,
-				() => Instance.formState.DataModificationsWithValidationsFromOtherElements,
-				() => Instance.formState.ReportValidationCreated() );
+				() => Current.formState.ValidationPredicate,
+				() => Current.formState.DataModifications,
+				() => Current.formState.DataModificationsWithValidationsFromOtherElements,
+				() => Current.formState.ReportValidationCreated() );
 			FormValueStatics.Init(
-				formValue => Instance.formValues.Add( formValue ),
-				() => Instance.formState.DataModifications,
+				formValue => Current.formValues.Add( formValue ),
+				() => Current.formState.DataModifications,
 				() => AppRequestState.Instance.EwfPageRequestState.PostBackValues );
 			ComponentStateItem.Init(
 				AssertPageTreeNotBuilt,
-				() => Instance.elementOrIdentifiedComponentIdGetter(),
+				() => Current.elementOrIdentifiedComponentIdGetter(),
 				id => {
 					var valuesById = AppRequestState.Instance.EwfPageRequestState.ComponentStateValuesById;
 					return valuesById != null && valuesById.TryGetValue( id, out var value ) ? value : null;
 				},
-				() => Instance.formState.DataModifications,
-				( id, item ) => Instance.componentStateItemsById.Add( id, item ) );
-			PostBack.Init( () => Instance.formState.DataModifications );
+				() => Current.formState.DataModifications,
+				( id, item ) => Current.componentStateItemsById.Add( id, item ) );
+			PostBack.Init( () => Current.formState.DataModifications );
 			PostBackFormAction.Init(
 				postBack => {
-					if( !Instance.postBacksById.TryGetValue( postBack.Id, out var existingPostBack ) )
-						Instance.postBacksById.Add( postBack.Id, postBack );
+					if( !Current.postBacksById.TryGetValue( postBack.Id, out var existingPostBack ) )
+						Current.postBacksById.Add( postBack.Id, postBack );
 					else if( existingPostBack != postBack )
 						throw new ApplicationException( "A post-back with an ID of \"{0}\" already exists in the page.".FormatWith( existingPostBack.Id ) );
 				},
 				postBack => {
-					if( Instance.GetPostBack( postBack.Id ) != postBack )
+					if( Current.GetPostBack( postBack.Id ) != postBack )
 						throw new ApplicationException( "The post-back must have been added to the page." );
 					if( ( postBack as ActionPostBack )?.ValidationDm is PostBack validationPostBack &&
-					    Instance.GetPostBack( validationPostBack.Id ) != validationPostBack )
+					    Current.GetPostBack( validationPostBack.Id ) != validationPostBack )
 						throw new ApplicationException( "The post-back's validation data-modification, if it is a post-back, must have been added to the page." );
 				} );
 			FormState.Init(
-				() => Instance.formState,
+				() => Current.formState,
 				dataModifications => {
-					if( dataModifications.Contains( Instance.dataUpdate ) &&
-					    dataModifications.Any( i => i != Instance.dataUpdate && !( (ActionPostBack)i ).IsIntermediate ) )
+					if( dataModifications.Contains( Current.dataUpdate ) &&
+					    dataModifications.Any( i => i != Current.dataUpdate && !( (ActionPostBack)i ).IsIntermediate ) )
 						throw new ApplicationException(
 							"If the data-update modification is included, it is meaningless to include any full post-backs since these inherently update the page's data." );
 				},
-				dataModification => dataModification == Instance.dataUpdate ? Instance.dataUpdatePostBack : (ActionPostBack)dataModification );
+				dataModification => dataModification == Current.dataUpdate ? Current.dataUpdatePostBack : (ActionPostBack)dataModification );
 			PageBase.contentGetter = contentGetter;
 		}
 
 		/// <summary>
 		/// Gets the currently executing page, or null if the currently executing resource is not a page.
 		/// </summary>
-		public static PageBase Instance {
+		public static PageBase Current {
 			get {
 				if( !( HttpContext.Current.CurrentHandler is PageBase pageObject ) )
 					return null;
@@ -130,16 +130,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Add a status message of the given type to the status message collection.
 		/// </summary>
 		public static void AddStatusMessage( StatusMessageType type, string message ) {
-			Instance.statusMessages.Add( new Tuple<StatusMessageType, string>( type, message ) );
+			Current.statusMessages.Add( new Tuple<StatusMessageType, string>( type, message ) );
 		}
 
 		internal static void AssertPageTreeNotBuilt() {
-			if( Instance.formState == null )
+			if( Current.formState == null )
 				throw new ApplicationException( "The page tree has already been built." );
 		}
 
 		internal static void AssertPageTreeBuilt() {
-			if( Instance.formState != null )
+			if( Current.formState != null )
 				throw new ApplicationException( "The page tree has not yet been built." );
 		}
 
