@@ -80,6 +80,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
+		/// Gets the parameters modification object for this entity setup.
+		/// </summary>
+		public abstract ParametersModificationBase ParametersModificationAsBaseType { get; }
+
+		/// <summary>
 		/// Gets a list of groups containing this entity setup’s listed resources.
 		/// </summary>
 		public IReadOnlyCollection<ResourceGroup> ListedResources => listedResources.Value;
@@ -141,11 +146,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		protected internal virtual bool AllowsSearchEngineIndexing => ParentResource?.AllowsSearchEngineIndexing ?? true;
-
-		/// <summary>
-		/// Gets the parameters modification object for this entity setup.
-		/// </summary>
-		public abstract ParametersModificationBase ParametersModificationAsBaseType { get; }
 
 		public sealed override bool Equals( object obj ) => Equals( obj as BasicUrlHandler );
 		public abstract bool Equals( BasicUrlHandler other );
