@@ -219,20 +219,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 				// Re-create page object. A big reason to do this is that some pages execute database queries or other code during initialization in order to prime the
 				// data-access cache. The code above resets the cache and we want to re-prime it right away.
-				AppRequestState.Instance.UserDisabledByResource = true;
-				try {
-					using( MiniProfiler.Current.Step( "EWF - Re-create page object after page-view data modifications" ) )
-						nextPageObject = reCreate();
-
-					bool urlChanged;
-					using( MiniProfiler.Current.Step( "EWF - Check URL after page-view data modifications" ) )
-						urlChanged = nextPageObject.GetUrl( false, false, true ) != AppRequestState.Instance.Url;
-					if( urlChanged )
-						throw getPossibleDeveloperMistakeException( "The URL of the page changed after page-view data modifications." );
-				}
-				finally {
-					AppRequestState.Instance.UserDisabledByResource = false;
-				}
+				using( MiniProfiler.Current.Step( "EWF - Re-create page object after page-view data modifications" ) )
+					nextPageObject = reCreate();
+				bool urlChanged;
+				using( MiniProfiler.Current.Step( "EWF - Check URL after page-view data modifications" ) )
+					urlChanged = nextPageObject.GetUrl( false, false, true ) != AppRequestState.Instance.Url;
+				if( urlChanged )
+					throw getPossibleDeveloperMistakeException( "The URL of the page changed after page-view data modifications." );
 				bool userAuthorized;
 				using( MiniProfiler.Current.Step( "EWF - Check page authorization after page-view data modifications" ) )
 					userAuthorized = nextPageObject.UserCanAccessResource;

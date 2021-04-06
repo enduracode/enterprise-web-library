@@ -222,11 +222,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		internal sealed override string GetUrl( bool ensureUserCanAccessResource, bool ensureResourceNotDisabled, bool makeAbsolute ) {
-			var url = UrlHandlingStatics.GetCanonicalUrl( this, ShouldBeSecureGivenCurrentRequest ) + uriFragmentIdentifier.PrependDelimiter( "#" );
+			var secure = ShouldBeSecureGivenCurrentRequest;
+			string getCanonicalUrl() => UrlHandlingStatics.GetCanonicalUrl( this, secure );
+			var url = ( EwfApp.Instance != null && EwfApp.Instance.RequestState != null
+				            ? EwfApp.Instance.RequestState.ExecuteWithResourceAndUserDisabled( getCanonicalUrl )
+				            : getCanonicalUrl() ) + uriFragmentIdentifier.PrependDelimiter( "#" );
+
 			if( ensureUserCanAccessResource && !UserCanAccessResource )
 				throw new ApplicationException( "GetUrl was called for a resource that the authenticated user cannot access. The URL would have been " + url + "." );
 			if( ensureResourceNotDisabled && AlternativeMode is DisabledResourceMode )
 				throw new ApplicationException( "GetUrl was called for a resource that is disabled. The URL would have been " + url + "." );
+
 			return url;
 		}
 
@@ -272,18 +278,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		void BasicUrlHandler.HandleRequest( HttpContext context ) {
 			currentResourceSetter( this );
 
-			AppRequestState.Instance.UserDisabledByResource = true;
-			try {
-				var canonicalUrl = GetUrl( false, false, true );
-				if( canonicalUrl != AppRequestState.Instance.Url ) {
-					if( !ShouldBeSecureGivenCurrentRequest && EwfApp.Instance.RequestIsSecure( context.Request ) )
-						context.Response.AppendHeader( "Strict-Transport-Security", "max-age=0" );
-					writeRedirectResponse( context, canonicalUrl, true );
-					return;
-				}
-			}
-			finally {
-				AppRequestState.Instance.UserDisabledByResource = false;
+			var canonicalUrl = GetUrl( false, false, true );
+			if( canonicalUrl != AppRequestState.Instance.Url ) {
+				if( !ShouldBeSecureGivenCurrentRequest && EwfApp.Instance.RequestIsSecure( context.Request ) )
+					context.Response.AppendHeader( "Strict-Transport-Security", "max-age=0" );
+				writeRedirectResponse( context, canonicalUrl, true );
+				return;
 			}
 
 			bool userAuthorized;

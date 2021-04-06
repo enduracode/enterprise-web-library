@@ -42,7 +42,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly List<Action> nonTransactionalModificationMethods = new List<Action>();
 		private bool transactionMarkedForRollback;
 
-		internal ResourceBase Resource;
+		private bool resourceAndUserDisabled;
+
+		private ResourceBase resource;
 
 		/// <summary>
 		/// EWL use only.
@@ -50,7 +52,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public bool IntermediateUserExists { get; set; }
 
 		private bool userEnabled;
-		internal bool UserDisabledByResource { get; set; }
 		private Tuple<User, SpecifiedValue<User>> userAndImpersonator;
 
 		private string errorPrefix = "";
@@ -135,6 +136,22 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			cleanUpDatabaseConnectionsAndExecuteNonTransactionalModificationMethods();
 		}
 
+		internal T ExecuteWithResourceAndUserDisabled<T>( Func<T> method ) {
+			resourceAndUserDisabled = true;
+			try {
+				return method();
+			}
+			finally {
+				resourceAndUserDisabled = false;
+			}
+		}
+
+		internal void SetResource( ResourceBase resource ) {
+			this.resource = resource;
+		}
+
+		internal ResourceBase Resource => resourceAndUserDisabled ? null : resource;
+
 		/// <summary>
 		/// EwfApp use only.
 		/// </summary>
@@ -170,7 +187,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			get {
 				if( !userEnabled )
 					throw new ApplicationException( "User cannot be accessed this early in the request life cycle." );
-				if( UserDisabledByResource )
+				if( resourceAndUserDisabled )
 					throw new UserDisabledByPageException( "User cannot be accessed. See the AppTools.User documentation for details." );
 				if( !UserAccessible )
 					throw new ApplicationException( "User cannot be accessed from a nonsecure connection in an application that supports secure connections." );
