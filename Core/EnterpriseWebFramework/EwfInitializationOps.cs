@@ -73,6 +73,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						}
 
 						CssPreprocessingStatics.Init( globalInitializer.GetType().Assembly, globalType.Assembly );
+						ResourceBase.Init( resource => AppRequestState.Instance.Resource = resource, () => AppRequestState.Instance.Resource );
 						EwfPage.Init( BasicPageContent.GetContent );
 						HyperlinkBehaviorExtensionCreators.Init( ModalBox.GetBrowsingModalBoxOpenStatements );
 						FileUpload.Init( () => ( (BasicPageContent)EwfPage.Instance.BasicContent ).FormUsesMultipartEncoding = true );

@@ -16,12 +16,25 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal const string ResourcePathSeparator = " > ";
 		internal const string EntityResourceSeparator = " / ";
 
+		private static Action<ResourceBase> currentResourceSetter;
+		private static Func<ResourceBase> currentResourceGetter;
+
 		internal static string CombineResourcePathStrings( string separator, string one, string two, params string[] pathStrings ) {
 			var pathString = StringTools.ConcatenateWithDelimiter( separator, one, two );
 			foreach( var s in pathStrings )
 				pathString = StringTools.ConcatenateWithDelimiter( separator, pathString, s );
 			return pathString;
 		}
+
+		internal static void Init( Action<ResourceBase> currentResourceSetter, Func<ResourceBase> currentResourceGetter ) {
+			ResourceBase.currentResourceSetter = currentResourceSetter;
+			ResourceBase.currentResourceGetter = currentResourceGetter;
+		}
+
+		/// <summary>
+		/// Gets the currently executing resource, or null if the URL has not yet been resolved.
+		/// </summary>
+		internal static ResourceBase Current => currentResourceGetter();
 
 		private string uriFragmentIdentifierField = "";
 		private readonly Lazy<ResourceBase> parentResource;
@@ -257,6 +270,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		protected virtual IEnumerable<UrlPattern> getChildUrlPatterns() => Enumerable.Empty<UrlPattern>();
 
 		void BasicUrlHandler.HandleRequest( HttpContext context ) {
+			currentResourceSetter( this );
+
 			AppRequestState.Instance.UserDisabledByResource = true;
 			try {
 				var canonicalUrl = GetUrl( false, false, true );

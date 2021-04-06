@@ -115,9 +115,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets the currently executing page, or null if the currently executing resource is not a page.
 		/// </summary>
-		public static PageBase Current {
+		public new static PageBase Current {
 			get {
-				if( !( HttpContext.Current.CurrentHandler is PageBase pageObject ) )
+				if( !( ResourceBase.Current is PageBase pageObject ) )
 					return null;
 				PageBase next;
 				while( ( next = pageObject.nextPageObject ) != null )

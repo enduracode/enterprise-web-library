@@ -42,6 +42,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly List<Action> nonTransactionalModificationMethods = new List<Action>();
 		private bool transactionMarkedForRollback;
 
+		internal ResourceBase Resource;
+
 		/// <summary>
 		/// EWL use only.
 		/// </summary>
