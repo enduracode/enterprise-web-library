@@ -1,11 +1,10 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Web;
-using System.Web.UI;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
@@ -19,9 +18,9 @@ using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
-	/// A System.Web.UI.Page that contains special Red Stapler Enterprise Web Framework logic. Requires that view state and session state be enabled.
+	/// A page in a web application.
 	/// </summary>
-	public abstract class EwfPage: Page {
+	public abstract class PageBase: ResourceBase {
 		// These strings are duplicated in the JavaScript file.
 		internal const string FormId = "ewfForm";
 		internal const string HiddenFieldName = "ewfData";
@@ -66,7 +65,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 		}
 
-		internal new static void Init(
+		internal static void Init(
 			Func<PageContent, Func<string>, Func<string>, ( PageContent, FlowComponent, FlowComponent, FlowComponent, Action, bool )> contentGetter ) {
 			EwfValidation.Init(
 				() => Instance.formState.ValidationPredicate,
@@ -110,13 +109,22 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							"If the data-update modification is included, it is meaningless to include any full post-backs since these inherently update the page's data." );
 				},
 				dataModification => dataModification == Instance.dataUpdate ? Instance.dataUpdatePostBack : (ActionPostBack)dataModification );
-			EwfPage.contentGetter = contentGetter;
+			PageBase.contentGetter = contentGetter;
 		}
 
 		/// <summary>
-		/// Returns the currently executing EwfPage, or null if the currently executing page is not an EwfPage.
+		/// Gets the currently executing page, or null if the currently executing resource is not a page.
 		/// </summary>
-		public static EwfPage Instance => HttpContext.Current.CurrentHandler as EwfPage;
+		public static PageBase Instance {
+			get {
+				if( !( HttpContext.Current.CurrentHandler is PageBase pageObject ) )
+					return null;
+				PageBase next;
+				while( ( next = pageObject.nextPageObject ) != null )
+					pageObject = next;
+				return pageObject;
+			}
+		}
 
 		/// <summary>
 		/// Add a status message of the given type to the status message collection.
@@ -134,6 +142,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			if( Instance.formState != null )
 				throw new ApplicationException( "The page tree has not yet been built." );
 		}
+
+		private PageBase nextPageObject;
 
 		private FormState formState;
 		internal PageContent BasicContent;
@@ -153,99 +163,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly List<Tuple<StatusMessageType, string>> statusMessages = new List<Tuple<StatusMessageType, string>>();
 
 		/// <summary>
-		/// Returns the entity setup for this page, if one exists.
-		/// </summary>
-		public abstract EntitySetupBase EsAsBaseType { get; }
-
-		/// <summary>
-		/// Gets the page info object for this page. Necessary so we can validate query parameters and ensure authenticated user can access the page.
-		/// </summary>
-		public abstract PageInfo InfoAsBaseType { get; }
-
-		/// <summary>
 		/// Gets the parameters modification object for this page. 
 		/// </summary>
 		public abstract ParametersModificationBase ParametersModificationAsBaseType { get; }
 
-		/// <summary>
-		/// Executes EWF logic in addition to the standard ASP.NET PreInit logic.
-		/// </summary>
-		protected sealed override void OnPreInit( EventArgs e ) {
-			initEntitySetupAndCreateInfoObjects();
-			base.OnPreInit( e );
-		}
+		protected sealed override ExternalRedirect getRedirect() => base.getRedirect();
 
-		private void initEntitySetupAndCreateInfoObjects() {
-			AppRequestState.Instance.UserDisabledByPage = true;
-			try {
-				using( MiniProfiler.Current.Step( "EWF - Create page info" ) )
-					createInfoFromQueryString();
+		protected sealed override EwfSafeRequestHandler getOrHead() => new EwfSafeResponseWriter( processViewAndGetResponse() );
 
-				// If the request doesn't match the page's specified security level, redirect with the proper level. Do this before ensuring that the user can access the
-				// page since in certificate authentication systems this can be affected by the connection security level.
-				//
-				// When goal 448 (Clean URLs) is complete, we want to do full URL normalization during request dispatching, like we do with shortcut URLs.
-				bool connectionSecurityIncorrect;
-				using( MiniProfiler.Current.Step( "EWF - Check connection security" ) )
-					connectionSecurityIncorrect = getConnectionSecurityIncorrect();
-				if( connectionSecurityIncorrect ) {
-					if( !InfoAsBaseType.ShouldBeSecureGivenCurrentRequest && EwfApp.Instance.RequestIsSecure( Request ) )
-						Response.AppendHeader( "Strict-Transport-Security", "max-age=0" );
-					NetTools.Redirect( InfoAsBaseType.GetUrl( false, false, true ) );
-				}
-			}
-			finally {
-				AppRequestState.Instance.UserDisabledByPage = false;
-			}
-
-			// This logic depends on the authenticated user and on page and entity setup info objects.
-			bool userCanAccessResource;
-			using( MiniProfiler.Current.Step( "EWF - Check page authorization" ) )
-				userCanAccessResource = InfoAsBaseType.UserCanAccessResource;
-			if( !userCanAccessResource )
-				throw new AccessDeniedException(
-					ConfigurationStatics.IsIntermediateInstallation && !InfoAsBaseType.IsIntermediateInstallationPublicResource &&
-					!AppRequestState.Instance.IntermediateUserExists,
-					InfoAsBaseType.LogInPage );
-
-			DisabledResourceMode disabledMode;
-			using( MiniProfiler.Current.Step( "EWF - Check alternative page mode" ) )
-				disabledMode = InfoAsBaseType.AlternativeMode as DisabledResourceMode;
-			if( disabledMode != null )
-				throw new PageDisabledException( disabledMode.Message );
-
-			var cachedRequestHandler = requestHandler;
-			if( cachedRequestHandler != null ) {
-				Response.ClearHeaders();
-				Response.ClearContent();
-				cachedRequestHandler.WriteResponse();
-
-				// Calling Response.End() is not a good practice; see http://stackoverflow.com/q/1087777/35349. We should be able to remove this call when we separate
-				// EWF from Web Forms. This is EnduraCode goal 790.
-				Response.End();
-			}
-		}
-
-		/// <summary>
-		/// Creates the info object for this page based on the query parameters of the request.
-		/// </summary>
-		protected abstract void createInfoFromQueryString();
-
-		/// <summary>
-		/// Gets the request handler for this page, which will override the page.
-		/// </summary>
-		protected virtual EwfSafeRequestHandler requestHandler => null;
-
-		/// <summary>
-		/// Performs EWF activities in addition to the normal InitComplete activities.
-		/// </summary>
-		protected sealed override void OnInitComplete( EventArgs e ) {
-			base.OnInitComplete( e );
-			if( Request.HttpMethod == "POST" && AppRequestState.Instance.EwfPageRequestState == null ) {
-				handlePostBack();
-				return;
-			}
-
+		private EwfResponse processViewAndGetResponse() {
 			if( AppRequestState.Instance.EwfPageRequestState == null ) {
 				if( StandardLibrarySessionState.Instance.EwfPageRequestState != null ) {
 					AppRequestState.Instance.EwfPageRequestState = StandardLibrarySessionState.Instance.EwfPageRequestState;
@@ -291,31 +217,39 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					}
 				}
 
-				// Re-create info objects. A big reason to do this is that some info objects execute database queries or other code in order to prime the data-access
-				// cache. The code above resets the cache and we want to re-prime it right away.
-				AppRequestState.Instance.UserDisabledByPage = true;
+				// Re-create page object. A big reason to do this is that some pages execute database queries or other code during initialization in order to prime the
+				// data-access cache. The code above resets the cache and we want to re-prime it right away.
+				AppRequestState.Instance.UserDisabledByResource = true;
 				try {
-					using( MiniProfiler.Current.Step( "EWF - Re-create page info after page-view data modifications" ) )
-						reCreateInfo();
+					using( MiniProfiler.Current.Step( "EWF - Re-create page object after page-view data modifications" ) )
+						nextPageObject = reCreate();
 
-					bool connectionSecurityIncorrect;
-					using( MiniProfiler.Current.Step( "EWF - Check connection security after page-view data modifications" ) )
-						connectionSecurityIncorrect = getConnectionSecurityIncorrect();
-					if( connectionSecurityIncorrect )
-						throw getPossibleDeveloperMistakeException( "The connection security of the page changed after page-view data modifications." );
+					bool urlChanged;
+					using( MiniProfiler.Current.Step( "EWF - Check URL after page-view data modifications" ) )
+						urlChanged = nextPageObject.GetUrl( false, false, true ) != AppRequestState.Instance.Url;
+					if( urlChanged )
+						throw getPossibleDeveloperMistakeException( "The URL of the page changed after page-view data modifications." );
 				}
 				finally {
-					AppRequestState.Instance.UserDisabledByPage = false;
+					AppRequestState.Instance.UserDisabledByResource = false;
 				}
-				bool userCanAccessResource;
+				bool userAuthorized;
 				using( MiniProfiler.Current.Step( "EWF - Check page authorization after page-view data modifications" ) )
-					userCanAccessResource = InfoAsBaseType.UserCanAccessResource;
+					userAuthorized = nextPageObject.UserCanAccessResource;
 				DisabledResourceMode disabledMode;
 				using( MiniProfiler.Current.Step( "EWF - Check alternative page mode after page-view data modifications" ) )
-					disabledMode = InfoAsBaseType.AlternativeMode as DisabledResourceMode;
-				if( !userCanAccessResource || disabledMode != null )
+					disabledMode = nextPageObject.AlternativeMode as DisabledResourceMode;
+				if( !userAuthorized || disabledMode != null )
 					throw getPossibleDeveloperMistakeException( "The user lost access to the page or the page became disabled after page-view data modifications." );
+				return nextPageObject.processSecondaryOperationAndGetResponse();
 			}
+
+			return processSecondaryOperationAndGetResponse();
+		}
+
+		private EwfResponse processSecondaryOperationAndGetResponse() {
+			var requestState = AppRequestState.Instance.EwfPageRequestState;
+			var dmIdAndSecondaryOp = requestState.DmIdAndSecondaryOp;
 
 			onLoadData();
 
@@ -363,8 +297,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						}
 					} );
 				if( navigationNeeded )
-					navigate( null, null );
+					return navigate( null, null );
 			}
+
+			return getResponse();
 		}
 
 		/// <summary>
@@ -445,18 +381,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// EWF use only.
 		/// </summary>
-		protected abstract void reCreateInfo();
+		protected abstract PageBase reCreate();
 
-		private bool getConnectionSecurityIncorrect() {
-			return InfoAsBaseType.ShouldBeSecureGivenCurrentRequest != EwfApp.Instance.RequestIsSecure( Request );
-		}
+		protected sealed override EwfResponse put() => base.put();
+		protected sealed override EwfResponse patch() => base.patch();
+		protected sealed override EwfResponse delete() => base.delete();
 
-		private void handlePostBack() {
-			HiddenFieldData hiddenFieldData = null;
+		protected sealed override EwfResponse post() {
+			HiddenFieldData hiddenFieldData;
 			try {
 				// throws exception if field missing, because Request.Form returns null
 				hiddenFieldData = JsonConvert.DeserializeObject<HiddenFieldData>(
-					Request.Form[ HiddenFieldName ],
+					HttpContext.Current.Request.Form[ HiddenFieldName ],
 					new JsonSerializerSettings { MissingMemberHandling = MissingMemberHandling.Error } );
 
 				AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( hiddenFieldData.ScrollPositionX, hiddenFieldData.ScrollPositionY );
@@ -466,12 +402,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				// Set a 400 status code if there are any problems loading hidden field state. We're assuming these problems are never the developers' fault.
 				if( AppRequestState.Instance.EwfPageRequestState == null )
 					AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( null, null );
-				Response.StatusCode = 400;
-				Response.TrySkipIisCustomErrors = true;
+				HttpContext.Current.Response.StatusCode = 400;
+				HttpContext.Current.Response.TrySkipIisCustomErrors = true;
 				AppRequestState.Instance.EwfPageRequestState.FocusKey = "";
 				AppRequestState.Instance.EwfPageRequestState.GeneralModificationErrors =
 					Translation.ApplicationHasBeenUpdatedAndWeCouldNotInterpretAction.ToCollection();
-				resetPage();
+				nextPageObject = reCreate();
+				return nextPageObject.processViewAndGetResponse();
 			}
 
 			onLoadData();
@@ -563,16 +500,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( null, null );
 				} );
 
-			navigate( redirectInfo, AppRequestState.Instance.EwfPageRequestState.ModificationErrorsExist ? null : fullSecondaryResponse );
+			return navigate( redirectInfo, AppRequestState.Instance.EwfPageRequestState.ModificationErrorsExist ? null : fullSecondaryResponse );
 		}
 
-		/// <summary>
-		/// This needs to be called after the page state dictionary has been created or restored.
-		/// </summary>
 		private void onLoadData() {
-			if( HasControls() )
-				throw new ApplicationException( "ASPX content exists." );
-
 			var elementJsInitStatements = new StringBuilder();
 
 			formState = new FormState();
@@ -714,12 +645,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			requestState.PostBackValues = new PostBackValueDictionary();
 			var extraPostBackValuesExist = requestState.ComponentStateValuesById.Keys.Any( i => !componentStateItemsById.ContainsKey( i ) ) |
 			                               requestState.PostBackValues.AddFromRequest(
-				                               Request.Form.Cast<string>().Except( new[] { HiddenFieldName, ButtonElementName } ),
+				                               HttpContext.Current.Request.Form.Cast<string>().Except( new[] { HiddenFieldName, ButtonElementName } ),
 				                               postBackValueKeys.Contains,
-				                               key => Request.Form[ key ] ) | requestState.PostBackValues.AddFromRequest(
-				                               Request.Files.Cast<string>(),
+				                               key => HttpContext.Current.Request.Form[ key ] ) | requestState.PostBackValues.AddFromRequest(
+				                               HttpContext.Current.Request.Files.Cast<string>(),
 				                               postBackValueKeys.Contains,
-				                               key => Request.Files[ key ] );
+				                               key => HttpContext.Current.Request.Files[ key ] );
 
 			// Make sure data didn't change under this page's feet since the last request.
 			var invalidPostBackValuesExist =
@@ -800,30 +731,33 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return ( contents.ToString(), staticStateItems, staticFormValues );
 		}
 
-		private void navigate( ResourceInfo destination, FullResponse secondaryResponse ) {
+		private EwfResponse navigate( ResourceInfo destination, FullResponse secondaryResponse ) {
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
 
 			string destinationUrl;
 			try {
-				// Determine the final redirect destination. If a destination is already specified and it is the current page or a page with the same entity setup,
-				// replace any default optional parameter values it may have with new values from this post back. If a destination isn't specified, make it the current
+				// Determine the final navigation destination. If a destination is already specified and it is the current page or a page with the same entity setup,
+				// replace any default optional parameter values it may have with new values from this post-back. If a destination isn't specified, make it the current
 				// page with new parameter values from this post back. At the end of this block, destination is always newly created with fresh data that reflects any
-				// changes that may have occurred in EH methods (except when the destination is an external resource). It's important that every case below *actually
+				// data modifications that may have occurred (except when the destination is an external resource). It's important that every case below *actually
 				// creates* a new resource object to guard against this scenario:
 				// 1. A page modifies data such that a previously-created destination resource object that is then used here is no longer valid because it would throw
 				//    an exception from init if it were re-created.
 				// 2. The page redirects, or transfers, to this destination, leading the user to an error page without developers being notified. This is bad behavior.
+				// It would also be a problem if the destination were the current page object since it could then contain dirty state from this post-back after
+				// navigation.
 				if( requestState.ModificationErrorsExist ||
 				    ( requestState.DmIdAndSecondaryOp != null && requestState.DmIdAndSecondaryOp.Item2 == SecondaryPostBackOperation.NoOperation ) )
-					destination = InfoAsBaseType.CloneAndReplaceDefaultsIfPossible( true );
+					destination = CloneAndReplaceDefaultsIfPossible( true );
 				else if( destination == null )
 					destination = reCreateFromNewParameterValues();
 				else if( destination is ResourceBase r )
 					destination = r.CloneAndReplaceDefaultsIfPossible( false );
+				nextPageObject = destination as PageBase;
 
-				// This GetUrl call is important even for the transfer case below for the same reason that we *actually create* a new page info object in every case
-				// above. We want to force developers to get an error email if a page modifies data to make itself unauthorized/disabled without specifying a different
-				// page as the redirect destination. The resulting transfer would lead the user to an error page.
+				// This GetUrl call is important even for the transfer case below for the same reason that we *actually create* a new page object in every case above.
+				// We want to force developers to get an error email if a page modifies data to make itself unauthorized/disabled without specifying a different page as
+				// the redirect destination. The resulting transfer would lead the user to an error page.
 				destinationUrl = destination.GetUrl();
 			}
 			catch( Exception e ) {
@@ -841,17 +775,20 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 
 			// If the redirect destination is identical to the current page, do a transfer instead of a redirect.
-			if( destination is ResourceBase resource && resource.IsIdenticalToCurrent() ) {
+			if( nextPageObject?.IsIdenticalToCurrent() == true ) {
 				AppRequestState.Instance.ClearUserAndImpersonator();
-				resetPage();
+				return nextPageObject.processViewAndGetResponse();
 			}
 
 			// If the redirect destination is the current page, but with different query parameters, save request state in session state until the next request.
-			if( destination.GetType() == InfoAsBaseType.GetType() )
+			if( destination.GetType() == GetType() )
 				StandardLibrarySessionState.Instance.EwfPageRequestState = requestState;
 
-			// When we separate EWF from Web Forms, we want this to become an HTTP 303 redirect, if it isn’t already.
-			NetTools.Redirect( destinationUrl );
+			HttpContext.Current.Response.StatusCode = 303;
+			return EwfResponse.Create(
+				ContentTypes.PlainText,
+				new EwfResponseBodyCreator( writer => writer.Write( "See Other: {0}".FormatWith( destinationUrl ) ) ),
+				additionalHeaderFieldGetter: () => ( "Location", destinationUrl ).ToCollection() );
 		}
 
 		/// <summary>
@@ -868,13 +805,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			throw new ApplicationException( StringTools.ConcatenateWithDelimiter( " ", sentences ), innerException );
 		}
 
-		private void resetPage() {
-			Server.Transfer( Request.AppRelativeCurrentExecutionFilePath );
-		}
-
-		protected sealed override void OnPreRender( EventArgs eventArgs ) {
-			base.OnPreRender( eventArgs );
-
+		private EwfResponse getResponse() {
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
 			var modificationErrorsOccurred = requestState.ModificationErrorsExist &&
 			                                 ( requestState.DmIdAndSecondaryOp == null ||
@@ -896,19 +827,28 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			FormsAuthStatics.UpdateFormsAuthCookieIfNecessary();
 
-			if( !ConfigurationStatics.IsLiveInstallation )
-				Response.AppendHeader( "X-Robots-Tag", "noindex, nofollow" );
-			else if( !InfoAsBaseType.AllowsSearchEngineIndexing )
-				Response.AppendHeader( "X-Robots-Tag", "noindex" );
+			var response = EwfResponse.Create(
+				ContentTypes.Html,
+				new EwfResponseBodyCreator( pageTree.WriteMarkup ),
+				additionalHeaderFieldGetter: () => {
+					var headerFields = new List<( string, string )>();
 
-			// Without this header, certain sites could be forced into compatibility mode due to the Compatibility View Blacklist maintained by Microsoft.
-			Response.AppendHeader( "X-UA-Compatible", "IE=edge" );
+					if( !ConfigurationStatics.IsLiveInstallation )
+						headerFields.Add( ( "X-Robots-Tag", "noindex, nofollow" ) );
+					else if( !AllowsSearchEngineIndexing )
+						headerFields.Add( ( "X-Robots-Tag", "noindex" ) );
 
-			pageTree.WriteMarkup( Response.Output );
+					// Without this header, certain sites could be forced into compatibility mode due to the Compatibility View Blacklist maintained by Microsoft.
+					headerFields.Add( ( "X-UA-Compatible", "IE=edge" ) );
+
+					return headerFields;
+				} );
 
 
 			StandardLibrarySessionState.Instance.StatusMessages.Clear();
 			StandardLibrarySessionState.Instance.ClearClientSideNavigation();
+
+			return response;
 		}
 
 		private string getJsInitStatements( string elementJsInitStatements ) {
@@ -929,7 +869,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				out var clientSideNavigationDelay );
 			var clientSideNavigationStatements = "";
 			if( clientSideNavigationUrl.Any() ) {
-				var url = this.GetClientUrl( clientSideNavigationUrl );
+				var url = clientSideNavigationUrl;
 				if( clientSideNavigationInNewWindow )
 					clientSideNavigationStatements = "var newWindow = window.open( '{0}', '{1}' ); newWindow.focus();".FormatWith( url, "_blank" );
 				else
@@ -963,18 +903,5 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Gets the function call that should be executed when the jQuery document ready event is fired.
 		/// </summary>
 		protected virtual string javaScriptDocumentReadyFunctionCall => "";
-
-		/// <summary>
-		/// Saves view state.
-		/// </summary>
-		protected sealed override object SaveViewState() {
-			// This is the last possible place in the life cycle this could go; view state is saved right after this.
-			foreach( Control child in Controls )
-				child.EnableViewState = false;
-
-			return base.SaveViewState();
-		}
-
-		protected sealed override void SavePageStateToPersistenceMedium( object state ) {}
 	}
 }

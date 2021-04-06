@@ -532,9 +532,7 @@
     <Compile Include="EnterpriseWebFramework\Modal Boxes\ModalBoxId.cs" />
     <Compile Include="EnterpriseWebFramework\Modal Boxes\OpenModalBehavior.cs" />
     <Compile Include="EnterpriseWebFramework\MvcStatics.cs" />
-    <Compile Include="EnterpriseWebFramework\Form Controls\Text Box\AutoCompleteService.cs">
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
+    <Compile Include="EnterpriseWebFramework\Form Controls\Text Box\AutoCompleteService.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\CellPlaceholder.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\ColumnPrimaryItemGroup.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\ColumnPrimaryTable.cs" />
@@ -559,9 +557,6 @@
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Data Modification\EwfValidation.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Data Modification\PostBackValueDictionary.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Data Modification\ValidationList.cs" />
-    <Compile Include="EnterpriseWebFramework\Page Infrastructure\EwfPage.cs">
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\EwfPageRequestState.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Form Setup\FormAction.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Form Setup\FormState.cs" />
@@ -597,6 +592,7 @@
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Nodes\ElementNodeLocalData.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Nodes\MarkupBlockNode.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Nodes\TextNode.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\PageBase.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\PageContent.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\PageInfo.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\PageNode.cs" />
@@ -732,7 +728,6 @@
     <Compile Include="MailMerging\RowTree\MergeValue.cs" />
     <Compile Include="MailMerging\RowTree\MergeRow.cs" />
     <Compile Include="MultiMessageApplicationException.cs" />
-    <Compile Include="Tools\ControlTools.cs" />
     <Compile Include="Tools\ServiceControllerTools.cs" />
     <Compile Include="TrustedHtmlString.cs" />
     <Compile Include="UnexpectedValueException.cs" />

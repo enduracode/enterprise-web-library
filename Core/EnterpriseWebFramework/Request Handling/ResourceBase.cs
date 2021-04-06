@@ -5,6 +5,7 @@ using System.Linq;
 using System.Web;
 using EnterpriseWebLibrary.Configuration;
 using Humanizer;
+using StackExchange.Profiling;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -72,7 +73,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
-		/// Gets the entity setup info object if one exists.
+		/// Gets the entity setup for this resource, if one exists.
 		/// </summary>
 		public abstract EntitySetupBase EsAsBaseType { get; }
 
@@ -256,13 +257,33 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		protected virtual IEnumerable<UrlPattern> getChildUrlPatterns() => Enumerable.Empty<UrlPattern>();
 
 		void BasicUrlHandler.HandleRequest( HttpContext context ) {
-			var canonicalUrl = GetUrl( false, false, true );
-			if( canonicalUrl != AppRequestState.Instance.Url ) {
-				if( !ShouldBeSecureGivenCurrentRequest && EwfApp.Instance.RequestIsSecure( context.Request ) )
-					context.Response.AppendHeader( "Strict-Transport-Security", "max-age=0" );
-				writeRedirectResponse( context, canonicalUrl, true );
-				return;
+			AppRequestState.Instance.UserDisabledByResource = true;
+			try {
+				var canonicalUrl = GetUrl( false, false, true );
+				if( canonicalUrl != AppRequestState.Instance.Url ) {
+					if( !ShouldBeSecureGivenCurrentRequest && EwfApp.Instance.RequestIsSecure( context.Request ) )
+						context.Response.AppendHeader( "Strict-Transport-Security", "max-age=0" );
+					writeRedirectResponse( context, canonicalUrl, true );
+					return;
+				}
 			}
+			finally {
+				AppRequestState.Instance.UserDisabledByResource = false;
+			}
+
+			bool userAuthorized;
+			using( MiniProfiler.Current.Step( "EWF - Check resource authorization" ) )
+				userAuthorized = UserCanAccessResource;
+			if( !userAuthorized )
+				throw new AccessDeniedException(
+					ConfigurationStatics.IsIntermediateInstallation && !IsIntermediateInstallationPublicResource && !AppRequestState.Instance.IntermediateUserExists,
+					LogInPage );
+
+			DisabledResourceMode disabledMode;
+			using( MiniProfiler.Current.Step( "EWF - Check alternative resource mode" ) )
+				disabledMode = AlternativeMode as DisabledResourceMode;
+			if( disabledMode != null )
+				throw new PageDisabledException( disabledMode.Message );
 
 			var redirect = getRedirect();
 			if( redirect != null ) {
@@ -332,6 +353,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				.WriteToAspNetResponse( context.Response, omitBody: context.Request.HttpMethod == "HEAD" );
 		}
 
+		/// <summary>
+		/// Returns the handler for a GET or HEAD request.
+		/// </summary>
 		protected virtual EwfSafeRequestHandler getOrHead() => null;
 
 		protected virtual EwfResponse put() => null;

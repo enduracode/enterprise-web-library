@@ -48,7 +48,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public bool IntermediateUserExists { get; set; }
 
 		private bool userEnabled;
-		internal bool UserDisabledByPage { get; set; }
+		internal bool UserDisabledByResource { get; set; }
 		private Tuple<User, SpecifiedValue<User>> userAndImpersonator;
 
 		private string errorPrefix = "";
@@ -168,7 +168,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			get {
 				if( !userEnabled )
 					throw new ApplicationException( "User cannot be accessed this early in the request life cycle." );
-				if( UserDisabledByPage )
+				if( UserDisabledByResource )
 					throw new UserDisabledByPageException( "User cannot be accessed. See the AppTools.User documentation for details." );
 				if( !UserAccessible )
 					throw new ApplicationException( "User cannot be accessed from a nonsecure connection in an application that supports secure connections." );
