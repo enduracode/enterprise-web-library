@@ -179,7 +179,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		}
 
 		private static IReadOnlyCollection<EtherealComponent> getLogInHiddenFieldsAndSetUpClientSideLogic( DataValue<string> clientTime ) {
-			EwfPage.Instance.PreRender += delegate { setCookie( testCookieName, "No data" ); };
+			setCookie( testCookieName, "No data" );
 
 			var timeHiddenFieldId = new HiddenFieldId();
 			return new EwfHiddenField(
