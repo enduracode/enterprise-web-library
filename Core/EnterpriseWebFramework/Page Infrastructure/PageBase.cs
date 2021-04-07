@@ -371,11 +371,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return null;
 		}
 
-		/// <summary>
-		/// EWF use only.
-		/// </summary>
-		protected abstract PageBase reCreate();
-
 		protected sealed override EwfResponse put() => base.put();
 		protected sealed override EwfResponse patch() => base.patch();
 		protected sealed override EwfResponse delete() => base.delete();
@@ -741,7 +736,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				// navigation.
 				if( requestState.ModificationErrorsExist ||
 				    ( requestState.DmIdAndSecondaryOp != null && requestState.DmIdAndSecondaryOp.Item2 == SecondaryPostBackOperation.NoOperation ) )
-					destination = CloneAndReplaceDefaultsIfPossible( true );
+					destination = reCreate();
 				else if( destination == null )
 					destination = reCreateFromNewParameterValues();
 				else if( destination is ResourceBase r )
@@ -783,6 +778,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				new EwfResponseBodyCreator( writer => writer.Write( "See Other: {0}".FormatWith( destinationUrl ) ) ),
 				additionalHeaderFieldGetter: () => ( "Location", destinationUrl ).ToCollection() );
 		}
+
+		/// <summary>
+		/// Framework use only.
+		/// </summary>
+		protected abstract PageBase reCreate();
 
 		/// <summary>
 		/// Creates a page info object using the new parameter value fields in this page.
