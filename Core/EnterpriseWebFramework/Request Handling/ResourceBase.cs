@@ -222,8 +222,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		internal sealed override string GetUrl( bool ensureUserCanAccessResource, bool ensureResourceNotDisabled, bool makeAbsolute ) {
-			var secure = ShouldBeSecureGivenCurrentRequest;
-			string getCanonicalUrl() => UrlHandlingStatics.GetCanonicalUrl( this, secure );
+			string getCanonicalUrl() => UrlHandlingStatics.GetCanonicalUrl( this, ShouldBeSecureGivenCurrentRequest );
 			var url = ( EwfApp.Instance != null && EwfApp.Instance.RequestState != null
 				            ? EwfApp.Instance.RequestState.ExecuteWithResourceAndUserDisabled( getCanonicalUrl )
 				            : getCanonicalUrl() ) + uriFragmentIdentifier.PrependDelimiter( "#" );
