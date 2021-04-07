@@ -79,7 +79,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			this.selectionChangedAction = selectionChangedAction;
 
-			EwfPage.Instance.AddControlTreeValidation(
+			PageBase.Current.AddControlTreeValidation(
 				() => ValidateControls(
 					allowNoSelection,
 					buttonIdAndIsReadOnlyAndValueAndPmvQuadruples.All( i => !i.value ),

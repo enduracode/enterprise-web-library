@@ -388,10 +388,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
-		/// Returns true if this resource info object is identical to the current resource info object. The comparison excludes optional parameters that haven't
-		/// been explicitly set.
+		/// Returns true if this resource is identical to the current resource. The comparison excludes optional parameters that haven't been explicitly set.
 		/// </summary>
-		public bool IsIdenticalToCurrent() => Equals( EwfPage.Instance.InfoAsBaseType );
+		public bool IsIdenticalToCurrent() => Equals( Current );
 
 		/// <summary>
 		/// Framework use only.

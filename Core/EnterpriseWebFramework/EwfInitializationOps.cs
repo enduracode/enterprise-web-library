@@ -74,11 +74,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 						CssPreprocessingStatics.Init( globalInitializer.GetType().Assembly, globalType.Assembly );
 						ResourceBase.Init( resource => AppRequestState.Instance.SetResource( resource ), () => AppRequestState.Instance.Resource );
-						EwfPage.Init( BasicPageContent.GetContent );
+						PageBase.Init( BasicPageContent.GetContent );
 						HyperlinkBehaviorExtensionCreators.Init( ModalBox.GetBrowsingModalBoxOpenStatements );
-						FileUpload.Init( () => ( (BasicPageContent)EwfPage.Instance.BasicContent ).FormUsesMultipartEncoding = true );
-						ModalBox.Init( () => ( (BasicPageContent)EwfPage.Instance.BasicContent ).BrowsingModalBoxId );
-						CreditCardCollector.Init( () => ( (BasicPageContent)EwfPage.Instance.BasicContent ).IncludesStripeCheckout = true );
+						FileUpload.Init( () => ( (BasicPageContent)PageBase.Current.BasicContent ).FormUsesMultipartEncoding = true );
+						ModalBox.Init( () => ( (BasicPageContent)PageBase.Current.BasicContent ).BrowsingModalBoxId );
+						CreditCardCollector.Init( () => ( (BasicPageContent)PageBase.Current.BasicContent ).IncludesStripeCheckout = true );
 						BasicPageContent.Init(
 							contentObjects => {
 								var contentUsesUi = contentObjects.Any( i => i is UiPageContent );

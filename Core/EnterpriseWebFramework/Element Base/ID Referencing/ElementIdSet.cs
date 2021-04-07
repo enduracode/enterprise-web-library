@@ -13,7 +13,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Adds an element’s client-side ID to this set. ElementData use only.
 		/// </summary>
 		internal override void AddId( string id ) {
-			EwfPage.AssertPageTreeNotBuilt();
+			PageBase.AssertPageTreeNotBuilt();
 			ids.Add( id );
 		}
 
@@ -22,7 +22,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public IReadOnlyCollection<string> Ids {
 			get {
-				EwfPage.AssertPageTreeBuilt();
+				PageBase.AssertPageTreeBuilt();
 				return ids;
 			}
 		}

@@ -55,7 +55,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								                     foreach( var i in ids )
 									                     BlobStorageStatics.SystemProvider.DeleteFile( i );
 								                     filesDeletedNotifier?.Invoke();
-								                     EwfPage.AddStatusMessage( StatusMessageType.Info, "Selected files deleted successfully." );
+								                     PageBase.AddStatusMessage( StatusMessageType.Info, "Selected files deleted successfully." );
 							                     } )
 						                     .ToCollection(),
 				fields: columnSetups );
@@ -135,7 +135,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							BlobStorageStatics.GetContentTypeForPostedFile( file ) );
 
 					fileCreatedOrReplacedNotifier?.Invoke( newFileId );
-					EwfPage.AddStatusMessage( StatusMessageType.Info, "File uploaded successfully." );
+					PageBase.AddStatusMessage( StatusMessageType.Info, "File uploaded successfully." );
 				} );
 			return FormState.ExecuteWithDataModificationsAndDefaultAction(
 				dm.ToCollection(),

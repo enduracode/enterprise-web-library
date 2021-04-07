@@ -48,7 +48,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				pageName = new PageName(
 					excludePageNameIfEntitySetupExists: currentPageBehavior == PagePathCurrentPageBehavior.IncludeCurrentPageAndExcludePageNameIfEntitySetupExists );
 
-			var pagePath = EwfPage.Instance.InfoAsBaseType.ResourcePath;
+			var pagePath = PageBase.Current.ResourcePath;
 			var components = new List<FlowComponent>();
 			foreach( var resource in pagePath.Take( pagePath.Count - 1 ) ) {
 				components.Add( new EwfHyperlink( resource, new StandardHyperlinkStyle( resource.ResourceFullName ) ) );
@@ -64,7 +64,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Returns true if this component will not display any content.
 		/// </summary>
-		public bool IsEmpty => EwfPage.Instance.InfoAsBaseType.ResourcePath.Count == 1 && ( pageName == null || pageName.IsEmpty );
+		public bool IsEmpty => PageBase.Current.ResourcePath.Count == 1 && ( pageName == null || pageName.IsEmpty );
 
 		IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() => children;
 	}

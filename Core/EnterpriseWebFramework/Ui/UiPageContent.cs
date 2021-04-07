@@ -171,7 +171,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			if( contentFootActions == null && contentFootComponents == null )
 				contentFootActions = Enumerable.Empty<ButtonSetup>().Materialize();
 
-			entityUiSetup = ( EwfPage.Instance.EsAsBaseType as UiEntitySetup )?.GetUiSetup();
+			entityUiSetup = ( PageBase.Current.EsAsBaseType as UiEntitySetup )?.GetUiSetup();
 			basicContent = new BasicPageContent( dataUpdateModificationMethod: dataUpdateModificationMethod, isAutoDataUpdater: isAutoDataUpdater ).Add(
 				getGlobalContainer()
 					.Append(
@@ -203,7 +203,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			if( !EwfUiStatics.AppProvider.BrowserWarningDisabled() ) {
 				if( AppRequestState.Instance.Browser.IsOldVersionOfMajorBrowser() && !StandardLibrarySessionState.Instance.HideBrowserWarningForRemainderOfSession )
-					EwfPage.AddStatusMessage(
+					PageBase.AddStatusMessage(
 						StatusMessageType.Warning,
 						StringTools.ConcatenateWithDelimiter(
 							" ",
@@ -245,7 +245,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			var userInfo = new List<FlowComponent>();
 			if( AppRequestState.Instance.UserAccessible ) {
-				var changePasswordPage = EwfApp.MetaLogicFactory.CreateChangePasswordPageInfo( EwfPage.Instance.InfoAsBaseType.GetUrl() );
+				var changePasswordPage = EwfApp.MetaLogicFactory.CreateChangePasswordPageInfo( PageBase.Current.GetUrl() );
 				if( changePasswordPage.UserCanAccessResource && AppTools.User != null )
 					userInfo.Add( new GenericFlowContainer( getUserInfo( changePasswordPage ), classes: userInfoClass ) );
 			}
@@ -301,7 +301,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private FlowComponent getEntityAndTopTabContainer() {
 			var components = new List<FlowComponent> { getEntityContainer() };
 			if( entityUsesTabMode( TabMode.Horizontal ) ) {
-				var resourceGroups = EwfPage.Instance.EsAsBaseType.ListedResources;
+				var resourceGroups = PageBase.Current.EsAsBaseType.ListedResources;
 				if( resourceGroups.Count > 1 )
 					throw new ApplicationException( "Top tabs are not supported with multiple resource groups." );
 				components.Add( getTopTabListContainer( resourceGroups.Single() ) );
@@ -315,9 +315,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				classes: entityContainerClass );
 
 		private IReadOnlyCollection<FlowComponent> getPagePath() {
-			var entitySetup = EwfPage.Instance.EsAsBaseType;
+			var entitySetup = PageBase.Current.EsAsBaseType;
 			var pagePath = new PagePath(
-				currentPageBehavior: entitySetup != null && EwfPage.Instance.InfoAsBaseType.ParentResource == null && entitySetup.ListedResources.Any()
+				currentPageBehavior: entitySetup != null && PageBase.Current.ParentResource == null && entitySetup.ListedResources.Any()
 					                     ? PagePathCurrentPageBehavior.IncludeCurrentPageAndExcludePageNameIfEntitySetupExists
 					                     : PagePathCurrentPageBehavior.IncludeCurrentPage );
 			return pagePath.IsEmpty ? Enumerable.Empty<FlowComponent>().Materialize() : pagePath.ToCollection();
@@ -345,7 +345,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		private FlowComponent getEntityActionListContainer() {
-			if( entityUiSetup == null || EwfPage.Instance.InfoAsBaseType.ParentResource != null )
+			if( entityUiSetup == null || PageBase.Current.ParentResource != null )
 				return null;
 			var listItems = getActionListItems( entityUiSetup.Actions ).Materialize();
 			if( !listItems.Any() )
@@ -367,11 +367,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				classes: topTabListContainerClass );
 
 		private bool entityUsesTabMode( TabMode tabMode ) =>
-			entityUiSetup != null && EwfPage.Instance.InfoAsBaseType.ParentResource == null && entityUiSetup.GetTabMode( EwfPage.Instance.EsAsBaseType ) == tabMode;
+			entityUiSetup != null && PageBase.Current.ParentResource == null && entityUiSetup.GetTabMode( PageBase.Current.EsAsBaseType ) == tabMode;
 
 		private FlowComponent getSideTabContainer() {
 			var components = new List<FlowComponent>();
-			foreach( var resourceGroup in EwfPage.Instance.EsAsBaseType.ListedResources ) {
+			foreach( var resourceGroup in PageBase.Current.EsAsBaseType.ListedResources ) {
 				var tabs = getTabHyperlinksForResources( resourceGroup, true );
 				if( tabs.Any() && resourceGroup.Name.Any() )
 					components.Add( new GenericFlowContainer( resourceGroup.Name.ToComponents(), classes: sideTabGroupHeadClass ) );
@@ -429,7 +429,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										.ToComponentListItem( displaySetup: action.DisplaySetup ) ) ).ToCollection(),
 							classes: contentFootActionListContainerClass ) );
 				else if( isAutoDataUpdater )
-					components.Add( new SubmitButton( new StandardButtonStyle( "Update Now" ), postBack: EwfPage.Instance.DataUpdatePostBack ) );
+					components.Add( new SubmitButton( new StandardButtonStyle( "Update Now" ), postBack: PageBase.Current.DataUpdatePostBack ) );
 			}
 			else {
 				if( isAutoDataUpdater )

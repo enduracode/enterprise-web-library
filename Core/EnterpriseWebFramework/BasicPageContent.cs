@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Web;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.WebSessionState;
@@ -210,8 +211,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 											() => new ElementLocalData( "title" ),
 											children: ( titleOverride.Any() ? titleOverride : getTitle() ).ToComponents() ) ).Concat( getMetadataAndFaviconLinks() )
 									.Concat( getTypekitLogicIfNecessary() )
-									.Concat(
-										from i in cssInfoCreator( contentObjects ) select getStyleSheetLink( EwfPage.Instance.GetClientUrl( i.GetUrl( false, false, false ) ) ) )
+									.Concat( from i in cssInfoCreator( contentObjects ) select getStyleSheetLink( i.GetUrl() ) )
 									.Append( getModernizrLogic() )
 									.Concat( getGoogleAnalyticsLogicIfNecessary() )
 									.Append( getJavaScriptIncludes() )
@@ -231,7 +231,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 											formContext => new ElementData(
 												() => {
 													var attributes = new List<ElementAttribute>();
-													attributes.Add( new ElementAttribute( "action", EwfPage.Instance.InfoAsBaseType.GetUrl() ) );
+													attributes.Add( new ElementAttribute( "action", PageBase.Current.GetUrl() ) );
 													attributes.Add( new ElementAttribute( "method", "post" ) );
 													if( FormUsesMultipartEncoding )
 														attributes.Add( new ElementAttribute( "enctype", "multipart/form-data" ) );
@@ -241,7 +241,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 														"form",
 														focusDependentData: new ElementFocusDependentData( attributes: attributes, includeIdAttribute: true ) );
 												},
-												clientSideIdOverride: EwfPage.FormId,
+												clientSideIdOverride: PageBase.FormId,
 												children: preContentComponents.Concat( bodyContent )
 													.Concat( postContentComponents )
 													.Append( etherealContainer )
@@ -251,14 +251,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 																() => {
 																	var attributes = new List<ElementAttribute>();
 																	attributes.Add( new ElementAttribute( "type", "hidden" ) );
-																	attributes.Add( new ElementAttribute( "name", EwfPage.HiddenFieldName ) );
+																	attributes.Add( new ElementAttribute( "name", PageBase.HiddenFieldName ) );
 																	attributes.Add( new ElementAttribute( "value", hiddenFieldValueGetter() ) );
 
 																	return new ElementLocalData(
 																		"input",
 																		focusDependentData: new ElementFocusDependentData( attributes: attributes, includeIdAttribute: true ) );
 																},
-																clientSideIdOverride: EwfPage.HiddenFieldName ) ) )
+																clientSideIdOverride: PageBase.HiddenFieldName ) ) )
 													.Materialize(),
 												etherealChildren: etherealComponents.Concat( etherealContent ).Materialize() ) ).Append( jsInitElement )
 										.Materialize() ) ) )
@@ -274,7 +274,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			outerComponents.Add(
 				new FlowIdContainer(
-					EwfPage.Instance.StatusMessages.Any() && statusMessagesDisplayAsNotification()
+					PageBase.Current.StatusMessages.Any() && statusMessagesDisplayAsNotification()
 						? new GenericFlowContainer( null, classes: notificationSpacerClass ).ToCollection()
 						: Enumerable.Empty<FlowComponent>() ) );
 
@@ -410,7 +410,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			// This is used by the EWF JavaScript file.
 			const string notificationSectionContainerId = "ewfNotification";
 
-			return EwfPage.Instance.StatusMessages.Any() && statusMessagesDisplayAsNotification()
+			return PageBase.Current.StatusMessages.Any() && statusMessagesDisplayAsNotification()
 				       ? new DisplayableElement(
 					       context => new DisplayableElementData(
 						       null,
@@ -418,7 +418,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							       "div",
 							       focusDependentData: new DisplayableElementFocusDependentData(
 								       includeIdAttribute: true,
-								       jsInitStatements: "setTimeout( 'dockNotificationSection();', " + EwfPage.Instance.StatusMessages.Count() * 1000 + " );" ) ),
+								       jsInitStatements: "setTimeout( 'dockNotificationSection();', " + PageBase.Current.StatusMessages.Count() * 1000 + " );" ) ),
 						       classes: notificationSectionContainerNotificationClass,
 						       clientSideIdOverride: notificationSectionContainerId,
 						       children: new Section( null, SectionStyle.Box, null, "Messages", null, getStatusMessageComponentList().ToCollection(), false, true, null )
@@ -435,15 +435,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						new FlowIdContainer(
 							new Section(
 								"Messages",
-								EwfPage.Instance.StatusMessages.Any() && !statusMessagesDisplayAsNotification()
+								PageBase.Current.StatusMessages.Any() && !statusMessagesDisplayAsNotification()
 									? getStatusMessageComponentList().ToCollection()
 									: Enumerable.Empty<FlowComponent>().Materialize() ).ToCollection() ).ToCollection(),
-						open: EwfPage.Instance.StatusMessages.Any() && !statusMessagesDisplayAsNotification() ) )
+						open: PageBase.Current.StatusMessages.Any() && !statusMessagesDisplayAsNotification() ) )
 				.Materialize();
 
 		private FlowComponent getStatusMessageComponentList() =>
 			new StackList(
-				EwfPage.Instance.StatusMessages.Select(
+				PageBase.Current.StatusMessages.Select(
 					i => new GenericFlowContainer(
 						new FontAwesomeIcon( i.Item1 == StatusMessageType.Info ? "fa-info-circle" : "fa-exclamation-triangle", "fa-lg", "fa-fw" )
 							.Append<PhrasingComponent>( new GenericPhrasingContainer( i.Item2.ToComponents(), classes: statusMessageTextClass ) )
@@ -451,7 +451,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						classes: i.Item1 == StatusMessageType.Info ? infoMessageContainerClass : warningMessageContainerClass ).ToComponentListItem() ) );
 
 		private bool statusMessagesDisplayAsNotification() {
-			return EwfPage.Instance.StatusMessages.All( i => i.Item1 == StatusMessageType.Info ) && EwfPage.Instance.StatusMessages.Count() <= 3;
+			return PageBase.Current.StatusMessages.All( i => i.Item1 == StatusMessageType.Info ) && PageBase.Current.StatusMessages.Count() <= 3;
 		}
 
 		private string getTitle() =>
@@ -460,8 +460,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				EwfApp.Instance.AppDisplayName.Length > 0 ? EwfApp.Instance.AppDisplayName : ConfigurationStatics.SystemName,
 				ResourceBase.CombineResourcePathStrings(
 					ResourceBase.ResourcePathSeparator,
-					EwfPage.Instance.InfoAsBaseType.ParentResourceEntityPathString,
-					EwfPage.Instance.InfoAsBaseType.ResourceFullName ) );
+					PageBase.Current.ParentResourceEntityPathString,
+					PageBase.Current.ResourceFullName ) );
 
 		private IReadOnlyCollection<FlowComponent> getMetadataAndFaviconLinks() {
 			var components = new List<FlowComponent>();
@@ -470,23 +470,25 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				getMeta( "application-name", EwfApp.Instance.AppDisplayName.Length > 0 ? EwfApp.Instance.AppDisplayName : ConfigurationStatics.SystemName ) );
 
 			// Chrome start URL
-			components.Add( getMeta( "application-url", EwfPage.Instance.GetClientUrl( NetTools.HomeUrl ) ) );
+			components.Add(
+				getMeta(
+					"application-url",
+					EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString( EwfConfigurationStatics.AppSupportsSecureConnections ) ) );
 
 			// IE9 start URL
-			components.Add( getMeta( "msapplication-starturl", EwfPage.Instance.GetClientUrl( NetTools.HomeUrl ) ) );
+			components.Add(
+				getMeta(
+					"msapplication-starturl",
+					EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString( EwfConfigurationStatics.AppSupportsSecureConnections ) ) );
 
 			var faviconPng48X48 = EwfApp.Instance.FaviconPng48X48;
 			if( faviconPng48X48 != null && faviconPng48X48.UserCanAccessResource )
-				components.Add(
-					getLink(
-						EwfPage.Instance.GetClientUrl( faviconPng48X48.GetUrl( true, true, false ) ),
-						"icon",
-						attributes: new ElementAttribute( "sizes", "48x48" ).ToCollection() ) );
+				components.Add( getLink( faviconPng48X48.GetUrl(), "icon", attributes: new ElementAttribute( "sizes", "48x48" ).ToCollection() ) );
 
 			var favicon = EwfApp.Instance.Favicon;
 			if( favicon != null && favicon.UserCanAccessResource )
 				// rel="shortcut icon" is deprecated and will be replaced with rel="icon".
-				components.Add( getLink( EwfPage.Instance.GetClientUrl( favicon.GetUrl( true, true, false ) ), "shortcut icon" ) );
+				components.Add( getLink( favicon.GetUrl(), "shortcut icon" ) );
 
 			components.Add( getMeta( "viewport", "initial-scale=1" ) );
 
@@ -496,8 +498,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private IEnumerable<FlowComponent> getTypekitLogicIfNecessary() {
 			if( EwfApp.Instance.TypekitId.Any() ) {
 				yield return new TrustedHtmlString(
-					"<script type=\"text/javascript\" src=\"http" + ( EwfApp.Instance.RequestIsSecure( EwfPage.Instance.Request ) ? "s" : "" ) + "://use.typekit.com/" +
-					EwfApp.Instance.TypekitId + ".js\"></script>" ).ToComponent();
+					"<script type=\"text/javascript\" src=\"http" + ( EwfApp.Instance.RequestIsSecure( HttpContext.Current.Request ) ? "s" : "" ) +
+					"://use.typekit.com/" + EwfApp.Instance.TypekitId + ".js\"></script>" ).ToComponent();
 				yield return new TrustedHtmlString( "<script type=\"text/javascript\">try{Typekit.load();}catch(e){}</script>" ).ToComponent();
 			}
 		}
@@ -506,9 +508,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			getLink( url, "stylesheet", attributes: new ElementAttribute( "type", "text/css" ).ToCollection() );
 
 		private FlowComponent getModernizrLogic() =>
-			new TrustedHtmlString(
-				"<script type=\"text/javascript\" src=\"" +
-				EwfPage.Instance.GetClientUrl( EwfApp.MetaLogicFactory.CreateModernizrJavaScriptInfo().GetUrl( false, false, false ) ) + "\"></script>" ).ToComponent();
+			new TrustedHtmlString( "<script type=\"text/javascript\" src=\"" + EwfApp.MetaLogicFactory.CreateModernizrJavaScriptInfo().GetUrl() + "\"></script>" )
+				.ToComponent();
 
 		private IEnumerable<FlowComponent> getGoogleAnalyticsLogicIfNecessary() {
 			if( EwfApp.Instance.GoogleAnalyticsWebPropertyId.Length == 0 )
@@ -536,8 +537,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				() => {
 					var markup = new StringBuilder();
 
-					string getElement( ResourceInfo resource ) =>
-						"<script src=\"{0}\" defer></script>".FormatWith( EwfPage.Instance.GetClientUrl( resource.GetUrl( false, false, false ) ) );
+					string getElement( ResourceInfo resource ) => "<script src=\"{0}\" defer></script>".FormatWith( resource.GetUrl() );
 
 					foreach( var i in EwfApp.MetaLogicFactory.CreateJavaScriptInfos( IncludesStripeCheckout ).Select( getElement ) )
 						markup.Append( i );

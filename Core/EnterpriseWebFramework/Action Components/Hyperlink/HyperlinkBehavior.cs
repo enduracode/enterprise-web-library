@@ -18,7 +18,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal static FormAction GetHyperlinkPostBackAction( ResourceInfo destination ) {
 			var id = PostBack.GetCompositeId( "ewfLink", destination.GetUrl() );
 			return new PostBackFormAction(
-				EwfPage.Instance.GetPostBack( id ) ?? PostBack.CreateFull( id: id, actionGetter: () => new PostBackAction( destination ) ) );
+				PageBase.Current.GetPostBack( id ) ?? PostBack.CreateFull( id: id, actionGetter: () => new PostBackAction( destination ) ) );
 		}
 
 		private readonly ResourceInfo destination;
@@ -37,7 +37,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			Url = new Lazy<string>( () => destination != null ? destination.GetUrl( true, false, true ) : "" );
 			var isPostBackHyperlink = new Lazy<bool>(
-				() => destination != null && !( destination.AlternativeMode is DisabledResourceMode ) && !target.Any() && EwfPage.Instance.IsAutoDataUpdater.Value );
+				() => destination != null && !( destination.AlternativeMode is DisabledResourceMode ) && !target.Any() && PageBase.Current.IsAutoDataUpdater.Value );
 			AttributeGetter = forNonHyperlinkElement =>
 				( destination != null && !forNonHyperlinkElement ? new ElementAttribute( "href", Url.Value ).ToCollection() : Enumerable.Empty<ElementAttribute>() )
 				.Concat(

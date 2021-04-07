@@ -74,7 +74,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					try {
 						var messageAndDestination = successHandler( response.Id, amountInDollars.Value );
 						if( messageAndDestination.Message.Any() )
-							EwfPage.AddStatusMessage( StatusMessageType.Info, messageAndDestination.Message );
+							PageBase.AddStatusMessage( StatusMessageType.Info, messageAndDestination.Message );
 						successDestination = messageAndDestination.Destination;
 					}
 					catch( Exception e ) {

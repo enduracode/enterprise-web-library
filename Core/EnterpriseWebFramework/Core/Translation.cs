@@ -30,16 +30,12 @@
 				getCorrectTranslation(
 					"Another user has modified this page since the last time you saw it.",
 					"Otro usuario ha modificado esta página desde la última vez que usted lo vio." ) + " " + getCorrectTranslation(
-					"Please either " + Tewl.Tools.NetTools.BuildBasicLink( "load the latest version", EwfPage.Instance.InfoAsBaseType.GetUrl(), false ) +
+					"Please either " + Tewl.Tools.NetTools.BuildBasicLink( "load the latest version", PageBase.Current.GetUrl(), false ) +
 					" or repeat your last action to save this version.",
-					"Por favor, " + Tewl.Tools.NetTools.BuildBasicLink( "carga la última versión", EwfPage.Instance.InfoAsBaseType.GetUrl(), false ) +
+					"Por favor, " + Tewl.Tools.NetTools.BuildBasicLink( "carga la última versión", PageBase.Current.GetUrl(), false ) +
 					" o repita la última acción para guardar a esta versión." ) + " " + getCorrectTranslation(
-					"You can also " + Tewl.Tools.NetTools.BuildBasicLink( "load the latest version in another window", EwfPage.Instance.InfoAsBaseType.GetUrl(), true ) +
-					".",
-					"También puede " + Tewl.Tools.NetTools.BuildBasicLink(
-						"cargar la versión más reciente en otra ventana",
-						EwfPage.Instance.InfoAsBaseType.GetUrl(),
-						true ) + "." ) );
+					"You can also " + Tewl.Tools.NetTools.BuildBasicLink( "load the latest version in another window", PageBase.Current.GetUrl(), true ) + ".",
+					"También puede " + Tewl.Tools.NetTools.BuildBasicLink( "cargar la versión más reciente en otra ventana", PageBase.Current.GetUrl(), true ) + "." ) );
 
 		internal static string AnotherUserHasModifiedPageAndWeCouldNotInterpretAction {
 			get {

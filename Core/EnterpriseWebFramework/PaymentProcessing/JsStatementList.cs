@@ -16,7 +16,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Adds the JavaScript statement getter. This can only be called once.
 		/// </summary>
 		internal void AddStatementGetter( Func<string> statementGetter ) {
-			EwfPage.AssertPageTreeNotBuilt();
+			PageBase.AssertPageTreeNotBuilt();
 			if( this.statementGetter != null )
 				throw new ApplicationException( "The statement getter was already added." );
 			this.statementGetter = statementGetter;
@@ -26,7 +26,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Returns the JavaScript statements. Not available until after the page tree has been built.
 		/// </summary>
 		public string GetStatements() {
-			EwfPage.AssertPageTreeBuilt();
+			PageBase.AssertPageTreeBuilt();
 			return statementGetter != null ? statementGetter() : "";
 		}
 	}

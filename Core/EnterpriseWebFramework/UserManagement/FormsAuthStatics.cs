@@ -234,7 +234,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 			var clockDifference = clientParseResult.GetValueOrThrow() - AppRequestState.RequestTime;
 			if( Math.Abs( clockDifference.TotalMinutes ) > 5 ) {
 				var timeZone = DateTimeZoneProviders.Tzdb.GetSystemDefault();
-				EwfPage.AddStatusMessage(
+				PageBase.AddStatusMessage(
 					StatusMessageType.Warning,
 					Translation.YourClockIsWrong + " " + AppRequestState.RequestTime.InZone( timeZone ).ToDateTimeUnspecified().ToHourAndMinuteString() + " " +
 					timeZone.GetZoneInterval( AppRequestState.RequestTime ).Name + "." );

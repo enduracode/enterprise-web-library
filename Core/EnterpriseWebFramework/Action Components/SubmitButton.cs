@@ -18,7 +18,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			// behavior of HTML’s implicit submission appears to be somewhat arbitrary when there is no submit button; see
 			// https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#implicit-submission. Second, we don’t want the implicit submission behavior of
 			// form controls to unpredictably change if a submit button is added or removed.
-			return action is PostBackFormAction postBackAction && postBackAction.PostBack == EwfPage.Instance.SubmitButtonPostBack && !forceJsHandling
+			return action is PostBackFormAction postBackAction && postBackAction.PostBack == PageBase.Current.SubmitButtonPostBack && !forceJsHandling
 				       ? ""
 				       : "if( e.which == 13 ) {{ {0} }}".FormatWith( "e.preventDefault();".ConcatenateWithSpace( action?.GetJsStatements() ?? "" ) );
 		}
@@ -41,9 +41,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					FormAction action = postBackAction;
 					action.AddToPageIfNecessary();
 
-					if( EwfPage.Instance.SubmitButtonPostBack != null )
+					if( PageBase.Current.SubmitButtonPostBack != null )
 						throw new ApplicationException( "A submit button already exists on the page." );
-					EwfPage.Instance.SubmitButtonPostBack = postBackAction.PostBack;
+					PageBase.Current.SubmitButtonPostBack = postBackAction.PostBack;
 
 					return new DisplayableElementData(
 						displaySetup,
@@ -51,7 +51,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							"button",
 							new FocusabilityCondition( true ),
 							isFocused => {
-								var attributes = new List<ElementAttribute> { new ElementAttribute( "name", EwfPage.ButtonElementName ), new ElementAttribute( "value", "v" ) };
+								var attributes =
+									new List<ElementAttribute> { new ElementAttribute( "name", PageBase.ButtonElementName ), new ElementAttribute( "value", "v" ) };
 								if( isFocused )
 									attributes.Add( new ElementAttribute( "autofocus" ) );
 

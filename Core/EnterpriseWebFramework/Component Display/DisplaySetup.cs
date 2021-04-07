@@ -42,7 +42,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public bool ComponentsDisplayed {
 			get {
-				EwfPage.AssertPageTreeBuilt();
+				PageBase.AssertPageTreeBuilt();
 				return componentsDisplayedPredicate();
 			}
 		}

@@ -13,7 +13,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Adds the element’s client-side ID. This can only be called once. ElementData use only.
 		/// </summary>
 		internal override void AddId( string id ) {
-			EwfPage.AssertPageTreeNotBuilt();
+			PageBase.AssertPageTreeNotBuilt();
 			if( this.id.Length > 0 )
 				throw new ApplicationException( "The ID was already added." );
 			this.id = id;
@@ -24,7 +24,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public string Id {
 			get {
-				EwfPage.AssertPageTreeBuilt();
+				PageBase.AssertPageTreeBuilt();
 				return id;
 			}
 		}

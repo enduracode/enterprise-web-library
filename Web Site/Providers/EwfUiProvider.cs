@@ -11,7 +11,7 @@ namespace EnterpriseWebLibrary.WebSite.Providers {
 				return navButtonSetups;
 
 			// This will hide itself because Contact Us requires a logged-in user, and the standard library test web site has no users.
-			var contactPage = EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ContactSupport.GetInfo( EwfPage.Instance.InfoAsBaseType.GetUrl() );
+			var contactPage = EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ContactSupport.GetInfo( PageBase.Current.GetUrl() );
 			navButtonSetups.Add( new HyperlinkSetup( contactPage, contactPage.ResourceName ) );
 
 			navButtonSetups.Add(
@@ -23,7 +23,7 @@ namespace EnterpriseWebLibrary.WebSite.Providers {
 							behavior: new PostBackBehavior(
 								postBack: PostBack.CreateFull(
 									id: "testMethod",
-									modificationMethod: () => EwfPage.AddStatusMessage( StatusMessageType.Info, "Successful method execution." ) ) ) ).ToCollection() ) ) );
+									modificationMethod: () => PageBase.AddStatusMessage( StatusMessageType.Info, "Successful method execution." ) ) ) ).ToCollection() ) ) );
 
 			return navButtonSetups;
 		}

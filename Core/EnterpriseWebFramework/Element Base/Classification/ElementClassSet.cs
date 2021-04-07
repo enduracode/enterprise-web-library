@@ -38,20 +38,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Adds an element ID to this set, which enables JavaScript to change the classes on the element.
 		/// </summary>
 		internal void AddElementId( string id ) {
-			foreach( var keyValuePair in ConditionsByClassName.Where( i => i.Value != null ) ) {
+			foreach( var keyValuePair in ConditionsByClassName.Where( i => i.Value != null ) )
 				keyValuePair.Value.AddJsModificationStatement(
 					expression => "if( {0} ) {1} else {2}".FormatWith(
 						expression,
 						"{ " + "$( '#{0}' ).addClass( '{1}' );".FormatWith( id, keyValuePair.Key ) + " }",
 						"{ " + "$( '#{0}' ).removeClass( '{1}' );".FormatWith( id, keyValuePair.Key ) + " }" ) );
-			}
 		}
 
 		/// <summary>
 		/// Not available until after the page tree has been built.
 		/// </summary>
 		internal IEnumerable<string> GetClassNames() {
-			EwfPage.AssertPageTreeBuilt();
+			PageBase.AssertPageTreeBuilt();
 			return from i in ConditionsByClassName where i.Value == null || i.Value.IsTrue select i.Key;
 		}
 	}

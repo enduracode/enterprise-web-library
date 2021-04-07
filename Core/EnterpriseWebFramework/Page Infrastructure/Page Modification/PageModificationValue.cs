@@ -22,7 +22,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="statementGetter">A function that takes the value expression and returns a complete statement. Do not pass null.</param>
 		public void AddJsModificationStatement( Func<string, string> statementGetter ) {
 			// This dependency on EwfPage should not exist.
-			EwfPage.AssertPageTreeNotBuilt();
+			PageBase.AssertPageTreeNotBuilt();
 
 			jsModificationStatements.Add( statementGetter );
 		}
@@ -39,7 +39,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public T Value {
 			get {
 				// This dependency on EwfPage should not exist.
-				EwfPage.AssertPageTreeBuilt();
+				PageBase.AssertPageTreeBuilt();
 
 				return value.Value;
 			}
@@ -50,7 +50,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public string GetJsModificationStatements( string valueExpression ) {
 			// This dependency on EwfPage should not exist.
-			EwfPage.AssertPageTreeBuilt();
+			PageBase.AssertPageTreeBuilt();
 
 			return jsModificationStatements.Aggregate(
 				new StringBuilder(),

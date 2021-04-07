@@ -81,7 +81,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						validationMethod( postBackItemId, validator );
 					} );
 
-			EwfPage.Instance.AddControlTreeValidation(
+			PageBase.Current.AddControlTreeValidation(
 				() => RadioButtonGroup.ValidateControls(
 					noSelectionIsValid.HasValue,
 					EwlStatics.AreEqual( getNoSelectionItemId(), selectedItemId ),

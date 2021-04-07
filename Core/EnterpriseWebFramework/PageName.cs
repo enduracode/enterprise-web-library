@@ -15,8 +15,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		/// <param name="excludePageNameIfEntitySetupExists">Pass true to exclude the page name if an entity setup exists.</param>
 		public PageName( bool excludePageNameIfEntitySetupExists = false ) {
-			var es = EwfPage.Instance.EsAsBaseType;
-			var info = EwfPage.Instance.InfoAsBaseType;
+			var es = PageBase.Current.EsAsBaseType;
+			var info = PageBase.Current;
 			pageName = excludePageNameIfEntitySetupExists && es != null && info.ParentResource == null ? es.EntitySetupName : info.ResourceFullName;
 
 			children = new DisplayableElement(

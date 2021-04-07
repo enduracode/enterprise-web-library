@@ -154,7 +154,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				AppRequestState.AddNonTransactionalModificationMethod(
 					() => {
 						FormsAuthStatics.SendPassword( email.Value, passwordToEmail );
-						EwfPage.AddStatusMessage( StatusMessageType.Info, "Password reset email sent." );
+						PageBase.AddStatusMessage( StatusMessageType.Info, "Password reset email sent." );
 					} );
 			};
 		}
