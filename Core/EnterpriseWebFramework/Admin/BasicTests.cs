@@ -19,7 +19,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin {
 								.ToComponentListItem() ) ) );
 
 		private void throwException() {
-			throw new ApplicationException( "This is a test from the {0} page.".FormatWith( info.ResourceFullName ) );
+			throw new ApplicationException( "This is a test from the {0} page.".FormatWith( ResourceFullName ) );
 		}
 	}
 }

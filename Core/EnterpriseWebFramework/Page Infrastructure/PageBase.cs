@@ -785,9 +785,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		protected abstract PageBase reCreate();
 
 		/// <summary>
-		/// Creates a page info object using the new parameter value fields in this page.
+		/// Creates a page object using the new parameter value fields in this page.
 		/// </summary>
-		protected abstract PageInfo reCreateFromNewParameterValues();
+		protected abstract PageBase reCreateFromNewParameterValues();
 
 		private ApplicationException getPossibleDeveloperMistakeException( string messageSentence, Exception innerException = null ) {
 			var sentences = new[]

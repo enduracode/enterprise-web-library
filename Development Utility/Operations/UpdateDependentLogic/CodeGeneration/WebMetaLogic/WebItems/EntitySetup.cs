@@ -29,11 +29,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			InfoStatics.WriteParameterMembers( writer, requiredParameters, optionalParameters );
 			if( requiredParameters.Any() || optionalParameters.Any() )
 				writer.WriteLine( "internal ParametersModification parametersModification;" );
-			InfoStatics.WriteConstructorAndHelperMethods( writer, requiredParameters, optionalParameters, false, true );
-			writer.WriteLine( "protected override UrlEncoder getUrlEncoder() => null;" );
+			InfoStatics.WriteConstructorAndHelperMethods( writer, generalData, requiredParameters, optionalParameters, false, true );
 			writer.WriteLine(
-				"public override ParametersModificationBase ParametersModificationAsBaseType { get { return " +
-				( requiredParameters.Any() || optionalParameters.Any() ? "parametersModification" : "null" ) + "; } }" );
+				"public override ParametersModificationBase ParametersModificationAsBaseType => {0};".FormatWith(
+					requiredParameters.Any() || optionalParameters.Any() ? "parametersModification" : "null" ) );
+			writer.WriteLine( "protected override UrlEncoder getUrlEncoder() => null;" );
 			WebMetaLogicStatics.WriteReCreateFromNewParameterValuesMethod(
 				writer,
 				requiredParameters,

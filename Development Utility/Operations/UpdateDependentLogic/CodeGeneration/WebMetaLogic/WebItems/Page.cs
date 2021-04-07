@@ -1,129 +1,66 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Humanizer;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic.WebItems {
 	internal class Page {
 		private readonly WebItemGeneralData generalData;
+		private readonly EntitySetup entitySetup;
 		private readonly List<VariableSpecification> requiredParameters;
 		private readonly List<VariableSpecification> optionalParameters;
-		private readonly EntitySetup entitySetup;
 
 		internal Page( WebItemGeneralData generalData, EntitySetup entitySetup ) {
 			this.generalData = generalData;
+			this.entitySetup = entitySetup;
 			requiredParameters = generalData.ReadParametersFromCode( false );
 			optionalParameters = generalData.ReadParametersFromCode( true );
-			this.entitySetup = entitySetup;
 
 			// NOTE: Blow up if there is a name collision between parameters and entitySetup.Parameters.
 		}
 
 		internal void GenerateCode( TextWriter writer ) {
-			writer.WriteLine( "namespace " + generalData.Namespace + " {" );
-			writer.WriteLine( "public partial class " + generalData.ClassName + " {" );
+			writer.WriteLine( "namespace {0} {{".FormatWith( generalData.Namespace ) );
+			writer.WriteLine( "public sealed partial class {0}: PageBase {{".FormatWith( generalData.ClassName ) );
 
-			writeInfoClass( writer );
 			OptionalParameterPackageStatics.WriteClassIfNecessary( writer, optionalParameters );
 			ParametersModificationStatics.WriteClassIfNecessary( writer, requiredParameters.Concat( optionalParameters ) );
-			writer.WriteLine( "private Info info;" );
+			writeGetInfoMethod( writer );
+			if( entitySetup != null )
+				writer.WriteLine( "public EntitySetup Es;" );
+			InfoStatics.WriteParameterMembers( writer, requiredParameters, optionalParameters );
 			if( requiredParameters.Any() || optionalParameters.Any() )
 				writer.WriteLine( "private ParametersModification parametersModification;" );
-			if( entitySetup != null )
-				writer.WriteLine( "public EntitySetup Es { get { return info.Es; } }" );
-			writer.WriteLine( "public override EntitySetupBase EsAsBaseType { get { return info.EsAsBaseType; } }" );
-			writer.WriteLine( "public override PageInfo InfoAsBaseType { get { return info; } }" );
+			InfoStatics.WriteConstructorAndHelperMethods( writer, generalData, requiredParameters, optionalParameters, entitySetup != null, false );
+			writer.WriteLine( "public override EntitySetupBase EsAsBaseType => {0};".FormatWith( entitySetup != null ? "Es" : "null" ) );
 			writer.WriteLine(
-				"public override ParametersModificationBase ParametersModificationAsBaseType { get { return " +
-				( requiredParameters.Any() || optionalParameters.Any() ? "parametersModification" : "null" ) + "; } }" );
-			WebMetaLogicStatics.WriteCreateInfoFromQueryStringMethod( writer, entitySetup, requiredParameters, optionalParameters );
-			writer.WriteLine( "protected override void reCreateInfo() {" );
-			writer.WriteLine( "var infoLocal = info;" );
-			writer.WriteLine( "info = null;" );
-			writer.WriteLine( "info = (Info)infoLocal.CloneAndReplaceDefaultsIfPossible( true );" );
-			writer.WriteLine( "}" );
-			writeGetInfoMethod( writer );
+				"public override ParametersModificationBase ParametersModificationAsBaseType => {0};".FormatWith(
+					requiredParameters.Any() || optionalParameters.Any() ? "parametersModification" : "null" ) );
+			writer.WriteLine( "protected override UrlEncoder getUrlEncoder() => null;" );
+			writer.WriteLine( "protected override PageBase reCreate() => CloneAndReplaceDefaultsIfPossible( true );" );
 			WebMetaLogicStatics.WriteReCreateFromNewParameterValuesMethod(
 				writer,
 				requiredParameters,
 				optionalParameters,
-				"protected override PageInfo ",
-				"Info",
+				"protected override PageBase ",
+				generalData.ClassName,
 				entitySetup != null ? "Es.ReCreateFromNewParameterValues()" : "" );
+			writeCloneAndReplaceDefaultsIfPossibleMethod( writer );
+			writeEqualsMethod( writer );
+			InfoStatics.WriteGetHashCodeMethod( writer, generalData.PathRelativeToProject, requiredParameters, optionalParameters );
 
 			writer.WriteLine( "}" );
 			writer.WriteLine( "}" );
 		}
 
-		private void writeInfoClass( TextWriter writer ) {
-			writer.WriteLine( "public sealed partial class Info: PageInfo {" );
-			if( entitySetup != null )
-				writer.WriteLine( "public EntitySetup Es;" );
-			InfoStatics.WriteParameterMembers( writer, requiredParameters, optionalParameters );
-			InfoStatics.WriteConstructorAndHelperMethods( writer, requiredParameters, optionalParameters, entitySetup != null, false );
-			writer.WriteLine( "public override EntitySetupBase EsAsBaseType { get { return " + ( entitySetup != null ? "Es" : "null" ) + "; } }" );
-			writeInfoBuildUrlMethod( writer );
-			writeInfoIsIdenticalToMethod( writer );
-			writeInfoCloneAndReplaceDefaultsIfPossibleMethod( writer );
-			writer.WriteLine( "}" );
-		}
-
-		private void writeInfoBuildUrlMethod( TextWriter writer ) {
-			writer.WriteLine( "protected override string buildUrl() {" );
-
-			var parameters = new List<VariableSpecification>();
-			if( entitySetup != null )
-				parameters.AddRange( entitySetup.RequiredParameters.Concat( entitySetup.OptionalParameters ) );
-			parameters.AddRange( requiredParameters.Concat( optionalParameters ) );
-
-			writer.WriteLine( ( parameters.Any() ? "var" : "const string" ) + " url = \"~/" + generalData.UrlRelativeToProject + "?\";" );
-
-			foreach( var parameter in parameters ) {
-				var prefix = requiredParameters.Contains( parameter ) || optionalParameters.Contains( parameter ) ? "" : "Es.";
-				var parameterReference = prefix + parameter.PropertyName;
-				var defaultParameterReference = prefix + InfoStatics.DefaultOptionalParameterPackageName + "." + parameter.PropertyName;
-				var defaultParameterWasSpecifiedReference = prefix + InfoStatics.DefaultOptionalParameterPackageName + "." +
-				                                            OptionalParameterPackageStatics.GetWasSpecifiedPropertyName( parameter );
-				if( optionalParameters.Contains( parameter ) || ( entitySetup != null && entitySetup.OptionalParameters.Contains( parameter ) ) )
-					// If a default was specified for the parameter and the default matches the value of our parameter, don't include it.
-					// If a default was not specified and the value of our parameter is the default value of the type, don't include it.
-					writer.WriteLine(
-						"if( !( (" + defaultParameterWasSpecifiedReference + " && " +
-						( parameter.IsEnumerable
-							  ? defaultParameterReference + ".SequenceEqual( " + parameterReference + " )"
-							  : defaultParameterReference + " == " + parameterReference ) + " ) || ( !" + defaultParameterWasSpecifiedReference + " && " +
-						( parameter.IsEnumerable
-							  ? "!" + parameterReference + ".Any()"
-							  : parameterReference + " == " + ( parameter.IsString ? "\"\"" : "default(" + parameter.TypeName + ")" ) ) + " ) ) )" );
-				writer.WriteLine(
-					"url += \"" + parameter.PropertyName + "=\" + HttpUtility.UrlEncode( " + parameter.GetUrlSerializationExpression( parameterReference ) +
-					" ) + '&';" );
-			}
-
-			writer.WriteLine( "return url.Remove( url.Length - 1 );" );
-			writer.WriteLine( "}" );
-		}
-
-		private void writeInfoIsIdenticalToMethod( TextWriter writer ) {
-			writer.WriteLine( "protected override bool isIdenticalTo( ResourceBase resourceAsBaseType ) {" );
-			writer.WriteLine( "if( !( resourceAsBaseType is Info ) )" );
-			writer.WriteLine( "return false;" );
-			writer.WriteLine( "var info = resourceAsBaseType as Info;" );
-			if( entitySetup != null ) {
-				writer.WriteLine( "if( !Es.IsIdenticalTo( info.Es ) )" );
-				writer.WriteLine( "return false;" );
-			}
-			InfoStatics.WriteIsIdenticalToParameterComparisons( writer, requiredParameters, optionalParameters );
-			writer.WriteLine( "}" );
-		}
-
-		private void writeInfoCloneAndReplaceDefaultsIfPossibleMethod( TextWriter writer ) {
+		private void writeCloneAndReplaceDefaultsIfPossibleMethod( TextWriter writer ) {
 			writer.WriteLine( "public override ResourceBase CloneAndReplaceDefaultsIfPossible( bool disableReplacementOfDefaults ) {" );
 			if( optionalParameters.Any() ) {
 				writer.WriteLine( "var parametersModification = Instance.ParametersModificationAsBaseType as ParametersModification;" );
 				writer.WriteLine( "if( parametersModification != null && !disableReplacementOfDefaults )" );
 				writer.WriteLine(
-					"return new Info( " + StringTools.ConcatenateWithDelimiter(
+					"return new {0}( ".FormatWith( generalData.ClassName ) + StringTools.ConcatenateWithDelimiter(
 						", ",
 						entitySetup != null ? "Es.CloneAndReplaceDefaultsIfPossible( disableReplacementOfDefaults )" : "",
 						InfoStatics.GetInfoConstructorArguments(
@@ -135,7 +72,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 						"uriFragmentIdentifier: uriFragmentIdentifier" ) + " );" );
 			}
 			writer.WriteLine(
-				"return new Info( " + StringTools.ConcatenateWithDelimiter(
+				"return new {0}( ".FormatWith( generalData.ClassName ) + StringTools.ConcatenateWithDelimiter(
 					", ",
 					entitySetup != null ? "Es.CloneAndReplaceDefaultsIfPossible( disableReplacementOfDefaults )" : "",
 					InfoStatics.GetInfoConstructorArguments( requiredParameters, optionalParameters, parameter => parameter.FieldName, parameter => parameter.FieldName ),
@@ -143,12 +80,21 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			writer.WriteLine( "}" );
 		}
 
+		private void writeEqualsMethod( TextWriter writer ) {
+			writer.WriteLine( "public override bool Equals( BasicUrlHandler other ) {" );
+			writer.WriteLine( "if( !( other is {0} otherPage ) ) return false;".FormatWith( generalData.ClassName ) );
+			if( entitySetup != null )
+				writer.WriteLine( "if( !EwlStatics.AreEqual( otherPage.Es, Es ) ) return false;" );
+			InfoStatics.WriteEqualsParameterComparisons( writer, requiredParameters, optionalParameters, "otherPage" );
+			writer.WriteLine( "}" );
+		}
+
 		private void writeGetInfoMethod( TextWriter writer ) {
 			CodeGenerationStatics.AddSummaryDocComment(
 				writer,
-				"Creates an info object for this page. Use the Info class constructor instead of this method if you want to reuse the entity setup info object." );
+				"Creates an object for this page. Use the constructor instead of this method if you want to reuse the entity setup object." );
 			writer.WriteLine(
-				"public static Info GetInfo( " + StringTools.ConcatenateWithDelimiter(
+				"public static {0} GetInfo( ".FormatWith( generalData.ClassName ) + StringTools.ConcatenateWithDelimiter(
 					", ",
 					entitySetup != null ? WebMetaLogicStatics.GetParameterDeclarations( entitySetup.RequiredParameters ) : "",
 					WebMetaLogicStatics.GetParameterDeclarations( requiredParameters ),
@@ -164,7 +110,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 					                        entitySetup.OptionalParameters.Count > 0 ? "optionalParameterPackage: entitySetupOptionalParameterPackage" : "" ) + " )"
 				                      : "";
 			writer.WriteLine(
-				"return new Info( " + StringTools.ConcatenateWithDelimiter(
+				"return new {0}( ".FormatWith( generalData.ClassName ) + StringTools.ConcatenateWithDelimiter(
 					", ",
 					entitySetupArgs,
 					InfoStatics.GetInfoConstructorArgumentsForRequiredParameters( requiredParameters, parameter => parameter.Name ),

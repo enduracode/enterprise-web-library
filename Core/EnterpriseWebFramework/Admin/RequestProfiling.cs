@@ -8,12 +8,10 @@ using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin {
 	partial class RequestProfiling {
-		partial class Info {
-			protected override AlternativeResourceMode createAlternativeMode() =>
-				UserManagementStatics.UserManagementEnabled
-					? null
-					: new DisabledResourceMode( "To prevent unauthorized profiling, this feature requires user management to be enabled." );
-		}
+		protected override AlternativeResourceMode createAlternativeMode() =>
+			UserManagementStatics.UserManagementEnabled
+				? null
+				: new DisabledResourceMode( "To prevent unauthorized profiling, this feature requires user management to be enabled." );
 
 		protected override PageContent getContent() {
 			var content = new UiPageContent();

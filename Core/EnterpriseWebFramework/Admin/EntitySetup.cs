@@ -25,11 +25,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin {
 		}
 
 		protected override IEnumerable<ResourceGroup> createListedResources() =>
-			new ResourceGroup( new BasicTests.Info( this ), new RequestProfiling.Info( this ), new SystemUsers.Info( this ) ).ToCollection();
+			new ResourceGroup( new BasicTests( this ), new RequestProfiling( this ), new SystemUsers( this ) ).ToCollection();
 
 		protected override UrlHandler getUrlParent() => frameworkUrlParentGetter();
 
-		protected override UrlHandler getRequestHandler() => new BasicTests.Info( this );
+		protected override UrlHandler getRequestHandler() => new BasicTests( this );
 
 		protected override IEnumerable<UrlPattern> getChildUrlPatterns() {
 			return new UrlPattern( /* use static as the segment to get to framework static files */ ).ToCollection()

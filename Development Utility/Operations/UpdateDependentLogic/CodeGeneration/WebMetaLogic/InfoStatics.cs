@@ -39,8 +39,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 		}
 
 		internal static void WriteConstructorAndHelperMethods(
-			TextWriter writer, IReadOnlyCollection<VariableSpecification> requiredParameters, IReadOnlyCollection<VariableSpecification> optionalParameters,
-			bool includeEsParameter, bool isEs ) {
+			TextWriter writer, WebItemGeneralData generalData, IReadOnlyCollection<VariableSpecification> requiredParameters,
+			IReadOnlyCollection<VariableSpecification> optionalParameters, bool includeEsParameter, bool isEs ) {
 			// It's important to force the cache to be enabled in the constructor since info objects are often created in post-back-action getters.
 
 			writeConstructorDocComments( writer, requiredParameters );
@@ -50,7 +50,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				                            WebMetaLogicStatics.GetParameterDeclarations( requiredParameters ),
 				                            optionalParameters.Count > 0 ? "OptionalParameterPackage optionalParameterPackage = null" : "",
 				                            !isEs ? "string uriFragmentIdentifier = \"\"" : "" ) + " ) {";
-			writer.WriteLine( "internal {0}".FormatWith( isEs ? "EntitySetup" : "Info" ) + constructorParameters );
+			writer.WriteLine( "internal {0}".FormatWith( generalData.ClassName ) + constructorParameters );
 			writer.WriteLine( "DataAccessState.Current.ExecuteWithCache( () => {" );
 
 			// Initialize parameter fields. We want to create and call this method even if there are no parameters so that non-generated constructors can still call
