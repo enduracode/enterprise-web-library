@@ -61,7 +61,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		protected void executeFragmentIdentifierValidatorIfNecessary( Func<string, string> validator ) {
 			// If this info object is being created for the current request, skip validation since the fragment identifier will not be available. User agents are not
 			// supposed to include it in requests. See section 3.5 of http://www.ietf.org/rfc/rfc3986.txt.
-			if( EwfPage.Instance != null && EwfPage.Instance.InfoAsBaseType == null )
+			if( EwfApp.Instance != null && EwfApp.Instance.RequestState != null && Current == null )
 				return;
 
 			var message = validator( uriFragmentIdentifier );
