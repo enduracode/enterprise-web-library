@@ -3,8 +3,8 @@ using System.Web.Script.Serialization;
 using EnterpriseWebLibrary.TewlContrib;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
-	public abstract class AutoCompleteService: EwfPage {
-		protected override EwfSafeRequestHandler requestHandler =>
+	public abstract class AutoCompleteService: ResourceBase {
+		protected override EwfSafeRequestHandler getOrHead() =>
 			new EwfSafeResponseWriter(
 				EwfResponse.Create( ContentTypes.PlainText, new EwfResponseBodyCreator( () => new JavaScriptSerializer().Serialize( getItems() ) ) ) );
 
