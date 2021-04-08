@@ -41,19 +41,17 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				"internal {0} ".FormatWith( generalData.ClassName ),
 				generalData.ClassName,
 				"" );
-			writeCloneAndReplaceDefaultsIfPossibleMethod( writer );
+			writeReCreateAndReplaceDefaultsIfPossibleMethod( writer );
 			writeEqualsMethod( writer );
 			InfoStatics.WriteGetHashCodeMethod( writer, generalData.PathRelativeToProject, requiredParameters, optionalParameters );
 			writer.WriteLine( "}" );
 			writer.WriteLine( "}" );
 		}
 
-		private void writeCloneAndReplaceDefaultsIfPossibleMethod( TextWriter writer ) {
-			writer.WriteLine( "internal {0} CloneAndReplaceDefaultsIfPossible( bool disableReplacementOfDefaults ) {{".FormatWith( generalData.ClassName ) );
+		private void writeReCreateAndReplaceDefaultsIfPossibleMethod( TextWriter writer ) {
+			writer.WriteLine( "internal {0} ReCreateAndReplaceDefaultsIfPossible() {{".FormatWith( generalData.ClassName ) );
 			if( optionalParameters.Any() ) {
-				writer.WriteLine(
-					"var parametersModification = ( EwfPage.Instance.InfoAsBaseType != null ? EwfPage.Instance.EsAsBaseType?.ParametersModificationAsBaseType : null ) as ParametersModification;" );
-				writer.WriteLine( "if( parametersModification != null && !disableReplacementOfDefaults )" );
+				writer.WriteLine( "if( PageBase.Current.EsAsBaseType?.ParametersModificationAsBaseType is ParametersModification parametersModification )" );
 				writer.WriteLine(
 					"return new {0}( {1} );".FormatWith(
 						generalData.ClassName,

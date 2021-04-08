@@ -393,12 +393,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public bool IsIdenticalToCurrent() => Equals( Current );
 
 		/// <summary>
-		/// Framework use only.
-		/// If the type of this resource info object corresponds to the current resource or if the type of this resource info object's entity setup info corresponds
-		/// to the current entity setup, this method returns a clone of this object that uses values from the current resource and entity setup instead of defaults
+		/// Framework use only. If the type of this resource corresponds to the current resource or if the type of this resource’s entity setup corresponds to the
+		/// current entity setup, this method returns a clone of this object that uses values from the current resource and entity setup instead of defaults
 		/// whenever possible.
 		/// </summary>
-		public abstract ResourceBase CloneAndReplaceDefaultsIfPossible( bool disableReplacementOfDefaults );
+		public abstract ResourceBase ReCreateAndReplaceDefaultsIfPossible();
 
 		public sealed override bool Equals( object obj ) => Equals( obj as BasicUrlHandler );
 		public abstract bool Equals( BasicUrlHandler other );

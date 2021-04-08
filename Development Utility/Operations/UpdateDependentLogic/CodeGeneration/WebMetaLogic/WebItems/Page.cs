@@ -38,7 +38,27 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				"public override ParametersModificationBase ParametersModificationAsBaseType => {0};".FormatWith(
 					requiredParameters.Any() || optionalParameters.Any() ? "parametersModification" : "null" ) );
 			writer.WriteLine( "protected override UrlEncoder getUrlEncoder() => null;" );
-			writer.WriteLine( "protected override PageBase reCreate() => CloneAndReplaceDefaultsIfPossible( true );" );
+			writer.WriteLine(
+				"protected override PageBase reCreate() => new {0}({1});".FormatWith(
+					generalData.ClassName,
+					StringTools.ConcatenateWithDelimiter(
+							", ",
+							entitySetup != null
+								? "new {0}({1})".FormatWith(
+									entitySetup.GeneralData.ClassName,
+									InfoStatics.GetInfoConstructorArguments(
+											entitySetup.RequiredParameters,
+											entitySetup.OptionalParameters,
+											parameter => "Es.{0}".FormatWith( parameter.PropertyName ),
+											parameter => "Es.{0}".FormatWith( parameter.PropertyName ) )
+										.Surround( " ", " " ) )
+								: "",
+							InfoStatics.GetInfoConstructorArguments(
+								requiredParameters,
+								optionalParameters,
+								parameter => parameter.PropertyName,
+								parameter => parameter.PropertyName ) )
+						.Surround( " ", " " ) ) );
 			WebMetaLogicStatics.WriteReCreateFromNewParameterValuesMethod(
 				writer,
 				requiredParameters,
@@ -46,7 +66,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				"protected override PageBase ",
 				generalData.ClassName,
 				entitySetup != null ? "Es.ReCreateFromNewParameterValues()" : "" );
-			writeCloneAndReplaceDefaultsIfPossibleMethod( writer );
+			writeReCreateAndReplaceDefaultsIfPossibleMethod( writer );
 			writeEqualsMethod( writer );
 			InfoStatics.WriteGetHashCodeMethod( writer, generalData.PathRelativeToProject, requiredParameters, optionalParameters );
 
@@ -54,15 +74,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			writer.WriteLine( "}" );
 		}
 
-		private void writeCloneAndReplaceDefaultsIfPossibleMethod( TextWriter writer ) {
-			writer.WriteLine( "public override ResourceBase CloneAndReplaceDefaultsIfPossible( bool disableReplacementOfDefaults ) {" );
+		private void writeReCreateAndReplaceDefaultsIfPossibleMethod( TextWriter writer ) {
+			writer.WriteLine( "public override ResourceBase ReCreateAndReplaceDefaultsIfPossible() {" );
 			if( optionalParameters.Any() ) {
-				writer.WriteLine( "var parametersModification = Instance.ParametersModificationAsBaseType as ParametersModification;" );
-				writer.WriteLine( "if( parametersModification != null && !disableReplacementOfDefaults )" );
+				writer.WriteLine( "if( Current.ParametersModificationAsBaseType is ParametersModification parametersModification )" );
 				writer.WriteLine(
 					"return new {0}( ".FormatWith( generalData.ClassName ) + StringTools.ConcatenateWithDelimiter(
 						", ",
-						entitySetup != null ? "Es.CloneAndReplaceDefaultsIfPossible( disableReplacementOfDefaults )" : "",
+						entitySetup != null ? "Es.ReCreateAndReplaceDefaultsIfPossible()" : "",
 						InfoStatics.GetInfoConstructorArguments(
 							requiredParameters,
 							optionalParameters,
@@ -74,7 +93,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			writer.WriteLine(
 				"return new {0}( ".FormatWith( generalData.ClassName ) + StringTools.ConcatenateWithDelimiter(
 					", ",
-					entitySetup != null ? "Es.CloneAndReplaceDefaultsIfPossible( disableReplacementOfDefaults )" : "",
+					entitySetup != null ? "Es.ReCreateAndReplaceDefaultsIfPossible()" : "",
 					InfoStatics.GetInfoConstructorArguments( requiredParameters, optionalParameters, parameter => parameter.FieldName, parameter => parameter.FieldName ),
 					"uriFragmentIdentifier: uriFragmentIdentifier" ) + " );" );
 			writer.WriteLine( "}" );

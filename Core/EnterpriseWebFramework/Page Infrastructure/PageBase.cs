@@ -740,7 +740,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				else if( destination == null )
 					destination = reCreateFromNewParameterValues();
 				else if( destination is ResourceBase r )
-					destination = r.CloneAndReplaceDefaultsIfPossible( false );
+					destination = r.ReCreateAndReplaceDefaultsIfPossible();
 				nextPageObject = destination as PageBase;
 
 				// This GetUrl call is important even for the transfer case below for the same reason that we *actually create* a new page object in every case above.
