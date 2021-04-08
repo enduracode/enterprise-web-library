@@ -244,7 +244,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
 			var dmIdAndSecondaryOp = requestState.DmIdAndSecondaryOp;
 
-			onLoadData();
+			buildPage();
 
 			if( requestState.StaticRegionContents != null ) {
 				var nodeUpdateRegionLinkersByKey = updateRegionLinkerNodes.SelectMany( i => i.KeyedUpdateRegionLinkers, ( node, keyedLinker ) => ( node, keyedLinker ) )
@@ -399,7 +399,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				return nextPageObject.processViewAndGetResponse();
 			}
 
-			onLoadData();
+			buildPage();
 
 			ResourceInfo redirectInfo = null;
 			FullResponse fullSecondaryResponse = null;
@@ -491,7 +491,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return navigate( redirectInfo, AppRequestState.Instance.EwfPageRequestState.ModificationErrorsExist ? null : fullSecondaryResponse );
 		}
 
-		private void onLoadData() {
+		private void buildPage() {
 			var elementJsInitStatements = new StringBuilder();
 
 			formState = new FormState();
