@@ -50,11 +50,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			path = path ?? defaultAttributes.Path;
 			path = path != null ? "/" + path : defaultBaseUrl.AbsolutePath;
 
-			// Ensure that the domain and path of the cookie are in scope for both the request URL and resource URL. These two URLs can be different on requests that
+			// Ensure that the domain and path of the cookie are in scope for both the request URL and page URL. These two URLs can be different on requests that
 			// transfer to the log-in page, etc.
 			var requestUrls = new List<string> { AppRequestState.Instance.Url };
-			if( ResourceBase.Current != null )
-				requestUrls.Add( ResourceBase.Current.GetUrl( false, false, true ) );
+			if( PageBase.Current != null )
+				requestUrls.Add( PageBase.Current.GetUrl( false, false, true ) );
 			foreach( var url in requestUrls ) {
 				var uri = new Uri( url );
 				if( domain.Any() && !( "." + uri.Host ).EndsWith( "." + domain ) )
