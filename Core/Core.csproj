@@ -782,6 +782,7 @@
       <SubType>
       </SubType>
     </None>
+    <None Include="EnterpriseWebFramework\StaticFiles\\**\*.*" />
     <None Include="InstallationSupportUtility\SystemManagerInterface\Messages\BuildMessage\Build.xsd">
       <SubType>Designer</SubType>
     </None>
