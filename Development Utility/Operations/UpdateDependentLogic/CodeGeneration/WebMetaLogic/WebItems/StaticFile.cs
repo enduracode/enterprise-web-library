@@ -18,7 +18,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 
 		internal void GenerateCode( TextWriter writer ) {
 			writer.WriteLine( "namespace {0} {{".FormatWith( generalData.Namespace ) );
-			writer.WriteLine( "public sealed partial class {0}: StaticFileBase {{".FormatWith( generalData.ClassName ) );
+			writer.WriteLine( "public sealed partial class {0}: StaticFile {{".FormatWith( generalData.ClassName ) );
 
 			if( inVersionedFolder )
 				writer.WriteLine( "public {0}(): base( true ) {{}}".FormatWith( generalData.ClassName ) );

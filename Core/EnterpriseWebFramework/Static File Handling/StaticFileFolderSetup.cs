@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public abstract class StaticFileFolderSetup: EntitySetupBase {
-		private readonly Lazy<StaticFileFolderSetup> parentFolderSetup;
+		protected readonly Lazy<StaticFileFolderSetup> parentFolderSetup;
 
 		protected StaticFileFolderSetup() {
 			parentFolderSetup = new Lazy<StaticFileFolderSetup>( createParentFolderSetup );
