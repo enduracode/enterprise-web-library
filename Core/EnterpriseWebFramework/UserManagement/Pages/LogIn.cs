@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
+using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
 using Tewl.Tools;
 
@@ -21,7 +22,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 				modificationMethod: () => user = logInHiddenFieldsAndMethod.Item2(),
 				actionGetter: () => new PostBackAction(
 					user.MustChangePassword ? ChangePassword.GetInfo( ReturnUrl ) as ResourceInfo : new ExternalResource( ReturnUrl ) ) );
-			var newPasswordPb = PostBack.CreateFull( id: "newPw", actionGetter: getSendNewPasswordAction );
+			var newPasswordPb = PostBack.CreateFull(
+				id: "newPw",
+				modificationMethod: () => {
+					var userLocal = UserManagementStatics.GetUser( emailAddress.Value );
+					if( userLocal == null )
+						throw new DataModificationException( getUnregisteredEmailMessage() );
+					FormsAuthStatics.ResetAndSendPassword( userLocal.UserId );
+					AddStatusMessage( StatusMessageType.Info, "Your new password has been sent to your email address." );
+				},
+				actionGetter: () => new PostBackAction( new ExternalResource( ReturnUrl ) ) );
 
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				logInPb.ToCollection(),
@@ -55,7 +65,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 									.Append(
 										new EwfButton(
 											new StandardButtonStyle( "Send me a new password", buttonSize: ButtonSize.ShrinkWrap ),
-											behavior: new PostBackBehavior( postBack: newPasswordPb ) ) )
+											behavior: new ConfirmationButtonBehavior(
+												new Paragraph( "Are you sure you want to reset your password?".ToComponents() ).Append(
+														new Paragraph(
+															StringTools.ConcatenateWithDelimiter(
+																	" ",
+																	"Click \"Continue\" to email yourself a new password.",
+																	"Upon receiving your new password, you may immediately use it to log in.",
+																	"You will then be prompted to change your password to something you will remember, which you may use to log in from that point forward." )
+																.ToComponents() ) )
+													.Materialize(),
+												postBack: newPasswordPb ) ) )
 									.Materialize() ) );
 
 					content.Add(
@@ -82,13 +102,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 			}
 
 			return content;
-		}
-
-		private PostBackAction getSendNewPasswordAction() {
-			var userLocal = UserManagementStatics.GetUser( emailAddress.Value );
-			if( userLocal == null )
-				throw new DataModificationException( getUnregisteredEmailMessage() );
-			return new PostBackAction( ConfirmPasswordReset.GetInfo( userLocal.Email, ReturnUrl ) );
 		}
 
 		private string getUnregisteredEmailMessage() {

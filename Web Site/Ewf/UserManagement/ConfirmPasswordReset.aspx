@@ -1,1 +1,0 @@
-<%@ Page Language="C#" CodeBehind="ConfirmPasswordReset.aspx.cs" Inherits="EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement.ConfirmPasswordReset" %>
