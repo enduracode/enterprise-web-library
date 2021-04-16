@@ -12,8 +12,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 		}
 
 		internal static void AddParamDocComment( TextWriter writer, string name, string description ) {
-			if( description.Length == 0 )
-				return;
 			writer.WriteLine( "/// <param name=\"" + name + "\">" + description + "</param>" );
 		}
 

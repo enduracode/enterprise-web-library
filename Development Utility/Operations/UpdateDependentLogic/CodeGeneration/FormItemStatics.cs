@@ -500,15 +500,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			IEnumerable<CSharpParameter> preValueOptionalParams, string valueParamTypeName, IEnumerable<CSharpParameter> postValueOptionalParams,
 			bool includeAdditionalValidationMethodParam, Func<string, string> formControlExpressionGetter, string preFormItemStatements = "",
 			string postFormItemStatements = "", IEnumerable<string> additionalSummarySentences = null ) {
-			CodeGenerationStatics.AddSummaryDocComment(
-				writer,
-				getFormItemGetterSummary( field, controlTypeForName, additionalSummarySentences ?? new string[ 0 ] ) );
-			if( includeAdditionalValidationMethodParam )
-				CodeGenerationStatics.AddParamDocComment(
-					writer,
-					"additionalValidationMethod",
-					"A method that takes the form control’s validator and performs additional validation." );
-
 			var parameters = new List<CSharpParameter>();
 			parameters.AddRange( requiredParams );
 			parameters.Add( new CSharpParameter( "FormItemSetup", "formItemSetup", "null" ) );
@@ -519,8 +510,18 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
 			parameters.Add( new CSharpParameter( valueParamTypeName, "value", "null" ) );
 			parameters.AddRange( postValueOptionalParams );
 			if( includeAdditionalValidationMethodParam )
-				parameters.Add( new CSharpParameter( "System.Action<Validator>", "additionalValidationMethod", "null" ) );
+				parameters.Add(
+					new CSharpParameter(
+						"System.Action<Validator>",
+						"additionalValidationMethod",
+						defaultValue: "null",
+						description: "A method that takes the form control’s validator and performs additional validation." ) );
 
+			CodeGenerationStatics.AddSummaryDocComment(
+				writer,
+				getFormItemGetterSummary( field, controlTypeForName, additionalSummarySentences ?? new string[ 0 ] ) );
+			foreach( var i in parameters )
+				CodeGenerationStatics.AddParamDocComment( writer, i.Name, i.Description );
 			writer.WriteLine(
 				"public FormItem " + EwlStatics.GetCSharpIdentifier( "Get" + field.PascalCasedName + controlTypeForName + "FormItem" ) + "( " +
 				parameters.Select( i => i.MethodSignatureDeclaration ).GetCommaDelimitedStringFromCollection() + " ) {" );

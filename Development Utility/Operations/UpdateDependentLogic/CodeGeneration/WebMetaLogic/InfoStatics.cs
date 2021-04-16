@@ -88,7 +88,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				var warning = "";
 				if( parameter.IsString || parameter.IsEnumerable )
 					warning = " Do not pass null.";
-				CodeGenerationStatics.AddParamDocComment( writer, parameter.Name, parameter.Comment + warning );
+				var description = parameter.Comment + warning;
+				if( description.Length == 0 )
+					continue;
+				CodeGenerationStatics.AddParamDocComment( writer, parameter.Name, description );
 			}
 		}
 
