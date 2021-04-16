@@ -1,54 +1,51 @@
-using System;
+﻿using System;
 using System.Linq;
 using EnterpriseWebLibrary.Configuration;
-using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.WebSessionState;
 using Tewl.Tools;
 
+// EwlPage
 // Parameter: string returnUrl
 // OptionalParameter: string user
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 	// This page does not use the EWF UI because displaying authenticated user information would be misleading.
-	partial class SelectUser: EwfPage {
-		partial class Info {
-			internal User UserObject { get; private set; }
+	partial class Impersonate {
+		private bool pageViewDataModificationsExecuted;
+		internal User UserObject { get; private set; }
 
-			protected override void init() {
-				if( !UserManagementStatics.UserManagementEnabled )
-					throw new ApplicationException( "User management not enabled" );
+		protected override void init() {
+			if( !UserManagementStatics.UserManagementEnabled )
+				throw new ApplicationException( "User management not enabled" );
 
-				if( User.Any() && User != "anonymous" && ( UserObject = UserManagementStatics.GetUser( User ) ) == null )
-					throw new ApplicationException( "user" );
-			}
-
-			protected override bool userCanAccessResource {
-				get {
-					var user = AppRequestState.Instance.ImpersonatorExists ? AppRequestState.Instance.ImpersonatorUser : AppTools.User;
-					return ( user != null && user.Role.CanManageUsers ) || !ConfigurationStatics.IsLiveInstallation;
-				}
-			}
+			if( User.Any() && User != "anonymous" && ( UserObject = UserManagementStatics.GetUser( User ) ) == null )
+				throw new ApplicationException( "user" );
 		}
 
-		private bool pageViewDataModificationsExecuted;
+		protected override bool userCanAccessResource {
+			get {
+				var user = AppRequestState.Instance.ImpersonatorExists ? AppRequestState.Instance.ImpersonatorUser : AppTools.User;
+				return ( user != null && user.Role.CanManageUsers ) || !ConfigurationStatics.IsLiveInstallation;
+			}
+		}
 
 		protected override Action getPageViewDataModificationMethod() {
 			pageViewDataModificationsExecuted = true;
 
-			if( !info.User.Any() )
+			if( !User.Any() )
 				return null;
-			return () => UserImpersonationStatics.BeginImpersonation( info.UserObject );
+			return () => UserImpersonationStatics.BeginImpersonation( UserObject );
 		}
 
 		protected override PageContent getContent() {
 			var content = new BasicPageContent( bodyClasses: CssElementCreator.SelectUserPageBodyClass );
 
-			if( info.User.Any() ) {
+			if( User.Any() ) {
 				if( !pageViewDataModificationsExecuted )
 					throw new ApplicationException( "Page-view data modifications did not execute." );
 
 				content.Add( new Paragraph( "Please wait.".ToComponents() ) );
-				StandardLibrarySessionState.Instance.SetInstantClientSideNavigation( new ExternalResource( info.ReturnUrl ).GetUrl() );
+				StandardLibrarySessionState.Instance.SetInstantClientSideNavigation( new ExternalResource( ReturnUrl ).GetUrl() );
 				return content;
 			}
 
@@ -65,7 +62,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			var user = new DataValue<User>();
 			var pb = PostBack.CreateFull(
 				modificationMethod: () => UserImpersonationStatics.BeginImpersonation( user.Value ),
-				actionGetter: () => new PostBackAction( new ExternalResource( info.ReturnUrl.Any() ? info.ReturnUrl : NetTools.HomeUrl ) ) );
+				actionGetter: () => new PostBackAction( new ExternalResource( ReturnUrl.Any() ? ReturnUrl : NetTools.HomeUrl ) ) );
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				pb.ToCollection(),
 				() => {

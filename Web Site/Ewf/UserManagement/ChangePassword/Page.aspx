@@ -1,1 +1,0 @@
-<%@ Page Language="C#" CodeBehind="Page.aspx.cs" Inherits="EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement.ChangePassword.Page" %>

@@ -638,6 +638,9 @@
     <Compile Include="EnterpriseWebFramework\Ui\UiPageContent.cs" />
     <Compile Include="EnterpriseWebFramework\UserEditor.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\FormsAuthStatics.cs" />
+    <Compile Include="EnterpriseWebFramework\UserManagement\Pages\ChangePassword.cs" />
+    <Compile Include="EnterpriseWebFramework\UserManagement\Pages\Impersonate.cs" />
+    <Compile Include="EnterpriseWebFramework\UserManagement\Pages\LogIn.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\StrictFormsAuthUserManagementProvider.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Text Box\AutoCompleteItem.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\UserImpersonationStatics.cs" />

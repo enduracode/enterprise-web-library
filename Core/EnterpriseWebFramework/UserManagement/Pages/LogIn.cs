@@ -1,15 +1,15 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
-using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using Humanizer;
 using Tewl.Tools;
 
+// EwlPage
 // Parameter: string returnUrl
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement {
-	partial class LogIn: EwfPage {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
+	partial class LogIn {
 		private DataValue<string> emailAddress;
 		private FormsAuthCapableUser user;
 
@@ -20,7 +20,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			var logInPb = PostBack.CreateFull(
 				modificationMethod: () => user = logInHiddenFieldsAndMethod.Item2(),
 				actionGetter: () => new PostBackAction(
-					user.MustChangePassword ? ChangePassword.Page.GetInfo( info.ReturnUrl ) as ResourceInfo : new ExternalResource( info.ReturnUrl ) ) );
+					user.MustChangePassword ? ChangePassword.GetInfo( ReturnUrl ) as ResourceInfo : new ExternalResource( ReturnUrl ) ) );
 			var newPasswordPb = PostBack.CreateFull( id: "newPw", actionGetter: getSendNewPasswordAction );
 
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
@@ -88,7 +88,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 			var userLocal = UserManagementStatics.GetUser( emailAddress.Value );
 			if( userLocal == null )
 				throw new DataModificationException( getUnregisteredEmailMessage() );
-			return new PostBackAction( ConfirmPasswordReset.GetInfo( userLocal.Email, info.ReturnUrl ) );
+			return new PostBackAction( ConfirmPasswordReset.GetInfo( userLocal.Email, ReturnUrl ) );
 		}
 
 		private string getUnregisteredEmailMessage() {

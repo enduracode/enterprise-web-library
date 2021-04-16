@@ -1,26 +1,23 @@
-using EnterpriseWebLibrary.Encryption;
-using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
+﻿using EnterpriseWebLibrary.Encryption;
 using EnterpriseWebLibrary.WebSessionState;
 using Tewl.Tools;
 
+// EwlPage
 // Parameter: string returnAndDestinationUrl
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.UserManagement.ChangePassword {
-	partial class Page: EwfPage {
-		partial class Info {
-			public override string ResourceName => "Change Password";
-			protected override bool userCanAccessResource => AppTools.User != null;
-		}
-
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
+	partial class ChangePassword {
 		private DataValue<string> newPassword;
+
+		protected override bool userCanAccessResource => AppTools.User != null;
 
 		protected override PageContent getContent() {
 			newPassword = new DataValue<string>();
 			return FormState.ExecuteWithDataModificationsAndDefaultAction(
-				PostBack.CreateFull( modificationMethod: modifyData, actionGetter: () => new PostBackAction( new ExternalResource( info.ReturnAndDestinationUrl ) ) )
+				PostBack.CreateFull( modificationMethod: modifyData, actionGetter: () => new PostBackAction( new ExternalResource( ReturnAndDestinationUrl ) ) )
 					.ToCollection(),
 				() => new UiPageContent(
-					pageActions: new HyperlinkSetup( new ExternalResource( info.ReturnAndDestinationUrl ), "Back" ).ToCollection(),
+					pageActions: new HyperlinkSetup( new ExternalResource( ReturnAndDestinationUrl ), "Back" ).ToCollection(),
 					contentFootActions: new ButtonSetup( "Change Password" ).ToCollection() ).Add(
 					FormItemList.CreateStack(
 						items: newPassword.GetPasswordModificationFormItems(
