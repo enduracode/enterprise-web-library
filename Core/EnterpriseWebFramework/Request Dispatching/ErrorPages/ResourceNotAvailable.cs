@@ -1,22 +1,20 @@
-using System.Linq;
+﻿using System.Linq;
 using EnterpriseWebLibrary.WebSessionState;
 using Tewl.Tools;
 
+// EwlPage
 // Parameter: bool showHomeLink
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ErrorPages {
-	partial class PageNotAvailable: EwfPage {
-		partial class Info {
-			protected override bool IsIntermediateInstallationPublicResource => true;
-			protected override ConnectionSecurity ConnectionSecurity => ConnectionSecurity.MatchingCurrentRequest;
-		}
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.ErrorPages {
+	partial class ResourceNotAvailable {
+		protected internal override bool IsIntermediateInstallationPublicResource => true;
+		protected internal override ConnectionSecurity ConnectionSecurity => ConnectionSecurity.MatchingCurrentRequest;
 
 		protected override PageContent getContent() {
 			var content = new ErrorPageContent(
 				new Paragraph(
 					Translation.ThePageYouRequestedIsNotAvailable.ToComponents()
-						.Concat(
-							info.ShowHomeLink ? " ".ToComponents().Concat( Translation.YouWillBeSentToTheHomePage.ToComponents() ) : Enumerable.Empty<PhrasingComponent>() )
+						.Concat( ShowHomeLink ? " ".ToComponents().Concat( Translation.YouWillBeSentToTheHomePage.ToComponents() ) : Enumerable.Empty<PhrasingComponent>() )
 						.Materialize() ).ToCollection() );
 
 			// NOTE: We can't set this code right now because it makes EwfApp.handleEndRequest think that this page couldn't be found.
@@ -24,7 +22,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSi
 
 			Response.TrySkipIisCustomErrors = true;
 
-			if( info.ShowHomeLink )
+			if( ShowHomeLink )
 				StandardLibrarySessionState.Instance.SetTimedClientSideNavigation( NetTools.HomeUrl, 5 );
 
 			return content;

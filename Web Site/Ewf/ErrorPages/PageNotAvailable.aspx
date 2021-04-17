@@ -1,1 +1,0 @@
-<%@ Page Language="C#" CodeBehind="PageNotAvailable.aspx.cs" Inherits="EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ErrorPages.PageNotAvailable" %>

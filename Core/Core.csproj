@@ -609,6 +609,11 @@
     <Compile Include="EnterpriseWebFramework\PaymentProcessing\JsStatementList.cs" />
     <Compile Include="EnterpriseWebFramework\PaymentProcessing\StatusMessageAndDestination.cs" />
     <Compile Include="EnterpriseWebFramework\Request Dispatching\AppRequestDispatchingProvider.cs" />
+    <Compile Include="EnterpriseWebFramework\Request Dispatching\ErrorPages\AccessDenied.cs" />
+    <Compile Include="EnterpriseWebFramework\Request Dispatching\ErrorPages\ErrorPageContent.cs" />
+    <Compile Include="EnterpriseWebFramework\Request Dispatching\ErrorPages\ResourceDisabled.cs" />
+    <Compile Include="EnterpriseWebFramework\Request Dispatching\ErrorPages\ResourceNotAvailable.cs" />
+    <Compile Include="EnterpriseWebFramework\Request Dispatching\ErrorPages\UnhandledException.cs" />
     <Compile Include="EnterpriseWebFramework\Request Dispatching\RequestDispatchingStatics.cs" />
     <Compile Include="EnterpriseWebFramework\Request Handling\EntitySetupBase.cs" />
     <Compile Include="EnterpriseWebFramework\Request Handling\EwfSafeRequestHandler.cs" />

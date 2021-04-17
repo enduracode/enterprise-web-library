@@ -1,1 +1,0 @@
-<%@ Page Language="C#" CodeBehind="UnhandledException.aspx.cs" Inherits="EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ErrorPages.UnhandledException" %>

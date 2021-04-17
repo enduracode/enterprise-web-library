@@ -1,19 +1,18 @@
 ﻿using System.Linq;
 using Tewl.Tools;
 
+// EwlPage
 // Parameter: bool showHomeLink
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ErrorPages {
-	partial class AccessDenied: EwfPage {
-		partial class Info {
-			protected override bool IsIntermediateInstallationPublicResource => true;
-			protected override ConnectionSecurity ConnectionSecurity => ConnectionSecurity.MatchingCurrentRequest;
-		}
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.ErrorPages {
+	partial class AccessDenied {
+		protected internal override bool IsIntermediateInstallationPublicResource => true;
+		protected internal override ConnectionSecurity ConnectionSecurity => ConnectionSecurity.MatchingCurrentRequest;
 
 		protected override PageContent getContent() {
 			var content = new ErrorPageContent(
 				new Paragraph( Translation.AccessIsDenied.ToComponents() ).Concat(
-						info.ShowHomeLink
+						ShowHomeLink
 							? new Paragraph(
 									new EwfHyperlink(
 										new ExternalResource( NetTools.HomeUrl ),

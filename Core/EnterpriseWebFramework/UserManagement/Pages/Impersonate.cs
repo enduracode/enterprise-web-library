@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.WebSessionState;
+using Humanizer;
+using JetBrains.Annotations;
 using Tewl.Tools;
 
 // EwlPage
@@ -11,6 +14,14 @@ using Tewl.Tools;
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 	// This page does not use the EWF UI because displaying authenticated user information would be misleading.
 	partial class Impersonate {
+		private static readonly ElementClass elementClass = new ElementClass( "ewfSelectUser" );
+
+		[ UsedImplicitly ]
+		private class CssElementCreator: ControlCssElementCreator {
+			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() =>
+				new CssElement( "SelectUserPageBody", "body.{0}".FormatWith( elementClass.ClassName ) ).ToCollection();
+		}
+
 		private bool pageViewDataModificationsExecuted;
 		internal User UserObject { get; private set; }
 
@@ -38,7 +49,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 		}
 
 		protected override PageContent getContent() {
-			var content = new BasicPageContent( bodyClasses: CssElementCreator.SelectUserPageBodyClass );
+			var content = new BasicPageContent( bodyClasses: elementClass );
 
 			if( User.Any() ) {
 				if( !pageViewDataModificationsExecuted )

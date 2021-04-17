@@ -1,1 +1,0 @@
-﻿<%@ Page Language="C#" CodeBehind="AccessDenied.aspx.cs" Inherits="EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.ErrorPages.AccessDenied" %>
