@@ -754,12 +754,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			// Put the secondary response into session state right before navigation so that it doesn't get sent if there is an error before this point.
 			if( secondaryResponse != null ) {
-				// It's important that we put the response in session state first since it's used by the Info.init method of the pre-built-response page.
+				// It's important that we put the response in session state first since it's used by the init method of the pre-built-response resource.
 				StandardLibrarySessionState.Instance.ResponseToSend = secondaryResponse;
-				StandardLibrarySessionState.Instance.SetClientSideNavigation(
-					EwfApp.MetaLogicFactory.CreatePreBuiltResponsePageInfo().GetUrl(),
-					!secondaryResponse.FileName.Any(),
-					null );
+				StandardLibrarySessionState.Instance.SetClientSideNavigation( new PreBuiltResponse().GetUrl(), !secondaryResponse.FileName.Any(), null );
 			}
 
 			// If the redirect destination is identical to the current page, do a transfer instead of a redirect.

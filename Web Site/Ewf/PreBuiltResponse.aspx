@@ -1,1 +1,0 @@
-<%@ Page Language="C#" CodeBehind="PreBuiltResponse.aspx.cs" Inherits="EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.PreBuiltResponse" %>

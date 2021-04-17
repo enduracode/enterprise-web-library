@@ -601,6 +601,7 @@
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Partial Updating\PreModificationUpdateRegion.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Partial Updating\UpdateRegionLinker.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Partial Updating\UpdateRegionSet.cs" />
+    <Compile Include="EnterpriseWebFramework\Page Infrastructure\PreBuiltResponse.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\ScrollPosition.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\SecondaryPostBackOperation.cs" />
     <Compile Include="EnterpriseWebFramework\PageName.cs" />
