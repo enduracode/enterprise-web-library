@@ -1,23 +1,22 @@
-using System.Linq;
+﻿using System.Linq;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
 using Tewl.Tools;
 
+// EwlPage
 // Parameter: string returnUrl
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite {
-	partial class ContactSupport: EwfPage {
-		partial class Info {
-			protected override bool userCanAccessResource => AppTools.User != null;
-		}
-
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+	partial class ContactSupport {
 		private readonly DataValue<string> body = new DataValue<string>();
+
+		protected override bool userCanAccessResource => AppTools.User != null;
 
 		protected override PageContent getContent() =>
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
-				PostBack.CreateFull( modificationMethod: modifyData, actionGetter: () => new PostBackAction( new ExternalResource( info.ReturnUrl ) ) ).ToCollection(),
+				PostBack.CreateFull( modificationMethod: modifyData, actionGetter: () => new PostBackAction( new ExternalResource( ReturnUrl ) ) ).ToCollection(),
 				() => {
 					var content = new UiPageContent( contentFootActions: new ButtonSetup( "Send Message" ).ToCollection() );
 
