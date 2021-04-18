@@ -1,1 +1,0 @@
-<%@ Page Language="C#" CodeBehind="IntermediateLogIn.aspx.cs" Inherits="EnterpriseWebLibrary.EnterpriseWebFramework.EnterpriseWebLibrary.WebSite.IntermediateLogIn" %>

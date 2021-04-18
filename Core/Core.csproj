@@ -548,6 +548,7 @@
     <Compile Include="EnterpriseWebFramework\Layout\Tables\EwfTableStyle.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\SpaceForMultiColOrRowCell.cs" />
     <Compile Include="EnterpriseWebFramework\Layout\Tables\TableCellVerticalAlignment.cs" />
+    <Compile Include="EnterpriseWebFramework\NonLiveLogIn.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Autofocus\AutofocusCondition.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Autofocus\EtherealAutofocusRegion.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Autofocus\FlowAutofocusRegion.cs" />
