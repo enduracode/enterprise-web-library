@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Web;
 using EnterpriseWebLibrary.WebSessionState;
 using Tewl.Tools;
 
@@ -18,9 +19,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.ErrorPages {
 						.Materialize() ).ToCollection() );
 
 			// NOTE: We can't set this code right now because it makes EwfApp.handleEndRequest think that this page couldn't be found.
-			//Response.StatusCode = 404;
+			//HttpContext.Current.Response.StatusCode = 404;
 
-			Response.TrySkipIisCustomErrors = true;
+			HttpContext.Current.Response.TrySkipIisCustomErrors = true;
 
 			if( ShowHomeLink )
 				StandardLibrarySessionState.Instance.SetTimedClientSideNavigation( NetTools.HomeUrl, 5 );

@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Web;
 using Tewl.Tools;
 
 // EwlPage
@@ -21,8 +22,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.ErrorPages {
 							: Enumerable.Empty<FlowComponent>() )
 					.Materialize() );
 
-			Response.StatusCode = 403;
-			Response.TrySkipIisCustomErrors = true;
+			HttpContext.Current.Response.StatusCode = 403;
+			HttpContext.Current.Response.TrySkipIisCustomErrors = true;
 
 			return content;
 		}
