@@ -12,7 +12,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		protected internal override ConnectionSecurity ConnectionSecurity => ConnectionSecurity.MatchingCurrentRequest;
 
-		protected override EwfSafeRequestHandler requestHandler =>
-			new EwfSafeResponseWriter( new EwfResponse( StandardLibrarySessionState.Instance.ResponseToSend ) );
+		protected override EwfSafeRequestHandler getOrHead() => new EwfSafeResponseWriter( new EwfResponse( StandardLibrarySessionState.Instance.ResponseToSend ) );
 	}
 }

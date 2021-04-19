@@ -122,10 +122,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			BodyCreator = bodyCreator;
 		}
 
-		/// <summary>
-		/// EWF use only.
-		/// </summary>
-		public EwfResponse( FullResponse fullResponse ) {
+		internal EwfResponse( FullResponse fullResponse ) {
 			ContentType = fullResponse.ContentType;
 			FileNameCreator = () => fullResponse.FileName;
 			AdditionalHeaderFieldGetter = () => fullResponse.AdditionalHeaderFields;
