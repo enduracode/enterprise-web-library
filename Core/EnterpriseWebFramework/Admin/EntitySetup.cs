@@ -33,7 +33,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin {
 
 		protected override IEnumerable<UrlPattern> getChildUrlPatterns() {
 			return new UrlPattern( /* use static as the segment to get to framework static files */ ).ToCollection()
-				.Append( new UrlPattern( /* use impersonate as the segment to get to MetaLogicFactory.CreateSelectUserPageInfo( "" ) */ ) );
+				.Append( /* non-live-log-in */ )
+				.Append( /* log-in */ )
+				.Append( /* change-password */ )
+				.Append( new UrlPattern( /* use impersonate as the segment to get to MetaLogicFactory.CreateSelectUserPageInfo( "" ) */ ) )
+				.Append( /* pre-built-response */ )
+				.Append( /* contact-support */ )
+				.Append( /* access-denied */ )
+				.Append( /* resource-disabled */ )
+				.Append( /* resource-not-available */ )
+				.Append( /* unhandled-exception */ )
+				.Append( /* tests */ )
+				.Append( /* profiling */ )
+				.Append( /* users */ );
 		}
 
 		EntityUiSetup UiEntitySetup.GetUiSetup() => new EntityUiSetup();
