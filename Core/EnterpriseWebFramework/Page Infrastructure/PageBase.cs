@@ -395,8 +395,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				AppRequestState.Instance.EwfPageRequestState.FocusKey = "";
 				AppRequestState.Instance.EwfPageRequestState.GeneralModificationErrors =
 					Translation.ApplicationHasBeenUpdatedAndWeCouldNotInterpretAction.ToCollection();
-				nextPageObject = reCreate();
-				return nextPageObject.processViewAndGetResponse();
+				return processViewAndGetResponse();
 			}
 
 			buildPage();
