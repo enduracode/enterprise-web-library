@@ -42,9 +42,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly List<Action> nonTransactionalModificationMethods = new List<Action>();
 		private bool transactionMarkedForRollback;
 
-		private bool resourceAndUserDisabled;
-
 		private ResourceBase resource;
+		internal bool ResourceDisabled;
 
 		/// <summary>
 		/// EWL use only.
@@ -52,6 +51,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public bool IntermediateUserExists { get; set; }
 
 		private bool userEnabled;
+		private bool userDisabled;
 		private Tuple<User, SpecifiedValue<User>> userAndImpersonator;
 
 		private string errorPrefix = "";
@@ -136,21 +136,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			cleanUpDatabaseConnectionsAndExecuteNonTransactionalModificationMethods();
 		}
 
-		internal T ExecuteWithResourceAndUserDisabled<T>( Func<T> method ) {
-			resourceAndUserDisabled = true;
-			try {
-				return method();
-			}
-			finally {
-				resourceAndUserDisabled = false;
-			}
-		}
-
 		internal void SetResource( ResourceBase resource ) {
 			this.resource = resource;
 		}
 
-		internal ResourceBase Resource => resourceAndUserDisabled ? null : resource;
+		internal ResourceBase Resource => ResourceDisabled ? null : resource;
 
 		/// <summary>
 		/// EwfApp use only.
@@ -163,6 +153,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var userIsProfiling = UserAccessible && ( ProfilingUserId.HasValue || ImpersonatorExists ) && AppMemoryCache.UserIsProfilingRequests( ProfilingUserId );
 			if( !userIsProfiling && !HttpContext.Current.Request.IsLocal && ConfigurationStatics.IsLiveInstallation )
 				MiniProfiler.Stop( discardResults: true );
+		}
+
+		internal T ExecuteWithUserDisabled<T>( Func<T> method ) {
+			userDisabled = true;
+			try {
+				return method();
+			}
+			finally {
+				userDisabled = false;
+			}
 		}
 
 		/// <summary>
@@ -187,7 +187,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			get {
 				if( !userEnabled )
 					throw new ApplicationException( "User cannot be accessed this early in the request life cycle." );
-				if( resourceAndUserDisabled )
+				if( userDisabled )
 					throw new UserDisabledByPageException( "User cannot be accessed. See the AppTools.User documentation for details." );
 				if( !UserAccessible )
 					throw new ApplicationException( "User cannot be accessed from a nonsecure connection in an application that supports secure connections." );

@@ -8,6 +8,12 @@ using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	internal static class UrlHandlingStatics {
+		private static Func<string, string, BasicUrlHandler> urlResolver;
+
+		internal static void Init( Func<string, string, BasicUrlHandler> urlResolver ) {
+			UrlHandlingStatics.urlResolver = urlResolver;
+		}
+
 		internal static string GetCanonicalUrl( BasicUrlHandler basicHandler, bool secure ) {
 			UrlHandler parent = null;
 			if( basicHandler is UrlHandler handler ) {
@@ -60,7 +66,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var path = generatePath( baseUrlParameters, segments );
 			var appRelativeUrl = generateAppRelativeUrl( path, query );
 
-			var resolvedHandler = ResolveUrl( baseUrlString, appRelativeUrl );
+			var resolvedHandler = urlResolver( baseUrlString, appRelativeUrl );
 			if( !EwlStatics.AreEqual( resolvedHandler, basicHandler ) )
 				throw new ApplicationException( "The handler’s canonical URL does not resolve back to the same handler." );
 

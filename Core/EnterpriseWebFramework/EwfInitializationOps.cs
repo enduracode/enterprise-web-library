@@ -57,6 +57,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						// Prevent MiniProfiler JSON exceptions caused by pages with hundreds of database queries.
 						MiniProfiler.Settings.MaxJsonResponseSize = int.MaxValue;
 
+						UrlHandlingStatics.Init(
+							( baseUrlString, appRelativeUrl ) => {
+								AppRequestState.Instance.ResourceDisabled = true;
+								try {
+									return UrlHandlingStatics.ResolveUrl( baseUrlString, appRelativeUrl );
+								}
+								finally {
+									AppRequestState.Instance.ResourceDisabled = false;
+								}
+							} );
+
 						var globalType = BuildManager.GetGlobalAsaxType().BaseType;
 						if( !( globalType.Assembly.CreateInstance( "EnterpriseWebLibrary.EnterpriseWebFramework." + globalType.Namespace + ".MetaLogicFactory" ) is
 							       AppMetaLogicFactory metaLogicFactory ) )

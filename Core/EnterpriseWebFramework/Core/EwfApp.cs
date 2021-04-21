@@ -179,8 +179,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		private void resolveUrl() {
-			var handler = RequestState.ExecuteWithResourceAndUserDisabled(
-				() => UrlHandlingStatics.ResolveUrl( RequestState.BaseUrl, GetRequestAppRelativeUrl( Request ) ) );
+			var handler = RequestState.ExecuteWithUserDisabled( () => UrlHandlingStatics.ResolveUrl( RequestState.BaseUrl, GetRequestAppRelativeUrl( Request ) ) );
 			if( handler != null ) {
 				HttpContext.Current.RemapHandler( new HandlerAdapter( handler ) );
 				return;
