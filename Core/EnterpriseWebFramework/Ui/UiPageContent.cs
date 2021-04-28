@@ -385,11 +385,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			foreach( var resource in resourceGroup.Resources.Where( p => p.UserCanAccessResource ) )
 				hyperlinks.Add(
 					new EwfHyperlink(
-						resource.IsIdenticalToCurrent() ? null : resource,
+						resource.MatchesCurrent() ? null : resource,
 						new StandardHyperlinkStyle(
 							resource.ResourceName,
-							icon: includeIcons ? new ActionComponentIcon( new FontAwesomeIcon( resource.IsIdenticalToCurrent() ? "fa-circle" : "fa-circle-thin" ) ) : null ),
-						classes: resource.IsIdenticalToCurrent() ? currentTabClass :
+							icon: includeIcons ? new ActionComponentIcon( new FontAwesomeIcon( resource.MatchesCurrent() ? "fa-circle" : "fa-circle-thin" ) ) : null ),
+						classes: resource.MatchesCurrent() ? currentTabClass :
 						         resource.AlternativeMode is DisabledResourceMode ? disabledTabClass : ElementClassSet.Empty ) );
 			return hyperlinks;
 		}
