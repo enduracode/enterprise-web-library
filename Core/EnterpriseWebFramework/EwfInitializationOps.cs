@@ -59,12 +59,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 						UrlHandlingStatics.Init(
 							( baseUrlString, appRelativeUrl ) => {
-								AppRequestState.Instance.ResourceDisabled = true;
+								AppRequestState.Instance.UrlHandlerStateDisabled = true;
 								try {
-									return UrlHandlingStatics.ResolveUrl( baseUrlString, appRelativeUrl );
+									return UrlHandlingStatics.ResolveUrl( baseUrlString, appRelativeUrl ).Last();
 								}
 								finally {
-									AppRequestState.Instance.ResourceDisabled = false;
+									AppRequestState.Instance.UrlHandlerStateDisabled = false;
 								}
 							} );
 

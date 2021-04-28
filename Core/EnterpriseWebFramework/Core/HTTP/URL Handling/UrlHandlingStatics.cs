@@ -73,7 +73,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return baseUrlString + ( path.Length > 0 ? "/" : "" ) + appRelativeUrl;
 		}
 
-		internal static BasicUrlHandler ResolveUrl( string baseUrlString, string appRelativeUrl ) {
+		internal static IReadOnlyCollection<BasicUrlHandler> ResolveUrl( string baseUrlString, string appRelativeUrl ) {
+			var handlers = new List<BasicUrlHandler>();
+
 			var urlComponents = parseAppRelativeUrl( appRelativeUrl );
 			var pathComponents = parsePath( urlComponents.path );
 
@@ -95,6 +97,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			if( decoder == null )
 				return null;
 			var basicHandler = decoder.GetUrlHandler( baseUrl.Parameters );
+			handlers.Add( basicHandler );
 
 			for( var segmentIndex = 0; segmentIndex < pathComponents.segments.Count; segmentIndex += 1 ) {
 				if( !( basicHandler is UrlHandler handler ) )
@@ -117,9 +120,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				if( decoder == null )
 					return null;
 				basicHandler = decoder.GetUrlHandler( segment.Parameters );
+				handlers.Add( basicHandler );
 			}
 
-			return basicHandler;
+			return handlers;
 		}
 
 		private static string generateAppRelativeUrl( string path, string query ) => path + query.PrependDelimiter( "?" );

@@ -8,6 +8,7 @@ using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using NodaTime;
 using StackExchange.Profiling;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -42,8 +43,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly List<Action> nonTransactionalModificationMethods = new List<Action>();
 		private bool transactionMarkedForRollback;
 
+		private IReadOnlyCollection<BasicUrlHandler> urlHandlers;
 		private ResourceBase resource;
-		internal bool ResourceDisabled;
+		private bool newUrlParameterValuesEffective;
+		internal bool UrlHandlerStateDisabled;
 
 		/// <summary>
 		/// EWL use only.
@@ -136,11 +139,30 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			cleanUpDatabaseConnectionsAndExecuteNonTransactionalModificationMethods();
 		}
 
+		internal void SetUrlHandlers( IReadOnlyCollection<BasicUrlHandler> handlers ) {
+			urlHandlers = handlers;
+		}
+
+		/// <summary>
+		/// Framework use only.
+		/// </summary>
+		public IReadOnlyCollection<BasicUrlHandler> UrlHandlers =>
+			( UrlHandlerStateDisabled ? null : urlHandlers ) ?? Enumerable.Empty<BasicUrlHandler>().Materialize();
+
 		internal void SetResource( ResourceBase resource ) {
 			this.resource = resource;
 		}
 
-		internal ResourceBase Resource => ResourceDisabled ? null : resource;
+		internal ResourceBase Resource => UrlHandlerStateDisabled ? null : resource;
+
+		internal void SetNewUrlParameterValuesEffective( bool effective ) {
+			newUrlParameterValuesEffective = effective;
+		}
+
+		/// <summary>
+		/// Framework use only.
+		/// </summary>
+		public bool NewUrlParameterValuesEffective => newUrlParameterValuesEffective && !UrlHandlerStateDisabled;
 
 		/// <summary>
 		/// EwfApp use only.

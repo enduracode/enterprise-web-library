@@ -179,9 +179,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		private void resolveUrl() {
-			var handler = RequestState.ExecuteWithUserDisabled( () => UrlHandlingStatics.ResolveUrl( RequestState.BaseUrl, GetRequestAppRelativeUrl( Request ) ) );
-			if( handler != null ) {
-				HttpContext.Current.RemapHandler( new HandlerAdapter( handler ) );
+			var handlers = RequestState.ExecuteWithUserDisabled( () => UrlHandlingStatics.ResolveUrl( RequestState.BaseUrl, GetRequestAppRelativeUrl( Request ) ) );
+			if( handlers != null ) {
+				RequestState.SetUrlHandlers( handlers );
+				HttpContext.Current.RemapHandler( new HandlerAdapter( handlers.Last() ) );
 				return;
 			}
 
