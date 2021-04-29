@@ -140,7 +140,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				writer.WriteLine( "}" );
 
 				// Apply parameter values from the setter.
-				writer.WriteLine( "optionalParameterSpecifier = new OptionalParameterSpecifier();" );
+				writer.WriteLine( "var optionalParameterSpecifier = new OptionalParameterSpecifier();" );
 				writer.WriteLine(
 					"optionalParameterSetter?.Invoke( optionalParameterSpecifier, new Parameters( {0} ) );".FormatWith(
 						StringTools.ConcatenateWithDelimiter(
