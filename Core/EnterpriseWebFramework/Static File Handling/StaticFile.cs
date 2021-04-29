@@ -130,7 +130,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		protected sealed override EwfResponse delete() => base.delete();
 		protected sealed override EwfResponse post() => base.post();
 
-		public override ResourceBase ReCreateAndReplaceDefaultsIfPossible() => this;
+		protected internal sealed override ResourceBase ReCreate() => this;
 
 		public sealed override bool Equals( BasicUrlHandler other ) =>
 			other is StaticFile otherFile && otherFile.isFrameworkFile == isFrameworkFile && otherFile.relativeFilePath == relativeFilePath &&
