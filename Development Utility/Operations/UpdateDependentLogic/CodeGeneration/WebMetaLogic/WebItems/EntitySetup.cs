@@ -24,8 +24,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 		internal void GenerateCode( TextWriter writer ) {
 			writer.WriteLine( "namespace " + generalData.Namespace + " {" );
 			writer.WriteLine( "public sealed partial class {0}: EntitySetupBase {{".FormatWith( generalData.ClassName ) );
-			OptionalParameterPackageStatics.WriteClassIfNecessary( writer, optionalParameters );
+			OptionalParameterPackageStatics.WriteClassIfNecessary( writer, requiredParameters, optionalParameters );
 			ParametersModificationStatics.WriteClassIfNecessary( writer, requiredParameters.Concat( optionalParameters ) );
+			InfoStatics.WriteSpecifyParameterDefaultsMethod( writer, optionalParameters );
 			InfoStatics.WriteParameterMembers( writer, requiredParameters, optionalParameters );
 			if( requiredParameters.Any() || optionalParameters.Any() )
 				writer.WriteLine( "internal ParametersModification parametersModification;" );
@@ -37,39 +38,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			WebMetaLogicStatics.WriteReCreateFromNewParameterValuesMethod(
 				writer,
 				requiredParameters,
-				optionalParameters,
 				"internal {0} ".FormatWith( generalData.ClassName ),
 				generalData.ClassName,
 				"" );
-			writeReCreateAndReplaceDefaultsIfPossibleMethod( writer );
 			writeEqualsMethod( writer );
 			InfoStatics.WriteGetHashCodeMethod( writer, generalData.PathRelativeToProject, requiredParameters, optionalParameters );
 			writer.WriteLine( "}" );
-			writer.WriteLine( "}" );
-		}
-
-		private void writeReCreateAndReplaceDefaultsIfPossibleMethod( TextWriter writer ) {
-			writer.WriteLine( "internal {0} ReCreateAndReplaceDefaultsIfPossible() {{".FormatWith( generalData.ClassName ) );
-			if( optionalParameters.Any() ) {
-				writer.WriteLine( "if( PageBase.Current.EsAsBaseType?.ParametersModificationAsBaseType is ParametersModification parametersModification )" );
-				writer.WriteLine(
-					"return new {0}( {1} );".FormatWith(
-						generalData.ClassName,
-						InfoStatics.GetInfoConstructorArguments(
-							requiredParameters,
-							optionalParameters,
-							parameter => parameter.FieldName,
-							parameter => InfoStatics.GetWasSpecifiedFieldName( parameter ) + " ? " + parameter.FieldName + " : parametersModification." +
-							             parameter.PropertyName ) ) );
-			}
-			writer.WriteLine(
-				"return new {0}( {1} );".FormatWith(
-					generalData.ClassName,
-					InfoStatics.GetInfoConstructorArguments(
-						requiredParameters,
-						optionalParameters,
-						parameter => parameter.FieldName,
-						parameter => parameter.FieldName ) ) );
 			writer.WriteLine( "}" );
 		}
 

@@ -24,9 +24,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			writer.WriteLine( "namespace {0} {{".FormatWith( generalData.Namespace ) );
 			writer.WriteLine( "public sealed partial class {0}: PageBase {{".FormatWith( generalData.ClassName ) );
 
-			OptionalParameterPackageStatics.WriteClassIfNecessary( writer, optionalParameters );
+			OptionalParameterPackageStatics.WriteClassIfNecessary( writer, requiredParameters, optionalParameters );
 			ParametersModificationStatics.WriteClassIfNecessary( writer, requiredParameters.Concat( optionalParameters ) );
 			writeGetInfoMethod( writer );
+			InfoStatics.WriteSpecifyParameterDefaultsMethod( writer, optionalParameters );
 			if( entitySetup != null )
 				writer.WriteLine( "public EntitySetup Es;" );
 			InfoStatics.WriteParameterMembers( writer, requiredParameters, optionalParameters );
@@ -39,63 +40,30 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 					requiredParameters.Any() || optionalParameters.Any() ? "parametersModification" : "null" ) );
 			writer.WriteLine( "protected override UrlEncoder getUrlEncoder() => null;" );
 			writer.WriteLine(
-				"protected override PageBase reCreate() => new {0}({1});".FormatWith(
+				"protected internal override ResourceBase ReCreate() => new {0}( {1} );".FormatWith(
 					generalData.ClassName,
 					StringTools.ConcatenateWithDelimiter(
-							", ",
-							entitySetup != null
-								? "new {0}({1})".FormatWith(
-									entitySetup.GeneralData.ClassName,
-									InfoStatics.GetInfoConstructorArguments(
-											entitySetup.RequiredParameters,
-											entitySetup.OptionalParameters,
-											parameter => "Es.{0}".FormatWith( parameter.PropertyName ),
-											parameter => "Es.{0}".FormatWith( parameter.PropertyName ) )
-										.Surround( " ", " " ) )
-								: "",
-							InfoStatics.GetInfoConstructorArguments(
-								requiredParameters,
-								optionalParameters,
-								parameter => parameter.PropertyName,
-								parameter => parameter.PropertyName ) )
-						.Surround( " ", " " ) ) );
+						", ",
+						entitySetup != null
+							? "new {0}({1})".FormatWith(
+								entitySetup.GeneralData.ClassName,
+								InfoStatics.GetInfoConstructorArgumentsForRequiredParameters(
+										entitySetup.RequiredParameters,
+										parameter => "Es.{0}".FormatWith( parameter.PropertyName ) )
+									.Surround( " ", " " ) )
+							: "",
+						InfoStatics.GetInfoConstructorArgumentsForRequiredParameters( requiredParameters, parameter => parameter.PropertyName ),
+						"uriFragmentIdentifier: uriFragmentIdentifier" ) ) );
 			WebMetaLogicStatics.WriteReCreateFromNewParameterValuesMethod(
 				writer,
 				requiredParameters,
-				optionalParameters,
 				"protected override PageBase ",
 				generalData.ClassName,
 				entitySetup != null ? "Es.ReCreateFromNewParameterValues()" : "" );
-			writeReCreateAndReplaceDefaultsIfPossibleMethod( writer );
 			writeEqualsMethod( writer );
 			InfoStatics.WriteGetHashCodeMethod( writer, generalData.PathRelativeToProject, requiredParameters, optionalParameters );
 
 			writer.WriteLine( "}" );
-			writer.WriteLine( "}" );
-		}
-
-		private void writeReCreateAndReplaceDefaultsIfPossibleMethod( TextWriter writer ) {
-			writer.WriteLine( "public override ResourceBase ReCreateAndReplaceDefaultsIfPossible() {" );
-			if( optionalParameters.Any() ) {
-				writer.WriteLine( "if( Current.ParametersModificationAsBaseType is ParametersModification parametersModification )" );
-				writer.WriteLine(
-					"return new {0}( ".FormatWith( generalData.ClassName ) + StringTools.ConcatenateWithDelimiter(
-						", ",
-						entitySetup != null ? "Es.ReCreateAndReplaceDefaultsIfPossible()" : "",
-						InfoStatics.GetInfoConstructorArguments(
-							requiredParameters,
-							optionalParameters,
-							parameter => parameter.FieldName,
-							parameter => InfoStatics.GetWasSpecifiedFieldName( parameter ) + " ? " + parameter.FieldName + " : parametersModification." +
-							             parameter.PropertyName ),
-						"uriFragmentIdentifier: uriFragmentIdentifier" ) + " );" );
-			}
-			writer.WriteLine(
-				"return new {0}( ".FormatWith( generalData.ClassName ) + StringTools.ConcatenateWithDelimiter(
-					", ",
-					entitySetup != null ? "Es.ReCreateAndReplaceDefaultsIfPossible()" : "",
-					InfoStatics.GetInfoConstructorArguments( requiredParameters, optionalParameters, parameter => parameter.FieldName, parameter => parameter.FieldName ),
-					"uriFragmentIdentifier: uriFragmentIdentifier" ) + " );" );
 			writer.WriteLine( "}" );
 		}
 

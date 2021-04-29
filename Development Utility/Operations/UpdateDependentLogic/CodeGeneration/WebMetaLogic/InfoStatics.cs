@@ -7,48 +7,50 @@ using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic {
 	internal static class InfoStatics {
-		public const string DefaultOptionalParameterPackageName = "_defaultOptionalParameterPackage";
+		private const string parameterDefaultsFieldName = "__parameterDefaults";
+
+		internal static void WriteSpecifyParameterDefaultsMethod( TextWriter writer, IReadOnlyCollection<VariableSpecification> optionalParameters ) {
+			if( !optionalParameters.Any() )
+				return;
+
+			CodeGenerationStatics.AddSummaryDocComment(
+				writer,
+				"Specifies optional parameter default values. This method is always called during construction of an object." );
+			writer.WriteLine( "static partial void specifyParameterDefaults( OptionalParameterSpecifier specifier, Parameters parameters );" );
+		}
 
 		internal static void WriteParameterMembers(
 			TextWriter writer, List<VariableSpecification> requiredParameters, List<VariableSpecification> optionalParameters ) {
-			writeMembersForParameterList( writer, requiredParameters, false );
-			writeMembersForParameterList( writer, optionalParameters, true );
+			writeMembersForParameterList( writer, requiredParameters );
+			writeMembersForParameterList( writer, optionalParameters );
 			if( optionalParameters.Any() ) {
 				CodeGenerationStatics.AddGeneratedCodeUseOnlyComment( writer );
-				writer.WriteLine( "internal OptionalParameterPackage " + DefaultOptionalParameterPackageName + " = new OptionalParameterPackage();" );
+				writer.WriteLine( "internal OptionalParameterSpecifier {0} = new OptionalParameterSpecifier();".FormatWith( parameterDefaultsFieldName ) );
 			}
 		}
 
-		private static void writeMembersForParameterList( TextWriter writer, List<VariableSpecification> parameters, bool writeWasSetFlags ) {
+		private static void writeMembersForParameterList( TextWriter writer, List<VariableSpecification> parameters ) {
 			foreach( var parameter in parameters ) {
 				CodeGenerationStatics.AddGeneratedCodeUseOnlyComment( writer );
 				writer.WriteLine(
 					"private " + parameter.TypeName + " " + parameter.FieldName +
 					( parameter.IsString ? " = \"\"" : parameter.IsEnumerable ? " = " + parameter.EnumerableInitExpression : "" ) + ";" );
-				if( writeWasSetFlags ) {
-					CodeGenerationStatics.AddGeneratedCodeUseOnlyComment( writer );
-					writer.WriteLine( "private bool " + GetWasSpecifiedFieldName( parameter ) + ";" );
-				}
 				CodeGenerationStatics.AddSummaryDocComment( writer, parameter.Comment );
 				writer.WriteLine( "public " + parameter.TypeName + " " + parameter.PropertyName + " { get { return " + parameter.FieldName + "; } }" );
 			}
 		}
 
-		public static string GetWasSpecifiedFieldName( VariableSpecification parameter ) {
-			return parameter.FieldName + "WasSpecified";
-		}
-
 		internal static void WriteConstructorAndHelperMethods(
 			TextWriter writer, WebItemGeneralData generalData, IReadOnlyCollection<VariableSpecification> requiredParameters,
 			IReadOnlyCollection<VariableSpecification> optionalParameters, bool includeEsParameter, bool isEs ) {
-			// It's important to force the cache to be enabled in the constructor since info objects are often created in post-back-action getters.
+			// It's important to force the cache to be enabled in the constructor since these objects are often created in post-back-action getters.
 
 			writeConstructorDocComments( writer, requiredParameters );
 			var constructorParameters = "( " + StringTools.ConcatenateWithDelimiter(
 				                            ", ",
 				                            includeEsParameter ? "EntitySetup es" : "",
 				                            WebMetaLogicStatics.GetParameterDeclarations( requiredParameters ),
-				                            optionalParameters.Count > 0 ? "OptionalParameterPackage optionalParameterPackage = null" : "",
+				                            optionalParameters.Count > 0 ? "Action<OptionalParameterSpecifier, Parameters> optionalParameterSetter = null" : "",
 				                            !isEs ? "string uriFragmentIdentifier = \"\"" : "" ) + " ) {";
 			writer.WriteLine( "internal {0}".FormatWith( generalData.ClassName ) + constructorParameters );
 			writer.WriteLine( "DataAccessState.Current.ExecuteWithCache( () => {" );
@@ -60,7 +62,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 					", ",
 					includeEsParameter ? "es" : "",
 					GetInfoConstructorArgumentsForRequiredParameters( requiredParameters, p => p.Name ),
-					optionalParameters.Count > 0 ? "optionalParameterPackage: optionalParameterPackage" : "",
+					optionalParameters.Count > 0 ? "optionalParameterSetter: optionalParameterSetter" : "",
 					!isEs ? "uriFragmentIdentifier: uriFragmentIdentifier" : "" ) + " );" );
 
 			// Call init.
@@ -69,18 +71,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			writer.WriteLine( "} );" );
 			writer.WriteLine( "}" );
 
-			// Declare partial helper methods that will be called by the constructor.
-			writeInitParametersMethod( writer, requiredParameters, optionalParameters, includeEsParameter, isEs, constructorParameters );
-			if( optionalParameters.Any() ) {
-				CodeGenerationStatics.AddSummaryDocComment(
-					writer,
-					"Initializes an optional parameter package with request time default values. This method is always called during construction of the object." );
-				writer.WriteLine( "partial void initDefaultOptionalParameterPackage( OptionalParameterPackage package );" );
-				CodeGenerationStatics.AddSummaryDocComment(
-					writer,
-					"Initializes an optional parameter package with non request time default values. This method is called during construction of the object unless the object is being created from the URL to directly handle the current request." );
-				writer.WriteLine( "partial void initUserDefaultOptionalParameterPackage( OptionalParameterPackage package );" );
-			}
+			writeInitParametersMethod( writer, generalData, requiredParameters, optionalParameters, includeEsParameter, isEs, constructorParameters );
 		}
 
 		private static void writeConstructorDocComments( TextWriter writer, IReadOnlyCollection<VariableSpecification> requiredParameters ) {
@@ -96,8 +87,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 		}
 
 		private static void writeInitParametersMethod(
-			TextWriter writer, IReadOnlyCollection<VariableSpecification> requiredParameters, IReadOnlyCollection<VariableSpecification> optionalParameters,
-			bool includeEsParameter, bool isEs, string constructorParameters ) {
+			TextWriter writer, WebItemGeneralData generalData, IReadOnlyCollection<VariableSpecification> requiredParameters,
+			IReadOnlyCollection<VariableSpecification> optionalParameters, bool includeEsParameter, bool isEs, string constructorParameters ) {
 			CodeGenerationStatics.AddSummaryDocComment(
 				writer,
 				"Initializes required and optional parameters. A call to this should be the first line of every non-generated constructor." );
@@ -115,63 +106,76 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 
 			// Initialize optional parameter fields.
 			if( optionalParameters.Any() ) {
-				writer.WriteLine( "optionalParameterPackage = optionalParameterPackage ?? new OptionalParameterPackage();" );
+				writer.WriteLine( "var optionalParametersInitializedFromCurrent = false;" );
+				writer.WriteLine( "if( EwfApp.Instance != null && AppRequestState.Instance != null ) {" );
 
-				// Initialize fields whose values have been specified.
-				foreach( var optionalParameter in optionalParameters ) {
-					writer.WriteLine( "if( optionalParameterPackage." + OptionalParameterPackageStatics.GetWasSpecifiedPropertyName( optionalParameter ) + " ) {" );
-					writer.WriteLine( optionalParameter.FieldName + " = optionalParameterPackage." + optionalParameter.PropertyName + ";" );
-					writer.WriteLine( GetWasSpecifiedFieldName( optionalParameter ) + " = true;" );
+				// If the list of current URL handlers has a matching object, apply its parameter values.
+				writer.WriteLine( "foreach( var urlHandler in AppRequestState.Instance.UrlHandlers ) {" );
+				writer.WriteLine( "if( !( urlHandler is {0} match ) ) continue;".FormatWith( generalData.ClassName ) );
+				foreach( var i in requiredParameters )
+					writer.WriteLine( "if( !EwlStatics.AreEqual( match.{0}, {0} ) ) continue;".FormatWith( i.PropertyName ) );
+				foreach( var i in optionalParameters )
+					writer.WriteLine( "{0} = match.{1};".FormatWith( i.FieldName, i.PropertyName ) );
+				writer.WriteLine( "optionalParametersInitializedFromCurrent = true;" );
+				writer.WriteLine( "break;" );
+				writer.WriteLine( "}" );
+
+				// If new parameter values are effective, and the current resource or an ancestor matches this object, apply its new parameter values.
+				if( generalData.IsPage() || isEs ) {
+					writer.WriteLine( "if( AppRequestState.Instance.NewUrlParameterValuesEffective ) {" );
+					writer.WriteLine( "UrlHandler urlHandler = {0}Current ?? ResourceBase.Current;".FormatWith( generalData.IsPage() ? "" : "PageBase." ) );
+					writer.WriteLine( "do {" );
+					writer.WriteLine( "if( !( urlHandler is {0} match ) ) continue;".FormatWith( generalData.ClassName ) );
+					foreach( var i in requiredParameters )
+						writer.WriteLine( "if( !EwlStatics.AreEqual( match.{0}, {0} ) ) continue;".FormatWith( i.PropertyName ) );
+					foreach( var i in optionalParameters )
+						writer.WriteLine( "{0} = match.parametersModification.{1};".FormatWith( i.FieldName, i.PropertyName ) );
+					writer.WriteLine( "optionalParametersInitializedFromCurrent = true;" );
+					writer.WriteLine( "break;" );
+					writer.WriteLine( "}" );
+					writer.WriteLine( "while( ( urlHandler = urlHandler.GetParent() ) != null );" );
 					writer.WriteLine( "}" );
 				}
 
-				// If the current info object is the same type, use it to initialize fields whose values have not been specified.
-				if( isEs )
-					writer.WriteLine( "var currentInfo = EwfPage.Instance?.InfoAsBaseType != null ? EwfPage.Instance.EsAsBaseType as EntitySetup : null;" );
-				else
-					writer.WriteLine( "var currentInfo = Instance?.InfoAsBaseType as Info;" );
-				writer.WriteLine( "if( currentInfo != null ) {" );
-				foreach( var optionalParameter in optionalParameters ) {
-					writer.WriteLine( "if( !" + GetWasSpecifiedFieldName( optionalParameter ) + " )" );
-					writer.WriteLine( optionalParameter.FieldName + " = currentInfo." + optionalParameter.FieldName + ";" );
-				}
 				writer.WriteLine( "}" );
 
-				// This is called after all specified values and all current info object values have been incorporated since these can affect default values.
-				writer.WriteLine( "initDefaultOptionalParameterPackage( " + DefaultOptionalParameterPackageName + " );" );
-
-
-				// If the current info object is *not* the same type, use default values to initialize fields whose values have not been specified.
-
-				writer.WriteLine( "if( currentInfo == null ) {" );
-				foreach( var optionalParameter in optionalParameters ) {
+				// Apply parameter values from the setter.
+				writer.WriteLine( "optionalParameterSpecifier = new OptionalParameterSpecifier();" );
+				writer.WriteLine(
+					"optionalParameterSetter?.Invoke( optionalParameterSpecifier, new Parameters( {0} ) );".FormatWith(
+						StringTools.ConcatenateWithDelimiter(
+							", ",
+							requiredParameters.Select( i => i.PropertyName )
+								.Append(
+									"optionalParametersInitializedFromCurrent ? new OptionalParameters( {0} ) : null".FormatWith(
+										StringTools.ConcatenateWithDelimiter( ", ", optionalParameters.Select( i => i.PropertyName ) ) ) ) ) ) );
+				foreach( var i in optionalParameters )
 					writer.WriteLine(
-						"if( !" + GetWasSpecifiedFieldName( optionalParameter ) + " && " + DefaultOptionalParameterPackageName + "." +
-						OptionalParameterPackageStatics.GetWasSpecifiedPropertyName( optionalParameter ) + " )" );
-					writer.WriteLine( optionalParameter.FieldName + " = " + DefaultOptionalParameterPackageName + "." + optionalParameter.PropertyName + ";" );
-				}
+						"if( optionalParameterSpecifier.{0} ) {1} = optionalParameterSpecifier.{2};".FormatWith(
+							OptionalParameterPackageStatics.GetWasSpecifiedPropertyName( i ),
+							i.FieldName,
+							i.PropertyName ) );
 
-				// Overwrite base default values with user defaults except when this info object is being created for the current request. It's important that the
-				// fields contain base default values before initUserDefaultOptionalParameterPackage is called in case the implementation of the method wants to use
-				// base defaults when determining user defaults.
-				writer.WriteLine( "if( EwfPage.Instance == null || EwfPage.Instance.InfoAsBaseType != null ) {" );
-				writer.WriteLine( "var userDefaultOptionalParameterPackage = new OptionalParameterPackage();" );
-				writer.WriteLine( "initUserDefaultOptionalParameterPackage( userDefaultOptionalParameterPackage );" );
-				foreach( var optionalParameter in optionalParameters ) {
+				// This is called after all current values and values from the setter have been incorporated since these can affect default values.
+				writer.WriteLine(
+					"specifyParameterDefaults( {0}, new Parameters( {1} ) );".FormatWith(
+						parameterDefaultsFieldName,
+						StringTools.ConcatenateWithDelimiter(
+							", ",
+							requiredParameters.Select( i => i.PropertyName )
+								.Append(
+									"new OptionalParameters( {0} )".FormatWith(
+										StringTools.ConcatenateWithDelimiter( ", ", optionalParameters.Select( i => i.PropertyName ) ) ) ) ) ) );
+
+				// Apply default values to parameters not yet initialized.
+				writer.WriteLine( "if( !optionalParametersInitializedFromCurrent ) {" );
+				foreach( var i in optionalParameters )
 					writer.WriteLine(
-						"if( !" + GetWasSpecifiedFieldName( optionalParameter ) + " && userDefaultOptionalParameterPackage." +
-						OptionalParameterPackageStatics.GetWasSpecifiedPropertyName( optionalParameter ) + " )" );
-					writer.WriteLine( optionalParameter.FieldName + " = userDefaultOptionalParameterPackage." + optionalParameter.PropertyName + ";" );
-				}
-				writer.WriteLine( "}" );
-
-				writer.WriteLine( "}" );
-
-				// Clear WasSpecified fields when this info object is being created for the current request. This will cause CloneAndReplaceDefaultsIfPossible to behave
-				// the same on this object as it would on a new copy of the object created during the request with no optional parameter values specified.
-				writer.WriteLine( "if( EwfPage.Instance != null && EwfPage.Instance.InfoAsBaseType == null ) {" );
-				foreach( var optionalParameter in optionalParameters )
-					writer.WriteLine( GetWasSpecifiedFieldName( optionalParameter ) + " = false;" );
+						"if( !optionalParameterSpecifier.{0} && {1}.{0} ) {2} = {1}.{3};".FormatWith(
+							OptionalParameterPackageStatics.GetWasSpecifiedPropertyName( i ),
+							parameterDefaultsFieldName,
+							i.FieldName,
+							i.PropertyName ) );
 				writer.WriteLine( "}" );
 			}
 
@@ -186,24 +190,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				}
 
 			writer.WriteLine( "}" ); // initParameters method
-		}
-
-		internal static string GetInfoConstructorArguments(
-			IReadOnlyCollection<VariableSpecification> requiredParameters, IReadOnlyCollection<VariableSpecification> optionalParameters,
-			Func<VariableSpecification, string> requiredParameterToArgMapper, Func<VariableSpecification, string> optionalParameterToArgMapper ) {
-			var optionalParameterAssignments = "";
-			foreach( var optionalParameter in optionalParameters )
-				optionalParameterAssignments = StringTools.ConcatenateWithDelimiter(
-					", ",
-					optionalParameterAssignments,
-					optionalParameter.PropertyName + " = " + optionalParameterToArgMapper( optionalParameter ) );
-			if( optionalParameterAssignments.Length > 0 )
-				optionalParameterAssignments = "optionalParameterPackage: new OptionalParameterPackage { " + optionalParameterAssignments + " }";
-
-			return StringTools.ConcatenateWithDelimiter(
-				", ",
-				GetInfoConstructorArgumentsForRequiredParameters( requiredParameters, requiredParameterToArgMapper ),
-				optionalParameterAssignments );
 		}
 
 		internal static string GetInfoConstructorArgumentsForRequiredParameters(

@@ -227,17 +227,15 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 		}
 
 		internal static void WriteReCreateFromNewParameterValuesMethod(
-			TextWriter writer, IReadOnlyCollection<VariableSpecification> requiredParameters, IReadOnlyCollection<VariableSpecification> optionalParameters,
-			string methodNamePrefix, string className, string infoConstructorArgPrefix ) {
+			TextWriter writer, IReadOnlyCollection<VariableSpecification> requiredParameters, string methodNamePrefix, string className,
+			string infoConstructorArgPrefix ) {
 			writer.WriteLine( methodNamePrefix + ( methodNamePrefix.Contains( "protected" ) ? "r" : "R" ) + "eCreateFromNewParameterValues() {" );
 			writer.WriteLine(
 				"return new {0}( ".FormatWith( className ) + StringTools.ConcatenateWithDelimiter(
 					", ",
 					infoConstructorArgPrefix,
-					InfoStatics.GetInfoConstructorArguments(
+					InfoStatics.GetInfoConstructorArgumentsForRequiredParameters(
 						requiredParameters,
-						optionalParameters,
-						parameter => "parametersModification." + parameter.PropertyName,
 						parameter => "parametersModification." + parameter.PropertyName ) ) + " );" );
 			writer.WriteLine( "}" );
 		}

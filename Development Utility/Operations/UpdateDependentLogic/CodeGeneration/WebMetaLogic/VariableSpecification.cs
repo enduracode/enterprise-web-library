@@ -103,7 +103,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 
 		public string Name { get { return name; } }
 		public string PropertyName { get { return name.CapitalizeString(); } }
-		public string FieldName { get { return "_" + name; } }
+		public string FieldName { get { return "__" + name; } }
 
 		public string Comment { get { return comment; } }
 

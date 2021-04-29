@@ -219,22 +219,23 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 				// Re-create page object. A big reason to do this is that some pages execute database queries or other code during initialization in order to prime the
 				// data-access cache. The code above resets the cache and we want to re-prime it right away.
+				PageBase newPageObject;
 				using( MiniProfiler.Current.Step( "EWF - Re-create page object after page-view data modifications" ) )
-					nextPageObject = reCreate();
+					newPageObject = (PageBase)ReCreate();
 				bool urlChanged;
 				using( MiniProfiler.Current.Step( "EWF - Check URL after page-view data modifications" ) )
-					urlChanged = nextPageObject.GetUrl( false, false, true ) != AppRequestState.Instance.Url;
+					urlChanged = newPageObject.GetUrl( false, false, true ) != AppRequestState.Instance.Url;
 				if( urlChanged )
 					throw getPossibleDeveloperMistakeException( "The URL of the page changed after page-view data modifications." );
 				bool userAuthorized;
 				using( MiniProfiler.Current.Step( "EWF - Check page authorization after page-view data modifications" ) )
-					userAuthorized = nextPageObject.UserCanAccessResource;
+					userAuthorized = newPageObject.UserCanAccessResource;
 				DisabledResourceMode disabledMode;
 				using( MiniProfiler.Current.Step( "EWF - Check alternative page mode after page-view data modifications" ) )
-					disabledMode = nextPageObject.AlternativeMode as DisabledResourceMode;
+					disabledMode = newPageObject.AlternativeMode as DisabledResourceMode;
 				if( !userAuthorized || disabledMode != null )
 					throw getPossibleDeveloperMistakeException( "The user lost access to the page or the page became disabled after page-view data modifications." );
-				return nextPageObject.processSecondaryOperationAndGetResponse();
+				return ( nextPageObject = newPageObject ).processSecondaryOperationAndGetResponse();
 			}
 
 			return processSecondaryOperationAndGetResponse();
@@ -735,12 +736,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				// navigation.
 				if( requestState.ModificationErrorsExist ||
 				    ( requestState.DmIdAndSecondaryOp != null && requestState.DmIdAndSecondaryOp.Item2 == SecondaryPostBackOperation.NoOperation ) )
-					destination = reCreate();
-				else if( destination == null )
-					destination = reCreateFromNewParameterValues();
-				else if( destination is ResourceBase r )
-					destination = r.ReCreateAndReplaceDefaultsIfPossible();
-				nextPageObject = destination as PageBase;
+					destination = ReCreate();
+				else {
+					AppRequestState.Instance.SetNewUrlParameterValuesEffective( true );
+					if( destination == null )
+						destination = reCreateFromNewParameterValues();
+					else if( destination is ResourceBase r )
+						destination = r.ReCreate();
+				}
 
 				// This GetUrl call is important even for the transfer case below for the same reason that we *actually create* a new page object in every case above.
 				// We want to force developers to get an error email if a page modifies data to make itself unauthorized/disabled without specifying a different page as
@@ -759,9 +762,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 
 			// If the redirect destination is identical to the current page, do a transfer instead of a redirect.
-			if( nextPageObject?.IsIdenticalToCurrent() == true ) {
+			if( destination is PageBase page && page.MatchesCurrent() ) {
+				page.replaceUrlHandlers();
+				AppRequestState.Instance.SetNewUrlParameterValuesEffective( false );
 				AppRequestState.Instance.ClearUserAndImpersonator();
-				return nextPageObject.processViewAndGetResponse();
+				return ( nextPageObject = page ).processViewAndGetResponse();
 			}
 
 			// If the redirect destination is the current page, but with different query parameters, save request state in session state until the next request.
@@ -776,11 +781,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
-		/// Framework use only.
-		/// </summary>
-		protected abstract PageBase reCreate();
-
-		/// <summary>
 		/// Creates a page object using the new parameter value fields in this page.
 		/// </summary>
 		protected abstract PageBase reCreateFromNewParameterValues();
@@ -792,6 +792,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					"There is a chance that this was caused by something outside the request, but it's more likely that a developer incorrectly modified something."
 				};
 			throw new ApplicationException( StringTools.ConcatenateWithDelimiter( " ", sentences ), innerException );
+		}
+
+		private void replaceUrlHandlers() {
+			var urlHandlers = new List<BasicUrlHandler>();
+			UrlHandler urlHandler = this;
+			do
+				urlHandlers.Add( urlHandler );
+			while( ( urlHandler = urlHandler.GetParent() ) != null );
+			AppRequestState.Instance.SetUrlHandlers( urlHandlers );
 		}
 
 		private EwfResponse getResponse() {

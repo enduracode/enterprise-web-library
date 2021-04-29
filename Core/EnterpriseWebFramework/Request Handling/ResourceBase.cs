@@ -285,11 +285,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				return;
 			}
 
-			// This will exchange the ancestor handlers created while resolving the URL with new ones created as URL parents during the GetUrl call above. All
-			// parameter values will remain the same since if they differed we would have redirected above. But WasSpecified flags can change since the parameter
-			// modifiers used when creating URL parents can explicitly specify values that happen to match the defaults.
-			ReplaceUrlHandlers();
-
 			bool userAuthorized;
 			using( MiniProfiler.Current.Step( "EWF - Check resource authorization" ) )
 				userAuthorized = UserCanAccessResource;
@@ -350,15 +345,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 		}
 
-		internal void ReplaceUrlHandlers() {
-			var urlHandlers = new List<BasicUrlHandler>();
-			UrlHandler urlHandler = this;
-			do
-				urlHandlers.Add( urlHandler );
-			while( ( urlHandler = urlHandler.GetParent() ) != null );
-			AppRequestState.Instance.SetUrlHandlers( urlHandlers );
-		}
-
 		/// <summary>
 		/// Returns the redirect for the resource, if it is located outside of the application.
 		/// </summary>
@@ -407,11 +393,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public bool MatchesCurrent() => Equals( Current );
 
 		/// <summary>
-		/// Framework use only. If the type of this resource corresponds to the current resource or if the type of this resource’s entity setup corresponds to the
-		/// current entity setup, this method returns a clone of this object that uses values from the current resource and entity setup instead of defaults
-		/// whenever possible.
+		/// Framework use only.
 		/// </summary>
-		public abstract ResourceBase ReCreateAndReplaceDefaultsIfPossible();
+		protected internal abstract ResourceBase ReCreate();
 
 		public sealed override bool Equals( object obj ) => Equals( obj as BasicUrlHandler );
 		public abstract bool Equals( BasicUrlHandler other );
