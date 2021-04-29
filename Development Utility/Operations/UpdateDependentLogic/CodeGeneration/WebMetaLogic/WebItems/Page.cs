@@ -86,22 +86,22 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 					entitySetup != null ? WebMetaLogicStatics.GetParameterDeclarations( entitySetup.RequiredParameters ) : "",
 					WebMetaLogicStatics.GetParameterDeclarations( requiredParameters ),
 					entitySetup != null && entitySetup.OptionalParameters.Count > 0
-						? "EntitySetup.OptionalParameterPackage entitySetupOptionalParameterPackage = null"
+						? "Action<EntitySetup.OptionalParameterSpecifier, EntitySetup.Parameters> entitySetupOptionalParameterSetter = null"
 						: "",
-					optionalParameters.Count > 0 ? "OptionalParameterPackage optionalParameterPackage = null" : "",
+					optionalParameters.Count > 0 ? "Action<OptionalParameterSpecifier, Parameters> optionalParameterSetter = null" : "",
 					"string uriFragmentIdentifier = \"\"" ) + " ) {" );
 			var entitySetupArgs = entitySetup != null
 				                      ? "new EntitySetup( " + StringTools.ConcatenateWithDelimiter(
 					                        ", ",
 					                        InfoStatics.GetInfoConstructorArgumentsForRequiredParameters( entitySetup.RequiredParameters, parameter => parameter.Name ),
-					                        entitySetup.OptionalParameters.Count > 0 ? "optionalParameterPackage: entitySetupOptionalParameterPackage" : "" ) + " )"
+					                        entitySetup.OptionalParameters.Count > 0 ? "optionalParameterSetter: entitySetupOptionalParameterSetter" : "" ) + " )"
 				                      : "";
 			writer.WriteLine(
 				"return new {0}( ".FormatWith( generalData.ClassName ) + StringTools.ConcatenateWithDelimiter(
 					", ",
 					entitySetupArgs,
 					InfoStatics.GetInfoConstructorArgumentsForRequiredParameters( requiredParameters, parameter => parameter.Name ),
-					optionalParameters.Count > 0 ? "optionalParameterPackage: optionalParameterPackage" : "",
+					optionalParameters.Count > 0 ? "optionalParameterSetter: optionalParameterSetter" : "",
 					"uriFragmentIdentifier: uriFragmentIdentifier" ) + " );" );
 			writer.WriteLine( "}" );
 		}
