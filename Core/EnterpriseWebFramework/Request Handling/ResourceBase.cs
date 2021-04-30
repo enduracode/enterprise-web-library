@@ -182,7 +182,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets the log in page to use for this resource if the system supports forms authentication.
 		/// </summary>
-		protected internal virtual PageInfo LogInPage {
+		protected internal virtual ResourceBase LogInPage {
 			get {
 				if( ParentResource != null )
 					return ParentResource.LogInPage;

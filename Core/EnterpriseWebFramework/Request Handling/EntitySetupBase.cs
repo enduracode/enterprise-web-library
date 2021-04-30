@@ -50,7 +50,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets the log in page to use for resources that are part of this entity setup if the system supports forms authentication.
 		/// </summary>
-		protected internal virtual PageInfo LogInPage => ParentResource?.LogInPage;
+		protected internal virtual ResourceBase LogInPage => ParentResource?.LogInPage;
 
 		/// <summary>
 		/// Gets the alternative mode for this entity setup or null if it is in normal mode. Do not call this from the createAlternativeMode method of an ancestor;

@@ -595,7 +595,6 @@
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Page Structure\Nodes\TextNode.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\PageBase.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\PageContent.cs" />
-    <Compile Include="EnterpriseWebFramework\Page Infrastructure\PageInfo.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\PageNode.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\PageTree.cs" />
     <Compile Include="EnterpriseWebFramework\Page Infrastructure\Partial Updating\ModificationErrorDictionary.cs" />
