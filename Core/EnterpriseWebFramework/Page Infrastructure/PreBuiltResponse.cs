@@ -1,7 +1,7 @@
 ﻿using System;
 using EnterpriseWebLibrary.WebSessionState;
 
-// EwlPage
+// EwlResource
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	partial class PreBuiltResponse {

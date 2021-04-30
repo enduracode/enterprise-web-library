@@ -61,7 +61,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				if( Path.GetExtension( fileName ).ToLowerInvariant() != ".cs" )
 					continue;
 				var generalData = new WebItemGeneralData( projectPath, projectNamespace, EwlStatics.CombinePaths( folderPathRelativeToProject, fileName ), false );
-				if( !generalData.IsPage() )
+				if( !generalData.IsResource() && !generalData.IsPage() && !generalData.IsAutoCompleteService() )
 					continue;
 				new Page( generalData, entitySetup ).GenerateCode( writer );
 			}

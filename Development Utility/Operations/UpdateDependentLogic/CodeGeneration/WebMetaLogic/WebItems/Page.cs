@@ -22,10 +22,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 
 		internal void GenerateCode( TextWriter writer ) {
 			writer.WriteLine( "namespace {0} {{".FormatWith( generalData.Namespace ) );
-			writer.WriteLine( "public sealed partial class {0}: PageBase {{".FormatWith( generalData.ClassName ) );
+			writer.WriteLine(
+				"public sealed partial class {0}: {1} {{".FormatWith(
+					generalData.ClassName,
+					generalData.IsResource() ? "ResourceBase" : generalData.IsPage() ? "PageBase" : "AutoCompleteService" ) );
 
 			OptionalParameterPackageStatics.WriteClassIfNecessary( writer, requiredParameters, optionalParameters );
-			ParametersModificationStatics.WriteClassIfNecessary( writer, requiredParameters.Concat( optionalParameters ) );
+			if( generalData.IsPage() )
+				ParametersModificationStatics.WriteClassIfNecessary( writer, requiredParameters.Concat( optionalParameters ) );
 			writeGetInfoMethod( writer );
 			InfoStatics.WriteSpecifyParameterDefaultsMethod( writer, optionalParameters );
 			if( entitySetup != null )
@@ -35,9 +39,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				writer.WriteLine( "private ParametersModification parametersModification;" );
 			InfoStatics.WriteConstructorAndHelperMethods( writer, generalData, requiredParameters, optionalParameters, entitySetup != null, false );
 			writer.WriteLine( "public override EntitySetupBase EsAsBaseType => {0};".FormatWith( entitySetup != null ? "Es" : "null" ) );
-			writer.WriteLine(
-				"public override ParametersModificationBase ParametersModificationAsBaseType => {0};".FormatWith(
-					requiredParameters.Any() || optionalParameters.Any() ? "parametersModification" : "null" ) );
+			if( generalData.IsPage() )
+				writer.WriteLine(
+					"public override ParametersModificationBase ParametersModificationAsBaseType => {0};".FormatWith(
+						requiredParameters.Any() || optionalParameters.Any() ? "parametersModification" : "null" ) );
 			writer.WriteLine( "protected override UrlEncoder getUrlEncoder() => null;" );
 			writer.WriteLine(
 				"protected internal override ResourceBase ReCreate() => new {0}( {1} );".FormatWith(
@@ -54,12 +59,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 							: "",
 						InfoStatics.GetInfoConstructorArgumentsForRequiredParameters( requiredParameters, parameter => parameter.PropertyName ),
 						"uriFragmentIdentifier: uriFragmentIdentifier" ) ) );
-			WebMetaLogicStatics.WriteReCreateFromNewParameterValuesMethod(
-				writer,
-				requiredParameters,
-				"protected override PageBase ",
-				generalData.ClassName,
-				entitySetup != null ? "Es.ReCreateFromNewParameterValues()" : "" );
+			if( generalData.IsPage() )
+				WebMetaLogicStatics.WriteReCreateFromNewParameterValuesMethod(
+					writer,
+					requiredParameters,
+					"protected override PageBase ",
+					generalData.ClassName,
+					entitySetup != null ? "Es.ReCreateFromNewParameterValues()" : "" );
 			writeEqualsMethod( writer );
 			InfoStatics.WriteGetHashCodeMethod( writer, generalData.PathRelativeToProject, requiredParameters, optionalParameters );
 
