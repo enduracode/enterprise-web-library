@@ -362,7 +362,6 @@
     <Compile Include="EnterpriseWebFramework\Component Display\DisplaySetup.cs" />
     <Compile Include="EnterpriseWebFramework\ContactSupport.cs" />
     <Compile Include="EnterpriseWebFramework\Core\AccessDeniedException.cs" />
-    <Compile Include="EnterpriseWebFramework\Core\AppMetaLogicFactory.cs" />
     <Compile Include="EnterpriseWebFramework\Core\AppRequestState.cs" />
     <Compile Include="EnterpriseWebFramework\Core\ConnectionSecurity.cs" />
     <Compile Include="EnterpriseWebFramework\Core\CookieStatics.cs" />

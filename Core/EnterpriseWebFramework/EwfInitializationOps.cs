@@ -9,7 +9,9 @@ using System.Web.Http;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
+using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using StackExchange.Profiling;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public static class EwfInitializationOps {
@@ -69,11 +71,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							} );
 
 						var globalType = BuildManager.GetGlobalAsaxType().BaseType;
-						if( !( globalType.Assembly.CreateInstance( "EnterpriseWebLibrary.EnterpriseWebFramework." + globalType.Namespace + ".MetaLogicFactory" ) is
-							       AppMetaLogicFactory metaLogicFactory ) )
-							throw new ApplicationException( "Meta logic factory not found." );
-						EwfApp.Init( metaLogicFactory );
-
 						Func<ProviderType> getProviderGetter<ProviderType>( string providerName ) where ProviderType: class {
 							var appAssembly = globalType.Assembly;
 							var typeName = globalType.Namespace + ".Providers." + providerName;
@@ -95,13 +92,55 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								var contentUsesUi = contentObjects.Any( i => i is UiPageContent );
 
 								var cssInfos = new List<ResourceInfo>();
-								cssInfos.AddRange( EwfApp.MetaLogicFactory.CreateBasicCssInfos() );
+								cssInfos.Add(
+									new ExternalResource(
+										"//fonts.googleapis.com/css2?family=Libre+Franklin:wght@500;600;700&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400&display=fallback" ) );
+								cssInfos.Add( new ExternalResource( "//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" ) );
+								cssInfos.Add( new StaticFiles.Versioned.Third_party.Jquery_ui.Jquery_ui_1114custom_v2.Jquery_uiminCss() );
+								cssInfos.Add( new StaticFiles.Third_party.Select_cssCss() );
+								cssInfos.Add( new StaticFiles.Versioned.Third_party.Chosen.Chosen_v187.ChosenminCss() );
+								cssInfos.Add( new StaticFiles.Third_party.Time_picker.StylesCss() );
+								cssInfos.Add( new ExternalResource( "//cdn.jsdelivr.net/qtip2/2.2.1/jquery.qtip.min.css" ) );
+								cssInfos.Add( new ExternalResource( "//cdnjs.cloudflare.com/ajax/libs/dialog-polyfill/0.4.9/dialog-polyfill.min.css" ) );
+								cssInfos.Add( new StaticFiles.Styles.BasicCss() );
 								if( contentUsesUi )
-									cssInfos.AddRange( EwfApp.MetaLogicFactory.CreateEwfUiCssInfos() );
+									cssInfos.AddRange(
+										new ResourceInfo[]
+											{
+												new StaticFiles.Styles.Ui.ColorsCss(), new StaticFiles.Styles.Ui.FontsCss(), new StaticFiles.Styles.Ui.LayoutCss(),
+												new StaticFiles.Styles.Ui.TransitionsCss()
+											} );
 								cssInfos.AddRange( EwfApp.Instance.GetStyleSheets() );
 								if( contentUsesUi )
 									cssInfos.AddRange( EwfUiStatics.AppProvider.GetStyleSheets() );
 								return cssInfos;
+							},
+							hideWarnings => {
+								var url = AppRequestState.Instance.Url;
+								if( AppRequestState.Instance.UserAccessible && AppRequestState.Instance.ImpersonatorExists )
+									url = new UserManagement.Pages.Impersonate( url, optionalParameterSetter: ( specifier, parameters ) => specifier.User = AppTools.User.Email )
+										.GetUrl();
+								return new NonLiveLogIn(
+									url,
+									optionalParameterSetter: ( specifier, parameters ) => {
+										specifier.Password = ConfigurationStatics.SystemGeneralProvider.IntermediateLogInPassword;
+										specifier.HideWarnings = hideWarnings;
+									} ).GetUrl();
+							},
+							() => {
+								if( !AppRequestState.Instance.UserAccessible || !AppRequestState.Instance.ImpersonatorExists ||
+								    ( ConfigurationStatics.IsIntermediateInstallation && !AppRequestState.Instance.IntermediateUserExists ) )
+									return null;
+								return ( "User impersonation is in effect.",
+									       new HyperlinkSetup( new UserManagement.Pages.Impersonate( AppRequestState.Instance.Url ), "Change user" ).Append<ActionComponentSetup>(
+											       new ButtonSetup(
+												       "End impersonation",
+												       behavior: new PostBackBehavior(
+													       postBack: PostBack.CreateFull(
+														       id: "ewfEndImpersonation",
+														       modificationMethod: UserImpersonationStatics.EndImpersonation,
+														       actionGetter: () => new PostBackAction( new ExternalResource( NetTools.HomeUrl ) ) ) ) ) )
+										       .Materialize() );
 							} );
 						EwfUiStatics.Init( getProviderGetter<AppEwfUiProvider>( "EwfUi" ) );
 						Admin.EntitySetup.Init( () => RequestDispatchingStatics.AppProvider.GetFrameworkUrlParent() );

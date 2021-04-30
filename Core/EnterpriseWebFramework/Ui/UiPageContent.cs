@@ -245,7 +245,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			var userInfo = new List<FlowComponent>();
 			if( AppRequestState.Instance.UserAccessible ) {
-				var changePasswordPage = EwfApp.MetaLogicFactory.CreateChangePasswordPageInfo( PageBase.Current.GetUrl() );
+				var changePasswordPage = new UserManagement.Pages.ChangePassword( PageBase.Current.GetUrl() );
 				if( changePasswordPage.UserCanAccessResource && AppTools.User != null )
 					userInfo.Add( new GenericFlowContainer( getUserInfo( changePasswordPage ), classes: userInfoClass ) );
 			}
@@ -253,7 +253,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return new GenericFlowContainer( appLogo.Concat( userInfo ).Materialize(), classes: appLogoAndUserInfoClass );
 		}
 
-		private IReadOnlyCollection<FlowComponent> getUserInfo( PageInfo changePasswordPage ) {
+		private IReadOnlyCollection<FlowComponent> getUserInfo( PageBase changePasswordPage ) {
 			var components = new List<FlowComponent>();
 
 			components.AddRange( "Logged in as {0}".FormatWith( AppTools.User.Email ).ToComponents() );

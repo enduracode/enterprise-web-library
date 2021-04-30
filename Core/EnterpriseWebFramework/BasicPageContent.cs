@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Web;
 using EnterpriseWebLibrary.Configuration;
-using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
 using JetBrains.Annotations;
@@ -31,6 +30,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private static readonly ElementClass statusMessageTextClass = new ElementClass( "ewfStatusText" );
 
 		private static Func<IReadOnlyCollection<PageContent>, IEnumerable<ResourceInfo>> cssInfoCreator;
+		private static Func<bool, string> intermediateUrlGetter;
+		private static Func<( string message, IReadOnlyCollection<ActionComponentSetup> actions )?> impersonationWarningLineGetter;
 
 		[ UsedImplicitly ]
 		private class CssElementCreator: ControlCssElementCreator {
@@ -143,8 +144,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 		}
 
-		internal static void Init( Func<IReadOnlyCollection<PageContent>, IEnumerable<ResourceInfo>> cssInfoCreator ) {
+		internal static void Init(
+			Func<IReadOnlyCollection<PageContent>, IEnumerable<ResourceInfo>> cssInfoCreator, Func<bool, string> intermediateUrlGetter,
+			Func<( string, IReadOnlyCollection<ActionComponentSetup> )?> impersonationWarningLineGetter ) {
 			BasicPageContent.cssInfoCreator = cssInfoCreator;
+			BasicPageContent.intermediateUrlGetter = intermediateUrlGetter;
+			BasicPageContent.impersonationWarningLineGetter = impersonationWarningLineGetter;
 		}
 
 		internal static ( PageContent, FlowComponent, FlowComponent, FlowComponent, Action, bool ) GetContent(
@@ -318,42 +323,29 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 											FormItemList.CreateGrid(
 													1,
 													items: new[] { false, true }.Select(
-															i => {
-																var url = AppRequestState.Instance.Url;
-																if( AppRequestState.Instance.UserAccessible && AppRequestState.Instance.ImpersonatorExists )
-																	url = EwfApp.MetaLogicFactory.CreateSelectUserPageInfo( url, user: AppTools.User.Email ).GetUrl();
-																url = EwfApp.MetaLogicFactory.CreateIntermediateLogInPageInfo(
-																		url,
-																		passwordAndHideWarnings: ( ConfigurationStatics.SystemGeneralProvider.IntermediateLogInPassword, i ) )
-																	.GetUrl();
-																return new GenericPhrasingContainer(
-																	url.ToComponents(),
-																	classes: new ElementClass( "ewfIntermediateUrl" /* This is used by EWF CSS files. */ ) ).ToFormItem(
-																	label: i ? "Non-live warnings hidden:".ToComponents() : "Standard:".ToComponents() );
-															} )
+															hideWarnings => new GenericPhrasingContainer(
+																intermediateUrlGetter( hideWarnings ).ToComponents(),
+																classes: new ElementClass( "ewfIntermediateUrl" /* This is used by EWF CSS files. */ ) ).ToFormItem(
+																label: hideWarnings ? "Non-live warnings hidden:".ToComponents() : "Standard:".ToComponents() ) )
 														.Materialize() )
 												.ToCollection() ).ToCollection() ) ) ) );
 				}
 				warningLines.Add( components );
 			}
 
-			if( AppRequestState.Instance.UserAccessible && AppRequestState.Instance.ImpersonatorExists &&
-			    ( !ConfigurationStatics.IsIntermediateInstallation || AppRequestState.Instance.IntermediateUserExists ) )
+			var impersonationWarningLine = impersonationWarningLineGetter();
+			if( impersonationWarningLine.HasValue )
 				warningLines.Add(
-					"User impersonation is in effect. ".ToComponents()
-						.Append(
-							new EwfHyperlink(
-								EwfApp.MetaLogicFactory.CreateSelectUserPageInfo( AppRequestState.Instance.Url ),
-								new ButtonHyperlinkStyle( "Change user", buttonSize: ButtonSize.ShrinkWrap ) ) )
+					impersonationWarningLine.Value.message.ToComponents()
 						.Concat( " ".ToComponents() )
-						.Append(
-							new EwfButton(
-								new StandardButtonStyle( "End impersonation", buttonSize: ButtonSize.ShrinkWrap ),
-								behavior: new PostBackBehavior(
-									postBack: PostBack.CreateFull(
-										id: "ewfEndImpersonation",
-										modificationMethod: UserImpersonationStatics.EndImpersonation,
-										actionGetter: () => new PostBackAction( new ExternalResource( NetTools.HomeUrl ) ) ) ) ) )
+						.Concat(
+							impersonationWarningLine.Value.actions
+								.Select(
+									i => i.GetActionComponent(
+											( text, icon ) => new ButtonHyperlinkStyle( text, buttonSize: ButtonSize.ShrinkWrap ),
+											( text, icon ) => new StandardButtonStyle( text, buttonSize: ButtonSize.ShrinkWrap ) )
+										.ToCollection() )
+								.Aggregate( ( components, action ) => components.Concat( " ".ToComponents() ).Materialize() ) )
 						.Materialize() );
 
 			if( warningLines.Any() )
@@ -508,8 +500,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			getLink( url, "stylesheet", attributes: new ElementAttribute( "type", "text/css" ).ToCollection() );
 
 		private FlowComponent getModernizrLogic() =>
-			new TrustedHtmlString( "<script type=\"text/javascript\" src=\"" + EwfApp.MetaLogicFactory.CreateModernizrJavaScriptInfo().GetUrl() + "\"></script>" )
-				.ToComponent();
+			new TrustedHtmlString( "<script type=\"text/javascript\" src=\"" + new StaticFiles.ModernizrJs().GetUrl() + "\"></script>" ).ToComponent();
 
 		private IEnumerable<FlowComponent> getGoogleAnalyticsLogicIfNecessary() {
 			if( EwfApp.Instance.GoogleAnalyticsWebPropertyId.Length == 0 )
@@ -539,7 +530,21 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 					string getElement( ResourceInfo resource ) => "<script src=\"{0}\" defer></script>".FormatWith( resource.GetUrl() );
 
-					foreach( var i in EwfApp.MetaLogicFactory.CreateJavaScriptInfos( IncludesStripeCheckout ).Select( getElement ) )
+					var infos = new List<ResourceInfo>();
+					infos.Add( new ExternalResource( "//code.jquery.com/jquery-1.12.3.min.js" ) );
+					infos.Add( new StaticFiles.Versioned.Third_party.Jquery_ui.Jquery_ui_1114custom_v2.Jquery_uiminJs() );
+					infos.Add( new StaticFiles.Versioned.Third_party.Chosen.Chosen_v187.ChosenjqueryminJs() );
+					infos.Add( new StaticFiles.Third_party.Time_picker.CodeJs() );
+					infos.Add( new ExternalResource( "//cdn.jsdelivr.net/qtip2/2.2.1/jquery.qtip.min.js" ) );
+					infos.Add( new ExternalResource( "//cdnjs.cloudflare.com/ajax/libs/dialog-polyfill/0.4.9/dialog-polyfill.min.js" ) );
+					infos.Add( new StaticFiles.Third_party.Spin_js.SpinminJs() );
+					infos.Add( new ExternalResource( "//cdn.ckeditor.com/4.5.8/full/ckeditor.js" ) );
+					infos.Add( new ExternalResource( "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js" ) );
+					infos.Add( new ExternalResource( "https://instant.page/5.1.0" ) );
+					if( IncludesStripeCheckout )
+						infos.Add( new ExternalResource( "https://checkout.stripe.com/checkout.js" ) );
+					infos.Add( new StaticFiles.CodeJs() );
+					foreach( var i in infos.Select( getElement ) )
 						markup.Append( i );
 					markup.Append( MiniProfiler.RenderIncludes().ToHtmlString() );
 					foreach( var i in EwfApp.Instance.GetJavaScriptFiles().Select( getElement ) )

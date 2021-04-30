@@ -5,7 +5,9 @@ using System.Web;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.Email;
+using EnterpriseWebLibrary.EnterpriseWebFramework.ErrorPages;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
+using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages;
 using StackExchange.Profiling;
 using Tewl.Tools;
 using static Humanizer.StringExtensions;
@@ -15,8 +17,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// The HttpApplication class for a web site using EWF. Provides access to the authenticated user, handles errors, and performs other useful functions.
 	/// </summary>
 	public abstract class EwfApp: HttpApplication {
-		internal static AppMetaLogicFactory MetaLogicFactory { get; private set; }
-
 		/// <summary>
 		/// EwfInitializationOps and private use only.
 		/// </summary>
@@ -55,10 +55,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				}
 				catch {}
 			}
-		}
-
-		internal static void Init( AppMetaLogicFactory metaLogicFactory ) {
-			MetaLogicFactory = metaLogicFactory;
 		}
 
 		// This member is per web user (request). We must be careful to never accidentally use values from a previous request.
@@ -315,7 +311,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						// 1. Requests where we set the status code in handleError
 						// 2. Requests to handlers that set the status code directly instead of throwing exceptions, e.g. the IIS static file handler
 						if( Response.StatusCode == 404 && !handleErrorIfOnErrorPage( "A status code of 404 was produced", null ) )
-							transferRequest( getErrorPage( MetaLogicFactory.CreatePageNotAvailableErrorPageInfo( !RequestState.HomeUrlRequest ) ), false );
+							transferRequest( getErrorPage( new ResourceNotAvailable( !RequestState.HomeUrlRequest ) ), false );
 
 						if( RequestState.TransferRequestPath.Length > 0 )
 							// NOTE: If we transfer to a path with no query string, TransferRequest adds the current query string. Because of this bug we need to make sure all
@@ -378,11 +374,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						var pageDisabledException = exception.GetBaseException() as PageDisabledException;
 						if( accessDeniedException != null ) {
 							if( accessDeniedException.CausedByIntermediateUser )
-								transferRequest( MetaLogicFactory.CreateIntermediateLogInPageInfo( RequestState.Url ), true );
+								transferRequest( new NonLiveLogIn( RequestState.Url ), true );
 							else {
 								var userNotYetAuthenticated = RequestState.UserAccessible && AppTools.User == null && UserManagementStatics.UserManagementEnabled;
 								if( userNotYetAuthenticated && !ConfigurationStatics.IsLiveInstallation && !RequestState.ImpersonatorExists )
-									transferRequest( MetaLogicFactory.CreateSelectUserPageInfo( RequestState.Url ), true );
+									transferRequest( new Impersonate( RequestState.Url ), true );
 								else if( userNotYetAuthenticated && FormsAuthStatics.FormsAuthEnabled )
 									if( accessDeniedException.LogInPage != null ) {
 										// We pass false here to avoid complicating things with ThreadAbortExceptions.
@@ -391,16 +387,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										CompleteRequest();
 									}
 									else
-										transferRequest( MetaLogicFactory.CreateLogInPageInfo( RequestState.Url ), true );
+										transferRequest( new LogIn( RequestState.Url ), true );
 								else
-									transferRequest( getErrorPage( MetaLogicFactory.CreateAccessDeniedErrorPageInfo( !RequestState.HomeUrlRequest ) ), true );
+									transferRequest( getErrorPage( new AccessDenied( !RequestState.HomeUrlRequest ) ), true );
 							}
 						}
 						else if( pageDisabledException != null )
-							transferRequest( MetaLogicFactory.CreatePageDisabledErrorPageInfo( pageDisabledException.Message ), true );
+							transferRequest( new ResourceDisabled( pageDisabledException.Message ), true );
 						else {
 							RequestState.SetError( "", exception );
-							transferRequest( getErrorPage( MetaLogicFactory.CreateUnhandledExceptionErrorPageInfo() ), true );
+							transferRequest( getErrorPage( new UnhandledException() ), true );
 						}
 					}
 				},
@@ -426,7 +422,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		private bool handleErrorIfOnUnhandledExceptionPage( string errorEvent, Exception exception ) {
-			if( getErrorPage( MetaLogicFactory.CreateUnhandledExceptionErrorPageInfo() ).GetUrl() != RequestState.Url )
+			if( getErrorPage( new UnhandledException() ).GetUrl() != RequestState.Url )
 				return false;
 			RequestState.SetError( errorEvent + " during a request for the unhandled exception page" + ( exception != null ? ":" : "." ), exception );
 			set500StatusCode( "Unhandled Exception Page Error" );
@@ -440,10 +436,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		private bool handleErrorIfOnHandledErrorPage( string errorEvent, Exception exception ) {
-			var handledErrorPages = new[]
+			var handledErrorPages = new PageBase[]
 				{
-					MetaLogicFactory.CreateAccessDeniedErrorPageInfo( false ), MetaLogicFactory.CreatePageDisabledErrorPageInfo( "" ),
-					MetaLogicFactory.CreatePageNotAvailableErrorPageInfo( false )
+					new AccessDenied( false ), new ResourceDisabled( "" ), new ResourceNotAvailable( false )
 				}.Select( getErrorPage );
 			var requestParameters = new HashSet<string>( getQueryParameters( RequestState.Url ) );
 			if( handledErrorPages.All(
@@ -451,7 +446,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				        getQueryParameters( page.GetUrl() ).Any( i => !requestParameters.Contains( i ) ) ) )
 				return false;
 			RequestState.SetError( errorEvent + " during a request for a handled error page" + ( exception != null ? ":" : "." ), exception );
-			transferRequest( getErrorPage( MetaLogicFactory.CreateUnhandledExceptionErrorPageInfo() ), true );
+			transferRequest( getErrorPage( new UnhandledException() ), true );
 			return true;
 		}
 
@@ -459,7 +454,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return HttpUtility.ParseQueryString( url.Separate( "?", false ).Skip( 1 ).FirstOrDefault() ?? "" ).Cast<string>();
 		}
 
-		private void transferRequest( PageInfo page, bool completeRequest ) {
+		private void transferRequest( PageBase page, bool completeRequest ) {
 			var pageUrl = getTransferPath( page );
 
 			// We can't immediately call TransferRequest because of a problem with session state described by Luis Abreu:
@@ -477,13 +472,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return url;
 		}
 
-		private PageInfo getErrorPage( PageInfo ewfErrorPage ) {
+		private PageBase getErrorPage( PageBase ewfErrorPage ) {
 			return errorPage ?? ewfErrorPage;
 		}
 
 		/// <summary>
 		/// Gets the page that users will be redirected to when errors occur in the application.
 		/// </summary>
-		protected virtual PageInfo errorPage => null;
+		protected virtual PageBase errorPage => null;
 	}
 }
