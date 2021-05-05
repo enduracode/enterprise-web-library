@@ -18,9 +18,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.ErrorPages {
 						.Concat( ShowHomeLink ? " ".ToComponents().Concat( Translation.YouWillBeSentToTheHomePage.ToComponents() ) : Enumerable.Empty<PhrasingComponent>() )
 						.Materialize() ).ToCollection() );
 
-			// NOTE: We can't set this code right now because it makes EwfApp.handleEndRequest think that this page couldn't be found.
-			//HttpContext.Current.Response.StatusCode = 404;
-
+			HttpContext.Current.Response.StatusCode = 404;
 			HttpContext.Current.Response.TrySkipIisCustomErrors = true;
 
 			if( ShowHomeLink )

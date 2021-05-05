@@ -57,9 +57,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private bool userDisabled;
 		private Tuple<User, SpecifiedValue<User>> userAndImpersonator;
 
-		private string errorPrefix = "";
-		private Exception errorException;
-		internal string TransferRequestPath { get; set; }
+		private readonly List<( string prefix, Exception exception )> errors = new List<( string, Exception )>();
 		internal EwfPageRequestState EwfPageRequestState { get; set; }
 
 		/// <summary>
@@ -75,8 +73,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			dataAccessState = new DataAccessState( databaseConnectionInitializer: initDatabaseConnection );
 			dataAccessState.ResetCache();
-
-			TransferRequestPath = "";
 
 			// We cache the browser capabilities so we can determine the actual browser making the request even after modifying the capabilities, which we do later in
 			// the life cycle from EwfPage.
@@ -248,17 +244,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				                      : Tuple.Create( impersonator.Value, (SpecifiedValue<User>)null );
 		}
 
-		internal void SetError( string prefix, Exception exception ) {
-			errorPrefix = prefix;
-			errorException = exception;
+		internal void AddError( string prefix, Exception exception ) {
+			errors.Add( ( prefix, exception ) );
 		}
 
 		internal void CleanUp() {
 			// Skip non-transactional modification methods because they could cause database connections to be reinitialized.
 			cleanUpDatabaseConnectionsAndExecuteNonTransactionalModificationMethods( skipNonTransactionalModificationMethods: true );
 
-			if( errorPrefix.Any() || errorException != null ) {
-				TelemetryStatics.ReportError( errorPrefix, errorException );
+			if( errors.Any() ) {
+				foreach( var i in errors )
+					TelemetryStatics.ReportError( i.prefix, i.exception );
 				MiniProfiler.Stop();
 			}
 			else {

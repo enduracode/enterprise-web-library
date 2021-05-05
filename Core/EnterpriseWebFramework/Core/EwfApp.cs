@@ -33,7 +33,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			bool IHttpHandler.IsReusable => false;
 		}
 
-		internal static void ExecuteWithBasicExceptionHandling( Action handler, bool setErrorInRequestState, bool set500StatusCode ) {
+		internal static void ExecuteWithBasicExceptionHandling( Action handler, bool addErrorToRequestState, bool set500StatusCode ) {
 			try {
 				handler();
 			}
@@ -43,8 +43,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					EwlStatics.CallEveryMethod(
 						delegate {
 							const string prefix = "An exception occurred that could not be handled by the main exception handler:";
-							if( setErrorInRequestState )
-								Instance.RequestState.SetError( prefix, e );
+							if( addErrorToRequestState )
+								Instance.RequestState.AddError( prefix, e );
 							else
 								TelemetryStatics.ReportError( prefix, e );
 						},
@@ -84,44 +84,52 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				// way to report them since even our basic exception handling may not work if the application isn't initialized.
 				try {
 					set500StatusCode( "Initialization Failure" );
+					CompleteRequest();
 				}
 				catch {}
 				return;
 			}
 
 			ExecuteWithBasicExceptionHandling(
-				delegate {
-					if( RequestState != null ) {
-						RequestState = null;
-						throw new ApplicationException( "AppRequestState was not properly cleaned up from a previous request." );
+				() => {
+					try {
+						if( RequestState != null ) {
+							RequestState = null;
+							throw new ApplicationException( "AppRequestState was not properly cleaned up from a previous request." );
+						}
+
+
+						// This used to be just HttpContext.Current.Request.Url, but that doesn't work with Azure due to the use of load balancing. An Azure load balancer
+						// will bind to the ip/host/port through which all web requests should come in, and then the request is redirected to one of the server instances
+						// running this web application. For example, a user will request mydomain.com. In Azure, there may be two instances running this web site, on
+						// someIp:81 and someIp:82. For some reason, HttpContext.Current.Request.Url ends up using the host and port from one of these addresses instead of
+						// using the host and port from the HTTP Host header, which is what the client is actually "viewing". Basically, HttpContext.Current.Request.Url
+						// returns http://someIp:81?something=1 instead of http://mydomain.com?something=1. See
+						// http://stackoverflow.com/questions/9560838/azure-load-balancer-causes-400-error-invalid-hostname-on-postback.
+
+						var baseUrl = getRequestBaseUrl( Request );
+						if( !baseUrl.Any() ) {
+							Response.StatusCode = 400;
+							CompleteRequest();
+							return;
+						}
+						var appRelativeUrl = GetRequestAppRelativeUrl( Request, disableLeadingSlashRemoval: true );
+
+						// If the base URL doesn't include a path and the app-relative URL is just a slash, don't include this trailing slash in the URL since it will not be
+						// present in the canonical URLs that we construct and therefore it would cause problems with URL normalization.
+						var url = !getRequestBasePath( Request ).Any() && appRelativeUrl.Length == "/".Length ? baseUrl : baseUrl + appRelativeUrl;
+
+
+						// This blocks until the entire request has been received from the client.
+						// This won't compile unless it is assigned to something, which is why it is unused.
+						var stream = Request.InputStream;
+
+						RequestState = new AppRequestState( url, baseUrl );
 					}
-
-
-					// This used to be just HttpContext.Current.Request.Url, but that doesn't work with Azure due to the use of load balancing. An Azure load balancer
-					// will bind to the ip/host/port through which all web requests should come in, and then the request is redirected to one of the server instances
-					// running this web application. For example, a user will request mydomain.com. In Azure, there may be two instances running this web site, on
-					// someIp:81 and someIp:82. For some reason, HttpContext.Current.Request.Url ends up using the host and port from one of these addresses instead of
-					// using the host and port from the HTTP Host header, which is what the client is actually "viewing". Basically, HttpContext.Current.Request.Url
-					// returns http://someIp:81?something=1 instead of http://mydomain.com?something=1. See
-					// http://stackoverflow.com/questions/9560838/azure-load-balancer-causes-400-error-invalid-hostname-on-postback.
-
-					var baseUrl = getRequestBaseUrl( Request );
-					if( !baseUrl.Any() ) {
-						setStatusCode( 400 );
-						return;
+					catch {
+						CompleteRequest();
+						throw;
 					}
-					var appRelativeUrl = GetRequestAppRelativeUrl( Request, disableLeadingSlashRemoval: true );
-
-					// If the base URL doesn't include a path and the app-relative URL is just a slash, don't include this trailing slash in the URL since it will not be
-					// present in the canonical URLs that we construct and therefore it would cause problems with URL normalization.
-					var url = !getRequestBasePath( Request ).Any() && appRelativeUrl.Length == "/".Length ? baseUrl : baseUrl + appRelativeUrl;
-
-
-					// This blocks until the entire request has been received from the client.
-					// This won't compile unless it is assigned to something, which is why it is unused.
-					var stream = Request.InputStream;
-
-					RequestState = new AppRequestState( url, baseUrl );
 				},
 				false,
 				true );
@@ -304,31 +312,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			if( !FrameworkInitialized || RequestState == null )
 				return;
 
-			ExecuteWithBasicExceptionHandling(
-				delegate {
-					try {
-						// This 404 condition covers two types of requests:
-						// 1. Requests where we set the status code in handleError
-						// 2. Requests to handlers that set the status code directly instead of throwing exceptions, e.g. the IIS static file handler
-						if( Response.StatusCode == 404 && !handleErrorIfOnErrorPage( "A status code of 404 was produced", null ) )
-							transferRequest( getErrorPage( new ResourceNotAvailable( !RequestState.HomeUrlRequest ) ), false );
-
-						if( RequestState.TransferRequestPath.Length > 0 )
-							// NOTE: If we transfer to a path with no query string, TransferRequest adds the current query string. Because of this bug we need to make sure all
-							// pages we transfer to have at least one parameter.
-							Server.TransferRequest( RequestState.TransferRequestPath, false, "GET", null );
-					}
-					catch {
-						RequestState.RollbackDatabaseTransactions();
-						DataAccessState.Current.ResetCache();
-						throw;
-					}
-				},
-				true,
-				true );
-
 			// Do not set a status code since we may have already set one or set a redirect page.
-			ExecuteWithBasicExceptionHandling( delegate { RequestState.CleanUp(); }, false, false );
+			ExecuteWithBasicExceptionHandling( () => RequestState.CleanUp(), false, false );
 			RequestState = null;
 		}
 
@@ -336,26 +321,24 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// This method will not work properly unless the application is initialized, RequestState is not null, and the authenticated user is available.
 		/// </summary>
 		private void handleError( object sender, EventArgs e ) {
-			// The reason we don't write our error page HTML directly to the response, like ASP.NET does, is that this limits the functionality of the error pages
-			// and requires them to be built differently than all other pages. We don't transfer to the error pages either, because application errors can occur at
-			// any time in the ASP.NET life cycle and transferring to a page causes it to immediately execute even if it's not the normal time for this to happen.
-			// Redirecting works, but has the drawback of not being able to send proper HTTP error codes in the response since the redirects themselves require a
-			// particular code. TransferRequest seems to be the only method that gives us everything we want.
-
 			ExecuteWithBasicExceptionHandling(
-				delegate {
-					// This code should happen first to prevent errors from going to the Windows event log.
-					var exception = Server.GetLastError();
-					Server.ClearError();
+				() => {
+					Exception exception;
+					try {
+						// This code should happen first to prevent errors from going to the Windows event log.
+						exception = Server.GetLastError();
+						Server.ClearError();
 
-					RequestState.RollbackDatabaseTransactions();
-					DataAccessState.Current.ResetCache();
+						rollbackDatabaseTransactions();
+					}
+					finally {
+						CompleteRequest();
+					}
 
 					var errorIsWcf404 = exception.InnerException is System.ServiceModel.EndpointNotFoundException;
 
 					// We can remove this as soon as requesting a URL with a vertical pipe doesn't blow up our web applications.
-					var argException = exception as ArgumentException;
-					var errorIsBogusPathException = argException != null && argException.Message == "Illegal characters in path.";
+					var errorIsBogusPathException = exception is ArgumentException argException && argException.Message == "Illegal characters in path.";
 
 					// In the first part of this condition we check to make sure the base exception is also an HttpException, because we had a problem with WCF wrapping an
 					// important non-HttpException inside an HttpException that somehow had a code of 404. In the second part of the condition (after the OR) we use
@@ -363,113 +346,58 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					// problem that occurred. The third part of the condition handles ResourceNotAvailableExceptions from HTTP handlers such as CssHandler; these are not
 					// wrapped with another exception.
 					if( ( exception is HttpException && ( exception as HttpException ).GetHttpCode() == 404 && exception.GetBaseException() is HttpException ) ||
-					    exception.InnerException is ResourceNotAvailableException || exception is ResourceNotAvailableException || onErrorProneAspNetHandler ||
-					    errorIsWcf404 || errorIsBogusPathException ) {
-						setStatusCode( 404 );
-						return;
-					}
+					    exception.InnerException is ResourceNotAvailableException || exception is ResourceNotAvailableException || errorIsWcf404 ||
+					    errorIsBogusPathException )
+						transferRequest( getErrorPage( new ResourceNotAvailable( !RequestState.HomeUrlRequest ) ) );
 
-					if( !handleErrorIfOnErrorPage( "An exception occurred", exception ) ) {
-						var accessDeniedException = exception.GetBaseException() as AccessDeniedException;
-						var pageDisabledException = exception.GetBaseException() as PageDisabledException;
-						if( accessDeniedException != null ) {
-							if( accessDeniedException.CausedByIntermediateUser )
-								transferRequest( new NonLiveLogIn( RequestState.Url ), true );
-							else {
-								var userNotYetAuthenticated = RequestState.UserAccessible && AppTools.User == null && UserManagementStatics.UserManagementEnabled;
-								if( userNotYetAuthenticated && !ConfigurationStatics.IsLiveInstallation && !RequestState.ImpersonatorExists )
-									transferRequest( new Impersonate( RequestState.Url ), true );
-								else if( userNotYetAuthenticated && FormsAuthStatics.FormsAuthEnabled )
-									if( accessDeniedException.LogInPage != null ) {
-										// We pass false here to avoid complicating things with ThreadAbortExceptions.
-										Response.Redirect( accessDeniedException.LogInPage.GetUrl(), false );
-
-										CompleteRequest();
-									}
-									else
-										transferRequest( new LogIn( RequestState.Url ), true );
-								else
-									transferRequest( getErrorPage( new AccessDenied( !RequestState.HomeUrlRequest ) ), true );
-							}
-						}
-						else if( pageDisabledException != null )
-							transferRequest( new ResourceDisabled( pageDisabledException.Message ), true );
+					else if( exception.GetBaseException() is AccessDeniedException accessDeniedException ) {
+						if( accessDeniedException.CausedByIntermediateUser )
+							transferRequest( new NonLiveLogIn( RequestState.Url ) );
 						else {
-							RequestState.SetError( "", exception );
-							transferRequest( getErrorPage( new UnhandledException() ), true );
+							var userNotYetAuthenticated = RequestState.UserAccessible && AppTools.User == null && UserManagementStatics.UserManagementEnabled;
+							if( userNotYetAuthenticated && !ConfigurationStatics.IsLiveInstallation && !RequestState.ImpersonatorExists )
+								transferRequest( new Impersonate( RequestState.Url ) );
+							else if( userNotYetAuthenticated && FormsAuthStatics.FormsAuthEnabled )
+								if( accessDeniedException.LogInPage != null )
+									// We pass false here to avoid complicating things with ThreadAbortExceptions.
+									Response.Redirect( accessDeniedException.LogInPage.GetUrl(), false );
+								else
+									transferRequest( new LogIn( RequestState.Url ) );
+							else
+								transferRequest( getErrorPage( new AccessDenied( !RequestState.HomeUrlRequest ) ) );
 						}
+					}
+					else if( exception.GetBaseException() is PageDisabledException pageDisabledException )
+						transferRequest( new ResourceDisabled( pageDisabledException.Message ) );
+					else {
+						RequestState.AddError( "", exception );
+						transferRequestToUnhandledExceptionPage();
 					}
 				},
 				true,
 				true );
 		}
 
-		private bool onErrorProneAspNetHandler {
-			get {
-				var errorProneHandlers = new[] { "~/WebResource.axd", "~/ScriptResource.axd" };
-				return errorProneHandlers.SingleOrDefault( s => s.ToLower() == Request.AppRelativeCurrentExecutionFilePath.ToLower() ) != null;
+		private void transferRequest( ResourceBase resource ) {
+			try {
+				resource.HandleRequest( HttpContext.Current, true );
+			}
+			catch( Exception exception ) {
+				rollbackDatabaseTransactions();
+				RequestState.AddError( "An exception occurred during a request for a handled error page or a log-in page:", exception );
+				transferRequestToUnhandledExceptionPage();
 			}
 		}
 
-		private void setStatusCode( int code ) {
-			Response.StatusCode = code;
-			CompleteRequest();
-		}
-
-		private bool handleErrorIfOnErrorPage( string errorEvent, Exception exception ) {
-			// The order of the two conditions is important.
-			return handleErrorIfOnUnhandledExceptionPage( errorEvent, exception ) || handleErrorIfOnHandledErrorPage( errorEvent, exception );
-		}
-
-		private bool handleErrorIfOnUnhandledExceptionPage( string errorEvent, Exception exception ) {
-			if( getErrorPage( new UnhandledException() ).GetUrl() != RequestState.Url )
-				return false;
-			RequestState.SetError( errorEvent + " during a request for the unhandled exception page" + ( exception != null ? ":" : "." ), exception );
-			set500StatusCode( "Unhandled Exception Page Error" );
-			return true;
-		}
-
-		private void set500StatusCode( string description ) {
-			Response.StatusCode = 500;
-			Response.StatusDescription = description + " in EWF Application";
-			CompleteRequest();
-		}
-
-		private bool handleErrorIfOnHandledErrorPage( string errorEvent, Exception exception ) {
-			var handledErrorPages = new PageBase[]
-				{
-					new AccessDenied( false ), new ResourceDisabled( "" ), new ResourceNotAvailable( false )
-				}.Select( getErrorPage );
-			var requestParameters = new HashSet<string>( getQueryParameters( RequestState.Url ) );
-			if( handledErrorPages.All(
-				page => page.GetUrl().Separate( "?", false ).First() != RequestState.Url.Separate( "?", false ).First() ||
-				        getQueryParameters( page.GetUrl() ).Any( i => !requestParameters.Contains( i ) ) ) )
-				return false;
-			RequestState.SetError( errorEvent + " during a request for a handled error page" + ( exception != null ? ":" : "." ), exception );
-			transferRequest( getErrorPage( new UnhandledException() ), true );
-			return true;
-		}
-
-		private IEnumerable<string> getQueryParameters( string url ) {
-			return HttpUtility.ParseQueryString( url.Separate( "?", false ).Skip( 1 ).FirstOrDefault() ?? "" ).Cast<string>();
-		}
-
-		private void transferRequest( PageBase page, bool completeRequest ) {
-			var pageUrl = getTransferPath( page );
-
-			// We can't immediately call TransferRequest because of a problem with session state described by Luis Abreu:
-			// http://msmvps.com/blogs/luisabreu/archive/2007/10/09/are-you-using-the-new-transferrequest.aspx
-			RequestState.TransferRequestPath = pageUrl;
-
-			if( completeRequest )
-				CompleteRequest();
-		}
-
-		private string getTransferPath( ResourceBase resource ) {
-			var url = resource.GetUrl( true, true, false );
-			if( resource.ShouldBeSecureGivenCurrentRequest != RequestIsSecure( Request ) )
-				throw new ApplicationException( url + " has a connection security setting that is incompatible with the current request." );
-			return url;
+		private void transferRequestToUnhandledExceptionPage() {
+			try {
+				getErrorPage( new UnhandledException() ).HandleRequest( HttpContext.Current, true );
+			}
+			catch( Exception exception ) {
+				rollbackDatabaseTransactions();
+				RequestState.AddError( "An exception occurred during a request for the unhandled exception page:", exception );
+				set500StatusCode( "Unhandled Exception Page Error" );
+			}
 		}
 
 		private PageBase getErrorPage( PageBase ewfErrorPage ) {
@@ -480,5 +408,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Gets the page that users will be redirected to when errors occur in the application.
 		/// </summary>
 		protected virtual PageBase errorPage => null;
+
+		private void rollbackDatabaseTransactions() {
+			RequestState.RollbackDatabaseTransactions();
+			DataAccessState.Current.ResetCache();
+
+			RequestState.EwfPageRequestState = new EwfPageRequestState( null, null );
+		}
+
+		private void set500StatusCode( string description ) {
+			Response.StatusCode = 500;
+			Response.StatusDescription = description + " in EWF Application";
+		}
 	}
 }

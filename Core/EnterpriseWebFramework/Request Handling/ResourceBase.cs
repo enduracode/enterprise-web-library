@@ -274,15 +274,23 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		protected virtual IEnumerable<UrlPattern> getChildUrlPatterns() => Enumerable.Empty<UrlPattern>();
 
-		void BasicUrlHandler.HandleRequest( HttpContext context ) {
+		void BasicUrlHandler.HandleRequest( HttpContext context ) => HandleRequest( context, false );
+
+		internal void HandleRequest( HttpContext context, bool requestTransferred ) {
 			currentResourceSetter( this );
 
 			var canonicalUrl = GetUrl( false, false, true );
-			if( canonicalUrl != AppRequestState.Instance.Url ) {
-				if( !ShouldBeSecureGivenCurrentRequest && EwfApp.Instance.RequestIsSecure( context.Request ) )
-					context.Response.AppendHeader( "Strict-Transport-Security", "max-age=0" );
-				writeRedirectResponse( context, canonicalUrl, true );
-				return;
+			if( requestTransferred ) {
+				if( ShouldBeSecureGivenCurrentRequest != EwfApp.Instance.RequestIsSecure( context.Request ) )
+					throw new ApplicationException( "{0} has a connection security setting that is incompatible with the current request.".FormatWith( canonicalUrl ) );
+			}
+			else {
+				if( canonicalUrl != AppRequestState.Instance.Url ) {
+					if( !ShouldBeSecureGivenCurrentRequest && EwfApp.Instance.RequestIsSecure( context.Request ) )
+						context.Response.AppendHeader( "Strict-Transport-Security", "max-age=0" );
+					writeRedirectResponse( context, canonicalUrl, true );
+					return;
+				}
 			}
 
 			bool userAuthorized;
@@ -301,15 +309,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			var redirect = getRedirect();
 			if( redirect != null ) {
+				if( requestTransferred )
+					throw new ApplicationException( "A redirect is not valid when the request has been transferred." );
 				writeRedirectResponse( context, redirect.Resource.GetUrl(), redirect.IsPermanent );
 				return;
 			}
 
-			if( context.Request.HttpMethod == "GET" || context.Request.HttpMethod == "HEAD" ) {
+			if( context.Request.HttpMethod == "GET" || context.Request.HttpMethod == "HEAD" || requestTransferred ) {
 				var requestHandler = getOrHead();
 				if( requestHandler != null )
 					requestHandler.WriteResponse();
 				else {
+					if( requestTransferred )
+						throw new ApplicationException( "getOrHead must be implemented when the request has been transferred." );
 					context.Response.StatusCode = 405;
 					EwfResponse.Create( "", new EwfResponseBodyCreator( () => "" ), additionalHeaderFieldGetter: () => ( "Allow", "" ).ToCollection() )
 						.WriteToAspNetResponse( context.Response );
