@@ -400,9 +400,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
-		/// Returns true if this resource is identical to the current resource. The comparison excludes optional parameters that haven't been explicitly set.
+		/// Returns true if this resource is identical to the current resource.
 		/// </summary>
-		public bool MatchesCurrent() => Equals( Current );
+		public virtual bool MatchesCurrent() => Equals( Current );
 
 		/// <summary>
 		/// Framework use only.

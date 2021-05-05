@@ -44,6 +44,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 					"public override ParametersModificationBase ParametersModificationAsBaseType => {0};".FormatWith(
 						requiredParameters.Any() || optionalParameters.Any() ? "parametersModification" : "null" ) );
 			writer.WriteLine( "protected override UrlEncoder getUrlEncoder() => null;" );
+			if( !generalData.IsPage() )
+				writer.WriteLine( "public override bool MatchesCurrent() => base.MatchesCurrent();" );
 			writer.WriteLine(
 				"protected internal override ResourceBase ReCreate() => new {0}( {1} );".FormatWith(
 					generalData.ClassName,

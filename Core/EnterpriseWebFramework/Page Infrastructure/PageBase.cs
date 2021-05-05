@@ -780,11 +780,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				additionalHeaderFieldGetter: () => ( "Location", destinationUrl ).ToCollection() );
 		}
 
-		/// <summary>
-		/// Creates a page object using the new parameter value fields in this page.
-		/// </summary>
-		protected abstract PageBase reCreateFromNewParameterValues();
-
 		private ApplicationException getPossibleDeveloperMistakeException( string messageSentence, Exception innerException = null ) {
 			var sentences = new[]
 				{
@@ -901,5 +896,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Gets the function call that should be executed when the jQuery document ready event is fired.
 		/// </summary>
 		protected virtual string javaScriptDocumentReadyFunctionCall => "";
+
+		public sealed override bool MatchesCurrent() => Equals( Current );
+
+		/// <summary>
+		/// Creates a page object using the new parameter value fields in this page.
+		/// </summary>
+		protected abstract PageBase reCreateFromNewParameterValues();
 	}
 }

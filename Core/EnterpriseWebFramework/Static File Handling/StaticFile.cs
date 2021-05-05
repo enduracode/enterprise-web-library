@@ -130,6 +130,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		protected sealed override EwfResponse delete() => base.delete();
 		protected sealed override EwfResponse post() => base.post();
 
+		public sealed override bool MatchesCurrent() => base.MatchesCurrent();
+
 		protected internal sealed override ResourceBase ReCreate() => this;
 
 		public sealed override bool Equals( BasicUrlHandler other ) =>
