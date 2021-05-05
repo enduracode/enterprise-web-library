@@ -9,7 +9,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			if( !parameters.Any() )
 				return;
 
-			writer.WriteLine( "internal class ParametersModification: ParametersModificationBase {" );
+			writer.WriteLine( "internal class ParametersModification {" );
 			foreach( var parameter in parameters ) {
 				writer.WriteLine( "private readonly DataValue<{0}> {1} = new DataValue<{0}>();".FormatWith( parameter.TypeName, parameter.Name ) );
 				if( parameter.IsString || parameter.IsEnumerable ) {

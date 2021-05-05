@@ -620,7 +620,6 @@
     <Compile Include="EnterpriseWebFramework\Request Handling\EwfSafeRequestHandler.cs" />
     <Compile Include="EnterpriseWebFramework\Request Handling\EwfSafeResponseWriter.cs" />
     <Compile Include="EnterpriseWebFramework\Request Handling\ExternalRedirect.cs" />
-    <Compile Include="EnterpriseWebFramework\Request Handling\ParametersModificationBase.cs" />
     <Compile Include="EnterpriseWebFramework\Request Handling\ResourceBase.cs" />
     <Compile Include="EnterpriseWebFramework\Request Handling\ResourceGroup.cs" />
     <Compile Include="EnterpriseWebFramework\RevisionDisplayStatics.cs" />

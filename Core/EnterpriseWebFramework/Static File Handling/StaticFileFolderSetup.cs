@@ -30,8 +30,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		protected abstract string folderPath { get; }
 
-		public sealed override ParametersModificationBase ParametersModificationAsBaseType => null;
-
 		public sealed override bool Equals( BasicUrlHandler other ) =>
 			other is StaticFileFolderSetup otherFs && otherFs.isFrameworkFolder == isFrameworkFolder && otherFs.folderPath == folderPath;
 

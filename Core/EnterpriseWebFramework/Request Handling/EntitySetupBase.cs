@@ -80,11 +80,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
-		/// Gets the parameters modification object for this entity setup.
-		/// </summary>
-		public abstract ParametersModificationBase ParametersModificationAsBaseType { get; }
-
-		/// <summary>
 		/// Gets a list of groups containing this entity setup’s listed resources.
 		/// </summary>
 		public IReadOnlyCollection<ResourceGroup> ListedResources => listedResources.Value;

@@ -162,11 +162,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal PostBack SubmitButtonPostBack;
 		private readonly List<Tuple<StatusMessageType, string>> statusMessages = new List<Tuple<StatusMessageType, string>>();
 
-		/// <summary>
-		/// Gets the parameters modification object for this page. 
-		/// </summary>
-		public abstract ParametersModificationBase ParametersModificationAsBaseType { get; }
-
 		protected sealed override ExternalRedirect getRedirect() => base.getRedirect();
 
 		protected sealed override EwfSafeRequestHandler getOrHead() => new EwfSafeResponseWriter( processViewAndGetResponse() );
