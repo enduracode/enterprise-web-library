@@ -123,7 +123,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				// If new parameter values are effective, and the current resource or an ancestor matches this object, apply its new parameter values.
 				if( generalData.IsPage() || isEs ) {
 					writer.WriteLine( "if( AppRequestState.Instance.NewUrlParameterValuesEffective ) {" );
-					writer.WriteLine( "UrlHandler urlHandler = {0}Current ?? ResourceBase.Current;".FormatWith( generalData.IsPage() ? "" : "PageBase." ) );
+					writer.WriteLine( "UrlHandler urlHandler = {0}Current;".FormatWith( generalData.IsPage() ? "" : "PageBase." ) );
 					writer.WriteLine( "do {" );
 					writer.WriteLine( "if( !( urlHandler is {0} match ) ) continue;".FormatWith( generalData.ClassName ) );
 					foreach( var i in requiredParameters )
