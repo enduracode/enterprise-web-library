@@ -162,6 +162,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal PostBack SubmitButtonPostBack;
 		private readonly List<Tuple<StatusMessageType, string>> statusMessages = new List<Tuple<StatusMessageType, string>>();
 
+		/// <summary>
+		/// Initializes the parameters modification object for this page.
+		/// </summary>
+		protected abstract void initParametersModification();
+
 		protected sealed override ExternalRedirect getRedirect() => base.getRedirect();
 
 		protected sealed override EwfSafeRequestHandler getOrHead() => new EwfSafeResponseWriter( processViewAndGetResponse() );
@@ -487,9 +492,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		private void buildPage() {
-			var elementJsInitStatements = new StringBuilder();
+			UrlHandler urlHandler = this;
+			do {
+				if( urlHandler is PageBase page )
+					page.initParametersModification();
+				else if( urlHandler is EntitySetupBase entitySetup )
+					entitySetup.InitParametersModification();
+			}
+			while( ( urlHandler = urlHandler.GetParent() ) != null );
 
 			formState = new FormState();
+			var elementJsInitStatements = new StringBuilder();
 			var content = contentGetter(
 				FormState.ExecuteWithDataModificationsAndDefaultAction(
 					DataUpdate.ToCollection(),

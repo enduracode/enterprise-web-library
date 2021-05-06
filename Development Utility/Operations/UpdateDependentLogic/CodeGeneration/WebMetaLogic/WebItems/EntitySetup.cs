@@ -31,6 +31,15 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			if( requiredParameters.Any() || optionalParameters.Any() )
 				writer.WriteLine( "internal ParametersModification parametersModification;" );
 			InfoStatics.WriteConstructorAndHelperMethods( writer, generalData, requiredParameters, optionalParameters, false, true );
+			if( requiredParameters.Any() || optionalParameters.Any() ) {
+				writer.WriteLine( "protected internal override void InitParametersModification() {" );
+				writer.WriteLine( "parametersModification = new ParametersModification();" );
+				foreach( var i in requiredParameters.Concat( optionalParameters ) )
+					writer.WriteLine( "parametersModification.{0} = {0};".FormatWith( i.PropertyName ) );
+				writer.WriteLine( "}" );
+			}
+			else
+				writer.WriteLine( "protected internal override void InitParametersModification() {}" );
 			writer.WriteLine( "protected override UrlEncoder getUrlEncoder() => null;" );
 			WebMetaLogicStatics.WriteReCreateFromNewParameterValuesMethod(
 				writer,

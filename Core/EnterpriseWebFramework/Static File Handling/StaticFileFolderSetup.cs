@@ -18,6 +18,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		public sealed override string EntitySetupName => "";
 
+		protected internal sealed override void InitParametersModification() {}
+
 		protected sealed override IEnumerable<ResourceGroup> createListedResources() => Enumerable.Empty<ResourceGroup>();
 
 		protected internal override ConnectionSecurity ConnectionSecurity => ParentResource?.ConnectionSecurity ?? ConnectionSecurity.MatchingCurrentRequest;

@@ -39,6 +39,17 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				writer.WriteLine( "private ParametersModification parametersModification;" );
 			InfoStatics.WriteConstructorAndHelperMethods( writer, generalData, requiredParameters, optionalParameters, entitySetup != null, false );
 			writer.WriteLine( "public override EntitySetupBase EsAsBaseType => {0};".FormatWith( entitySetup != null ? "Es" : "null" ) );
+			if( generalData.IsPage() ) {
+				if( requiredParameters.Any() || optionalParameters.Any() ) {
+					writer.WriteLine( "protected override void initParametersModification() {" );
+					writer.WriteLine( "parametersModification = new ParametersModification();" );
+					foreach( var i in requiredParameters.Concat( optionalParameters ) )
+						writer.WriteLine( "parametersModification.{0} = {0};".FormatWith( i.PropertyName ) );
+					writer.WriteLine( "}" );
+				}
+				else
+					writer.WriteLine( "protected override void initParametersModification() {}" );
+			}
 			writer.WriteLine( "protected override UrlEncoder getUrlEncoder() => null;" );
 			if( !generalData.IsPage() )
 				writer.WriteLine( "public override bool MatchesCurrent() => base.MatchesCurrent();" );

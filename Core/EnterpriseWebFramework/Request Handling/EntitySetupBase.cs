@@ -80,6 +80,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
+		/// Initializes the parameters modification object for this entity setup.
+		/// </summary>
+		protected internal abstract void InitParametersModification();
+
+		/// <summary>
 		/// Gets a list of groups containing this entity setup’s listed resources.
 		/// </summary>
 		public IReadOnlyCollection<ResourceGroup> ListedResources => listedResources.Value;

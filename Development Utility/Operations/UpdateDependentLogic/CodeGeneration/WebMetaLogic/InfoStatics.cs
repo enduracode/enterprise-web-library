@@ -182,13 +182,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			if( !isEs )
 				writer.WriteLine( "base.uriFragmentIdentifier = uriFragmentIdentifier;" );
 
-			if( isEs )
-				if( requiredParameters.Any() || optionalParameters.Any() ) {
-					writer.WriteLine( "parametersModification = new ParametersModification();" );
-					foreach( var parameter in requiredParameters.Concat( optionalParameters ) )
-						writer.WriteLine( "parametersModification.{0} = {0};".FormatWith( parameter.PropertyName ) );
-				}
-
 			writer.WriteLine( "}" ); // initParameters method
 		}
 
