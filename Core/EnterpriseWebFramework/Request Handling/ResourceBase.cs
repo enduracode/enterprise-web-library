@@ -16,7 +16,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal const string ResourcePathSeparator = " > ";
 		internal const string EntityResourceSeparator = " / ";
 
-		private static Action<ResourceBase> currentResourceSetter;
+		private static Action<bool, ResourceBase> urlHandlerStateUpdater;
 		private static Func<ResourceBase> currentResourceGetter;
 
 		internal static string CombineResourcePathStrings( string separator, string one, string two, params string[] pathStrings ) {
@@ -26,8 +26,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return pathString;
 		}
 
-		internal static void Init( Action<ResourceBase> currentResourceSetter, Func<ResourceBase> currentResourceGetter ) {
-			ResourceBase.currentResourceSetter = currentResourceSetter;
+		internal static void Init( Action<bool, ResourceBase> urlHandlerStateUpdater, Func<ResourceBase> currentResourceGetter ) {
+			ResourceBase.urlHandlerStateUpdater = urlHandlerStateUpdater;
 			ResourceBase.currentResourceGetter = currentResourceGetter;
 		}
 
@@ -277,8 +277,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		void BasicUrlHandler.HandleRequest( HttpContext context ) => HandleRequest( context, false );
 
 		internal void HandleRequest( HttpContext context, bool requestTransferred ) {
-			currentResourceSetter( this );
-
 			var canonicalUrl = GetUrl( false, false, true );
 			if( requestTransferred ) {
 				if( ShouldBeSecureGivenCurrentRequest != EwfApp.Instance.RequestIsSecure( context.Request ) )
@@ -306,6 +304,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				disabledMode = AlternativeMode as DisabledResourceMode;
 			if( disabledMode != null )
 				throw new PageDisabledException( disabledMode.Message );
+
+			urlHandlerStateUpdater( requestTransferred, this );
 
 			var redirect = getRedirect();
 			if( redirect != null ) {

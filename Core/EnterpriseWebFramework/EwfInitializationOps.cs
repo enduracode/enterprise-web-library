@@ -81,7 +81,23 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						}
 
 						CssPreprocessingStatics.Init( globalInitializer.GetType().Assembly, globalType.Assembly );
-						ResourceBase.Init( resource => AppRequestState.Instance.SetResource( resource ), () => AppRequestState.Instance.Resource );
+						ResourceBase.Init(
+							( requestTransferred, resource ) => {
+								if( requestTransferred ) {
+									var urlHandlers = new List<BasicUrlHandler>();
+									UrlHandler urlHandler = resource;
+									do
+										urlHandlers.Add( urlHandler );
+									while( ( urlHandler = urlHandler.GetParent() ) != null );
+									AppRequestState.Instance.SetUrlHandlers( urlHandlers );
+
+									AppRequestState.Instance.SetNewUrlParameterValuesEffective( false );
+									AppRequestState.Instance.SetResource( resource );
+								}
+								else
+									AppRequestState.Instance.SetResource( resource );
+							},
+							() => AppRequestState.Instance.Resource );
 						PageBase.Init( BasicPageContent.GetContent );
 						HyperlinkBehaviorExtensionCreators.Init( ModalBox.GetBrowsingModalBoxOpenStatements );
 						FileUpload.Init( () => ( (BasicPageContent)PageBase.Current.BasicContent ).FormUsesMultipartEncoding = true );
