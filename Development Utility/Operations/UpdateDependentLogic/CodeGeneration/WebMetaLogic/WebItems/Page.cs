@@ -35,7 +35,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			if( entitySetup != null )
 				writer.WriteLine( "public EntitySetup Es;" );
 			InfoStatics.WriteParameterMembers( writer, requiredParameters, optionalParameters );
-			if( requiredParameters.Any() || optionalParameters.Any() )
+			if( generalData.IsPage() && ( requiredParameters.Any() || optionalParameters.Any() ) )
 				writer.WriteLine( "private ParametersModification parametersModification;" );
 			InfoStatics.WriteConstructorAndHelperMethods( writer, generalData, requiredParameters, optionalParameters, entitySetup != null, false );
 			writer.WriteLine( "public override EntitySetupBase EsAsBaseType => {0};".FormatWith( entitySetup != null ? "Es" : "null" ) );
