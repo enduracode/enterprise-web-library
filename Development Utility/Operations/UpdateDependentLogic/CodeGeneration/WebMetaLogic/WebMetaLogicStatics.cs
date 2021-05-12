@@ -123,6 +123,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			writer.WriteLine( "namespace {0} {{".FormatWith( folderNamespace ) );
 			writer.WriteLine( "public sealed partial class {0}: StaticFileFolderSetup {{".FormatWith( className ) );
 
+			UrlStatics.GenerateUrlClasses(
+				writer,
+				null,
+				Enumerable.Empty<VariableSpecification>().Materialize(),
+				Enumerable.Empty<VariableSpecification>().Materialize() );
 			writer.WriteLine( "protected override StaticFileFolderSetup createParentFolderSetup() => {0};".FormatWith( isRootFolder ? "null" : parentExpression ) );
 			if( !isRootFolder || parentExpression.Any() )
 				writer.WriteLine( "protected override UrlHandler getUrlParent() => {0};".FormatWith( isRootFolder ? parentExpression : "parentFolderSetup.Value" ) );

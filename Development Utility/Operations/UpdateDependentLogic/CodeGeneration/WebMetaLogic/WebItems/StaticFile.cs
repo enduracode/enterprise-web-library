@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using Humanizer;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic.WebItems {
 	internal class StaticFile {
@@ -19,6 +21,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 		internal void GenerateCode( TextWriter writer ) {
 			writer.WriteLine( "namespace {0} {{".FormatWith( generalData.Namespace ) );
 			writer.WriteLine( "public sealed partial class {0}: StaticFile {{".FormatWith( generalData.ClassName ) );
+			UrlStatics.GenerateUrlClasses(
+				writer,
+				null,
+				Enumerable.Empty<VariableSpecification>().Materialize(),
+				Enumerable.Empty<VariableSpecification>().Materialize() );
 
 			if( inVersionedFolder )
 				writer.WriteLine( "public {0}(): base( true ) {{}}".FormatWith( generalData.ClassName ) );

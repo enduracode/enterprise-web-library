@@ -30,6 +30,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			OptionalParameterPackageStatics.WriteClassIfNecessary( writer, requiredParameters, optionalParameters );
 			if( generalData.IsPage() )
 				ParametersModificationStatics.WriteClassIfNecessary( writer, requiredParameters.Concat( optionalParameters ) );
+			UrlStatics.GenerateUrlClasses( writer, entitySetup, requiredParameters, optionalParameters );
 			writeGetInfoMethod( writer );
 			InfoStatics.WriteSpecifyParameterDefaultsMethod( writer, optionalParameters );
 			if( entitySetup != null )

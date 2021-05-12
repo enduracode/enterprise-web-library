@@ -119,6 +119,7 @@
     <Compile Include="Operations\UpdateDependentLogic\CodeGeneration\WebMetaLogic\InfoStatics.cs" />
     <Compile Include="Operations\UpdateDependentLogic\CodeGeneration\WebMetaLogic\OptionalParameterPackageStatics.cs" />
     <Compile Include="Operations\UpdateDependentLogic\CodeGeneration\WebMetaLogic\ParametersModificationStatics.cs" />
+    <Compile Include="Operations\UpdateDependentLogic\CodeGeneration\WebMetaLogic\UrlStatics.cs" />
     <Compile Include="Operations\UpdateDependentLogic\CodeGeneration\WebMetaLogic\VariableSpecification.cs" />
     <Compile Include="Operations\UpdateDependentLogic\CodeGeneration\WebMetaLogic\WebItemGeneralData.cs" />
     <Compile Include="Operations\UpdateDependentLogic\CodeGeneration\WebMetaLogic\WebItems\EntitySetup.cs" />
