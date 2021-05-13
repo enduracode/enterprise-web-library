@@ -26,7 +26,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			writer.WriteLine( "public sealed partial class {0}: EntitySetupBase {{".FormatWith( generalData.ClassName ) );
 			OptionalParameterPackageStatics.WriteClassIfNecessary( writer, requiredParameters, optionalParameters );
 			ParametersModificationStatics.WriteClassIfNecessary( writer, requiredParameters.Concat( optionalParameters ) );
-			UrlStatics.GenerateUrlClasses( writer, null, requiredParameters, optionalParameters );
+			UrlStatics.GenerateUrlClasses( writer, null, requiredParameters, optionalParameters, false );
 			InfoStatics.WriteSpecifyParameterDefaultsMethod( writer, optionalParameters );
 			InfoStatics.WriteParameterMembers( writer, requiredParameters, optionalParameters );
 			if( requiredParameters.Any() || optionalParameters.Any() )

@@ -9,13 +9,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 	internal static class UrlStatics {
 		internal static void GenerateUrlClasses(
 			TextWriter writer, EntitySetup entitySetup, IReadOnlyCollection<VariableSpecification> requiredParameters,
-			IReadOnlyCollection<VariableSpecification> optionalParameters ) {
-			generateEncoder( writer, entitySetup, requiredParameters, optionalParameters );
+			IReadOnlyCollection<VariableSpecification> optionalParameters, bool includeVersionString ) {
+			generateEncoder( writer, entitySetup, requiredParameters, optionalParameters, includeVersionString );
 		}
 
 		private static void generateEncoder(
 			TextWriter writer, EntitySetup entitySetup, IReadOnlyCollection<VariableSpecification> requiredParameters,
-			IReadOnlyCollection<VariableSpecification> optionalParameters ) {
+			IReadOnlyCollection<VariableSpecification> optionalParameters, bool includeVersionString ) {
 			writer.WriteLine( "internal sealed class UrlEncoder: EnterpriseWebFramework.UrlEncoder {" );
 
 			if( entitySetup != null ) {
@@ -31,6 +31,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				writer.WriteLine( "private readonly {0} {1};".FormatWith( getOptionalParameterType( i ), i.Name ) );
 				writer.WriteLine( "private bool {0}Accessed;".FormatWith( i.Name ) );
 			}
+			if( includeVersionString ) {
+				writer.WriteLine( "private readonly string versionString;" );
+				writer.WriteLine( "private bool versionStringAccessed;" );
+			}
 
 			writer.WriteLine(
 				"internal UrlEncoder({0}) {{".FormatWith(
@@ -38,7 +42,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 							", ",
 							( entitySetup != null ? "{0} entitySetup".FormatWith( entitySetup.GeneralData.ClassName ).ToCollection() : Enumerable.Empty<string>() )
 							.Concat( requiredParameters.Select( i => i.TypeName + " " + i.Name ) )
-							.Concat( optionalParameters.Select( i => getOptionalParameterType( i ) + " " + i.Name ) ) )
+							.Concat( optionalParameters.Select( i => getOptionalParameterType( i ) + " " + i.Name ) )
+							.Concat( includeVersionString ? "string versionString".ToCollection() : Enumerable.Empty<string>() ) )
 						.Surround( " ", " " ) ) );
 			if( entitySetup != null ) {
 				writer.WriteLine( "this.entitySetup = entitySetup;" );
@@ -48,6 +53,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			}
 			foreach( var i in requiredParameters.Concat( optionalParameters ) )
 				writer.WriteLine( "this.{0} = {0};".FormatWith( i.Name ) );
+			if( includeVersionString )
+				writer.WriteLine( "this.versionString = versionString;" );
 			writer.WriteLine( "}" );
 
 			if( entitySetup != null ) {
@@ -80,6 +87,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				writer.WriteLine( "return {0};".FormatWith( getOptionalParameterValueExpression( i ) ) );
 				writer.WriteLine( "}" );
 			}
+			if( includeVersionString ) {
+				writer.WriteLine( "public string GetVersionString() {" );
+				writer.WriteLine( "versionStringAccessed = true;" );
+				writer.WriteLine( "return versionString;" );
+				writer.WriteLine( "}" );
+			}
 
 			writer.WriteLine( "IReadOnlyCollection<( string, string, bool )> EnterpriseWebFramework.UrlEncoder.GetRemainingParameters() {" );
 			writer.WriteLine(
@@ -97,6 +110,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 						i.PropertyName,
 						i.Name,
 						i.GetUrlSerializationExpression( getOptionalParameterValueExpression( i ) ) ) );
+			if( includeVersionString )
+				writer.WriteLine( "if( versionString.Any() && !versionStringAccessed ) parameters.Add( ( \"version\", versionString, false ) );" );
 			writer.WriteLine( "return parameters;" );
 			writer.WriteLine( "}" );
 

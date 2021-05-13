@@ -25,7 +25,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				writer,
 				null,
 				Enumerable.Empty<VariableSpecification>().Materialize(),
-				Enumerable.Empty<VariableSpecification>().Materialize() );
+				Enumerable.Empty<VariableSpecification>().Materialize(),
+				!inVersionedFolder );
 
 			if( inVersionedFolder )
 				writer.WriteLine( "public {0}(): base( true ) {{}}".FormatWith( generalData.ClassName ) );

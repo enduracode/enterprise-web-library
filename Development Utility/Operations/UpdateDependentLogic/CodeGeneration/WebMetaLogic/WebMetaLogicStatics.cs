@@ -127,7 +127,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				writer,
 				null,
 				Enumerable.Empty<VariableSpecification>().Materialize(),
-				Enumerable.Empty<VariableSpecification>().Materialize() );
+				Enumerable.Empty<VariableSpecification>().Materialize(),
+				false );
 			writer.WriteLine( "protected override StaticFileFolderSetup createParentFolderSetup() => {0};".FormatWith( isRootFolder ? "null" : parentExpression ) );
 			if( !isRootFolder || parentExpression.Any() )
 				writer.WriteLine( "protected override UrlHandler getUrlParent() => {0};".FormatWith( isRootFolder ? parentExpression : "parentFolderSetup.Value" ) );
