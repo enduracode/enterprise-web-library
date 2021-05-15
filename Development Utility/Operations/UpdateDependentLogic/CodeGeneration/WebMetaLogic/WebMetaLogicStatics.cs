@@ -132,7 +132,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			writer.WriteLine( "protected override StaticFileFolderSetup createParentFolderSetup() => {0};".FormatWith( isRootFolder ? "null" : parentExpression ) );
 			if( !isRootFolder || parentExpression.Any() )
 				writer.WriteLine( "protected override UrlHandler getUrlParent() => {0};".FormatWith( isRootFolder ? parentExpression : "parentFolderSetup.Value" ) );
-			writer.WriteLine( "protected override UrlEncoder getUrlEncoder() => null;" );
+			UrlStatics.GenerateGetEncoderMethod(
+				writer,
+				"",
+				Enumerable.Empty<VariableSpecification>().Materialize(),
+				Enumerable.Empty<VariableSpecification>().Materialize(),
+				false );
 			writer.WriteLine( "protected override IEnumerable<UrlPattern> getChildUrlPatterns() => null;" );
 			writer.WriteLine( "protected override bool isFrameworkFolder => {0};".FormatWith( inFramework ? "true" : "false" ) );
 			writer.WriteLine( "protected override string folderPath => @\"{0}\";".FormatWith( folderPathRelativeToProject ) );

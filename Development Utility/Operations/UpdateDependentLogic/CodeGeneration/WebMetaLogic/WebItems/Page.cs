@@ -51,7 +51,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				else
 					writer.WriteLine( "protected override void initParametersModification() {}" );
 			}
-			writer.WriteLine( "protected override UrlEncoder getUrlEncoder() => null;" );
+			UrlStatics.GenerateGetEncoderMethod( writer, "Es", requiredParameters, optionalParameters, false );
 			if( !generalData.IsPage() )
 				writer.WriteLine( "public override bool MatchesCurrent() => base.MatchesCurrent();" );
 			writer.WriteLine(

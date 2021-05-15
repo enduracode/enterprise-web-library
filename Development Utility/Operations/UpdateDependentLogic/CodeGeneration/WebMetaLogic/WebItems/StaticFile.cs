@@ -21,20 +21,29 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 		internal void GenerateCode( TextWriter writer ) {
 			writer.WriteLine( "namespace {0} {{".FormatWith( generalData.Namespace ) );
 			writer.WriteLine( "public sealed partial class {0}: StaticFile {{".FormatWith( generalData.ClassName ) );
+
 			UrlStatics.GenerateUrlClasses(
 				writer,
 				null,
 				Enumerable.Empty<VariableSpecification>().Materialize(),
 				Enumerable.Empty<VariableSpecification>().Materialize(),
 				!inVersionedFolder );
+			writer.WriteLine( "private readonly {0} folderSetup;".FormatWith( folderSetupClassName ) );
 
 			if( inVersionedFolder )
-				writer.WriteLine( "public {0}(): base( true ) {{}}".FormatWith( generalData.ClassName ) );
+				writer.WriteLine( "public {0}(): base( true ) {{".FormatWith( generalData.ClassName ) );
 			else
-				writer.WriteLine( "public {0}( bool disableVersioning = false ): base( !disableVersioning ) {{}}".FormatWith( generalData.ClassName ) );
+				writer.WriteLine( "public {0}( bool disableVersioning = false ): base( !disableVersioning ) {{".FormatWith( generalData.ClassName ) );
+			writer.WriteLine( "folderSetup = new {0}();".FormatWith( folderSetupClassName ) );
+			writer.WriteLine( "}" );
 
-			writer.WriteLine( "public override EntitySetupBase EsAsBaseType => new {0}();".FormatWith( folderSetupClassName ) );
-			writer.WriteLine( "protected override UrlEncoder getUrlEncoder() => null;" );
+			writer.WriteLine( "public override EntitySetupBase EsAsBaseType => folderSetup;" );
+			UrlStatics.GenerateGetEncoderMethod(
+				writer,
+				"folderSetup",
+				Enumerable.Empty<VariableSpecification>().Materialize(),
+				Enumerable.Empty<VariableSpecification>().Materialize(),
+				!inVersionedFolder );
 			writer.WriteLine(
 				"protected override DateTimeOffset getBuildDateAndTime() => {0};".FormatWith( AppStatics.GetLiteralDateTimeExpression( DateTimeOffset.UtcNow ) ) );
 			writer.WriteLine( "protected override bool isFrameworkFile => {0};".FormatWith( inFramework ? "true" : "false" ) );

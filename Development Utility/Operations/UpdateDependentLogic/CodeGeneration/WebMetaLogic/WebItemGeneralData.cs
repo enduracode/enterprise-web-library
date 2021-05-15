@@ -9,6 +9,8 @@ using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic {
 	internal class WebItemGeneralData {
+		internal const string ParameterDefaultsFieldName = "__parameterDefaults";
+
 		internal static string GetNamespaceFromPath( string projectNamespace, string pathRelativeToProject, bool isFilePath ) {
 			var tokens = pathRelativeToProject.Separate( Path.DirectorySeparatorChar.ToString(), false );
 			var namespaceTokens = isFilePath ? tokens.Take( tokens.Count - 1 ) : tokens;

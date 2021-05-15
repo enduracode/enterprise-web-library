@@ -123,5 +123,32 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 
 		private static string getOptionalParameterValueExpression( VariableSpecification p ) =>
 			p.IsString || p.IsEnumerable ? p.Name : "{0}.Value".FormatWith( p.Name );
+
+		internal static void GenerateGetEncoderMethod(
+			TextWriter writer, string entitySetupFieldName, IReadOnlyCollection<VariableSpecification> requiredParameters,
+			IReadOnlyCollection<VariableSpecification> optionalParameters, bool includeVersionString ) {
+			writer.WriteLine(
+				"protected override UrlEncoder getUrlEncoder() => new UrlEncoder({0});".FormatWith(
+					StringTools.ConcatenateWithDelimiter(
+							", ",
+							( entitySetupFieldName.Any() ? entitySetupFieldName.ToCollection() : Enumerable.Empty<string>() )
+							.Concat( requiredParameters.Select( i => i.PropertyName ) )
+							.Concat(
+								optionalParameters.Select(
+									i => {
+										// If a default was specified for the parameter and the default matches the value of our parameter, don't include it.
+										// If a default was not specified and the value of our parameter is the default value of the type, don't include it.
+										var defaultParameterReference = WebItemGeneralData.ParameterDefaultsFieldName + "." + i.PropertyName;
+										return "( {0} && {1} ) || ( !{0} && {2} ) ? null : {3}".FormatWith(
+											WebItemGeneralData.ParameterDefaultsFieldName + "." + OptionalParameterPackageStatics.GetWasSpecifiedPropertyName( i ),
+											i.IsEnumerable
+												? defaultParameterReference + ".SequenceEqual( " + i.PropertyName + " )"
+												: defaultParameterReference + " == " + i.PropertyName,
+											i.IsEnumerable ? "!" + i.PropertyName + ".Any()" : i.PropertyName + " == " + ( i.IsString ? "\"\"" : "default(" + i.TypeName + ")" ),
+											i.IsString || i.IsEnumerable ? i.PropertyName : "new SpecifiedValue<{0}>( {1} )".FormatWith( i.TypeName, i.PropertyName ) );
+									} ) )
+							.Concat( includeVersionString ? "getUrlVersionString()".ToCollection() : Enumerable.Empty<string>() ) )
+						.Surround( " ", " " ) ) );
+		}
 	}
 }

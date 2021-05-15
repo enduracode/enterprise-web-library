@@ -7,8 +7,6 @@ using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic {
 	internal static class InfoStatics {
-		private const string parameterDefaultsFieldName = "__parameterDefaults";
-
 		internal static void WriteSpecifyParameterDefaultsMethod( TextWriter writer, IReadOnlyCollection<VariableSpecification> optionalParameters ) {
 			if( !optionalParameters.Any() )
 				return;
@@ -25,7 +23,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			writeMembersForParameterList( writer, optionalParameters );
 			if( optionalParameters.Any() ) {
 				CodeGenerationStatics.AddGeneratedCodeUseOnlyComment( writer );
-				writer.WriteLine( "internal OptionalParameterSpecifier {0} = new OptionalParameterSpecifier();".FormatWith( parameterDefaultsFieldName ) );
+				writer.WriteLine(
+					"internal OptionalParameterSpecifier {0} = new OptionalParameterSpecifier();".FormatWith( WebItemGeneralData.ParameterDefaultsFieldName ) );
 			}
 		}
 
@@ -159,7 +158,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				// This is called after all current values and values from the setter have been incorporated since these can affect default values.
 				writer.WriteLine(
 					"specifyParameterDefaults( {0}, new Parameters( {1} ) );".FormatWith(
-						parameterDefaultsFieldName,
+						WebItemGeneralData.ParameterDefaultsFieldName,
 						StringTools.ConcatenateWithDelimiter(
 							", ",
 							requiredParameters.Select( i => i.PropertyName )
@@ -173,7 +172,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 					writer.WriteLine(
 						"if( !optionalParameterSpecifier.{0} && {1}.{0} ) {2} = {1}.{3};".FormatWith(
 							OptionalParameterPackageStatics.GetWasSpecifiedPropertyName( i ),
-							parameterDefaultsFieldName,
+							WebItemGeneralData.ParameterDefaultsFieldName,
 							i.FieldName,
 							i.PropertyName ) );
 				writer.WriteLine( "}" );

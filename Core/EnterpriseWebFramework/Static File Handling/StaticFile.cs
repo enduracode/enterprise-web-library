@@ -79,6 +79,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		protected abstract string relativeFilePath { get; }
 
+		/// <summary>
+		/// Framework use only.
+		/// </summary>
+		protected string getUrlVersionString() => isVersioned ? EwfSafeResponseWriter.GetUrlVersionString( GetResourceLastModificationDateAndTime() ) : "";
+
 		protected sealed override ExternalRedirect getRedirect() => base.getRedirect();
 
 		protected sealed override EwfSafeRequestHandler getOrHead() {
