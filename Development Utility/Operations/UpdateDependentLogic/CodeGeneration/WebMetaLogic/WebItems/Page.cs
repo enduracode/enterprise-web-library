@@ -30,7 +30,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			OptionalParameterPackageStatics.WriteClassIfNecessary( writer, requiredParameters, optionalParameters );
 			if( generalData.IsPage() )
 				ParametersModificationStatics.WriteClassIfNecessary( writer, requiredParameters.Concat( optionalParameters ) );
-			UrlStatics.GenerateUrlClasses( writer, entitySetup, requiredParameters, optionalParameters, false );
+			UrlStatics.GenerateUrlClasses( writer, generalData.ClassName, entitySetup, requiredParameters, optionalParameters, false );
 			writeGetInfoMethod( writer );
 			InfoStatics.WriteSpecifyParameterDefaultsMethod( writer, optionalParameters );
 			if( entitySetup != null )
@@ -51,7 +51,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				else
 					writer.WriteLine( "protected override void initParametersModification() {}" );
 			}
-			UrlStatics.GenerateGetEncoderMethod( writer, "Es", requiredParameters, optionalParameters, false );
+			UrlStatics.GenerateGetEncoderMethod( writer, entitySetup != null ? "Es" : "", requiredParameters, optionalParameters, false );
 			if( !generalData.IsPage() )
 				writer.WriteLine( "public override bool MatchesCurrent() => base.MatchesCurrent();" );
 			writer.WriteLine(

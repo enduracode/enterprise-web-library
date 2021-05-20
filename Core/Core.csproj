@@ -380,6 +380,7 @@
     <Compile Include="EnterpriseWebFramework\Core\HTTP\URL Handling\EncodingBaseUrl.cs" />
     <Compile Include="EnterpriseWebFramework\Core\HTTP\URL Handling\EncodingUrlParameterCollection.cs" />
     <Compile Include="EnterpriseWebFramework\Core\HTTP\URL Handling\EncodingUrlSegment.cs" />
+    <Compile Include="EnterpriseWebFramework\Core\HTTP\URL Handling\UnresolvableUrlException.cs" />
     <Compile Include="EnterpriseWebFramework\Core\HTTP\URL Handling\UrlDecoder.cs" />
     <Compile Include="EnterpriseWebFramework\Core\HTTP\URL Handling\UrlEncoder.cs" />
     <Compile Include="EnterpriseWebFramework\Core\HTTP\URL Handling\UrlHandler.cs" />

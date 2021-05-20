@@ -73,10 +73,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						writer.WriteLine( "using System;" );
 						writer.WriteLine( "using System.Collections.Generic;" );
 						writer.WriteLine( "using System.Globalization;" );
+						writer.WriteLine( "using System.Linq;" );
 						writer.WriteLine( "using System.Reflection;" );
 						writer.WriteLine( "using System.Runtime.InteropServices;" );
+						writer.WriteLine( "using System.Threading;" );
 						writer.WriteLine( "using EnterpriseWebLibrary.DataAccess;" );
 						writer.WriteLine( "using Tewl.InputValidation;" );
+						writer.WriteLine( "using Tewl.Tools;" );
 						writer.WriteLine();
 						writeAssemblyInfo( writer, installation, "" );
 						writer.WriteLine();

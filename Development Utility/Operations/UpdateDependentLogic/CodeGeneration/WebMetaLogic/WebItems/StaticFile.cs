@@ -24,6 +24,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 
 			UrlStatics.GenerateUrlClasses(
 				writer,
+				generalData.ClassName,
 				null,
 				Enumerable.Empty<VariableSpecification>().Materialize(),
 				Enumerable.Empty<VariableSpecification>().Materialize(),
@@ -40,7 +41,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			writer.WriteLine( "public override EntitySetupBase EsAsBaseType => folderSetup;" );
 			UrlStatics.GenerateGetEncoderMethod(
 				writer,
-				"folderSetup",
+				"",
 				Enumerable.Empty<VariableSpecification>().Materialize(),
 				Enumerable.Empty<VariableSpecification>().Materialize(),
 				!inVersionedFolder );

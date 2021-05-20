@@ -183,7 +183,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		private void resolveUrl() {
-			var handlers = RequestState.ExecuteWithUserDisabled( () => UrlHandlingStatics.ResolveUrl( RequestState.BaseUrl, GetRequestAppRelativeUrl( Request ) ) );
+			var handlers = RequestState.ExecuteWithUserDisabled(
+				() => {
+					try {
+						return UrlHandlingStatics.ResolveUrl( RequestState.BaseUrl, GetRequestAppRelativeUrl( Request ) );
+					}
+					catch( UnresolvableUrlException e ) {
+						throw new ResourceNotAvailableException( "Failed to resolve the URL.", e );
+					}
+				} );
 			if( handlers != null ) {
 				RequestState.SetUrlHandlers( handlers );
 				HttpContext.Current.RemapHandler( new HandlerAdapter( handlers.Last() ) );

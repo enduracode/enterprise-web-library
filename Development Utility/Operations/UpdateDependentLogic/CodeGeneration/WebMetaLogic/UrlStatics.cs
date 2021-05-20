@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic.WebItems;
@@ -8,9 +9,10 @@ using Tewl.Tools;
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic {
 	internal static class UrlStatics {
 		internal static void GenerateUrlClasses(
-			TextWriter writer, EntitySetup entitySetup, IReadOnlyCollection<VariableSpecification> requiredParameters,
+			TextWriter writer, string className, EntitySetup entitySetup, IReadOnlyCollection<VariableSpecification> requiredParameters,
 			IReadOnlyCollection<VariableSpecification> optionalParameters, bool includeVersionString ) {
 			generateEncoder( writer, entitySetup, requiredParameters, optionalParameters, includeVersionString );
+			generateDecoder( writer, className, entitySetup, requiredParameters, optionalParameters, includeVersionString );
 		}
 
 		private static void generateEncoder(
@@ -28,7 +30,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				writer.WriteLine( "private bool {0}Accessed;".FormatWith( i.Name ) );
 			}
 			foreach( var i in optionalParameters ) {
-				writer.WriteLine( "private readonly {0} {1};".FormatWith( getOptionalParameterType( i ), i.Name ) );
+				writer.WriteLine( "private readonly {0} {1};".FormatWith( getSpecifiableParameterType( i ), i.Name ) );
 				writer.WriteLine( "private bool {0}Accessed;".FormatWith( i.Name ) );
 			}
 			if( includeVersionString ) {
@@ -42,7 +44,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 							", ",
 							( entitySetup != null ? "{0} entitySetup".FormatWith( entitySetup.GeneralData.ClassName ).ToCollection() : Enumerable.Empty<string>() )
 							.Concat( requiredParameters.Select( i => i.TypeName + " " + i.Name ) )
-							.Concat( optionalParameters.Select( i => getOptionalParameterType( i ) + " " + i.Name ) )
+							.Concat( optionalParameters.Select( i => getSpecifiableParameterType( i ) + " " + i.Name ) )
 							.Concat( includeVersionString ? "string versionString".ToCollection() : Enumerable.Empty<string>() ) )
 						.Surround( " ", " " ) ) );
 			if( entitySetup != null ) {
@@ -84,7 +86,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				writer.WriteLine( "public {0} Get{1}() {{".FormatWith( i.TypeName, i.PropertyName ) );
 				writer.WriteLine( "if( !{0}IsPresent ) throw new ApplicationException( \"The parameter is not present.\" );".FormatWith( i.PropertyName ) );
 				writer.WriteLine( "{0}Accessed = true;".FormatWith( i.Name ) );
-				writer.WriteLine( "return {0};".FormatWith( getOptionalParameterValueExpression( i ) ) );
+				writer.WriteLine( "return {0}{1};".FormatWith( i.Name, getSpecifiableParameterValueSelector( i ) ) );
 				writer.WriteLine( "}" );
 			}
 			if( includeVersionString ) {
@@ -106,10 +108,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				writer.WriteLine( "if( !{0}Accessed ) parameters.Add( ( \"{0}\", {1}, false ) );".FormatWith( i.Name, i.GetUrlSerializationExpression( i.Name ) ) );
 			foreach( var i in optionalParameters )
 				writer.WriteLine(
-					"if( {0}IsPresent && !{1}Accessed ) parameters.Add( ( \"{1}\", {2}, false ) );".FormatWith(
+					"if( {0}IsPresent && !{1}Accessed ) parameters.Add( ( \"{1}\", {1}{2}, false ) );".FormatWith(
 						i.PropertyName,
 						i.Name,
-						i.GetUrlSerializationExpression( getOptionalParameterValueExpression( i ) ) ) );
+						i.GetUrlSerializationExpression( getSpecifiableParameterValueSelector( i ) ) ) );
 			if( includeVersionString )
 				writer.WriteLine( "if( versionString.Any() && !versionStringAccessed ) parameters.Add( ( \"version\", versionString, false ) );" );
 			writer.WriteLine( "return parameters;" );
@@ -118,17 +120,167 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			writer.WriteLine( "}" );
 		}
 
-		private static string getOptionalParameterType( VariableSpecification p ) =>
+		private static void generateDecoder(
+			TextWriter writer, string className, EntitySetup entitySetup, IReadOnlyCollection<VariableSpecification> requiredParameters,
+			IReadOnlyCollection<VariableSpecification> optionalParameters, bool includeVersionString ) {
+			writer.WriteLine( "internal sealed class UrlDecoder: EnterpriseWebFramework.UrlDecoder {" );
+
+			if( entitySetup != null )
+				writer.WriteLine( "private readonly Func<DecodingUrlParameterCollection, {0}> entitySetupGetter;".FormatWith( entitySetup.GeneralData.ClassName ) );
+			foreach( var i in requiredParameters.Concat( optionalParameters ) )
+				writer.WriteLine( "private readonly {0} {1};".FormatWith( getSpecifiableParameterType( i ), i.Name ) );
+			if( includeVersionString )
+				writer.WriteLine( "private readonly string versionString;" );
+
+			if( entitySetup == null )
+				writer.WriteLine(
+					"public UrlDecoder({0}) {{".FormatWith(
+						StringTools.ConcatenateWithDelimiter(
+								", ",
+								requiredParameters.Concat( optionalParameters )
+									.Select( i => getSpecifiableParameterType( i ) + " " + i.Name )
+									.Concat( includeVersionString ? "string versionString".ToCollection() : Enumerable.Empty<string>() )
+									.Select( i => "{0} = null".FormatWith( i ) ) )
+							.Surround( " ", " " ) ) );
+			else {
+				writer.WriteLine(
+					"public UrlDecoder( {0} ): this( {1} ) {{}}".FormatWith(
+						StringTools.ConcatenateWithDelimiter(
+							", ",
+							"{0} entitySetup".FormatWith( entitySetup.GeneralData.ClassName )
+								.ToCollection()
+								.Concat(
+									requiredParameters.Concat( optionalParameters )
+										.Select( i => getSpecifiableParameterType( i ) + " " + i.Name )
+										.Concat( includeVersionString ? "string versionString".ToCollection() : Enumerable.Empty<string>() )
+										.Select( i => "{0} = null".FormatWith( i ) ) ) ),
+						StringTools.ConcatenateWithDelimiter(
+							", ",
+							"parameters => entitySetup".ToCollection().Concat( requiredParameters.Concat( optionalParameters ).Select( i => i.Name ) ) ) ) );
+				writer.WriteLine(
+					"public UrlDecoder({0}): this( {1} ) {{}}".FormatWith(
+						StringTools.ConcatenateWithDelimiter(
+								", ",
+								entitySetup.RequiredParameters.Concat( entitySetup.OptionalParameters )
+									.Concat( requiredParameters )
+									.Concat( optionalParameters )
+									.Select( i => getSpecifiableParameterType( i ) + " " + i.Name )
+									.Concat( includeVersionString ? "string versionString".ToCollection() : Enumerable.Empty<string>() )
+									.Select( i => "{0} = null".FormatWith( i ) ) )
+							.Surround( " ", " " ),
+						StringTools.ConcatenateWithDelimiter(
+							", ",
+							"parameters => ({0})( (EnterpriseWebFramework.UrlDecoder)new {0}.UrlDecoder({1}) ).GetUrlHandler( parameters )".FormatWith(
+									entitySetup.GeneralData.ClassName,
+									StringTools.ConcatenateWithDelimiter(
+											", ",
+											entitySetup.RequiredParameters.Concat( entitySetup.OptionalParameters ).Select( i => i.Name + ": " + i.Name ) )
+										.Surround( " ", " " ) )
+								.ToCollection()
+								.Concat( requiredParameters.Concat( optionalParameters ).Select( i => i.Name ) ) ) ) );
+				writer.WriteLine(
+					"private UrlDecoder( {0} ) {{".FormatWith(
+						StringTools.ConcatenateWithDelimiter(
+							", ",
+							"Func<DecodingUrlParameterCollection, {0}> entitySetupGetter".FormatWith( entitySetup.GeneralData.ClassName )
+								.ToCollection()
+								.Concat( requiredParameters.Concat( optionalParameters ).Select( i => getSpecifiableParameterType( i ) + " " + i.Name ) )
+								.Concat( includeVersionString ? "string versionString".ToCollection() : Enumerable.Empty<string>() ) ) ) );
+			}
+			if( entitySetup != null )
+				writer.WriteLine( "this.entitySetupGetter = entitySetupGetter;" );
+			foreach( var i in requiredParameters.Concat( optionalParameters ) )
+				writer.WriteLine( "this.{0} = {0};".FormatWith( i.Name ) );
+			if( includeVersionString )
+				writer.WriteLine( "this.versionString = versionString;" );
+			writer.WriteLine( "}" );
+
+			writer.WriteLine( "BasicUrlHandler EnterpriseWebFramework.UrlDecoder.GetUrlHandler( DecodingUrlParameterCollection parameters ) {" );
+			if( entitySetup != null )
+				writer.WriteLine( "var entitySetup = entitySetupGetter( parameters );" );
+
+			foreach( var i in requiredParameters ) {
+				writer.WriteLine( "{0} {1}Argument;".FormatWith( i.TypeName, i.Name ) );
+				writer.WriteLine( "if( {0} != null ) {0}Argument = {0}{1};".FormatWith( i.Name, getSpecifiableParameterValueSelector( i ) ) );
+				writer.WriteLine( "else {" );
+				writer.WriteLine( "var {0}String = parameters.GetRemainingParameter( \"{0}\" );".FormatWith( i.Name ) );
+				writer.WriteLine( "if( {0}String == null ) throw new UnresolvableUrlException( \"The {0} parameter is not present.\", null );".FormatWith( i.Name ) );
+				writer.WriteLine( "try {" );
+				writer.WriteLine( "{0}Argument = {1};".FormatWith( i.Name, i.GetUrlDeserializationExpression( "{0}String".FormatWith( i.Name ) ) ) );
+				writer.WriteLine( "}" );
+				writer.WriteLine( "catch( Exception e ) {" );
+				writer.WriteLine( "throw new UnresolvableUrlException( \"Failed to deserialize the {0} parameter.\", e );".FormatWith( i.Name ) );
+				writer.WriteLine( "}" );
+				writer.WriteLine( "}" );
+			}
+
+			foreach( var i in optionalParameters ) {
+				writer.WriteLine( "{0} {1}Argument = null;".FormatWith( getSpecifiableParameterType( i ), i.Name ) );
+				writer.WriteLine( "if( {0} != null ) {0}Argument = {0};".FormatWith( i.Name ) );
+				writer.WriteLine( "else {" );
+				writer.WriteLine( "var {0}String = parameters.GetRemainingParameter( \"{0}\" );".FormatWith( i.Name ) );
+				writer.WriteLine( "if( {0}String != null )".FormatWith( i.Name ) );
+				writer.WriteLine( "try {" );
+				var deserializationExpression = i.GetUrlDeserializationExpression( "{0}String".FormatWith( i.Name ) );
+				writer.WriteLine(
+					"{0}Argument = {1};".FormatWith(
+						i.Name,
+						i.IsString || i.IsEnumerable ? deserializationExpression : "new SpecifiedValue<{0}>( {1} )".FormatWith( i.TypeName, deserializationExpression ) ) );
+				writer.WriteLine( "}" );
+				writer.WriteLine( "catch( Exception e ) {" );
+				writer.WriteLine( "throw new UnresolvableUrlException( \"Failed to deserialize the {0} parameter.\", e );".FormatWith( i.Name ) );
+				writer.WriteLine( "}" );
+				writer.WriteLine( "}" );
+			}
+
+			if( includeVersionString )
+				writer.WriteLine( "var isVersioned = versionString != null ? versionString.Any() : parameters.GetRemainingParameter( \"version\" ) != null;" );
+
+			writer.WriteLine( "try {" );
+			writer.WriteLine(
+				"return new {0}({1});".FormatWith(
+					className,
+					StringTools.ConcatenateWithDelimiter(
+							", ",
+							( entitySetup != null ? "entitySetup".ToCollection() : Enumerable.Empty<string>() )
+							.Concat( requiredParameters.Select( i => "{0}Argument".FormatWith( i.Name ) ) )
+							.Concat(
+								optionalParameters.Any()
+									? StringTools.ConcatenateWithDelimiter(
+											Environment.NewLine,
+											"optionalParameterSetter: ( specifier, _ ) => {".ToCollection()
+												.Concat(
+													optionalParameters.Select(
+														i => "if( {0}Argument != null ) specifier.{1} = {0}Argument{2};".FormatWith(
+															i.Name,
+															i.PropertyName,
+															getSpecifiableParameterValueSelector( i ) ) ) )
+												.Append( "}" ) )
+										.ToCollection()
+									: Enumerable.Empty<string>() )
+							.Concat( includeVersionString ? "disableVersioning: !isVersioned".ToCollection() : Enumerable.Empty<string>() ) )
+						.Surround( " ", " " ) ) );
+			writer.WriteLine( "}" );
+			writer.WriteLine( "catch( Exception e ) {" );
+			writer.WriteLine( "if( e is UserDisabledByPageException ) throw;" );
+			writer.WriteLine( "throw new UnresolvableUrlException( \"Failed to create the URL handler.\", e );" );
+			writer.WriteLine( "}" );
+
+			writer.WriteLine( "}" );
+
+			writer.WriteLine( "}" );
+		}
+
+		private static string getSpecifiableParameterType( VariableSpecification p ) =>
 			p.IsString || p.IsEnumerable ? p.TypeName : "SpecifiedValue<{0}>".FormatWith( p.TypeName );
 
-		private static string getOptionalParameterValueExpression( VariableSpecification p ) =>
-			p.IsString || p.IsEnumerable ? p.Name : "{0}.Value".FormatWith( p.Name );
+		private static string getSpecifiableParameterValueSelector( VariableSpecification p ) => p.IsString || p.IsEnumerable ? "" : ".Value";
 
 		internal static void GenerateGetEncoderMethod(
 			TextWriter writer, string entitySetupFieldName, IReadOnlyCollection<VariableSpecification> requiredParameters,
 			IReadOnlyCollection<VariableSpecification> optionalParameters, bool includeVersionString ) {
 			writer.WriteLine(
-				"protected override UrlEncoder getUrlEncoder() => new UrlEncoder({0});".FormatWith(
+				"protected override EnterpriseWebFramework.UrlEncoder getUrlEncoder() => new UrlEncoder({0});".FormatWith(
 					StringTools.ConcatenateWithDelimiter(
 							", ",
 							( entitySetupFieldName.Any() ? entitySetupFieldName.ToCollection() : Enumerable.Empty<string>() )
