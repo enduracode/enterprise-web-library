@@ -262,7 +262,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 						.Surround( " ", " " ) ) );
 			writer.WriteLine( "}" );
 			writer.WriteLine( "catch( Exception e ) {" );
-			writer.WriteLine( "if( e is UserDisabledByPageException ) throw;" );
+			writer.WriteLine( "if( e is UserDisabledException ) throw;" );
 			writer.WriteLine( "throw new UnresolvableUrlException( \"Failed to create the URL handler.\", e );" );
 			writer.WriteLine( "}" );
 

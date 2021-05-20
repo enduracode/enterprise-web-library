@@ -395,7 +395,7 @@
     <Compile Include="EnterpriseWebFramework\Core\Resource Meta Logic\ResourceInfo.cs" />
     <Compile Include="EnterpriseWebFramework\Core\ResourceNotAvailableException.cs" />
     <Compile Include="EnterpriseWebFramework\Core\Translation.cs" />
-    <Compile Include="EnterpriseWebFramework\Core\UserDisabledByPageException.cs" />
+    <Compile Include="EnterpriseWebFramework\Core\UserDisabledException.cs" />
     <Compile Include="EnterpriseWebFramework\CSS Length\AncestorRelativeLength.cs" />
     <Compile Include="EnterpriseWebFramework\CSS Length\ContentBasedLength.cs" />
     <Compile Include="EnterpriseWebFramework\CSS Length\CssLength.cs" />

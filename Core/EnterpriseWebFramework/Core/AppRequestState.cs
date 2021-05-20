@@ -206,7 +206,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				if( !userEnabled )
 					throw new ApplicationException( "User cannot be accessed this early in the request life cycle." );
 				if( userDisabled )
-					throw new UserDisabledByPageException( "User cannot be accessed. See the AppTools.User documentation for details." );
+					throw new UserDisabledException( "User cannot be accessed. See the AppTools.User documentation for details." );
 				if( !UserAccessible )
 					throw new ApplicationException( "User cannot be accessed from a nonsecure connection in an application that supports secure connections." );
 				if( userAndImpersonator == null )
