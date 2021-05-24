@@ -11,14 +11,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// An object that writes a response to a safe HTTP request (e.g. GET, HEAD).
 	/// </summary>
 	public class EwfSafeResponseWriter {
-		internal const string UrlVersionStringFormat = "yyyyMMddHHmmssfff";
-
 		/// <summary>
 		/// Returns the URL resource-version string for the specified date/time.
 		/// </summary>
-		public static string GetUrlVersionString( DateTimeOffset dateAndTime ) {
-			return dateAndTime.ToString( UrlVersionStringFormat, DateTimeFormatInfo.InvariantInfo );
-		}
+		public static string GetUrlVersionString( DateTimeOffset dateAndTime ) => dateAndTime.ToString( "yyyyMMddHHmmssfff", DateTimeFormatInfo.InvariantInfo );
 
 		internal static void AddCacheControlHeader( HttpResponse aspNetResponse, bool requestIsSecure, bool responseHasCachingInfo, bool? responseNeverExpires ) {
 			// Assume that all HTTPS responses are private. This isn’t true for CSS, JavaScript, etc. requests that are only secure in order to match the security of
