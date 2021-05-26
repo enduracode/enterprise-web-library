@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Web;
 using EnterpriseWebLibrary.Configuration;
+using Humanizer;
 using MimeTypes;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -96,7 +97,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var contentType = mediaTypeOverride != null ? mediaTypeOverride.MediaType : MimeTypeMap.GetMimeType( extension );
 
 			var urlVersionString = isVersioned ? "invariant" : "";
-			Func<string> cacheKeyGetter = () => GetUrl( false, false, false );
+			string getCacheKey() => "staticFile-{0}-{1}".FormatWith( isFrameworkFile, relativeFilePath );
 			EwfSafeResponseWriter responseWriter;
 			if( contentType == TewlContrib.ContentTypes.Css ) {
 				Func<string> cssGetter = () => File.ReadAllText( filePath );
@@ -104,13 +105,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					                 ? new EwfSafeResponseWriter(
 						                 cssGetter,
 						                 urlVersionString,
-						                 () => new ResponseMemoryCachingSetup( cacheKeyGetter(), GetResourceLastModificationDateAndTime() ) )
+						                 () => new ResponseMemoryCachingSetup( getCacheKey(), GetResourceLastModificationDateAndTime() ) )
 					                 : new EwfSafeResponseWriter(
 						                 () => EwfResponse.Create(
 							                 TewlContrib.ContentTypes.Css,
 							                 new EwfResponseBodyCreator( () => CssPreprocessor.TransformCssFile( cssGetter() ) ) ),
 						                 GetResourceLastModificationDateAndTime(),
-						                 memoryCacheKeyGetter: cacheKeyGetter );
+						                 memoryCacheKeyGetter: getCacheKey );
 			}
 			else {
 				Func<EwfResponse> responseCreator = () => EwfResponse.Create(
@@ -124,8 +125,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					                 ? new EwfSafeResponseWriter(
 						                 responseCreator,
 						                 urlVersionString,
-						                 memoryCachingSetupGetter: () => new ResponseMemoryCachingSetup( cacheKeyGetter(), GetResourceLastModificationDateAndTime() ) )
-					                 : new EwfSafeResponseWriter( responseCreator, GetResourceLastModificationDateAndTime(), memoryCacheKeyGetter: cacheKeyGetter );
+						                 memoryCachingSetupGetter: () => new ResponseMemoryCachingSetup( getCacheKey(), GetResourceLastModificationDateAndTime() ) )
+					                 : new EwfSafeResponseWriter( responseCreator, GetResourceLastModificationDateAndTime(), memoryCacheKeyGetter: getCacheKey );
 			}
 			return responseWriter;
 		}
