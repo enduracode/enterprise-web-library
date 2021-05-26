@@ -281,38 +281,42 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			TextWriter writer, string className, EntitySetup entitySetup, IReadOnlyCollection<VariableSpecification> requiredParameters, bool includeVersionString ) {
 			writer.WriteLine( "internal static class UrlPatterns {" );
 
-			if( requiredParameters.Count == 0 ) {
-				CodeGenerationStatics.AddSummaryDocComment( writer, "Creates a literal URL pattern. Segment suggestion: {0}.".FormatWith( className.ToUrlSlug() ) );
-				writer.WriteLine(
-					"public static UrlPattern Literal( {0} ) => new UrlPattern( encoder => {1}, url => {2} );".FormatWith(
-						( entitySetup != null ? "{0} entitySetup, ".FormatWith( entitySetup.GeneralData.ClassName ) : "" ) + "string segment",
-						entitySetup != null
-							? includeVersionString
-								  ?
-								  "encoder is UrlEncoder local && local.CheckEntitySetup( entitySetup ) ? local.GetVersionString().Length > 0 ? EncodingUrlSegment.CreateWithVersionString( segment, local.GetVersionString() ) : EncodingUrlSegment.Create( segment ) : null"
-								  : "encoder is UrlEncoder local && local.CheckEntitySetup( entitySetup ) ? EncodingUrlSegment.Create( segment ) : null"
-							:
-							includeVersionString
-								?
-								"encoder is UrlEncoder local ? local.GetVersionString().Length > 0 ? EncodingUrlSegment.CreateWithVersionString( segment, local.GetVersionString() ) : EncodingUrlSegment.Create( segment ) : null"
-								: "encoder is UrlEncoder local ? EncodingUrlSegment.Create( segment ) : null",
-						entitySetup != null
-							? includeVersionString
-								  ?
-								  "url.HasVersionString( out var components ) && components.segment == segment ? new UrlDecoder( entitySetup, versionString: components.versionString ) : url.Segment == segment ? new UrlDecoder( entitySetup, versionString: \"\" ) : null"
-								  : "url.Segment == segment ? new UrlDecoder( entitySetup ) : null"
-							:
-							includeVersionString
-								?
-								"url.HasVersionString( out var components ) && components.segment == segment ? new UrlDecoder( versionString: components.versionString ) : url.Segment == segment ? new UrlDecoder( versionString: \"\" ) : null"
-								: "url.Segment == segment ? new UrlDecoder() : null" ) );
-			}
+			CodeGenerationStatics.AddSummaryDocComment(
+				writer,
+				"Creates a literal URL pattern. Segment suggestion: {0}.".FormatWith( className.CamelToEnglish().ToUrlSlug() ) );
+			writer.WriteLine(
+				"public static UrlPattern Literal( {0} ) => new UrlPattern( encoder => {1}, url => {2} );".FormatWith(
+					( entitySetup != null ? "{0} entitySetup, ".FormatWith( entitySetup.GeneralData.ClassName ) : "" ) + "string segment",
+					entitySetup != null
+						? includeVersionString
+							  ?
+							  "encoder is UrlEncoder local && local.CheckEntitySetup( entitySetup ) ? local.GetVersionString().Length > 0 ? EncodingUrlSegment.CreateWithVersionString( segment, local.GetVersionString() ) : EncodingUrlSegment.Create( segment ) : null"
+							  : "encoder is UrlEncoder local && local.CheckEntitySetup( entitySetup ) ? EncodingUrlSegment.Create( segment ) : null"
+						:
+						includeVersionString
+							?
+							"encoder is UrlEncoder local ? local.GetVersionString().Length > 0 ? EncodingUrlSegment.CreateWithVersionString( segment, local.GetVersionString() ) : EncodingUrlSegment.Create( segment ) : null"
+							: "encoder is UrlEncoder local ? EncodingUrlSegment.Create( segment ) : null",
+					entitySetup != null
+						? includeVersionString
+							  ?
+							  "url.HasVersionString( out var components ) && components.segment == segment ? new UrlDecoder( entitySetup, versionString: components.versionString ) : url.Segment == segment ? new UrlDecoder( entitySetup, versionString: \"\" ) : null"
+							  : "url.Segment == segment ? new UrlDecoder( entitySetup ) : null"
+						:
+						includeVersionString
+							?
+							"url.HasVersionString( out var components ) && components.segment == segment ? new UrlDecoder( versionString: components.versionString ) : url.Segment == segment ? new UrlDecoder( versionString: \"\" ) : null"
+							: "url.Segment == segment ? new UrlDecoder() : null" ) );
 
 			if( requiredParameters.Count == 1 ) {
 				var parameter = requiredParameters.Single();
 				if( "int".ToCollection().Append( "int?" ).Contains( parameter.TypeName ) ) {
-					CodeGenerationStatics.AddSummaryDocComment( writer, "Creates a positive-int URL pattern." );
 					var parameterIsNullable = parameter.TypeName == "int?";
+					CodeGenerationStatics.AddSummaryDocComment(
+						writer,
+						"Creates a positive-int URL pattern." + ( parameterIsNullable
+							                                          ? " If the parameter supports null for the purpose of creating new resources, we recommend that the null segment be a verb such as “create” or “add”."
+							                                          : "" ) );
 					writer.WriteLine(
 						"public static UrlPattern {0}({1}) => new UrlPattern( encoder => {2}, url => {3} );".FormatWith(
 							parameter.PropertyName + "PositiveInt",
