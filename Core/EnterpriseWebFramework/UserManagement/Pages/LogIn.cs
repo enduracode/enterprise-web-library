@@ -14,6 +14,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 		private DataValue<string> emailAddress;
 		private FormsAuthCapableUser user;
 
+		protected override UrlHandler getUrlParent() => new Admin.EntitySetup();
+
 		protected override PageContent getContent() {
 			var content = new UiPageContent( omitContentBox: true );
 

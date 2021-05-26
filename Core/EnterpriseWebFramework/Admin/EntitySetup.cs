@@ -31,22 +31,22 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin {
 
 		protected override UrlHandler getRequestHandler() => new BasicTests( this );
 
-		protected override IEnumerable<UrlPattern> getChildUrlPatterns() {
-			return new UrlPattern( /* use static as the segment to get to framework static files */ ).ToCollection()
-				.Append( /* non-live-log-in */ )
-				.Append( /* log-in */ )
-				.Append( /* change-password */ )
-				.Append( new UrlPattern( /* use impersonate as the segment to get to MetaLogicFactory.CreateSelectUserPageInfo( "" ) */ ) )
-				.Append( /* pre-built-response */ )
-				.Append( /* contact-support */ )
-				.Append( /* access-denied */ )
-				.Append( /* resource-disabled */ )
-				.Append( /* resource-not-available */ )
-				.Append( /* unhandled-exception */ )
-				.Append( /* tests */ )
-				.Append( /* profiling */ )
-				.Append( /* users */ );
-		}
+		protected override IEnumerable<UrlPattern> getChildUrlPatterns() =>
+			StaticFiles.FolderSetup.UrlPatterns.Literal( "static" )
+				.ToCollection()
+				.Append( NonLiveLogIn.UrlPatterns.Literal( "non-live-log-in" ) )
+				.Append( UserManagement.Pages.LogIn.UrlPatterns.Literal( "log-in" ) )
+				.Append( UserManagement.Pages.ChangePassword.UrlPatterns.Literal( "change-password" ) )
+				.Append( UserManagement.Pages.Impersonate.UrlPatterns.Literal( "impersonate" ) )
+				.Append( PreBuiltResponse.UrlPatterns.Literal( "pre-built-response" ) )
+				.Append( ContactSupport.UrlPatterns.Literal( "contact-support" ) )
+				.Append( ErrorPages.AccessDenied.UrlPatterns.Literal( "access-denied" ) )
+				.Append( ErrorPages.ResourceDisabled.UrlPatterns.Literal( "resource-disabled" ) )
+				.Append( ErrorPages.ResourceNotAvailable.UrlPatterns.Literal( "resource-not-available" ) )
+				.Append( ErrorPages.UnhandledException.UrlPatterns.Literal( "unhandled-exception" ) )
+				.Append( BasicTests.UrlPatterns.Literal( this, "tests" ) )
+				.Append( RequestProfiling.UrlPatterns.Literal( this, "profiling" ) )
+				.Append( SystemUsers.UrlPatterns.Literal( this, "users" ) );
 
 		EntityUiSetup UiEntitySetup.GetUiSetup() => new EntityUiSetup();
 	}

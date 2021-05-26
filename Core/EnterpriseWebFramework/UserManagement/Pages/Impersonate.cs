@@ -40,6 +40,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 			}
 		}
 
+		protected override UrlHandler getUrlParent() => new Admin.EntitySetup();
+
 		protected override Action getPageViewDataModificationMethod() {
 			pageViewDataModificationsExecuted = true;
 

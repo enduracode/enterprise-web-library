@@ -10,6 +10,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 		private DataValue<string> newPassword;
 
 		protected override bool userCanAccessResource => AppTools.User != null;
+		protected override UrlHandler getUrlParent() => new Admin.EntitySetup();
 
 		protected override PageContent getContent() {
 			newPassword = new DataValue<string>();

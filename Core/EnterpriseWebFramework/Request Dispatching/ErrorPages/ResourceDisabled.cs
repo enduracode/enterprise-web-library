@@ -6,6 +6,7 @@
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.ErrorPages {
 	partial class ResourceDisabled {
 		protected internal override bool IsIntermediateInstallationPublicResource => true;
+		protected override UrlHandler getUrlParent() => new Admin.EntitySetup();
 		protected internal override ConnectionSecurity ConnectionSecurity => ConnectionSecurity.MatchingCurrentRequest;
 
 		protected override PageContent getContent() =>

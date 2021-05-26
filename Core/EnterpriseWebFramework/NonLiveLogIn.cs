@@ -23,6 +23,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		public override string ResourceName => "Non-Live Installation Log In";
 		protected internal override bool IsIntermediateInstallationPublicResource => true;
+		protected override UrlHandler getUrlParent() => new Admin.EntitySetup();
 
 		protected override Action getPageViewDataModificationMethod() {
 			pageViewDataModificationsExecuted = true;

@@ -13,6 +13,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly DataValue<string> body = new DataValue<string>();
 
 		protected override bool userCanAccessResource => AppTools.User != null;
+		protected override UrlHandler getUrlParent() => new Admin.EntitySetup();
 
 		protected override PageContent getContent() =>
 			FormState.ExecuteWithDataModificationsAndDefaultAction(

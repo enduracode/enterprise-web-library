@@ -10,6 +10,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				throw new ApplicationException();
 		}
 
+		protected override UrlHandler getUrlParent() => new Admin.EntitySetup();
 		protected internal override ConnectionSecurity ConnectionSecurity => ConnectionSecurity.MatchingCurrentRequest;
 
 		protected override EwfSafeRequestHandler getOrHead() => new EwfSafeResponseWriter( new EwfResponse( StandardLibrarySessionState.Instance.ResponseToSend ) );

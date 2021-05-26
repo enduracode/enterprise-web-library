@@ -28,7 +28,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			if( !frameworkUrlSegment.Any() )
 				frameworkUrlSegment = EwlStatics.EwlInitialism.ToUrlSlug();
-			patterns.Add( new UrlPattern() );
+			patterns.Add( Admin.EntitySetup.UrlPatterns.Literal( frameworkUrlSegment ) );
 
 			if( !appStaticFileUrlSegment.Any() )
 				appStaticFileUrlSegment = "static";

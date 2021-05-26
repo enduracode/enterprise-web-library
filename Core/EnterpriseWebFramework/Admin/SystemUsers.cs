@@ -1,4 +1,5 @@
-﻿using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
+﻿using System.Collections.Generic;
+using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using Tewl.Tools;
 
 // EwlPage
@@ -7,6 +8,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin {
 	partial class SystemUsers {
 		protected override AlternativeResourceMode createAlternativeMode() =>
 			UserManagementStatics.UserManagementEnabled ? null : new DisabledResourceMode( "User management is not enabled in this system." );
+
+		protected override IEnumerable<UrlPattern> getChildUrlPatterns() => SystemUser.UrlPatterns.UserIdPositiveInt( Es, "create" ).ToCollection();
 
 		protected override PageContent getContent() =>
 			new UiPageContent().Add(
