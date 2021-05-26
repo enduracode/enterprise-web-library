@@ -13,6 +13,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			IReadOnlyCollection<VariableSpecification> optionalParameters, bool includeVersionString ) {
 			generateEncoder( writer, entitySetup, requiredParameters, optionalParameters, includeVersionString );
 			generateDecoder( writer, className, entitySetup, requiredParameters, optionalParameters, includeVersionString );
+			generatePatterns( writer, className, entitySetup, requiredParameters, includeVersionString );
 		}
 
 		private static void generateEncoder(
@@ -275,6 +276,90 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			p.IsString || p.IsEnumerable ? p.TypeName : "SpecifiedValue<{0}>".FormatWith( p.TypeName );
 
 		private static string getSpecifiableParameterValueSelector( VariableSpecification p ) => p.IsString || p.IsEnumerable ? "" : ".Value";
+
+		private static void generatePatterns(
+			TextWriter writer, string className, EntitySetup entitySetup, IReadOnlyCollection<VariableSpecification> requiredParameters, bool includeVersionString ) {
+			writer.WriteLine( "internal static class UrlPatterns {" );
+
+			if( requiredParameters.Count == 0 ) {
+				CodeGenerationStatics.AddSummaryDocComment( writer, "Creates a literal URL pattern. Segment suggestion: {0}.".FormatWith( className.ToUrlSlug() ) );
+				writer.WriteLine(
+					"public static UrlPattern Literal( {0} ) => new UrlPattern( encoder => {1}, url => {2} );".FormatWith(
+						( entitySetup != null ? "{0} entitySetup, ".FormatWith( entitySetup.GeneralData.ClassName ) : "" ) + "string segment",
+						entitySetup != null
+							? includeVersionString
+								  ?
+								  "encoder is UrlEncoder local && local.CheckEntitySetup( entitySetup ) ? local.GetVersionString().Length > 0 ? EncodingUrlSegment.CreateWithVersionString( segment, local.GetVersionString() ) : EncodingUrlSegment.Create( segment ) : null"
+								  : "encoder is UrlEncoder local && local.CheckEntitySetup( entitySetup ) ? EncodingUrlSegment.Create( segment ) : null"
+							:
+							includeVersionString
+								?
+								"encoder is UrlEncoder local ? local.GetVersionString().Length > 0 ? EncodingUrlSegment.CreateWithVersionString( segment, local.GetVersionString() ) : EncodingUrlSegment.Create( segment ) : null"
+								: "encoder is UrlEncoder local ? EncodingUrlSegment.Create( segment ) : null",
+						entitySetup != null
+							? includeVersionString
+								  ?
+								  "url.HasVersionString( out var components ) && components.segment == segment ? new UrlDecoder( entitySetup, versionString: components.versionString ) : url.Segment == segment ? new UrlDecoder( entitySetup, versionString: \"\" ) : null"
+								  : "url.Segment == segment ? new UrlDecoder( entitySetup ) : null"
+							:
+							includeVersionString
+								?
+								"url.HasVersionString( out var components ) && components.segment == segment ? new UrlDecoder( versionString: components.versionString ) : url.Segment == segment ? new UrlDecoder( versionString: \"\" ) : null"
+								: "url.Segment == segment ? new UrlDecoder() : null" ) );
+			}
+
+			if( requiredParameters.Count == 1 ) {
+				var parameter = requiredParameters.Single();
+				if( "int".ToCollection().Append( "int?" ).Contains( parameter.TypeName ) ) {
+					CodeGenerationStatics.AddSummaryDocComment( writer, "Creates a positive-int URL pattern." );
+					var parameterIsNullable = parameter.TypeName == "int?";
+					writer.WriteLine(
+						"public static UrlPattern {0}({1}) => new UrlPattern( encoder => {2}, url => {3} );".FormatWith(
+							parameter.PropertyName + "PositiveInt",
+							StringTools.ConcatenateWithDelimiter(
+									", ",
+									entitySetup != null ? "{0} entitySetup".FormatWith( entitySetup.GeneralData.ClassName ) : "",
+									parameterIsNullable ? "string nullSegment" : "" )
+								.Surround( " ", " " ),
+							entitySetup != null
+								? parameterIsNullable
+									  ?
+									  "encoder is UrlEncoder local && local.CheckEntitySetup( entitySetup ) ? local.Get{0}().HasValue ? EncodingUrlSegment.CreatePositiveInt( local.Get{0}().Value ) : EncodingUrlSegment.Create( nullSegment ) : null"
+										  .FormatWith( parameter.PropertyName )
+									  : "encoder is UrlEncoder local && local.CheckEntitySetup( entitySetup ) ? EncodingUrlSegment.CreatePositiveInt( local.Get{0}() ) : null"
+										  .FormatWith( parameter.PropertyName )
+								:
+								parameterIsNullable
+									?
+									"encoder is UrlEncoder local ? local.Get{0}().HasValue ? EncodingUrlSegment.CreatePositiveInt( local.Get{0}().Value ) : EncodingUrlSegment.Create( nullSegment ) : null"
+										.FormatWith( parameter.PropertyName )
+									: "encoder is UrlEncoder local ? EncodingUrlSegment.CreatePositiveInt( local.Get{0}() ) : null".FormatWith( parameter.PropertyName ),
+							entitySetup != null
+								? parameterIsNullable
+									  ?
+									  "url.IsPositiveInt( out var value ) ? new UrlDecoder( entitySetup, {0}: new SpecifiedValue<int?>( value ) ) : url.Segment == nullSegment ? new UrlDecoder( entitySetup, {0}: new SpecifiedValue<int?>( null ) ) : null"
+										  .FormatWith( parameter.Name )
+									  : "url.IsPositiveInt( out var value ) ? new UrlDecoder( entitySetup, {0}: new SpecifiedValue<int>( value ) ) : null"
+										  .FormatWith( parameter.Name )
+								:
+								parameterIsNullable
+									?
+									"url.IsPositiveInt( out var value ) ? new UrlDecoder( {0}: new SpecifiedValue<int?>( value ) ) : url.Segment == nullSegment ? new UrlDecoder( {0}: new SpecifiedValue<int?>( null ) ) : null"
+										.FormatWith( parameter.Name )
+									: "url.IsPositiveInt( out var value ) ? new UrlDecoder( {0}: new SpecifiedValue<int>( value ) ) : null".FormatWith( parameter.Name ) ) );
+				}
+			}
+
+			if( entitySetup == null && requiredParameters.Count == 0 && !includeVersionString ) {
+				CodeGenerationStatics.AddSummaryDocComment( writer, "Creates a base URL pattern that generates the default base URL and accepts any base URL." );
+				writer.WriteLine(
+					"public static BaseUrlPattern BaseUrlPattern() => new BaseUrlPattern( encoder => {0}, url => {1} );".FormatWith(
+						"encoder is UrlEncoder local ? new EncodingBaseUrl( new BaseUrl( \"\", null, null, null ) ) : null",
+						"new UrlDecoder()" ) );
+			}
+
+			writer.WriteLine( "}" );
+		}
 
 		internal static void GenerateGetEncoderMethod(
 			TextWriter writer, string entitySetupFieldName, IReadOnlyCollection<VariableSpecification> requiredParameters,
