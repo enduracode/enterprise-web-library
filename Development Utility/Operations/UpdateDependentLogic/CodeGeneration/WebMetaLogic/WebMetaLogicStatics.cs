@@ -90,6 +90,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 
 			var folderNamespace = WebItemGeneralData.GetNamespaceFromPath( projectNamespace, folderPathRelativeToProject, false );
 			const string folderSetupClassName = "FolderSetup";
+			var files = IoMethods.GetFileNamesInFolder( folderPath )
+				.Select( i => new WebItemGeneralData( projectPath, projectNamespace, EwlStatics.CombinePaths( folderPathRelativeToProject, i ), true ) )
+				.Materialize();
+			var subfolderNames = IoMethods.GetFolderNamesInFolder( folderPath ).Materialize();
 			generateStaticFileFolderSetup(
 				writer,
 				inFramework,
@@ -97,16 +101,22 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				folderPathRelativeToProject,
 				folderNamespace,
 				folderSetupClassName,
-				folderParentExpression );
+				folderParentExpression,
+				files.Select( i => "{0}.UrlPatterns.Literal( \"{1}\" )".FormatWith( i.ClassName, i.FileName ) )
+					.Concat(
+						subfolderNames.Select(
+							subfolderName => "{0}.{1}.UrlPatterns.Literal( \"{2}\" )".FormatWith(
+								WebItemGeneralData.GetNamespaceFromPath( projectNamespace, EwlStatics.CombinePaths( folderPathRelativeToProject, subfolderName ), false )
+									.Separate( ".", false )
+									.Last(),
+								folderSetupClassName,
+								subfolderName ) ) )
+					.Materialize() );
 
-			foreach( var fileName in IoMethods.GetFileNamesInFolder( folderPath ) )
-				new StaticFile(
-					new WebItemGeneralData( projectPath, projectNamespace, EwlStatics.CombinePaths( folderPathRelativeToProject, fileName ), true ),
-					inFramework,
-					inVersionedFolder == true,
-					folderSetupClassName ).GenerateCode( writer );
+			foreach( var file in files )
+				new StaticFile( file, inFramework, inVersionedFolder == true, folderSetupClassName ).GenerateCode( writer );
 
-			foreach( var subfolderName in IoMethods.GetFolderNamesInFolder( folderPath ) )
+			foreach( var subfolderName in subfolderNames )
 				generateStaticFileLogic(
 					writer,
 					projectPath,
@@ -119,7 +129,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 
 		private static void generateStaticFileFolderSetup(
 			TextWriter writer, bool inFramework, bool isRootFolder, string folderPathRelativeToProject, string folderNamespace, string className,
-			string parentExpression ) {
+			string parentExpression, IReadOnlyCollection<string> childPatterns ) {
 			writer.WriteLine( "namespace {0} {{".FormatWith( folderNamespace ) );
 			writer.WriteLine( "public sealed partial class {0}: StaticFileFolderSetup {{".FormatWith( className ) );
 
@@ -139,7 +149,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				Enumerable.Empty<VariableSpecification>().Materialize(),
 				Enumerable.Empty<VariableSpecification>().Materialize(),
 				false );
-			writer.WriteLine( "protected override IEnumerable<UrlPattern> getChildUrlPatterns() => null;" );
+			writer.WriteLine(
+				"protected override IEnumerable<UrlPattern> getChildUrlPatterns() => {0};".FormatWith(
+					childPatterns.Any() ? "new[] {{ {0} }}".FormatWith( StringTools.ConcatenateWithDelimiter( ", ", childPatterns ) ) : "base.getChildUrlPatterns()" ) );
 			writer.WriteLine( "protected override bool isFrameworkFolder => {0};".FormatWith( inFramework ? "true" : "false" ) );
 			writer.WriteLine( "protected override string folderPath => @\"{0}\";".FormatWith( folderPathRelativeToProject ) );
 

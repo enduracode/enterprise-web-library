@@ -20,15 +20,17 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 		}
 
 		private readonly string pathRelativeToProject;
+		private readonly string fileName;
 		private readonly string itemNamespace;
 		private readonly string className;
 		private readonly string code;
 
 		internal WebItemGeneralData( string projectPath, string projectNamespace, string pathRelativeToProject, bool includeFileExtensionInClassName ) {
 			this.pathRelativeToProject = pathRelativeToProject;
+			var path = EwlStatics.CombinePaths( projectPath, pathRelativeToProject );
+			fileName = Path.GetFileName( path );
 
 			// Load this item's code if it exists.
-			var path = EwlStatics.CombinePaths( projectPath, pathRelativeToProject );
 			code = path.EndsWith( ".cs" ) ? File.ReadAllText( path ) : "";
 
 			// Attempt to get the namespace from the code. If this fails, use a namespace based on the item's path in the project.
@@ -42,6 +44,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 		}
 
 		internal string PathRelativeToProject => pathRelativeToProject;
+		internal string FileName => fileName;
 		internal string Namespace => itemNamespace;
 		internal string ClassName => className;
 
