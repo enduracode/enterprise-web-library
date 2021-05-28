@@ -44,6 +44,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				"",
 				Enumerable.Empty<VariableSpecification>().Materialize(),
 				Enumerable.Empty<VariableSpecification>().Materialize(),
+				p => "false",
 				!inVersionedFolder );
 			writer.WriteLine(
 				"protected override DateTimeOffset getBuildDateAndTime() => {0};".FormatWith( AppStatics.GetLiteralDateTimeExpression( DateTimeOffset.UtcNow ) ) );

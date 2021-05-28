@@ -41,7 +41,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			}
 			else
 				writer.WriteLine( "protected internal override void InitParametersModification() {}" );
-			UrlStatics.GenerateGetEncoderMethod( writer, "", requiredParameters, optionalParameters, false );
+			UrlStatics.GenerateGetEncoderMethod( writer, "", requiredParameters, optionalParameters, p => "true", false );
 			WebMetaLogicStatics.WriteReCreateFromNewParameterValuesMethod(
 				writer,
 				requiredParameters,

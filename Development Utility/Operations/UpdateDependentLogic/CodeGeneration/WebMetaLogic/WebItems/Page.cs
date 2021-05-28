@@ -31,6 +31,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			if( generalData.IsPage() )
 				ParametersModificationStatics.WriteClassIfNecessary( writer, requiredParameters.Concat( optionalParameters ) );
 			UrlStatics.GenerateUrlClasses( writer, generalData.ClassName, entitySetup, requiredParameters, optionalParameters, false );
+			if( optionalParameters.Any() )
+				generateSegmentParameterSpecifier( writer );
 			writeGetInfoMethod( writer );
 			InfoStatics.WriteSpecifyParameterDefaultsMethod( writer, optionalParameters );
 			if( entitySetup != null )
@@ -38,6 +40,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			InfoStatics.WriteParameterMembers( writer, requiredParameters, optionalParameters );
 			if( generalData.IsPage() && ( requiredParameters.Any() || optionalParameters.Any() ) )
 				writer.WriteLine( "private ParametersModification parametersModification;" );
+			if( optionalParameters.Any() )
+				writer.WriteLine( "private readonly Lazy<SegmentParameterSpecifier> segmentParameterSpecifier;" );
 			InfoStatics.WriteConstructorAndHelperMethods( writer, generalData, requiredParameters, optionalParameters, entitySetup != null, false );
 			writer.WriteLine( "public override EntitySetupBase EsAsBaseType => {0};".FormatWith( entitySetup != null ? "Es" : "null" ) );
 			if( generalData.IsPage() ) {
@@ -51,7 +55,15 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				else
 					writer.WriteLine( "protected override void initParametersModification() {}" );
 			}
-			UrlStatics.GenerateGetEncoderMethod( writer, entitySetup != null ? "Es" : "", requiredParameters, optionalParameters, false );
+			UrlStatics.GenerateGetEncoderMethod(
+				writer,
+				entitySetup != null ? "Es" : "",
+				requiredParameters,
+				optionalParameters,
+				p => "segmentParameterSpecifier.Value.{0}IsSegmentParameter".FormatWith( p.PropertyName ),
+				false );
+			if( optionalParameters.Any() )
+				writer.WriteLine( "partial void specifySegmentParameters( SegmentParameterSpecifier specifier );" );
 			if( !generalData.IsPage() )
 				writer.WriteLine( "public override bool MatchesCurrent() => base.MatchesCurrent();" );
 			writer.WriteLine(
@@ -80,6 +92,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			InfoStatics.WriteGetHashCodeMethod( writer, generalData.PathRelativeToProject, requiredParameters, optionalParameters );
 
 			writer.WriteLine( "}" );
+			writer.WriteLine( "}" );
+		}
+
+		private void generateSegmentParameterSpecifier( TextWriter writer ) {
+			writer.WriteLine( "private class SegmentParameterSpecifier {" );
+			foreach( var i in optionalParameters )
+				writer.WriteLine( "public bool {0}IsSegmentParameter {{ get; set; }}".FormatWith( i.PropertyName ) );
 			writer.WriteLine( "}" );
 		}
 

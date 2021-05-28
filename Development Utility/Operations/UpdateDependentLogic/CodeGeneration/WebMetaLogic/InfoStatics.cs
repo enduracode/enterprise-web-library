@@ -68,6 +68,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			writer.WriteLine( "init();" );
 
 			writer.WriteLine( "} );" );
+			if( generalData.IsPage() && optionalParameters.Any() )
+				writer.WriteLine(
+					"segmentParameterSpecifier = new Lazy<SegmentParameterSpecifier>( () => { var specifier = new SegmentParameterSpecifier(); specifySegmentParameters( specifier ); return specifier; }, LazyThreadSafetyMode.None );" );
 			writer.WriteLine( "}" );
 
 			writeInitParametersMethod( writer, generalData, requiredParameters, optionalParameters, includeEsParameter, isEs, constructorParameters );

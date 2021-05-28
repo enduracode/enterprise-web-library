@@ -148,6 +148,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				"",
 				Enumerable.Empty<VariableSpecification>().Materialize(),
 				Enumerable.Empty<VariableSpecification>().Materialize(),
+				p => "true",
 				false );
 			writer.WriteLine(
 				"protected override IEnumerable<UrlPattern> getChildUrlPatterns() => {0};".FormatWith(

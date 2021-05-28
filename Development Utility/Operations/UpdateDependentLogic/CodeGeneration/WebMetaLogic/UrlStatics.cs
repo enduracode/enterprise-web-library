@@ -32,6 +32,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			}
 			foreach( var i in optionalParameters ) {
 				writer.WriteLine( "private readonly {0} {1};".FormatWith( getSpecifiableParameterType( i ), i.Name ) );
+				writer.WriteLine( "private readonly bool {0}IsSegmentParameter;".FormatWith( i.Name ) );
 				writer.WriteLine( "private bool {0}Accessed;".FormatWith( i.Name ) );
 			}
 			if( includeVersionString ) {
@@ -45,7 +46,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 							", ",
 							( entitySetup != null ? "{0} entitySetup".FormatWith( entitySetup.GeneralData.ClassName ).ToCollection() : Enumerable.Empty<string>() )
 							.Concat( requiredParameters.Select( i => i.TypeName + " " + i.Name ) )
-							.Concat( optionalParameters.Select( i => getSpecifiableParameterType( i ) + " " + i.Name ) )
+							.Concat(
+								optionalParameters.SelectMany(
+									i => new[] { getSpecifiableParameterType( i ) + " " + i.Name, "bool {0}IsSegmentParameter".FormatWith( i.Name ) } ) )
 							.Concat( includeVersionString ? "string versionString".ToCollection() : Enumerable.Empty<string>() ) )
 						.Surround( " ", " " ) ) );
 			if( entitySetup != null ) {
@@ -54,8 +57,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 					"entitySetupEncoder = new Lazy<{0}.UrlEncoder>( () => ({0}.UrlEncoder)( (UrlHandler)entitySetup ).GetEncoder(), LazyThreadSafetyMode.None );"
 						.FormatWith( entitySetup.GeneralData.ClassName ) );
 			}
-			foreach( var i in requiredParameters.Concat( optionalParameters ) )
+			foreach( var i in requiredParameters )
 				writer.WriteLine( "this.{0} = {0};".FormatWith( i.Name ) );
+			foreach( var i in optionalParameters ) {
+				writer.WriteLine( "this.{0} = {0};".FormatWith( i.Name ) );
+				writer.WriteLine( "this.{0}IsSegmentParameter = {0}IsSegmentParameter;".FormatWith( i.Name ) );
+			}
 			if( includeVersionString )
 				writer.WriteLine( "this.versionString = versionString;" );
 			writer.WriteLine( "}" );
@@ -84,10 +91,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			foreach( var i in optionalParameters ) {
 				writer.WriteLine( "public bool {0}IsPresent => {1} != null;".FormatWith( i.PropertyName, i.Name ) );
 
-				writer.WriteLine( "public {0} Get{1}() {{".FormatWith( i.TypeName, i.PropertyName ) );
+				writer.WriteLine( "public ( {0} value, bool isSegmentParameter ) Get{1}() {{".FormatWith( i.TypeName, i.PropertyName ) );
 				writer.WriteLine( "if( !{0}IsPresent ) throw new ApplicationException( \"The parameter is not present.\" );".FormatWith( i.PropertyName ) );
 				writer.WriteLine( "{0}Accessed = true;".FormatWith( i.Name ) );
-				writer.WriteLine( "return {0}{1};".FormatWith( i.Name, getSpecifiableParameterValueSelector( i ) ) );
+				writer.WriteLine( "return ( {0}{1}, {0}IsSegmentParameter );".FormatWith( i.Name, getSpecifiableParameterValueSelector( i ) ) );
 				writer.WriteLine( "}" );
 			}
 			if( includeVersionString ) {
@@ -106,10 +113,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				writer.WriteLine(
 					"if( !entitySetupMatched ) parameters.AddRange( ( (EnterpriseWebFramework.UrlEncoder)entitySetupEncoder.Value ).GetRemainingParameters() );" );
 			foreach( var i in requiredParameters )
-				writer.WriteLine( "if( !{0}Accessed ) parameters.Add( ( \"{0}\", {1}, false ) );".FormatWith( i.Name, i.GetUrlSerializationExpression( i.Name ) ) );
+				writer.WriteLine( "if( !{0}Accessed ) parameters.Add( ( \"{0}\", {1}, true ) );".FormatWith( i.Name, i.GetUrlSerializationExpression( i.Name ) ) );
 			foreach( var i in optionalParameters )
 				writer.WriteLine(
-					"if( {0}IsPresent && !{1}Accessed ) parameters.Add( ( \"{1}\", {1}{2}, false ) );".FormatWith(
+					"if( {0}IsPresent && !{1}Accessed ) parameters.Add( ( \"{1}\", {1}{2}, {1}IsSegmentParameter ) );".FormatWith(
 						i.PropertyName,
 						i.Name,
 						i.GetUrlSerializationExpression( getSpecifiableParameterValueSelector( i ) ) ) );
@@ -367,7 +374,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 
 		internal static void GenerateGetEncoderMethod(
 			TextWriter writer, string entitySetupFieldName, IReadOnlyCollection<VariableSpecification> requiredParameters,
-			IReadOnlyCollection<VariableSpecification> optionalParameters, bool includeVersionString ) {
+			IReadOnlyCollection<VariableSpecification> optionalParameters, Func<VariableSpecification, string> isSegmentParameterExpressionGetter,
+			bool includeVersionString ) {
 			writer.WriteLine(
 				"protected override EnterpriseWebFramework.UrlEncoder getUrlEncoder() => new UrlEncoder({0});".FormatWith(
 					StringTools.ConcatenateWithDelimiter(
@@ -375,18 +383,20 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 							( entitySetupFieldName.Any() ? entitySetupFieldName.ToCollection() : Enumerable.Empty<string>() )
 							.Concat( requiredParameters.Select( i => i.PropertyName ) )
 							.Concat(
-								optionalParameters.Select(
+								optionalParameters.SelectMany(
 									i => {
 										// If a default was specified for the parameter and the default matches the value of our parameter, don't include it.
 										// If a default was not specified and the value of our parameter is the default value of the type, don't include it.
 										var defaultParameterReference = WebItemGeneralData.ParameterDefaultsFieldName + "." + i.PropertyName;
-										return "( {0} && {1} ) || ( !{0} && {2} ) ? null : {3}".FormatWith(
+										var value = "( {0} && {1} ) || ( !{0} && {2} ) ? null : {3}".FormatWith(
 											WebItemGeneralData.ParameterDefaultsFieldName + "." + OptionalParameterPackageStatics.GetWasSpecifiedPropertyName( i ),
 											i.IsEnumerable
 												? defaultParameterReference + ".SequenceEqual( " + i.PropertyName + " )"
 												: defaultParameterReference + " == " + i.PropertyName,
 											i.IsEnumerable ? "!" + i.PropertyName + ".Any()" : i.PropertyName + " == " + ( i.IsString ? "\"\"" : "default(" + i.TypeName + ")" ),
 											i.IsString || i.IsEnumerable ? i.PropertyName : "new SpecifiedValue<{0}>( {1} )".FormatWith( i.TypeName, i.PropertyName ) );
+
+										return new[] { value, isSegmentParameterExpressionGetter( i ) };
 									} ) )
 							.Concat( includeVersionString ? "getUrlVersionString()".ToCollection() : Enumerable.Empty<string>() ) )
 						.Surround( " ", " " ) ) );
