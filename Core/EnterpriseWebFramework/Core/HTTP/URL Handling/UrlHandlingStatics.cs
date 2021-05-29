@@ -62,7 +62,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			if( query == null )
 				query = generateQuery( parameters.queryParameters );
 
-			var baseUrlString = baseUrl.BaseUrl.GetUrlString( secure );
+			var baseUrlString = baseUrl.BaseUrl.CompleteWithDefaults( EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl ).GetUrlString( secure );
 			var path = generatePath( baseUrlParameters, segments );
 			var appRelativeUrl = generateAppRelativeUrl( path, query );
 
