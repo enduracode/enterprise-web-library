@@ -20,13 +20,8 @@
 		/// <param name="disableAuthorizationCheck">Pass true to allow a URL to be returned that the authenticated user cannot access. Use with caution. Might be
 		/// useful if you are adding the URL to an email message or otherwise displaying it outside the application.</param>
 		/// <returns></returns>
-		public string GetUrl( bool disableAuthorizationCheck = false ) {
-			// App relative URLs can be a problem when stored in returnUrl query parameters or otherwise stored across requests since a stored resource might have a
-			// different security level than the current resource, and when redirecting to the stored resource we wouldn't switch. Therefore we always use absolute
-			// URLs.
-			return GetUrl( !disableAuthorizationCheck, true, true );
-		}
+		public string GetUrl( bool disableAuthorizationCheck = false ) => GetUrl( !disableAuthorizationCheck, true );
 
-		internal abstract string GetUrl( bool ensureUserCanAccessResource, bool ensureResourceNotDisabled, bool makeAbsolute );
+		internal abstract string GetUrl( bool ensureUserCanAccessResource, bool ensureResourceNotDisabled );
 	}
 }

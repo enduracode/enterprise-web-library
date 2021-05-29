@@ -54,7 +54,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			// transfer to the log-in page, etc.
 			var requestUrls = new List<string> { AppRequestState.Instance.Url };
 			if( PageBase.Current != null )
-				requestUrls.Add( PageBase.Current.GetUrl( false, false, true ) );
+				requestUrls.Add( PageBase.Current.GetUrl( false, false ) );
 			foreach( var url in requestUrls ) {
 				var uri = new Uri( url );
 				if( domain.Any() && !( "." + uri.Host ).EndsWith( "." + domain ) )

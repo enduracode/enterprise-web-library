@@ -221,7 +221,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return null;
 		}
 
-		internal sealed override string GetUrl( bool ensureUserCanAccessResource, bool ensureResourceNotDisabled, bool makeAbsolute ) {
+		internal sealed override string GetUrl( bool ensureUserCanAccessResource, bool ensureResourceNotDisabled ) {
 			string getCanonicalUrl() => UrlHandlingStatics.GetCanonicalUrl( this, ShouldBeSecureGivenCurrentRequest );
 			var url = ( EwfApp.Instance != null && EwfApp.Instance.RequestState != null
 				            ? EwfApp.Instance.RequestState.ExecuteWithUserDisabled( getCanonicalUrl )
@@ -277,7 +277,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		void BasicUrlHandler.HandleRequest( HttpContext context ) => HandleRequest( context, false );
 
 		internal void HandleRequest( HttpContext context, bool requestTransferred ) {
-			var canonicalUrl = GetUrl( false, false, true );
+			var canonicalUrl = GetUrl( false, false );
 			if( requestTransferred ) {
 				if( ShouldBeSecureGivenCurrentRequest != EwfApp.Instance.RequestIsSecure( context.Request ) )
 					throw new ApplicationException( "{0} has a connection security setting that is incompatible with the current request.".FormatWith( canonicalUrl ) );

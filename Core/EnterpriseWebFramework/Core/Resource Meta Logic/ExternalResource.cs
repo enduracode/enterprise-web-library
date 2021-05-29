@@ -15,12 +15,10 @@
 		public override bool UserCanAccessResource => true;
 		public override AlternativeResourceMode AlternativeMode => null;
 
-		internal override string GetUrl( bool ensureUserCanAccessResource, bool ensureResourceNotDisabled, bool makeAbsolute ) =>
-			makeAbsolute
-				? url.Replace(
-					"~",
-					EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString(
-						ConnectionSecurity.SecureIfPossible.ShouldBeSecureGivenCurrentRequest( false ) ) )
-				: url;
+		internal override string GetUrl( bool ensureUserCanAccessResource, bool ensureResourceNotDisabled ) =>
+			url.Replace(
+				"~",
+				EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString(
+					ConnectionSecurity.SecureIfPossible.ShouldBeSecureGivenCurrentRequest( false ) ) );
 	}
 }

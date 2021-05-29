@@ -35,7 +35,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			this.destination = destination;
 			Classes = destination?.AlternativeMode is NewContentResourceMode ? ActionComponentCssElementCreator.NewContentClass : ElementClassSet.Empty;
 
-			Url = new Lazy<string>( () => destination != null ? destination.GetUrl( true, false, true ) : "" );
+			Url = new Lazy<string>( () => destination != null ? destination.GetUrl( true, false ) : "" );
 			var isPostBackHyperlink = new Lazy<bool>(
 				() => destination != null && !( destination.AlternativeMode is DisabledResourceMode ) && !target.Any() && PageBase.Current.IsAutoDataUpdater.Value );
 			AttributeGetter = forNonHyperlinkElement =>
