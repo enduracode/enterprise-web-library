@@ -16,10 +16,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.ErrorPages {
 				new Paragraph( Translation.AccessIsDenied.ToComponents() ).Concat(
 						ShowHomeLink
 							? new Paragraph(
-									new EwfHyperlink(
-										new ExternalResource( NetTools.HomeUrl ),
-										new StandardHyperlinkStyle( Translation.ClickHereToGoToHomePage ) ).ToCollection() )
-								.ToCollection()
+								new EwfHyperlink(
+									new ExternalResource(
+										EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString(
+											ConnectionSecurity.SecureIfPossible.ShouldBeSecureGivenCurrentRequest( false ) ) ),
+									new StandardHyperlinkStyle( Translation.ClickHereToGoToHomePage ) ).ToCollection() ).ToCollection()
 							: Enumerable.Empty<FlowComponent>() )
 					.Materialize() );
 

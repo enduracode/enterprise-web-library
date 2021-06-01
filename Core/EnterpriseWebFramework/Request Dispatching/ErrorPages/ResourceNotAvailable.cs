@@ -23,7 +23,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.ErrorPages {
 			HttpContext.Current.Response.TrySkipIisCustomErrors = true;
 
 			if( ShowHomeLink )
-				StandardLibrarySessionState.Instance.SetTimedClientSideNavigation( NetTools.HomeUrl, 5 );
+				StandardLibrarySessionState.Instance.SetTimedClientSideNavigation(
+					EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString(
+						ConnectionSecurity.SecureIfPossible.ShouldBeSecureGivenCurrentRequest( false ) ),
+					5 );
 
 			return content;
 		}
