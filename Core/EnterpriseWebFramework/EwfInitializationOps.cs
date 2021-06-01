@@ -155,7 +155,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 													       postBack: PostBack.CreateFull(
 														       id: "ewfEndImpersonation",
 														       modificationMethod: UserImpersonationStatics.EndImpersonation,
-														       actionGetter: () => new PostBackAction( new ExternalResource( NetTools.HomeUrl ) ) ) ) ) )
+														       actionGetter: () => new PostBackAction(
+															       new ExternalResource(
+																       EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString(
+																	       EwfConfigurationStatics.AppSupportsSecureConnections ) ) ) ) ) ) )
 										       .Materialize() );
 							} );
 						EwfUiStatics.Init( getProviderGetter<AppEwfUiProvider>( "EwfUi" ) );

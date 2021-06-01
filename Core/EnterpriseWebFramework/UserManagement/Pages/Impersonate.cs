@@ -75,7 +75,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 			var user = new DataValue<User>();
 			var pb = PostBack.CreateFull(
 				modificationMethod: () => UserImpersonationStatics.BeginImpersonation( user.Value ),
-				actionGetter: () => new PostBackAction( new ExternalResource( ReturnUrl.Any() ? ReturnUrl : NetTools.HomeUrl ) ) );
+				actionGetter: () => new PostBackAction(
+					new ExternalResource(
+						ReturnUrl.Any()
+							? ReturnUrl
+							: EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString( EwfConfigurationStatics.AppSupportsSecureConnections ) ) ) );
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				pb.ToCollection(),
 				() => {
