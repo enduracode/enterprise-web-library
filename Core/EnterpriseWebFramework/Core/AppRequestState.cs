@@ -35,7 +35,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly Instant beginInstant;
 		private readonly string url;
 		private readonly string baseUrl;
-		private readonly bool homeUrlRequest = HttpContext.Current.Request.AppRelativeCurrentExecutionFilePath == NetTools.HomeUrl;
+		private readonly bool homeUrlRequest = HttpContext.Current.Request.AppRelativeCurrentExecutionFilePath == "~/";
 
 		private readonly DataAccessState dataAccessState;
 		private bool primaryDatabaseConnectionInitialized;

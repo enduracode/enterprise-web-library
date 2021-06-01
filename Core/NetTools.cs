@@ -12,11 +12,6 @@ namespace EnterpriseWebLibrary {
 	/// </summary>
 	public static class NetTools {
 		/// <summary>
-		/// EWL use only.
-		/// </summary>
-		public const string HomeUrl = "~/";
-
-		/// <summary>
 		/// Encodes the given text as HTML, replacing instances of \n with &lt;br/&gt; and optionally replacing the empty string with a non-breaking space.
 		/// </summary>
 		public static string GetTextAsEncodedHtml( this string text, bool returnNonBreakingSpaceIfEmpty = true ) {
