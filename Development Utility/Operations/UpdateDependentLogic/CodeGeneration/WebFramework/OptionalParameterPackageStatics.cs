@@ -16,8 +16,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 				writer.WriteLine( "public readonly {0} {1};".FormatWith( i.TypeName, i.PropertyName ) );
 			writer.WriteLine( "public readonly OptionalParameters OptionalParameters;" );
 			writer.WriteLine(
-				"public Parameters( {0}, OptionalParameters optionalParameters ) {{".FormatWith(
-					StringTools.ConcatenateWithDelimiter( ", ", requiredParameters.Select( i => i.TypeName + " " + i.Name ) ) ) );
+				"public Parameters( {0} ) {{".FormatWith(
+					StringTools.ConcatenateWithDelimiter( ", ", requiredParameters.Select( i => i.TypeName + " " + i.Name ) ).AppendDelimiter( ", " ) +
+					"OptionalParameters optionalParameters" ) );
 			foreach( var i in requiredParameters )
 				writer.WriteLine( "{0} = {1};".FormatWith( i.PropertyName, i.Name ) );
 			writer.WriteLine( "OptionalParameters = optionalParameters;" );

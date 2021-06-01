@@ -95,8 +95,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 							writer,
 							EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.CoreProjectName ),
 							"EnterpriseWebLibrary",
-							generatedCodeFolderName,
 							true,
+							generatedCodeFolderName,
 							StaticFile.FrameworkStaticFilesSourceFolderPath,
 							"" );
 					} );
@@ -236,8 +236,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					writer,
 					installation.DevelopmentInstallationLogic.LibraryPath,
 					installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName,
+					false,
 					generatedCodeFolderName,
-					null,
 					null,
 					null );
 			}
@@ -415,8 +415,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					writer,
 					application.Path,
 					project.NamespaceAndAssemblyName,
-					generatedCodeFolderName,
 					false,
+					generatedCodeFolderName,
 					StaticFile.AppStaticFilesFolderName,
 					"RequestDispatchingStatics.AppProvider.GetFrameworkUrlParent()" );
 			}

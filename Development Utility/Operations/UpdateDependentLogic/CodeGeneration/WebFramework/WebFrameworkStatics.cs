@@ -9,21 +9,21 @@ using Tewl.Tools;
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework {
 	internal static class WebFrameworkStatics {
 		internal static void Generate(
-			TextWriter writer, string projectPath, string projectNamespace, string generatedCodeFolderPath, bool? staticFilesFolderIsInFramework,
+			TextWriter writer, string projectPath, string projectNamespace, bool projectContainsFramework, string generatedCodeFolderPath,
 			string staticFilesFolderPath, string staticFilesFolderUrlParentExpression ) {
 			generateForFolder(
 				writer,
 				projectPath,
 				projectNamespace,
+				projectContainsFramework,
 				generatedCodeFolderPath,
-				staticFilesFolderIsInFramework,
 				staticFilesFolderPath,
 				staticFilesFolderUrlParentExpression,
 				"" );
 		}
 
 		private static void generateForFolder(
-			TextWriter writer, string projectPath, string projectNamespace, string generatedCodeFolderPath, bool? staticFilesFolderIsInFramework,
+			TextWriter writer, string projectPath, string projectNamespace, bool projectContainsFramework, string generatedCodeFolderPath,
 			string staticFilesFolderPath, string staticFilesFolderUrlParentExpression, string folderPathRelativeToProject ) {
 			if( folderPathRelativeToProject == generatedCodeFolderPath )
 				return;
@@ -33,7 +33,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 					writer,
 					projectPath,
 					projectNamespace,
-					staticFilesFolderIsInFramework.Value,
+					projectContainsFramework,
 					null,
 					folderPathRelativeToProject,
 					staticFilesFolderUrlParentExpression );
@@ -52,7 +52,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 			EntitySetup entitySetup = null;
 			if( entitySetupFileName.Length > 0 ) {
 				var filePathRelativeToProject = Path.Combine( folderPathRelativeToProject, entitySetupFileName );
-				entitySetup = new EntitySetup( new WebItemGeneralData( projectPath, projectNamespace, filePathRelativeToProject, false ) );
+				entitySetup = new EntitySetup( projectContainsFramework, new WebItemGeneralData( projectPath, projectNamespace, filePathRelativeToProject, false ) );
 				entitySetup.GenerateCode( writer );
 			}
 
@@ -75,8 +75,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 					writer,
 					projectPath,
 					projectNamespace,
+					projectContainsFramework,
 					generatedCodeFolderPath,
-					staticFilesFolderIsInFramework,
 					staticFilesFolderPath,
 					staticFilesFolderUrlParentExpression,
 					subFolderPath );

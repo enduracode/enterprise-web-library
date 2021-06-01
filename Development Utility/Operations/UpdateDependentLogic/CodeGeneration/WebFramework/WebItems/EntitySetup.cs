@@ -5,11 +5,13 @@ using Humanizer;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework.WebItems {
 	internal class EntitySetup {
+		private readonly bool projectContainsFramework;
 		private readonly WebItemGeneralData generalData;
 		private readonly List<VariableSpecification> requiredParameters;
 		private readonly List<VariableSpecification> optionalParameters;
 
-		internal EntitySetup( WebItemGeneralData generalData ) {
+		internal EntitySetup( bool projectContainsFramework, WebItemGeneralData generalData ) {
+			this.projectContainsFramework = projectContainsFramework;
 			this.generalData = generalData;
 			requiredParameters = generalData.ReadParametersFromCode( false );
 			optionalParameters = generalData.ReadParametersFromCode( true );
@@ -33,14 +35,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 				writer.WriteLine( "internal ParametersModification parametersModification;" );
 			InfoStatics.WriteConstructorAndHelperMethods( writer, generalData, requiredParameters, optionalParameters, false, true );
 			if( requiredParameters.Any() || optionalParameters.Any() ) {
-				writer.WriteLine( "protected internal override void InitParametersModification() {" );
+				writer.WriteLine( "{0} override void InitParametersModification() {{".FormatWith( projectContainsFramework ? "protected internal" : "protected" ) );
 				writer.WriteLine( "parametersModification = new ParametersModification();" );
 				foreach( var i in requiredParameters.Concat( optionalParameters ) )
 					writer.WriteLine( "parametersModification.{0} = {0};".FormatWith( i.PropertyName ) );
 				writer.WriteLine( "}" );
 			}
 			else
-				writer.WriteLine( "protected internal override void InitParametersModification() {}" );
+				writer.WriteLine( "{0} override void InitParametersModification() {{}}".FormatWith( projectContainsFramework ? "protected internal" : "protected" ) );
 			UrlStatics.GenerateGetEncoderMethod( writer, "", requiredParameters, optionalParameters, p => "true", false );
 			WebFrameworkStatics.WriteReCreateFromNewParameterValuesMethod(
 				writer,
