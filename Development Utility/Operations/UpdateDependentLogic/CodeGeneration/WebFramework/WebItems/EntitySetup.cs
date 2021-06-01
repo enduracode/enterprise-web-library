@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using Humanizer;
 
-namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic.WebItems {
+namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework.WebItems {
 	internal class EntitySetup {
 		private readonly WebItemGeneralData generalData;
 		private readonly List<VariableSpecification> requiredParameters;
@@ -42,7 +42,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			else
 				writer.WriteLine( "protected internal override void InitParametersModification() {}" );
 			UrlStatics.GenerateGetEncoderMethod( writer, "", requiredParameters, optionalParameters, p => "true", false );
-			WebMetaLogicStatics.WriteReCreateFromNewParameterValuesMethod(
+			WebFrameworkStatics.WriteReCreateFromNewParameterValuesMethod(
 				writer,
 				requiredParameters,
 				"internal {0} ".FormatWith( generalData.ClassName ),

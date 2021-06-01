@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic.WebItems;
+using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework.WebItems;
 using Humanizer;
 using Tewl.Tools;
 
-namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic {
+namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework {
 	internal static class UrlStatics {
 		internal static void GenerateUrlClasses(
 			TextWriter writer, string className, EntitySetup entitySetup, IReadOnlyCollection<VariableSpecification> requiredParameters,

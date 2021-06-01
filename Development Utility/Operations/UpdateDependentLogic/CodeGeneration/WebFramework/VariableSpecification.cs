@@ -9,7 +9,7 @@ using EnterpriseWebLibrary.InstallationSupportUtility;
 using Microsoft.CSharp;
 using Tewl.Tools;
 
-namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic {
+namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework {
 	/// <summary>
 	/// The specification for a parameter or a page state variable.
 	/// </summary>

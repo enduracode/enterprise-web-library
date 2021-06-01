@@ -7,7 +7,7 @@ using EnterpriseWebLibrary.InstallationSupportUtility;
 using Humanizer;
 using Tewl.Tools;
 
-namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic {
+namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework {
 	internal class WebItemGeneralData {
 		internal const string ParameterDefaultsFieldName = "__parameterDefaults";
 

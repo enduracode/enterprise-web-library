@@ -4,14 +4,14 @@ using System.Linq;
 using Humanizer;
 using Tewl.Tools;
 
-namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic.WebItems {
-	internal class Page {
+namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework.WebItems {
+	internal class Resource {
 		private readonly WebItemGeneralData generalData;
 		private readonly EntitySetup entitySetup;
 		private readonly List<VariableSpecification> requiredParameters;
 		private readonly List<VariableSpecification> optionalParameters;
 
-		internal Page( WebItemGeneralData generalData, EntitySetup entitySetup ) {
+		internal Resource( WebItemGeneralData generalData, EntitySetup entitySetup ) {
 			this.generalData = generalData;
 			this.entitySetup = entitySetup;
 			requiredParameters = generalData.ReadParametersFromCode( false );
@@ -82,7 +82,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 						InfoStatics.GetInfoConstructorArgumentsForRequiredParameters( requiredParameters, parameter => parameter.PropertyName ),
 						"uriFragmentIdentifier: uriFragmentIdentifier" ) ) );
 			if( generalData.IsPage() )
-				WebMetaLogicStatics.WriteReCreateFromNewParameterValuesMethod(
+				WebFrameworkStatics.WriteReCreateFromNewParameterValuesMethod(
 					writer,
 					requiredParameters,
 					"protected override PageBase ",
@@ -118,8 +118,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			writer.WriteLine(
 				"public static {0} GetInfo( ".FormatWith( generalData.ClassName ) + StringTools.ConcatenateWithDelimiter(
 					", ",
-					entitySetup != null ? WebMetaLogicStatics.GetParameterDeclarations( entitySetup.RequiredParameters ) : "",
-					WebMetaLogicStatics.GetParameterDeclarations( requiredParameters ),
+					entitySetup != null ? WebFrameworkStatics.GetParameterDeclarations( entitySetup.RequiredParameters ) : "",
+					WebFrameworkStatics.GetParameterDeclarations( requiredParameters ),
 					entitySetup != null && entitySetup.OptionalParameters.Count > 0
 						? "Action<EntitySetup.OptionalParameterSpecifier, EntitySetup.Parameters> entitySetupOptionalParameterSetter = null"
 						: "",

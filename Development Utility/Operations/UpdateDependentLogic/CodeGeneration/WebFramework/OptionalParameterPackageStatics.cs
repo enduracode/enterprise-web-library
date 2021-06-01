@@ -4,7 +4,7 @@ using System.Linq;
 using Humanizer;
 using Tewl.Tools;
 
-namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic {
+namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework {
 	internal static class OptionalParameterPackageStatics {
 		internal static void WriteClassIfNecessary(
 			TextWriter writer, IReadOnlyCollection<VariableSpecification> requiredParameters, IReadOnlyCollection<VariableSpecification> optionalParameters ) {

@@ -1,13 +1,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic.WebItems;
+using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework.WebItems;
 using Humanizer;
 using Tewl.IO;
 using Tewl.Tools;
 
-namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic {
-	internal static class WebMetaLogicStatics {
+namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework {
+	internal static class WebFrameworkStatics {
 		internal static void Generate(
 			TextWriter writer, string projectPath, string projectNamespace, string generatedCodeFolderPath, bool? staticFilesFolderIsInFramework,
 			string staticFilesFolderPath, string staticFilesFolderUrlParentExpression ) {
@@ -63,7 +63,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 				var generalData = new WebItemGeneralData( projectPath, projectNamespace, EwlStatics.CombinePaths( folderPathRelativeToProject, fileName ), false );
 				if( !generalData.IsResource() && !generalData.IsPage() && !generalData.IsAutoCompleteService() )
 					continue;
-				new Page( generalData, entitySetup ).GenerateCode( writer );
+				new Resource( generalData, entitySetup ).GenerateCode( writer );
 			}
 
 			// Delve into sub folders.

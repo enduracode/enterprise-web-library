@@ -91,7 +91,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						writer.WriteLine( "}" );
 						writer.WriteLine( "}" );
 						writer.WriteLine();
-						CodeGeneration.WebMetaLogic.WebMetaLogicStatics.Generate(
+						CodeGeneration.WebFramework.WebFrameworkStatics.Generate(
 							writer,
 							EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.CoreProjectName ),
 							"EnterpriseWebLibrary",
@@ -232,7 +232,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				}
 
 				writer.WriteLine();
-				CodeGeneration.WebMetaLogic.WebMetaLogicStatics.Generate(
+				CodeGeneration.WebFramework.WebFrameworkStatics.Generate(
 					writer,
 					installation.DevelopmentInstallationLogic.LibraryPath,
 					installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName,
@@ -411,7 +411,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine();
 				writeAssemblyInfo( writer, installation, project.name );
 				writer.WriteLine();
-				CodeGeneration.WebMetaLogic.WebMetaLogicStatics.Generate(
+				CodeGeneration.WebFramework.WebFrameworkStatics.Generate(
 					writer,
 					application.Path,
 					project.NamespaceAndAssemblyName,

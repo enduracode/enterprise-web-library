@@ -5,7 +5,7 @@ using System.Linq;
 using Humanizer;
 using Tewl.Tools;
 
-namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebMetaLogic {
+namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework {
 	internal static class InfoStatics {
 		internal static void WriteSpecifyParameterDefaultsMethod( TextWriter writer, IReadOnlyCollection<VariableSpecification> optionalParameters ) {
 			if( !optionalParameters.Any() )
@@ -48,7 +48,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebM
 			var constructorParameters = "( " + StringTools.ConcatenateWithDelimiter(
 				                            ", ",
 				                            includeEsParameter ? "EntitySetup es" : "",
-				                            WebMetaLogicStatics.GetParameterDeclarations( requiredParameters ),
+				                            WebFrameworkStatics.GetParameterDeclarations( requiredParameters ),
 				                            optionalParameters.Count > 0 ? "Action<OptionalParameterSpecifier, Parameters> optionalParameterSetter = null" : "",
 				                            !isEs ? "string uriFragmentIdentifier = \"\"" : "" ) + " ) {";
 			writer.WriteLine( "internal {0}".FormatWith( generalData.ClassName ) + constructorParameters );
