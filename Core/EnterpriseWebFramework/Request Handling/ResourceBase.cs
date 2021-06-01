@@ -26,6 +26,23 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return pathString;
 		}
 
+		internal static void WriteRedirectResponse( HttpContext context, string url, bool permanent ) {
+			context.Response.StatusCode = permanent ? 308 : 307;
+
+			if( context.Request.HttpMethod == "GET" || context.Request.HttpMethod == "HEAD" )
+				EwfSafeResponseWriter.AddCacheControlHeader(
+					context.Response,
+					EwfApp.Instance.RequestIsSecure( context.Request ),
+					false,
+					permanent ? (bool?)null : false );
+
+			EwfResponse.Create(
+					ContentTypes.PlainText,
+					new EwfResponseBodyCreator( writer => writer.Write( "{0} Redirect: {1}".FormatWith( permanent ? "Permanent" : "Temporary", url ) ) ),
+					additionalHeaderFieldGetter: () => ( "Location", url ).ToCollection() )
+				.WriteToAspNetResponse( context.Response, omitBody: context.Request.HttpMethod == "HEAD" );
+		}
+
 		internal static void Init( Action<bool, ResourceBase> urlHandlerStateUpdater, Func<ResourceBase> currentResourceGetter ) {
 			ResourceBase.urlHandlerStateUpdater = urlHandlerStateUpdater;
 			ResourceBase.currentResourceGetter = currentResourceGetter;
@@ -297,7 +314,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				if( canonicalUrl != AppRequestState.Instance.Url ) {
 					if( !ShouldBeSecureGivenCurrentRequest && EwfApp.Instance.RequestIsSecure( context.Request ) )
 						context.Response.AppendHeader( "Strict-Transport-Security", "max-age=0" );
-					writeRedirectResponse( context, canonicalUrl, true );
+					WriteRedirectResponse( context, canonicalUrl, true );
 					return;
 				}
 			}
@@ -322,7 +339,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			if( redirect != null ) {
 				if( requestTransferred )
 					throw new ApplicationException( "A redirect is not valid when the request has been transferred." );
-				writeRedirectResponse( context, redirect.Resource.GetUrl(), redirect.IsPermanent );
+				WriteRedirectResponse( context, redirect.Resource.GetUrl(), redirect.IsPermanent );
 				return;
 			}
 
@@ -372,23 +389,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Returns the redirect for the resource, if it is located outside of the application.
 		/// </summary>
 		protected virtual ExternalRedirect getRedirect() => null;
-
-		private void writeRedirectResponse( HttpContext context, string url, bool permanent ) {
-			context.Response.StatusCode = permanent ? 308 : 307;
-
-			if( context.Request.HttpMethod == "GET" || context.Request.HttpMethod == "HEAD" )
-				EwfSafeResponseWriter.AddCacheControlHeader(
-					context.Response,
-					EwfApp.Instance.RequestIsSecure( context.Request ),
-					false,
-					permanent ? (bool?)null : false );
-
-			EwfResponse.Create(
-					ContentTypes.PlainText,
-					new EwfResponseBodyCreator( writer => writer.Write( "{0} Redirect: {1}".FormatWith( permanent ? "Permanent" : "Temporary", url ) ) ),
-					additionalHeaderFieldGetter: () => ( "Location", url ).ToCollection() )
-				.WriteToAspNetResponse( context.Response, omitBody: context.Request.HttpMethod == "HEAD" );
-		}
 
 		/// <summary>
 		/// Returns the handler for a GET or HEAD request.

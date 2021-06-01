@@ -28,13 +28,6 @@ namespace EnterpriseWebLibrary {
 		}
 
 		/// <summary>
-		/// Redirects to the given URL. Throws a ThreadAbortedException. NOTE: Make this internal.
-		/// </summary>
-		public static void Redirect( string url ) {
-			HttpContext.Current.Response.Redirect( url );
-		}
-
-		/// <summary>
 		/// Creates an image with the given text and font and returns a response object.
 		/// Text will be all on one line and will not be wider than 800 pixels or higher than 150 pixels.
 		/// Do not pass null for text. Passing null for font will result in a generic Sans Serif, 10pt font.

@@ -203,9 +203,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			if( absoluteUrl.Scheme == "http" && absoluteUrl.Port == 80 && absoluteUrl.AbsolutePath.StartsWith( "/.well-known/acme-challenge/" ) ) {
 				var systemManager = ConfigurationStatics.MachineConfiguration?.SystemManager;
 				if( systemManager != null )
-					NetTools.Redirect(
+					ResourceBase.WriteRedirectResponse(
+						HttpContext.Current,
 						systemManager.HttpBaseUrl.Replace( "https://", "http://" ) +
-						"/Pages/Public/AcmeChallengeResponse.aspx?Token={0}".FormatWith( HttpUtility.UrlEncode( absoluteUrl.Segments.Last() ) ) );
+						"/Pages/Public/AcmeChallengeResponse.aspx?Token={0}".FormatWith( HttpUtility.UrlEncode( absoluteUrl.Segments.Last() ) ),
+						false );
 			}
 		}
 
