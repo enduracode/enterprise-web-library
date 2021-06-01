@@ -24,8 +24,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.ErrorPages {
 
 			if( ShowHomeLink )
 				StandardLibrarySessionState.Instance.SetTimedClientSideNavigation(
-					EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString(
-						ConnectionSecurity.SecureIfPossible.ShouldBeSecureGivenCurrentRequest( false ) ),
+					EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString( EwfConfigurationStatics.AppSupportsSecureConnections ),
 					5 );
 
 			return content;

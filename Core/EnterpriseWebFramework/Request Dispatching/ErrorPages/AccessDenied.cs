@@ -18,8 +18,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.ErrorPages {
 							? new Paragraph(
 								new EwfHyperlink(
 									new ExternalResource(
-										EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString(
-											ConnectionSecurity.SecureIfPossible.ShouldBeSecureGivenCurrentRequest( false ) ) ),
+										EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString( EwfConfigurationStatics.AppSupportsSecureConnections ) ),
 									new StandardHyperlinkStyle( Translation.ClickHereToGoToHomePage ) ).ToCollection() ).ToCollection()
 							: Enumerable.Empty<FlowComponent>() )
 					.Materialize() );
