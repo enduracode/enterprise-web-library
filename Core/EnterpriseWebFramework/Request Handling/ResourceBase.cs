@@ -250,7 +250,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		protected abstract UrlEncoder getUrlEncoder();
 
-		internal bool ShouldBeSecureGivenCurrentRequest => ConnectionSecurity.ShouldBeSecureGivenCurrentRequest( IsIntermediateInstallationPublicResource );
+		internal bool ShouldBeSecureGivenCurrentRequest {
+			get {
+				// Intermediate installations must be secure because the intermediate user cookie is secure.
+				if( ConfigurationStatics.IsIntermediateInstallation && !IsIntermediateInstallationPublicResource )
+					return true;
+
+				var connectionSecurity = ConnectionSecurity;
+				return connectionSecurity == ConnectionSecurity.MatchingCurrentRequest
+					       ? EwfApp.Instance != null && EwfApp.Instance.RequestState != null && EwfApp.Instance.RequestIsSecure( HttpContext.Current.Request )
+					       : connectionSecurity == ConnectionSecurity.SecureIfPossible && EwfConfigurationStatics.AppSupportsSecureConnections;
+			}
+		}
 
 		/// <summary>
 		/// Gets the desired security setting for requests to the resource.
