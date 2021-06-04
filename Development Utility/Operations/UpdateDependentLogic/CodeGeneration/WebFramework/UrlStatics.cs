@@ -13,7 +13,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 			IReadOnlyCollection<VariableSpecification> optionalParameters, bool includeVersionString ) {
 			generateEncoder( writer, entitySetup, requiredParameters, optionalParameters, includeVersionString );
 			generateDecoder( writer, className, entitySetup, requiredParameters, optionalParameters, includeVersionString );
-			generatePatterns( writer, className, entitySetup, requiredParameters, includeVersionString );
+			generatePatterns( writer, className, entitySetup, requiredParameters, optionalParameters, includeVersionString );
 		}
 
 		private static void generateEncoder(
@@ -285,7 +285,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 		private static string getSpecifiableParameterValueSelector( VariableSpecification p ) => p.IsString || p.IsEnumerable ? "" : ".Value";
 
 		private static void generatePatterns(
-			TextWriter writer, string className, EntitySetup entitySetup, IReadOnlyCollection<VariableSpecification> requiredParameters, bool includeVersionString ) {
+			TextWriter writer, string className, EntitySetup entitySetup, IReadOnlyCollection<VariableSpecification> requiredParameters,
+			IReadOnlyCollection<VariableSpecification> optionalParameters, bool includeVersionString ) {
 			writer.WriteLine( "internal static class UrlPatterns {" );
 
 			CodeGenerationStatics.AddSummaryDocComment(
@@ -293,7 +294,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 				"Creates a literal URL pattern. Segment suggestion: {0}.".FormatWith( className.CamelToEnglish().ToUrlSlug() ) );
 			writer.WriteLine(
 				"public static UrlPattern Literal( {0} ) => new UrlPattern( encoder => {1}, url => {2} );".FormatWith(
-					( entitySetup != null ? "{0} entitySetup, ".FormatWith( entitySetup.GeneralData.ClassName ) : "" ) + "string segment",
+					( entitySetup != null ? "{0} entitySetup, ".FormatWith( entitySetup.GeneralData.ClassName ) : "" ) + "string segment" +
+					getOldParameterNamePatternParameters( requiredParameters.Concat( optionalParameters ) ).PrependDelimiter( ", " ),
 					entitySetup != null
 						? includeVersionString
 							  ?
@@ -307,13 +309,19 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 					entitySetup != null
 						? includeVersionString
 							  ?
-							  "url.HasVersionString( out var components ) && components.segment == segment ? new UrlDecoder( entitySetup, versionString: components.versionString ) : url.Segment == segment ? new UrlDecoder( entitySetup, versionString: \"\" ) : null"
-							  : "url.Segment == segment ? new UrlDecoder( entitySetup ) : null"
+							  "url.HasVersionString( out var components ) && components.segment == segment ? new UrlDecoder( {0}, versionString: components.versionString ) : url.Segment == segment ? new UrlDecoder( {0}, versionString: \"\" ) : null"
+								  .FormatWith(
+									  "entitySetup" + getOldParameterNameDecoderArguments( requiredParameters.Concat( optionalParameters ) )
+										  .PrependDelimiter( ", " ) )
+							  : "url.Segment == segment ? new UrlDecoder( entitySetup{0} ) : null".FormatWith(
+								  getOldParameterNameDecoderArguments( requiredParameters.Concat( optionalParameters ) ).PrependDelimiter( ", " ) )
 						:
 						includeVersionString
 							?
-							"url.HasVersionString( out var components ) && components.segment == segment ? new UrlDecoder( versionString: components.versionString ) : url.Segment == segment ? new UrlDecoder( versionString: \"\" ) : null"
-							: "url.Segment == segment ? new UrlDecoder() : null" ) );
+							"url.HasVersionString( out var components ) && components.segment == segment ? new UrlDecoder( {0}versionString: components.versionString ) : url.Segment == segment ? new UrlDecoder( {0}versionString: \"\" ) : null"
+								.FormatWith( getOldParameterNameDecoderArguments( requiredParameters.Concat( optionalParameters ) ).AppendDelimiter( ", " ) )
+							: "url.Segment == segment ? new UrlDecoder({0}) : null".FormatWith(
+								getOldParameterNameDecoderArguments( requiredParameters.Concat( optionalParameters ) ).Surround( " ", " " ) ) ) );
 
 			if( requiredParameters.Count == 1 ) {
 				var parameter = requiredParameters.Single();
@@ -330,7 +338,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 							StringTools.ConcatenateWithDelimiter(
 									", ",
 									entitySetup != null ? "{0} entitySetup".FormatWith( entitySetup.GeneralData.ClassName ) : "",
-									parameterIsNullable ? "string nullSegment" : "" )
+									parameterIsNullable ? "string nullSegment" : "",
+									getOldParameterNamePatternParameters( optionalParameters ) )
 								.Surround( " ", " " ),
 							entitySetup != null
 								? parameterIsNullable
@@ -348,29 +357,47 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 							entitySetup != null
 								? parameterIsNullable
 									  ?
-									  "url.IsPositiveInt( out var value ) ? new UrlDecoder( entitySetup, {0}: new SpecifiedValue<int?>( value ) ) : url.Segment == nullSegment ? new UrlDecoder( entitySetup, {0}: new SpecifiedValue<int?>( null ) ) : null"
-										  .FormatWith( parameter.Name )
-									  : "url.IsPositiveInt( out var value ) ? new UrlDecoder( entitySetup, {0}: new SpecifiedValue<int>( value ) ) : null"
-										  .FormatWith( parameter.Name )
+									  "url.IsPositiveInt( out var value ) ? new UrlDecoder( entitySetup, {0}: new SpecifiedValue<int?>( value ){1} ) : url.Segment == nullSegment ? new UrlDecoder( entitySetup, {0}: new SpecifiedValue<int?>( null ){1} ) : null"
+										  .FormatWith( parameter.Name, getOldParameterNameDecoderArguments( optionalParameters ) )
+									  : "url.IsPositiveInt( out var value ) ? new UrlDecoder( entitySetup, {0}: new SpecifiedValue<int>( value ){1} ) : null"
+										  .FormatWith( parameter.Name, getOldParameterNameDecoderArguments( optionalParameters ) )
 								:
 								parameterIsNullable
 									?
-									"url.IsPositiveInt( out var value ) ? new UrlDecoder( {0}: new SpecifiedValue<int?>( value ) ) : url.Segment == nullSegment ? new UrlDecoder( {0}: new SpecifiedValue<int?>( null ) ) : null"
-										.FormatWith( parameter.Name )
-									: "url.IsPositiveInt( out var value ) ? new UrlDecoder( {0}: new SpecifiedValue<int>( value ) ) : null".FormatWith( parameter.Name ) ) );
+									"url.IsPositiveInt( out var value ) ? new UrlDecoder( {0}: new SpecifiedValue<int?>( value ){1} ) : url.Segment == nullSegment ? new UrlDecoder( {0}: new SpecifiedValue<int?>( null ){1} ) : null"
+										.FormatWith( parameter.Name, getOldParameterNameDecoderArguments( optionalParameters ) )
+									: "url.IsPositiveInt( out var value ) ? new UrlDecoder( {0}: new SpecifiedValue<int>( value ){1} ) : null".FormatWith(
+										parameter.Name,
+										getOldParameterNameDecoderArguments( optionalParameters ) ) ) );
 				}
 			}
 
 			if( entitySetup == null && requiredParameters.Count == 0 && !includeVersionString ) {
 				CodeGenerationStatics.AddSummaryDocComment( writer, "Creates a base URL pattern that generates the default base URL and accepts any base URL." );
 				writer.WriteLine(
-					"public static BaseUrlPattern BaseUrlPattern() => new BaseUrlPattern( encoder => {0}, url => {1} );".FormatWith(
+					"public static BaseUrlPattern BaseUrlPattern({0}) => new BaseUrlPattern( encoder => {1}, url => {2} );".FormatWith(
+						getOldParameterNamePatternParameters( optionalParameters ).Surround( " ", " " ),
 						"encoder is UrlEncoder local ? new EncodingBaseUrl( new BaseUrl( \"\", null, null, null ) ) : null",
-						"new UrlDecoder()" ) );
+						"new UrlDecoder({0})".FormatWith( getOldParameterNameDecoderArguments( optionalParameters ).Surround( " ", " " ) ) ) );
 			}
 
 			writer.WriteLine( "}" );
 		}
+
+		private static string getOldParameterNamePatternParameters( IEnumerable<VariableSpecification> parameters ) =>
+			StringTools.ConcatenateWithDelimiter( ", ", parameters.Select( i => "IEnumerable<string> {0}OldNames = null".FormatWith( i.Name ) ) );
+
+		private static string getOldParameterNameDecoderArguments( IEnumerable<VariableSpecification> parameters ) =>
+			StringTools.ConcatenateWithDelimiter(
+				", ",
+				parameters.Select(
+					i =>
+						"{0}: {0}OldNames != null ? {0}OldNames.Select( i => url.Parameters.Get( i ) ).Where( i => i != null ).Select( i => {{ try {{ return {1}; }} catch( Exception e ) {{ throw new UnresolvableUrlException( \"Failed to deserialize the {0} parameter.\", e ); }} }} ).FirstOrDefault() : null"
+							.FormatWith(
+								i.Name,
+								i.IsString || i.IsEnumerable
+									? i.GetUrlDeserializationExpression( "i" )
+									: "new SpecifiedValue<{0}>( {1} )".FormatWith( i.TypeName, i.GetUrlDeserializationExpression( "i" ) ) ) ) );
 
 		internal static void GenerateGetEncoderMethod(
 			TextWriter writer, string entitySetupFieldName, IReadOnlyCollection<VariableSpecification> requiredParameters,
