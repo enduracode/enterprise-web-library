@@ -149,59 +149,12 @@
   <ItemGroup>
     <Compile Include="CreateSystem.aspx.cs">
       <DependentUpon>CreateSystem.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="CreateSystem.aspx.designer.cs">
       <DependentUpon>CreateSystem.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Ewf\ContactSupport.aspx.cs">
-      <DependentUpon>ContactSupport.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Ewf\ContactSupport.aspx.designer.cs">
-      <DependentUpon>ContactSupport.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Ewf\CssElementCreator.cs" />
-    <Compile Include="Ewf\ErrorPages\ErrorPageContent.cs" />
-    <Compile Include="Ewf\ErrorPages\PageDisabled.aspx.cs">
-      <DependentUpon>PageDisabled.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Ewf\ErrorPages\PageDisabled.aspx.designer.cs">
-      <DependentUpon>PageDisabled.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Ewf\IntermediateLogIn.aspx.cs">
-      <DependentUpon>IntermediateLogIn.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Ewf\IntermediateLogIn.aspx.designer.cs">
-      <DependentUpon>IntermediateLogIn.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Ewf\MetaLogicFactory.cs" />
-    <Compile Include="Ewf\PreBuiltResponse.aspx.cs">
-      <DependentUpon>PreBuiltResponse.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Ewf\PreBuiltResponse.aspx.designer.cs">
-      <DependentUpon>PreBuiltResponse.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Ewf\UserManagement\ConfirmPasswordReset.aspx.cs">
-      <DependentUpon>ConfirmPasswordReset.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Ewf\UserManagement\ConfirmPasswordReset.aspx.designer.cs">
-      <DependentUpon>ConfirmPasswordReset.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Ewf\UserManagement\SelectUser.aspx.cs">
-      <DependentUpon>SelectUser.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Ewf\UserManagement\SelectUser.aspx.designer.cs">
-      <DependentUpon>SelectUser.aspx</DependentUpon>
-    </Compile>
     <Compile Include="GetSchema.aspx.cs">
       <DependentUpon>GetSchema.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="GetSchema.aspx.designer.cs">
       <DependentUpon>GetSchema.aspx</DependentUpon>
@@ -214,56 +167,48 @@
     <Compile Include="TestController.cs" />
     <Compile Include="TestPages\ActionControls.aspx.cs">
       <DependentUpon>ActionControls.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="TestPages\ActionControls.aspx.designer.cs">
       <DependentUpon>ActionControls.aspx</DependentUpon>
     </Compile>
     <Compile Include="TestPages\Basic\ModalContent.aspx.cs">
       <DependentUpon>ModalContent.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="TestPages\Basic\ModalContent.aspx.designer.cs">
       <DependentUpon>ModalContent.aspx</DependentUpon>
     </Compile>
     <Compile Include="TestPages\BoxDemo.aspx.cs">
       <DependentUpon>BoxDemo.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="TestPages\BoxDemo.aspx.designer.cs">
       <DependentUpon>BoxDemo.aspx</DependentUpon>
     </Compile>
     <Compile Include="TestPages\Charts.aspx.cs">
       <DependentUpon>Charts.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="TestPages\Charts.aspx.designer.cs">
       <DependentUpon>Charts.aspx</DependentUpon>
     </Compile>
     <Compile Include="TestPages\Checkboxes.aspx.cs">
       <DependentUpon>Checkboxes.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="TestPages\Checkboxes.aspx.designer.cs">
       <DependentUpon>Checkboxes.aspx</DependentUpon>
     </Compile>
     <Compile Include="TestPages\CheckboxListDemo.aspx.cs">
       <DependentUpon>CheckboxListDemo.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="TestPages\CheckboxListDemo.aspx.designer.cs">
       <DependentUpon>CheckboxListDemo.aspx</DependentUpon>
     </Compile>
     <Compile Include="TestPages\ComponentLists.aspx.cs">
       <DependentUpon>ComponentLists.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="TestPages\ComponentLists.aspx.designer.cs">
       <DependentUpon>ComponentLists.aspx</DependentUpon>
     </Compile>
     <Compile Include="TestPages\DateAndTimePickers.aspx.cs">
       <DependentUpon>DateAndTimePickers.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="TestPages\DateAndTimePickers.aspx.designer.cs">
       <DependentUpon>DateAndTimePickers.aspx</DependentUpon>
@@ -271,146 +216,94 @@
     <Compile Include="TestPages\EntitySetup.cs" />
     <Compile Include="TestPages\HtmlEditing.aspx.cs">
       <DependentUpon>HtmlEditing.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="TestPages\HtmlEditing.aspx.designer.cs">
       <DependentUpon>HtmlEditing.aspx</DependentUpon>
     </Compile>
     <Compile Include="TestPages\ColumnPrimaryTableDemo.aspx.cs">
       <DependentUpon>ColumnPrimaryTableDemo.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="TestPages\ColumnPrimaryTableDemo.aspx.designer.cs">
       <DependentUpon>ColumnPrimaryTableDemo.aspx</DependentUpon>
     </Compile>
     <Compile Include="TestPages\EwfTableDemo.aspx.cs">
       <DependentUpon>EwfTableDemo.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="TestPages\EwfTableDemo.aspx.designer.cs">
       <DependentUpon>EwfTableDemo.aspx</DependentUpon>
     </Compile>
     <Compile Include="TestPages\GetImage.aspx.cs">
       <DependentUpon>GetImage.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="TestPages\GetImage.aspx.designer.cs">
       <DependentUpon>GetImage.aspx</DependentUpon>
     </Compile>
     <Compile Include="TestPages\IntermediatePostBacks.aspx.cs">
       <DependentUpon>IntermediatePostBacks.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="TestPages\IntermediatePostBacks.aspx.designer.cs">
       <DependentUpon>IntermediatePostBacks.aspx</DependentUpon>
     </Compile>
     <Compile Include="TestPages\MailMerging.aspx.cs">
       <DependentUpon>MailMerging.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="TestPages\MailMerging.aspx.designer.cs">
       <DependentUpon>MailMerging.aspx</DependentUpon>
     </Compile>
     <Compile Include="TestPages\ModalBoxes.aspx.cs">
       <DependentUpon>ModalBoxes.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="TestPages\ModalBoxes.aspx.designer.cs">
       <DependentUpon>ModalBoxes.aspx</DependentUpon>
     </Compile>
     <Compile Include="TestPages\NumberControlDemo.aspx.cs">
       <DependentUpon>NumberControlDemo.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="TestPages\NumberControlDemo.aspx.designer.cs">
       <DependentUpon>NumberControlDemo.aspx</DependentUpon>
     </Compile>
     <Compile Include="TestPages\OmniDemo.aspx.cs">
       <DependentUpon>OmniDemo.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="TestPages\OmniDemo.aspx.designer.cs">
       <DependentUpon>OmniDemo.aspx</DependentUpon>
     </Compile>
     <Compile Include="TestPages\OptionalParameters.aspx.cs">
       <DependentUpon>OptionalParameters.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="TestPages\OptionalParameters.aspx.designer.cs">
       <DependentUpon>OptionalParameters.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Ewf\ErrorPages\AccessDenied.aspx.cs">
-      <DependentUpon>AccessDenied.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Ewf\ErrorPages\AccessDenied.aspx.designer.cs">
-      <DependentUpon>AccessDenied.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Ewf\ErrorPages\PageNotAvailable.aspx.cs">
-      <DependentUpon>PageNotAvailable.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="Ewf\ErrorPages\PageNotAvailable.aspx.designer.cs">
-      <DependentUpon>PageNotAvailable.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Ewf\ErrorPages\UnhandledException.aspx.cs">
-      <SubType>ASPXCodeBehind</SubType>
-      <DependentUpon>UnhandledException.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Ewf\ErrorPages\UnhandledException.aspx.designer.cs">
-      <DependentUpon>UnhandledException.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Ewf\UserManagement\ChangePassword\Page.aspx.cs">
-      <SubType>ASPXCodeBehind</SubType>
-      <DependentUpon>Page.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Ewf\UserManagement\ChangePassword\Page.aspx.designer.cs">
-      <DependentUpon>Page.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Ewf\UserManagement\LogIn.aspx.cs">
-      <SubType>ASPXCodeBehind</SubType>
-      <DependentUpon>LogIn.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Ewf\UserManagement\LogIn.aspx.designer.cs">
-      <DependentUpon>LogIn.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Generated Code\ISU.cs">
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
+    <Compile Include="Generated Code\ISU.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="TestPages\RegexHelper.aspx.cs">
       <DependentUpon>RegexHelper.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="TestPages\RegexHelper.aspx.designer.cs">
       <DependentUpon>RegexHelper.aspx</DependentUpon>
     </Compile>
     <Compile Include="TestPages\SelectListDemo.aspx.cs">
       <DependentUpon>SelectListDemo.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="TestPages\SelectListDemo.aspx.designer.cs">
       <DependentUpon>SelectListDemo.aspx</DependentUpon>
     </Compile>
     <Compile Include="TestPages\StatusMessages.aspx.cs">
       <DependentUpon>StatusMessages.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="TestPages\StatusMessages.aspx.designer.cs">
       <DependentUpon>StatusMessages.aspx</DependentUpon>
     </Compile>
     <Compile Include="TestPages\SubFolder\Details.aspx.cs">
       <DependentUpon>Details.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="TestPages\SubFolder\Details.aspx.designer.cs">
       <DependentUpon>Details.aspx</DependentUpon>
     </Compile>
     <Compile Include="TestPages\SubFolder\Disabled.aspx.cs">
       <DependentUpon>Disabled.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="TestPages\SubFolder\Disabled.aspx.designer.cs">
       <DependentUpon>Disabled.aspx</DependentUpon>
@@ -418,28 +311,24 @@
     <Compile Include="TestPages\SubFolder\EntitySetup.cs" />
     <Compile Include="TestPages\SubFolder\General.aspx.cs">
       <DependentUpon>General.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="TestPages\SubFolder\General.aspx.designer.cs">
       <DependentUpon>General.aspx</DependentUpon>
     </Compile>
     <Compile Include="TestPages\SubFolder\New.aspx.cs">
       <DependentUpon>New.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="TestPages\SubFolder\New.aspx.designer.cs">
       <DependentUpon>New.aspx</DependentUpon>
     </Compile>
     <Compile Include="TestPages\TestService.aspx.cs">
       <DependentUpon>TestService.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="TestPages\TestService.aspx.designer.cs">
       <DependentUpon>TestService.aspx</DependentUpon>
     </Compile>
     <Compile Include="TestPages\TextControlDemo.aspx.cs">
       <DependentUpon>TextControlDemo.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="TestPages\TextControlDemo.aspx.designer.cs">
       <DependentUpon>TextControlDemo.aspx</DependentUpon>
@@ -447,42 +336,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="CreateSystem.aspx" />
-    <Content Include="Ewf\ContactSupport.aspx" />
-    <Content Include="Ewf\ErrorPages\PageDisabled.aspx" />
-    <Content Include="Ewf\Modernizr.js" />
-    <Content Include="Ewf\PreBuiltResponse.aspx" />
-    <Content Include="Ewf\Styles\Basic.css" />
-    <Content Include="Ewf\Styles\EwfUi\Colors.css" />
-    <Content Include="Ewf\Styles\EwfUi\Fonts.css" />
-    <Content Include="Ewf\Styles\EwfUi\Layout.css" />
-    <Content Include="Ewf\Styles\EwfUi\Transitions.css" />
-    <Content Include="Ewf\ThirdParty\SelectCss.css" />
-    <Content Include="Ewf\ThirdParty\SpinJs\spin.min.js" />
-    <Content Include="Ewf\ThirdParty\TimePicker\JavaScript.js" />
-    <Content Include="Ewf\ThirdParty\TimePicker\Styles.css" />
-    <Content Include="Ewf\UserManagement\ConfirmPasswordReset.aspx" />
-    <Content Include="Ewf\UserManagement\SelectUser.aspx" />
-    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Chosen\chosen_v1.8.7\chosen-sprite%402x.png" />
-    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Chosen\chosen_v1.8.7\chosen-sprite.png" />
-    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Chosen\chosen_v1.8.7\chosen.jquery.min.js" />
-    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Chosen\chosen_v1.8.7\chosen.min.css" />
-    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\jquery-ui-1.11.4.custom-v2\images\ui-bg_flat_0_aaaaaa_40x100.png" />
-    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\jquery-ui-1.11.4.custom-v2\images\ui-bg_flat_75_ffffff_40x100.png" />
-    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\jquery-ui-1.11.4.custom-v2\images\ui-bg_glass_55_fbf9ee_1x400.png" />
-    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\jquery-ui-1.11.4.custom-v2\images\ui-bg_glass_65_ffffff_1x400.png" />
-    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\jquery-ui-1.11.4.custom-v2\images\ui-bg_glass_75_dadada_1x400.png" />
-    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\jquery-ui-1.11.4.custom-v2\images\ui-bg_glass_75_e6e6e6_1x400.png" />
-    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\jquery-ui-1.11.4.custom-v2\images\ui-bg_glass_95_fef1ec_1x400.png" />
-    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\jquery-ui-1.11.4.custom-v2\images\ui-bg_highlight-soft_75_cccccc_1x100.png" />
-    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\jquery-ui-1.11.4.custom-v2\images\ui-icons_222222_256x240.png" />
-    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\jquery-ui-1.11.4.custom-v2\images\ui-icons_2e83ff_256x240.png" />
-    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\jquery-ui-1.11.4.custom-v2\images\ui-icons_454545_256x240.png" />
-    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\jquery-ui-1.11.4.custom-v2\images\ui-icons_888888_256x240.png" />
-    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\jquery-ui-1.11.4.custom-v2\images\ui-icons_cd0a0a_256x240.png" />
-    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\jquery-ui-1.11.4.custom-v2\jquery-ui.min.css" />
-    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\jquery-ui-1.11.4.custom-v2\jquery-ui.min.js" />
-    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\JQueryUi\ReadMe.txt" />
-    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\ReadMe.txt" />
     <Content Include="GetSchema.aspx" />
     <Content Include="Global.asax" />
   </ItemGroup>
@@ -506,12 +359,8 @@
     <Content Include="TestPages\NumberControlDemo.aspx" />
     <Content Include="TestPages\OmniDemo.aspx" />
     <Content Include="TestPages\OptionalParameters.aspx" />
-    <Content Include="Ewf\ErrorPages\AccessDenied.aspx" />
-    <Content Include="Ewf\ErrorPages\PageNotAvailable.aspx" />
-    <Content Include="Ewf\ErrorPages\UnhandledException.aspx" />
     <Content Include="Service\Web.config" />
     <Content Include="packages.config" />
-    <Content Include="Ewf\VersionedStaticFiles\ThirdParty\Chosen\chosen_v1.8.7\LICENSE.md" />
     <Content Include="TestPages\RegexHelper.aspx" />
     <Content Include="TestPages\SelectListDemo.aspx" />
     <Content Include="TestPages\StatusMessages.aspx" />
@@ -522,9 +371,6 @@
     <Content Include="TestPages\TestService.aspx" />
     <Content Include="TestPages\TextControlDemo.aspx" />
     <Content Include="Web.config" />
-    <Content Include="Ewf\JavaScript.js" />
-    <Content Include="Ewf\UserManagement\ChangePassword\Page.aspx" />
-    <Content Include="Ewf\UserManagement\LogIn.aspx" />
     <Content Include="Test.css" />
   </ItemGroup>
   <ItemGroup>
@@ -538,7 +384,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Ewf\IntermediateLogIn.aspx" />
     <Content Include="Service\Service.svc" />
     <Content Include="TestPages\GetImage.aspx" />
   </ItemGroup>
