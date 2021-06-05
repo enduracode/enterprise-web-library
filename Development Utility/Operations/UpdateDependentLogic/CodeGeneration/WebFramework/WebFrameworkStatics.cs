@@ -63,7 +63,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 				var generalData = new WebItemGeneralData( projectPath, projectNamespace, EwlStatics.CombinePaths( folderPathRelativeToProject, fileName ), false );
 				if( !generalData.IsResource() && !generalData.IsPage() && !generalData.IsAutoCompleteService() )
 					continue;
-				new Resource( generalData, entitySetup ).GenerateCode( writer );
+				new Resource( projectContainsFramework, generalData, entitySetup ).GenerateCode( writer );
 			}
 
 			// Delve into sub folders.

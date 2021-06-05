@@ -6,12 +6,14 @@ using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework.WebItems {
 	internal class Resource {
+		private readonly bool projectContainsFramework;
 		private readonly WebItemGeneralData generalData;
 		private readonly EntitySetup entitySetup;
 		private readonly List<VariableSpecification> requiredParameters;
 		private readonly List<VariableSpecification> optionalParameters;
 
-		internal Resource( WebItemGeneralData generalData, EntitySetup entitySetup ) {
+		internal Resource( bool projectContainsFramework, WebItemGeneralData generalData, EntitySetup entitySetup ) {
+			this.projectContainsFramework = projectContainsFramework;
 			this.generalData = generalData;
 			this.entitySetup = entitySetup;
 			requiredParameters = generalData.ReadParametersFromCode( false );
@@ -67,7 +69,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 			if( !generalData.IsPage() )
 				writer.WriteLine( "public override bool MatchesCurrent() => base.MatchesCurrent();" );
 			writer.WriteLine(
-				"protected internal override ResourceBase ReCreate() => new {0}( {1} );".FormatWith(
+				"{0} override ResourceBase ReCreate() => new {1}( {2} );".FormatWith(
+					projectContainsFramework ? "protected internal" : "protected",
 					generalData.ClassName,
 					StringTools.ConcatenateWithDelimiter(
 						", ",
