@@ -11,7 +11,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal DecodingUrlParameterCollection(
 			IEnumerable<( string name, string value )> segmentParameters, IEnumerable<( string name, string value )> queryParameters ) {
-			parameters = segmentParameters.Concat( queryParameters ).ToLookup( i => i.name, i => i.value );
+			parameters = segmentParameters.Concat( queryParameters ).ToLookup( i => i.name, i => i.value, StringComparer.OrdinalIgnoreCase );
 			accessedParameters = new HashSet<string>( parameters.Count );
 		}
 

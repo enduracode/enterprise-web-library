@@ -309,18 +309,19 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 					entitySetup != null
 						? includeVersionString
 							  ?
-							  "url.HasVersionString( out var components ) && components.segment == segment ? new UrlDecoder( {0}, versionString: components.versionString ) : url.Segment == segment ? new UrlDecoder( {0}, versionString: \"\" ) : null"
+							  "url.HasVersionString( out var components ) && string.Equals( components.segment, segment, StringComparison.OrdinalIgnoreCase ) ? new UrlDecoder( {0}, versionString: components.versionString ) : string.Equals( url.Segment, segment, StringComparison.OrdinalIgnoreCase ) ? new UrlDecoder( {0}, versionString: \"\" ) : null"
 								  .FormatWith(
 									  "entitySetup" + getOldParameterNameDecoderArguments( requiredParameters.Concat( optionalParameters ) )
 										  .PrependDelimiter( ", " ) )
-							  : "url.Segment == segment ? new UrlDecoder( entitySetup{0} ) : null".FormatWith(
-								  getOldParameterNameDecoderArguments( requiredParameters.Concat( optionalParameters ) ).PrependDelimiter( ", " ) )
+							  : "string.Equals( url.Segment, segment, StringComparison.OrdinalIgnoreCase ) ? new UrlDecoder( entitySetup{0} ) : null"
+								  .FormatWith(
+									  getOldParameterNameDecoderArguments( requiredParameters.Concat( optionalParameters ) ).PrependDelimiter( ", " ) )
 						:
 						includeVersionString
 							?
-							"url.HasVersionString( out var components ) && components.segment == segment ? new UrlDecoder( {0}versionString: components.versionString ) : url.Segment == segment ? new UrlDecoder( {0}versionString: \"\" ) : null"
+							"url.HasVersionString( out var components ) && string.Equals( components.segment, segment, StringComparison.OrdinalIgnoreCase ) ? new UrlDecoder( {0}versionString: components.versionString ) : string.Equals( url.Segment, segment, StringComparison.OrdinalIgnoreCase ) ? new UrlDecoder( {0}versionString: \"\" ) : null"
 								.FormatWith( getOldParameterNameDecoderArguments( requiredParameters.Concat( optionalParameters ) ).AppendDelimiter( ", " ) )
-							: "url.Segment == segment ? new UrlDecoder({0}) : null".FormatWith(
+							: "string.Equals( url.Segment, segment, StringComparison.OrdinalIgnoreCase ) ? new UrlDecoder({0}) : null".FormatWith(
 								getOldParameterNameDecoderArguments( requiredParameters.Concat( optionalParameters ) ).Surround( " ", " " ) ) ) );
 
 			if( requiredParameters.Count == 1 ) {
@@ -357,14 +358,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 							entitySetup != null
 								? parameterIsNullable
 									  ?
-									  "url.IsPositiveInt( out var value ) ? new UrlDecoder( entitySetup, {0}: new SpecifiedValue<int?>( value ){1} ) : url.Segment == nullSegment ? new UrlDecoder( entitySetup, {0}: new SpecifiedValue<int?>( null ){1} ) : null"
+									  "url.IsPositiveInt( out var value ) ? new UrlDecoder( entitySetup, {0}: new SpecifiedValue<int?>( value ){1} ) : string.Equals( url.Segment, nullSegment, StringComparison.OrdinalIgnoreCase ) ? new UrlDecoder( entitySetup, {0}: new SpecifiedValue<int?>( null ){1} ) : null"
 										  .FormatWith( parameter.Name, getOldParameterNameDecoderArguments( optionalParameters ) )
 									  : "url.IsPositiveInt( out var value ) ? new UrlDecoder( entitySetup, {0}: new SpecifiedValue<int>( value ){1} ) : null"
 										  .FormatWith( parameter.Name, getOldParameterNameDecoderArguments( optionalParameters ) )
 								:
 								parameterIsNullable
 									?
-									"url.IsPositiveInt( out var value ) ? new UrlDecoder( {0}: new SpecifiedValue<int?>( value ){1} ) : url.Segment == nullSegment ? new UrlDecoder( {0}: new SpecifiedValue<int?>( null ){1} ) : null"
+									"url.IsPositiveInt( out var value ) ? new UrlDecoder( {0}: new SpecifiedValue<int?>( value ){1} ) : string.Equals( url.Segment, nullSegment, StringComparison.OrdinalIgnoreCase ) ? new UrlDecoder( {0}: new SpecifiedValue<int?>( null ){1} ) : null"
 										.FormatWith( parameter.Name, getOldParameterNameDecoderArguments( optionalParameters ) )
 									: "url.IsPositiveInt( out var value ) ? new UrlDecoder( {0}: new SpecifiedValue<int>( value ){1} ) : null".FormatWith(
 										parameter.Name,
