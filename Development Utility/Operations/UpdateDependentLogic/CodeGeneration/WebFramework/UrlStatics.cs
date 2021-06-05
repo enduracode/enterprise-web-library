@@ -116,10 +116,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 				writer.WriteLine( "if( !{0}Accessed ) parameters.Add( ( \"{0}\", {1}, true ) );".FormatWith( i.Name, i.GetUrlSerializationExpression( i.Name ) ) );
 			foreach( var i in optionalParameters )
 				writer.WriteLine(
-					"if( {0}IsPresent && !{1}Accessed ) parameters.Add( ( \"{1}\", {1}{2}, {1}IsSegmentParameter ) );".FormatWith(
+					"if( {0}IsPresent && !{1}Accessed ) parameters.Add( ( \"{1}\", {2}, {1}IsSegmentParameter ) );".FormatWith(
 						i.PropertyName,
 						i.Name,
-						i.GetUrlSerializationExpression( getSpecifiableParameterValueSelector( i ) ) ) );
+						i.GetUrlSerializationExpression( i.Name + getSpecifiableParameterValueSelector( i ) ) ) );
 			if( includeVersionString )
 				writer.WriteLine( "if( versionString.Any() && !versionStringAccessed ) parameters.Add( ( \"version\", versionString, false ) );" );
 			writer.WriteLine( "return parameters;" );
