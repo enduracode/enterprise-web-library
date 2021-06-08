@@ -389,6 +389,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			// This must be done before web meta logic generation, which can be affected by the contents of Web.config files.
 			WebConfigStatics.GenerateWebConfig( application, project );
 
+			Directory.CreateDirectory( EwlStatics.CombinePaths( application.Path, StaticFile.AppStaticFilesFolderName ) );
+
 			var webProjectGeneratedCodeFolderPath = EwlStatics.CombinePaths( application.Path, generatedCodeFolderName );
 			Directory.CreateDirectory( webProjectGeneratedCodeFolderPath );
 			var webProjectIsuFilePath = EwlStatics.CombinePaths( webProjectGeneratedCodeFolderPath, "ISU.cs" );
@@ -401,7 +403,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "using System.Linq;" );
 				writer.WriteLine( "using System.Reflection;" );
 				writer.WriteLine( "using System.Runtime.InteropServices;" );
-				writer.WriteLine( "using System.Web;" );
+				writer.WriteLine( "using System.Threading;" );
 				writer.WriteLine( "using EnterpriseWebLibrary;" );
 				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess;" );
 				writer.WriteLine( "using EnterpriseWebLibrary.EnterpriseWebFramework;" );
@@ -410,6 +412,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "using Tewl.Tools;" );
 				writer.WriteLine();
 				writeAssemblyInfo( writer, installation, project.name );
+				writer.WriteLine();
+				writer.WriteLine( "namespace {0}.Providers {{".FormatWith( project.NamespaceAndAssemblyName ) );
+				writer.WriteLine( "internal partial class RequestDispatching: AppRequestDispatchingProvider {" );
+				writer.WriteLine(
+					"protected override UrlPattern GetStaticFilesFolderUrlPattern( string urlSegment ) => StaticFiles.FolderSetup.UrlPatterns.Literal( urlSegment );" );
+				writer.WriteLine( "}" );
+				writer.WriteLine( "}" );
 				writer.WriteLine();
 				CodeGeneration.WebFramework.WebFrameworkStatics.Generate(
 					writer,

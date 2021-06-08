@@ -78,7 +78,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 					writer.WriteLine( "public {0} Get{1}() => entitySetupEncoder.Value.Get{1}();".FormatWith( i.TypeName, i.PropertyName ) );
 				foreach( var i in entitySetup.OptionalParameters ) {
 					writer.WriteLine( "public bool {0}IsPresent => entitySetupEncoder.Value.{0}IsPresent;".FormatWith( i.PropertyName ) );
-					writer.WriteLine( "public {0} Get{1}() => entitySetupEncoder.Value.Get{1}();".FormatWith( i.TypeName, i.PropertyName ) );
+					writer.WriteLine(
+						"public ( {0} value, bool isSegmentParameter ) Get{1}() => entitySetupEncoder.Value.Get{1}();".FormatWith( i.TypeName, i.PropertyName ) );
 				}
 			}
 
@@ -393,12 +394,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 				", ",
 				parameters.Select(
 					i =>
-						"{0}: {0}OldNames != null ? {0}OldNames.Select( i => url.Parameters.Get( i ) ).Where( i => i != null ).Select( i => {{ try {{ return {1}; }} catch( Exception e ) {{ throw new UnresolvableUrlException( \"Failed to deserialize the {0} parameter.\", e ); }} }} ).FirstOrDefault() : null"
+						"{0}: {0}OldNames != null ? {0}OldNames.Select( i => url.Parameters.Get( i ) ).Where( i => i != null ).Select( value => {{ try {{ return {1}; }} catch( Exception e ) {{ throw new UnresolvableUrlException( \"Failed to deserialize the {0} parameter.\", e ); }} }} ).FirstOrDefault() : null"
 							.FormatWith(
 								i.Name,
 								i.IsString || i.IsEnumerable
-									? i.GetUrlDeserializationExpression( "i" )
-									: "new SpecifiedValue<{0}>( {1} )".FormatWith( i.TypeName, i.GetUrlDeserializationExpression( "i" ) ) ) ) );
+									? i.GetUrlDeserializationExpression( "value" )
+									: "new SpecifiedValue<{0}>( {1} )".FormatWith( i.TypeName, i.GetUrlDeserializationExpression( "value" ) ) ) ) );
 
 		internal static void GenerateGetEncoderMethod(
 			TextWriter writer, string entitySetupFieldName, IReadOnlyCollection<VariableSpecification> requiredParameters,
