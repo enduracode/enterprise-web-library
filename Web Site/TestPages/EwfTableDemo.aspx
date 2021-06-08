@@ -1,1 +1,0 @@
-<%@ Page Language="C#" CodeBehind="EwfTableDemo.aspx.cs" Inherits="EnterpriseWebLibrary.WebSite.TestPages.EwfTableDemo" %>

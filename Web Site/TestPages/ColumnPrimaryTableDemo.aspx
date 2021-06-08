@@ -1,1 +1,0 @@
-<%@ Page Language="C#" CodeBehind="ColumnPrimaryTableDemo.aspx.cs" Inherits="EnterpriseWebLibrary.WebSite.TestPages.ColumnPrimaryTableDemo" %>

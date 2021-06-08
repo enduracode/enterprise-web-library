@@ -1,1 +1,0 @@
-<%@ Page Language="C#" CodeBehind="BoxDemo.aspx.cs" Inherits="EnterpriseWebLibrary.WebSite.TestPages.BoxDemo" %>

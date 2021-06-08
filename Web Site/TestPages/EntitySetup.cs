@@ -12,30 +12,34 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 	partial class EntitySetup: UiEntitySetup {
 		protected override ResourceBase createParentResource() => null;
 
-		protected override List<ResourceGroup> createResources() =>
+		public override string EntitySetupName => "Web Framework Demo";
+
+		protected override IEnumerable<ResourceGroup> createListedResources() =>
 			new List<ResourceGroup>
 				{
-					new ResourceGroup( "Layout", new BoxDemo.Info( this ), new ComponentLists.Info( this ) ),
-					new ResourceGroup( "Tables", new EwfTableDemo.Info( this ), new ColumnPrimaryTableDemo.Info( this ) ),
+					new ResourceGroup( "Layout", new BoxDemo( this ), new ComponentLists( this ) ),
+					new ResourceGroup( "Tables", new EwfTableDemo( this ), new ColumnPrimaryTableDemo( this ) ),
 					new ResourceGroup(
 						"Form Controls",
-						new TextControlDemo.Info( this ),
-						new NumberControlDemo.Info( this ),
-						new Checkboxes.Info( this ),
-						new SelectListDemo.Info( this ),
-						new CheckboxListDemo.Info( this ),
-						new DateAndTimePickers.Info( this ) ),
-					new ResourceGroup( "Working Stuff", new ActionControls.Info( this ), new OptionalParameters.Info( this ), new OmniDemo.Info( this ) ),
-					new ResourceGroup( "First category", new HtmlEditing.Info( this ), new RegexHelper.Info( this ), new StatusMessages.Info( this ) ),
-					new ResourceGroup(
-						"Other",
-						new IntermediatePostBacks.Info( this ),
-						new ModalBoxes.Info( this ),
-						new MailMerging.Info( this ),
-						new Charts.Info( this ) )
+						new TextControlDemo( this ),
+						new NumberControlDemo( this ),
+						new Checkboxes( this ),
+						new SelectListDemo( this ),
+						new CheckboxListDemo( this ),
+						new DateAndTimePickers( this ) ),
+					new ResourceGroup( "Working Stuff", new ActionControls( this ), new OptionalParametersDemo( this ), new OmniDemo( this ) ),
+					new ResourceGroup( "First category", new HtmlEditing( this ), new RegexHelper( this ), new StatusMessages( this ) ),
+					new ResourceGroup( "Other", new IntermediatePostBacks( this ), new ModalBoxes( this ), new MailMerging( this ), new Charts( this ) )
 				};
 
-		public override string EntitySetupName => "Web Framework Demo";
+		protected override UrlHandler getRequestHandler() => new BoxDemo( this );
+		protected override bool canRepresentRequestHandler() => true;
+
+		protected override IEnumerable<UrlPattern> getChildUrlPatterns() =>
+			RequestDispatchingStatics.GetFrameworkUrlPatterns()
+				.Append( CreateSystem.UrlPatterns.Literal( "create-system" ) )
+				.Append( ConfigurationSchemas.EntitySetup.UrlPatterns.Literal( "ConfigurationSchemas" ) )
+				.Concat( LegacyUrlStatics.GetPatterns() );
 
 		EntityUiSetup UiEntitySetup.GetUiSetup() {
 			var one = new ModalBoxId();
@@ -87,7 +91,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 						behavior: new PostBackBehavior(
 							postBack: PostBack.CreateFull(
 								id: "delegate",
-								modificationMethod: () => EwfPage.AddStatusMessage( StatusMessageType.Info, "Did Something." ) ) ) )
+								modificationMethod: () => PageBase.AddStatusMessage( StatusMessageType.Info, "Did Something." ) ) ) )
 					.Append<ActionComponentSetup>(
 						new HyperlinkSetup( new ExternalResource( "http://www.google.com" ).ToHyperlinkNewTabBehavior(), "Go to Google in new window" ) )
 					.Append(

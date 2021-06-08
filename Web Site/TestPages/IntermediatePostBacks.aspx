@@ -1,1 +1,0 @@
-<%@ Page Language="C#" CodeBehind="IntermediatePostBacks.aspx.cs" Inherits="EnterpriseWebLibrary.WebSite.TestPages.IntermediatePostBacks" %>

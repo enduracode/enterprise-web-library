@@ -1,1 +1,0 @@
-<%@ Page Language="C#" CodeBehind="DateAndTimePickers.aspx.cs" Inherits="EnterpriseWebLibrary.WebSite.TestPages.DateAndTimePickers" %>

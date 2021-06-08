@@ -1,1 +1,0 @@
-<%@ Page Language="C#" CodeBehind="MailMerging.aspx.cs" Inherits="EnterpriseWebLibrary.WebSite.TestPages.MailMerging" %>

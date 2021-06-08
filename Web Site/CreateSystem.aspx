@@ -1,1 +1,0 @@
-<%@ Page Language="C#" CodeBehind="CreateSystem.aspx.cs" Inherits="EnterpriseWebLibrary.WebSite.CreateSystem" %>

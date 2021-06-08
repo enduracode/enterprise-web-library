@@ -1,1 +1,0 @@
-<%@ Page Language="C#" CodeBehind="ComponentLists.aspx.cs" Inherits="EnterpriseWebLibrary.WebSite.TestPages.ComponentLists" %>

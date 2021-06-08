@@ -6,10 +6,12 @@ namespace EnterpriseWebLibrary.WebSite.TestPages.SubFolder {
 	partial class EntitySetup: UiEntitySetup {
 		protected override ResourceBase createParentResource() => ActionControls.GetInfo();
 
-		protected override List<ResourceGroup> createResources() =>
-			new List<ResourceGroup> { new ResourceGroup( new General.Info( this ), new Details.Info( this ), new Disabled.Info( this ), new New.Info( this ) ) };
-
 		public override string EntitySetupName => "Nested";
+
+		protected override IEnumerable<ResourceGroup> createListedResources() =>
+			new List<ResourceGroup> { new ResourceGroup( new General( this ), new Details( this ), new Disabled( this ), new New( this ) ) };
+
+		protected override UrlHandler getRequestHandler() => null;
 
 		EntityUiSetup UiEntitySetup.GetUiSetup() =>
 			new EntityUiSetup( entitySummaryContent: new Paragraph( "Awesome content goes here.".ToComponents() ).ToCollection(), tabMode: TabMode.Horizontal );

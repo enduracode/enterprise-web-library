@@ -1,1 +1,0 @@
-<%@ Page Language="C#" CodeBehind="Details.aspx.cs" Inherits="EnterpriseWebLibrary.WebSite.TestPages.SubFolder.Details" %>

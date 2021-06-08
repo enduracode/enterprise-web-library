@@ -1,1 +1,0 @@
-<%@ Page Language="C#" CodeBehind="Charts.aspx.cs" Inherits="EnterpriseWebLibrary.WebSite.TestPages.Charts" %>

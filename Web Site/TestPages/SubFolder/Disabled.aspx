@@ -1,1 +1,0 @@
-<%@ Page Language="C#" CodeBehind="Disabled.aspx.cs" Inherits="EnterpriseWebLibrary.WebSite.TestPages.SubFolder.Disabled" %>

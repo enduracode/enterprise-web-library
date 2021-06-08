@@ -147,231 +147,62 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CreateSystem.aspx.cs">
-      <DependentUpon>CreateSystem.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="CreateSystem.aspx.designer.cs">
-      <DependentUpon>CreateSystem.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="GetSchema.aspx.cs">
-      <DependentUpon>GetSchema.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="GetSchema.aspx.designer.cs">
-      <DependentUpon>GetSchema.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="Providers\EwfUiProvider.cs" />
+    <Compile Include="ConfigurationSchemas\EntitySetup.cs" />
+    <Compile Include="ConfigurationSchemas\GetSchema.cs" />
+    <Compile Include="CreateSystem.cs" />
+    <Compile Include="LegacyUrlStatics.cs" />
+    <Compile Include="Providers\EwfUi.cs" />
+    <Compile Include="Providers\RequestDispatching.cs" />
     <Compile Include="Service\IService.cs" />
     <Compile Include="Service\Service.svc.cs">
       <DependentUpon>Service.svc</DependentUpon>
     </Compile>
     <Compile Include="TestController.cs" />
-    <Compile Include="TestPages\ActionControls.aspx.cs">
-      <DependentUpon>ActionControls.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\ActionControls.aspx.designer.cs">
-      <DependentUpon>ActionControls.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\Basic\ModalContent.aspx.cs">
-      <DependentUpon>ModalContent.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\Basic\ModalContent.aspx.designer.cs">
-      <DependentUpon>ModalContent.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\BoxDemo.aspx.cs">
-      <DependentUpon>BoxDemo.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\BoxDemo.aspx.designer.cs">
-      <DependentUpon>BoxDemo.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\Charts.aspx.cs">
-      <DependentUpon>Charts.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\Charts.aspx.designer.cs">
-      <DependentUpon>Charts.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\Checkboxes.aspx.cs">
-      <DependentUpon>Checkboxes.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\Checkboxes.aspx.designer.cs">
-      <DependentUpon>Checkboxes.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\CheckboxListDemo.aspx.cs">
-      <DependentUpon>CheckboxListDemo.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\CheckboxListDemo.aspx.designer.cs">
-      <DependentUpon>CheckboxListDemo.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\ComponentLists.aspx.cs">
-      <DependentUpon>ComponentLists.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\ComponentLists.aspx.designer.cs">
-      <DependentUpon>ComponentLists.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\DateAndTimePickers.aspx.cs">
-      <DependentUpon>DateAndTimePickers.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\DateAndTimePickers.aspx.designer.cs">
-      <DependentUpon>DateAndTimePickers.aspx</DependentUpon>
-    </Compile>
+    <Compile Include="TestPages\ActionControls.cs" />
+    <Compile Include="TestPages\Basic\Legacy URLs\LegacyUrlFolderSetup.cs" />
+    <Compile Include="TestPages\Basic\ModalContent.cs" />
+    <Compile Include="TestPages\BoxDemo.cs" />
+    <Compile Include="TestPages\Charts.cs" />
+    <Compile Include="TestPages\Checkboxes.cs" />
+    <Compile Include="TestPages\CheckboxListDemo.cs" />
+    <Compile Include="TestPages\ColumnPrimaryTableDemo.cs" />
+    <Compile Include="TestPages\ComponentLists.cs" />
+    <Compile Include="TestPages\DateAndTimePickers.cs" />
     <Compile Include="TestPages\EntitySetup.cs" />
-    <Compile Include="TestPages\HtmlEditing.aspx.cs">
-      <DependentUpon>HtmlEditing.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\HtmlEditing.aspx.designer.cs">
-      <DependentUpon>HtmlEditing.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\ColumnPrimaryTableDemo.aspx.cs">
-      <DependentUpon>ColumnPrimaryTableDemo.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\ColumnPrimaryTableDemo.aspx.designer.cs">
-      <DependentUpon>ColumnPrimaryTableDemo.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\EwfTableDemo.aspx.cs">
-      <DependentUpon>EwfTableDemo.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\EwfTableDemo.aspx.designer.cs">
-      <DependentUpon>EwfTableDemo.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\GetImage.aspx.cs">
-      <DependentUpon>GetImage.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\GetImage.aspx.designer.cs">
-      <DependentUpon>GetImage.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\IntermediatePostBacks.aspx.cs">
-      <DependentUpon>IntermediatePostBacks.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\IntermediatePostBacks.aspx.designer.cs">
-      <DependentUpon>IntermediatePostBacks.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\MailMerging.aspx.cs">
-      <DependentUpon>MailMerging.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\MailMerging.aspx.designer.cs">
-      <DependentUpon>MailMerging.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\ModalBoxes.aspx.cs">
-      <DependentUpon>ModalBoxes.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\ModalBoxes.aspx.designer.cs">
-      <DependentUpon>ModalBoxes.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\NumberControlDemo.aspx.cs">
-      <DependentUpon>NumberControlDemo.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\NumberControlDemo.aspx.designer.cs">
-      <DependentUpon>NumberControlDemo.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\OmniDemo.aspx.cs">
-      <DependentUpon>OmniDemo.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\OmniDemo.aspx.designer.cs">
-      <DependentUpon>OmniDemo.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\OptionalParameters.aspx.cs">
-      <DependentUpon>OptionalParameters.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\OptionalParameters.aspx.designer.cs">
-      <DependentUpon>OptionalParameters.aspx</DependentUpon>
-    </Compile>
     <Compile Include="Generated Code\ISU.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="TestPages\RegexHelper.aspx.cs">
-      <DependentUpon>RegexHelper.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\RegexHelper.aspx.designer.cs">
-      <DependentUpon>RegexHelper.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\SelectListDemo.aspx.cs">
-      <DependentUpon>SelectListDemo.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\SelectListDemo.aspx.designer.cs">
-      <DependentUpon>SelectListDemo.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\StatusMessages.aspx.cs">
-      <DependentUpon>StatusMessages.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\StatusMessages.aspx.designer.cs">
-      <DependentUpon>StatusMessages.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\SubFolder\Details.aspx.cs">
-      <DependentUpon>Details.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\SubFolder\Details.aspx.designer.cs">
-      <DependentUpon>Details.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\SubFolder\Disabled.aspx.cs">
-      <DependentUpon>Disabled.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\SubFolder\Disabled.aspx.designer.cs">
-      <DependentUpon>Disabled.aspx</DependentUpon>
-    </Compile>
+    <Compile Include="TestPages\EwfTableDemo.cs" />
+    <Compile Include="TestPages\GetImage.cs" />
+    <Compile Include="TestPages\HtmlEditing.cs" />
+    <Compile Include="TestPages\IntermediatePostBacks.cs" />
+    <Compile Include="TestPages\Legacy URLs\LegacyUrlFolderSetup.cs" />
+    <Compile Include="TestPages\MailMerging.cs" />
+    <Compile Include="TestPages\ModalBoxes.cs" />
+    <Compile Include="TestPages\NumberControlDemo.cs" />
+    <Compile Include="TestPages\OmniDemo.cs" />
+    <Compile Include="TestPages\OptionalParametersDemo.cs" />
+    <Compile Include="TestPages\RegexHelper.cs" />
+    <Compile Include="TestPages\SelectListDemo.cs" />
+    <Compile Include="TestPages\StatusMessages.cs" />
+    <Compile Include="TestPages\SubFolder\Details.cs" />
+    <Compile Include="TestPages\SubFolder\Disabled.cs" />
     <Compile Include="TestPages\SubFolder\EntitySetup.cs" />
-    <Compile Include="TestPages\SubFolder\General.aspx.cs">
-      <DependentUpon>General.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\SubFolder\General.aspx.designer.cs">
-      <DependentUpon>General.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\SubFolder\New.aspx.cs">
-      <DependentUpon>New.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\SubFolder\New.aspx.designer.cs">
-      <DependentUpon>New.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\TestService.aspx.cs">
-      <DependentUpon>TestService.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\TestService.aspx.designer.cs">
-      <DependentUpon>TestService.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\TextControlDemo.aspx.cs">
-      <DependentUpon>TextControlDemo.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="TestPages\TextControlDemo.aspx.designer.cs">
-      <DependentUpon>TextControlDemo.aspx</DependentUpon>
-    </Compile>
+    <Compile Include="TestPages\SubFolder\General.cs" />
+    <Compile Include="TestPages\SubFolder\Legacy URLs\LegacyUrlFolderSetup.cs" />
+    <Compile Include="TestPages\SubFolder\New.cs" />
+    <Compile Include="TestPages\TestService.cs" />
+    <Compile Include="TestPages\TextControlDemo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="CreateSystem.aspx" />
-    <Content Include="GetSchema.aspx" />
     <Content Include="Global.asax" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="TestPages\ActionControls.aspx" />
-    <Content Include="TestPages\Basic\ModalContent.aspx" />
-    <Content Include="TestPages\BoxDemo.aspx" />
-    <Content Include="TestPages\Charts.aspx" />
-    <Content Include="TestPages\Checkboxes.aspx" />
-    <Content Include="TestPages\CheckboxListDemo.aspx" />
-    <Content Include="TestPages\ColumnPrimaryTableDemo.aspx" />
-    <Content Include="TestPages\ComponentLists.aspx" />
-    <Content Include="TestPages\DateAndTimePickers.aspx" />
-    <Content Include="TestPages\EwfTableDemo.aspx" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="TestPages\HtmlEditing.aspx" />
-    <Content Include="TestPages\IntermediatePostBacks.aspx" />
-    <Content Include="TestPages\MailMerging.aspx" />
-    <Content Include="TestPages\ModalBoxes.aspx" />
-    <Content Include="TestPages\NumberControlDemo.aspx" />
-    <Content Include="TestPages\OmniDemo.aspx" />
-    <Content Include="TestPages\OptionalParameters.aspx" />
     <Content Include="Service\Web.config" />
     <Content Include="packages.config" />
-    <Content Include="TestPages\RegexHelper.aspx" />
-    <Content Include="TestPages\SelectListDemo.aspx" />
-    <Content Include="TestPages\StatusMessages.aspx" />
-    <Content Include="TestPages\SubFolder\Details.aspx" />
-    <Content Include="TestPages\SubFolder\Disabled.aspx" />
-    <Content Include="TestPages\SubFolder\General.aspx" />
-    <Content Include="TestPages\SubFolder\New.aspx" />
-    <Content Include="TestPages\TestService.aspx" />
-    <Content Include="TestPages\TextControlDemo.aspx" />
+    <Content Include="StaticFiles\test.css" />
     <Content Include="Web.config" />
-    <Content Include="Test.css" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Library\Library.csproj">
@@ -385,7 +216,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Service\Service.svc" />
-    <Content Include="TestPages\GetImage.aspx" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

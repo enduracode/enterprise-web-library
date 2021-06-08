@@ -1,1 +1,0 @@
-<%@ Page Language="C#" CodeBehind="NumberControlDemo.aspx.cs" Inherits="EnterpriseWebLibrary.WebSite.TestPages.NumberControlDemo" %>

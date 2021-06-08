@@ -1,1 +1,0 @@
-<%@ Page Language="C#" CodeBehind="SelectListDemo.aspx.cs" Inherits="EnterpriseWebLibrary.WebSite.TestPages.SelectListDemo" %>

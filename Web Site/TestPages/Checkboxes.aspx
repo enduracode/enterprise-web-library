@@ -1,1 +1,0 @@
-<%@ Page Language="C#" CodeBehind="Checkboxes.aspx.cs" Inherits="EnterpriseWebLibrary.WebSite.TestPages.Checkboxes" %>

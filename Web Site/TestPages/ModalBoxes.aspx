@@ -1,1 +1,0 @@
-<%@ Page Language="C#" CodeBehind="ModalBoxes.aspx.cs" Inherits="EnterpriseWebLibrary.WebSite.TestPages.ModalBoxes" %>

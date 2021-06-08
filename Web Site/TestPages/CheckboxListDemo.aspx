@@ -1,1 +1,0 @@
-<%@ Page Language="C#" CodeBehind="CheckboxListDemo.aspx.cs" Inherits="EnterpriseWebLibrary.WebSite.TestPages.CheckboxListDemo" %>

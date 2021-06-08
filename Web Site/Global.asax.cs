@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
-using EnterpriseWebLibrary.WebSite.TestPages;
+using EnterpriseWebLibrary.WebSite.StaticFiles;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.WebSite {
@@ -17,28 +17,8 @@ namespace EnterpriseWebLibrary.WebSite {
 		}
 
 
-		protected override IEnumerable<ShortcutUrlResolver> GetShortcutUrlResolvers() {
-			yield return new ShortcutUrlResolver(
-				"",
-				ConnectionSecurity.SecureIfPossible,
-				() => {
-					var page = BoxDemo.GetInfo();
-					return page.UserCanAccessResource ? page : null;
-				} );
+		protected override IEnumerable<BaseUrlPattern> GetBaseUrlPatterns() => TestPages.EntitySetup.UrlPatterns.BaseUrlPattern().ToCollection();
 
-			yield return new ShortcutUrlResolver( "create-system", ConnectionSecurity.SecureIfPossible, () => CreateSystem.GetInfo() );
-
-			foreach( var i in GlobalStatics.ConfigurationXsdFileNames ) {
-				var fileName = i;
-				yield return new ShortcutUrlResolver(
-					"ConfigurationSchemas/" + fileName.EnglishToPascal(),
-					ConnectionSecurity.NonSecure,
-					() => GetSchema.GetInfo( fileName ) );
-			}
-		}
-
-		protected override List<ResourceInfo> GetStyleSheets() {
-			return new List<ResourceInfo> { new TestCss.Info() };
-		}
+		protected override List<ResourceInfo> GetStyleSheets() => new List<ResourceInfo> { new TestCss() };
 	}
 }

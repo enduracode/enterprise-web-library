@@ -1,1 +1,0 @@
-<%@ Page Language="C#" CodeBehind="StatusMessages.aspx.cs" Inherits="EnterpriseWebLibrary.WebSite.TestPages.StatusMessages" %>

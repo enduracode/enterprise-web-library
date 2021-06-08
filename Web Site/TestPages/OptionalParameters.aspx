@@ -1,1 +1,0 @@
-<%@ Page Language="C#" CodeBehind="OptionalParameters.aspx.cs" Inherits="EnterpriseWebLibrary.WebSite.TestPages.OptionalParameters" %>

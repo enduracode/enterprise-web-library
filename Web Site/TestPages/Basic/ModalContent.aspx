@@ -1,1 +1,0 @@
-<%@ Page Language="C#" CodeBehind="ModalContent.aspx.cs" Inherits="EnterpriseWebLibrary.WebSite.TestPages.Basic.ModalContent" %>
