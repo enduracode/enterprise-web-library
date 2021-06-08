@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.Web.SessionState;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.Email;
@@ -198,6 +199,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				RequestState.SetUrlHandlers( handlers.Reverse().Materialize() );
 
 				HttpContext.Current.RemapHandler( new HandlerAdapter( handlers.Last() ) );
+				if( handlers.Last() is PageBase || handlers.Last() is EntitySetupBase )
+					HttpContext.Current.SetSessionStateBehavior( SessionStateBehavior.Required );
 				return;
 			}
 

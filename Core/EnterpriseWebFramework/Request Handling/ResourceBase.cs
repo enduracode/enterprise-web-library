@@ -136,7 +136,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Returns the name of the resource.
 		/// </summary>
-		public virtual string ResourceName => GetType().DeclaringType.Name.CamelToEnglish();
+		public virtual string ResourceName => GetType().Name.CamelToEnglish();
 
 		/// <summary>
 		/// Returns the name of the resource, including the entity setup name if an entity setup exists.

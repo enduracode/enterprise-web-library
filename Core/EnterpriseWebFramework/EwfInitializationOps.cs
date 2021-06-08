@@ -63,7 +63,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							( baseUrlString, appRelativeUrl ) => {
 								AppRequestState.Instance.UrlHandlerStateDisabled = true;
 								try {
-									return UrlHandlingStatics.ResolveUrl( baseUrlString, appRelativeUrl ).Last();
+									return UrlHandlingStatics.ResolveUrl( baseUrlString, appRelativeUrl )?.Last();
 								}
 								finally {
 									AppRequestState.Instance.UrlHandlerStateDisabled = false;

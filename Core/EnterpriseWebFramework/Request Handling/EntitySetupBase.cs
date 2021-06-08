@@ -116,7 +116,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		( UrlHandler parent, UrlHandler child ) UrlHandler.GetCanonicalHandlerPair( UrlHandler child ) =>
 			EwlStatics.AreEqual( child, getRequestHandler() ) && canRepresentRequestHandler()
-				? ( (UrlHandler)this ).GetParent().GetCanonicalHandlerPair( this )
+				? ( (UrlHandler)this ).GetParent()?.GetCanonicalHandlerPair( this ) ?? ( null, this )
 				: ( this, child );
 
 		/// <summary>
