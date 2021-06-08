@@ -26,8 +26,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 				writer,
 				generalData.ClassName,
 				null,
-				Enumerable.Empty<VariableSpecification>().Materialize(),
-				Enumerable.Empty<VariableSpecification>().Materialize(),
+				Enumerable.Empty<WebItemParameter>().Materialize(),
+				Enumerable.Empty<WebItemParameter>().Materialize(),
 				!inVersionedFolder );
 			writer.WriteLine( "private readonly {0} folderSetup;".FormatWith( folderSetupClassName ) );
 
@@ -42,8 +42,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 			UrlStatics.GenerateGetEncoderMethod(
 				writer,
 				"",
-				Enumerable.Empty<VariableSpecification>().Materialize(),
-				Enumerable.Empty<VariableSpecification>().Materialize(),
+				Enumerable.Empty<WebItemParameter>().Materialize(),
+				Enumerable.Empty<WebItemParameter>().Materialize(),
 				p => "false",
 				!inVersionedFolder );
 			writer.WriteLine(

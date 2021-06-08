@@ -54,7 +54,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 		internal bool IsAutoCompleteService() =>
 			Regex.IsMatch( code, "^// {0}AutoCompleteService\r?$".FormatWith( EwlStatics.EwlInitialism.EnglishToPascal() ), RegexOptions.Multiline );
 
-		internal List<VariableSpecification> ReadParametersFromCode( bool readOptionalParameters ) {
+		internal List<WebItemParameter> ReadParametersFromCode( bool readOptionalParameters ) {
 			try {
 				return getVariablesFromCode( code, readOptionalParameters ? "OptionalParameter" : "Parameter" ).ToList();
 			}
@@ -63,10 +63,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 			}
 		}
 
-		private IEnumerable<VariableSpecification> getVariablesFromCode( string code, string keyword ) {
+		private IEnumerable<WebItemParameter> getVariablesFromCode( string code, string keyword ) {
 			var pattern = @"^//\s*" + keyword + @":\s(?<type>[a-zA-Z_0-9<>]*\??)\s(?<name>\w*)(\ *//(?<comment>[^\n]*))?";
 			return from Match match in Regex.Matches( code, pattern, RegexOptions.Multiline )
-			       select new VariableSpecification( match.Groups[ "type" ].Value, match.Groups[ "name" ].Value, match.Groups[ "comment" ].Value );
+			       select new WebItemParameter( match.Groups[ "type" ].Value, match.Groups[ "name" ].Value, match.Groups[ "comment" ].Value );
 		}
 	}
 }

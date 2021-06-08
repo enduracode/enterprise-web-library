@@ -7,8 +7,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 	internal class EntitySetup {
 		private readonly bool projectContainsFramework;
 		private readonly WebItemGeneralData generalData;
-		private readonly List<VariableSpecification> requiredParameters;
-		private readonly List<VariableSpecification> optionalParameters;
+		private readonly List<WebItemParameter> requiredParameters;
+		private readonly List<WebItemParameter> optionalParameters;
 
 		internal EntitySetup( bool projectContainsFramework, WebItemGeneralData generalData ) {
 			this.projectContainsFramework = projectContainsFramework;
@@ -19,9 +19,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 
 		internal WebItemGeneralData GeneralData { get { return generalData; } }
 
-		internal List<VariableSpecification> RequiredParameters { get { return requiredParameters; } }
+		internal List<WebItemParameter> RequiredParameters { get { return requiredParameters; } }
 
-		internal List<VariableSpecification> OptionalParameters { get { return optionalParameters; } }
+		internal List<WebItemParameter> OptionalParameters { get { return optionalParameters; } }
 
 		internal void GenerateCode( TextWriter writer ) {
 			writer.WriteLine( "namespace " + generalData.Namespace + " {" );

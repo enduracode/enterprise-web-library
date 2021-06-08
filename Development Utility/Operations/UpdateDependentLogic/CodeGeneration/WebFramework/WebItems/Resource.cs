@@ -9,8 +9,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 		private readonly bool projectContainsFramework;
 		private readonly WebItemGeneralData generalData;
 		private readonly EntitySetup entitySetup;
-		private readonly List<VariableSpecification> requiredParameters;
-		private readonly List<VariableSpecification> optionalParameters;
+		private readonly List<WebItemParameter> requiredParameters;
+		private readonly List<WebItemParameter> optionalParameters;
 
 		internal Resource( bool projectContainsFramework, WebItemGeneralData generalData, EntitySetup entitySetup ) {
 			this.projectContainsFramework = projectContainsFramework;

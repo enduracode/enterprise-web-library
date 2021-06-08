@@ -120,9 +120,9 @@
     <Compile Include="Operations\UpdateDependentLogic\CodeGeneration\WebFramework\OptionalParameterPackageStatics.cs" />
     <Compile Include="Operations\UpdateDependentLogic\CodeGeneration\WebFramework\ParametersModificationStatics.cs" />
     <Compile Include="Operations\UpdateDependentLogic\CodeGeneration\WebFramework\UrlStatics.cs" />
-    <Compile Include="Operations\UpdateDependentLogic\CodeGeneration\WebFramework\VariableSpecification.cs" />
     <Compile Include="Operations\UpdateDependentLogic\CodeGeneration\WebFramework\WebFrameworkStatics.cs" />
     <Compile Include="Operations\UpdateDependentLogic\CodeGeneration\WebFramework\WebItemGeneralData.cs" />
+    <Compile Include="Operations\UpdateDependentLogic\CodeGeneration\WebFramework\WebItemParameter.cs" />
     <Compile Include="Operations\UpdateDependentLogic\CodeGeneration\WebFramework\WebItems\EntitySetup.cs" />
     <Compile Include="Operations\UpdateDependentLogic\CodeGeneration\WebFramework\WebItems\Resource.cs" />
     <Compile Include="Operations\UpdateDependentLogic\CodeGeneration\WebFramework\WebItems\StaticFile.cs" />

@@ -5,7 +5,7 @@ using Humanizer;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework {
 	internal static class ParametersModificationStatics {
-		internal static void WriteClassIfNecessary( TextWriter writer, IEnumerable<VariableSpecification> parameters ) {
+		internal static void WriteClassIfNecessary( TextWriter writer, IEnumerable<WebItemParameter> parameters ) {
 			if( !parameters.Any() )
 				return;
 
@@ -38,7 +38,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 			writer.WriteLine( "}" );
 		}
 
-		private static void writePropertyDocComment( TextWriter writer, VariableSpecification parameter ) {
+		private static void writePropertyDocComment( TextWriter writer, WebItemParameter parameter ) {
 			CodeGenerationStatics.AddSummaryDocComment(
 				writer,
 				"Gets or sets the new value for the " + parameter.Name + " parameter." +

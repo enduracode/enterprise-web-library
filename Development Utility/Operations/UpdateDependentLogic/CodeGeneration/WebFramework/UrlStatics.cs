@@ -9,16 +9,16 @@ using Tewl.Tools;
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework {
 	internal static class UrlStatics {
 		internal static void GenerateUrlClasses(
-			TextWriter writer, string className, EntitySetup entitySetup, IReadOnlyCollection<VariableSpecification> requiredParameters,
-			IReadOnlyCollection<VariableSpecification> optionalParameters, bool includeVersionString ) {
+			TextWriter writer, string className, EntitySetup entitySetup, IReadOnlyCollection<WebItemParameter> requiredParameters,
+			IReadOnlyCollection<WebItemParameter> optionalParameters, bool includeVersionString ) {
 			generateEncoder( writer, entitySetup, requiredParameters, optionalParameters, includeVersionString );
 			generateDecoder( writer, className, entitySetup, requiredParameters, optionalParameters, includeVersionString );
 			generatePatterns( writer, className, entitySetup, requiredParameters, optionalParameters, includeVersionString );
 		}
 
 		private static void generateEncoder(
-			TextWriter writer, EntitySetup entitySetup, IReadOnlyCollection<VariableSpecification> requiredParameters,
-			IReadOnlyCollection<VariableSpecification> optionalParameters, bool includeVersionString ) {
+			TextWriter writer, EntitySetup entitySetup, IReadOnlyCollection<WebItemParameter> requiredParameters,
+			IReadOnlyCollection<WebItemParameter> optionalParameters, bool includeVersionString ) {
 			writer.WriteLine( "internal sealed class UrlEncoder: EnterpriseWebFramework.UrlEncoder {" );
 
 			if( entitySetup != null ) {
@@ -130,8 +130,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 		}
 
 		private static void generateDecoder(
-			TextWriter writer, string className, EntitySetup entitySetup, IReadOnlyCollection<VariableSpecification> requiredParameters,
-			IReadOnlyCollection<VariableSpecification> optionalParameters, bool includeVersionString ) {
+			TextWriter writer, string className, EntitySetup entitySetup, IReadOnlyCollection<WebItemParameter> requiredParameters,
+			IReadOnlyCollection<WebItemParameter> optionalParameters, bool includeVersionString ) {
 			writer.WriteLine( "internal sealed class UrlDecoder: EnterpriseWebFramework.UrlDecoder {" );
 
 			if( entitySetup != null )
@@ -280,14 +280,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 			writer.WriteLine( "}" );
 		}
 
-		private static string getSpecifiableParameterType( VariableSpecification p ) =>
+		private static string getSpecifiableParameterType( WebItemParameter p ) =>
 			p.IsString || p.IsEnumerable ? p.TypeName : "SpecifiedValue<{0}>".FormatWith( p.TypeName );
 
-		private static string getSpecifiableParameterValueSelector( VariableSpecification p ) => p.IsString || p.IsEnumerable ? "" : ".Value";
+		private static string getSpecifiableParameterValueSelector( WebItemParameter p ) => p.IsString || p.IsEnumerable ? "" : ".Value";
 
 		private static void generatePatterns(
-			TextWriter writer, string className, EntitySetup entitySetup, IReadOnlyCollection<VariableSpecification> requiredParameters,
-			IReadOnlyCollection<VariableSpecification> optionalParameters, bool includeVersionString ) {
+			TextWriter writer, string className, EntitySetup entitySetup, IReadOnlyCollection<WebItemParameter> requiredParameters,
+			IReadOnlyCollection<WebItemParameter> optionalParameters, bool includeVersionString ) {
 			writer.WriteLine( "internal static class UrlPatterns {" );
 
 			CodeGenerationStatics.AddSummaryDocComment(
@@ -386,10 +386,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 			writer.WriteLine( "}" );
 		}
 
-		private static string getOldParameterNamePatternParameters( IEnumerable<VariableSpecification> parameters ) =>
+		private static string getOldParameterNamePatternParameters( IEnumerable<WebItemParameter> parameters ) =>
 			StringTools.ConcatenateWithDelimiter( ", ", parameters.Select( i => "IEnumerable<string> {0}OldNames = null".FormatWith( i.Name ) ) );
 
-		private static string getOldParameterNameDecoderArguments( IEnumerable<VariableSpecification> parameters ) =>
+		private static string getOldParameterNameDecoderArguments( IEnumerable<WebItemParameter> parameters ) =>
 			StringTools.ConcatenateWithDelimiter(
 				", ",
 				parameters.Select(
@@ -402,9 +402,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 									: "new SpecifiedValue<{0}>( {1} )".FormatWith( i.TypeName, i.GetUrlDeserializationExpression( "value" ) ) ) ) );
 
 		internal static void GenerateGetEncoderMethod(
-			TextWriter writer, string entitySetupFieldName, IReadOnlyCollection<VariableSpecification> requiredParameters,
-			IReadOnlyCollection<VariableSpecification> optionalParameters, Func<VariableSpecification, string> isSegmentParameterExpressionGetter,
-			bool includeVersionString ) {
+			TextWriter writer, string entitySetupFieldName, IReadOnlyCollection<WebItemParameter> requiredParameters,
+			IReadOnlyCollection<WebItemParameter> optionalParameters, Func<WebItemParameter, string> isSegmentParameterExpressionGetter, bool includeVersionString ) {
 			writer.WriteLine(
 				"protected override EnterpriseWebFramework.UrlEncoder getUrlEncoder() => new UrlEncoder({0});".FormatWith(
 					StringTools.ConcatenateWithDelimiter(

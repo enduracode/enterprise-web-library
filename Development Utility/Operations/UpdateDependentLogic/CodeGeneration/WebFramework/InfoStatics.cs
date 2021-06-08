@@ -7,7 +7,7 @@ using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework {
 	internal static class InfoStatics {
-		internal static void WriteSpecifyParameterDefaultsMethod( TextWriter writer, IReadOnlyCollection<VariableSpecification> optionalParameters ) {
+		internal static void WriteSpecifyParameterDefaultsMethod( TextWriter writer, IReadOnlyCollection<WebItemParameter> optionalParameters ) {
 			if( !optionalParameters.Any() )
 				return;
 
@@ -17,8 +17,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 			writer.WriteLine( "static partial void specifyParameterDefaults( OptionalParameterSpecifier specifier, Parameters parameters );" );
 		}
 
-		internal static void WriteParameterMembers(
-			TextWriter writer, List<VariableSpecification> requiredParameters, List<VariableSpecification> optionalParameters ) {
+		internal static void WriteParameterMembers( TextWriter writer, List<WebItemParameter> requiredParameters, List<WebItemParameter> optionalParameters ) {
 			writeMembersForParameterList( writer, requiredParameters );
 			writeMembersForParameterList( writer, optionalParameters );
 			if( optionalParameters.Any() ) {
@@ -28,7 +27,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 			}
 		}
 
-		private static void writeMembersForParameterList( TextWriter writer, List<VariableSpecification> parameters ) {
+		private static void writeMembersForParameterList( TextWriter writer, List<WebItemParameter> parameters ) {
 			foreach( var parameter in parameters ) {
 				CodeGenerationStatics.AddGeneratedCodeUseOnlyComment( writer );
 				writer.WriteLine(
@@ -40,8 +39,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 		}
 
 		internal static void WriteConstructorAndHelperMethods(
-			TextWriter writer, WebItemGeneralData generalData, IReadOnlyCollection<VariableSpecification> requiredParameters,
-			IReadOnlyCollection<VariableSpecification> optionalParameters, bool includeEsParameter, bool isEs ) {
+			TextWriter writer, WebItemGeneralData generalData, IReadOnlyCollection<WebItemParameter> requiredParameters,
+			IReadOnlyCollection<WebItemParameter> optionalParameters, bool includeEsParameter, bool isEs ) {
 			// It's important to force the cache to be enabled in the constructor since these objects are often created in post-back-action getters.
 
 			writeConstructorDocComments( writer, requiredParameters );
@@ -76,7 +75,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 			writeInitParametersMethod( writer, generalData, requiredParameters, optionalParameters, includeEsParameter, isEs, constructorParameters );
 		}
 
-		private static void writeConstructorDocComments( TextWriter writer, IReadOnlyCollection<VariableSpecification> requiredParameters ) {
+		private static void writeConstructorDocComments( TextWriter writer, IReadOnlyCollection<WebItemParameter> requiredParameters ) {
 			foreach( var parameter in requiredParameters ) {
 				var warning = "";
 				if( parameter.IsString || parameter.IsEnumerable )
@@ -89,8 +88,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 		}
 
 		private static void writeInitParametersMethod(
-			TextWriter writer, WebItemGeneralData generalData, IReadOnlyCollection<VariableSpecification> requiredParameters,
-			IReadOnlyCollection<VariableSpecification> optionalParameters, bool includeEsParameter, bool isEs, string constructorParameters ) {
+			TextWriter writer, WebItemGeneralData generalData, IReadOnlyCollection<WebItemParameter> requiredParameters,
+			IReadOnlyCollection<WebItemParameter> optionalParameters, bool includeEsParameter, bool isEs, string constructorParameters ) {
 			CodeGenerationStatics.AddSummaryDocComment(
 				writer,
 				"Initializes required and optional parameters. A call to this should be the first line of every non-generated constructor." );
@@ -188,7 +187,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 		}
 
 		internal static string GetInfoConstructorArgumentsForRequiredParameters(
-			IReadOnlyCollection<VariableSpecification> requiredParameters, Func<VariableSpecification, string> requiredParameterToArgMapper ) {
+			IReadOnlyCollection<WebItemParameter> requiredParameters, Func<WebItemParameter, string> requiredParameterToArgMapper ) {
 			var text = "";
 			foreach( var requiredParameter in requiredParameters )
 				text = StringTools.ConcatenateWithDelimiter( ", ", text, requiredParameterToArgMapper( requiredParameter ) );
@@ -196,15 +195,15 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 		}
 
 		internal static void WriteEqualsParameterComparisons(
-			TextWriter writer, List<VariableSpecification> requiredParameters, List<VariableSpecification> optionalParameters, string otherObjectName ) {
+			TextWriter writer, List<WebItemParameter> requiredParameters, List<WebItemParameter> optionalParameters, string otherObjectName ) {
 			foreach( var parameter in requiredParameters.Concat( optionalParameters ) )
 				writer.WriteLine( "if( !EwlStatics.AreEqual( {0}.{1}, {1} ) ) return false;".FormatWith( otherObjectName, parameter.PropertyName ) );
 			writer.WriteLine( "return true;" );
 		}
 
 		internal static void WriteGetHashCodeMethod(
-			TextWriter writer, string pathRelativeToProject, IReadOnlyCollection<VariableSpecification> requiredParameters,
-			IReadOnlyCollection<VariableSpecification> optionalParameters ) {
+			TextWriter writer, string pathRelativeToProject, IReadOnlyCollection<WebItemParameter> requiredParameters,
+			IReadOnlyCollection<WebItemParameter> optionalParameters ) {
 			writer.WriteLine(
 				"public override int GetHashCode() => ( {0} ).GetHashCode();".FormatWith(
 					"@\"{0}\"".FormatWith( pathRelativeToProject ) + StringTools

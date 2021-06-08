@@ -7,7 +7,7 @@ using Tewl.Tools;
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework {
 	internal static class OptionalParameterPackageStatics {
 		internal static void WriteClassIfNecessary(
-			TextWriter writer, IReadOnlyCollection<VariableSpecification> requiredParameters, IReadOnlyCollection<VariableSpecification> optionalParameters ) {
+			TextWriter writer, IReadOnlyCollection<WebItemParameter> requiredParameters, IReadOnlyCollection<WebItemParameter> optionalParameters ) {
 			if( !optionalParameters.Any() )
 				return;
 
@@ -65,7 +65,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 			writer.WriteLine( "}" );
 		}
 
-		public static string GetWasSpecifiedPropertyName( VariableSpecification parameter ) {
+		public static string GetWasSpecifiedPropertyName( WebItemParameter parameter ) {
 			return parameter.PropertyName + "WasSpecified";
 		}
 	}

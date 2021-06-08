@@ -286,8 +286,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 				writer,
 				className,
 				null,
-				Enumerable.Empty<VariableSpecification>().Materialize(),
-				Enumerable.Empty<VariableSpecification>().Materialize(),
+				Enumerable.Empty<WebItemParameter>().Materialize(),
+				Enumerable.Empty<WebItemParameter>().Materialize(),
 				false );
 			writer.WriteLine( "protected override StaticFileFolderSetup createParentFolderSetup() => {0};".FormatWith( isRootFolder ? "null" : parentExpression ) );
 			if( !isRootFolder || parentExpression.Any() )
@@ -295,8 +295,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 			UrlStatics.GenerateGetEncoderMethod(
 				writer,
 				"",
-				Enumerable.Empty<VariableSpecification>().Materialize(),
-				Enumerable.Empty<VariableSpecification>().Materialize(),
+				Enumerable.Empty<WebItemParameter>().Materialize(),
+				Enumerable.Empty<WebItemParameter>().Materialize(),
 				p => "true",
 				false );
 			writer.WriteLine(
@@ -309,7 +309,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 			writer.WriteLine( "}" );
 		}
 
-		internal static string GetParameterDeclarations( IReadOnlyCollection<VariableSpecification> parameters ) {
+		internal static string GetParameterDeclarations( IReadOnlyCollection<WebItemParameter> parameters ) {
 			var text = "";
 			foreach( var parameter in parameters )
 				text = StringTools.ConcatenateWithDelimiter( ", ", text, parameter.TypeName + " " + parameter.Name );
@@ -317,7 +317,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 		}
 
 		internal static void WriteReCreateFromNewParameterValuesMethod(
-			TextWriter writer, IReadOnlyCollection<VariableSpecification> requiredParameters, string methodNamePrefix, string className,
+			TextWriter writer, IReadOnlyCollection<WebItemParameter> requiredParameters, string methodNamePrefix, string className,
 			string infoConstructorArgPrefix ) {
 			writer.WriteLine( methodNamePrefix + ( methodNamePrefix.Contains( "protected" ) ? "r" : "R" ) + "eCreateFromNewParameterValues() {" );
 			writer.WriteLine(

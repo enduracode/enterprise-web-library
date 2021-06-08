@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.CodeDom;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
@@ -13,7 +13,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 	/// <summary>
 	/// The specification for a parameter or a page state variable.
 	/// </summary>
-	internal class VariableSpecification {
+	internal class WebItemParameter {
 		private static readonly CSharpCodeProvider provider = new CSharpCodeProvider();
 		private static readonly Dictionary<string, Type> rawTypeNamesToTypes = new Dictionary<string, Type>();
 		private static readonly Dictionary<Type, string> typesToNormalizedTypeNames = new Dictionary<Type, string>();
@@ -24,7 +24,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 		private readonly string name;
 		private readonly string comment;
 
-		public VariableSpecification( string typeName, string name, string comment ) {
+		public WebItemParameter( string typeName, string name, string comment ) {
 			if( !rawTypeNamesToTypes.TryGetValue( typeName, out type ) ) {
 				// We need to compile some fake code because it's the only way to evaluate C# type alias such as "string" and "int?".
 				// This code block has a known memory leak because it is impossible to unload the assembly we create. Also, most people would think the performance
