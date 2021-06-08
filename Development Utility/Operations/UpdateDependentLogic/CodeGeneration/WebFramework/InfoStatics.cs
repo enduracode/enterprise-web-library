@@ -114,7 +114,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 				writer.WriteLine( "foreach( var urlHandler in AppRequestState.Instance.UrlHandlers ) {" );
 				writer.WriteLine( "if( !( urlHandler is {0} match ) ) continue;".FormatWith( generalData.ClassName ) );
 				foreach( var i in requiredParameters )
-					writer.WriteLine( "if( !EwlStatics.AreEqual( match.{0}, {0} ) ) continue;".FormatWith( i.PropertyName ) );
+					writer.WriteLine( "if( !{0} ) continue;".FormatWith( i.GetEqualityExpression( "match.{0}".FormatWith( i.PropertyName ), i.PropertyName ) ) );
 				foreach( var i in optionalParameters )
 					writer.WriteLine( "{0} = match.{1};".FormatWith( i.FieldName, i.PropertyName ) );
 				writer.WriteLine( "optionalParametersInitializedFromCurrent = true;" );
@@ -128,7 +128,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 					writer.WriteLine( "do {" );
 					writer.WriteLine( "if( !( urlHandler is {0} match ) ) continue;".FormatWith( generalData.ClassName ) );
 					foreach( var i in requiredParameters )
-						writer.WriteLine( "if( !EwlStatics.AreEqual( match.{0}, {0} ) ) continue;".FormatWith( i.PropertyName ) );
+						writer.WriteLine( "if( !{0} ) continue;".FormatWith( i.GetEqualityExpression( "match.{0}".FormatWith( i.PropertyName ), i.PropertyName ) ) );
 					foreach( var i in optionalParameters )
 						writer.WriteLine( "{0} = match.parametersModification.{1};".FormatWith( i.FieldName, i.PropertyName ) );
 					writer.WriteLine( "optionalParametersInitializedFromCurrent = true;" );
@@ -197,7 +197,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 		internal static void WriteEqualsParameterComparisons(
 			TextWriter writer, List<WebItemParameter> requiredParameters, List<WebItemParameter> optionalParameters, string otherObjectName ) {
 			foreach( var parameter in requiredParameters.Concat( optionalParameters ) )
-				writer.WriteLine( "if( !EwlStatics.AreEqual( {0}.{1}, {1} ) ) return false;".FormatWith( otherObjectName, parameter.PropertyName ) );
+				writer.WriteLine(
+					"if( !{0} ) return false;".FormatWith(
+						parameter.GetEqualityExpression( "{0}.{1}".FormatWith( otherObjectName, parameter.PropertyName ), parameter.PropertyName ) ) );
 			writer.WriteLine( "return true;" );
 		}
 
@@ -206,8 +208,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 			IReadOnlyCollection<WebItemParameter> optionalParameters ) {
 			writer.WriteLine(
 				"public override int GetHashCode() => ( {0} ).GetHashCode();".FormatWith(
-					"@\"{0}\"".FormatWith( pathRelativeToProject ) + StringTools
-						.ConcatenateWithDelimiter( ", ", requiredParameters.Concat( optionalParameters ).Select( i => i.PropertyName ) )
+					"@\"{0}\"".FormatWith( pathRelativeToProject ) + StringTools.ConcatenateWithDelimiter(
+							", ",
+							requiredParameters.Concat( optionalParameters ).Where( i => !i.IsEnumerable ).Select( i => i.PropertyName ) )
 						.PrependDelimiter( ", " ) ) );
 		}
 	}

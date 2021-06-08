@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using EnterpriseWebLibrary.InstallationSupportUtility;
+using Humanizer;
 using Microsoft.CSharp;
 using Tewl.Tools;
 
@@ -96,16 +97,16 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 			return name;
 		}
 
-		public string TypeName { get { return normalizedTypeName; } }
-		public bool IsString { get { return type == typeof( string ); } }
-		internal bool IsEnumerable { get { return normalizedElementTypeName.Any(); } }
-		internal string EnumerableInitExpression { get { return IsEnumerable ? "new " + normalizedElementTypeName + "[ 0 ]" : ""; } }
+		public string TypeName => normalizedTypeName;
+		public bool IsString => type == typeof( string );
+		internal bool IsEnumerable => normalizedElementTypeName.Any();
+		internal string EnumerableInitExpression => IsEnumerable ? "new " + normalizedElementTypeName + "[ 0 ]" : "";
 
-		public string Name { get { return name; } }
-		public string PropertyName { get { return name.CapitalizeString(); } }
-		public string FieldName { get { return "__" + name; } }
+		public string Name => name;
+		public string PropertyName => name.CapitalizeString();
+		public string FieldName => "__" + name;
 
-		public string Comment { get { return comment; } }
+		public string Comment => comment;
 
 		internal string GetUrlSerializationExpression( string valueExpression ) {
 			if( IsEnumerable )
@@ -136,5 +137,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 
 			return new ModificationField( PropertyName, PropertyName, name, type, normalizedTypeName, nullableTypeName, normalizedElementTypeName, null, null );
 		}
+
+		internal string GetEqualityExpression( string x, string y ) =>
+			IsEnumerable ? "{0}.SequenceEqual( {1} )".FormatWith( x, y ) : "EwlStatics.AreEqual( {0}, {1} )".FormatWith( x, y );
 	}
 }
