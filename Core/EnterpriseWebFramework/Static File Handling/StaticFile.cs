@@ -58,17 +58,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Gets the path of the file.
 		/// </summary>
 		private string filePath =>
-			isFrameworkFile
-				? ConfigurationStatics.InstallationConfiguration.SystemIsEwl && ConfigurationStatics.IsDevelopmentInstallation
-					  ?
-					  EwlStatics.CombinePaths(
-						  ConfigurationStatics.InstallationConfiguration.InstallationPath,
-						  EwlStatics.CoreProjectName,
-						  FrameworkStaticFilesSourceFolderPath )
-					  : EwlStatics.CombinePaths(
-						  ConfigurationStatics.InstallationConfiguration.InstallationPath,
-						  InstallationFileStatics.WebFrameworkStaticFilesFolderName )
-				: EwlStatics.CombinePaths( HttpRuntime.AppDomainAppPath, AppStaticFilesFolderName, relativeFilePath );
+			EwlStatics.CombinePaths(
+				isFrameworkFile
+					? ConfigurationStatics.InstallationConfiguration.SystemIsEwl && ConfigurationStatics.IsDevelopmentInstallation
+						  ?
+						  EwlStatics.CombinePaths(
+							  ConfigurationStatics.InstallationConfiguration.InstallationPath,
+							  EwlStatics.CoreProjectName,
+							  FrameworkStaticFilesSourceFolderPath )
+						  : EwlStatics.CombinePaths(
+							  ConfigurationStatics.InstallationConfiguration.InstallationPath,
+							  InstallationFileStatics.WebFrameworkStaticFilesFolderName )
+					: EwlStatics.CombinePaths( HttpRuntime.AppDomainAppPath, AppStaticFilesFolderName ),
+				relativeFilePath );
 
 		/// <summary>
 		/// Gets whether the file is part of the framework.

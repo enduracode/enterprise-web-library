@@ -303,7 +303,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 				"protected override IEnumerable<UrlPattern> getChildUrlPatterns() => {0};".FormatWith(
 					childPatterns.Any() ? "new[] {{ {0} }}".FormatWith( StringTools.ConcatenateWithDelimiter( ", ", childPatterns ) ) : "base.getChildUrlPatterns()" ) );
 			writer.WriteLine( "protected override bool isFrameworkFolder => {0};".FormatWith( inFramework ? "true" : "false" ) );
-			writer.WriteLine( "protected override string folderPath => @\"{0}\";".FormatWith( folderPathRelativeToProject ) );
+			writer.WriteLine(
+				"protected override string folderPath => @\"{0}\";".FormatWith(
+					folderPathRelativeToProject.Substring(
+						( ( inFramework
+							    ? EnterpriseWebFramework.StaticFile.FrameworkStaticFilesSourceFolderPath
+							    : EnterpriseWebFramework.StaticFile.AppStaticFilesFolderName ) + ( isRootFolder ? "" : Path.DirectorySeparatorChar.ToString() ) )
+						.Length ) ) );
 
 			writer.WriteLine( "}" );
 			writer.WriteLine( "}" );

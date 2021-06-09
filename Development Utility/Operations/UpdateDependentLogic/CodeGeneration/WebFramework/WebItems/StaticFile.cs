@@ -49,7 +49,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 			writer.WriteLine(
 				"protected override DateTimeOffset getBuildDateAndTime() => {0};".FormatWith( AppStatics.GetLiteralDateTimeExpression( DateTimeOffset.UtcNow ) ) );
 			writer.WriteLine( "protected override bool isFrameworkFile => {0};".FormatWith( inFramework ? "true" : "false" ) );
-			writer.WriteLine( "protected override string relativeFilePath => @\"{0}\";".FormatWith( generalData.PathRelativeToProject ) );
+			writer.WriteLine(
+				"protected override string relativeFilePath => @\"{0}\";".FormatWith(
+					generalData.PathRelativeToProject.Substring(
+						( ( inFramework
+							    ? EnterpriseWebFramework.StaticFile.FrameworkStaticFilesSourceFolderPath
+							    : EnterpriseWebFramework.StaticFile.AppStaticFilesFolderName ) + Path.DirectorySeparatorChar ).Length ) ) );
 
 			writer.WriteLine( "}" );
 			writer.WriteLine( "}" );
