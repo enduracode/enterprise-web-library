@@ -74,6 +74,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			AuthenticateRequest += handleAuthenticateRequest;
 			PostAuthenticateRequest += handlePostAuthenticateRequest;
 			PostResolveRequestCache += handlePostResolveRequestCache;
+			MapRequestHandler += handleMapRequestHandler;
 			EndRequest += handleEndRequest;
 			Error += handleError;
 		}
@@ -215,11 +216,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						"/Pages/Public/AcmeChallengeResponse.aspx?Token={0}".FormatWith( HttpUtility.UrlEncode( absoluteUrl.Segments.Last() ) ),
 						false );
 					CompleteRequest();
-					return;
 				}
 			}
-
-			throw new ResourceNotAvailableException( "Failed to resolve the URL.", null );
 		}
 
 		// One difference between this and HttpRequest.AppRelativeCurrentExecutionFilePath is that the latter does not include the query string.
@@ -246,6 +244,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Returns the base URL patterns for the application.
 		/// </summary>
 		protected internal abstract IEnumerable<BaseUrlPattern> GetBaseUrlPatterns();
+
+		private void handleMapRequestHandler( object sender, EventArgs e ) {
+			if( HttpContext.Current.Handler == null )
+				throw new ResourceNotAvailableException( "Failed to resolve the URL.", null );
+		}
 
 		// The warning below also appears on EwfPage.getPageViewDataModificationMethod.
 		/// <summary>
