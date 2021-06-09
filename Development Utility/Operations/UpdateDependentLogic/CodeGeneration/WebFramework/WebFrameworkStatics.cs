@@ -210,7 +210,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 				if( Path.GetExtension( fileName ).ToLowerInvariant() != ".cs" )
 					continue;
 				var generalData = new WebItemGeneralData( projectPath, projectNamespace, EwlStatics.CombinePaths( folderPathRelativeToProject, fileName ), false );
-				if( !generalData.IsResource() && !generalData.IsPage() && !generalData.IsAutoCompleteService() )
+				if( !generalData.IsResource() )
 					continue;
 				new Resource( projectContainsFramework, generalData, entitySetup ).GenerateCode( writer );
 			}

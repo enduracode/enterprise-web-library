@@ -48,7 +48,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 		internal string Namespace => itemNamespace;
 		internal string ClassName => className;
 
-		internal bool IsResource() => Regex.IsMatch( code, "^// {0}Resource\r?$".FormatWith( EwlStatics.EwlInitialism.EnglishToPascal() ), RegexOptions.Multiline );
+		internal bool IsResource() =>
+			Regex.IsMatch( code, "^// {0}Resource\r?$".FormatWith( EwlStatics.EwlInitialism.EnglishToPascal() ), RegexOptions.Multiline ) || IsPage() ||
+			IsAutoCompleteService();
+
 		internal bool IsPage() => Regex.IsMatch( code, "^// {0}Page\r?$".FormatWith( EwlStatics.EwlInitialism.EnglishToPascal() ), RegexOptions.Multiline );
 
 		internal bool IsAutoCompleteService() =>

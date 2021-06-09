@@ -27,7 +27,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 			writer.WriteLine(
 				"public sealed partial class {0}: {1} {{".FormatWith(
 					generalData.ClassName,
-					generalData.IsResource() ? "ResourceBase" : generalData.IsPage() ? "PageBase" : "AutoCompleteService" ) );
+					generalData.IsPage() ? "PageBase" : generalData.IsAutoCompleteService() ? "AutoCompleteService" : "ResourceBase" ) );
 
 			OptionalParameterPackageStatics.WriteClassIfNecessary( writer, requiredParameters, optionalParameters );
 			if( generalData.IsPage() )
