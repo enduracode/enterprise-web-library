@@ -67,7 +67,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 			writer.WriteLine( "init();" );
 
 			writer.WriteLine( "} );" );
-			if( generalData.IsPage() && optionalParameters.Any() )
+			if( generalData.IsResource() && optionalParameters.Any() )
 				writer.WriteLine(
 					"segmentParameterSpecifier = new Lazy<SegmentParameterSpecifier>( () => { var specifier = new SegmentParameterSpecifier(); specifySegmentParameters( specifier ); return specifier; }, LazyThreadSafetyMode.None );" );
 			writer.WriteLine( "}" );
