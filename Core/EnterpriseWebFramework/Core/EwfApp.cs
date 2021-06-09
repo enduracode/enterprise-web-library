@@ -208,13 +208,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var absoluteUrl = new Uri( RequestState.Url );
 			if( absoluteUrl.Scheme == "http" && absoluteUrl.Port == 80 && absoluteUrl.AbsolutePath.StartsWith( "/.well-known/acme-challenge/" ) ) {
 				var systemManager = ConfigurationStatics.MachineConfiguration?.SystemManager;
-				if( systemManager != null )
+				if( systemManager != null ) {
 					ResourceBase.WriteRedirectResponse(
 						HttpContext.Current,
 						systemManager.HttpBaseUrl.Replace( "https://", "http://" ) +
 						"/Pages/Public/AcmeChallengeResponse.aspx?Token={0}".FormatWith( HttpUtility.UrlEncode( absoluteUrl.Segments.Last() ) ),
 						false );
+					CompleteRequest();
+					return;
+				}
 			}
+
+			throw new ResourceNotAvailableException( "Failed to resolve the URL.", null );
 		}
 
 		// One difference between this and HttpRequest.AppRelativeCurrentExecutionFilePath is that the latter does not include the query string.
