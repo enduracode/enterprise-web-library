@@ -12,6 +12,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly Lazy<ResourceBase> parentResource;
 		private readonly Lazy<AlternativeResourceMode> alternativeMode;
 		private readonly Lazy<IReadOnlyCollection<ResourceGroup>> listedResources;
+		private readonly Lazy<UrlHandler> urlParent;
 
 		/// <summary>
 		/// Creates an entity setup object.
@@ -20,6 +21,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			parentResource = new Lazy<ResourceBase>( createParentResource );
 			alternativeMode = new Lazy<AlternativeResourceMode>( createAlternativeMode );
 			listedResources = new Lazy<IReadOnlyCollection<ResourceGroup>>( () => createListedResources().Materialize() );
+			urlParent = new Lazy<UrlHandler>( getUrlParent );
 		}
 
 		/// <summary>
@@ -94,7 +96,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		protected abstract IEnumerable<ResourceGroup> createListedResources();
 
-		UrlHandler UrlHandler.GetParent() => getUrlParent();
+		UrlHandler UrlHandler.GetParent() => urlParent.Value;
 
 		/// <summary>
 		/// Returns the resource or entity setup that will determine this entity setup’s canonical URL. One reason to override is if
