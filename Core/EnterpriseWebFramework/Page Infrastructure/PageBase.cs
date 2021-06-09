@@ -224,7 +224,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					newPageObject = (PageBase)ReCreate();
 				bool urlChanged;
 				using( MiniProfiler.Current.Step( "EWF - Check URL after page-view data modifications" ) )
-					urlChanged = newPageObject.GetUrl( false, false ) != AppRequestState.Instance.Url;
+					urlChanged = newPageObject.GetUrl( false, false ) != GetUrl( false, false );
 				if( urlChanged )
 					throw getPossibleDeveloperMistakeException( "The URL of the page changed after page-view data modifications." );
 				bool userAuthorized;
