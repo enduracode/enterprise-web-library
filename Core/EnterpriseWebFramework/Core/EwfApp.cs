@@ -364,17 +364,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					// We can remove this as soon as requesting a URL with a vertical pipe doesn't blow up our web applications.
 					var errorIsBogusPathException = exception is ArgumentException argException && argException.Message == "Illegal characters in path.";
 
-					// In the first part of this condition we check to make sure the base exception is also an HttpException, because we had a problem with WCF wrapping an
-					// important non-HttpException inside an HttpException that somehow had a code of 404. In the second part of the condition (after the OR) we use
-					// InnerException instead of GetBaseException because the ResourceNotAvailableException always has an inner exception that describes the specific
-					// problem that occurred. The third part of the condition handles ResourceNotAvailableExceptions from HTTP handlers such as CssHandler; these are not
-					// wrapped with another exception.
-					if( ( exception is HttpException && ( exception as HttpException ).GetHttpCode() == 404 && exception.GetBaseException() is HttpException ) ||
-					    exception.InnerException is ResourceNotAvailableException || exception is ResourceNotAvailableException || errorIsWcf404 ||
-					    errorIsBogusPathException )
+					if( exception is ResourceNotAvailableException || errorIsWcf404 || errorIsBogusPathException )
 						transferRequest( getErrorPage( new ResourceNotAvailable( !RequestState.HomeUrlRequest ) ) );
 
-					else if( exception.GetBaseException() is AccessDeniedException accessDeniedException ) {
+					else if( exception is AccessDeniedException accessDeniedException ) {
 						if( accessDeniedException.CausedByIntermediateUser )
 							transferRequest( new NonLiveLogIn( RequestState.Url ) );
 						else {
@@ -391,7 +384,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								transferRequest( getErrorPage( new AccessDenied( !RequestState.HomeUrlRequest ) ) );
 						}
 					}
-					else if( exception.GetBaseException() is PageDisabledException pageDisabledException )
+					else if( exception is PageDisabledException pageDisabledException )
 						transferRequest( new ResourceDisabled( pageDisabledException.Message ) );
 					else {
 						RequestState.AddError( "", exception );
