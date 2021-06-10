@@ -1,8 +1,5 @@
 ﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
-	/// <summary>
-	/// Framework use only.
-	/// </summary>
-	public static class Translation {
+	internal static class Translation {
 		internal static string DownloadExisting { get { return getCorrectTranslation( "Download existing", "Descargar archivo existente" ); } }
 		internal static string NoExistingFile { get { return getCorrectTranslation( "No existing file", "No existe el archivo" ); } }
 
@@ -80,9 +77,6 @@
 		/// </summary>
 		public static string AccessIsDenied { get { return getCorrectTranslation( "Access is denied.", "Acceso denegado." ); } }
 
-		/// <summary>
-		/// AccessDenied.aspx use only.
-		/// </summary>
 		public static string ClickHereToGoToHomePage {
 			get { return getCorrectTranslation( "Click here to go to the home page.", "Haga clic aquí para ir a la página principal." ); }
 		}
@@ -92,17 +86,6 @@
 		/// </summary>
 		public static string ThePageYouRequestedIsNotAvailable {
 			get { return getCorrectTranslation( "The page you requested is no longer available.", "La página solicitada ya no está disponible." ); }
-		}
-
-		/// <summary>
-		/// PageNotAvailable.aspx use only.
-		/// </summary>
-		public static string YouWillBeSentToTheHomePage {
-			get {
-				return getCorrectTranslation(
-					"You will be sent to the home page of the site in five seconds.",
-					"Se le enviará a la página principal del sitio web en cinco segundos." );
-			}
 		}
 
 		/// <summary>

@@ -10,7 +10,21 @@ namespace EnterpriseWebLibrary.WebSessionState {
 	/// When we're ready to remove this class, we should also disable session state in the Web.config file, although we might want to provide a way for individual
 	/// systems to keep it enabled if necessary.
 	/// </summary>
-	public class StandardLibrarySessionState {
+	internal class StandardLibrarySessionState {
+		// This is a hack that exists because sometimes error pages are processed at a point in the life cycle when session state is not available.
+		public static bool SessionAvailable => HttpContext.Current.Session != null;
+
+		/// <summary>
+		/// Returns the session state object for the current HTTP context.
+		/// </summary>
+		public static StandardLibrarySessionState Instance {
+			get {
+				if( HttpContext.Current.Session[ "StandardLibrarySessionStateObject" ] == null )
+					HttpContext.Current.Session[ "StandardLibrarySessionStateObject" ] = new StandardLibrarySessionState();
+				return HttpContext.Current.Session[ "StandardLibrarySessionStateObject" ] as StandardLibrarySessionState;
+			}
+		}
+
 		private readonly List<Tuple<StatusMessageType, string>> statusMessages = new List<Tuple<StatusMessageType, string>>();
 		private string clientSideNavigationUrl = "";
 		private bool clientSideNavigationInNewWindow;
@@ -24,17 +38,6 @@ namespace EnterpriseWebLibrary.WebSessionState {
 		internal EwfPageRequestState EwfPageRequestState { get; set; }
 
 		private StandardLibrarySessionState() {}
-
-		/// <summary>
-		/// Returns the session state object for the current HTTP context.
-		/// </summary>
-		public static StandardLibrarySessionState Instance {
-			get {
-				if( HttpContext.Current.Session[ "StandardLibrarySessionStateObject" ] == null )
-					HttpContext.Current.Session[ "StandardLibrarySessionStateObject" ] = new StandardLibrarySessionState();
-				return HttpContext.Current.Session[ "StandardLibrarySessionStateObject" ] as StandardLibrarySessionState;
-			}
-		}
 
 		internal List<Tuple<StatusMessageType, string>> StatusMessages { get { return statusMessages; } }
 

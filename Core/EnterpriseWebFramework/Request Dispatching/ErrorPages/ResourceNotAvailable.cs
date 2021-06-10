@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using System.Web;
-using EnterpriseWebLibrary.WebSessionState;
 using Tewl.Tools;
 
 // EwlPage
@@ -14,18 +13,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.ErrorPages {
 
 		protected override PageContent getContent() {
 			var content = new ErrorPageContent(
-				new Paragraph(
-					Translation.ThePageYouRequestedIsNotAvailable.ToComponents()
-						.Concat( ShowHomeLink ? " ".ToComponents().Concat( Translation.YouWillBeSentToTheHomePage.ToComponents() ) : Enumerable.Empty<PhrasingComponent>() )
-						.Materialize() ).ToCollection() );
+				new Paragraph( Translation.ThePageYouRequestedIsNotAvailable.ToComponents() ).Concat(
+						ShowHomeLink
+							? new Paragraph(
+								new EwfHyperlink(
+									new ExternalResource(
+										EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString( EwfConfigurationStatics.AppSupportsSecureConnections ) ),
+									new StandardHyperlinkStyle( Translation.ClickHereToGoToHomePage ) ).ToCollection() ).ToCollection()
+							: Enumerable.Empty<FlowComponent>() )
+					.Materialize() );
 
 			HttpContext.Current.Response.StatusCode = 404;
 			HttpContext.Current.Response.TrySkipIisCustomErrors = true;
-
-			if( ShowHomeLink )
-				StandardLibrarySessionState.Instance.SetTimedClientSideNavigation(
-					EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString( EwfConfigurationStatics.AppSupportsSecureConnections ),
-					5 );
 
 			return content;
 		}

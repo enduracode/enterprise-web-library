@@ -173,7 +173,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		private EwfResponse processViewAndGetResponse() {
 			if( AppRequestState.Instance.EwfPageRequestState == null ) {
-				if( StandardLibrarySessionState.Instance.EwfPageRequestState != null ) {
+				if( StandardLibrarySessionState.SessionAvailable && StandardLibrarySessionState.Instance.EwfPageRequestState != null ) {
 					AppRequestState.Instance.EwfPageRequestState = StandardLibrarySessionState.Instance.EwfPageRequestState;
 					StandardLibrarySessionState.Instance.EwfPageRequestState = null;
 				}
@@ -207,7 +207,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							i();
 						AppRequestState.AddNonTransactionalModificationMethod(
 							() => {
-								StandardLibrarySessionState.Instance.StatusMessages.AddRange( statusMessages );
+								if( StandardLibrarySessionState.SessionAvailable )
+									StandardLibrarySessionState.Instance.StatusMessages.AddRange( statusMessages );
 								statusMessages.Clear();
 							} );
 						AppRequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
@@ -617,7 +618,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// EWL use only. Gets the status messages.
 		/// </summary>
-		public IEnumerable<Tuple<StatusMessageType, string>> StatusMessages => StandardLibrarySessionState.Instance.StatusMessages.Concat( statusMessages );
+		public IEnumerable<Tuple<StatusMessageType, string>> StatusMessages =>
+			( StandardLibrarySessionState.SessionAvailable
+				  ? StandardLibrarySessionState.Instance.StatusMessages
+				  : Enumerable.Empty<Tuple<StatusMessageType, string>>() ).Concat( statusMessages );
 
 		private void executeWithDataModificationExceptionHandling( Action method ) {
 			try {
@@ -846,8 +850,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				} );
 
 
-			StandardLibrarySessionState.Instance.StatusMessages.Clear();
-			StandardLibrarySessionState.Instance.ClearClientSideNavigation();
+			if( StandardLibrarySessionState.SessionAvailable ) {
+				StandardLibrarySessionState.Instance.StatusMessages.Clear();
+				StandardLibrarySessionState.Instance.ClearClientSideNavigation();
+			}
 
 			return response;
 		}
@@ -864,19 +870,21 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			// If the page has requested a client-side redirect, configure it now. The JavaScript solution is preferred over a meta tag since apparently it doesn't
 			// cause reload behavior by the browser. See http://josephsmarr.com/2007/06/06/the-hidden-cost-of-meta-refresh-tags.
-			StandardLibrarySessionState.Instance.GetClientSideNavigationSetup(
-				out var clientSideNavigationUrl,
-				out var clientSideNavigationInNewWindow,
-				out var clientSideNavigationDelay );
 			var clientSideNavigationStatements = "";
-			if( clientSideNavigationUrl.Any() ) {
-				var url = clientSideNavigationUrl;
-				if( clientSideNavigationInNewWindow )
-					clientSideNavigationStatements = "var newWindow = window.open( '{0}', '{1}' ); newWindow.focus();".FormatWith( url, "_blank" );
-				else
-					clientSideNavigationStatements = "location.replace( '" + url + "' );";
-				if( clientSideNavigationDelay.HasValue )
-					clientSideNavigationStatements = "setTimeout( \"" + clientSideNavigationStatements + "\", " + clientSideNavigationDelay.Value * 1000 + " );";
+			if( StandardLibrarySessionState.SessionAvailable ) {
+				StandardLibrarySessionState.Instance.GetClientSideNavigationSetup(
+					out var clientSideNavigationUrl,
+					out var clientSideNavigationInNewWindow,
+					out var clientSideNavigationDelay );
+				if( clientSideNavigationUrl.Any() ) {
+					var url = clientSideNavigationUrl;
+					if( clientSideNavigationInNewWindow )
+						clientSideNavigationStatements = "var newWindow = window.open( '{0}', '{1}' ); newWindow.focus();".FormatWith( url, "_blank" );
+					else
+						clientSideNavigationStatements = "location.replace( '" + url + "' );";
+					if( clientSideNavigationDelay.HasValue )
+						clientSideNavigationStatements = "setTimeout( \"" + clientSideNavigationStatements + "\", " + clientSideNavigationDelay.Value * 1000 + " );";
+				}
 			}
 
 			return StringTools.ConcatenateWithDelimiter(
