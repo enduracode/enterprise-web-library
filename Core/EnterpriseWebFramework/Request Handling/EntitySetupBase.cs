@@ -141,7 +141,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		protected virtual IEnumerable<UrlPattern> getChildUrlPatterns() => Enumerable.Empty<UrlPattern>();
 
 		void BasicUrlHandler.HandleRequest( HttpContext context ) {
-			var requestHandler = getRequestHandler();
+			UrlHandler requestHandler;
+			try {
+				requestHandler = getRequestHandler();
+			}
+			catch( Exception e ) {
+				if( e is UserDisabledException )
+					throw;
+				throw new ResourceNotAvailableException( "Failed to get the request handler.", e );
+			}
+
 			if( requestHandler == null )
 				throw new ResourceNotAvailableException( "An entity setup cannot handle a request.", null );
 			requestHandler.HandleRequest( context );
