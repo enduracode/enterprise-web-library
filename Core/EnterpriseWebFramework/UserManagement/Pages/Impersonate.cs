@@ -33,6 +33,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 				throw new ApplicationException( "user" );
 		}
 
+		public override string ResourceName => ConfigurationStatics.IsLiveInstallation ? "Impersonate User" : "Select User";
+
 		protected override bool userCanAccessResource {
 			get {
 				var user = AppRequestState.Instance.ImpersonatorExists ? AppRequestState.Instance.ImpersonatorUser : AppTools.User;
