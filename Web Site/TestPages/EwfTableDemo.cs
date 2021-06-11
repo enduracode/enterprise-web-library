@@ -127,9 +127,3 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 		}
 	}
 }
-
-namespace EnterpriseWebLibrary.WebSite.TestPages {
-	partial class EwfTableDemo {
-		protected override UrlHandler getUrlParent() => new LegacyUrlFolderSetup();
-	}
-}
