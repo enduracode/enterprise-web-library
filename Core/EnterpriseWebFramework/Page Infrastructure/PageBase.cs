@@ -27,8 +27,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal const string ButtonElementName = "ewfButton";
 
-		private static Func<PageContent, Func<string>, Func<string>, ( PageContent basicContent, FlowComponent component, FlowComponent etherealContainer,
-			FlowComponent jsInitElement, Action dataUpdateModificationMethod, bool isAutoDataUpdater )> contentGetter;
+		private static Func<Func<Func<PageContent>, PageContent>, Func<string>, Func<string>, ( PageContent basicContent, FlowComponent component, FlowComponent
+			etherealContainer, FlowComponent jsInitElement, Action dataUpdateModificationMethod, bool isAutoDataUpdater )> contentGetter;
 
 		[ JsonObject( ItemRequired = Required.Always, MemberSerialization = MemberSerialization.Fields ) ]
 		private class HiddenFieldData {
@@ -66,7 +66,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		internal static void Init(
-			Func<PageContent, Func<string>, Func<string>, ( PageContent, FlowComponent, FlowComponent, FlowComponent, Action, bool )> contentGetter ) {
+			Func<Func<Func<PageContent>, PageContent>, Func<string>, Func<string>, ( PageContent, FlowComponent, FlowComponent, FlowComponent, Action, bool )>
+				contentGetter ) {
 			EwfValidation.Init(
 				() => Current.formState.ValidationPredicate,
 				() => Current.formState.DataModifications,
@@ -505,11 +506,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			formState = new FormState();
 			var elementJsInitStatements = new StringBuilder();
 			var content = contentGetter(
-				FormState.ExecuteWithDataModificationsAndDefaultAction(
+				defaultContentGetter => FormState.ExecuteWithDataModificationsAndDefaultAction(
 					DataUpdate.ToCollection(),
 					() => {
 						using( MiniProfiler.Current.Step( "EWF - Get page content" ) )
-							return getContent();
+							return getContent() ?? defaultContentGetter();
 					} ),
 				() => {
 					var rs = AppRequestState.Instance.EwfPageRequestState;
