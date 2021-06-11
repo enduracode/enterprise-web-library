@@ -348,7 +348,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 											( text, icon ) => new ButtonHyperlinkStyle( text, buttonSize: ButtonSize.ShrinkWrap ),
 											( text, icon ) => new StandardButtonStyle( text, buttonSize: ButtonSize.ShrinkWrap ) )
 										.ToCollection() )
-								.Aggregate( ( components, action ) => components.Concat( " ".ToComponents() ).Materialize() ) )
+								.Aggregate( ( components, action ) => components.Concat( " ".ToComponents() ).Concat( action ).Materialize() ) )
 						.Materialize() );
 
 			if( warningLines.Any() )
