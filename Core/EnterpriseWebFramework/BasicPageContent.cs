@@ -154,6 +154,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal static ( PageContent, FlowComponent, FlowComponent, FlowComponent, Action, bool ) GetContent(
 			PageContent content, Func<string> hiddenFieldValueGetter, Func<string> jsInitStatementGetter ) {
+			content = content ?? new BasicPageContent();
+
 			var contentObjects = new List<PageContent>();
 			while( !( content is BasicPageContent ) ) {
 				contentObjects.Add( content );
