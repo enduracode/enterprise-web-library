@@ -363,9 +363,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					// We can remove this as soon as requesting a URL with a vertical pipe doesn't blow up our web applications.
 					var errorIsBogusPathException = exception is ArgumentException argException && argException.Message == "Illegal characters in path.";
 
+					var baseUrlRequest = new Lazy<bool>(
+						() => string.Equals(
+							RequestState.Url,
+							EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString( EwfConfigurationStatics.AppSupportsSecureConnections ),
+							StringComparison.Ordinal ) );
 					if( exception is ResourceNotAvailableException || errorIsWcf404 || errorIsBogusPathException )
-						transferRequest( getErrorPage( new ResourceNotAvailable( !RequestState.HomeUrlRequest ) ) );
-
+						transferRequest( getErrorPage( new ResourceNotAvailable( !baseUrlRequest.Value ) ) );
 					else if( exception is AccessDeniedException accessDeniedException ) {
 						if( accessDeniedException.CausedByIntermediateUser )
 							transferRequest( new NonLiveLogIn( RequestState.Url ) );
@@ -380,7 +384,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								else
 									transferRequest( new LogIn( RequestState.Url ) );
 							else
-								transferRequest( getErrorPage( new AccessDenied( !RequestState.HomeUrlRequest ) ) );
+								transferRequest( getErrorPage( new AccessDenied( !baseUrlRequest.Value ) ) );
 						}
 					}
 					else if( exception is PageDisabledException pageDisabledException )

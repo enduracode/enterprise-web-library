@@ -35,7 +35,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly Instant beginInstant;
 		private readonly string url;
 		private readonly string baseUrl;
-		private readonly bool homeUrlRequest = HttpContext.Current.Request.AppRelativeCurrentExecutionFilePath == "~/";
 
 		private readonly DataAccessState dataAccessState;
 		private bool primaryDatabaseConnectionInitialized;
@@ -85,8 +84,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public string Url => url;
 
 		internal string BaseUrl => baseUrl;
-
-		internal bool HomeUrlRequest => homeUrlRequest;
 
 		/// <summary>
 		/// EwfApp.ewfApplicationStart use only.
