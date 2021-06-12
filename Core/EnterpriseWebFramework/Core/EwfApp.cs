@@ -346,52 +346,59 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private void handleError( object sender, EventArgs e ) {
 			ExecuteWithBasicExceptionHandling(
 				() => {
-					Exception exception;
 					try {
-						// This code should happen first to prevent errors from going to the Windows event log.
-						exception = Server.GetLastError();
-						Server.ClearError();
+						Exception exception;
+						try {
+							// This code should happen first to prevent errors from going to the Windows event log.
+							exception = Server.GetLastError();
+							Server.ClearError();
 
-						rollbackDatabaseTransactions();
-					}
-					finally {
-						CompleteRequest();
-					}
+							rollbackDatabaseTransactionsAndClearResponse();
+						}
+						finally {
+							CompleteRequest();
+						}
 
-					var errorIsWcf404 = exception.InnerException is System.ServiceModel.EndpointNotFoundException;
+						var errorIsWcf404 = exception.InnerException is System.ServiceModel.EndpointNotFoundException;
 
-					// We can remove this as soon as requesting a URL with a vertical pipe doesn't blow up our web applications.
-					var errorIsBogusPathException = exception is ArgumentException argException && argException.Message == "Illegal characters in path.";
+						// We can remove this as soon as requesting a URL with a vertical pipe doesn't blow up our web applications.
+						var errorIsBogusPathException = exception is ArgumentException argException && argException.Message == "Illegal characters in path.";
 
-					var baseUrlRequest = new Lazy<bool>(
-						() => string.Equals(
-							RequestState.Url,
-							EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString( EwfConfigurationStatics.AppSupportsSecureConnections ),
-							StringComparison.Ordinal ) );
-					if( exception is ResourceNotAvailableException || errorIsWcf404 || errorIsBogusPathException )
-						transferRequest( getErrorPage( new ResourceNotAvailable( !baseUrlRequest.Value ) ) );
-					else if( exception is AccessDeniedException accessDeniedException ) {
-						if( accessDeniedException.CausedByIntermediateUser )
-							transferRequest( new NonLiveLogIn( RequestState.Url ) );
-						else {
-							var userNotYetAuthenticated = RequestState.UserAccessible && AppTools.User == null && UserManagementStatics.UserManagementEnabled;
-							if( userNotYetAuthenticated && !ConfigurationStatics.IsLiveInstallation && !RequestState.ImpersonatorExists )
-								transferRequest( new Impersonate( RequestState.Url ) );
-							else if( userNotYetAuthenticated && FormsAuthStatics.FormsAuthEnabled )
-								if( accessDeniedException.LogInPage != null )
-									// We pass false here to avoid complicating things with ThreadAbortExceptions.
-									Response.Redirect( accessDeniedException.LogInPage.GetUrl(), false );
+						var baseUrlRequest = new Lazy<bool>(
+							() => string.Equals(
+								RequestState.Url,
+								EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString( EwfConfigurationStatics.AppSupportsSecureConnections ),
+								StringComparison.Ordinal ) );
+						if( exception is ResourceNotAvailableException || errorIsWcf404 || errorIsBogusPathException )
+							transferRequest( getErrorPage( new ResourceNotAvailable( !baseUrlRequest.Value ) ) );
+						else if( exception is AccessDeniedException accessDeniedException ) {
+							if( accessDeniedException.CausedByIntermediateUser )
+								transferRequest( new NonLiveLogIn( RequestState.Url ) );
+							else {
+								var userNotYetAuthenticated = RequestState.UserAccessible && AppTools.User == null && UserManagementStatics.UserManagementEnabled;
+								if( userNotYetAuthenticated && !ConfigurationStatics.IsLiveInstallation && !RequestState.ImpersonatorExists )
+									transferRequest( new Impersonate( RequestState.Url ) );
+								else if( userNotYetAuthenticated && FormsAuthStatics.FormsAuthEnabled )
+									if( accessDeniedException.LogInPage != null )
+										// We pass false here to avoid complicating things with ThreadAbortExceptions.
+										Response.Redirect( accessDeniedException.LogInPage.GetUrl(), false );
+									else
+										transferRequest( new LogIn( RequestState.Url ) );
 								else
-									transferRequest( new LogIn( RequestState.Url ) );
-							else
-								transferRequest( getErrorPage( new AccessDenied( !baseUrlRequest.Value ) ) );
+									transferRequest( getErrorPage( new AccessDenied( !baseUrlRequest.Value ) ) );
+							}
+						}
+						else if( exception is PageDisabledException pageDisabledException )
+							transferRequest( new ResourceDisabled( pageDisabledException.Message ) );
+						else {
+							RequestState.AddError( "", exception );
+							transferRequestToUnhandledExceptionPage();
 						}
 					}
-					else if( exception is PageDisabledException pageDisabledException )
-						transferRequest( new ResourceDisabled( pageDisabledException.Message ) );
-					else {
-						RequestState.AddError( "", exception );
-						transferRequestToUnhandledExceptionPage();
+					catch {
+						Response.ClearHeaders();
+						Response.ClearContent();
+						throw;
 					}
 				},
 				true,
@@ -403,7 +410,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				resource.HandleRequest( HttpContext.Current, true );
 			}
 			catch( Exception exception ) {
-				rollbackDatabaseTransactions();
+				rollbackDatabaseTransactionsAndClearResponse();
 				RequestState.AddError( "An exception occurred during a request for a handled error page or a log-in page:", exception );
 				transferRequestToUnhandledExceptionPage();
 			}
@@ -414,7 +421,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				getErrorPage( new UnhandledException() ).HandleRequest( HttpContext.Current, true );
 			}
 			catch( Exception exception ) {
-				rollbackDatabaseTransactions();
+				rollbackDatabaseTransactionsAndClearResponse();
 				RequestState.AddError( "An exception occurred during a request for the unhandled exception page:", exception );
 				set500StatusCode( "Unhandled Exception Page Error" );
 			}
@@ -429,11 +436,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		protected virtual PageBase errorPage => null;
 
-		private void rollbackDatabaseTransactions() {
+		private void rollbackDatabaseTransactionsAndClearResponse() {
 			RequestState.RollbackDatabaseTransactions();
 			DataAccessState.Current.ResetCache();
 
 			RequestState.EwfPageRequestState = new EwfPageRequestState( null, null );
+
+			Response.ClearHeaders();
+			Response.ClearContent();
 		}
 
 		private void set500StatusCode( string description ) {
