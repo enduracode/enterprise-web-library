@@ -162,9 +162,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="contentFootComponents">The content-foot components.</param>
 		/// <param name="dataUpdateModificationMethod">The modification method for the page’s data-update modification.</param>
 		/// <param name="isAutoDataUpdater">Pass true to force a post-back when a hyperlink is clicked.</param>
+		/// <param name="pageLoadPostBack">A post-back that will be triggered automatically by the browser when the page is finished loading.</param>
 		public UiPageContent(
 			bool omitContentBox = false, IReadOnlyCollection<ActionComponentSetup> pageActions = null, IReadOnlyCollection<ButtonSetup> contentFootActions = null,
-			IReadOnlyCollection<FlowComponent> contentFootComponents = null, Action dataUpdateModificationMethod = null, bool isAutoDataUpdater = false ) {
+			IReadOnlyCollection<FlowComponent> contentFootComponents = null, Action dataUpdateModificationMethod = null, bool isAutoDataUpdater = false,
+			ActionPostBack pageLoadPostBack = null ) {
 			pageActions = pageActions ?? Enumerable.Empty<ActionComponentSetup>().Materialize();
 			if( contentFootActions != null && contentFootComponents != null )
 				throw new ApplicationException( "Either contentFootActions or contentFootComponents may be specified, but not both." );
@@ -172,34 +174,38 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				contentFootActions = Enumerable.Empty<ButtonSetup>().Materialize();
 
 			entityUiSetup = ( PageBase.Current.EsAsBaseType as UiEntitySetup )?.GetUiSetup();
-			basicContent = new BasicPageContent( dataUpdateModificationMethod: dataUpdateModificationMethod, isAutoDataUpdater: isAutoDataUpdater ).Add(
-				getGlobalContainer()
-					.Append(
-						new GenericFlowContainer(
-							getEntityAndTopTabContainer()
-								.Append(
-									EwfTable.Create( style: EwfTableStyle.Raw, classes: sideTabAndContentBlockClass )
-										.AddItem(
-											EwfTableItem.Create(
-												( entityUsesTabMode( TabMode.Vertical )
-													  ? getSideTabContainer().ToCell( setup: new TableCellSetup( classes: sideTabContainerClass ) ).ToCollection()
-													  : Enumerable.Empty<EwfTableCell>() ).Append(
-													getPageActionListContainer( pageActions )
-														.Append(
-															new DisplayableElement(
-																context => new DisplayableElementData(
-																	null,
-																	() => new DisplayableElementLocalData( "div" ),
-																	classes: omitContentBox ? null : contentClass,
-																	children: content ) ) )
-														.Concat( getContentFootBlock( isAutoDataUpdater, contentFootActions, contentFootComponents ) )
-														.Materialize()
-														.ToCell( setup: new TableCellSetup( classes: contentClass ) ) )
-												.Materialize() ) ) )
-								.Materialize(),
-							clientSideIdOverride: entityAndTabAndContentBlockId ) )
-					.Concat( getGlobalFootContainer() )
-					.Materialize() );
+			basicContent =
+				new BasicPageContent(
+					dataUpdateModificationMethod: dataUpdateModificationMethod,
+					isAutoDataUpdater: isAutoDataUpdater,
+					pageLoadPostBack: pageLoadPostBack ).Add(
+					getGlobalContainer()
+						.Append(
+							new GenericFlowContainer(
+								getEntityAndTopTabContainer()
+									.Append(
+										EwfTable.Create( style: EwfTableStyle.Raw, classes: sideTabAndContentBlockClass )
+											.AddItem(
+												EwfTableItem.Create(
+													( entityUsesTabMode( TabMode.Vertical )
+														  ? getSideTabContainer().ToCell( setup: new TableCellSetup( classes: sideTabContainerClass ) ).ToCollection()
+														  : Enumerable.Empty<EwfTableCell>() ).Append(
+														getPageActionListContainer( pageActions )
+															.Append(
+																new DisplayableElement(
+																	context => new DisplayableElementData(
+																		null,
+																		() => new DisplayableElementLocalData( "div" ),
+																		classes: omitContentBox ? null : contentClass,
+																		children: content ) ) )
+															.Concat( getContentFootBlock( isAutoDataUpdater, contentFootActions, contentFootComponents ) )
+															.Materialize()
+															.ToCell( setup: new TableCellSetup( classes: contentClass ) ) )
+													.Materialize() ) ) )
+									.Materialize(),
+								clientSideIdOverride: entityAndTabAndContentBlockId ) )
+						.Concat( getGlobalFootContainer() )
+						.Materialize() );
 
 			if( !EwfUiStatics.AppProvider.BrowserWarningDisabled() ) {
 				if( AppRequestState.Instance.Browser.IsOldVersionOfMajorBrowser() && !StandardLibrarySessionState.Instance.HideBrowserWarningForRemainderOfSession )

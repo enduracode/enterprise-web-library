@@ -152,7 +152,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			BasicPageContent.impersonationWarningLineGetter = impersonationWarningLineGetter;
 		}
 
-		internal static ( PageContent, FlowComponent, FlowComponent, FlowComponent, Action, bool ) GetContent(
+		internal static ( PageContent, FlowComponent, FlowComponent, FlowComponent, Action, bool, ActionPostBack ) GetContent(
 			Func<Func<PageContent>, PageContent> contentGetter, Func<string> hiddenFieldValueGetter, Func<string> jsInitStatementGetter ) {
 			var content = contentGetter( () => new BasicPageContent() );
 
@@ -165,7 +165,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			var jsInitElement = getJsInitElement( jsInitStatementGetter );
 			return ( basicContent, basicContent.componentGetter( contentObjects, hiddenFieldValueGetter, jsInitElement ), basicContent.etherealContainer,
-				       jsInitElement, basicContent.dataUpdateModificationMethod, basicContent.isAutoDataUpdater );
+				       jsInitElement, basicContent.dataUpdateModificationMethod, basicContent.isAutoDataUpdater, basicContent.pageLoadPostBack );
 		}
 
 		private static FlowComponent getJsInitElement( Func<string> jsInitStatementGetter ) =>
@@ -191,6 +191,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly List<EtherealComponent> etherealContent = new List<EtherealComponent>();
 		private readonly Action dataUpdateModificationMethod;
 		private readonly bool isAutoDataUpdater;
+		private readonly ActionPostBack pageLoadPostBack;
 
 		/// <summary>
 		/// Creates a basic page content object.
@@ -200,9 +201,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="bodyClasses"></param>
 		/// <param name="dataUpdateModificationMethod">The modification method for the page’s data-update modification.</param>
 		/// <param name="isAutoDataUpdater">Pass true to force a post-back when a hyperlink is clicked.</param>
+		/// <param name="pageLoadPostBack">A post-back that will be triggered automatically by the browser when the page is finished loading.</param>
 		public BasicPageContent(
 			string titleOverride = "", TrustedHtmlString customHeadElements = null, ElementClassSet bodyClasses = null, Action dataUpdateModificationMethod = null,
-			bool isAutoDataUpdater = false ) {
+			bool isAutoDataUpdater = false, ActionPostBack pageLoadPostBack = null ) {
 			var preContentComponents = getPreContentComponents();
 			var postContentComponents = getPostContentComponents();
 			var etherealComponents = getEtherealComponents();
@@ -274,6 +276,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			etherealContainer = new GenericFlowContainer( null );
 			this.dataUpdateModificationMethod = dataUpdateModificationMethod;
 			this.isAutoDataUpdater = isAutoDataUpdater;
+			this.pageLoadPostBack = pageLoadPostBack;
 		}
 
 		private IReadOnlyCollection<FlowComponent> getPreContentComponents() {

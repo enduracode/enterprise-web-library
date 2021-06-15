@@ -28,7 +28,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal const string ButtonElementName = "ewfButton";
 
 		private static Func<Func<Func<PageContent>, PageContent>, Func<string>, Func<string>, ( PageContent basicContent, FlowComponent component, FlowComponent
-			etherealContainer, FlowComponent jsInitElement, Action dataUpdateModificationMethod, bool isAutoDataUpdater )> contentGetter;
+				etherealContainer, FlowComponent jsInitElement, Action dataUpdateModificationMethod, bool isAutoDataUpdater, ActionPostBack pageLoadPostBack )>
+			contentGetter;
 
 		[ JsonObject( ItemRequired = Required.Always, MemberSerialization = MemberSerialization.Fields ) ]
 		private class HiddenFieldData {
@@ -66,8 +67,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		internal static void Init(
-			Func<Func<Func<PageContent>, PageContent>, Func<string>, Func<string>, ( PageContent, FlowComponent, FlowComponent, FlowComponent, Action, bool )>
-				contentGetter ) {
+			Func<Func<Func<PageContent>, PageContent>, Func<string>, Func<string>, ( PageContent, FlowComponent, FlowComponent, FlowComponent, Action, bool,
+				ActionPostBack )> contentGetter ) {
 			EwfValidation.Init(
 				() => Current.formState.ValidationPredicate,
 				() => Current.formState.DataModifications,
@@ -504,6 +505,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			while( ( urlHandler = urlHandler.GetParent() ) != null );
 
 			formState = new FormState();
+			FormAction pageLoadAction = null;
 			var elementJsInitStatements = new StringBuilder();
 			var content = contentGetter(
 				defaultContentGetter => FormState.ExecuteWithDataModificationsAndDefaultAction(
@@ -529,11 +531,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							"" ),
 						Formatting.None );
 				},
-				() => getJsInitStatements( elementJsInitStatements.ToString() ) );
+				() => getJsInitStatements( elementJsInitStatements.ToString(), pageLoadAction != null ? pageLoadAction.GetJsStatements() : "" ) );
 			BasicContent = content.basicContent;
 			if( content.dataUpdateModificationMethod != null )
 				dataUpdate.AddModificationMethod( content.dataUpdateModificationMethod );
 			IsAutoDataUpdater = content.isAutoDataUpdater;
+			if( content.pageLoadPostBack != null )
+				( pageLoadAction = new PostBackFormAction( content.pageLoadPostBack ) ).AddToPageIfNecessary();
 			using( MiniProfiler.Current.Step( "EWF - Build page tree" ) )
 				pageTree = new PageTree(
 					content.component,
@@ -859,7 +863,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return response;
 		}
 
-		private string getJsInitStatements( string elementJsInitStatements ) {
+		private string getJsInitStatements( string elementJsInitStatements, string pageLoadActionStatements ) {
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
 			var scroll = scrollPositionForThisResponse == ScrollPosition.LastPositionOrStatusBar &&
 			             ( !requestState.ModificationErrorsExist || ( requestState.DmIdAndSecondaryOp != null &&
@@ -899,7 +903,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				elementJsInitStatements,
 				EwfApp.Instance.JavaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
 				javaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
-				StringTools.ConcatenateWithDelimiter( " ", scrollStatement, clientSideNavigationStatements )
+				StringTools.ConcatenateWithDelimiter( " ", scrollStatement, pageLoadActionStatements, clientSideNavigationStatements )
 					.PrependDelimiter( "window.onload = function() { " )
 					.AppendDelimiter( " };" ) );
 		}
