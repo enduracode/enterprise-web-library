@@ -30,8 +30,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			this.responseWriter = responseWriter;
 		}
 
-		internal void WriteResponse() {
-			responseWriter.WriteResponse();
+		internal void WriteResponse( bool forceImmediateResponseExpiration ) {
+			responseWriter.WriteResponse( forceImmediateResponseExpiration );
 		}
 	}
 }

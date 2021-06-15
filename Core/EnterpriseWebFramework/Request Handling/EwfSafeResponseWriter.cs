@@ -30,10 +30,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				aspNetResponse.Cache.SetMaxAge( responseNeverExpires.Value ? TimeSpan.FromDays( 365 ) : TimeSpan.Zero );
 		}
 
-		private static Action<HttpRequest, HttpResponse> createWriter(
+		private static Action<HttpResponse, HttpRequest, bool> createWriter(
 			Func<EwfResponse> responseCreator, string urlVersionString, string eTagBase, Func<DateTimeOffset> lastModificationDateAndTimeGetter,
 			Func<string> memoryCacheKeyGetter ) {
-			return ( aspNetRequest, aspNetResponse ) => {
+			return ( aspNetResponse, aspNetRequest, forceImmediateResponseExpiration ) => {
 				var response = new Lazy<EwfResponse>( responseCreator );
 
 				// If we ever want to implement content negotiation, we can do so here. We can accept multiple response-creator functions instead of just one. Then, if
@@ -46,7 +46,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					aspNetResponse,
 					EwfApp.Instance.RequestIsSecure( aspNetRequest ),
 					urlVersionString.Any() || eTagBase.Any() || lastModificationDateAndTimeGetter != null,
-					urlVersionString.Any() );
+					urlVersionString.Any() && !forceImmediateResponseExpiration );
 
 				var lastModificationDateAndTime = lastModificationDateAndTimeGetter != null ? new Lazy<DateTimeOffset>( lastModificationDateAndTimeGetter ) : null;
 				string eTag;
@@ -99,7 +99,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			};
 		}
 
-		private readonly Action<HttpRequest, HttpResponse> writer;
+		private readonly Action<HttpResponse, HttpRequest, bool> writer;
 
 		/// <summary>
 		/// Creates a response writer with CSS text.
@@ -183,8 +183,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				() => memoryCachingSetup.Value != null ? memoryCachingSetup.Value.CacheKey : "" );
 		}
 
-		internal void WriteResponse() {
-			writer( HttpContext.Current.Request, HttpContext.Current.Response );
+		internal void WriteResponse( bool forceImmediateResponseExpiration ) {
+			writer( HttpContext.Current.Response, HttpContext.Current.Request, forceImmediateResponseExpiration );
 		}
 	}
 }
