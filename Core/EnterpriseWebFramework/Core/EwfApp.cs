@@ -440,7 +440,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			RequestState.RollbackDatabaseTransactions();
 			DataAccessState.Current.ResetCache();
 
-			RequestState.EwfPageRequestState = new EwfPageRequestState( null, null );
+			RequestState.EwfPageRequestState = new EwfPageRequestState( AppRequestState.RequestTime, null, null );
 
 			Response.ClearHeaders();
 			Response.ClearContent();

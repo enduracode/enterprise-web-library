@@ -33,6 +33,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		[ JsonObject( ItemRequired = Required.Always, MemberSerialization = MemberSerialization.Fields ) ]
 		private class HiddenFieldData {
+			[ JsonProperty( PropertyName = "firstRequestTime" ) ]
+			public readonly Instant FirstRequestTime;
+
 			[ JsonProperty( PropertyName = "componentState" ) ]
 			public readonly ImmutableDictionary<string, JToken> ComponentStateValuesById;
 
@@ -55,8 +58,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			public readonly string ScrollPositionY;
 
 			public HiddenFieldData(
-				ImmutableDictionary<string, JToken> componentStateValuesById, string formValueHash, string lastPostBackFailingDmId, string postBackId,
-				string scrollPositionX, string scrollPositionY ) {
+				Instant firstRequestTime, ImmutableDictionary<string, JToken> componentStateValuesById, string formValueHash, string lastPostBackFailingDmId,
+				string postBackId, string scrollPositionX, string scrollPositionY ) {
+				FirstRequestTime = firstRequestTime;
 				ComponentStateValuesById = componentStateValuesById;
 				FormValueHash = formValueHash;
 				LastPostBackFailingDmId = lastPostBackFailingDmId;
@@ -180,7 +184,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					StandardLibrarySessionState.Instance.EwfPageRequestState = null;
 				}
 				else
-					AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( null, null );
+					AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( AppRequestState.RequestTime, null, null );
 			}
 
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
@@ -387,13 +391,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					HttpContext.Current.Request.Form[ HiddenFieldName ],
 					new JsonSerializerSettings { MissingMemberHandling = MissingMemberHandling.Error } );
 
-				AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( hiddenFieldData.ScrollPositionX, hiddenFieldData.ScrollPositionY );
+				AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState(
+					hiddenFieldData.FirstRequestTime,
+					hiddenFieldData.ScrollPositionX,
+					hiddenFieldData.ScrollPositionY );
 				AppRequestState.Instance.EwfPageRequestState.ComponentStateValuesById = hiddenFieldData.ComponentStateValuesById;
 			}
 			catch {
 				// Set a 400 status code if there are any problems loading hidden field state. We're assuming these problems are never the developers' fault.
 				if( AppRequestState.Instance.EwfPageRequestState == null )
-					AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( null, null );
+					AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( AppRequestState.RequestTime, null, null );
 				HttpContext.Current.Response.StatusCode = 400;
 				HttpContext.Current.Response.TrySkipIisCustomErrors = true;
 				AppRequestState.Instance.EwfPageRequestState.FocusKey = "";
@@ -488,7 +495,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							updateRegions.Select( i => Tuple.Create( i.key, i.region.ArgumentGetter() ) ).Materialize() );
 					}
 					else
-						AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( null, null );
+						AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( AppRequestState.RequestTime, null, null );
 				} );
 
 			return navigate( redirectInfo, AppRequestState.Instance.EwfPageRequestState.ModificationErrorsExist ? null : fullSecondaryResponse );
@@ -523,6 +530,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 					return JsonConvert.SerializeObject(
 						new HiddenFieldData(
+							rs.FirstRequestTime,
 							componentStateItemsById.ToImmutableDictionary( i => i.Key, i => i.Value.ValueAsJson ),
 							generateFormValueHash(),
 							failingDmId,
@@ -639,6 +647,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						return ( validation, errors );
 					} )
 				.ToImmutableDictionary( i => i.validation, i => i.errors );
+
+		/// <summary>
+		/// Gets the time instant at which the page was first requested. This remains constant across intermediate post-backs, but is reset after a full post-back.
+		/// </summary>
+		public Instant FirstRequestTime => AppRequestState.Instance.EwfPageRequestState.FirstRequestTime;
 
 		/// <summary>
 		/// Gets the page's data-update modification, which executes on every full post-back prior to the post-back object. WARNING: Do *not* use this for
