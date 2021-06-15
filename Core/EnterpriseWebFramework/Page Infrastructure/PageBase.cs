@@ -574,6 +574,51 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		protected virtual PageContent getContent() => null;
 
+		private string getJsInitStatements( string elementJsInitStatements, string pageLoadActionStatements ) {
+			var requestState = AppRequestState.Instance.EwfPageRequestState;
+			var scroll = scrollPositionForThisResponse == ScrollPosition.LastPositionOrStatusBar &&
+			             ( !requestState.ModificationErrorsExist || ( requestState.DmIdAndSecondaryOp != null &&
+			                                                          new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }
+				                                                          .Contains( requestState.DmIdAndSecondaryOp.Item2 ) ) );
+			var scrollStatement = "";
+			if( scroll && requestState.ScrollPositionX != null && requestState.ScrollPositionY != null )
+				scrollStatement = "window.scroll(" + requestState.ScrollPositionX + "," + requestState.ScrollPositionY + ");";
+
+			// If the page has requested a client-side redirect, configure it now. The JavaScript solution is preferred over a meta tag since apparently it doesn't
+			// cause reload behavior by the browser. See http://josephsmarr.com/2007/06/06/the-hidden-cost-of-meta-refresh-tags.
+			var clientSideNavigationStatements = "";
+			if( StandardLibrarySessionState.SessionAvailable ) {
+				StandardLibrarySessionState.Instance.GetClientSideNavigationSetup(
+					out var clientSideNavigationUrl,
+					out var clientSideNavigationInNewWindow,
+					out var clientSideNavigationDelay );
+				if( clientSideNavigationUrl.Any() ) {
+					var url = clientSideNavigationUrl;
+					if( clientSideNavigationInNewWindow )
+						clientSideNavigationStatements = "var newWindow = window.open( '{0}', '{1}' ); newWindow.focus();".FormatWith( url, "_blank" );
+					else
+						clientSideNavigationStatements = "location.replace( '" + url + "' );";
+					if( clientSideNavigationDelay.HasValue )
+						clientSideNavigationStatements = "setTimeout( \"" + clientSideNavigationStatements + "\", " + clientSideNavigationDelay.Value * 1000 + " );";
+				}
+			}
+
+			return StringTools.ConcatenateWithDelimiter(
+				" ",
+				"OnDocumentReady();",
+				"$( '#{0}' ).submit( function( e, postBackId ) {{ postBackRequestStarting( e, postBackId !== undefined ? postBackId : '{1}' ); }} );".FormatWith(
+					FormId,
+					SubmitButtonPostBack != null
+						? SubmitButtonPostBack.Id
+						: "" /* This empty string we're using when no submit button exists is arbitrary and meaningless; it should never actually be submitted. */ ),
+				elementJsInitStatements,
+				EwfApp.Instance.JavaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
+				javaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
+				StringTools.ConcatenateWithDelimiter( " ", scrollStatement, pageLoadActionStatements, clientSideNavigationStatements )
+					.PrependDelimiter( "window.onload = function() { " )
+					.AppendDelimiter( " };" ) );
+		}
+
 		private ImmutableDictionary<EwfValidation, IReadOnlyCollection<string>> addModificationErrorDisplaysAndGetErrors(
 			string id, ErrorSourceSet errorSources ) =>
 			errorSources.Validations.Select(
@@ -861,51 +906,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 
 			return response;
-		}
-
-		private string getJsInitStatements( string elementJsInitStatements, string pageLoadActionStatements ) {
-			var requestState = AppRequestState.Instance.EwfPageRequestState;
-			var scroll = scrollPositionForThisResponse == ScrollPosition.LastPositionOrStatusBar &&
-			             ( !requestState.ModificationErrorsExist || ( requestState.DmIdAndSecondaryOp != null &&
-			                                                          new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }
-				                                                          .Contains( requestState.DmIdAndSecondaryOp.Item2 ) ) );
-			var scrollStatement = "";
-			if( scroll && requestState.ScrollPositionX != null && requestState.ScrollPositionY != null )
-				scrollStatement = "window.scroll(" + requestState.ScrollPositionX + "," + requestState.ScrollPositionY + ");";
-
-			// If the page has requested a client-side redirect, configure it now. The JavaScript solution is preferred over a meta tag since apparently it doesn't
-			// cause reload behavior by the browser. See http://josephsmarr.com/2007/06/06/the-hidden-cost-of-meta-refresh-tags.
-			var clientSideNavigationStatements = "";
-			if( StandardLibrarySessionState.SessionAvailable ) {
-				StandardLibrarySessionState.Instance.GetClientSideNavigationSetup(
-					out var clientSideNavigationUrl,
-					out var clientSideNavigationInNewWindow,
-					out var clientSideNavigationDelay );
-				if( clientSideNavigationUrl.Any() ) {
-					var url = clientSideNavigationUrl;
-					if( clientSideNavigationInNewWindow )
-						clientSideNavigationStatements = "var newWindow = window.open( '{0}', '{1}' ); newWindow.focus();".FormatWith( url, "_blank" );
-					else
-						clientSideNavigationStatements = "location.replace( '" + url + "' );";
-					if( clientSideNavigationDelay.HasValue )
-						clientSideNavigationStatements = "setTimeout( \"" + clientSideNavigationStatements + "\", " + clientSideNavigationDelay.Value * 1000 + " );";
-				}
-			}
-
-			return StringTools.ConcatenateWithDelimiter(
-				" ",
-				"OnDocumentReady();",
-				"$( '#{0}' ).submit( function( e, postBackId ) {{ postBackRequestStarting( e, postBackId !== undefined ? postBackId : '{1}' ); }} );".FormatWith(
-					FormId,
-					SubmitButtonPostBack != null
-						? SubmitButtonPostBack.Id
-						: "" /* This empty string we're using when no submit button exists is arbitrary and meaningless; it should never actually be submitted. */ ),
-				elementJsInitStatements,
-				EwfApp.Instance.JavaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
-				javaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
-				StringTools.ConcatenateWithDelimiter( " ", scrollStatement, pageLoadActionStatements, clientSideNavigationStatements )
-					.PrependDelimiter( "window.onload = function() { " )
-					.AppendDelimiter( " };" ) );
 		}
 
 		/// <summary>
