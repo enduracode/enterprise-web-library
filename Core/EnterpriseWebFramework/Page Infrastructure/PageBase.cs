@@ -588,18 +588,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			// cause reload behavior by the browser. See http://josephsmarr.com/2007/06/06/the-hidden-cost-of-meta-refresh-tags.
 			var clientSideNavigationStatements = "";
 			if( StandardLibrarySessionState.SessionAvailable ) {
-				StandardLibrarySessionState.Instance.GetClientSideNavigationSetup(
-					out var clientSideNavigationUrl,
-					out var clientSideNavigationInNewWindow,
-					out var clientSideNavigationDelay );
+				StandardLibrarySessionState.Instance.GetClientSideNavigationSetup( out var clientSideNavigationUrl, out var clientSideNavigationInNewWindow );
 				if( clientSideNavigationUrl.Any() ) {
 					var url = clientSideNavigationUrl;
 					if( clientSideNavigationInNewWindow )
 						clientSideNavigationStatements = "var newWindow = window.open( '{0}', '{1}' ); newWindow.focus();".FormatWith( url, "_blank" );
 					else
 						clientSideNavigationStatements = "location.replace( '" + url + "' );";
-					if( clientSideNavigationDelay.HasValue )
-						clientSideNavigationStatements = "setTimeout( \"" + clientSideNavigationStatements + "\", " + clientSideNavigationDelay.Value * 1000 + " );";
 				}
 			}
 
@@ -820,7 +815,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			if( secondaryResponse != null ) {
 				// It's important that we put the response in session state first since it's used by the init method of the pre-built-response resource.
 				StandardLibrarySessionState.Instance.ResponseToSend = secondaryResponse;
-				StandardLibrarySessionState.Instance.SetClientSideNavigation( new PreBuiltResponse().GetUrl(), !secondaryResponse.FileName.Any(), null );
+				StandardLibrarySessionState.Instance.SetClientSideNavigation( new PreBuiltResponse().GetUrl(), !secondaryResponse.FileName.Any() );
 			}
 
 			// If the redirect destination is identical to the current page, do a transfer instead of a redirect.

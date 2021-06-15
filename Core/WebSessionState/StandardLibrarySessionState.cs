@@ -28,7 +28,6 @@ namespace EnterpriseWebLibrary.WebSessionState {
 		private readonly List<Tuple<StatusMessageType, string>> statusMessages = new List<Tuple<StatusMessageType, string>>();
 		private string clientSideNavigationUrl = "";
 		private bool clientSideNavigationInNewWindow;
-		private int? clientSideNavigationDelay;
 
 		/// <summary>
 		/// EWF use only.
@@ -41,31 +40,14 @@ namespace EnterpriseWebLibrary.WebSessionState {
 
 		internal List<Tuple<StatusMessageType, string>> StatusMessages { get { return statusMessages; } }
 
-		/// <summary>
-		/// Adds a client-side redirect command to the response with the specified URL. The redirect should happen as soon as the page is finished loading.
-		/// </summary>
-		public void SetInstantClientSideNavigation( string url ) {
-			SetClientSideNavigation( url, false, null );
-		}
-
-		/// <summary>
-		/// Adds a client-side redirect command to the response with the specified URL. The redirect should happen the specified number of seconds after the page is
-		/// finished loading.
-		/// </summary>
-		public void SetTimedClientSideNavigation( string url, int numberOfSeconds ) {
-			SetClientSideNavigation( url, false, numberOfSeconds );
-		}
-
-		internal void SetClientSideNavigation( string url, bool navigateInNewWindow, int? delayInSeconds ) {
+		internal void SetClientSideNavigation( string url, bool navigateInNewWindow ) {
 			clientSideNavigationUrl = url;
 			clientSideNavigationInNewWindow = navigateInNewWindow;
-			clientSideNavigationDelay = delayInSeconds;
 		}
 
-		internal void GetClientSideNavigationSetup( out string url, out bool navigateInNewWindow, out int? delayInSeconds ) {
+		internal void GetClientSideNavigationSetup( out string url, out bool navigateInNewWindow ) {
 			url = clientSideNavigationUrl;
 			navigateInNewWindow = clientSideNavigationInNewWindow;
-			delayInSeconds = clientSideNavigationDelay;
 		}
 
 		internal void ClearClientSideNavigation() {
