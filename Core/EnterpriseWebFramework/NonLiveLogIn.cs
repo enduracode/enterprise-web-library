@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using EnterpriseWebLibrary.Configuration;
-using EnterpriseWebLibrary.WebSessionState;
 using Tewl.Tools;
 
 // EwlPage
@@ -11,8 +10,6 @@ using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	partial class NonLiveLogIn {
-		private bool pageViewDataModificationsExecuted;
-
 		protected override void init() {
 			if( !ConfigurationStatics.IsIntermediateInstallation )
 				throw new ApplicationException( "installation type" );
@@ -25,24 +22,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		protected internal override bool IsIntermediateInstallationPublicResource => true;
 		protected override UrlHandler getUrlParent() => new Admin.EntitySetup();
 
-		protected override Action getPageViewDataModificationMethod() {
-			pageViewDataModificationsExecuted = true;
-
-			if( !Password.Any() )
-				return null;
-			return () => logIn( HideWarnings );
-		}
-
 		protected override PageContent getContent() {
-			if( Password.Any() ) {
-				if( !pageViewDataModificationsExecuted )
-					throw new ApplicationException( "Page-view data modifications did not execute." );
-
-				var content = new UiPageContent();
-				content.Add( new Paragraph( "Please wait.".ToComponents() ) );
-				StandardLibrarySessionState.Instance.SetInstantClientSideNavigation( new ExternalResource( ReturnUrl ).GetUrl() );
-				return content;
-			}
+			if( Password.Any() )
+				return new UiPageContent(
+					pageLoadPostBack: PostBack.CreateFull(
+						modificationMethod: () => logIn( HideWarnings ),
+						actionGetter: () => new PostBackAction( new ExternalResource( ReturnUrl ) ) ) ).Add( new Paragraph( "Please wait.".ToComponents() ) );
 
 			return FormState.ExecuteWithDataModificationsAndDefaultAction(
 				PostBack.CreateFull( modificationMethod: () => logIn( false ), actionGetter: () => new PostBackAction( new ExternalResource( ReturnUrl ) ) )

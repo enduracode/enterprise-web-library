@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using EnterpriseWebLibrary.Configuration;
-using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
 using JetBrains.Annotations;
 using Tewl.Tools;
@@ -22,7 +21,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 				new CssElement( "SelectUserPageBody", "body.{0}".FormatWith( elementClass.ClassName ) ).ToCollection();
 		}
 
-		private bool pageViewDataModificationsExecuted;
 		internal User UserObject { get; private set; }
 
 		protected override void init() {
@@ -44,26 +42,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 
 		protected override UrlHandler getUrlParent() => new Admin.EntitySetup();
 
-		protected override Action getPageViewDataModificationMethod() {
-			pageViewDataModificationsExecuted = true;
-
-			if( !User.Any() )
-				return null;
-			return () => UserImpersonationStatics.BeginImpersonation( UserObject );
-		}
-
 		protected override PageContent getContent() {
+			if( User.Any() )
+				return new BasicPageContent(
+					bodyClasses: elementClass,
+					pageLoadPostBack: PostBack.CreateFull(
+						modificationMethod: () => UserImpersonationStatics.BeginImpersonation( UserObject ),
+						actionGetter: () => new PostBackAction( new ExternalResource( ReturnUrl ) ) ) ).Add( new Paragraph( "Please wait.".ToComponents() ) );
+
 			var content = new BasicPageContent( bodyClasses: elementClass );
-
-			if( User.Any() ) {
-				if( !pageViewDataModificationsExecuted )
-					throw new ApplicationException( "Page-view data modifications did not execute." );
-
-				content.Add( new Paragraph( "Please wait.".ToComponents() ) );
-				StandardLibrarySessionState.Instance.SetInstantClientSideNavigation( new ExternalResource( ReturnUrl ).GetUrl() );
-				return content;
-			}
-
 			content.Add( new PageName() );
 
 			if( ConfigurationStatics.IsLiveInstallation )
