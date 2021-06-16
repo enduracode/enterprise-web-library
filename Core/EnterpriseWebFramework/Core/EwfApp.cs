@@ -449,6 +449,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private void set500StatusCode( string description ) {
 			Response.StatusCode = 500;
 			Response.StatusDescription = description + " in EWF Application";
+			Response.TrySkipIisCustomErrors = false;
 		}
 	}
 }
