@@ -33,6 +33,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public override string ResourceName => "";
 
+		protected internal override bool IsIntermediateInstallationPublicResource => isFrameworkFile;
+
 		protected sealed override UrlHandler getUrlParent() => EsAsBaseType;
 
 		protected sealed override IEnumerable<UrlPattern> getChildUrlPatterns() => base.getChildUrlPatterns();
