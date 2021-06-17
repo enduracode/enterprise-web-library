@@ -127,9 +127,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 												new StaticFiles.Styles.Ui.ColorsCss(), new StaticFiles.Styles.Ui.FontsCss(), new StaticFiles.Styles.Ui.LayoutCss(),
 												new StaticFiles.Styles.Ui.TransitionsCss()
 											} );
-								cssInfos.AddRange( EwfApp.Instance.GetStyleSheets() );
+								foreach( var resource in EwfApp.Instance.GetStyleSheets() ) {
+									assertResourceIsIntermediateInstallationPublicResourceWhenNecessary( resource );
+									cssInfos.Add( resource );
+								}
 								if( contentUsesUi )
-									cssInfos.AddRange( EwfUiStatics.AppProvider.GetStyleSheets() );
+									foreach( var resource in EwfUiStatics.AppProvider.GetStyleSheets() ) {
+										assertResourceIsIntermediateInstallationPublicResourceWhenNecessary( resource );
+										cssInfos.Add( resource );
+									}
 								return cssInfos;
 							},
 							( markup, includeStripeCheckout ) => {
@@ -152,8 +158,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								foreach( var i in infos.Select( getElement ) )
 									markup.Append( i );
 								markup.Append( MiniProfiler.RenderIncludes().ToHtmlString() );
-								foreach( var i in EwfApp.Instance.GetJavaScriptFiles().Select( getElement ) )
-									markup.Append( i );
+								foreach( var resource in EwfApp.Instance.GetJavaScriptFiles() ) {
+									assertResourceIsIntermediateInstallationPublicResourceWhenNecessary( resource );
+									markup.Append( getElement( resource ) );
+								}
 							},
 							hideWarnings => {
 								var url = AppRequestState.Instance.Url;
@@ -224,6 +232,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					unloadDelay,
 					Timeout.Infinite );
 			}
+		}
+
+		private static void assertResourceIsIntermediateInstallationPublicResourceWhenNecessary( ResourceInfo resource ) {
+			if( !PageBase.Current.IsIntermediateInstallationPublicResource )
+				return;
+			if( resource is ResourceBase appResource && !appResource.IsIntermediateInstallationPublicResource )
+				throw new Exception(
+					"You must specify resource {0} as an intermediate-installation public resource because it is used on an intermediate-installation public page."
+						.FormatWith( resource.GetUrl( false, false ) ) );
 		}
 
 		/// <summary>
