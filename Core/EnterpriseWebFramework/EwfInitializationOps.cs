@@ -10,6 +10,7 @@ using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
+using Humanizer;
 using StackExchange.Profiling;
 using Tewl.Tools;
 
@@ -130,6 +131,29 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								if( contentUsesUi )
 									cssInfos.AddRange( EwfUiStatics.AppProvider.GetStyleSheets() );
 								return cssInfos;
+							},
+							( markup, includeStripeCheckout ) => {
+								string getElement( ResourceInfo resource ) => "<script src=\"{0}\" defer></script>".FormatWith( resource.GetUrl() );
+
+								var infos = new List<ResourceInfo>();
+								infos.Add( new ExternalResource( "//code.jquery.com/jquery-1.12.3.min.js" ) );
+								infos.Add( new StaticFiles.Versioned.Third_party.Jquery_ui.Jquery_ui_1114custom_v2.Jquery_uiminJs() );
+								infos.Add( new StaticFiles.Versioned.Third_party.Chosen.Chosen_v187.ChosenjqueryminJs() );
+								infos.Add( new StaticFiles.Third_party.Time_picker.CodeJs() );
+								infos.Add( new ExternalResource( "//cdn.jsdelivr.net/qtip2/2.2.1/jquery.qtip.min.js" ) );
+								infos.Add( new ExternalResource( "//cdnjs.cloudflare.com/ajax/libs/dialog-polyfill/0.4.9/dialog-polyfill.min.js" ) );
+								infos.Add( new StaticFiles.Third_party.Spin_js.SpinminJs() );
+								infos.Add( new ExternalResource( "//cdn.ckeditor.com/4.5.8/full/ckeditor.js" ) );
+								infos.Add( new ExternalResource( "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js" ) );
+								infos.Add( new ExternalResource( "https://instant.page/5.1.0" ) );
+								if( includeStripeCheckout )
+									infos.Add( new ExternalResource( "https://checkout.stripe.com/checkout.js" ) );
+								infos.Add( new StaticFiles.CodeJs() );
+								foreach( var i in infos.Select( getElement ) )
+									markup.Append( i );
+								markup.Append( MiniProfiler.RenderIncludes().ToHtmlString() );
+								foreach( var i in EwfApp.Instance.GetJavaScriptFiles().Select( getElement ) )
+									markup.Append( i );
 							},
 							hideWarnings => {
 								var url = AppRequestState.Instance.Url;
