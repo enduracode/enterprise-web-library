@@ -157,6 +157,7 @@
     <Compile Include="Service\Service.svc.cs">
       <DependentUpon>Service.svc</DependentUpon>
     </Compile>
+    <Compile Include="StaticFiles\Logic\TestCss.cs" />
     <Compile Include="TestController.cs" />
     <Compile Include="TestPages\ActionControls.cs" />
     <Compile Include="TestPages\Basic\Legacy URLs\LegacyUrlFolderSetup.cs" />
