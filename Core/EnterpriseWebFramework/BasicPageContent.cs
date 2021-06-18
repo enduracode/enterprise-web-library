@@ -351,9 +351,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							impersonationWarningLine.Value.actions
 								.Select(
 									i => i.GetActionComponent(
-											( text, icon ) => new ButtonHyperlinkStyle( text, buttonSize: ButtonSize.ShrinkWrap ),
-											( text, icon ) => new StandardButtonStyle( text, buttonSize: ButtonSize.ShrinkWrap ) )
-										.ToCollection() )
+										( text, icon ) => new ButtonHyperlinkStyle( text, buttonSize: ButtonSize.ShrinkWrap ),
+										( text, icon ) => new StandardButtonStyle( text, buttonSize: ButtonSize.ShrinkWrap ) ) )
+								.Where( i => i != null )
+								.Select( i => i.ToCollection() )
 								.Aggregate( ( components, action ) => components.Concat( " ".ToComponents() ).Concat( action ).Materialize() ) )
 						.Materialize() );
 
