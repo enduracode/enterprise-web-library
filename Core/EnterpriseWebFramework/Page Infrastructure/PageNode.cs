@@ -123,6 +123,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			};
 		}
 
+		public PageNode() {
+			Children = noChildren;
+			EtherealChildren = noChildren;
+			MarkupWriter = writer => {
+				throw new Exception(
+					"A page component contained a null child, which is not allowed. Markup already written:" + Environment.NewLine + Environment.NewLine + writer );
+			};
+		}
+
 		public IEnumerable<PageNode> AllChildren => Children.Concat( EtherealChildren );
 	}
 }

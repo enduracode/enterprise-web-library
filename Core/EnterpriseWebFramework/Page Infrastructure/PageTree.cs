@@ -153,6 +153,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				return buildIdentifiedComponentNode( data, data.ChildGetter );
 			}
 
+			if( component == null )
+				return new PageNode();
+
 			throw new UnexpectedValueException( "component", component );
 		}
 
