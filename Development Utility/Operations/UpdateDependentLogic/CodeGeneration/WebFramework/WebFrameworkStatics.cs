@@ -235,6 +235,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 		private static void generateStaticFileLogic(
 			TextWriter writer, string projectPath, string projectNamespace, bool inFramework, bool? inVersionedFolder, string folderPathRelativeToProject,
 			string folderParentExpression ) {
+			var isRootFolder = !inVersionedFolder.HasValue;
 			var folderPath = EwlStatics.CombinePaths( projectPath, folderPathRelativeToProject );
 
 			var folderNamespace = WebItemGeneralData.GetNamespaceFromPath( projectNamespace, folderPathRelativeToProject, false );
@@ -242,11 +243,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 			var files = IoMethods.GetFileNamesInFolder( folderPath )
 				.Select( i => new WebItemGeneralData( projectPath, projectNamespace, EwlStatics.CombinePaths( folderPathRelativeToProject, i ), true ) )
 				.Materialize();
-			var subfolderNames = IoMethods.GetFolderNamesInFolder( folderPath ).Materialize();
+			var subfolderNames = IoMethods.GetFolderNamesInFolder( folderPath )
+				.Where( i => !isRootFolder || i != AppStatics.StaticFileLogicFolderName )
+				.Materialize();
 			generateStaticFileFolderSetup(
 				writer,
 				inFramework,
-				!inVersionedFolder.HasValue,
+				isRootFolder,
 				folderPathRelativeToProject,
 				folderNamespace,
 				folderSetupClassName,
@@ -264,6 +267,19 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 
 			foreach( var file in files )
 				new StaticFile( file, inFramework, inVersionedFolder == true, folderSetupClassName ).GenerateCode( writer );
+
+			var staticFilesFolderPath = inFramework
+				                            ? EnterpriseWebFramework.StaticFile.FrameworkStaticFilesSourceFolderPath
+				                            : EnterpriseWebFramework.StaticFile.AppStaticFilesFolderName;
+			var logicFolderPath = EwlStatics.CombinePaths(
+				projectPath,
+				staticFilesFolderPath,
+				AppStatics.StaticFileLogicFolderName,
+				folderPathRelativeToProject.Substring( ( staticFilesFolderPath + ( isRootFolder ? "" : Path.DirectorySeparatorChar.ToString() ) ).Length ) );
+			Directory.CreateDirectory( logicFolderPath );
+			createStaticFileLogicTemplate( logicFolderPath, folderNamespace, folderSetupClassName );
+			foreach( var i in files )
+				createStaticFileLogicTemplate( logicFolderPath, i.Namespace, i.ClassName );
 
 			foreach( var subfolderName in subfolderNames )
 				generateStaticFileLogic(
@@ -313,6 +329,25 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 
 			writer.WriteLine( "}" );
 			writer.WriteLine( "}" );
+		}
+
+		private static void createStaticFileLogicTemplate( string folderPath, string itemNamespace, string className ) {
+			var templateFilePath = EwlStatics.CombinePaths( folderPath, className + DataAccess.DataAccessStatics.CSharpTemplateFileExtension );
+			IoMethods.DeleteFile( templateFilePath );
+
+			// If a real file exists, don’t create a template.
+			if( File.Exists( EwlStatics.CombinePaths( folderPath, className + ".cs" ) ) )
+				return;
+
+			using( var writer = new StreamWriter( templateFilePath, false, Encoding.UTF8 ) ) {
+				writer.WriteLine( "namespace {0} {{".FormatWith( itemNamespace ) );
+				writer.WriteLine( "	partial class {0} {{".FormatWith( className ) );
+				writer.WriteLine(
+					"		// IMPORTANT: Change extension from \"{0}\" to \".cs\" before including in project and editing.".FormatWith(
+						DataAccess.DataAccessStatics.CSharpTemplateFileExtension ) );
+				writer.WriteLine( "	}" );
+				writer.WriteLine( "}" );
+			}
 		}
 
 		internal static string GetParameterDeclarations( IReadOnlyCollection<WebItemParameter> parameters ) {
