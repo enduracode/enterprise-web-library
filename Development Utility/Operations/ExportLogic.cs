@@ -320,12 +320,27 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				File.WriteAllText( webConfigPath, File.ReadAllText( webConfigPath ).Replace( "debug=\"true\"", "debug=\"false\"" ) );
 			}
 
-			var frameworkStaticFilesFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, InstallationFileStatics.WebFrameworkStaticFilesFolderName );
-			if( Directory.Exists( frameworkStaticFilesFolderPath ) )
+			if( installation.DevelopmentInstallationLogic.SystemIsEwl ) {
 				IoMethods.CopyFolder(
-					frameworkStaticFilesFolderPath,
+					EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.CoreProjectName, StaticFile.FrameworkStaticFilesSourceFolderPath ),
 					EwlStatics.CombinePaths( serverSideLogicFolderPath, InstallationFileStatics.WebFrameworkStaticFilesFolderName ),
 					false );
+				IoMethods.DeleteFolder(
+					EwlStatics.CombinePaths(
+						serverSideLogicFolderPath,
+						InstallationFileStatics.WebFrameworkStaticFilesFolderName,
+						AppStatics.StaticFileLogicFolderName ) );
+			}
+			else {
+				var frameworkStaticFilesFolderPath = EwlStatics.CombinePaths(
+					installation.GeneralLogic.Path,
+					InstallationFileStatics.WebFrameworkStaticFilesFolderName );
+				if( Directory.Exists( frameworkStaticFilesFolderPath ) )
+					IoMethods.CopyFolder(
+						frameworkStaticFilesFolderPath,
+						EwlStatics.CombinePaths( serverSideLogicFolderPath, InstallationFileStatics.WebFrameworkStaticFilesFolderName ),
+						false );
+			}
 		}
 
 		private void packageWindowsServices( DevelopmentInstallation installation, string serverSideLogicFolderPath ) {
