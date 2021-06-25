@@ -286,6 +286,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
+		/// Creates and returns a list of custom style sheets that should be used on pages not using the EWF user interface.
+		/// </summary>
+		protected internal virtual List<ResourceInfo> GetCustomUiStyleSheets() {
+			return new List<ResourceInfo>();
+		}
+
+		/// <summary>
 		/// Gets the Google Analytics Web Property ID, which should always start with "UA-". Never returns null.
 		/// </summary>
 		public virtual string GoogleAnalyticsWebPropertyId => "";

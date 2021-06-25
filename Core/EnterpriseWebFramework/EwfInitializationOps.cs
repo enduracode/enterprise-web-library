@@ -136,6 +136,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										assertResourceIsIntermediateInstallationPublicResourceWhenNecessary( resource );
 										cssInfos.Add( resource );
 									}
+								else
+									foreach( var resource in EwfApp.Instance.GetCustomUiStyleSheets() ) {
+										assertResourceIsIntermediateInstallationPublicResourceWhenNecessary( resource );
+										cssInfos.Add( resource );
+									}
 								return cssInfos;
 							},
 							( markup, includeStripeCheckout ) => {
