@@ -19,7 +19,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 		private static void generateEncoder(
 			TextWriter writer, EntitySetup entitySetup, IReadOnlyCollection<WebItemParameter> requiredParameters,
 			IReadOnlyCollection<WebItemParameter> optionalParameters, bool includeVersionString ) {
-			writer.WriteLine( "internal sealed class UrlEncoder: EnterpriseWebFramework.UrlEncoder {" );
+			writer.WriteLine( "internal sealed class UrlEncoder: global::EnterpriseWebLibrary.EnterpriseWebFramework.UrlEncoder {" );
 
 			if( entitySetup != null ) {
 				writer.WriteLine( "private readonly {0} entitySetup;".FormatWith( entitySetup.GeneralData.ClassName ) );
@@ -105,14 +105,15 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 				writer.WriteLine( "}" );
 			}
 
-			writer.WriteLine( "IReadOnlyCollection<( string, string, bool )> EnterpriseWebFramework.UrlEncoder.GetRemainingParameters() {" );
+			writer.WriteLine(
+				"IReadOnlyCollection<( string, string, bool )> global::EnterpriseWebLibrary.EnterpriseWebFramework.UrlEncoder.GetRemainingParameters() {" );
 			writer.WriteLine(
 				"var parameters = new List<( string, string, bool )>( {0} );".FormatWith(
 					( entitySetup?.RequiredParameters.Concat( entitySetup.OptionalParameters ).Count() ?? 0 ) +
 					requiredParameters.Concat( optionalParameters ).Count() ) );
 			if( entitySetup != null )
 				writer.WriteLine(
-					"if( !entitySetupMatched ) parameters.AddRange( ( (EnterpriseWebFramework.UrlEncoder)entitySetupEncoder.Value ).GetRemainingParameters() );" );
+					"if( !entitySetupMatched ) parameters.AddRange( ( (global::EnterpriseWebLibrary.EnterpriseWebFramework.UrlEncoder)entitySetupEncoder.Value ).GetRemainingParameters() );" );
 			foreach( var i in requiredParameters )
 				writer.WriteLine( "if( !{0}Accessed ) parameters.Add( ( \"{0}\", {1}, true ) );".FormatWith( i.Name, i.GetUrlSerializationExpression( i.Name ) ) );
 			foreach( var i in optionalParameters )
@@ -132,7 +133,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 		private static void generateDecoder(
 			TextWriter writer, string className, EntitySetup entitySetup, IReadOnlyCollection<WebItemParameter> requiredParameters,
 			IReadOnlyCollection<WebItemParameter> optionalParameters, bool includeVersionString ) {
-			writer.WriteLine( "internal sealed class UrlDecoder: EnterpriseWebFramework.UrlDecoder {" );
+			writer.WriteLine( "internal sealed class UrlDecoder: global::EnterpriseWebLibrary.EnterpriseWebFramework.UrlDecoder {" );
 
 			if( entitySetup != null )
 				writer.WriteLine( "private readonly Func<DecodingUrlParameterCollection, {0}> entitySetupGetter;".FormatWith( entitySetup.GeneralData.ClassName ) );
@@ -179,7 +180,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 							.Surround( " ", " " ),
 						StringTools.ConcatenateWithDelimiter(
 							", ",
-							"parameters => ({0})( (EnterpriseWebFramework.UrlDecoder)new {0}.UrlDecoder({1}) ).GetUrlHandler( parameters )".FormatWith(
+							"parameters => ({0})( (global::EnterpriseWebLibrary.EnterpriseWebFramework.UrlDecoder)new {0}.UrlDecoder({1}) ).GetUrlHandler( parameters )"
+								.FormatWith(
 									entitySetup.GeneralData.ClassName,
 									StringTools.ConcatenateWithDelimiter(
 											", ",
@@ -204,7 +206,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 				writer.WriteLine( "this.versionString = versionString;" );
 			writer.WriteLine( "}" );
 
-			writer.WriteLine( "BasicUrlHandler EnterpriseWebFramework.UrlDecoder.GetUrlHandler( DecodingUrlParameterCollection parameters ) {" );
+			writer.WriteLine(
+				"BasicUrlHandler global::EnterpriseWebLibrary.EnterpriseWebFramework.UrlDecoder.GetUrlHandler( DecodingUrlParameterCollection parameters ) {" );
 			if( entitySetup != null )
 				writer.WriteLine( "var entitySetup = entitySetupGetter( parameters );" );
 
@@ -405,7 +408,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 			TextWriter writer, string entitySetupFieldName, IReadOnlyCollection<WebItemParameter> requiredParameters,
 			IReadOnlyCollection<WebItemParameter> optionalParameters, Func<WebItemParameter, string> isSegmentParameterExpressionGetter, bool includeVersionString ) {
 			writer.WriteLine(
-				"protected override EnterpriseWebFramework.UrlEncoder getUrlEncoder() => new UrlEncoder({0});".FormatWith(
+				"protected override global::EnterpriseWebLibrary.EnterpriseWebFramework.UrlEncoder getUrlEncoder() => new UrlEncoder({0});".FormatWith(
 					StringTools.ConcatenateWithDelimiter(
 							", ",
 							( entitySetupFieldName.Any() ? entitySetupFieldName.ToCollection() : Enumerable.Empty<string>() )
