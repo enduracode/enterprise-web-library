@@ -7,11 +7,16 @@ namespace EnterpriseWebLibrary.Collections {
 	/// All right values must be unique.
 	/// </summary>
 	public class OneToOneMap<T1, T2> {
-		private readonly Dictionary<T1, T2> leftToRight = new Dictionary<T1, T2>();
-		private readonly Dictionary<T2, T1> rightToLeft = new Dictionary<T2, T1>();
+		private readonly Dictionary<T1, T2> leftToRight;
+		private readonly Dictionary<T2, T1> rightToLeft;
 		private readonly List<T1> leftValues = new List<T1>();
 		private readonly List<T2> rightValues = new List<T2>();
 		private readonly List<KeyValuePair<T1, T2>> pairs = new List<KeyValuePair<T1, T2>>();
+
+		public OneToOneMap( IEqualityComparer<T1> leftComparer = null, IEqualityComparer<T2> rightComparer = null ) {
+			leftToRight = new Dictionary<T1, T2>( leftComparer );
+			rightToLeft = new Dictionary<T2, T1>( rightComparer );
+		}
 
 		/// <summary>
 		/// Add a pair of values.
