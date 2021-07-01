@@ -14,6 +14,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// An HTTP response, minus any caching information.
 	/// </summary>
 	public class EwfResponse {
+		private sealed class AspNetAdapter: HttpResponseBase {
+			public AspNetAdapter( Stream outputStream ) {
+				ContentType = ContentTypes.Html;
+				OutputStream = outputStream;
+			}
+
+			public override string ContentType { get; set; }
+			public override Stream OutputStream { get; }
+		}
+
 		/// <summary>
 		/// Creates an Excel workbook response. Automatically converts the specified file name to a safe file name.
 		/// </summary>
@@ -106,6 +116,21 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				fileNameCreator ?? ( () => "" ),
 				additionalHeaderFieldGetter ?? ( () => Enumerable.Empty<(string, string)>().Materialize() ),
 				bodyCreator );
+		}
+
+		/// <summary>
+		/// Creates a response from an ASP.NET <see cref="HttpResponseBase"/> object.
+		/// </summary>
+		/// <param name="aspNetResponseWriter">A method that takes an ASP.NET <see cref="HttpResponseBase"/> object and writes to it.</param>
+		public static EwfResponse CreateFromAspNetResponse( Action<HttpResponseBase> aspNetResponseWriter ) {
+			AspNetAdapter aspNetResponse;
+			byte[] binaryBody;
+			using( var stream = new MemoryStream() ) {
+				aspNetResponse = new AspNetAdapter( stream );
+				aspNetResponseWriter( aspNetResponse );
+				binaryBody = stream.ToArray();
+			}
+			return Create( aspNetResponse.ContentType, new EwfResponseBodyCreator( () => binaryBody ) );
 		}
 
 		internal readonly string ContentType;
