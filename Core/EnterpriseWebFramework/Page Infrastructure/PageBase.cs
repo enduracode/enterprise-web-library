@@ -763,16 +763,24 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var staticStateItems = staticNodes.Select( i => i.StateItem ).Where( i => i != null ).ToImmutableHashSet();
 			var staticFormValues = staticNodes.Select( i => i.FormValue ).Where( i => i != null ).Distinct().OrderBy( i => i.GetPostBackValueKey() ).Materialize();
 
+			// Intermediate post-backs sometimes have good reason to change durable values outside of update regions, e.g. when updating filters on a search page. We
+			// allow this under the assumption that all durable values are retrieved using a technique such as snapshot isolation to protect against concurrent
+			// modifications during the request. If concurrent modifications did occur they would be unintentionally ignored.
+			var requestState = AppRequestState.Instance.EwfPageRequestState;
+			var durableValueChangesNotAllowed = requestState.ModificationErrorsExist ||
+			                                    ( requestState.DmIdAndSecondaryOp != null &&
+			                                      requestState.DmIdAndSecondaryOp.Item2 == SecondaryPostBackOperation.NoOperation );
 			foreach( var pair in componentStateItemsById.Where( i => staticStateItems.Contains( i.Value ) ).OrderBy( i => i.Key ) ) {
 				contents.Append( pair.Key );
-				contents.Append( pair.Value.DurableValue );
+				if( durableValueChangesNotAllowed )
+					contents.Append( pair.Value.DurableValue );
 			}
 			foreach( var formValue in staticFormValues ) {
 				contents.Append( formValue.GetPostBackValueKey() );
-				contents.Append( formValue.GetDurableValueAsString() );
+				if( durableValueChangesNotAllowed )
+					contents.Append( formValue.GetDurableValueAsString() );
 			}
 
-			var requestState = AppRequestState.Instance.EwfPageRequestState;
 			if( requestState.ModificationErrorsExist )
 				// Include mod error display keys. They shouldn't change across a transfer when there are modification errors because that could prevent some of the
 				// errors from being displayed.
