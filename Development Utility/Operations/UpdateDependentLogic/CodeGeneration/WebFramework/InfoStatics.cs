@@ -111,29 +111,47 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 				writer.WriteLine( "if( EwfApp.Instance != null && AppRequestState.Instance != null ) {" );
 
 				// If the list of current URL handlers has a matching object, apply its parameter values.
-				writer.WriteLine( "foreach( var urlHandler in AppRequestState.Instance.UrlHandlers ) {" );
-				writer.WriteLine( "if( !( urlHandler is {0} match ) ) continue;".FormatWith( generalData.ClassName ) );
-				foreach( var i in requiredParameters )
-					writer.WriteLine( "if( !{0} ) continue;".FormatWith( i.GetEqualityExpression( "match.{0}".FormatWith( i.PropertyName ), i.PropertyName ) ) );
-				foreach( var i in optionalParameters )
-					writer.WriteLine( "{0} = match.{1};".FormatWith( i.FieldName, i.PropertyName ) );
-				writer.WriteLine( "optionalParametersInitializedFromCurrent = true;" );
-				writer.WriteLine( "break;" );
-				writer.WriteLine( "}" );
+				writer.WriteLine( "foreach( var urlHandler in AppRequestState.Instance.UrlHandlers )" );
+				if( isEs ) {
+					writer.WriteLine( "if( urlHandler is ResourceBase r ) {" );
+					writer.WriteLine( "if( {0} ) {{".FormatWith( getHandlerMatchExpression( generalData, requiredParameters, true ) ) );
+					generateMatchingHandlerParameterInitStatements( writer, optionalParameters, false );
+					writer.WriteLine( "}" );
+					writer.WriteLine( "}" );
+					writer.WriteLine( "else {" );
+					writer.WriteLine( "if( {0} ) {{".FormatWith( getHandlerMatchExpression( generalData, requiredParameters, false ) ) );
+					generateMatchingHandlerParameterInitStatements( writer, optionalParameters, false );
+					writer.WriteLine( "}" );
+					writer.WriteLine( "}" );
+				}
+				else {
+					writer.WriteLine( "if( {0} ) {{".FormatWith( getHandlerMatchExpression( generalData, requiredParameters, false ) ) );
+					generateMatchingHandlerParameterInitStatements( writer, optionalParameters, false );
+					writer.WriteLine( "}" );
+				}
 
 				// If new parameter values are effective, and the current resource or an ancestor matches this object, apply its new parameter values.
 				if( generalData.IsPage() || isEs ) {
 					writer.WriteLine( "if( AppRequestState.Instance.NewUrlParameterValuesEffective ) {" );
 					writer.WriteLine( "UrlHandler urlHandler = {0}Current;".FormatWith( generalData.IsPage() ? "" : "PageBase." ) );
-					writer.WriteLine( "do {" );
-					writer.WriteLine( "if( !( urlHandler is {0} match ) ) continue;".FormatWith( generalData.ClassName ) );
-					foreach( var i in requiredParameters )
-						writer.WriteLine( "if( !{0} ) continue;".FormatWith( i.GetEqualityExpression( "match.{0}".FormatWith( i.PropertyName ), i.PropertyName ) ) );
-					foreach( var i in optionalParameters )
-						writer.WriteLine( "{0} = match.parametersModification.{1};".FormatWith( i.FieldName, i.PropertyName ) );
-					writer.WriteLine( "optionalParametersInitializedFromCurrent = true;" );
-					writer.WriteLine( "break;" );
-					writer.WriteLine( "}" );
+					writer.WriteLine( "do" );
+					if( isEs ) {
+						writer.WriteLine( "if( urlHandler is ResourceBase r ) {" );
+						writer.WriteLine( "if( {0} ) {{".FormatWith( getHandlerMatchExpression( generalData, requiredParameters, true ) ) );
+						generateMatchingHandlerParameterInitStatements( writer, optionalParameters, true );
+						writer.WriteLine( "}" );
+						writer.WriteLine( "}" );
+						writer.WriteLine( "else {" );
+						writer.WriteLine( "if( {0} ) {{".FormatWith( getHandlerMatchExpression( generalData, requiredParameters, false ) ) );
+						generateMatchingHandlerParameterInitStatements( writer, optionalParameters, true );
+						writer.WriteLine( "}" );
+						writer.WriteLine( "}" );
+					}
+					else {
+						writer.WriteLine( "if( {0} ) {{".FormatWith( getHandlerMatchExpression( generalData, requiredParameters, false ) ) );
+						generateMatchingHandlerParameterInitStatements( writer, optionalParameters, true );
+						writer.WriteLine( "}" );
+					}
 					writer.WriteLine( "while( ( urlHandler = urlHandler.GetParent() ) != null );" );
 					writer.WriteLine( "}" );
 				}
@@ -184,6 +202,26 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 				writer.WriteLine( "base.uriFragmentIdentifier = uriFragmentIdentifier;" );
 
 			writer.WriteLine( "}" ); // initParameters method
+		}
+
+		private static string getHandlerMatchExpression(
+			WebItemGeneralData generalData, IReadOnlyCollection<WebItemParameter> requiredParameters, bool compareEntitySetup ) =>
+			( compareEntitySetup
+				  ? "r.EsAsBaseType is {0} match".FormatWith( generalData.ClassName )
+				  : "urlHandler is {0} match".FormatWith( generalData.ClassName ) ) + StringTools.ConcatenateWithDelimiter(
+					" && ",
+					requiredParameters.Select( i => i.GetEqualityExpression( "match.{0}".FormatWith( i.PropertyName ), i.PropertyName ) ) )
+				.PrependDelimiter( " && " );
+
+		private static void generateMatchingHandlerParameterInitStatements(
+			TextWriter writer, IReadOnlyCollection<WebItemParameter> optionalParameters, bool useNewParameterValues ) {
+			foreach( var i in optionalParameters )
+				writer.WriteLine(
+					useNewParameterValues
+						? "{0} = match.parametersModification.{1};".FormatWith( i.FieldName, i.PropertyName )
+						: "{0} = match.{1};".FormatWith( i.FieldName, i.PropertyName ) );
+			writer.WriteLine( "optionalParametersInitializedFromCurrent = true;" );
+			writer.WriteLine( "break;" );
 		}
 
 		internal static string GetInfoConstructorArgumentsForRequiredParameters(

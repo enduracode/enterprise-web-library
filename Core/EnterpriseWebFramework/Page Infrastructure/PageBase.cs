@@ -504,8 +504,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private void buildPage() {
 			UrlHandler urlHandler = this;
 			do {
-				if( urlHandler is PageBase page )
-					page.initParametersModification();
+				if( urlHandler is ResourceBase resource ) {
+					if( urlHandler is PageBase page )
+						page.initParametersModification();
+					resource.EsAsBaseType?.InitParametersModification();
+				}
 				else if( urlHandler is EntitySetupBase entitySetup )
 					entitySetup.InitParametersModification();
 			}
