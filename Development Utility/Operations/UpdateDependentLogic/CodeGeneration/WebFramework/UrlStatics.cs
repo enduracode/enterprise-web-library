@@ -69,7 +69,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 
 			if( entitySetup != null ) {
 				writer.WriteLine( "public bool CheckEntitySetup( {0} entitySetup ) {{".FormatWith( entitySetup.GeneralData.ClassName ) );
-				writer.WriteLine( "if( entitySetup != this.entitySetup ) return false;" );
+				writer.WriteLine( "if( !EwlStatics.AreEqual( entitySetup, this.entitySetup ) ) return false;" );
 				writer.WriteLine( "entitySetupMatched = true;" );
 				writer.WriteLine( "return true;" );
 				writer.WriteLine( "}" );
