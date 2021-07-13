@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using @@BaseNamespace.Library;
-using EnterpriseWebLibrary;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
+using Tewl.Tools;
+using @@BaseNamespace.Library;
 
 namespace @@BaseNamespace.Website {
 	public class Global: EwfApp {
@@ -18,6 +17,6 @@ namespace @@BaseNamespace.Website {
 		}
 
 
-		protected override IEnumerable<BaseUrlPattern> GetBaseUrlPatterns() => Enumerable.Empty<BaseUrlPattern>();
+		protected override IEnumerable<BaseUrlPattern> GetBaseUrlPatterns() => Home.UrlPatterns.BaseUrlPattern().ToCollection();
 	}
 }
