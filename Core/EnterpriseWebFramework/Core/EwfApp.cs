@@ -200,7 +200,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				RequestState.SetUrlHandlers( handlers.Reverse().Materialize() );
 
 				HttpContext.Current.RemapHandler( new HandlerAdapter( handlers.Last() ) );
-				if( handlers.Last() is PageBase || handlers.Last() is EntitySetupBase )
+				if( handlers.Last() is PageBase || handlers.Last() is EntitySetupBase || handlers.Last() is PreBuiltResponse )
 					HttpContext.Current.SetSessionStateBehavior( SessionStateBehavior.Required );
 				return;
 			}
