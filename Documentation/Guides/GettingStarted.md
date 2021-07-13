@@ -5,7 +5,7 @@
 
 ## Requirements
 
-*	Windows 10, .NET Framework 4.7.2, IIS Express 10 (.NET 5 support is on the roadmap but please [speak up](https://community.enterpriseweblibrary.org/) if you’re interested!)
+*	Windows 10, .NET Framework 4.7.2, IIS Express 10 (.NET 6 support is on the roadmap but please [speak up](https://community.enterpriseweblibrary.org/) if you’re interested!)
 *	Visual Studio 2019 (recommended)
 *	SQL Server 2019 or later, MySQL 5.7, or Oracle Database 12c (if you want a relational database)
 
@@ -22,7 +22,7 @@ For servers, the only requirement is Windows Server 2016 or later with IIS enabl
 
 	*	Apply some IIS Express configuration
 
-	*	Copy some files into the `Website` project, and update the project file to reference them
+	*	Copy some web-framework files into the solution
 
 	*	Generate a few pieces of code in both projects, and update the Web.config file
 
@@ -34,7 +34,7 @@ For servers, the only requirement is Windows Server 2016 or later with IIS enabl
 
 	More information on this is available from our developers; please [ask for help in the forum](https://community.enterpriseweblibrary.org/).
 
-5.	Run the `Website` project. If you see a page that says "The page you requested is no longer available", everything is working and you can begin building your system.
+5.	Run the `Website` project. If you see a home page that reads “Welcome to the Enterprise Web Library!”, everything is working and you can begin building your system.
 
 
 ## Adding a database
