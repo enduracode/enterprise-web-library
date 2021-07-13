@@ -896,14 +896,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			pageTree.PrepareForRendering( modificationErrorsOccurred, isFocusablePredicate );
 
-
-			// Direct response object modifications. These should happen once per page view; they are not needed in redirect responses.
-
-			FormsAuthStatics.UpdateFormsAuthCookieIfNecessary();
-
-			var response = EwfResponse.Create(
+			return EwfResponse.Create(
 				ContentTypes.Html,
-				new EwfResponseBodyCreator( pageTree.WriteMarkup ),
+				new EwfResponseBodyCreator(
+					writer => {
+						FormsAuthStatics.UpdateFormsAuthCookieIfNecessary();
+
+						pageTree.WriteMarkup( writer );
+
+						if( StandardLibrarySessionState.SessionAvailable ) {
+							StandardLibrarySessionState.Instance.StatusMessages.Clear();
+							StandardLibrarySessionState.Instance.ClearClientSideNavigation();
+						}
+					} ),
 				additionalHeaderFieldGetter: () => {
 					var headerFields = new List<( string, string )>();
 
@@ -917,14 +922,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 					return headerFields;
 				} );
-
-
-			if( StandardLibrarySessionState.SessionAvailable ) {
-				StandardLibrarySessionState.Instance.StatusMessages.Clear();
-				StandardLibrarySessionState.Instance.ClearClientSideNavigation();
-			}
-
-			return response;
 		}
 
 		/// <summary>
