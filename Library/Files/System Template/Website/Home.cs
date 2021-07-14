@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 
-// 
+// EwlPage
 
 namespace @@BaseNamespace.Website {
 	partial class Home {
