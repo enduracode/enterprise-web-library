@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -15,7 +16,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 		private static List<string> aspxFilePaths;
 
 		internal static void Generate(
-			TextWriter writer, string projectPath, string projectNamespace, bool projectContainsFramework, string generatedCodeFolderPath,
+			TextWriter writer, string projectPath, string projectNamespace, bool projectContainsFramework, IEnumerable<string> ignoredFolderPaths,
 			string staticFilesFolderPath, string staticFilesFolderUrlParentExpression ) {
 			var legacyUrlStaticsFilePath = EwlStatics.CombinePaths( projectPath, "LegacyUrlStatics.cs" );
 			if( File.Exists( legacyUrlStaticsFilePath ) && File.ReadAllText( legacyUrlStaticsFilePath ).Length == 0 ) {
@@ -28,7 +29,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 				projectPath,
 				projectNamespace,
 				projectContainsFramework,
-				generatedCodeFolderPath,
+				ignoredFolderPaths.ToImmutableHashSet( StringComparer.Ordinal ),
 				staticFilesFolderPath,
 				staticFilesFolderUrlParentExpression,
 				"" );
@@ -41,9 +42,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 		}
 
 		private static void generateForFolder(
-			TextWriter writer, string projectPath, string projectNamespace, bool projectContainsFramework, string generatedCodeFolderPath,
+			TextWriter writer, string projectPath, string projectNamespace, bool projectContainsFramework, ImmutableHashSet<string> ignoredFolderPaths,
 			string staticFilesFolderPath, string staticFilesFolderUrlParentExpression, string folderPathRelativeToProject ) {
-			if( folderPathRelativeToProject == generatedCodeFolderPath )
+			if( ignoredFolderPaths.Contains( folderPathRelativeToProject ) )
 				return;
 
 			if( folderPathRelativeToProject == staticFilesFolderPath ) {
@@ -225,7 +226,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 					projectPath,
 					projectNamespace,
 					projectContainsFramework,
-					generatedCodeFolderPath,
+					ignoredFolderPaths,
 					staticFilesFolderPath,
 					staticFilesFolderUrlParentExpression,
 					subFolderPath );
