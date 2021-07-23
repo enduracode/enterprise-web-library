@@ -363,17 +363,17 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 								? parameterIsNullable
 									  ?
 									  "url.IsPositiveInt( out var value ) ? new UrlDecoder( entitySetup, {0}: new SpecifiedValue<int?>( value ){1} ) : string.Equals( url.Segment, nullSegment, StringComparison.OrdinalIgnoreCase ) ? new UrlDecoder( entitySetup, {0}: new SpecifiedValue<int?>( null ){1} ) : null"
-										  .FormatWith( parameter.Name, getOldParameterNameDecoderArguments( optionalParameters ) )
+										  .FormatWith( parameter.Name, getOldParameterNameDecoderArguments( optionalParameters ).PrependDelimiter( ", " ) )
 									  : "url.IsPositiveInt( out var value ) ? new UrlDecoder( entitySetup, {0}: new SpecifiedValue<int>( value ){1} ) : null"
-										  .FormatWith( parameter.Name, getOldParameterNameDecoderArguments( optionalParameters ) )
+										  .FormatWith( parameter.Name, getOldParameterNameDecoderArguments( optionalParameters ).PrependDelimiter( ", " ) )
 								:
 								parameterIsNullable
 									?
 									"url.IsPositiveInt( out var value ) ? new UrlDecoder( {0}: new SpecifiedValue<int?>( value ){1} ) : string.Equals( url.Segment, nullSegment, StringComparison.OrdinalIgnoreCase ) ? new UrlDecoder( {0}: new SpecifiedValue<int?>( null ){1} ) : null"
-										.FormatWith( parameter.Name, getOldParameterNameDecoderArguments( optionalParameters ) )
+										.FormatWith( parameter.Name, getOldParameterNameDecoderArguments( optionalParameters ).PrependDelimiter( ", " ) )
 									: "url.IsPositiveInt( out var value ) ? new UrlDecoder( {0}: new SpecifiedValue<int>( value ){1} ) : null".FormatWith(
 										parameter.Name,
-										getOldParameterNameDecoderArguments( optionalParameters ) ) ) );
+										getOldParameterNameDecoderArguments( optionalParameters ).PrependDelimiter( ", " ) ) ) );
 				}
 			}
 
