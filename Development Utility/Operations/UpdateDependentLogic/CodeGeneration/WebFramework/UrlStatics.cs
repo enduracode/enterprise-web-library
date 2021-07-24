@@ -362,16 +362,16 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 							entitySetup != null
 								? parameterIsNullable
 									  ?
-									  "url.IsPositiveInt( out var value ) ? new UrlDecoder( entitySetup, {0}: new SpecifiedValue<int?>( value ){1} ) : string.Equals( url.Segment, nullSegment, StringComparison.OrdinalIgnoreCase ) ? new UrlDecoder( entitySetup, {0}: new SpecifiedValue<int?>( null ){1} ) : null"
+									  "url.IsPositiveInt( out var segmentInt ) ? new UrlDecoder( entitySetup, {0}: new SpecifiedValue<int?>( segmentInt ){1} ) : string.Equals( url.Segment, nullSegment, StringComparison.OrdinalIgnoreCase ) ? new UrlDecoder( entitySetup, {0}: new SpecifiedValue<int?>( null ){1} ) : null"
 										  .FormatWith( parameter.Name, getOldParameterNameDecoderArguments( optionalParameters ).PrependDelimiter( ", " ) )
-									  : "url.IsPositiveInt( out var value ) ? new UrlDecoder( entitySetup, {0}: new SpecifiedValue<int>( value ){1} ) : null"
+									  : "url.IsPositiveInt( out var segmentInt ) ? new UrlDecoder( entitySetup, {0}: new SpecifiedValue<int>( segmentInt ){1} ) : null"
 										  .FormatWith( parameter.Name, getOldParameterNameDecoderArguments( optionalParameters ).PrependDelimiter( ", " ) )
 								:
 								parameterIsNullable
 									?
-									"url.IsPositiveInt( out var value ) ? new UrlDecoder( {0}: new SpecifiedValue<int?>( value ){1} ) : string.Equals( url.Segment, nullSegment, StringComparison.OrdinalIgnoreCase ) ? new UrlDecoder( {0}: new SpecifiedValue<int?>( null ){1} ) : null"
+									"url.IsPositiveInt( out var segmentInt ) ? new UrlDecoder( {0}: new SpecifiedValue<int?>( segmentInt ){1} ) : string.Equals( url.Segment, nullSegment, StringComparison.OrdinalIgnoreCase ) ? new UrlDecoder( {0}: new SpecifiedValue<int?>( null ){1} ) : null"
 										.FormatWith( parameter.Name, getOldParameterNameDecoderArguments( optionalParameters ).PrependDelimiter( ", " ) )
-									: "url.IsPositiveInt( out var value ) ? new UrlDecoder( {0}: new SpecifiedValue<int>( value ){1} ) : null".FormatWith(
+									: "url.IsPositiveInt( out var segmentInt ) ? new UrlDecoder( {0}: new SpecifiedValue<int>( segmentInt ){1} ) : null".FormatWith(
 										parameter.Name,
 										getOldParameterNameDecoderArguments( optionalParameters ).PrependDelimiter( ", " ) ) ) );
 				}
