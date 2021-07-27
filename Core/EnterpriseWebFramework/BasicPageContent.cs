@@ -30,6 +30,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		private static Func<IReadOnlyCollection<PageContent>, IEnumerable<ResourceInfo>> cssInfoCreator;
 		private static Action<StringBuilder, bool> javaScriptIncludeBuilder;
+		private static Func<IEnumerable<( ResourceInfo resource, string rel, string sizes )>> appIconGetter;
 		private static Func<bool, string> intermediateUrlGetter;
 		private static Func<( string message, IReadOnlyCollection<ActionComponentSetup> actions )?> impersonationWarningLineGetter;
 
@@ -146,9 +147,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal static void Init(
 			Func<IReadOnlyCollection<PageContent>, IEnumerable<ResourceInfo>> cssInfoCreator, Action<StringBuilder, bool> javaScriptIncludeBuilder,
-			Func<bool, string> intermediateUrlGetter, Func<( string, IReadOnlyCollection<ActionComponentSetup> )?> impersonationWarningLineGetter ) {
+			Func<IEnumerable<( ResourceInfo, string, string )>> appIconGetter, Func<bool, string> intermediateUrlGetter,
+			Func<( string, IReadOnlyCollection<ActionComponentSetup> )?> impersonationWarningLineGetter ) {
 			BasicPageContent.cssInfoCreator = cssInfoCreator;
 			BasicPageContent.javaScriptIncludeBuilder = javaScriptIncludeBuilder;
+			BasicPageContent.appIconGetter = appIconGetter;
 			BasicPageContent.intermediateUrlGetter = intermediateUrlGetter;
 			BasicPageContent.impersonationWarningLineGetter = impersonationWarningLineGetter;
 		}
@@ -225,6 +228,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									.Append( getModernizrLogic() )
 									.Concat( getGoogleAnalyticsLogicIfNecessary() )
 									.Append( getJavaScriptIncludes() )
+									.Concat(
+										from i in appIconGetter()
+										select getLink( i.resource.GetUrl(), i.rel, attributes: i.sizes.Any() ? new ElementAttribute( "sizes", i.sizes ).ToCollection() : null ) )
 									.Append( ( customHeadElements ?? new TrustedHtmlString( "" ) ).ToComponent() )
 									.Materialize() ) ).Append(
 							new ElementComponent(
@@ -482,15 +488,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				getMeta(
 					"msapplication-starturl",
 					EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString( EwfConfigurationStatics.AppSupportsSecureConnections ) ) );
-
-			var faviconPng48X48 = EwfApp.Instance.FaviconPng48X48;
-			if( faviconPng48X48 != null && faviconPng48X48.UserCanAccessResource )
-				components.Add( getLink( faviconPng48X48.GetUrl(), "icon", attributes: new ElementAttribute( "sizes", "48x48" ).ToCollection() ) );
-
-			var favicon = EwfApp.Instance.Favicon;
-			if( favicon != null && favicon.UserCanAccessResource )
-				// rel="shortcut icon" is deprecated and will be replaced with rel="icon".
-				components.Add( getLink( favicon.GetUrl(), "shortcut icon" ) );
 
 			components.Add( getMeta( "viewport", "initial-scale=1" ) );
 

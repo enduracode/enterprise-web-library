@@ -168,6 +168,23 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									markup.Append( getElement( resource ) );
 								}
 							},
+							() => {
+								var icons = new List<( ResourceInfo, string, string )>();
+
+								var faviconPng48X48 = EwfApp.Instance.FaviconPng48X48;
+								if( faviconPng48X48 != null ) {
+									assertResourceIsIntermediateInstallationPublicResourceWhenNecessary( faviconPng48X48 );
+									icons.Add( ( faviconPng48X48, "icon", "48x48" ) );
+								}
+
+								var favicon = EwfApp.Instance.Favicon;
+								if( favicon != null ) {
+									assertResourceIsIntermediateInstallationPublicResourceWhenNecessary( favicon );
+									icons.Add( ( favicon, "icon", "" ) );
+								}
+
+								return icons;
+							},
 							hideWarnings => {
 								var url = AppRequestState.Instance.Url;
 								if( AppRequestState.Instance.UserAccessible && AppRequestState.Instance.ImpersonatorExists )
