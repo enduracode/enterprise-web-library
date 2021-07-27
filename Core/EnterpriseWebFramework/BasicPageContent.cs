@@ -222,7 +222,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								children: new ElementComponent(
 										titleContext => new ElementData(
 											() => new ElementLocalData( "title" ),
-											children: ( titleOverride.Any() ? titleOverride : getTitle() ).ToComponents() ) ).Concat( getMetadataAndFaviconLinks() )
+											children: ( titleOverride.Any() ? titleOverride : getTitle() ).ToComponents() ) )
+									.Append(
+										getMeta(
+											"application-name",
+											EwfApp.Instance.AppDisplayName.Length > 0 ? EwfApp.Instance.AppDisplayName : ConfigurationStatics.SystemName ) )
 									.Concat( getTypekitLogicIfNecessary() )
 									.Concat( from i in cssInfoCreator( contentObjects ) select getStyleSheetLink( i.GetUrl() ) )
 									.Append( getModernizrLogic() )
@@ -231,6 +235,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									.Concat(
 										from i in appIconGetter()
 										select getLink( i.resource.GetUrl(), i.rel, attributes: i.sizes.Any() ? new ElementAttribute( "sizes", i.sizes ).ToCollection() : null ) )
+									.Append( getMeta( "viewport", "initial-scale=1" ) )
+									.Append(
+										// Chrome start URL
+										getMeta(
+											"application-url",
+											EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString( EwfConfigurationStatics.AppSupportsSecureConnections ) ) )
+									.Append(
+										// IE9 start URL
+										getMeta(
+											"msapplication-starturl",
+											EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString( EwfConfigurationStatics.AppSupportsSecureConnections ) ) )
 									.Append( ( customHeadElements ?? new TrustedHtmlString( "" ) ).ToComponent() )
 									.Materialize() ) ).Append(
 							new ElementComponent(
@@ -470,29 +485,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					ResourceBase.ResourcePathSeparator,
 					PageBase.Current.ParentResourceEntityPathString,
 					PageBase.Current.ResourceFullName ) );
-
-		private IReadOnlyCollection<FlowComponent> getMetadataAndFaviconLinks() {
-			var components = new List<FlowComponent>();
-
-			components.Add(
-				getMeta( "application-name", EwfApp.Instance.AppDisplayName.Length > 0 ? EwfApp.Instance.AppDisplayName : ConfigurationStatics.SystemName ) );
-
-			// Chrome start URL
-			components.Add(
-				getMeta(
-					"application-url",
-					EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString( EwfConfigurationStatics.AppSupportsSecureConnections ) ) );
-
-			// IE9 start URL
-			components.Add(
-				getMeta(
-					"msapplication-starturl",
-					EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString( EwfConfigurationStatics.AppSupportsSecureConnections ) ) );
-
-			components.Add( getMeta( "viewport", "initial-scale=1" ) );
-
-			return components;
-		}
 
 		private IEnumerable<FlowComponent> getTypekitLogicIfNecessary() {
 			if( EwfApp.Instance.TypekitId.Any() ) {
