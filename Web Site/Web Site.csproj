@@ -153,6 +153,7 @@
     <Compile Include="LegacyUrlStatics.cs" />
     <Compile Include="Providers\EwfUi.cs" />
     <Compile Include="Providers\RequestDispatching.cs" />
+    <Compile Include="Providers\StandardPageLogic.cs" />
     <Compile Include="Service\IService.cs" />
     <Compile Include="Service\Service.svc.cs">
       <DependentUpon>Service.svc</DependentUpon>

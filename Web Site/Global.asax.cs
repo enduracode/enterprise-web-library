@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
-using EnterpriseWebLibrary.WebSite.StaticFiles;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.WebSite {
@@ -18,7 +17,5 @@ namespace EnterpriseWebLibrary.WebSite {
 
 
 		protected override IEnumerable<BaseUrlPattern> GetBaseUrlPatterns() => TestPages.EntitySetup.UrlPatterns.BaseUrlPattern().ToCollection();
-
-		protected override List<ResourceInfo> GetStyleSheets() => new List<ResourceInfo> { new TestCss() };
 	}
 }
