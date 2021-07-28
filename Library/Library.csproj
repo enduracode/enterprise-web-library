@@ -148,6 +148,7 @@
     <Content Include="Files\System Template\Website\Home.cs" />
     <Content Include="Files\System Template\Website\Providers\EwfUi.cs" />
     <Content Include="Files\System Template\Website\Providers\RequestDispatching.cs" />
+    <Content Include="Files\System Template\Website\Providers\StandardPageLogic.cs" />
     <Content Include="Files\System Template\Website\Website.csproj" />
   </ItemGroup>
   <ItemGroup>

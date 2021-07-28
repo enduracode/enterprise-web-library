@@ -82,6 +82,7 @@
     <Compile Include="Home.cs" />
     <Compile Include="Providers\EwfUi.cs" />
     <Compile Include="Providers\RequestDispatching.cs" />
+    <Compile Include="Providers\StandardPageLogic.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Library\Library.csproj">
