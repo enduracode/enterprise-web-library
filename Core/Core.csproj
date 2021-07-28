@@ -344,7 +344,7 @@
     <Compile Include="EnterpriseWebFramework\Automatic Layout\FormItemList.cs" />
     <Compile Include="EnterpriseWebFramework\Automatic Layout\FormItemListSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Automatic Layout\FormItemSetup.cs" />
-    <Compile Include="EnterpriseWebFramework\BasicPageContent.cs" />
+    <Compile Include="EnterpriseWebFramework\Base Page\BasicPageContent.cs" />
     <Compile Include="EnterpriseWebFramework\BLOB Management\BlobFileCollectionManager.cs" />
     <Compile Include="EnterpriseWebFramework\BLOB Management\BlobFileManager.cs" />
     <Compile Include="EnterpriseWebFramework\BLOB Management\BlobFileManagerSetup.cs" />
