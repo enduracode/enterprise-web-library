@@ -226,7 +226,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									.Append(
 										getMeta(
 											"application-name",
-											EwfApp.Instance.AppDisplayName.Length > 0 ? EwfApp.Instance.AppDisplayName : ConfigurationStatics.SystemName ) )
+											BasePageStatics.AppProvider.AppDisplayName.Length > 0 ? BasePageStatics.AppProvider.AppDisplayName : ConfigurationStatics.SystemName ) )
 									.Concat( getTypekitLogicIfNecessary() )
 									.Concat( from i in cssInfoCreator( contentObjects ) select getStyleSheetLink( i.GetUrl() ) )
 									.Append( getModernizrLogic() )
@@ -480,17 +480,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private string getTitle() =>
 			StringTools.ConcatenateWithDelimiter(
 				" - ",
-				EwfApp.Instance.AppDisplayName.Length > 0 ? EwfApp.Instance.AppDisplayName : ConfigurationStatics.SystemName,
+				BasePageStatics.AppProvider.AppDisplayName.Length > 0 ? BasePageStatics.AppProvider.AppDisplayName : ConfigurationStatics.SystemName,
 				ResourceBase.CombineResourcePathStrings(
 					ResourceBase.ResourcePathSeparator,
 					PageBase.Current.ParentResourceEntityPathString,
 					PageBase.Current.ResourceFullName ) );
 
 		private IEnumerable<FlowComponent> getTypekitLogicIfNecessary() {
-			if( EwfApp.Instance.TypekitId.Any() ) {
+			if( BasePageStatics.AppProvider.TypekitId.Any() ) {
 				yield return new TrustedHtmlString(
 					"<script type=\"text/javascript\" src=\"http" + ( EwfApp.Instance.RequestIsSecure( HttpContext.Current.Request ) ? "s" : "" ) +
-					"://use.typekit.com/" + EwfApp.Instance.TypekitId + ".js\"></script>" ).ToComponent();
+					"://use.typekit.com/" + BasePageStatics.AppProvider.TypekitId + ".js\"></script>" ).ToComponent();
 				yield return new TrustedHtmlString( "<script type=\"text/javascript\">try{Typekit.load();}catch(e){}</script>" ).ToComponent();
 			}
 		}
@@ -502,7 +502,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			new TrustedHtmlString( "<script type=\"text/javascript\" src=\"" + new StaticFiles.ModernizrJs().GetUrl() + "\"></script>" ).ToComponent();
 
 		private IEnumerable<FlowComponent> getGoogleAnalyticsLogicIfNecessary() {
-			if( EwfApp.Instance.GoogleAnalyticsWebPropertyId.Length == 0 )
+			if( BasePageStatics.AppProvider.GoogleAnalyticsWebPropertyId.Length == 0 )
 				yield break;
 			using( var sw = new StringWriter() ) {
 				sw.WriteLine( "<script>" );
@@ -511,9 +511,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				sw.WriteLine( "m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)" );
 				sw.WriteLine( "})(window,document,'script','//www.google-analytics.com/analytics.js','ga');" );
 
-				var userId = EwfApp.Instance.GetGoogleAnalyticsUserId();
+				var userId = BasePageStatics.AppProvider.GetGoogleAnalyticsUserId();
 				sw.WriteLine(
-					"ga('create', '" + EwfApp.Instance.GoogleAnalyticsWebPropertyId + "', 'auto'{0});",
+					"ga('create', '" + BasePageStatics.AppProvider.GoogleAnalyticsWebPropertyId + "', 'auto'{0});",
 					userId.Any() ? ", {{'userId': '{0}'}}".FormatWith( userId ) : "" );
 
 				sw.WriteLine( "ga('send', 'pageview');" );

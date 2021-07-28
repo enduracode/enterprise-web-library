@@ -27,6 +27,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal const string ButtonElementName = "ewfButton";
 
+		private static ( Func<Action> pageViewDataModificationMethodGetter, Func<string> javaScriptDocumentReadyFunctionCallGetter ) appProvider;
+
 		private static Func<Func<Func<PageContent>, PageContent>, Func<string>, Func<string>, ( PageContent basicContent, FlowComponent component, FlowComponent
 				etherealContainer, FlowComponent jsInitElement, Action dataUpdateModificationMethod, bool isAutoDataUpdater, ActionPostBack pageLoadPostBack )>
 			contentGetter;
@@ -71,6 +73,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		internal static void Init(
+			( Func<Action>, Func<string> ) appProvider,
 			Func<Func<Func<PageContent>, PageContent>, Func<string>, Func<string>, ( PageContent, FlowComponent, FlowComponent, FlowComponent, Action, bool,
 				ActionPostBack )> contentGetter ) {
 			EwfValidation.Init(
@@ -115,6 +118,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							"If the data-update modification is included, it is meaningless to include any full post-backs since these inherently update the page's data." );
 				},
 				dataModification => dataModification == Current.dataUpdate ? Current.dataUpdatePostBack : (ActionPostBack)dataModification );
+			PageBase.appProvider = appProvider;
 			PageBase.contentGetter = contentGetter;
 		}
 
@@ -196,7 +200,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			                                                   new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains(
 				                                                   dmIdAndSecondaryOp.Item2 ) ) ) {
 				var modMethods = new List<Action>();
-				modMethods.Add( EwfApp.Instance.GetPageViewDataModificationMethod() );
+				modMethods.Add( appProvider.pageViewDataModificationMethodGetter() );
 				if( AppRequestState.Instance.UserAccessible ) {
 					if( AppTools.User != null )
 						modMethods.Add( getLastPageRequestTimeUpdateMethod( AppTools.User ) );
@@ -365,7 +369,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			};
 		}
 
-		// The warning below also appears on EwfApp.GetPageViewDataModificationMethod.
+		// The warning below also appears on AppStandardPageLogicProvider.GetPageViewDataModificationMethod.
 		/// <summary>
 		/// Returns a method that executes data modifications that happen simply because of a request and require no other action by the user. Returns null if there
 		/// are no modifications, which can improve page performance since the data-access cache does not need to be reset.
@@ -618,7 +622,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						? SubmitButtonPostBack.Id
 						: "" /* This empty string we're using when no submit button exists is arbitrary and meaningless; it should never actually be submitted. */ ),
 				elementJsInitStatements,
-				EwfApp.Instance.JavaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
+				appProvider.javaScriptDocumentReadyFunctionCallGetter().AppendDelimiter( ";" ),
 				javaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
 				StringTools.ConcatenateWithDelimiter( " ", scrollStatement, pageLoadActionStatements, clientSideNavigationStatements )
 					.PrependDelimiter( "window.onload = function() { " )

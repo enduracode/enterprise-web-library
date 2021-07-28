@@ -99,11 +99,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									AppRequestState.Instance.SetResource( resource );
 							},
 							() => AppRequestState.Instance.Resource );
-						PageBase.Init( BasicPageContent.GetContent );
+						PageBase.Init(
+							( () => BasePageStatics.AppProvider.GetPageViewDataModificationMethod(), () => BasePageStatics.AppProvider.JavaScriptDocumentReadyFunctionCall ),
+							BasicPageContent.GetContent );
 						HyperlinkBehaviorExtensionCreators.Init( ModalBox.GetBrowsingModalBoxOpenStatements );
 						FileUpload.Init( () => ( (BasicPageContent)PageBase.Current.BasicContent ).FormUsesMultipartEncoding = true );
 						ModalBox.Init( () => ( (BasicPageContent)PageBase.Current.BasicContent ).BrowsingModalBoxId );
 						CreditCardCollector.Init( () => ( (BasicPageContent)PageBase.Current.BasicContent ).IncludesStripeCheckout = true );
+						BasePageStatics.Init( getProviderGetter<AppStandardPageLogicProvider>( "StandardPageLogic" ) );
 						BasicPageContent.Init(
 							contentObjects => {
 								var contentUsesUi = contentObjects.Any( i => i is UiPageContent );
@@ -127,7 +130,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 												new StaticFiles.Styles.Ui.ColorsCss(), new StaticFiles.Styles.Ui.FontsCss(), new StaticFiles.Styles.Ui.LayoutCss(),
 												new StaticFiles.Styles.Ui.TransitionsCss()
 											} );
-								foreach( var resource in EwfApp.Instance.GetStyleSheets() ) {
+								foreach( var resource in BasePageStatics.AppProvider.GetStyleSheets() ) {
 									assertResourceIsIntermediateInstallationPublicResourceWhenNecessary( resource );
 									cssInfos.Add( resource );
 								}
@@ -137,7 +140,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										cssInfos.Add( resource );
 									}
 								else
-									foreach( var resource in EwfApp.Instance.GetCustomUiStyleSheets() ) {
+									foreach( var resource in BasePageStatics.AppProvider.GetCustomUiStyleSheets() ) {
 										assertResourceIsIntermediateInstallationPublicResourceWhenNecessary( resource );
 										cssInfos.Add( resource );
 									}
@@ -163,7 +166,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								foreach( var i in infos.Select( getElement ) )
 									markup.Append( i );
 								markup.Append( MiniProfiler.RenderIncludes().ToHtmlString() );
-								foreach( var resource in EwfApp.Instance.GetJavaScriptFiles() ) {
+								foreach( var resource in BasePageStatics.AppProvider.GetJavaScriptFiles() ) {
 									assertResourceIsIntermediateInstallationPublicResourceWhenNecessary( resource );
 									markup.Append( getElement( resource ) );
 								}
@@ -171,13 +174,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							() => {
 								var icons = new List<( ResourceInfo, string, string )>();
 
-								var faviconPng48X48 = EwfApp.Instance.FaviconPng48X48;
+								var faviconPng48X48 = BasePageStatics.AppProvider.FaviconPng48X48;
 								if( faviconPng48X48 != null ) {
 									assertResourceIsIntermediateInstallationPublicResourceWhenNecessary( faviconPng48X48 );
 									icons.Add( ( faviconPng48X48, "icon", "48x48" ) );
 								}
 
-								var favicon = EwfApp.Instance.Favicon;
+								var favicon = BasePageStatics.AppProvider.Favicon;
 								if( favicon != null ) {
 									assertResourceIsIntermediateInstallationPublicResourceWhenNecessary( favicon );
 									icons.Add( ( favicon, "icon", "" ) );

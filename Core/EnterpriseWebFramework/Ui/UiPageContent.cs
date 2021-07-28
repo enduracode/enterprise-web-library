@@ -246,7 +246,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var appLogo = new GenericFlowContainer(
 				( !ConfigurationStatics.IsIntermediateInstallation || AppRequestState.Instance.IntermediateUserExists
 					  ? EwfUiStatics.AppProvider.GetLogoComponent()
-					  : null ) ?? ( EwfApp.Instance.AppDisplayName.Length > 0 ? EwfApp.Instance.AppDisplayName : ConfigurationStatics.SystemName ).ToComponents(),
+					  : null ) ?? ( BasePageStatics.AppProvider.AppDisplayName.Length > 0 ? BasePageStatics.AppProvider.AppDisplayName : ConfigurationStatics.SystemName )
+				.ToComponents(),
 				classes: appLogoClass );
 
 			var userInfo = new List<FlowComponent>();
