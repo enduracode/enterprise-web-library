@@ -383,6 +383,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return null;
 		}
 
+		protected sealed override bool managesDataAccessCacheInUnsafeRequestMethods => true;
+
 		protected sealed override EwfResponse put() => base.put();
 		protected sealed override EwfResponse patch() => base.patch();
 		protected sealed override EwfResponse delete() => base.delete();

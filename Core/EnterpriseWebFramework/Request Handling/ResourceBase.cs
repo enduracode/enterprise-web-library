@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Web;
 using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.DataAccess;
 using Humanizer;
 using StackExchange.Profiling;
 using Tewl.Tools;
@@ -362,29 +363,27 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			EwfResponse response;
 			switch( context.Request.HttpMethod ) {
 				case "PUT":
-					response = put();
+					response = executeUnsafeRequestMethod( put );
 					break;
 				case "PATCH":
-					response = patch();
+					response = executeUnsafeRequestMethod( patch );
 					break;
 				case "DELETE":
-					response = delete();
+					response = executeUnsafeRequestMethod( delete );
 					break;
 				case "POST":
-					response = post();
+					response = executeUnsafeRequestMethod( post );
 					break;
 				default:
 					context.Response.StatusCode = 501;
-					EwfResponse.Create( "", new EwfResponseBodyCreator( () => "" ) ).WriteToAspNetResponse( context.Response );
-					return;
+					response = EwfResponse.Create( "", new EwfResponseBodyCreator( () => "" ) );
+					break;
 			}
-			if( response != null )
-				response.WriteToAspNetResponse( context.Response );
-			else {
+			if( response == null ) {
 				context.Response.StatusCode = 405;
-				EwfResponse.Create( "", new EwfResponseBodyCreator( () => "" ), additionalHeaderFieldGetter: () => ( "Allow", "" ).ToCollection() )
-					.WriteToAspNetResponse( context.Response );
+				response = EwfResponse.Create( "", new EwfResponseBodyCreator( () => "" ), additionalHeaderFieldGetter: () => ( "Allow", "" ).ToCollection() );
 			}
+			response.WriteToAspNetResponse( context.Response );
 		}
 
 		/// <summary>
@@ -396,6 +395,21 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Returns the handler for a GET or HEAD request.
 		/// </summary>
 		protected virtual EwfSafeRequestHandler getOrHead() => null;
+
+		private EwfResponse executeUnsafeRequestMethod( Func<EwfResponse> method ) {
+			if( managesDataAccessCacheInUnsafeRequestMethods )
+				return method();
+
+			DataAccessState.Current.DisableCache();
+			try {
+				return method();
+			}
+			finally {
+				DataAccessState.Current.ResetCache();
+			}
+		}
+
+		protected virtual bool managesDataAccessCacheInUnsafeRequestMethods => false;
 
 		protected virtual EwfResponse put() => null;
 		protected virtual EwfResponse patch() => null;

@@ -135,6 +135,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return responseWriter;
 		}
 
+		protected sealed override bool managesDataAccessCacheInUnsafeRequestMethods => base.managesDataAccessCacheInUnsafeRequestMethods;
 		protected sealed override EwfResponse put() => base.put();
 		protected sealed override EwfResponse patch() => base.patch();
 		protected sealed override EwfResponse delete() => base.delete();
