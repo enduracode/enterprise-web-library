@@ -213,7 +213,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					ResourceBase.WriteRedirectResponse(
 						HttpContext.Current,
 						systemManager.HttpBaseUrl.Replace( "https://", "http://" ) +
-						"/Pages/Public/AcmeChallengeResponse.aspx?Token={0}".FormatWith( HttpUtility.UrlEncode( absoluteUrl.Segments.Last() ) ),
+						"/Pages/Public/AcmeChallengeResponse.aspx;token={0}".FormatWith( HttpUtility.UrlEncode( absoluteUrl.Segments.Last() ) ),
 						false );
 					CompleteRequest();
 				}
