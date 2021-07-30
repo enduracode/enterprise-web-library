@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Humanizer;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework.WebItems {
 	internal class EntitySetup {
@@ -33,6 +34,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 			InfoStatics.WriteParameterMembers( writer, requiredParameters, optionalParameters );
 			if( requiredParameters.Any() || optionalParameters.Any() )
 				writer.WriteLine( "internal ParametersModification parametersModification;" );
+			if( optionalParameters.Any() )
+				writer.WriteLine( "private Action<OptionalParameterSpecifier, Parameters> optionalParameterSetter;" );
 			InfoStatics.WriteConstructorAndHelperMethods( writer, generalData, requiredParameters, optionalParameters, false, true );
 			if( requiredParameters.Any() || optionalParameters.Any() ) {
 				writer.WriteLine( "{0} override void InitParametersModification() {{".FormatWith( projectContainsFramework ? "protected internal" : "protected" ) );
@@ -44,6 +47,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 			else
 				writer.WriteLine( "{0} override void InitParametersModification() {{}}".FormatWith( projectContainsFramework ? "protected internal" : "protected" ) );
 			UrlStatics.GenerateGetEncoderMethod( writer, "", requiredParameters, optionalParameters, p => "true", false );
+			writer.WriteLine(
+				"internal {0} ReCreate() => new {0}({1});".FormatWith(
+					generalData.ClassName,
+					StringTools.ConcatenateWithDelimiter(
+							", ",
+							InfoStatics.GetInfoConstructorArgumentsForRequiredParameters( requiredParameters, parameter => parameter.PropertyName ),
+							optionalParameters.Any() ? "optionalParameterSetter: optionalParameterSetter" : "" )
+						.Surround( " ", " " ) ) );
 			WebFrameworkStatics.WriteReCreateFromNewParameterValuesMethod(
 				writer,
 				requiredParameters,

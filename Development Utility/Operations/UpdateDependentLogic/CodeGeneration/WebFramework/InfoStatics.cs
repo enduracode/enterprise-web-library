@@ -201,6 +201,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 			if( !isEs )
 				writer.WriteLine( "base.uriFragmentIdentifier = uriFragmentIdentifier;" );
 
+			if( optionalParameters.Any() )
+				writer.WriteLine( "this.optionalParameterSetter = optionalParameterSetter;" );
+
 			writer.WriteLine( "}" ); // initParameters method
 		}
 

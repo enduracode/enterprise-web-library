@@ -42,8 +42,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 			InfoStatics.WriteParameterMembers( writer, requiredParameters, optionalParameters );
 			if( generalData.IsPage() && ( requiredParameters.Any() || optionalParameters.Any() ) )
 				writer.WriteLine( "private ParametersModification parametersModification;" );
-			if( optionalParameters.Any() )
+			if( optionalParameters.Any() ) {
 				writer.WriteLine( "private readonly Lazy<SegmentParameterSpecifier> segmentParameterSpecifier;" );
+				writer.WriteLine( "private Action<OptionalParameterSpecifier, Parameters> optionalParameterSetter;" );
+			}
 			InfoStatics.WriteConstructorAndHelperMethods( writer, generalData, requiredParameters, optionalParameters, entitySetup != null, false );
 			writer.WriteLine( "public override EntitySetupBase EsAsBaseType => {0};".FormatWith( entitySetup != null ? "Es" : "null" ) );
 			if( generalData.IsPage() ) {
@@ -74,15 +76,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 					generalData.ClassName,
 					StringTools.ConcatenateWithDelimiter(
 						", ",
-						entitySetup != null
-							? "new {0}({1})".FormatWith(
-								entitySetup.GeneralData.ClassName,
-								InfoStatics.GetInfoConstructorArgumentsForRequiredParameters(
-										entitySetup.RequiredParameters,
-										parameter => "Es.{0}".FormatWith( parameter.PropertyName ) )
-									.Surround( " ", " " ) )
-							: "",
+						entitySetup != null ? "Es.ReCreate()" : "",
 						InfoStatics.GetInfoConstructorArgumentsForRequiredParameters( requiredParameters, parameter => parameter.PropertyName ),
+						optionalParameters.Any() ? "optionalParameterSetter: optionalParameterSetter" : "",
 						"uriFragmentIdentifier: uriFragmentIdentifier" ) ) );
 			if( generalData.IsPage() )
 				WebFrameworkStatics.WriteReCreateFromNewParameterValuesMethod(
