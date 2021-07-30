@@ -260,10 +260,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 								optionalParameters.Any()
 									? StringTools.ConcatenateWithDelimiter(
 											Environment.NewLine,
-											"optionalParameterSetter: ( specifier, _ ) => {".ToCollection()
+											"optionalParameterSetter: ( s, p ) => {".ToCollection()
+												.Append( "if( p.OptionalParameters != null ) return;" )
 												.Concat(
 													optionalParameters.Select(
-														i => "if( {0}Argument != null ) specifier.{1} = {0}Argument{2};".FormatWith(
+														i => "if( {0}Argument != null ) s.{1} = {0}Argument{2};".FormatWith(
 															i.Name,
 															i.PropertyName,
 															getSpecifiableParameterValueSelector( i ) ) ) )
