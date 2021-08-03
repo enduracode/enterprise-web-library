@@ -141,7 +141,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				return ( "", Enumerable.Empty<string>().MaterializeAsList() );
 			var segments = path.Separate( "/", false );
 			var firstSegment = segments.First();
-			return firstSegment[ 0 ] == ';' ? ( firstSegment.Substring( 1 ), segments.Skip( 1 ).MaterializeAsList() ) : ( "", segments );
+			return firstSegment.Length > 0 && firstSegment[ 0 ] == ';' ? ( firstSegment.Substring( 1 ), segments.Skip( 1 ).MaterializeAsList() ) : ( "", segments );
 		}
 
 		private static string generateSegment( string segment, string parameters ) => segment + parameters.PrependDelimiter( ";" );
