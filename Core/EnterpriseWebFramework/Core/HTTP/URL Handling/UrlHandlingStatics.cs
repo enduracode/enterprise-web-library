@@ -35,6 +35,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					segment = i.Generator( encoder );
 					if( segment != null )
 						break;
+					encoder.ResetState();
 				}
 				if( segment == null )
 					throw new ApplicationException( "The handler does not match any of the parent’s child URL patterns." );
@@ -54,6 +55,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				baseUrl = i.Generator( encoder );
 				if( baseUrl != null )
 					break;
+				encoder.ResetState();
 			}
 			if( baseUrl == null )
 				throw new ApplicationException( "The handler does not match any of the base URL patterns for the application." );
@@ -93,6 +95,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				decoder = i.Parser( baseUrl );
 				if( decoder != null )
 					break;
+				baseUrl.Parameters.ResetState();
 			}
 			if( decoder == null )
 				return null;
@@ -116,6 +119,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					decoder = i.Parser( segment );
 					if( decoder != null )
 						break;
+					segment.Parameters.ResetState();
 				}
 				if( decoder == null )
 					return null;

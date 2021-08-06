@@ -37,5 +37,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var matches = parameters[ name ].Materialize();
 			return matches.Count > 1 ? throw new UnresolvableUrlException( "Multiple {0} parameters exist.".FormatWith( name ), null ) : matches.SingleOrDefault();
 		}
+
+		internal void ResetState() {
+			accessedParameters.Clear();
+		}
 	}
 }

@@ -6,5 +6,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Framework use only.
 		/// </summary>
 		IReadOnlyCollection<( string name, string value, bool isSegmentParameter )> GetRemainingParameters();
+
+		/// <summary>
+		/// Framework use only.
+		/// </summary>
+		void ResetState();
 	}
 }
