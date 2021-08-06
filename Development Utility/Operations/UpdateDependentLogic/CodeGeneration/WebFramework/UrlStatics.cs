@@ -127,6 +127,18 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 			writer.WriteLine( "return parameters;" );
 			writer.WriteLine( "}" );
 
+			writer.WriteLine( "void global::EnterpriseWebLibrary.EnterpriseWebFramework.UrlEncoder.ResetState() {" );
+			if( entitySetup != null ) {
+				writer.WriteLine( "entitySetupMatched = false;" );
+				writer.WriteLine(
+					"if( entitySetupEncoder.IsValueCreated ) ( (global::EnterpriseWebLibrary.EnterpriseWebFramework.UrlEncoder)entitySetupEncoder.Value ).ResetState();" );
+			}
+			foreach( var i in requiredParameters.Concat( optionalParameters ) )
+				writer.WriteLine( "{0}Accessed = false;".FormatWith( i.Name ) );
+			if( includeVersionString )
+				writer.WriteLine( "versionStringAccessed = false;" );
+			writer.WriteLine( "}" );
+
 			writer.WriteLine( "}" );
 		}
 
