@@ -37,6 +37,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 
 		protected override IEnumerable<UrlPattern> getChildUrlPatterns() =>
 			RequestDispatchingStatics.GetFrameworkUrlPatterns()
+				.Append( BoxDemo.UrlPatterns.Literal( this, "box" ) )
 				.Append( EwfTableDemo.UrlPatterns.Literal( this, "ewf-table" ) )
 				.Append( CreateSystem.UrlPatterns.Literal( "create-system" ) )
 				.Append( ConfigurationSchemas.EntitySetup.UrlPatterns.Literal( "ConfigurationSchemas" ) )
