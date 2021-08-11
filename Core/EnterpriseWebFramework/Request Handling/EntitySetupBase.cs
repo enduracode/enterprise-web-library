@@ -116,10 +116,20 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		protected internal virtual ConnectionSecurity ConnectionSecurity => ParentResource?.ConnectionSecurity ?? ConnectionSecurity.SecureIfPossible;
 
-		( UrlHandler parent, UrlHandler child ) UrlHandler.GetCanonicalHandlerPair( UrlHandler child ) =>
-			EwlStatics.AreEqual( child, getRequestHandler() ) && canRepresentRequestHandler()
-				? ( (UrlHandler)this ).GetParent()?.GetCanonicalHandlerPair( this ) ?? ( null, this )
-				: ( this, child );
+		( UrlHandler parent, UrlHandler child ) UrlHandler.GetCanonicalHandlerPair( UrlHandler child ) {
+			UrlHandler requestHandler;
+			AppRequestState.Instance.UrlHandlerStateDisabled = true;
+			try {
+				requestHandler = getRequestHandler();
+			}
+			finally {
+				AppRequestState.Instance.UrlHandlerStateDisabled = false;
+			}
+
+			return EwlStatics.AreEqual( child, requestHandler ) && canRepresentRequestHandler()
+				       ? ( (UrlHandler)this ).GetParent()?.GetCanonicalHandlerPair( this ) ?? ( null, this )
+				       : ( this, child );
+		}
 
 		IEnumerable<UrlHandler> UrlHandler.GetRequestHandlingDescendants() {
 			UrlHandler requestHandler;
