@@ -16,15 +16,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal static string GetCanonicalUrl( BasicUrlHandler basicHandler, bool secure ) {
 			UrlHandler parent = null;
+			var canonicalHandler = basicHandler;
 			if( basicHandler is UrlHandler handler ) {
 				parent = handler.GetParent();
 				if( parent != null ) {
 					var pair = parent.GetCanonicalHandlerPair( handler );
 					parent = pair.parent;
-					basicHandler = pair.child;
+					canonicalHandler = pair.child;
 				}
 			}
-			var encoder = basicHandler.GetEncoder();
+			var encoder = canonicalHandler.GetEncoder();
 
 			var segments = new List<string>();
 			string query = null;
@@ -126,6 +127,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				basicHandler = decoder.GetUrlHandler( segment.Parameters );
 				handlers.Add( basicHandler );
 			}
+
+			if( basicHandler is UrlHandler lastHandler )
+				handlers.AddRange( lastHandler.GetRequestHandlingDescendants() );
 
 			return handlers;
 		}

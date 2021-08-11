@@ -2,7 +2,7 @@
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
-	/// An object that defines a particular URL in the application and handles a request for it or any of its descendants.
+	/// An object that defines a particular URL in the application and handles a request to it.
 	/// </summary>
 	public interface UrlHandler: BasicUrlHandler {
 		/// <summary>
@@ -14,6 +14,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Returns the parent and child URL handlers that will determine the specified child handler’s canonical URL.
 		/// </summary>
 		( UrlHandler parent, UrlHandler child ) GetCanonicalHandlerPair( UrlHandler child );
+
+		/// <summary>
+		/// Returns the line of implicit descendant handlers used for an HTTP request to this handler.
+		/// </summary>
+		IEnumerable<UrlHandler> GetRequestHandlingDescendants();
 
 		/// <summary>
 		/// Returns this handler’s child URL patterns.

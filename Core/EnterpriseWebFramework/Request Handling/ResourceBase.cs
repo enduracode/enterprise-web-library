@@ -298,6 +298,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		( UrlHandler parent, UrlHandler child ) UrlHandler.GetCanonicalHandlerPair( UrlHandler child ) => ( this, child );
 
+		IEnumerable<UrlHandler> UrlHandler.GetRequestHandlingDescendants() => Enumerable.Empty<UrlHandler>();
+
 		IEnumerable<UrlPattern> UrlHandler.GetChildPatterns() => getChildUrlPatterns();
 
 		/// <summary>

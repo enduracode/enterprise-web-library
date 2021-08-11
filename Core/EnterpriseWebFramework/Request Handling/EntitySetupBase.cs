@@ -121,9 +121,23 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				? ( (UrlHandler)this ).GetParent()?.GetCanonicalHandlerPair( this ) ?? ( null, this )
 				: ( this, child );
 
+		IEnumerable<UrlHandler> UrlHandler.GetRequestHandlingDescendants() {
+			UrlHandler requestHandler;
+			try {
+				requestHandler = getRequestHandler();
+			}
+			catch( Exception e ) {
+				if( e is UserDisabledException )
+					throw;
+				throw new UnresolvableUrlException( "Failed to get the request handler.", e );
+			}
+
+			return requestHandler != null ? requestHandler.ToCollection().Concat( requestHandler.GetRequestHandlingDescendants() ) : Enumerable.Empty<UrlHandler>();
+		}
+
 		/// <summary>
-		/// Returns the resource or entity setup that will handle an HTTP request for this entity setup’s URL. Normally this should be the first of the listed
-		/// resources. We do not recommend returning null; doing so will make the entity setup URL unusable. Must not depend on the authenticated user.
+		/// Returns the resource or entity setup that will handle an HTTP request to this entity setup. Normally this should be the first of the listed resources.
+		/// We do not recommend returning null; doing so will make the entity setup URL unusable. Must not depend on the authenticated user.
 		/// </summary>
 		protected abstract UrlHandler getRequestHandler();
 
@@ -141,19 +155,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		protected virtual IEnumerable<UrlPattern> getChildUrlPatterns() => Enumerable.Empty<UrlPattern>();
 
 		void BasicUrlHandler.HandleRequest( HttpContext context ) {
-			UrlHandler requestHandler;
-			try {
-				requestHandler = getRequestHandler();
-			}
-			catch( Exception e ) {
-				if( e is UserDisabledException )
-					throw;
-				throw new ResourceNotAvailableException( "Failed to get the request handler.", e );
-			}
-
-			if( requestHandler == null )
-				throw new ResourceNotAvailableException( "An entity setup cannot handle a request.", null );
-			requestHandler.HandleRequest( context );
+			throw new ResourceNotAvailableException( "An entity setup cannot handle a request.", null );
 		}
 
 		protected internal virtual bool AllowsSearchEngineIndexing => ParentResource?.AllowsSearchEngineIndexing ?? true;
