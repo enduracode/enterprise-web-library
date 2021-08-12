@@ -57,8 +57,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 						GlobalConfiguration.Configure( WebApiStatics.ConfigureWebApi );
 
-						// Prevent MiniProfiler JSON exceptions caused by pages with hundreds of database queries.
-						MiniProfiler.Settings.MaxJsonResponseSize = int.MaxValue;
+						MiniProfiler.Configure( new MiniProfilerOptions() );
 
 						UrlHandlingStatics.Init(
 							( baseUrlString, appRelativeUrl ) => {
@@ -165,7 +164,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								infos.Add( new StaticFiles.CodeJs() );
 								foreach( var i in infos.Select( getElement ) )
 									markup.Append( i );
-								markup.Append( MiniProfiler.RenderIncludes().ToHtmlString() );
+								markup.Append( MiniProfiler.Current.RenderIncludes().ToHtmlString() );
 								foreach( var resource in BasePageStatics.AppProvider.GetJavaScriptFiles() ) {
 									assertResourceIsIntermediateInstallationPublicResourceWhenNecessary( resource );
 									markup.Append( getElement( resource ) );

@@ -66,7 +66,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal AppRequestState( string url, string baseUrl ) {
 			beginInstant = SystemClock.Instance.GetCurrentInstant();
-			MiniProfiler.Start();
+			MiniProfiler.StartNew();
 			this.url = url;
 			this.baseUrl = baseUrl;
 
@@ -167,7 +167,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			// the installation is not live or the request is local; doing so would prevent adequate testing of the user check.
 			var userIsProfiling = UserAccessible && ( ProfilingUserId.HasValue || ImpersonatorExists ) && AppMemoryCache.UserIsProfilingRequests( ProfilingUserId );
 			if( !userIsProfiling && !HttpContext.Current.Request.IsLocal && ConfigurationStatics.IsLiveInstallation )
-				MiniProfiler.Stop( discardResults: true );
+				MiniProfiler.Current.Stop( discardResults: true );
 		}
 
 		internal T ExecuteWithUserDisabled<T>( Func<T> method ) {
@@ -252,11 +252,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			if( errors.Any() ) {
 				foreach( var i in errors )
 					TelemetryStatics.ReportError( i.prefix, i.exception );
-				MiniProfiler.Stop();
+				MiniProfiler.Current?.Stop();
 			}
 			else {
 				var duration = SystemClock.Instance.GetCurrentInstant() - beginInstant;
-				MiniProfiler.Stop();
+				MiniProfiler.Current?.Stop();
 				if( MiniProfiler.Current != null )
 					duration = Duration.FromMilliseconds( (double)MiniProfiler.Current.DurationMilliseconds );
 				const int thresholdInSeconds = 30;

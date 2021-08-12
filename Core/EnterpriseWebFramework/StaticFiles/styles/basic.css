@@ -898,14 +898,14 @@ ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleBothStates > ewfS
 		height: 0;
 	}
 }
-.profiler-results {
+.mp-results {
 	opacity: .4;
 }
-.profiler-results:hover {
+.mp-results:hover {
 	opacity: 1;
 }
 @media print {
-	.profiler-results {
+	.mp-results {
 		display: none;
 	}
 }
