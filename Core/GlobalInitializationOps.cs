@@ -9,6 +9,9 @@ using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.Encryption;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
+using Newtonsoft.Json;
+using NodaTime;
+using NodaTime.Serialization.JsonNet;
 using Tewl;
 
 namespace EnterpriseWebLibrary {
@@ -61,6 +64,8 @@ namespace EnterpriseWebLibrary {
 
 			try {
 				CultureInfo.DefaultThreadCurrentCulture = Cultures.EnglishUnitedStates;
+
+				JsonConvert.DefaultSettings = () => new JsonSerializerSettings().ConfigureForNodaTime( DateTimeZoneProviders.Tzdb );
 
 				var asposePdfLicensePath = EwlStatics.CombinePaths( ConfigurationStatics.InstallationConfiguration.AsposeLicenseFolderPath, "Aspose.PDF.lic" );
 				if( File.Exists( asposePdfLicensePath ) )
