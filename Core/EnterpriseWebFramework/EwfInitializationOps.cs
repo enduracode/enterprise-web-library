@@ -57,7 +57,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 						GlobalConfiguration.Configure( WebApiStatics.ConfigureWebApi );
 
-						MiniProfiler.Configure( new MiniProfilerOptions() );
+						var miniProfilerOptions = new MiniProfilerOptions();
+						miniProfilerOptions.IgnoredPaths.Clear();
+						MiniProfiler.Configure( miniProfilerOptions );
 
 						UrlHandlingStatics.Init(
 							( baseUrlString, appRelativeUrl ) => {
