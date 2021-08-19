@@ -9,11 +9,6 @@
 		string Name { get; }
 
 		/// <summary>
-		/// Gets the description of the service.
-		/// </summary>
-		string Description { get; }
-
-		/// <summary>
 		/// Initializes the service.
 		/// </summary>
 		void Init();

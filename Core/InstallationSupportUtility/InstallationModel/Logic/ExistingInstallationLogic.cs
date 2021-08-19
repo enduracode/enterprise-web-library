@@ -1,11 +1,9 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.ServiceProcess;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Configuration.SystemGeneral;
-using EnterpriseWebLibrary.Email;
 using Humanizer;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
@@ -41,13 +39,11 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 		}
 
 		public void UninstallServices() {
-			// Installutil tries to stop services during uninstallation, but doesn't report failure if a service doesn't stop. That's why we stop the services
-			// ourselves first.
 			stopServices();
 
 			var allServices = ServiceController.GetServices();
 			foreach( var service in runtimeConfiguration.WindowsServices.Where( s => allServices.Any( sc => sc.ServiceName == s.InstalledName ) ) )
-				runInstallutil( service, true );
+				TewlContrib.ProcessTools.RunProgram( "sc", "delete \"{0}\"".FormatWith( service.InstalledName ), "", true );
 		}
 
 		private void stopServices() {
@@ -119,25 +115,18 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 			foreach( var service in runtimeConfiguration.WindowsServices ) {
 				if( ServiceController.GetServices().Any( sc => sc.ServiceName == service.InstalledName ) )
 					throw new UserCorrectableException( "A service could not be installed because one with the same name already exists." );
-				runInstallutil( service, false );
-			}
-		}
-
-		private void runInstallutil( WindowsService service, bool uninstall ) {
-			try {
 				TewlContrib.ProcessTools.RunProgram(
-					EwlStatics.CombinePaths( RuntimeEnvironment.GetRuntimeDirectory(), "installutil" ),
-					( uninstall ? "/u " : "" ) + "\"" + EwlStatics.CombinePaths(
-						GetWindowsServiceFolderPath( service, true ),
-						service.NamespaceAndAssemblyName + ".exe" /* file extension is required */ ) + "\"",
+					"sc",
+					"create \"{0}\" binpath= \"{1}\" obj= \"NT AUTHORITY\\NetworkService\"".FormatWith(
+						service.InstalledName,
+						EwlStatics.CombinePaths( GetWindowsServiceFolderPath( service, true ), service.NamespaceAndAssemblyName + ".exe" ) ),
 					"",
 					true );
-			}
-			catch( Exception e ) {
-				const string message = "Installer tool failed.";
-				if( e.Message.Contains( typeof( EmailSendingException ).Name ) )
-					throw new UserCorrectableException( message, e );
-				throw new ApplicationException( message, e );
+				TewlContrib.ProcessTools.RunProgram(
+					"sc",
+					"description \"{0}\" \"{1}\"".FormatWith( service.InstalledName, "Performs actions for {0}.".FormatWith( runtimeConfiguration.SystemName ) ),
+					"",
+					true );
 			}
 		}
 

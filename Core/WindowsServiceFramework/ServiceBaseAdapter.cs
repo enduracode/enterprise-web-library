@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Linq;
 using System.ServiceProcess;
 using System.Threading;
+using EnterpriseWebLibrary.Configuration;
 using NodaTime;
 
 namespace EnterpriseWebLibrary.WindowsServiceFramework {
@@ -18,7 +20,7 @@ namespace EnterpriseWebLibrary.WindowsServiceFramework {
 		/// Creates a ServiceBase adapter. Generated code use only.
 		/// </summary>
 		public ServiceBaseAdapter( WindowsServiceBase service ) {
-			ServiceName = WindowsServiceMethods.GetServiceInstalledName( service );
+			ServiceName = ConfigurationStatics.InstallationConfiguration.WindowsServices.Single( s => s.Name == service.Name ).InstalledName;
 			AutoLog = false;
 
 			this.service = service;

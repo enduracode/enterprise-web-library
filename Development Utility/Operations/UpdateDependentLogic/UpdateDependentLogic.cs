@@ -455,7 +455,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 				writer.WriteLine( "[ MTAThread ]" );
 				writer.WriteLine( "private static void Main() {" );
-				writer.WriteLine( "InitStatics();" );
+				writer.WriteLine( "SystemInitializer globalInitializer = null;" );
+				writer.WriteLine( "initGlobalInitializer( ref globalInitializer );" );
+				writer.WriteLine( "var dataAccessState = new ThreadLocal<DataAccessState>( () => new DataAccessState() );" );
+				writer.WriteLine(
+					"GlobalInitializationOps.InitStatics( globalInitializer, \"{0}\", false, mainDataAccessStateGetter: () => dataAccessState.Value, useLongDatabaseTimeouts: true );"
+						.FormatWith( service.Name ) );
 				writer.WriteLine( "try {" );
 				writer.WriteLine(
 					"TelemetryStatics.ExecuteBlockWithStandardExceptionHandling( () => ServiceBase.Run( new ServiceBaseAdapter( new " + service.Name.EnglishToPascal() +
@@ -466,37 +471,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "}" );
 				writer.WriteLine( "}" );
 
-				writer.WriteLine( "internal static void InitStatics() {" );
-				writer.WriteLine( "SystemInitializer globalInitializer = null;" );
-				writer.WriteLine( "initGlobalInitializer( ref globalInitializer );" );
-				writer.WriteLine( "var dataAccessState = new ThreadLocal<DataAccessState>( () => new DataAccessState() );" );
-				writer.WriteLine(
-					"GlobalInitializationOps.InitStatics( globalInitializer, \"{0}\", false, mainDataAccessStateGetter: () => dataAccessState.Value, useLongDatabaseTimeouts: true );"
-						.FormatWith( service.Name ) );
-				writer.WriteLine( "}" );
-
 				writer.WriteLine( "static partial void initGlobalInitializer( ref SystemInitializer globalInitializer );" );
-
-				writer.WriteLine( "}" );
-
-				writer.WriteLine( "[ RunInstaller( true ) ]" );
-				writer.WriteLine( "public class Installer: System.Configuration.Install.Installer {" );
-
-				writer.WriteLine( "public Installer() {" );
-				writer.WriteLine( "Program.InitStatics();" );
-				writer.WriteLine( "try {" );
-				writer.WriteLine( "var code = GlobalInitializationOps.ExecuteAppWithStandardExceptionHandling( delegate {" );
-				writer.WriteLine( "Installers.Add( WindowsServiceMethods.CreateServiceProcessInstaller() );" );
-				writer.WriteLine( "Installers.Add( WindowsServiceMethods.CreateServiceInstaller( new " + service.Name.EnglishToPascal() + "() ) );" );
-				writer.WriteLine( "} );" );
-				writer.WriteLine( "if( code != 0 )" );
-				writer.WriteLine(
-					"throw new ApplicationException( \"Service installer objects could not be created. More information should be available in a separate error email from the service executable.\" );" );
-				writer.WriteLine( "}" );
-				writer.WriteLine( "finally {" );
-				writer.WriteLine( "GlobalInitializationOps.CleanUpStatics();" );
-				writer.WriteLine( "}" );
-				writer.WriteLine( "}" );
 
 				writer.WriteLine( "}" );
 
