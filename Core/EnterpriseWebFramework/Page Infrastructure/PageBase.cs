@@ -177,6 +177,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		protected abstract void initParametersModification();
 
+		protected sealed override bool disablesUrlNormalization => base.disablesUrlNormalization;
+
 		protected sealed override ExternalRedirect getRedirect() => base.getRedirect();
 
 		protected sealed override EwfSafeRequestHandler getOrHead() => new EwfSafeResponseWriter( processViewAndGetResponse() );

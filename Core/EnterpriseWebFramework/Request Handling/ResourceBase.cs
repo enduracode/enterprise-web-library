@@ -316,11 +316,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					throw new ApplicationException( "{0} has a connection security setting that is incompatible with the current request.".FormatWith( canonicalUrl ) );
 			}
 			else {
-				if( canonicalUrl != AppRequestState.Instance.Url ) {
-					if( !ShouldBeSecureGivenCurrentRequest && EwfApp.Instance.RequestIsSecure( context.Request ) )
-						context.Response.AppendHeader( "Strict-Transport-Security", "max-age=0" );
-					WriteRedirectResponse( context, canonicalUrl, true );
-					return;
+				if( disablesUrlNormalization ) {
+					if( ShouldBeSecureGivenCurrentRequest != EwfApp.Instance.RequestIsSecure( context.Request ) )
+						throw new ResourceNotAvailableException( "The resource has a connection security setting that is incompatible with the current request.", null );
+				}
+				else {
+					if( canonicalUrl != AppRequestState.Instance.Url ) {
+						if( !ShouldBeSecureGivenCurrentRequest && EwfApp.Instance.RequestIsSecure( context.Request ) )
+							context.Response.AppendHeader( "Strict-Transport-Security", "max-age=0" );
+						WriteRedirectResponse( context, canonicalUrl, true );
+						return;
+					}
 				}
 			}
 
@@ -387,6 +393,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 			response.WriteToAspNetResponse( context.Response );
 		}
+
+		/// <summary>
+		/// Gets whether URL normalization is disabled when the resource is requested.
+		/// </summary>
+		protected virtual bool disablesUrlNormalization => false;
 
 		/// <summary>
 		/// Returns the redirect for the resource, if it is located outside of the application.
