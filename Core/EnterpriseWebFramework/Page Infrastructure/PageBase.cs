@@ -304,7 +304,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						}
 					} );
 				if( navigationNeeded )
-					return navigate( null, null );
+					return navigate( null, null, null );
 			}
 
 			return getResponse();
@@ -419,7 +419,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			buildPage();
 
-			ResourceInfo redirectInfo = null;
+			( ResourceInfo destination, Func<ResourceInfo, bool> authorizationCheckDisabledPredicate )? navigationBehavior = null;
 			FullResponse fullSecondaryResponse = null;
 			executeWithDataModificationExceptionHandling(
 				() => {
@@ -462,7 +462,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								changesExist( actionPostBack ),
 								handleValidationErrors,
 								postBackAction => {
-									redirectInfo = postBackAction?.Resource;
+									navigationBehavior = postBackAction?.NavigationBehavior;
 									requestState.FocusKey = postBackAction?.ReloadBehavior?.FocusKey ?? "";
 									fullSecondaryResponse = postBackAction?.ReloadBehavior?.SecondaryResponse?.GetFullResponse();
 								} );
@@ -506,7 +506,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( AppRequestState.RequestTime, null, null );
 				} );
 
-			return navigate( redirectInfo, AppRequestState.Instance.EwfPageRequestState.ModificationErrorsExist ? null : fullSecondaryResponse );
+			return navigate(
+				navigationBehavior?.destination,
+				navigationBehavior?.authorizationCheckDisabledPredicate,
+				AppRequestState.Instance.EwfPageRequestState.ModificationErrorsExist ? null : fullSecondaryResponse );
 		}
 
 		private void buildPage() {
@@ -808,9 +811,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return ( contents.ToString(), staticStateItems, staticFormValues );
 		}
 
-		private EwfResponse navigate( ResourceInfo destination, FullResponse secondaryResponse ) {
+		private EwfResponse navigate( ResourceInfo destination, Func<ResourceInfo, bool> authorizationCheckDisabledPredicate, FullResponse secondaryResponse ) {
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
 
+			bool authorizationCheckDisabled;
 			string destinationUrl;
 			try {
 				// Determine the final navigation destination. If a destination is already specified and it is the current page or a page with the same entity setup,
@@ -837,7 +841,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				// This GetUrl call is important even for the transfer case below for the same reason that we *actually create* a new page object in every case above.
 				// We want to force developers to get an error email if a page modifies data to make itself unauthorized/disabled without specifying a different page as
 				// the redirect destination. The resulting transfer would lead the user to an error page.
-				destinationUrl = destination.GetUrl();
+				authorizationCheckDisabled = !requestState.ModificationErrorsExist && authorizationCheckDisabledPredicate?.Invoke( destination ) == true;
+				destinationUrl = destination.GetUrl( !authorizationCheckDisabled, !authorizationCheckDisabled );
 			}
 			catch( Exception e ) {
 				throw getPossibleDeveloperMistakeException( "The post-modification destination page became invalid.", innerException: e );
@@ -850,16 +855,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				StandardLibrarySessionState.Instance.SetClientSideNavigation( new PreBuiltResponse().GetUrl(), !secondaryResponse.FileName.Any() );
 			}
 
-			// If the redirect destination is identical to the current page, do a transfer instead of a redirect.
-			if( destination is PageBase page && page.MatchesCurrent() ) {
+			// If the destination resource is identical to the current page, do a transfer instead of a redirect. Don’t do this if the authorization check was
+			// disabled since, if there is a possibility of the destination page sending a 403 status code, we need to always send a 303 code first (below) so the
+			// client knows the POST worked.
+			if( destination is PageBase page && !authorizationCheckDisabled &&
+			    string.Equals( destinationUrl, AppRequestState.Instance.Url, StringComparison.Ordinal ) ) {
 				page.replaceUrlHandlers();
 				AppRequestState.Instance.SetNewUrlParameterValuesEffective( false );
 				AppRequestState.Instance.ClearUserAndImpersonator();
 				return ( nextPageObject = page ).processViewAndGetResponse();
 			}
 
-			// If the redirect destination is the current page, but with different query parameters, save request state in session state until the next request.
-			if( destination.GetType() == GetType() )
+			// If modification errors exist or this is not full post-back navigation, save request state in session state until the next request.
+			if( requestState.ModificationErrorsExist || requestState.DmIdAndSecondaryOp != null )
 				StandardLibrarySessionState.Instance.EwfPageRequestState = requestState;
 
 			HttpContext.Current.Response.StatusCode = 303;

@@ -44,8 +44,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Creates hyperlink behavior. EnduraCode goal 2450 will add a JavaScript predicate parameter to this method.
 		/// </summary>
 		/// <param name="hyperlinkBehavior">The behavior. Pass a <see cref="ResourceInfo"/> to navigate to the resource in the default way, or call
-		/// <see cref="HyperlinkBehaviorExtensionCreators.ToHyperlinkNewTabBehavior(ResourceInfo)"/> or
-		/// <see cref="HyperlinkBehaviorExtensionCreators.ToHyperlinkModalBoxBehavior(ResourceInfo, BrowsingContextSetup)"/>. For a mailto link, call
+		/// <see cref="HyperlinkBehaviorExtensionCreators.ToHyperlinkNewTabBehavior(ResourceInfo, bool)"/> or
+		/// <see cref="HyperlinkBehaviorExtensionCreators.ToHyperlinkModalBoxBehavior(ResourceInfo, bool, BrowsingContextSetup)"/>. For a mailto link, call
 		/// <see cref="HyperlinkBehaviorExtensionCreators.ToHyperlinkBehavior(Email.EmailAddress, string, string, string, string)"/>.</param>
 		public static ElementActivationBehavior CreateHyperlink( HyperlinkBehavior hyperlinkBehavior ) => new ElementActivationBehavior( hyperlinkBehavior );
 
@@ -80,7 +80,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal readonly Action PostBackAdder;
 
 		private ElementActivationBehavior( HyperlinkBehavior hyperlinkBehavior ) {
-			Classes = hyperlinkBehavior.HasDestination() ? ActivatableClass : ElementClassSet.Empty;
+			Classes = hyperlinkBehavior.HasDestination ? ActivatableClass : ElementClassSet.Empty;
 			AttributeGetter = () => hyperlinkBehavior.AttributeGetter( true );
 			IncludesIdAttribute = () => hyperlinkBehavior.IncludesIdAttribute( true );
 			EtherealChildren = hyperlinkBehavior.EtherealChildren;
@@ -104,7 +104,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			if( action == null && !script.Any() ) {
 				HyperlinkBehavior hyperlinkBehavior = resource;
 
-				Classes = hyperlinkBehavior.HasDestination() ? ActivatableClass : ElementClassSet.Empty;
+				Classes = hyperlinkBehavior.HasDestination ? ActivatableClass : ElementClassSet.Empty;
 				AttributeGetter = () => hyperlinkBehavior.AttributeGetter( true );
 				IncludesIdAttribute = () => hyperlinkBehavior.IncludesIdAttribute( true );
 				EtherealChildren = hyperlinkBehavior.EtherealChildren;
