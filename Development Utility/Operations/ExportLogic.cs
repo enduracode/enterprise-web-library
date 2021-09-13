@@ -143,10 +143,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			writer.WriteLine( "<title>" + installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + "</title>" );
 			writer.WriteLine( "<authors>William Gross, Greg Smalter, Sam Rueby</authors>" );
 			writer.WriteLine(
-				"<description>The {0} ({1}), and its tailored infrastructure platform, are a complete and open solution for developing and operating web-based enterprise software.</description>"
+				"<description>The {0} ({1}), together with its tailored infrastructure platform, is a highly opinionated foundation for web-based enterprise software.</description>"
 					.FormatWith( EwlStatics.EwlName, EwlStatics.EwlInitialism ) );
 			writer.WriteLine( "<projectUrl>http://enterpriseweblibrary.org</projectUrl>" );
-			writer.WriteLine( "<licenseUrl>http://enterpriseweblibrary.org/license</licenseUrl>" );
+			writer.WriteLine( "<license type=\"expression\">MIT</license>" );
 			writer.WriteLine( "<requireLicenseAcceptance>false</requireLicenseAcceptance>" );
 			writer.WriteLine( "<dependencies>" );
 
@@ -225,7 +225,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					InstallationConfiguration.InstallationConfigurationFolderName,
 					InstallationConfiguration.InstallationsFolderName ) ) )
 				if( !new[] { InstallationConfiguration.DevelopmentInstallationFolderName, AppStatics.MercurialRepositoryFolderName }.Contains(
-					Path.GetFileName( installationConfigurationFolderPath ) ) ) {
+					    Path.GetFileName( installationConfigurationFolderPath ) ) ) {
 					var buildMessageInstallation = new InstallationSupportUtility.SystemManagerInterface.Messages.BuildMessage.Installation();
 
 					// Do not perform schema validation since the schema file on disk may not match this version of the ISU.
