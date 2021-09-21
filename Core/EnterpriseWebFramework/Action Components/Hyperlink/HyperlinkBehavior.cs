@@ -104,7 +104,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			PostBackAdder = () => {};
 		}
 
-		internal bool HasDestination => hasDestination;
+		/// <summary>
+		/// Gets whether the behavior object has a destination.
+		/// </summary>
+		public bool HasDestination => hasDestination;
+
 		public bool UserCanNavigateToDestination() => userCanNavigateToDestinationPredicate();
 	}
 
