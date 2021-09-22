@@ -311,19 +311,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						else if( exception is AccessDeniedException accessDeniedException ) {
 							if( accessDeniedException.CausedByIntermediateUser )
 								transferRequest( 403, new NonLiveLogIn( RequestState.Url ) );
-							else {
-								var userNotYetAuthenticated = RequestState.UserAccessible && AppTools.User == null && UserManagementStatics.UserManagementEnabled;
-								if( userNotYetAuthenticated && !ConfigurationStatics.IsLiveInstallation && !RequestState.ImpersonatorExists )
-									transferRequest( 403, new Impersonate( RequestState.Url ) );
-								else if( userNotYetAuthenticated && FormsAuthStatics.FormsAuthEnabled )
-									if( accessDeniedException.LogInPage != null )
-										// We pass false here to avoid complicating things with ThreadAbortExceptions.
-										Response.Redirect( accessDeniedException.LogInPage.GetUrl(), false );
-									else
-										transferRequest( 403, new LogIn( RequestState.Url ) );
+							else if( UserManagementStatics.UserManagementEnabled && !ConfigurationStatics.IsLiveInstallation && RequestState.UserAccessible &&
+							         !RequestState.ImpersonatorExists )
+								transferRequest( 403, new Impersonate( RequestState.Url ) );
+							else if( UserManagementStatics.UserManagementEnabled && FormsAuthStatics.FormsAuthEnabled )
+								if( accessDeniedException.LogInPage != null )
+									// We pass false here to avoid complicating things with ThreadAbortExceptions.
+									Response.Redirect( accessDeniedException.LogInPage.GetUrl(), false );
 								else
-									transferRequest( 403, getErrorPage( new AccessDenied( !baseUrlRequest.Value ) ) );
-							}
+									transferRequest( 403, new LogIn( RequestState.Url ) );
+							else
+								transferRequest( 403, getErrorPage( new AccessDenied( !baseUrlRequest.Value ) ) );
 						}
 						else if( exception is PageDisabledException pageDisabledException )
 							transferRequest( null, new ResourceDisabled( pageDisabledException.Message ) );
