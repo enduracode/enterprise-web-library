@@ -307,26 +307,26 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString( EwfConfigurationStatics.AppSupportsSecureConnections ),
 								StringComparison.Ordinal ) );
 						if( exception is ResourceNotAvailableException || errorIsWcf404 || errorIsBogusPathException )
-							transferRequest( getErrorPage( new ResourceNotAvailable( !baseUrlRequest.Value ) ) );
+							transferRequest( 404, getErrorPage( new ResourceNotAvailable( !baseUrlRequest.Value ) ) );
 						else if( exception is AccessDeniedException accessDeniedException ) {
 							if( accessDeniedException.CausedByIntermediateUser )
-								transferRequest( new NonLiveLogIn( RequestState.Url ) );
+								transferRequest( 403, new NonLiveLogIn( RequestState.Url ) );
 							else {
 								var userNotYetAuthenticated = RequestState.UserAccessible && AppTools.User == null && UserManagementStatics.UserManagementEnabled;
 								if( userNotYetAuthenticated && !ConfigurationStatics.IsLiveInstallation && !RequestState.ImpersonatorExists )
-									transferRequest( new Impersonate( RequestState.Url ) );
+									transferRequest( 403, new Impersonate( RequestState.Url ) );
 								else if( userNotYetAuthenticated && FormsAuthStatics.FormsAuthEnabled )
 									if( accessDeniedException.LogInPage != null )
 										// We pass false here to avoid complicating things with ThreadAbortExceptions.
 										Response.Redirect( accessDeniedException.LogInPage.GetUrl(), false );
 									else
-										transferRequest( new LogIn( RequestState.Url ) );
+										transferRequest( 403, new LogIn( RequestState.Url ) );
 								else
-									transferRequest( getErrorPage( new AccessDenied( !baseUrlRequest.Value ) ) );
+									transferRequest( 403, getErrorPage( new AccessDenied( !baseUrlRequest.Value ) ) );
 							}
 						}
 						else if( exception is PageDisabledException pageDisabledException )
-							transferRequest( new ResourceDisabled( pageDisabledException.Message ) );
+							transferRequest( null, new ResourceDisabled( pageDisabledException.Message ) );
 						else {
 							RequestState.AddError( "", exception );
 							transferRequestToUnhandledExceptionPage();
@@ -342,7 +342,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				true );
 		}
 
-		private void transferRequest( ResourceBase resource ) {
+		private void transferRequest( int? statusCode, ResourceBase resource ) {
+			if( statusCode.HasValue ) {
+				HttpContext.Current.Response.StatusCode = statusCode.Value;
+				HttpContext.Current.Response.TrySkipIisCustomErrors = true;
+			}
+
 			try {
 				resource.HandleRequest( HttpContext.Current, true );
 			}
@@ -354,6 +359,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		private void transferRequestToUnhandledExceptionPage() {
+			HttpContext.Current.Response.StatusCode = 500;
+			HttpContext.Current.Response.TrySkipIisCustomErrors = true;
+
 			try {
 				getErrorPage( new UnhandledException() ).HandleRequest( HttpContext.Current, true );
 			}

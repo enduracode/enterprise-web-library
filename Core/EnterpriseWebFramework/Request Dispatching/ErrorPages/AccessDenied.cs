@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using System.Web;
 using Tewl.Tools;
 
 // EwlPage
@@ -11,8 +10,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.ErrorPages {
 		protected override UrlHandler getUrlParent() => new Admin.EntitySetup();
 		protected internal override ConnectionSecurity ConnectionSecurity => ConnectionSecurity.MatchingCurrentRequest;
 
-		protected override PageContent getContent() {
-			var content = new ErrorPageContent(
+		protected override PageContent getContent() =>
+			new ErrorPageContent(
 				new Paragraph( Translation.AccessIsDenied.ToComponents() ).Concat(
 						ShowHomeLink
 							? new Paragraph(
@@ -22,11 +21,5 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.ErrorPages {
 									new StandardHyperlinkStyle( Translation.ClickHereToGoToHomePage ) ).ToCollection() ).ToCollection()
 							: Enumerable.Empty<FlowComponent>() )
 					.Materialize() );
-
-			HttpContext.Current.Response.StatusCode = 403;
-			HttpContext.Current.Response.TrySkipIisCustomErrors = true;
-
-			return content;
-		}
 	}
 }

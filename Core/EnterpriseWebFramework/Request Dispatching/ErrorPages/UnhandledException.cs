@@ -1,5 +1,4 @@
-﻿using System.Web;
-using Tewl.Tools;
+﻿using Tewl.Tools;
 
 // EwlPage
 
@@ -9,13 +8,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.ErrorPages {
 		protected override UrlHandler getUrlParent() => new Admin.EntitySetup();
 		protected internal override ConnectionSecurity ConnectionSecurity => ConnectionSecurity.MatchingCurrentRequest;
 
-		protected override PageContent getContent() {
-			var content = new ErrorPageContent( new Paragraph( Translation.AnErrorHasOccurred.ToComponents() ).ToCollection() );
-
-			HttpContext.Current.Response.StatusCode = 500;
-			HttpContext.Current.Response.TrySkipIisCustomErrors = true;
-
-			return content;
-		}
+		protected override PageContent getContent() => new ErrorPageContent( new Paragraph( Translation.AnErrorHasOccurred.ToComponents() ).ToCollection() );
 	}
 }
