@@ -9,7 +9,7 @@ using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	partial class OptionalParametersDemo {
-		static partial void specifyParameterDefaults( OptionalParameterSpecifier specifier, Parameters parameters ) {
+		static partial void specifyParameterDefaults( OptionalParameterSpecifier specifier, EntitySetup entitySetup, Parameters parameters ) {
 			specifier.Field1 = "Default value";
 		}
 
@@ -26,7 +26,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 					behavior: new PostBackBehavior(
 						postBack: PostBack.CreateFull(
 							actionGetter: () => new PostBackAction(
-								new OptionalParametersDemo( Es, optionalParameterSetter: ( specifier, parameters ) => { specifier.Field2 = "bob"; } ) ) ) ) ) );
+								new OptionalParametersDemo( Es, optionalParameterSetter: ( specifier, entitySetup, parameters ) => { specifier.Field2 = "bob"; } ) ) ) ) ) );
 
 			var table = EwfTable.Create( headItems: new[] { EwfTableItem.Create( "Url".ToCell(), "Valid?".ToCell() ) } );
 			content.Add( table );

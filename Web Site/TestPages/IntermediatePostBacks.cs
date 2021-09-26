@@ -12,7 +12,7 @@ using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	partial class IntermediatePostBacks {
-		static partial void specifyParameterDefaults( OptionalParameterSpecifier specifier, Parameters parameters ) {
+		static partial void specifyParameterDefaults( OptionalParameterSpecifier specifier, EntitySetup entitySetup, Parameters parameters ) {
 			specifier.NonIdItemStates = new[] { 0, 0, 0 };
 			specifier.ItemIds = new[] { 0, 1, 2 };
 		}

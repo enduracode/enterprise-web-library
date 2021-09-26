@@ -12,7 +12,7 @@ using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.WebSite.TestPages {
 	partial class EwfTableDemo {
-		static partial void specifyParameterDefaults( OptionalParameterSpecifier specifier, Parameters parameters ) {
+		static partial void specifyParameterDefaults( OptionalParameterSpecifier specifier, EntitySetup entitySetup, Parameters parameters ) {
 			specifier.GroupCount = 3;
 			specifier.FirstGroupItemCount = 45;
 		}
