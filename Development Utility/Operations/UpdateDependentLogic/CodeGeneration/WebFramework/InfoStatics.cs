@@ -7,14 +7,17 @@ using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework {
 	internal static class InfoStatics {
-		internal static void WriteSpecifyParameterDefaultsMethod( TextWriter writer, IReadOnlyCollection<WebItemParameter> optionalParameters ) {
-			if( !optionalParameters.Any() )
-				return;
-
+		internal static void WriteSpecifyParameterDefaultsMethod( TextWriter writer, bool includeEsParameter ) {
 			CodeGenerationStatics.AddSummaryDocComment(
 				writer,
 				"Specifies optional parameter default values. This method is always called during construction of an object." );
-			writer.WriteLine( "static partial void specifyParameterDefaults( OptionalParameterSpecifier specifier, Parameters parameters );" );
+			writer.WriteLine(
+				"static partial void specifyParameterDefaults( {0} );".FormatWith(
+					StringTools.ConcatenateWithDelimiter(
+						", ",
+						"OptionalParameterSpecifier specifier",
+						includeEsParameter ? "EntitySetup entitySetup" : "",
+						"Parameters parameters" ) ) );
 		}
 
 		internal static void WriteParameterMembers( TextWriter writer, List<WebItemParameter> requiredParameters, List<WebItemParameter> optionalParameters ) {
@@ -48,7 +51,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 				                            ", ",
 				                            includeEsParameter ? "EntitySetup es" : "",
 				                            WebFrameworkStatics.GetParameterDeclarations( requiredParameters ),
-				                            optionalParameters.Count > 0 ? "Action<OptionalParameterSpecifier, Parameters> optionalParameterSetter = null" : "",
+				                            optionalParameters.Count > 0
+					                            ? "Action<{0}> optionalParameterSetter = null".FormatWith(
+						                            StringTools.ConcatenateWithDelimiter(
+							                            ", ",
+							                            "OptionalParameterSpecifier",
+							                            includeEsParameter ? "EntitySetup" : "",
+							                            "Parameters" ) )
+					                            : "",
 				                            !isEs ? "string uriFragmentIdentifier = \"\"" : "" ) + " ) {";
 			writer.WriteLine( "internal {0}".FormatWith( generalData.ClassName ) + constructorParameters );
 			writer.WriteLine( "DataAccessState.Current.ExecuteWithCache( () => {" );
@@ -161,13 +171,18 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 				// Apply parameter values from the setter.
 				writer.WriteLine( "var optionalParameterSpecifier = new OptionalParameterSpecifier();" );
 				writer.WriteLine(
-					"optionalParameterSetter?.Invoke( optionalParameterSpecifier, new Parameters( {0} ) );".FormatWith(
+					"optionalParameterSetter?.Invoke( {0} );".FormatWith(
 						StringTools.ConcatenateWithDelimiter(
 							", ",
-							requiredParameters.Select( i => i.PropertyName )
-								.Append(
-									"optionalParametersInitializedFromCurrent ? new OptionalParameters( {0} ) : null".FormatWith(
-										StringTools.ConcatenateWithDelimiter( ", ", optionalParameters.Select( i => i.PropertyName ) ) ) ) ) ) );
+							"optionalParameterSpecifier",
+							includeEsParameter ? "es" : "",
+							"new Parameters( {0} )".FormatWith(
+								StringTools.ConcatenateWithDelimiter(
+									", ",
+									requiredParameters.Select( i => i.PropertyName )
+										.Append(
+											"optionalParametersInitializedFromCurrent ? new OptionalParameters( {0} ) : null".FormatWith(
+												StringTools.ConcatenateWithDelimiter( ", ", optionalParameters.Select( i => i.PropertyName ) ) ) ) ) ) ) ) );
 				foreach( var i in optionalParameters )
 					writer.WriteLine(
 						"if( optionalParameterSpecifier.{0} ) {1} = optionalParameterSpecifier.{2};".FormatWith(
@@ -177,14 +192,18 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 
 				// This is called after all current values and values from the setter have been incorporated since these can affect default values.
 				writer.WriteLine(
-					"specifyParameterDefaults( {0}, new Parameters( {1} ) );".FormatWith(
-						WebItemGeneralData.ParameterDefaultsFieldName,
+					"specifyParameterDefaults( {0} );".FormatWith(
 						StringTools.ConcatenateWithDelimiter(
 							", ",
-							requiredParameters.Select( i => i.PropertyName )
-								.Append(
-									"new OptionalParameters( {0} )".FormatWith(
-										StringTools.ConcatenateWithDelimiter( ", ", optionalParameters.Select( i => i.PropertyName ) ) ) ) ) ) );
+							WebItemGeneralData.ParameterDefaultsFieldName,
+							includeEsParameter ? "es" : "",
+							"new Parameters( {0} )".FormatWith(
+								StringTools.ConcatenateWithDelimiter(
+									", ",
+									requiredParameters.Select( i => i.PropertyName )
+										.Append(
+											"new OptionalParameters( {0} )".FormatWith(
+												StringTools.ConcatenateWithDelimiter( ", ", optionalParameters.Select( i => i.PropertyName ) ) ) ) ) ) ) ) );
 
 				// Apply default values to parameters not yet initialized.
 				writer.WriteLine( "if( !optionalParametersInitializedFromCurrent ) {" );

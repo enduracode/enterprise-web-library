@@ -272,7 +272,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 								optionalParameters.Any()
 									? StringTools.ConcatenateWithDelimiter(
 											Environment.NewLine,
-											"optionalParameterSetter: ( s, p ) => {".ToCollection()
+											"optionalParameterSetter: ( {0} ) => {{"
+												.FormatWith( StringTools.ConcatenateWithDelimiter( ", ", "s", entitySetup != null ? "es" : "", "p" ) )
+												.ToCollection()
 												.Append( "if( p.OptionalParameters != null ) return;" )
 												.Concat(
 													optionalParameters.Select(

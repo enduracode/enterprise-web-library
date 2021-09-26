@@ -36,7 +36,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 			if( optionalParameters.Any() )
 				generateSegmentParameterSpecifier( writer );
 			writeGetInfoMethod( writer );
-			InfoStatics.WriteSpecifyParameterDefaultsMethod( writer, optionalParameters );
+			if( optionalParameters.Any() )
+				InfoStatics.WriteSpecifyParameterDefaultsMethod( writer, entitySetup != null );
 			if( entitySetup != null )
 				writer.WriteLine( "public EntitySetup Es;" );
 			InfoStatics.WriteParameterMembers( writer, requiredParameters, optionalParameters );
@@ -44,7 +45,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 				writer.WriteLine( "private ParametersModification parametersModification;" );
 			if( optionalParameters.Any() ) {
 				writer.WriteLine( "private readonly Lazy<SegmentParameterSpecifier> segmentParameterSpecifier;" );
-				writer.WriteLine( "private Action<OptionalParameterSpecifier, Parameters> optionalParameterSetter;" );
+				writer.WriteLine(
+					"private Action<{0}> optionalParameterSetter;".FormatWith(
+						StringTools.ConcatenateWithDelimiter( ", ", "OptionalParameterSpecifier", entitySetup != null ? "EntitySetup" : "", "Parameters" ) ) );
 			}
 			InfoStatics.WriteConstructorAndHelperMethods( writer, generalData, requiredParameters, optionalParameters, entitySetup != null, false );
 			writer.WriteLine( "public override EntitySetupBase EsAsBaseType => {0};".FormatWith( entitySetup != null ? "Es" : "null" ) );
@@ -122,7 +125,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 					entitySetup != null && entitySetup.OptionalParameters.Count > 0
 						? "Action<EntitySetup.OptionalParameterSpecifier, EntitySetup.Parameters> entitySetupOptionalParameterSetter = null"
 						: "",
-					optionalParameters.Count > 0 ? "Action<OptionalParameterSpecifier, Parameters> optionalParameterSetter = null" : "",
+					optionalParameters.Count > 0
+						? "Action<{0}> optionalParameterSetter = null".FormatWith(
+							StringTools.ConcatenateWithDelimiter( ", ", "OptionalParameterSpecifier", entitySetup != null ? "EntitySetup" : "", "Parameters" ) )
+						: "",
 					"string uriFragmentIdentifier = \"\"" ) + " ) {" );
 			var entitySetupArgs = entitySetup != null
 				                      ? "new EntitySetup( " + StringTools.ConcatenateWithDelimiter(

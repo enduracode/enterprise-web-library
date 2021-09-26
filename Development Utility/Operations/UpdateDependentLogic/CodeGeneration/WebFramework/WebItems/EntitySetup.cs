@@ -30,7 +30,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 			OptionalParameterPackageStatics.WriteClassIfNecessary( writer, requiredParameters, optionalParameters );
 			ParametersModificationStatics.WriteClassIfNecessary( writer, requiredParameters.Concat( optionalParameters ) );
 			UrlStatics.GenerateUrlClasses( writer, generalData.ClassName, null, requiredParameters, optionalParameters, false );
-			InfoStatics.WriteSpecifyParameterDefaultsMethod( writer, optionalParameters );
+			if( optionalParameters.Any() )
+				InfoStatics.WriteSpecifyParameterDefaultsMethod( writer, false );
 			InfoStatics.WriteParameterMembers( writer, requiredParameters, optionalParameters );
 			if( requiredParameters.Any() || optionalParameters.Any() )
 				writer.WriteLine( "internal ParametersModification parametersModification;" );
