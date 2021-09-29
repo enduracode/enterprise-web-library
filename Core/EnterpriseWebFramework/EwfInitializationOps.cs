@@ -192,8 +192,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							hideWarnings => {
 								var url = AppRequestState.Instance.Url;
 								if( AppRequestState.Instance.UserAccessible && AppRequestState.Instance.ImpersonatorExists )
-									url = new UserManagement.Pages.Impersonate( url, optionalParameterSetter: ( specifier, parameters ) => specifier.User = AppTools.User.Email )
-										.GetUrl();
+									url = new UserManagement.Pages.Impersonate(
+										url,
+										optionalParameterSetter: ( specifier, parameters ) =>
+											specifier.User = AppTools.User != null ? AppTools.User.Email : UserManagement.Pages.Impersonate.AnonymousUser ).GetUrl();
 								return new NonLiveLogIn(
 									url,
 									optionalParameterSetter: ( specifier, parameters ) => {

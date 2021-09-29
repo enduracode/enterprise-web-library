@@ -13,6 +13,7 @@ using Tewl.Tools;
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 	// This page does not use the EWF UI because displaying authenticated user information would be misleading.
 	partial class Impersonate {
+		internal const string AnonymousUser = "anonymous";
 		private static readonly ElementClass elementClass = new ElementClass( "ewfSelectUser" );
 
 		[ UsedImplicitly ]
@@ -27,7 +28,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 			if( !UserManagementStatics.UserManagementEnabled )
 				throw new ApplicationException( "User management not enabled" );
 
-			if( User.Any() && User != "anonymous" && ( UserObject = UserManagementStatics.GetUser( User ) ) == null )
+			if( User.Any() && User != AnonymousUser && ( UserObject = UserManagementStatics.GetUser( User ) ) == null )
 				throw new ApplicationException( "user" );
 		}
 
