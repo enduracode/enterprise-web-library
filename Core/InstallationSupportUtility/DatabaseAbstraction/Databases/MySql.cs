@@ -9,7 +9,6 @@ using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction.
 using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using Humanizer;
-using Polly;
 using Tewl.IO;
 using Tewl.Tools;
 
@@ -90,21 +89,18 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 				sw.WriteLine( "CREATE DATABASE {0};".FormatWith( info.Database ) );
 				if( filePath.Any() ) {
 					sw.WriteLine( "use {0}".FormatWith( info.Database ) );
-					sw.WriteLine( "source {0}".FormatWith( filePath ) );
+					sw.WriteLine( "source {0}".FormatWith( filePath.Replace( '\\', '/' ) ) );
 				}
 				sw.WriteLine( "quit" );
 
 				executeMethodWithDbExceptionHandling(
 					delegate {
 						try {
-							Policy.Handle<Exception>( e => filePath.Any() && e.Message.Contains( "ERROR at line 4: Unknown command '\\U'." ) )
-								.WaitAndRetry( 5, attemptNumber => TimeSpan.FromSeconds( Math.Pow( 2, attemptNumber + 7 ) ) )
-								.Execute(
-									() => TewlContrib.ProcessTools.RunProgram(
-										EwlStatics.CombinePaths( binFolderPath, "mysql" ),
-										getHostAndAuthenticationArguments() + " --disable-reconnect --batch --disable-auto-rehash",
-										sw.ToString(),
-										true ) );
+							TewlContrib.ProcessTools.RunProgram(
+								EwlStatics.CombinePaths( binFolderPath, "mysql" ),
+								getHostAndAuthenticationArguments() + " --disable-reconnect --batch --disable-auto-rehash",
+								sw.ToString(),
+								true );
 						}
 						catch( Exception e ) {
 							if( filePath.Any() && e.Message.Contains( "ERROR" ) && e.Message.Contains( "at line" ) )
