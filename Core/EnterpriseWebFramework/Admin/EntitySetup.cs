@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
+using Humanizer;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin {
@@ -14,7 +15,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin {
 
 		protected override ResourceBase createParentResource() => null;
 
-		public override string EntitySetupName => "EWF Admin";
+		public override string EntitySetupName => "{0} Admin".FormatWith( EwlStatics.EwlInitialism );
 
 		protected internal override bool UserCanAccessEntitySetup {
 			get {
