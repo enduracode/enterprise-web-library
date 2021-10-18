@@ -48,6 +48,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin {
 				.Append( RequestProfiling.UrlPatterns.Literal( this, "profiling" ) )
 				.Append( SystemUsers.UrlPatterns.Literal( this, "users" ) );
 
-		EntityUiSetup UiEntitySetup.GetUiSetup() => new EntityUiSetup();
+		EntityUiSetup UiEntitySetup.GetUiSetup() =>
+			new EntityUiSetup(
+				actions: new HyperlinkSetup(
+					new UserManagement.Pages.Impersonate( PageBase.Current.GetUrl() ),
+					"Impersonate user",
+					icon: new ActionComponentIcon( new FontAwesomeIcon( "fa-key" ) ) ).ToCollection() );
 	}
 }
