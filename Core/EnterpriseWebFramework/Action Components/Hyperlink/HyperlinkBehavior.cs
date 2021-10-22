@@ -93,6 +93,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		internal HyperlinkBehavior( string mailtoUri ) {
+			hasDestination = true;
+			userCanNavigateToDestinationPredicate = () => true;
+
 			Classes = ElementClassSet.Empty;
 			Url = new Lazy<string>( () => "mailto:{0}".FormatWith( mailtoUri ) );
 			AttributeGetter = forNonHyperlinkElement =>
