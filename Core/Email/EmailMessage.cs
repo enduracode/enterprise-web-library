@@ -14,6 +14,11 @@ namespace EnterpriseWebLibrary.Email {
 		public EmailAddress From { get; set; }
 
 		/// <summary>
+		/// Collection of Reply-To addresses.
+		/// </summary>
+		public List<EmailAddress> ReplyToAddresses { get; set; }
+
+		/// <summary>
 		/// Collection of to addresses.
 		/// </summary>
 		public List<EmailAddress> ToAddresses { get; set; }
@@ -27,11 +32,6 @@ namespace EnterpriseWebLibrary.Email {
 		/// Collection of BCC addresses.
 		/// </summary>
 		public List<EmailAddress> BccAddresses { get; set; }
-
-		/// <summary>
-		/// Collection of Reply-To addresses.
-		/// </summary>
-		public List<EmailAddress> ReplyToAddresses { get; set; }
 
 		/// <summary>
 		/// The subject.
@@ -55,13 +55,13 @@ namespace EnterpriseWebLibrary.Email {
 		/// Creates a new Email message.
 		/// </summary>
 		public EmailMessage() {
-			Subject = "";
-			BodyHtml = "";
+			ReplyToAddresses = new List<EmailAddress>();
 			ToAddresses = new List<EmailAddress>();
 			CcAddresses = new List<EmailAddress>();
 			BccAddresses = new List<EmailAddress>();
-			ReplyToAddresses = new List<EmailAddress>();
+			Subject = "";
 			CustomHeaders = new List<Tuple<string, string>>();
+			BodyHtml = "";
 		}
 	}
 }
