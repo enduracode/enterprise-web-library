@@ -18,7 +18,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return FormState.ExecuteWithDataModificationsAndDefaultAction(
 				PostBack.CreateFull(
 						modificationMethod: () => {
-							var message = new EmailMessage { Subject = "Contact from " + ConfigurationStatics.SystemName, BodyHtml = body.Value.GetTextAsEncodedHtml() };
+							var message = new EmailMessage
+								{
+									Subject = "Support request from {0} in {1}".FormatWith(
+										AppTools.User.FriendlyName.Any() ? AppTools.User.FriendlyName : AppTools.User.Email,
+										ConfigurationStatics.SystemName ),
+									BodyHtml = body.Value.GetTextAsEncodedHtml()
+								};
 							message.ReplyToAddresses.Add( new EmailAddress( AppTools.User.Email, AppTools.User.FriendlyName ) );
 							message.ToAddresses.AddRange( EmailStatics.GetAdministratorEmailAddresses() );
 							EmailStatics.SendEmailWithDefaultFromAddress( message );
