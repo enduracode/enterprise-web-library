@@ -10,6 +10,7 @@ using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
+using EnterpriseWebLibrary.UserManagement;
 using Humanizer;
 using StackExchange.Profiling;
 using Tewl.Tools;
@@ -222,6 +223,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										       .Materialize() );
 							} );
 						EwfUiStatics.Init( getProviderGetter<AppEwfUiProvider>( "EwfUi" ) );
+						FormsAuthStatics.Init( () => UserManagementStatics.SystemProvider );
 						Admin.EntitySetup.Init( () => RequestDispatchingStatics.AppProvider.GetFrameworkUrlParent() );
 						RequestDispatchingStatics.Init( getProviderGetter<AppRequestDispatchingProvider>( "RequestDispatching" ) );
 

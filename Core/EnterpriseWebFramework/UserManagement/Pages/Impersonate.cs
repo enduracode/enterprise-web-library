@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.UserManagement;
 using Humanizer;
 using JetBrains.Annotations;
 using Tewl.Tools;

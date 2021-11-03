@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using Humanizer;
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
+namespace EnterpriseWebLibrary.UserManagement {
 	/// <summary>
 	/// Provides useful constants and methods pertaining to user management.
 	/// </summary>
@@ -19,7 +21,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 
 		internal static void Init() {
 			provider = ConfigurationStatics.GetSystemLibraryProvider( providerName ) as SystemUserManagementProvider;
-			FormsAuthStatics.Init( () => SystemProvider );
 		}
 
 		/// <summary>

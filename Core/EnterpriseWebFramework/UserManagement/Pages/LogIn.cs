@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
+using EnterpriseWebLibrary.UserManagement;
 using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
 using Tewl.Tools;

@@ -8,6 +8,7 @@ using System.Web;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
+using EnterpriseWebLibrary.UserManagement;
 using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
 using Newtonsoft.Json;

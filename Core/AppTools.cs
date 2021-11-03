@@ -1,5 +1,5 @@
 using EnterpriseWebLibrary.EnterpriseWebFramework;
-using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
+using EnterpriseWebLibrary.UserManagement;
 
 namespace EnterpriseWebLibrary {
 	// Do NOT add anything new to this class; we will delete it after we figure out where to move the User property.

@@ -1,6 +1,6 @@
 ﻿using System;
 using EnterpriseWebLibrary.Caching;
-using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
+using EnterpriseWebLibrary.UserManagement;
 using Humanizer;
 using Tewl.Tools;
 

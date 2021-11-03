@@ -5,7 +5,7 @@ using System.Web;
 using EnterpriseWebLibrary.Caching;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
-using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
+using EnterpriseWebLibrary.UserManagement;
 using NodaTime;
 using StackExchange.Profiling;
 using Tewl.Tools;

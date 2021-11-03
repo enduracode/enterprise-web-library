@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using EnterpriseWebLibrary.Encryption;
-using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
+using EnterpriseWebLibrary.UserManagement;
 using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
 using Tewl.Tools;
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 	/// <summary>
 	/// A list of fields to enable editing of a user’s generic properties.
 	/// NOTE: Expand this to take additional FormItems to allow customization of this control?

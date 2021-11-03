@@ -5,6 +5,7 @@ using System.Web;
 using System.Web.Security;
 using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.Encryption;
+using EnterpriseWebLibrary.UserManagement;
 using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
 using NodaTime;

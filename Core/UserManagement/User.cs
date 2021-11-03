@@ -1,6 +1,6 @@
 ﻿using NodaTime;
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
+namespace EnterpriseWebLibrary.UserManagement {
 	/// <summary>
 	/// Represents a user of the system.
 	/// </summary>

@@ -1,4 +1,4 @@
-namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
+﻿namespace EnterpriseWebLibrary.UserManagement {
 	/// <summary>
 	/// Represents an authorization role in the system.
 	/// </summary>

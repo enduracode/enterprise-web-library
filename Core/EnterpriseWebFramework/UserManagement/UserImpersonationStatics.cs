@@ -1,4 +1,6 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
+﻿using EnterpriseWebLibrary.UserManagement;
+
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 	/// <summary>
 	/// EWL use only.
 	/// </summary>

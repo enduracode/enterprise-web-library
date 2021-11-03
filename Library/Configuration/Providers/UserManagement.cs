@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
+using EnterpriseWebLibrary.UserManagement;
 using NodaTime;
 
 namespace EnterpriseWebLibrary.Configuration.Providers {

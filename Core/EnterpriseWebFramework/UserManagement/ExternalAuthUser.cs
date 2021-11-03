@@ -1,4 +1,5 @@
-﻿using NodaTime;
+﻿using EnterpriseWebLibrary.UserManagement;
+using NodaTime;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 	/// <summary>

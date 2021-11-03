@@ -9,6 +9,7 @@ using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ErrorPages;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages;
+using EnterpriseWebLibrary.UserManagement;
 using StackExchange.Profiling;
 using Tewl.Tools;
 using static Humanizer.StringExtensions;

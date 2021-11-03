@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using EnterpriseWebLibrary.UserManagement;
 using NodaTime;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {

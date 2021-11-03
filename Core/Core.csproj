@@ -656,13 +656,13 @@
     <Compile Include="EnterpriseWebFramework\EwfExtensionMethods.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\Entity\TabMode.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\UiPageContent.cs" />
-    <Compile Include="EnterpriseWebFramework\UserEditor.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\FormsAuthStatics.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\Pages\ChangePassword.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\Pages\Impersonate.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\Pages\LogIn.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\StrictFormsAuthUserManagementProvider.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Text Box\AutoCompleteItem.cs" />
+    <Compile Include="EnterpriseWebFramework\UserManagement\UserEditor.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\UserImpersonationStatics.cs" />
     <Compile Include="EwlNuGetPackageSpecificationStatics.cs" />
     <Compile Include="EwlStatics.cs" />
@@ -737,7 +737,6 @@
     <Compile Include="Tools\IntervalTools.cs" />
     <Compile Include="Tools\HttpBrowserCapabilitiesTools.cs" />
     <Compile Include="Tools\HttpRequestTools.cs" />
-    <Compile Include="EnterpriseWebFramework\UserManagement\UserManagementStatics.cs" />
     <Compile Include="MailMerging\AsposeMergeRowEnumerator.cs" />
     <Compile Include="MailMerging\DataTree\MergeDataTreeChild.cs" />
     <Compile Include="MailMerging\DataTree\MergeDataTreeOps.cs" />
@@ -755,6 +754,10 @@
     <Compile Include="TrustedHtmlString.cs" />
     <Compile Include="UnexpectedValueException.cs" />
     <Compile Include="UnitTestingInitializationOps.cs" />
+    <Compile Include="UserManagement\Role.cs" />
+    <Compile Include="UserManagement\SystemUserManagementProvider.cs" />
+    <Compile Include="UserManagement\User.cs" />
+    <Compile Include="UserManagement\UserManagementStatics.cs" />
     <Compile Include="Wcf\AccessDeniedException.cs" />
     <Compile Include="InitializationAwareValue.cs" />
     <Compile Include="MailMerging\FieldImplementation\BasicMergeFieldImplementationWithMsWordName.cs" />
@@ -762,11 +765,8 @@
     <Compile Include="Encryption\Password.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\ExternalAuthUser.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\ExternalAuthUserManagementProvider.cs" />
-    <Compile Include="EnterpriseWebFramework\UserManagement\Role.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\FormsAuthCapableUser.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\FormsAuthCapableUserManagementProvider.cs" />
-    <Compile Include="EnterpriseWebFramework\UserManagement\User.cs" />
-    <Compile Include="EnterpriseWebFramework\UserManagement\SystemUserManagementProvider.cs" />
     <Compile Include="Collections\ListSet.cs" />
     <Compile Include="InstallationFileStatics.cs" />
     <Compile Include="NetTools.cs" />

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
+namespace EnterpriseWebLibrary.UserManagement {
 	/// <summary>
 	/// Defines how user management operations will be carried out against the database for a particular application.
 	/// </summary>
