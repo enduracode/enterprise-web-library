@@ -13,10 +13,7 @@ using NodaTime.Text;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
-	/// <summary>
-	/// Statics related to forms authentication.
-	/// </summary>
-	public static class FormsAuthStatics {
+	public static class AuthenticationStatics {
 		private const string testCookieName = "TestCookie";
 
 		/// <summary>
@@ -27,7 +24,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		private static Func<SystemUserManagementProvider> providerGetter;
 
 		internal static void Init( Func<SystemUserManagementProvider> providerGetter ) {
-			FormsAuthStatics.providerGetter = providerGetter;
+			AuthenticationStatics.providerGetter = providerGetter;
 		}
 
 		/// <summary>

@@ -656,7 +656,7 @@
     <Compile Include="EnterpriseWebFramework\EwfExtensionMethods.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\Entity\TabMode.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\UiPageContent.cs" />
-    <Compile Include="EnterpriseWebFramework\UserManagement\FormsAuthStatics.cs" />
+    <Compile Include="EnterpriseWebFramework\UserManagement\AuthenticationStatics.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\Pages\ChangePassword.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\Pages\Impersonate.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\Pages\LogIn.cs" />
