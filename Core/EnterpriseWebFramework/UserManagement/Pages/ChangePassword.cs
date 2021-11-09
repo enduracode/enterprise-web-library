@@ -1,4 +1,5 @@
 ﻿using EnterpriseWebLibrary.Encryption;
+using EnterpriseWebLibrary.UserManagement;
 using EnterpriseWebLibrary.WebSessionState;
 using Tewl.Tools;
 
@@ -28,14 +29,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 
 		private void modifyData() {
 			var password = new Password( newPassword.Value );
-			FormsAuthStatics.SystemProvider.InsertOrUpdateUser(
-				AppTools.User.UserId,
-				AppTools.User.Email,
-				AppTools.User.Role.RoleId,
-				AppTools.User.LastRequestTime,
-				password.Salt,
-				password.ComputeSaltedHash(),
-				false );
+			UserManagementStatics.LocalIdentityProvider.UserUpdater( AppTools.User.UserId, password.Salt, password.ComputeSaltedHash(), false );
 			AddStatusMessage( StatusMessageType.Info, "Your password has been successfully changed. Use it the next time you log in." );
 		}
 	}

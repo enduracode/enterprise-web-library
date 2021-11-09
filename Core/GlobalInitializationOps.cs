@@ -84,6 +84,8 @@ namespace EnterpriseWebLibrary {
 
 				GlobalInitializationOps.globalInitializer = globalInitializer;
 				globalInitializer.InitStatics();
+
+				UserManagementStatics.InitSystemSpecificLogicDependencies();
 			}
 			catch( Exception e ) {
 				secondaryInitFailed = true;

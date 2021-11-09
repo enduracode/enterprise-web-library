@@ -4,6 +4,7 @@ using System.Linq;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
+using EnterpriseWebLibrary.UserManagement;
 using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
 using JetBrains.Annotations;
@@ -264,7 +265,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var components = new List<FlowComponent>();
 
 			components.AddRange( "Logged in as {0}".FormatWith( AppTools.User.Email ).ToComponents() );
-			if( !FormsAuthStatics.FormsAuthEnabled )
+			if( !UserManagementStatics.LocalIdentityProviderEnabled )
 				return components;
 
 			components.Add(
@@ -278,7 +279,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									behavior: new PostBackBehavior(
 										postBack: PostBack.CreateFull(
 											id: "ewfLogOut",
-											modificationMethod: FormsAuthStatics.LogOutUser,
+											modificationMethod: AuthenticationStatics.LogOutUser,
 											actionGetter: () =>
 												// NOTE: Is this the correct behavior if we are already on a public page?
 												new PostBackAction(

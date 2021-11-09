@@ -17,7 +17,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin {
 						tableActions: new HyperlinkSetup( new SystemUser( Es, null ), "Create User" ).ToCollection(),
 						headItems: EwfTableItem.Create( "Email".ToCell().Append( "Role".ToCell() ).Materialize() ).ToCollection() )
 					.AddData(
-						UserManagementStatics.GetUsers(),
+						UserManagementStatics.SystemProvider.GetUsers(),
 						user => EwfTableItem.Create(
 							user.Email.ToCell().Append( user.Role.Name.ToCell() ).Materialize(),
 							setup: EwfTableItemSetup.Create( activationBehavior: ElementActivationBehavior.CreateHyperlink( new SystemUser( Es, user.UserId ) ) ) ) ) );

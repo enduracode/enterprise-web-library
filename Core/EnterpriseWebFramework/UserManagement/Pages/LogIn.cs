@@ -12,26 +12,24 @@ using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 	partial class LogIn {
-		private DataValue<string> emailAddress;
-		private FormsAuthCapableUser user;
-
 		protected override UrlHandler getUrlParent() => new Admin.EntitySetup();
 
 		protected override PageContent getContent() {
 			var content = new UiPageContent( omitContentBox: true );
 
-			Tuple<IReadOnlyCollection<EtherealComponent>, Func<FormsAuthCapableUser>> logInHiddenFieldsAndMethod = null;
+			DataValue<string> emailAddress = null;
+			Tuple<IReadOnlyCollection<EtherealComponent>, Func<( User, bool )>> logInHiddenFieldsAndMethod = null;
+			var mustChangePassword = false;
 			var logInPb = PostBack.CreateFull(
-				modificationMethod: () => user = logInHiddenFieldsAndMethod.Item2(),
+				modificationMethod: () => mustChangePassword = logInHiddenFieldsAndMethod.Item2().Item2,
 				actionGetter: () => new PostBackAction(
-					user.MustChangePassword ? ChangePassword.GetInfo( ReturnUrl ) as ResourceInfo : new ExternalResource( ReturnUrl ) ) );
+					mustChangePassword ? ChangePassword.GetInfo( ReturnUrl ) as ResourceInfo : new ExternalResource( ReturnUrl ) ) );
 			var newPasswordPb = PostBack.CreateFull(
 				id: "newPw",
 				modificationMethod: () => {
-					var userLocal = UserManagementStatics.GetUser( emailAddress.Value );
-					if( userLocal == null )
-						throw new DataModificationException( getUnregisteredEmailMessage() );
-					FormsAuthStatics.ResetAndSendPassword( userLocal.UserId );
+					var errorMessage = UserManagementStatics.LocalIdentityProvider.ResetAndSendPassword( emailAddress.Value, getUnregisteredEmailMessage() );
+					if( errorMessage.Any() )
+						throw new DataModificationException( errorMessage );
 					AddStatusMessage( StatusMessageType.Info, "Your new password has been sent to your email address." );
 				},
 				actionGetter: () => new PostBackAction( new ExternalResource( ReturnUrl ) ) );
@@ -43,7 +41,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 					registeredComponents.Add(
 						new Paragraph(
 							"You may log in to this system if you have registered your email address with {0}"
-								.FormatWith( FormsAuthStatics.SystemProvider.AdministratingCompanyName )
+								.FormatWith( UserManagementStatics.LocalIdentityProvider.AdministratingCompanyName )
 								.ToComponents() ) );
 
 					emailAddress = new DataValue<string>();
@@ -60,7 +58,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 										.ToFormItem( label: "Password".ToComponents() ) )
 								.Materialize() ) );
 
-					if( FormsAuthStatics.PasswordResetEnabled )
+					if( UserManagementStatics.LocalIdentityProvider.PasswordResetEnabled )
 						registeredComponents.Add(
 							new Paragraph(
 								new ImportantContent( "Forgot password?".ToComponents() ).ToCollection()
@@ -86,7 +84,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 							AutofocusCondition.InitialRequest(),
 							new Section( "Registered users", registeredComponents, style: SectionStyle.Box ).ToCollection() ) );
 
-					logInHiddenFieldsAndMethod = FormsAuthStatics.GetLogInHiddenFieldsAndMethod(
+					logInHiddenFieldsAndMethod = AuthenticationStatics.GetLogInHiddenFieldsAndMethod(
 						emailAddress,
 						password,
 						getUnregisteredEmailMessage(),
@@ -100,17 +98,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 			else {
 				var unregisteredComponents = new List<FlowComponent>();
 				unregisteredComponents.Add(
-					new Paragraph( "If you have difficulty logging in, please {0}".FormatWith( FormsAuthStatics.SystemProvider.LogInHelpInstructions ).ToComponents() ) );
+					new Paragraph(
+						"If you have difficulty logging in, please {0}".FormatWith( UserManagementStatics.LocalIdentityProvider.LogInHelpInstructions ).ToComponents() ) );
 				content.Add( new Section( "Unregistered users", unregisteredComponents, style: SectionStyle.Box ) );
 			}
 
 			return content;
 		}
 
-		private string getUnregisteredEmailMessage() {
-			return "The email address you entered is not registered.  You must register the email address with " +
-			       FormsAuthStatics.SystemProvider.AdministratingCompanyName + " before using it to log in.  To do this, " +
-			       FormsAuthStatics.SystemProvider.LogInHelpInstructions;
-		}
+		private string getUnregisteredEmailMessage() =>
+			"The email address you entered is not registered. You must register the email address with " +
+			UserManagementStatics.LocalIdentityProvider.AdministratingCompanyName + " before using it to log in. To do this, " +
+			UserManagementStatics.LocalIdentityProvider.LogInHelpInstructions;
 	}
 }

@@ -88,7 +88,7 @@ namespace EnterpriseWebLibrary.WebTestingFramework {
 						selenium.WaitForPageToLoad( "30000" );
 					} );
 			}
-			if( UserManagementStatics.UserManagementEnabled && FormsAuthStatics.FormsAuthEnabled ) {
+			if( UserManagementStatics.UserManagementEnabled /* && FormsAuthStatics.FormsAuthEnabled */ ) {
 				executeSeleniumBlock(
 					"Forms log on",
 					delegate {

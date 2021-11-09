@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Security;
-using EnterpriseWebLibrary.Email;
-using EnterpriseWebLibrary.Encryption;
+using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.UserManagement;
 using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
@@ -21,35 +20,42 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		/// </summary>
 		public static readonly TimeSpan SessionDuration = TimeSpan.FromHours( 32 ); // persist across consecutive days of usage
 
-		private static Func<SystemUserManagementProvider> providerGetter;
+		internal static void Init() {}
 
-		internal static void Init( Func<SystemUserManagementProvider> providerGetter ) {
-			AuthenticationStatics.providerGetter = providerGetter;
-		}
 
 		/// <summary>
-		/// EWL use only.
+		/// The second item in the returned tuple will be (1) null if impersonation is not taking place, (2) a value with a null user if impersonation is taking
+		/// place with an impersonator who doesn't correspond to a user, or (3) a value containing the impersonator.
 		/// </summary>
-		public static bool FormsAuthEnabled => providerGetter() is FormsAuthCapableUserManagementProvider;
+		internal static Tuple<User, SpecifiedValue<User>> GetUserAndImpersonatorFromRequest() {
+			var userLazy = new Func<User>[]
+					{
+						() => {
+							var cookie = CookieStatics.GetCookie( FormsAuthCookieName );
+							if( cookie == null )
+								return null;
+							var ticket = GetFormsAuthTicket( cookie );
+							return ticket != null ? UserManagementStatics.GetUser( int.Parse( ticket.Name ), false ) : null;
+						},
+						() => {
+							var identity = HttpContext.Current.User.Identity;
+							return identity.IsAuthenticated && identity.AuthenticationType == CertificateAuthenticationModule.CertificateAuthenticationType
+								       ? UserManagementStatics.SystemProvider.GetUser( identity.Name )
+								       : null;
+						}
+					}.Select( i => new Lazy<User>( i ) )
+				.FirstOrDefault( i => i.Value != null );
+			var user = userLazy != null ? userLazy.Value : null;
 
-		/// <summary>
-		/// EWL use only.
-		/// </summary>
-		public static FormsAuthCapableUserManagementProvider SystemProvider => (FormsAuthCapableUserManagementProvider)providerGetter();
+			if( ( user != null && user.Role.CanManageUsers ) || !ConfigurationStatics.IsLiveInstallation ) {
+				var cookie = CookieStatics.GetCookie( UserImpersonationStatics.CookieName );
+				if( cookie != null )
+					return Tuple.Create(
+						cookie.Value.Any() ? UserManagementStatics.GetUser( int.Parse( cookie.Value ), false ) : null,
+						new SpecifiedValue<User>( user ) );
+			}
 
-		internal static IEnumerable<FormsAuthCapableUser> GetUsers() {
-			return SystemProvider.GetUsers();
-		}
-
-		internal static FormsAuthCapableUser GetUser( int userId, bool ensureUserExists ) {
-			var user = SystemProvider.GetUser( userId );
-			if( user == null && ensureUserExists )
-				throw new ApplicationException( "A user with an ID of {0} does not exist.".FormatWith( userId ) );
-			return user;
-		}
-
-		internal static FormsAuthCapableUser GetUser( string emailAddress ) {
-			return SystemProvider.GetUser( emailAddress );
+			return Tuple.Create( user, (SpecifiedValue<User>)null );
 		}
 
 
@@ -73,8 +79,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 						if( password.Value != passwordAgain.Value )
 							validator.NoteErrorAndAddMessage( "Passwords do not match." );
 						else {
-							if( SystemProvider is StrictFormsAuthUserManagementProvider strictProvider )
-								strictProvider.ValidatePassword( validator, password.Value );
+							if( UserManagementStatics.LocalIdentityProvider.PasswordValidationMethod != null )
+								UserManagementStatics.LocalIdentityProvider.PasswordValidationMethod( validator, password.Value );
 							else if( password.Value.Length < 7 )
 								validator.NoteErrorAndAddMessage( "Passwords must be at least 7 characters long." );
 						}
@@ -94,68 +100,44 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 			emailAddress.ToEmailAddressControl( false, setup: EmailAddressControlSetup.Create( autoFillTokens: "email" ), value: "" ).ToFormItem( label: label );
 
 		/// <summary>
-		/// Returns log-in hidden fields and a modification method that logs in a user. Also sets up client-side logic for user log-in. Do not call if the system
-		/// does not implement the forms-authentication-capable user-management provider.
+		/// Returns log-in hidden fields and a modification method that logs in a user. Also sets up client-side logic for user log-in. Do not call if the local
+		/// identity provider is not enabled.
 		/// </summary>
-		public static Tuple<IReadOnlyCollection<EtherealComponent>, Func<FormsAuthCapableUser>> GetLogInHiddenFieldsAndMethod(
+		public static Tuple<IReadOnlyCollection<EtherealComponent>, Func<( User, bool )>> GetLogInHiddenFieldsAndMethod(
 			DataValue<string> emailAddress, DataValue<string> password, string emailAddressErrorMessage, string passwordErrorMessage ) {
 			var clientTime = new DataValue<string>();
 			var hiddenFields = getLogInHiddenFieldsAndSetUpClientSideLogic( clientTime );
 
 			return Tuple.Create(
 				hiddenFields,
-				new Func<FormsAuthCapableUser>(
+				new Func<( User, bool )>(
 					() => {
 						var errors = new List<string>();
 
-						var user = SystemProvider.GetUser( emailAddress.Value );
-						if( user != null ) {
-							var authenticationSuccessful = false;
-							if( user.SaltedPassword != null ) {
-								// Trim the password if it is temporary; the user may have copied and pasted it from an email, which can add white space on the ends.
-								var hashedPassword = new Password( user.MustChangePassword ? password.Value.Trim() : password.Value, user.Salt ).ComputeSaltedHash();
-								if( user.SaltedPassword.SequenceEqual( hashedPassword ) )
-									authenticationSuccessful = true;
-							}
-
-							var strictProvider = SystemProvider as StrictFormsAuthUserManagementProvider;
-							if( strictProvider != null ) {
-								strictProvider.PostAuthenticate( user, authenticationSuccessful );
-
-								// Re-retrieve the user in case PostAuthenticate modified it.
-								user = SystemProvider.GetUser( user.UserId );
-							}
-
-							if( authenticationSuccessful )
-								SetFormsAuthCookieAndUser( user );
-							else
-								errors.Add( passwordErrorMessage );
-						}
+						var errorMessage = UserManagementStatics.LocalIdentityProvider.LogInUserWithPassword(
+							emailAddress.Value,
+							password.Value,
+							emailAddressErrorMessage,
+							passwordErrorMessage,
+							out var user,
+							out var mustChangePassword );
+						if( errorMessage.Any() )
+							errors.Add( errorMessage );
 						else
-							errors.Add( emailAddressErrorMessage );
+							SetFormsAuthCookieAndUser( user, authenticationTimeoutMinutes: UserManagementStatics.LocalIdentityProvider.AuthenticationTimeoutMinutes );
 
 						errors.AddRange( verifyTestCookie() );
 						addStatusMessageIfClockNotSynchronized( clientTime );
 
 						if( errors.Any() )
 							throw new DataModificationException( errors.ToArray() );
-						return user;
+						return ( user, mustChangePassword );
 					} ) );
 		}
 
 		/// <summary>
-		/// PRE: SystemProvider is a FormsAuthCapableUserManagementProvider.
-		/// Returns true if the given credentials correspond to a user and are correct.
-		/// </summary>
-		public static bool UserCredentialsAreCorrect( string userEmailAddress, string providedPassword ) {
-			// NOTE: With the exception of the password trimming, this is similar to the logic in GetLogInMethod.
-			var user = SystemProvider.GetUser( userEmailAddress );
-			return user?.SaltedPassword != null && user.SaltedPassword.SequenceEqual( new Password( providedPassword, user.Salt ).ComputeSaltedHash() );
-		}
-
-		/// <summary>
 		/// Returns log-in hidden fields and a modification method that logs in the specified user. Also sets up client-side logic for user log-in. Do not call if
-		/// the system does not implement the forms-authentication-capable user-management provider.
+		/// user management is not enabled.
 		/// </summary>
 		public static Tuple<IReadOnlyCollection<EtherealComponent>, Action<int>> GetLogInHiddenFieldsAndSpecifiedUserLogInMethod() {
 			var clientTime = new DataValue<string>();
@@ -165,7 +147,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 				hiddenFields,
 				new Action<int>(
 					userId => {
-						var user = SystemProvider.GetUser( userId );
+						var user = UserManagementStatics.SystemProvider.GetUser( userId );
 						SetFormsAuthCookieAndUser( user );
 
 						var errors = new List<string>();
@@ -192,19 +174,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		/// <summary>
 		/// MVC and private use only.
 		/// </summary>
-		public static void SetFormsAuthCookieAndUser( FormsAuthCapableUser user ) {
+		public static void SetFormsAuthCookieAndUser( User user, int? authenticationTimeoutMinutes = null ) {
 			if( AppRequestState.Instance.ImpersonatorExists )
 				UserImpersonationStatics.SetCookie( user );
 			else {
-				var strictProvider = SystemProvider as StrictFormsAuthUserManagementProvider;
-
 				// If the user's role requires enhanced security, require re-authentication every 12 minutes. Otherwise, make it the same as a session timeout.
-				var authenticationDuration = ( strictProvider?.AuthenticationTimeoutInMinutes ).HasValue
-					                             ?
-					                             TimeSpan.FromMinutes( strictProvider.AuthenticationTimeoutInMinutes.Value )
-					                             : user.Role.RequiresEnhancedSecurity
-						                             ? TimeSpan.FromMinutes( 12 )
-						                             : SessionDuration;
+				var authenticationDuration = authenticationTimeoutMinutes.HasValue ? TimeSpan.FromMinutes( authenticationTimeoutMinutes.Value ) :
+				                             user.Role.RequiresEnhancedSecurity ? TimeSpan.FromMinutes( 12 ) : SessionDuration;
 
 				var ticket = new FormsAuthenticationTicket( user.UserId.ToString(), false /*meaningless*/, (int)authenticationDuration.TotalMinutes );
 				AppRequestState.AddNonTransactionalModificationMethod( () => setFormsAuthCookie( ticket ) );
@@ -285,55 +261,5 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		}
 
 		internal static string FormsAuthCookieName => "User";
-
-
-		// Password Reset
-
-		/// <summary>
-		/// EWL use only.
-		/// </summary>
-		public static bool PasswordResetEnabled {
-			get {
-				string subject;
-				string bodyHtml;
-				SystemProvider.GetPasswordResetParams( "", "", out subject, out bodyHtml );
-				return subject.Any() || bodyHtml.Any();
-			}
-		}
-
-		/// <summary>
-		/// Resets the password of the user with the specified email address and sends a message with the new password to their email address. Do not call if the
-		/// system does not implement the forms authentication capable user management provider.
-		/// </summary>
-		public static void ResetAndSendPassword( string validatedEmailAddress, string emailAddressErrorMessage ) {
-			var user = GetUser( validatedEmailAddress );
-			if( user == null )
-				throw new DataModificationException( emailAddressErrorMessage );
-			ResetAndSendPassword( user.UserId );
-		}
-
-		/// <summary>
-		/// Resets the password of the given user and sends a message with the new password to their email address. Do not call if the system does not implement the
-		/// forms authentication capable user management provider.
-		/// </summary>
-		public static void ResetAndSendPassword( int userId ) {
-			User user = SystemProvider.GetUser( userId );
-
-			// reset the password
-			var newPassword = new Password();
-			SystemProvider.InsertOrUpdateUser( userId, user.Email, user.Role.RoleId, user.LastRequestTime, newPassword.Salt, newPassword.ComputeSaltedHash(), true );
-
-			// send the email
-			SendPassword( user.Email, newPassword.PasswordText );
-		}
-
-		internal static void SendPassword( string emailAddress, string password ) {
-			string subject;
-			string bodyHtml;
-			SystemProvider.GetPasswordResetParams( emailAddress, password, out subject, out bodyHtml );
-			var m = new EmailMessage { Subject = subject, BodyHtml = bodyHtml };
-			m.ToAddresses.Add( new EmailAddress( emailAddress ) );
-			EmailStatics.SendEmailWithDefaultFromAddress( m );
-		}
 	}
 }

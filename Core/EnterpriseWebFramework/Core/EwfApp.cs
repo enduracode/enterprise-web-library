@@ -7,7 +7,6 @@ using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ErrorPages;
-using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages;
 using EnterpriseWebLibrary.UserManagement;
 using StackExchange.Profiling;
@@ -315,7 +314,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							else if( UserManagementStatics.UserManagementEnabled && !ConfigurationStatics.IsLiveInstallation && RequestState.UserAccessible &&
 							         !RequestState.ImpersonatorExists )
 								transferRequest( 403, new Impersonate( RequestState.Url ) );
-							else if( UserManagementStatics.UserManagementEnabled && FormsAuthStatics.FormsAuthEnabled )
+							else if( UserManagementStatics.LocalIdentityProviderEnabled )
 								if( accessDeniedException.LogInPage != null )
 									// We pass false here to avoid complicating things with ThreadAbortExceptions.
 									Response.Redirect( accessDeniedException.LogInPage.GetUrl(), false );

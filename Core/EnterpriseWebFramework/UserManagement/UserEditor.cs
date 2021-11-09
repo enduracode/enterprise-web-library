@@ -13,6 +13,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 	/// NOTE: Expand this to take additional FormItems to allow customization of this control?
 	/// </summary>
 	public class UserEditor: FlowComponent {
+		public delegate void DataSetterMethod( DataValue<string> emailAddress, DataValue<int> roleId );
+
+		public delegate void PasswordDataSetterMethod( int salt, byte[] saltedPassword, bool mustChangePassword );
+
 		private readonly IReadOnlyCollection<FlowComponent> children;
 
 		/// <summary>
@@ -24,34 +28,31 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		/// used.</param>
 		/// <param name="dataSetter">A method that takes the validated data and puts it in a modification object. Use if you’d like to insert or update the user
 		/// yourself. Pass null to have the user-management provider handle the insert or update.</param>
+		/// <param name="passwordDataSetter">A method that takes the validated password data and puts it in a modification object. Use if you’d like to insert or
+		/// update the user yourself. Pass null to have the user-management provider handle the insert or update. This parameter is required if the local identity
+		/// provider is enabled and <paramref name="dataSetter"/> is specified, and is otherwise ignored.</param>
 		public UserEditor(
-			int? userId, out Action modificationMethod, List<Role> availableRoles = null,
-			Action<( DataValue<string> email, DataValue<int> roleId, DataValue<int> salt, DataValue<byte[]> saltedPassword, DataValue<bool> mustChangePassword )>
-				dataSetter = null ) {
+			int? userId, out Action modificationMethod, List<Role> availableRoles = null, DataSetterMethod dataSetter = null,
+			PasswordDataSetterMethod passwordDataSetter = null ) {
 			availableRoles = ( availableRoles?.OrderBy( r => r.Name ) ?? UserManagementStatics.SystemProvider.GetRoles() ).ToList();
 
 			var user = userId.HasValue ? UserManagementStatics.GetUser( userId.Value, true ) : null;
-			var facUser = FormsAuthStatics.FormsAuthEnabled && user != null ? FormsAuthStatics.GetUser( user.UserId, true ) : null;
 
 			var email = new DataValue<string>();
 			var roleId = new DataValue<int>();
-			var salt = new DataValue<int>();
-			var saltedPassword = new DataValue<byte[]>();
-			var mustChangePassword = new DataValue<bool>();
+			var passwordData = new InitializationAwareValue<( int salt, byte[] saltedPassword, bool mustChangePassword )>();
 			string passwordToEmail = null;
 
 			var b = FormItemList.CreateStack();
 
 			b.AddFormItems( email.ToEmailAddressControl( false, value: user != null ? user.Email : "" ).ToFormItem( label: "Email address".ToComponents() ) );
 
-			if( FormsAuthStatics.FormsAuthEnabled ) {
+			if( UserManagementStatics.LocalIdentityProviderEnabled ) {
 				var group = new RadioButtonGroup( false );
 
 				void genPassword( bool emailPassword ) {
 					var password = new Password();
-					salt.Value = password.Salt;
-					saltedPassword.Value = password.ComputeSaltedHash();
-					mustChangePassword.Value = true;
+					passwordData.Value = ( password.Salt, password.ComputeSaltedHash(), true );
 					if( emailPassword )
 						passwordToEmail = password.PasswordText;
 				}
@@ -60,14 +61,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 						true,
 						label: userId.HasValue ? "Keep the current password".ToComponents() : "Do not create a password".ToComponents(),
 						validationMethod: ( postBackValue, validator ) => {
-							if( !postBackValue.Value )
-								return;
-							if( user != null ) {
-								salt.Value = facUser.Salt;
-								saltedPassword.Value = facUser.SaltedPassword;
-								mustChangePassword.Value = facUser.MustChangePassword;
-							}
-							else
+							if( postBackValue.Value && user == null )
 								genPassword( false );
 						} )
 					.ToFormItem();
@@ -98,9 +92,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 										new EwfValidation(
 											validator => {
 												var p = new Password( password.Value );
-												salt.Value = p.Salt;
-												saltedPassword.Value = p.ComputeSaltedHash();
-												mustChangePassword.Value = false;
+												passwordData.Value = ( p.Salt, p.ComputeSaltedHash(), false );
 											} );
 
 										return list.ToCollection();
@@ -123,37 +115,26 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 			children = new Section( "Security Information", b.ToCollection() ).ToCollection();
 
 			modificationMethod = () => {
-				if( dataSetter != null )
-					dataSetter( ( email, roleId, salt, saltedPassword, mustChangePassword ) );
-				else if( FormsAuthStatics.FormsAuthEnabled )
-					if( userId.HasValue )
-						FormsAuthStatics.SystemProvider.InsertOrUpdateUser(
+				if( dataSetter != null ) {
+					dataSetter( email, roleId );
+					if( passwordData.Initialized )
+						passwordDataSetter( passwordData.Value.salt, passwordData.Value.saltedPassword, passwordData.Value.mustChangePassword );
+				}
+				else {
+					userId = UserManagementStatics.SystemProvider.InsertOrUpdateUser( userId, email.Value, roleId.Value, user?.LastRequestTime );
+					if( passwordData.Initialized )
+						UserManagementStatics.LocalIdentityProvider.UserUpdater(
 							userId.Value,
-							email.Value,
-							roleId.Value,
-							user.LastRequestTime,
-							salt.Value,
-							saltedPassword.Value,
-							mustChangePassword.Value );
-					else
-						FormsAuthStatics.SystemProvider.InsertOrUpdateUser(
-							null,
-							email.Value,
-							roleId.Value,
-							null,
-							salt.Value,
-							saltedPassword.Value,
-							mustChangePassword.Value );
-				else if( UserManagementStatics.SystemProvider is ExternalAuthUserManagementProvider ) {
-					var provider = UserManagementStatics.SystemProvider as ExternalAuthUserManagementProvider;
-					provider.InsertOrUpdateUser( userId, email.Value, roleId.Value, user?.LastRequestTime );
+							passwordData.Value.salt,
+							passwordData.Value.saltedPassword,
+							passwordData.Value.mustChangePassword );
 				}
 
 				if( passwordToEmail == null )
 					return;
 				AppRequestState.AddNonTransactionalModificationMethod(
 					() => {
-						FormsAuthStatics.SendPassword( email.Value, passwordToEmail );
+						UserManagementStatics.LocalIdentityProvider.SendPassword( email.Value, passwordToEmail );
 						PageBase.AddStatusMessage( StatusMessageType.Info, "Password reset email sent." );
 					} );
 			};

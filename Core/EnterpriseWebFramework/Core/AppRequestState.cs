@@ -5,6 +5,7 @@ using System.Web;
 using EnterpriseWebLibrary.Caching;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.UserManagement;
 using NodaTime;
 using StackExchange.Profiling;
@@ -208,7 +209,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					throw new ApplicationException( "User cannot be accessed from a nonsecure connection in an application that supports secure connections." );
 				if( userAndImpersonator == null )
 					userAndImpersonator = UserManagementStatics.UserManagementEnabled
-						                      ? UserManagementStatics.GetUserAndImpersonatorFromRequest()
+						                      ? AuthenticationStatics.GetUserAndImpersonatorFromRequest()
 						                      : Tuple.Create<User, SpecifiedValue<User>>( null, null );
 				return userAndImpersonator;
 			}

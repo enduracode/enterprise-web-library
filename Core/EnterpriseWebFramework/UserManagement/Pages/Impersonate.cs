@@ -29,7 +29,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 			if( !UserManagementStatics.UserManagementEnabled )
 				throw new ApplicationException( "User management not enabled" );
 
-			if( User.Any() && User != AnonymousUser && ( UserObject = UserManagementStatics.GetUser( User ) ) == null )
+			if( User.Any() && User != AnonymousUser && ( UserObject = UserManagementStatics.SystemProvider.GetUser( User ) ) == null )
 				throw new ApplicationException( "user" );
 		}
 
@@ -83,7 +83,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 										user.Value = null;
 										return;
 									}
-									user.Value = UserManagementStatics.GetUser( postBackValue );
+									user.Value = UserManagementStatics.SystemProvider.GetUser( postBackValue );
 									if( user.Value == null )
 										validator.NoteErrorAndAddMessage( "The email address you entered does not match a user." );
 								} ).ToFormItem( label: "User's email address (leave blank for anonymous)".ToComponents() )

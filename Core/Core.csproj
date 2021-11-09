@@ -660,7 +660,6 @@
     <Compile Include="EnterpriseWebFramework\UserManagement\Pages\ChangePassword.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\Pages\Impersonate.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\Pages\LogIn.cs" />
-    <Compile Include="EnterpriseWebFramework\UserManagement\StrictFormsAuthUserManagementProvider.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Text Box\AutoCompleteItem.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\UserEditor.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\UserImpersonationStatics.cs" />
@@ -754,6 +753,9 @@
     <Compile Include="TrustedHtmlString.cs" />
     <Compile Include="UnexpectedValueException.cs" />
     <Compile Include="UnitTestingInitializationOps.cs" />
+    <Compile Include="UserManagement\IdentityProvider.cs" />
+    <Compile Include="UserManagement\IdentityProviders\LocalIdentityProvider.cs" />
+    <Compile Include="UserManagement\IdentityProviders\SamlIdentityProvider.cs" />
     <Compile Include="UserManagement\Role.cs" />
     <Compile Include="UserManagement\SystemUserManagementProvider.cs" />
     <Compile Include="UserManagement\User.cs" />
@@ -763,10 +765,6 @@
     <Compile Include="MailMerging\FieldImplementation\BasicMergeFieldImplementationWithMsWordName.cs" />
     <Compile Include="Email\EmailMessage.cs" />
     <Compile Include="Encryption\Password.cs" />
-    <Compile Include="EnterpriseWebFramework\UserManagement\ExternalAuthUser.cs" />
-    <Compile Include="EnterpriseWebFramework\UserManagement\ExternalAuthUserManagementProvider.cs" />
-    <Compile Include="EnterpriseWebFramework\UserManagement\FormsAuthCapableUser.cs" />
-    <Compile Include="EnterpriseWebFramework\UserManagement\FormsAuthCapableUserManagementProvider.cs" />
     <Compile Include="Collections\ListSet.cs" />
     <Compile Include="InstallationFileStatics.cs" />
     <Compile Include="NetTools.cs" />

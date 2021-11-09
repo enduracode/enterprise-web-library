@@ -42,7 +42,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebC
 					"<compilation debug=\"true\" targetFramework=\"4.7.2\" />",
 					"<compilation debug=\"true\" targetFramework=\"4.7.2\"><buildProviders><remove extension=\".edmx\" /></buildProviders></compilation>" );
 
-			sections = sections.Replace( "@@SessionTimeout", ( (int)FormsAuthStatics.SessionDuration.TotalMinutes ).ToString() );
+			sections = sections.Replace( "@@SessionTimeout", ( (int)AuthenticationStatics.SessionDuration.TotalMinutes ).ToString() );
 
 			var useCertificateAuth = project.useCertificateAuthenticationSpecified && project.useCertificateAuthentication;
 			sections = sections.Replace(

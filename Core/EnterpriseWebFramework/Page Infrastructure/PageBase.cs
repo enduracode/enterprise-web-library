@@ -336,23 +336,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			return () => {
 				void updateUser() {
-					if( FormsAuthStatics.FormsAuthEnabled ) {
-						var formsAuthCapableUser = (FormsAuthCapableUser)user;
-						FormsAuthStatics.SystemProvider.InsertOrUpdateUser(
-							user.UserId,
-							user.Email,
-							user.Role.RoleId,
-							AppRequestState.RequestTime,
-							formsAuthCapableUser.Salt,
-							formsAuthCapableUser.SaltedPassword,
-							formsAuthCapableUser.MustChangePassword );
-					}
-					else
-						( UserManagementStatics.SystemProvider as ExternalAuthUserManagementProvider )?.InsertOrUpdateUser(
-							user.UserId,
-							user.Email,
-							user.Role.RoleId,
-							AppRequestState.RequestTime );
+					UserManagementStatics.SystemProvider.InsertOrUpdateUser( user.UserId, user.Email, user.Role.RoleId, AppRequestState.RequestTime );
 				}
 				if( ConfigurationStatics.DatabaseExists )
 					DataAccessState.Current.PrimaryDatabaseConnection.ExecuteInTransaction(
@@ -917,7 +901,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				ContentTypes.Html,
 				new EwfResponseBodyCreator(
 					writer => {
-						FormsAuthStatics.UpdateFormsAuthCookieIfNecessary();
+						AuthenticationStatics.UpdateFormsAuthCookieIfNecessary();
 
 						pageTree.WriteMarkup( writer );
 
