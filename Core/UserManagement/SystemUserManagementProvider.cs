@@ -30,7 +30,7 @@ namespace EnterpriseWebLibrary.UserManagement {
 		/// <summary>
 		/// Inserts a new user (if no user ID is passed) or updates an existing user with the specified parameters. Returns the user’s ID.
 		/// </summary>
-		int InsertOrUpdateUser( int? userId, string email, int roleId, Instant? lastRequestTime );
+		int InsertOrUpdateUser( int? userId, string emailAddress, int roleId, Instant? lastRequestTime );
 
 		/// <summary>
 		/// Deletes the user with the specified ID.
