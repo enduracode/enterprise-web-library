@@ -48,6 +48,8 @@ namespace EnterpriseWebLibrary.UserManagement {
 			localIdentityProvider = identityProviders.OfType<LocalIdentityProvider>().SingleOrDefault();
 		}
 
+		internal static IReadOnlyCollection<IdentityProvider> IdentityProviders => identityProviders;
+
 		internal static bool LocalIdentityProviderEnabled => localIdentityProvider != null;
 
 		internal static LocalIdentityProvider LocalIdentityProvider => localIdentityProvider;

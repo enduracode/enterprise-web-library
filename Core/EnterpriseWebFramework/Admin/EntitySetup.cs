@@ -26,7 +26,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin {
 		}
 
 		protected override IEnumerable<ResourceGroup> createListedResources() =>
-			new ResourceGroup( new BasicTests( this ), new RequestProfiling( this ), new SystemUsers( this ) ).ToCollection();
+			new ResourceGroup( new BasicTests( this ), new RequestProfiling( this ), new SystemUsers( this ), new IdentityProviders( this ) ).ToCollection();
 
 		protected override UrlHandler getUrlParent() => frameworkUrlParentGetter();
 
@@ -47,7 +47,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin {
 				.Append( ErrorPages.UnhandledException.UrlPatterns.Literal( "unhandled-exception" ) )
 				.Append( BasicTests.UrlPatterns.Literal( this, "tests" ) )
 				.Append( RequestProfiling.UrlPatterns.Literal( this, "profiling" ) )
-				.Append( SystemUsers.UrlPatterns.Literal( this, "users" ) );
+				.Append( SystemUsers.UrlPatterns.Literal( this, "users" ) )
+				.Append( IdentityProviders.UrlPatterns.Literal( this, "identity-providers" ) );
 
 		EntityUiSetup UiEntitySetup.GetUiSetup() =>
 			new EntityUiSetup(
