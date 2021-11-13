@@ -6,30 +6,23 @@ using EnterpriseWebLibrary.DatabaseSpecification;
 namespace EnterpriseWebLibrary.DataAccess {
 	internal static class DataAccessStatics {
 		private const string providerName = "DataAccess";
-		private static SystemDataAccessProvider provider;
+		private static SystemProviderReference<SystemDataAccessProvider> provider;
 		private static IEnumerable<DatabaseInfo> disabledAutomaticTransactionSecondaryDatabases;
 
 		internal static void Init() {
-			provider = ConfigurationStatics.GetSystemLibraryProvider( providerName ) as SystemDataAccessProvider;
+			provider = ConfigurationStatics.GetSystemLibraryProvider<SystemDataAccessProvider>( providerName );
 
-			var automaticTransactionDisablingProvider = provider as AutomaticTransactionDisablingProvider;
-			disabledAutomaticTransactionSecondaryDatabases = automaticTransactionDisablingProvider != null
-				                                                 ? automaticTransactionDisablingProvider.GetDisabledAutomaticTransactionSecondaryDatabaseNames()
-					                                                   .Select( i => ConfigurationStatics.InstallationConfiguration.GetSecondaryDatabaseInfo( i ) )
-					                                                   .ToArray()
-				                                                 : new DatabaseInfo[ 0 ];
+			disabledAutomaticTransactionSecondaryDatabases =
+				provider.GetProvider( returnNullIfNotFound: true ) is AutomaticTransactionDisablingProvider automaticTransactionDisablingProvider
+					? automaticTransactionDisablingProvider.GetDisabledAutomaticTransactionSecondaryDatabaseNames()
+						.Select( i => ConfigurationStatics.InstallationConfiguration.GetSecondaryDatabaseInfo( i ) )
+						.ToArray()
+					: new DatabaseInfo[ 0 ];
 		}
 
-		internal static SystemDataAccessProvider SystemProvider {
-			get {
-				if( provider == null )
-					throw ConfigurationStatics.CreateProviderNotFoundException( providerName );
-				return provider;
-			}
-		}
+		internal static SystemDataAccessProvider SystemProvider => provider.GetProvider();
 
-		internal static bool DatabaseShouldHaveAutomaticTransactions( DatabaseInfo databaseInfo ) {
-			return disabledAutomaticTransactionSecondaryDatabases.All( i => i.SecondaryDatabaseName != databaseInfo.SecondaryDatabaseName );
-		}
+		internal static bool DatabaseShouldHaveAutomaticTransactions( DatabaseInfo databaseInfo ) =>
+			disabledAutomaticTransactionSecondaryDatabases.All( i => i.SecondaryDatabaseName != databaseInfo.SecondaryDatabaseName );
 	}
 }

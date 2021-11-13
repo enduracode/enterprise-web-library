@@ -11,19 +11,13 @@ namespace EnterpriseWebLibrary.Encryption {
 	/// </summary>
 	public static class EncryptionOps {
 		private const string providerName = "Encryption";
-		private static SystemEncryptionProvider provider;
+		private static SystemProviderReference<SystemEncryptionProvider> provider;
 
 		internal static void Init() {
-			provider = ConfigurationStatics.GetSystemLibraryProvider( providerName ) as SystemEncryptionProvider;
+			provider = ConfigurationStatics.GetSystemLibraryProvider<SystemEncryptionProvider>( providerName );
 		}
 
-		internal static SystemEncryptionProvider SystemProvider {
-			get {
-				if( provider == null )
-					throw ConfigurationStatics.CreateProviderNotFoundException( providerName );
-				return provider;
-			}
-		}
+		internal static SystemEncryptionProvider SystemProvider => provider.GetProvider();
 
 		/// <summary>
 		/// Generates a random initialization vector, which should be 16 bytes long since that is the block size of the encryption algorithm.
@@ -79,8 +73,7 @@ namespace EnterpriseWebLibrary.Encryption {
 		/// the same data with the same key (providing you pass a different init vector each time), thus preventing rainbow table attacks.
 		/// </summary>
 		[ Obsolete(
-			"Guaranteed through 31 July 2017. We can't think of a use case for this that isn't handled better by using the unencrypted value in conjunction with Randomness.GetRandomHexString."
-			) ]
+			"Guaranteed through 31 July 2017. We can't think of a use case for this that isn't handled better by using the unencrypted value in conjunction with Randomness.GetRandomHexString." ) ]
 		public static string GetEncryptedString( byte[] initVector, string value ) {
 			return ( BitConverter.ToString( initVector ) + BitConverter.ToString( EncryptString( initVector, value ) ) ).Replace( "-", "" );
 		}
@@ -89,8 +82,7 @@ namespace EnterpriseWebLibrary.Encryption {
 		/// This returns the encrypted string that was encrypted via the GetEncryptedString method.
 		/// </summary>
 		[ Obsolete(
-			"Guaranteed through 31 July 2017. We can't think of a use case for this that isn't handled better by using the unencrypted value in conjunction with Randomness.GetRandomHexString."
-			) ]
+			"Guaranteed through 31 July 2017. We can't think of a use case for this that isn't handled better by using the unencrypted value in conjunction with Randomness.GetRandomHexString." ) ]
 		public static string GetDecryptedString( string encryptedString ) {
 			// IV is the first part of the parmater, which is 16 bytes/32 hex characters
 			var pairs = new List<string>();

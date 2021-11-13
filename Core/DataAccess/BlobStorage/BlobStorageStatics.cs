@@ -8,19 +8,13 @@ using EnterpriseWebLibrary.IO;
 namespace EnterpriseWebLibrary.DataAccess.BlobStorage {
 	public static class BlobStorageStatics {
 		private const string providerName = "BlobStorage";
-		private static SystemBlobStorageProvider provider;
+		private static SystemProviderReference<SystemBlobStorageProvider> provider;
 
 		internal static void Init() {
-			provider = ConfigurationStatics.GetSystemLibraryProvider( providerName ) as SystemBlobStorageProvider;
+			provider = ConfigurationStatics.GetSystemLibraryProvider<SystemBlobStorageProvider>( providerName );
 		}
 
-		internal static SystemBlobStorageProvider SystemProvider {
-			get {
-				if( provider == null )
-					throw ConfigurationStatics.CreateProviderNotFoundException( providerName );
-				return provider;
-			}
-		}
+		internal static SystemBlobStorageProvider SystemProvider => provider.GetProvider();
 
 		/// <summary>
 		/// Returns the first file in the specified file collection, or null if the collection is empty.

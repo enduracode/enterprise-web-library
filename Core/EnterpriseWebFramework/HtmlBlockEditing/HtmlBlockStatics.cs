@@ -11,19 +11,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public static class HtmlBlockStatics {
 		private const string providerName = "HtmlBlockEditing";
 
-		private static SystemHtmlBlockEditingProvider provider;
+		private static SystemProviderReference<SystemHtmlBlockEditingProvider> provider;
 
 		internal static void Init() {
-			provider = ConfigurationStatics.GetSystemLibraryProvider( providerName ) as SystemHtmlBlockEditingProvider;
+			provider = ConfigurationStatics.GetSystemLibraryProvider<SystemHtmlBlockEditingProvider>( providerName );
 		}
 
-		internal static SystemHtmlBlockEditingProvider SystemProvider {
-			get {
-				if( provider == null )
-					throw ConfigurationStatics.CreateProviderNotFoundException( providerName );
-				return provider;
-			}
-		}
+		internal static SystemHtmlBlockEditingProvider SystemProvider => provider.GetProvider();
 
 		/// <summary>
 		/// Gets the HTML from the specified HTML block, after decoding intra site URIs.

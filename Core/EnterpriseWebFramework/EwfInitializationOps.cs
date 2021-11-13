@@ -10,6 +10,7 @@ using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
+using EnterpriseWebLibrary.ExternalFunctionality;
 using Humanizer;
 using StackExchange.Profiling;
 using Tewl.Tools;
@@ -61,6 +62,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						miniProfilerOptions.IgnoredPaths.Clear();
 						MiniProfiler.Configure( miniProfilerOptions );
 
+						var globalType = BuildManager.GetGlobalAsaxType().BaseType;
+						var providerGetter = new SystemProviderGetter(
+							globalType.Assembly,
+							globalType.Namespace + ".Providers",
+							providerName =>
+								@"{0} provider not found in application. To implement, create a class named {0} in ""Your Web Site\Providers"" that derives from App{0}Provider."
+									.FormatWith( providerName ) );
+
+						if( ExternalFunctionalityStatics.SamlFunctionalityEnabled )
+							ExternalFunctionalityStatics.ExternalSamlProvider.InitAppStatics( providerGetter );
+
 						UrlHandlingStatics.Init(
 							( baseUrlString, appRelativeUrl ) => {
 								AppRequestState.Instance.UrlHandlerStateDisabled = true;
@@ -71,17 +83,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									AppRequestState.Instance.UrlHandlerStateDisabled = false;
 								}
 							} );
-
-						var globalType = BuildManager.GetGlobalAsaxType().BaseType;
-						Func<ProviderType> getProviderGetter<ProviderType>( string providerName ) where ProviderType: class {
-							var appAssembly = globalType.Assembly;
-							var typeName = globalType.Namespace + ".Providers." + providerName;
-							var provider = appAssembly.GetType( typeName ) != null ? appAssembly.CreateInstance( typeName ) as ProviderType : null;
-							return () => provider ?? throw new ApplicationException(
-								             providerName + " provider not found in application. To implement, create a class named " + providerName +
-								             @" in ""Your Web Site\Providers"" that derives from App" + providerName + "Provider." );
-						}
-
 						CssPreprocessingStatics.Init( globalInitializer.GetType().Assembly, globalType.Assembly );
 						ResourceBase.Init(
 							( requestTransferred, resource ) => {
@@ -107,7 +108,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						FileUpload.Init( () => ( (BasicPageContent)PageBase.Current.BasicContent ).FormUsesMultipartEncoding = true );
 						ModalBox.Init( () => ( (BasicPageContent)PageBase.Current.BasicContent ).BrowsingModalBoxId );
 						CreditCardCollector.Init( () => ( (BasicPageContent)PageBase.Current.BasicContent ).IncludesStripeCheckout = true );
-						BasePageStatics.Init( getProviderGetter<AppStandardPageLogicProvider>( "StandardPageLogic" ) );
+						BasePageStatics.Init( providerGetter.GetProvider<AppStandardPageLogicProvider>( "StandardPageLogic" ) );
 						BasicPageContent.Init(
 							contentObjects => {
 								var contentUsesUi = contentObjects.Any( i => i is UiPageContent );
@@ -221,13 +222,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 																	       EwfConfigurationStatics.AppSupportsSecureConnections ) ) ) ) ) ) )
 										       .Materialize() );
 							} );
-						EwfUiStatics.Init( getProviderGetter<AppEwfUiProvider>( "EwfUi" ) );
-						AuthenticationStatics.Init();
+						EwfUiStatics.Init( providerGetter.GetProvider<AppEwfUiProvider>( "EwfUi" ) );
+						AuthenticationStatics.Init( providerGetter.GetProvider<AppAuthenticationProvider>( "Authentication" ) );
 						Admin.EntitySetup.Init( () => RequestDispatchingStatics.AppProvider.GetFrameworkUrlParent() );
-						RequestDispatchingStatics.Init( getProviderGetter<AppRequestDispatchingProvider>( "RequestDispatching" ) );
+						RequestDispatchingStatics.Init( providerGetter.GetProvider<AppRequestDispatchingProvider>( "RequestDispatching" ) );
 
 						EwfInitializationOps.appInitializer = appInitializer;
 						appInitializer?.InitStatics();
+
+						AuthenticationStatics.InitAppSpecificLogicDependencies();
+						if( AuthenticationStatics.SamlIdentityProviders.Any() || ExternalFunctionalityStatics.SamlFunctionalityEnabled )
+							ExternalFunctionalityStatics.ExternalSamlProvider.InitAppSpecificLogicDependencies( AuthenticationStatics.SamlIdentityProviders );
 
 						initTimeDataAccessState = null;
 						EwfApp.FrameworkInitialized = true;

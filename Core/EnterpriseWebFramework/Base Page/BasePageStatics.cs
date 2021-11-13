@@ -1,13 +1,13 @@
-﻿using System;
+﻿using EnterpriseWebLibrary.Configuration;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	internal static class BasePageStatics {
-		private static Func<AppStandardPageLogicProvider> providerGetter;
+		private static SystemProviderReference<AppStandardPageLogicProvider> provider;
 
-		internal static void Init( Func<AppStandardPageLogicProvider> providerGetter ) {
-			BasePageStatics.providerGetter = providerGetter;
+		internal static void Init( SystemProviderReference<AppStandardPageLogicProvider> provider ) {
+			BasePageStatics.provider = provider;
 		}
 
-		internal static AppStandardPageLogicProvider AppProvider => providerGetter();
+		internal static AppStandardPageLogicProvider AppProvider => provider.GetProvider();
 	}
 }

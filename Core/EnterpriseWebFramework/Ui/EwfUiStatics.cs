@@ -1,19 +1,19 @@
-﻿using System;
+﻿using EnterpriseWebLibrary.Configuration;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Ui {
 	/// <summary>
 	/// EWL use only.
 	/// </summary>
 	public static class EwfUiStatics {
-		private static Func<AppEwfUiProvider> providerGetter;
+		private static SystemProviderReference<AppEwfUiProvider> provider;
 
-		internal static void Init( Func<AppEwfUiProvider> providerGetter ) {
-			EwfUiStatics.providerGetter = providerGetter;
+		internal static void Init( SystemProviderReference<AppEwfUiProvider> provider ) {
+			EwfUiStatics.provider = provider;
 		}
 
 		/// <summary>
 		/// EWL use only.
 		/// </summary>
-		public static AppEwfUiProvider AppProvider => providerGetter();
+		public static AppEwfUiProvider AppProvider => provider.GetProvider();
 	}
 }

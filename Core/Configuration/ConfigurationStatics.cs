@@ -93,7 +93,7 @@ namespace EnterpriseWebLibrary.Configuration {
 			initializationLog += Environment.NewLine + "Successfully loaded installation configuration";
 
 			ConfigurationStatics.globalInitializerType = globalInitializerType;
-			SystemGeneralProvider = GetSystemLibraryProvider( "General" ) as SystemGeneralProvider;
+			SystemGeneralProvider = GetSystemLibraryProvider<SystemGeneralProvider>( "General" ).GetProvider( returnNullIfNotFound: true );
 			if( SystemGeneralProvider == null )
 				throw new ApplicationException( "General provider not found in system" );
 
@@ -176,16 +176,14 @@ namespace EnterpriseWebLibrary.Configuration {
 		}
 
 
-		internal static object GetSystemLibraryProvider( string providerName ) {
-			var systemLibraryAssembly = globalInitializerType.Assembly;
-			var typeName = globalInitializerType.Namespace + ".Configuration." + ProvidersFolderAndNamespaceName + "." + providerName;
-			return systemLibraryAssembly.GetType( typeName ) != null ? systemLibraryAssembly.CreateInstance( typeName ) : null;
-		}
+		internal static SystemProviderReference<ProviderType> GetSystemLibraryProvider<ProviderType>( string providerName ) where ProviderType: class =>
+			new SystemProviderGetter(
+				globalInitializerType.Assembly,
+				globalInitializerType.Namespace + ".Configuration." + ProvidersFolderAndNamespaceName,
+				getProviderNotFoundErrorMessage ).GetProvider<ProviderType>( providerName );
 
-		internal static ApplicationException CreateProviderNotFoundException( string providerName ) {
-			return new ApplicationException(
-				providerName + " provider not found in system. To implement, create a class named " + providerName + @" in Library\Configuration\" +
-				ProvidersFolderAndNamespaceName + " and implement the System" + providerName + "Provider interface." );
-		}
+		private static string getProviderNotFoundErrorMessage( string providerName ) =>
+			providerName + " provider not found in system. To implement, create a class named " + providerName + @" in Library\Configuration\" +
+			ProvidersFolderAndNamespaceName + " and implement the System" + providerName + "Provider interface.";
 	}
 }

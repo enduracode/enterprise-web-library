@@ -261,6 +261,8 @@
     <Compile Include="Configuration\Machine\MachineConfiguration.cs" />
     <Compile Include="Configuration\SystemDevelopment\SystemDevelopmentConfiguration.cs" />
     <Compile Include="Configuration\SystemGeneral\WindowsService.cs" />
+    <Compile Include="Configuration\SystemProviderGetter.cs" />
+    <Compile Include="Configuration\SystemProviderReference.cs" />
     <Compile Include="Configuration\WebApplication.cs" />
     <Compile Include="DataAccess\AutomaticTransactionDisablingProvider.cs" />
     <Compile Include="DataAccess\BlobStorage\BlobFile.cs" />
@@ -657,6 +659,7 @@
     <Compile Include="EnterpriseWebFramework\EwfExtensionMethods.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\Entity\TabMode.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\UiPageContent.cs" />
+    <Compile Include="EnterpriseWebFramework\UserManagement\AppAuthenticationProvider.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\AuthenticationStatics.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\Pages\ChangePassword.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\Pages\Impersonate.cs" />
@@ -666,6 +669,9 @@
     <Compile Include="EnterpriseWebFramework\UserManagement\UserImpersonationStatics.cs" />
     <Compile Include="EwlNuGetPackageSpecificationStatics.cs" />
     <Compile Include="EwlStatics.cs" />
+    <Compile Include="ExternalFunctionality\ExternalFunctionalityStatics.cs" />
+    <Compile Include="ExternalFunctionality\ExternalSamlProvider.cs" />
+    <Compile Include="ExternalFunctionality\SystemExternalFunctionalityProvider.cs" />
     <Compile Include="Generated Code\Build Message.cs" />
     <Compile Include="Generated Code\Installation Standard Configuration.cs" />
     <Compile Include="Generated Code\ISU.cs" />

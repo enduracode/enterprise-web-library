@@ -5,6 +5,7 @@ using System.Web;
 using System.Web.Security;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.UserManagement;
+using EnterpriseWebLibrary.UserManagement.IdentityProviders;
 using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
 using NodaTime;
@@ -20,7 +21,25 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		/// </summary>
 		public static readonly TimeSpan SessionDuration = TimeSpan.FromHours( 32 ); // persist across consecutive days of usage
 
-		internal static void Init() {}
+		private static SystemProviderReference<AppAuthenticationProvider> provider;
+
+		private static IReadOnlyCollection<SamlIdentityProvider> samlIdentityProviders;
+
+		internal static void Init( SystemProviderReference<AppAuthenticationProvider> provider ) {
+			AuthenticationStatics.provider = provider;
+		}
+
+		internal static AppAuthenticationProvider AppProvider => provider.GetProvider();
+
+		internal static void InitAppSpecificLogicDependencies() {
+			// In the future we expect this to use logic from AppAuthenticationProvider to potentially filter the system’s identity providers.
+			samlIdentityProviders =
+				( UserManagementStatics.UserManagementEnabled
+					  ? UserManagementStatics.IdentityProviders.OfType<SamlIdentityProvider>()
+					  : Enumerable.Empty<SamlIdentityProvider>() ).Materialize();
+		}
+
+		internal static IReadOnlyCollection<SamlIdentityProvider> SamlIdentityProviders => samlIdentityProviders;
 
 
 		/// <summary>

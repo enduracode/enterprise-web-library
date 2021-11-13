@@ -1,20 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using EnterpriseWebLibrary.Configuration;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public static class RequestDispatchingStatics {
-		private static Func<AppRequestDispatchingProvider> providerGetter;
+		private static SystemProviderReference<AppRequestDispatchingProvider> provider;
 
-		internal static void Init( Func<AppRequestDispatchingProvider> providerGetter ) {
-			RequestDispatchingStatics.providerGetter = providerGetter;
+		internal static void Init( SystemProviderReference<AppRequestDispatchingProvider> provider ) {
+			RequestDispatchingStatics.provider = provider;
 		}
 
 		/// <summary>
 		/// Framework use only.
 		/// </summary>
-		public static AppRequestDispatchingProvider AppProvider => providerGetter();
+		public static AppRequestDispatchingProvider AppProvider => provider.GetProvider();
 
 		/// <summary>
 		/// Returns a list of URL patterns for the framework.

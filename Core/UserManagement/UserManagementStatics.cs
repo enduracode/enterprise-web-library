@@ -13,33 +13,24 @@ namespace EnterpriseWebLibrary.UserManagement {
 	public static class UserManagementStatics {
 		private const string providerName = "UserManagement";
 
-		/// <summary>
-		/// Do not use directly. Use <see cref="SystemProvider"/>.
-		/// </summary>
-		private static SystemUserManagementProvider provider;
+		private static SystemProviderReference<SystemUserManagementProvider> provider;
 
 		private static IReadOnlyCollection<IdentityProvider> identityProviders;
 		private static LocalIdentityProvider localIdentityProvider;
 
 		internal static void Init() {
-			provider = ConfigurationStatics.GetSystemLibraryProvider( providerName ) as SystemUserManagementProvider;
+			provider = ConfigurationStatics.GetSystemLibraryProvider<SystemUserManagementProvider>( providerName );
 		}
 
 		/// <summary>
 		/// EWL use only.
 		/// </summary>
-		public static bool UserManagementEnabled => provider != null;
+		public static bool UserManagementEnabled => provider.GetProvider( returnNullIfNotFound: true ) != null;
 
 		/// <summary>
 		/// EWL use only.
 		/// </summary>
-		public static SystemUserManagementProvider SystemProvider {
-			get {
-				if( provider == null )
-					throw ConfigurationStatics.CreateProviderNotFoundException( providerName );
-				return provider;
-			}
-		}
+		public static SystemUserManagementProvider SystemProvider => provider.GetProvider();
 
 		internal static void InitSystemSpecificLogicDependencies() {
 			if( !UserManagementEnabled )

@@ -8,6 +8,7 @@ using EnterpriseWebLibrary.DataAccess.BlobStorage;
 using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.Encryption;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary.ExternalFunctionality;
 using EnterpriseWebLibrary.UserManagement;
 using Newtonsoft.Json;
 using NodaTime;
@@ -81,6 +82,8 @@ namespace EnterpriseWebLibrary {
 				EncryptionOps.Init();
 				HtmlBlockStatics.Init();
 				UserManagementStatics.Init();
+
+				ExternalFunctionalityStatics.Init();
 
 				GlobalInitializationOps.globalInitializer = globalInitializer;
 				globalInitializer.InitStatics();
