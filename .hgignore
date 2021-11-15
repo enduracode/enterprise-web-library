@@ -2,6 +2,7 @@ syntax: glob
 
 .vs/Enterprise Web Library/v16/.suo
 .vs/Enterprise Web Library/v16/Server/sqlite3/
+.vs/slnx.sqlite
 packages/
 _ReSharper*
 Enterprise Web Library.sln.DotSettings.user
