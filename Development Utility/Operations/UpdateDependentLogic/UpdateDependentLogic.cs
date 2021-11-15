@@ -108,6 +108,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						writer.WriteLine( "using System.Runtime.InteropServices;" );
 						writeAssemblyInfo( writer, installation, "Development Utility" );
 					} );
+				generateCodeForProject(
+					installation,
+					@"Providers\SAML",
+					writer => {
+						writer.WriteLine( "using System.Reflection;" );
+						writer.WriteLine( "using System.Runtime.InteropServices;" );
+						writeAssemblyInfo( writer, installation, "SAML Provider" );
+					} );
 			}
 			generateLibraryCode( installation );
 			foreach( var webProject in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects ?? new WebProject[ 0 ] )
@@ -292,8 +300,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine();
 				writer.WriteLine( "namespace " + baseNamespace + " {" );
 				writer.WriteLine( "public class SecondaryDatabaseNames {" );
-				foreach( var secondaryDatabase in installation.DevelopmentInstallationLogic.DatabasesForCodeGeneration.Where( d => d.SecondaryDatabaseName.Length > 0 )
-				)
+				foreach( var secondaryDatabase in
+					installation.DevelopmentInstallationLogic.DatabasesForCodeGeneration.Where( d => d.SecondaryDatabaseName.Length > 0 ) )
 					writer.WriteLine( "public const string " + secondaryDatabase.SecondaryDatabaseName + " = \"" + secondaryDatabase.SecondaryDatabaseName + "\";" );
 				writer.WriteLine( "}" );
 				writer.WriteLine( "}" );
