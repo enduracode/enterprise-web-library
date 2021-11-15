@@ -17,15 +17,15 @@ Core/obj/
 Core/Generated Code/
 Core/EnterpriseWebLibrary.xml
 
-Development Utility/bin/
-Development Utility/obj/
-Development Utility/Generated Code/
-
 Library/bin/
 Library/obj/
 Library/Configuration/Aspose Licenses/
 Library/Files/*.xsd
 Library/Generated Code/
+
+Development Utility/bin/
+Development Utility/obj/
+Development Utility/Generated Code/
 
 Solution Files/bin/
 Solution Files/obj/
@@ -36,3 +36,7 @@ Tests/obj/
 Web Site/bin/
 Web Site/obj/
 Web Site/Generated Code/
+
+Providers/SAML/bin/
+Providers/SAML/obj/
+Providers/SAML/Generated Code/

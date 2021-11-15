@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31729.503
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "Core\Core.csproj", "{7EED5926-9FE0-44DB-9B5F-5A6856CE392E}"
 EndProject
@@ -14,6 +14,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Development Utility", "Development Utility\Development Utility.csproj", "{621E8A1E-19BC-4734-BBF5-D322312044A3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{69B7A268-9BC0-4416-8966-479BC35FFB39}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Providers", "Providers", "{B5CB99D1-18E2-43BD-A258-188345434139}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SAML", "Providers\SAML\SAML.csproj", "{6104041B-DB8D-4ED4-B2A3-DB4BA7135C09}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,9 +46,19 @@ Global
 		{69B7A268-9BC0-4416-8966-479BC35FFB39}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{69B7A268-9BC0-4416-8966-479BC35FFB39}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{69B7A268-9BC0-4416-8966-479BC35FFB39}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6104041B-DB8D-4ED4-B2A3-DB4BA7135C09}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6104041B-DB8D-4ED4-B2A3-DB4BA7135C09}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6104041B-DB8D-4ED4-B2A3-DB4BA7135C09}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6104041B-DB8D-4ED4-B2A3-DB4BA7135C09}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{6104041B-DB8D-4ED4-B2A3-DB4BA7135C09} = {B5CB99D1-18E2-43BD-A258-188345434139}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {ABE9478E-BE34-422C-B0F1-F9D179ECB31D}
 	EndGlobalSection
 	GlobalSection(NDepend) = preSolution
 		Project = ".\Enterprise Web Library.ndproj"
