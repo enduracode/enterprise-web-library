@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AppSamlProvider.cs" />
     <Compile Include="Generated Code\ISU.cs" />
     <Compile Include="SamlProvider.cs" />
   </ItemGroup>
