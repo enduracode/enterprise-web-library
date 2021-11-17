@@ -12,14 +12,18 @@ namespace EnterpriseWebLibrary.UserManagement {
 	/// </summary>
 	public static class UserManagementStatics {
 		private const string providerName = "UserManagement";
+		internal const string CertificatePassword = "password";
 
 		private static SystemProviderReference<SystemUserManagementProvider> provider;
+		private static Action certificateUpdateNotifier;
 
 		private static IReadOnlyCollection<IdentityProvider> identityProviders;
 		private static LocalIdentityProvider localIdentityProvider;
+		private static ( Func<string> getter, Action<string> updater )? certificateMethods;
 
-		internal static void Init() {
+		internal static void Init( Action certificateUpdateNotifier ) {
 			provider = ConfigurationStatics.GetSystemLibraryProvider<SystemUserManagementProvider>( providerName );
+			UserManagementStatics.certificateUpdateNotifier = certificateUpdateNotifier;
 		}
 
 		/// <summary>
@@ -37,6 +41,7 @@ namespace EnterpriseWebLibrary.UserManagement {
 				return;
 			identityProviders = SystemProvider.GetIdentityProviders().Materialize();
 			localIdentityProvider = identityProviders.OfType<LocalIdentityProvider>().SingleOrDefault();
+			certificateMethods = SystemProvider.GetCertificateMethods();
 		}
 
 		internal static IReadOnlyCollection<IdentityProvider> IdentityProviders => identityProviders;
@@ -44,6 +49,16 @@ namespace EnterpriseWebLibrary.UserManagement {
 		internal static bool LocalIdentityProviderEnabled => localIdentityProvider != null;
 
 		internal static LocalIdentityProvider LocalIdentityProvider => localIdentityProvider;
+
+		internal static string GetCertificate() =>
+			certificateMethods.HasValue ? certificateMethods.Value.getter() : throw new ApplicationException( "Self-signed certificate methods not available." );
+
+		internal static void UpdateCertificate( string certificate ) {
+			if( !certificateMethods.HasValue )
+				throw new ApplicationException( "Self-signed certificate methods not available." );
+			certificateMethods.Value.updater( certificate );
+			certificateUpdateNotifier();
+		}
 
 		internal static User GetUser( int userId, bool ensureUserExists ) {
 			var user = SystemProvider.GetUser( userId );

@@ -1,5 +1,6 @@
 ﻿using System;
 using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.UserManagement;
 
 namespace EnterpriseWebLibrary.ExternalFunctionality {
 	internal static class ExternalFunctionalityStatics {
@@ -12,7 +13,7 @@ namespace EnterpriseWebLibrary.ExternalFunctionality {
 			provider = ConfigurationStatics.GetSystemLibraryProvider<SystemExternalFunctionalityProvider>( ProviderName );
 
 			samlProvider = provider.GetProvider( returnNullIfNotFound: true )?.GetSamlProvider();
-			samlProvider?.InitStatics();
+			samlProvider?.InitStatics( UserManagementStatics.GetCertificate, UserManagementStatics.CertificatePassword );
 		}
 
 		internal static bool SamlFunctionalityEnabled => samlProvider != null;

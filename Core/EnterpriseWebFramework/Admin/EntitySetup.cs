@@ -26,7 +26,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin {
 		}
 
 		protected override IEnumerable<ResourceGroup> createListedResources() =>
-			new ResourceGroup( new BasicTests( this ), new RequestProfiling( this ), new SystemUsers( this ), new IdentityProviders( this ) ).ToCollection();
+			new ResourceGroup( new BasicTests( this ), new RequestProfiling( this ), new UserManagement( this ) ).ToCollection();
 
 		protected override UrlHandler getUrlParent() => frameworkUrlParentGetter();
 
@@ -36,9 +36,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin {
 			StaticFiles.FolderSetup.UrlPatterns.Literal( "static" )
 				.ToCollection()
 				.Append( NonLiveLogIn.UrlPatterns.Literal( "non-live-log-in" ) )
-				.Append( UserManagement.Pages.LogIn.UrlPatterns.Literal( "log-in" ) )
-				.Append( UserManagement.Pages.ChangePassword.UrlPatterns.Literal( "change-password" ) )
-				.Append( UserManagement.Pages.Impersonate.UrlPatterns.Literal( "impersonate" ) )
+				.Append( EnterpriseWebFramework.UserManagement.Pages.LogIn.UrlPatterns.Literal( "log-in" ) )
+				.Append( EnterpriseWebFramework.UserManagement.Pages.ChangePassword.UrlPatterns.Literal( "change-password" ) )
+				.Append( EnterpriseWebFramework.UserManagement.Pages.SamlLogIn.UrlPatterns.Literal( "saml-log-in" ) )
+				.Append( EnterpriseWebFramework.UserManagement.Pages.Impersonate.UrlPatterns.Literal( "impersonate" ) )
 				.Append( PreBuiltResponse.UrlPatterns.Literal( "pre-built-response" ) )
 				.Append( ContactSupport.UrlPatterns.Literal( "contact-support" ) )
 				.Append( ErrorPages.AccessDenied.UrlPatterns.Literal( "access-denied" ) )
@@ -47,13 +48,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin {
 				.Append( ErrorPages.UnhandledException.UrlPatterns.Literal( "unhandled-exception" ) )
 				.Append( BasicTests.UrlPatterns.Literal( this, "tests" ) )
 				.Append( RequestProfiling.UrlPatterns.Literal( this, "profiling" ) )
-				.Append( SystemUsers.UrlPatterns.Literal( this, "users" ) )
-				.Append( IdentityProviders.UrlPatterns.Literal( this, "identity-providers" ) );
+				.Append( UserManagement.UrlPatterns.Literal( this, "users" ) )
+				.Append( EnterpriseWebFramework.UserManagement.SamlMetadata.UrlPatterns.Literal( "saml" ) );
 
 		EntityUiSetup UiEntitySetup.GetUiSetup() =>
 			new EntityUiSetup(
 				actions: new HyperlinkSetup(
-					new UserManagement.Pages.Impersonate( PageBase.Current.GetUrl() ),
+					new EnterpriseWebFramework.UserManagement.Pages.Impersonate( PageBase.Current.GetUrl() ),
 					"Impersonate user",
 					icon: new ActionComponentIcon( new FontAwesomeIcon( "fa-key" ) ) ).ToCollection() );
 	}

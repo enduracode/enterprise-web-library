@@ -81,7 +81,11 @@ namespace EnterpriseWebLibrary {
 				DataAccessState.Init( mainDataAccessStateGetter, useLongDatabaseTimeouts );
 				EncryptionOps.Init();
 				HtmlBlockStatics.Init();
-				UserManagementStatics.Init();
+				UserManagementStatics.Init(
+					() => {
+						if( ExternalFunctionalityStatics.SamlFunctionalityEnabled )
+							ExternalFunctionalityStatics.ExternalSamlProvider.RefreshConfiguration();
+					} );
 
 				ExternalFunctionalityStatics.Init();
 

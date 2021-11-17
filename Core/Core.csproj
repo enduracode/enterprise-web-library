@@ -351,10 +351,9 @@
     <Compile Include="EnterpriseWebFramework\Action Components\ToolTip.cs" />
     <Compile Include="EnterpriseWebFramework\Admin\BasicTests.cs" />
     <Compile Include="EnterpriseWebFramework\Admin\EntitySetup.cs" />
-    <Compile Include="EnterpriseWebFramework\Admin\IdentityProviders.cs" />
     <Compile Include="EnterpriseWebFramework\Admin\RequestProfiling.cs" />
     <Compile Include="EnterpriseWebFramework\Admin\SystemUser.cs" />
-    <Compile Include="EnterpriseWebFramework\Admin\SystemUsers.cs" />
+    <Compile Include="EnterpriseWebFramework\Admin\UserManagement.cs" />
     <Compile Include="EnterpriseWebFramework\Automatic Layout\FormItem.cs" />
     <Compile Include="EnterpriseWebFramework\Automatic Layout\FormItemList.cs" />
     <Compile Include="EnterpriseWebFramework\Automatic Layout\FormItemListSetup.cs" />

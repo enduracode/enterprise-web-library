@@ -1,0 +1,72 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using EnterpriseWebLibrary.UserManagement;
+using EnterpriseWebLibrary.UserManagement.IdentityProviders;
+using Humanizer;
+using Tewl.Tools;
+
+// EwlPage
+
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin {
+	partial class UserManagement {
+		protected override AlternativeResourceMode createAlternativeMode() =>
+			UserManagementStatics.UserManagementEnabled ? null : new DisabledResourceMode( "User management is not enabled in this system." );
+
+		protected override IEnumerable<UrlPattern> getChildUrlPatterns() => SystemUser.UrlPatterns.UserIdPositiveInt( Es, "create" ).ToCollection();
+
+		protected override PageContent getContent() {
+			var content = new UiPageContent( omitContentBox: true );
+			if( UserManagementStatics.IdentityProviders.OfType<SamlIdentityProvider>().Any() ) {
+				var certificate = UserManagementStatics.GetCertificate();
+				content.Add(
+					new Section(
+						"Self-signed certificate",
+						( certificate.Any()
+							  ? "Certificate valid until {0}.".FormatWith(
+									  new X509Certificate2( Convert.FromBase64String( certificate ), UserManagementStatics.CertificatePassword ).NotAfter.ToDayMonthYearString(
+										  false ) )
+								  .ToComponents()
+							  : "No certificate.".ToComponents() ).Concat( " ".ToComponents() )
+						.Append(
+							new EwfButton(
+								new StandardButtonStyle( "Regenerate", buttonSize: ButtonSize.ShrinkWrap ),
+								behavior: new ConfirmationButtonBehavior(
+									"Are you sure?".ToComponents(),
+									postBack: PostBack.CreateFull(
+										"certificate",
+										modificationMethod: () => UserManagementStatics.UpdateCertificate( generateCertificate( DateTimeOffset.UtcNow ) ) ) ) ) )
+						.Materialize(),
+						style: SectionStyle.Box ) );
+			}
+			content.Add(
+				new Section(
+					"System users",
+					EwfTable.Create(
+							tableActions: new HyperlinkSetup( new SystemUser( Es, null ), "Create User" ).ToCollection(),
+							headItems: EwfTableItem.Create( "Email".ToCell().Append( "Role".ToCell() ).Materialize() ).ToCollection() )
+						.AddData(
+							UserManagementStatics.SystemProvider.GetUsers(),
+							user => EwfTableItem.Create(
+								user.Email.ToCell().Append( user.Role.Name.ToCell() ).Materialize(),
+								setup: EwfTableItemSetup.Create( activationBehavior: ElementActivationBehavior.CreateHyperlink( new SystemUser( Es, user.UserId ) ) ) ) )
+						.ToCollection(),
+					style: SectionStyle.Box ) );
+			return content;
+		}
+
+		private string generateCertificate( DateTimeOffset currentTime ) {
+			using( var algorithm = new RSACryptoServiceProvider(
+				2048,
+				new CspParameters( 24, "Microsoft Enhanced RSA and AES Cryptographic Provider", Guid.NewGuid().ToString() ) ) ) {
+				var request = new CertificateRequest( "CN={0}".FormatWith( EwlStatics.EwlName ), algorithm, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1 );
+				request.CertificateExtensions.Add(
+					new X509KeyUsageExtension( X509KeyUsageFlags.DigitalSignature | X509KeyUsageFlags.DataEncipherment | X509KeyUsageFlags.KeyEncipherment, false ) );
+				using( var certificate = request.CreateSelfSigned( currentTime, currentTime.AddYears( 10 ) ) )
+					return Convert.ToBase64String( certificate.Export( X509ContentType.Pfx, UserManagementStatics.CertificatePassword ) );
+			}
+		}
+	}
+}

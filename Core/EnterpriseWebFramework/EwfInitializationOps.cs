@@ -71,7 +71,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									.FormatWith( providerName ) );
 
 						if( ExternalFunctionalityStatics.SamlFunctionalityEnabled )
-							ExternalFunctionalityStatics.ExternalSamlProvider.InitAppStatics( providerGetter );
+							ExternalFunctionalityStatics.ExternalSamlProvider.InitAppStatics( providerGetter, () => AuthenticationStatics.SamlIdentityProviders );
 
 						UrlHandlingStatics.Init(
 							( baseUrlString, appRelativeUrl ) => {
@@ -232,7 +232,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 						AuthenticationStatics.InitAppSpecificLogicDependencies();
 						if( AuthenticationStatics.SamlIdentityProviders.Any() || ExternalFunctionalityStatics.SamlFunctionalityEnabled )
-							ExternalFunctionalityStatics.ExternalSamlProvider.InitAppSpecificLogicDependencies( AuthenticationStatics.SamlIdentityProviders );
+							ExternalFunctionalityStatics.ExternalSamlProvider.InitAppSpecificLogicDependencies();
 
 						initTimeDataAccessState = null;
 						EwfApp.FrameworkInitialized = true;

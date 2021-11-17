@@ -15,7 +15,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin {
 				User = UserManagementStatics.GetUser( UserId.Value, true );
 		}
 
-		protected override ResourceBase createParentResource() => new SystemUsers( Es );
+		protected override ResourceBase createParentResource() => new UserManagement( Es );
 
 		public override string ResourceName => User == null ? "New User" : User.Email;
 
@@ -31,7 +31,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin {
 								             postBack: PostBack.CreateFull(
 									             id: "delete",
 									             modificationMethod: deleteUser,
-									             actionGetter: () => new PostBackAction( new SystemUsers( Es ) ) ) ) ).ToCollection()
+									             actionGetter: () => new PostBackAction( ParentResource ) ) ) ).ToCollection()
 						             : null,
 					contentFootActions: new ButtonSetup( "OK" ).ToCollection() ).Add( new UserEditor( UserId, out userModMethod ) ) );
 		}
