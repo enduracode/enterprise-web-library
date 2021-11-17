@@ -74,15 +74,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							ExternalFunctionalityStatics.ExternalSamlProvider.InitAppStatics( providerGetter, () => AuthenticationStatics.SamlIdentityProviders );
 
 						UrlHandlingStatics.Init(
-							( baseUrlString, appRelativeUrl ) => {
-								AppRequestState.Instance.UrlHandlerStateDisabled = true;
-								try {
-									return UrlHandlingStatics.ResolveUrl( baseUrlString, appRelativeUrl )?.Last();
-								}
-								finally {
-									AppRequestState.Instance.UrlHandlerStateDisabled = false;
-								}
-							} );
+							( baseUrlString, appRelativeUrl ) =>
+								AppRequestState.ExecuteWithUrlHandlerStateDisabled( () => UrlHandlingStatics.ResolveUrl( baseUrlString, appRelativeUrl )?.Last() ) );
 						CssPreprocessingStatics.Init( globalInitializer.GetType().Assembly, globalType.Assembly );
 						ResourceBase.Init(
 							( requestTransferred, resource ) => {

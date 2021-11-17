@@ -33,6 +33,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			Instance.addNonTransactionalModificationMethod( modificationMethod );
 		}
 
+		internal static T ExecuteWithUrlHandlerStateDisabled<T>( Func<T> method ) {
+			if( EwfApp.Instance == null || EwfApp.Instance.RequestState == null )
+				return method();
+
+			Instance.urlHandlerStateDisabled = true;
+			try {
+				return method();
+			}
+			finally {
+				Instance.urlHandlerStateDisabled = false;
+			}
+		}
+
 		private readonly Instant beginInstant;
 		private readonly string url;
 		private readonly string baseUrl;
@@ -43,10 +56,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly List<Action> nonTransactionalModificationMethods = new List<Action>();
 		private bool transactionMarkedForRollback;
 
+		private bool urlHandlerStateDisabled;
 		private IReadOnlyCollection<BasicUrlHandler> urlHandlers;
 		private ResourceBase resource;
 		private bool newUrlParameterValuesEffective;
-		internal bool UrlHandlerStateDisabled;
 
 		/// <summary>
 		/// EWL use only.
@@ -141,13 +154,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Framework use only.
 		/// </summary>
 		public IReadOnlyCollection<BasicUrlHandler> UrlHandlers =>
-			( UrlHandlerStateDisabled ? null : urlHandlers ) ?? Enumerable.Empty<BasicUrlHandler>().Materialize();
+			( urlHandlerStateDisabled ? null : urlHandlers ) ?? Enumerable.Empty<BasicUrlHandler>().Materialize();
 
 		internal void SetResource( ResourceBase resource ) {
 			this.resource = resource;
 		}
 
-		internal ResourceBase Resource => UrlHandlerStateDisabled ? null : resource;
+		internal ResourceBase Resource => urlHandlerStateDisabled ? null : resource;
 
 		internal void SetNewUrlParameterValuesEffective( bool effective ) {
 			newUrlParameterValuesEffective = effective;
@@ -156,7 +169,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Framework use only.
 		/// </summary>
-		public bool NewUrlParameterValuesEffective => newUrlParameterValuesEffective && !UrlHandlerStateDisabled;
+		public bool NewUrlParameterValuesEffective => newUrlParameterValuesEffective && !urlHandlerStateDisabled;
 
 		/// <summary>
 		/// EwfApp use only.
