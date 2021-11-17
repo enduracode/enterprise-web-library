@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml;
 using ComponentSpace.SAML2;
 using ComponentSpace.SAML2.Configuration;
 using EnterpriseWebLibrary.Configuration;
@@ -12,6 +13,7 @@ using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.Saml {
 	public class SamlProvider: ExternalSamlProvider {
+		private static string samlConfigurationName;
 		private static Func<string> certificateGetter;
 		private static string certificatePassword;
 
@@ -19,6 +21,7 @@ namespace EnterpriseWebLibrary.Saml {
 		private static Func<IReadOnlyCollection<SamlIdentityProvider>> samlIdentityProviderGetter;
 
 		void ExternalSamlProvider.InitStatics( Func<string> certificateGetter, string certificatePassword ) {
+			samlConfigurationName = EwlStatics.EwlInitialism.EnglishToCamel() + "UserManagement";
 			SamlProvider.certificateGetter = certificateGetter;
 			SamlProvider.certificatePassword = certificatePassword;
 		}
@@ -42,7 +45,7 @@ namespace EnterpriseWebLibrary.Saml {
 
 			var samlIdentityProviders = samlIdentityProviderGetter();
 			if( samlIdentityProviders.Any() ) {
-				var userManagementConfiguration = new SAMLConfiguration { Name = EwlStatics.EwlInitialism.EnglishToCamel() + "UserManagement" };
+				var userManagementConfiguration = new SAMLConfiguration { Name = samlConfigurationName };
 				userManagementConfiguration.LocalServiceProviderConfiguration = new LocalServiceProviderConfiguration
 					{
 						Name = SamlMetadata.GetInfo().GetUrl(),
@@ -64,6 +67,18 @@ namespace EnterpriseWebLibrary.Saml {
 					configurations.AddConfiguration( i );
 
 			SAMLController.Configurations = configurations;
+		}
+
+		XmlElement ExternalSamlProvider.GetMetadataElement() {
+			var spConfiguration = SAMLController.Configurations.GetConfiguration( samlConfigurationName ).LocalServiceProviderConfiguration;
+			return MetadataExporter.Export(
+					spConfiguration,
+					SAMLController.CertificateManager.GetLocalServiceProviderSignatureCertificates( spConfiguration, null ),
+					SAMLController.CertificateManager.GetLocalServiceProviderEncryptionCertificates( spConfiguration, null ),
+					spConfiguration.AssertionConsumerServiceUrl,
+					null,
+					null )
+				.ToXml();
 		}
 	}
 }

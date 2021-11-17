@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Xml;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.UserManagement.IdentityProviders;
 
@@ -21,5 +22,7 @@ namespace EnterpriseWebLibrary.ExternalFunctionality {
 		void InitAppSpecificLogicDependencies();
 
 		void RefreshConfiguration();
+
+		XmlElement GetMetadataElement();
 	}
 }
