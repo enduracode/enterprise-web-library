@@ -4,11 +4,10 @@ using System.Linq;
 using System.Xml;
 using ComponentSpace.SAML2;
 using ComponentSpace.SAML2.Configuration;
+using ComponentSpace.SAML2.Metadata;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
-using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages;
 using EnterpriseWebLibrary.ExternalFunctionality;
-using EnterpriseWebLibrary.UserManagement.IdentityProviders;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.Saml {
@@ -18,7 +17,7 @@ namespace EnterpriseWebLibrary.Saml {
 		private static string certificatePassword;
 
 		private static SystemProviderReference<AppSamlProvider> provider;
-		private static Func<IReadOnlyCollection<SamlIdentityProvider>> samlIdentityProviderGetter;
+		private static Func<IReadOnlyCollection<XmlElement>> samlIdentityProviderGetter;
 
 		void ExternalSamlProvider.InitStatics( Func<string> certificateGetter, string certificatePassword ) {
 			samlConfigurationName = EwlStatics.EwlInitialism.EnglishToCamel() + "UserManagement";
@@ -26,8 +25,7 @@ namespace EnterpriseWebLibrary.Saml {
 			SamlProvider.certificatePassword = certificatePassword;
 		}
 
-		void ExternalSamlProvider.InitAppStatics(
-			SystemProviderGetter providerGetter, Func<IReadOnlyCollection<SamlIdentityProvider>> samlIdentityProviderGetter ) {
+		void ExternalSamlProvider.InitAppStatics( SystemProviderGetter providerGetter, Func<IReadOnlyCollection<XmlElement>> samlIdentityProviderGetter ) {
 			provider = providerGetter.GetProvider<AppSamlProvider>( "Saml" );
 			SamlProvider.samlIdentityProviderGetter = samlIdentityProviderGetter;
 		}
@@ -49,7 +47,7 @@ namespace EnterpriseWebLibrary.Saml {
 				userManagementConfiguration.LocalServiceProviderConfiguration = new LocalServiceProviderConfiguration
 					{
 						Name = SamlMetadata.GetInfo().GetUrl(),
-						AssertionConsumerServiceUrl = SamlLogIn.GetInfo().GetUrl(),
+						AssertionConsumerServiceUrl = SamlAssertions.GetInfo().GetUrl(),
 						LocalCertificates = new List<CertificateConfiguration>
 							{
 								new CertificateConfiguration { String = certificateGetter(), Password = certificatePassword }
@@ -57,6 +55,11 @@ namespace EnterpriseWebLibrary.Saml {
 						ResolveToHttps = false
 					};
 				foreach( var identityProvider in samlIdentityProviders ) {
+					var element = identityProvider;
+					foreach( var i in EntitiesDescriptor.IsValid( element )
+						                  ? MetadataImporter.ImportIdentityProviders( new EntitiesDescriptor( element ), null )
+						                  : MetadataImporter.ImportIdentityProviders( new EntityDescriptor( element ), null ) )
+						userManagementConfiguration.AddPartnerIdentityProvider( i );
 				}
 				configurations.AddConfiguration( userManagementConfiguration );
 			}
@@ -69,7 +72,7 @@ namespace EnterpriseWebLibrary.Saml {
 			SAMLController.Configurations = configurations;
 		}
 
-		XmlElement ExternalSamlProvider.GetMetadataElement() {
+		XmlElement ExternalSamlProvider.GetMetadata() {
 			var spConfiguration = SAMLController.Configurations.GetConfiguration( samlConfigurationName ).LocalServiceProviderConfiguration;
 			return MetadataExporter.Export(
 					spConfiguration,

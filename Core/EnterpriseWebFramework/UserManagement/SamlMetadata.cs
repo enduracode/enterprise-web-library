@@ -21,7 +21,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 					new EwfResponseBodyCreator(
 						( Stream stream ) => {
 							using( var writer = XmlWriter.Create( stream, new XmlWriterSettings { Indent = true } ) )
-								ExternalFunctionalityStatics.ExternalSamlProvider.GetMetadataElement().OwnerDocument.Save( writer );
+								ExternalFunctionalityStatics.ExternalSamlProvider.GetMetadata().OwnerDocument.Save( writer );
 						} ) ) );
 	}
 }

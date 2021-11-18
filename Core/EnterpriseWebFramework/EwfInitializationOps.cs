@@ -2,10 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Compilation;
 using System.Web.Http;
+using System.Xml;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
@@ -71,7 +74,27 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									.FormatWith( providerName ) );
 
 						if( ExternalFunctionalityStatics.SamlFunctionalityEnabled )
-							ExternalFunctionalityStatics.ExternalSamlProvider.InitAppStatics( providerGetter, () => AuthenticationStatics.SamlIdentityProviders );
+							ExternalFunctionalityStatics.ExternalSamlProvider.InitAppStatics(
+								providerGetter,
+								() => AuthenticationStatics.SamlIdentityProviders.Select(
+										identityProvider => {
+											using( var client = new HttpClient() ) {
+												client.Timeout = new TimeSpan( 0, 0, 10 );
+												return Task.Run(
+														async () => {
+															using( var response = await client.GetAsync( identityProvider.MetadataUrl, HttpCompletionOption.ResponseHeadersRead ) ) {
+																response.EnsureSuccessStatusCode();
+																var document = new XmlDocument();
+																using( var stream = await response.Content.ReadAsStreamAsync() )
+																	using( var reader = XmlReader.Create( stream ) )
+																		document.Load( reader );
+																return document.DocumentElement;
+															}
+														} )
+													.Result;
+											}
+										} )
+									.Materialize() );
 
 						UrlHandlingStatics.Init(
 							( baseUrlString, appRelativeUrl ) =>

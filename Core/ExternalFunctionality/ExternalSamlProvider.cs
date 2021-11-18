@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Xml;
 using EnterpriseWebLibrary.Configuration;
-using EnterpriseWebLibrary.UserManagement.IdentityProviders;
 
 namespace EnterpriseWebLibrary.ExternalFunctionality {
 	/// <summary>
@@ -17,12 +16,12 @@ namespace EnterpriseWebLibrary.ExternalFunctionality {
 		/// <summary>
 		/// Initializes the application-level functionality in the provider.
 		/// </summary>
-		void InitAppStatics( SystemProviderGetter providerGetter, Func<IReadOnlyCollection<SamlIdentityProvider>> samlIdentityProviderGetter );
+		void InitAppStatics( SystemProviderGetter providerGetter, Func<IReadOnlyCollection<XmlElement>> samlIdentityProviderGetter );
 
 		void InitAppSpecificLogicDependencies();
 
 		void RefreshConfiguration();
 
-		XmlElement GetMetadataElement();
+		XmlElement GetMetadata();
 	}
 }

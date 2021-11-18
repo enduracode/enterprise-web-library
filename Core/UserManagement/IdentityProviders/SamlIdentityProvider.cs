@@ -1,17 +1,13 @@
-﻿using System;
-
-namespace EnterpriseWebLibrary.UserManagement.IdentityProviders {
+﻿namespace EnterpriseWebLibrary.UserManagement.IdentityProviders {
 	public class SamlIdentityProvider: IdentityProvider {
-		internal readonly Func<string> CertificateGetter;
-		private readonly Action<string> certificateUpdater;
+		internal readonly string MetadataUrl;
 
-		public SamlIdentityProvider( Func<string> certificateGetter, Action<string> certificateUpdater ) {
-			CertificateGetter = certificateGetter;
-			this.certificateUpdater = certificateUpdater;
-		}
-
-		internal void UpdateCertificate( string certificate ) {
-			certificateUpdater( certificate );
+		/// <summary>
+		/// Creates a SAML identity provider.
+		/// </summary>
+		/// <param name="metadataUrl">Do not pass null or the empty string.</param>
+		public SamlIdentityProvider( string metadataUrl ) {
+			MetadataUrl = metadataUrl;
 		}
 	}
 }
