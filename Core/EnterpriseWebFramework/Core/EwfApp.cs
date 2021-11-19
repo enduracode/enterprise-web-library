@@ -7,6 +7,7 @@ using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ErrorPages;
+using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages;
 using EnterpriseWebLibrary.UserManagement;
 using StackExchange.Profiling;
@@ -314,12 +315,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							else if( UserManagementStatics.UserManagementEnabled && !ConfigurationStatics.IsLiveInstallation && RequestState.UserAccessible &&
 							         !RequestState.ImpersonatorExists )
 								transferRequest( 403, new Impersonate( RequestState.Url ) );
-							else if( UserManagementStatics.LocalIdentityProviderEnabled )
-								if( accessDeniedException.LogInPage != null )
-									// We pass false here to avoid complicating things with ThreadAbortExceptions.
-									Response.Redirect( accessDeniedException.LogInPage.GetUrl(), false );
-								else
-									transferRequest( 403, new LogIn( RequestState.Url ) );
+							else if( accessDeniedException.LogInPage != null )
+								transferRequest( 403, accessDeniedException.LogInPage );
+							else if( UserManagementStatics.LocalIdentityProviderEnabled || AuthenticationStatics.SamlIdentityProviders.Count > 1 )
+								transferRequest( 403, new LogIn( RequestState.Url ) );
+							else if( AuthenticationStatics.SamlIdentityProviders.Any() )
+								transferRequest( 403, new SamlLogIn( AuthenticationStatics.SamlIdentityProviders.Single().EntityId, RequestState.Url ) );
 							else
 								transferRequest( 403, getErrorPage( new AccessDenied( !baseUrlRequest.Value ) ) );
 						}

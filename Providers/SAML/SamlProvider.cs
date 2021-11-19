@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Web;
 using System.Xml;
 using ComponentSpace.SAML2;
 using ComponentSpace.SAML2.Configuration;
@@ -17,7 +18,7 @@ namespace EnterpriseWebLibrary.Saml {
 		private static string certificatePassword;
 
 		private static SystemProviderReference<AppSamlProvider> provider;
-		private static Func<IReadOnlyCollection<XmlElement>> samlIdentityProviderGetter;
+		private static Func<IReadOnlyCollection<( XmlElement metadata, string entityId )>> samlIdentityProviderGetter;
 
 		void ExternalSamlProvider.InitStatics( Func<string> certificateGetter, string certificatePassword ) {
 			samlConfigurationName = EwlStatics.EwlInitialism.EnglishToCamel() + "UserManagement";
@@ -25,7 +26,8 @@ namespace EnterpriseWebLibrary.Saml {
 			SamlProvider.certificatePassword = certificatePassword;
 		}
 
-		void ExternalSamlProvider.InitAppStatics( SystemProviderGetter providerGetter, Func<IReadOnlyCollection<XmlElement>> samlIdentityProviderGetter ) {
+		void ExternalSamlProvider.InitAppStatics(
+			SystemProviderGetter providerGetter, Func<IReadOnlyCollection<( XmlElement metadata, string entityId )>> samlIdentityProviderGetter ) {
 			provider = providerGetter.GetProvider<AppSamlProvider>( "Saml" );
 			SamlProvider.samlIdentityProviderGetter = samlIdentityProviderGetter;
 		}
@@ -54,13 +56,12 @@ namespace EnterpriseWebLibrary.Saml {
 							},
 						ResolveToHttps = false
 					};
-				foreach( var identityProvider in samlIdentityProviders ) {
-					var element = identityProvider;
-					foreach( var i in EntitiesDescriptor.IsValid( element )
-						                  ? MetadataImporter.ImportIdentityProviders( new EntitiesDescriptor( element ), null )
-						                  : MetadataImporter.ImportIdentityProviders( new EntityDescriptor( element ), null ) )
-						userManagementConfiguration.AddPartnerIdentityProvider( i );
-				}
+				foreach( var identityProvider in samlIdentityProviders )
+					userManagementConfiguration.AddPartnerIdentityProvider(
+						( EntitiesDescriptor.IsValid( identityProvider.metadata )
+							  ? MetadataImporter.ImportIdentityProviders( new EntitiesDescriptor( identityProvider.metadata ), null )
+							  : MetadataImporter.ImportIdentityProviders( new EntityDescriptor( identityProvider.metadata ), null ) ).Single(
+							i => string.Equals( i.Name, identityProvider.entityId, StringComparison.Ordinal ) ) );
 				configurations.AddConfiguration( userManagementConfiguration );
 			}
 
@@ -82,6 +83,25 @@ namespace EnterpriseWebLibrary.Saml {
 					null,
 					null )
 				.ToXml();
+		}
+
+		void ExternalSamlProvider.WriteLogInResponse( HttpResponseBase response, string identityProvider, string returnUrl ) {
+			SAMLController.ConfigurationName = samlConfigurationName;
+			SAMLServiceProvider.InitiateSSO( response, returnUrl, identityProvider );
+		}
+
+		( string identityProvider, string userName, IDictionary<string, string> attributes, string returnUrl ) ExternalSamlProvider.ReadAssertion(
+			HttpRequest request ) {
+			SAMLController.ConfigurationName = samlConfigurationName;
+			SAMLServiceProvider.ReceiveSSO(
+				request,
+				out _,
+				out var identityProvider,
+				out _,
+				out var userName,
+				out IDictionary<string, string> attributes,
+				out var returnUrl );
+			return ( identityProvider, userName, attributes, returnUrl );
 		}
 	}
 }

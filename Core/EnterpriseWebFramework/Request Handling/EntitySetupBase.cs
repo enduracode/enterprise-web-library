@@ -50,7 +50,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		protected internal virtual bool UserCanAccessEntitySetup => true;
 
 		/// <summary>
-		/// Gets the log in page to use for resources that are part of this entity setup if the system supports forms authentication.
+		/// Gets the log-in page to use for resources that are part of this entity setup, or null for default behavior.
 		/// </summary>
 		protected internal virtual ResourceBase LogInPage => ParentResource?.LogInPage;
 

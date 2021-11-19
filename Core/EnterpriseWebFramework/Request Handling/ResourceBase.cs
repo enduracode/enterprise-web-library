@@ -200,7 +200,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		protected virtual bool userCanAccessResource => true;
 
 		/// <summary>
-		/// Gets the log in page to use for this resource if the system supports forms authentication.
+		/// Gets the log-in page to use for this resource, or null for default behavior.
 		/// </summary>
 		protected internal virtual ResourceBase LogInPage {
 			get {

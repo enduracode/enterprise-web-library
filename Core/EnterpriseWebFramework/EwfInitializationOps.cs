@@ -80,7 +80,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										identityProvider => {
 											using( var client = new HttpClient() ) {
 												client.Timeout = new TimeSpan( 0, 0, 10 );
-												return Task.Run(
+												var metadata = Task.Run(
 														async () => {
 															using( var response = await client.GetAsync( identityProvider.MetadataUrl, HttpCompletionOption.ResponseHeadersRead ) ) {
 																response.EnsureSuccessStatusCode();
@@ -92,6 +92,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 															}
 														} )
 													.Result;
+												return ( metadata, identityProvider.EntityId );
 											}
 										} )
 									.Materialize() );

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Web;
 using System.Xml;
 using EnterpriseWebLibrary.Configuration;
 
@@ -16,12 +17,16 @@ namespace EnterpriseWebLibrary.ExternalFunctionality {
 		/// <summary>
 		/// Initializes the application-level functionality in the provider.
 		/// </summary>
-		void InitAppStatics( SystemProviderGetter providerGetter, Func<IReadOnlyCollection<XmlElement>> samlIdentityProviderGetter );
+		void InitAppStatics( SystemProviderGetter providerGetter, Func<IReadOnlyCollection<( XmlElement metadata, string entityId )>> samlIdentityProviderGetter );
 
 		void InitAppSpecificLogicDependencies();
 
 		void RefreshConfiguration();
 
 		XmlElement GetMetadata();
+
+		void WriteLogInResponse( HttpResponseBase response, string identityProvider, string returnUrl );
+
+		( string identityProvider, string userName, IDictionary<string, string> attributes, string returnUrl ) ReadAssertion( HttpRequest request );
 	}
 }
