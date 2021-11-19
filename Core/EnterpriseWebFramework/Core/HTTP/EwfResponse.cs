@@ -5,6 +5,7 @@ using System.Linq;
 using System.Web;
 using EnterpriseWebLibrary.MailMerging;
 using EnterpriseWebLibrary.MailMerging.RowTree;
+using Humanizer;
 using Tewl;
 using Tewl.IO;
 using Tewl.Tools;
@@ -15,6 +16,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// </summary>
 	public class EwfResponse {
 		private sealed class AspNetAdapter: HttpResponseBase {
+			internal string RedirectUrl = "";
+
 			public AspNetAdapter( Stream outputStream ) {
 				ContentType = ContentTypes.Html;
 				OutputStream = outputStream;
@@ -22,6 +25,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			public override string ContentType { get; set; }
 			public override Stream OutputStream { get; }
+
+			public override void Redirect( string url, bool endResponse ) {
+				if( url.IsNullOrEmpty() || endResponse )
+					base.Redirect( url, endResponse );
+				else
+					RedirectUrl = url;
+			}
 		}
 
 		/// <summary>
@@ -128,6 +138,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			using( var stream = new MemoryStream() ) {
 				aspNetResponse = new AspNetAdapter( stream );
 				aspNetResponseWriter( aspNetResponse );
+				if( aspNetResponse.RedirectUrl.Any() ) {
+					HttpContext.Current.Response.StatusCode = 307;
+					return Create(
+						ContentTypes.PlainText,
+						new EwfResponseBodyCreator( writer => writer.Write( "Temporary Redirect: {0}".FormatWith( aspNetResponse.RedirectUrl ) ) ),
+						additionalHeaderFieldGetter: () => ( "Location", aspNetResponse.RedirectUrl ).ToCollection() );
+				}
 				binaryBody = stream.ToArray();
 			}
 			return Create( aspNetResponse.ContentType, new EwfResponseBodyCreator( () => binaryBody ) );
