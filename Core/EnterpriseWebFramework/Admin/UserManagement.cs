@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.UserManagement;
 using EnterpriseWebLibrary.UserManagement.IdentityProviders;
 using Humanizer;
@@ -23,22 +24,34 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin {
 				var certificate = UserManagementStatics.GetCertificate();
 				content.Add(
 					new Section(
-						"Self-signed certificate",
-						( certificate.Any()
-							  ? "Certificate valid until {0}.".FormatWith(
-									  new X509Certificate2( Convert.FromBase64String( certificate ), UserManagementStatics.CertificatePassword ).NotAfter.ToDayMonthYearString(
-										  false ) )
-								  .ToComponents()
-							  : "No certificate.".ToComponents() ).Concat( " ".ToComponents() )
-						.Append(
-							new EwfButton(
-								new StandardButtonStyle( "Regenerate", buttonSize: ButtonSize.ShrinkWrap ),
-								behavior: new ConfirmationButtonBehavior(
-									"Are you sure?".ToComponents(),
-									postBack: PostBack.CreateFull(
-										"certificate",
-										modificationMethod: () => UserManagementStatics.UpdateCertificate( generateCertificate( DateTimeOffset.UtcNow ) ) ) ) ) )
-						.Materialize(),
+						"Identity providers",
+						FormItemList.CreateStack(
+								items:
+								( certificate.Any()
+									  ? "Certificate valid until {0}.".FormatWith(
+											  new X509Certificate2( Convert.FromBase64String( certificate ), UserManagementStatics.CertificatePassword ).NotAfter
+												  .ToDayMonthYearString(
+													  false ) )
+										  .ToComponents()
+									  : "No certificate.".ToComponents() ).Concat( " ".ToComponents() )
+								.Append(
+									new EwfButton(
+										new StandardButtonStyle( "Regenerate", buttonSize: ButtonSize.ShrinkWrap ),
+										behavior: new ConfirmationButtonBehavior(
+											"Are you sure?".ToComponents(),
+											postBack: PostBack.CreateFull(
+												"certificate",
+												modificationMethod: () => UserManagementStatics.UpdateCertificate( generateCertificate( DateTimeOffset.UtcNow ) ) ) ) ) )
+								.Materialize()
+								.ToFormItem( label: "System self-signed certificate".ToComponents() )
+								.Concat(
+									AuthenticationStatics.SamlIdentityProviders.Any()
+										? new EwfHyperlink( EnterpriseWebFramework.UserManagement.SamlResources.Metadata.GetInfo(), new StandardHyperlinkStyle( "" ) )
+											.ToFormItem( label: "Application SAML metadata".ToComponents() )
+											.ToCollection()
+										: Enumerable.Empty<FormItem>() )
+								.Materialize() )
+							.ToCollection(),
 						style: SectionStyle.Box ) );
 			}
 			content.Add(
