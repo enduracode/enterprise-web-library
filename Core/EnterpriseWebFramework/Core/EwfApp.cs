@@ -8,7 +8,6 @@ using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ErrorPages;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
-using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages;
 using EnterpriseWebLibrary.UserManagement;
 using StackExchange.Profiling;
 using Tewl.Tools;
@@ -314,13 +313,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								transferRequest( 403, new NonLiveLogIn( RequestState.Url ) );
 							else if( UserManagementStatics.UserManagementEnabled && !ConfigurationStatics.IsLiveInstallation && RequestState.UserAccessible &&
 							         !RequestState.ImpersonatorExists )
-								transferRequest( 403, new Impersonate( RequestState.Url ) );
+								transferRequest( 403, new UserManagement.Pages.Impersonate( RequestState.Url ) );
 							else if( accessDeniedException.LogInPage != null )
 								transferRequest( 403, accessDeniedException.LogInPage );
 							else if( UserManagementStatics.LocalIdentityProviderEnabled || AuthenticationStatics.SamlIdentityProviders.Count > 1 )
-								transferRequest( 403, new LogIn( RequestState.Url ) );
+								transferRequest( 403, new UserManagement.Pages.LogIn( RequestState.Url ) );
 							else if( AuthenticationStatics.SamlIdentityProviders.Any() )
-								transferRequest( 403, new SamlLogIn( AuthenticationStatics.SamlIdentityProviders.Single().EntityId, RequestState.Url ) );
+								transferRequest(
+									403,
+									new UserManagement.SamlResources.LogIn( AuthenticationStatics.SamlIdentityProviders.Single().EntityId, RequestState.Url ) );
 							else
 								transferRequest( 403, getErrorPage( new AccessDenied( !baseUrlRequest.Value ) ) );
 						}

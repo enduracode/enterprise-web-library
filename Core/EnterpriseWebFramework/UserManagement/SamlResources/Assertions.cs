@@ -7,14 +7,14 @@ using Tewl.Tools;
 
 // EwlResource
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
-	partial class SamlAssertions {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.SamlResources {
+	partial class Assertions {
 		protected override void init() {
 			if( !AuthenticationStatics.SamlIdentityProviders.Any() )
 				throw new ApplicationException( "There are no SAML identity providers enabled in this application." );
 		}
 
-		protected override UrlHandler getUrlParent() => new Admin.EntitySetup();
+		protected override UrlHandler getUrlParent() => new Metadata();
 
 		protected override EwfResponse post() {
 			var assertion = ExternalFunctionalityStatics.ExternalSamlProvider.ReadAssertion( HttpContext.Current.Request );

@@ -7,7 +7,6 @@ using ComponentSpace.SAML2;
 using ComponentSpace.SAML2.Configuration;
 using ComponentSpace.SAML2.Metadata;
 using EnterpriseWebLibrary.Configuration;
-using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.ExternalFunctionality;
 using Tewl.Tools;
 
@@ -48,8 +47,8 @@ namespace EnterpriseWebLibrary.Saml {
 				var userManagementConfiguration = new SAMLConfiguration { Name = samlConfigurationName };
 				userManagementConfiguration.LocalServiceProviderConfiguration = new LocalServiceProviderConfiguration
 					{
-						Name = SamlMetadata.GetInfo().GetUrl(),
-						AssertionConsumerServiceUrl = SamlAssertions.GetInfo().GetUrl(),
+						Name = EnterpriseWebFramework.UserManagement.SamlResources.Metadata.GetInfo().GetUrl(),
+						AssertionConsumerServiceUrl = EnterpriseWebFramework.UserManagement.SamlResources.Assertions.GetInfo().GetUrl(),
 						LocalCertificates = new List<CertificateConfiguration>
 							{
 								new CertificateConfiguration { String = certificateGetter(), Password = certificatePassword }

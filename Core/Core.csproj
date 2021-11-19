@@ -664,9 +664,9 @@
     <Compile Include="EnterpriseWebFramework\UserManagement\Pages\Impersonate.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\Pages\LogIn.cs" />
     <Compile Include="EnterpriseWebFramework\Form Controls\Text Box\AutoCompleteItem.cs" />
-    <Compile Include="EnterpriseWebFramework\UserManagement\SamlAssertions.cs" />
-    <Compile Include="EnterpriseWebFramework\UserManagement\SamlLogIn.cs" />
-    <Compile Include="EnterpriseWebFramework\UserManagement\SamlMetadata.cs" />
+    <Compile Include="EnterpriseWebFramework\UserManagement\SamlResources\Assertions.cs" />
+    <Compile Include="EnterpriseWebFramework\UserManagement\SamlResources\LogIn.cs" />
+    <Compile Include="EnterpriseWebFramework\UserManagement\SamlResources\Metadata.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\UserEditor.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\UserImpersonationStatics.cs" />
     <Compile Include="EwlNuGetPackageSpecificationStatics.cs" />

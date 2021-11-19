@@ -38,8 +38,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin {
 				.Append( NonLiveLogIn.UrlPatterns.Literal( "non-live-log-in" ) )
 				.Append( EnterpriseWebFramework.UserManagement.Pages.LogIn.UrlPatterns.Literal( "log-in" ) )
 				.Append( EnterpriseWebFramework.UserManagement.Pages.ChangePassword.UrlPatterns.Literal( "change-password" ) )
-				.Append( EnterpriseWebFramework.UserManagement.SamlLogIn.UrlPatterns.Literal( "saml-log-in" ) )
-				.Append( EnterpriseWebFramework.UserManagement.SamlAssertions.UrlPatterns.Literal( "saml-assertions" ) )
+				.Append( EnterpriseWebFramework.UserManagement.SamlResources.Metadata.UrlPatterns.Literal( "saml" ) )
 				.Append( EnterpriseWebFramework.UserManagement.Pages.Impersonate.UrlPatterns.Literal( "impersonate" ) )
 				.Append( PreBuiltResponse.UrlPatterns.Literal( "pre-built-response" ) )
 				.Append( ContactSupport.UrlPatterns.Literal( "contact-support" ) )
@@ -49,8 +48,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin {
 				.Append( ErrorPages.UnhandledException.UrlPatterns.Literal( "unhandled-exception" ) )
 				.Append( BasicTests.UrlPatterns.Literal( this, "tests" ) )
 				.Append( RequestProfiling.UrlPatterns.Literal( this, "profiling" ) )
-				.Append( UserManagement.UrlPatterns.Literal( this, "users" ) )
-				.Append( EnterpriseWebFramework.UserManagement.SamlMetadata.UrlPatterns.Literal( "saml" ) );
+				.Append( UserManagement.UrlPatterns.Literal( this, "users" ) );
 
 		EntityUiSetup UiEntitySetup.GetUiSetup() =>
 			new EntityUiSetup(
