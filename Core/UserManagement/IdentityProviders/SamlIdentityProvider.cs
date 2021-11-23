@@ -2,7 +2,7 @@
 
 namespace EnterpriseWebLibrary.UserManagement.IdentityProviders {
 	public class SamlIdentityProvider: IdentityProvider {
-		public delegate User LogInUserGetterMethod( string userName, IDictionary<string, string> attributes );
+		public delegate User LogInUserGetterMethod( string userName, IReadOnlyDictionary<string, string> attributes );
 
 		internal readonly string MetadataUrl;
 		internal readonly string EntityId;
@@ -21,6 +21,6 @@ namespace EnterpriseWebLibrary.UserManagement.IdentityProviders {
 			this.logInUserGetter = logInUserGetter;
 		}
 
-		internal User LogInUser( string userName, IDictionary<string, string> attributes ) => logInUserGetter( userName, attributes );
+		internal User LogInUser( string userName, IReadOnlyDictionary<string, string> attributes ) => logInUserGetter( userName, attributes );
 	}
 }

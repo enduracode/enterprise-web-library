@@ -27,6 +27,6 @@ namespace EnterpriseWebLibrary.ExternalFunctionality {
 
 		void WriteLogInResponse( HttpResponseBase response, string identityProvider, string returnUrl );
 
-		( string identityProvider, string userName, IDictionary<string, string> attributes, string returnUrl ) ReadAssertion( HttpRequest request );
+		( string identityProvider, string userName, IReadOnlyDictionary<string, string> attributes, string returnUrl ) ReadAssertion( HttpRequest request );
 	}
 }

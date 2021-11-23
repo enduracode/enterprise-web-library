@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Web;
 using System.Xml;
 using ComponentSpace.SAML2;
+using ComponentSpace.SAML2.Assertions;
 using ComponentSpace.SAML2.Configuration;
 using ComponentSpace.SAML2.Metadata;
 using EnterpriseWebLibrary.Configuration;
@@ -89,18 +91,13 @@ namespace EnterpriseWebLibrary.Saml {
 			SAMLServiceProvider.InitiateSSO( response, returnUrl, identityProvider );
 		}
 
-		( string identityProvider, string userName, IDictionary<string, string> attributes, string returnUrl ) ExternalSamlProvider.ReadAssertion(
+		( string identityProvider, string userName, IReadOnlyDictionary<string, string> attributes, string returnUrl ) ExternalSamlProvider.ReadAssertion(
 			HttpRequest request ) {
 			SAMLController.ConfigurationName = samlConfigurationName;
-			SAMLServiceProvider.ReceiveSSO(
-				request,
-				out _,
-				out var identityProvider,
-				out _,
-				out var userName,
-				out IDictionary<string, string> attributes,
-				out var returnUrl );
-			return ( identityProvider, userName, attributes, returnUrl );
+			SAMLServiceProvider.ReceiveSSO( request, out _, out var identityProvider, out _, out var userName, out SAMLAttribute[] attributes, out var returnUrl );
+			return ( identityProvider, userName,
+				       attributes.Where( i => i.Values.Any() && i.Values.First().Data != null )
+					       .ToImmutableDictionary( i => i.Name, i => i.Values.First().Data.ToString() ), returnUrl );
 		}
 	}
 }
