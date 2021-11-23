@@ -23,7 +23,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						Path = nameAndDomainAndPath.Item3,
 						Expires = expires?.ToDateTimeUtc() ?? DateTime.MinValue,
 						Secure = secure,
-						HttpOnly = httpOnly
+						HttpOnly = httpOnly,
+						SameSite = secure ? SameSiteMode.None : SameSiteMode.Lax
 					} );
 		}
 
