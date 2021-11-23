@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Web;
+using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.ExternalFunctionality;
+using EnterpriseWebLibrary.UserManagement;
 using Humanizer;
 using Tewl.Tools;
 
@@ -16,16 +18,32 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.SamlResourc
 
 		protected override UrlHandler getUrlParent() => new Metadata();
 
+		protected override bool managesDataAccessCacheInUnsafeRequestMethods => true;
+
 		protected override EwfResponse post() {
 			var assertion = ExternalFunctionalityStatics.ExternalSamlProvider.ReadAssertion( HttpContext.Current.Request );
 
+			User user;
 			var identityProvider =
 				AuthenticationStatics.SamlIdentityProviders.Single( i => string.Equals( i.EntityId, assertion.identityProvider, StringComparison.Ordinal ) );
-			var user = identityProvider.LogInUser( assertion.userName, assertion.attributes );
+			DataAccessState.Current.DisableCache();
+			try {
+				user = identityProvider.LogInUser( assertion.userName, assertion.attributes );
+			}
+			finally {
+				DataAccessState.Current.ResetCache();
+			}
 			if( user == null )
 				throw new ApplicationException( "user" );
 
 			AuthenticationStatics.SetFormsAuthCookieAndUser( user );
+
+			try {
+				AppRequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
+			}
+			finally {
+				DataAccessState.Current.ResetCache();
+			}
 
 			HttpContext.Current.Response.StatusCode = 303;
 			return EwfResponse.Create(
