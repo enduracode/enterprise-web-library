@@ -110,7 +110,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					} );
 				generateCodeForProject(
 					installation,
-					@"Providers\SAML",
+					EwlStatics.SamlProviderProjectPath,
 					writer => {
 						writer.WriteLine( "using System.Reflection;" );
 						writer.WriteLine( "using System.Runtime.InteropServices;" );
@@ -543,8 +543,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			}
 		}
 
-		private void generateCodeForProject( DevelopmentInstallation installation, string projectName, Action<TextWriter> codeWriter ) {
-			var generatedCodeFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, projectName, generatedCodeFolderName );
+		private void generateCodeForProject( DevelopmentInstallation installation, string projectPath, Action<TextWriter> codeWriter ) {
+			var generatedCodeFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, projectPath, generatedCodeFolderName );
 			Directory.CreateDirectory( generatedCodeFolderPath );
 			var isuFilePath = EwlStatics.CombinePaths( generatedCodeFolderPath, "ISU.cs" );
 			IoMethods.DeleteFile( isuFilePath );

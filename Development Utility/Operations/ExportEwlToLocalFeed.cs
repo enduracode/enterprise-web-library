@@ -20,7 +20,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			// nuget.exe has problems if the folder doesn't exist.
 			Directory.CreateDirectory( localNuGetFeedFolderPath );
 
-			ExportLogic.CreateEwlNuGetPackage( installation, ExportLogic.GetPackagingConfiguration( installation ), true, localNuGetFeedFolderPath, null );
+			ExportLogic.CreateEwlNuGetPackages(
+				installation,
+				ExportLogic.GetPackagingConfiguration( installation ),
+				true,
+				localNuGetFeedFolderPath,
+				new bool?[] { null } );
 		}
 	}
 }

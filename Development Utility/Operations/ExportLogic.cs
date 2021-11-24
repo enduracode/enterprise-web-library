@@ -12,9 +12,11 @@ using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
 using EnterpriseWebLibrary.IO;
+using EnterpriseWebLibrary.TewlContrib;
 using Humanizer;
 using Tewl;
 using Tewl.IO;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 	internal class ExportLogic: Operation {
@@ -35,77 +37,159 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					       };
 		}
 
-		internal static byte[] CreateEwlNuGetPackage(
-			DevelopmentInstallation installation, PackagingConfiguration packagingConfiguration, bool useDebugAssembly, string outputFolderPath, bool? prerelease ) {
-			var localExportDateAndTime = prerelease.HasValue ? null as DateTime? : DateTime.Now;
+		internal static IReadOnlyCollection<( string id, IReadOnlyList<byte[]> packages )> CreateEwlNuGetPackages(
+			DevelopmentInstallation installation, PackagingConfiguration packagingConfiguration, bool useDebugAssembly, string outputFolderPath,
+			IEnumerable<bool?> prereleaseValues ) {
+			var now = DateTime.Now;
+			var packages = new List<( string, IReadOnlyList<byte[]> )>();
 
-			IoMethods.ExecuteWithTempFolder(
-				folderPath => {
-					var ewlOutputFolderPath = EwlStatics.CombinePaths(
-						installation.GeneralLogic.Path,
-						EwlStatics.CoreProjectName,
-						EwlStatics.GetProjectOutputFolderPath( useDebugAssembly ) );
-					var libFolderPath = EwlStatics.CombinePaths( folderPath, @"lib\net472-full" );
-					foreach( var fileName in new[] { "dll", "pdb", "xml" }.Select( i => "EnterpriseWebLibrary." + i ) )
-						IoMethods.CopyFile( EwlStatics.CombinePaths( ewlOutputFolderPath, fileName ), EwlStatics.CombinePaths( libFolderPath, fileName ) );
+			var mainId = packagingConfiguration.SystemShortName;
+			var mainPackages = prereleaseValues.Select(
+					prerelease => {
+						var localExportDateAndTime = prerelease.HasValue ? (DateTime?)null : now;
 
-					IoMethods.CopyFile(
-						EwlStatics.CombinePaths( installation.GeneralLogic.Path, @"Development Utility\Package Manager Console Commands.ps1" ),
-						EwlStatics.CombinePaths( folderPath, @"tools\init.ps1" ) );
+						IoMethods.ExecuteWithTempFolder(
+							folderPath => {
+								var ewlOutputFolderPath = EwlStatics.CombinePaths(
+									installation.GeneralLogic.Path,
+									EwlStatics.CoreProjectName,
+									EwlStatics.GetProjectOutputFolderPath( useDebugAssembly ) );
+								var libFolderPath = EwlStatics.CombinePaths( folderPath, @"lib\net472-full" );
+								foreach( var fileName in new[] { "dll", "pdb", "xml" }.Select( i => "EnterpriseWebLibrary." + i ) )
+									IoMethods.CopyFile( EwlStatics.CombinePaths( ewlOutputFolderPath, fileName ), EwlStatics.CombinePaths( libFolderPath, fileName ) );
 
-					IoMethods.CopyFolder(
-						EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.CoreProjectName, StaticFile.FrameworkStaticFilesSourceFolderPath ),
-						EwlStatics.CombinePaths( folderPath, InstallationFileStatics.WebFrameworkStaticFilesFolderName ),
-						false );
-					IoMethods.DeleteFolder(
-						EwlStatics.CombinePaths( folderPath, InstallationFileStatics.WebFrameworkStaticFilesFolderName, AppStatics.StaticFileLogicFolderName ) );
+								IoMethods.CopyFile(
+									EwlStatics.CombinePaths( installation.GeneralLogic.Path, @"Development Utility\Package Manager Console Commands.ps1" ),
+									EwlStatics.CombinePaths( folderPath, @"tools\init.ps1" ) );
 
-					const string duProjectAndFolderName = "Development Utility";
-					IoMethods.CopyFolder(
-						EwlStatics.CombinePaths( installation.GeneralLogic.Path, duProjectAndFolderName, EwlStatics.GetProjectOutputFolderPath( useDebugAssembly ) ),
-						EwlStatics.CombinePaths( folderPath, duProjectAndFolderName ),
-						false );
-					packageGeneralFiles( installation, folderPath, false );
-					IoMethods.CopyFolder(
-						EwlStatics.CombinePaths(
-							installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath,
-							InstallationConfiguration.InstallationConfigurationFolderName,
-							InstallationConfiguration.InstallationsFolderName,
-							!prerelease.HasValue || prerelease.Value ? "Testing" : "Live" ),
-						EwlStatics.CombinePaths(
-							folderPath,
-							InstallationConfiguration.ConfigurationFolderName,
-							InstallationConfiguration.InstallationConfigurationFolderName ),
-						false );
-					if( File.Exists( installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationSharedConfigurationFilePath ) )
-						IoMethods.CopyFile(
-							installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationSharedConfigurationFilePath,
+								IoMethods.CopyFolder(
+									EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.CoreProjectName, StaticFile.FrameworkStaticFilesSourceFolderPath ),
+									EwlStatics.CombinePaths( folderPath, InstallationFileStatics.WebFrameworkStaticFilesFolderName ),
+									false );
+								IoMethods.DeleteFolder(
+									EwlStatics.CombinePaths( folderPath, InstallationFileStatics.WebFrameworkStaticFilesFolderName, AppStatics.StaticFileLogicFolderName ) );
+
+								const string duProjectAndFolderName = "Development Utility";
+								IoMethods.CopyFolder(
+									EwlStatics.CombinePaths( installation.GeneralLogic.Path, duProjectAndFolderName, EwlStatics.GetProjectOutputFolderPath( useDebugAssembly ) ),
+									EwlStatics.CombinePaths( folderPath, duProjectAndFolderName ),
+									false );
+								packageGeneralFiles( installation, folderPath, false );
+								IoMethods.CopyFolder(
+									EwlStatics.CombinePaths(
+										installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath,
+										InstallationConfiguration.InstallationConfigurationFolderName,
+										InstallationConfiguration.InstallationsFolderName,
+										!prerelease.HasValue || prerelease.Value ? "Testing" : "Live" ),
+									EwlStatics.CombinePaths(
+										folderPath,
+										InstallationConfiguration.ConfigurationFolderName,
+										InstallationConfiguration.InstallationConfigurationFolderName ),
+									false );
+								if( File.Exists( installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationSharedConfigurationFilePath ) )
+									IoMethods.CopyFile(
+										installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationSharedConfigurationFilePath,
+										EwlStatics.CombinePaths(
+											folderPath,
+											InstallationConfiguration.ConfigurationFolderName,
+											InstallationConfiguration.InstallationConfigurationFolderName,
+											InstallationConfiguration.InstallationSharedConfigurationFileName ) );
+
+								var manifestPath = EwlStatics.CombinePaths( folderPath, "Package.nuspec" );
+								using( var writer = IoMethods.GetTextWriterForWrite( manifestPath ) )
+									writeNuGetPackageManifest(
+										writer,
+										installation,
+										mainId,
+										"",
+										w => {
+											var lines = from line in File.ReadAllLines(
+												            EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.CoreProjectName, "packages.config" ) )
+											            let trimmedLine = line.Trim()
+											            where trimmedLine.StartsWith( "<package " )
+											            select trimmedLine;
+											foreach( var line in lines )
+												w.WriteLine( Regex.Replace( line.Replace( "package", "dependency" ), @" targetFramework=""[\w]+""", "" ) );
+										},
+										prerelease,
+										localExportDateAndTime );
+
+								StatusStatics.SetStatus(
+									TewlContrib.ProcessTools.RunProgram(
+										EwlStatics.CombinePaths( installation.GeneralLogic.Path, @"Solution Files\nuget" ),
+										"pack \"" + manifestPath + "\" -OutputDirectory \"" + outputFolderPath + "\"",
+										"",
+										true ) );
+							} );
+
+						return File.ReadAllBytes(
 							EwlStatics.CombinePaths(
-								folderPath,
-								InstallationConfiguration.ConfigurationFolderName,
-								InstallationConfiguration.InstallationConfigurationFolderName,
-								InstallationConfiguration.InstallationSharedConfigurationFileName ) );
+								outputFolderPath,
+								EwlNuGetPackageSpecificationStatics.GetNuGetPackageFileName(
+									mainId,
+									installation.CurrentMajorVersion,
+									!prerelease.HasValue || prerelease.Value ? installation.NextBuildNumber as int? : null,
+									localExportDateAndTime: localExportDateAndTime ) ) );
+					} )
+				.MaterializeAsList();
+			packages.Add( ( mainId, mainPackages ) );
 
-					var manifestPath = EwlStatics.CombinePaths( folderPath, "Package.nuspec" );
-					using( var writer = IoMethods.GetTextWriterForWrite( manifestPath ) )
-						writeNuGetPackageManifest( installation, packagingConfiguration, prerelease, localExportDateAndTime, writer );
+			var samlId = mainId + ".Saml";
+			var samlPackages = prereleaseValues.Select(
+					prerelease => {
+						var localExportDateAndTime = prerelease.HasValue ? (DateTime?)null : now;
 
-					StatusStatics.SetStatus(
-						TewlContrib.ProcessTools.RunProgram(
-							EwlStatics.CombinePaths( installation.GeneralLogic.Path, @"Solution Files\nuget" ),
-							"pack \"" + manifestPath + "\" -OutputDirectory \"" + outputFolderPath + "\"",
-							"",
-							true ) );
-				} );
+						IoMethods.ExecuteWithTempFolder(
+							folderPath => {
+								foreach( var fileName in new[] { "dll", "pdb" }.Select( i => "EnterpriseWebLibrary.Saml." + i ) )
+									IoMethods.CopyFile(
+										EwlStatics.CombinePaths(
+											installation.GeneralLogic.Path,
+											EwlStatics.SamlProviderProjectPath,
+											EwlStatics.GetProjectOutputFolderPath( useDebugAssembly ),
+											fileName ),
+										EwlStatics.CombinePaths( folderPath, @"lib\net472-full", fileName ) );
 
-			return File.ReadAllBytes(
-				EwlStatics.CombinePaths(
-					outputFolderPath,
-					EwlNuGetPackageSpecificationStatics.GetNuGetPackageFileName(
-						packagingConfiguration.SystemShortName,
-						installation.CurrentMajorVersion,
-						!prerelease.HasValue || prerelease.Value ? installation.NextBuildNumber as int? : null,
-						localExportDateAndTime: localExportDateAndTime ) ) );
+								var manifestPath = EwlStatics.CombinePaths( folderPath, "Package.nuspec" );
+								using( var writer = IoMethods.GetTextWriterForWrite( manifestPath ) )
+									writeNuGetPackageManifest(
+										writer,
+										installation,
+										samlId,
+										"SAML Provider",
+										w => {
+											w.WriteLine(
+												"<dependency id=\"Ewl\" version=\"[{0}]\" />".FormatWith(
+													EwlNuGetPackageSpecificationStatics.GetNuGetPackageVersionString(
+														installation.CurrentMajorVersion,
+														!prerelease.HasValue || prerelease.Value ? (int?)installation.NextBuildNumber : null,
+														localExportDateAndTime: localExportDateAndTime ) ) );
+											w.WriteLine( "<dependency id=\"ComponentSpace.Saml2.Net.Licensed\" version=\"5.0.0\" />" );
+										},
+										prerelease,
+										localExportDateAndTime );
+
+								StatusStatics.SetStatus(
+									TewlContrib.ProcessTools.RunProgram(
+										EwlStatics.CombinePaths( installation.GeneralLogic.Path, @"Solution Files\nuget" ),
+										"pack \"" + manifestPath + "\" -OutputDirectory \"" + outputFolderPath + "\"",
+										"",
+										true ) );
+							} );
+
+						return File.ReadAllBytes(
+							EwlStatics.CombinePaths(
+								outputFolderPath,
+								EwlNuGetPackageSpecificationStatics.GetNuGetPackageFileName(
+									samlId,
+									installation.CurrentMajorVersion,
+									!prerelease.HasValue || prerelease.Value ? installation.NextBuildNumber as int? : null,
+									localExportDateAndTime: localExportDateAndTime ) ) );
+					} )
+				.MaterializeAsList();
+			packages.Add( ( samlId, samlPackages ) );
+
+			return packages;
 		}
 
 		private static void packageGeneralFiles( DevelopmentInstallation installation, string folderPath, bool includeDatabaseUpdates ) {
@@ -129,18 +213,19 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		}
 
 		private static void writeNuGetPackageManifest(
-			DevelopmentInstallation installation, PackagingConfiguration packagingConfiguration, bool? prerelease, DateTime? localExportDateAndTime,
-			TextWriter writer ) {
+			TextWriter writer, DevelopmentInstallation installation, string id, string projectName, Action<TextWriter> dependencyWriter, bool? prerelease,
+			DateTime? localExportDateAndTime ) {
 			writer.WriteLine( "<?xml version=\"1.0\"?>" );
 			writer.WriteLine( "<package>" );
 			writer.WriteLine( "<metadata>" );
-			writer.WriteLine( "<id>" + EwlNuGetPackageSpecificationStatics.GetNuGetPackageId( packagingConfiguration.SystemShortName ) + "</id>" );
+			writer.WriteLine( "<id>" + id + "</id>" );
 			writer.WriteLine(
 				"<version>" + EwlNuGetPackageSpecificationStatics.GetNuGetPackageVersionString(
 					installation.CurrentMajorVersion,
-					!prerelease.HasValue || prerelease.Value ? installation.NextBuildNumber as int? : null,
+					!prerelease.HasValue || prerelease.Value ? (int?)installation.NextBuildNumber : null,
 					localExportDateAndTime: localExportDateAndTime ) + "</version>" );
-			writer.WriteLine( "<title>" + installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + "</title>" );
+			writer.WriteLine(
+				"<title>" + installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + projectName.PrependDelimiter( " - " ) + "</title>" );
 			writer.WriteLine( "<authors>William Gross, Greg Smalter, Sam Rueby</authors>" );
 			writer.WriteLine(
 				"<description>The {0} ({1}), together with its tailored infrastructure platform, is a highly opinionated foundation for web-based enterprise software.</description>"
@@ -149,14 +234,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			writer.WriteLine( "<license type=\"expression\">MIT</license>" );
 			writer.WriteLine( "<requireLicenseAcceptance>false</requireLicenseAcceptance>" );
 			writer.WriteLine( "<dependencies>" );
-
-			var lines = from line in File.ReadAllLines( EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.CoreProjectName, "packages.config" ) )
-			            let trimmedLine = line.Trim()
-			            where trimmedLine.StartsWith( "<package " )
-			            select trimmedLine;
-			foreach( var line in lines )
-				writer.WriteLine( Regex.Replace( line.Replace( "package", "dependency" ), @" targetFramework=""[\w]+""", "" ) );
-
+			dependencyWriter( writer );
 			writer.WriteLine( "</dependencies>" );
 			writer.WriteLine( "<tags>C# ASP.NET DAL SQL-Server MySQL Oracle</tags>" );
 			writer.WriteLine( "</metadata>" );
@@ -253,8 +331,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					operationResult.NumberOfBytesTransferred += buildMessageInstallation.ConfigurationPackage.LongLength;
 				}
 
+			build.NuGetPackages = new InstallationSupportUtility.SystemManagerInterface.Messages.BuildMessage.Build.NuGetPackagesType();
 			if( installation.DevelopmentInstallationLogic.SystemIsEwl )
-				build.NuGetPackages = packageEwl( installation, packagingConfiguration, logicPackagesFolderPath );
+				build.NuGetPackages.AddRange( packageEwl( installation, packagingConfiguration, logicPackagesFolderPath ) );
 
 			var recognizedInstallation = installation as RecognizedDevelopmentInstallation;
 			if( recognizedInstallation == null )
@@ -378,12 +457,16 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				false );
 		}
 
-		private InstallationSupportUtility.SystemManagerInterface.Messages.BuildMessage.Build.NuGetPackagesType packageEwl(
-			DevelopmentInstallation installation, PackagingConfiguration packagingConfiguration, string logicPackagesFolderPath ) {
-			var buildMessageNuGetPackages = new InstallationSupportUtility.SystemManagerInterface.Messages.BuildMessage.Build.NuGetPackagesType();
-			buildMessageNuGetPackages.Prerelease = CreateEwlNuGetPackage( installation, packagingConfiguration, false, logicPackagesFolderPath, true );
-			buildMessageNuGetPackages.Stable = CreateEwlNuGetPackage( installation, packagingConfiguration, false, logicPackagesFolderPath, false );
-			return buildMessageNuGetPackages;
-		}
+		private IEnumerable<InstallationSupportUtility.SystemManagerInterface.Messages.BuildMessage.NuGetPackage> packageEwl(
+			DevelopmentInstallation installation, PackagingConfiguration packagingConfiguration, string logicPackagesFolderPath ) =>
+			CreateEwlNuGetPackages( installation, packagingConfiguration, false, logicPackagesFolderPath, new bool?[] { true, false } )
+				.Select(
+					i => {
+						var package = new InstallationSupportUtility.SystemManagerInterface.Messages.BuildMessage.NuGetPackage();
+						package.Id = i.id;
+						package.Prerelease = i.packages[ 0 ];
+						package.Stable = i.packages[ 1 ];
+						return package;
+					} );
 	}
 }

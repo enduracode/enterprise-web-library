@@ -29,6 +29,11 @@ namespace EnterpriseWebLibrary {
 		public const string CoreProjectName = "Core";
 
 		/// <summary>
+		/// Development Utility and internal use only.
+		/// </summary>
+		public const string SamlProviderProjectPath = @"Providers\SAML";
+
+		/// <summary>
 		/// Installation Support Utility and internal use only.
 		/// </summary>
 		public const string TestRunnerProjectName = "Test Runner";
