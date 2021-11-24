@@ -667,6 +667,7 @@
     <Compile Include="EnterpriseWebFramework\UserManagement\SamlResources\Assertions.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\SamlResources\LogIn.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\SamlResources\Metadata.cs" />
+    <Compile Include="EnterpriseWebFramework\UserManagement\SamlResources\VerifyClientFunctionality.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\UserEditor.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\UserImpersonationStatics.cs" />
     <Compile Include="EwlNuGetPackageSpecificationStatics.cs" />

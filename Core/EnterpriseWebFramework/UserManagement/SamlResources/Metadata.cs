@@ -18,7 +18,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.SamlResourc
 		protected override UrlHandler getUrlParent() => new Admin.EntitySetup();
 
 		protected override IEnumerable<UrlPattern> getChildUrlPatterns() =>
-			LogIn.UrlPatterns.Literal( "log-in" ).ToCollection().Append( Assertions.UrlPatterns.Literal( "assertions" ) );
+			LogIn.UrlPatterns.Literal( "log-in" )
+				.ToCollection()
+				.Append( Assertions.UrlPatterns.Literal( "assertions" ) )
+				.Append( VerifyClientFunctionality.UrlPatterns.Literal( "verify-functionality" ) );
 
 		protected override EwfSafeRequestHandler getOrHead() =>
 			new EwfSafeResponseWriter(

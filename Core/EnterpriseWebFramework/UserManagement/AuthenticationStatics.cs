@@ -127,7 +127,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		public static Tuple<IReadOnlyCollection<EtherealComponent>, Func<( User, bool )>> GetLogInHiddenFieldsAndMethod(
 			DataValue<string> emailAddress, DataValue<string> password, string emailAddressErrorMessage, string passwordErrorMessage ) {
 			var clientTime = new DataValue<string>();
-			var hiddenFields = getLogInHiddenFieldsAndSetUpClientSideLogic( clientTime );
+			var hiddenFields = GetLogInHiddenFieldsAndSetUpClientSideLogic( clientTime );
 
 			return Tuple.Create(
 				hiddenFields,
@@ -162,7 +162,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		/// </summary>
 		public static Tuple<IReadOnlyCollection<EtherealComponent>, Action<int>> GetLogInHiddenFieldsAndSpecifiedUserLogInMethod() {
 			var clientTime = new DataValue<string>();
-			var hiddenFields = getLogInHiddenFieldsAndSetUpClientSideLogic( clientTime );
+			var hiddenFields = GetLogInHiddenFieldsAndSetUpClientSideLogic( clientTime );
 
 			return Tuple.Create(
 				hiddenFields,
@@ -179,7 +179,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 					} ) );
 		}
 
-		private static IReadOnlyCollection<EtherealComponent> getLogInHiddenFieldsAndSetUpClientSideLogic( DataValue<string> clientTime ) {
+		internal static IReadOnlyCollection<EtherealComponent> GetLogInHiddenFieldsAndSetUpClientSideLogic( DataValue<string> clientTime ) {
 			setCookie( testCookieName, "No data" );
 
 			var timeHiddenFieldId = new HiddenFieldId();
@@ -226,23 +226,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 			CookieStatics.SetCookie( name, value, null, EwfConfigurationStatics.AppSupportsSecureConnections, true );
 		}
 
-		private static string[] verifyTestCookie() {
-			return CookieStatics.GetCookie( testCookieName ) == null ? new[] { Translation.YourBrowserHasCookiesDisabled } : new string[ 0 ];
-		}
+		private static IEnumerable<string> verifyTestCookie() =>
+			TestCookieMissing() ? Translation.YourBrowserHasCookiesDisabled.ToCollection() : Enumerable.Empty<string>();
 
 		private static void addStatusMessageIfClockNotSynchronized( DataValue<string> clientTime ) {
-			var clientParseResult = InstantPattern.ExtendedIso.Parse( clientTime.Value );
-			if( !clientParseResult.Success )
-				throw new DataModificationException( "Your browser did not submit the current time." );
-
-			var clockDifference = clientParseResult.GetValueOrThrow() - AppRequestState.RequestTime;
-			if( Math.Abs( clockDifference.TotalMinutes ) > 5 ) {
-				var timeZone = DateTimeZoneProviders.Tzdb.GetSystemDefault();
-				PageBase.AddStatusMessage(
-					StatusMessageType.Warning,
-					Translation.YourClockIsWrong + " " + AppRequestState.RequestTime.InZone( timeZone ).ToDateTimeUnspecified().ToHourAndMinuteString() + " " +
-					timeZone.GetZoneInterval( AppRequestState.RequestTime ).Name + "." );
-			}
+			if( ClockNotSynchronized( clientTime ) )
+				PageBase.AddStatusMessage( StatusMessageType.Warning, GetClockWrongMessage() );
 		}
 
 
@@ -315,6 +304,26 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 				( AppTools.User != null ? "+" : "-" ) + ( identityProvider is LocalIdentityProvider ? "Local" :
 				                                          identityProvider is SamlIdentityProvider saml ? saml.EntityId :
 				                                          throw new ApplicationException( "identity provider" ) ) );
+		}
+
+
+		// Client-side functionality verification
+
+		internal static bool TestCookieMissing() => CookieStatics.GetCookie( testCookieName ) == null;
+
+		internal static bool ClockNotSynchronized( DataValue<string> clientTime ) {
+			var clientParseResult = InstantPattern.ExtendedIso.Parse( clientTime.Value );
+			if( !clientParseResult.Success )
+				throw new DataModificationException( "Your browser did not submit the current time." );
+
+			var clockDifference = clientParseResult.GetValueOrThrow() - AppRequestState.RequestTime;
+			return Math.Abs( clockDifference.TotalMinutes ) > 5;
+		}
+
+		internal static string GetClockWrongMessage() {
+			var timeZone = DateTimeZoneProviders.Tzdb.GetSystemDefault();
+			return Translation.YourClockIsWrong + " " + AppRequestState.RequestTime.InZone( timeZone ).ToDateTimeUnspecified().ToHourAndMinuteString() + " " +
+			       timeZone.GetZoneInterval( AppRequestState.RequestTime ).Name + ".";
 		}
 	}
 }

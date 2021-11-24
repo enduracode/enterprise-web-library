@@ -46,11 +46,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.SamlResourc
 				DataAccessState.Current.ResetCache();
 			}
 
+			var destinationUrl = new VerifyClientFunctionality( assertion.returnUrl ).GetUrl();
 			HttpContext.Current.Response.StatusCode = 303;
 			return EwfResponse.Create(
 				ContentTypes.PlainText,
-				new EwfResponseBodyCreator( writer => writer.Write( "See Other: {0}".FormatWith( assertion.returnUrl ) ) ),
-				additionalHeaderFieldGetter: () => ( "Location", assertion.returnUrl ).ToCollection() );
+				new EwfResponseBodyCreator( writer => writer.Write( "See Other: {0}".FormatWith( destinationUrl ) ) ),
+				additionalHeaderFieldGetter: () => ( "Location", destinationUrl ).ToCollection() );
 		}
 	}
 }
