@@ -20,6 +20,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.SamlResourc
 		protected override EwfSafeRequestHandler getOrHead() =>
 			new EwfSafeResponseWriter(
 				EwfResponse.CreateFromAspNetResponse(
-					aspNetResponse => ExternalFunctionalityStatics.ExternalSamlProvider.WriteLogInResponse( aspNetResponse, identityProvider.EntityId, ReturnUrl ) ) );
+					aspNetResponse => ExternalFunctionalityStatics.ExternalSamlProvider.WriteLogInResponse(
+						aspNetResponse,
+						identityProvider.EntityId,
+						identityProvider == AuthenticationStatics.GetUserLastIdentityProvider(),
+						ReturnUrl ) ) );
 	}
 }

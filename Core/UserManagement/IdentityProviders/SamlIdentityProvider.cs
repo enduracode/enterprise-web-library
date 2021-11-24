@@ -14,7 +14,8 @@ namespace EnterpriseWebLibrary.UserManagement.IdentityProviders {
 		/// <param name="metadataUrl">Do not pass null or the empty string.</param>
 		/// <param name="entityId">Do not pass null or the empty string.</param>
 		/// <param name="logInUserGetter">A function that takes a SAML subject name identifier and a collection of attributes and returns the corresponding user
-		/// object, or null if a user with that identifier does not exist. This function may also update the user if necessary. Do not pass null.</param>
+		/// object, or null if a user with that identifier does not exist. This function may also update the user if necessary, or even create a new user. Do not
+		/// pass null.</param>
 		public SamlIdentityProvider( string metadataUrl, string entityId, LogInUserGetterMethod logInUserGetter ) {
 			MetadataUrl = metadataUrl;
 			EntityId = entityId;

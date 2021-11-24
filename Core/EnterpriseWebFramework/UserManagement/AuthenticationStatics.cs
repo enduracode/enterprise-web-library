@@ -14,6 +14,8 @@ using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 	public static class AuthenticationStatics {
+		private const string userCookieName = "User";
+		private const string identityProviderCookieName = "IdentityProvider";
 		private const string testCookieName = "TestCookie";
 
 		/// <summary>
@@ -50,7 +52,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 			var userLazy = new Func<User>[]
 					{
 						() => {
-							var cookie = CookieStatics.GetCookie( FormsAuthCookieName );
+							var cookie = CookieStatics.GetCookie( userCookieName );
 							if( cookie == null )
 								return null;
 							var ticket = GetFormsAuthTicket( cookie );
@@ -143,7 +145,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 						if( errorMessage.Any() )
 							errors.Add( errorMessage );
 						else
-							SetFormsAuthCookieAndUser( user, authenticationTimeoutMinutes: UserManagementStatics.LocalIdentityProvider.AuthenticationTimeoutMinutes );
+							SetFormsAuthCookieAndUser( user, identityProvider: UserManagementStatics.LocalIdentityProvider );
 
 						errors.AddRange( verifyTestCookie() );
 						addStatusMessageIfClockNotSynchronized( clientTime );
@@ -193,22 +195,31 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		/// <summary>
 		/// MVC and private use only.
 		/// </summary>
-		public static void SetFormsAuthCookieAndUser( User user, int? authenticationTimeoutMinutes = null ) {
+		public static void SetFormsAuthCookieAndUser( User user, IdentityProvider identityProvider = null ) {
 			if( AppRequestState.Instance.ImpersonatorExists )
 				UserImpersonationStatics.SetCookie( user );
 			else {
 				// If the user's role requires enhanced security, require re-authentication every 12 minutes. Otherwise, make it the same as a session timeout.
-				var authenticationDuration = authenticationTimeoutMinutes.HasValue ? TimeSpan.FromMinutes( authenticationTimeoutMinutes.Value ) :
-				                             user.Role.RequiresEnhancedSecurity ? TimeSpan.FromMinutes( 12 ) : SessionDuration;
+				var authenticationDuration = identityProvider is LocalIdentityProvider local && local.AuthenticationTimeoutMinutes.HasValue
+					                             ?
+					                             TimeSpan.FromMinutes( local.AuthenticationTimeoutMinutes.Value )
+					                             : user.Role.RequiresEnhancedSecurity
+						                             ? TimeSpan.FromMinutes( 12 )
+						                             : SessionDuration;
 
 				var ticket = new FormsAuthenticationTicket( user.UserId.ToString(), false /*meaningless*/, (int)authenticationDuration.TotalMinutes );
 				AppRequestState.AddNonTransactionalModificationMethod( () => setFormsAuthCookie( ticket ) );
 			}
 			AppRequestState.Instance.SetUser( user );
+
+			if( identityProvider != null )
+				AppRequestState.AddNonTransactionalModificationMethod( () => SetUserLastIdentityProvider( identityProvider ) );
+			else
+				AppRequestState.AddNonTransactionalModificationMethod( () => CookieStatics.ClearCookie( identityProviderCookieName ) );
 		}
 
 		private static void setFormsAuthCookie( FormsAuthenticationTicket ticket ) {
-			setCookie( FormsAuthCookieName, FormsAuthentication.Encrypt( ticket ) );
+			setCookie( userCookieName, FormsAuthentication.Encrypt( ticket ) );
 		}
 
 		private static void setCookie( string name, string value ) {
@@ -238,7 +249,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		// Cookie Updating
 
 		internal static void UpdateFormsAuthCookieIfNecessary() {
-			var cookie = CookieStatics.GetCookie( FormsAuthCookieName );
+			var cookie = CookieStatics.GetCookie( userCookieName );
 			if( cookie == null )
 				return;
 
@@ -273,12 +284,37 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 			else
 				AppRequestState.AddNonTransactionalModificationMethod( clearFormsAuthCookie );
 			AppRequestState.Instance.SetUser( null );
+
+			AppRequestState.AddNonTransactionalModificationMethod( () => CookieStatics.ClearCookie( identityProviderCookieName ) );
 		}
 
 		private static void clearFormsAuthCookie() {
-			CookieStatics.ClearCookie( FormsAuthCookieName );
+			CookieStatics.ClearCookie( userCookieName );
 		}
 
-		internal static string FormsAuthCookieName => "User";
+
+		// User’s last identity provider
+
+		internal static IdentityProvider GetUserLastIdentityProvider() {
+			var cookie = CookieStatics.GetCookie( identityProviderCookieName );
+
+			// Ignore the cookie if the existence of a user has changed since that could mean the user timed out.
+			return cookie != null && cookie.Value[ 0 ] == ( AppTools.User != null ? '+' : '-' )
+				       ? UserManagementStatics.IdentityProviders.SingleOrDefault(
+					       identityProvider => string.Equals(
+						       identityProvider is LocalIdentityProvider ? "Local" :
+						       identityProvider is SamlIdentityProvider saml ? saml.EntityId : throw new ApplicationException( "identity provider" ),
+						       cookie.Value.Substring( 1 ),
+						       StringComparison.Ordinal ) )
+				       : null;
+		}
+
+		internal static void SetUserLastIdentityProvider( IdentityProvider identityProvider ) {
+			setCookie(
+				identityProviderCookieName,
+				( AppTools.User != null ? "+" : "-" ) + ( identityProvider is LocalIdentityProvider ? "Local" :
+				                                          identityProvider is SamlIdentityProvider saml ? saml.EntityId :
+				                                          throw new ApplicationException( "identity provider" ) ) );
+		}
 	}
 }

@@ -25,7 +25,7 @@ namespace EnterpriseWebLibrary.ExternalFunctionality {
 
 		XmlElement GetMetadata();
 
-		void WriteLogInResponse( HttpResponseBase response, string identityProvider, string returnUrl );
+		void WriteLogInResponse( HttpResponseBase response, string identityProvider, bool forceReauthentication, string returnUrl );
 
 		( string identityProvider, string userName, IReadOnlyDictionary<string, string> attributes, string returnUrl ) ReadAssertion( HttpRequest request );
 	}

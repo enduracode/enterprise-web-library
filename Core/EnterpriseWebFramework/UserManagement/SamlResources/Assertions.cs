@@ -23,9 +23,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.SamlResourc
 		protected override EwfResponse post() {
 			var assertion = ExternalFunctionalityStatics.ExternalSamlProvider.ReadAssertion( HttpContext.Current.Request );
 
-			User user;
 			var identityProvider =
 				AuthenticationStatics.SamlIdentityProviders.Single( i => string.Equals( i.EntityId, assertion.identityProvider, StringComparison.Ordinal ) );
+			User user;
 			DataAccessState.Current.DisableCache();
 			try {
 				user = identityProvider.LogInUser( assertion.userName, assertion.attributes );
@@ -33,10 +33,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.SamlResourc
 			finally {
 				DataAccessState.Current.ResetCache();
 			}
-			if( user == null )
-				throw new ApplicationException( "user" );
 
-			AuthenticationStatics.SetFormsAuthCookieAndUser( user );
+			if( user != null )
+				AuthenticationStatics.SetFormsAuthCookieAndUser( user, identityProvider: identityProvider );
+			else
+				AuthenticationStatics.SetUserLastIdentityProvider( identityProvider );
 
 			try {
 				AppRequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();

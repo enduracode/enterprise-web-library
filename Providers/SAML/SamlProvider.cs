@@ -86,9 +86,9 @@ namespace EnterpriseWebLibrary.Saml {
 				.ToXml();
 		}
 
-		void ExternalSamlProvider.WriteLogInResponse( HttpResponseBase response, string identityProvider, string returnUrl ) {
+		void ExternalSamlProvider.WriteLogInResponse( HttpResponseBase response, string identityProvider, bool forceReauthentication, string returnUrl ) {
 			SAMLController.ConfigurationName = samlConfigurationName;
-			SAMLServiceProvider.InitiateSSO( response, returnUrl, identityProvider );
+			SAMLServiceProvider.InitiateSSO( response, returnUrl, identityProvider, new SSOOptions { ForceAuthn = forceReauthentication } );
 		}
 
 		( string identityProvider, string userName, IReadOnlyDictionary<string, string> attributes, string returnUrl ) ExternalSamlProvider.ReadAssertion(
