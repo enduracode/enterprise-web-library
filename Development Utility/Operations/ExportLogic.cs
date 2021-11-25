@@ -159,7 +159,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 										"SAML Provider",
 										w => {
 											w.WriteLine(
-												"<dependency id=\"Ewl\" version=\"[{0}]\" />".FormatWith(
+												"<dependency id=\"{0}\" version=\"[{1}]\" />".FormatWith(
+													mainId,
 													EwlNuGetPackageSpecificationStatics.GetNuGetPackageVersionString(
 														installation.CurrentMajorVersion,
 														!prerelease.HasValue || prerelease.Value ? (int?)installation.NextBuildNumber : null,
