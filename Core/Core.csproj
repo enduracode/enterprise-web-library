@@ -264,6 +264,7 @@
     <Compile Include="Configuration\SystemProviderGetter.cs" />
     <Compile Include="Configuration\SystemProviderReference.cs" />
     <Compile Include="Configuration\WebApplication.cs" />
+    <Compile Include="DataAccess\AutomaticDatabaseConnectionManager.cs" />
     <Compile Include="DataAccess\AutomaticTransactionDisablingProvider.cs" />
     <Compile Include="DataAccess\BlobStorage\BlobFile.cs" />
     <Compile Include="DataAccess\BlobStorage\BlobStorageStatics.cs" />

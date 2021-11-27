@@ -247,9 +247,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						EwfInitializationOps.appInitializer = appInitializer;
 						appInitializer?.InitStatics();
 
-						AuthenticationStatics.InitAppSpecificLogicDependencies();
+						executeWithAutomaticDatabaseConnections( AuthenticationStatics.InitAppSpecificLogicDependencies );
 						if( AuthenticationStatics.SamlIdentityProviders.Any() || ExternalFunctionalityStatics.SamlFunctionalityEnabled )
-							ExternalFunctionalityStatics.ExternalSamlProvider.InitAppSpecificLogicDependencies();
+							executeWithAutomaticDatabaseConnections( ExternalFunctionalityStatics.ExternalSamlProvider.InitAppSpecificLogicDependencies );
 
 						initTimeDataAccessState = null;
 						EwfApp.FrameworkInitialized = true;
@@ -292,6 +292,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				throw new Exception(
 					"You must specify resource {0} as an intermediate-installation public resource because it is used on an intermediate-installation public page."
 						.FormatWith( resource.GetUrl( false, false ) ) );
+		}
+
+		private static void executeWithAutomaticDatabaseConnections( Action method ) {
+			var connectionManager = new AutomaticDatabaseConnectionManager();
+			try {
+				connectionManager.DataAccessState.ExecuteWithThis( method );
+				connectionManager.CommitTransactionsAndExecuteNonTransactionalModificationMethods();
+			}
+			catch {
+				connectionManager.RollbackTransactions();
+				throw;
+			}
 		}
 
 		/// <summary>

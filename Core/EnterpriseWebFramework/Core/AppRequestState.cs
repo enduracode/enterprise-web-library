@@ -30,7 +30,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Queues the specified non-transactional modification method to be executed after database transactions are committed.
 		/// </summary>
 		public static void AddNonTransactionalModificationMethod( Action modificationMethod ) {
-			Instance.addNonTransactionalModificationMethod( modificationMethod );
+			Instance.databaseConnectionManager.AddNonTransactionalModificationMethod( modificationMethod );
 		}
 
 		internal static T ExecuteWithUrlHandlerStateDisabled<T>( Func<T> method ) {
@@ -50,11 +50,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly string url;
 		private readonly string baseUrl;
 
-		private readonly DataAccessState dataAccessState;
-		private bool primaryDatabaseConnectionInitialized;
-		private readonly List<string> secondaryDatabasesWithInitializedConnections = new List<string>();
-		private readonly List<Action> nonTransactionalModificationMethods = new List<Action>();
-		private bool transactionMarkedForRollback;
+		private readonly AutomaticDatabaseConnectionManager databaseConnectionManager;
 
 		private bool urlHandlerStateDisabled;
 		private IReadOnlyCollection<BasicUrlHandler> urlHandlers;
@@ -84,8 +80,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			this.url = url;
 			this.baseUrl = baseUrl;
 
-			dataAccessState = new DataAccessState( databaseConnectionInitializer: initDatabaseConnection );
-			dataAccessState.ResetCache();
+			databaseConnectionManager = new AutomaticDatabaseConnectionManager();
+			databaseConnectionManager.DataAccessState.ResetCache();
 
 			// We cache the browser capabilities so we can determine the actual browser making the request even after modifying the capabilities, which we do later in
 			// the life cycle from EwfPage.
@@ -100,50 +96,20 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal string BaseUrl => baseUrl;
 
 		/// <summary>
-		/// EwfApp.ewfApplicationStart use only.
+		/// EwfInitializationOps.InitStatics use only.
 		/// </summary>
-		internal DataAccessState DataAccessState => dataAccessState;
-
-		private void initDatabaseConnection( DBConnection connection ) {
-			if( connection.DatabaseInfo.SecondaryDatabaseName.Any()
-				    ? secondaryDatabasesWithInitializedConnections.Contains( connection.DatabaseInfo.SecondaryDatabaseName )
-				    : primaryDatabaseConnectionInitialized )
-				return;
-
-			connection.Open();
-			if( DataAccessStatics.DatabaseShouldHaveAutomaticTransactions( connection.DatabaseInfo ) )
-				connection.BeginTransaction();
-
-			if( connection.DatabaseInfo.SecondaryDatabaseName.Any() )
-				secondaryDatabasesWithInitializedConnections.Add( connection.DatabaseInfo.SecondaryDatabaseName );
-			else
-				primaryDatabaseConnectionInitialized = true;
-		}
-
-		private void addNonTransactionalModificationMethod( Action modificationMethod ) {
-			nonTransactionalModificationMethods.Add( modificationMethod );
-		}
+		internal DataAccessState DataAccessState => databaseConnectionManager.DataAccessState;
 
 		internal void PreExecuteCommitTimeValidationMethodsForAllOpenConnections() {
-			if( primaryDatabaseConnectionInitialized ) {
-				var connection = DataAccessState.Current.PrimaryDatabaseConnection;
-				if( DataAccessStatics.DatabaseShouldHaveAutomaticTransactions( connection.DatabaseInfo ) )
-					connection.PreExecuteCommitTimeValidationMethods();
-			}
-			foreach( var databaseName in secondaryDatabasesWithInitializedConnections ) {
-				var connection = DataAccessState.Current.GetSecondaryDatabaseConnection( databaseName );
-				if( DataAccessStatics.DatabaseShouldHaveAutomaticTransactions( connection.DatabaseInfo ) )
-					connection.PreExecuteCommitTimeValidationMethods();
-			}
+			databaseConnectionManager.PreExecuteCommitTimeValidationMethods();
 		}
 
 		internal void CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods() {
-			cleanUpDatabaseConnectionsAndExecuteNonTransactionalModificationMethods();
+			databaseConnectionManager.CommitTransactionsAndExecuteNonTransactionalModificationMethods();
 		}
 
 		internal void RollbackDatabaseTransactions() {
-			transactionMarkedForRollback = true;
-			cleanUpDatabaseConnectionsAndExecuteNonTransactionalModificationMethods();
+			databaseConnectionManager.RollbackTransactions();
 		}
 
 		internal void SetUrlHandlers( IReadOnlyCollection<BasicUrlHandler> handlers ) {
@@ -261,7 +227,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal void CleanUp() {
 			// Skip non-transactional modification methods because they could cause database connections to be reinitialized.
-			cleanUpDatabaseConnectionsAndExecuteNonTransactionalModificationMethods( skipNonTransactionalModificationMethods: true );
+			databaseConnectionManager.CleanUpConnectionsAndExecuteNonTransactionalModificationMethods( skipNonTransactionalModificationMethods: true );
 
 			if( errors.Any() ) {
 				foreach( var i in errors )
@@ -278,73 +244,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					TelemetryStatics.ReportError(
 						"Request took " + duration.TotalSeconds + " seconds to process. The threshold is " + thresholdInSeconds + " seconds.",
 						null );
-			}
-		}
-
-		private void cleanUpDatabaseConnectionsAndExecuteNonTransactionalModificationMethods( bool skipNonTransactionalModificationMethods = false ) {
-			var methods = new List<Action>();
-			if( primaryDatabaseConnectionInitialized )
-				methods.Add( () => cleanUpDatabaseConnection( DataAccessState.Current.PrimaryDatabaseConnection ) );
-			foreach( var databaseName in secondaryDatabasesWithInitializedConnections ) {
-				var databaseNameCopy = databaseName;
-				methods.Add( () => cleanUpDatabaseConnection( DataAccessState.Current.GetSecondaryDatabaseConnection( databaseNameCopy ) ) );
-			}
-			methods.Add(
-				() => {
-					try {
-						if( !skipNonTransactionalModificationMethods && !transactionMarkedForRollback ) {
-							DataAccessState.Current.DisableCache();
-							try {
-								foreach( var i in nonTransactionalModificationMethods )
-									i();
-							}
-							finally {
-								DataAccessState.Current.ResetCache();
-							}
-						}
-					}
-					finally {
-						nonTransactionalModificationMethods.Clear();
-					}
-				} );
-			EwlStatics.CallEveryMethod( methods.ToArray() );
-			transactionMarkedForRollback = false;
-		}
-
-		private void cleanUpDatabaseConnection( DBConnection connection ) {
-			// Keep the connection initialized during cleanup to accommodate commit-time validation methods.
-			try {
-				try {
-					if( !DataAccessStatics.DatabaseShouldHaveAutomaticTransactions( connection.DatabaseInfo ) )
-						return;
-
-					try {
-						if( !transactionMarkedForRollback )
-							connection.CommitTransaction();
-					}
-					catch {
-						// Modifying this boolean here means that the order in which connections are cleaned up matters. Not modifying it here means
-						// possibly committing things to secondary databases that shouldn't be committed. We've decided that the primary connection
-						// is the most likely to have these errors, and is cleaned up first, so modifying this boolean here will yield the best results
-						// until we implement a true distributed transaction model with two-phase commit.
-						transactionMarkedForRollback = true;
-
-						throw;
-					}
-					finally {
-						if( transactionMarkedForRollback )
-							connection.RollbackTransaction();
-					}
-				}
-				finally {
-					connection.Close();
-				}
-			}
-			finally {
-				if( connection.DatabaseInfo.SecondaryDatabaseName.Any() )
-					secondaryDatabasesWithInitializedConnections.Remove( connection.DatabaseInfo.SecondaryDatabaseName );
-				else
-					primaryDatabaseConnectionInitialized = false;
 			}
 		}
 	}
