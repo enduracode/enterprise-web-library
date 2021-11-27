@@ -105,11 +105,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		internal void CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods() {
-			databaseConnectionManager.CommitTransactionsAndExecuteNonTransactionalModificationMethods();
+			databaseConnectionManager.CommitTransactionsAndExecuteNonTransactionalModificationMethods( true );
 		}
 
 		internal void RollbackDatabaseTransactions() {
-			databaseConnectionManager.RollbackTransactions();
+			databaseConnectionManager.RollbackTransactions( true );
 		}
 
 		internal void SetUrlHandlers( IReadOnlyCollection<BasicUrlHandler> handlers ) {
@@ -227,7 +227,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal void CleanUp() {
 			// Skip non-transactional modification methods because they could cause database connections to be reinitialized.
-			databaseConnectionManager.CleanUpConnectionsAndExecuteNonTransactionalModificationMethods( skipNonTransactionalModificationMethods: true );
+			databaseConnectionManager.CleanUpConnectionsAndExecuteNonTransactionalModificationMethods( true, skipNonTransactionalModificationMethods: true );
 
 			if( errors.Any() ) {
 				foreach( var i in errors )

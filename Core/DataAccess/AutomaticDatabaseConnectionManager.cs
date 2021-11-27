@@ -54,16 +54,16 @@ namespace EnterpriseWebLibrary.DataAccess {
 			}
 		}
 
-		public void CommitTransactionsAndExecuteNonTransactionalModificationMethods() {
-			CleanUpConnectionsAndExecuteNonTransactionalModificationMethods();
+		public void CommitTransactionsAndExecuteNonTransactionalModificationMethods( bool cacheEnabled ) {
+			CleanUpConnectionsAndExecuteNonTransactionalModificationMethods( cacheEnabled );
 		}
 
-		public void RollbackTransactions() {
+		public void RollbackTransactions( bool cacheEnabled ) {
 			transactionsMarkedForRollback = true;
-			CleanUpConnectionsAndExecuteNonTransactionalModificationMethods();
+			CleanUpConnectionsAndExecuteNonTransactionalModificationMethods( cacheEnabled );
 		}
 
-		internal void CleanUpConnectionsAndExecuteNonTransactionalModificationMethods( bool skipNonTransactionalModificationMethods = false ) {
+		internal void CleanUpConnectionsAndExecuteNonTransactionalModificationMethods( bool cacheEnabled, bool skipNonTransactionalModificationMethods = false ) {
 			var methods = new List<Action>();
 			if( primaryDatabaseConnectionInitialized )
 				methods.Add( () => cleanUpConnection( dataAccessState.PrimaryDatabaseConnection ) );
@@ -75,14 +75,19 @@ namespace EnterpriseWebLibrary.DataAccess {
 				() => {
 					try {
 						if( !skipNonTransactionalModificationMethods && !transactionsMarkedForRollback ) {
-							dataAccessState.DisableCache();
-							try {
+							if( cacheEnabled ) {
+								dataAccessState.DisableCache();
+								try {
+									foreach( var i in nonTransactionalModificationMethods )
+										i();
+								}
+								finally {
+									dataAccessState.ResetCache();
+								}
+							}
+							else
 								foreach( var i in nonTransactionalModificationMethods )
 									i();
-							}
-							finally {
-								dataAccessState.ResetCache();
-							}
 						}
 					}
 					finally {

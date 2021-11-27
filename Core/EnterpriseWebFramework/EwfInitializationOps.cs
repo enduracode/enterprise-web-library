@@ -298,10 +298,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var connectionManager = new AutomaticDatabaseConnectionManager();
 			try {
 				connectionManager.DataAccessState.ExecuteWithThis( method );
-				connectionManager.CommitTransactionsAndExecuteNonTransactionalModificationMethods();
+				connectionManager.CommitTransactionsAndExecuteNonTransactionalModificationMethods( false );
 			}
 			catch {
-				connectionManager.RollbackTransactions();
+				connectionManager.RollbackTransactions( false );
 				throw;
 			}
 		}
