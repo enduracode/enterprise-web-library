@@ -177,7 +177,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				if( ConfigurationStatics.IsIntermediateInstallation ) {
 					if( IsIntermediateInstallationPublicResource )
 						return true;
-					if( !AppRequestState.Instance.IntermediateUserExists )
+					if( EwfApp.Instance == null || EwfApp.Instance.RequestState == null || !EwfApp.Instance.RequestState.IntermediateUserExists )
 						return false;
 				}
 
