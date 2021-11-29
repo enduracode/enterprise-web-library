@@ -49,7 +49,7 @@ namespace EnterpriseWebLibrary.Saml {
 				var userManagementConfiguration = new SAMLConfiguration { Name = samlConfigurationName };
 				userManagementConfiguration.LocalServiceProviderConfiguration = new LocalServiceProviderConfiguration
 					{
-						Name = EnterpriseWebFramework.UserManagement.SamlResources.Metadata.GetInfo().GetUrl(),
+						Name = EnterpriseWebFramework.UserManagement.SamlResources.Metadata.GetInfo().GetUrl( disableAuthorizationCheck: true ),
 						AssertionConsumerServiceUrl = EnterpriseWebFramework.UserManagement.SamlResources.Assertions.GetInfo().GetUrl(),
 						LocalCertificates = new List<CertificateConfiguration>
 							{

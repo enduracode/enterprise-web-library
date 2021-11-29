@@ -16,6 +16,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.SamlResourc
 				throw new ApplicationException( "There are no SAML identity providers enabled in this application." );
 		}
 
+		protected internal override bool IsIntermediateInstallationPublicResource => true;
+
 		protected override UrlHandler getUrlParent() => new Metadata();
 
 		protected override bool managesDataAccessCacheInUnsafeRequestMethods => true;
