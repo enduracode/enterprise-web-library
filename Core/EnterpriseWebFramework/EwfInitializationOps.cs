@@ -248,7 +248,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									specifier.User = user;
 									specifier.Code = code;
 								} ).GetUrl(),
-							destinationUrl => new UserManagement.Pages.ChangePassword( destinationUrl ).GetUrl() );
+							destinationUrl => new UserManagement.Pages.ChangePassword( destinationUrl ).GetUrl( disableAuthorizationCheck: true ) );
 						Admin.EntitySetup.Init( () => RequestDispatchingStatics.AppProvider.GetFrameworkUrlParent() );
 						RequestDispatchingStatics.Init( providerGetter.GetProvider<AppRequestDispatchingProvider>( "RequestDispatching" ) );
 

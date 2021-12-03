@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using EnterpriseWebLibrary.UserManagement;
 using EnterpriseWebLibrary.UserManagement.IdentityProviders;
+using Humanizer;
 using NodaTime;
 using Tewl.Tools;
 
@@ -8,8 +9,8 @@ namespace EnterpriseWebLibrary.Configuration.Providers {
 	internal class UserManagement: SystemUserManagementProvider {
 		protected override IEnumerable<IdentityProvider> GetIdentityProviders() =>
 			new LocalIdentityProvider(
-				"",
-				"",
+				"{0} Team".FormatWith( EwlStatics.EwlInitialism ),
+				"contact the {0} Team.".FormatWith( EwlStatics.EwlInitialism ),
 				emailAddress => ( createUser(), 1, null ),
 				userId => ( null, null, null, null, "" ),
 				( userId, salt, saltedPassword ) => {},

@@ -125,7 +125,7 @@ namespace EnterpriseWebLibrary.UserManagement.IdentityProviders {
 				var codeBuilder = new StringBuilder();
 				for( var i = 0; i < 6; i += 1 ) {
 					rng.GetBytes( bytes );
-					codeBuilder.Append( numbers[ BitConverter.ToInt32( bytes, 0 ) % numbers.Length ] );
+					codeBuilder.Append( numbers[ (int)( BitConverter.ToUInt32( bytes, 0 ) % numbers.Length ) ] );
 				}
 				code = codeBuilder.ToString();
 
