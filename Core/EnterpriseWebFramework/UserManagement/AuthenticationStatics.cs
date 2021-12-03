@@ -24,11 +24,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		public static readonly TimeSpan SessionDuration = TimeSpan.FromHours( 32 ); // persist across consecutive days of usage
 
 		private static SystemProviderReference<AppAuthenticationProvider> provider;
+		private static LocalIdentityProvider.AutoLogInPageUrlGetterMethod autoLogInPageUrlGetter;
+		private static LocalIdentityProvider.ChangePasswordPageUrlGetterMethod changePasswordPageUrlGetter;
 
 		private static IReadOnlyCollection<SamlIdentityProvider> samlIdentityProviders;
 
-		internal static void Init( SystemProviderReference<AppAuthenticationProvider> provider ) {
+		internal static void Init(
+			SystemProviderReference<AppAuthenticationProvider> provider, LocalIdentityProvider.AutoLogInPageUrlGetterMethod autoLogInPageUrlGetter,
+			LocalIdentityProvider.ChangePasswordPageUrlGetterMethod changePasswordPageUrlGetter ) {
 			AuthenticationStatics.provider = provider;
+			AuthenticationStatics.autoLogInPageUrlGetter = autoLogInPageUrlGetter;
+			AuthenticationStatics.changePasswordPageUrlGetter = changePasswordPageUrlGetter;
 		}
 
 		internal static AppAuthenticationProvider AppProvider => provider.GetProvider();
@@ -124,24 +130,22 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		/// Returns log-in hidden fields and a modification method that logs in a user. Also sets up client-side logic for user log-in. Do not call if the local
 		/// identity provider is not enabled.
 		/// </summary>
-		public static Tuple<IReadOnlyCollection<EtherealComponent>, Func<( User, bool )>> GetLogInHiddenFieldsAndMethod(
-			DataValue<string> emailAddress, DataValue<string> password, string emailAddressErrorMessage, string passwordErrorMessage ) {
+		public static Tuple<IReadOnlyCollection<EtherealComponent>, Func<User>> GetLogInHiddenFieldsAndMethod(
+			DataValue<string> emailAddress, DataValue<string> password, string errorMessage = "" ) {
 			var clientTime = new DataValue<string>();
 			var hiddenFields = GetLogInHiddenFieldsAndSetUpClientSideLogic( clientTime );
 
 			return Tuple.Create(
 				hiddenFields,
-				new Func<( User, bool )>(
+				new Func<User>(
 					() => {
 						var errors = new List<string>();
 
-						var errorMessage = UserManagementStatics.LocalIdentityProvider.LogInUserWithPassword(
+						errorMessage = UserManagementStatics.LocalIdentityProvider.LogInUserWithPassword(
 							emailAddress.Value,
 							password.Value,
-							emailAddressErrorMessage,
-							passwordErrorMessage,
 							out var user,
-							out var mustChangePassword );
+							errorMessage: errorMessage );
 						if( errorMessage.Any() )
 							errors.Add( errorMessage );
 						else
@@ -152,8 +156,20 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 
 						if( errors.Any() )
 							throw new DataModificationException( errors.ToArray() );
-						return ( user, mustChangePassword );
+						return user;
 					} ) );
+		}
+
+		/// <summary>
+		/// Sends a login email to a user. Do not call if the local identity provider is not enabled.
+		/// </summary>
+		public static void SendLoginCode( DataValue<string> emailAddress, bool isPasswordReset, string destinationUrl ) {
+			UserManagementStatics.LocalIdentityProvider.SendLoginCode(
+				emailAddress.Value,
+				isPasswordReset,
+				autoLogInPageUrlGetter,
+				changePasswordPageUrlGetter,
+				destinationUrl );
 		}
 
 		/// <summary>

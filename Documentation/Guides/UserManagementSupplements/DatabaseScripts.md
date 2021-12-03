@@ -32,13 +32,21 @@ create table Users(
 		not null,
 	SaltedPassword varbinary( 20 )
 		null,
-	MustChangePassword bit
+	LoginCodeSalt varbinary( 16 )
+		null,
+	HashedLoginCode varbinary( 20 )
+		null,
+	LoginCodeExpirationDateAndTime datetime2
+		null,
+	LoginCodeRemainingAttemptCount tinyint
+		null,
+	LoginCodeDestinationUrl varchar( 500 )
 		not null
 )
 go
 
 insert into MainSequence default values
-insert into Users values( @@IDENTITY, 'john.doe@example.com', 1, NULL, 0, NULL, 1 );
+insert into Users values( @@IDENTITY, 'john.doe@example.com', 1, NULL, 0, NULL, NULL, NULL, NULL, NULL, '' );
 go
 ```
 

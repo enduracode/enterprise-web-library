@@ -29,7 +29,7 @@ namespace EnterpriseWebLibrary.UserManagement {
 
 		/// <summary>
 		/// Returns the user with the specified email address, or null if a user with that email address does not exist. Do not pass null. We recommend that you use
-		/// case-insensitive comparison. This method exists to support user impersonation.
+		/// case-insensitive comparison. This method exists to support passwordless authentication and user impersonation.
 		/// </summary>
 		protected internal abstract User GetUser( string emailAddress );
 

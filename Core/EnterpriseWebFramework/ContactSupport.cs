@@ -22,7 +22,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								{
 									Subject = "Support request from {0} in {1}".FormatWith(
 										AppTools.User.FriendlyName.Any() ? AppTools.User.FriendlyName : AppTools.User.Email,
-										ConfigurationStatics.SystemName ),
+										ConfigurationStatics.SystemDisplayName ),
 									BodyHtml = body.Value.GetTextAsEncodedHtml()
 								};
 							message.ReplyToAddresses.Add( new EmailAddress( AppTools.User.Email, AppTools.User.FriendlyName ) );

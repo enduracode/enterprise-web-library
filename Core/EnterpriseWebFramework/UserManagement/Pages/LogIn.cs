@@ -9,6 +9,8 @@ using Tewl.Tools;
 
 // EwlPage
 // Parameter: string returnUrl
+// OptionalParameter: string user
+// OptionalParameter: string code
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 	partial class LogIn {
@@ -18,18 +20,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 			var content = new UiPageContent( omitContentBox: true );
 
 			DataValue<string> emailAddress = null;
-			Tuple<IReadOnlyCollection<EtherealComponent>, Func<( User, bool )>> logInHiddenFieldsAndMethod = null;
-			var mustChangePassword = false;
+			Tuple<IReadOnlyCollection<EtherealComponent>, Func<User>> logInHiddenFieldsAndMethod = null;
 			var logInPb = PostBack.CreateFull(
-				modificationMethod: () => mustChangePassword = logInHiddenFieldsAndMethod.Item2().Item2,
-				actionGetter: () => new PostBackAction(
-					mustChangePassword ? ChangePassword.GetInfo( ReturnUrl ) as ResourceInfo : new ExternalResource( ReturnUrl ) ) );
+				modificationMethod: () => logInHiddenFieldsAndMethod.Item2(),
+				actionGetter: () => new PostBackAction( new ExternalResource( ReturnUrl ) ) );
 			var newPasswordPb = PostBack.CreateFull(
 				id: "newPw",
 				modificationMethod: () => {
-					var errorMessage = UserManagementStatics.LocalIdentityProvider.ResetAndSendPassword( emailAddress.Value, getUnregisteredEmailMessage() );
-					if( errorMessage.Any() )
-						throw new DataModificationException( errorMessage );
+					AuthenticationStatics.SendLoginCode( emailAddress, true, ReturnUrl );
 					AddStatusMessage( StatusMessageType.Info, "Your new password has been sent to your email address." );
 				},
 				actionGetter: () => new PostBackAction( new ExternalResource( ReturnUrl ) ) );
@@ -40,8 +38,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 					var registeredComponents = new List<FlowComponent>();
 					registeredComponents.Add(
 						new Paragraph(
-							"You may log in to this system if you have registered your email address with {0}"
-								.FormatWith( UserManagementStatics.LocalIdentityProvider.AdministratingCompanyName )
+							"You may log in to this system if you have registered your email address with {0}."
+								.FormatWith( UserManagementStatics.LocalIdentityProvider.AdministratingOrganizationName )
 								.ToComponents() ) );
 
 					emailAddress = new DataValue<string>();
@@ -58,37 +56,32 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 										.ToFormItem( label: "Password".ToComponents() ) )
 								.Materialize() ) );
 
-					if( UserManagementStatics.LocalIdentityProvider.PasswordResetEnabled )
-						registeredComponents.Add(
-							new Paragraph(
-								new ImportantContent( "Forgot password?".ToComponents() ).ToCollection()
-									.Concat( " ".ToComponents() )
-									.Append(
-										new EwfButton(
-											new StandardButtonStyle( "Send me a new password", buttonSize: ButtonSize.ShrinkWrap ),
-											behavior: new ConfirmationButtonBehavior(
-												new Paragraph( "Are you sure you want to reset your password?".ToComponents() ).Append(
-														new Paragraph(
-															StringTools.ConcatenateWithDelimiter(
-																	" ",
-																	"Click \"Continue\" to email yourself a new password.",
-																	"Upon receiving your new password, you may immediately use it to log in.",
-																	"You will then be prompted to change your password to something you will remember, which you may use to log in from that point forward." )
-																.ToComponents() ) )
-													.Materialize(),
-												postBack: newPasswordPb ) ) )
-									.Materialize() ) );
+					registeredComponents.Add(
+						new Paragraph(
+							new ImportantContent( "Forgot password?".ToComponents() ).ToCollection()
+								.Concat( " ".ToComponents() )
+								.Append(
+									new EwfButton(
+										new StandardButtonStyle( "Send me a new password", buttonSize: ButtonSize.ShrinkWrap ),
+										behavior: new ConfirmationButtonBehavior(
+											new Paragraph( "Are you sure you want to reset your password?".ToComponents() ).Append(
+													new Paragraph(
+														StringTools.ConcatenateWithDelimiter(
+																" ",
+																"Click \"Continue\" to email yourself a new password.",
+																"Upon receiving your new password, you may immediately use it to log in.",
+																"You will then be prompted to change your password to something you will remember, which you may use to log in from that point forward." )
+															.ToComponents() ) )
+												.Materialize(),
+											postBack: newPasswordPb ) ) )
+								.Materialize() ) );
 
 					content.Add(
 						new FlowAutofocusRegion(
 							AutofocusCondition.InitialRequest(),
 							new Section( "Registered users", registeredComponents, style: SectionStyle.Box ).ToCollection() ) );
 
-					logInHiddenFieldsAndMethod = AuthenticationStatics.GetLogInHiddenFieldsAndMethod(
-						emailAddress,
-						password,
-						getUnregisteredEmailMessage(),
-						"Incorrect password. If you do not know your password, enter your email address and send yourself a new password using the link below." );
+					logInHiddenFieldsAndMethod = AuthenticationStatics.GetLogInHiddenFieldsAndMethod( emailAddress, password );
 					content.Add( logInHiddenFieldsAndMethod.Item1 );
 				} );
 
@@ -105,10 +98,5 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 
 			return content;
 		}
-
-		private string getUnregisteredEmailMessage() =>
-			"The email address you entered is not registered. You must register the email address with " +
-			UserManagementStatics.LocalIdentityProvider.AdministratingCompanyName + " before using it to log in. To do this, " +
-			UserManagementStatics.LocalIdentityProvider.LogInHelpInstructions;
 	}
 }

@@ -240,7 +240,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										       .Materialize() );
 							} );
 						EwfUiStatics.Init( providerGetter.GetProvider<AppEwfUiProvider>( "EwfUi" ) );
-						AuthenticationStatics.Init( providerGetter.GetProvider<AppAuthenticationProvider>( "Authentication" ) );
+						AuthenticationStatics.Init(
+							providerGetter.GetProvider<AppAuthenticationProvider>( "Authentication" ),
+							( user, code ) => new UserManagement.Pages.LogIn(
+								"",
+								optionalParameterSetter: ( specifier, parameters ) => {
+									specifier.User = user;
+									specifier.Code = code;
+								} ).GetUrl(),
+							destinationUrl => new UserManagement.Pages.ChangePassword( destinationUrl ).GetUrl() );
 						Admin.EntitySetup.Init( () => RequestDispatchingStatics.AppProvider.GetFrameworkUrlParent() );
 						RequestDispatchingStatics.Init( providerGetter.GetProvider<AppRequestDispatchingProvider>( "RequestDispatching" ) );
 

@@ -10,9 +10,10 @@ namespace EnterpriseWebLibrary.Configuration.Providers {
 			new LocalIdentityProvider(
 				"",
 				"",
-				emailAddress => ( createUser(), 1, null, false ),
-				( emailAddress, password ) => ( "You should never see this", "You should never see this.".GetTextAsEncodedHtml() ),
-				( userId, salt, saltedPassword, mustChangePassword ) => {} ).ToCollection();
+				emailAddress => ( createUser(), 1, null ),
+				userId => ( null, null, null, null, "" ),
+				( userId, salt, saltedPassword ) => {},
+				( userId, salt, hashedCode, expirationTime, remainingAttemptCount, destinationUrl ) => {} ).ToCollection();
 
 		protected override IEnumerable<User> GetUsers() => createUser().ToCollection();
 

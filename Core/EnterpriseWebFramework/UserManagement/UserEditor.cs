@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using EnterpriseWebLibrary.Encryption;
 using EnterpriseWebLibrary.UserManagement;
-using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
 using Tewl.Tools;
 
@@ -15,7 +14,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 	public class UserEditor: FlowComponent {
 		public delegate void DataSetterMethod( DataValue<string> emailAddress, DataValue<int> roleId );
 
-		public delegate void PasswordDataSetterMethod( int salt, byte[] saltedPassword, bool mustChangePassword );
+		public delegate void PasswordDataSetterMethod( int salt, byte[] saltedPassword );
 
 		private readonly IReadOnlyCollection<FlowComponent> children;
 
@@ -40,8 +39,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 
 			var email = new DataValue<string>();
 			var roleId = new DataValue<int>();
-			var passwordData = new InitializationAwareValue<( int salt, byte[] saltedPassword, bool mustChangePassword )>();
-			string passwordToEmail = null;
+			var passwordData = new InitializationAwareValue<( int salt, byte[] saltedPassword )>();
 
 			var b = FormItemList.CreateStack();
 
@@ -50,28 +48,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 			if( UserManagementStatics.LocalIdentityProviderEnabled ) {
 				var group = new RadioButtonGroup( false );
 
-				void genPassword( bool emailPassword ) {
-					var password = new Password();
-					passwordData.Value = ( password.Salt, password.ComputeSaltedHash(), true );
-					if( emailPassword )
-						passwordToEmail = password.PasswordText;
-				}
-
 				var keepPassword = group.CreateRadioButton(
 						true,
 						label: userId.HasValue ? "Keep the current password".ToComponents() : "Do not create a password".ToComponents(),
 						validationMethod: ( postBackValue, validator ) => {
-							if( postBackValue.Value && user == null )
-								genPassword( false );
-						} )
-					.ToFormItem();
-
-				var generatePassword = group.CreateRadioButton(
-						false,
-						label: "Generate a {0} password and email it to the user".FormatWith( userId.HasValue ? "new, random" : "random" ).ToComponents(),
-						validationMethod: ( postBackValue, validator ) => {
-							if( postBackValue.Value )
-								genPassword( true );
+							if( postBackValue.Value && user == null ) {
+								var password = new Password();
+								passwordData.Value = ( password.Salt, password.ComputeSaltedHash() );
+							}
 						} )
 					.ToFormItem();
 
@@ -92,7 +76,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 										new EwfValidation(
 											validator => {
 												var p = new Password( password.Value );
-												passwordData.Value = ( p.Salt, p.ComputeSaltedHash(), false );
+												passwordData.Value = ( p.Salt, p.ComputeSaltedHash() );
 											} );
 
 										return list.ToCollection();
@@ -102,8 +86,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 					.ToFormItem();
 
 				b.AddFormItems(
-					new StackList( keepPassword.ToListItem().ToCollection().Append( generatePassword.ToListItem() ).Append( providePassword.ToListItem() ) ).ToFormItem(
-						label: "Password".ToComponents() ) );
+					new StackList( keepPassword.ToListItem().ToCollection().Append( providePassword.ToListItem() ) ).ToFormItem( label: "Password".ToComponents() ) );
 			}
 
 			b.AddFormItems(
@@ -118,25 +101,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 				if( dataSetter != null ) {
 					dataSetter( email, roleId );
 					if( passwordData.Initialized )
-						passwordDataSetter( passwordData.Value.salt, passwordData.Value.saltedPassword, passwordData.Value.mustChangePassword );
+						passwordDataSetter( passwordData.Value.salt, passwordData.Value.saltedPassword );
 				}
 				else {
 					userId = UserManagementStatics.SystemProvider.InsertOrUpdateUser( userId, email.Value, roleId.Value, user?.LastRequestTime );
 					if( passwordData.Initialized )
-						UserManagementStatics.LocalIdentityProvider.UserUpdater(
-							userId.Value,
-							passwordData.Value.salt,
-							passwordData.Value.saltedPassword,
-							passwordData.Value.mustChangePassword );
+						UserManagementStatics.LocalIdentityProvider.PasswordUpdater( userId.Value, passwordData.Value.salt, passwordData.Value.saltedPassword );
 				}
-
-				if( passwordToEmail == null )
-					return;
-				AppRequestState.AddNonTransactionalModificationMethod(
-					() => {
-						UserManagementStatics.LocalIdentityProvider.SendPassword( email.Value, passwordToEmail );
-						PageBase.AddStatusMessage( StatusMessageType.Info, "Password reset email sent." );
-					} );
 			};
 		}
 

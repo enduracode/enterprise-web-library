@@ -102,9 +102,10 @@ namespace EnterpriseWebLibrary.Configuration {
 		}
 
 		/// <summary>
-		/// Gets the name of the system.
+		/// Gets the display name of the system.
 		/// </summary>
-		public static string SystemName { get { return InstallationConfiguration.SystemName; } }
+		public static string SystemDisplayName =>
+			SystemGeneralProvider.SystemDisplayName.Length > 0 ? SystemGeneralProvider.SystemDisplayName : InstallationConfiguration.SystemName;
 
 		/// <summary>
 		/// Returns the default base URL for the specified web application. This will never have a trailing slash.

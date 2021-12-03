@@ -226,7 +226,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									.Append(
 										getMeta(
 											"application-name",
-											BasePageStatics.AppProvider.AppDisplayName.Length > 0 ? BasePageStatics.AppProvider.AppDisplayName : ConfigurationStatics.SystemName ) )
+											BasePageStatics.AppProvider.AppDisplayName.Length > 0
+												? BasePageStatics.AppProvider.AppDisplayName
+												: ConfigurationStatics.SystemDisplayName ) )
 									.Concat( getTypekitLogicIfNecessary() )
 									.Concat( from i in cssInfoCreator( contentObjects ) select getStyleSheetLink( i.GetUrl() ) )
 									.Append( getModernizrLogic() )
@@ -480,7 +482,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private string getTitle() =>
 			StringTools.ConcatenateWithDelimiter(
 				" - ",
-				BasePageStatics.AppProvider.AppDisplayName.Length > 0 ? BasePageStatics.AppProvider.AppDisplayName : ConfigurationStatics.SystemName,
+				BasePageStatics.AppProvider.AppDisplayName.Length > 0 ? BasePageStatics.AppProvider.AppDisplayName : ConfigurationStatics.SystemDisplayName,
 				ResourceBase.CombineResourcePathStrings(
 					ResourceBase.ResourcePathSeparator,
 					PageBase.Current.ParentResourceEntityPathString,
