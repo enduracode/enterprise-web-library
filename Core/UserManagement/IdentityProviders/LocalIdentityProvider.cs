@@ -142,22 +142,18 @@ namespace EnterpriseWebLibrary.UserManagement.IdentityProviders {
 				isPasswordReset ? changePasswordPageUrlGetter( destinationUrl ) : destinationUrl );
 
 			var body = new StringBuilder();
-			body.AppendLine( "<div style=\"display: flex; flex-wrap: wrap; align-items: center;\">" );
-			body.AppendLine( "<div style=\"margin-right: 2em;\">" );
 			body.AppendLine(
-				"<a href=\"{0}\" style=\"font-size: 1.2em; border-radius: .4em; background-color: hsla( 211, 70%, 45%, 1 ); padding: .6em; color: white; text-decoration: none;\">Log In Automatically</a>"
-					.FormatWith( autologInPageUrlGetter( user.Email, code ) ) );
-			body.AppendLine( "</div>" );
+				"<p><a href=\"{0}\" style=\"font-size: 1.2em;\">Click or tap here to log in automatically</a></p>".FormatWith(
+					autologInPageUrlGetter( user.Email, code ) ) );
 			body.AppendLine(
-				"<div>or enter this code:<br><b style=\"font-size: 1.4em;\">{0} {1}</b></div>".FormatWith( code.Substring( 0, 3 ), code.Substring( 3, 3 ) ) );
-			body.AppendLine( "</div>" );
+				"<p>or enter this code:<br><b style=\"font-size: 1.4em;\">{0} {1}</b></p>".FormatWith( code.Substring( 0, 3 ), code.Substring( 3, 3 ) ) );
 			if( isPasswordReset )
 				body.AppendLine(
-					"<p style=\"max-width: 35em;\">You will then be prompted to change your password to something you will remember, which you may use to log in from that point forward.</p>" );
+					"<p>You will then be prompted to change your password to something you will remember, which you may use to log in from that point forward.</p>" );
 			body.AppendLine(
-				"<p style=\"max-width: 35em;\">This login information is valid for {0}. If you need to log in later, please return to the page you were trying to access and send yourself another login email.</p>"
+				"<p>This login information is valid for {0}. If you need to log in later, please return to the page you were trying to access and send yourself another login email.</p>"
 					.FormatWith( codeDuration.ToTimeSpan().ToConciseString() ) );
-			body.AppendLine( "<p style=\"max-width: 35em;\">Thank you,<br>{0}</p>".FormatWith( AdministratingOrganizationName ) );
+			body.AppendLine( "<p>Thank you,<br>{0}</p>".FormatWith( AdministratingOrganizationName ) );
 
 			var message = new EmailMessage
 				{
