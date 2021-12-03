@@ -28,7 +28,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 				id: "newPw",
 				modificationMethod: () => {
 					AuthenticationStatics.SendLoginCode( emailAddress, true, ReturnUrl );
-					AddStatusMessage( StatusMessageType.Info, "Your new password has been sent to your email address." );
+					AddStatusMessage( StatusMessageType.Info, "Your login code has been sent to your email address." );
 				},
 				actionGetter: () => new PostBackAction( new ExternalResource( ReturnUrl ) ) );
 
@@ -62,15 +62,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 								.Concat( " ".ToComponents() )
 								.Append(
 									new EwfButton(
-										new StandardButtonStyle( "Send me a new password", buttonSize: ButtonSize.ShrinkWrap ),
+										new StandardButtonStyle( "Email me a login code", buttonSize: ButtonSize.ShrinkWrap ),
 										behavior: new ConfirmationButtonBehavior(
 											new Paragraph( "Are you sure you want to reset your password?".ToComponents() ).Append(
 													new Paragraph(
 														StringTools.ConcatenateWithDelimiter(
 																" ",
-																"Click \"Continue\" to email yourself a new password.",
-																"Upon receiving your new password, you may immediately use it to log in.",
-																"You will then be prompted to change your password to something you will remember, which you may use to log in from that point forward." )
+																"Click \"Continue\" to email yourself a login code.",
+																"After logging in, you will be prompted to change your password to something you will remember, which you may use to log in from that point forward." )
 															.ToComponents() ) )
 												.Materialize(),
 											postBack: newPasswordPb ) ) )
