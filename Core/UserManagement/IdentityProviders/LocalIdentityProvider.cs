@@ -74,7 +74,8 @@ namespace EnterpriseWebLibrary.UserManagement.IdentityProviders {
 
 		internal string LogInUserWithPassword( string emailAddress, string password, out User user, string errorMessage = "" ) {
 			if( errorMessage.Length == 0 )
-				errorMessage = "Login failed. Please check your email address and password. If you do not know your password, please reset it using the button below.";
+				errorMessage =
+					"Login failed. Please check your email address and password. If you do not know your password, please set a new one using the button below.";
 
 			user = null;
 

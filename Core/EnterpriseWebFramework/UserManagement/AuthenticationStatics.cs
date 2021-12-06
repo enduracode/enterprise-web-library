@@ -29,6 +29,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 
 		private static IReadOnlyCollection<SamlIdentityProvider> samlIdentityProviders;
 
+		public delegate User PasswordLoginModificationMethod( DataValue<string> emailAddress, DataValue<string> password, string errorMessage = "" );
+
+		public delegate void LoginCodeSenderMethod( DataValue<string> emailAddress, bool isPasswordReset, string destinationUrl );
+
+		public delegate ( User user, string destinationUrl ) CodeLoginModificationMethod( string emailAddress, string code, string errorMessage = "" );
+
+		public delegate void SpecifiedUserLoginModificationMethod( int userId );
+
 		internal static void Init(
 			SystemProviderReference<AppAuthenticationProvider> provider, LocalIdentityProvider.AutoLogInPageUrlGetterMethod autoLogInPageUrlGetter,
 			LocalIdentityProvider.ChangePasswordPageUrlGetterMethod changePasswordPageUrlGetter ) {
@@ -127,72 +135,72 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 			emailAddress.ToEmailAddressControl( false, setup: EmailAddressControlSetup.Create( autoFillTokens: "email" ), value: "" ).ToFormItem( label: label );
 
 		/// <summary>
-		/// Returns log-in hidden fields and a modification method that logs in a user. Also sets up client-side logic for user log-in. Do not call if the local
-		/// identity provider is not enabled.
+		/// Returns log-in hidden fields and modification methods for logging in a user. Also sets up client-side logic for user log-in. Do not call if user
+		/// management is not enabled, and use only the specified-user login method if the local identity provider is not enabled.
 		/// </summary>
-		public static Tuple<IReadOnlyCollection<EtherealComponent>, Func<User>> GetLogInHiddenFieldsAndMethod(
-			DataValue<string> emailAddress, DataValue<string> password, string errorMessage = "" ) {
+		public static ( IReadOnlyCollection<EtherealComponent> hiddenFields, ( PasswordLoginModificationMethod passwordLoginMethod, LoginCodeSenderMethod
+			loginCodeSender, CodeLoginModificationMethod codeLoginMethod, SpecifiedUserLoginModificationMethod specifiedUserLoginMethod ) modificationMethods )
+			GetLogInHiddenFieldsAndMethods() {
 			var clientTime = new DataValue<string>();
 			var hiddenFields = GetLogInHiddenFieldsAndSetUpClientSideLogic( clientTime );
 
-			return Tuple.Create(
-				hiddenFields,
-				new Func<User>(
-					() => {
-						var errors = new List<string>();
+			return ( hiddenFields, ( ( emailAddress, password, errorMessage ) => {
+					                       var errors = new List<string>();
 
-						errorMessage = UserManagementStatics.LocalIdentityProvider.LogInUserWithPassword(
-							emailAddress.Value,
-							password.Value,
-							out var user,
-							errorMessage: errorMessage );
-						if( errorMessage.Any() )
-							errors.Add( errorMessage );
-						else
-							SetFormsAuthCookieAndUser( user, identityProvider: UserManagementStatics.LocalIdentityProvider );
+					                       errorMessage = UserManagementStatics.LocalIdentityProvider.LogInUserWithPassword(
+						                       emailAddress.Value,
+						                       password.Value,
+						                       out var user,
+						                       errorMessage: errorMessage );
+					                       if( errorMessage.Any() )
+						                       errors.Add( errorMessage );
+					                       else
+						                       SetFormsAuthCookieAndUser( user, identityProvider: UserManagementStatics.LocalIdentityProvider );
 
-						errors.AddRange( verifyTestCookie() );
-						addStatusMessageIfClockNotSynchronized( clientTime );
+					                       errors.AddRange( verifyTestCookie() );
+					                       addStatusMessageIfClockNotSynchronized( clientTime );
 
-						if( errors.Any() )
-							throw new DataModificationException( errors.ToArray() );
-						return user;
-					} ) );
-		}
+					                       if( errors.Any() )
+						                       throw new DataModificationException( errors.ToArray() );
+					                       return user;
+				                       },
+				                       ( emailAddress, isPasswordReset, destinationUrl ) => {
+					                       UserManagementStatics.LocalIdentityProvider.SendLoginCode(
+						                       emailAddress.Value,
+						                       isPasswordReset,
+						                       autoLogInPageUrlGetter,
+						                       changePasswordPageUrlGetter,
+						                       destinationUrl );
+				                       }, ( emailAddress, code, errorMessage ) => {
+					                       var errors = new List<string>();
 
-		/// <summary>
-		/// Sends a login email to a user. Do not call if the local identity provider is not enabled.
-		/// </summary>
-		public static void SendLoginCode( DataValue<string> emailAddress, bool isPasswordReset, string destinationUrl ) {
-			UserManagementStatics.LocalIdentityProvider.SendLoginCode(
-				emailAddress.Value,
-				isPasswordReset,
-				autoLogInPageUrlGetter,
-				changePasswordPageUrlGetter,
-				destinationUrl );
-		}
+					                       errorMessage = UserManagementStatics.LocalIdentityProvider.LogInUserWithCode(
+						                       emailAddress,
+						                       code,
+						                       out var user,
+						                       out var destinationUrl,
+						                       errorMessage: errorMessage );
+					                       if( errorMessage.Any() )
+						                       errors.Add( errorMessage );
+					                       else
+						                       SetFormsAuthCookieAndUser( user, identityProvider: UserManagementStatics.LocalIdentityProvider );
 
-		/// <summary>
-		/// Returns log-in hidden fields and a modification method that logs in the specified user. Also sets up client-side logic for user log-in. Do not call if
-		/// user management is not enabled.
-		/// </summary>
-		public static Tuple<IReadOnlyCollection<EtherealComponent>, Action<int>> GetLogInHiddenFieldsAndSpecifiedUserLogInMethod() {
-			var clientTime = new DataValue<string>();
-			var hiddenFields = GetLogInHiddenFieldsAndSetUpClientSideLogic( clientTime );
+					                       errors.AddRange( verifyTestCookie() );
+					                       addStatusMessageIfClockNotSynchronized( clientTime );
 
-			return Tuple.Create(
-				hiddenFields,
-				new Action<int>(
-					userId => {
-						var user = UserManagementStatics.SystemProvider.GetUser( userId );
-						SetFormsAuthCookieAndUser( user );
+					                       if( errors.Any() )
+						                       throw new DataModificationException( errors.ToArray() );
+					                       return ( user, destinationUrl );
+				                       }, userId => {
+					                       var user = UserManagementStatics.SystemProvider.GetUser( userId );
+					                       SetFormsAuthCookieAndUser( user );
 
-						var errors = new List<string>();
-						errors.AddRange( verifyTestCookie() );
-						addStatusMessageIfClockNotSynchronized( clientTime );
-						if( errors.Any() )
-							throw new DataModificationException( errors.ToArray() );
-					} ) );
+					                       var errors = new List<string>();
+					                       errors.AddRange( verifyTestCookie() );
+					                       addStatusMessageIfClockNotSynchronized( clientTime );
+					                       if( errors.Any() )
+						                       throw new DataModificationException( errors.ToArray() );
+				                       } ) );
 		}
 
 		internal static IReadOnlyCollection<EtherealComponent> GetLogInHiddenFieldsAndSetUpClientSideLogic( DataValue<string> clientTime ) {

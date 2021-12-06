@@ -303,3 +303,14 @@ ewfUiPoweredByEwlFooterContainer {
 		display: none;
 	}
 }
+
+/* log-in page */
+.ewfLogInPasswordContainer {
+	display: flex;
+	flex-flow: row wrap;
+	align-items: center;
+	gap: .5em 1.5em;
+}
+.ewfLogInPasswordContainer > div > span {
+	margin-right: .5em;
+}
