@@ -583,10 +583,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		private string getJsInitStatements( string elementJsInitStatements, string pageLoadActionStatements ) {
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
-			var scroll = scrollPositionForThisResponse == ScrollPosition.LastPositionOrStatusBar &&
-			             ( !requestState.ModificationErrorsExist || ( requestState.DmIdAndSecondaryOp != null &&
-			                                                          new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }
-				                                                          .Contains( requestState.DmIdAndSecondaryOp.Item2 ) ) );
+			var modificationErrorsOccurred = requestState.ModificationErrorsExist &&
+			                                 ( requestState.DmIdAndSecondaryOp == null ||
+			                                   !new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains(
+				                                   requestState.DmIdAndSecondaryOp.Item2 ) );
+
+			var scroll = scrollPositionForThisResponse == ScrollPosition.LastPositionOrStatusBar && !modificationErrorsOccurred;
 			var scrollStatement = "";
 			if( scroll && requestState.ScrollPositionX != null && requestState.ScrollPositionY != null )
 				scrollStatement = "window.scroll(" + requestState.ScrollPositionX + "," + requestState.ScrollPositionY + ");";
@@ -616,7 +618,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				elementJsInitStatements,
 				appProvider.javaScriptDocumentReadyFunctionCallGetter().AppendDelimiter( ";" ),
 				javaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
-				StringTools.ConcatenateWithDelimiter( " ", scrollStatement, pageLoadActionStatements, clientSideNavigationStatements )
+				StringTools.ConcatenateWithDelimiter( " ", scrollStatement, modificationErrorsOccurred ? "" : pageLoadActionStatements, clientSideNavigationStatements )
 					.PrependDelimiter( "window.onload = function() { " )
 					.AppendDelimiter( " };" ) );
 		}
