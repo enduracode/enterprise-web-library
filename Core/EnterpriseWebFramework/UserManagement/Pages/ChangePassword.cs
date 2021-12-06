@@ -1,5 +1,5 @@
-﻿using EnterpriseWebLibrary.Encryption;
-using EnterpriseWebLibrary.UserManagement;
+﻿using EnterpriseWebLibrary.UserManagement;
+using EnterpriseWebLibrary.UserManagement.IdentityProviders;
 using EnterpriseWebLibrary.WebSessionState;
 using Tewl.Tools;
 
@@ -28,7 +28,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 		}
 
 		private void modifyData() {
-			var password = new Password( newPassword.Value );
+			var password = new LocalIdentityProvider.Password( newPassword.Value );
 			UserManagementStatics.LocalIdentityProvider.PasswordUpdater( AppTools.User.UserId, password.Salt, password.ComputeSaltedHash() );
 			AddStatusMessage( StatusMessageType.Info, "Your password has been successfully changed. Use it the next time you log in." );
 		}

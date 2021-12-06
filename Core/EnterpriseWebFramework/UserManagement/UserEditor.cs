@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using EnterpriseWebLibrary.Encryption;
 using EnterpriseWebLibrary.UserManagement;
+using EnterpriseWebLibrary.UserManagement.IdentityProviders;
 using Humanizer;
 using Tewl.Tools;
 
@@ -53,7 +53,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 						label: userId.HasValue ? "Keep the current password".ToComponents() : "Do not create a password".ToComponents(),
 						validationMethod: ( postBackValue, validator ) => {
 							if( postBackValue.Value && user == null ) {
-								var password = new Password();
+								var password = new LocalIdentityProvider.Password();
 								passwordData.Value = ( password.Salt, password.ComputeSaltedHash() );
 							}
 						} )
@@ -75,7 +75,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 
 										new EwfValidation(
 											validator => {
-												var p = new Password( password.Value );
+												var p = new LocalIdentityProvider.Password( password.Value );
 												passwordData.Value = ( p.Salt, p.ComputeSaltedHash() );
 											} );
 

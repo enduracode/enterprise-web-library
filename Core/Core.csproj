@@ -775,7 +775,6 @@
     <Compile Include="InitializationAwareValue.cs" />
     <Compile Include="MailMerging\FieldImplementation\BasicMergeFieldImplementationWithMsWordName.cs" />
     <Compile Include="Email\EmailMessage.cs" />
-    <Compile Include="Encryption\Password.cs" />
     <Compile Include="Collections\ListSet.cs" />
     <Compile Include="InstallationFileStatics.cs" />
     <Compile Include="NetTools.cs" />
