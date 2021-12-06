@@ -11,15 +11,7 @@ namespace EnterpriseWebLibrary.Encryption {
 		private readonly string password;
 		private readonly int salt;
 
-		/// <summary>
-		/// Not documented.
-		/// </summary>
-		public string PasswordText { get { return password; } }
-
-		/// <summary>
-		/// Not documented.
-		/// </summary>
-		public int Salt { get { return salt; } }
+		public int Salt => salt;
 
 		/// <summary>
 		/// Generates a new random password with random salt.
@@ -42,10 +34,10 @@ namespace EnterpriseWebLibrary.Encryption {
 		// It is important that this password not contain white space on the ends since the log in page trims this off.
 		private static string createRandomPassword( int passwordLength ) {
 			const string allowedChars = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNOPQRSTUVWXYZ23456789";
-			var randomBytes = new Byte[passwordLength];
+			var randomBytes = new Byte[ passwordLength ];
 			var rng = new RNGCryptoServiceProvider();
 			rng.GetBytes( randomBytes );
-			var chars = new char[passwordLength];
+			var chars = new char[ passwordLength ];
 			var allowedCharCount = allowedChars.Length;
 
 			for( var i = 0; i < passwordLength; i++ )
@@ -55,16 +47,13 @@ namespace EnterpriseWebLibrary.Encryption {
 		}
 
 		private static int createRandomSalt() {
-			var saltBytes = new Byte[4];
+			var saltBytes = new Byte[ 4 ];
 			var rng = new RNGCryptoServiceProvider();
 			rng.GetBytes( saltBytes );
 
 			return ( ( saltBytes[ 0 ] << 24 ) + ( saltBytes[ 1 ] << 16 ) + ( saltBytes[ 2 ] << 8 ) + saltBytes[ 3 ] );
 		}
 
-		/// <summary>
-		/// Not documented.
-		/// </summary>
 		public byte[] ComputeSaltedHash() {
 			// Create a new salt
 			var saltBytes = new Byte[ 4 ];
