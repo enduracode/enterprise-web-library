@@ -157,3 +157,7 @@ function dockNotificationSection() {
 	};
 	jQuery.each( fieldSelection, function( i ) { jQuery.fn[i] = this; } );
 } )();
+
+function initLogInPage( passwordSelector, loginCodeSelector ) {
+	$( passwordSelector ).on( "input", function() { $( loginCodeSelector ).get( 0 ).tabIndex = $( this ).val().length === 0 ? 0 : -1; } );
+}

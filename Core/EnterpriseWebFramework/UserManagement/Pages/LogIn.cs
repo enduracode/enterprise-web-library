@@ -216,8 +216,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 		}
 
 		protected override string javaScriptDocumentReadyFunctionCall =>
-			"$( '.{0}' ).on( 'input', function() {{ $( '.{1}' ).get( 0 ).tabIndex = $( this ).val().length === 0 ? 0 : -1; }} )".FormatWith(
-				passwordClass.ClassName,
-				loginCodeClass.ClassName );
+			"initLogInPage( '.{0}', '.{1}' )".FormatWith( passwordClass.ClassName, loginCodeClass.ClassName );
 	}
 }
