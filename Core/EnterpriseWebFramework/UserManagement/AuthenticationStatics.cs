@@ -132,7 +132,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		/// Gets an email address form item for use on log-in pages.
 		/// </summary>
 		public static FormItem GetEmailAddressFormItem( this DataValue<string> emailAddress, IReadOnlyCollection<PhrasingComponent> label ) =>
-			emailAddress.ToEmailAddressControl( false, setup: EmailAddressControlSetup.Create( autoFillTokens: "email" ), value: "" ).ToFormItem( label: label );
+			// The username token probably works better for password managers; see https://stackoverflow.com/a/57902690/35349.
+			emailAddress.ToEmailAddressControl( false, setup: EmailAddressControlSetup.Create( autoFillTokens: "username" ), value: "" ).ToFormItem( label: label );
 
 		/// <summary>
 		/// Returns log-in hidden fields and modification methods for logging in a user. Also sets up client-side logic for user log-in. Do not call if user
