@@ -31,7 +31,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				maxLength,
 				( postBackValue, validator ) => {
 					var errorHandler = new ValidationErrorHandler( "value" );
-					var validatedValue = validator.GetString( errorHandler, postBackValue, allowEmpty, minLength ?? 0, int.MaxValue );
+					var validatedValue = validator.GetString( errorHandler, postBackValue, allowEmpty, minLength ?? 0, maxLength ?? int.MaxValue );
 					if( errorHandler.LastResult != ErrorCondition.NoError )
 						return null;
 
