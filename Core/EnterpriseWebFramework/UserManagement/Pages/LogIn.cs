@@ -213,8 +213,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 				false,
 				setup: NumericTextControlSetup.Create( classes: loginCodeTextControlClass ),
 				value: "",
-				minLength: 6,
-				maxLength: 6 );
+				maxLength: 10 );
 			return new FlowAutofocusRegion( autofocusCondition, control.PageComponent.ToCollection() ).ToFormItem(
 				setup: new FormItemSetup( updateRegionSets: updateRegionSets ),
 				label: control.Labeler.CreateLabel( "Login code".ToComponents() ),
