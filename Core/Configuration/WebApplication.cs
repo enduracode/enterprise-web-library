@@ -53,39 +53,27 @@ namespace EnterpriseWebLibrary.Configuration {
 
 		internal WebApplication(
 			string name, string installationPath, bool supportsSecureConnections, InstallationStandardWebApplication configuration, string installationFullShortName,
-			bool systemHasMultipleWebApplications ): this(
-			name,
-			installationPath,
-			supportsSecureConnections,
-			configuration.IisApplication,
-			installationFullShortName,
-			systemHasMultipleWebApplications,
-			configuration.DefaultBaseUrl,
-			configuration.DefaultCookieAttributes ) {}
-
-		internal WebApplication(
-			string name, string installationPath, bool supportsSecureConnections, IisApplication iisApplication, string installationFullShortName,
-			bool systemHasMultipleWebApplications, InstallationStandardBaseUrl baseUrl, InstallationStandardCookieAttributes cookieAttributes ) {
+			bool systemHasMultipleWebApplications ) {
 			Name = name;
 			Path = EwlStatics.CombinePaths( installationPath, name );
 			SupportsSecureConnections = supportsSecureConnections;
-			IisApplication = iisApplication;
+			IisApplication = configuration.IisApplication;
 
-			var site = iisApplication as Site;
+			var site = configuration.IisApplication as Site;
 			var siteHostName = site?.HostNames.First();
-			var virtualDirectory = iisApplication as VirtualDirectory;
+			var virtualDirectory = configuration.IisApplication as VirtualDirectory;
 
 			if( virtualDirectory != null && virtualDirectory.Name == null )
 				virtualDirectory.Name = installationFullShortName + ( systemHasMultipleWebApplications ? name.EnglishToPascal() : "" );
 
 			// We must pass values for all components since we will not have defaults to fall back on when getting the URL string for this object.
-			DefaultBaseUrl = baseUrl != null
+			DefaultBaseUrl = configuration.DefaultBaseUrl != null
 				                 ?
 				                 new BaseUrl(
-					                 baseUrl.Host,
-					                 baseUrl.NonsecurePortSpecified ? baseUrl.NonsecurePort : 80,
-					                 baseUrl.SecurePortSpecified ? baseUrl.SecurePort : 443,
-					                 baseUrl.Path ?? "" )
+					                 configuration.DefaultBaseUrl.Host,
+					                 configuration.DefaultBaseUrl.NonsecurePortSpecified ? configuration.DefaultBaseUrl.NonsecurePort : 80,
+					                 configuration.DefaultBaseUrl.SecurePortSpecified ? configuration.DefaultBaseUrl.SecurePort : 443,
+					                 configuration.DefaultBaseUrl.Path ?? "" )
 				                 : site != null
 					                 ? new BaseUrl(
 						                 siteHostName.Name,
@@ -94,8 +82,11 @@ namespace EnterpriseWebLibrary.Configuration {
 						                 "" )
 					                 : new BaseUrl( virtualDirectory.Site, 80, 443, virtualDirectory.Name );
 
-			DefaultCookieAttributes = cookieAttributes != null
-				                          ? new DefaultCookieAttributes( cookieAttributes.Domain, cookieAttributes.Path, cookieAttributes.NamePrefix )
+			DefaultCookieAttributes = configuration.DefaultCookieAttributes != null
+				                          ? new DefaultCookieAttributes(
+					                          configuration.DefaultCookieAttributes.Domain,
+					                          configuration.DefaultCookieAttributes.Path,
+					                          configuration.DefaultCookieAttributes.NamePrefix )
 				                          : new DefaultCookieAttributes( null, null, null );
 		}
 
