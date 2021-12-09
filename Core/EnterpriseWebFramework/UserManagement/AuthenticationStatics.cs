@@ -31,7 +31,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 
 		public delegate User PasswordLoginModificationMethod( DataValue<string> emailAddress, DataValue<string> password, string errorMessage = "" );
 
-		public delegate void LoginCodeSenderMethod( DataValue<string> emailAddress, bool isPasswordReset, string destinationUrl );
+		public delegate void LoginCodeSenderMethod( DataValue<string> emailAddress, bool isPasswordReset, string destinationUrl, int? newUserRoleId = null );
 
 		public delegate ( User user, string destinationUrl ) CodeLoginModificationMethod( string emailAddress, string code, string errorMessage = "" );
 
@@ -164,13 +164,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 					                       if( errors.Any() )
 						                       throw new DataModificationException( errors.ToArray() );
 					                       return user;
-				                       }, ( emailAddress, isPasswordReset, destinationUrl ) => {
+				                       }, ( emailAddress, isPasswordReset, destinationUrl, newUserRoleId ) => {
 					                       UserManagementStatics.LocalIdentityProvider.SendLoginCode(
 						                       emailAddress.Value,
 						                       isPasswordReset,
 						                       autoLogInPageUrlGetter,
 						                       changePasswordPageUrlGetter,
-						                       destinationUrl );
+						                       destinationUrl,
+						                       newUserRoleId: newUserRoleId );
 					                       PageBase.AddStatusMessage( StatusMessageType.Info, "Your login code has been sent to your email address." );
 				                       }, ( emailAddress, code, errorMessage ) => {
 					                       var errors = new List<string>();

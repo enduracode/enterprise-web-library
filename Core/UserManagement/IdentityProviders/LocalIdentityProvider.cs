@@ -185,10 +185,13 @@ namespace EnterpriseWebLibrary.UserManagement.IdentityProviders {
 
 		internal void SendLoginCode(
 			string emailAddress, bool isPasswordReset, AutoLogInPageUrlGetterMethod autologInPageUrlGetter,
-			ChangePasswordPageUrlGetterMethod changePasswordPageUrlGetter, string destinationUrl ) {
+			ChangePasswordPageUrlGetterMethod changePasswordPageUrlGetter, string destinationUrl, int? newUserRoleId = null ) {
 			var user = UserManagementStatics.SystemProvider.GetUser( emailAddress );
-			if( user == null )
-				return;
+			if( user == null ) {
+				if( !newUserRoleId.HasValue )
+					return;
+				user = UserManagementStatics.GetUser( UserManagementStatics.SystemProvider.InsertOrUpdateUser( null, emailAddress, newUserRoleId.Value, null ), true );
+			}
 
 			string code;
 			var salt = new byte[ 16 ];
