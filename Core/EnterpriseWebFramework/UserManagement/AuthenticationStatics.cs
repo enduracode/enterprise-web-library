@@ -10,6 +10,7 @@ using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
 using NodaTime;
 using NodaTime.Text;
+using Tewl.InputValidation;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
@@ -131,9 +132,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		/// <summary>
 		/// Gets an email address form item for use on log-in pages.
 		/// </summary>
-		public static FormItem GetEmailAddressFormItem( this DataValue<string> emailAddress, IReadOnlyCollection<PhrasingComponent> label ) =>
+		public static FormItem GetEmailAddressFormItem(
+			this DataValue<string> emailAddress, IReadOnlyCollection<PhrasingComponent> label, Action<Validator> additionalValidationMethod = null ) =>
 			// The username token probably works better for password managers; see https://stackoverflow.com/a/57902690/35349.
-			emailAddress.ToEmailAddressControl( false, setup: EmailAddressControlSetup.Create( autoFillTokens: "username" ), value: "" ).ToFormItem( label: label );
+			emailAddress.ToEmailAddressControl(
+					false,
+					setup: EmailAddressControlSetup.Create( autoFillTokens: "username" ),
+					value: "",
+					additionalValidationMethod: additionalValidationMethod )
+				.ToFormItem( label: label );
 
 		/// <summary>
 		/// Gets a login code form item for use on log-in pages.
