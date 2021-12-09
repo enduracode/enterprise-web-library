@@ -17,7 +17,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 
 		private static readonly ElementClass passwordClass = new ElementClass( "ewfLogInPassword" );
 		private static readonly ElementClass loginCodeButtonClass = new ElementClass( "ewfLogInLcB" );
-		private static readonly ElementClass loginCodeTextControlClass = new ElementClass( "ewfLogInLcTc" );
 
 		protected override UrlHandler getUrlParent() => new Admin.EntitySetup();
 
@@ -206,11 +205,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 		}
 
 		private FormItem getLoginCodeFormItem( IEnumerable<UpdateRegionSet> updateRegionSets, AutofocusCondition autofocusCondition, DataValue<string> loginCode ) {
-			var control = loginCode.ToNumericTextControl(
-				false,
-				setup: NumericTextControlSetup.Create( classes: loginCodeTextControlClass ),
-				value: "",
-				maxLength: 10 );
+			var control = loginCode.ToNumericTextControl( false, value: "", maxLength: 10 );
 			return new FlowAutofocusRegion( autofocusCondition, control.PageComponent.ToCollection() ).ToFormItem(
 				setup: new FormItemSetup( updateRegionSets: updateRegionSets ),
 				label: control.Labeler.CreateLabel( "Login code".ToComponents() ),
@@ -218,6 +213,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 		}
 
 		protected override string javaScriptDocumentReadyFunctionCall =>
-			"initLogInPage( '.{0}', '.{1}', '.{2}' )".FormatWith( passwordClass.ClassName, loginCodeButtonClass.ClassName, loginCodeTextControlClass.ClassName );
+			"initLogInPage( '.{0}', '.{1}' )".FormatWith( passwordClass.ClassName, loginCodeButtonClass.ClassName );
 	}
 }

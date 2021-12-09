@@ -341,7 +341,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 												       .ConcatenateWithSpace(
 													       numericPageModificationValue?.GetJsModificationStatements( "Number( {0} )".FormatWith( "$( this ).val()" ) ) ?? "" )
 												       .Surround( "$( '#{0}' ).change( function() {{ ".FormatWith( context.Id ), " } );" ),
-											       autoCompleteStatements );
+											       autoCompleteStatements,
+											       requiresNumericValue ? "initNumericTextControl( '#{0}' );".FormatWith( context.Id ) : "" );
 
 										       return new DisplayableElementLocalData(
 											       inputElementType.Any() ? "input" : "textarea",

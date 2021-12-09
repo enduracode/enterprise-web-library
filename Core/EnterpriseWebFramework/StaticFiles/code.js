@@ -114,6 +114,14 @@ function dockNotificationSection() {
 	$( "#ewfNotification" ).removeClass().addClass( "ewfNotificationD" );
 }
 
+function initNumericTextControl( selector ) {
+	$( selector ).on( "paste",
+		function( e ) {
+			e.preventDefault();
+			this.setRangeText( e.originalEvent.clipboardData.getData( "text" ).replace( /\D/g, "" ), this.selectionStart, this.selectionEnd, "end" );
+		} );
+}
+
 // Supports DurationControl.
 /*
  * jQuery plugin: fieldSelection - v0.1.0 - last change: 2006-12-16
@@ -158,11 +166,6 @@ function dockNotificationSection() {
 	jQuery.each( fieldSelection, function( i ) { jQuery.fn[i] = this; } );
 } )();
 
-function initLogInPage( passwordSelector, loginCodeButtonSelector, loginCodeTextControlSelector ) {
+function initLogInPage( passwordSelector, loginCodeButtonSelector ) {
 	$( passwordSelector ).on( "input", function() { $( loginCodeButtonSelector ).get( 0 ).tabIndex = $( this ).val().length === 0 ? 0 : -1; } );
-	$( loginCodeTextControlSelector ).on( "paste",
-		function( e ) {
-			e.preventDefault();
-			this.setRangeText( e.originalEvent.clipboardData.getData( "text" ).replace( /\D/g, "" ), this.selectionStart, this.selectionEnd, "end" );
-		} );
 }
