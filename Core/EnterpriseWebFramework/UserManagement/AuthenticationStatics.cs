@@ -136,6 +136,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 			emailAddress.ToEmailAddressControl( false, setup: EmailAddressControlSetup.Create( autoFillTokens: "username" ), value: "" ).ToFormItem( label: label );
 
 		/// <summary>
+		/// Gets a login code form item for use on log-in pages.
+		/// </summary>
+		public static FormItem GetLoginCodeFormItem( this DataValue<string> loginCode ) =>
+			loginCode.ToNumericTextControl( false, value: "", maxLength: 10 ).ToFormItem( label: "Login code".ToComponents() );
+
+		/// <summary>
 		/// Returns log-in hidden fields and modification methods for logging in a user. Also sets up client-side logic for user log-in. Do not call if user
 		/// management is not enabled, and use only the specified-user login method if the local identity provider is not enabled.
 		/// </summary>
