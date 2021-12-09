@@ -9,9 +9,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			AppConfiguration = ConfigurationStatics.InstallationConfiguration.WebApplications.Single( a => a.Name == ConfigurationStatics.AppName );
 		}
 
-		/// <summary>
-		/// Standard library use only.
-		/// </summary>
-		public static bool AppSupportsSecureConnections => AppConfiguration.SupportsSecureConnections;
+		internal static bool AppSupportsSecureConnections => AppConfiguration.SupportsSecureConnections;
 	}
 }
