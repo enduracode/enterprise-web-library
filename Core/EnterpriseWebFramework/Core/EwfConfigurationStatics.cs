@@ -12,8 +12,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Standard library use only.
 		/// </summary>
-		public static bool AppSupportsSecureConnections {
-			get { return AppConfiguration.SupportsSecureConnections || ConfigurationStatics.IsIntermediateInstallation; }
-		}
+		public static bool AppSupportsSecureConnections => AppConfiguration.SupportsSecureConnections;
 	}
 }

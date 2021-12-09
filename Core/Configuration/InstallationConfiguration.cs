@@ -154,7 +154,7 @@ namespace EnterpriseWebLibrary.Configuration {
 					                           : new WebApplication(
 						                           name,
 						                           installationPath,
-						                           supportsSecureConnections,
+						                           true,
 						                           IntermediateInstallationConfiguration.WebApplications.Single( i => i.Name == name ),
 						                           FullShortName,
 						                           systemWebApplicationElements.AtLeast( 2 ) ) ).ToImmutableArray();
