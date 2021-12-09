@@ -22,7 +22,7 @@ namespace EnterpriseWebLibrary {
 			return ( url.Scheme == "https", url.Host, url.Port, url.AbsolutePath.Substring( "/".Length ) );
 		}
 
-		private readonly string host;
+		internal readonly string Host;
 		private readonly int? nonsecurePort;
 		private readonly int? securePort;
 		private readonly string path;
@@ -35,7 +35,7 @@ namespace EnterpriseWebLibrary {
 		/// <param name="securePort">Pass null to use the application's default from the configuration file.</param>
 		/// <param name="path">Pass null to use the application's default from the configuration file. Pass the empty string to represent the root path.</param>
 		public BaseUrl( string host, int? nonsecurePort, int? securePort, string path ) {
-			this.host = host;
+			Host = host;
 			this.nonsecurePort = nonsecurePort;
 			this.securePort = securePort;
 			this.path = path;
@@ -43,7 +43,7 @@ namespace EnterpriseWebLibrary {
 
 		internal BaseUrl CompleteWithDefaults( BaseUrl defaults ) {
 			return new BaseUrl(
-				host.Any() ? host : defaults.host,
+				Host.Any() ? Host : defaults.Host,
 				nonsecurePort ?? defaults.nonsecurePort,
 				securePort ?? defaults.securePort,
 				path ?? defaults.path );
@@ -51,7 +51,7 @@ namespace EnterpriseWebLibrary {
 
 		internal string GetUrlString( bool secure ) {
 			var port = secure ? securePort.Value : nonsecurePort.Value;
-			return GetUrlString( secure, host + ":" + port, path );
+			return GetUrlString( secure, Host + ":" + port, path );
 		}
 	}
 }

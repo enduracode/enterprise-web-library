@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.UserManagement;
 using EnterpriseWebLibrary.UserManagement.IdentityProviders;
@@ -72,9 +73,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin {
 
 		private string generateCertificate( DateTimeOffset currentTime ) {
 			using( var algorithm = new RSACryptoServiceProvider(
-				2048,
+				3072,
 				new CspParameters( 24, "Microsoft Enhanced RSA and AES Cryptographic Provider", Guid.NewGuid().ToString() ) ) ) {
-				var request = new CertificateRequest( "CN={0}".FormatWith( EwlStatics.EwlName ), algorithm, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1 );
+				var request = new CertificateRequest(
+					"CN={0}".FormatWith( ConfigurationStatics.InstallationConfiguration.WebApplications.Single().DefaultBaseUrl.Host ),
+					algorithm,
+					HashAlgorithmName.SHA256,
+					RSASignaturePadding.Pkcs1 );
 				request.CertificateExtensions.Add(
 					new X509KeyUsageExtension( X509KeyUsageFlags.DigitalSignature | X509KeyUsageFlags.DataEncipherment | X509KeyUsageFlags.KeyEncipherment, false ) );
 				using( var certificate = request.CreateSelfSigned( currentTime, currentTime.AddYears( 10 ) ) )
