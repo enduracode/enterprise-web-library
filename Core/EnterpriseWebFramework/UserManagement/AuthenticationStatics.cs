@@ -164,14 +164,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 					                       if( errors.Any() )
 						                       throw new DataModificationException( errors.ToArray() );
 					                       return user;
-				                       },
-				                       ( emailAddress, isPasswordReset, destinationUrl ) => {
+				                       }, ( emailAddress, isPasswordReset, destinationUrl ) => {
 					                       UserManagementStatics.LocalIdentityProvider.SendLoginCode(
 						                       emailAddress.Value,
 						                       isPasswordReset,
 						                       autoLogInPageUrlGetter,
 						                       changePasswordPageUrlGetter,
 						                       destinationUrl );
+					                       PageBase.AddStatusMessage( StatusMessageType.Info, "Your login code has been sent to your email address." );
 				                       }, ( emailAddress, code, errorMessage ) => {
 					                       var errors = new List<string>();
 

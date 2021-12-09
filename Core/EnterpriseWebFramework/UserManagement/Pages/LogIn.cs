@@ -2,7 +2,6 @@
 using System.Linq;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.UserManagement;
-using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
 using Tewl.Tools;
 
@@ -71,7 +70,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 					                 id: "sendCode",
 					                 modificationMethod: () => {
 						                 loginCodeSender( emailAddress, false, ReturnUrl );
-						                 AddStatusMessage( StatusMessageType.Info, "Your login code has been sent to your email address." );
 						                 codeEntryIsForPasswordReset.Value.Value = false;
 					                 },
 					                 reloadBehaviorGetter: () => new PageReloadBehavior( focusKey: passwordOrCodeFocusKey ) )
@@ -82,7 +80,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 					                    id: "newPw",
 					                    modificationMethod: () => {
 						                    loginCodeSender( emailAddress, true, ReturnUrl );
-						                    AddStatusMessage( StatusMessageType.Info, "Your login code has been sent to your email address." );
 						                    codeEntryIsForPasswordReset.Value.Value = true;
 					                    },
 					                    reloadBehaviorGetter: () => new PageReloadBehavior( focusKey: passwordOrCodeFocusKey ) )
