@@ -185,7 +185,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 						                       changePasswordPageUrlGetter,
 						                       destinationUrl,
 						                       newUserRoleId: newUserRoleId );
-					                       PageBase.AddStatusMessage( StatusMessageType.Info, "Your login code has been sent to your email address." );
+					                       PageBase.AddStatusMessage( StatusMessageType.Info, "Your login code has been sent to {0}.".FormatWith( emailAddress.Value ) );
 				                       }, ( emailAddress, code, errorMessage ) => {
 					                       var errors = new List<string>();
 
