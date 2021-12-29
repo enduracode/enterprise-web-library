@@ -53,10 +53,5 @@ namespace EnterpriseWebLibrary.WebSessionState {
 		internal void ClearClientSideNavigation() {
 			clientSideNavigationUrl = "";
 		}
-
-		/// <summary>
-		/// EWL use only.
-		/// </summary>
-		public bool HideBrowserWarningForRemainderOfSession { get; set; }
 	}
 }
