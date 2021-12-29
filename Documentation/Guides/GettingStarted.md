@@ -2,11 +2,13 @@
 
 **Please note:** While EWL has been in production use for many years, this Getting Started guide is brand new. If you run into problems please let us know in our [community forum](https://community.enterpriseweblibrary.org/) and one of the developers will help you out.
 
+Last updated for Enterprise Web Library version 72.
+
 
 ## Requirements
 
 *	Windows 10, .NET Framework 4.7.2, IIS Express 10 (.NET 6 support is on the roadmap but please [speak up](https://community.enterpriseweblibrary.org/) if you’re interested!)
-*	Visual Studio 2019 (recommended)
+*	Visual Studio 2019 or later (recommended)
 *	SQL Server 2019 or later, MySQL 5.7, or Oracle Database 12c (if you want a relational database)
 
 For servers, the only requirement is Windows Server 2016 or later with IIS enabled.
