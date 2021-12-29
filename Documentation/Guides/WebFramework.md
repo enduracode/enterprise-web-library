@@ -1,6 +1,6 @@
 # Using the web framework
 
-Last updated for Enterprise Web Library version 68.
+Last updated for Enterprise Web Library version 72.
 
 
 ## Setup: creating a system and database
@@ -27,91 +27,98 @@ Then open `Library/Configuration/Development.xml` and replace the empty `<databa
 
 ## Adding pages
 
-We’re going to build a simple service-order management system for a bicycle repair shop, consisting of two pages: a list of service orders and a form to create/update a service order.
+We’re going to build a simple service-order management system for a bicycle repair shop, consisting of two pages: a list of service orders and a form to create/update a service order. We can use the existing home page (`Home.cs` in the `Website` project) as the list page.
 
-Add a new item to the `Website` project and select the **Web Form** template. Name the page `ServiceOrders`. This will be the list page. Remove all markup from the `.aspx` file so that it only contains the `@ Page` directive. In the `.aspx.cs` file, change the class to inherit from `EwfPage` and remove the `Page_Load` method.
-
-For the form, add another page in the same way naming it `ServiceOrder` (no “s” at the end). Modify the `.aspx` and `.aspx.cs` files in the same way. In `ServiceOrder.aspx.cs`, paste the following line between the using directives and namespace declaration:
+For the form, add a class called `ServiceOrder` to the `Website` project. In `ServiceOrder.cs`, first change the declaration from `public class ServiceOrder` to `partial class ServiceOrder`. Then paste the following lines between the using directives and namespace declaration:
 
 ```C#
+// EwlPage
 // Parameter: int? serviceOrderId
 ```
 
-This line declares a URL query parameter that will be incorporated into the generated code for the page. Speaking of generated code, run `Update-DependentLogic` now to generate the code for both pages we just added. You’ll see the purpose of this a bit later.
+The first line tells the framework to generate code for this class, to make it a page, and the second declares a URL query parameter that will be incorporated into this generated code. Speaking of generated code, run `Update-DependentLogic` now to create it.
+
+Now we need to set up a URL pattern for the form page. Open `Home.cs`, add a using directive for `System.Linq`, and replace the implementation of `getChildUrlPatterns` with the following expression:
+
+```C#
+RequestDispatchingStatics.GetFrameworkUrlPatterns().Append( ServiceOrder.UrlPatterns.ServiceOrderIdPositiveInt( "create" ) )
+```
+
+This adds child URLs to the home page for every existing service order ID (e.g. `/123`) and one more for creating a new service order: `/create`.
+
+There is one more step we must take to make this work. Open `ServiceOrder.cs` and add the following method to the class:
+
+```C#
+protected override ResourceBase createParentResource() => new Home();
+```
+
+This method specifies the parent of this page, which is used to inherit security settings and for other purposes such as automatic navigational breadcrumbs for users. It also determines the page’s canonical URL.
 
 
 ## Building a simple page
 
-Let’s start our implementation with the list page. For now, since we don’t yet have any service orders in the database, we won’t even add a list; we’ll just add a hyperlink to the new-order form. Open `ServiceOrders.aspx.cs`. Add the following method to the class:
+Let’s start our implementation with the list page. For now, since we don’t yet have any service orders in the database, we won’t even add a list; we’ll just add a hyperlink to the new-order form. Open `Home.cs`. Replace the implementation of `getContent` with this expression:
 
 ```C#
-protected override PageContent getContent() =>
-	new UiPageContent().Add(
-		new EwfHyperlink( new ServiceOrder.Info( null ), new ButtonHyperlinkStyle( "New service order", buttonSize: ButtonSize.Large ) ) );
+new UiPageContent().Add( new EwfHyperlink( new ServiceOrder( null ), new ButtonHyperlinkStyle( "New service order", buttonSize: ButtonSize.Large ) ) )
 ```
 
 Let’s examine this. First of all, notice there is no HTML. We made the deliberate decision to use pure C# instead of an HTML template syntax such as Razor because pages built in this framework typically use very little HTML, directly. They use higher-level components that abstract away most HTML-level details. For example, we’ve configured the `EwfHyperlink` component here to look like a large button without specifying a `class` attribute or anything else that may be required in the HTML to make that happen.
 
-The first argument to the `EwfHyperlink` constructor, `new ServiceOrder.Info( null )`, is a reference to the form page with a null `serviceOrderId`. We’ll use null to represent creating a new order. This page reference obviates the need for a URL and provides additional benefits. It is statically checked by the compiler, ensuring the existence of the page and parameter. And it is run during the rendering of the hyperlink, ensuring a valid parameter value according to the page’s own assertions. You’ll see this in the next section.
+The first argument to the `EwfHyperlink` constructor, `new ServiceOrder( null )`, is a reference to the form page with a null `serviceOrderId`. We’ll use null to represent creating a new order. This page reference obviates the need for a URL and provides additional benefits. It is statically checked by the compiler, ensuring the existence of the page and parameter. And it is run during the rendering of the hyperlink, ensuring a valid parameter value according to the page’s own assertions. You’ll see this in the next section.
 
 The `Add` method on `UiPageContent`, which is chainable, adds components to the page.
 
-Click `ServiceOrders.aspx` in the Solution Explorer and then select Start Without Debugging from the Debug menu. You’ll see the list page, with the single large button you added. The button sits within a user interface that is provided by the framework, called the **EWF UI**. You can opt out of this UI (by replacing `UiPageContent` with `BasicPageContent`) but it’s powerful enough to be used even in large enterprise applications.
+Click the `Website` project in the Solution Explorer and then select Start Without Debugging from the Debug menu. You’ll see the list page, with the single large button you added. The button sits within a user interface that is provided by the framework, called the **EWF UI**. You can opt out of this UI (by replacing `UiPageContent` with `BasicPageContent`) but it’s powerful enough to be used even in large enterprise applications.
 
 
-## Using page information classes
+## Using page initialization logic
 
-Open up `ServiceOrder.aspx.cs` (the form page) and paste the following within the class:
+Open up `ServiceOrder.cs` (the form page) and paste the following within the class, above `createParentResource`:
 
 ```C#
-partial class Info {
-	internal ServiceOrdersTableRetrieval.Row ServiceOrder { get; private set; }
+private ServiceOrdersTableRetrieval.Row serviceOrderRow;
 
-	protected override void init() {
-		if( ServiceOrderId.HasValue )
-			ServiceOrder = ServiceOrdersTableRetrieval.GetRowMatchingId( ServiceOrderId.Value );
-	}
-
-	protected override ResourceBase createParentResource() => new ServiceOrders.Info();
+protected override void init() {
+	if( ServiceOrderId.HasValue )
+		serviceOrderRow = ServiceOrdersTableRetrieval.GetRowMatchingId( ServiceOrderId.Value );
 }
 ```
 
-This code adds functionality to the `Info` class that is automatically generated for the page. `Info` contains logic for the page that is useful even when the page is not actually being requested, e.g. when we create a hyperlink to the page as we did above. `Info` objects can be directly created and are also created automatically when their page is requested.
+The `init` method is called by the constructor and runs even when the page is not actually being requested, e.g. when we create a hyperlink to the page as we did above.
 
-The `init` method is called by the constructor. In our implementation here, we load the query-parameter-specified service order (if the ID is not null) into a property, simultaneously validating the parameter by throwing an exception from `GetRowMatchingId` if the row doesn’t exist. When this code runs during the rendering of another page (e.g. to build a hyperlink as we did above), the exception will not be handled and will result in an error report to the developer. On the other hand, when this code runs during a request for *this* page, the framework will convert the exception into an HTTP 404 status code since there’s no action a developer can take if a user (or crawler) attempts to visit an invalid page.
-
-The `createParentResource` method specifies the parent of this page, which is used to inherit security settings and for other purposes such as automatic navigational breadcrumbs for users.
+In our implementation here, we load the query-parameter-specified service order (if the ID is not null) into a field, simultaneously validating the parameter by throwing an exception from `GetRowMatchingId` if the row doesn’t exist. When this code runs during the rendering of another page (e.g. to build a hyperlink as we did above), the exception will not be handled and will result in an error report to the developer. On the other hand, when this code runs during a request for *this* page, the framework will convert the exception into an HTTP 404 status code since there’s no action a developer can take if a user (or crawler) attempts to visit an invalid page.
 
 
 ## Creating a form
 
-Paste the following complete form implementation into the class, below the `Info` class:
+Paste the following complete form implementation into the class, below the `createParentResource` method:
 
 ```C#
 protected override PageContent getContent() {
-	var mod = info.ServiceOrderId.HasValue ? info.ServiceOrder.ToModification() : ServiceOrdersModification.CreateForInsert();
+	var mod = ServiceOrderId.HasValue ? serviceOrderRow.ToModification() : ServiceOrdersModification.CreateForInsert();
 	return FormState.ExecuteWithDataModificationsAndDefaultAction(
 		PostBack.CreateFull(
 				modificationMethod: () => {
-					if( !info.ServiceOrderId.HasValue )
+					if( !ServiceOrderId.HasValue )
 						mod.ServiceOrderId = MainSequence.GetNextValue();
 					mod.Execute();
 				},
-				actionGetter: () => new PostBackAction( info.ParentResource ) )
+				actionGetter: () => new PostBackAction( ParentResource ) )
 			.ToCollection(),
 		() => {
 			var content = new UiPageContent( contentFootActions: new ButtonSetup( "Submit" ).ToCollection() );
 
 			var formItemList = FormItemList.CreateStack();
 
-			formItemList.AddItem( mod.GetCustomerNameTextControlFormItem( false, value: info.ServiceOrderId.HasValue ? null : "" ) );
-			formItemList.AddItem( mod.GetCustomerEmailEmailAddressControlFormItem( false, value: info.ServiceOrderId.HasValue ? null : "" ) );
-			formItemList.AddItem( mod.GetBicycleDescriptionTextControlFormItem( false, value: info.ServiceOrderId.HasValue ? null : "" ) );
+			formItemList.AddItem( mod.GetCustomerNameTextControlFormItem( false, value: ServiceOrderId.HasValue ? null : "" ) );
+			formItemList.AddItem( mod.GetCustomerEmailEmailAddressControlFormItem( false, value: ServiceOrderId.HasValue ? null : "" ) );
+			formItemList.AddItem( mod.GetBicycleDescriptionTextControlFormItem( false, value: ServiceOrderId.HasValue ? null : "" ) );
 
 			formItemList.AddItem(
 				mod.GetServiceTypeIdRadioListFormItem(
 					RadioListSetup.Create( ServiceTypesTableRetrieval.GetAllRows().Select( i => SelectListItem.Create( (int?)i.ServiceTypeId, i.ServiceTypeName ) ) ),
-					value: info.ServiceOrderId.HasValue ? null : new SpecifiedValue<int?>( null ) ) );
+					value: ServiceOrderId.HasValue ? null : new SpecifiedValue<int?>( null ) ) );
 
 			content.Add( formItemList );
 
@@ -120,17 +127,17 @@ protected override PageContent getContent() {
 }
 ```
 
-If you go back to `ServiceOrders.aspx` in your browser and click the button, you’ll see the form. Try it out. When you submit, you’ll go back to the list page--but won’t see your new order yet since we haven’t implemented this.
+If you go back to the home page in your browser and click the button, you’ll see the form. Try it out. When you submit, you’ll go back to the list page--but won’t see your new order yet since we haven’t implemented this.
 
 Let’s break down the code above.
 
 First we have the creation of a `ServiceOrdersModification` object:
 
 ```C#
-var mod = info.ServiceOrderId.HasValue ? info.ServiceOrder.ToModification() : ServiceOrdersModification.CreateForInsert();
+var mod = ServiceOrderId.HasValue ? serviceOrderRow.ToModification() : ServiceOrdersModification.CreateForInsert();
 ```
 
-If we’re updating an order, we set the object up to modify the row we loaded in `Info.init`. For a new order we set it up to do a row insert. Learn more in the [Data Access](DataAccess.md) guide.
+If we’re updating an order, we set the object up to modify the row we loaded in `init`. For a new order we set it up to do a row insert. Learn more in the [Data Access](DataAccess.md) guide.
 
 Then we have a call to `FormState.ExecuteWithDataModificationsAndDefaultAction`. The first argument is a `PostBack` object and the second is a method (starting with `var content`). There are a couple of important concepts here.
 
@@ -149,7 +156,7 @@ You can create validations directly, but they are most commonly created by form-
 The **modification method** stage of `PostBack` execution runs the specified method:
 
 ```C#
-if( !info.ServiceOrderId.HasValue )
+if( !ServiceOrderId.HasValue )
 	mod.ServiceOrderId = MainSequence.GetNextValue();
 mod.Execute();
 ```
@@ -159,7 +166,7 @@ This is where the persistence actually happens. If this is a new service order w
 The **post-modification action** stage of the `PostBack` determines what happens after data is modified. Sometimes you’ll want the user to stay on the page, with or without extra behavior such as a change in keyboard focus or a file download. But in this case we want to navigate them back to the list page:
 
 ```C#
-() => new PostBackAction( info.ParentResource )
+() => new PostBackAction( ParentResource )
 ```
 
 We don’t refererence the list page directly. Instead we just navigate back to the parent page, which does the same thing since we already designated the list as the parent. But this makes our page more maintainable in the event we change the parent.
@@ -169,7 +176,7 @@ Now let’s break down the method we are passing to `FormState.ExecuteWithDataMo
 The next statement creates a `FormItemList` component, to which we will add several `FormItem` objects. A form item is an abstract container that includes content (usually a form control), a label, and a validation object. Here, we create the form items using generated methods in the `ServiceOrdersModification` class. For example:
 
 ```C#
-mod.GetCustomerEmailEmailAddressControlFormItem( false, value: info.ServiceOrderId.HasValue ? null : "" )
+mod.GetCustomerEmailEmailAddressControlFormItem( false, value: ServiceOrderId.HasValue ? null : "" )
 ```
 
 This creates a form item containing an email-address form control. The first parameter specifies that it should require a value from the user. The second parameter (`value`) determines the initial value in the control. When updating a service order, we pass `null` which tells the control to get its value from the `ServiceOrdersModification` object. For new orders we specify the empty string.
@@ -181,7 +188,7 @@ You can display form items in several different ways, but the most common way is
 
 ## Displaying data in a table
 
-Open `ServiceOrders.aspx.cs`. Add another `UiPageContent.Add` method to the chain, passing in this block of code:
+Open `Home.cs`. Add another `UiPageContent.Add` method to the chain, passing in this block of code:
 
 ```C#
 EwfTable.Create(
@@ -203,8 +210,7 @@ EwfTable.Create(
 				.Append( i.BicycleDescription.ToCell() )
 				.Append( ServiceTypesTableRetrieval.GetRowMatchingId( i.ServiceTypeId ).ServiceTypeName.ToCell() )
 				.Materialize(),
-			setup: EwfTableItemSetup.Create(
-				activationBehavior: ElementActivationBehavior.CreateHyperlink( new ServiceOrder.Info( i.ServiceOrderId ) ) ) ) )
+			setup: EwfTableItemSetup.Create( activationBehavior: ElementActivationBehavior.CreateHyperlink( new ServiceOrder( i.ServiceOrderId ) ) ) ) )
 ```
 
 You’ll now see a table of existing service orders on the page, in which clicking on a row navigates to the form for that order. Let’s look at the call to `EwfTable.Create`. The `caption` is a title for the table. `fields` configures the columns. In this case we’re using a “12 column grid” system to specify their widths; the `.ToPercentage()` calls are misleading here because the table treats the values as simple proportions and doesn’t require them to add up to 100%.
@@ -218,7 +224,7 @@ The `AddData` method takes two parameters, a sequence of data rows and a selecto
 In the selector function we create an item that includes a setup:
 
 ```C#
-setup: EwfTableItemSetup.Create( activationBehavior: ElementActivationBehavior.CreateHyperlink( new ServiceOrder.Info( i.ServiceOrderId ) ) )
+setup: EwfTableItemSetup.Create( activationBehavior: ElementActivationBehavior.CreateHyperlink( new ServiceOrder( i.ServiceOrderId ) ) )
 ```
 
 The setup object lets us pass an `ElementActivationBehavior`, which lets us make the table row act like a hyperlink and navigate to the form when clicked.
