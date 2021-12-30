@@ -562,31 +562,28 @@ insert into UserRoles values( 3, 'Bicycle mechanic' )
 go
 ```
 
-Run `Update-DependentLogic` to execute that and regenerate code. Now let’s prevent anonymous users from visiting the list of service orders. In `ServiceOrders.aspx.cs` add this `Info` class above `getContent`:
+Run `Update-DependentLogic` to execute that and regenerate code. Now let’s prevent anonymous users from visiting the list of service orders. In `Home.cs` add this property above `getChildUrlPatterns`:
 
 ```C#
-partial class Info {
-	protected override bool userCanAccessResource => AppTools.User != null;
-}
+protected override bool userCanAccessResource => AppTools.User != null;
 ```
 
-The `AppTools.User` property gives us the currently-authenticated user, or null if authentication hasn’t taken place. Therefore this expression will allow access to the page only if the user has logged in. Try it out by visiting `ServiceOrders.aspx`. You should see a page titled Select User, which is a special log in page provided by the framework when you are running the system locally for development. It saves you from having to enter a password. If you were visiting a live installation of the system you’d see a real log in page.
+The `AppTools.User` property gives us the currently-authenticated user, or null if authentication hasn’t taken place. Therefore this expression will allow access to the page only if the user has logged in. Try it out by visiting the site. You should see a page titled Select User, which is a special log in page provided by the framework when you are running the system locally for development. It saves you from having to enter a password. If you were visiting a live installation of the system you’d see a real log in page.
 
 Type in whatever email address you used for the first user and you should land on the Service Orders page. Notice the new Logged In As section in the upper-right corner of the page.
 
-Let’s now restrict the creation and updating of service orders such that this can only be done by mechanics and administrators. Open `ServiceOrder.aspx.cs` and add this property override to the `Info` class:
+Let’s now restrict the creation and updating of service orders such that this can only be done by mechanics and administrators. Open `ServiceOrder.cs` and add this property override above `getContent`:
 
 ```C#
-protected override bool userCanAccessResource =>
-	new[] { UserRolesRows.BicycleMechanic, UserRolesRows.Administrator }.Contains( AppTools.User.Role.RoleId );
+protected override bool userCanAccessResource => new[] { UserRolesRows.BicycleMechanic, UserRolesRows.Administrator }.Contains( AppTools.User.Role.RoleId );
 ```
 
 Notice that we’re not handling a null `AppTools.User`. That’s because, if you recall, this page uses the service-order list as its parent. A child page inherits the parent’s authorization logic and can never be less restrictive. The child’s `userCanAccessResource` property can only add additional restrictions. To access the child, the user must effectively pass `parentConditions && childConditions`. This is recursive all the way up the tree of pages.
 
-There’s one more thing we need to do. Go back to `ServiceOrders.aspx.cs`. Add this as the first statement in `getContent`:
+There’s one more thing we need to do. Go back to `Home.cs`. Add this as the first statement in `getContent`:
 
 ```C#
-var newOrderPage = new ServiceOrder.Info( null );
+var newOrderPage = new ServiceOrder( null );
 ```
 
 Then replace the argument of the first `UiPageContent.Add` call with the following:
@@ -594,14 +591,14 @@ Then replace the argument of the first `UiPageContent.Add` call with the followi
 ```C#
 newOrderPage.UserCanAccessResource
 	? new EwfHyperlink( newOrderPage, new ButtonHyperlinkStyle( "New service order", buttonSize: ButtonSize.Large ) ).ToCollection()
-	: Enumerable.Empty<FlowComponent>().Materialize() )
+	: Enumerable.Empty<FlowComponent>().Materialize()
 ```
 
 And replace the second argument of the `AddData` call for the table with:
 
 ```C#
 i => {
-	var page = new ServiceOrder.Info( i.ServiceOrderId );
+	var page = new ServiceOrder( i.ServiceOrderId );
 	return EwfTableItem.Create(
 		i.ServiceOrderId.ToString()
 			.ToCell()
@@ -616,11 +613,11 @@ i => {
 
 Together these two changes prevent any linking to the form page if the user does not have access. If you skip this step you’ll receive exceptions when visiting the list page. The framework does this intentionally to prevent you from creating links to unauthorized pages, to spare the user from ever receiving “access denied” errors when navigating.
 
-Let’s see what this looks like for normal users. Visit `ServiceOrders.aspx`. Since you’re an admin you’ll still see the links. We now need to create and switch into a normal user, so go to the address bar and replace the `/ServiceOrders.aspx` at the end of the URL with `/ewf`.
+Let’s see what this looks like for normal users. Visit the home page. Since you’re an admin you’ll still see the links. We now need to create and switch into a normal user, so go to the address bar and add `/ewl` to the end of the URL.
 
-This is the framework’s built-in admin area. One thing you can do here is view and modify the users of the system. Click the System Users tab and then the Create User button on the right. Type an email address, e.g. `standard-user@example.com`, and select the Standard User role. Click OK. Now click the End Impersonation button in the yellow bar at the top of the page.
+This is the framework’s built-in admin area. One thing you can do here is view and modify the users of the system. Click the User Management tab and then the Create User button on the right. Type an email address, e.g. `standard-user@example.com`, and select the Standard User role. Click OK. Now click the End Impersonation button in the yellow bar at the top of the page.
 
-Put `ServiceOrders.aspx` back into the address bar. This time, on the Select User page, enter the email address you used for the standard user. When you click Begin Impersonation, you should now see the service-order list without the New Service Order button, and with no option to click any of the existing service orders.
+This time, on the Select User page, enter the email address you used for the standard user. When you click Begin Impersonation, you should now see the service-order list without the New Service Order button, and with no option to click any of the existing service orders.
 
 
 ## Learning more

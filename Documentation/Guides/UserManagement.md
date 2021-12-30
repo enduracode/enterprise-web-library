@@ -1,6 +1,6 @@
 # Adding user management
 
-Last updated for Enterprise Web Library version 65.
+Last updated for Enterprise Web Library version 72.
 
 
 ## Creating database schema
@@ -35,92 +35,99 @@ Add a class called `UserManagement` to your `Library/Configuration/Providers` fo
 
 ```C#
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using EnterpriseWebLibrary;
-using EnterpriseWebLibrary.Configuration;
-using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
-using Humanizer;
+using EnterpriseWebLibrary.UserManagement;
+using EnterpriseWebLibrary.UserManagement.IdentityProviders;
 using NodaTime;
 using ServiceManager.Library.DataAccess;
 using ServiceManager.Library.DataAccess.CommandConditions;
 using ServiceManager.Library.DataAccess.Modification;
 using ServiceManager.Library.DataAccess.RowConstants;
 using ServiceManager.Library.DataAccess.TableRetrieval;
+using Tewl.Tools;
 
 namespace ServiceManager.Library.Configuration.Providers {
-	internal class UserManagement: FormsAuthCapableUserManagementProvider {
-		void SystemUserManagementProvider.DeleteUser( int userId ) => UsersModification.DeleteRows( new UsersTableEqualityConditions.UserId( userId ) );
+	internal class UserManagement: SystemUserManagementProvider {
+		protected override IEnumerable<IdentityProvider> GetIdentityProviders() =>
+			new LocalIdentityProvider(
+				"Organization Name",
+				"contact Organization Name.",
+				emailAddress => {
+					var user = UsersTableRetrieval.GetRows( new UsersTableEqualityConditions.EmailAddress( emailAddress ) ).SingleOrDefault();
+					if( user == null )
+						return null;
+					return ( getUserObject( user ), user.Salt, user.SaltedPassword );
+				},
+				userId => {
+					var user = UsersTableRetrieval.GetRowMatchingId( userId );
+					return ( user.LoginCodeSalt, user.HashedLoginCode,
+						       user.LoginCodeExpirationDateAndTime.ToNewUnderlyingValue( v => LocalDateTime.FromDateTime( v ).InUtc().ToInstant() ),
+						       user.LoginCodeRemainingAttemptCount, user.LoginCodeDestinationUrl );
+				},
+				( userId, salt, saltedPassword ) => {
+					var mod = UsersModification.CreateForUpdate( new UsersTableEqualityConditions.UserId( userId ) );
+					mod.Salt = salt;
+					mod.SaltedPassword = saltedPassword;
+					mod.Execute();
+				},
+				( userId, salt, hashedCode, expirationTime, remainingAttemptCount, destinationUrl ) => {
+					var mod = UsersModification.CreateForUpdate( new UsersTableEqualityConditions.UserId( userId ) );
+					mod.LoginCodeSalt = salt;
+					mod.HashedLoginCode = hashedCode;
+					mod.LoginCodeExpirationDateAndTime = expirationTime?.InUtc().ToDateTimeUnspecified();
+					mod.LoginCodeRemainingAttemptCount = remainingAttemptCount;
+					mod.LoginCodeDestinationUrl = destinationUrl;
+					mod.Execute();
+				} ).ToCollection();
 
-		IEnumerable<Role> SystemUserManagementProvider.GetRoles() => UserRolesTableRetrieval.GetAllRows().Select( i => getRoleObject( i.UserRoleId ) );
+		protected override IEnumerable<User> GetUsers() => UsersTableRetrieval.GetRows().OrderBy( i => i.EmailAddress ).Select( getUserObject );
 
-		IEnumerable<FormsAuthCapableUser> FormsAuthCapableUserManagementProvider.GetUsers() =>
-			UsersTableRetrieval.GetRows().OrderBy( i => i.EmailAddress ).Select( getUserObject );
+		protected override User GetUser( int userId ) => getUserObject( UsersTableRetrieval.GetRowMatchingId( userId, returnNullIfNoMatch: true ) );
 
-		FormsAuthCapableUser FormsAuthCapableUserManagementProvider.GetUser( int userId ) =>
-			getUserObject( UsersTableRetrieval.GetRowMatchingId( userId, returnNullIfNoMatch: true ) );
+		protected override User GetUser( string emailAddress ) =>
+			getUserObject( UsersTableRetrieval.GetRows( new UsersTableEqualityConditions.EmailAddress( emailAddress ) ).SingleOrDefault() );
 
-		FormsAuthCapableUser FormsAuthCapableUserManagementProvider.GetUser( string email ) =>
-			getUserObject( UsersTableRetrieval.GetRows( new UsersTableEqualityConditions.EmailAddress( email ) ).SingleOrDefault() );
-
-		private FormsAuthCapableUser getUserObject( UsersTableRetrieval.Row user ) =>
+		private User getUserObject( UsersTableRetrieval.Row user ) =>
 			user == null
 				? null
-				: new FormsAuthCapableUser(
+				: new User(
 					user.UserId,
 					user.EmailAddress,
 					getRoleObject( user.RoleId ),
-					user.LastRequestDateAndTime.ToNewUnderlyingValue( v => LocalDateTime.FromDateTime( v ).InUtc().ToInstant() ),
-					user.Salt,
-					user.SaltedPassword,
-					user.MustChangePassword );
+					user.LastRequestDateAndTime.ToNewUnderlyingValue( v => LocalDateTime.FromDateTime( v ).InUtc().ToInstant() ) );
 
 		private Role getRoleObject( int roleId ) => new Role( roleId, UserRolesRows.GetNameFromValue( roleId ), roleId == UserRolesRows.Administrator, false );
 
-		void FormsAuthCapableUserManagementProvider.InsertOrUpdateUser(
-			int? userId, string email, int roleId, Instant? lastRequestTime, int salt, byte[] saltedPassword, bool mustChangePassword ) {
+		protected override int InsertOrUpdateUser( int? userId, string emailAddress, int roleId, Instant? lastRequestTime ) {
 			if( userId.HasValue ) {
 				var mod = UsersModification.CreateForUpdate( new UsersTableEqualityConditions.UserId( userId.Value ) );
-				mod.EmailAddress = email;
+				mod.EmailAddress = emailAddress;
 				mod.RoleId = roleId;
 				mod.LastRequestDateAndTime = lastRequestTime?.InUtc().ToDateTimeUnspecified();
-				mod.Salt = salt;
-				mod.SaltedPassword = saltedPassword;
-				mod.MustChangePassword = mustChangePassword;
 				mod.Execute();
 			}
-			else
+			else {
+				userId = MainSequence.GetNextValue();
 				UsersModification.InsertRow(
-					MainSequence.GetNextValue(),
-					email,
+					userId.Value,
+					emailAddress,
 					roleId,
 					lastRequestTime?.InUtc().ToDateTimeUnspecified(),
-					salt,
-					saltedPassword,
-					mustChangePassword );
-		}
-
-		void FormsAuthCapableUserManagementProvider.GetPasswordResetParams( string email, string password, out string subject, out string bodyHtml ) {
-			subject = "{0} - New password".FormatWith( ConfigurationStatics.SystemName );
-			using( var sw = new StringWriter() ) {
-				sw.WriteLine( "Thank you for using {0}. Your new temporary password is:".FormatWith( ConfigurationStatics.SystemName ) );
-				sw.WriteLine();
-				sw.WriteLine( password );
-				sw.WriteLine();
-				sw.WriteLine(
-					"You can use this password to log in at {0}.".FormatWith(
-						ConfigurationStatics.GetWebApplicationDefaultBaseUrl( WebApplicationNames.Website, false ) ) );
-				sw.WriteLine();
-				sw.WriteLine( "Thanks again," );
-				sw.WriteLine( "Organization Name" );
-				bodyHtml = sw.ToString().GetTextAsEncodedHtml();
+					0,
+					null,
+					null,
+					null,
+					null,
+					null,
+					"" );
 			}
+			return userId.Value;
 		}
 
-		string FormsAuthCapableUserManagementProvider.AdministratingCompanyName => "Organization Name";
-		string FormsAuthCapableUserManagementProvider.LogInHelpInstructions => "contact Organization Name.";
+		protected override void DeleteUser( int userId ) => UsersModification.DeleteRows( new UsersTableEqualityConditions.UserId( userId ) );
+
+		protected override IEnumerable<Role> GetRoles() => UserRolesTableRetrieval.GetAllRows().Select( i => getRoleObject( i.UserRoleId ) );
 	}
 }
 ```
-
-Note that you can implement `StrictFormsAuthUserManagementProvider` instead if you’d like.
