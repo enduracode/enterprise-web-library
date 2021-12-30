@@ -232,7 +232,7 @@ The setup object lets us pass an `ElementActivationBehavior`, which lets us make
 
 ## Using temporary state during a post-back
 
-What we’ve built above covers the staple features of the framework that you’ll need for almost any application. But let’s go back to `ServiceOrder.aspx.cs` and look at some more-advanced features that are just as important when building complex forms.
+What we’ve built above covers the staple features of the framework that you’ll need for almost any application. But let’s go back to `ServiceOrder.cs` and look at some more-advanced features that are just as important when building complex forms.
 
 First we’ll cover temporary state. The form controls that we’re already using store their validated values in the `ServiceOrdersModification` object, with the intention that the values will be persisted in our database. But what if you want to have a form control whose posted-back value shouldn’t be directly persisted, and only used to influence the validation of other controls?
 
@@ -283,13 +283,13 @@ formItemList.AddItem(
 									.Append( new LineBreak() )
 									.Append( new SideComments( "Multiple of $5, minimum $10".ToComponents() ) )
 									.Materialize(),
-								value: info.ServiceOrderId.HasValue ? null : new SpecifiedValue<decimal?>( null ),
+								value: ServiceOrderId.HasValue ? null : new SpecifiedValue<decimal?>( null ),
 								allowEmpty: false,
 								minValue: 10,
 								valueStep: 5 )
 							.ToComponentCollection();
 					} ) ),
-			value: info.ServiceOrderId.HasValue && info.ServiceOrder.CustomerBudget.HasValue,
+			value: ServiceOrderId.HasValue && serviceOrderRow.CustomerBudget.HasValue,
 			additionalValidationMethod: validator => {
 				if( !customerHasBudget.Value )
 					budgetClearer();
@@ -399,7 +399,7 @@ additionalValidationMethod: validator => {
 
 Let’s make another page modification that changes the color of the form when it’s a flat tire repair, to make it clear to users that this service order is a quick job.
 
-We’ll use CSS to do this, and our first step is to add a style sheet to the `Website` project. Name it `Styles` and paste this into it:
+We’ll use CSS to do this, and our first step is to add a style sheet. Click the `Website` project in the Solution Explorer and then click the Show All Files toolbar button. A `StaticFiles` folder will appear. Add a style sheet to the folder, naming it `styles`, and paste this into it:
 
 ```CSS
 .flatTire {
@@ -407,10 +407,10 @@ We’ll use CSS to do this, and our first step is to add a style sheet to the `W
 }
 ```
 
-Run `Update-DependentLogic` to generate some code for our new style sheet. Open `Global.asax.cs` and override `EwfApp.GetStyleSheets`:
+Run `Update-DependentLogic` to generate some code for our new style sheet. Open `Providers/StandardPageLogic.cs` and override `GetStyleSheets`:
 
 ```C#
-protected override List<ResourceInfo> GetStyleSheets() => new List<ResourceInfo> { new StylesCss.Info() };
+protected override List<ResourceInfo> GetStyleSheets() => new List<ResourceInfo> { new StaticFiles.StylesCss() };
 ```
 
 This will include the style sheet on all pages in the application. Now we’ll conditionally add the `flatTire` class to the `FormItemList`. Paste in the following as the first argument to `FormItemList.CreateStack`:
@@ -441,10 +441,9 @@ Let’s illustrate these concepts by implementing an expandable list of service 
 Add these three lines at the top of the `addServiceDetailFormItems` method:
 
 ```C#
-var requests = info.ServiceOrderId.HasValue
-	               ? ServiceOrderRequestsTableRetrieval.GetRows(
-		               new ServiceOrderRequestsTableEqualityConditions.ServiceOrderId( info.ServiceOrderId.Value ) )
-	               : Enumerable.Empty<ServiceOrderRequestsTableRetrieval.Row>();
+var requests = ServiceOrderId.HasValue
+					? ServiceOrderRequestsTableRetrieval.GetRows( new ServiceOrderRequestsTableEqualityConditions.ServiceOrderId( ServiceOrderId.Value ) )
+					: Enumerable.Empty<ServiceOrderRequestsTableRetrieval.Row>();
 var requestLineCount = ComponentStateItem.Create( "requestLineCount", Math.Max( requests.Count(), 1 ), v => v > 0, false );
 var addRequestUpdateRegion = new UpdateRegionSet();
 ```
@@ -504,8 +503,8 @@ var serviceRequestInserts = new List<ServiceOrderRequestsModification>();
 Pass this to `addServiceDetailFormItems` as the second argument. Now our only remaining task is to add logic that appropriately modifies service requests when the form is submitted. Add this block to the modification method of `PostBack.CreateFull`, after `mod.Execute`:
 
 ```C#
-if( info.ServiceOrderId.HasValue )
-	ServiceOrderRequestsModification.DeleteRows( new ServiceOrderRequestsTableEqualityConditions.ServiceOrderId( info.ServiceOrderId.Value ) );
+if( ServiceOrderId.HasValue )
+	ServiceOrderRequestsModification.DeleteRows( new ServiceOrderRequestsTableEqualityConditions.ServiceOrderId( ServiceOrderId.Value ) );
 foreach( var i in serviceRequestInserts.Where( i => i.RequestDescriptionHasChanged && i.RequestDescription.Any() ) ) {
 	i.ServiceOrderRequestId = MainSequence.GetNextValue();
 	i.ServiceOrderId = mod.ServiceOrderId;
