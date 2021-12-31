@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using EnterpriseWebLibrary.UserManagement;
-using EnterpriseWebLibrary.UserManagement.IdentityProviders;
 using Humanizer;
 using Tewl.Tools;
 
@@ -12,9 +11,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 	/// NOTE: Expand this to take additional FormItems to allow customization of this control?
 	/// </summary>
 	public class UserEditor: FlowComponent {
-		public delegate void DataSetterMethod( DataValue<string> emailAddress, DataValue<int> roleId );
-
-		public delegate void PasswordDataSetterMethod( int salt, byte[] saltedPassword );
+		public delegate int UserInserterOrUpdaterMethod( DataValue<string> emailAddress, DataValue<int> roleId );
 
 		private readonly IReadOnlyCollection<FlowComponent> children;
 
@@ -25,21 +22,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		/// <param name="modificationMethod"></param>
 		/// <param name="availableRoles">Pass a restricted list of <see cref="Role"/>s the user may select. Otherwise, Roles available in the System Provider are
 		/// used.</param>
-		/// <param name="dataSetter">A method that takes the validated data and puts it in a modification object. Use if you’d like to insert or update the user
-		/// yourself. Pass null to have the user-management provider handle the insert or update.</param>
-		/// <param name="passwordDataSetter">A method that takes the validated password data and puts it in a modification object. Use if you’d like to insert or
-		/// update the user yourself. Pass null to have the user-management provider handle the insert or update. This parameter is required if the local identity
-		/// provider is enabled and <paramref name="dataSetter"/> is specified, and is otherwise ignored.</param>
+		/// <param name="userInserterOrUpdater">A function that takes the validated data, inserts or updates the user, and returns the user’s ID. Pass null to have
+		/// the user-management provider handle the insert or update.</param>
 		public UserEditor(
-			int? userId, out Action modificationMethod, List<Role> availableRoles = null, DataSetterMethod dataSetter = null,
-			PasswordDataSetterMethod passwordDataSetter = null ) {
+			int? userId, out Action modificationMethod, List<Role> availableRoles = null, UserInserterOrUpdaterMethod userInserterOrUpdater = null ) {
 			availableRoles = ( availableRoles?.OrderBy( r => r.Name ) ?? UserManagementStatics.SystemProvider.GetRoles() ).ToList();
 
 			var user = userId.HasValue ? UserManagementStatics.GetUser( userId.Value, true ) : null;
 
 			var email = new DataValue<string>();
 			var roleId = new DataValue<int>();
-			var passwordData = new InitializationAwareValue<( int salt, byte[] saltedPassword )>();
+			Action<int> passwordUpdater = null;
 
 			var b = FormItemList.CreateStack();
 
@@ -47,46 +40,28 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 
 			if( UserManagementStatics.LocalIdentityProviderEnabled ) {
 				var group = new RadioButtonGroup( false );
-
-				var keepPassword = group.CreateRadioButton(
-						true,
-						label: userId.HasValue ? "Keep the current password".ToComponents() : "Do not create a password".ToComponents(),
-						validationMethod: ( postBackValue, validator ) => {
-							if( postBackValue.Value && user == null ) {
-								var password = new LocalIdentityProvider.Password();
-								passwordData.Value = ( password.Salt, password.ComputeSaltedHash() );
-							}
-						} )
-					.ToFormItem();
-
 				var providePasswordSelected = new DataValue<bool>();
-				var providePassword = group.CreateFlowRadioButton(
-						false,
-						label: "Provide a {0}".FormatWith( userId.HasValue ? "new password" : "password" ).ToComponents(),
-						setup: FlowRadioButtonSetup.Create(
-							nestedContentGetter: () => {
-								return FormState.ExecuteWithValidationPredicate(
-									() => providePasswordSelected.Value,
-									() => {
-										var password = new DataValue<string>();
-										var list = FormItemList.CreateStack(
-											generalSetup: new FormItemListSetup( classes: new ElementClass( "newPassword" ) ),
-											items: password.GetPasswordModificationFormItems() );
-
-										new EwfValidation(
-											validator => {
-												var p = new LocalIdentityProvider.Password( password.Value );
-												passwordData.Value = ( p.Salt, p.ComputeSaltedHash() );
-											} );
-
-										return list.ToCollection();
-									} );
-							} ),
-						validationMethod: ( postBackValue, validator ) => providePasswordSelected.Value = postBackValue.Value )
-					.ToFormItem();
-
 				b.AddFormItems(
-					new StackList( keepPassword.ToListItem().ToCollection().Append( providePassword.ToListItem() ) ).ToFormItem( label: "Password".ToComponents() ) );
+					new StackList(
+						group.CreateRadioButton( true, label: userId.HasValue ? "Keep the current password".ToComponents() : "Do not create a password".ToComponents() )
+							.ToFormItem()
+							.ToListItem()
+							.Append(
+								providePasswordSelected.ToFlowRadioButton(
+										group,
+										"Provide a {0}".FormatWith( userId.HasValue ? "new password" : "password" ).ToComponents(),
+										setup: FlowRadioButtonSetup.Create(
+											nestedContentGetter: () => {
+												return FormState.ExecuteWithValidationPredicate(
+													() => providePasswordSelected.Value,
+													() => FormItemList.CreateStack(
+															generalSetup: new FormItemListSetup( classes: new ElementClass( "newPassword" ) ),
+															items: AuthenticationStatics.GetPasswordModificationFormItems( out passwordUpdater ) )
+														.ToCollection() );
+											} ),
+										value: false )
+									.ToFormItem()
+									.ToListItem() ) ).ToFormItem( label: "Password".ToComponents() ) );
 			}
 
 			b.AddFormItems(
@@ -98,16 +73,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 			children = new Section( "Security Information", b.ToCollection() ).ToCollection();
 
 			modificationMethod = () => {
-				if( dataSetter != null ) {
-					dataSetter( email, roleId );
-					if( passwordData.Initialized )
-						passwordDataSetter( passwordData.Value.salt, passwordData.Value.saltedPassword );
-				}
-				else {
+				if( userInserterOrUpdater != null )
+					userId = userInserterOrUpdater( email, roleId );
+				else
 					userId = UserManagementStatics.SystemProvider.InsertOrUpdateUser( userId, email.Value, roleId.Value, user?.LastRequestTime );
-					if( passwordData.Initialized )
-						UserManagementStatics.LocalIdentityProvider.PasswordUpdater( userId.Value, passwordData.Value.salt, passwordData.Value.saltedPassword );
-				}
+				passwordUpdater?.Invoke( userId.Value );
 			};
 		}
 

@@ -98,30 +98,38 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		// Adding a New User
 
 		/// <summary>
-		/// Gets password and "password again" form items. The validation sets this data value to the provided password, and ensures that the two form items contain
-		/// identical, valid passwords.
+		/// Gets password and "password again" form items. The validation ensures that the two form items contain identical, valid passwords.
 		/// </summary>
+		/// <param name="passwordUpdater">A method that takes a user ID and updates the password data for the corresponding user. Do not pass null.</param>
+		/// <param name="firstLabel"></param>
+		/// <param name="secondLabel"></param>
 		public static IReadOnlyCollection<FormItem> GetPasswordModificationFormItems(
-			this DataValue<string> password, IEnumerable<PhrasingComponent> firstLabel = null, IEnumerable<PhrasingComponent> secondLabel = null ) {
-			var passwordAgain = new DataValue<string>();
-			var passwordAgainFormItem = passwordAgain.ToTextControl( true, setup: TextControlSetup.CreateObscured( autoFillTokens: "new-password" ), value: "" )
+			out Action<int> passwordUpdater, IEnumerable<PhrasingComponent> firstLabel = null, IEnumerable<PhrasingComponent> secondLabel = null ) {
+			var password = new DataValue<string>();
+			var passwordAgainFormItem = password.ToTextControl( true, setup: TextControlSetup.CreateObscured( autoFillTokens: "new-password" ), value: "" )
 				.ToFormItem( label: secondLabel?.Materialize() ?? "Password again".ToComponents() );
 
-			var passwordFormItem = password.ToTextControl(
-					true,
-					setup: TextControlSetup.CreateObscured( autoFillTokens: "new-password" ),
-					value: "",
-					additionalValidationMethod: validator => {
-						if( password.Value != passwordAgain.Value )
-							validator.NoteErrorAndAddMessage( "Passwords do not match." );
-						else {
-							if( UserManagementStatics.LocalIdentityProvider.PasswordValidationMethod != null )
-								UserManagementStatics.LocalIdentityProvider.PasswordValidationMethod( validator, password.Value );
-							else if( password.Value.Length < 7 )
-								validator.NoteErrorAndAddMessage( "Passwords must be at least 7 characters long." );
-						}
-					} )
-				.ToFormItem( label: firstLabel?.Materialize() ?? "Password".ToComponents() );
+			var passwordFormItem = new TextControl(
+				"",
+				true,
+				setup: TextControlSetup.CreateObscured( autoFillTokens: "new-password" ),
+				validationMethod: ( postBackValue, validator ) => {
+					if( postBackValue != password.Value )
+						validator.NoteErrorAndAddMessage( "Passwords do not match." );
+					else {
+						if( UserManagementStatics.LocalIdentityProvider.PasswordValidationMethod != null )
+							UserManagementStatics.LocalIdentityProvider.PasswordValidationMethod( validator, password.Value );
+						else if( password.Value.Length < 7 )
+							validator.NoteErrorAndAddMessage( "Passwords must be at least 7 characters long." );
+					}
+				} ).ToFormItem( label: firstLabel?.Materialize() ?? "Password".ToComponents() );
+
+			passwordUpdater = userId => {
+				if( !password.Changed )
+					return;
+				var p = new LocalIdentityProvider.Password( password.Value );
+				UserManagementStatics.LocalIdentityProvider.PasswordUpdater( userId, p.Salt, p.ComputeSaltedHash() );
+			};
 
 			return new[] { passwordFormItem, passwordAgainFormItem };
 		}

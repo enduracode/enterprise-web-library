@@ -25,11 +25,6 @@ namespace EnterpriseWebLibrary.UserManagement.IdentityProviders {
 			public int Salt => salt;
 
 			/// <summary>
-			/// Generates a new random password with random salt.
-			/// </summary>
-			public Password(): this( createRandomPassword( 8 ), createRandomSalt() ) {}
-
-			/// <summary>
 			/// Create a new password with the given text and randomly generated salt.
 			/// </summary>
 			public Password( string passwordText ): this( passwordText, createRandomSalt() ) {}
@@ -40,21 +35,6 @@ namespace EnterpriseWebLibrary.UserManagement.IdentityProviders {
 			public Password( string strPassword, int nSalt ) {
 				password = strPassword;
 				salt = nSalt;
-			}
-
-			// It is important that this password not contain white space on the ends since the log in page trims this off.
-			private static string createRandomPassword( int passwordLength ) {
-				const string allowedChars = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNOPQRSTUVWXYZ23456789";
-				var randomBytes = new Byte[ passwordLength ];
-				var rng = new RNGCryptoServiceProvider();
-				rng.GetBytes( randomBytes );
-				var chars = new char[ passwordLength ];
-				var allowedCharCount = allowedChars.Length;
-
-				for( var i = 0; i < passwordLength; i++ )
-					chars[ i ] = allowedChars[ randomBytes[ i ] % allowedCharCount ];
-
-				return new string( chars );
 			}
 
 			private static int createRandomSalt() {
