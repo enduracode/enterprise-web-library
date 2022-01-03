@@ -25,7 +25,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		/// <param name="userInserterOrUpdater">A function that takes the validated data, inserts or updates the user, and returns the user’s ID. Pass null to have
 		/// the user-management provider handle the insert or update.</param>
 		public UserEditor(
-			int? userId, out Action modificationMethod, List<Role> availableRoles = null, UserInserterOrUpdaterMethod userInserterOrUpdater = null ) {
+			int? userId, out Action modificationMethod, IEnumerable<Role> availableRoles = null, UserInserterOrUpdaterMethod userInserterOrUpdater = null ) {
 			availableRoles = availableRoles?.OrderBy( r => r.Name ) ?? UserManagementStatics.SystemProvider.GetRoles();
 
 			var user = userId.HasValue ? UserManagementStatics.GetUser( userId.Value, true ) : null;
