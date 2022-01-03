@@ -115,7 +115,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							CompleteRequest();
 							return;
 						}
-						var appRelativeUrl = GetRequestAppRelativeUrl( Request, disableLeadingSlashRemoval: true );
+
+						string appRelativeUrl;
+						try {
+							appRelativeUrl = GetRequestAppRelativeUrl( Request, disableLeadingSlashRemoval: true );
+						}
+						catch {
+							set500StatusCode( "App-Relative URL Unavailable" );
+							CompleteRequest();
+							return;
+						}
 
 						// If the base URL doesn't include a path and the app-relative URL is just a slash, don't include this trailing slash in the URL since it will not be
 						// present in the canonical URLs that we construct and therefore it would cause problems with URL normalization.
@@ -224,6 +233,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal static string GetRequestAppRelativeUrl( HttpRequest request, bool disableLeadingSlashRemoval = false ) {
 			// See https://stackoverflow.com/a/782002/35349.
 			var url = request.ServerVariables[ "HTTP_URL" ];
+
+			if( url == null )
+				throw new ApplicationException( "HTTP_URL server variable not available." );
 
 			// If a base path exists (on the web server, not the reverse proxy), remove it along with the subsequent slash if one exists. Otherwise just remove the
 			// leading slash, which we know exists since an HTTP request path must start with a slash. We're doing this slash removal ultimately because we are trying
