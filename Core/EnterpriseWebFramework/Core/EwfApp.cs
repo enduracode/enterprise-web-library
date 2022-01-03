@@ -271,9 +271,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets the Internet media type overrides for the application, which are used when serving static files. Do not return null.
 		/// </summary>
-		protected internal virtual IEnumerable<MediaTypeOverride> GetMediaTypeOverrides() {
-			return new MediaTypeOverride[ 0 ];
-		}
+		protected internal virtual IEnumerable<MediaTypeOverride> GetMediaTypeOverrides() => Enumerable.Empty<MediaTypeOverride>();
 
 		/// <summary>
 		/// Returns true if Spanish should be used. Default is false.
