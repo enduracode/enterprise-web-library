@@ -26,7 +26,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		/// the user-management provider handle the insert or update.</param>
 		public UserEditor(
 			int? userId, out Action modificationMethod, List<Role> availableRoles = null, UserInserterOrUpdaterMethod userInserterOrUpdater = null ) {
-			availableRoles = ( availableRoles?.OrderBy( r => r.Name ) ?? UserManagementStatics.SystemProvider.GetRoles() ).ToList();
+			availableRoles = availableRoles?.OrderBy( r => r.Name ) ?? UserManagementStatics.SystemProvider.GetRoles();
 
 			var user = userId.HasValue ? UserManagementStatics.GetUser( userId.Value, true ) : null;
 
