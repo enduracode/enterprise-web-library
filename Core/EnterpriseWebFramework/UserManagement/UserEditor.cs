@@ -36,7 +36,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 
 			var b = FormItemList.CreateStack();
 
-			b.AddFormItems( email.ToEmailAddressControl( false, value: user != null ? user.Email : "" ).ToFormItem( label: "Email address".ToComponents() ) );
+			b.AddItems(
+				email.ToEmailAddressControl( false, value: user != null ? user.Email : "" )
+					.ToFormItem( label: "Email address".ToComponents() )
+					.Append(
+						roleId.ToDropDown(
+								DropDownSetup.Create( from i in availableRoles select SelectListItem.Create( (int?)i.RoleId, i.Name ) ),
+								value: new SpecifiedValue<int?>( user?.Role.RoleId ) )
+							.ToFormItem( label: "Role".ToComponents() ) )
+					.Materialize() );
 
 			if( UserManagementStatics.LocalIdentityProviderEnabled ) {
 				var group = new RadioButtonGroup( false );
@@ -63,12 +71,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 									.ToFormItem()
 									.ToListItem() ) ).ToFormItem( label: "Password".ToComponents() ) );
 			}
-
-			b.AddFormItems(
-				roleId.ToDropDown(
-						DropDownSetup.Create( from i in availableRoles select SelectListItem.Create( i.RoleId as int?, i.Name ) ),
-						value: new SpecifiedValue<int?>( user?.Role.RoleId ) )
-					.ToFormItem( label: "Role".ToComponents() ) );
 
 			children = new Section( "Security Information", b.ToCollection() ).ToCollection();
 
