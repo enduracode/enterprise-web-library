@@ -278,13 +278,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										postBack: PostBack.CreateFull(
 											id: "ewfLogOut",
 											modificationMethod: AuthenticationStatics.LogOutUser,
-											actionGetter: () =>
-												// NOTE: Is this the correct behavior if we are already on a public page?
-												new PostBackAction(
-													new ExternalResource(
-														EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString(
-															EwfConfigurationStatics.AppSupportsSecureConnections ) ) ) ) ) )
-								.ToCollection()
+											actionGetter: () => new PostBackAction( null, authorizationCheckDisabledPredicate: resource => true ) ) ) ).ToCollection()
 								.ToComponentListItem() ) ) );
 
 			return components;
