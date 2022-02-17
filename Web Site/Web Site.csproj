@@ -142,7 +142,7 @@
     <Reference Include="System.XML" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="Tewl, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Tewl.2020.9.19.1508-pre\lib\net461\Tewl.dll</HintPath>
+      <HintPath>..\packages\Tewl.2022.2.17.1117\lib\net461\Tewl.dll</HintPath>
     </Reference>
     <Reference Include="WindowsBase" />
   </ItemGroup>
