@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
@@ -37,6 +38,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			// Initialize system.
 			var initTimeDataAccessState = new ThreadLocal<DataAccessState>( () => new DataAccessState() );
 			try {
+				// If the machine was recently started, delay initialization to give database services time to warm up. This avoids errors during data access.
+				if( TimeSpan.FromMilliseconds( GetTickCount64() ) < new TimeSpan( 0, 3, 0 ) )
+					Thread.Sleep( new TimeSpan( 0, 0, 30 ) );
+
 				GlobalInitializationOps.InitStatics(
 					globalInitializer,
 					Path.GetFileName( Path.GetDirectoryName( HttpRuntime.AppDomainAppPath ) ),
@@ -292,6 +297,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					Timeout.Infinite );
 			}
 		}
+
+		[ DllImport( "kernel32" ) ]
+		private static extern ulong GetTickCount64();
 
 		private static void assertResourceIsIntermediateInstallationPublicResourceWhenNecessary( ResourceInfo resource ) {
 			if( !PageBase.Current.IsIntermediateInstallationPublicResource )
