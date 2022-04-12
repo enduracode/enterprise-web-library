@@ -40,7 +40,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			try {
 				// If the machine was recently started, delay initialization to give database services time to warm up. This avoids errors during data access.
 				if( TimeSpan.FromMilliseconds( GetTickCount64() ) < new TimeSpan( 0, 3, 0 ) )
-					Thread.Sleep( new TimeSpan( 0, 0, 30 ) );
+					Thread.Sleep( new TimeSpan( 0, 1, 0 ) );
 
 				GlobalInitializationOps.InitStatics(
 					globalInitializer,
