@@ -793,6 +793,7 @@
     </Compile>
     <Compile Include="WindowsServiceFramework\TickInterval.cs" />
     <Compile Include="WindowsServiceFramework\WindowsServiceBase.cs" />
+    <Compile Include="WindowsServiceFramework\WindowsServiceStatics.cs" />
     <Compile Include="WpfInitializationOps.cs" />
   </ItemGroup>
   <ItemGroup>

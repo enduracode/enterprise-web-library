@@ -36,13 +36,13 @@ namespace EnterpriseWebLibrary.WindowsServiceFramework {
 				return;
 			}
 
-			Action method = () => {
+			void init() {
 				lastTickInstant = SystemClock.Instance.GetCurrentInstant();
 				service.Init();
 
 				timer = new Timer( tick, null, tickInterval, Timeout.Infinite );
-			};
-			if( !TelemetryStatics.ExecuteBlockWithStandardExceptionHandling( method ) ) {
+			}
+			if( !TelemetryStatics.ExecuteBlockWithStandardExceptionHandling( init ) ) {
 				ExitCode = 0x428; // Win32 error code; see http://msdn.microsoft.com/en-us/library/cc231199.aspx.
 				Stop();
 			}
@@ -70,9 +70,9 @@ namespace EnterpriseWebLibrary.WindowsServiceFramework {
 					// We need to schedule the next tick even if there is an exception thrown in this one. Use try-finally instead of CallEveryMethod so we don't lose
 					// exception stack traces.
 					try {
-						var currentInstant = SystemClock.Instance.GetCurrentInstant();
-						var interval = new TickInterval( new Interval( lastTickInstant, currentInstant ) );
-						lastTickInstant = currentInstant;
+						WindowsServiceStatics.TickTime = SystemClock.Instance.GetCurrentInstant();
+						var interval = new TickInterval( new Interval( lastTickInstant, WindowsServiceStatics.TickTime ) );
+						lastTickInstant = WindowsServiceStatics.TickTime;
 
 						service.Tick( interval );
 					}
