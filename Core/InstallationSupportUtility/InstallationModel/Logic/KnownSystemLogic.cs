@@ -15,7 +15,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 		public SoftwareSystem RsisSystem => rsisSystem;
 
 		public void DownloadAsposeLicenses( string configurationFolderPath ) {
-			ConfigurationLogic.ExecuteWithSystemManagerClient(
+			SystemManagerConnectionStatics.ExecuteWithSystemManagerClient(
 				client => {
 					Task.Run(
 							async () => {

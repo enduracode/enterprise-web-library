@@ -20,7 +20,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 			var cacheFilePath = EwlStatics.CombinePaths( ConfigurationStatics.EwlFolderPath, "System List.xml" );
 			var cacheUsed = false;
 			try {
-				ConfigurationLogic.ExecuteWithSystemManagerClient(
+				SystemManagerConnectionStatics.ExecuteWithSystemManagerClient(
 					client => {
 						Task.Run(
 								async () => {

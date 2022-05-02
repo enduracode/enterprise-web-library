@@ -25,7 +25,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.SystemManagerInterface
 			if( dataExportToRsisWebSiteNotPermitted ? !File.Exists( IsuStatics.GetDataPackageZipFilePath( FullName ) ) : !DataPackageSize.HasValue )
 				return "";
 
-			var downloadedPackagesFolder = EwlStatics.CombinePaths( ConfigurationLogic.DownloadedDataPackagesFolderPath, FullName );
+			var downloadedPackagesFolder = EwlStatics.CombinePaths( SystemManagerConnectionStatics.DownloadedDataPackagesFolderPath, FullName );
 
 			var packageZipFilePath = "";
 			// See if we can re-use an existing package.
@@ -53,9 +53,9 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.SystemManagerInterface
 
 		private long downloadDataPackage( string packageZipFilePath ) {
 			using( var fileWriteStream = IoMethods.GetFileStreamForWrite( packageZipFilePath ) ) {
-				ConfigurationLogic.ExecuteIsuServiceMethod(
+				SystemManagerConnectionStatics.ExecuteIsuServiceMethod(
 					channel => {
-						using( var networkStream = channel.DownloadDataPackage( ConfigurationLogic.SystemManagerAccessToken, Id ) )
+						using( var networkStream = channel.DownloadDataPackage( SystemManagerConnectionStatics.SystemManagerAccessToken, Id ) )
 							networkStream.CopyTo( fileWriteStream );
 					},
 					"data package download" );

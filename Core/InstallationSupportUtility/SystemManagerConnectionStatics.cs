@@ -1,14 +1,14 @@
-using System;
+﻿using System;
 using System.Net.Http;
 using System.ServiceModel;
 using EnterpriseWebLibrary.Configuration;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility {
-	public static class ConfigurationLogic {
+	public static class SystemManagerConnectionStatics {
 		/// <summary>
 		/// This should only be used by the Installation Support Utility.
 		/// </summary>
-		public static string DownloadedDataPackagesFolderPath = EwlStatics.CombinePaths( ConfigurationStatics.EwlFolderPath, "Downloaded Data Packages" );
+		public static readonly string DownloadedDataPackagesFolderPath = EwlStatics.CombinePaths( ConfigurationStatics.EwlFolderPath, "Downloaded Data Packages" );
 
 		private static ChannelFactory<SystemManagerInterface.ServiceContracts.Isu> isuServiceFactory;
 		private static ChannelFactory<SystemManagerInterface.ServiceContracts.ProgramRunner> programRunnerServiceFactory;

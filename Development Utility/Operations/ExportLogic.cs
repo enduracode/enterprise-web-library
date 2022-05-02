@@ -349,11 +349,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						XmlOps.SerializeIntoStream( build, memoryStream );
 						memoryStream.Position = 0;
 
-						ConfigurationLogic.ExecuteIsuServiceMethod(
+						SystemManagerConnectionStatics.ExecuteIsuServiceMethod(
 							channel => channel.UploadBuild(
 								new InstallationSupportUtility.SystemManagerInterface.Messages.BuildUploadMessage
 									{
-										AuthenticationKey = ConfigurationLogic.SystemManagerAccessToken, BuildDocument = memoryStream
+										AuthenticationKey = SystemManagerConnectionStatics.SystemManagerAccessToken, BuildDocument = memoryStream
 									} ),
 							"build upload" );
 					}

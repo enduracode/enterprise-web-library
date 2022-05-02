@@ -91,7 +91,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility {
 			var existingInstallationLogic = new ExistingInstallationLogic( generalInstallationLogic, new InstallationConfiguration( path, true ) );
 
 			if( existingInstallationLogic.RuntimeConfiguration.RsisInstallationId.HasValue ) {
-				ConfigurationLogic.Init();
+				SystemManagerConnectionStatics.Init();
 				SystemListStatics.RefreshSystemList();
 				var knownSystemLogic = new KnownSystemLogic(
 					SystemListStatics.RsisSystemList.Systems.Single(

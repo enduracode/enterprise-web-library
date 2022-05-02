@@ -686,7 +686,6 @@
     <Compile Include="Generated Code\System Manager Email Interface.cs" />
     <Compile Include="GlobalInitializationOps.cs" />
     <Compile Include="IisConfigurationStatics.cs" />
-    <Compile Include="InstallationSupportUtility\ConfigurationLogic.cs" />
     <Compile Include="InstallationSupportUtility\DatabaseAbstraction\Database.cs" />
     <Compile Include="InstallationSupportUtility\DatabaseAbstraction\DatabaseOps.cs" />
     <Compile Include="InstallationSupportUtility\DatabaseAbstraction\Databases\MySql.cs" />
@@ -720,6 +719,7 @@
     <Compile Include="InstallationSupportUtility\OperationResult.cs" />
     <Compile Include="InstallationSupportUtility\StatusStatics.cs" />
     <Compile Include="InstallationSupportUtility\SystemListStatics.cs" />
+    <Compile Include="InstallationSupportUtility\SystemManagerConnectionStatics.cs" />
     <Compile Include="InstallationSupportUtility\SystemManagerInterface\Messages\BuildUploadMessage.cs" />
     <Compile Include="InstallationSupportUtility\SystemManagerInterface\Messages\DataPackageUploadMessage.cs" />
     <Compile Include="InstallationSupportUtility\SystemManagerInterface\Messages\SystemListMessage\RsisInstallation.cs" />
