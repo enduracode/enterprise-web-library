@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<schema targetNamespace="http://enterpriseweblibrary.org" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:ewl="http://enterpriseweblibrary.org"
+        elementFormDefault="qualified">
+	<element name="SystemManagerEmailInterface" type="ewl:SystemManagerEmailInterface" />
+	<complexType name="SystemManagerEmailInterface">
+		<sequence>
+			<element name="Name" type="string" />
+			<element name="Address" type="string" />
+		</sequence>
+	</complexType>
+</schema>

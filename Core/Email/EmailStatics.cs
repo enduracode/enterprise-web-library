@@ -8,20 +8,31 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.Email.SystemManagerInterface;
 using Humanizer;
 using Tewl;
+using Tewl.IO;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.Email {
 	public static class EmailStatics {
+		internal static readonly string SystemManagerInterfaceFilePath = EwlStatics.CombinePaths(
+			ConfigurationStatics.EwlFolderPath,
+			"System Manager Email Interface" + FileExtensions.Xml );
+
 		/// <summary>
 		/// System Manager and private use only.
 		/// </summary>
 		public const string InstallationIdHeaderFieldName = "X-EWL-Installation-ID";
 
+		private static SystemManagerEmailInterface systemManagerInterface;
 		private static Action<EmailMessage> emailSender;
 
 		internal static void Init() {
+			systemManagerInterface = File.Exists( SystemManagerInterfaceFilePath )
+				                         ? XmlOps.DeserializeFromFile<SystemManagerEmailInterface>( SystemManagerInterfaceFilePath, false )
+				                         : null;
+
 			if( ConfigurationStatics.InstallationConfiguration.InstallationType == InstallationType.Development )
 				emailSender = message => sendEmailWithSmtpServer( null, message );
 			else {
@@ -35,9 +46,7 @@ namespace EnterpriseWebLibrary.Email {
 					service = intermediateConfig.EmailSendingService;
 				}
 
-				var sendGridService = service as Configuration.InstallationStandard.SendGrid;
-				var smtpServerService = service as Configuration.InstallationStandard.SmtpServer;
-				if( sendGridService != null ) {
+				if( service is Configuration.InstallationStandard.SendGrid sendGridService ) {
 					var client = new SendGrid.SendGridClient(
 						new SendGrid.SendGridClientOptions
 							{
@@ -64,7 +73,7 @@ namespace EnterpriseWebLibrary.Email {
 						}
 					};
 				}
-				else if( smtpServerService != null )
+				else if( service is Configuration.InstallationStandard.SmtpServer smtpServerService )
 					emailSender = message => sendEmailWithSmtpServer( smtpServerService, message );
 				else
 					emailSender = message => { throw new ApplicationException( "Failed to find an email-sending service in the installation configuration file." ); };
@@ -98,7 +107,7 @@ namespace EnterpriseWebLibrary.Email {
 			m.PlainTextContent = htmlToPlainText( message.BodyHtml );
 			m.HtmlContent = message.BodyHtml;
 
-			foreach( var i in message.Attachments ) {
+			foreach( var i in message.Attachments )
 				if( i.Stream == null )
 					m.AddAttachment( Path.GetFileName( i.FilePath ), Convert.ToBase64String( File.ReadAllBytes( i.FilePath ) ) );
 				else
@@ -106,7 +115,6 @@ namespace EnterpriseWebLibrary.Email {
 						i.Stream.CopyTo( stream );
 						m.AddAttachment( i.AttachmentDisplayName, Convert.ToBase64String( stream.ToArray() ) );
 					}
-			}
 
 			return m;
 		}
@@ -275,7 +283,7 @@ namespace EnterpriseWebLibrary.Email {
 			m.BccAddresses.Clear();
 
 			if( ConfigurationStatics.InstallationConfiguration.RsisInstallationId.HasValue ) {
-				m.ToAddresses.Add( new EmailAddress( "system-manager@enterpriseweblibrary.com", "EWL System Manager" ) );
+				m.ToAddresses.Add( systemManagerInterface.GetEmailAddress() );
 				m.CustomHeaders.Add(
 					Tuple.Create( InstallationIdHeaderFieldName, ConfigurationStatics.InstallationConfiguration.RsisInstallationId.Value.ToString() ) );
 			}

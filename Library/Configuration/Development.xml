@@ -39,6 +39,13 @@
 		</schema>
 		<schema>
 			<project>Core</project>
+			<pathInProject>Email\SystemManagerInterface\Schema.xsd</pathInProject>
+			<namespace>EnterpriseWebLibrary.Email.SystemManagerInterface</namespace>
+			<codeFileName>System Manager Email Interface.cs</codeFileName>
+			<useSvcUtil>true</useSvcUtil>
+		</schema>
+		<schema>
+			<project>Core</project>
 			<pathInProject>InstallationSupportUtility\SystemManagerInterface\Messages\BuildMessage\Build.xsd</pathInProject>
 			<namespace>EnterpriseWebLibrary.InstallationSupportUtility.SystemManagerInterface.Messages.BuildMessage</namespace>
 			<codeFileName>Build Message.cs</codeFileName>
