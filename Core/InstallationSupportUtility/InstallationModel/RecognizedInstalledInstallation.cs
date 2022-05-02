@@ -16,7 +16,7 @@
 			this.existingInstalledInstallationLogic = existingInstalledInstallationLogic;
 			this.knownSystemLogic = knownSystemLogic;
 			knownInstallationLogic = new KnownInstallationLogic(
-				SystemListStatics.RsisSystemList.GetInstallationById( existingInstallationLogic.RuntimeConfiguration.RsisInstallationId.Value ) );
+				SystemManagerConnectionStatics.SystemList.GetInstallationById( existingInstallationLogic.RuntimeConfiguration.RsisInstallationId.Value ) );
 			this.recognizedInstallationLogic = recognizedInstallationLogic;
 		}
 

@@ -4,8 +4,10 @@ using System.Net.Http;
 using System.ServiceModel;
 using System.Threading.Tasks;
 using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.InstallationSupportUtility.SystemManagerInterface.Messages.SystemListMessage;
 using Humanizer;
+using Tewl;
 using Tewl.IO;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility {
@@ -20,26 +22,33 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 		private static ChannelFactory<SystemManagerInterface.ServiceContracts.Isu> isuServiceFactory;
 		private static ChannelFactory<SystemManagerInterface.ServiceContracts.ProgramRunner> programRunnerServiceFactory;
 
-		public static void Init() {
-			RefreshSystemList();
+		public static void Init( bool forProgramRunner = false ) {
+			RefreshLocalData( forProgramRunner: forProgramRunner );
 
 			isuServiceFactory = getNetTcpChannelFactory<SystemManagerInterface.ServiceContracts.Isu>( "Isu.svc" );
 			programRunnerServiceFactory = getNetTcpChannelFactory<SystemManagerInterface.ServiceContracts.ProgramRunner>( "ProgramRunner.svc" );
 		}
 
 		/// <summary>
-		/// Gets a new system list.
+		/// Gets new System Manager local data.
 		/// </summary>
-		public static void RefreshSystemList() {
-			// Do not perform schema validation since we don't want to be forced into redeploying Program Runner after every schema change. We also don't have access
-			// to the schema on non-development machines.
-			var cacheFilePath = EwlStatics.CombinePaths( ConfigurationStatics.EwlFolderPath, "System List.xml" );
+		public static void RefreshLocalData( bool forProgramRunner = false ) {
+			// Do not perform system-list schema validation since we don’t want to be forced into redeploying Program Runner after every schema change. We also don’t
+			// have access to the schema on non-development machines.
+			byte[] emailInterface = null;
+			var systemListFilePath = EwlStatics.CombinePaths( ConfigurationStatics.EwlFolderPath, "System List" + FileExtensions.Xml );
 			var cacheUsed = false;
 			try {
 				ExecuteWithSystemManagerClient(
 					client => {
 						Task.Run(
 								async () => {
+									if( !forProgramRunner )
+										using( var response = await client.GetAsync( "email-interface", HttpCompletionOption.ResponseHeadersRead ) ) {
+											response.EnsureSuccessStatusCode();
+											emailInterface = await response.Content.ReadAsByteArrayAsync();
+										}
+
 									using( var response = await client.GetAsync( "system-list", HttpCompletionOption.ResponseHeadersRead ) ) {
 										response.EnsureSuccessStatusCode();
 										using( var stream = await response.Content.ReadAsStreamAsync() )
@@ -50,24 +59,30 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 					} );
 			}
 			catch( Exception e ) {
-				// Use the cached version of the system list if it is available.
-				if( File.Exists( cacheFilePath ) ) {
-					SystemList = XmlOps.DeserializeFromFile<SystemList>( cacheFilePath, false );
+				// Use the cached version of the data if available.
+				if( File.Exists( systemListFilePath ) ) {
+					if( !forProgramRunner )
+						emailInterface = File.ReadAllBytes( EmailStatics.SystemManagerInterfaceFilePath );
+					SystemList = XmlOps.DeserializeFromFile<SystemList>( systemListFilePath, false );
 					cacheUsed = true;
 				}
 				else
-					throw new UserCorrectableException( "Failed to download the system list and a cached version is not available.", e );
+					throw new UserCorrectableException( "Failed to download System Manager data and a cached version is not available.", e );
 			}
 
 			StatusStatics.SetStatus(
-				cacheUsed ? "Failed to download the system list; loaded a cached version from \"{0}\".".FormatWith( cacheFilePath ) : "Downloaded the system list." );
+				cacheUsed
+					? "Failed to download System Manager data; loaded a cached version from \"{0}\".".FormatWith( ConfigurationStatics.EwlFolderPath )
+					: "Downloaded System Manager data." );
 
-			// Cache the system list so something is available in the future if the machine is offline.
+			// Cache the data so something is available in the future if the System Manager is unavailable.
 			try {
-				XmlOps.SerializeIntoFile( SystemList, cacheFilePath );
+				if( !forProgramRunner )
+					File.WriteAllBytes( EmailStatics.SystemManagerInterfaceFilePath, emailInterface );
+				XmlOps.SerializeIntoFile( SystemList, systemListFilePath );
 			}
 			catch( Exception e ) {
-				const string generalMessage = "Failed to cache the system list on disk.";
+				const string generalMessage = "Failed to cache System Manager data on disk.";
 				if( e is UnauthorizedAccessException )
 					throw new UserCorrectableException( generalMessage + " If the program is running as a non built in administrator, you may need to disable UAC.", e );
 

@@ -92,9 +92,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility {
 
 			if( existingInstallationLogic.RuntimeConfiguration.RsisInstallationId.HasValue ) {
 				SystemManagerConnectionStatics.Init();
-				SystemListStatics.RefreshSystemList();
 				var knownSystemLogic = new KnownSystemLogic(
-					SystemListStatics.RsisSystemList.Systems.Single(
+					SystemManagerConnectionStatics.SystemList.Systems.Single(
 						i => i.DevelopmentInstallationId == existingInstallationLogic.RuntimeConfiguration.RsisInstallationId.Value ) );
 				var recognizedInstallationLogic = new RecognizedInstallationLogic( existingInstallationLogic, knownSystemLogic );
 				return new RecognizedDevelopmentInstallation( generalInstallationLogic, existingInstallationLogic, knownSystemLogic, recognizedInstallationLogic );

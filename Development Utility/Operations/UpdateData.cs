@@ -24,7 +24,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 			RsisInstallation sourceInstallation;
 			if( installation is RecognizedDevelopmentInstallation recognizedInstallation ) {
-				var sources = SystemListStatics.RsisSystemList.GetDataUpdateSources( recognizedInstallation );
+				var sources = SystemManagerConnectionStatics.SystemList.GetDataUpdateSources( recognizedInstallation );
 				if( source.Any() ) {
 					sourceInstallation = sources.SingleOrDefault( i => i.ShortName == source );
 					if( sourceInstallation == null )

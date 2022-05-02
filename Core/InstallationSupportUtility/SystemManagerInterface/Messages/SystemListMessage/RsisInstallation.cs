@@ -8,11 +8,13 @@ using Tewl.IO;
 namespace EnterpriseWebLibrary.InstallationSupportUtility.SystemManagerInterface.Messages.SystemListMessage {
 	public partial class RsisInstallation {
 		public string FullName =>
-			InstallationConfiguration.GetFullNameFromSystemAndInstallationNames( SystemListStatics.RsisSystemList.GetSystemByInstallationId( Id ).Name, Name );
+			InstallationConfiguration.GetFullNameFromSystemAndInstallationNames(
+				SystemManagerConnectionStatics.SystemList.GetSystemByInstallationId( Id ).Name,
+				Name );
 
 		public string FullShortName =>
 			InstallationConfiguration.GetFullShortNameFromSystemAndInstallationNames(
-				SystemListStatics.RsisSystemList.GetSystemByInstallationId( Id ).ShortName,
+				SystemManagerConnectionStatics.SystemList.GetSystemByInstallationId( Id ).ShortName,
 				ShortName );
 
 		/// <summary>
