@@ -108,7 +108,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 					( info as DatabaseInfo ).SecondaryDatabaseName,
 					info.DataSource,
 					"sys",
-					ConfigurationLogic.OracleSysPassword,
+					sysPassword,
 					info.SupportsConnectionPooling,
 					info.SupportsLinguisticIndexes ),
 				cn => {
@@ -162,7 +162,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 							( info as DatabaseInfo ).SecondaryDatabaseName,
 							info.DataSource,
 							"sys",
-							ConfigurationLogic.OracleSysPassword,
+							sysPassword,
 							info.SupportsConnectionPooling,
 							info.SupportsLinguisticIndexes ),
 						deleteUser );
@@ -226,6 +226,11 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 		private string getDumpFileName() {
 			return info.UserAndSchema + ".dmp";
 		}
+
+		private string sysPassword =>
+			ConfigurationStatics.MachineConfiguration == null || ConfigurationStatics.MachineConfiguration.OracleSysPassword == null
+				? throw new UserCorrectableException( "Missing Oracle sys password in machine configuration file." )
+				: ConfigurationStatics.MachineConfiguration.OracleSysPassword;
 
 		private void deleteUser( DBConnection cn ) {
 			try {

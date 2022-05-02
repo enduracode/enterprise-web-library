@@ -148,13 +148,5 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 				return ConfigurationStatics.MachineConfiguration.SystemManager;
 			}
 		}
-
-		public static string OracleSysPassword {
-			get {
-				if( ConfigurationStatics.MachineConfiguration == null || ConfigurationStatics.MachineConfiguration.OracleSysPassword == null )
-					throw new UserCorrectableException( "Missing Oracle sys password in machine configuration file." );
-				return ConfigurationStatics.MachineConfiguration.OracleSysPassword;
-			}
-		}
 	}
 }
