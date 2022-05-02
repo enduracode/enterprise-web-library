@@ -12,11 +12,6 @@ using Tewl.IO;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility {
 	public static class SystemManagerConnectionStatics {
-		/// <summary>
-		/// This should only be used by the Installation Support Utility.
-		/// </summary>
-		public static readonly string DownloadedDataPackagesFolderPath = EwlStatics.CombinePaths( ConfigurationStatics.EwlFolderPath, "Downloaded Data Packages" );
-
 		public static SystemList SystemList { get; private set; }
 
 		private static ChannelFactory<SystemManagerInterface.ServiceContracts.Isu> isuServiceFactory;
