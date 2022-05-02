@@ -718,7 +718,6 @@
     <Compile Include="InstallationSupportUtility\Operation.cs" />
     <Compile Include="InstallationSupportUtility\OperationResult.cs" />
     <Compile Include="InstallationSupportUtility\StatusStatics.cs" />
-    <Compile Include="InstallationSupportUtility\SystemListStatics.cs" />
     <Compile Include="InstallationSupportUtility\SystemManagerConnectionStatics.cs" />
     <Compile Include="InstallationSupportUtility\SystemManagerInterface\Messages\BuildUploadMessage.cs" />
     <Compile Include="InstallationSupportUtility\SystemManagerInterface\Messages\DataPackageUploadMessage.cs" />

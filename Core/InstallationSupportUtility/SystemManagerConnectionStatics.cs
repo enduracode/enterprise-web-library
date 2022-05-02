@@ -1,7 +1,12 @@
 ﻿using System;
+using System.IO;
 using System.Net.Http;
 using System.ServiceModel;
+using System.Threading.Tasks;
 using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.InstallationSupportUtility.SystemManagerInterface.Messages.SystemListMessage;
+using Humanizer;
+using Tewl.IO;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility {
 	public static class SystemManagerConnectionStatics {
@@ -10,12 +15,66 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 		/// </summary>
 		public static readonly string DownloadedDataPackagesFolderPath = EwlStatics.CombinePaths( ConfigurationStatics.EwlFolderPath, "Downloaded Data Packages" );
 
+		public static SystemList SystemList { get; private set; }
+
 		private static ChannelFactory<SystemManagerInterface.ServiceContracts.Isu> isuServiceFactory;
 		private static ChannelFactory<SystemManagerInterface.ServiceContracts.ProgramRunner> programRunnerServiceFactory;
 
 		public static void Init() {
+			RefreshSystemList();
+
 			isuServiceFactory = getNetTcpChannelFactory<SystemManagerInterface.ServiceContracts.Isu>( "Isu.svc" );
 			programRunnerServiceFactory = getNetTcpChannelFactory<SystemManagerInterface.ServiceContracts.ProgramRunner>( "ProgramRunner.svc" );
+		}
+
+		/// <summary>
+		/// Gets a new system list.
+		/// </summary>
+		public static void RefreshSystemList() {
+			// Do not perform schema validation since we don't want to be forced into redeploying Program Runner after every schema change. We also don't have access
+			// to the schema on non-development machines.
+			var cacheFilePath = EwlStatics.CombinePaths( ConfigurationStatics.EwlFolderPath, "System List.xml" );
+			var cacheUsed = false;
+			try {
+				ExecuteWithSystemManagerClient(
+					client => {
+						Task.Run(
+								async () => {
+									using( var response = await client.GetAsync( "system-list", HttpCompletionOption.ResponseHeadersRead ) ) {
+										response.EnsureSuccessStatusCode();
+										using( var stream = await response.Content.ReadAsStreamAsync() )
+											SystemList = XmlOps.DeserializeFromStream<SystemList>( stream, false );
+									}
+								} )
+							.Wait();
+					} );
+			}
+			catch( Exception e ) {
+				// Use the cached version of the system list if it is available.
+				if( File.Exists( cacheFilePath ) ) {
+					SystemList = XmlOps.DeserializeFromFile<SystemList>( cacheFilePath, false );
+					cacheUsed = true;
+				}
+				else
+					throw new UserCorrectableException( "Failed to download the system list and a cached version is not available.", e );
+			}
+
+			StatusStatics.SetStatus(
+				cacheUsed ? "Failed to download the system list; loaded a cached version from \"{0}\".".FormatWith( cacheFilePath ) : "Downloaded the system list." );
+
+			// Cache the system list so something is available in the future if the machine is offline.
+			try {
+				XmlOps.SerializeIntoFile( SystemList, cacheFilePath );
+			}
+			catch( Exception e ) {
+				const string generalMessage = "Failed to cache the system list on disk.";
+				if( e is UnauthorizedAccessException )
+					throw new UserCorrectableException( generalMessage + " If the program is running as a non built in administrator, you may need to disable UAC.", e );
+
+				// An IOException probably means the file is locked. In this case we want to ignore the problem and move on.
+				if( !( e is IOException ) )
+					throw new UserCorrectableException( generalMessage, e );
+			}
 		}
 
 		private static ChannelFactory<T> getHttpChannelFactory<T>( string serviceFileName ) {
