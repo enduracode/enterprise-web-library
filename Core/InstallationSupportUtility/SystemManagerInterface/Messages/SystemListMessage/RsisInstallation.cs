@@ -57,7 +57,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.SystemManagerInterface
 			using( var fileWriteStream = IoMethods.GetFileStreamForWrite( packageZipFilePath ) ) {
 				SystemManagerConnectionStatics.ExecuteIsuServiceMethod(
 					channel => {
-						using( var networkStream = channel.DownloadDataPackage( SystemManagerConnectionStatics.SystemManagerAccessToken, Id ) )
+						using( var networkStream = channel.DownloadDataPackage( SystemManagerConnectionStatics.AccessToken, Id ) )
 							networkStream.CopyTo( fileWriteStream );
 					},
 					"data package download" );

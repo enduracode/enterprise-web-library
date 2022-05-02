@@ -353,7 +353,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 							channel => channel.UploadBuild(
 								new InstallationSupportUtility.SystemManagerInterface.Messages.BuildUploadMessage
 									{
-										AuthenticationKey = SystemManagerConnectionStatics.SystemManagerAccessToken, BuildDocument = memoryStream
+										AuthenticationKey = SystemManagerConnectionStatics.AccessToken, BuildDocument = memoryStream
 									} ),
 							"build upload" );
 					}

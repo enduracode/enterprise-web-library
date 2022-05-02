@@ -99,10 +99,10 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 
 			// This prevents certificate validation problems on dev machines with self-signed certificates.
 			// This can probably be done anywhere before we try to get the system list. 
-			if( SystemManager.HttpBaseUrl.StartsWith( "https://localhost" ) )
+			if( Configuration.HttpBaseUrl.StartsWith( "https://localhost" ) )
 				System.Net.ServicePointManager.ServerCertificateValidationCallback = ( ( sender, certificate, chain, sslPolicyErrors ) => true );
 
-			return new ChannelFactory<T>( binding, Tewl.Tools.NetTools.CombineUrls( SystemManager.HttpBaseUrl, "Service/" + serviceFileName ) );
+			return new ChannelFactory<T>( binding, Tewl.Tools.NetTools.CombineUrls( Configuration.HttpBaseUrl, "Service/" + serviceFileName ) );
 		}
 
 		private static ChannelFactory<T> getNetTcpChannelFactory<T>( string serviceFileName ) {
@@ -121,17 +121,17 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 			// Performance
 			binding.MaxBufferSize = binding.ReaderQuotas.MaxBytesPerRead = 65536;
 
-			var factory = new ChannelFactory<T>( binding, Tewl.Tools.NetTools.CombineUrls( SystemManager.TcpBaseUrl, "Service/" + serviceFileName ) );
-			factory.Credentials.Windows.ClientCredential.UserName = SystemManager.TcpUsername;
-			factory.Credentials.Windows.ClientCredential.Password = SystemManager.TcpPassword;
+			var factory = new ChannelFactory<T>( binding, Tewl.Tools.NetTools.CombineUrls( Configuration.TcpBaseUrl, "Service/" + serviceFileName ) );
+			factory.Credentials.Windows.ClientCredential.UserName = Configuration.TcpUsername;
+			factory.Credentials.Windows.ClientCredential.Password = Configuration.TcpPassword;
 			return factory;
 		}
 
 		public static void ExecuteWithSystemManagerClient( Action<HttpClient> method, bool useLongTimeouts = false ) {
 			using( var client = new HttpClient() ) {
 				client.Timeout = useLongTimeouts ? new TimeSpan( 0, 2, 0 ) : new TimeSpan( 0, 0, 10 );
-				client.BaseAddress = new Uri( SystemManager.HttpBaseUrl + "/" );
-				client.DefaultRequestHeaders.TryAddWithoutValidation( "Authorization", SystemManager.AccessToken );
+				client.BaseAddress = new Uri( Configuration.HttpBaseUrl + "/" );
+				client.DefaultRequestHeaders.TryAddWithoutValidation( "Authorization", Configuration.AccessToken );
 
 				method( client );
 			}
@@ -213,14 +213,11 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 				innerException );
 		}
 
-		public static string SystemManagerAccessToken => SystemManager.AccessToken;
+		public static string AccessToken => Configuration.AccessToken;
 
-		public static Configuration.Machine.MachineConfigurationSystemManager SystemManager {
-			get {
-				if( ConfigurationStatics.MachineConfiguration == null || ConfigurationStatics.MachineConfiguration.SystemManager == null )
-					throw new UserCorrectableException( "Missing System Manager element in machine configuration file." );
-				return ConfigurationStatics.MachineConfiguration.SystemManager;
-			}
-		}
+		public static Configuration.Machine.MachineConfigurationSystemManager Configuration =>
+			ConfigurationStatics.MachineConfiguration == null || ConfigurationStatics.MachineConfiguration.SystemManager == null
+				? throw new UserCorrectableException( "Missing System Manager element in machine configuration file." )
+				: ConfigurationStatics.MachineConfiguration.SystemManager;
 	}
 }
