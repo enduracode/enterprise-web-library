@@ -17,8 +17,9 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 		private static ChannelFactory<SystemManagerInterface.ServiceContracts.Isu> isuServiceFactory;
 		private static ChannelFactory<SystemManagerInterface.ServiceContracts.ProgramRunner> programRunnerServiceFactory;
 
-		public static void Init( bool forProgramRunner = false ) {
-			RefreshLocalData( forProgramRunner: forProgramRunner );
+		public static void Init( bool? refreshProgramRunnerDataOnly = false ) {
+			if( refreshProgramRunnerDataOnly.HasValue )
+				RefreshLocalData( forProgramRunner: refreshProgramRunnerDataOnly.Value );
 
 			isuServiceFactory = getNetTcpChannelFactory<SystemManagerInterface.ServiceContracts.Isu>( "Isu.svc" );
 			programRunnerServiceFactory = getNetTcpChannelFactory<SystemManagerInterface.ServiceContracts.ProgramRunner>( "ProgramRunner.svc" );
