@@ -43,8 +43,7 @@ namespace EnterpriseWebLibrary.DataAccess {
 			this.databaseInfo = databaseInfo;
 
 			// Sometimes databases are slow when nightly operations are underway.
-			var time = SystemClock.Instance.GetCurrentInstant().InZone( DateTimeZoneProviders.Tzdb.GetSystemDefault() ).TimeOfDay;
-			var isNight = new LocalTime( 22, 0 ) <= time || time < new LocalTime( 6, 0 );
+			var isNight = SystemClock.Instance.GetCurrentInstant().InZone( DateTimeZoneProviders.Tzdb.GetSystemDefault() ).TimeOfDay.IsInNight();
 			var timeout = isNight ? 120 : useLongTimeouts ? 60 : 15;
 
 			// Build the connection string.

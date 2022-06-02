@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using ImageResizer;
+using NodaTime;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary {
@@ -292,5 +293,10 @@ namespace EnterpriseWebLibrary {
 		public static DestinationType? ToNewUnderlyingValue<SourceType, DestinationType>( this SourceType? value, Func<SourceType, DestinationType> valueSelector )
 			where SourceType: struct where DestinationType: struct =>
 			value.HasValue ? (DestinationType?)valueSelector( value.Value ) : null;
+
+		/// <summary>
+		/// Returns whether this time is within the hours when nightly operations are typically underway.
+		/// </summary>
+		public static bool IsInNight( this LocalTime time ) => new LocalTime( 22, 0 ) <= time || time < new LocalTime( 6, 0 );
 	}
 }

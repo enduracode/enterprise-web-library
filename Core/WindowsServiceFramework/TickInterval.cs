@@ -12,12 +12,18 @@ namespace EnterpriseWebLibrary.WindowsServiceFramework {
 			localIntervals = interval.ToLocalIntervals();
 		}
 
-		public bool Contains( Instant instant ) {
-			return interval.Contains( instant );
-		}
+		public bool Contains( Instant instant ) => interval.Contains( instant );
 
-		public bool FitsPattern( OperationRecurrencePattern pattern ) {
-			return localIntervals.Any( i => pattern.IntervalFits( i.Beginning, i.End ) );
-		}
+		/// <summary>
+		/// Returns whether this interval ends after the specified date.
+		/// </summary>
+		public bool EndsAfter( LocalDate date ) => interval.End.InZone( DateTimeZoneProviders.Tzdb.GetSystemDefault() ).Date > date;
+
+		/// <summary>
+		/// Returns whether this interval ends at a time when applications are normally used.
+		/// </summary>
+		public bool EndsWithinNormalUseHours() => !interval.End.InZone( DateTimeZoneProviders.Tzdb.GetSystemDefault() ).TimeOfDay.IsInNight();
+
+		public bool FitsPattern( OperationRecurrencePattern pattern ) => localIntervals.Any( i => pattern.IntervalFits( i.Beginning, i.End ) );
 	}
 }
