@@ -61,8 +61,11 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 
 				if( service.Status == ServiceControllerStatus.Stopped )
 					continue;
-				if( service.Status != ServiceControllerStatus.StopPending )
+				if( service.Status != ServiceControllerStatus.StopPending ) {
+					if( service.Status == ServiceControllerStatus.StartPending )
+						service.WaitForStatusWithTimeOut( ServiceControllerStatus.Running );
 					service.Stop();
+				}
 				service.WaitForStatusWithTimeOut( ServiceControllerStatus.Stopped );
 			}
 		}
