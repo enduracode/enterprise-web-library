@@ -74,7 +74,8 @@ namespace EnterpriseWebLibrary.WindowsServiceFramework {
 						var interval = new TickInterval( new Interval( lastTickInstant, WindowsServiceStatics.TickTime ) );
 						lastTickInstant = WindowsServiceStatics.TickTime;
 
-						service.Tick( interval );
+						if( interval.EndsWithinNormalUseHours() || !ConfigurationStatics.IsIntermediateInstallation )
+							service.Tick( interval );
 					}
 					finally {
 						try {
