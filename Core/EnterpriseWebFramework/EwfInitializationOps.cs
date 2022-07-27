@@ -8,7 +8,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Compilation;
-using System.Web.Http;
 using System.Xml;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
@@ -47,9 +46,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					Path.GetFileName( Path.GetDirectoryName( HttpRuntime.AppDomainAppPath ) ),
 					false,
 					mainDataAccessStateGetter: () => {
-						return EwfApp.Instance != null ? EwfApp.Instance.RequestState != null ? EwfApp.Instance.RequestState.DataAccessState :
-						                                 initTimeDataAccessState.Value :
-						       System.ServiceModel.OperationContext.Current != null ? wcfDataAccessState.Value : null;
+						return EwfApp.Instance != null
+							       ?
+							       EwfApp.Instance.RequestState != null ? EwfApp.Instance.RequestState.DataAccessState : initTimeDataAccessState.Value
+							       : System.ServiceModel.OperationContext.Current != null
+								       ? wcfDataAccessState.Value
+								       : null;
 					} );
 			}
 			catch {
@@ -63,8 +65,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				EwfApp.ExecuteWithBasicExceptionHandling(
 					() => {
 						EwfConfigurationStatics.Init();
-
-						GlobalConfiguration.Configure( WebApiStatics.ConfigureWebApi );
 
 						var miniProfilerOptions = new MiniProfilerOptions();
 						miniProfilerOptions.IgnoredPaths.Clear();
