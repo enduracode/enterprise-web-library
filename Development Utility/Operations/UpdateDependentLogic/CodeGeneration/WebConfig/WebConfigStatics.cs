@@ -44,16 +44,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebC
 
 			sections = sections.Replace( "@@SessionTimeout", ( (int)AuthenticationStatics.SessionDuration.TotalMinutes ).ToString() );
 
-			var useCertificateAuth = project.useCertificateAuthenticationSpecified && project.useCertificateAuthentication;
-			sections = sections.Replace(
-				"@@CertificateAuthenticationModulePlace",
-				useCertificateAuth
-					? "<add name=\"CertificateAuthentication\" type=\"EnterpriseWebLibrary.CertificateAuthenticationModule, EnterpriseWebLibrary\"/>"
-					: "" );
-
-			const string cacheTimeoutTimeSpan = "10:00:00"; // 10 hours
-			sections = sections.Replace( "@@CacheTimeout", cacheTimeoutTimeSpan );
-
 			return sections;
 		}
 

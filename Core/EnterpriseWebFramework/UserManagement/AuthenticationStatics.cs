@@ -64,24 +64,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		/// place with an impersonator who doesn't correspond to a user, or (3) a value containing the impersonator.
 		/// </summary>
 		internal static Tuple<User, SpecifiedValue<User>> GetUserAndImpersonatorFromRequest() {
-			var userLazy = new Func<User>[]
-					{
-						() => {
-							var cookie = CookieStatics.GetCookie( userCookieName );
-							if( cookie == null )
-								return null;
-							var ticket = GetFormsAuthTicket( cookie );
-							return ticket != null ? UserManagementStatics.GetUser( int.Parse( ticket.Name ), false ) : null;
-						},
-						() => {
-							var identity = HttpContext.Current.User.Identity;
-							return identity.IsAuthenticated && identity.AuthenticationType == CertificateAuthenticationModule.CertificateAuthenticationType
-								       ? UserManagementStatics.SystemProvider.GetUser( identity.Name )
-								       : null;
-						}
-					}.Select( i => new Lazy<User>( i ) )
-				.FirstOrDefault( i => i.Value != null );
-			var user = userLazy != null ? userLazy.Value : null;
+			User getUser() {
+				var cookie = CookieStatics.GetCookie( userCookieName );
+				if( cookie == null )
+					return null;
+				var ticket = GetFormsAuthTicket( cookie );
+				return ticket != null ? UserManagementStatics.GetUser( int.Parse( ticket.Name ), false ) : null;
+			}
+			var user = getUser();
 
 			if( ( user != null && user.Role.CanManageUsers ) || !ConfigurationStatics.IsLiveInstallation ) {
 				var cookie = CookieStatics.GetCookie( UserImpersonationStatics.CookieName );

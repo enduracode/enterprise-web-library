@@ -47,7 +47,6 @@
 		<sequence>
 			<element name="name" type="string" />
 			<element name="NamespaceAndAssemblyName" type="string" />
-			<element name="useCertificateAuthentication" type="boolean" minOccurs="0" />
 			<element name="DefaultCookieAttributes" type="rs:SystemDevelopmentCookieAttributes" minOccurs="0" />
 			<element name="UsesEntityFramework" type="boolean" minOccurs="0" />
 			<element name="IsUpdateableWhenInstalled" type="boolean" minOccurs="0" />

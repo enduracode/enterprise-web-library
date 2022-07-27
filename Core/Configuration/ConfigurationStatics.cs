@@ -116,8 +116,6 @@ namespace EnterpriseWebLibrary.Configuration {
 
 		internal static bool DatabaseExists { get { return InstallationConfiguration.PrimaryDatabaseInfo != null; } }
 
-		internal static string CertificateEmailAddressOverride { get { return InstallationConfiguration.CertificateEmailAddressOverride; } }
-
 		internal static bool IsDevelopmentInstallation { get { return InstallationConfiguration.InstallationType == InstallationType.Development; } }
 
 		/// <summary>

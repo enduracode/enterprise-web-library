@@ -243,8 +243,6 @@ namespace EnterpriseWebLibrary.Configuration {
 			get { return isDevelopmentInstallation ? "Dev" : installationStandardConfiguration.installedInstallation.shortName; }
 		}
 
-		internal string CertificateEmailAddressOverride { get { return installationStandardConfiguration.CertificateEmailAddressOverride ?? ""; } }
-
 		/// <summary>
 		/// Gets a list of the administrators for the installation.
 		/// </summary>
