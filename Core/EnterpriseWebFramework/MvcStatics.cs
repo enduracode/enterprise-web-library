@@ -1,15 +1,14 @@
 ﻿using System.Web.Mvc;
-using System.Web.Routing;
 using EnterpriseWebLibrary.DataAccess;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public static class MvcStatics {
-		private class EwfActionFilterAttribute: ActionFilterAttribute {
-			public override void OnActionExecuting( ActionExecutingContext filterContext ) {
+		private class EwfActionFilterAttribute: IActionFilter {
+			void IActionFilter.OnActionExecuting( ActionExecutingContext filterContext ) {
 				DataAccessState.Current.DisableCache();
 			}
 
-			public override void OnActionExecuted( ActionExecutedContext filterContext ) {
+			void IActionFilter.OnActionExecuted( ActionExecutedContext filterContext ) {
 				try {
 					if( filterContext.Exception == null )
 						AppRequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
@@ -20,13 +19,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 		}
 
-		public static void ConfigureMvc() {
-			AreaRegistration.RegisterAllAreas();
+		// This needs to be updated for ASP.NET Core MVC.
+		//public static void ConfigureMvc() {
+		//	AreaRegistration.RegisterAllAreas();
 
-			GlobalFilters.Filters.Add( new EwfActionFilterAttribute() );
+		//	GlobalFilters.Filters.Add( new EwfActionFilterAttribute() );
 
-			RouteTable.Routes.IgnoreRoute( "{resource}.axd/{*pathInfo}" );
-			RouteTable.Routes.IgnoreRoute( "Ewf/{*path}" );
-		}
+		//	RouteTable.Routes.IgnoreRoute( "{resource}.axd/{*pathInfo}" );
+		//	RouteTable.Routes.IgnoreRoute( "Ewf/{*path}" );
+		//}
 	}
 }
