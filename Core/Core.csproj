@@ -353,6 +353,7 @@
     <Compile Include="EnterpriseWebFramework\Core\EwfApp.cs" />
     <Compile Include="EnterpriseWebFramework\Core\EwfConfigurationStatics.cs" />
     <Compile Include="EnterpriseWebFramework\Core\HTTP\BlobFileResponse.cs" />
+    <Compile Include="EnterpriseWebFramework\Core\HTTP\EwfRequest.cs" />
     <Compile Include="EnterpriseWebFramework\Core\HTTP\EwfResponse.cs" />
     <Compile Include="EnterpriseWebFramework\Core\HTTP\EwfResponseBodyCreator.cs" />
     <Compile Include="EnterpriseWebFramework\Core\HTTP\FullResponse.cs" />
@@ -624,7 +625,6 @@
     <Compile Include="EnterpriseWebFramework\Ui\Entity\EntityUiSetup.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\Entity\UiEntitySetup.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\EwfUiStatics.cs" />
-    <Compile Include="EnterpriseWebFramework\EwfExtensionMethods.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\Entity\TabMode.cs" />
     <Compile Include="EnterpriseWebFramework\Ui\UiPageContent.cs" />
     <Compile Include="EnterpriseWebFramework\UserManagement\AppAuthenticationProvider.cs" />

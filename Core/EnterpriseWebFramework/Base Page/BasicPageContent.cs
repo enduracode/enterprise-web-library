@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Web;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
@@ -491,8 +490,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private IEnumerable<FlowComponent> getTypekitLogicIfNecessary() {
 			if( BasePageStatics.AppProvider.TypekitId.Any() ) {
 				yield return new TrustedHtmlString(
-					"<script type=\"text/javascript\" src=\"http" + ( EwfApp.Instance.RequestIsSecure( HttpContext.Current.Request ) ? "s" : "" ) +
-					"://use.typekit.com/" + BasePageStatics.AppProvider.TypekitId + ".js\"></script>" ).ToComponent();
+					"<script type=\"text/javascript\" src=\"http" + ( EwfRequest.Current.IsSecure ? "s" : "" ) + "://use.typekit.com/" +
+					BasePageStatics.AppProvider.TypekitId + ".js\"></script>" ).ToComponent();
 				yield return new TrustedHtmlString( "<script type=\"text/javascript\">try{Typekit.load();}catch(e){}</script>" ).ToComponent();
 			}
 		}

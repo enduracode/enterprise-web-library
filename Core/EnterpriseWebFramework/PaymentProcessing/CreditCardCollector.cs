@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.WebSessionState;
 using ServiceStack.Stripe;
@@ -42,7 +41,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			JsStatementList jsOpenStatements, string testPublishableKey, string livePublishableKey, string name, string description, decimal? amountInDollars,
 			string testSecretKey, string liveSecretKey, Func<string, decimal, StatusMessageAndDestination> successHandler,
 			string prefilledEmailAddressOverride = null ) {
-			if( !EwfApp.Instance.RequestIsSecure( HttpContext.Current.Request ) )
+			if( !EwfRequest.Current.IsSecure )
 				throw new ApplicationException( "Credit-card collection can only be done from secure pages." );
 
 			if( amountInDollars.HasValue && amountInDollars.Value.DollarValueHasFractionalCents() )
