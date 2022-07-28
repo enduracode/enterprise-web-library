@@ -49,10 +49,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.SamlResourc
 			}
 
 			var destinationUrl = new VerifyClientFunctionality( assertion.returnUrl ).GetUrl();
-			HttpContext.Current.Response.StatusCode = 303;
 			return EwfResponse.Create(
 				ContentTypes.PlainText,
 				new EwfResponseBodyCreator( writer => writer.Write( "See Other: {0}".FormatWith( destinationUrl ) ) ),
+				statusCodeGetter: () => 303,
 				additionalHeaderFieldGetter: () => ( "Location", destinationUrl ).ToCollection() );
 		}
 	}

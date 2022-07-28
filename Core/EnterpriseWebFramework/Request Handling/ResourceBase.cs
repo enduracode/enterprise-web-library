@@ -28,8 +28,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		internal static void WriteRedirectResponse( HttpContext context, string url, bool permanent ) {
-			context.Response.StatusCode = permanent ? 308 : 307;
-
 			if( context.Request.HttpMethod == "GET" || context.Request.HttpMethod == "HEAD" )
 				EwfSafeResponseWriter.AddCacheControlHeader(
 					context.Response,
@@ -40,6 +38,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			EwfResponse.Create(
 					ContentTypes.PlainText,
 					new EwfResponseBodyCreator( writer => writer.Write( "{0} Redirect: {1}".FormatWith( permanent ? "Permanent" : "Temporary", url ) ) ),
+					statusCodeGetter: () => permanent ? 308 : 307,
 					additionalHeaderFieldGetter: () => ( "Location", url ).ToCollection() )
 				.WriteToAspNetResponse( context.Response, omitBody: context.Request.HttpMethod == "HEAD" );
 		}
@@ -362,8 +361,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				else {
 					if( requestTransferred )
 						throw new ApplicationException( "getOrHead must be implemented when the request has been transferred." );
-					context.Response.StatusCode = 405;
-					EwfResponse.Create( "", new EwfResponseBodyCreator( () => "" ), additionalHeaderFieldGetter: () => ( "Allow", "" ).ToCollection() )
+					EwfResponse.Create(
+							"",
+							new EwfResponseBodyCreator( () => "" ),
+							statusCodeGetter: () => 405,
+							additionalHeaderFieldGetter: () => ( "Allow", "" ).ToCollection() )
 						.WriteToAspNetResponse( context.Response );
 				}
 				return;
@@ -384,14 +386,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					response = executeUnsafeRequestMethod( post );
 					break;
 				default:
-					context.Response.StatusCode = 501;
-					response = EwfResponse.Create( "", new EwfResponseBodyCreator( () => "" ) );
+					response = EwfResponse.Create( "", new EwfResponseBodyCreator( () => "" ), statusCodeGetter: () => 501 );
 					break;
 			}
-			if( response == null ) {
-				context.Response.StatusCode = 405;
-				response = EwfResponse.Create( "", new EwfResponseBodyCreator( () => "" ), additionalHeaderFieldGetter: () => ( "Allow", "" ).ToCollection() );
-			}
+			if( response == null )
+				response = EwfResponse.Create(
+					"",
+					new EwfResponseBodyCreator( () => "" ),
+					statusCodeGetter: () => 405,
+					additionalHeaderFieldGetter: () => ( "Allow", "" ).ToCollection() );
 			response.WriteToAspNetResponse( context.Response );
 		}
 

@@ -182,9 +182,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		protected sealed override ExternalRedirect getRedirect() => base.getRedirect();
 
-		protected sealed override EwfSafeRequestHandler getOrHead() => new EwfSafeResponseWriter( processViewAndGetResponse() );
+		protected sealed override EwfSafeRequestHandler getOrHead() => new EwfSafeResponseWriter( processViewAndGetResponse( null ) );
 
-		private EwfResponse processViewAndGetResponse() {
+		private EwfResponse processViewAndGetResponse( int? statusCode ) {
 			if( AppRequestState.Instance.EwfPageRequestState == null ) {
 				if( StandardLibrarySessionState.SessionAvailable && StandardLibrarySessionState.Instance.EwfPageRequestState != null ) {
 					AppRequestState.Instance.EwfPageRequestState = StandardLibrarySessionState.Instance.EwfPageRequestState;
@@ -249,13 +249,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					disabledMode = newPageObject.AlternativeMode as DisabledResourceMode;
 				if( !userAuthorized || disabledMode != null )
 					throw getPossibleDeveloperMistakeException( "The user lost access to the page or the page became disabled after page-view data modifications." );
-				return ( nextPageObject = newPageObject ).processSecondaryOperationAndGetResponse();
+				return ( nextPageObject = newPageObject ).processSecondaryOperationAndGetResponse( statusCode );
 			}
 
-			return processSecondaryOperationAndGetResponse();
+			return processSecondaryOperationAndGetResponse( statusCode );
 		}
 
-		private EwfResponse processSecondaryOperationAndGetResponse() {
+		private EwfResponse processSecondaryOperationAndGetResponse( int? statusCode ) {
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
 			var dmIdAndSecondaryOp = requestState.DmIdAndSecondaryOp;
 
@@ -308,7 +308,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					return navigate( null, null, null );
 			}
 
-			return getResponse();
+			return getResponse( statusCode );
 		}
 
 		/// <summary>
@@ -394,12 +394,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				// Set a 400 status code if there are any problems loading hidden field state. We're assuming these problems are never the developers' fault.
 				if( AppRequestState.Instance.EwfPageRequestState == null )
 					AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( AppRequestState.RequestTime, null, null );
-				HttpContext.Current.Response.StatusCode = 400;
 				HttpContext.Current.Response.TrySkipIisCustomErrors = true;
 				AppRequestState.Instance.EwfPageRequestState.FocusKey = "";
 				AppRequestState.Instance.EwfPageRequestState.GeneralModificationErrors =
 					Translation.ApplicationHasBeenUpdatedAndWeCouldNotInterpretAction.ToCollection();
-				return processViewAndGetResponse();
+				return processViewAndGetResponse( 400 );
 			}
 
 			buildPage();
@@ -416,8 +415,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						throw new DataModificationException( Translation.AnotherUserHasModifiedPageAndWeCouldNotInterpretAction );
 					var lastPostBackFailingDm = postBack.IsIntermediate && hiddenFieldData.LastPostBackFailingDmId != null
 						                            ? hiddenFieldData.LastPostBackFailingDmId.Any()
-							                              ?
-							                              GetPostBack( hiddenFieldData.LastPostBackFailingDmId ) as DataModification
+							                              ? GetPostBack( hiddenFieldData.LastPostBackFailingDmId ) as DataModification
 							                              : dataUpdate
 						                            : null;
 					if( postBack.IsIntermediate && hiddenFieldData.LastPostBackFailingDmId != null && lastPostBackFailingDm == null )
@@ -850,17 +848,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				page.replaceUrlHandlers();
 				AppRequestState.Instance.SetNewUrlParameterValuesEffective( false );
 				AppRequestState.Instance.ClearUserAndImpersonator();
-				return ( nextPageObject = page ).processViewAndGetResponse();
+				return ( nextPageObject = page ).processViewAndGetResponse( null );
 			}
 
 			// If modification errors exist or this is not full post-back navigation, save request state in session state until the next request.
 			if( requestState.ModificationErrorsExist || requestState.DmIdAndSecondaryOp != null )
 				StandardLibrarySessionState.Instance.EwfPageRequestState = requestState;
 
-			HttpContext.Current.Response.StatusCode = 303;
 			return EwfResponse.Create(
 				ContentTypes.PlainText,
 				new EwfResponseBodyCreator( writer => writer.Write( "See Other: {0}".FormatWith( destinationUrl ) ) ),
+				statusCodeGetter: () => 303,
 				additionalHeaderFieldGetter: () => ( "Location", destinationUrl ).ToCollection() );
 		}
 
@@ -882,7 +880,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			AppRequestState.Instance.SetUrlHandlers( urlHandlers );
 		}
 
-		private EwfResponse getResponse() {
+		private EwfResponse getResponse( int? statusCode ) {
 			var requestState = AppRequestState.Instance.EwfPageRequestState;
 			var modificationErrorsOccurred = requestState.ModificationErrorsExist &&
 			                                 ( requestState.DmIdAndSecondaryOp == null ||
@@ -912,6 +910,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							StandardLibrarySessionState.Instance.ClearClientSideNavigation();
 						}
 					} ),
+				statusCodeGetter: () => statusCode,
 				additionalHeaderFieldGetter: () => {
 					var headerFields = new List<( string, string )>();
 

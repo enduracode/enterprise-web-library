@@ -110,23 +110,24 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
-		/// Creates a response. 
+		/// Creates a response.
 		/// </summary>
 		/// <param name="contentType">The media type of the response. We recommend that you always specify this, but pass the empty string if you don't have it. Do
 		/// not pass null.</param>
 		/// <param name="bodyCreator">The response body creator.</param>
+		/// <param name="statusCodeGetter">A function that gets the response status code. Pass or return null for 200 (OK).</param>
 		/// <param name="fileNameCreator">A function that creates the file name for saving the response. If you return a nonempty string, the response will be
 		/// processed as an attachment with the specified file name. Do not return null from the function.</param>
 		/// <param name="additionalHeaderFieldGetter">A function that gets additional HTTP header fields for the response.</param>
 		public static EwfResponse Create(
-			string contentType, EwfResponseBodyCreator bodyCreator, Func<string> fileNameCreator = null,
-			Func<IReadOnlyCollection<( string, string )>> additionalHeaderFieldGetter = null ) {
-			return new EwfResponse(
+			string contentType, EwfResponseBodyCreator bodyCreator, Func<int?> statusCodeGetter = null, Func<string> fileNameCreator = null,
+			Func<IReadOnlyCollection<( string, string )>> additionalHeaderFieldGetter = null ) =>
+			new EwfResponse(
 				contentType,
+				statusCodeGetter ?? ( () => null ),
 				fileNameCreator ?? ( () => "" ),
 				additionalHeaderFieldGetter ?? ( () => Enumerable.Empty<(string, string)>().Materialize() ),
 				bodyCreator );
-		}
 
 		/// <summary>
 		/// Creates a response from an ASP.NET <see cref="HttpResponseBase"/> object.
@@ -138,27 +139,28 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			using( var stream = new MemoryStream() ) {
 				aspNetResponse = new AspNetAdapter( stream );
 				aspNetResponseWriter( aspNetResponse );
-				if( aspNetResponse.RedirectUrl.Any() ) {
-					HttpContext.Current.Response.StatusCode = 307;
+				if( aspNetResponse.RedirectUrl.Any() )
 					return Create(
 						ContentTypes.PlainText,
 						new EwfResponseBodyCreator( writer => writer.Write( "Temporary Redirect: {0}".FormatWith( aspNetResponse.RedirectUrl ) ) ),
+						statusCodeGetter: () => 307,
 						additionalHeaderFieldGetter: () => ( "Location", aspNetResponse.RedirectUrl ).ToCollection() );
-				}
 				binaryBody = stream.ToArray();
 			}
 			return Create( aspNetResponse.ContentType, new EwfResponseBodyCreator( () => binaryBody ) );
 		}
 
 		internal readonly string ContentType;
+		internal readonly Func<int?> StatusCodeGetter;
 		internal readonly Func<string> FileNameCreator;
 		internal readonly Func<IReadOnlyCollection<( string, string )>> AdditionalHeaderFieldGetter;
 		internal readonly EwfResponseBodyCreator BodyCreator;
 
 		private EwfResponse(
-			string contentType, Func<string> fileNameCreator, Func<IReadOnlyCollection<( string, string )>> additionalHeaderFieldGetter,
+			string contentType, Func<int?> statusCodeGetter, Func<string> fileNameCreator, Func<IReadOnlyCollection<( string, string )>> additionalHeaderFieldGetter,
 			EwfResponseBodyCreator bodyCreator ) {
 			ContentType = contentType;
+			StatusCodeGetter = statusCodeGetter;
 			FileNameCreator = fileNameCreator;
 			AdditionalHeaderFieldGetter = additionalHeaderFieldGetter;
 			BodyCreator = bodyCreator;
@@ -166,6 +168,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal EwfResponse( FullResponse fullResponse ) {
 			ContentType = fullResponse.ContentType;
+			StatusCodeGetter = () => fullResponse.StatusCode;
 			FileNameCreator = () => fullResponse.FileName;
 			AdditionalHeaderFieldGetter = () => fullResponse.AdditionalHeaderFields;
 			BodyCreator = fullResponse.TextBody != null
@@ -173,13 +176,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				              : new EwfResponseBodyCreator( () => fullResponse.BinaryBody );
 		}
 
-		internal FullResponse CreateFullResponse() {
-			return BodyCreator.BodyIsText
-				       ? new FullResponse( ContentType, FileNameCreator(), AdditionalHeaderFieldGetter(), BodyCreator.TextBodyCreator() )
-				       : new FullResponse( ContentType, FileNameCreator(), AdditionalHeaderFieldGetter(), BodyCreator.BinaryBodyCreator() );
-		}
+		internal FullResponse CreateFullResponse() =>
+			BodyCreator.BodyIsText
+				? new FullResponse( StatusCodeGetter(), ContentType, FileNameCreator(), AdditionalHeaderFieldGetter(), BodyCreator.TextBodyCreator() )
+				: new FullResponse( StatusCodeGetter(), ContentType, FileNameCreator(), AdditionalHeaderFieldGetter(), BodyCreator.BinaryBodyCreator() );
 
 		internal void WriteToAspNetResponse( HttpResponse aspNetResponse, bool omitBody = false ) {
+			var statusCode = StatusCodeGetter();
+			if( statusCode.HasValue )
+				aspNetResponse.StatusCode = statusCode.Value;
+
 			if( ContentType.Length > 0 )
 				aspNetResponse.ContentType = ContentType;
 
