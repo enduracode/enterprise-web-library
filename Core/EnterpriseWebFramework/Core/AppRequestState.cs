@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using EnterpriseWebLibrary.Caching;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
@@ -137,7 +136,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			// Abandon the profiling session if it's not needed. The boolean expressions are in this order because we don't want to short circuit the user check if
 			// the installation is not live or the request is local; doing so would prevent adequate testing of the user check.
 			var userIsProfiling = UserAccessible && ( ProfilingUserId.HasValue || ImpersonatorExists ) && AppMemoryCache.UserIsProfilingRequests( ProfilingUserId );
-			if( !userIsProfiling && !HttpContext.Current.Request.IsLocal && ConfigurationStatics.IsLiveInstallation )
+			if( !userIsProfiling && !EwfRequest.Current.IsLocal && ConfigurationStatics.IsLiveInstallation )
 				MiniProfiler.Current.Stop( discardResults: true );
 		}
 
