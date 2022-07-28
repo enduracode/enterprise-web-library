@@ -102,7 +102,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										} )
 									.Materialize() );
 
-						EwfRequest.Init( () => HttpContext.Current.Request );
+						EwfRequest.Init( providerGetter.GetProvider<AppRequestBaseUrlProvider>( "RequestBaseUrl" ), () => HttpContext.Current.Request );
 						UrlHandlingStatics.Init(
 							( baseUrlString, appRelativeUrl ) =>
 								AppRequestState.ExecuteWithUrlHandlerStateDisabled( () => UrlHandlingStatics.ResolveUrl( baseUrlString, appRelativeUrl )?.Last() ) );

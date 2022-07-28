@@ -128,7 +128,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 						// If the base URL doesn't include a path and the app-relative URL is just a slash, don't include this trailing slash in the URL since it will not be
 						// present in the canonical URLs that we construct and therefore it would cause problems with URL normalization.
-						var url = !getRequestBasePath( Request ).Any() && appRelativeUrl.Length == "/".Length ? baseUrl : baseUrl + appRelativeUrl;
+						var url = !EwfRequest.AppBaseUrlProvider.GetRequestBasePath( Request ).Any() && appRelativeUrl.Length == "/".Length
+							          ? baseUrl
+							          : baseUrl + appRelativeUrl;
 
 
 						// This blocks until the entire request has been received from the client.
@@ -147,37 +149,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		private string getRequestBaseUrl( HttpRequest request ) {
-			var host = getRequestHost( request );
-			return host.Any() ? BaseUrl.GetUrlString( RequestIsSecure( request ), host, getRequestBasePath( request ) ) : "";
-		}
-
-		/// <summary>
-		/// Returns true if the specified request is secure. Override this to be more than just <see cref="HttpRequest.IsSecureConnection"/> if you are using a
-		/// reverse proxy to perform SSL termination. Remember that your implementation should support not just live installations, but also development and
-		/// intermediate installations.
-		/// </summary>
-		protected internal virtual bool RequestIsSecure( HttpRequest request ) {
-			return request.IsSecureConnection;
-		}
-
-		/// <summary>
-		/// Returns the host name for the specified request. Override this if you are using a reverse proxy that is changing the Host header. Include the port
-		/// number in the return value if it is not the default port. Never return null. If the host name is unavailable (i.e. the request uses HTTP 1.0 and does
-		/// not include a Host header), return the empty string, which will cause a 400 status code to be returned. Remember that your implementation should support
-		/// not just live installations, but also development and intermediate installations.
-		/// </summary>
-		protected virtual string getRequestHost( HttpRequest request ) {
-			var host = request.Headers[ "Host" ]; // returns null if field missing
-			return host ?? "";
-		}
-
-		/// <summary>
-		/// Returns the base path for the specified request. Override this if you are using a reverse proxy and are changing the base path. Never return null.
-		/// Return the empty string to represent the root path. Remember that your implementation should support not just live installations, but also development
-		/// and intermediate installations.
-		/// </summary>
-		protected virtual string getRequestBasePath( HttpRequest request ) {
-			return request.RawUrl.Truncate( HttpRuntime.AppDomainAppVirtualPath.Length ).Substring( "/".Length );
+			var provider = EwfRequest.AppBaseUrlProvider;
+			var host = provider.GetRequestHost( request );
+			return host.Any() ? BaseUrl.GetUrlString( provider.RequestIsSecure( request ), host, provider.GetRequestBasePath( request ) ) : "";
 		}
 
 		private void handleAuthenticateRequest( object sender, EventArgs e ) {

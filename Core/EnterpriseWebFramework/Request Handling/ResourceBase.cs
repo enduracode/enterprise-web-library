@@ -33,7 +33,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			if( context.Request.HttpMethod == "GET" || context.Request.HttpMethod == "HEAD" )
 				EwfSafeResponseWriter.AddCacheControlHeader(
 					context.Response,
-					EwfApp.Instance.RequestIsSecure( context.Request ),
+					EwfRequest.AppBaseUrlProvider.RequestIsSecure( context.Request ),
 					false,
 					permanent ? (bool?)null : false );
 
@@ -278,7 +278,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 				var connectionSecurity = ConnectionSecurity;
 				return connectionSecurity == ConnectionSecurity.MatchingCurrentRequest
-					       ? EwfApp.Instance != null && EwfApp.Instance.RequestState != null && EwfApp.Instance.RequestIsSecure( HttpContext.Current.Request )
+					       ? EwfApp.Instance != null && EwfApp.Instance.RequestState != null &&
+					         EwfRequest.AppBaseUrlProvider.RequestIsSecure( HttpContext.Current.Request )
 					       : connectionSecurity == ConnectionSecurity.SecureIfPossible && EwfConfigurationStatics.AppSupportsSecureConnections;
 			}
 		}
@@ -312,17 +313,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal void HandleRequest( HttpContext context, bool requestTransferred ) {
 			var canonicalUrl = GetUrl( false, false );
 			if( requestTransferred ) {
-				if( ShouldBeSecureGivenCurrentRequest != EwfApp.Instance.RequestIsSecure( context.Request ) )
+				if( ShouldBeSecureGivenCurrentRequest != EwfRequest.AppBaseUrlProvider.RequestIsSecure( context.Request ) )
 					throw new ApplicationException( "{0} has a connection security setting that is incompatible with the current request.".FormatWith( canonicalUrl ) );
 			}
 			else {
 				if( disablesUrlNormalization ) {
-					if( ShouldBeSecureGivenCurrentRequest != EwfApp.Instance.RequestIsSecure( context.Request ) )
+					if( ShouldBeSecureGivenCurrentRequest != EwfRequest.AppBaseUrlProvider.RequestIsSecure( context.Request ) )
 						throw new ResourceNotAvailableException( "The resource has a connection security setting that is incompatible with the current request.", null );
 				}
 				else {
 					if( canonicalUrl != AppRequestState.Instance.Url ) {
-						if( !ShouldBeSecureGivenCurrentRequest && EwfApp.Instance.RequestIsSecure( context.Request ) )
+						if( !ShouldBeSecureGivenCurrentRequest && EwfRequest.AppBaseUrlProvider.RequestIsSecure( context.Request ) )
 							context.Response.AppendHeader( "Strict-Transport-Security", "max-age=0" );
 						WriteRedirectResponse( context, canonicalUrl, true );
 						return;

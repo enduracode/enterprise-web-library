@@ -352,6 +352,7 @@
     <Compile Include="EnterpriseWebFramework\Core\CookieStatics.cs" />
     <Compile Include="EnterpriseWebFramework\Core\EwfApp.cs" />
     <Compile Include="EnterpriseWebFramework\Core\EwfConfigurationStatics.cs" />
+    <Compile Include="EnterpriseWebFramework\Core\HTTP\AppRequestBaseUrlProvider.cs" />
     <Compile Include="EnterpriseWebFramework\Core\HTTP\BlobFileResponse.cs" />
     <Compile Include="EnterpriseWebFramework\Core\HTTP\EwfRequest.cs" />
     <Compile Include="EnterpriseWebFramework\Core\HTTP\EwfResponse.cs" />

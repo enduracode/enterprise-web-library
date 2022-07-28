@@ -44,7 +44,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 				AddCacheControlHeader(
 					aspNetResponse,
-					EwfApp.Instance.RequestIsSecure( aspNetRequest ),
+					EwfRequest.AppBaseUrlProvider.RequestIsSecure( aspNetRequest ),
 					urlVersionString.Any() || eTagBase.Any() || lastModificationDateAndTimeGetter != null,
 					urlVersionString.Any() && !forceImmediateResponseExpiration );
 
