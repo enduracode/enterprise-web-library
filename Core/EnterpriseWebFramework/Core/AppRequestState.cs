@@ -69,11 +69,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly List<( string prefix, Exception exception )> errors = new List<( string, Exception )>();
 		internal EwfPageRequestState EwfPageRequestState { get; set; }
 
-		/// <summary>
-		/// Do not use. This exists to support legacy behavior.
-		/// </summary>
-		public HttpBrowserCapabilities Browser { get; }
-
 		internal AppRequestState( string url, string baseUrl ) {
 			beginInstant = SystemClock.Instance.GetCurrentInstant();
 			MiniProfiler.StartNew();
@@ -82,10 +77,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			databaseConnectionManager = new AutomaticDatabaseConnectionManager();
 			databaseConnectionManager.DataAccessState.ResetCache();
-
-			// We cache the browser capabilities so we can determine the actual browser making the request even after modifying the capabilities, which we do later in
-			// the life cycle from EwfPage.
-			Browser = HttpContext.Current.Request.Browser;
 		}
 
 		/// <summary>

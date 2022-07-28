@@ -5,7 +5,6 @@ using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.UserManagement;
-using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
 using JetBrains.Annotations;
 using Tewl.Tools;
@@ -207,24 +206,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								clientSideIdOverride: entityAndTabAndContentBlockId ) )
 						.Concat( getGlobalFootContainer() )
 						.Materialize() );
-
-			if( !EwfUiStatics.AppProvider.BrowserWarningDisabled() && AppRequestState.Instance.Browser.IsOldVersionOfMajorBrowser() )
-				PageBase.AddStatusMessage(
-					StatusMessageType.Warning,
-					StringTools.ConcatenateWithDelimiter(
-						" ",
-						"We've detected that you are not using the latest version of your browser.",
-						"While most features of this site will work, and you will be safe browsing here, we strongly recommend using the newest version of your browser in order to provide a better experience on this site and a safer experience throughout the Internet." ) +
-					"<br/>" +
-					Tewl.Tools.NetTools.BuildBasicLink( "Click here to get Firefox (it's free)", new ExternalResource( "http://www.getfirefox.com" ).GetUrl(), true ) +
-					"<br />" +
-					Tewl.Tools.NetTools.BuildBasicLink(
-						"Click here to get Chrome (it's free)",
-						new ExternalResource( "https://www.google.com/intl/en/chrome/browser/" ).GetUrl(),
-						true ) + "<br />" + Tewl.Tools.NetTools.BuildBasicLink(
-						"Click here to get the latest Internet Explorer (it's free)",
-						new ExternalResource( "http://www.beautyoftheweb.com/" ).GetUrl(),
-						true ) );
 		}
 
 		private FlowComponent getGlobalContainer() =>

@@ -714,7 +714,6 @@
     <Compile Include="TewlContrib\Tools\DateTimeTools.cs" />
     <Compile Include="TewlContrib\Tools\ProcessTools.cs" />
     <Compile Include="Tools\IntervalTools.cs" />
-    <Compile Include="Tools\HttpBrowserCapabilitiesTools.cs" />
     <Compile Include="Tools\HttpRequestTools.cs" />
     <Compile Include="MailMerging\AsposeMergeRowEnumerator.cs" />
     <Compile Include="MailMerging\DataTree\MergeDataTreeChild.cs" />

@@ -10,16 +10,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates and returns a list of custom style sheets that should be used on EWF UI pages.
 		/// </summary>
-		public virtual List<ResourceInfo> GetStyleSheets() {
-			return new List<ResourceInfo>();
-		}
+		public virtual List<ResourceInfo> GetStyleSheets() => new List<ResourceInfo>();
 
 		/// <summary>
 		/// Gets the logo to be shown at the top of the EWF user interface. Returns null if the application display name should be used instead.
 		/// </summary>
-		public virtual IReadOnlyCollection<FlowComponent> GetLogoComponent() {
-			return null;
-		}
+		public virtual IReadOnlyCollection<FlowComponent> GetLogoComponent() => null;
 
 		/// <summary>
 		/// Gets the global navigational action components.
@@ -34,16 +30,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets whether items in the page action control list are separated with a pipe character.
 		/// </summary>
-		public virtual bool PageActionItemsSeparatedWithPipe() {
-			return true;
-		}
-
-		/// <summary>
-		/// Gets whether the browser warning is disabled.
-		/// </summary>
-		public virtual bool BrowserWarningDisabled() {
-			return false;
-		}
+		public virtual bool PageActionItemsSeparatedWithPipe() => true;
 
 		/// <summary>
 		/// Gets the components to be shown at the bottom of the log-in page for systems with forms authentication.
