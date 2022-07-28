@@ -183,8 +183,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				() => memoryCachingSetup.Value != null ? memoryCachingSetup.Value.CacheKey : "" );
 		}
 
-		internal void WriteResponse( bool forceImmediateResponseExpiration ) {
-			writer( HttpContext.Current.Response, HttpContext.Current.Request, forceImmediateResponseExpiration );
+		internal void WriteResponse( HttpContext context, bool forceImmediateResponseExpiration ) {
+			writer( context.Response, context.Request, forceImmediateResponseExpiration );
 		}
 	}
 }

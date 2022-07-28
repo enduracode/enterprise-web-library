@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Web;
 using EnterpriseWebLibrary.DataAccess;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -30,8 +31,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			this.responseWriter = responseWriter;
 		}
 
-		internal void WriteResponse( bool forceImmediateResponseExpiration ) {
-			responseWriter.WriteResponse( forceImmediateResponseExpiration );
+		internal void WriteResponse( HttpContext context, bool forceImmediateResponseExpiration ) {
+			responseWriter.WriteResponse( context, forceImmediateResponseExpiration );
 		}
 	}
 }

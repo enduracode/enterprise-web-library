@@ -357,7 +357,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			if( context.Request.HttpMethod == "GET" || context.Request.HttpMethod == "HEAD" || requestTransferred ) {
 				var requestHandler = getOrHead();
 				if( requestHandler != null )
-					requestHandler.WriteResponse( requestTransferred );
+					requestHandler.WriteResponse( context, requestTransferred );
 				else {
 					if( requestTransferred )
 						throw new ApplicationException( "getOrHead must be implemented when the request has been transferred." );
