@@ -18,22 +18,22 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		public static EwfRequest Current => new EwfRequest( currentRequestGetter() );
 
-		private readonly HttpRequest aspNetRequest;
+		internal readonly HttpRequest AspNetRequest;
 
 		private EwfRequest( HttpRequest aspNetRequest ) {
-			this.aspNetRequest = aspNetRequest;
+			AspNetRequest = aspNetRequest;
 		}
 
 		/// <summary>
 		/// Returns true if this request is secure.
 		/// </summary>
-		public bool IsSecure => AppBaseUrlProvider.RequestIsSecure( aspNetRequest );
+		public bool IsSecure => AppBaseUrlProvider.RequestIsSecure( AspNetRequest );
 
 		/// <summary>
 		/// Gets whether the request is from the local computer.
 		/// </summary>
 		internal bool IsLocal =>
 			// Consider using https://www.strathweb.com/2016/04/request-islocal-in-asp-net-core/ for ASP.NET Core.
-			aspNetRequest.IsLocal;
+			AspNetRequest.IsLocal;
 	}
 }

@@ -106,6 +106,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						UrlHandlingStatics.Init(
 							( baseUrlString, appRelativeUrl ) =>
 								AppRequestState.ExecuteWithUrlHandlerStateDisabled( () => UrlHandlingStatics.ResolveUrl( baseUrlString, appRelativeUrl )?.Last() ) );
+						CookieStatics.Init( cookie => HttpContext.Current.Response.Cookies.Add( cookie ) );
 						CssPreprocessingStatics.Init( globalInitializer.GetType().Assembly, globalType.Assembly );
 						ResourceBase.Init(
 							( requestTransferred, resource ) => {

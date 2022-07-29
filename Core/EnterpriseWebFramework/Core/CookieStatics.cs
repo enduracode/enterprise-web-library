@@ -8,15 +8,21 @@ using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	internal class CookieStatics {
+		private static Action<HttpCookie> responseCookieAdder;
+
+		internal static void Init( Action<HttpCookie> responseCookieAdder ) {
+			CookieStatics.responseCookieAdder = responseCookieAdder;
+		}
+
 		internal static HttpCookie GetCookie( string name, bool omitNamePrefix = false ) {
 			var defaultAttributes = EwfConfigurationStatics.AppConfiguration.DefaultCookieAttributes;
-			return HttpContext.Current.Request.Cookies[ ( omitNamePrefix ? "" : defaultAttributes.NamePrefix ?? "" ) + name ];
+			return EwfRequest.Current.AspNetRequest.Cookies[ ( omitNamePrefix ? "" : defaultAttributes.NamePrefix ?? "" ) + name ];
 		}
 
 		internal static void SetCookie(
 			string name, string value, Instant? expires, bool secure, bool httpOnly, string domain = null, string path = null, bool omitNamePrefix = false ) {
 			var nameAndDomainAndPath = getNameAndDomainAndPath( name, domain, path, omitNamePrefix );
-			HttpContext.Current.Response.Cookies.Add(
+			responseCookieAdder(
 				new HttpCookie( nameAndDomainAndPath.Item1, value )
 					{
 						Domain = nameAndDomainAndPath.Item2,
@@ -30,7 +36,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal static void ClearCookie( string name, string domain = null, string path = null, bool omitNamePrefix = false ) {
 			var nameAndDomainAndPath = getNameAndDomainAndPath( name, domain, path, omitNamePrefix );
-			HttpContext.Current.Response.Cookies.Add(
+			responseCookieAdder(
 				new HttpCookie( nameAndDomainAndPath.Item1 )
 					{
 						Domain = nameAndDomainAndPath.Item2,
