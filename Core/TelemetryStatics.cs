@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.ServiceModel;
-using System.Web;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -55,15 +54,15 @@ namespace EnterpriseWebLibrary {
 						sw.WriteLine( "URL: " + AppRequestState.Instance.Url );
 
 						sw.WriteLine();
-						foreach( string fieldName in HttpContext.Current.Request.Form )
-							sw.WriteLine( "Form field " + fieldName + ": " + HttpContext.Current.Request.Form[ fieldName ] );
+						foreach( string fieldName in EwfRequest.Current.AspNetRequest.Form )
+							sw.WriteLine( "Form field " + fieldName + ": " + EwfRequest.Current.AspNetRequest.Form[ fieldName ] );
 
 						sw.WriteLine();
-						foreach( string cookieName in HttpContext.Current.Request.Cookies )
-							sw.WriteLine( "Cookie " + cookieName + ": " + HttpContext.Current.Request.Cookies[ cookieName ].Value );
+						foreach( string cookieName in EwfRequest.Current.AspNetRequest.Cookies )
+							sw.WriteLine( "Cookie " + cookieName + ": " + EwfRequest.Current.AspNetRequest.Cookies[ cookieName ].Value );
 
 						sw.WriteLine();
-						sw.WriteLine( "User agent: " + HttpContext.Current.Request.GetUserAgent() );
+						sw.WriteLine( "User agent: " + EwfRequest.Current.AspNetRequest.GetUserAgent() );
 						sw.WriteLine( "Referrer: " + NetTools.ReferringUrl );
 
 						User user = null;

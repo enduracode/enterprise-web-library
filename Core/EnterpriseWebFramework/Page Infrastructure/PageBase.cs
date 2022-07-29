@@ -381,7 +381,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			try {
 				// throws exception if field missing, because Request.Form returns null
 				hiddenFieldData = JsonConvert.DeserializeObject<HiddenFieldData>(
-					HttpContext.Current.Request.Form[ HiddenFieldName ],
+					EwfRequest.Current.AspNetRequest.Form[ HiddenFieldName ],
 					new JsonSerializerSettings { MissingMemberHandling = MissingMemberHandling.Error } );
 
 				AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState(
@@ -702,12 +702,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			requestState.PostBackValues = new PostBackValueDictionary();
 			var extraPostBackValuesExist = requestState.ComponentStateValuesById.Keys.Any( i => !componentStateItemsById.ContainsKey( i ) ) |
 			                               requestState.PostBackValues.AddFromRequest(
-				                               HttpContext.Current.Request.Form.Cast<string>().Except( new[] { HiddenFieldName, ButtonElementName } ),
+				                               EwfRequest.Current.AspNetRequest.Form.Cast<string>().Except( new[] { HiddenFieldName, ButtonElementName } ),
 				                               postBackValueKeys.Contains,
-				                               key => HttpContext.Current.Request.Form[ key ] ) | requestState.PostBackValues.AddFromRequest(
-				                               HttpContext.Current.Request.Files.Cast<string>(),
+				                               key => EwfRequest.Current.AspNetRequest.Form[ key ] ) | requestState.PostBackValues.AddFromRequest(
+				                               EwfRequest.Current.AspNetRequest.Files.Cast<string>(),
 				                               postBackValueKeys.Contains,
-				                               key => HttpContext.Current.Request.Files[ key ] );
+				                               key => EwfRequest.Current.AspNetRequest.Files[ key ] );
 
 			// Make sure data didn't change under this page's feet since the last request.
 			var invalidPostBackValuesExist =
