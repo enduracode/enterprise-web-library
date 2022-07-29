@@ -63,7 +63,8 @@ namespace EnterpriseWebLibrary {
 
 						sw.WriteLine();
 						sw.WriteLine( "User agent: " + EwfRequest.Current.AspNetRequest.GetUserAgent() );
-						sw.WriteLine( "Referrer: " + NetTools.ReferringUrl );
+						sw.WriteLine(
+							"Referrer: " + ( EwfRequest.Current.AspNetRequest.UrlReferrer != null ? EwfRequest.Current.AspNetRequest.UrlReferrer.AbsoluteUri : "" ) );
 
 						User user = null;
 						User impersonator = null;

@@ -21,13 +21,6 @@ namespace EnterpriseWebLibrary {
 		}
 
 		/// <summary>
-		/// Returns the full url of the page that redirected to the current location.
-		/// </summary>
-		public static string ReferringUrl {
-			get { return ( HttpContext.Current.Request.UrlReferrer != null ? HttpContext.Current.Request.UrlReferrer.AbsoluteUri : "" ); }
-		}
-
-		/// <summary>
 		/// Creates an image with the given text and font and returns a response object.
 		/// Text will be all on one line and will not be wider than 800 pixels or higher than 150 pixels.
 		/// Do not pass null for text. Passing null for font will result in a generic Sans Serif, 10pt font.
