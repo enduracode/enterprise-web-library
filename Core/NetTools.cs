@@ -53,15 +53,6 @@ namespace EnterpriseWebLibrary {
 					} ) );
 		}
 
-		public static HttpCookie GetCookie( string name ) {
-			// Check the response collection first in case we set the cookie earlier in this request. The Response.Cookies indexer has the side effect of creating a
-			// cookie if one doesn't already exist; we do the Allkeys.Any check to prevent this from happening.
-			if( HttpContext.Current.Response.Cookies.AllKeys.Any( i => i == name ) )
-				return HttpContext.Current.Response.Cookies[ name ];
-
-			return HttpContext.Current.Request.Cookies[ name ];
-		}
-
 		internal static bool IsWebApp() {
 			return HttpContext.Current != null;
 		}
