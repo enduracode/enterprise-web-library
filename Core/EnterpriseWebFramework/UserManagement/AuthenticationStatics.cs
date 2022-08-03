@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Security;
+﻿using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Security.Principal;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.UserManagement;
 using EnterpriseWebLibrary.UserManagement.IdentityProviders;
 using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.DataProtection;
 using NodaTime;
 using NodaTime.Text;
 using Tewl.InputValidation;
@@ -22,9 +22,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		/// <summary>
 		/// The idle time required for a session to be erased.
 		/// </summary>
-		public static readonly TimeSpan SessionDuration = TimeSpan.FromHours( 32 ); // persist across consecutive days of usage
+		public static readonly Duration SessionDuration = Duration.FromHours( 32 ); // persist across consecutive days of usage
 
 		private static SystemProviderReference<AppAuthenticationProvider> provider;
+		private static TicketDataFormat authenticationTicketProtector;
 		private static LocalIdentityProvider.AutoLogInPageUrlGetterMethod autoLogInPageUrlGetter;
 		private static LocalIdentityProvider.ChangePasswordPageUrlGetterMethod changePasswordPageUrlGetter;
 
@@ -39,9 +40,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		public delegate void SpecifiedUserLoginModificationMethod( int userId );
 
 		internal static void Init(
-			SystemProviderReference<AppAuthenticationProvider> provider, LocalIdentityProvider.AutoLogInPageUrlGetterMethod autoLogInPageUrlGetter,
+			SystemProviderReference<AppAuthenticationProvider> provider, IDataProtectionProvider dataProtectionProvider,
+			LocalIdentityProvider.AutoLogInPageUrlGetterMethod autoLogInPageUrlGetter,
 			LocalIdentityProvider.ChangePasswordPageUrlGetterMethod changePasswordPageUrlGetter ) {
 			AuthenticationStatics.provider = provider;
+			authenticationTicketProtector = new TicketDataFormat( dataProtectionProvider.CreateProtector( "EnterpriseWebLibrary.WebFramework.UserManagement" ) );
 			AuthenticationStatics.autoLogInPageUrlGetter = autoLogInPageUrlGetter;
 			AuthenticationStatics.changePasswordPageUrlGetter = changePasswordPageUrlGetter;
 		}
@@ -65,21 +68,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		/// </summary>
 		internal static Tuple<User, SpecifiedValue<User>> GetUserAndImpersonatorFromRequest() {
 			User getUser() {
-				var cookie = CookieStatics.GetCookie( userCookieName );
-				if( cookie == null )
+				if( !CookieStatics.TryGetCookieValue( userCookieName, out var cookieValue ) )
 					return null;
-				var ticket = GetFormsAuthTicket( cookie );
-				return ticket != null ? UserManagementStatics.GetUser( int.Parse( ticket.Name ), false ) : null;
+				var ticket = GetFormsAuthTicket( cookieValue );
+				return ticket != null ? UserManagementStatics.GetUser( int.Parse( ticket.Principal.Identity.Name ), false ) : null;
 			}
 			var user = getUser();
 
-			if( ( user != null && user.Role.CanManageUsers ) || !ConfigurationStatics.IsLiveInstallation ) {
-				var cookie = CookieStatics.GetCookie( UserImpersonationStatics.CookieName );
-				if( cookie != null )
-					return Tuple.Create(
-						cookie.Value.Any() ? UserManagementStatics.GetUser( int.Parse( cookie.Value ), false ) : null,
-						new SpecifiedValue<User>( user ) );
-			}
+			if( ( user != null && user.Role.CanManageUsers ) || !ConfigurationStatics.IsLiveInstallation )
+				if( CookieStatics.TryGetCookieValue( UserImpersonationStatics.CookieName, out var cookieValue ) )
+					return Tuple.Create( cookieValue.Any() ? UserManagementStatics.GetUser( int.Parse( cookieValue ), false ) : null, new SpecifiedValue<User>( user ) );
 
 			return Tuple.Create( user, (SpecifiedValue<User>)null );
 		}
@@ -239,12 +237,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 				// If the user's role requires enhanced security, require re-authentication every 12 minutes. Otherwise, make it the same as a session timeout.
 				var authenticationDuration = identityProvider is LocalIdentityProvider local && local.AuthenticationTimeoutMinutes.HasValue
 					                             ?
-					                             TimeSpan.FromMinutes( local.AuthenticationTimeoutMinutes.Value )
+					                             Duration.FromMinutes( local.AuthenticationTimeoutMinutes.Value )
 					                             : user.Role.RequiresEnhancedSecurity
-						                             ? TimeSpan.FromMinutes( 12 )
+						                             ? Duration.FromMinutes( 12 )
 						                             : SessionDuration;
 
-				var ticket = new FormsAuthenticationTicket( user.UserId.ToString(), false /*meaningless*/, (int)authenticationDuration.TotalMinutes );
+				var ticket = new AuthenticationTicket(
+					new ClaimsPrincipal( new GenericIdentity( user.UserId.ToString() ) ),
+					new AuthenticationProperties
+						{
+							IssuedUtc = AppRequestState.RequestTime.ToDateTimeOffset(),
+							ExpiresUtc = AppRequestState.RequestTime.Plus( authenticationDuration ).ToDateTimeOffset()
+						},
+					EwlStatics.EwlInitialism );
 				AppRequestState.AddNonTransactionalModificationMethod( () => setFormsAuthCookie( ticket ) );
 			}
 			AppRequestState.Instance.SetUser( user );
@@ -255,8 +260,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 				AppRequestState.AddNonTransactionalModificationMethod( () => CookieStatics.ClearCookie( identityProviderCookieName ) );
 		}
 
-		private static void setFormsAuthCookie( FormsAuthenticationTicket ticket ) {
-			setCookie( userCookieName, FormsAuthentication.Encrypt( ticket ) );
+		private static void setFormsAuthCookie( AuthenticationTicket ticket ) {
+			setCookie( userCookieName, authenticationTicketProtector.Protect( ticket ) );
 		}
 
 		private static void setCookie( string name, string value ) {
@@ -275,27 +280,30 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		// Cookie Updating
 
 		internal static void UpdateFormsAuthCookieIfNecessary() {
-			var cookie = CookieStatics.GetCookie( userCookieName );
-			if( cookie == null )
+			if( !CookieStatics.TryGetCookieValue( userCookieName, out var cookieValue ) )
 				return;
 
-			var ticket = GetFormsAuthTicket( cookie );
+			var ticket = GetFormsAuthTicket( cookieValue );
 			if( ticket != null ) {
-				var newTicket = FormsAuthentication.RenewTicketIfOld( ticket );
-				if( newTicket != ticket )
-					setFormsAuthCookie( newTicket );
+				var passedDuration = AppRequestState.RequestTime - Instant.FromDateTimeOffset( ticket.Properties.IssuedUtc.Value );
+				var totalDuration = Duration.FromTimeSpan( ticket.Properties.ExpiresUtc.Value - ticket.Properties.IssuedUtc.Value );
+				if( passedDuration / totalDuration >= .5 ) {
+					ticket.Properties.IssuedUtc = ticket.Properties.IssuedUtc.Value + passedDuration.ToTimeSpan();
+					ticket.Properties.ExpiresUtc = ticket.Properties.ExpiresUtc.Value + passedDuration.ToTimeSpan();
+					setFormsAuthCookie( ticket );
+				}
 			}
 			else
 				clearFormsAuthCookie();
 		}
 
-		internal static FormsAuthenticationTicket GetFormsAuthTicket( HttpCookie cookie ) {
-			FormsAuthenticationTicket ticket = null;
+		internal static AuthenticationTicket GetFormsAuthTicket( string cookie ) {
+			AuthenticationTicket ticket = null;
 			try {
-				ticket = FormsAuthentication.Decrypt( cookie.Value );
+				ticket = authenticationTicketProtector.Unprotect( cookie );
 			}
-			catch {}
-			return ticket != null && !ticket.Expired ? ticket : null;
+			catch( CryptographicException ) {}
+			return ticket != null && AppRequestState.RequestTime < Instant.FromDateTimeOffset( ticket.Properties.ExpiresUtc.Value ) ? ticket : null;
 		}
 
 
@@ -321,19 +329,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 
 		// User’s last identity provider
 
-		internal static IdentityProvider GetUserLastIdentityProvider() {
-			var cookie = CookieStatics.GetCookie( identityProviderCookieName );
-
+		internal static IdentityProvider GetUserLastIdentityProvider() =>
 			// Ignore the cookie if the existence of a user has changed since that could mean the user timed out.
-			return cookie != null && cookie.Value[ 0 ] == ( AppTools.User != null ? '+' : '-' )
-				       ? UserManagementStatics.IdentityProviders.SingleOrDefault(
-					       identityProvider => string.Equals(
-						       identityProvider is LocalIdentityProvider ? "Local" :
-						       identityProvider is SamlIdentityProvider saml ? saml.EntityId : throw new ApplicationException( "identity provider" ),
-						       cookie.Value.Substring( 1 ),
-						       StringComparison.Ordinal ) )
-				       : null;
-		}
+			CookieStatics.TryGetCookieValue( identityProviderCookieName, out var cookieValue ) && cookieValue[ 0 ] == ( AppTools.User != null ? '+' : '-' )
+				? UserManagementStatics.IdentityProviders.SingleOrDefault(
+					identityProvider => string.Equals(
+						identityProvider is LocalIdentityProvider ? "Local" :
+						identityProvider is SamlIdentityProvider saml ? saml.EntityId : throw new ApplicationException( "identity provider" ),
+						cookieValue.Substring( 1 ),
+						StringComparison.Ordinal ) )
+				: null;
 
 		internal static void SetUserLastIdentityProvider( IdentityProvider identityProvider ) {
 			setCookie(
@@ -346,7 +351,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 
 		// Client-side functionality verification
 
-		internal static bool TestCookieMissing() => CookieStatics.GetCookie( testCookieName ) == null;
+		internal static bool TestCookieMissing() => !CookieStatics.TryGetCookieValue( testCookieName, out _ );
 
 		internal static bool ClockNotSynchronized( DataValue<string> clientTime ) {
 			var clientParseResult = InstantPattern.ExtendedIso.Parse( clientTime.Value );

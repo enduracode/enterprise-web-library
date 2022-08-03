@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
+﻿using System.Collections.Immutable;
 using System.Security.Cryptography;
 using System.Text;
-using System.Web;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
@@ -702,12 +698,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			requestState.PostBackValues = new PostBackValueDictionary();
 			var extraPostBackValuesExist = requestState.ComponentStateValuesById.Keys.Any( i => !componentStateItemsById.ContainsKey( i ) ) |
 			                               requestState.PostBackValues.AddFromRequest(
-				                               EwfRequest.Current.AspNetRequest.Form.Cast<string>().Except( new[] { HiddenFieldName, ButtonElementName } ),
-				                               postBackValueKeys.Contains,
-				                               key => EwfRequest.Current.AspNetRequest.Form[ key ] ) | requestState.PostBackValues.AddFromRequest(
-				                               EwfRequest.Current.AspNetRequest.Files.Cast<string>(),
-				                               postBackValueKeys.Contains,
-				                               key => EwfRequest.Current.AspNetRequest.Files[ key ] );
+				                               EwfRequest.Current.AspNetRequest.Form
+					                               .Where(
+						                               i => !string.Equals( i.Key, HiddenFieldName, StringComparison.Ordinal ) && !string.Equals(
+							                                    i.Key,
+							                                    ButtonElementName,
+							                                    StringComparison.Ordinal ) )
+					                               .Select( i => KeyValuePair.Create( i.Key, (object)i.Value.Single() ) ),
+				                               postBackValueKeys.Contains ) | requestState.PostBackValues.AddFromRequest(
+				                               EwfRequest.Current.AspNetRequest.Form.Files.Select( i => KeyValuePair.Create( i.Name, (object)i ) ),
+				                               postBackValueKeys.Contains );
 
 			// Make sure data didn't change under this page's feet since the last request.
 			var invalidPostBackValuesExist =

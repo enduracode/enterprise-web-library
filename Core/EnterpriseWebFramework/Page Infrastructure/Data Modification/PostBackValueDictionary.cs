@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A dictionary of form control values from a post back.
 	/// </summary>
@@ -15,17 +11,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Returns true if extra post-back values exist.
 		/// </summary>
-		/// <param name="keys"></param>
+		/// <param name="keyValuePairs">Values cannot be null.</param>
 		/// <param name="keyPredicate"></param>
-		/// <param name="valueSelector">Do not return null from this method.</param>
-		internal bool AddFromRequest( IEnumerable<string> keys, Func<string, bool> keyPredicate, Func<string, object> valueSelector ) {
+		internal bool AddFromRequest( IEnumerable<KeyValuePair<string, object>> keyValuePairs, Func<string, bool> keyPredicate ) {
 			var extraPostBackValuesExist = false;
-			foreach( var key in keys ) {
-				if( keyPredicate( key ) && !dictionary.ContainsKey( key ) )
-					dictionary.Add( key, valueSelector( key ) );
+			foreach( var pair in keyValuePairs )
+				if( keyPredicate( pair.Key ) && !dictionary.ContainsKey( pair.Key ) )
+					dictionary.Add( pair.Key, pair.Value );
 				else
 					extraPostBackValuesExist = true;
-			}
 			return extraPostBackValuesExist;
 		}
 

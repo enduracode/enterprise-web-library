@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Aspose.Words.Reporting;
+﻿using Aspose.Words.MailMerging;
 using EnterpriseWebLibrary.MailMerging.RowTree;
 
 namespace EnterpriseWebLibrary.MailMerging {
@@ -38,7 +36,8 @@ namespace EnterpriseWebLibrary.MailMerging {
 			else if( mergeValue is MergeValue<byte[]> )
 				fieldValue = ( mergeValue as MergeValue<byte[]> ).Evaluate( ensureAllFieldsHaveValues );
 			else
-				throw new MailMergingException( "Merge field " + fieldName + ( tableName.Length > 0 ? " in table " + tableName : "" ) + " evaluates to an unsupported type." );
+				throw new MailMergingException(
+					"Merge field " + fieldName + ( tableName.Length > 0 ? " in table " + tableName : "" ) + " evaluates to an unsupported type." );
 
 			return true;
 		}

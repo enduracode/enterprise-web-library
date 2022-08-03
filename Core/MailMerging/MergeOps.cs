@@ -1,10 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
-using Aspose.Words.Reporting;
+using Aspose.Words.MailMerging;
 using EnterpriseWebLibrary.IO;
 using EnterpriseWebLibrary.MailMerging.RowTree;
 using Tewl.IO;
@@ -53,7 +49,7 @@ namespace EnterpriseWebLibrary.MailMerging {
 		public static string CreateString( MergeRow row, bool ensureAllFieldsHaveValues, string template ) {
 			var errors = new List<string>();
 
-			foreach( var mergeValue in row.Values ) {
+			foreach( var mergeValue in row.Values )
 				try {
 					var regex = new Regex( @"@@(" + mergeValue.Name + @")\b" ); // \b forces match to occur on word/non-word boundary;
 
@@ -74,7 +70,6 @@ namespace EnterpriseWebLibrary.MailMerging {
 				catch( MailMergingException e ) {
 					errors.AddRange( e.Messages );
 				}
-			}
 
 			// Since we have evaluated all recognized merge fields, we can now assume that any remaining fields are invalid.
 			// NOTE: Valid merge fields that caused a MailMergingException above are incorrectly included in this message. Fix this when we switch to stateful parsing.
@@ -216,11 +211,10 @@ namespace EnterpriseWebLibrary.MailMerging {
 			if( !rowTree.Rows.Any() )
 				return;
 
-			foreach( var fieldName in fieldNames ) {
+			foreach( var fieldName in fieldNames )
 				if( rowTree.Rows.First().Values.All( i => i.Name != fieldName ) )
 					// Use ApplicationException instead of MailMergingException because the field names can easily be validated before this method is called.
 					throw new ApplicationException( "Merge field " + fieldName + " is invalid." );
-			}
 
 			var writer = useTabAsSeparator ? (TextBasedTabularDataFileWriter)new TabDelimitedFileWriter() : new CsvFileWriter();
 
@@ -275,11 +269,10 @@ namespace EnterpriseWebLibrary.MailMerging {
 		internal static ExcelFileWriter CreateExcelFileWriter( MergeRowTree rowTree, IEnumerable<string> fieldNames, bool useMsWordFieldNames ) {
 			var excelFile = new ExcelFileWriter();
 			if( rowTree.Rows.Any() ) {
-				foreach( var fieldName in fieldNames ) {
+				foreach( var fieldName in fieldNames )
 					if( rowTree.Rows.First().Values.All( i => i.Name != fieldName ) )
 						// Use ApplicationException instead of MailMergingException because the field names can easily be validated before this method is called.
 						throw new ApplicationException( "Merge field " + fieldName + " is invalid." );
-				}
 
 				var sheet = excelFile.DefaultWorksheet;
 				sheet.AddHeaderToWorksheet(
@@ -287,7 +280,7 @@ namespace EnterpriseWebLibrary.MailMerging {
 						.Select( mergeValue => useMsWordFieldNames ? mergeValue.MsWordName : mergeValue.Name.CamelToEnglish() )
 						.ToArray() );
 				sheet.FreezeHeaderRow();
-				foreach( var row in rowTree.Rows ) {
+				foreach( var row in rowTree.Rows )
 					sheet.AddRowToWorksheet(
 						fieldNames.Select( fieldName => row.Values.Single( i => i.Name == fieldName ) )
 							.Select(
@@ -303,7 +296,6 @@ namespace EnterpriseWebLibrary.MailMerging {
 									return value;
 								} )
 							.ToArray() );
-				}
 			}
 			return excelFile;
 		}

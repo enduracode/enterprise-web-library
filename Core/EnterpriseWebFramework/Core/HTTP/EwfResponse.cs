@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Web;
-using EnterpriseWebLibrary.MailMerging;
+﻿using EnterpriseWebLibrary.MailMerging;
 using EnterpriseWebLibrary.MailMerging.RowTree;
 using Humanizer;
+using Microsoft.AspNetCore.Http;
 using Tewl;
 using Tewl.IO;
 using Tewl.Tools;
@@ -15,22 +11,30 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// An HTTP response, minus any caching information.
 	/// </summary>
 	public class EwfResponse {
-		private sealed class AspNetAdapter: HttpResponseBase {
+		private sealed class AspNetAdapter: HttpResponse {
+			private readonly Stream body;
 			internal string RedirectUrl = "";
 
-			public AspNetAdapter( Stream outputStream ) {
+			public AspNetAdapter( Stream body ) {
+				this.body = body;
 				ContentType = ContentTypes.Html;
-				OutputStream = outputStream;
 			}
 
+			public override HttpContext HttpContext => throw new NotImplementedException();
+			public override int StatusCode { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+			public override IHeaderDictionary Headers => throw new NotImplementedException();
+			public override Stream Body { get => body; set => throw new NotImplementedException(); }
+			public override long? ContentLength { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 			public override string ContentType { get; set; }
-			public override Stream OutputStream { get; }
+			public override IResponseCookies Cookies => throw new NotImplementedException();
+			public override bool HasStarted => throw new NotImplementedException();
+			public override void OnStarting( Func<object, Task> callback, object state ) => throw new NotImplementedException();
+			public override void OnCompleted( Func<object, Task> callback, object state ) => throw new NotImplementedException();
 
-			public override void Redirect( string url, bool endResponse ) {
-				if( url.IsNullOrEmpty() || endResponse )
-					base.Redirect( url, endResponse );
-				else
-					RedirectUrl = url;
+			public override void Redirect( string location, bool permanent ) {
+				if( location.Length == 0 || permanent )
+					throw new NotImplementedException();
+				RedirectUrl = location;
 			}
 		}
 
@@ -130,10 +134,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				bodyCreator );
 
 		/// <summary>
-		/// Creates a response from an ASP.NET <see cref="HttpResponseBase"/> object.
+		/// Creates a response from an ASP.NET <see cref="HttpResponse"/> object.
 		/// </summary>
-		/// <param name="aspNetResponseWriter">A method that takes an ASP.NET <see cref="HttpResponseBase"/> object and writes to it.</param>
-		public static EwfResponse CreateFromAspNetResponse( Action<HttpResponseBase> aspNetResponseWriter ) {
+		/// <param name="aspNetResponseWriter">A method that takes an ASP.NET <see cref="HttpResponse"/> object and writes to it.</param>
+		public static EwfResponse CreateFromAspNetResponse( Action<HttpResponse> aspNetResponseWriter ) {
 			AspNetAdapter aspNetResponse;
 			byte[] binaryBody;
 			using( var stream = new MemoryStream() ) {
@@ -191,10 +195,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			var fileName = FileNameCreator();
 			if( fileName.Any() )
-				aspNetResponse.AppendHeader( "content-disposition", "attachment; filename=\"" + fileName + "\"" );
+				aspNetResponse.Headers.ContentDisposition = "attachment; filename=\"" + fileName + "\"";
 
 			foreach( var i in AdditionalHeaderFieldGetter() )
-				aspNetResponse.AppendHeader( i.Item1, i.Item2 );
+				aspNetResponse.Headers.Append( i.Item1, i.Item2 );
 
 			if( !omitBody )
 				BodyCreator.WriteToResponse( aspNetResponse );

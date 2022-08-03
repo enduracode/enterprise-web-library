@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using Microsoft.AspNetCore.Http;
 using Tewl.InputValidation;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -27,7 +24,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		private readonly Func<T, string> stringValueSelector;
 		private readonly Func<string, PostBackValueValidationResult<T>> stringPostBackValueValidator;
-		private readonly Func<HttpPostedFile, PostBackValueValidationResult<T>> filePostBackValueValidator;
+		private readonly Func<IFormFile, PostBackValueValidationResult<T>> filePostBackValueValidator;
 		private readonly List<Action<T>> pageModificationValueAdders = new List<Action<T>>();
 		private readonly HashSet<DataModification> dataModifications = new HashSet<DataModification>();
 
@@ -60,7 +57,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// we've seen exceptions take as long as 50 ms each when debugging.</param>
 		public FormValue(
 			Func<T> durableValueGetter, Func<string> postBackValueKeyGetter, Func<T, string> stringValueSelector,
-			Func<HttpPostedFile, PostBackValueValidationResult<T>> filePostBackValueValidator ) {
+			Func<IFormFile, PostBackValueValidationResult<T>> filePostBackValueValidator ) {
 			this.durableValueGetter = durableValueGetter;
 			this.postBackValueKeyGetter = postBackValueKeyGetter;
 			this.stringValueSelector = stringValueSelector;
@@ -128,7 +125,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		private PostBackValueValidationResult<T> validatePostBackValue( object value ) {
 			if( filePostBackValueValidator != null ) {
-				var fileValue = value as HttpPostedFile;
+				var fileValue = value as IFormFile;
 				return value == null || fileValue != null ? filePostBackValueValidator( fileValue ) : PostBackValueValidationResult<T>.CreateInvalid();
 			}
 

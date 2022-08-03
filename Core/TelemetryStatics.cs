@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using System.ServiceModel;
+﻿using System.ServiceModel;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -54,17 +52,16 @@ namespace EnterpriseWebLibrary {
 						sw.WriteLine( "URL: " + AppRequestState.Instance.Url );
 
 						sw.WriteLine();
-						foreach( string fieldName in EwfRequest.Current.AspNetRequest.Form )
-							sw.WriteLine( "Form field " + fieldName + ": " + EwfRequest.Current.AspNetRequest.Form[ fieldName ] );
+						foreach( var i in EwfRequest.Current.AspNetRequest.Form )
+							sw.WriteLine( "Form field " + i.Key + ": " + i.Value.Single() );
 
 						sw.WriteLine();
-						foreach( string cookieName in EwfRequest.Current.AspNetRequest.Cookies )
-							sw.WriteLine( "Cookie " + cookieName + ": " + EwfRequest.Current.AspNetRequest.Cookies[ cookieName ].Value );
+						foreach( var cookie in EwfRequest.Current.AspNetRequest.Cookies )
+							sw.WriteLine( "Cookie " + cookie.Key + ": " + cookie.Value );
 
 						sw.WriteLine();
-						sw.WriteLine( "User agent: " + EwfRequest.Current.AspNetRequest.GetUserAgent() );
-						sw.WriteLine(
-							"Referrer: " + ( EwfRequest.Current.AspNetRequest.UrlReferrer != null ? EwfRequest.Current.AspNetRequest.UrlReferrer.AbsoluteUri : "" ) );
+						sw.WriteLine( "User agent: " + EwfRequest.Current.AspNetRequest.Headers.UserAgent );
+						sw.WriteLine( "Referrer: " + EwfRequest.Current.AspNetRequest.Headers.Referer );
 
 						User user = null;
 						User impersonator = null;

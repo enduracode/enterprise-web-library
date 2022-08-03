@@ -1,29 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using Humanizer;
+﻿using Humanizer;
+using Microsoft.AspNetCore.Http;
 using NodaTime;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	internal class CookieStatics {
-		private static Action<HttpCookie> responseCookieAdder;
+		private static Action<string, string, CookieOptions> responseCookieAdder;
 
-		internal static void Init( Action<HttpCookie> responseCookieAdder ) {
+		internal static void Init( Action<string, string, CookieOptions> responseCookieAdder ) {
 			CookieStatics.responseCookieAdder = responseCookieAdder;
 		}
 
-		internal static HttpCookie GetCookie( string name, bool omitNamePrefix = false ) {
+		internal static bool TryGetCookieValue( string name, out string value, bool omitNamePrefix = false ) {
 			var defaultAttributes = EwfConfigurationStatics.AppConfiguration.DefaultCookieAttributes;
-			return EwfRequest.Current.AspNetRequest.Cookies[ ( omitNamePrefix ? "" : defaultAttributes.NamePrefix ?? "" ) + name ];
+			return EwfRequest.Current.AspNetRequest.Cookies.TryGetValue( ( omitNamePrefix ? "" : defaultAttributes.NamePrefix ?? "" ) + name, out value );
 		}
 
 		internal static void SetCookie(
 			string name, string value, Instant? expires, bool secure, bool httpOnly, string domain = null, string path = null, bool omitNamePrefix = false ) {
 			var nameAndDomainAndPath = getNameAndDomainAndPath( name, domain, path, omitNamePrefix );
 			responseCookieAdder(
-				new HttpCookie( nameAndDomainAndPath.Item1, value )
+				nameAndDomainAndPath.Item1,
+				value,
+				new CookieOptions
 					{
 						Domain = nameAndDomainAndPath.Item2,
 						Path = nameAndDomainAndPath.Item3,
@@ -36,13 +35,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal static void ClearCookie( string name, string domain = null, string path = null, bool omitNamePrefix = false ) {
 			var nameAndDomainAndPath = getNameAndDomainAndPath( name, domain, path, omitNamePrefix );
-			responseCookieAdder(
-				new HttpCookie( nameAndDomainAndPath.Item1 )
-					{
-						Domain = nameAndDomainAndPath.Item2,
-						Path = nameAndDomainAndPath.Item3,
-						Expires = SystemClock.Instance.GetCurrentInstant().Minus( Duration.FromDays( 1 ) ).ToDateTimeUtc()
-					} );
+			responseCookieAdder( nameAndDomainAndPath.Item1, null, new CookieOptions { Domain = nameAndDomainAndPath.Item2, Path = nameAndDomainAndPath.Item3 } );
 		}
 
 		private static Tuple<string, string, string> getNameAndDomainAndPath( string name, string domain, string path, bool omitNamePrefix ) {

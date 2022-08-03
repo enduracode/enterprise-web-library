@@ -1,5 +1,4 @@
-﻿using System;
-using System.Web;
+﻿using Microsoft.AspNetCore.Http;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>

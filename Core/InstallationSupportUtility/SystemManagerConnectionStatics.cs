@@ -1,8 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Net.Http;
-using System.ServiceModel;
-using System.Threading.Tasks;
+﻿using System.ServiceModel;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.InstallationSupportUtility.SystemManagerInterface.Messages.SystemListMessage;
@@ -98,7 +94,9 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 			if( Configuration.HttpBaseUrl.StartsWith( "https://localhost" ) )
 				System.Net.ServicePointManager.ServerCertificateValidationCallback = ( ( sender, certificate, chain, sslPolicyErrors ) => true );
 
-			return new ChannelFactory<T>( binding, Tewl.Tools.NetTools.CombineUrls( Configuration.HttpBaseUrl, "Service/" + serviceFileName ) );
+			return new ChannelFactory<T>(
+				binding,
+				new EndpointAddress( Tewl.Tools.NetTools.CombineUrls( Configuration.HttpBaseUrl, "Service/" + serviceFileName ) ) );
 		}
 
 		private static ChannelFactory<T> getNetTcpChannelFactory<T>( string serviceFileName ) {
@@ -117,7 +115,9 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 			// Performance
 			binding.MaxBufferSize = binding.ReaderQuotas.MaxBytesPerRead = 65536;
 
-			var factory = new ChannelFactory<T>( binding, Tewl.Tools.NetTools.CombineUrls( Configuration.TcpBaseUrl, "Service/" + serviceFileName ) );
+			var factory = new ChannelFactory<T>(
+				binding,
+				new EndpointAddress( Tewl.Tools.NetTools.CombineUrls( Configuration.TcpBaseUrl, "Service/" + serviceFileName ) ) );
 			factory.Credentials.Windows.ClientCredential.UserName = Configuration.TcpUsername;
 			factory.Credentials.Windows.ClientCredential.Password = Configuration.TcpPassword;
 			return factory;

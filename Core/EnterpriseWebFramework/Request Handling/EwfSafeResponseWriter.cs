@@ -1,10 +1,9 @@
-﻿using System;
-using System.Globalization;
-using System.Linq;
+﻿using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
-using System.Web;
-using EnterpriseWebLibrary.TewlContrib;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Net.Http.Headers;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -17,17 +16,20 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public static string GetUrlVersionString( DateTimeOffset dateAndTime ) => dateAndTime.ToString( "yyyyMMddHHmmssfff", DateTimeFormatInfo.InvariantInfo );
 
 		internal static void AddCacheControlHeader( HttpResponse aspNetResponse, bool requestIsSecure, bool responseHasCachingInfo, bool? responseNeverExpires ) {
+			var headerValue = new CacheControlHeaderValue();
+
 			// Assume that all HTTPS responses are private. This isn’t true for CSS, JavaScript, etc. requests that are only secure in order to match the security of
-			// a page, but that’s not a big deal since most shared caches can't open and cache HTTPS anyway.
+			// a page, but that’s not a big deal since most shared caches can’t open and cache HTTPS anyway.
 			//
 			// If we don’t have caching information, the response is probably not shareable.
-			//
-			// Using ServerAndPrivate instead of just Private is a hack that is necessary because ASP.NET suppresses ETags with Private. But ASP.NET output caching
-			// (i.e. server caching) will still be disabled because we have removed the caching modules from IIS.
-			aspNetResponse.Cache.SetCacheability( !requestIsSecure && responseHasCachingInfo ? HttpCacheability.Public : HttpCacheability.ServerAndPrivate );
+			if( !requestIsSecure && responseHasCachingInfo )
+				headerValue.Public = true;
+			else
+				headerValue.Private = true;
 
 			if( responseNeverExpires.HasValue )
-				aspNetResponse.Cache.SetMaxAge( responseNeverExpires.Value ? TimeSpan.FromDays( 365 ) : TimeSpan.Zero );
+				headerValue.MaxAge = responseNeverExpires.Value ? TimeSpan.FromDays( 365 ) : TimeSpan.Zero;
+			aspNetResponse.GetTypedHeaders().CacheControl = headerValue;
 		}
 
 		private static Action<HttpResponse, HttpRequest, bool> createWriter(
@@ -71,20 +73,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 				// Strong ETags must vary by content coding. Since we don't know yet how this response will be encoded (gzip or otherwise), the best thing we can do is
 				// use the Accept-Encoding header value in the ETag.
-				var acceptEncoding = aspNetRequest.Headers[ "Accept-Encoding" ]; // returns null if field missing
-				if( acceptEncoding != null )
-					eTag += acceptEncoding.Replace( ", ", "" ); // On 4 Feb 2015 we saw the comma/space cause Chrome to incorrectly split the ETag apart.
+				// On 4 Feb 2015 we saw the comma/space cause Chrome to incorrectly split the ETag apart.
+				eTag += StringTools.ConcatenateWithDelimiter( "", aspNetRequest.Headers.AcceptEncoding );
 
-				aspNetResponse.Cache.SetETag( eTag );
+				var typedHeaders = aspNetResponse.GetTypedHeaders();
+				typedHeaders.ETag = new EntityTagHeaderValue( eTag );
 
 				// Sending a Last-Modified header isn't a good enough reason to force evaluation of lastModificationDateAndTimeGetter, which could be expensive.
 				if( lastModificationDateAndTimeGetter != null && lastModificationDateAndTime.IsValueCreated )
-					aspNetResponse.Cache.SetLastModified( lastModificationDateAndTime.Value.UtcDateTime );
+					typedHeaders.LastModified = lastModificationDateAndTime.Value.UtcDateTime;
 
 				// When we separate EWF from Web Forms, we may need to add a Vary header with "Accept-Encoding". Do that here.
 
-				var ifNoneMatch = aspNetRequest.Headers.GetValues( "If-None-Match" ); // returns null if field missing
-				if( ifNoneMatch != null && ifNoneMatch.Contains( eTag ) ) {
+				if( aspNetRequest.Headers.IfNoneMatch.Contains( eTag ) ) {
 					aspNetResponse.StatusCode = 304;
 					return;
 				}
@@ -95,7 +96,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					response = new Lazy<EwfResponse>( () => new EwfResponse( fullResponse ) );
 				}
 
-				response.Value.WriteToAspNetResponse( aspNetResponse, omitBody: aspNetRequest.HttpMethod == "HEAD" );
+				response.Value.WriteToAspNetResponse( aspNetResponse, omitBody: aspNetRequest.Method == "HEAD" );
 			};
 		}
 

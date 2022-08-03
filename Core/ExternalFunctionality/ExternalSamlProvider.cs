@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Web;
-using System.Xml;
+﻿using System.Xml;
 using EnterpriseWebLibrary.Configuration;
+using Microsoft.AspNetCore.Http;
 
 namespace EnterpriseWebLibrary.ExternalFunctionality {
 	/// <summary>
@@ -25,7 +23,7 @@ namespace EnterpriseWebLibrary.ExternalFunctionality {
 
 		XmlElement GetMetadata();
 
-		void WriteLogInResponse( HttpResponseBase response, string identityProvider, bool forceReauthentication, string returnUrl );
+		void WriteLogInResponse( HttpResponse response, string identityProvider, bool forceReauthentication, string returnUrl );
 
 		( string identityProvider, string userName, IReadOnlyDictionary<string, string> attributes, string returnUrl ) ReadAssertion( HttpRequest request );
 	}

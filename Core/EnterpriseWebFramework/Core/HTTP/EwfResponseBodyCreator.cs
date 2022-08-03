@@ -1,6 +1,6 @@
-﻿using System;
-using System.IO;
-using System.Web;
+﻿using System.Text;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -73,9 +73,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal void WriteToResponse( HttpResponse response ) {
 			if( BodyIsText )
-				TextBodyWriter( response.Output );
+				using( var writer = new HttpResponseStreamWriter( response.Body, Encoding.UTF8 ) )
+					TextBodyWriter( writer );
 			else
-				BinaryBodyWriter( response.OutputStream );
+				BinaryBodyWriter( response.Body );
 		}
 	}
 }

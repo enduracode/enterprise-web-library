@@ -1,6 +1,5 @@
-﻿using System;
-using System.Web;
-using EnterpriseWebLibrary.DataAccess;
+﻿using EnterpriseWebLibrary.DataAccess;
+using Microsoft.AspNetCore.Http;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>

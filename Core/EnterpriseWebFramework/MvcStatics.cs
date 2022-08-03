@@ -1,5 +1,5 @@
-﻿using System.Web.Mvc;
-using EnterpriseWebLibrary.DataAccess;
+﻿using EnterpriseWebLibrary.DataAccess;
+using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public static class MvcStatics {

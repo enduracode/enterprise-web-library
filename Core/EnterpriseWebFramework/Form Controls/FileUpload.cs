@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Web;
-using EnterpriseWebLibrary.IO;
+﻿using EnterpriseWebLibrary.IO;
+using Microsoft.AspNetCore.Http;
 using Tewl.InputValidation;
 using Tewl.Tools;
 
@@ -35,13 +31,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			Labeler = new FormControlLabeler();
 
 			var id = new ElementId();
-			var formValue = new FormValue<HttpPostedFile>(
+			var formValue = new FormValue<IFormFile>(
 				() => null,
 				() => id.Id,
 				v => "",
 				rawValue => rawValue == null
-					            ? PostBackValueValidationResult<HttpPostedFile>.CreateInvalid()
-					            : PostBackValueValidationResult<HttpPostedFile>.CreateValid( rawValue.ContentLength > 0 ? rawValue : null ) );
+					            ? PostBackValueValidationResult<IFormFile>.CreateInvalid()
+					            : PostBackValueValidationResult<IFormFile>.CreateValid( rawValue.Length > 0 ? rawValue : null ) );
 
 			PageComponent = new CustomPhrasingComponent(
 				new DisplayableElement(
@@ -76,11 +72,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					} );
 		}
 
-		private RsFile getRsFile( HttpPostedFile file ) {
+		private RsFile getRsFile( IFormFile file ) {
 			if( file == null )
 				return null;
 			using( var ms = new MemoryStream() ) {
-				file.InputStream.CopyTo( ms );
+				file.CopyTo( ms );
 				return new RsFile( ms.ToArray(), Path.GetFileName( file.FileName ), contentType: file.ContentType );
 			}
 		}

@@ -6,10 +6,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private const string intermediateAuthenticationCookieValue = "213aslkja23w09fua90zo9735";
 		private const string warningsHiddenCookieName = "NonLiveWarningsHidden";
 
-		internal static bool IntermediateAuthenticationCookieExists() {
-			var cookie = CookieStatics.GetCookie( intermediateAuthenticationCookieName );
-			return cookie != null && cookie.Value == intermediateAuthenticationCookieValue;
-		}
+		internal static bool IntermediateAuthenticationCookieExists() =>
+			CookieStatics.TryGetCookieValue( intermediateAuthenticationCookieName, out var value ) && value == intermediateAuthenticationCookieValue;
 
 		/// <summary>
 		/// Sets the intermediate user cookie.
@@ -32,7 +30,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			CookieStatics.ClearCookie( intermediateAuthenticationCookieName );
 		}
 
-		internal static bool WarningsHiddenCookieExists() => CookieStatics.GetCookie( warningsHiddenCookieName ) != null;
+		internal static bool WarningsHiddenCookieExists() => CookieStatics.TryGetCookieValue( warningsHiddenCookieName, out _ );
 
 		/// <summary>
 		/// EWF use only.

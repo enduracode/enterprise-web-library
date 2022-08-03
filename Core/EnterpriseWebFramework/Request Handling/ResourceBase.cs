@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Web;
+﻿using System.ComponentModel;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
 using Humanizer;
+using Microsoft.AspNetCore.Http;
 using StackExchange.Profiling;
 using Tewl.Tools;
 
@@ -28,7 +25,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		internal static void WriteRedirectResponse( HttpContext context, string url, bool permanent ) {
-			if( context.Request.HttpMethod == "GET" || context.Request.HttpMethod == "HEAD" )
+			if( context.Request.Method == "GET" || context.Request.Method == "HEAD" )
 				EwfSafeResponseWriter.AddCacheControlHeader(
 					context.Response,
 					EwfRequest.AppBaseUrlProvider.RequestIsSecure( context.Request ),
@@ -40,7 +37,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					new EwfResponseBodyCreator( writer => writer.Write( "{0} Redirect: {1}".FormatWith( permanent ? "Permanent" : "Temporary", url ) ) ),
 					statusCodeGetter: () => permanent ? 308 : 307,
 					additionalHeaderFieldGetter: () => ( "Location", url ).ToCollection() )
-				.WriteToAspNetResponse( context.Response, omitBody: context.Request.HttpMethod == "HEAD" );
+				.WriteToAspNetResponse( context.Response, omitBody: context.Request.Method == "HEAD" );
 		}
 
 		internal static void Init( Action<bool, ResourceBase> urlHandlerStateUpdater, Func<ResourceBase> currentResourceGetter ) {
@@ -278,7 +275,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				var connectionSecurity = ConnectionSecurity;
 				return connectionSecurity == ConnectionSecurity.MatchingCurrentRequest
 					       ? EwfApp.Instance != null && EwfApp.Instance.RequestState != null &&
-					         EwfRequest.AppBaseUrlProvider.RequestIsSecure( HttpContext.Current.Request )
+					         EwfRequest.AppBaseUrlProvider.RequestIsSecure( EwfRequest.Current.AspNetRequest )
 					       : connectionSecurity == ConnectionSecurity.SecureIfPossible && EwfConfigurationStatics.AppSupportsSecureConnections;
 			}
 		}
@@ -323,7 +320,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				else {
 					if( canonicalUrl != AppRequestState.Instance.Url ) {
 						if( !ShouldBeSecureGivenCurrentRequest && EwfRequest.AppBaseUrlProvider.RequestIsSecure( context.Request ) )
-							context.Response.AppendHeader( "Strict-Transport-Security", "max-age=0" );
+							context.Response.Headers.StrictTransportSecurity = "max-age=0";
 						WriteRedirectResponse( context, canonicalUrl, true );
 						return;
 					}
@@ -354,7 +351,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				return;
 			}
 
-			if( context.Request.HttpMethod == "GET" || context.Request.HttpMethod == "HEAD" || requestTransferred ) {
+			if( context.Request.Method == "GET" || context.Request.Method == "HEAD" || requestTransferred ) {
 				var requestHandler = getOrHead();
 				if( requestHandler != null )
 					requestHandler.WriteResponse( context, requestTransferred );
@@ -372,7 +369,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 
 			EwfResponse response;
-			switch( context.Request.HttpMethod ) {
+			switch( context.Request.Method ) {
 				case "PUT":
 					response = executeUnsafeRequestMethod( put );
 					break;
