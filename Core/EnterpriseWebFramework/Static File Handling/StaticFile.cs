@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Web;
-using EnterpriseWebLibrary.Configuration;
+﻿using EnterpriseWebLibrary.Configuration;
 using Humanizer;
 using MimeTypes;
 
@@ -63,15 +58,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			EwlStatics.CombinePaths(
 				isFrameworkFile
 					? ConfigurationStatics.InstallationConfiguration.SystemIsEwl && ConfigurationStatics.IsDevelopmentInstallation
-						  ?
-						  EwlStatics.CombinePaths(
+						  ? EwlStatics.CombinePaths(
 							  ConfigurationStatics.InstallationConfiguration.InstallationPath,
 							  EwlStatics.CoreProjectName,
 							  FrameworkStaticFilesSourceFolderPath )
 						  : EwlStatics.CombinePaths(
 							  ConfigurationStatics.InstallationConfiguration.InstallationPath,
 							  InstallationFileStatics.WebFrameworkStaticFilesFolderName )
-					: EwlStatics.CombinePaths( HttpRuntime.AppDomainAppPath, AppStaticFilesFolderName ),
+					: EwlStatics.CombinePaths( EwfConfigurationStatics.HostEnvironment.ContentRootPath, AppStaticFilesFolderName ),
 				relativeFilePath );
 
 		/// <summary>
