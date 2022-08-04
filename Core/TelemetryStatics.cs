@@ -172,37 +172,5 @@ namespace EnterpriseWebLibrary {
 				return false;
 			}
 		}
-
-		/// <summary>
-		/// Use this to email errors from web service methods and turn normal exceptions into FaultExceptions.
-		/// </summary>
-		public static void ExecuteWebServiceWithStandardExceptionHandling( Action method ) {
-			// NOTE: Do we need to check whether the system logic was initialized properly or will EwfApp_BeginRequest take care of it?
-			try {
-				method();
-			}
-			catch( Exception e ) {
-				throw createWebServiceException( e );
-			}
-		}
-
-		/// <summary>
-		/// Use this to email errors from web service methods and turn normal exceptions into FaultExceptions.
-		/// </summary>
-		public static T ExecuteWebServiceWithStandardExceptionHandling<T>( Func<T> method ) {
-			// NOTE: Do we need to check whether the system logic was initialized properly or will EwfApp_BeginRequest take care of it?
-			try {
-				return method();
-			}
-			catch( Exception e ) {
-				throw createWebServiceException( e );
-			}
-		}
-
-		private static Exception createWebServiceException( Exception e ) {
-			if( !( e is Wcf.AccessDeniedException ) )
-				ReportError( e );
-			return new FaultException( e.ToString() );
-		}
 	}
 }
