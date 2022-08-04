@@ -1,7 +1,6 @@
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
-using System.Linq;
 using System.Web;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using Tewl.Tools;
@@ -51,10 +50,6 @@ namespace EnterpriseWebLibrary {
 						finalImage.MakeTransparent( Color.White );
 						finalImage.Save( stream, ImageFormat.Png );
 					} ) );
-		}
-
-		internal static bool IsWebApp() {
-			return HttpContext.Current != null;
 		}
 	}
 }

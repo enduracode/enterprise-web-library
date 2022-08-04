@@ -1,19 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Web;
-using System.Web.Compilation;
+﻿using System.Runtime.InteropServices;
 using System.Xml;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.ExternalFunctionality;
+using EnterpriseWebLibrary.UserManagement;
 using Humanizer;
 using StackExchange.Profiling;
 using Tewl.Tools;
@@ -45,6 +37,39 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					globalInitializer,
 					Path.GetFileName( Path.GetDirectoryName( HttpRuntime.AppDomainAppPath ) ),
 					false,
+					telemetryAppErrorContextWriter: writer => {
+						// This check ensures that there is an actual request, which is not the case during application initialization.
+						if( EwfApp.Instance != null && EwfApp.Instance.RequestState != null ) {
+							writer.WriteLine();
+							writer.WriteLine( "URL: " + AppRequestState.Instance.Url );
+
+							writer.WriteLine();
+							foreach( var i in EwfRequest.Current.AspNetRequest.Form )
+								writer.WriteLine( "Form field " + i.Key + ": " + i.Value.Single() );
+
+							writer.WriteLine();
+							foreach( var cookie in EwfRequest.Current.AspNetRequest.Cookies )
+								writer.WriteLine( "Cookie " + cookie.Key + ": " + cookie.Value );
+
+							writer.WriteLine();
+							writer.WriteLine( "User agent: " + EwfRequest.Current.AspNetRequest.Headers.UserAgent );
+							writer.WriteLine( "Referrer: " + EwfRequest.Current.AspNetRequest.Headers.Referer );
+
+							User user = null;
+							User impersonator = null;
+
+							// exception-prone code
+							try {
+								user = AppTools.User;
+								impersonator = AppRequestState.Instance.ImpersonatorExists ? AppRequestState.Instance.ImpersonatorUser : null;
+							}
+							catch {}
+
+							if( user != null )
+								writer.WriteLine(
+									"User: {0}{1}".FormatWith( user.Email, impersonator != null ? " (impersonated by {0})".FormatWith( impersonator.Email ) : "" ) );
+						}
+					},
 					mainDataAccessStateGetter: () => {
 						return EwfApp.Instance != null
 							       ?

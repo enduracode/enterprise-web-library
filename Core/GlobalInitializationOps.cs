@@ -1,6 +1,4 @@
-﻿using System;
-using System.Globalization;
-using System.IO;
+﻿using System.Globalization;
 using EnterpriseWebLibrary.Caching;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
@@ -33,13 +31,14 @@ namespace EnterpriseWebLibrary {
 		/// <param name="isClientSideApp"></param>
 		/// <param name="assemblyFolderPath">Pass a nonempty string to override the assembly folder path, which is used to locate the installation folder. Use with
 		/// caution.</param>
+		/// <param name="telemetryAppErrorContextWriter"></param>
 		/// <param name="mainDataAccessStateGetter">A method that returns the current main data-access state whenever it is requested, including during this
 		/// InitStatics call. Do not allow multiple threads to use the same state at the same time. If you pass null, the data-access subsystem will not be
 		/// available in the application.</param>
 		/// <param name="useLongDatabaseTimeouts">Pass true if the application is a background process that can tolerate slow database access.</param>
 		public static void InitStatics(
 			SystemInitializer globalInitializer, string appName, bool isClientSideApp, string assemblyFolderPath = "",
-			Func<DataAccessState> mainDataAccessStateGetter = null, bool useLongDatabaseTimeouts = false ) {
+			Action<TextWriter> telemetryAppErrorContextWriter = null, Func<DataAccessState> mainDataAccessStateGetter = null, bool useLongDatabaseTimeouts = false ) {
 			var initializationLog = "Starting init";
 			try {
 				if( initialized )
@@ -51,7 +50,7 @@ namespace EnterpriseWebLibrary {
 				// Initialize these before the exception handling block below because it's reasonable for the exception handling to depend on them.
 				ConfigurationStatics.Init( assemblyFolderPath, globalInitializer.GetType(), appName, isClientSideApp, ref initializationLog );
 				EmailStatics.Init();
-				TelemetryStatics.Init();
+				TelemetryStatics.Init( telemetryAppErrorContextWriter );
 
 				// Setting the initialized flag to true must be done before executing the secondary init block below so that exception handling works.
 				initialized = true;
