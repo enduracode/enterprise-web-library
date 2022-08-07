@@ -65,7 +65,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						  : EwlStatics.CombinePaths(
 							  ConfigurationStatics.InstallationConfiguration.InstallationPath,
 							  InstallationFileStatics.WebFrameworkStaticFilesFolderName )
-					: EwlStatics.CombinePaths( EwfConfigurationStatics.HostEnvironment.ContentRootPath, AppStaticFilesFolderName ),
+					: EwlStatics.CombinePaths( EwfConfigurationStatics.AppConfiguration.Path, AppStaticFilesFolderName ),
 				relativeFilePath );
 
 		/// <summary>

@@ -1,9 +1,5 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
+﻿using System.Diagnostics;
 using System.Reflection;
-using System.Web;
 using EnterpriseWebLibrary.Configuration.Machine;
 using Humanizer;
 using Tewl.IO;
@@ -70,24 +66,12 @@ namespace EnterpriseWebLibrary.Configuration {
 			initializationLog += Environment.NewLine + "Stack trace initialized";
 
 			// Determine the installation path and load configuration information.
-			string installationPath;
-			bool isDevelopmentInstallation;
-			if( NetTools.IsWebApp() ) {
-				initializationLog += Environment.NewLine + "Is a web app";
-
-				installationPath = EwlStatics.CombinePaths( HttpRuntime.AppDomainAppPath, ".." );
-				isDevelopmentInstallation = !InstallationConfiguration.InstalledInstallationExists( installationPath );
-			}
-			else {
-				initializationLog += Environment.NewLine + "Is not a web app";
-
-				// Assume this is an installed installation. If this assumption turns out to be wrong, consider it a development installation. Installed executables are
-				// one level below the installation folder.
-				installationPath = EwlStatics.CombinePaths( assemblyFolderPath.Any() ? assemblyFolderPath : Path.GetDirectoryName( AppAssembly.Location ), ".." );
-				isDevelopmentInstallation = !InstallationConfiguration.InstalledInstallationExists( installationPath );
-				if( isDevelopmentInstallation )
-					installationPath = EwlStatics.CombinePaths( installationPath, "..", ".." ); // Visual Studio puts executables inside bin\Debug.
-			}
+			// Assume this is an installed installation. If this assumption turns out to be wrong, consider it a development installation. Installed executables are
+			// one level below the installation folder.
+			var installationPath = EwlStatics.CombinePaths( assemblyFolderPath.Any() ? assemblyFolderPath : Path.GetDirectoryName( AppAssembly.Location ), ".." );
+			var isDevelopmentInstallation = !InstallationConfiguration.InstalledInstallationExists( installationPath );
+			if( isDevelopmentInstallation )
+				installationPath = EwlStatics.CombinePaths( installationPath, "..", ".." ); // Visual Studio puts executables inside bin\Debug.
 			initializationLog += Environment.NewLine + "Successfully determined installation path";
 			InstallationConfiguration = new InstallationConfiguration( installationPath, isDevelopmentInstallation );
 			initializationLog += Environment.NewLine + "Successfully loaded installation configuration";
