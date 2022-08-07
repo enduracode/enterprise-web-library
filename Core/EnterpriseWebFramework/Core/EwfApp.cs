@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Web;
-using System.Web.SessionState;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.Email;
@@ -18,11 +14,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// The HttpApplication class for a web site using EWF. Provides access to the authenticated user, handles errors, and performs other useful functions.
 	/// </summary>
 	public abstract class EwfApp: HttpApplication {
-		/// <summary>
-		/// EwfInitializationOps and private use only.
-		/// </summary>
-		internal static bool FrameworkInitialized { get; set; }
-
 		private class HandlerAdapter: IHttpHandler {
 			private readonly BasicUrlHandler handler;
 
@@ -80,18 +71,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		private void handleBeginRequest( object sender, EventArgs e ) {
-			if( !FrameworkInitialized ) {
-				// We can't redirect to a normal page to communicate this information because since initialization failed, the request for that page will trigger
-				// another BeginRequest event that puts us in an infinite loop. We can't rely on anything except an HTTP return code. Suppress exceptions; there is no
-				// way to report them since even our basic exception handling may not work if the application isn't initialized.
-				try {
-					set500StatusCode( "Initialization Failure" );
-					CompleteRequest();
-				}
-				catch {}
-				return;
-			}
-
 			ExecuteWithBasicExceptionHandling(
 				() => {
 					try {
@@ -253,7 +232,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public virtual bool UseSpanishLanguage => false;
 
 		private void handleEndRequest( object sender, EventArgs e ) {
-			if( !FrameworkInitialized || RequestState == null )
+			if( RequestState == null )
 				return;
 
 			// Do not set a status code since we may have already set one or set a redirect page.
