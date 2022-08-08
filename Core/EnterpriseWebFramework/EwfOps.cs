@@ -135,6 +135,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									else
 										cookies.Delete( name, options );
 								} );
+							Translation.Init( () => "en-US" );
 							CssPreprocessingStatics.Init( globalInitializer.GetType().Assembly, programType.Assembly );
 							ResourceBase.Init(
 								( requestTransferred, resource ) => {

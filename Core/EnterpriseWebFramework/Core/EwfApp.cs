@@ -226,11 +226,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		protected internal virtual IEnumerable<MediaTypeOverride> GetMediaTypeOverrides() => Enumerable.Empty<MediaTypeOverride>();
 
-		/// <summary>
-		/// Returns true if Spanish should be used. Default is false.
-		/// </summary>
-		public virtual bool UseSpanishLanguage => false;
-
 		private void handleEndRequest( object sender, EventArgs e ) {
 			if( RequestState == null )
 				return;

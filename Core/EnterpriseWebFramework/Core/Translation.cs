@@ -1,5 +1,11 @@
 ﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	internal static class Translation {
+		private static Func<string> requestLanguageGetter;
+
+		internal static void Init( Func<string> requestLanguageGetter ) {
+			Translation.requestLanguageGetter = requestLanguageGetter;
+		}
+
 		internal static string DownloadExisting { get { return getCorrectTranslation( "Download existing", "Descargar archivo existente" ); } }
 		internal static string NoExistingFile { get { return getCorrectTranslation( "No existing file", "No existe el archivo" ); } }
 
@@ -105,8 +111,7 @@
 		/// <summary>
 		/// Key must be a string constant defined in this class.
 		/// </summary>
-		private static string getCorrectTranslation( string english, string spanish ) {
-			return EwfApp.Instance.UseSpanishLanguage ? spanish : english;
-		}
+		private static string getCorrectTranslation( string english, string spanish ) =>
+			string.Equals( requestLanguageGetter(), "es", StringComparison.Ordinal ) ? spanish : english;
 	}
 }
