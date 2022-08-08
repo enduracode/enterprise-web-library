@@ -312,14 +312,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 		}
 
-		private PageBase getErrorPage( PageBase ewfErrorPage ) {
-			return errorPage ?? ewfErrorPage;
-		}
-
-		/// <summary>
-		/// Gets the page that users will be redirected to when errors occur in the application.
-		/// </summary>
-		protected virtual PageBase errorPage => null;
+		private PageBase getErrorPage( PageBase ewfErrorPage ) => RequestDispatchingStatics.AppProvider.GetErrorPage() ?? ewfErrorPage;
 
 		private void rollbackDatabaseTransactionsAndClearResponse() {
 			RequestState.RollbackDatabaseTransactions();

@@ -17,5 +17,10 @@
 		/// Framework use only.
 		/// </summary>
 		protected internal abstract UrlPattern GetStaticFilesFolderUrlPattern( string urlSegment );
+
+		/// <summary>
+		/// Gets the page that users will be transferred to when errors occur in the application.
+		/// </summary>
+		protected internal virtual PageBase GetErrorPage() => null;
 	}
 }
