@@ -203,11 +203,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return url;
 		}
 
-		/// <summary>
-		/// Returns the base URL patterns for the application.
-		/// </summary>
-		protected internal abstract IEnumerable<BaseUrlPattern> GetBaseUrlPatterns();
-
 		private void handleMapRequestHandler( object sender, EventArgs e ) {
 			if( HttpContext.Current.Handler == null )
 				throw new ResourceNotAvailableException( "Failed to resolve the URL.", null );

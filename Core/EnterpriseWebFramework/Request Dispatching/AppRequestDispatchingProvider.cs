@@ -4,6 +4,11 @@
 	/// </summary>
 	public abstract class AppRequestDispatchingProvider {
 		/// <summary>
+		/// Returns the base URL patterns for the application.
+		/// </summary>
+		protected internal abstract IEnumerable<BaseUrlPattern> GetBaseUrlPatterns();
+
+		/// <summary>
 		/// Returns the URL handler that will determine the canonical URL patterns for the framework.
 		/// </summary>
 		public abstract UrlHandler GetFrameworkUrlParent();

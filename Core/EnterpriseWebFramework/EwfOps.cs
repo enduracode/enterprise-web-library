@@ -125,6 +125,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							var contextAccessor = app.Services.GetRequiredService<IHttpContextAccessor>();
 							EwfRequest.Init( providerGetter.GetProvider<AppRequestBaseUrlProvider>( "RequestBaseUrl" ), () => contextAccessor.HttpContext.Request );
 							UrlHandlingStatics.Init(
+								() => RequestDispatchingStatics.AppProvider.GetBaseUrlPatterns(),
 								( baseUrlString, appRelativeUrl ) =>
 									AppRequestState.ExecuteWithUrlHandlerStateDisabled( () => UrlHandlingStatics.ResolveUrl( baseUrlString, appRelativeUrl )?.Last() ) );
 							CookieStatics.Init(

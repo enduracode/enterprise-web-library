@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
+﻿using System.Net;
 using System.Web;
 using EnterpriseWebLibrary.TewlContrib;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	internal static class UrlHandlingStatics {
+		private static Func<IEnumerable<BaseUrlPattern>> baseUrlPatternGetter;
 		private static Func<string, string, BasicUrlHandler> urlResolver;
 
-		internal static void Init( Func<string, string, BasicUrlHandler> urlResolver ) {
+		internal static void Init( Func<IEnumerable<BaseUrlPattern>> baseUrlPatternGetter, Func<string, string, BasicUrlHandler> urlResolver ) {
+			UrlHandlingStatics.baseUrlPatternGetter = baseUrlPatternGetter;
 			UrlHandlingStatics.urlResolver = urlResolver;
 		}
 
@@ -52,7 +51,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 
 			EncodingBaseUrl baseUrl = null;
-			foreach( var i in EwfApp.Instance.GetBaseUrlPatterns() ) {
+			foreach( var i in baseUrlPatternGetter() ) {
 				baseUrl = i.Generator( encoder );
 				if( baseUrl != null )
 					break;
@@ -92,7 +91,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					parseSegmentParameters( pathComponents.baseUrlParameters ),
 					pathComponents.segments.Any() ? Enumerable.Empty<( string, string )>() : parseQuery( urlComponents.query ) ) );
 			UrlDecoder decoder = null;
-			foreach( var i in EwfApp.Instance.GetBaseUrlPatterns() ) {
+			foreach( var i in baseUrlPatternGetter() ) {
 				decoder = i.Parser( baseUrl );
 				if( decoder != null )
 					break;
