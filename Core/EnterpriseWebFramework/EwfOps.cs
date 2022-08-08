@@ -154,6 +154,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										AppRequestState.Instance.SetResource( resource );
 								},
 								() => AppRequestState.Instance.Resource );
+							StaticFile.Init( providerGetter.GetProvider<AppStaticFileHandlingProvider>( "StaticFileHandling" ) );
 							PageBase.Init(
 								( () => BasePageStatics.AppProvider.GetPageViewDataModificationMethod(),
 									() => BasePageStatics.AppProvider.JavaScriptDocumentReadyFunctionCall ),

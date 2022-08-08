@@ -17,6 +17,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public const string AppStaticFilesFolderName = "StaticFiles";
 
+		private static AppStaticFileHandlingProvider provider;
+
+		internal static void Init( SystemProviderReference<AppStaticFileHandlingProvider> provider ) {
+			StaticFile.provider = provider.GetProvider( returnNullIfNotFound: true ) ?? new AppStaticFileHandlingProvider();
+		}
+
 		private readonly bool isVersioned;
 
 		protected StaticFile( bool isVersioned ) {
@@ -93,7 +99,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				throw new ResourceNotAvailableException( "Failed to find the extension in the file path.", null );
 			var extension = relativeFilePath.Substring( extensionIndex );
 
-			var mediaTypeOverride = EwfApp.Instance.GetMediaTypeOverrides().SingleOrDefault( i => i.FileExtension == extension );
+			var mediaTypeOverride = provider.GetMediaTypeOverrides().SingleOrDefault( i => i.FileExtension == extension );
 			var contentType = mediaTypeOverride != null ? mediaTypeOverride.MediaType : MimeTypeMap.GetMimeType( extension );
 
 			var urlVersionString = isVersioned ? "invariant" : "";

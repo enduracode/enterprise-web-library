@@ -221,11 +221,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			EmailStatics.SendHealthCheckEmail( ConfigurationStatics.InstallationConfiguration.FullShortName + " - " + ConfigurationStatics.AppName );
 		}
 
-		/// <summary>
-		/// Gets the Internet media type overrides for the application, which are used when serving static files. Do not return null.
-		/// </summary>
-		protected internal virtual IEnumerable<MediaTypeOverride> GetMediaTypeOverrides() => Enumerable.Empty<MediaTypeOverride>();
-
 		private void handleEndRequest( object sender, EventArgs e ) {
 			if( RequestState == null )
 				return;
