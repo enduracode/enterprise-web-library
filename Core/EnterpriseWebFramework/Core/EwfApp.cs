@@ -1,7 +1,6 @@
 using System.Web;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
-using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ErrorPages;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.UserManagement;
@@ -212,13 +211,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private void handleMapRequestHandler( object sender, EventArgs e ) {
 			if( HttpContext.Current.Handler == null )
 				throw new ResourceNotAvailableException( "Failed to resolve the URL.", null );
-		}
-
-		/// <summary>
-		/// Standard library use only.
-		/// </summary>
-		public void SendHealthCheck() {
-			EmailStatics.SendHealthCheckEmail( ConfigurationStatics.InstallationConfiguration.FullShortName + " - " + ConfigurationStatics.AppName );
 		}
 
 		private void handleEndRequest( object sender, EventArgs e ) {

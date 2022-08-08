@@ -1,7 +1,10 @@
-﻿using EnterpriseWebLibrary.Configuration;
+﻿using System.Text;
+using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Email;
 using Humanizer;
 using NodaTime;
+using Tewl;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary {
 	public static class TelemetryStatics {
@@ -171,6 +174,27 @@ namespace EnterpriseWebLibrary {
 				ReportError( e );
 				return false;
 			}
+		}
+
+		internal static void SendHealthCheck() {
+			var message = new EmailMessage();
+
+			var body = new StringBuilder();
+			var tenGibibytes = 10 * Math.Pow( 1024, 3 );
+			var freeSpaceIsLow = false;
+			foreach( var driveInfo in DriveInfo.GetDrives().Where( d => d.DriveType == DriveType.Fixed ) ) {
+				var bytesFree = driveInfo.TotalFreeSpace;
+				freeSpaceIsLow = freeSpaceIsLow || bytesFree < tenGibibytes;
+				body.AppendLine( "{0} free on {1} drive.".FormatWith( FormattingMethods.GetFormattedBytes( bytesFree ), driveInfo.Name ) );
+			}
+
+			message.Subject = StringTools.ConcatenateWithDelimiter(
+				" ",
+				"Health check",
+				freeSpaceIsLow ? "and WARNING" : "",
+				"from " + ConfigurationStatics.InstallationConfiguration.FullShortName + " - " + ConfigurationStatics.AppName );
+			message.BodyHtml = body.ToString().GetTextAsEncodedHtml();
+			EmailStatics.SendDeveloperNotificationEmail( message );
 		}
 	}
 }

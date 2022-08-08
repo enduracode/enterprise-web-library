@@ -1,5 +1,4 @@
-﻿using System;
-using Humanizer;
+﻿using Humanizer;
 
 // EwlPage
 
@@ -10,8 +9,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin {
 				new StackList(
 					new EwfButton(
 							new StandardButtonStyle( "Send Health Check" ),
-							behavior: new PostBackBehavior(
-								postBack: PostBack.CreateFull( id: "sendHealthCheck", modificationMethod: () => EwfApp.Instance.SendHealthCheck() ) ) ).ToComponentListItem()
+							behavior: new PostBackBehavior( postBack: PostBack.CreateFull( id: "sendHealthCheck", modificationMethod: TelemetryStatics.SendHealthCheck ) ) )
+						.ToComponentListItem()
 						.Append(
 							new EwfButton(
 									new StandardButtonStyle( "Throw Unhandled Exception" ),
