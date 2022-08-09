@@ -37,7 +37,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				false,
 				telemetryAppErrorContextWriter: writer => {
 					// This check ensures that there is an actual request, which is not the case during application initialization.
-					if( EwfApp.Instance != null && EwfApp.Instance.RequestState != null ) {
+					if( EwfApp.RequestState != null ) {
 						writer.WriteLine();
 						writer.WriteLine( "URL: " + AppRequestState.Instance.Url );
 
@@ -68,7 +68,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								"User: {0}{1}".FormatWith( user.Email, impersonator != null ? " (impersonated by {0})".FormatWith( impersonator.Email ) : "" ) );
 					}
 				},
-				mainDataAccessStateGetter: () => EwfApp.Instance.RequestState != null ? EwfApp.Instance.RequestState.DataAccessState : initTimeDataAccessState.Value );
+				mainDataAccessStateGetter: () => EwfApp.RequestState != null ? EwfApp.RequestState.DataAccessState : initTimeDataAccessState.Value );
 			try {
 				return GlobalInitializationOps.ExecuteAppWithStandardExceptionHandling(
 					() => {
@@ -291,7 +291,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									} ).GetUrl(),
 								destinationUrl => new UserManagement.Pages.ChangePassword( destinationUrl ).GetUrl( disableAuthorizationCheck: true ) );
 							Admin.EntitySetup.Init( () => RequestDispatchingStatics.AppProvider.GetFrameworkUrlParent() );
-							RequestDispatchingStatics.Init( providerGetter.GetProvider<AppRequestDispatchingProvider>( "RequestDispatching" ) );
+							RequestDispatchingStatics.Init(
+								providerGetter.GetProvider<AppRequestDispatchingProvider>( "RequestDispatching" ),
+								() => contextAccessor.HttpContext );
 
 							appInitializer?.InitStatics();
 
@@ -301,6 +303,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 							initTimeDataAccessState = null;
 
+							app.Use( RequestDispatchingStatics.ProcessRequest );
+							app.UseRouting();
+							app.Use( EwfApp.EnsureUrlResolved );
 							app.UseMiniProfiler();
 							app.Run();
 						}

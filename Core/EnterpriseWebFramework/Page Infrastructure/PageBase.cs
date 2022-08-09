@@ -390,7 +390,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				// Set a 400 status code if there are any problems loading hidden field state. We're assuming these problems are never the developers' fault.
 				if( AppRequestState.Instance.EwfPageRequestState == null )
 					AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( AppRequestState.RequestTime, null, null );
-				HttpContext.Current.Response.TrySkipIisCustomErrors = true;
 				AppRequestState.Instance.EwfPageRequestState.FocusKey = "";
 				AppRequestState.Instance.EwfPageRequestState.GeneralModificationErrors =
 					Translation.ApplicationHasBeenUpdatedAndWeCouldNotInterpretAction.ToCollection();

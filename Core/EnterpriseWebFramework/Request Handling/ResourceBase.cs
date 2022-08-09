@@ -77,7 +77,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		protected void executeFragmentIdentifierValidatorIfNecessary( Func<string, string> validator ) {
 			// If this info object is being created for the current request, skip validation since the fragment identifier will not be available. User agents are not
 			// supposed to include it in requests. See section 3.5 of http://www.ietf.org/rfc/rfc3986.txt.
-			if( EwfApp.Instance != null && EwfApp.Instance.RequestState != null && Current == null )
+			if( EwfApp.RequestState != null && Current == null )
 				return;
 
 			var message = validator( uriFragmentIdentifier );
@@ -173,7 +173,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				if( ConfigurationStatics.IsIntermediateInstallation ) {
 					if( IsIntermediateInstallationPublicResource )
 						return true;
-					if( EwfApp.Instance == null || EwfApp.Instance.RequestState == null || !EwfApp.Instance.RequestState.IntermediateUserExists )
+					if( EwfApp.RequestState == null || !EwfApp.RequestState.IntermediateUserExists )
 						return false;
 				}
 
@@ -239,9 +239,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal sealed override string GetUrl( bool ensureUserCanAccessResource, bool ensureResourceNotDisabled ) {
 			string getCanonicalUrl() => UrlHandlingStatics.GetCanonicalUrl( this, ShouldBeSecureGivenCurrentRequest );
-			var url = ( EwfApp.Instance != null && EwfApp.Instance.RequestState != null
-				            ? EwfApp.Instance.RequestState.ExecuteWithUserDisabled( getCanonicalUrl )
-				            : getCanonicalUrl() ) + uriFragmentIdentifier.PrependDelimiter( "#" );
+			var url = ( EwfApp.RequestState != null ? EwfApp.RequestState.ExecuteWithUserDisabled( getCanonicalUrl ) : getCanonicalUrl() ) +
+			          uriFragmentIdentifier.PrependDelimiter( "#" );
 
 			if( ensureUserCanAccessResource && !UserCanAccessResource )
 				throw new ApplicationException( "GetUrl was called for a resource that the authenticated user cannot access. The URL would have been " + url + "." );
@@ -274,8 +273,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 				var connectionSecurity = ConnectionSecurity;
 				return connectionSecurity == ConnectionSecurity.MatchingCurrentRequest
-					       ? EwfApp.Instance != null && EwfApp.Instance.RequestState != null &&
-					         EwfRequest.AppBaseUrlProvider.RequestIsSecure( EwfRequest.Current.AspNetRequest )
+					       ? EwfApp.RequestState != null && EwfRequest.AppBaseUrlProvider.RequestIsSecure( EwfRequest.Current.AspNetRequest )
 					       : connectionSecurity == ConnectionSecurity.SecureIfPossible && EwfConfigurationStatics.AppSupportsSecureConnections;
 			}
 		}

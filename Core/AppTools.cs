@@ -12,6 +12,6 @@ namespace EnterpriseWebLibrary {
 		/// explicitly specify the connection security as SecureIfPossible in the current item. With this use, keep in mind that no parent authorization
 		/// logic has executed and therefore you cannot assume anything about the user. Does not currently work outside of web applications.
 		/// </summary>
-		public static User User => EwfApp.Instance != null && EwfApp.Instance.RequestState != null ? EwfApp.Instance.RequestState.UserAndImpersonator.Item1 : null;
+		public static User User => EwfApp.RequestState != null ? EwfApp.RequestState.UserAndImpersonator.Item1 : null;
 	}
 }

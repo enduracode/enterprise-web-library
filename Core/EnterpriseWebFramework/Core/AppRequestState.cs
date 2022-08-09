@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using EnterpriseWebLibrary.Caching;
+﻿using EnterpriseWebLibrary.Caching;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
@@ -18,7 +15,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Gets the app request state object for the current request.
 		/// </summary>
-		public static AppRequestState Instance => EwfApp.Instance.RequestState;
+		public static AppRequestState Instance => EwfApp.RequestState;
 
 		/// <summary>
 		/// Gets the time instant for the current request.
@@ -33,7 +30,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		internal static T ExecuteWithUrlHandlerStateDisabled<T>( Func<T> method ) {
-			if( EwfApp.Instance == null || EwfApp.Instance.RequestState == null )
+			if( EwfApp.RequestState == null )
 				return method();
 
 			Instance.urlHandlerStateDisabled = true;

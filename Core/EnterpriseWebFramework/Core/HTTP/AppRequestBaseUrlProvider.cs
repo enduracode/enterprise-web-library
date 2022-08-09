@@ -25,6 +25,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Return the empty string to represent the root path. Remember that your implementation should support not just live installations, but also development
 		/// and intermediate installations.
 		/// </summary>
-		protected internal virtual string GetRequestBasePath( HttpRequest request ) => request.PathBase.Value.Substring( "/".Length );
+		protected internal virtual string GetRequestBasePath( HttpRequest request ) => request.PathBase.HasValue ? request.PathBase.ToString()[ 1.. ] : "";
 	}
 }

@@ -4,152 +4,110 @@ using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ErrorPages;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.UserManagement;
+using Microsoft.AspNetCore.Http;
 using StackExchange.Profiling;
 using Tewl.Tools;
 using static Humanizer.StringExtensions;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
-	/// <summary>
-	/// The HttpApplication class for a web site using EWF. Provides access to the authenticated user, handles errors, and performs other useful functions.
-	/// </summary>
-	public abstract class EwfApp: HttpApplication {
-		private class HandlerAdapter: IHttpHandler {
-			private readonly BasicUrlHandler handler;
+	internal static class EwfApp {
+		private static Func<HttpContext> currentContextGetter;
 
-			public HandlerAdapter( BasicUrlHandler handler ) {
-				this.handler = handler;
-			}
-
-			void IHttpHandler.ProcessRequest( HttpContext context ) => handler.HandleRequest( context );
-			bool IHttpHandler.IsReusable => false;
+		internal static void Init( Func<HttpContext> currentContextGetter ) {
+			EwfApp.currentContextGetter = currentContextGetter;
 		}
 
-		internal static void ExecuteWithBasicExceptionHandling( Action handler, bool addErrorToRequestState, bool set500StatusCode ) {
+		internal static void ExecuteWithBasicExceptionHandling( Action handler, bool addErrorToRequestState, bool write500Response ) {
 			try {
 				handler();
 			}
 			catch( Exception e ) {
-				// Suppress all exceptions since there is no way to report them and in some cases they could wreck the control flow for the request.
-				try {
-					EwlStatics.CallEveryMethod(
-						delegate {
-							const string prefix = "An exception occurred that could not be handled by the main exception handler:";
-							if( addErrorToRequestState )
-								Instance.RequestState.AddError( prefix, e );
-							else
-								TelemetryStatics.ReportError( prefix, e );
-						},
-						delegate {
-							if( set500StatusCode )
-								Instance.set500StatusCode( "Exception" );
-						} );
-				}
-				catch {}
+				EwlStatics.CallEveryMethod(
+					delegate {
+						const string prefix = "An exception occurred that could not be handled by the main exception handler:";
+						if( addErrorToRequestState )
+							RequestState.AddError( prefix, e );
+						else
+							TelemetryStatics.ReportError( prefix, e );
+					},
+					delegate {
+						if( write500Response )
+							EwfApp.write500Response( currentContextGetter(), "Exception" );
+					} );
 			}
 		}
 
-		// This member is per web user (request). We must be careful to never accidentally use values from a previous request.
-		internal AppRequestState RequestState { get; private set; }
-
 		/// <summary>
-		/// Returns the EwfApp object for the current HTTP context.
+		/// Returns the request-state object for the current HTTP context.
 		/// </summary>
-		public static EwfApp Instance => NetTools.IsWebApp() ? HttpContext.Current.ApplicationInstance as EwfApp : null;
-
-		/// <summary>
-		/// Registers event handlers for certain application events.
-		/// </summary>
-		protected EwfApp() {
-			BeginRequest += handleBeginRequest;
-			AuthenticateRequest += handleAuthenticateRequest;
-			PostAuthenticateRequest += handlePostAuthenticateRequest;
-			PostResolveRequestCache += handlePostResolveRequestCache;
-			MapRequestHandler += handleMapRequestHandler;
-			EndRequest += handleEndRequest;
-			Error += handleError;
+		internal static AppRequestState RequestState {
+			get => currentContextGetter != null /* i.e. IsWebApp */ ? (AppRequestState)currentContextGetter()?.Items[ EwlStatics.EwlInitialism ] : null;
+			private set => currentContextGetter().Items.Add( EwlStatics.EwlInitialism, value );
 		}
 
-		private void handleBeginRequest( object sender, EventArgs e ) {
+		internal static void HandleBeginRequest( HttpContext context ) {
 			ExecuteWithBasicExceptionHandling(
 				() => {
-					try {
-						if( RequestState != null ) {
-							RequestState = null;
-							throw new ApplicationException( "AppRequestState was not properly cleaned up from a previous request." );
-						}
+					// This used to be just HttpContext.Current.Request.Url, but that doesn't work with Azure due to the use of load balancing. An Azure load balancer
+					// will bind to the ip/host/port through which all web requests should come in, and then the request is redirected to one of the server instances
+					// running this web application. For example, a user will request mydomain.com. In Azure, there may be two instances running this web site, on
+					// someIp:81 and someIp:82. For some reason, HttpContext.Current.Request.Url ends up using the host and port from one of these addresses instead of
+					// using the host and port from the HTTP Host header, which is what the client is actually "viewing". Basically, HttpContext.Current.Request.Url
+					// returns http://someIp:81?something=1 instead of http://mydomain.com?something=1. See
+					// http://stackoverflow.com/questions/9560838/azure-load-balancer-causes-400-error-invalid-hostname-on-postback.
 
-
-						// This used to be just HttpContext.Current.Request.Url, but that doesn't work with Azure due to the use of load balancing. An Azure load balancer
-						// will bind to the ip/host/port through which all web requests should come in, and then the request is redirected to one of the server instances
-						// running this web application. For example, a user will request mydomain.com. In Azure, there may be two instances running this web site, on
-						// someIp:81 and someIp:82. For some reason, HttpContext.Current.Request.Url ends up using the host and port from one of these addresses instead of
-						// using the host and port from the HTTP Host header, which is what the client is actually "viewing". Basically, HttpContext.Current.Request.Url
-						// returns http://someIp:81?something=1 instead of http://mydomain.com?something=1. See
-						// http://stackoverflow.com/questions/9560838/azure-load-balancer-causes-400-error-invalid-hostname-on-postback.
-
-						var baseUrl = getRequestBaseUrl( Request );
-						if( !baseUrl.Any() ) {
-							Response.StatusCode = 400;
-							CompleteRequest();
-							return;
-						}
-
-						string appRelativeUrl;
-						try {
-							appRelativeUrl = GetRequestAppRelativeUrl( Request, disableLeadingSlashRemoval: true );
-						}
-						catch {
-							set500StatusCode( "App-Relative URL Unavailable" );
-							CompleteRequest();
-							return;
-						}
-
-						// If the base URL doesn't include a path and the app-relative URL is just a slash, don't include this trailing slash in the URL since it will not be
-						// present in the canonical URLs that we construct and therefore it would cause problems with URL normalization.
-						var url = !EwfRequest.AppBaseUrlProvider.GetRequestBasePath( Request ).Any() && appRelativeUrl.Length == "/".Length
-							          ? baseUrl
-							          : baseUrl + appRelativeUrl;
-
-
-						// This blocks until the entire request has been received from the client.
-						// This won't compile unless it is assigned to something, which is why it is unused.
-						var stream = Request.InputStream;
-
-						RequestState = new AppRequestState( url, baseUrl );
+					var baseUrl = getRequestBaseUrl( context.Request );
+					if( !baseUrl.Any() ) {
+						EwfResponse.Create( "", new EwfResponseBodyCreator( () => "" ), statusCodeGetter: () => 400 ).WriteToAspNetResponse( context.Response );
+						return;
 					}
-					catch {
-						CompleteRequest();
-						throw;
-					}
+
+					var appRelativeUrl = context.Request.Path.Add( context.Request.QueryString );
+
+					// If the base URL doesn't include a path and the app-relative URL is just a slash, don't include this trailing slash in the URL since it will not be
+					// present in the canonical URLs that we construct and therefore it would cause problems with URL normalization.
+					var url = !EwfRequest.AppBaseUrlProvider.GetRequestBasePath( context.Request ).Any() && appRelativeUrl.Length == "/".Length
+						          ? baseUrl
+						          : baseUrl + appRelativeUrl;
+
+
+					RequestState = new AppRequestState( url, baseUrl );
 				},
 				false,
 				true );
 		}
 
-		private string getRequestBaseUrl( HttpRequest request ) {
+		private static string getRequestBaseUrl( HttpRequest request ) {
 			var provider = EwfRequest.AppBaseUrlProvider;
 			var host = provider.GetRequestHost( request );
 			return host.Any() ? BaseUrl.GetUrlString( provider.RequestIsSecure( request ), host, provider.GetRequestBasePath( request ) ) : "";
 		}
 
-		private void handleAuthenticateRequest( object sender, EventArgs e ) {
+		internal static void HandleAuthenticateRequest() {
 			RequestState.IntermediateUserExists = NonLiveInstallationStatics.IntermediateAuthenticationCookieExists();
 		}
 
-		private void handlePostAuthenticateRequest( object sender, EventArgs e ) {
+		internal static void HandlePostAuthenticateRequest() {
 			RequestState.EnableUser();
 		}
 
-		private void handlePostResolveRequestCache( object sender, EventArgs e ) {
+		internal static Action<HttpContext> ResolveUrl( HttpContext context ) {
 			using( MiniProfiler.Current.Step( "EWF - Resolve URL" ) )
-				resolveUrl();
+				return resolveUrl( context );
 		}
 
-		private void resolveUrl() {
+		private static Action<HttpContext> resolveUrl( HttpContext context ) {
+			// Remove the leading slash if it exists. We are trying to normalize the difference between root applications and subdirectory applications by not
+			// distinguishing between app-relative URLs of "" and "/". In root applications this distinction doesn’t exist. We’ve decided on a standard of never
+			// allowing an app-relative URL of "/".
+			var appRelativeUrl = context.Request.Path.Add( context.Request.QueryString );
+			if( context.Request.Path.HasValue )
+				appRelativeUrl = appRelativeUrl[ 1.. ];
+
 			var handlers = RequestState.ExecuteWithUserDisabled(
 				() => {
 					try {
-						return UrlHandlingStatics.ResolveUrl( RequestState.BaseUrl, GetRequestAppRelativeUrl( Request ) );
+						return UrlHandlingStatics.ResolveUrl( RequestState.BaseUrl, appRelativeUrl );
 					}
 					catch( UnresolvableUrlException e ) {
 						throw new ResourceNotAvailableException( "Failed to resolve the URL.", e );
@@ -160,83 +118,48 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				// one handler in the list, we want parameters to be taken from the lowest-level segment. That’s why we reverse the handlers here.
 				RequestState.SetUrlHandlers( handlers.Reverse().Materialize() );
 
-				HttpContext.Current.RemapHandler( new HandlerAdapter( handlers.Last() ) );
-				if( handlers.Last() is PageBase || handlers.Last() is EntitySetupBase || handlers.Last() is PreBuiltResponse )
-					HttpContext.Current.SetSessionStateBehavior( SessionStateBehavior.Required );
-				return;
+				//if( handlers.Last() is PageBase || handlers.Last() is EntitySetupBase || handlers.Last() is PreBuiltResponse )
+				//	HttpContext.Current.SetSessionStateBehavior( SessionStateBehavior.Required );
+				return handlers.Last().HandleRequest;
 			}
 
 			// ACME challenge response; see https://tools.ietf.org/html/rfc8555#section-8.3
 			var absoluteUrl = new Uri( RequestState.Url );
 			if( absoluteUrl.Scheme == "http" && absoluteUrl.Port == 80 && absoluteUrl.AbsolutePath.StartsWith( "/.well-known/acme-challenge/" ) ) {
 				var systemManager = ConfigurationStatics.MachineConfiguration?.SystemManager;
-				if( systemManager != null ) {
-					ResourceBase.WriteRedirectResponse(
-						HttpContext.Current,
+				if( systemManager != null )
+					return c => ResourceBase.WriteRedirectResponse(
+						c,
 						systemManager.HttpBaseUrl.Replace( "https://", "http://" ) +
 						"/Pages/Public/AcmeChallengeResponse.aspx;token={0}".FormatWith( HttpUtility.UrlEncode( absoluteUrl.Segments.Last() ) ),
 						false );
-					CompleteRequest();
-				}
 			}
+
+			return null;
 		}
 
-		// One difference between this and HttpRequest.AppRelativeCurrentExecutionFilePath is that the latter does not include the query string.
-		internal static string GetRequestAppRelativeUrl( HttpRequest request, bool disableLeadingSlashRemoval = false ) {
-			// See https://stackoverflow.com/a/782002/35349.
-			var url = request.ServerVariables[ "HTTP_URL" ];
-
-			if( url == null )
-				throw new ApplicationException( "HTTP_URL server variable not available." );
-
-			// If a base path exists (on the web server, not the reverse proxy), remove it along with the subsequent slash if one exists. Otherwise just remove the
-			// leading slash, which we know exists since an HTTP request path must start with a slash. We're doing this slash removal ultimately because we are trying
-			// to normalize the difference between root applications and subdirectory applications by not distinguishing between app-relative URLs of "" and "/". In
-			// root applications this distinction doesn't exist. We've decided on a standard of never allowing an app-relative URL of "/".
-			if( HttpRuntime.AppDomainAppVirtualPath.Substring( "/".Length ).Any() ) {
-				url = url.Substring( HttpRuntime.AppDomainAppVirtualPath.Length );
-				url = url.StartsWith( "/" ) && !disableLeadingSlashRemoval ? url.Substring( 1 ) : url;
-			}
-			else if( !disableLeadingSlashRemoval )
-				url = url.Substring( 1 );
-
-			return url;
-		}
-
-		private void handleMapRequestHandler( object sender, EventArgs e ) {
-			if( HttpContext.Current.Handler == null )
+		internal static async Task EnsureUrlResolved( HttpContext context, RequestDelegate next ) {
+			if( context.GetEndpoint() == null )
 				throw new ResourceNotAvailableException( "Failed to resolve the URL.", null );
+			await next( context );
 		}
 
-		private void handleEndRequest( object sender, EventArgs e ) {
+		internal static void HandleEndRequest() {
 			if( RequestState == null )
 				return;
 
 			// Do not set a status code since we may have already set one or set a redirect page.
 			ExecuteWithBasicExceptionHandling( () => RequestState.CleanUp(), false, false );
-			RequestState = null;
 		}
 
 		/// <summary>
-		/// This method will not work properly unless the application is initialized, RequestState is not null, and the authenticated user is available.
+		/// This method will not work properly unless RequestState is not null and the authenticated user is available.
 		/// </summary>
-		private void handleError( object sender, EventArgs e ) {
+		internal static void HandleError( HttpContext context, Exception exception ) {
 			ExecuteWithBasicExceptionHandling(
 				() => {
 					try {
-						Exception exception;
-						try {
-							// This code should happen first to prevent errors from going to the Windows event log.
-							exception = Server.GetLastError();
-							Server.ClearError();
-
-							rollbackDatabaseTransactionsAndClearResponse();
-						}
-						finally {
-							CompleteRequest();
-						}
-
-						var errorIsWcf404 = exception.InnerException is System.ServiceModel.EndpointNotFoundException;
+						rollbackDatabaseTransactionsAndClearResponse( context );
 
 						// We can remove this as soon as requesting a URL with a vertical pipe doesn't blow up our web applications.
 						var errorIsBogusPathException = exception is ArgumentException argException && argException.Message == "Illegal characters in path.";
@@ -246,35 +169,35 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								RequestState.Url,
 								EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString( EwfConfigurationStatics.AppSupportsSecureConnections ),
 								StringComparison.Ordinal ) );
-						if( exception is ResourceNotAvailableException || errorIsWcf404 || errorIsBogusPathException )
-							transferRequest( 404, getErrorPage( new ResourceNotAvailable( !baseUrlRequest.Value ) ) );
+						if( exception is ResourceNotAvailableException || errorIsBogusPathException )
+							transferRequest( context, 404, getErrorPage( new ResourceNotAvailable( !baseUrlRequest.Value ) ) );
 						else if( exception is AccessDeniedException accessDeniedException ) {
 							if( accessDeniedException.CausedByIntermediateUser )
-								transferRequest( 403, new NonLiveLogIn( RequestState.Url ) );
+								transferRequest( context, 403, new NonLiveLogIn( RequestState.Url ) );
 							else if( UserManagementStatics.UserManagementEnabled && !ConfigurationStatics.IsLiveInstallation && RequestState.UserAccessible &&
 							         !RequestState.ImpersonatorExists )
-								transferRequest( 403, new UserManagement.Pages.Impersonate( RequestState.Url ) );
+								transferRequest( context, 403, new UserManagement.Pages.Impersonate( RequestState.Url ) );
 							else if( accessDeniedException.LogInPage != null )
-								transferRequest( 403, accessDeniedException.LogInPage );
+								transferRequest( context, 403, accessDeniedException.LogInPage );
 							else if( UserManagementStatics.LocalIdentityProviderEnabled || AuthenticationStatics.SamlIdentityProviders.Count > 1 )
-								transferRequest( 403, new UserManagement.Pages.LogIn( RequestState.Url ) );
+								transferRequest( context, 403, new UserManagement.Pages.LogIn( RequestState.Url ) );
 							else if( AuthenticationStatics.SamlIdentityProviders.Any() )
 								transferRequest(
+									context,
 									403,
 									new UserManagement.SamlResources.LogIn( AuthenticationStatics.SamlIdentityProviders.Single().EntityId, RequestState.Url ) );
 							else
-								transferRequest( 403, getErrorPage( new AccessDenied( !baseUrlRequest.Value ) ) );
+								transferRequest( context, 403, getErrorPage( new AccessDenied( !baseUrlRequest.Value ) ) );
 						}
 						else if( exception is PageDisabledException pageDisabledException )
-							transferRequest( null, new ResourceDisabled( pageDisabledException.Message ) );
+							transferRequest( context, null, new ResourceDisabled( pageDisabledException.Message ) );
 						else {
 							RequestState.AddError( "", exception );
-							transferRequestToUnhandledExceptionPage();
+							transferRequestToUnhandledExceptionPage( context );
 						}
 					}
 					catch {
-						Response.ClearHeaders();
-						Response.ClearContent();
+						context.Response.Clear();
 						throw;
 					}
 				},
@@ -282,52 +205,50 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				true );
 		}
 
-		private void transferRequest( int? statusCode, ResourceBase resource ) {
-			if( statusCode.HasValue ) {
-				HttpContext.Current.Response.StatusCode = statusCode.Value;
-				HttpContext.Current.Response.TrySkipIisCustomErrors = true;
-			}
+		private static void transferRequest( HttpContext context, int? statusCode, ResourceBase resource ) {
+			if( statusCode.HasValue )
+				context.Response.StatusCode = statusCode.Value;
 
 			try {
-				resource.HandleRequest( HttpContext.Current, true );
+				resource.HandleRequest( context, true );
 			}
 			catch( Exception exception ) {
-				rollbackDatabaseTransactionsAndClearResponse();
+				rollbackDatabaseTransactionsAndClearResponse( context );
 				RequestState.AddError( "An exception occurred during a request for a handled error page or a log-in page:", exception );
-				transferRequestToUnhandledExceptionPage();
+				transferRequestToUnhandledExceptionPage( context );
 			}
 		}
 
-		private void transferRequestToUnhandledExceptionPage() {
-			HttpContext.Current.Response.StatusCode = 500;
-			HttpContext.Current.Response.TrySkipIisCustomErrors = true;
+		private static void transferRequestToUnhandledExceptionPage( HttpContext context ) {
+			context.Response.StatusCode = 500;
 
 			try {
-				getErrorPage( new UnhandledException() ).HandleRequest( HttpContext.Current, true );
+				getErrorPage( new UnhandledException() ).HandleRequest( context, true );
 			}
 			catch( Exception exception ) {
-				rollbackDatabaseTransactionsAndClearResponse();
+				rollbackDatabaseTransactionsAndClearResponse( context );
 				RequestState.AddError( "An exception occurred during a request for the unhandled exception page:", exception );
-				set500StatusCode( "Unhandled Exception Page Error" );
+				write500Response( context, "Unhandled Exception Page Error" );
 			}
 		}
 
-		private PageBase getErrorPage( PageBase ewfErrorPage ) => RequestDispatchingStatics.AppProvider.GetErrorPage() ?? ewfErrorPage;
+		private static PageBase getErrorPage( PageBase ewfErrorPage ) => RequestDispatchingStatics.AppProvider.GetErrorPage() ?? ewfErrorPage;
 
-		private void rollbackDatabaseTransactionsAndClearResponse() {
+		private static void rollbackDatabaseTransactionsAndClearResponse( HttpContext context ) {
 			RequestState.RollbackDatabaseTransactions();
 			DataAccessState.Current.ResetCache();
 
 			RequestState.EwfPageRequestState = new EwfPageRequestState( AppRequestState.RequestTime, null, null );
 
-			Response.ClearHeaders();
-			Response.ClearContent();
+			context.Response.Clear();
 		}
 
-		private void set500StatusCode( string description ) {
-			Response.StatusCode = 500;
-			Response.StatusDescription = description + " in EWF Application";
-			Response.TrySkipIisCustomErrors = false;
+		private static void write500Response( HttpContext context, string description ) {
+			EwfResponse.Create(
+					ContentTypes.PlainText,
+					new EwfResponseBodyCreator( writer => writer.Write( "{0} in EWF Application".FormatWith( description ) ) ),
+					statusCodeGetter: () => 500 )
+				.WriteToAspNetResponse( context.Response, omitBody: string.Equals( context.Request.Method, "HEAD", StringComparison.Ordinal ) );
 		}
 	}
 }
