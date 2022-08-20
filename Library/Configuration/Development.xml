@@ -4,7 +4,7 @@
 	<LibraryNamespaceAndAssemblyName>EnterpriseWebLibrary</LibraryNamespaceAndAssemblyName>
 	<webProjects>
 		<project>
-			<name>Web Site</name>
+			<name>Website</name>
 			<NamespaceAndAssemblyName>EnterpriseWebLibrary.WebSite</NamespaceAndAssemblyName>
 		</project>
 	</webProjects>

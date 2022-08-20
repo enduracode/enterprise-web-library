@@ -16,7 +16,7 @@
 			</EmailSendingService>
 			<WebApplications>
 				<Application>
-					<Name>Web Site</Name>
+					<Name>Website</Name>
 					<IisApplication xsi:type="Site">
 						<HostNames>
 							<HostName>

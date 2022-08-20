@@ -95,7 +95,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								programType.Assembly,
 								programType.Namespace + ".Providers",
 								providerName =>
-									@"{0} provider not found in application. To implement, create a class named {0} in ""Your Web Site\Providers"" that derives from App{0}Provider."
+									@"{0} provider not found in application. To implement, create a class named {0} in ""Your Website\Providers"" that derives from App{0}Provider."
 										.FormatWith( providerName ) );
 
 							if( ExternalFunctionalityStatics.SamlFunctionalityEnabled )

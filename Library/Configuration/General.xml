@@ -5,7 +5,7 @@
 	<systemShortName>Ewl</systemShortName>
 	<WebApplications>
 		<Application>
-			<Name>Web Site</Name>
+			<Name>Website</Name>
 			<SupportsSecureConnections>false</SupportsSecureConnections>
 		</Application>
 	</WebApplications>
