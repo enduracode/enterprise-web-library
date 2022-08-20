@@ -71,7 +71,8 @@ namespace EnterpriseWebLibrary.Configuration {
 			var installationPath = EwlStatics.CombinePaths( assemblyFolderPath.Any() ? assemblyFolderPath : Path.GetDirectoryName( AppAssembly.Location ), ".." );
 			var isDevelopmentInstallation = !InstallationConfiguration.InstalledInstallationExists( installationPath );
 			if( isDevelopmentInstallation )
-				installationPath = EwlStatics.CombinePaths( installationPath, "..", ".." ); // Visual Studio puts executables inside bin\Debug.
+				// Visual Studio puts executables inside bin\Debug\target-framework-moniker.
+				installationPath = EwlStatics.CombinePaths( installationPath, "..", "..", ".." );
 			initializationLog += Environment.NewLine + "Successfully determined installation path";
 			InstallationConfiguration = new InstallationConfiguration( installationPath, isDevelopmentInstallation );
 			initializationLog += Environment.NewLine + "Successfully loaded installation configuration";
