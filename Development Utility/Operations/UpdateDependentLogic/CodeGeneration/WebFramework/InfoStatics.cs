@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using Humanizer;
+﻿using Humanizer;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework {
@@ -118,7 +114,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 			// Initialize optional parameter fields.
 			if( optionalParameters.Any() ) {
 				writer.WriteLine( "var optionalParametersInitializedFromCurrent = false;" );
-				writer.WriteLine( "if( EwfApp.Instance != null && AppRequestState.Instance != null ) {" );
+				writer.WriteLine( "if( AppRequestState.Instance != null ) {" );
 
 				// If the list of current URL handlers has a matching object, apply its parameter values.
 				writer.WriteLine( "foreach( var urlHandler in AppRequestState.Instance.UrlHandlers )" );

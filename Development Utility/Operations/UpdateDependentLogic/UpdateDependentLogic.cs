@@ -251,7 +251,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				var runProgramExpression = "EnterpriseWebLibrary.TewlContrib.ProcessTools.RunProgram( " + programPath +
 				                           ", \"\", Newtonsoft.Json.JsonConvert.SerializeObject( arguments, Newtonsoft.Json.Formatting.None ) + System.Environment.NewLine + input, false )";
 
-				writer.WriteLine( "if( EwfApp.Instance != null && AppRequestState.Instance != null )" );
+				writer.WriteLine( "if( AppRequestState.Instance != null )" );
 				writer.WriteLine( "AppRequestState.AddNonTransactionalModificationMethod( () => " + runProgramExpression + " );" );
 				writer.WriteLine( "else" );
 				writer.WriteLine( runProgramExpression + ";" );
