@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using Humanizer;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CSharp;
 using Tewl.Tools;
@@ -29,7 +30,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 					var result = CSharpCompilation.Create(
 							null,
 							syntaxTrees: CSharpSyntaxTree.ParseText( "using System; using System.Collections.Generic; public class A { public " + typeName + " B; }" )
-								.ToCollection() )
+								.ToCollection(),
+							references: MetadataReference.CreateFromFile( typeof( object ).Assembly.Location ).ToCollection(),
+							options: new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary ) )
 						.Emit( stream );
 					if( !result.Success )
 						throw new UserCorrectableException( "The type name \"" + typeName + "\" is invalid." );
