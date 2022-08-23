@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Text;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Configuration.SystemDevelopment;
 using EnterpriseWebLibrary.Configuration.SystemGeneral;
@@ -63,20 +64,18 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			// Generate code.
 			if( installation.DevelopmentInstallationLogic.SystemIsEwl ) {
 				generateCodeForProject(
+					installation,
+					"",
 					EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.CoreProjectName ),
 					writer => {
 						writer.WriteLine( "using System;" );
 						writer.WriteLine( "using System.Collections.Generic;" );
 						writer.WriteLine( "using System.Globalization;" );
 						writer.WriteLine( "using System.Linq;" );
-						writer.WriteLine( "using System.Reflection;" );
-						writer.WriteLine( "using System.Runtime.InteropServices;" );
 						writer.WriteLine( "using System.Threading;" );
 						writer.WriteLine( "using EnterpriseWebLibrary.DataAccess;" );
 						writer.WriteLine( "using Tewl.InputValidation;" );
 						writer.WriteLine( "using Tewl.Tools;" );
-						writer.WriteLine();
-						writeAssemblyInfo( writer, installation, "" );
 						writer.WriteLine();
 						writer.WriteLine( "namespace EnterpriseWebLibrary {" );
 						writer.WriteLine( "partial class EwlStatics {" );
@@ -96,19 +95,15 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 							"" );
 					} );
 				generateCodeForProject(
+					installation,
+					"Development Utility",
 					EwlStatics.CombinePaths( installation.GeneralLogic.Path, "Development Utility" ),
-					writer => {
-						writer.WriteLine( "using System.Reflection;" );
-						writer.WriteLine( "using System.Runtime.InteropServices;" );
-						writeAssemblyInfo( writer, installation, "Development Utility" );
-					} );
+					_ => {} );
 				generateCodeForProject(
+					installation,
+					"SAML Provider",
 					EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.SamlProviderProjectPath ),
-					writer => {
-						writer.WriteLine( "using System.Reflection;" );
-						writer.WriteLine( "using System.Runtime.InteropServices;" );
-						writeAssemblyInfo( writer, installation, "SAML Provider" );
-					} );
+					_ => {} );
 			}
 			generateLibraryCode( installation );
 			foreach( var webProject in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects ?? new WebProject[ 0 ] )
@@ -119,14 +114,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				generateServerSideConsoleProjectCode( installation, project );
 			if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject != null )
 				generateCodeForProject(
+					installation,
+					installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name,
 					EwlStatics.CombinePaths(
 						installation.GeneralLogic.Path,
 						installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name ),
-					writer => {
-						writer.WriteLine( "using System.Reflection;" );
-						writer.WriteLine( "using System.Runtime.InteropServices;" );
-						writeAssemblyInfo( writer, installation, installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name );
-					} );
+					_ => {} );
 
 			generateXmlSchemaLogicForInstallationConfigurationFile( installation, "Custom" );
 			generateXmlSchemaLogicForInstallationConfigurationFile( installation, "Shared" );
@@ -166,6 +159,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 		private void generateLibraryCode( DevelopmentInstallation installation ) {
 			generateCodeForProject(
+				installation,
+				"Library",
 				installation.DevelopmentInstallationLogic.LibraryPath,
 				writer => {
 					// Don't add "using System" here. It will create a huge number of ReSharper warnings in the generated code file.
@@ -174,8 +169,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					writer.WriteLine( "using System.Data.Common;" );
 					writer.WriteLine( "using System.Diagnostics;" ); // Necessary for ServerSideConsoleAppStatics
 					writer.WriteLine( "using System.Linq;" );
-					writer.WriteLine( "using System.Reflection;" );
-					writer.WriteLine( "using System.Runtime.InteropServices;" );
 					writer.WriteLine( "using EnterpriseWebLibrary;" );
 					writer.WriteLine( "using EnterpriseWebLibrary.Caching;" );
 					writer.WriteLine( "using EnterpriseWebLibrary.Collections;" ); // Necessary for row constants
@@ -194,8 +187,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					writer.WriteLine( "using Tewl.InputValidation;" );
 					writer.WriteLine( "using Tewl.Tools;" );
 
-					writer.WriteLine();
-					writeAssemblyInfo( writer, installation, "Library" );
 					if( installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications.Any() ) {
 						writer.WriteLine();
 						writer.WriteLine( "namespace " + installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName + " {" );
@@ -394,6 +385,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			Directory.CreateDirectory( EwlStatics.CombinePaths( application.Path, StaticFile.AppStaticFilesFolderName ) );
 
 			generateCodeForProject(
+				installation,
+				project.name,
 				application.Path,
 				writer => {
 					writer.WriteLine( "using System;" );
@@ -401,8 +394,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					writer.WriteLine( "using System.Collections.ObjectModel;" );
 					writer.WriteLine( "using System.Globalization;" );
 					writer.WriteLine( "using System.Linq;" );
-					writer.WriteLine( "using System.Reflection;" );
-					writer.WriteLine( "using System.Runtime.InteropServices;" );
 					writer.WriteLine( "using System.Threading;" );
 					writer.WriteLine( "using EnterpriseWebLibrary;" );
 					writer.WriteLine( "using EnterpriseWebLibrary.DataAccess;" );
@@ -410,8 +401,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					writer.WriteLine( "using NodaTime;" );
 					writer.WriteLine( "using Tewl.InputValidation;" );
 					writer.WriteLine( "using Tewl.Tools;" );
-					writer.WriteLine();
-					writeAssemblyInfo( writer, installation, project.name );
 					writer.WriteLine();
 					writer.WriteLine( "namespace {0}.Providers {{".FormatWith( project.NamespaceAndAssemblyName ) );
 					writer.WriteLine( "internal partial class RequestDispatching: AppRequestDispatchingProvider {" );
@@ -433,19 +422,17 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 		private void generateWindowsServiceCode( DevelopmentInstallation installation, WindowsService service ) {
 			generateCodeForProject(
+				installation,
+				service.Name,
 				EwlStatics.CombinePaths( installation.GeneralLogic.Path, service.Name ),
 				writer => {
 					writer.WriteLine( "using System;" );
 					writer.WriteLine( "using System.ComponentModel;" );
-					writer.WriteLine( "using System.Reflection;" );
-					writer.WriteLine( "using System.Runtime.InteropServices;" );
 					writer.WriteLine( "using System.ServiceProcess;" );
 					writer.WriteLine( "using System.Threading;" );
 					writer.WriteLine( "using EnterpriseWebLibrary;" );
 					writer.WriteLine( "using EnterpriseWebLibrary.DataAccess;" );
 					writer.WriteLine( "using EnterpriseWebLibrary.WindowsServiceFramework;" );
-					writer.WriteLine();
-					writeAssemblyInfo( writer, installation, service.Name );
 					writer.WriteLine();
 					writer.WriteLine( "namespace " + service.NamespaceAndAssemblyName + " {" );
 
@@ -484,19 +471,17 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 		private void generateServerSideConsoleProjectCode( DevelopmentInstallation installation, ServerSideConsoleProject project ) {
 			generateCodeForProject(
+				installation,
+				project.Name,
 				EwlStatics.CombinePaths( installation.GeneralLogic.Path, project.Name ),
 				writer => {
 					writer.WriteLine( "using System;" );
 					writer.WriteLine( "using System.Collections.Generic;" );
 					writer.WriteLine( "using System.Collections.Immutable;" );
 					writer.WriteLine( "using System.IO;" );
-					writer.WriteLine( "using System.Reflection;" );
-					writer.WriteLine( "using System.Runtime.InteropServices;" );
 					writer.WriteLine( "using System.Threading;" );
 					writer.WriteLine( "using EnterpriseWebLibrary;" );
 					writer.WriteLine( "using EnterpriseWebLibrary.DataAccess;" );
-					writer.WriteLine();
-					writeAssemblyInfo( writer, installation, project.Name );
 					writer.WriteLine();
 					writer.WriteLine( "namespace " + project.NamespaceAndAssemblyName + " {" );
 					writer.WriteLine( "internal static partial class Program {" );
@@ -531,27 +516,33 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				} );
 		}
 
-		private void generateCodeForProject( string projectPath, Action<TextWriter> codeWriter ) {
+		private void generateCodeForProject( DevelopmentInstallation installation, string projectName, string projectPath, Action<TextWriter> codeWriter ) {
+			using( var writer = new StreamWriter( EwlStatics.CombinePaths( projectPath, "Directory.Build.props" ), false, Encoding.UTF8 ) ) {
+				writer.WriteLine( "<Project>" );
+				writer.WriteLine( "<PropertyGroup>" );
+
+				writer.WriteLine( "<Version>{0}</Version>".FormatWith( "{0}.0.{1}.0".FormatWith( installation.CurrentMajorVersion, installation.NextBuildNumber ) ) );
+
+				// assembly attributes; see https://docs.microsoft.com/en-us/dotnet/standard/assembly/set-attributes
+				writer.WriteLine( "<GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>" );
+				writer.WriteLine( "<Product>{0}</Product>".FormatWith( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName ) );
+				writer.WriteLine(
+					"<AssemblyTitle>{0}</AssemblyTitle>".FormatWith(
+						installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + projectName.PrependDelimiter( " - " ) ) );
+
+				// package properties; see https://docs.microsoft.com/en-us/nuget/reference/msbuild-targets#pack-target
+				writer.WriteLine( "<PackageVersion>0</PackageVersion>" ); // Clear since we create both prerelease and stable packages with different version numbers.
+
+				writer.WriteLine( "</PropertyGroup>" );
+				writer.WriteLine( "</Project>" );
+			}
+
 			var generatedCodeFolderPath = EwlStatics.CombinePaths( projectPath, generatedCodeFolderName );
 			Directory.CreateDirectory( generatedCodeFolderPath );
 			var isuFilePath = EwlStatics.CombinePaths( generatedCodeFolderPath, "ISU.cs" );
 			IoMethods.DeleteFile( isuFilePath );
 			using( TextWriter writer = new StreamWriter( isuFilePath ) )
 				codeWriter( writer );
-		}
-
-		private void writeAssemblyInfo( TextWriter writer, DevelopmentInstallation installation, string projectName ) {
-			writeAssemblyAttribute(
-				writer,
-				"AssemblyTitle",
-				"\"" + installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + projectName.PrependDelimiter( " - " ) + "\"" );
-			writeAssemblyAttribute( writer, "AssemblyProduct", "\"" + installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + "\"" );
-			writeAssemblyAttribute( writer, "ComVisible", "false" );
-			writeAssemblyAttribute( writer, "AssemblyVersion", "\"" + installation.CurrentMajorVersion + ".0." + installation.NextBuildNumber + ".0\"" );
-		}
-
-		private void writeAssemblyAttribute( TextWriter writer, string name, string value ) {
-			writer.WriteLine( "[ assembly: " + name + "( " + value + " ) ]" );
 		}
 
 		private void generateXmlSchemaLogicForInstallationConfigurationFile( DevelopmentInstallation installation, string schemaFileName ) {
