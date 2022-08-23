@@ -165,84 +165,84 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		}
 
 		private void generateLibraryCode( DevelopmentInstallation installation ) {
-			var libraryGeneratedCodeFolderPath = EwlStatics.CombinePaths( installation.DevelopmentInstallationLogic.LibraryPath, generatedCodeFolderName );
-			Directory.CreateDirectory( libraryGeneratedCodeFolderPath );
-			var isuFilePath = EwlStatics.CombinePaths( libraryGeneratedCodeFolderPath, "ISU.cs" );
-			IoMethods.DeleteFile( isuFilePath );
-			using( TextWriter writer = new StreamWriter( isuFilePath ) ) {
-				// Don't add "using System" here. It will create a huge number of ReSharper warnings in the generated code file.
-				writer.WriteLine( "using System.Collections.Generic;" );
-				writer.WriteLine( "using System.Data;" ); // Necessary for stored procedure logic
-				writer.WriteLine( "using System.Data.Common;" );
-				writer.WriteLine( "using System.Diagnostics;" ); // Necessary for ServerSideConsoleAppStatics
-				writer.WriteLine( "using System.Linq;" );
-				writer.WriteLine( "using System.Reflection;" );
-				writer.WriteLine( "using System.Runtime.InteropServices;" );
-				writer.WriteLine( "using EnterpriseWebLibrary;" );
-				writer.WriteLine( "using EnterpriseWebLibrary.Caching;" );
-				writer.WriteLine( "using EnterpriseWebLibrary.Collections;" ); // Necessary for row constants
-				writer.WriteLine( "using EnterpriseWebLibrary.Configuration;" );
-				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess;" );
-				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.CommandWriting;" );
-				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.CommandWriting.Commands;" );
-				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction;" );
-				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction.Conditions;" );
-				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.RetrievalCaching;" );
-				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.RevisionHistory;" );
-				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.StandardModification;" );
-				writer.WriteLine( "using EnterpriseWebLibrary.Email;" );
-				writer.WriteLine( "using EnterpriseWebLibrary.EnterpriseWebFramework;" );
-				writer.WriteLine( "using NodaTime;" );
-				writer.WriteLine( "using Tewl.InputValidation;" );
-				writer.WriteLine( "using Tewl.Tools;" );
+			generateCodeForProject(
+				installation.DevelopmentInstallationLogic.LibraryPath,
+				writer => {
+					// Don't add "using System" here. It will create a huge number of ReSharper warnings in the generated code file.
+					writer.WriteLine( "using System.Collections.Generic;" );
+					writer.WriteLine( "using System.Data;" ); // Necessary for stored procedure logic
+					writer.WriteLine( "using System.Data.Common;" );
+					writer.WriteLine( "using System.Diagnostics;" ); // Necessary for ServerSideConsoleAppStatics
+					writer.WriteLine( "using System.Linq;" );
+					writer.WriteLine( "using System.Reflection;" );
+					writer.WriteLine( "using System.Runtime.InteropServices;" );
+					writer.WriteLine( "using EnterpriseWebLibrary;" );
+					writer.WriteLine( "using EnterpriseWebLibrary.Caching;" );
+					writer.WriteLine( "using EnterpriseWebLibrary.Collections;" ); // Necessary for row constants
+					writer.WriteLine( "using EnterpriseWebLibrary.Configuration;" );
+					writer.WriteLine( "using EnterpriseWebLibrary.DataAccess;" );
+					writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.CommandWriting;" );
+					writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.CommandWriting.Commands;" );
+					writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction;" );
+					writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction.Conditions;" );
+					writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.RetrievalCaching;" );
+					writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.RevisionHistory;" );
+					writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.StandardModification;" );
+					writer.WriteLine( "using EnterpriseWebLibrary.Email;" );
+					writer.WriteLine( "using EnterpriseWebLibrary.EnterpriseWebFramework;" );
+					writer.WriteLine( "using NodaTime;" );
+					writer.WriteLine( "using Tewl.InputValidation;" );
+					writer.WriteLine( "using Tewl.Tools;" );
 
-				writer.WriteLine();
-				writeAssemblyInfo( writer, installation, "Library" );
-				if( installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications.Any() ) {
 					writer.WriteLine();
-					writer.WriteLine( "namespace " + installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName + " {" );
-					writer.WriteLine( "public static class WebApplicationNames {" );
-					foreach( var i in installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications )
-						writer.WriteLine( "public const string {0} = \"{1}\";".FormatWith( EwlStatics.GetCSharpIdentifier( i.Name.EnglishToPascal() ), i.Name ) );
-					writer.WriteLine( "}" );
-					writer.WriteLine( "}" );
-				}
-				writer.WriteLine();
-				TypedCssClassStatics.Generate(
-					installation.GeneralLogic.Path,
-					installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName,
-					writer );
-				writer.WriteLine();
-				generateServerSideConsoleAppStatics( writer, installation );
-				generateDataAccessCode( writer, installation );
-
-				var emailTemplateFolderPath = EwlStatics.CombinePaths(
-					InstallationFileStatics.GetGeneralFilesFolderPath( installation.GeneralLogic.Path, true ),
-					InstallationFileStatics.FilesFolderName,
-					EmailTemplate.TemplateFolderName );
-				if( Directory.Exists( emailTemplateFolderPath ) ) {
+					writeAssemblyInfo( writer, installation, "Library" );
+					if( installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications.Any() ) {
+						writer.WriteLine();
+						writer.WriteLine( "namespace " + installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName + " {" );
+						writer.WriteLine( "public static class WebApplicationNames {" );
+						foreach( var i in installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications )
+							writer.WriteLine( "public const string {0} = \"{1}\";".FormatWith( EwlStatics.GetCSharpIdentifier( i.Name.EnglishToPascal() ), i.Name ) );
+						writer.WriteLine( "}" );
+						writer.WriteLine( "}" );
+					}
 					writer.WriteLine();
-					writer.WriteLine( "namespace " + installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName + " {" );
-					writer.WriteLine( "public static class EmailTemplates {" );
-					foreach( var i in IoMethods.GetFileNamesInFolder( emailTemplateFolderPath, searchPattern: "*.html" ) )
-						writer.WriteLine(
-							"public static readonly EmailTemplateName {0} = new EmailTemplateName( \"{1}\" );".FormatWith(
-								EwlStatics.GetCSharpIdentifier( Path.GetFileNameWithoutExtension( i ).EnglishToPascal() ),
-								i ) );
-					writer.WriteLine( "}" );
-					writer.WriteLine( "}" );
-				}
+					TypedCssClassStatics.Generate(
+						installation.GeneralLogic.Path,
+						installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName,
+						writer );
+					writer.WriteLine();
+					generateServerSideConsoleAppStatics( writer, installation );
+					generateDataAccessCode( writer, installation );
 
-				writer.WriteLine();
-				CodeGeneration.WebFramework.WebFrameworkStatics.Generate(
-					writer,
-					installation.DevelopmentInstallationLogic.LibraryPath,
-					installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName,
-					false,
-					InstallationConfiguration.ConfigurationFolderName.ToCollection().Append( InstallationFileStatics.FilesFolderName ).Append( generatedCodeFolderName ),
-					null,
-					null );
-			}
+					var emailTemplateFolderPath = EwlStatics.CombinePaths(
+						InstallationFileStatics.GetGeneralFilesFolderPath( installation.GeneralLogic.Path, true ),
+						InstallationFileStatics.FilesFolderName,
+						EmailTemplate.TemplateFolderName );
+					if( Directory.Exists( emailTemplateFolderPath ) ) {
+						writer.WriteLine();
+						writer.WriteLine( "namespace " + installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName + " {" );
+						writer.WriteLine( "public static class EmailTemplates {" );
+						foreach( var i in IoMethods.GetFileNamesInFolder( emailTemplateFolderPath, searchPattern: "*.html" ) )
+							writer.WriteLine(
+								"public static readonly EmailTemplateName {0} = new EmailTemplateName( \"{1}\" );".FormatWith(
+									EwlStatics.GetCSharpIdentifier( Path.GetFileNameWithoutExtension( i ).EnglishToPascal() ),
+									i ) );
+						writer.WriteLine( "}" );
+						writer.WriteLine( "}" );
+					}
+
+					writer.WriteLine();
+					CodeGeneration.WebFramework.WebFrameworkStatics.Generate(
+						writer,
+						installation.DevelopmentInstallationLogic.LibraryPath,
+						installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName,
+						false,
+						InstallationConfiguration.ConfigurationFolderName.ToCollection()
+							.Append( InstallationFileStatics.FilesFolderName )
+							.Append( generatedCodeFolderName ),
+						null,
+						null );
+				} );
 		}
 
 		private void generateServerSideConsoleAppStatics( TextWriter writer, DevelopmentInstallation installation ) {
@@ -393,148 +393,142 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 			Directory.CreateDirectory( EwlStatics.CombinePaths( application.Path, StaticFile.AppStaticFilesFolderName ) );
 
-			var webProjectGeneratedCodeFolderPath = EwlStatics.CombinePaths( application.Path, generatedCodeFolderName );
-			Directory.CreateDirectory( webProjectGeneratedCodeFolderPath );
-			var webProjectIsuFilePath = EwlStatics.CombinePaths( webProjectGeneratedCodeFolderPath, "ISU.cs" );
-			IoMethods.DeleteFile( webProjectIsuFilePath );
-			using( TextWriter writer = new StreamWriter( webProjectIsuFilePath ) ) {
-				writer.WriteLine( "using System;" );
-				writer.WriteLine( "using System.Collections.Generic;" );
-				writer.WriteLine( "using System.Collections.ObjectModel;" );
-				writer.WriteLine( "using System.Globalization;" );
-				writer.WriteLine( "using System.Linq;" );
-				writer.WriteLine( "using System.Reflection;" );
-				writer.WriteLine( "using System.Runtime.InteropServices;" );
-				writer.WriteLine( "using System.Threading;" );
-				writer.WriteLine( "using EnterpriseWebLibrary;" );
-				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess;" );
-				writer.WriteLine( "using EnterpriseWebLibrary.EnterpriseWebFramework;" );
-				writer.WriteLine( "using NodaTime;" );
-				writer.WriteLine( "using Tewl.InputValidation;" );
-				writer.WriteLine( "using Tewl.Tools;" );
-				writer.WriteLine();
-				writeAssemblyInfo( writer, installation, project.name );
-				writer.WriteLine();
-				writer.WriteLine( "namespace {0}.Providers {{".FormatWith( project.NamespaceAndAssemblyName ) );
-				writer.WriteLine( "internal partial class RequestDispatching: AppRequestDispatchingProvider {" );
-				writer.WriteLine(
-					"protected override UrlPattern GetStaticFilesFolderUrlPattern( string urlSegment ) => StaticFiles.FolderSetup.UrlPatterns.Literal( urlSegment );" );
-				writer.WriteLine( "}" );
-				writer.WriteLine( "}" );
-				writer.WriteLine();
-				CodeGeneration.WebFramework.WebFrameworkStatics.Generate(
-					writer,
-					application.Path,
-					project.NamespaceAndAssemblyName,
-					false,
-					generatedCodeFolderName.ToCollection(),
-					StaticFile.AppStaticFilesFolderName,
-					"RequestDispatchingStatics.AppProvider.GetFrameworkUrlParent()" );
-			}
+			generateCodeForProject(
+				application.Path,
+				writer => {
+					writer.WriteLine( "using System;" );
+					writer.WriteLine( "using System.Collections.Generic;" );
+					writer.WriteLine( "using System.Collections.ObjectModel;" );
+					writer.WriteLine( "using System.Globalization;" );
+					writer.WriteLine( "using System.Linq;" );
+					writer.WriteLine( "using System.Reflection;" );
+					writer.WriteLine( "using System.Runtime.InteropServices;" );
+					writer.WriteLine( "using System.Threading;" );
+					writer.WriteLine( "using EnterpriseWebLibrary;" );
+					writer.WriteLine( "using EnterpriseWebLibrary.DataAccess;" );
+					writer.WriteLine( "using EnterpriseWebLibrary.EnterpriseWebFramework;" );
+					writer.WriteLine( "using NodaTime;" );
+					writer.WriteLine( "using Tewl.InputValidation;" );
+					writer.WriteLine( "using Tewl.Tools;" );
+					writer.WriteLine();
+					writeAssemblyInfo( writer, installation, project.name );
+					writer.WriteLine();
+					writer.WriteLine( "namespace {0}.Providers {{".FormatWith( project.NamespaceAndAssemblyName ) );
+					writer.WriteLine( "internal partial class RequestDispatching: AppRequestDispatchingProvider {" );
+					writer.WriteLine(
+						"protected override UrlPattern GetStaticFilesFolderUrlPattern( string urlSegment ) => StaticFiles.FolderSetup.UrlPatterns.Literal( urlSegment );" );
+					writer.WriteLine( "}" );
+					writer.WriteLine( "}" );
+					writer.WriteLine();
+					CodeGeneration.WebFramework.WebFrameworkStatics.Generate(
+						writer,
+						application.Path,
+						project.NamespaceAndAssemblyName,
+						false,
+						generatedCodeFolderName.ToCollection(),
+						StaticFile.AppStaticFilesFolderName,
+						"RequestDispatchingStatics.AppProvider.GetFrameworkUrlParent()" );
+				} );
 		}
 
 		private void generateWindowsServiceCode( DevelopmentInstallation installation, WindowsService service ) {
-			var serviceProjectGeneratedCodeFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, service.Name, generatedCodeFolderName );
-			Directory.CreateDirectory( serviceProjectGeneratedCodeFolderPath );
-			var isuFilePath = EwlStatics.CombinePaths( serviceProjectGeneratedCodeFolderPath, "ISU.cs" );
-			IoMethods.DeleteFile( isuFilePath );
-			using( TextWriter writer = new StreamWriter( isuFilePath ) ) {
-				writer.WriteLine( "using System;" );
-				writer.WriteLine( "using System.ComponentModel;" );
-				writer.WriteLine( "using System.Reflection;" );
-				writer.WriteLine( "using System.Runtime.InteropServices;" );
-				writer.WriteLine( "using System.ServiceProcess;" );
-				writer.WriteLine( "using System.Threading;" );
-				writer.WriteLine( "using EnterpriseWebLibrary;" );
-				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess;" );
-				writer.WriteLine( "using EnterpriseWebLibrary.WindowsServiceFramework;" );
-				writer.WriteLine();
-				writeAssemblyInfo( writer, installation, service.Name );
-				writer.WriteLine();
-				writer.WriteLine( "namespace " + service.NamespaceAndAssemblyName + " {" );
+			generateCodeForProject(
+				EwlStatics.CombinePaths( installation.GeneralLogic.Path, service.Name ),
+				writer => {
+					writer.WriteLine( "using System;" );
+					writer.WriteLine( "using System.ComponentModel;" );
+					writer.WriteLine( "using System.Reflection;" );
+					writer.WriteLine( "using System.Runtime.InteropServices;" );
+					writer.WriteLine( "using System.ServiceProcess;" );
+					writer.WriteLine( "using System.Threading;" );
+					writer.WriteLine( "using EnterpriseWebLibrary;" );
+					writer.WriteLine( "using EnterpriseWebLibrary.DataAccess;" );
+					writer.WriteLine( "using EnterpriseWebLibrary.WindowsServiceFramework;" );
+					writer.WriteLine();
+					writeAssemblyInfo( writer, installation, service.Name );
+					writer.WriteLine();
+					writer.WriteLine( "namespace " + service.NamespaceAndAssemblyName + " {" );
 
-				writer.WriteLine( "internal static partial class Program {" );
+					writer.WriteLine( "internal static partial class Program {" );
 
-				writer.WriteLine( "[ MTAThread ]" );
-				writer.WriteLine( "private static void Main() {" );
-				writer.WriteLine( "SystemInitializer globalInitializer = null;" );
-				writer.WriteLine( "initGlobalInitializer( ref globalInitializer );" );
-				writer.WriteLine( "var dataAccessState = new ThreadLocal<DataAccessState>( () => new DataAccessState() );" );
-				writer.WriteLine(
-					"GlobalInitializationOps.InitStatics( globalInitializer, \"{0}\", false, mainDataAccessStateGetter: () => dataAccessState.Value, useLongDatabaseTimeouts: true );"
-						.FormatWith( service.Name ) );
-				writer.WriteLine( "try {" );
-				writer.WriteLine(
-					"TelemetryStatics.ExecuteBlockWithStandardExceptionHandling( () => ServiceBase.Run( new ServiceBaseAdapter( new " + service.Name.EnglishToPascal() +
-					"() ) ) );" );
-				writer.WriteLine( "}" );
-				writer.WriteLine( "finally {" );
-				writer.WriteLine( "GlobalInitializationOps.CleanUpStatics();" );
-				writer.WriteLine( "}" );
-				writer.WriteLine( "}" );
+					writer.WriteLine( "[ MTAThread ]" );
+					writer.WriteLine( "private static void Main() {" );
+					writer.WriteLine( "SystemInitializer globalInitializer = null;" );
+					writer.WriteLine( "initGlobalInitializer( ref globalInitializer );" );
+					writer.WriteLine( "var dataAccessState = new ThreadLocal<DataAccessState>( () => new DataAccessState() );" );
+					writer.WriteLine(
+						"GlobalInitializationOps.InitStatics( globalInitializer, \"{0}\", false, mainDataAccessStateGetter: () => dataAccessState.Value, useLongDatabaseTimeouts: true );"
+							.FormatWith( service.Name ) );
+					writer.WriteLine( "try {" );
+					writer.WriteLine(
+						"TelemetryStatics.ExecuteBlockWithStandardExceptionHandling( () => ServiceBase.Run( new ServiceBaseAdapter( new " + service.Name.EnglishToPascal() +
+						"() ) ) );" );
+					writer.WriteLine( "}" );
+					writer.WriteLine( "finally {" );
+					writer.WriteLine( "GlobalInitializationOps.CleanUpStatics();" );
+					writer.WriteLine( "}" );
+					writer.WriteLine( "}" );
 
-				writer.WriteLine( "static partial void initGlobalInitializer( ref SystemInitializer globalInitializer );" );
+					writer.WriteLine( "static partial void initGlobalInitializer( ref SystemInitializer globalInitializer );" );
 
-				writer.WriteLine( "}" );
+					writer.WriteLine( "}" );
 
-				writer.WriteLine( "internal partial class " + service.Name.EnglishToPascal() + ": WindowsServiceBase {" );
-				writer.WriteLine( "internal " + service.Name.EnglishToPascal() + "() {}" );
-				writer.WriteLine( "string WindowsServiceBase.Name { get { return \"" + service.Name + "\"; } }" );
-				writer.WriteLine( "}" );
+					writer.WriteLine( "internal partial class " + service.Name.EnglishToPascal() + ": WindowsServiceBase {" );
+					writer.WriteLine( "internal " + service.Name.EnglishToPascal() + "() {}" );
+					writer.WriteLine( "string WindowsServiceBase.Name { get { return \"" + service.Name + "\"; } }" );
+					writer.WriteLine( "}" );
 
-				writer.WriteLine( "}" );
-			}
+					writer.WriteLine( "}" );
+				} );
 		}
 
 		private void generateServerSideConsoleProjectCode( DevelopmentInstallation installation, ServerSideConsoleProject project ) {
-			var projectGeneratedCodeFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, project.Name, generatedCodeFolderName );
-			Directory.CreateDirectory( projectGeneratedCodeFolderPath );
-			var isuFilePath = EwlStatics.CombinePaths( projectGeneratedCodeFolderPath, "ISU.cs" );
-			IoMethods.DeleteFile( isuFilePath );
-			using( TextWriter writer = new StreamWriter( isuFilePath ) ) {
-				writer.WriteLine( "using System;" );
-				writer.WriteLine( "using System.Collections.Generic;" );
-				writer.WriteLine( "using System.Collections.Immutable;" );
-				writer.WriteLine( "using System.IO;" );
-				writer.WriteLine( "using System.Reflection;" );
-				writer.WriteLine( "using System.Runtime.InteropServices;" );
-				writer.WriteLine( "using System.Threading;" );
-				writer.WriteLine( "using EnterpriseWebLibrary;" );
-				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess;" );
-				writer.WriteLine();
-				writeAssemblyInfo( writer, installation, project.Name );
-				writer.WriteLine();
-				writer.WriteLine( "namespace " + project.NamespaceAndAssemblyName + " {" );
-				writer.WriteLine( "internal static partial class Program {" );
+			generateCodeForProject(
+				EwlStatics.CombinePaths( installation.GeneralLogic.Path, project.Name ),
+				writer => {
+					writer.WriteLine( "using System;" );
+					writer.WriteLine( "using System.Collections.Generic;" );
+					writer.WriteLine( "using System.Collections.Immutable;" );
+					writer.WriteLine( "using System.IO;" );
+					writer.WriteLine( "using System.Reflection;" );
+					writer.WriteLine( "using System.Runtime.InteropServices;" );
+					writer.WriteLine( "using System.Threading;" );
+					writer.WriteLine( "using EnterpriseWebLibrary;" );
+					writer.WriteLine( "using EnterpriseWebLibrary.DataAccess;" );
+					writer.WriteLine();
+					writeAssemblyInfo( writer, installation, project.Name );
+					writer.WriteLine();
+					writer.WriteLine( "namespace " + project.NamespaceAndAssemblyName + " {" );
+					writer.WriteLine( "internal static partial class Program {" );
 
-				writer.WriteLine( "[ MTAThread ]" );
-				writer.WriteLine( "private static int Main( string[] args ) {" );
-				writer.WriteLine( "SystemInitializer globalInitializer = null;" );
-				writer.WriteLine( "initGlobalInitializer( ref globalInitializer );" );
-				writer.WriteLine( "var dataAccessState = new ThreadLocal<DataAccessState>( () => new DataAccessState() );" );
-				writer.WriteLine(
-					"GlobalInitializationOps.InitStatics( globalInitializer, \"" + project.Name +
-					"\", false, mainDataAccessStateGetter: () => dataAccessState.Value );" );
-				writer.WriteLine( "try {" );
-				writer.WriteLine( "return GlobalInitializationOps.ExecuteAppWithStandardExceptionHandling( () => {" );
+					writer.WriteLine( "[ MTAThread ]" );
+					writer.WriteLine( "private static int Main( string[] args ) {" );
+					writer.WriteLine( "SystemInitializer globalInitializer = null;" );
+					writer.WriteLine( "initGlobalInitializer( ref globalInitializer );" );
+					writer.WriteLine( "var dataAccessState = new ThreadLocal<DataAccessState>( () => new DataAccessState() );" );
+					writer.WriteLine(
+						"GlobalInitializationOps.InitStatics( globalInitializer, \"" + project.Name +
+						"\", false, mainDataAccessStateGetter: () => dataAccessState.Value );" );
+					writer.WriteLine( "try {" );
+					writer.WriteLine( "return GlobalInitializationOps.ExecuteAppWithStandardExceptionHandling( () => {" );
 
-				// See https://stackoverflow.com/a/44135529/35349.
-				writer.WriteLine( "Console.SetIn( new StreamReader( Console.OpenStandardInput(), Console.InputEncoding, false, 4096 ) );" );
+					// See https://stackoverflow.com/a/44135529/35349.
+					writer.WriteLine( "Console.SetIn( new StreamReader( Console.OpenStandardInput(), Console.InputEncoding, false, 4096 ) );" );
 
-				writer.WriteLine( "ewlMain( Newtonsoft.Json.JsonConvert.DeserializeObject<ImmutableArray<string>>( Console.ReadLine() ) );" );
-				writer.WriteLine( "} );" );
-				writer.WriteLine( "}" );
-				writer.WriteLine( "finally {" );
-				writer.WriteLine( "GlobalInitializationOps.CleanUpStatics();" );
-				writer.WriteLine( "}" );
-				writer.WriteLine( "}" );
+					writer.WriteLine( "ewlMain( Newtonsoft.Json.JsonConvert.DeserializeObject<ImmutableArray<string>>( Console.ReadLine() ) );" );
+					writer.WriteLine( "} );" );
+					writer.WriteLine( "}" );
+					writer.WriteLine( "finally {" );
+					writer.WriteLine( "GlobalInitializationOps.CleanUpStatics();" );
+					writer.WriteLine( "}" );
+					writer.WriteLine( "}" );
 
-				writer.WriteLine( "static partial void initGlobalInitializer( ref SystemInitializer globalInitializer );" );
-				writer.WriteLine( "static partial void ewlMain( IReadOnlyList<string> arguments );" );
+					writer.WriteLine( "static partial void initGlobalInitializer( ref SystemInitializer globalInitializer );" );
+					writer.WriteLine( "static partial void ewlMain( IReadOnlyList<string> arguments );" );
 
-				writer.WriteLine( "}" );
-				writer.WriteLine( "}" );
-			}
+					writer.WriteLine( "}" );
+					writer.WriteLine( "}" );
+				} );
 		}
 
 		private void generateCodeForProject( string projectPath, Action<TextWriter> codeWriter ) {
