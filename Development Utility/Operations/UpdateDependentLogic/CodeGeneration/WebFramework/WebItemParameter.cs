@@ -1,12 +1,9 @@
-﻿using System;
-using System.CodeDom;
-using System.CodeDom.Compiler;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.CodeDom;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using Humanizer;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CSharp;
 using Tewl.Tools;
 
@@ -27,16 +24,17 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 
 		public WebItemParameter( string typeName, string name, string comment ) {
 			if( !rawTypeNamesToTypes.TryGetValue( typeName, out type ) ) {
-				// We need to compile some fake code because it's the only way to evaluate C# type alias such as "string" and "int?".
-				// This code block has a known memory leak because it is impossible to unload the assembly we create. Also, most people would think the performance
-				// here is inexcusably awful.
-				var compilerResults = provider.CompileAssemblyFromSource(
-					new CompilerParameters { GenerateInMemory = true, GenerateExecutable = false, IncludeDebugInformation = false },
-					"using System; using System.Collections.Generic; public class A { public " + typeName + " B; }" );
-
-				if( compilerResults.Errors.HasErrors || compilerResults.Errors.HasWarnings )
-					throw new UserCorrectableException( "The type name \"" + typeName + "\" is invalid." );
-				type = ( (FieldInfo)compilerResults.CompiledAssembly.GetType( "A" ).GetMember( "B" ).Single() ).FieldType;
+				// We need to compile some fake code because it’s the only way to evaluate C# type alias such as “string” and “int?”.
+				using( var stream = new MemoryStream() ) {
+					var result = CSharpCompilation.Create(
+							null,
+							syntaxTrees: CSharpSyntaxTree.ParseText( "using System; using System.Collections.Generic; public class A { public " + typeName + " B; }" )
+								.ToCollection() )
+						.Emit( stream );
+					if( !result.Success )
+						throw new UserCorrectableException( "The type name \"" + typeName + "\" is invalid." );
+					type = ( (FieldInfo)Assembly.Load( stream.ToArray() ).GetType( "A" ).GetMember( "B" ).Single() ).FieldType;
+				}
 				rawTypeNamesToTypes.Add( typeName, type );
 			}
 
