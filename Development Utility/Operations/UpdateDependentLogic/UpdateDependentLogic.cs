@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.IO;
-using System.Linq;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Configuration.SystemDevelopment;
 using EnterpriseWebLibrary.Configuration.SystemGeneral;
@@ -67,8 +63,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			// Generate code.
 			if( installation.DevelopmentInstallationLogic.SystemIsEwl ) {
 				generateCodeForProject(
-					installation,
-					EwlStatics.CoreProjectName,
+					EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.CoreProjectName ),
 					writer => {
 						writer.WriteLine( "using System;" );
 						writer.WriteLine( "using System.Collections.Generic;" );
@@ -101,16 +96,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 							"" );
 					} );
 				generateCodeForProject(
-					installation,
-					"Development Utility",
+					EwlStatics.CombinePaths( installation.GeneralLogic.Path, "Development Utility" ),
 					writer => {
 						writer.WriteLine( "using System.Reflection;" );
 						writer.WriteLine( "using System.Runtime.InteropServices;" );
 						writeAssemblyInfo( writer, installation, "Development Utility" );
 					} );
 				generateCodeForProject(
-					installation,
-					EwlStatics.SamlProviderProjectPath,
+					EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.SamlProviderProjectPath ),
 					writer => {
 						writer.WriteLine( "using System.Reflection;" );
 						writer.WriteLine( "using System.Runtime.InteropServices;" );
@@ -126,8 +119,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				generateServerSideConsoleProjectCode( installation, project );
 			if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject != null )
 				generateCodeForProject(
-					installation,
-					installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name,
+					EwlStatics.CombinePaths(
+						installation.GeneralLogic.Path,
+						installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name ),
 					writer => {
 						writer.WriteLine( "using System.Reflection;" );
 						writer.WriteLine( "using System.Runtime.InteropServices;" );
@@ -301,7 +295,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "namespace " + baseNamespace + " {" );
 				writer.WriteLine( "public class SecondaryDatabaseNames {" );
 				foreach( var secondaryDatabase in
-					installation.DevelopmentInstallationLogic.DatabasesForCodeGeneration.Where( d => d.SecondaryDatabaseName.Length > 0 ) )
+				        installation.DevelopmentInstallationLogic.DatabasesForCodeGeneration.Where( d => d.SecondaryDatabaseName.Length > 0 ) )
 					writer.WriteLine( "public const string " + secondaryDatabase.SecondaryDatabaseName + " = \"" + secondaryDatabase.SecondaryDatabaseName + "\";" );
 				writer.WriteLine( "}" );
 				writer.WriteLine( "}" );
@@ -543,8 +537,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			}
 		}
 
-		private void generateCodeForProject( DevelopmentInstallation installation, string projectPath, Action<TextWriter> codeWriter ) {
-			var generatedCodeFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, projectPath, generatedCodeFolderName );
+		private void generateCodeForProject( string projectPath, Action<TextWriter> codeWriter ) {
+			var generatedCodeFolderPath = EwlStatics.CombinePaths( projectPath, generatedCodeFolderName );
 			Directory.CreateDirectory( generatedCodeFolderPath );
 			var isuFilePath = EwlStatics.CombinePaths( generatedCodeFolderPath, "ISU.cs" );
 			IoMethods.DeleteFile( isuFilePath );
