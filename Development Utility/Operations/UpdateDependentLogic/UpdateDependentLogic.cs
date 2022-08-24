@@ -379,9 +379,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		private void generateWebConfigAndCodeForWebProject( DevelopmentInstallation installation, WebProject project ) {
 			var application = installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications.Single( i => i.Name == project.name );
 
-			// This must be done before web meta logic generation, which can be affected by the contents of Web.config files.
-			WebConfigStatics.GenerateWebConfig( application, project );
-
 			Directory.CreateDirectory( EwlStatics.CombinePaths( application.Path, StaticFile.AppStaticFilesFolderName ) );
 
 			generateCodeForProject(
@@ -418,6 +415,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						StaticFile.AppStaticFilesFolderName,
 						"RequestDispatchingStatics.AppProvider.GetFrameworkUrlParent()" );
 				} );
+
+			WebConfigStatics.GenerateWebConfig( application );
 		}
 
 		private void generateWindowsServiceCode( DevelopmentInstallation installation, WindowsService service ) {
