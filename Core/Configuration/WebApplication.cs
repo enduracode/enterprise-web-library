@@ -1,6 +1,4 @@
-﻿using System.IO;
-using System.Linq;
-using EnterpriseWebLibrary.Configuration.InstallationStandard;
+﻿using EnterpriseWebLibrary.Configuration.InstallationStandard;
 using EnterpriseWebLibrary.Configuration.SystemDevelopment;
 using Tewl.Tools;
 
@@ -12,7 +10,7 @@ namespace EnterpriseWebLibrary.Configuration {
 		/// <summary>
 		/// Development Utility use only.
 		/// </summary>
-		public const string WebConfigFileName = "Web.config";
+		public const string WebConfigFileName = "web.config";
 
 		/// <summary>
 		/// Development Utility and internal use only.
