@@ -8,11 +8,6 @@ namespace EnterpriseWebLibrary.Configuration {
 	/// </summary>
 	public class WebApplication {
 		/// <summary>
-		/// Development Utility use only.
-		/// </summary>
-		public const string WebConfigFileName = "web.config";
-
-		/// <summary>
 		/// Development Utility and internal use only.
 		/// </summary>
 		public readonly string Name;
@@ -91,6 +86,6 @@ namespace EnterpriseWebLibrary.Configuration {
 		/// <summary>
 		/// Internal and Development Utility use only.
 		/// </summary>
-		public string WebConfigFilePath => EwlStatics.CombinePaths( Path, WebConfigFileName );
+		public string WebConfigFilePath => EwlStatics.CombinePaths( Path, "web.config" );
 	}
 }

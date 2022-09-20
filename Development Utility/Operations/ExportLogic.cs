@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Configuration.InstallationStandard;
@@ -299,10 +295,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			// Set up the list of installation objects in the build message.
 			build.Installations = new InstallationSupportUtility.SystemManagerInterface.Messages.BuildMessage.Build.InstallationsType();
 			foreach( var installationConfigurationFolderPath in Directory.GetDirectories(
-				EwlStatics.CombinePaths(
-					installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath,
-					InstallationConfiguration.InstallationConfigurationFolderName,
-					InstallationConfiguration.InstallationsFolderName ) ) )
+				        EwlStatics.CombinePaths(
+					        installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath,
+					        InstallationConfiguration.InstallationConfigurationFolderName,
+					        InstallationConfiguration.InstallationsFolderName ) ) )
 				if( !new[] { InstallationConfiguration.DevelopmentInstallationFolderName, AppStatics.MercurialRepositoryFolderName }.Contains(
 					    Path.GetFileName( installationConfigurationFolderPath ) ) ) {
 					var buildMessageInstallation = new InstallationSupportUtility.SystemManagerInterface.Messages.BuildMessage.Installation();
@@ -395,9 +391,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				IoMethods.DeleteFile( EwlStatics.CombinePaths( webAppPath, webProject.name + ".csproj" ) );
 				IoMethods.DeleteFile( EwlStatics.CombinePaths( webAppPath, webProject.name + ".csproj.user" ) );
 				IoMethods.DeleteFile( EwlStatics.CombinePaths( webAppPath, webProject.name + ".csproj.vspscc" ) );
-
-				var webConfigPath = EwlStatics.CombinePaths( webAppPath, WebApplication.WebConfigFileName );
-				File.WriteAllText( webConfigPath, File.ReadAllText( webConfigPath ).Replace( "debug=\"true\"", "debug=\"false\"" ) );
 			}
 
 			if( installation.DevelopmentInstallationLogic.SystemIsEwl ) {
