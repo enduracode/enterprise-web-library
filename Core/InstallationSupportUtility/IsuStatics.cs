@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using EnterpriseWebLibrary.Configuration;
+﻿using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Configuration.InstallationStandard;
 using Humanizer;
 using Microsoft.Web.Administration;
@@ -10,57 +9,37 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 		/// <summary>
 		/// ISU and internal use only.
 		/// </summary>
-		public static void ConfigureIis( bool iisExpress, bool useServerAppPoolSettings ) {
-			if( iisExpress && !File.Exists(
-				    EwlStatics.CombinePaths( Environment.GetFolderPath( Environment.SpecialFolder.MyDocuments ), @"IISExpress\config\applicationhost.config" ) ) ) {
-				using var p = new Process();
-				p.StartInfo.FileName = @"C:\Program Files (x86)\IIS Express\iisexpress";
-				p.Start();
-				Thread.Sleep( 2000 );
-				if( !p.CloseMainWindow() )
-					// We need this when the process runs non-interactively, such as from a scheduled task on a build server.
-					p.Kill();
-				p.WaitForExit();
-			}
+		public static void ConfigureIis( bool useServerAppPoolSettings ) {
+			executeInIisServerManagerTransaction(
+				() => IisConfigurationStatics.ExecuteInServerManagerTransaction(
+					serverManager => {
+						var poolDefaults = serverManager.ApplicationPoolDefaults;
+						poolDefaults.StartMode = useServerAppPoolSettings ? StartMode.AlwaysRunning : StartMode.OnDemand;
 
-			configureIis( iisExpress, useServerAppPoolSettings );
-		}
+						// We use this because it's a consistent account name across all machines, which allows our SQL Server databases [which must grant access to the
+						// app pool] to be portable.
+						poolDefaults.ProcessModel.IdentityType = ProcessModelIdentityType.NetworkService;
 
-		private static void configureIis( bool iisExpress, bool useServerAppPoolSettings ) {
-			if( iisExpress ) {
-				// If we need to change applicationhost.config, do it at the XML level since Microsoft.Web.Administration does not work properly for IIS Express.
-			}
-			else
-				executeInIisServerManagerTransaction(
-					() => IisConfigurationStatics.ExecuteInServerManagerTransaction(
-						serverManager => {
-							var poolDefaults = serverManager.ApplicationPoolDefaults;
-							poolDefaults.StartMode = useServerAppPoolSettings ? StartMode.AlwaysRunning : StartMode.OnDemand;
+						// Disable idle time-out.
+						poolDefaults.ProcessModel.IdleTimeout = useServerAppPoolSettings ? TimeSpan.Zero : new TimeSpan( 0, 5, 0 );
 
-							// We use this because it's a consistent account name across all machines, which allows our SQL Server databases [which must grant access to the
-							// app pool] to be portable.
-							poolDefaults.ProcessModel.IdentityType = ProcessModelIdentityType.NetworkService;
+						// Disable regular time interval recycling.
+						poolDefaults.Recycling.PeriodicRestart.Time = TimeSpan.Zero;
 
-							// Disable idle time-out.
-							poolDefaults.ProcessModel.IdleTimeout = useServerAppPoolSettings ? TimeSpan.Zero : new TimeSpan( 0, 5, 0 );
-
-							// Disable regular time interval recycling.
-							poolDefaults.Recycling.PeriodicRestart.Time = TimeSpan.Zero;
-
-							poolDefaults.Recycling.PeriodicRestart.Schedule.Clear();
-							if( useServerAppPoolSettings )
-								poolDefaults.Recycling.PeriodicRestart.Schedule.Add( new TimeSpan( 23, 55, 0 ) );
+						poolDefaults.Recycling.PeriodicRestart.Schedule.Clear();
+						if( useServerAppPoolSettings )
+							poolDefaults.Recycling.PeriodicRestart.Schedule.Add( new TimeSpan( 23, 55, 0 ) );
 
 
-							var config = serverManager.GetApplicationHostConfiguration();
+						var config = serverManager.GetApplicationHostConfiguration();
 
-							var modulesSection = config.GetSection( "system.webServer/modules", "" );
-							foreach( var element in modulesSection.GetCollection() )
-								element.SetMetadata( "lockItem", null );
+						var modulesSection = config.GetSection( "system.webServer/modules", "" );
+						foreach( var element in modulesSection.GetCollection() )
+							element.SetMetadata( "lockItem", null );
 
-							var serverRuntimeSection = config.GetSection( "system.webServer/serverRuntime", "" );
-							serverRuntimeSection.OverrideMode = OverrideMode.Allow;
-						} ) );
+						var serverRuntimeSection = config.GetSection( "system.webServer/serverRuntime", "" );
+						serverRuntimeSection.OverrideMode = OverrideMode.Allow;
+					} ) );
 		}
 
 		/// <summary>

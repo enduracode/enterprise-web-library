@@ -29,14 +29,14 @@ namespace EnterpriseWebLibrary.Configuration {
 			Path = EwlStatics.CombinePaths( installationPath, name );
 			SupportsSecureConnections = supportsSecureConnections;
 
-			var iisExpress = File.ReadAllText( EwlStatics.CombinePaths( Path, name + ".csproj" ) ).Contains( "<UseIISExpress>true</UseIISExpress>" );
+			var kestrel = File.ReadAllText( EwlStatics.CombinePaths( Path, name + ".csproj.user" ) ).Contains( "<ActiveDebugProfile>Kestrel</ActiveDebugProfile>" );
 
 			// We must pass values for all components since we will not have defaults to fall back on when getting the URL string for this object.
 			DefaultBaseUrl = new BaseUrl(
 				"localhost",
-				iisExpress ? 44311 : 80,
-				iisExpress ? 44310 : 443,
-				systemShortName + ( systemHasMultipleWebApplications ? name.EnglishToPascal() : "" ) );
+				kestrel ? 44311 : 80,
+				kestrel ? 44310 : 443,
+				kestrel ? "" : systemShortName + ( systemHasMultipleWebApplications ? name.EnglishToPascal() : "" ) );
 
 			var cookieAttributes = configuration.DefaultCookieAttributes;
 			DefaultCookieAttributes = cookieAttributes != null

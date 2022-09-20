@@ -17,6 +17,7 @@ using Humanizer;
 using Tewl;
 using Tewl.IO;
 using Tewl.Tools;
+using static MoreLinq.Extensions.AtLeastExtension;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 	internal class UpdateDependentLogic: Operation {
@@ -31,16 +32,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		}
 
 		void Operation.Execute( Installation genericInstallation, IReadOnlyList<string> arguments, OperationResult operationResult ) {
-			IsuStatics.ConfigureIis( true, false );
-			Console.WriteLine( "Configured IIS Express." );
-
 			// This block exists because of https://enduracode.kilnhg.com/Review/K164316.
 			try {
-				IsuStatics.ConfigureIis( false, false );
-				Console.WriteLine( "Configured full IIS." );
+				IsuStatics.ConfigureIis( false );
+				Console.WriteLine( "Configured IIS." );
 			}
 			catch {
-				Console.WriteLine( "Did not configure full IIS." );
+				Console.WriteLine( "Did not configure IIS." );
 			}
 
 			var installation = genericInstallation as DevelopmentInstallation;
@@ -415,10 +413,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						"RequestDispatchingStatics.AppProvider.GetFrameworkUrlParent()" );
 				} );
 
+			var configurationFilesFolderPath = EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "Web Project Configuration" );
 			try {
 				File.WriteAllText(
 					application.WebConfigFilePath,
-					File.ReadAllText( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "web.config" ) ),
+					File.ReadAllText( EwlStatics.CombinePaths( configurationFilesFolderPath, "web.config" ) ),
 					Encoding.UTF8 );
 			}
 			catch( Exception e ) {
@@ -427,6 +426,15 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					throw new UserCorrectableException( message, e );
 				throw new ApplicationException( message, e );
 			}
+
+			File.WriteAllText(
+				EwlStatics.CombinePaths( application.Path, @"Properties\launchSettings.json" ),
+				File.ReadAllText( EwlStatics.CombinePaths( configurationFilesFolderPath, "launchSettings.json" ) )
+					.Replace(
+						"@@Path",
+						installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName +
+						( installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications.AtLeast( 2 ) ? application.Name.EnglishToPascal() : "" ) ),
+				Encoding.UTF8 );
 		}
 
 		private void generateWindowsServiceCode( DevelopmentInstallation installation, WindowsService service ) {

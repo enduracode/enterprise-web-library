@@ -1,0 +1,22 @@
+{
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iis": {
+      "applicationUrl": "http://localhost/@@Path",
+      "sslPort": 443
+    }
+  },
+  "profiles": {
+    "Kestrel": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "applicationUrl": "https://localhost:44310;http://localhost:44311",
+      "dotnetRunMessages": true
+    },
+    "IIS": {
+      "commandName": "IIS",
+      "launchBrowser": true
+    }
+  }
+}
