@@ -8,7 +8,6 @@ using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration;
 using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems;
 using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems.StandardModification;
-using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebConfig;
 using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.InstallationSupportUtility;
@@ -106,8 +105,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					_ => {} );
 			}
 			generateLibraryCode( installation );
-			foreach( var webProject in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects ?? new WebProject[ 0 ] )
-				generateWebConfigAndCodeForWebProject( installation, webProject );
+			foreach( var webProject in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects ?? Enumerable.Empty<WebProject>() )
+				generateWebProjectCode( installation, webProject );
 			foreach( var service in installation.ExistingInstallationLogic.RuntimeConfiguration.WindowsServices )
 				generateWindowsServiceCode( installation, service );
 			foreach( var project in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.ServerSideConsoleProjectsNonNullable )
@@ -376,7 +375,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					" not exist." );
 		}
 
-		private void generateWebConfigAndCodeForWebProject( DevelopmentInstallation installation, WebProject project ) {
+		private void generateWebProjectCode( DevelopmentInstallation installation, WebProject project ) {
 			var application = installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications.Single( i => i.Name == project.name );
 
 			Directory.CreateDirectory( EwlStatics.CombinePaths( application.Path, StaticFile.AppStaticFilesFolderName ) );
@@ -416,7 +415,18 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						"RequestDispatchingStatics.AppProvider.GetFrameworkUrlParent()" );
 				} );
 
-			WebConfigStatics.GenerateWebConfig( application );
+			try {
+				File.WriteAllText(
+					application.WebConfigFilePath,
+					File.ReadAllText( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "web.config" ) ),
+					Encoding.UTF8 );
+			}
+			catch( Exception e ) {
+				const string message = "Failed to write web configuration file.";
+				if( e is UnauthorizedAccessException )
+					throw new UserCorrectableException( message, e );
+				throw new ApplicationException( message, e );
+			}
 		}
 
 		private void generateWindowsServiceCode( DevelopmentInstallation installation, WindowsService service ) {
