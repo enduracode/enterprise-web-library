@@ -82,6 +82,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										ContentRootPath = EwfConfigurationStatics.AppConfiguration.Path
 									} );
 							builder.Services.AddHttpContextAccessor();
+							builder.Services.AddDataProtection();
 							var app = builder.Build();
 
 							var miniProfilerOptions = new MiniProfilerOptions();
