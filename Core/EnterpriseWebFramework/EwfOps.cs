@@ -41,9 +41,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						writer.WriteLine();
 						writer.WriteLine( "URL: " + AppRequestState.Instance.Url );
 
-						writer.WriteLine();
-						foreach( var i in EwfRequest.Current.AspNetRequest.Form )
-							writer.WriteLine( "Form field " + i.Key + ": " + i.Value.Single() );
+						if( EwfRequest.Current.AspNetRequest.HasFormContentType ) {
+							writer.WriteLine();
+							foreach( var i in EwfRequest.Current.AspNetRequest.Form )
+								writer.WriteLine( "Form field " + i.Key + ": " + i.Value.Single() );
+						}
 
 						writer.WriteLine();
 						foreach( var cookie in EwfRequest.Current.AspNetRequest.Cookies )
