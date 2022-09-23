@@ -33,7 +33,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var initTimeDataAccessState = new ThreadLocal<DataAccessState>( () => new DataAccessState() );
 			GlobalInitializationOps.InitStatics(
 				globalInitializer,
-				Path.GetFileName( Path.GetDirectoryName( Directory.GetCurrentDirectory() ) ),
+				Path.GetFileName( Directory.GetCurrentDirectory() ),
 				false,
 				telemetryAppErrorContextWriter: writer => {
 					// This check ensures that there is an actual request, which is not the case during application initialization.
