@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-using System.Reflection;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Xml;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
@@ -91,12 +89,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							miniProfilerOptions.IgnoredPaths.Clear();
 							MiniProfiler.Configure( miniProfilerOptions );
 
-							var programType = new StackTrace().GetFrames()
-								.Select( frame => frame.GetMethod().DeclaringType )
-								.First( type => type.Assembly != Assembly.GetExecutingAssembly() );
 							var providerGetter = new SystemProviderGetter(
-								programType.Assembly,
-								programType.Namespace + ".Providers",
+								ConfigurationStatics.AppAssembly,
+								ConfigurationStatics.AppAssembly.GetTypes()
+									.Single( i => typeof( AppRequestDispatchingProvider ).IsAssignableFrom( i ) && !i.IsInterface )
+									.Namespace,
 								providerName =>
 									@"{0} provider not found in application. To implement, create a class named {0} in ""Your Website\Providers"" that derives from App{0}Provider."
 										.FormatWith( providerName ) );
@@ -140,7 +137,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										cookies.Delete( name, options );
 								} );
 							Translation.Init( () => "en-US" );
-							CssPreprocessingStatics.Init( globalInitializer.GetType().Assembly, programType.Assembly );
+							CssPreprocessingStatics.Init( globalInitializer.GetType().Assembly, ConfigurationStatics.AppAssembly );
 							ResourceBase.Init(
 								( requestTransferred, resource ) => {
 									if( requestTransferred ) {
