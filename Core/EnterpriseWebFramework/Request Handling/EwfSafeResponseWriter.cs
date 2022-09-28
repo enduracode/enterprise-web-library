@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
+using Humanizer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Net.Http.Headers;
 using Tewl.Tools;
@@ -73,11 +74,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 				// Strong ETags must vary by content coding. Since we don't know yet how this response will be encoded (gzip or otherwise), the best thing we can do is
 				// use the Accept-Encoding header value in the ETag.
-				// On 4 Feb 2015 we saw the comma/space cause Chrome to incorrectly split the ETag apart.
 				eTag += StringTools.ConcatenateWithDelimiter( "", aspNetRequest.Headers.AcceptEncoding );
 
 				var typedHeaders = aspNetResponse.GetTypedHeaders();
-				typedHeaders.ETag = new EntityTagHeaderValue( eTag );
+				typedHeaders.ETag = new EntityTagHeaderValue( "\"{0}\"".FormatWith( eTag ) );
 
 				// Sending a Last-Modified header isn't a good enough reason to force evaluation of lastModificationDateAndTimeGetter, which could be expensive.
 				if( lastModificationDateAndTimeGetter != null && lastModificationDateAndTime.IsValueCreated )
