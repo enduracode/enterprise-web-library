@@ -9,6 +9,7 @@ using EnterpriseWebLibrary.UserManagement;
 using Humanizer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -81,6 +82,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										EnvironmentName = ConfigurationStatics.IsDevelopmentInstallation ? Environments.Development : Environments.Production,
 										ContentRootPath = EwfConfigurationStatics.AppConfiguration.Path
 									} );
+							builder.WebHost.ConfigureKestrel( options => { options.AllowSynchronousIO = true; } );
 							builder.Services.AddHttpContextAccessor();
 							builder.Services.AddDataProtection();
 							var app = builder.Build();
