@@ -118,8 +118,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				// one handler in the list, we want parameters to be taken from the lowest-level segment. That’s why we reverse the handlers here.
 				RequestState.SetUrlHandlers( handlers.Reverse().Materialize() );
 
-				//if( handlers.Last() is PageBase || handlers.Last() is EntitySetupBase || handlers.Last() is PreBuiltResponse )
-				//	HttpContext.Current.SetSessionStateBehavior( SessionStateBehavior.Required );
 				return handlers.Last().HandleRequest;
 			}
 

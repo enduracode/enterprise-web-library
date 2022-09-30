@@ -1,7 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Web;
+using System.Collections.Immutable;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
+using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.WebSessionState {
 	/// <summary>
@@ -10,48 +11,65 @@ namespace EnterpriseWebLibrary.WebSessionState {
 	/// When we're ready to remove this class, we should also disable session state in the Web.config file, although we might want to provide a way for individual
 	/// systems to keep it enabled if necessary.
 	/// </summary>
-	internal class StandardLibrarySessionState {
-		// This is a hack that exists because sometimes error pages are processed at a point in the life cycle when session state is not available.
-		public static bool SessionAvailable => HttpContext.Current.Session != null;
+	internal static class StandardLibrarySessionState {
+		private static Func<ISession> currentSessionGetter;
 
-		/// <summary>
-		/// Returns the session state object for the current HTTP context.
-		/// </summary>
-		public static StandardLibrarySessionState Instance {
+		internal static void Init( Func<HttpContext> currentContextGetter ) {
+			currentSessionGetter = () => currentContextGetter().Session;
+		}
+
+		internal static IReadOnlyCollection<( StatusMessageType, string )> StatusMessages {
 			get {
-				if( HttpContext.Current.Session[ "StandardLibrarySessionStateObject" ] == null )
-					HttpContext.Current.Session[ "StandardLibrarySessionStateObject" ] = new StandardLibrarySessionState();
-				return HttpContext.Current.Session[ "StandardLibrarySessionStateObject" ] as StandardLibrarySessionState;
+				var value = currentSessionGetter().GetString( "ewfStatusMessages" );
+				return value != null
+					       ? JsonConvert.DeserializeObject<ImmutableArray<( StatusMessageType, string )>>( value )
+					       : Enumerable.Empty<( StatusMessageType, string )>().Materialize();
+			}
+			set => currentSessionGetter().SetString( "ewfStatusMessages", JsonConvert.SerializeObject( value, Formatting.None ) );
+		}
+
+		internal static void SetClientSideNavigation( string url, bool navigateInNewWindow ) {
+			currentSessionGetter().SetString( "ewfClientSideNavigation", JsonConvert.SerializeObject( ( url, navigateInNewWindow ), Formatting.None ) );
+		}
+
+		internal static void GetClientSideNavigationSetup( out string url, out bool navigateInNewWindow ) {
+			var value = currentSessionGetter().GetString( "ewfClientSideNavigation" );
+			if( value != null ) {
+				var pair = JsonConvert.DeserializeObject<( string, bool )>( value );
+				url = pair.Item1;
+				navigateInNewWindow = pair.Item2;
+			}
+			else {
+				url = "";
+				navigateInNewWindow = false;
 			}
 		}
 
-		private readonly List<Tuple<StatusMessageType, string>> statusMessages = new List<Tuple<StatusMessageType, string>>();
-		private string clientSideNavigationUrl = "";
-		private bool clientSideNavigationInNewWindow;
-
-		/// <summary>
-		/// EWF use only.
-		/// </summary>
-		public FullResponse ResponseToSend { get; set; }
-
-		internal EwfPageRequestState EwfPageRequestState { get; set; }
-
-		private StandardLibrarySessionState() {}
-
-		internal List<Tuple<StatusMessageType, string>> StatusMessages { get { return statusMessages; } }
-
-		internal void SetClientSideNavigation( string url, bool navigateInNewWindow ) {
-			clientSideNavigationUrl = url;
-			clientSideNavigationInNewWindow = navigateInNewWindow;
+		internal static void ClearClientSideNavigation() {
+			currentSessionGetter().Remove( "ewfClientSideNavigation" );
 		}
 
-		internal void GetClientSideNavigationSetup( out string url, out bool navigateInNewWindow ) {
-			url = clientSideNavigationUrl;
-			navigateInNewWindow = clientSideNavigationInNewWindow;
+		internal static bool HasResponseToSend => currentSessionGetter().Keys.Contains( "ewfResponseToSend" );
+
+		internal static FullResponse ResponseToSend {
+			get {
+				var value = currentSessionGetter().GetString( "ewfResponseToSend" );
+				return value != null ? JsonConvert.DeserializeObject<FullResponse>( value ) : null;
+			}
+			set => currentSessionGetter().SetString( "ewfResponseToSend", JsonConvert.SerializeObject( value, Formatting.None ) );
 		}
 
-		internal void ClearClientSideNavigation() {
-			clientSideNavigationUrl = "";
+		internal static EwfPageRequestState EwfPageRequestState {
+			get {
+				var value = currentSessionGetter().GetString( "ewfPageRequestState" );
+				return value != null ? JsonConvert.DeserializeObject<EwfPageRequestState>( value ) : null;
+			}
+			set {
+				if( value != null )
+					currentSessionGetter().SetString( "ewfPageRequestState", JsonConvert.SerializeObject( value, Formatting.None ) );
+				else
+					currentSessionGetter().Remove( "ewfPageRequestState" );
+			}
 		}
 	}
 }

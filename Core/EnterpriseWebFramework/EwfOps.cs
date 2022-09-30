@@ -6,6 +6,7 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.ExternalFunctionality;
 using EnterpriseWebLibrary.UserManagement;
+using EnterpriseWebLibrary.WebSessionState;
 using Humanizer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
@@ -84,6 +85,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									} );
 							builder.WebHost.ConfigureKestrel( options => { options.AllowSynchronousIO = true; } );
 							builder.Services.AddHttpContextAccessor();
+							builder.Services.AddDistributedMemoryCache();
+							builder.Services.AddSession(
+								options => {
+									options.Cookie.IsEssential = true;
+									options.IdleTimeout = AuthenticationStatics.SessionDuration.ToTimeSpan();
+								} );
 							builder.Services.AddDataProtection();
 							var app = builder.Build();
 
@@ -158,6 +165,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								},
 								() => AppRequestState.Instance.Resource );
 							StaticFile.Init( providerGetter.GetProvider<AppStaticFileHandlingProvider>( "StaticFileHandling" ) );
+							StandardLibrarySessionState.Init( () => contextAccessor.HttpContext );
 							PageBase.Init(
 								( () => BasePageStatics.AppProvider.GetPageViewDataModificationMethod(),
 									() => BasePageStatics.AppProvider.JavaScriptDocumentReadyFunctionCall ),
@@ -305,6 +313,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 							initTimeDataAccessState = null;
 
+							app.UseSession();
 							app.Use( RequestDispatchingStatics.ProcessRequest );
 							app.UseRouting();
 							app.Use( EwfApp.EnsureUrlResolved );

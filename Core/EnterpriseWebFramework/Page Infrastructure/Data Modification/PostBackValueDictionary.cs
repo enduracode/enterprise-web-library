@@ -1,12 +1,13 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+﻿using Newtonsoft.Json;
+
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A dictionary of form control values from a post back.
 	/// </summary>
+	[ JsonObject( MemberSerialization = MemberSerialization.Fields ) ]
 	internal class PostBackValueDictionary {
-		private readonly Dictionary<string, object> dictionary = new Dictionary<string, object>();
+		private readonly Dictionary<string, object> dictionary = new();
 		private HashSet<string> nonRemovedKeys;
-
-		internal PostBackValueDictionary() {}
 
 		/// <summary>
 		/// Returns true if extra post-back values exist.
@@ -33,8 +34,7 @@
 		/// Returns null if there is no value for the specified key.
 		/// </summary>
 		internal object GetValue( string key ) {
-			object value;
-			return dictionary.TryGetValue( key, out value ) ? value : null;
+			return dictionary.TryGetValue( key, out var value ) ? value : null;
 		}
 
 		internal void RemoveExcept( IEnumerable<string> keys ) {

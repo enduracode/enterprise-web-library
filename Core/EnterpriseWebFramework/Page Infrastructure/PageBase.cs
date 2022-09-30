@@ -137,7 +137,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Add a status message of the given type to the status message collection.
 		/// </summary>
 		public static void AddStatusMessage( StatusMessageType type, string message ) {
-			Current.statusMessages.Add( new Tuple<StatusMessageType, string>( type, message ) );
+			Current.statusMessages.Add( ( type, message ) );
 		}
 
 		internal static void AssertPageTreeNotBuilt() {
@@ -167,7 +167,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly HashSet<EwfValidation> validationsWithErrors = new HashSet<EwfValidation>();
 		private readonly List<Action> controlTreeValidations = new List<Action>();
 		internal PostBack SubmitButtonPostBack;
-		private readonly List<Tuple<StatusMessageType, string>> statusMessages = new List<Tuple<StatusMessageType, string>>();
+		private readonly List<( StatusMessageType, string )> statusMessages = new();
 
 		/// <summary>
 		/// Initializes the parameters modification object for this page.
@@ -182,9 +182,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		private EwfResponse processViewAndGetResponse( int? statusCode ) {
 			if( AppRequestState.Instance.EwfPageRequestState == null ) {
-				if( StandardLibrarySessionState.SessionAvailable && StandardLibrarySessionState.Instance.EwfPageRequestState != null ) {
-					AppRequestState.Instance.EwfPageRequestState = StandardLibrarySessionState.Instance.EwfPageRequestState;
-					StandardLibrarySessionState.Instance.EwfPageRequestState = null;
+				var sessionValue = StandardLibrarySessionState.EwfPageRequestState;
+				if( sessionValue != null ) {
+					AppRequestState.Instance.EwfPageRequestState = sessionValue;
+					StandardLibrarySessionState.EwfPageRequestState = null;
 				}
 				else
 					AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( AppRequestState.RequestTime, null, null );
@@ -216,8 +217,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							i();
 						AppRequestState.AddNonTransactionalModificationMethod(
 							() => {
-								if( StandardLibrarySessionState.SessionAvailable )
-									StandardLibrarySessionState.Instance.StatusMessages.AddRange( statusMessages );
+								StandardLibrarySessionState.StatusMessages = StandardLibrarySessionState.StatusMessages.Concat( statusMessages ).Materialize();
 								statusMessages.Clear();
 							} );
 						AppRequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
@@ -452,7 +452,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					}
 
 					if( dmExecuted ) {
-						AppRequestState.AddNonTransactionalModificationMethod( () => StandardLibrarySessionState.Instance.StatusMessages.AddRange( statusMessages ) );
+						AppRequestState.AddNonTransactionalModificationMethod(
+							() => StandardLibrarySessionState.StatusMessages = StandardLibrarySessionState.StatusMessages.Concat( statusMessages ).Materialize() );
 						try {
 							AppRequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
 						}
@@ -588,16 +589,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			// If the page has requested a client-side redirect, configure it now. The JavaScript solution is preferred over a meta tag since apparently it doesn't
 			// cause reload behavior by the browser. See http://josephsmarr.com/2007/06/06/the-hidden-cost-of-meta-refresh-tags.
+			StandardLibrarySessionState.GetClientSideNavigationSetup( out var clientSideNavigationUrl, out var clientSideNavigationInNewWindow );
 			var clientSideNavigationStatements = "";
-			if( StandardLibrarySessionState.SessionAvailable ) {
-				StandardLibrarySessionState.Instance.GetClientSideNavigationSetup( out var clientSideNavigationUrl, out var clientSideNavigationInNewWindow );
-				if( clientSideNavigationUrl.Any() ) {
-					var url = clientSideNavigationUrl;
-					if( clientSideNavigationInNewWindow )
-						clientSideNavigationStatements = "var newWindow = window.open( '{0}', '{1}' ); newWindow.focus();".FormatWith( url, "_blank" );
-					else
-						clientSideNavigationStatements = "location.replace( '" + url + "' );";
-				}
+			if( clientSideNavigationUrl.Any() ) {
+				var url = clientSideNavigationUrl;
+				if( clientSideNavigationInNewWindow )
+					clientSideNavigationStatements = "var newWindow = window.open( '{0}', '{1}' ); newWindow.focus();".FormatWith( url, "_blank" );
+				else
+					clientSideNavigationStatements = "location.replace( '" + url + "' );";
 			}
 
 			return StringTools.ConcatenateWithDelimiter(
@@ -670,10 +669,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// EWL use only. Gets the status messages.
 		/// </summary>
-		public IEnumerable<Tuple<StatusMessageType, string>> StatusMessages =>
-			( StandardLibrarySessionState.SessionAvailable
-				  ? StandardLibrarySessionState.Instance.StatusMessages
-				  : Enumerable.Empty<Tuple<StatusMessageType, string>>() ).Concat( statusMessages );
+		public IEnumerable<( StatusMessageType, string )> StatusMessages => StandardLibrarySessionState.StatusMessages.Concat( statusMessages );
 
 		private void executeWithDataModificationExceptionHandling( Action method ) {
 			try {
@@ -835,8 +831,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			// Put the secondary response into session state right before navigation so that it doesn't get sent if there is an error before this point.
 			if( secondaryResponse != null ) {
 				// It's important that we put the response in session state first since it's used by the init method of the pre-built-response resource.
-				StandardLibrarySessionState.Instance.ResponseToSend = secondaryResponse;
-				StandardLibrarySessionState.Instance.SetClientSideNavigation( new PreBuiltResponse().GetUrl(), !secondaryResponse.FileName.Any() );
+				StandardLibrarySessionState.ResponseToSend = secondaryResponse;
+				StandardLibrarySessionState.SetClientSideNavigation( new PreBuiltResponse().GetUrl(), !secondaryResponse.FileName.Any() );
 			}
 
 			// If the destination resource is identical to the current page, do a transfer instead of a redirect. Don’t do this if the authorization check was
@@ -852,7 +848,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			// If modification errors exist or this is not full post-back navigation, save request state in session state until the next request.
 			if( requestState.ModificationErrorsExist || requestState.DmIdAndSecondaryOp != null )
-				StandardLibrarySessionState.Instance.EwfPageRequestState = requestState;
+				StandardLibrarySessionState.EwfPageRequestState = requestState;
 
 			return EwfResponse.Create(
 				ContentTypes.PlainText,
@@ -904,10 +900,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 						pageTree.WriteMarkup( writer );
 
-						if( StandardLibrarySessionState.SessionAvailable ) {
-							StandardLibrarySessionState.Instance.StatusMessages.Clear();
-							StandardLibrarySessionState.Instance.ClearClientSideNavigation();
-						}
+						StandardLibrarySessionState.StatusMessages = Enumerable.Empty<( StatusMessageType, string )>().Materialize();
+						StandardLibrarySessionState.ClearClientSideNavigation();
 					} ),
 				statusCodeGetter: () => statusCode,
 				additionalHeaderFieldGetter: () => {
