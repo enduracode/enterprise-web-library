@@ -1,9 +1,6 @@
 syntax: glob
 
-.vs/Enterprise Web Library/v16/.suo
-.vs/Enterprise Web Library/v16/Server/sqlite3/
-.vs/slnx.sqlite
-packages/
+.vs/
 _ReSharper*
 Enterprise Web Library.sln.DotSettings.user
 NDependOut/
@@ -15,6 +12,7 @@ Error Log.txt
 
 Core/bin/
 Core/obj/
+Core/Directory.Build.props
 Core/Generated Code/
 Core/EnterpriseWebLibrary.xml
 
@@ -22,10 +20,12 @@ Library/bin/
 Library/obj/
 Library/Configuration/Aspose Licenses/
 Library/Files/*.xsd
+Library/Directory.Build.props
 Library/Generated Code/
 
 Development Utility/bin/
 Development Utility/obj/
+Development Utility/Directory.Build.props
 Development Utility/Generated Code/
 
 Solution Files/bin/
@@ -34,10 +34,14 @@ Solution Files/obj/
 Tests/bin/
 Tests/obj/
 
-Web Site/bin/
-Web Site/obj/
-Web Site/Generated Code/
+Website/bin/
+Website/obj/
+Website/web.config
+Website/Directory.Build.props
+Website/Generated Code/
+Website/Properties/launchSettings.json
 
 Providers/SAML/bin/
 Providers/SAML/obj/
+Providers/SAML/Directory.Build.props
 Providers/SAML/Generated Code/
