@@ -1,9 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net6.0-windows</TargetFramework>
-    <AssemblyName>EnterpriseWebLibrary.Tests</AssemblyName>
-    <RootNamespace>EnterpriseWebLibrary.Tests</RootNamespace>
+    <AssemblyName>EnterpriseWebLibrary.Website</AssemblyName>
+    <RootNamespace>EnterpriseWebLibrary.WebSite</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 

@@ -1,178 +1,19 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="12.0">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
-    <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{3398B3A5-8445-410E-A69B-33EE3E914A03}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <RootNamespace>EnterpriseWebLibrary</RootNamespace>
+    <TargetFramework>net6.0-windows</TargetFramework>
     <AssemblyName>EnterpriseWebLibrary.Library</AssemblyName>
-    <SccProjectName>
-    </SccProjectName>
-    <SccLocalPath>
-    </SccLocalPath>
-    <SccAuxPath>
-    </SccAuxPath>
-    <SccProvider>
-    </SccProvider>
-    <FileUpgradeFlags>
-    </FileUpgradeFlags>
-    <OldToolsVersion>3.5</OldToolsVersion>
-    <UpgradeBackupLocation>
-    </UpgradeBackupLocation>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <TargetFrameworkProfile />
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\Standard Library\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
+    <RootNamespace>EnterpriseWebLibrary</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <DefaultItemExcludesInProjectFolder>$(DefaultItemExcludesInProjectFolder);Files\System Template\\**\*.*</DefaultItemExcludesInProjectFolder>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="ClosedXML, Version=0.95.4.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ClosedXML.0.95.4\lib\net46\ClosedXML.dll</HintPath>
-    </Reference>
-    <Reference Include="DocumentFormat.OpenXml, Version=2.14.0.0, Culture=neutral, PublicKeyToken=8fb06cb64d019a17, processorArchitecture=MSIL">
-      <HintPath>..\packages\DocumentFormat.OpenXml.2.14.0\lib\net46\DocumentFormat.OpenXml.dll</HintPath>
-    </Reference>
-    <Reference Include="ExcelNumberFormat, Version=1.1.0.0, Culture=neutral, PublicKeyToken=23c6f5d73be07eca, processorArchitecture=MSIL">
-      <HintPath>..\packages\ExcelNumberFormat.1.1.0\lib\net20\ExcelNumberFormat.dll</HintPath>
-    </Reference>
-    <Reference Include="Humanizer, Version=2.14.0.0, Culture=neutral, PublicKeyToken=979442b78dfc278e, processorArchitecture=MSIL">
-      <HintPath>..\packages\Humanizer.Core.2.14.1\lib\netstandard2.0\Humanizer.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="NodaTime, Version=3.1.0.0, Culture=neutral, PublicKeyToken=4226afe0d9b296d1, processorArchitecture=MSIL">
-      <HintPath>..\packages\NodaTime.3.1.0\lib\netstandard2.0\NodaTime.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Collections.Immutable, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Collections.Immutable.6.0.0\lib\net461\System.Collections.Immutable.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Core">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Data" />
-    <Reference Include="System.IO.FileSystem.Primitives, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.IO.FileSystem.Primitives.4.3.0\lib\net46\System.IO.FileSystem.Primitives.dll</HintPath>
-    </Reference>
-    <Reference Include="System.IO.Packaging, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.IO.Packaging.5.0.0\lib\net46\System.IO.Packaging.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Memory.4.5.4\lib\net461\System.Memory.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Numerics" />
-    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.6.0.0\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net47\System.ValueTuple.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web" />
-    <Reference Include="System.XML" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="Tewl, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Tewl.2022.2.17.1117\lib\net461\Tewl.dll</HintPath>
-    </Reference>
-    <Reference Include="WindowsBase" />
+    <ProjectReference Include="..\Core\Core.csproj" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="Configuration\Providers\Encryption.cs" />
-    <Compile Include="Configuration\Providers\General.cs" />
-    <Compile Include="Configuration\Providers\UserManagement.cs" />
-    <Compile Include="Generated Code\Installation Shared Configuration.cs" />
-    <Compile Include="Generated Code\ISU.cs" />
-    <Compile Include="GlobalInitializer.cs" />
-    <Compile Include="GlobalStatics.cs" />
-    <Compile Include="MailMerging\MergeStatics.cs" />
-    <Compile Include="MailMerging\PseudoChildRow.cs" />
-    <Compile Include="MailMerging\PseudoTableFields\FullName.cs" />
-    <Compile Include="MailMerging\PseudoTableFields\Test.cs" />
-    <Compile Include="MailMerging\PseudoTableRow.cs" />
-    <Compile Include="MailMerging\PsuedoChildFields\Another.cs" />
-    <Compile Include="MailMerging\PsuedoChildFields\TheValue.cs" />
+    <Content Include="Files\System Template\\**\*.*" />
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="Configuration\Development.xml" />
-    <Content Include="Configuration\General.xml">
-      <SubType>Designer</SubType>
-    </Content>
-    <Content Include="Configuration\Installation\Installations Template\Development\Standard.xml" />
-    <Content Include="Configuration\Installation\Installations Template\Live\Standard.xml" />
-    <Content Include="Configuration\Installation\Installations Template\Shared.xml" />
-    <Content Include="Configuration\Installation\Installations Template\Testing\Standard.xml" />
-    <Content Include="Configuration\Installation\Installations\Development\Standard.xml" />
-    <Content Include="Configuration\Installation\Installations\Live\Standard.xml" />
-    <Content Include="Configuration\Installation\Installations\Packaging.xml" />
-    <Content Include="Configuration\Installation\Installations\Shared.xml" />
-    <Content Include="Configuration\Installation\Installations\Testing\Standard.xml" />
-    <Content Include="Files\System Template\Library\Configuration\Development.xml" />
-    <Content Include="Files\System Template\Library\Configuration\General.xml" />
-    <Content Include="Files\System Template\Library\Configuration\Installation\Installations\Development\Standard.xml" />
-    <Content Include="Files\System Template\Library\Configuration\Installation\Installations\Live\Standard.xml" />
-    <Content Include="Files\System Template\Library\Configuration\Installation\Installations\Testing\Standard.xml" />
-    <Content Include="Files\System Template\Library\Configuration\Providers\General.cs" />
-    <Content Include="Files\System Template\Library\GlobalInitializer.cs" />
-    <Content Include="Files\System Template\Library\GlobalStatics.cs" />
-    <Content Include="Files\System Template\Library\Library.csproj" />
-    <Content Include="Files\System Template\Solution.sln" />
-    <Content Include="Files\System Template\Website\AppStatics.cs" />
-    <Content Include="Files\System Template\Website\Global.asax" />
-    <Content Include="Files\System Template\Website\Global.asax.cs" />
-    <Content Include="Files\System Template\Website\Home.cs" />
-    <Content Include="Files\System Template\Website\Providers\EwfUi.cs" />
-    <Content Include="Files\System Template\Website\Providers\RequestDispatching.cs" />
-    <Content Include="Files\System Template\Website\Providers\StandardPageLogic.cs" />
-    <Content Include="Files\System Template\Website\Website.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Core\Core.csproj">
-      <Project>{7EED5926-9FE0-44DB-9B5F-5A6856CE392E}</Project>
-      <Name>Core</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="app.config" />
-    <None Include="Configuration\Installation\Shared.xsd">
-      <SubType>Designer</SubType>
-    </None>
-    <None Include="Files\System Template\Website\packages.config" />
-    <None Include="Files\System Template\Website\Web.config" />
-    <None Include="Files\Template.config" />
-    <None Include="packages.config" />
-  </ItemGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
 </Project>
