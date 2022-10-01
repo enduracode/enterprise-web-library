@@ -550,6 +550,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				// package properties; see https://docs.microsoft.com/en-us/nuget/reference/msbuild-targets#pack-target
 				writer.WriteLine( "<PackageVersion>0</PackageVersion>" ); // Clear since we create both prerelease and stable packages with different version numbers.
 
+				writer.WriteLine(
+					"<DefaultItemExcludesInProjectFolder>$(DefaultItemExcludesInProjectFolder);Directory.Build.props</DefaultItemExcludesInProjectFolder>" );
+
 				writer.WriteLine( "</PropertyGroup>" );
 				writer.WriteLine( "</Project>" );
 			}
