@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using System.Web;
+﻿using System.Collections.Immutable;
 using System.Xml;
 using ComponentSpace.SAML2;
 using ComponentSpace.SAML2.Assertions;
@@ -10,6 +6,7 @@ using ComponentSpace.SAML2.Configuration;
 using ComponentSpace.SAML2.Metadata;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.ExternalFunctionality;
+using Microsoft.AspNetCore.Http;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.Saml {
@@ -86,7 +83,7 @@ namespace EnterpriseWebLibrary.Saml {
 				.ToXml();
 		}
 
-		void ExternalSamlProvider.WriteLogInResponse( HttpResponseBase response, string identityProvider, bool forceReauthentication, string returnUrl ) {
+		void ExternalSamlProvider.WriteLogInResponse( HttpResponse response, string identityProvider, bool forceReauthentication, string returnUrl ) {
 			SAMLController.ConfigurationName = samlConfigurationName;
 			SAMLServiceProvider.InitiateSSO( response, returnUrl, identityProvider, new SSOOptions { ForceAuthn = forceReauthentication } );
 		}
