@@ -551,7 +551,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "<PackageVersion>0</PackageVersion>" ); // Clear since we create both prerelease and stable packages with different version numbers.
 
 				writer.WriteLine(
-					"<DefaultItemExcludesInProjectFolder>$(DefaultItemExcludesInProjectFolder);Directory.Build.props</DefaultItemExcludesInProjectFolder>" );
+					"<DefaultItemExcludesInProjectFolder>$(DefaultItemExcludesInProjectFolder);Directory.Build.props;**/*.ewlt.cs</DefaultItemExcludesInProjectFolder>" );
 
 				writer.WriteLine( "</PropertyGroup>" );
 				writer.WriteLine( "</Project>" );
