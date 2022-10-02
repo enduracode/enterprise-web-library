@@ -88,7 +88,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							builder.Services.AddDistributedMemoryCache();
 							builder.Services.AddSession(
 								options => {
+									var defaultAttributes = EwfConfigurationStatics.AppConfiguration.DefaultCookieAttributes;
+									options.Cookie.Name = "{0}Session".FormatWith( defaultAttributes.NamePrefix ?? "" );
+									options.Cookie.Domain = defaultAttributes.Domain ?? "";
+									options.Cookie.Path = "/{0}".FormatWith( defaultAttributes.Path ?? EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.Path );
+									options.Cookie.SecurePolicy = CookieSecurePolicy.None;
 									options.Cookie.IsEssential = true;
+
 									options.IdleTimeout = AuthenticationStatics.SessionDuration.ToTimeSpan();
 								} );
 							builder.Services.AddDataProtection();
