@@ -313,6 +313,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 							initTimeDataAccessState = null;
 
+							if( ConfigurationStatics.IsDevelopmentInstallation && EwfConfigurationStatics.AppConfiguration.UsesKestrel.Value )
+								app.UsePathBase( "/{0}".FormatWith( EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.Path ) );
 							app.UseSession();
 							app.Use( RequestDispatchingStatics.ProcessRequest );
 							app.UseRouting();

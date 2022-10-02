@@ -18,6 +18,7 @@ namespace EnterpriseWebLibrary.Configuration {
 		public readonly string Path;
 
 		internal readonly bool SupportsSecureConnections;
+		internal readonly bool? UsesKestrel;
 		internal readonly IisApplication IisApplication;
 		internal readonly BaseUrl DefaultBaseUrl;
 		internal readonly DefaultCookieAttributes DefaultCookieAttributes;
@@ -29,14 +30,14 @@ namespace EnterpriseWebLibrary.Configuration {
 			Path = EwlStatics.CombinePaths( installationPath, name );
 			SupportsSecureConnections = supportsSecureConnections;
 
-			var kestrel = File.ReadAllText( EwlStatics.CombinePaths( Path, name + ".csproj.user" ) ).Contains( "<ActiveDebugProfile>Kestrel</ActiveDebugProfile>" );
+			UsesKestrel = File.ReadAllText( EwlStatics.CombinePaths( Path, name + ".csproj.user" ) ).Contains( "<ActiveDebugProfile>Kestrel</ActiveDebugProfile>" );
 
 			// We must pass values for all components since we will not have defaults to fall back on when getting the URL string for this object.
 			DefaultBaseUrl = new BaseUrl(
 				"localhost",
-				kestrel ? 44311 : 80,
-				kestrel ? 44310 : 443,
-				kestrel ? "" : systemShortName + ( systemHasMultipleWebApplications ? name.EnglishToPascal() : "" ) );
+				UsesKestrel.Value ? 44311 : 80,
+				UsesKestrel.Value ? 44310 : 443,
+				systemShortName + ( systemHasMultipleWebApplications ? name.EnglishToPascal() : "" ) );
 
 			var cookieAttributes = configuration.DefaultCookieAttributes;
 			DefaultCookieAttributes = cookieAttributes != null
