@@ -83,7 +83,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										EnvironmentName = ConfigurationStatics.IsDevelopmentInstallation ? Environments.Development : Environments.Production,
 										ContentRootPath = EwfConfigurationStatics.AppConfiguration.Path
 									} );
+
 							builder.WebHost.ConfigureKestrel( options => { options.AllowSynchronousIO = true; } );
+							if( ConfigurationStatics.IsDevelopmentInstallation && EwfConfigurationStatics.AppConfiguration.UsesKestrel.Value )
+								builder.Services.AddResponseCompression( options => { options.EnableForHttps = true; } );
+
 							builder.Services.AddHttpContextAccessor();
 							builder.Services.AddDistributedMemoryCache();
 							builder.Services.AddSession(
@@ -98,6 +102,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									options.IdleTimeout = AuthenticationStatics.SessionDuration.ToTimeSpan();
 								} );
 							builder.Services.AddDataProtection();
+
 							var app = builder.Build();
 
 							var miniProfilerOptions = new MiniProfilerOptions();
@@ -322,6 +327,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							if( ConfigurationStatics.IsDevelopmentInstallation && EwfConfigurationStatics.AppConfiguration.UsesKestrel.Value )
 								app.UsePathBase( "/{0}".FormatWith( EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.Path ) );
 							app.UseSession();
+							if( ConfigurationStatics.IsDevelopmentInstallation && EwfConfigurationStatics.AppConfiguration.UsesKestrel.Value )
+								app.UseResponseCompression();
 							app.Use( RequestDispatchingStatics.ProcessRequest );
 							app.UseRouting();
 							app.Use( EwfApp.EnsureUrlResolved );
