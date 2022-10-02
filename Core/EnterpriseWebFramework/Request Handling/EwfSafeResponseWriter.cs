@@ -77,7 +77,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				eTag += StringTools.ConcatenateWithDelimiter( "", aspNetRequest.Headers.AcceptEncoding );
 
 				var typedHeaders = aspNetResponse.GetTypedHeaders();
-				typedHeaders.ETag = new EntityTagHeaderValue( "\"{0}\"".FormatWith( eTag ) );
+				eTag = "\"{0}\"".FormatWith( eTag );
+				typedHeaders.ETag = new EntityTagHeaderValue( eTag );
 
 				// Sending a Last-Modified header isn't a good enough reason to force evaluation of lastModificationDateAndTimeGetter, which could be expensive.
 				if( lastModificationDateAndTimeGetter != null && lastModificationDateAndTime.IsValueCreated )
