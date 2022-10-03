@@ -20,6 +20,11 @@ using Tewl.Tools;
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public static class EwfOps {
 		/// <summary>
+		/// Development Utility and private use only.
+		/// </summary>
+		public const int InitializationTimeoutSeconds = 120;
+
+		/// <summary>
 		/// Call this from your Program.cs file. Besides this call, there should be no other code in the file.
 		/// </summary>
 		/// <param name="globalInitializer">The system's global initializer. Do not pass null.</param>
@@ -71,6 +76,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					}
 				},
 				mainDataAccessStateGetter: () => EwfApp.RequestState != null ? EwfApp.RequestState.DataAccessState : initTimeDataAccessState.Value );
+			var frameworkInitialized = false;
 			try {
 				return GlobalInitializationOps.ExecuteAppWithStandardExceptionHandling(
 					() => {
@@ -325,6 +331,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								executeWithAutomaticDatabaseConnections( ExternalFunctionalityStatics.ExternalSamlProvider.InitAppSpecificLogicDependencies );
 
 							initTimeDataAccessState = null;
+							frameworkInitialized = true;
 
 							if( ConfigurationStatics.IsDevelopmentInstallation && EwfConfigurationStatics.AppConfiguration.UsesKestrel.Value )
 								app.UsePathBase( "/{0}".FormatWith( EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.Path ) );
@@ -344,6 +351,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 			finally {
 				GlobalInitializationOps.CleanUpStatics();
+
+				// If initialization failed, ensure that we exceed the startupTimeLimit of the ASP.NET Core Module (ANCM). This will cause the module to recycle the IIS
+				// application pool and therefore retry initialization.
+				if( !frameworkInitialized && !ConfigurationStatics.IsDevelopmentInstallation )
+					Thread.Sleep( TimeSpan.FromSeconds( InitializationTimeoutSeconds + 10 ) );
 			}
 		}
 

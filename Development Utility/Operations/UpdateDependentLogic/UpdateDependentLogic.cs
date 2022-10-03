@@ -417,7 +417,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			try {
 				File.WriteAllText(
 					application.WebConfigFilePath,
-					File.ReadAllText( EwlStatics.CombinePaths( configurationFilesFolderPath, "web.config" ) ),
+					File.ReadAllText( EwlStatics.CombinePaths( configurationFilesFolderPath, "web.config" ) )
+						.Replace( "@@InitializationTimeoutSeconds", EwfOps.InitializationTimeoutSeconds.ToString() ),
 					Encoding.UTF8 );
 			}
 			catch( Exception e ) {
