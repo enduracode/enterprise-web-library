@@ -84,8 +84,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				if( lastModificationDateAndTimeGetter != null && lastModificationDateAndTime.IsValueCreated )
 					typedHeaders.LastModified = lastModificationDateAndTime.Value.UtcDateTime;
 
-				// When we separate EWF from Web Forms, we may need to add a Vary header with "Accept-Encoding". Do that here.
-
 				if( aspNetRequest.Headers.IfNoneMatch.Contains( eTag ) ) {
 					aspNetResponse.StatusCode = 304;
 					return;
