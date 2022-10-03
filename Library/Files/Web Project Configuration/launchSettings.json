@@ -3,7 +3,7 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iis": {
-      "applicationUrl": "http://localhost/@@Path",
+      "applicationUrl": "https://localhost/@@Path",
       "sslPort": 443
     }
   },
