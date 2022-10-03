@@ -88,6 +88,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							if( ConfigurationStatics.IsDevelopmentInstallation && EwfConfigurationStatics.AppConfiguration.UsesKestrel.Value )
 								builder.Services.AddResponseCompression( options => { options.EnableForHttps = true; } );
 
+							builder.Services.Configure<IISServerOptions>( options => { options.AllowSynchronousIO = true; } );
+
 							builder.Services.AddHttpContextAccessor();
 							builder.Services.AddDistributedMemoryCache();
 							builder.Services.AddSession(
