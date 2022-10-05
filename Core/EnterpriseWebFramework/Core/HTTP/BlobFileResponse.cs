@@ -1,5 +1,4 @@
-﻿using System;
-using EnterpriseWebLibrary.DataAccess.BlobStorage;
+﻿using EnterpriseWebLibrary.DataAccess.BlobStorage;
 using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -43,7 +42,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					() => {
 						var contents = BlobStorageStatics.SystemProvider.GetFileContents( file.FileId );
 						if( forcedImageWidth.Value.HasValue )
-							contents = EwlStatics.ResizeImage( contents, forcedImageWidth.Value.Value );
+							contents = EwlStatics.ResizeImage( contents, forcedImageWidth.Value.Value ).ToArray();
 						return contents;
 					} ),
 				fileNameCreator: () => processAsAttachment.Value ? file.FileName : "" );

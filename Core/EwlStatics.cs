@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
-using System.Linq;
+﻿using System.ComponentModel;
 using System.Net;
 using System.Text.RegularExpressions;
-using System.Threading;
-using ImageResizer;
+using EnterpriseWebLibrary.Configuration;
+using Humanizer;
+using Imageflow.Fluent;
 using NodaTime;
 using Polly;
 using Tewl.IO;
@@ -222,19 +219,28 @@ namespace EnterpriseWebLibrary {
 		/// <param name="newWidth">The new width of the image.</param>
 		/// <param name="newHeight">The new height of the image. If you specify this, the image may be cropped in one of the dimensions in order to keep the new
 		/// width and height as close as possible to the values you specify without stretching the image.</param>
-		public static byte[] ResizeImage( byte[] image, int newWidth, int? newHeight = null ) {
-			using( var fromStream = new MemoryStream( image ) ) {
-				using( var toStream = new MemoryStream() ) {
-					ImageBuilder.Current.Build(
-						new ImageJob(
-							fromStream,
-							toStream,
-							newHeight.HasValue ? new Instructions { Width = newWidth, Height = newHeight, Mode = FitMode.Crop } : new Instructions { Width = newWidth },
-							false,
-							false ) );
-					return toStream.ToArray();
-				}
-			}
+		public static ReadOnlySpan<byte> ResizeImage( byte[] image, int newWidth, int? newHeight = null ) {
+			if( !ConfigurationStatics.SystemGeneralProvider.ImageflowLicensed )
+				throw new Exception(
+					StringTools.ConcatenateWithSpace(
+						" ",
+						"The {0} method depends on Imageflow.".FormatWith( nameof(ResizeImage) ),
+						"To use this in your system, you must either accept the GNU Affero General Public License or purchase a commercial license; see https://github.com/imazen/imageflow-dotnet#license for more information.",
+						"After you have licensed this component, please return true from {0}.{1}.".FormatWith(
+							nameof(SystemGeneralProvider),
+							nameof(SystemGeneralProvider.ImageflowLicensed) ) ) );
+			return Task.Run(
+					async () => {
+						using var job = new ImageJob();
+						return await job.BuildCommandString(
+								       image,
+								       new BytesDestination(),
+								       newHeight.HasValue ? $"width={newWidth}&height={newHeight.Value}&mode=crop" : $"width={newWidth}" )
+							       .Finish()
+							       .InProcessAsync();
+					} )
+				.Result.First.TryGetBytes()
+				.Value;
 		}
 
 		/// <summary>

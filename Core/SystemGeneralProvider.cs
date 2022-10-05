@@ -22,5 +22,10 @@
 		/// Gets the email default from address.
 		/// </summary>
 		protected internal abstract string EmailDefaultFromAddress { get; }
+
+		/// <summary>
+		/// Gets whether Imageflow, used for image resizing, is licensed.
+		/// </summary>
+		protected internal virtual bool ImageflowLicensed => false;
 	}
 }
