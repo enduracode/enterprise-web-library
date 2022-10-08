@@ -12,9 +12,13 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using StackExchange.Profiling;
+using StackExchange.Profiling.Internal;
+using StackExchange.Profiling.Storage;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -23,6 +27,20 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Development Utility and private use only.
 		/// </summary>
 		public const int InitializationTimeoutSeconds = 120;
+
+		private class MiniProfilerConfigureOptions: IConfigureOptions<MiniProfilerOptions> {
+			private readonly IMemoryCache cache;
+
+			public MiniProfilerConfigureOptions( IMemoryCache cache ) {
+				this.cache = cache;
+			}
+
+			void IConfigureOptions<MiniProfilerOptions>.Configure( MiniProfilerOptions options ) {
+				options.RouteBasePath = "/profiler";
+				options.Storage = new MemoryCacheStorage( cache, TimeSpan.FromMinutes( 30 ) );
+				options.ShouldProfile = _ => false;
+			}
+		}
 
 		/// <summary>
 		/// Call this from your Program.cs file. Besides this call, there should be no other code in the file.
@@ -111,11 +129,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								} );
 							builder.Services.AddDataProtection();
 
+							// MiniProfiler
+							builder.Services.AddMemoryCache();
+							builder.Services.AddSingleton<IConfigureOptions<MiniProfilerOptions>, MiniProfilerConfigureOptions>();
+
 							var app = builder.Build();
 
-							var miniProfilerOptions = new MiniProfilerOptions();
-							miniProfilerOptions.IgnoredPaths.Clear();
-							MiniProfiler.Configure( miniProfilerOptions );
+							MiniProfiler.Configure( app.Services.GetRequiredService<IOptions<MiniProfilerOptions>>().Value );
 
 							var providerGetter = new SystemProviderGetter(
 								ConfigurationStatics.AppAssembly,
@@ -252,7 +272,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									infos.Add( new StaticFiles.CodeJs() );
 									foreach( var i in infos.Select( getElement ) )
 										markup.Append( i );
-									markup.Append( MiniProfiler.Current.RenderIncludes( contextAccessor.HttpContext ) );
+									if( MiniProfiler.Current != null ) {
+										var profiler = MiniProfiler.Current;
+										var ids = profiler.Options.ExpireAndGetUnviewed( profiler.User ) ?? new List<Guid>( 1 );
+										ids.Add( profiler.Id );
+										markup.Append(
+											Render.Includes(
+												profiler,
+												path: contextAccessor.HttpContext.Request.PathBase + ( (MiniProfilerOptions)profiler.Options ).RouteBasePath + "/",
+												isAuthorized: true,
+												null,
+												requestIDs: ids ) );
+									}
 									foreach( var resource in BasePageStatics.AppProvider.GetJavaScriptFiles() ) {
 										assertResourceIsIntermediateInstallationPublicResourceWhenNecessary( resource );
 										markup.Append( getElement( resource ) );
@@ -338,10 +369,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							app.UseSession();
 							if( ConfigurationStatics.IsDevelopmentInstallation && EwfConfigurationStatics.AppConfiguration.UsesKestrel.Value )
 								app.UseResponseCompression();
+							app.UseMiniProfiler(); // only used to handle MiniProfiler requests
 							app.Use( RequestDispatchingStatics.ProcessRequest );
 							app.UseRouting();
 							app.Use( EwfApp.EnsureUrlResolved );
-							app.UseMiniProfiler();
+
 							app.Run();
 						}
 						finally {

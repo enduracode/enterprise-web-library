@@ -67,7 +67,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal AppRequestState( string url, string baseUrl ) {
 			beginInstant = SystemClock.Instance.GetCurrentInstant();
-			MiniProfiler.StartNew();
+
+			var profiler = MiniProfiler.StartNew( profilerName: url );
+			profiler.User = ( (MiniProfilerOptions)profiler.Options ).UserIdProvider( EwfRequest.Current.AspNetRequest );
+
 			this.url = url;
 			this.baseUrl = baseUrl;
 
