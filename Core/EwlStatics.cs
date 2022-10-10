@@ -185,9 +185,7 @@ namespace EnterpriseWebLibrary {
 			catch {}
 		}
 
-		public static string GetProjectOutputFolderPath( bool debug ) {
-			return CombinePaths( "bin", debug ? "Debug" : "Release" );
-		}
+		public static string GetProjectOutputFolderPath( bool debug ) => CombinePaths( "bin", debug ? "Debug" : "Release", "net6.0-windows" );
 
 		/// <summary>
 		/// Returns true if the specified objects are equal according to the default equality comparer.

@@ -1,5 +1,4 @@
 ﻿using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Configuration.InstallationStandard;
 using EnterpriseWebLibrary.Configuration.SystemDevelopment;
@@ -50,7 +49,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 									installation.GeneralLogic.Path,
 									EwlStatics.CoreProjectName,
 									EwlStatics.GetProjectOutputFolderPath( useDebugAssembly ) );
-								var libFolderPath = EwlStatics.CombinePaths( folderPath, @"lib\net472-full" );
+								var libFolderPath = EwlStatics.CombinePaths( folderPath, @"lib\net6.0-windows" );
 								foreach( var fileName in new[] { "dll", "pdb", "xml" }.Select( i => "EnterpriseWebLibrary." + i ) )
 									IoMethods.CopyFile( EwlStatics.CombinePaths( ewlOutputFolderPath, fileName ), EwlStatics.CombinePaths( libFolderPath, fileName ) );
 
@@ -100,12 +99,15 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 										"",
 										w => {
 											var lines = from line in File.ReadAllLines(
-												            EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.CoreProjectName, "packages.config" ) )
+												            EwlStatics.CombinePaths(
+													            installation.GeneralLogic.Path,
+													            EwlStatics.CoreProjectName,
+													            EwlStatics.CoreProjectName + ".csproj" ) )
 											            let trimmedLine = line.Trim()
-											            where trimmedLine.StartsWith( "<package " )
+											            where trimmedLine.StartsWith( "<PackageReference " )
 											            select trimmedLine;
 											foreach( var line in lines )
-												w.WriteLine( Regex.Replace( line.Replace( "package", "dependency" ), @" targetFramework=""[\w]+""", "" ) );
+												w.WriteLine( line.Replace( "PackageReference", "dependency" ).Replace( "Include", "id" ).Replace( "Version", "version" ) );
 										},
 										prerelease,
 										localExportDateAndTime );
@@ -124,7 +126,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 								EwlNuGetPackageSpecificationStatics.GetNuGetPackageFileName(
 									mainId,
 									installation.CurrentMajorVersion,
-									!prerelease.HasValue || prerelease.Value ? installation.NextBuildNumber as int? : null,
+									!prerelease.HasValue || prerelease.Value ? installation.NextBuildNumber : null,
 									localExportDateAndTime: localExportDateAndTime ) ) );
 					} )
 				.MaterializeAsList();
@@ -144,7 +146,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 											EwlStatics.SamlProviderProjectPath,
 											EwlStatics.GetProjectOutputFolderPath( useDebugAssembly ),
 											fileName ),
-										EwlStatics.CombinePaths( folderPath, @"lib\net472-full", fileName ) );
+										EwlStatics.CombinePaths( folderPath, @"lib\net6.0-windows", fileName ) );
 
 								var manifestPath = EwlStatics.CombinePaths( folderPath, "Package.nuspec" );
 								using( var writer = IoMethods.GetTextWriterForWrite( manifestPath ) )
@@ -159,7 +161,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 													mainId,
 													EwlNuGetPackageSpecificationStatics.GetNuGetPackageVersionString(
 														installation.CurrentMajorVersion,
-														!prerelease.HasValue || prerelease.Value ? (int?)installation.NextBuildNumber : null,
+														!prerelease.HasValue || prerelease.Value ? installation.NextBuildNumber : null,
 														localExportDateAndTime: localExportDateAndTime ) ) );
 											w.WriteLine( "<dependency id=\"ComponentSpace.Saml2.Net.Licensed\" version=\"5.0.0\" />" );
 										},
@@ -180,7 +182,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 								EwlNuGetPackageSpecificationStatics.GetNuGetPackageFileName(
 									samlId,
 									installation.CurrentMajorVersion,
-									!prerelease.HasValue || prerelease.Value ? installation.NextBuildNumber as int? : null,
+									!prerelease.HasValue || prerelease.Value ? installation.NextBuildNumber : null,
 									localExportDateAndTime: localExportDateAndTime ) ) );
 					} )
 				.MaterializeAsList();
@@ -212,14 +214,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		private static void writeNuGetPackageManifest(
 			TextWriter writer, DevelopmentInstallation installation, string id, string projectName, Action<TextWriter> dependencyWriter, bool? prerelease,
 			DateTime? localExportDateAndTime ) {
-			writer.WriteLine( "<?xml version=\"1.0\"?>" );
-			writer.WriteLine( "<package>" );
+			writer.WriteLine( "<?xml version=\"1.0\" encoding=\"utf-8\"?>" );
+			writer.WriteLine( "<package xmlns=\"http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd\">" );
 			writer.WriteLine( "<metadata>" );
 			writer.WriteLine( "<id>" + id + "</id>" );
 			writer.WriteLine(
 				"<version>" + EwlNuGetPackageSpecificationStatics.GetNuGetPackageVersionString(
 					installation.CurrentMajorVersion,
-					!prerelease.HasValue || prerelease.Value ? (int?)installation.NextBuildNumber : null,
+					!prerelease.HasValue || prerelease.Value ? installation.NextBuildNumber : null,
 					localExportDateAndTime: localExportDateAndTime ) + "</version>" );
 			writer.WriteLine(
 				"<title>" + installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + projectName.PrependDelimiter( " - " ) + "</title>" );
@@ -231,7 +233,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			writer.WriteLine( "<license type=\"expression\">MIT</license>" );
 			writer.WriteLine( "<requireLicenseAcceptance>false</requireLicenseAcceptance>" );
 			writer.WriteLine( "<dependencies>" );
+			writer.WriteLine( "<group targetFramework=\"net6.0-windows\">" );
 			dependencyWriter( writer );
+			writer.WriteLine( "</group>" );
 			writer.WriteLine( "</dependencies>" );
 			writer.WriteLine( "<tags>C# ASP.NET DAL SQL-Server MySQL Oracle</tags>" );
 			writer.WriteLine( "</metadata>" );
@@ -270,7 +274,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			build.HgChangesetId = hgOutput.Length == 40 ? hgOutput : "";
 
 			build.LogicSize = AppStatics.NDependIsPresent && !installation.DevelopmentInstallationLogic.SystemIsEwl
-				                  ? GetLogicSize.GetNDependLocCount( installation, false ) as int?
+				                  ? GetLogicSize.GetNDependLocCount( installation, false )
 				                  : null;
 			var serverSideLogicFolderPath = EwlStatics.CombinePaths( logicPackagesFolderPath, "Server Side Logic" );
 			packageWebApps( installation, serverSideLogicFolderPath );
