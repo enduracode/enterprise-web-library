@@ -5,6 +5,7 @@
     <AssemblyName>EnterpriseWebLibrary</AssemblyName>
     <RootNamespace>EnterpriseWebLibrary</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
+    <NoWarn>1591</NoWarn>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
 
