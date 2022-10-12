@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using ComponentSpace.SAML2.Configuration;
+﻿using ComponentSpace.Saml2.Configuration;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.Saml {
@@ -8,6 +6,6 @@ namespace EnterpriseWebLibrary.Saml {
 	/// Application-specific SAML logic.
 	/// </summary>
 	public abstract class AppSamlProvider {
-		protected internal virtual IReadOnlyCollection<SAMLConfiguration> GetCustomConfigurations() => Enumerable.Empty<SAMLConfiguration>().Materialize();
+		protected internal virtual IReadOnlyCollection<SamlConfiguration> GetCustomConfigurations() => Enumerable.Empty<SamlConfiguration>().Materialize();
 	}
 }

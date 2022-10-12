@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using EnterpriseWebLibrary.ExternalFunctionality;
+﻿using EnterpriseWebLibrary.ExternalFunctionality;
 using EnterpriseWebLibrary.UserManagement.IdentityProviders;
 
 // EwlResource
@@ -20,10 +18,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.SamlResourc
 		protected override EwfSafeRequestHandler getOrHead() =>
 			new EwfSafeResponseWriter(
 				EwfResponse.CreateFromAspNetResponse(
-					aspNetResponse => ExternalFunctionalityStatics.ExternalSamlProvider.WriteLogInResponse(
-						aspNetResponse,
-						identityProvider.EntityId,
-						identityProvider == AuthenticationStatics.GetUserLastIdentityProvider(),
-						ReturnUrl ) ) );
+					aspNetResponse => Task.Run(
+							async () => await ExternalFunctionalityStatics.ExternalSamlProvider.WriteLogInResponse(
+								            aspNetResponse,
+								            identityProvider.EntityId,
+								            identityProvider == AuthenticationStatics.GetUserLastIdentityProvider(),
+								            ReturnUrl ) )
+						.Wait() ) );
 	}
 }

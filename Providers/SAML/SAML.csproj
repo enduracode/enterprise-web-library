@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ComponentSpace.Saml2.Net.Licensed" Version="5.0.0" />
+    <PackageReference Include="ComponentSpace.Saml2.Licensed" Version="4.4.0" />
   </ItemGroup>
 
   <ItemGroup>

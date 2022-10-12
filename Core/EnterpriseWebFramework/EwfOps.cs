@@ -133,6 +133,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							builder.Services.AddMemoryCache();
 							builder.Services.AddSingleton<IConfigureOptions<MiniProfilerOptions>, MiniProfilerConfigureOptions>();
 
+							if( ExternalFunctionalityStatics.SamlFunctionalityEnabled )
+								ExternalFunctionalityStatics.ExternalSamlProvider.RegisterDependencyInjectionServices( builder.Services );
+
 							var app = builder.Build();
 
 							MiniProfiler.Configure( app.Services.GetRequiredService<IOptions<MiniProfilerOptions>>().Value );
@@ -146,8 +149,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									@"{0} provider not found in application. To implement, create a class named {0} in ""Your Website\Providers"" that derives from App{0}Provider."
 										.FormatWith( providerName ) );
 
+							var contextAccessor = app.Services.GetRequiredService<IHttpContextAccessor>();
 							if( ExternalFunctionalityStatics.SamlFunctionalityEnabled )
 								ExternalFunctionalityStatics.ExternalSamlProvider.InitAppStatics(
+									() => contextAccessor.HttpContext?.RequestServices ?? app.Services,
 									providerGetter,
 									() => AuthenticationStatics.SamlIdentityProviders.Select(
 											identityProvider => {
@@ -170,7 +175,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 											} )
 										.Materialize() );
 
-							var contextAccessor = app.Services.GetRequiredService<IHttpContextAccessor>();
 							EwfRequest.Init( providerGetter.GetProvider<AppRequestBaseUrlProvider>( "RequestBaseUrl" ), () => contextAccessor.HttpContext.Request );
 							UrlHandlingStatics.Init(
 								() => RequestDispatchingStatics.AppProvider.GetBaseUrlPatterns(),

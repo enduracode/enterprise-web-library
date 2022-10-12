@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using EnterpriseWebLibrary.DataAccess;
+﻿using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.ExternalFunctionality;
 using EnterpriseWebLibrary.UserManagement;
 using Humanizer;
@@ -22,7 +20,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.SamlResourc
 		protected override bool managesDataAccessCacheInUnsafeRequestMethods => true;
 
 		protected override EwfResponse post() {
-			var assertion = ExternalFunctionalityStatics.ExternalSamlProvider.ReadAssertion( EwfRequest.Current.AspNetRequest );
+			var assertion = Task.Run( async () => await ExternalFunctionalityStatics.ExternalSamlProvider.ReadAssertion() ).Result;
 
 			var identityProvider =
 				AuthenticationStatics.SamlIdentityProviders.Single( i => string.Equals( i.EntityId, assertion.identityProvider, StringComparison.Ordinal ) );

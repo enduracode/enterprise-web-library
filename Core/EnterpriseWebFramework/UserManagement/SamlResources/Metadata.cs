@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Xml;
+﻿using System.Xml;
 using EnterpriseWebLibrary.ExternalFunctionality;
 using Tewl.Tools;
 
@@ -29,8 +25,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.SamlResourc
 					"application/samlmetadata+xml",
 					new EwfResponseBodyCreator(
 						( Stream stream ) => {
-							using( var writer = XmlWriter.Create( stream, new XmlWriterSettings { Indent = true } ) )
-								ExternalFunctionalityStatics.ExternalSamlProvider.GetMetadata().OwnerDocument.Save( writer );
+							using var writer = XmlWriter.Create( stream, new XmlWriterSettings { Indent = true } );
+							Task.Run( async () => await ExternalFunctionalityStatics.ExternalSamlProvider.GetMetadata() ).Result.OwnerDocument.Save( writer );
 						} ) ) );
 	}
 }
