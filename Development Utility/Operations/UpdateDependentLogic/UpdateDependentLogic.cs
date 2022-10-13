@@ -629,72 +629,77 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 		private void updateMercurialIgnoreFile( DevelopmentInstallation installation ) {
 			var filePath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".hgignore" );
-			var lines = File.Exists( filePath ) ? File.ReadAllLines( filePath ) : new string[ 0 ];
+			var lines = File.Exists( filePath ) ? File.ReadAllLines( filePath ) : Enumerable.Empty<string>();
 			IoMethods.DeleteFile( filePath );
-			using( TextWriter writer = new StreamWriter( filePath ) ) {
-				const string regionBegin = "# EWL-REGION";
-				const string regionEnd = "# END-EWL-REGION";
+			using TextWriter writer = new StreamWriter( filePath );
 
-				writer.WriteLine( regionBegin );
-				writer.WriteLine( "syntax: glob" );
+			const string regionBegin = "# EWL-REGION";
+			const string regionEnd = "# END-EWL-REGION";
+
+			writer.WriteLine( regionBegin );
+			writer.WriteLine( "syntax: glob" );
+			writer.WriteLine();
+			writer.WriteLine( ".vs/" );
+			writer.WriteLine( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + ".sln.DotSettings.user" );
+			writer.WriteLine( "{0}/".FormatWith( InstallationFileStatics.WebFrameworkStaticFilesFolderName ) );
+			writer.WriteLine( "Error Log.txt" );
+			writer.WriteLine( "*.csproj.user" );
+			writer.WriteLine( "*" + CodeGeneration.DataAccess.DataAccessStatics.CSharpTemplateFileExtension );
+			writer.WriteLine();
+			writer.WriteLine( "Solution Files/bin/" );
+			writer.WriteLine( "Solution Files/obj/" );
+			writer.WriteLine();
+			writer.WriteLine( "Library/bin/" );
+			writer.WriteLine( "Library/obj/" );
+			writer.WriteLine( $"Library/{InstallationConfiguration.ConfigurationFolderName}/{InstallationConfiguration.AsposeLicenseFolderName}/" );
+			writer.WriteLine( "Library/Directory.Build.props" );
+			writer.WriteLine( "Library/Generated Code/" );
+
+			foreach( var webProject in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects ?? Enumerable.Empty<WebProject>() ) {
 				writer.WriteLine();
-				writer.WriteLine( ".vs/{0}/v16/.suo".FormatWith( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName ) );
-				writer.WriteLine( ".vs/{0}/v16/Server/sqlite3/".FormatWith( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName ) );
-				writer.WriteLine( "packages/" );
-				writer.WriteLine( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + ".sln.DotSettings.user" );
-				writer.WriteLine( "{0}/".FormatWith( InstallationFileStatics.WebFrameworkStaticFilesFolderName ) );
-				writer.WriteLine( "Error Log.txt" );
-				writer.WriteLine( "*.csproj.user" );
-				writer.WriteLine( "*" + CodeGeneration.DataAccess.DataAccessStatics.CSharpTemplateFileExtension );
+				writer.WriteLine( webProject.name + "/bin/" );
+				writer.WriteLine( webProject.name + "/obj/" );
+				writer.WriteLine( webProject.name + "/web.config" );
+				writer.WriteLine( webProject.name + "/Directory.Build.props" );
+				writer.WriteLine( webProject.name + "/Generated Code/" );
+				writer.WriteLine( webProject.name + "/Properties/launchSettings.json" );
+			}
+
+			foreach( var service in installation.ExistingInstallationLogic.RuntimeConfiguration.WindowsServices ) {
 				writer.WriteLine();
-				writer.WriteLine( "Solution Files/bin/" );
-				writer.WriteLine( "Solution Files/obj/" );
+				writer.WriteLine( service.Name + "/bin/" );
+				writer.WriteLine( service.Name + "/obj/" );
+				writer.WriteLine( service.Name + "/Directory.Build.props" );
+				writer.WriteLine( service.Name + "/Generated Code/" );
+			}
+
+			foreach( var project in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.ServerSideConsoleProjectsNonNullable ) {
 				writer.WriteLine();
-				writer.WriteLine( "Library/bin/" );
-				writer.WriteLine( "Library/obj/" );
-				writer.WriteLine( $"Library/{InstallationConfiguration.ConfigurationFolderName}/{InstallationConfiguration.AsposeLicenseFolderName}/" );
-				writer.WriteLine( "Library/Generated Code/" );
+				writer.WriteLine( project.Name + "/bin/" );
+				writer.WriteLine( project.Name + "/obj/" );
+				writer.WriteLine( project.Name + "/Directory.Build.props" );
+				writer.WriteLine( project.Name + "/Generated Code/" );
+			}
 
-				foreach( var webProject in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects ?? new WebProject[ 0 ] ) {
-					writer.WriteLine();
-					writer.WriteLine( webProject.name + "/bin/" );
-					writer.WriteLine( webProject.name + "/obj/" );
-					writer.WriteLine( webProject.name + "/Generated Code/" );
-				}
-
-				foreach( var service in installation.ExistingInstallationLogic.RuntimeConfiguration.WindowsServices ) {
-					writer.WriteLine();
-					writer.WriteLine( service.Name + "/bin/" );
-					writer.WriteLine( service.Name + "/obj/" );
-					writer.WriteLine( service.Name + "/Generated Code/" );
-				}
-
-				foreach( var project in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.ServerSideConsoleProjectsNonNullable ) {
-					writer.WriteLine();
-					writer.WriteLine( project.Name + "/bin/" );
-					writer.WriteLine( project.Name + "/obj/" );
-					writer.WriteLine( project.Name + "/Generated Code/" );
-				}
-
-				if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject != null ) {
-					writer.WriteLine();
-					writer.WriteLine( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name + "/bin/" );
-					writer.WriteLine( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name + "/obj/" );
-					writer.WriteLine( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name + "/Generated Code/" );
-				}
-
+			if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject != null ) {
 				writer.WriteLine();
-				writer.WriteLine( regionEnd );
+				writer.WriteLine( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name + "/bin/" );
+				writer.WriteLine( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name + "/obj/" );
+				writer.WriteLine( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name + "/Directory.Build.props" );
+				writer.WriteLine( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name + "/Generated Code/" );
+			}
 
-				var skipping = false;
-				foreach( var line in lines ) {
-					if( line == regionBegin )
-						skipping = true;
-					if( !skipping )
-						writer.WriteLine( line );
-					if( line == regionEnd )
-						skipping = false;
-				}
+			writer.WriteLine();
+			writer.WriteLine( regionEnd );
+
+			var skipping = false;
+			foreach( var line in lines ) {
+				if( line == regionBegin )
+					skipping = true;
+				if( !skipping )
+					writer.WriteLine( line );
+				if( line == regionEnd )
+					skipping = false;
 			}
 		}
 	}
