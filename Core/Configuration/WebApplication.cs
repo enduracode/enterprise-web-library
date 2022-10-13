@@ -30,7 +30,8 @@ namespace EnterpriseWebLibrary.Configuration {
 			Path = EwlStatics.CombinePaths( installationPath, name );
 			SupportsSecureConnections = supportsSecureConnections;
 
-			UsesKestrel = File.ReadAllText( EwlStatics.CombinePaths( Path, name + ".csproj.user" ) ).Contains( "<ActiveDebugProfile>Kestrel</ActiveDebugProfile>" );
+			var userFilePath = EwlStatics.CombinePaths( Path, name + ".csproj.user" );
+			UsesKestrel = !File.Exists( userFilePath ) || File.ReadAllText( userFilePath ).Contains( "<ActiveDebugProfile>Kestrel</ActiveDebugProfile>" );
 
 			// We must pass values for all components since we will not have defaults to fall back on when getting the URL string for this object.
 			DefaultBaseUrl = new BaseUrl(
