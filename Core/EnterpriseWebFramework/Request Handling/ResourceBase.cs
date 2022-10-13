@@ -30,12 +30,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					context.Response,
 					EwfRequest.AppBaseUrlProvider.RequestIsSecure( context.Request ),
 					false,
-					permanent ? (bool?)null : false );
+					permanent && !ConfigurationStatics.IsDevelopmentInstallation ? (bool?)null : false );
 
 			EwfResponse.Create(
 					ContentTypes.PlainText,
 					new EwfResponseBodyCreator( writer => writer.Write( "{0} Redirect: {1}".FormatWith( permanent ? "Permanent" : "Temporary", url ) ) ),
-					statusCodeGetter: () => permanent ? 308 : 307,
+					statusCodeGetter: () => permanent && !ConfigurationStatics.IsDevelopmentInstallation ? 308 : 307,
 					additionalHeaderFieldGetter: () => ( "Location", url ).ToCollection() )
 				.WriteToAspNetResponse( context.Response, omitBody: context.Request.Method == "HEAD" );
 		}
