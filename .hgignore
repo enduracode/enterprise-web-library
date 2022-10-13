@@ -16,6 +16,9 @@ Core/Directory.Build.props
 Core/Generated Code/
 Core/EnterpriseWebLibrary.xml
 
+Solution Files/bin/
+Solution Files/obj/
+
 Library/bin/
 Library/obj/
 Library/Configuration/Aspose Licenses/
@@ -28,18 +31,15 @@ Development Utility/obj/
 Development Utility/Directory.Build.props
 Development Utility/Generated Code/
 
-Solution Files/bin/
-Solution Files/obj/
-
-Tests/bin/
-Tests/obj/
-
 Website/bin/
 Website/obj/
 Website/web.config
 Website/Directory.Build.props
 Website/Generated Code/
 Website/Properties/launchSettings.json
+
+Tests/bin/
+Tests/obj/
 
 Providers/SAML/bin/
 Providers/SAML/obj/
