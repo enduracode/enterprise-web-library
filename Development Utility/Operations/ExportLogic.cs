@@ -49,7 +49,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 									installation.GeneralLogic.Path,
 									EwlStatics.CoreProjectName,
 									EwlStatics.GetProjectOutputFolderPath( useDebugAssembly ) );
-								var libFolderPath = EwlStatics.CombinePaths( folderPath, @"lib\net6.0-windows" );
+								var libFolderPath = EwlStatics.CombinePaths( folderPath, @"lib\net6.0-windows7.0" );
 								foreach( var fileName in new[] { "dll", "pdb", "xml" }.Select( i => "EnterpriseWebLibrary." + i ) )
 									IoMethods.CopyFile( EwlStatics.CombinePaths( ewlOutputFolderPath, fileName ), EwlStatics.CombinePaths( libFolderPath, fileName ) );
 
@@ -146,7 +146,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 											EwlStatics.SamlProviderProjectPath,
 											EwlStatics.GetProjectOutputFolderPath( useDebugAssembly ),
 											fileName ),
-										EwlStatics.CombinePaths( folderPath, @"lib\net6.0-windows", fileName ) );
+										EwlStatics.CombinePaths( folderPath, @"lib\net6.0-windows7.0", fileName ) );
 
 								var manifestPath = EwlStatics.CombinePaths( folderPath, "Package.nuspec" );
 								using( var writer = IoMethods.GetTextWriterForWrite( manifestPath ) )
@@ -163,7 +163,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 														installation.CurrentMajorVersion,
 														!prerelease.HasValue || prerelease.Value ? installation.NextBuildNumber : null,
 														localExportDateAndTime: localExportDateAndTime ) ) );
-											w.WriteLine( "<dependency id=\"ComponentSpace.Saml2.Net.Licensed\" version=\"5.0.0\" />" );
+											w.WriteLine( "<dependency id=\"ComponentSpace.Saml2.Licensed\" version=\"4.4.0\" />" );
 										},
 										prerelease,
 										localExportDateAndTime );
@@ -233,7 +233,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			writer.WriteLine( "<license type=\"expression\">MIT</license>" );
 			writer.WriteLine( "<requireLicenseAcceptance>false</requireLicenseAcceptance>" );
 			writer.WriteLine( "<dependencies>" );
-			writer.WriteLine( "<group targetFramework=\"net6.0-windows\">" );
+			writer.WriteLine( "<group targetFramework=\"net6.0-windows7.0\">" );
 			dependencyWriter( writer );
 			writer.WriteLine( "</group>" );
 			writer.WriteLine( "</dependencies>" );
