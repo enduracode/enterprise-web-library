@@ -116,7 +116,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					EwlStatics.CombinePaths(
 						installation.GeneralLogic.Path,
 						installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name ),
-					_ => {} );
+					_ => {},
+					runtimeIdentifier: "win10-x64" );
 
 			generateXmlSchemaLogicForInstallationConfigurationFile( installation, "Custom" );
 			generateXmlSchemaLogicForInstallationConfigurationFile( installation, "Shared" );
@@ -411,7 +412,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						generatedCodeFolderName.ToCollection(),
 						StaticFile.AppStaticFilesFolderName,
 						"RequestDispatchingStatics.AppProvider.GetFrameworkUrlParent()" );
-				} );
+				},
+				runtimeIdentifier: "win10-x64" );
 
 			var configurationFilesFolderPath = EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "Web Project Configuration" );
 			try {
@@ -484,7 +486,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					writer.WriteLine( "}" );
 
 					writer.WriteLine( "}" );
-				} );
+				},
+				runtimeIdentifier: "win10-x64" );
 		}
 
 		private void generateServerSideConsoleProjectCode( DevelopmentInstallation installation, ServerSideConsoleProject project ) {
@@ -531,10 +534,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 					writer.WriteLine( "}" );
 					writer.WriteLine( "}" );
-				} );
+				},
+				runtimeIdentifier: "win10-x64" );
 		}
 
-		private void generateCodeForProject( DevelopmentInstallation installation, string projectName, string projectPath, Action<TextWriter> codeWriter ) {
+		private void generateCodeForProject(
+			DevelopmentInstallation installation, string projectName, string projectPath, Action<TextWriter> codeWriter, string runtimeIdentifier = "" ) {
 			using( var writer = new StreamWriter( EwlStatics.CombinePaths( projectPath, "Directory.Build.props" ), false, Encoding.UTF8 ) ) {
 				writer.WriteLine( "<Project>" );
 				writer.WriteLine( "<PropertyGroup>" );
@@ -550,6 +555,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 				// package properties; see https://docs.microsoft.com/en-us/nuget/reference/msbuild-targets#pack-target
 				writer.WriteLine( "<PackageVersion>0</PackageVersion>" ); // Clear since we create both prerelease and stable packages with different version numbers.
+
+				// publish-related properties; see https://learn.microsoft.com/en-us/dotnet/core/project-sdk/msbuild-props#publish-related-properties
+				if( runtimeIdentifier.Any() ) {
+					writer.WriteLine( "<RuntimeIdentifier>{0}</RuntimeIdentifier>".FormatWith( runtimeIdentifier ) );
+					writer.WriteLine( "<SelfContained>false</SelfContained>" );
+				}
 
 				writer.WriteLine(
 					"<DefaultItemExcludesInProjectFolder>$(DefaultItemExcludesInProjectFolder);Directory.Build.props;**/*.ewlt.cs</DefaultItemExcludesInProjectFolder>" );

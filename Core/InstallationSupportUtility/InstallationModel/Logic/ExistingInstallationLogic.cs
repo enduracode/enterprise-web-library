@@ -1,6 +1,4 @@
-﻿using System;
-using System.ComponentModel;
-using System.Linq;
+﻿using System.ComponentModel;
 using System.ServiceProcess;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Configuration.SystemGeneral;
@@ -138,7 +136,9 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 		public string GetWindowsServiceFolderPath( WindowsService service, bool useDebugFolderIfDevelopmentInstallation ) {
 			var path = EwlStatics.CombinePaths( generalInstallationLogic.Path, service.Name );
 			if( runtimeConfiguration.InstallationType == InstallationType.Development )
-				path = EwlStatics.CombinePaths( path, EwlStatics.GetProjectOutputFolderPath( useDebugFolderIfDevelopmentInstallation ) );
+				path = EwlStatics.CombinePaths(
+					path,
+					ConfigurationStatics.GetProjectOutputFolderPath( useDebugFolderIfDevelopmentInstallation, runtimeIdentifier: "win10-x64" ) );
 			return path;
 		}
 	}

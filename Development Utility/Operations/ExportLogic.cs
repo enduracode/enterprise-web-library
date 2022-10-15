@@ -48,7 +48,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 								var ewlOutputFolderPath = EwlStatics.CombinePaths(
 									installation.GeneralLogic.Path,
 									EwlStatics.CoreProjectName,
-									EwlStatics.GetProjectOutputFolderPath( useDebugAssembly ) );
+									ConfigurationStatics.GetProjectOutputFolderPath( useDebugAssembly ) );
 								var libFolderPath = EwlStatics.CombinePaths( folderPath, @"lib\net6.0-windows7.0" );
 								foreach( var fileName in new[] { "dll", "pdb", "xml" }.Select( i => "EnterpriseWebLibrary." + i ) )
 									IoMethods.CopyFile( EwlStatics.CombinePaths( ewlOutputFolderPath, fileName ), EwlStatics.CombinePaths( libFolderPath, fileName ) );
@@ -66,7 +66,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 								const string duProjectAndFolderName = "Development Utility";
 								IoMethods.CopyFolder(
-									EwlStatics.CombinePaths( installation.GeneralLogic.Path, duProjectAndFolderName, EwlStatics.GetProjectOutputFolderPath( useDebugAssembly ) ),
+									EwlStatics.CombinePaths(
+										installation.GeneralLogic.Path,
+										duProjectAndFolderName,
+										ConfigurationStatics.GetProjectOutputFolderPath( useDebugAssembly ) ),
 									EwlStatics.CombinePaths( folderPath, duProjectAndFolderName ),
 									false );
 								packageGeneralFiles( installation, folderPath, false );
@@ -144,7 +147,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 										EwlStatics.CombinePaths(
 											installation.GeneralLogic.Path,
 											EwlStatics.SamlProviderProjectPath,
-											EwlStatics.GetProjectOutputFolderPath( useDebugAssembly ),
+											ConfigurationStatics.GetProjectOutputFolderPath( useDebugAssembly ),
 											fileName ),
 										EwlStatics.CombinePaths( folderPath, @"lib\net6.0-windows7.0", fileName ) );
 
@@ -440,7 +443,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 		private void copyServerSideProject( DevelopmentInstallation installation, string serverSideLogicFolderPath, string project ) {
 			IoMethods.CopyFolder(
-				EwlStatics.CombinePaths( installation.GeneralLogic.Path, project, EwlStatics.GetProjectOutputFolderPath( false ) ),
+				EwlStatics.CombinePaths(
+					installation.GeneralLogic.Path,
+					project,
+					ConfigurationStatics.GetProjectOutputFolderPath( false, runtimeIdentifier: "win10-x64" ) ),
 				EwlStatics.CombinePaths( serverSideLogicFolderPath, project ),
 				false );
 		}
@@ -450,7 +456,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				EwlStatics.CombinePaths(
 					installation.GeneralLogic.Path,
 					installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name,
-					EwlStatics.GetProjectOutputFolderPath( false ) ),
+					ConfigurationStatics.GetProjectOutputFolderPath( false, runtimeIdentifier: "win10-x64" ) ),
 				EwlStatics.CombinePaths( clientSideAppFolder, installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name ),
 				false );
 		}

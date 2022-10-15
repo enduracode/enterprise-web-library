@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Configuration.SystemDevelopment;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
@@ -46,12 +43,16 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			return EwlStatics
 				.CombinePaths(
 					installation.DevelopmentInstallationLogic.LibraryPath,
-					EwlStatics.GetProjectOutputFolderPath( debug ),
+					ConfigurationStatics.GetProjectOutputFolderPath( debug ),
 					installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName + ".dll" )
 				.ToCollection()
 				.Concat(
-					from i in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects ?? new WebProject[ 0 ]
-					select EwlStatics.CombinePaths( installation.GeneralLogic.Path, i.name, "bin", i.NamespaceAndAssemblyName + ".dll" ) )
+					from i in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects ?? Enumerable.Empty<WebProject>()
+					select EwlStatics.CombinePaths(
+						installation.GeneralLogic.Path,
+						i.name,
+						ConfigurationStatics.GetProjectOutputFolderPath( debug, runtimeIdentifier: "win10-x64" ),
+						i.NamespaceAndAssemblyName + ".dll" ) )
 				.Concat(
 					from i in installation.ExistingInstallationLogic.RuntimeConfiguration.WindowsServices
 					select EwlStatics.CombinePaths(
@@ -62,17 +63,17 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					select EwlStatics.CombinePaths(
 						installation.GeneralLogic.Path,
 						i.Name,
-						EwlStatics.GetProjectOutputFolderPath( debug ),
+						ConfigurationStatics.GetProjectOutputFolderPath( debug, runtimeIdentifier: "win10-x64" ),
 						i.NamespaceAndAssemblyName + ".exe" ) )
 				.Concat(
 					installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject != null
 						? EwlStatics.CombinePaths(
 								installation.GeneralLogic.Path,
 								installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name,
-								EwlStatics.GetProjectOutputFolderPath( debug ),
+								ConfigurationStatics.GetProjectOutputFolderPath( debug, runtimeIdentifier: "win10-x64" ),
 								installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.assemblyName + ".exe" )
 							.ToCollection()
-						: new string[ 0 ] );
+						: Enumerable.Empty<string>() );
 		}
 
 		public static Operation Instance { get { return instance; } }

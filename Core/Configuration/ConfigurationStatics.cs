@@ -135,9 +135,8 @@ namespace EnterpriseWebLibrary.Configuration {
 		/// <summary>
 		/// Development Utility use only.
 		/// </summary>
-		public static string ServerSideConsoleAppRelativeFolderPath {
-			get { return InstallationConfiguration.InstallationType == InstallationType.Development ? EwlStatics.GetProjectOutputFolderPath( true ) : ""; }
-		}
+		public static string ServerSideConsoleAppRelativeFolderPath =>
+			InstallationConfiguration.InstallationType == InstallationType.Development ? GetProjectOutputFolderPath( true, runtimeIdentifier: "win10-x64" ) : "";
 
 
 		// Do not perform schema validation for non-development installations because the schema file won't be available on non-development machines. Do not perform
@@ -169,5 +168,11 @@ namespace EnterpriseWebLibrary.Configuration {
 		private static string getProviderNotFoundErrorMessage( string providerName ) =>
 			providerName + " provider not found in system. To implement, create a class named " + providerName + @" in Library\Configuration\" +
 			ProvidersFolderAndNamespaceName + " and implement the System" + providerName + "Provider interface.";
+
+		/// <summary>
+		/// Installation Support Utility and private use only.
+		/// </summary>
+		public static string GetProjectOutputFolderPath( bool debug, string runtimeIdentifier = "" ) =>
+			EwlStatics.CombinePaths( "bin", debug ? "Debug" : "Release", "net6.0-windows", runtimeIdentifier );
 	}
 }
