@@ -1,5 +1,4 @@
-﻿using System.Runtime.InteropServices;
-using EnterpriseWebLibrary.Configuration;
+﻿using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Configuration.InstallationStandard;
 using EnterpriseWebLibrary.Configuration.SystemDevelopment;
 using EnterpriseWebLibrary.DevelopmentUtility.Configuration.Packaging;
@@ -364,41 +363,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		}
 
 		private void packageWebApps( DevelopmentInstallation installation, string serverSideLogicFolderPath ) {
-			// NOTE: When packaging web apps, try to find a way to exclude data files. Apparently web deployment projects include these in their output even though
-			// they aren't part of the source web projects. NOTE ON NOTE: We don't use WDPs anymore, so maybe we can eliminate this note.
-			foreach( var webProject in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects ?? new WebProject[ 0 ] ) {
-				var webAppPath = EwlStatics.CombinePaths( serverSideLogicFolderPath, webProject.name );
-
-				// Pre-compile the web project.
-				try {
-					TewlContrib.ProcessTools.RunProgram(
-						EwlStatics.CombinePaths( RuntimeEnvironment.GetRuntimeDirectory(), "aspnet_compiler" ),
-						"-v \"/" + webProject.name + ".csproj\" -p \"" + EwlStatics.CombinePaths( installation.GeneralLogic.Path, webProject.name ) + "\" " +
-						( webProject.IsUpdateableWhenInstalledSpecified && webProject.IsUpdateableWhenInstalled ? "-u " : "" ) + "-f \"" + webAppPath + "\"",
-						"",
-						true );
-				}
-				catch( Exception e ) {
-					throw new UserCorrectableException( "ASP.NET pre-compilation failed for web project " + webProject.name + ".", e );
-				}
-				try {
-					TewlContrib.ProcessTools.RunProgram(
-						EwlStatics.CombinePaths( AppStatics.DotNetToolsFolderPath, "aspnet_merge" ),
-						"\"" + webAppPath + "\" -o " + webProject.NamespaceAndAssemblyName + ".Package -a -copyattrs",
-						"",
-						true );
-				}
-				catch( Exception e ) {
-					throw new UserCorrectableException( "ASP.NET Merge Tool failed for web project " + webProject.name + ".", e );
-				}
-
-				// Delete files and folders that aren't necessary for installed installations.
-				IoMethods.DeleteFolder( EwlStatics.CombinePaths( webAppPath, "Generated Code" ) );
-				IoMethods.DeleteFolder( EwlStatics.CombinePaths( webAppPath, "obj" ) );
-				IoMethods.DeleteFile( EwlStatics.CombinePaths( webAppPath, webProject.name + ".csproj" ) );
-				IoMethods.DeleteFile( EwlStatics.CombinePaths( webAppPath, webProject.name + ".csproj.user" ) );
-				IoMethods.DeleteFile( EwlStatics.CombinePaths( webAppPath, webProject.name + ".csproj.vspscc" ) );
-			}
+			foreach( var webProject in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects ?? Enumerable.Empty<WebProject>() )
+				publishApp(
+					EwlStatics.CombinePaths( installation.GeneralLogic.Path, webProject.name ),
+					EwlStatics.CombinePaths( serverSideLogicFolderPath, webProject.name ) );
 
 			if( installation.DevelopmentInstallationLogic.SystemIsEwl ) {
 				IoMethods.CopyFolder(
@@ -425,10 +393,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 		private void packageWindowsServices( DevelopmentInstallation installation, string serverSideLogicFolderPath ) {
 			foreach( var service in installation.ExistingInstallationLogic.RuntimeConfiguration.WindowsServices )
-				IoMethods.CopyFolder(
+				publishApp(
 					installation.ExistingInstallationLogic.GetWindowsServiceFolderPath( service, false ),
-					EwlStatics.CombinePaths( serverSideLogicFolderPath, service.Name ),
-					false );
+					EwlStatics.CombinePaths( serverSideLogicFolderPath, service.Name ) );
 		}
 
 		private void packageServerSideConsoleApps( DevelopmentInstallation installation, string serverSideLogicFolderPath ) {
@@ -442,23 +409,29 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		}
 
 		private void copyServerSideProject( DevelopmentInstallation installation, string serverSideLogicFolderPath, string project ) {
-			IoMethods.CopyFolder(
+			publishApp(
 				EwlStatics.CombinePaths(
 					installation.GeneralLogic.Path,
 					project,
 					ConfigurationStatics.GetProjectOutputFolderPath( false, runtimeIdentifier: "win10-x64" ) ),
-				EwlStatics.CombinePaths( serverSideLogicFolderPath, project ),
-				false );
+				EwlStatics.CombinePaths( serverSideLogicFolderPath, project ) );
 		}
 
 		private void packageClientSideApp( DevelopmentInstallation installation, string clientSideAppFolder ) {
-			IoMethods.CopyFolder(
+			publishApp(
 				EwlStatics.CombinePaths(
 					installation.GeneralLogic.Path,
 					installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name,
 					ConfigurationStatics.GetProjectOutputFolderPath( false, runtimeIdentifier: "win10-x64" ) ),
-				EwlStatics.CombinePaths( clientSideAppFolder, installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name ),
-				false );
+				EwlStatics.CombinePaths( clientSideAppFolder, installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name ) );
+		}
+
+		private void publishApp( string projectPath, string outputFolderPath ) {
+			TewlContrib.ProcessTools.RunProgram(
+				"dotnet",
+				"publish \"{0}\" --configuration Release --no-restore --output \"{1}\"".FormatWith( projectPath, outputFolderPath ),
+				"",
+				true );
 		}
 
 		private IEnumerable<InstallationSupportUtility.SystemManagerInterface.Messages.BuildMessage.NuGetPackage> packageEwl(
