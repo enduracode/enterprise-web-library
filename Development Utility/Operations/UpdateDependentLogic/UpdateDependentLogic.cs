@@ -95,7 +95,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					installation,
 					"Development Utility",
 					EwlStatics.CombinePaths( installation.GeneralLogic.Path, "Development Utility" ),
-					_ => {} );
+					_ => {},
+					runtimeIdentifier: "win10-x64" );
 				generateCodeForProject(
 					installation,
 					"SAML Provider",

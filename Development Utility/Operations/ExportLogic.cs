@@ -68,7 +68,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 									EwlStatics.CombinePaths(
 										installation.GeneralLogic.Path,
 										duProjectAndFolderName,
-										ConfigurationStatics.GetProjectOutputFolderPath( useDebugAssembly ) ),
+										ConfigurationStatics.GetProjectOutputFolderPath( useDebugAssembly, runtimeIdentifier: "win10-x64" ) ),
 									EwlStatics.CombinePaths( folderPath, duProjectAndFolderName ),
 									false );
 								packageGeneralFiles( installation, folderPath, false );
