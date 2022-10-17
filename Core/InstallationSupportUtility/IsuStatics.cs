@@ -23,6 +23,10 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 						// Disable idle time-out.
 						poolDefaults.ProcessModel.IdleTimeout = useServerAppPoolSettings ? TimeSpan.Zero : new TimeSpan( 0, 5, 0 );
 
+						// needed for ASP.NET Core Data Protection; see
+						// https://learn.microsoft.com/en-us/aspnet/core/host-and-deploy/iis/advanced?view=aspnetcore-6.0#data-protection
+						poolDefaults.ProcessModel.LoadUserProfile = true;
+
 						// Disable regular time interval recycling.
 						poolDefaults.Recycling.PeriodicRestart.Time = TimeSpan.Zero;
 
@@ -45,11 +49,13 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 		/// <summary>
 		/// ISU and internal use only.
 		/// </summary>
-		public static void UpdateIisAppPool( string name ) {
+		public static void UpdateIisAppPool( string name, bool usesClassicClr = false ) {
 			executeInIisServerManagerTransaction(
 				() => IisConfigurationStatics.ExecuteInServerManagerTransaction(
 					serverManager => {
 						var pool = serverManager.ApplicationPools[ name ] ?? serverManager.ApplicationPools.Add( name );
+						if( !usesClassicClr )
+							pool.ManagedRuntimeVersion = "";
 						pool.AutoStart = false;
 					} ) );
 		}

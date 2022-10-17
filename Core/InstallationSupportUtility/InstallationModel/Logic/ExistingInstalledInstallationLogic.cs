@@ -1,38 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.IO;
-using System.Linq;
+﻿using System.Collections.Immutable;
 using System.Security.AccessControl;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Configuration.InstallationStandard;
 using Humanizer;
+using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 	public class ExistingInstalledInstallationLogic {
 		public static void UpdateIisApplications( ExistingInstalledInstallationLogic newLogic, ExistingInstalledInstallationLogic oldLogic ) {
-			var appGetter =
-				new Func<ExistingInstalledInstallationLogic, IEnumerable<WebApplication>>(
-					logic =>
-					logic?.existingInstallationLogic.RuntimeConfiguration.WebApplications.Where( i => i.IisApplication != null ).ToImmutableArray() ??
-					Enumerable.Empty<WebApplication>() );
+			var appGetter = new Func<ExistingInstalledInstallationLogic, IEnumerable<WebApplication>>(
+				logic => logic?.existingInstallationLogic.RuntimeConfiguration.WebApplications.Where( i => i.IisApplication != null ).Materialize() ??
+				         Enumerable.Empty<WebApplication>() );
 			var newApps = appGetter( newLogic );
 			var oldApps = appGetter( oldLogic );
 
 			if( newApps.Any() )
-				IsuStatics.UpdateIisAppPool( newLogic.existingInstallationLogic.IisAppPoolName );
+				IsuStatics.UpdateIisAppPool(
+					newLogic.existingInstallationLogic.IisAppPoolName,
+					usesClassicClr: newLogic.existingInstallationLogic.RuntimeConfiguration.WebApplications.All(
+						i => !File.ReadAllText( i.WebConfigFilePath ).Contains( "<aspNetCore" ) ) );
 
 			var newSiteNames = new HashSet<string>();
 			var newVirtualDirectoryNames = new HashSet<string>();
 			foreach( var app in newApps ) {
-				var site = app.IisApplication as Site;
-				if( site != null ) {
+				if( app.IisApplication is Site site ) {
 					IsuStatics.UpdateIisSite( getIisSiteName( newLogic, app ), newLogic.existingInstallationLogic.IisAppPoolName, app.Path, site.HostNames );
 					newSiteNames.Add( getIisSiteName( newLogic, app ) );
 					continue;
 				}
-				var virtualDirectory = app.IisApplication as VirtualDirectory;
-				if( virtualDirectory != null ) {
+				if( app.IisApplication is VirtualDirectory virtualDirectory ) {
 					IsuStatics.UpdateIisVirtualDirectory( virtualDirectory.Site, virtualDirectory.Name, newLogic.existingInstallationLogic.IisAppPoolName, app.Path );
 					newVirtualDirectoryNames.Add( virtualDirectory.Name );
 					continue;
@@ -41,14 +37,12 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 			}
 
 			foreach( var app in oldApps ) {
-				var site = app.IisApplication as Site;
-				if( site != null ) {
+				if( app.IisApplication is Site ) {
 					if( !newSiteNames.Contains( getIisSiteName( oldLogic, app ) ) )
 						IsuStatics.DeleteIisSite( getIisSiteName( oldLogic, app ) );
 					continue;
 				}
-				var virtualDirectory = app.IisApplication as VirtualDirectory;
-				if( virtualDirectory != null ) {
+				if( app.IisApplication is VirtualDirectory virtualDirectory ) {
 					if( !newVirtualDirectoryNames.Contains( virtualDirectory.Name ) )
 						IsuStatics.DeleteIisVirtualDirectory( virtualDirectory.Site, virtualDirectory.Name );
 					continue;
@@ -60,9 +54,8 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 				IsuStatics.DeleteIisAppPool( oldLogic.existingInstallationLogic.IisAppPoolName );
 		}
 
-		private static string getIisSiteName( ExistingInstalledInstallationLogic logic, WebApplication app ) {
-			return "{0} - {1}".FormatWith( logic.existingInstallationLogic.RuntimeConfiguration.FullShortName, app.Name );
-		}
+		private static string getIisSiteName( ExistingInstalledInstallationLogic logic, WebApplication app ) =>
+			"{0} - {1}".FormatWith( logic.existingInstallationLogic.RuntimeConfiguration.FullShortName, app.Name );
 
 		private readonly ExistingInstallationLogic existingInstallationLogic;
 
@@ -73,13 +66,12 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 		public void PatchLogicForEnvironment() {
 			var isWin7 = Environment.OSVersion.Platform == PlatformID.Win32NT && Environment.OSVersion.Version.Major == 6 && Environment.OSVersion.Version.Minor == 1;
 			if( isWin7 )
-				foreach( var i in existingInstallationLogic.RuntimeConfiguration.WebApplications ) {
+				foreach( var i in existingInstallationLogic.RuntimeConfiguration.WebApplications )
 					File.WriteAllText(
 						i.WebConfigFilePath,
 						File.ReadAllText( i.WebConfigFilePath )
 							.Replace( "<applicationInitialization doAppInitAfterRestart=\"true\" />", "<!--<applicationInitialization doAppInitAfterRestart=\"true\" />-->" )
 							.Replace( "<add name=\"ApplicationInitializationModule\" />", "<!--<add name=\"ApplicationInitializationModule\" />-->" ) );
-				}
 		}
 
 		/// <summary>
@@ -95,14 +87,12 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
 			info.SetAccessControl( security );
 		}
 
-		public IReadOnlyCollection<Tuple<int, string>> GetWebApplicationCertificateIdAndHostNamePairs() {
-			return
-				existingInstallationLogic.RuntimeConfiguration.WebApplications.Select( i => i.IisApplication )
-					.OfType<Site>()
-					.SelectMany( i => i.HostNames )
-					.Where( i => i.SecureBinding != null )
-					.Select( i => Tuple.Create( i.SecureBinding.CertificateId, i.Name ) )
-					.ToImmutableArray();
-		}
+		public IReadOnlyCollection<Tuple<int, string>> GetWebApplicationCertificateIdAndHostNamePairs() =>
+			existingInstallationLogic.RuntimeConfiguration.WebApplications.Select( i => i.IisApplication )
+				.OfType<Site>()
+				.SelectMany( i => i.HostNames )
+				.Where( i => i.SecureBinding != null )
+				.Select( i => Tuple.Create( i.SecureBinding.CertificateId, i.Name ) )
+				.ToImmutableArray();
 	}
 }
