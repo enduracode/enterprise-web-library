@@ -64,13 +64,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 									EwlStatics.CombinePaths( folderPath, InstallationFileStatics.WebFrameworkStaticFilesFolderName, AppStatics.StaticFileLogicFolderName ) );
 
 								const string duProjectAndFolderName = "Development Utility";
-								IoMethods.CopyFolder(
+								publishApp(
 									EwlStatics.CombinePaths(
 										installation.GeneralLogic.Path,
 										duProjectAndFolderName,
 										ConfigurationStatics.GetProjectOutputFolderPath( useDebugAssembly, runtimeIdentifier: "win10-x64" ) ),
-									EwlStatics.CombinePaths( folderPath, duProjectAndFolderName ),
-									false );
+									EwlStatics.CombinePaths( folderPath, duProjectAndFolderName ) );
 								packageGeneralFiles( installation, folderPath, false );
 								IoMethods.CopyFolder(
 									EwlStatics.CombinePaths(
@@ -191,6 +190,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			packages.Add( ( samlId, samlPackages ) );
 
 			return packages;
+		}
+
+		private static void publishApp( string projectPath, string outputFolderPath ) {
+			TewlContrib.ProcessTools.RunProgram(
+				"dotnet",
+				"publish \"{0}\" --configuration Release --no-restore --output \"{1}\"".FormatWith( projectPath, outputFolderPath ),
+				"",
+				true );
 		}
 
 		private static void packageGeneralFiles( DevelopmentInstallation installation, string folderPath, bool includeDatabaseUpdates ) {
@@ -424,14 +431,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name,
 					ConfigurationStatics.GetProjectOutputFolderPath( false, runtimeIdentifier: "win10-x64" ) ),
 				EwlStatics.CombinePaths( clientSideAppFolder, installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name ) );
-		}
-
-		private void publishApp( string projectPath, string outputFolderPath ) {
-			TewlContrib.ProcessTools.RunProgram(
-				"dotnet",
-				"publish \"{0}\" --configuration Release --no-restore --output \"{1}\"".FormatWith( projectPath, outputFolderPath ),
-				"",
-				true );
 		}
 
 		private IEnumerable<InstallationSupportUtility.SystemManagerInterface.Messages.BuildMessage.NuGetPackage> packageEwl(
