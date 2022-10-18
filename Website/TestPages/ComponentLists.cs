@@ -4,7 +4,7 @@ using Tewl.Tools;
 
 // EwlPage
 
-namespace EnterpriseWebLibrary.WebSite.TestPages {
+namespace EnterpriseWebLibrary.Website.TestPages {
 	partial class ComponentLists {
 		protected override PageContent getContent() =>
 			new UiPageContent().Add(
@@ -17,7 +17,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 	}
 }
 
-namespace EnterpriseWebLibrary.WebSite.TestPages {
+namespace EnterpriseWebLibrary.Website.TestPages {
 partial class ComponentLists {
 protected override UrlHandler getUrlParent() => new LegacyUrlFolderSetup();
 }

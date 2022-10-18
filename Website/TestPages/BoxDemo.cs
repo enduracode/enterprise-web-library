@@ -4,7 +4,7 @@ using Tewl.Tools;
 
 // EwlPage
 
-namespace EnterpriseWebLibrary.WebSite.TestPages {
+namespace EnterpriseWebLibrary.Website.TestPages {
 	partial class BoxDemo {
 		public override string ResourceName => "Box";
 

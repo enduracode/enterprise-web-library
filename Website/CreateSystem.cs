@@ -9,7 +9,7 @@ using Tewl.Tools;
 
 // EwlPage
 
-namespace EnterpriseWebLibrary.WebSite {
+namespace EnterpriseWebLibrary.Website {
 	partial class CreateSystem {
 		private readonly DataValue<string> systemName = new DataValue<string>();
 		private readonly DataValue<string> systemShortName = new DataValue<string>();

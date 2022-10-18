@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 
-namespace EnterpriseWebLibrary.WebSite {
+namespace EnterpriseWebLibrary.Website {
 	internal static class LegacyUrlStatics {
 		public static IReadOnlyCollection<UrlPattern> GetPatterns() {
 			var patterns = new List<UrlPattern>();

@@ -4,7 +4,7 @@ using System.Linq;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using Tewl.Tools;
 
-namespace EnterpriseWebLibrary.WebSite.ConfigurationSchemas {
+namespace EnterpriseWebLibrary.Website.ConfigurationSchemas {
 	partial class EntitySetup {
 		protected override ResourceBase createParentResource() => null;
 		public override string EntitySetupName => "Configuration Schemas";

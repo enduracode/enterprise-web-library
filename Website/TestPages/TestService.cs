@@ -6,7 +6,7 @@ using EnterpriseWebLibrary.EnterpriseWebFramework;
 // EwlAutoCompleteService
 // OptionalParameter: string term
 
-namespace EnterpriseWebLibrary.WebSite.TestPages {
+namespace EnterpriseWebLibrary.Website.TestPages {
 	partial class TestService {
 		protected override IEnumerable<AutoCompleteItem> getItems() {
 			var rand = new Random();
@@ -20,7 +20,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 	}
 }
 
-namespace EnterpriseWebLibrary.WebSite.TestPages {
+namespace EnterpriseWebLibrary.Website.TestPages {
 	partial class TestService {
 		protected override UrlHandler getUrlParent() => new LegacyUrlFolderSetup();
 	}

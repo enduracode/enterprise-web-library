@@ -4,7 +4,7 @@ using Tewl.Tools;
 
 // EwlPage
 
-namespace EnterpriseWebLibrary.WebSite.TestPages {
+namespace EnterpriseWebLibrary.Website.TestPages {
 	partial class OmniDemo {
 		protected override PageContent getContent() {
 			var content = new UiPageContent( isAutoDataUpdater: true );
@@ -33,7 +33,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 	}
 }
 
-namespace EnterpriseWebLibrary.WebSite.TestPages {
+namespace EnterpriseWebLibrary.Website.TestPages {
 partial class OmniDemo {
 protected override UrlHandler getUrlParent() => new LegacyUrlFolderSetup();
 }

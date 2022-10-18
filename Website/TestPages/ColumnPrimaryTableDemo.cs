@@ -7,7 +7,7 @@ using Tewl.Tools;
 
 // EwlPage
 
-namespace EnterpriseWebLibrary.WebSite.TestPages {
+namespace EnterpriseWebLibrary.Website.TestPages {
 	partial class ColumnPrimaryTableDemo {
 		public override string ResourceName => "Column Primary";
 
@@ -85,7 +85,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 	}
 }
 
-namespace EnterpriseWebLibrary.WebSite.TestPages {
+namespace EnterpriseWebLibrary.Website.TestPages {
 	partial class ColumnPrimaryTableDemo {
 		protected override UrlHandler getUrlParent() => new LegacyUrlFolderSetup();
 	}

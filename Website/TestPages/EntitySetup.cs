@@ -8,7 +8,7 @@ using Tewl.Tools;
 
 // OptionalParameter: string someText
 
-namespace EnterpriseWebLibrary.WebSite.TestPages {
+namespace EnterpriseWebLibrary.Website.TestPages {
 	partial class EntitySetup: UiEntitySetup {
 		protected override ResourceBase createParentResource() => null;
 

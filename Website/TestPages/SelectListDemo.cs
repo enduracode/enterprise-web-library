@@ -5,7 +5,7 @@ using Tewl.Tools;
 
 // EwlPage
 
-namespace EnterpriseWebLibrary.WebSite.TestPages {
+namespace EnterpriseWebLibrary.Website.TestPages {
 	partial class SelectListDemo {
 		public override string ResourceName => "Select List";
 
@@ -96,7 +96,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 	}
 }
 
-namespace EnterpriseWebLibrary.WebSite.TestPages {
+namespace EnterpriseWebLibrary.Website.TestPages {
 	partial class SelectListDemo {
 		protected override UrlHandler getUrlParent() => new LegacyUrlFolderSetup();
 	}

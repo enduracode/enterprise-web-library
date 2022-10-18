@@ -5,7 +5,7 @@
 	<webProjects>
 		<project>
 			<name>Website</name>
-			<NamespaceAndAssemblyName>EnterpriseWebLibrary.WebSite</NamespaceAndAssemblyName>
+			<NamespaceAndAssemblyName>EnterpriseWebLibrary.Website</NamespaceAndAssemblyName>
 		</project>
 	</webProjects>
 	<xmlSchemas>

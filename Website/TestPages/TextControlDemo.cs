@@ -8,7 +8,7 @@ using Tewl.Tools;
 
 // EwlPage
 
-namespace EnterpriseWebLibrary.WebSite.TestPages {
+namespace EnterpriseWebLibrary.Website.TestPages {
 	partial class TextControlDemo {
 		public override string ResourceName => "Text Control";
 
@@ -105,7 +105,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 	}
 }
 
-namespace EnterpriseWebLibrary.WebSite.TestPages {
+namespace EnterpriseWebLibrary.Website.TestPages {
 	partial class TextControlDemo {
 		protected override UrlHandler getUrlParent() => new LegacyUrlFolderSetup();
 	}

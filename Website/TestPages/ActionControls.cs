@@ -3,7 +3,7 @@ using Tewl.Tools;
 
 // EwlPage
 
-namespace EnterpriseWebLibrary.WebSite.TestPages {
+namespace EnterpriseWebLibrary.Website.TestPages {
 	partial class ActionControls {
 		protected override PageContent getContent() =>
 			new UiPageContent( omitContentBox: true )
@@ -28,7 +28,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 	}
 }
 
-namespace EnterpriseWebLibrary.WebSite.TestPages {
+namespace EnterpriseWebLibrary.Website.TestPages {
 partial class ActionControls {
 protected override UrlHandler getUrlParent() => new LegacyUrlFolderSetup();
 }

@@ -8,7 +8,7 @@ using Tewl;
 // EwlResource
 // Parameter: string fileName
 
-namespace EnterpriseWebLibrary.WebSite.ConfigurationSchemas {
+namespace EnterpriseWebLibrary.Website.ConfigurationSchemas {
 	partial class GetSchema {
 		internal string FilePath { get; private set; }
 

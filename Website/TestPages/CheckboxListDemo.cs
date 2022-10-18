@@ -3,7 +3,7 @@ using EnterpriseWebLibrary.EnterpriseWebFramework;
 
 // EwlPage
 
-namespace EnterpriseWebLibrary.WebSite.TestPages {
+namespace EnterpriseWebLibrary.Website.TestPages {
 	partial class CheckboxListDemo {
 		public override string ResourceName => "Checkbox List";
 
@@ -19,7 +19,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 	}
 }
 
-namespace EnterpriseWebLibrary.WebSite.TestPages {
+namespace EnterpriseWebLibrary.Website.TestPages {
 	partial class CheckboxListDemo {
 		protected override UrlHandler getUrlParent() => new LegacyUrlFolderSetup();
 	}

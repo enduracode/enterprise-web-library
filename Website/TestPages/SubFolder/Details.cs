@@ -2,11 +2,11 @@
 
 // EwlPage
 
-namespace EnterpriseWebLibrary.WebSite.TestPages.SubFolder {
+namespace EnterpriseWebLibrary.Website.TestPages.SubFolder {
 	partial class Details {}
 }
 
-namespace EnterpriseWebLibrary.WebSite.TestPages.SubFolder {
+namespace EnterpriseWebLibrary.Website.TestPages.SubFolder {
 partial class Details {
 protected override UrlHandler getUrlParent() => new LegacyUrlFolderSetup();
 }

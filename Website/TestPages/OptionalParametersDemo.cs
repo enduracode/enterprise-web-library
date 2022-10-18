@@ -7,7 +7,7 @@ using Tewl.Tools;
 // OptionalParameter: string field2
 // OptionalParameter: int? field3
 
-namespace EnterpriseWebLibrary.WebSite.TestPages {
+namespace EnterpriseWebLibrary.Website.TestPages {
 	partial class OptionalParametersDemo {
 		static partial void specifyParameterDefaults( OptionalParameterSpecifier specifier, EntitySetup entitySetup, Parameters parameters ) {
 			specifier.Field1 = "Default value";
@@ -66,7 +66,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 	}
 }
 
-namespace EnterpriseWebLibrary.WebSite.TestPages {
+namespace EnterpriseWebLibrary.Website.TestPages {
 	partial class OptionalParametersDemo {
 		protected override UrlHandler getUrlParent() => new LegacyUrlFolderSetup();
 	}

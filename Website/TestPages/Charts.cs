@@ -5,7 +5,7 @@ using Tewl.Tools;
 
 // EwlPage
 
-namespace EnterpriseWebLibrary.WebSite.TestPages {
+namespace EnterpriseWebLibrary.Website.TestPages {
 	partial class Charts {
 		public override string ResourceName => "Chart";
 
@@ -66,7 +66,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 	}
 }
 
-namespace EnterpriseWebLibrary.WebSite.TestPages {
+namespace EnterpriseWebLibrary.Website.TestPages {
 	partial class Charts {
 		protected override UrlHandler getUrlParent() => new LegacyUrlFolderSetup();
 	}

@@ -2,7 +2,7 @@
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using Tewl.Tools;
 
-namespace EnterpriseWebLibrary.WebSite.TestPages.SubFolder {
+namespace EnterpriseWebLibrary.Website.TestPages.SubFolder {
 	partial class EntitySetup: UiEntitySetup {
 		protected override ResourceBase createParentResource() => ActionControls.GetInfo();
 

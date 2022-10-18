@@ -10,7 +10,7 @@ using Tewl.Tools;
 // OptionalParameter: int groupCount
 // OptionalParameter: int firstGroupItemCount
 
-namespace EnterpriseWebLibrary.WebSite.TestPages {
+namespace EnterpriseWebLibrary.Website.TestPages {
 	partial class EwfTableDemo {
 		static partial void specifyParameterDefaults( OptionalParameterSpecifier specifier, EntitySetup entitySetup, Parameters parameters ) {
 			specifier.GroupCount = 3;

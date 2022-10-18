@@ -10,7 +10,7 @@ using Tewl.Tools;
 // OptionalParameter: IEnumerable<int> nonIdItemStates
 // OptionalParameter: IEnumerable<int> itemIds
 
-namespace EnterpriseWebLibrary.WebSite.TestPages {
+namespace EnterpriseWebLibrary.Website.TestPages {
 	partial class IntermediatePostBacks {
 		static partial void specifyParameterDefaults( OptionalParameterSpecifier specifier, EntitySetup entitySetup, Parameters parameters ) {
 			specifier.NonIdItemStates = new[] { 0, 0, 0 };
@@ -187,7 +187,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 	}
 }
 
-namespace EnterpriseWebLibrary.WebSite.TestPages {
+namespace EnterpriseWebLibrary.Website.TestPages {
 	partial class IntermediatePostBacks {
 		protected override UrlHandler getUrlParent() => new LegacyUrlFolderSetup();
 	}

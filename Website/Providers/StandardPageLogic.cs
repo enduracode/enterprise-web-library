@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
-using EnterpriseWebLibrary.EnterpriseWebFramework;
-using EnterpriseWebLibrary.WebSite.StaticFiles;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary.Website.StaticFiles;
 
-namespace EnterpriseWebLibrary.WebSite.Providers {
+namespace EnterpriseWebLibrary.Website.Providers {
 	internal class StandardPageLogic: AppStandardPageLogicProvider {
-		protected override List<ResourceInfo> GetStyleSheets() => new List<ResourceInfo> { new TestCss() };
+		protected override List<ResourceInfo> GetStyleSheets() => new() { new TestCss() };
 	}
 }

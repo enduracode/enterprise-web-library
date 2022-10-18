@@ -3,7 +3,7 @@ using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.WebSessionState;
 using Tewl.Tools;
 
-namespace EnterpriseWebLibrary.WebSite.Providers {
+namespace EnterpriseWebLibrary.Website.Providers {
 	internal class EwfUi: AppEwfUiProvider {
 		public override IReadOnlyCollection<ActionComponentSetup> GetGlobalNavActions() {
 			var navButtonSetups = new List<ActionComponentSetup>();

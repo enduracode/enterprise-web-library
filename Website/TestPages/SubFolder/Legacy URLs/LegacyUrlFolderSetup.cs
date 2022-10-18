@@ -4,7 +4,7 @@ using EnterpriseWebLibrary.EnterpriseWebFramework;
 
 // EwlResource
 
-namespace EnterpriseWebLibrary.WebSite.TestPages.SubFolder {
+namespace EnterpriseWebLibrary.Website.TestPages.SubFolder {
 	partial class LegacyUrlFolderSetup {
 		protected override UrlHandler getUrlParent() => new TestPages.LegacyUrlFolderSetup();
 		protected override ConnectionSecurity ConnectionSecurity => ConnectionSecurity.MatchingCurrentRequest;

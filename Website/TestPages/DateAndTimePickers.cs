@@ -2,7 +2,7 @@
 
 // EwlPage
 
-namespace EnterpriseWebLibrary.WebSite.TestPages {
+namespace EnterpriseWebLibrary.Website.TestPages {
 	partial class DateAndTimePickers {
 		public override string ResourceName => "Date/Time Controls";
 
@@ -19,7 +19,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 	}
 }
 
-namespace EnterpriseWebLibrary.WebSite.TestPages {
+namespace EnterpriseWebLibrary.Website.TestPages {
 	partial class DateAndTimePickers {
 		protected override UrlHandler getUrlParent() => new LegacyUrlFolderSetup();
 	}

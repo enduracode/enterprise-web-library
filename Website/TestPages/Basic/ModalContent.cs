@@ -4,7 +4,7 @@ using Tewl.Tools;
 
 // EwlPage
 
-namespace EnterpriseWebLibrary.WebSite.TestPages.Basic {
+namespace EnterpriseWebLibrary.Website.TestPages.Basic {
 	partial class ModalContent {
 		protected override PageContent getContent() =>
 			new BasicPageContent().Add(
@@ -28,7 +28,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages.Basic {
 	}
 }
 
-namespace EnterpriseWebLibrary.WebSite.TestPages.Basic {
+namespace EnterpriseWebLibrary.Website.TestPages.Basic {
 partial class ModalContent {
 protected override UrlHandler getUrlParent() => new LegacyUrlFolderSetup();
 }

@@ -2,7 +2,7 @@
 
 // EwlPage
 
-namespace EnterpriseWebLibrary.WebSite.TestPages {
+namespace EnterpriseWebLibrary.Website.TestPages {
 	public partial class RegexHelper {
 		protected override PageContent getContent() {
 			var content = new UiPageContent();
@@ -68,7 +68,7 @@ namespace EnterpriseWebLibrary.WebSite.TestPages {
 	}
 }
 
-namespace EnterpriseWebLibrary.WebSite.TestPages {
+namespace EnterpriseWebLibrary.Website.TestPages {
 partial class RegexHelper {
 protected override UrlHandler getUrlParent() => new LegacyUrlFolderSetup();
 }
