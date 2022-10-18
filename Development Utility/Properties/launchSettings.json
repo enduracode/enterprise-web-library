@@ -2,7 +2,7 @@
   "profiles": {
     "Development Utility": {
       "commandName": "Project",
-      "commandLineArgs": "..\\..\\..\\.. UpdateDependentLogic"
+      "commandLineArgs": "..\\..\\..\\..\\.. UpdateDependentLogic"
     }
   }
 }
