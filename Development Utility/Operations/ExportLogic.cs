@@ -1,4 +1,5 @@
-﻿using EnterpriseWebLibrary.Configuration;
+﻿using System.Text;
+using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Configuration.InstallationStandard;
 using EnterpriseWebLibrary.Configuration.SystemDevelopment;
 using EnterpriseWebLibrary.DevelopmentUtility.Configuration.Packaging;
@@ -367,10 +368,17 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		}
 
 		private void packageWebApps( DevelopmentInstallation installation, string serverSideLogicFolderPath ) {
-			foreach( var webProject in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects ?? Enumerable.Empty<WebProject>() )
+			foreach( var webProject in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects ?? Enumerable.Empty<WebProject>() ) {
 				publishApp(
 					EwlStatics.CombinePaths( installation.GeneralLogic.Path, webProject.name ),
 					EwlStatics.CombinePaths( serverSideLogicFolderPath, webProject.name ) );
+				File.WriteAllText(
+					EwlStatics.CombinePaths( serverSideLogicFolderPath, webProject.name, "web.config" ),
+					File.ReadAllText( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "Web Project Configuration", "web.config" ) )
+						.Replace( "@@AssemblyPath", @".\{0}.exe".FormatWith( webProject.NamespaceAndAssemblyName ) )
+						.Replace( "@@InitializationTimeoutSeconds", EwfOps.InitializationTimeoutSeconds.ToString() ),
+					Encoding.UTF8 );
+			}
 
 			if( installation.DevelopmentInstallationLogic.SystemIsEwl ) {
 				IoMethods.CopyFolder(

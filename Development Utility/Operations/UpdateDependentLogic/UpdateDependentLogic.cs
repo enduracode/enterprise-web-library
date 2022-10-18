@@ -566,6 +566,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine(
 					"<DefaultItemExcludesInProjectFolder>$(DefaultItemExcludesInProjectFolder);Directory.Build.props;**/*.ewlt.cs</DefaultItemExcludesInProjectFolder>" );
 
+				// affects only web apps; see https://learn.microsoft.com/en-us/aspnet/core/host-and-deploy/iis/web-config?view=aspnetcore-6.0
+				writer.WriteLine( "<IsTransformWebConfigDisabled>true</IsTransformWebConfigDisabled>" );
+
 				writer.WriteLine( "</PropertyGroup>" );
 				writer.WriteLine( "</Project>" );
 			}
