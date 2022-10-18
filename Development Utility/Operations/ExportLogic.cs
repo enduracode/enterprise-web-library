@@ -65,10 +65,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 								const string duProjectAndFolderName = "Development Utility";
 								publishApp(
-									EwlStatics.CombinePaths(
-										installation.GeneralLogic.Path,
-										duProjectAndFolderName,
-										ConfigurationStatics.GetProjectOutputFolderPath( useDebugAssembly, runtimeIdentifier: "win10-x64" ) ),
+									EwlStatics.CombinePaths( installation.GeneralLogic.Path, duProjectAndFolderName ),
 									EwlStatics.CombinePaths( folderPath, duProjectAndFolderName ) );
 								packageGeneralFiles( installation, folderPath, false );
 								IoMethods.CopyFolder(
@@ -401,7 +398,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		private void packageWindowsServices( DevelopmentInstallation installation, string serverSideLogicFolderPath ) {
 			foreach( var service in installation.ExistingInstallationLogic.RuntimeConfiguration.WindowsServices )
 				publishApp(
-					installation.ExistingInstallationLogic.GetWindowsServiceFolderPath( service, false ),
+					EwlStatics.CombinePaths( installation.GeneralLogic.Path, service.Name ),
 					EwlStatics.CombinePaths( serverSideLogicFolderPath, service.Name ) );
 		}
 
@@ -416,20 +413,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		}
 
 		private void copyServerSideProject( DevelopmentInstallation installation, string serverSideLogicFolderPath, string project ) {
-			publishApp(
-				EwlStatics.CombinePaths(
-					installation.GeneralLogic.Path,
-					project,
-					ConfigurationStatics.GetProjectOutputFolderPath( false, runtimeIdentifier: "win10-x64" ) ),
-				EwlStatics.CombinePaths( serverSideLogicFolderPath, project ) );
+			publishApp( EwlStatics.CombinePaths( installation.GeneralLogic.Path, project ), EwlStatics.CombinePaths( serverSideLogicFolderPath, project ) );
 		}
 
 		private void packageClientSideApp( DevelopmentInstallation installation, string clientSideAppFolder ) {
 			publishApp(
-				EwlStatics.CombinePaths(
-					installation.GeneralLogic.Path,
-					installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name,
-					ConfigurationStatics.GetProjectOutputFolderPath( false, runtimeIdentifier: "win10-x64" ) ),
+				EwlStatics.CombinePaths( installation.GeneralLogic.Path, installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name ),
 				EwlStatics.CombinePaths( clientSideAppFolder, installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name ) );
 		}
 
