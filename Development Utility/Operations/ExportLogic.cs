@@ -53,22 +53,16 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 								foreach( var fileName in new[] { "dll", "pdb", "xml" }.Select( i => "EnterpriseWebLibrary." + i ) )
 									IoMethods.CopyFile( EwlStatics.CombinePaths( ewlOutputFolderPath, fileName ), EwlStatics.CombinePaths( libFolderPath, fileName ) );
 
+								var toolsFolderPath = EwlStatics.CombinePaths( folderPath, "tools" );
 								IoMethods.CopyFile(
 									EwlStatics.CombinePaths( installation.GeneralLogic.Path, @"Development Utility\Package Manager Console Commands.ps1" ),
-									EwlStatics.CombinePaths( folderPath, @"tools\init.ps1" ) );
-
-								IoMethods.CopyFolder(
-									EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.CoreProjectName, StaticFile.FrameworkStaticFilesSourceFolderPath ),
-									EwlStatics.CombinePaths( folderPath, InstallationFileStatics.WebFrameworkStaticFilesFolderName ),
-									false );
-								IoMethods.DeleteFolder(
-									EwlStatics.CombinePaths( folderPath, InstallationFileStatics.WebFrameworkStaticFilesFolderName, AppStatics.StaticFileLogicFolderName ) );
+									EwlStatics.CombinePaths( toolsFolderPath, "init.ps1" ) );
 
 								const string duProjectAndFolderName = "Development Utility";
 								publishApp(
 									EwlStatics.CombinePaths( installation.GeneralLogic.Path, duProjectAndFolderName ),
-									EwlStatics.CombinePaths( folderPath, duProjectAndFolderName ) );
-								packageGeneralFiles( installation, folderPath, false );
+									EwlStatics.CombinePaths( toolsFolderPath, duProjectAndFolderName ) );
+								packageGeneralFiles( installation, toolsFolderPath, false );
 								IoMethods.CopyFolder(
 									EwlStatics.CombinePaths(
 										installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath,
@@ -76,7 +70,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 										InstallationConfiguration.InstallationsFolderName,
 										!prerelease.HasValue || prerelease.Value ? "Testing" : "Live" ),
 									EwlStatics.CombinePaths(
-										folderPath,
+										toolsFolderPath,
 										InstallationConfiguration.ConfigurationFolderName,
 										InstallationConfiguration.InstallationConfigurationFolderName ),
 									false );
@@ -84,10 +78,17 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 									IoMethods.CopyFile(
 										installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationSharedConfigurationFilePath,
 										EwlStatics.CombinePaths(
-											folderPath,
+											toolsFolderPath,
 											InstallationConfiguration.ConfigurationFolderName,
 											InstallationConfiguration.InstallationConfigurationFolderName,
 											InstallationConfiguration.InstallationSharedConfigurationFileName ) );
+
+								IoMethods.CopyFolder(
+									EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.CoreProjectName, StaticFile.FrameworkStaticFilesSourceFolderPath ),
+									EwlStatics.CombinePaths( toolsFolderPath, InstallationFileStatics.WebFrameworkStaticFilesFolderName ),
+									false );
+								IoMethods.DeleteFolder(
+									EwlStatics.CombinePaths( toolsFolderPath, InstallationFileStatics.WebFrameworkStaticFilesFolderName, AppStatics.StaticFileLogicFolderName ) );
 
 								var manifestPath = EwlStatics.CombinePaths( folderPath, "Package.nuspec" );
 								using( var writer = IoMethods.GetTextWriterForWrite( manifestPath ) )

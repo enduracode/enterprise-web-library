@@ -8,7 +8,7 @@ function Initialize-InstallationConfiguration {
 	[CmdletBinding()]
 	Param()
 	Process {
-		& "$installPath\Development Utility\EnterpriseWebLibrary.DevelopmentUtility" $installationPath CreateInstallationConfiguration
+		& "$installPath\tools\Development Utility\EnterpriseWebLibrary.DevelopmentUtility" $installationPath CreateInstallationConfiguration
 	}
 }
 
@@ -20,7 +20,7 @@ function Update-Data {
 		[Switch]$ForceNewPackageDownload
 	)
 	Process {
-		& "$installPath\Development Utility\EnterpriseWebLibrary.DevelopmentUtility" $installationPath UpdateData $Source $ForceNewPackageDownload
+		& "$installPath\tools\Development Utility\EnterpriseWebLibrary.DevelopmentUtility" $installationPath UpdateData $Source $ForceNewPackageDownload
 	}
 }
 
@@ -28,7 +28,7 @@ function Update-DependentLogic {
 	[CmdletBinding()]
 	Param()
 	Process {
-		& "$installPath\Development Utility\EnterpriseWebLibrary.DevelopmentUtility" $installationPath UpdateDependentLogic
+		& "$installPath\tools\Development Utility\EnterpriseWebLibrary.DevelopmentUtility" $installationPath UpdateDependentLogic
 	}
 }
 
@@ -36,7 +36,7 @@ function ExportLogic {
 	[CmdletBinding()]
 	Param()
 	Process {
-		& "$installPath\Development Utility\EnterpriseWebLibrary.DevelopmentUtility" $installationPath ExportLogic
+		& "$installPath\tools\Development Utility\EnterpriseWebLibrary.DevelopmentUtility" $installationPath ExportLogic
 	}
 }
 
@@ -44,7 +44,7 @@ function Measure-LogicSize {
 	[CmdletBinding()]
 	Param()
 	Process {
-		& "$installPath\Development Utility\EnterpriseWebLibrary.DevelopmentUtility" $installationPath GetLogicSize
+		& "$installPath\tools\Development Utility\EnterpriseWebLibrary.DevelopmentUtility" $installationPath GetLogicSize
 	}
 }
 
@@ -52,7 +52,7 @@ function InstallAndStartServices {
 	[CmdletBinding()]
 	Param()
 	Process {
-		& "$installPath\Development Utility\EnterpriseWebLibrary.DevelopmentUtility" $installationPath InstallAndStartServices
+		& "$installPath\tools\Development Utility\EnterpriseWebLibrary.DevelopmentUtility" $installationPath InstallAndStartServices
 	}
 }
 
@@ -60,7 +60,7 @@ function StopAndUninstallServices {
 	[CmdletBinding()]
 	Param()
 	Process {
-		& "$installPath\Development Utility\EnterpriseWebLibrary.DevelopmentUtility" $installationPath StopAndUninstallServices
+		& "$installPath\tools\Development Utility\EnterpriseWebLibrary.DevelopmentUtility" $installationPath StopAndUninstallServices
 	}
 }
 
