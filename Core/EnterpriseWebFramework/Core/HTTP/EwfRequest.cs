@@ -38,7 +38,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Executes a method that reads a text request body.
 		/// </summary>
-		public void ExecuteWithRequestReader( Action<TextReader> method ) {
+		public void ExecuteWithBodyReader( Action<TextReader> method ) {
 			using var reader = new StreamReader(
 				AspNetRequest.Body,
 				encoding: AspNetRequest.GetTypedHeaders().ContentType.Encoding ?? Encoding.UTF8,
