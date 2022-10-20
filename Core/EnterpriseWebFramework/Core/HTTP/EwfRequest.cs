@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Text;
 using EnterpriseWebLibrary.Configuration;
 using Microsoft.AspNetCore.Http;
 
@@ -16,7 +17,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal static AppRequestBaseUrlProvider AppBaseUrlProvider => baseUrlProvider.GetProvider( returnNullIfNotFound: true ) ?? baseUrlDefaultProvider;
 
-		public static EwfRequest Current => new EwfRequest( currentRequestGetter() );
+		public static EwfRequest Current => new( currentRequestGetter() );
 
 		internal readonly HttpRequest AspNetRequest;
 
@@ -28,6 +29,23 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Returns true if this request is secure.
 		/// </summary>
 		public bool IsSecure => AppBaseUrlProvider.RequestIsSecure( AspNetRequest );
+
+		/// <summary>
+		/// Gets the request headers.
+		/// </summary>
+		public IHeaderDictionary Headers => AspNetRequest.Headers;
+
+		/// <summary>
+		/// Executes a method that reads a text request body.
+		/// </summary>
+		public void ExecuteWithRequestReader( Action<TextReader> method ) {
+			using var reader = new StreamReader(
+				AspNetRequest.Body,
+				encoding: AspNetRequest.GetTypedHeaders().ContentType.Encoding ?? Encoding.UTF8,
+				detectEncodingFromByteOrderMarks: false,
+				leaveOpen: true );
+			method( reader );
+		}
 
 		/// <summary>
 		/// Gets whether the request is from the local computer.

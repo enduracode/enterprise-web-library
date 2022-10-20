@@ -75,8 +75,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							writer.WriteLine( "Cookie " + cookie.Key + ": " + cookie.Value );
 
 						writer.WriteLine();
-						writer.WriteLine( "User agent: " + EwfRequest.Current.AspNetRequest.Headers.UserAgent );
-						writer.WriteLine( "Referrer: " + EwfRequest.Current.AspNetRequest.Headers.Referer );
+						writer.WriteLine( "User agent: " + EwfRequest.Current.Headers.UserAgent );
+						writer.WriteLine( "Referrer: " + EwfRequest.Current.Headers.Referer );
 
 						User user = null;
 						User impersonator = null;
