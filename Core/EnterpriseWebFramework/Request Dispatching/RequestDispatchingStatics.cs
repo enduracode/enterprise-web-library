@@ -22,6 +22,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				return;
 
 			try {
+				var ipAddresses = AppProvider.GetWhitelistedIpAddressesForMaintenance();
+				if( ipAddresses != null && !ipAddresses.Contains( context.Connection.RemoteIpAddress?.ToString() ) ) {
+					EwfResponse.Create( "", new EwfResponseBodyCreator( () => "" ), statusCodeGetter: () => 503 ).WriteToAspNetResponse( context.Response );
+					return;
+				}
+
 				EwfApp.HandleAuthenticateRequest();
 				EwfApp.HandlePostAuthenticateRequest();
 				var requestHandler = EwfApp.ResolveUrl( context );

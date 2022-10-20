@@ -1,8 +1,15 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+﻿using System.Collections.Immutable;
+
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// Application-specific request-dispatching logic.
 	/// </summary>
 	public abstract class AppRequestDispatchingProvider {
+		/// <summary>
+		/// Returns the IP addresses that are allowed to access the application, or null when the application is not down for maintenance.
+		/// </summary>
+		protected internal virtual ImmutableHashSet<string> GetWhitelistedIpAddressesForMaintenance() => null;
+
 		/// <summary>
 		/// Returns the base URL patterns for the application.
 		/// </summary>
