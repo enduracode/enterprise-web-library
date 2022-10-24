@@ -432,6 +432,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				throw new ApplicationException( message, e );
 			}
 
+			Directory.CreateDirectory( EwlStatics.CombinePaths( application.Path, "Properties" ) );
 			File.WriteAllText(
 				EwlStatics.CombinePaths( application.Path, @"Properties\launchSettings.json" ),
 				File.ReadAllText( EwlStatics.CombinePaths( configurationFilesFolderPath, "launchSettings.json" ) )
