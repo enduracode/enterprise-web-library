@@ -8,5 +8,5 @@ $packageVersion = ( ( & "Solution Files\nuget" list $searchTerm -Prerelease -Non
 New-Item packages\EWL\packages.config -Force -ItemType file -Value "<?xml version=`"1.0`" encoding=`"utf-8`"?><packages><package id=`"$packageId`" version=`"$packageVersion`" /></packages>" | Out-Null
 & "Solution Files\nuget" restore packages\EWL\packages.config -PackagesDirectory packages\EWL -NonInteractive
 
-cd "packages\EWL\Ewl*\Development Utility"
-& .\EnterpriseWebLibrary.DevelopmentUtility ..\..\..\.. UpdateDependentLogic
+cd "packages\EWL\Ewl*\tools\Development Utility"
+& .\EnterpriseWebLibrary.DevelopmentUtility ..\..\..\..\.. UpdateDependentLogic
