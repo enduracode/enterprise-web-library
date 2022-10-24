@@ -118,7 +118,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						installation.GeneralLogic.Path,
 						installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name ),
 					_ => {},
-					runtimeIdentifier: "win10-x64" );
+					runtimeIdentifier: "win10-x64",
+					selfContained: true );
 
 			generateXmlSchemaLogicForInstallationConfigurationFile( installation, "Custom" );
 			generateXmlSchemaLogicForInstallationConfigurationFile( installation, "Shared" );
@@ -540,7 +541,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 		}
 
 		private void generateCodeForProject(
-			DevelopmentInstallation installation, string projectName, string projectPath, Action<TextWriter> codeWriter, string runtimeIdentifier = "" ) {
+			DevelopmentInstallation installation, string projectName, string projectPath, Action<TextWriter> codeWriter, string runtimeIdentifier = "",
+			bool selfContained = false ) {
 			using( var writer = new StreamWriter( EwlStatics.CombinePaths( projectPath, "Directory.Build.props" ), false, Encoding.UTF8 ) ) {
 				writer.WriteLine( "<Project>" );
 				writer.WriteLine( "<PropertyGroup>" );
@@ -560,7 +562,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				// publish-related properties; see https://learn.microsoft.com/en-us/dotnet/core/project-sdk/msbuild-props#publish-related-properties
 				if( runtimeIdentifier.Any() ) {
 					writer.WriteLine( "<RuntimeIdentifier>{0}</RuntimeIdentifier>".FormatWith( runtimeIdentifier ) );
-					writer.WriteLine( "<SelfContained>false</SelfContained>" );
+					if( !selfContained )
+						writer.WriteLine( "<SelfContained>false</SelfContained>" );
 				}
 
 				writer.WriteLine(
