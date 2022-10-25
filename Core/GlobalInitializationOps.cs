@@ -70,9 +70,9 @@ namespace EnterpriseWebLibrary {
 				var asposePdfLicensePath = EwlStatics.CombinePaths( ConfigurationStatics.InstallationConfiguration.AsposeLicenseFolderPath, "Aspose.Pdf.lic" );
 				if( File.Exists( asposePdfLicensePath ) )
 					new Aspose.Pdf.License().SetLicense( asposePdfLicensePath );
-				var asposeWordsLicensePath = EwlStatics.CombinePaths( ConfigurationStatics.InstallationConfiguration.AsposeLicenseFolderPath, "Aspose.Words.lic" );
-				if( File.Exists( asposeWordsLicensePath ) )
-					new Aspose.Words.License().SetLicense( asposeWordsLicensePath );
+				//var asposeWordsLicensePath = EwlStatics.CombinePaths( ConfigurationStatics.InstallationConfiguration.AsposeLicenseFolderPath, "Aspose.Words.lic" );
+				//if( File.Exists( asposeWordsLicensePath ) )
+				//	new Aspose.Words.License().SetLicense( asposeWordsLicensePath );
 
 				AppMemoryCache.Init();
 				BlobStorageStatics.Init();
