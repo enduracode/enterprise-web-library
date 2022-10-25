@@ -45,13 +45,21 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 						IoMethods.ExecuteWithTempFolder(
 							folderPath => {
-								var ewlOutputFolderPath = EwlStatics.CombinePaths(
-									installation.GeneralLogic.Path,
-									EwlStatics.CoreProjectName,
-									ConfigurationStatics.GetProjectOutputFolderPath( useDebugAssembly ) );
-								var libFolderPath = EwlStatics.CombinePaths( folderPath, @"lib\net6.0-windows7.0" );
+								TewlContrib.ProcessTools.RunProgram(
+									"dotnet",
+									"build \"{0}\" --configuration {1} --no-restore".FormatWith(
+										EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.CoreProjectName ),
+										useDebugAssembly ? "Debug" : "Release" ),
+									"",
+									true );
 								foreach( var fileName in new[] { "dll", "pdb", "xml" }.Select( i => "EnterpriseWebLibrary." + i ) )
-									IoMethods.CopyFile( EwlStatics.CombinePaths( ewlOutputFolderPath, fileName ), EwlStatics.CombinePaths( libFolderPath, fileName ) );
+									IoMethods.CopyFile(
+										EwlStatics.CombinePaths(
+											installation.GeneralLogic.Path,
+											EwlStatics.CoreProjectName,
+											ConfigurationStatics.GetProjectOutputFolderPath( useDebugAssembly ),
+											fileName ),
+										EwlStatics.CombinePaths( folderPath, @"lib\net6.0-windows7.0", fileName ) );
 
 								var toolsFolderPath = EwlStatics.CombinePaths( folderPath, "tools" );
 								IoMethods.CopyFile(
@@ -139,6 +147,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 						IoMethods.ExecuteWithTempFolder(
 							folderPath => {
+								TewlContrib.ProcessTools.RunProgram(
+									"dotnet",
+									"build \"{0}\" --configuration {1} --no-restore".FormatWith(
+										EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.SamlProviderProjectPath ),
+										useDebugAssembly ? "Debug" : "Release" ),
+									"",
+									true );
 								foreach( var fileName in new[] { "dll", "pdb" }.Select( i => "EnterpriseWebLibrary.Saml." + i ) )
 									IoMethods.CopyFile(
 										EwlStatics.CombinePaths(
