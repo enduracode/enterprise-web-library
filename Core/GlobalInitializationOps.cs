@@ -67,7 +67,7 @@ namespace EnterpriseWebLibrary {
 
 				JsonConvert.DefaultSettings = () => new JsonSerializerSettings().ConfigureForNodaTime( DateTimeZoneProviders.Tzdb );
 
-				var asposePdfLicensePath = EwlStatics.CombinePaths( ConfigurationStatics.InstallationConfiguration.AsposeLicenseFolderPath, "Aspose.PDF.lic" );
+				var asposePdfLicensePath = EwlStatics.CombinePaths( ConfigurationStatics.InstallationConfiguration.AsposeLicenseFolderPath, "Aspose.Pdf.lic" );
 				if( File.Exists( asposePdfLicensePath ) )
 					new Aspose.Pdf.License().SetLicense( asposePdfLicensePath );
 				var asposeWordsLicensePath = EwlStatics.CombinePaths( ConfigurationStatics.InstallationConfiguration.AsposeLicenseFolderPath, "Aspose.Words.lic" );
