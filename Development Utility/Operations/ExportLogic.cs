@@ -140,6 +140,22 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				.MaterializeAsList();
 			packages.Add( ( mainId, mainPackages ) );
 
+			var mySqlId = mainId + ".MySql";
+			packages.Add(
+				( mySqlId,
+					createProviderNuGetPackages(
+						installation,
+						mainId,
+						"MySQL Provider",
+						EwlStatics.MySqlProviderProjectPath,
+						"EnterpriseWebLibrary.MySql",
+						mySqlId,
+						"<dependency id=\"MySql.Data\" version=\"8.0.31\" />".ToCollection(),
+						now,
+						useDebugAssembly,
+						outputFolderPath,
+						prereleaseValues ) ) );
+
 			var samlId = mainId + ".Saml";
 			packages.Add(
 				( samlId,
