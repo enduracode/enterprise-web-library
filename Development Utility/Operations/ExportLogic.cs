@@ -422,6 +422,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				publishApp(
 					EwlStatics.CombinePaths( installation.GeneralLogic.Path, webProject.name ),
 					EwlStatics.CombinePaths( serverSideLogicFolderPath, webProject.name ) );
+				IoMethods.CopyFolder(
+					EwlStatics.CombinePaths( installation.GeneralLogic.Path, webProject.name, StaticFile.AppStaticFilesFolderName ),
+					EwlStatics.CombinePaths( serverSideLogicFolderPath, webProject.name, StaticFile.AppStaticFilesFolderName ),
+					false );
+				IoMethods.DeleteFolder(
+					EwlStatics.CombinePaths( serverSideLogicFolderPath, webProject.name, StaticFile.AppStaticFilesFolderName, AppStatics.StaticFileLogicFolderName ) );
 				File.WriteAllText(
 					EwlStatics.CombinePaths( serverSideLogicFolderPath, webProject.name, "web.config" ),
 					File.ReadAllText( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "Web Project Configuration", "web.config" ) )
