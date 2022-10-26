@@ -141,7 +141,36 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			packages.Add( ( mainId, mainPackages ) );
 
 			var samlId = mainId + ".Saml";
-			var samlPackages = prereleaseValues.Select(
+			packages.Add(
+				( samlId,
+					createProviderNuGetPackages(
+						installation,
+						mainId,
+						"SAML Provider",
+						EwlStatics.SamlProviderProjectPath,
+						"EnterpriseWebLibrary.Saml",
+						samlId,
+						"<dependency id=\"ComponentSpace.Saml2.Licensed\" version=\"4.4.0\" />".ToCollection(),
+						now,
+						useDebugAssembly,
+						outputFolderPath,
+						prereleaseValues ) ) );
+
+			return packages;
+		}
+
+		private static void publishApp( string projectPath, string outputFolderPath ) {
+			TewlContrib.ProcessTools.RunProgram(
+				"dotnet",
+				"publish \"{0}\" --configuration Release --no-restore --output \"{1}\"".FormatWith( projectPath, outputFolderPath ),
+				"",
+				true );
+		}
+
+		private static IReadOnlyList<byte[]> createProviderNuGetPackages(
+			DevelopmentInstallation installation, string mainPackageId, string projectName, string projectPath, string assemblyName, string packageId,
+			IEnumerable<string> dependencies, DateTime now, bool useDebugAssembly, string outputFolderPath, IEnumerable<bool?> prereleaseValues ) =>
+			prereleaseValues.Select(
 					prerelease => {
 						var localExportDateAndTime = prerelease.HasValue ? (DateTime?)null : now;
 
@@ -150,15 +179,15 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 								TewlContrib.ProcessTools.RunProgram(
 									"dotnet",
 									"build \"{0}\" --configuration {1} --no-restore".FormatWith(
-										EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.SamlProviderProjectPath ),
+										EwlStatics.CombinePaths( installation.GeneralLogic.Path, projectPath ),
 										useDebugAssembly ? "Debug" : "Release" ),
 									"",
 									true );
-								foreach( var fileName in new[] { "dll", "pdb" }.Select( i => "EnterpriseWebLibrary.Saml." + i ) )
+								foreach( var fileName in new[] { "dll", "pdb" }.Select( i => "{0}.{1}".FormatWith( assemblyName, i ) ) )
 									IoMethods.CopyFile(
 										EwlStatics.CombinePaths(
 											installation.GeneralLogic.Path,
-											EwlStatics.SamlProviderProjectPath,
+											projectPath,
 											ConfigurationStatics.GetProjectOutputFolderPath( useDebugAssembly ),
 											fileName ),
 										EwlStatics.CombinePaths( folderPath, @"lib\net6.0-windows7.0", fileName ) );
@@ -168,17 +197,18 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 									writeNuGetPackageManifest(
 										writer,
 										installation,
-										samlId,
-										"SAML Provider",
+										packageId,
+										projectName,
 										w => {
 											w.WriteLine(
 												"<dependency id=\"{0}\" version=\"[{1}]\" />".FormatWith(
-													mainId,
+													mainPackageId,
 													EwlNuGetPackageSpecificationStatics.GetNuGetPackageVersionString(
 														installation.CurrentMajorVersion,
 														!prerelease.HasValue || prerelease.Value ? installation.NextBuildNumber : null,
 														localExportDateAndTime: localExportDateAndTime ) ) );
-											w.WriteLine( "<dependency id=\"ComponentSpace.Saml2.Licensed\" version=\"4.4.0\" />" );
+											foreach( var i in dependencies )
+												w.WriteLine( i );
 										},
 										prerelease,
 										localExportDateAndTime );
@@ -195,24 +225,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 							EwlStatics.CombinePaths(
 								outputFolderPath,
 								EwlNuGetPackageSpecificationStatics.GetNuGetPackageFileName(
-									samlId,
+									packageId,
 									installation.CurrentMajorVersion,
 									!prerelease.HasValue || prerelease.Value ? installation.NextBuildNumber : null,
 									localExportDateAndTime: localExportDateAndTime ) ) );
 					} )
 				.MaterializeAsList();
-			packages.Add( ( samlId, samlPackages ) );
-
-			return packages;
-		}
-
-		private static void publishApp( string projectPath, string outputFolderPath ) {
-			TewlContrib.ProcessTools.RunProgram(
-				"dotnet",
-				"publish \"{0}\" --configuration Release --no-restore --output \"{1}\"".FormatWith( projectPath, outputFolderPath ),
-				"",
-				true );
-		}
 
 		private static void packageGeneralFiles( DevelopmentInstallation installation, string folderPath, bool includeDatabaseUpdates ) {
 			// configuration files
