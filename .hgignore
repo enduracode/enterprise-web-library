@@ -41,6 +41,11 @@ Website/Properties/launchSettings.json
 Tests/bin/
 Tests/obj/
 
+Providers/MySQL/bin/
+Providers/MySQL/obj/
+Providers/MySQL/Directory.Build.props
+Providers/MySQL/Generated Code/
+
 Providers/SAML/bin/
 Providers/SAML/obj/
 Providers/SAML/Directory.Build.props

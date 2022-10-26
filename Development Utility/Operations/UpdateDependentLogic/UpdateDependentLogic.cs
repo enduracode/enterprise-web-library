@@ -99,6 +99,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					runtimeIdentifier: "win10-x64" );
 				generateCodeForProject(
 					installation,
+					"MySQL Provider",
+					EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.MySqlProviderProjectPath ),
+					_ => {} );
+				generateCodeForProject(
+					installation,
 					"SAML Provider",
 					EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.SamlProviderProjectPath ),
 					_ => {} );

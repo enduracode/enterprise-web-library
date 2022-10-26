@@ -4,6 +4,11 @@
 	/// </summary>
 	public abstract class SystemExternalFunctionalityProvider {
 		/// <summary>
+		/// Returns the external MySQL provider for the system. This should be a simple constructor expression with no other logic.
+		/// </summary>
+		protected internal virtual ExternalMySqlProvider GetMySqlProvider() => null;
+
+		/// <summary>
 		/// Returns the external SAML provider for the system. This should be a simple constructor expression with no other logic.
 		/// </summary>
 		protected internal virtual ExternalSamlProvider GetSamlProvider() => null;

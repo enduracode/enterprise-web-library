@@ -3,6 +3,7 @@ using EnterpriseWebLibrary.Caching;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.DataAccess.BlobStorage;
+using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.Encryption;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -75,11 +76,16 @@ namespace EnterpriseWebLibrary {
 				//	new Aspose.Words.License().SetLicense( asposeWordsLicensePath );
 
 				AppMemoryCache.Init();
-				BlobStorageStatics.Init();
+				EncryptionOps.Init();
+
+				// data access
+				MySqlInfo.Init( () => ExternalFunctionalityStatics.ExternalMySqlProvider.GetDbProviderFactory() );
 				DataAccessStatics.Init();
 				DataAccessState.Init( mainDataAccessStateGetter, useLongDatabaseTimeouts );
-				EncryptionOps.Init();
+
+				BlobStorageStatics.Init();
 				HtmlBlockStatics.Init();
+
 				UserManagementStatics.Init(
 					() => {
 						if( ExternalFunctionalityStatics.SamlFunctionalityEnabled )

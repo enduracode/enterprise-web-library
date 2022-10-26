@@ -32,6 +32,11 @@ namespace EnterpriseWebLibrary {
 		/// <summary>
 		/// Development Utility and internal use only.
 		/// </summary>
+		public const string MySqlProviderProjectPath = @"Providers\MySQL";
+
+		/// <summary>
+		/// Development Utility and internal use only.
+		/// </summary>
 		public const string SamlProviderProjectPath = @"Providers\SAML";
 
 		/// <summary>
