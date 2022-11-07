@@ -1,12 +1,10 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using EnterpriseWebLibrary.Configuration;
+﻿using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
 using EnterpriseWebLibrary.InstallationSupportUtility.SystemManagerInterface.Messages.SystemListMessage;
 using EnterpriseWebLibrary.IO;
 using Humanizer;
+using Tewl;
 using Tewl.IO;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility {
@@ -18,7 +16,17 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 			ExistingInstallation installation, bool installationIsStandbyDb, RsisInstallation source, bool forceNewPackageDownload,
 			OperationResult operationResult ) {
 			var recognizedInstallation = installation as RecognizedInstallation;
-			var packageZipFilePath = recognizedInstallation != null ? getDataPackage( source, forceNewPackageDownload, operationResult ) : "";
+
+			string packageZipFilePath;
+			if( recognizedInstallation != null )
+				packageZipFilePath = getDataPackage( source, forceNewPackageDownload, operationResult );
+			else {
+				var path = EwlStatics.CombinePaths(
+					getDownloadedPackagesFolderPath(),
+					installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + FileExtensions.Zip );
+				packageZipFilePath = File.Exists( path ) ? path : "";
+			}
+
 			return () => {
 				IoMethods.ExecuteWithTempFolder(
 					tempFolderPath => {
@@ -82,7 +90,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 				    : !installation.DataPackageSize.HasValue )
 				return "";
 
-			var downloadedPackagesFolder = EwlStatics.CombinePaths( ConfigurationStatics.EwlFolderPath, "Downloaded Data Packages", installation.FullName );
+			var downloadedPackagesFolder = EwlStatics.CombinePaths( getDownloadedPackagesFolderPath(), installation.FullName );
 
 			var packageZipFilePath = "";
 			// See if we can re-use an existing package.
@@ -107,6 +115,8 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 			deleteOldFiles( downloadedPackagesFolder, installation.InstallationTypeElements is LiveInstallationElements );
 			return packageZipFilePath;
 		}
+
+		private static string getDownloadedPackagesFolderPath() => EwlStatics.CombinePaths( ConfigurationStatics.EwlFolderPath, "Downloaded Data Packages" );
 
 		private static long downloadDataPackage( RsisInstallation installation, string packageZipFilePath ) {
 			using( var fileWriteStream = IoMethods.GetFileStreamForWrite( packageZipFilePath ) ) {
