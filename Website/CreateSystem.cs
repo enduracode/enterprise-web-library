@@ -1,5 +1,4 @@
-﻿using System.IO;
-using System.Text;
+﻿using System.Text;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.IO;
@@ -11,9 +10,9 @@ using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.Website {
 	partial class CreateSystem {
-		private readonly DataValue<string> systemName = new DataValue<string>();
-		private readonly DataValue<string> systemShortName = new DataValue<string>();
-		private readonly DataValue<string> baseNamespace = new DataValue<string>();
+		private readonly DataValue<string> systemName = new();
+		private readonly DataValue<string> systemShortName = new();
+		private readonly DataValue<string> baseNamespace = new();
 
 		public override string ResourceName => "Create a New {0} System".FormatWith( EwlStatics.EwlInitialism );
 
@@ -49,7 +48,7 @@ namespace EnterpriseWebLibrary.Website {
 										value: "",
 										maxLength: 50,
 										additionalValidationMethod: validator => {
-											if( baseNamespace.Value != EwlStatics.GetCSharpIdentifier( baseNamespace.Value ) )
+											if( baseNamespace.Value != EwlStatics.GetCSharpIdentifier( baseNamespace.Value, omitAtSignPrefixIfNotRequired: true ) )
 												validator.NoteErrorAndAddMessage( "The base namespace must be a valid C# identifier." );
 										} )
 									.ToFormItem( label: "Base namespace".ToComponents() )

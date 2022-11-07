@@ -156,7 +156,8 @@ namespace EnterpriseWebLibrary {
 		/// <summary>
 		/// Gets a valid C# identifier from the specified string.
 		/// </summary>
-		public static string GetCSharpIdentifier( string s ) {
+		// See https://stackoverflow.com/a/950651/35349.
+		public static string GetCSharpIdentifier( string s, bool omitAtSignPrefixIfNotRequired = false ) {
 			if( GetCSharpKeywords().Contains( s ) )
 				return "@" + s;
 
@@ -169,7 +170,7 @@ namespace EnterpriseWebLibrary {
 			if( Regex.IsMatch( s, @"^[^\p{L}\p{Nl}_]" ) )
 				s = "_" + s;
 
-			return s;
+			return ( omitAtSignPrefixIfNotRequired ? "" : "@" ) + s;
 		}
 
 		/// <summary>
