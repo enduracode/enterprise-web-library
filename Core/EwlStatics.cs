@@ -174,13 +174,19 @@ namespace EnterpriseWebLibrary {
 		}
 
 		/// <summary>
-		/// Gets a very limited set of CSharp keywords.
+		/// Gets a set of C# keywords.
 		/// </summary>
-		public static string[] GetCSharpKeywords() {
-			// There is no programmatic way to get C# keywords. So we'll expand this list as needed.
-			// GMS: This being public puts a lot of burden on us to have this list be complete.
-			return new[] { "base", "enum" };
-		}
+		public static string[] GetCSharpKeywords() =>
+			// See https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/.
+			new[]
+				{
+					"abstract", "as", "base", "bool", "break", "byte", "case", "catch", "char", "checked", "class", "const", "continue", "decimal", "default",
+					"delegate", "do", "double", "else", "enum", "event", "explicit", "extern", "false", "finally", "fixed", "float", "for", "foreach", "goto", "if",
+					"implicit", "in", "int", "interface", "internal", "is", "lock", "long", "namespace", "new", "null", "object", "operator", "out", "override",
+					"params", "private", "protected", "public", "readonly", "ref", "return", "sbyte", "sealed", "short", "sizeof", "stackalloc", "static", "string",
+					"struct", "switch", "this", "throw", "true", "try", "typeof", "uint", "ulong", "unchecked", "unsafe", "ushort", "using", "virtual", "void",
+					"volatile", "while"
+				};
 
 		internal static void EmergencyLog( string subject, string body ) {
 			try {
