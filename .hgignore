@@ -5,6 +5,7 @@ _ReSharper*
 Enterprise Web Library.sln.DotSettings.user
 NDependOut/
 DependencyMatrixSnapshot.png
+packages/
 Logic Packages/
 Error Log.txt
 *.csproj.user
