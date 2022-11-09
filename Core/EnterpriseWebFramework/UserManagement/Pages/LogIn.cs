@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.UserManagement;
 using Humanizer;
 using Tewl.Tools;
@@ -13,14 +11,18 @@ using Tewl.Tools;
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 	partial class LogIn {
 		// This class name is used by EWF CSS files.
-		private static readonly ElementClass passwordContainerClass = new ElementClass( "ewfLogInPasswordContainer" );
+		private static readonly ElementClass passwordContainerClass = new( "ewfLogInPasswordContainer" );
 
-		private static readonly ElementClass passwordClass = new ElementClass( "ewfLogInPassword" );
-		private static readonly ElementClass loginCodeButtonClass = new ElementClass( "ewfLogInLcB" );
+		private static readonly ElementClass passwordClass = new( "ewfLogInPassword" );
+		private static readonly ElementClass loginCodeButtonClass = new( "ewfLogInLcB" );
 
 		protected override UrlHandler getUrlParent() => new Admin.EntitySetup();
 
 		protected override PageContent getContent() {
+			var customContent = AuthenticationStatics.AppProvider.GetLogInPageContent( ReturnUrl, User, Code );
+			if( customContent != null )
+				return customContent;
+
 			AuthenticationStatics.CodeLoginModificationMethod codeLoginMethod = null;
 			string destinationUrl = null;
 			if( User.Any() ) {
@@ -44,7 +46,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 
 			var content = new UiPageContent( omitContentBox: true );
 
-			var codeEntryIsForPasswordReset = ComponentStateItem.Create<bool?>( "codeEntryIsForPasswordReset", null, value => true, false );
+			var codeEntryIsForPasswordReset = ComponentStateItem.Create<bool?>( "codeEntryIsForPasswordReset", null, _ => true, false );
 
 			var emailAddress = new DataValue<string>();
 			var password = new DataValue<string>();

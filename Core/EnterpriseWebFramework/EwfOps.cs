@@ -349,7 +349,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								app.Services.GetRequiredService<IDataProtectionProvider>(),
 								( user, code ) => new UserManagement.Pages.LogIn(
 									"",
-									optionalParameterSetter: ( specifier, parameters ) => {
+									optionalParameterSetter: ( specifier, _ ) => {
 										specifier.User = user;
 										specifier.Code = code;
 									} ).GetUrl(),
