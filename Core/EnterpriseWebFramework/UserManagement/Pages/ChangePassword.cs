@@ -1,9 +1,8 @@
-﻿using System;
-using EnterpriseWebLibrary.WebSessionState;
+﻿using EnterpriseWebLibrary.WebSessionState;
 using Tewl.Tools;
 
 // EwlPage
-// Parameter: string returnAndDestinationUrl
+// Parameter: string returnUrl
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 	partial class ChangePassword {
@@ -11,6 +10,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 		protected override UrlHandler getUrlParent() => new Admin.EntitySetup();
 
 		protected override PageContent getContent() {
+			var customContent = AuthenticationStatics.AppProvider.GetChangePasswordPageContent( ReturnUrl );
+			if( customContent != null )
+				return customContent;
+
 			Action<int> passwordUpdater = null;
 			return FormState.ExecuteWithDataModificationsAndDefaultAction(
 				PostBack.CreateFull(
@@ -18,10 +21,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 							passwordUpdater( AppTools.User.UserId );
 							AddStatusMessage( StatusMessageType.Info, "Your password has been successfully changed. Use it the next time you log in." );
 						},
-						actionGetter: () => new PostBackAction( new ExternalResource( ReturnAndDestinationUrl ) ) )
+						actionGetter: () => new PostBackAction( new ExternalResource( ReturnUrl ) ) )
 					.ToCollection(),
 				() => new UiPageContent(
-					pageActions: new HyperlinkSetup( new ExternalResource( ReturnAndDestinationUrl ), "Back" ).ToCollection(),
+					pageActions: new HyperlinkSetup( new ExternalResource( ReturnUrl ), "Back" ).ToCollection(),
 					contentFootActions: new ButtonSetup( "Change Password" ).ToCollection() ).Add(
 					FormItemList.CreateStack(
 						items: AuthenticationStatics.GetPasswordModificationFormItems(

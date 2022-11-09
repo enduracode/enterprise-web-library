@@ -7,5 +7,10 @@
 		/// Returns the default log-in page for the application, or null for the framework’s built-in page.
 		/// </summary>
 		protected internal virtual PageContent GetLogInPageContent( string returnUrl, string user, string code ) => null;
+
+		/// <summary>
+		/// Returns the change-password page for the application, or null for the framework’s built-in page.
+		/// </summary>
+		protected internal virtual PageContent GetChangePasswordPageContent( string returnUrl ) => null;
 	}
 }
