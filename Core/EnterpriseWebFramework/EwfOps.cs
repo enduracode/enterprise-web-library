@@ -2,6 +2,7 @@
 using System.Xml;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Core;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.ExternalFunctionality;
@@ -152,7 +153,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							var contextAccessor = app.Services.GetRequiredService<IHttpContextAccessor>();
 							if( ExternalFunctionalityStatics.SamlFunctionalityEnabled )
 								ExternalFunctionalityStatics.ExternalSamlProvider.InitAppStatics(
-									() => contextAccessor.HttpContext?.RequestServices ?? app.Services,
+									() => AspNetStatics.Services,
 									providerGetter,
 									() => AuthenticationStatics.SamlIdentityProviders.Select(
 											identityProvider => {
@@ -175,6 +176,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 											} )
 										.Materialize() );
 
+							AspNetStatics.Init( () => contextAccessor.HttpContext?.RequestServices ?? app.Services );
 							EwfRequest.Init( providerGetter.GetProvider<AppRequestBaseUrlProvider>( "RequestBaseUrl" ), () => contextAccessor.HttpContext.Request );
 							UrlHandlingStatics.Init(
 								() => RequestDispatchingStatics.AppProvider.GetBaseUrlPatterns(),
