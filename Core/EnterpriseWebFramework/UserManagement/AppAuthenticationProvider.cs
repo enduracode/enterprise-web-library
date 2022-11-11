@@ -2,7 +2,7 @@
 	/// <summary>
 	/// Application-specific authentication logic.
 	/// </summary>
-	public abstract class AppAuthenticationProvider {
+	public class AppAuthenticationProvider {
 		/// <summary>
 		/// Returns the default log-in page for the application, or null for the framework’s built-in page.
 		/// </summary>

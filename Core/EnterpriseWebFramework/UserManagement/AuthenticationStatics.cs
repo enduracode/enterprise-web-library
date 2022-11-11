@@ -24,7 +24,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		/// </summary>
 		public static readonly Duration SessionDuration = Duration.FromHours( 32 ); // persist across consecutive days of usage
 
-		private static SystemProviderReference<AppAuthenticationProvider> provider;
+		private static AppAuthenticationProvider provider;
 		private static TicketDataFormat authenticationTicketProtector;
 		private static LocalIdentityProvider.AutoLogInPageUrlGetterMethod autoLogInPageUrlGetter;
 		private static LocalIdentityProvider.ChangePasswordPageUrlGetterMethod changePasswordPageUrlGetter;
@@ -43,13 +43,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 			SystemProviderReference<AppAuthenticationProvider> provider, IDataProtectionProvider dataProtectionProvider,
 			LocalIdentityProvider.AutoLogInPageUrlGetterMethod autoLogInPageUrlGetter,
 			LocalIdentityProvider.ChangePasswordPageUrlGetterMethod changePasswordPageUrlGetter ) {
-			AuthenticationStatics.provider = provider;
+			AuthenticationStatics.provider = provider.GetProvider( returnNullIfNotFound: true ) ?? new AppAuthenticationProvider();
 			authenticationTicketProtector = new TicketDataFormat( dataProtectionProvider.CreateProtector( "EnterpriseWebLibrary.WebFramework.UserManagement" ) );
 			AuthenticationStatics.autoLogInPageUrlGetter = autoLogInPageUrlGetter;
 			AuthenticationStatics.changePasswordPageUrlGetter = changePasswordPageUrlGetter;
 		}
 
-		internal static AppAuthenticationProvider AppProvider => provider.GetProvider();
+		internal static AppAuthenticationProvider AppProvider => provider;
 
 		internal static void InitAppSpecificLogicDependencies() {
 			// In the future we expect this to use logic from AppAuthenticationProvider to potentially filter the system’s identity providers.
