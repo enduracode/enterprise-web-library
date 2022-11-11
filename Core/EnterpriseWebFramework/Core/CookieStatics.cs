@@ -26,7 +26,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					{
 						Domain = nameAndDomainAndPath.Item2,
 						Path = nameAndDomainAndPath.Item3,
-						Expires = expires?.ToDateTimeUtc() ?? DateTime.MinValue,
+						Expires = expires?.ToDateTimeUtc(),
 						Secure = secure,
 						HttpOnly = httpOnly,
 						SameSite = secure ? SameSiteMode.None : SameSiteMode.Lax
