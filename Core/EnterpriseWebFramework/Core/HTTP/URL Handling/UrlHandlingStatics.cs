@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Web;
 using EnterpriseWebLibrary.TewlContrib;
+using Microsoft.AspNetCore.Http;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -43,8 +44,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					throw new ApplicationException( "The segment must not be the empty string." );
 				parameters = segment.Parameters.Get( encoder );
 				segments.Add( generateSegment( segment.Segment, generateSegmentParameters( parameters.segmentParameters ) ) );
-				if( query == null )
-					query = generateQuery( parameters.queryParameters );
+				query ??= generateQuery( parameters.queryParameters );
 
 				encoder = parent.GetEncoder();
 				parent = parent.GetParent();
@@ -61,8 +61,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				throw new ApplicationException( "The handler does not match any of the base URL patterns for the application." );
 			parameters = baseUrl.Parameters.Get( encoder );
 			var baseUrlParameters = generateSegmentParameters( parameters.segmentParameters );
-			if( query == null )
-				query = generateQuery( parameters.queryParameters );
+			query ??= generateQuery( parameters.queryParameters );
 
 			var baseUrlString = baseUrl.BaseUrl.CompleteWithDefaults( EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl ).GetUrlString( secure );
 			var path = generatePath( baseUrlParameters, segments.AsEnumerable().Reverse() );
@@ -141,7 +140,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		private static string generatePath( string baseUrlParameters, IEnumerable<string> segments ) =>
-			StringTools.ConcatenateWithDelimiter( "/", baseUrlParameters.PrependDelimiter( ";" ).ToCollection().Concat( segments ) );
+			GetPathWithPredictableNormalizationBehavior(
+				StringTools.ConcatenateWithDelimiter( "/", baseUrlParameters.PrependDelimiter( ";" ).ToCollection().Concat( segments ) ) );
+
+		/// <summary>
+		/// Returns the specified path after percent-encoding all percent signs, which makes URL normalization behavior by web servers,
+		/// <see cref="PathString.FromUriComponent(string)"/>, etc. entirely predictable. They will all decode the encoded percent signs but be prevented from
+		/// potentially decoding any other characters such as the semicolons that we use to separate segment parameters.
+		/// </summary>
+		internal static string GetPathWithPredictableNormalizationBehavior( string path ) => path.Replace( "%", "%25" );
 
 		private static ( string baseUrlParameters, IReadOnlyList<string> segments ) parsePath( string path ) {
 			if( !path.Any() )
@@ -151,25 +158,49 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return firstSegment.Length > 0 && firstSegment[ 0 ] == ';' ? ( firstSegment.Substring( 1 ), segments.Skip( 1 ).MaterializeAsList() ) : ( "", segments );
 		}
 
-		private static string generateSegment( string segment, string parameters ) => segment + parameters.PrependDelimiter( ";" );
+		private static string generateSegment( string segment, string parameters ) => encodeSegmentComponent( segment ) + parameters.PrependDelimiter( ";" );
 
 		private static ( string segment, string parameters ) parseSegment( string segment ) {
 			var semicolonIndex = segment.IndexOf( ';' );
-			return semicolonIndex >= 0 ? ( segment.Remove( semicolonIndex ), segment.Substring( semicolonIndex + 1 ) ) : ( segment, "" );
+			return semicolonIndex >= 0
+				       ? ( decodeSegmentComponent( segment.Remove( semicolonIndex ) ), segment.Substring( semicolonIndex + 1 ) )
+				       : ( decodeSegmentComponent( segment ), "" );
 		}
 
 		private static string generateSegmentParameters( IEnumerable<( string name, string value )> parameters ) {
 			parameters = parameters.Materialize();
 			if( parameters.Any( i => i.name.Length == 0 ) )
 				throw new ApplicationException( "The parameter must have a name." );
-			return StringTools.ConcatenateWithDelimiter( ";", from i in parameters select WebUtility.UrlEncode( i.name ) + '=' + WebUtility.UrlEncode( i.value ) );
+			return StringTools.ConcatenateWithDelimiter(
+				";",
+				from i in parameters select encodeSegmentComponent( i.name, encodeEqualSign: true ) + '=' + encodeSegmentComponent( i.value ) );
 		}
 
 		private static IEnumerable<( string name, string value )> parseSegmentParameters( string segmentParameters ) =>
 			from parameter in segmentParameters.Separate( ";", false )
 			let equalsIndex = parameter.IndexOf( '=' )
 			where equalsIndex > 0
-			select ( WebUtility.UrlDecode( parameter.Remove( equalsIndex ) ), WebUtility.UrlDecode( parameter.Substring( equalsIndex + 1 ) ) );
+			select ( decodeSegmentComponent( parameter.Remove( equalsIndex ), decodeEqualSign: true ),
+				       decodeSegmentComponent( parameter.Substring( equalsIndex + 1 ) ) );
+
+		private static string encodeSegmentComponent( string value, bool encodeEqualSign = false ) {
+			value = value.encodePercentSigns().Replace( "/", "%2F" ).Replace( ";", "%3B" );
+			if( encodeEqualSign )
+				value = value.Replace( "=", "%3D" );
+			return new PathString( '/' + value ).ToUriComponent()[ 1.. ];
+		}
+
+		private static string decodeSegmentComponent( string value, bool decodeEqualSign = false ) {
+			value = PathString.FromUriComponent( '/' + value ).Value[ 1.. ].Replace( "%2F", "/" ).Replace( "%3B", ";" );
+			if( decodeEqualSign )
+				value = value.Replace( "%3D", "=" );
+			return value.decodePercentSigns();
+		}
+
+		// These are necessary because new PathString( "..." ).ToUriComponent() has unpredictable behavior with percent signs. If a percent sign appears to be part
+		// of a percent-encoded octet, it’s left alone, but otherwise it’s encoded. By pre-encoding we make the behavior predictable.
+		private static string encodePercentSigns( this string value ) => value.Replace( "%", "%25" );
+		private static string decodePercentSigns( this string encodedValue ) => encodedValue.Replace( "%25", "%" );
 
 		private static string generateQuery( IEnumerable<( string name, string value )> parameters ) {
 			parameters = parameters.Materialize();

@@ -62,7 +62,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						return;
 					}
 
-					var appRelativeUrl = context.Request.Path.Add( context.Request.QueryString );
+					var appRelativeUrl = UrlHandlingStatics.GetPathWithPredictableNormalizationBehavior( context.Request.Path.ToUriComponent() ) +
+					                     context.Request.QueryString.ToUriComponent();
 
 					// If the base URL doesn't include a path and the app-relative URL is just a slash, don't include this trailing slash in the URL since it will not be
 					// present in the canonical URLs that we construct and therefore it would cause problems with URL normalization.
@@ -100,7 +101,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			// Remove the leading slash if it exists. We are trying to normalize the difference between root applications and subdirectory applications by not
 			// distinguishing between app-relative URLs of "" and "/". In root applications this distinction doesn’t exist. We’ve decided on a standard of never
 			// allowing an app-relative URL of "/".
-			var appRelativeUrl = context.Request.Path.Add( context.Request.QueryString );
+			var appRelativeUrl = UrlHandlingStatics.GetPathWithPredictableNormalizationBehavior( context.Request.Path.ToUriComponent() ) +
+			                     context.Request.QueryString.ToUriComponent();
 			if( context.Request.Path.HasValue )
 				appRelativeUrl = appRelativeUrl[ 1.. ];
 
