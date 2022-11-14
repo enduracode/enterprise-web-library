@@ -43,7 +43,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						return;
 					}
 
-					appRelativeUrl = UrlHandlingStatics.GetPathWithPredictableNormalizationBehavior( context.Request.Path.ToUriComponent() ) +
+					appRelativeUrl = UrlHandlingStatics.EncodePathForPredictableNormalization( context.Request.Path.ToUriComponent() ) +
 					                 context.Request.QueryString.ToUriComponent();
 
 					// If the base URL doesn't include a path and the app-relative URL is just a slash, don't include this trailing slash in the URL since it will not be

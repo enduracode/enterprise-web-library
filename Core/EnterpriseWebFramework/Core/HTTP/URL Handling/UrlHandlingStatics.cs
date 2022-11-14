@@ -140,23 +140,25 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		private static string generatePath( string baseUrlParameters, IEnumerable<string> segments ) =>
-			GetPathWithPredictableNormalizationBehavior(
+			EncodePathForPredictableNormalization(
 				StringTools.ConcatenateWithDelimiter( "/", baseUrlParameters.PrependDelimiter( ";" ).ToCollection().Concat( segments ) ) );
+
+		private static ( string baseUrlParameters, IReadOnlyList<string> segments ) parsePath( string path ) {
+			if( !path.Any() )
+				return ( "", Enumerable.Empty<string>().MaterializeAsList() );
+			var segments = decodePathWithPredictableNormalization( path ).Separate( "/", false );
+			var firstSegment = segments.First();
+			return firstSegment.Length > 0 && firstSegment[ 0 ] == ';' ? ( firstSegment.Substring( 1 ), segments.Skip( 1 ).MaterializeAsList() ) : ( "", segments );
+		}
 
 		/// <summary>
 		/// Returns the specified path after percent-encoding all percent signs, which makes URL normalization behavior by web servers,
 		/// <see cref="PathString.FromUriComponent(string)"/>, etc. entirely predictable. They will all decode the encoded percent signs but be prevented from
 		/// potentially decoding any other characters such as the semicolons that we use to separate segment parameters.
 		/// </summary>
-		internal static string GetPathWithPredictableNormalizationBehavior( string path ) => path.Replace( "%", "%25" );
+		internal static string EncodePathForPredictableNormalization( string path ) => path.Replace( "%", "%25" );
 
-		private static ( string baseUrlParameters, IReadOnlyList<string> segments ) parsePath( string path ) {
-			if( !path.Any() )
-				return ( "", Enumerable.Empty<string>().MaterializeAsList() );
-			var segments = path.Separate( "/", false );
-			var firstSegment = segments.First();
-			return firstSegment.Length > 0 && firstSegment[ 0 ] == ';' ? ( firstSegment.Substring( 1 ), segments.Skip( 1 ).MaterializeAsList() ) : ( "", segments );
-		}
+		private static string decodePathWithPredictableNormalization( string path ) => path.Replace( "%25", "%" );
 
 		private static string generateSegment( string segment, string parameters ) => encodeSegmentComponent( segment ) + parameters.PrependDelimiter( ";" );
 
@@ -184,23 +186,22 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				       decodeSegmentComponent( parameter.Substring( equalsIndex + 1 ) ) );
 
 		private static string encodeSegmentComponent( string value, bool encodeEqualSign = false ) {
-			value = value.encodePercentSigns().Replace( "/", "%2F" ).Replace( ";", "%3B" );
+			// This is necessary because new PathString( "..." ).ToUriComponent() has unpredictable behavior with percent signs. If a percent sign appears to be part
+			// of a percent-encoded octet, it’s left alone, but otherwise it’s encoded. By pre-encoding we make the behavior predictable.
+			value = value.Replace( "%", "%25" );
+
+			value = new PathString( '/' + value ).ToUriComponent()[ 1.. ].Replace( "/", "%2F" ).Replace( ";", "%3B" );
 			if( encodeEqualSign )
 				value = value.Replace( "=", "%3D" );
-			return new PathString( '/' + value ).ToUriComponent()[ 1.. ];
+			return value;
 		}
 
 		private static string decodeSegmentComponent( string value, bool decodeEqualSign = false ) {
-			value = PathString.FromUriComponent( '/' + value ).Value[ 1.. ].Replace( "%2F", "/" ).Replace( "%3B", ";" );
+			value = value.Replace( "%2F", "/" ).Replace( "%3B", ";" );
 			if( decodeEqualSign )
 				value = value.Replace( "%3D", "=" );
-			return value.decodePercentSigns();
+			return PathString.FromUriComponent( '/' + value ).Value[ 1.. ];
 		}
-
-		// These are necessary because new PathString( "..." ).ToUriComponent() has unpredictable behavior with percent signs. If a percent sign appears to be part
-		// of a percent-encoded octet, it’s left alone, but otherwise it’s encoded. By pre-encoding we make the behavior predictable.
-		private static string encodePercentSigns( this string value ) => value.Replace( "%", "%25" );
-		private static string decodePercentSigns( this string encodedValue ) => encodedValue.Replace( "%25", "%" );
 
 		private static string generateQuery( IEnumerable<( string name, string value )> parameters ) {
 			parameters = parameters.Materialize();
