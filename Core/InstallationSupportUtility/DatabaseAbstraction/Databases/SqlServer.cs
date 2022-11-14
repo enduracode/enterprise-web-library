@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.DataAccess.CommandWriting;
@@ -100,14 +95,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Da
 						lineMarkerInsert.AddColumnModifications( new InlineDbCommandColumnValue( "ParameterValue", new DbParameterValue( 0 ) ).ToCollection() );
 						lineMarkerInsert.Execute( cn );
 
-						executeLongRunningCommand(
-							cn,
-							@"CREATE TABLE MainSequence(
-	MainSequenceId int
-		NOT NULL
-		IDENTITY
-		CONSTRAINT MainSequencePk PRIMARY KEY
-)" );
+						executeLongRunningCommand( cn, "CREATE SEQUENCE MainSequence AS int MINVALUE 1" );
 
 						const string userName = @"NT AUTHORITY\NETWORK SERVICE";
 						executeLongRunningCommand( cn, "CREATE USER [{0}]".FormatWith( userName ) );

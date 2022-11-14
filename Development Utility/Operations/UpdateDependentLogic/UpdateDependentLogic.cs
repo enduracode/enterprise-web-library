@@ -6,6 +6,7 @@ using EnterpriseWebLibrary.Configuration.SystemGeneral;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration;
+using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess;
 using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems;
 using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems.StandardModification;
 using EnterpriseWebLibrary.Email;
@@ -342,7 +343,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 							modNamespaceDeclaration,
 							database,
 							tableName,
-							CodeGeneration.DataAccess.DataAccessStatics.IsRevisionHistoryTable( tableName, configuration ) );
+							DataAccessStatics.IsRevisionHistoryTable( tableName, configuration ) );
 					}
 
 					// retrieval and modification commands - custom
@@ -356,8 +357,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						writer.WriteLine();
 						writer.WriteLine( "namespace {0} {{".FormatWith( baseNamespace ) );
 						writer.WriteLine( "public static class {0}MainSequence {{".FormatWith( database.SecondaryDatabaseName ) );
-						writer.WriteLine(
-							"public static int GetNextValue() => {0}Modification.MainSequenceModification.InsertRow();".FormatWith( database.SecondaryDatabaseName ) );
+						writer.WriteLine( "public static int GetNextValue() => {" );
+						writer.WriteLine( "var command = " + DataAccessStatics.GetConnectionExpression( database ) + ".DatabaseInfo.CreateCommand();" );
+						writer.WriteLine( "command.CommandText = \"SELECT NEXT VALUE FOR MainSequence\";" );
+						writer.WriteLine( "return (int)" + DataAccessStatics.GetConnectionExpression( database ) + ".ExecuteScalarCommand( cmd );" );
+						writer.WriteLine( "}" );
 						writer.WriteLine( "}" );
 						writer.WriteLine( "}" );
 					}
