@@ -37,9 +37,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					return;
 				}
 
-				HandleAuthenticateRequest();
-				HandlePostAuthenticateRequest();
-				var requestHandler = ResolveUrl( context );
+				EwfApp.RequestState.IntermediateUserExists = NonLiveInstallationStatics.IntermediateAuthenticationCookieExists();
+				EwfApp.RequestState.EnableUser();
+
+				Action<HttpContext> requestHandler;
+				using( MiniProfiler.Current.Step( "EWF - Resolve URL" ) )
+					requestHandler = resolveUrl( context );
+
 				if( requestHandler != null )
 					requestHandler( context );
 				else
@@ -87,22 +91,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		private static string getRequestBaseUrl( HttpRequest request ) {
-			var provider = EwfRequest.AppBaseUrlProvider;
-			var host = provider.GetRequestHost( request );
-			return host.Any() ? BaseUrl.GetUrlString( provider.RequestIsSecure( request ), host, provider.GetRequestBasePath( request ) ) : "";
-		}
-
-		internal static void HandleAuthenticateRequest() {
-			EwfApp.RequestState.IntermediateUserExists = NonLiveInstallationStatics.IntermediateAuthenticationCookieExists();
-		}
-
-		internal static void HandlePostAuthenticateRequest() {
-			EwfApp.RequestState.EnableUser();
-		}
-
-		internal static Action<HttpContext> ResolveUrl( HttpContext context ) {
-			using( MiniProfiler.Current.Step( "EWF - Resolve URL" ) )
-				return resolveUrl( context );
+			var baseUrlProvider = EwfRequest.AppBaseUrlProvider;
+			var host = baseUrlProvider.GetRequestHost( request );
+			return host.Any() ? BaseUrl.GetUrlString( baseUrlProvider.RequestIsSecure( request ), host, baseUrlProvider.GetRequestBasePath( request ) ) : "";
 		}
 
 		private static Action<HttpContext> resolveUrl( HttpContext context ) {
