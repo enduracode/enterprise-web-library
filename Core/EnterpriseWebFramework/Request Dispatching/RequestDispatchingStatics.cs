@@ -26,38 +26,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public static AppRequestDispatchingProvider AppProvider => provider.GetProvider();
 
 		internal static async Task ProcessRequest( HttpContext context, RequestDelegate next ) {
-			HandleBeginRequest( context );
-			if( context.Response.StatusCode != 200 )
-				return;
-
-			try {
-				var ipAddresses = AppProvider.GetWhitelistedIpAddressesForMaintenance();
-				if( ipAddresses != null && !ipAddresses.Contains( context.Connection.RemoteIpAddress?.ToString() ) ) {
-					EwfResponse.Create( "", new EwfResponseBodyCreator( () => "" ), statusCodeGetter: () => 503 ).WriteToAspNetResponse( context.Response );
-					return;
-				}
-
-				EwfApp.RequestState.IntermediateUserExists = NonLiveInstallationStatics.IntermediateAuthenticationCookieExists();
-				EwfApp.RequestState.EnableUser();
-
-				Action<HttpContext> requestHandler;
-				using( MiniProfiler.Current.Step( "EWF - Resolve URL" ) )
-					requestHandler = resolveUrl( context );
-
-				if( requestHandler != null )
-					requestHandler( context );
-				else
-					await next( context );
-			}
-			catch( Exception exception ) {
-				HandleError( context, exception );
-			}
-			finally {
-				HandleEndRequest();
-			}
-		}
-
-		internal static void HandleBeginRequest( HttpContext context ) {
 			executeWithBasicExceptionHandling(
 				() => {
 					// This used to be just HttpContext.Current.Request.Url, but that doesn't work with Azure due to the use of load balancing. An Azure load balancer
@@ -88,6 +56,34 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				},
 				false,
 				true );
+			if( context.Response.StatusCode != 200 )
+				return;
+
+			try {
+				var ipAddresses = AppProvider.GetWhitelistedIpAddressesForMaintenance();
+				if( ipAddresses != null && !ipAddresses.Contains( context.Connection.RemoteIpAddress?.ToString() ) ) {
+					EwfResponse.Create( "", new EwfResponseBodyCreator( () => "" ), statusCodeGetter: () => 503 ).WriteToAspNetResponse( context.Response );
+					return;
+				}
+
+				EwfApp.RequestState.IntermediateUserExists = NonLiveInstallationStatics.IntermediateAuthenticationCookieExists();
+				EwfApp.RequestState.EnableUser();
+
+				Action<HttpContext> requestHandler;
+				using( MiniProfiler.Current.Step( "EWF - Resolve URL" ) )
+					requestHandler = resolveUrl( context );
+
+				if( requestHandler != null )
+					requestHandler( context );
+				else
+					await next( context );
+			}
+			catch( Exception exception ) {
+				HandleError( context, exception );
+			}
+			finally {
+				HandleEndRequest();
+			}
 		}
 
 		private static string getRequestBaseUrl( HttpRequest request ) {
