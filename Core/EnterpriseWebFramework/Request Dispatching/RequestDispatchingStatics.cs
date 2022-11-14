@@ -26,6 +26,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public static AppRequestDispatchingProvider AppProvider => provider.GetProvider();
 
 		internal static async Task ProcessRequest( HttpContext context, RequestDelegate next ) {
+			string appRelativeUrl = null;
 			executeWithBasicExceptionHandling(
 				() => {
 					// This used to be just HttpContext.Current.Request.Url, but that doesn't work with Azure due to the use of load balancing. An Azure load balancer
@@ -42,8 +43,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						return;
 					}
 
-					var appRelativeUrl = UrlHandlingStatics.GetPathWithPredictableNormalizationBehavior( context.Request.Path.ToUriComponent() ) +
-					                     context.Request.QueryString.ToUriComponent();
+					appRelativeUrl = UrlHandlingStatics.GetPathWithPredictableNormalizationBehavior( context.Request.Path.ToUriComponent() ) +
+					                 context.Request.QueryString.ToUriComponent();
 
 					// If the base URL doesn't include a path and the app-relative URL is just a slash, don't include this trailing slash in the URL since it will not be
 					// present in the canonical URLs that we construct and therefore it would cause problems with URL normalization.
@@ -71,7 +72,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 				Action<HttpContext> requestHandler;
 				using( MiniProfiler.Current.Step( "EWF - Resolve URL" ) )
-					requestHandler = resolveUrl( context );
+					requestHandler = resolveUrl( context, appRelativeUrl );
 
 				if( requestHandler != null )
 					requestHandler( context );
@@ -92,12 +93,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return host.Any() ? BaseUrl.GetUrlString( baseUrlProvider.RequestIsSecure( request ), host, baseUrlProvider.GetRequestBasePath( request ) ) : "";
 		}
 
-		private static Action<HttpContext> resolveUrl( HttpContext context ) {
+		private static Action<HttpContext> resolveUrl( HttpContext context, string appRelativeUrl ) {
 			// Remove the leading slash if it exists. We are trying to normalize the difference between root applications and subdirectory applications by not
 			// distinguishing between app-relative URLs of "" and "/". In root applications this distinction doesn’t exist. We’ve decided on a standard of never
 			// allowing an app-relative URL of "/".
-			var appRelativeUrl = UrlHandlingStatics.GetPathWithPredictableNormalizationBehavior( context.Request.Path.ToUriComponent() ) +
-			                     context.Request.QueryString.ToUriComponent();
 			if( context.Request.Path.HasValue )
 				appRelativeUrl = appRelativeUrl[ 1.. ];
 
