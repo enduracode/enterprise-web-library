@@ -357,10 +357,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						writer.WriteLine();
 						writer.WriteLine( "namespace {0} {{".FormatWith( baseNamespace ) );
 						writer.WriteLine( "public static class {0}MainSequence {{".FormatWith( database.SecondaryDatabaseName ) );
-						writer.WriteLine( "public static int GetNextValue() => {" );
+						writer.WriteLine( "public static int GetNextValue() {" );
 						writer.WriteLine( "var command = " + DataAccessStatics.GetConnectionExpression( database ) + ".DatabaseInfo.CreateCommand();" );
 						writer.WriteLine( "command.CommandText = \"SELECT NEXT VALUE FOR MainSequence\";" );
-						writer.WriteLine( "return (int)" + DataAccessStatics.GetConnectionExpression( database ) + ".ExecuteScalarCommand( cmd );" );
+						writer.WriteLine( "return (int)" + DataAccessStatics.GetConnectionExpression( database ) + ".ExecuteScalarCommand( command );" );
 						writer.WriteLine( "}" );
 						writer.WriteLine( "}" );
 						writer.WriteLine( "}" );
