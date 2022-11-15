@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.IO;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework.WebItems;
@@ -203,7 +199,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 			}
 
 			// Generate code for files in the current folder.
-			foreach( var fileName in IoMethods.GetFileNamesInFolder( folderPath ) ) {
+			foreach( var fileName in IoMethods.GetFileNamesInFolder( folderPath ).OrderBy( i => i ) ) {
 				if( legacyUrlStatics != null &&
 				    aspxFilePaths.Any( i => i.EqualsIgnoreCase( EwlStatics.CombinePaths( projectPath, folderPathRelativeToProject, fileName ) ) ) )
 					continue;
@@ -217,7 +213,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 			}
 
 			// Delve into sub folders.
-			foreach( var subFolderName in IoMethods.GetFolderNamesInFolder( folderPath ) ) {
+			foreach( var subFolderName in IoMethods.GetFolderNamesInFolder( folderPath ).OrderBy( i => i ) ) {
 				var subFolderPath = Path.Combine( folderPathRelativeToProject, subFolderName );
 				if( subFolderPath == "bin" || subFolderPath == "obj" )
 					continue;
@@ -242,10 +238,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 			var folderNamespace = WebItemGeneralData.GetNamespaceFromPath( projectNamespace, folderPathRelativeToProject, false );
 			const string folderSetupClassName = "FolderSetup";
 			var files = IoMethods.GetFileNamesInFolder( folderPath )
+				.OrderBy( i => i )
 				.Select( i => new WebItemGeneralData( projectPath, projectNamespace, EwlStatics.CombinePaths( folderPathRelativeToProject, i ), true ) )
 				.Materialize();
 			var subfolderNames = IoMethods.GetFolderNamesInFolder( folderPath )
 				.Where( i => !isRootFolder || i != AppStatics.StaticFileLogicFolderName )
+				.OrderBy( i => i )
 				.Materialize();
 			generateStaticFileFolderSetup(
 				writer,
