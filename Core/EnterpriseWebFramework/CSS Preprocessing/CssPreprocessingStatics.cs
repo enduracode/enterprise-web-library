@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Reflection;
+﻿using System.Reflection;
 using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -10,7 +6,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// Provides access to custom elements.
 	/// </summary>
 	internal static class CssPreprocessingStatics {
-		private static readonly List<CssElement> elements = new List<CssElement>();
+		private static readonly List<CssElement> elements = new();
 
 		/// <summary>
 		/// Loads custom elements from the standard library assembly and any additional assemblies passed.
@@ -24,6 +20,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				throw new ApplicationException( "Duplicate elements exist: " + StringTools.ConcatenateWithDelimiter( ", ", duplicateElementNames ) + "." );
 		}
 
-		internal static ReadOnlyCollection<CssElement> Elements => elements.AsReadOnly();
+		internal static IReadOnlyCollection<CssElement> Elements => elements;
 	}
 }

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using EnterpriseWebLibrary.UserManagement;
+﻿using EnterpriseWebLibrary.UserManagement;
 using Humanizer;
 using Tewl.Tools;
 
@@ -26,7 +23,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin {
 		}
 
 		protected override IEnumerable<ResourceGroup> createListedResources() =>
-			new ResourceGroup( new BasicTests( this ), new RequestProfiling( this ), new UserManagement( this ) ).ToCollection();
+			new ResourceGroup( new BasicTests( this ), new RequestProfiling( this ), new UserManagement( this ), new CssElements( this ) ).ToCollection();
 
 		protected override UrlHandler getUrlParent() => frameworkUrlParentGetter();
 
@@ -48,10 +45,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin {
 				.Append( ErrorPages.UnhandledException.UrlPatterns.Literal( "unhandled-exception" ) )
 				.Append( BasicTests.UrlPatterns.Literal( this, "tests" ) )
 				.Append( RequestProfiling.UrlPatterns.Literal( this, "profiling" ) )
-				.Append( UserManagement.UrlPatterns.Literal( this, "users" ) );
+				.Append( UserManagement.UrlPatterns.Literal( this, "users" ) )
+				.Append( CssElements.UrlPatterns.Literal( this, "css-elements" ) );
 
 		EntityUiSetup UiEntitySetup.GetUiSetup() =>
-			new EntityUiSetup(
+			new(
 				actions: new HyperlinkSetup(
 					new EnterpriseWebFramework.UserManagement.Pages.Impersonate( PageBase.Current.GetUrl() ),
 					"Impersonate user",
