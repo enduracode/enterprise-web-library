@@ -19,6 +19,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 		protected override UrlHandler getUrlParent() => new Admin.EntitySetup();
 
 		protected override PageContent getContent() {
+			parametersModification.User = "";
+			parametersModification.Code = "";
+
 			var customContent = AuthenticationStatics.AppProvider.GetLogInPageContent( ReturnUrl, User, Code );
 			if( customContent != null )
 				return customContent;
