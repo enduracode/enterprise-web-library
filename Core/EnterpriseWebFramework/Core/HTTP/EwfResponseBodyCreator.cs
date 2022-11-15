@@ -7,6 +7,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// An object that creates an HTTP response body.
 	/// </summary>
 	public class EwfResponseBodyCreator {
+		internal static readonly Encoding TextEncoding = Encoding.UTF8;
+
 		internal readonly Func<string> TextBodyCreator;
 		internal readonly Func<byte[]> BinaryBodyCreator;
 		internal readonly Action<TextWriter> TextBodyWriter;
@@ -39,10 +41,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public EwfResponseBodyCreator( Action<TextWriter> textBodyWriter ) {
 			TextBodyCreator = () => {
-				using( var writer = new StringWriter() ) {
-					textBodyWriter( writer );
-					return writer.ToString();
-				}
+				using var writer = new StringWriter();
+				textBodyWriter( writer );
+				return writer.ToString();
 			};
 			TextBodyWriter = textBodyWriter;
 		}
@@ -52,15 +53,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		public EwfResponseBodyCreator( Action<Stream> binaryBodyWriter ) {
 			BinaryBodyCreator = () => {
-				using( var stream = new MemoryStream() ) {
-					binaryBodyWriter( stream );
-					return stream.ToArray();
-				}
+				using var stream = new MemoryStream();
+				binaryBodyWriter( stream );
+				return stream.ToArray();
 			};
 			BinaryBodyWriter = binaryBodyWriter;
 		}
 
-		internal bool BodyIsText { get { return TextBodyCreator != null; } }
+		internal bool BodyIsText => TextBodyCreator != null;
 
 		internal EwfResponseBodyCreator GetBufferedBodyCreator() {
 			if( BodyIsText ) {
@@ -73,7 +73,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal void WriteToResponse( HttpResponse response ) {
 			if( BodyIsText )
-				using( var writer = new HttpResponseStreamWriter( response.Body, Encoding.UTF8 ) )
+				using( var writer = new HttpResponseStreamWriter( response.Body, TextEncoding ) )
 					TextBodyWriter( writer );
 			else
 				BinaryBodyWriter( response.Body );

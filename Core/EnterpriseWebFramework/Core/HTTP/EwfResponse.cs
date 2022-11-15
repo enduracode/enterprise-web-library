@@ -2,6 +2,7 @@
 using EnterpriseWebLibrary.MailMerging.RowTree;
 using Humanizer;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Net.Http.Headers;
 using Tewl;
 using Tewl.IO;
 using Tewl.Tools;
@@ -190,8 +191,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			if( statusCode.HasValue )
 				aspNetResponse.StatusCode = statusCode.Value;
 
-			if( ContentType.Length > 0 )
-				aspNetResponse.ContentType = ContentType;
+			var typedHeaders = aspNetResponse.GetTypedHeaders();
+			if( ContentType.Length > 0 ) {
+				var headerValue = new MediaTypeHeaderValue( ContentType );
+				if( BodyCreator.BodyIsText )
+					headerValue.Encoding = EwfResponseBodyCreator.TextEncoding;
+				typedHeaders.ContentType = headerValue;
+			}
 
 			var fileName = FileNameCreator();
 			if( fileName.Any() )
