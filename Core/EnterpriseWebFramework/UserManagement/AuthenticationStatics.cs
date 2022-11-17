@@ -162,7 +162,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 						                       password.Value,
 						                       out var user,
 						                       errorMessage: errorMessage );
-					                       if( errorMessage.Any() )
+					                       if( errorMessage == null )
+						                       LogOutUser();
+					                       else if( errorMessage.Any() )
 						                       errors.Add( errorMessage );
 					                       else
 						                       SetFormsAuthCookieAndUser( user, identityProvider: UserManagementStatics.LocalIdentityProvider );
@@ -191,7 +193,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 						                       out var user,
 						                       out var destinationUrl,
 						                       errorMessage: errorMessage );
-					                       if( errorMessage.Any() )
+					                       if( errorMessage == null )
+						                       LogOutUser();
+					                       else if( errorMessage.Any() )
 						                       errors.Add( errorMessage );
 					                       else
 						                       SetFormsAuthCookieAndUser( user, identityProvider: UserManagementStatics.LocalIdentityProvider );
@@ -221,7 +225,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 			return new EwfHiddenField(
 				"",
 				id: timeHiddenFieldId,
-				validationMethod: ( postBackValue, validator ) => clientTime.Value = postBackValue.Value,
+				validationMethod: ( postBackValue, _ ) => clientTime.Value = postBackValue.Value,
 				jsInitStatementGetter: id => "$( document.getElementById( '{0}' ).form ).submit( function() {{ {1} }} );".FormatWith(
 					id,
 					timeHiddenFieldId.GetJsValueModificationStatements( "new Date().toISOString()" ) ) ).PageComponent.ToCollection();

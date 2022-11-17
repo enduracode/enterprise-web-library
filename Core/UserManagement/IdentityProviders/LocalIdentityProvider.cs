@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Email;
@@ -83,7 +81,7 @@ namespace EnterpriseWebLibrary.UserManagement.IdentityProviders {
 		internal readonly string LogInHelpInstructions;
 		private readonly Func<string, ( User user, int salt, byte[] saltedPassword )?> passwordLoginUserGetter;
 		private readonly LoginCodeGetterMethod loginCodeGetter;
-		private readonly Func<User, bool, bool> postAuthenticationMethod;
+		private readonly Func<User, bool, bool?> postAuthenticationMethod;
 		internal readonly int? AuthenticationTimeoutMinutes;
 		internal readonly Action<Validator, string> PasswordValidationMethod;
 		internal readonly PasswordUpdaterMethod PasswordUpdater;
@@ -101,9 +99,10 @@ namespace EnterpriseWebLibrary.UserManagement.IdentityProviders {
 		/// <param name="loginCodeGetter">A function that takes a user ID and returns the corresponding user’s login-code data.</param>
 		/// <param name="passwordUpdater">A method that takes a user ID and new password data and updates the corresponding user. Do not pass null.</param>
 		/// <param name="loginCodeUpdater">A method that takes a user ID and new login-code data and updates the corresponding user. Do not pass null.</param>
-		/// <param name="postAuthenticationMethod">Performs actions immediately after password authentication, which could include counting failed authentication
-		/// attempts or preventing a user from logging in. Takes a user object and whether authentication was successful, and returns whether login should be
-		/// allowed. Do not use unless the system absolutely requires micromanagement of authentication behavior.</param>
+		/// <param name="postAuthenticationMethod">Performs actions immediately after password or login-code authentication, which could include counting failed
+		/// authentication attempts or preventing a user from logging in. Takes a user object and whether built-in authentication was successful, and returns true
+		/// if authentication is successful, false if it failed for any reason, and null if it did not fail but is incomplete. Do not use unless the system
+		/// absolutely requires micromanagement of authentication behavior.</param>
 		/// <param name="authenticationTimeoutMinutes">The authentication timeout. Pass null to use the default. Do not use unless the system absolutely requires
 		/// micromanagement of authentication behavior.</param>
 		/// <param name="passwordValidationMethod">Validates the specified password. Called when a user changes their password. Do not use unless the system
@@ -111,7 +110,7 @@ namespace EnterpriseWebLibrary.UserManagement.IdentityProviders {
 		public LocalIdentityProvider(
 			string administratingOrganizationName, string logInHelpInstructions,
 			Func<string, ( User user, int salt, byte[] saltedPassword )?> passwordLoginUserGetter, LoginCodeGetterMethod loginCodeGetter,
-			PasswordUpdaterMethod passwordUpdater, LoginCodeUpdaterMethod loginCodeUpdater, Func<User, bool, bool> postAuthenticationMethod = null,
+			PasswordUpdaterMethod passwordUpdater, LoginCodeUpdaterMethod loginCodeUpdater, Func<User, bool, bool?> postAuthenticationMethod = null,
 			int? authenticationTimeoutMinutes = null, Action<Validator, string> passwordValidationMethod = null ) {
 			AdministratingOrganizationName = administratingOrganizationName;
 			LogInHelpInstructions = logInHelpInstructions;
@@ -135,23 +134,24 @@ namespace EnterpriseWebLibrary.UserManagement.IdentityProviders {
 			if( !userData.HasValue )
 				return errorMessage;
 
-			var authenticationSuccessful = false;
+			var passwordCorrect = false;
 			if( userData.Value.saltedPassword != null ) {
 				var hashedPassword = new Password( password, userData.Value.salt ).ComputeSaltedHash();
 				if( userData.Value.saltedPassword.SequenceEqual( hashedPassword ) )
-					authenticationSuccessful = true;
+					passwordCorrect = true;
 			}
 
+			bool? authenticationSuccessful = passwordCorrect;
 			if( postAuthenticationMethod != null )
-				authenticationSuccessful &= postAuthenticationMethod( userData.Value.user, authenticationSuccessful );
+				authenticationSuccessful = postAuthenticationMethod( userData.Value.user, passwordCorrect );
 
-			if( !authenticationSuccessful )
+			if( !passwordCorrect || authenticationSuccessful == false )
 				return errorMessage;
 			user = userData.Value.user;
 			if( postAuthenticationMethod != null )
-				// Re-retrieve the user in case PostAuthenticate modified it.
+				// Re-retrieve the user in case postAuthenticationMethod modified it.
 				user = UserManagementStatics.SystemProvider.GetUser( user.UserId );
-			return "";
+			return authenticationSuccessful == true ? "" : null;
 		}
 
 		/// <summary>
@@ -234,17 +234,17 @@ namespace EnterpriseWebLibrary.UserManagement.IdentityProviders {
 			if( userLocal == null )
 				return errorMessage;
 
-			var authenticationSuccessful = true;
+			var codeValid = true;
 
 			var codeData = loginCodeGetter( userLocal.UserId );
 			if( codeData.hashedCode == null )
-				authenticationSuccessful = false;
+				codeValid = false;
 			else if( codeData.expirationTime.Value <= SystemClock.Instance.GetCurrentInstant() )
-				authenticationSuccessful = false;
+				codeValid = false;
 			else if( codeData.remainingAttemptCount.Value == 0 )
-				authenticationSuccessful = false;
+				codeValid = false;
 			else if( !codeData.hashedCode.SequenceEqual( getHashedLoginCode( code, codeData.salt ) ) ) {
-				authenticationSuccessful = false;
+				codeValid = false;
 				loginCodeUpdater(
 					userLocal.UserId,
 					codeData.salt,
@@ -254,27 +254,29 @@ namespace EnterpriseWebLibrary.UserManagement.IdentityProviders {
 					codeData.destinationUrl );
 			}
 
+			bool? authenticationSuccessful = codeValid;
 			if( postAuthenticationMethod != null ) {
-				authenticationSuccessful &= postAuthenticationMethod( userLocal, authenticationSuccessful );
+				authenticationSuccessful = postAuthenticationMethod( userLocal, codeValid );
 
-				// Re-retrieve the user in case PostAuthenticate modified it.
+				// Re-retrieve the user in case postAuthenticationMethod modified it.
 				userLocal = UserManagementStatics.SystemProvider.GetUser( userLocal.UserId );
 			}
 
-			if( !authenticationSuccessful )
+			if( !codeValid || authenticationSuccessful == false )
 				return errorMessage;
 
 			loginCodeUpdater( userLocal.UserId, null, null, null, null, "" );
 
 			user = userLocal;
 			destinationUrl = codeData.destinationUrl;
-			return "";
+			return authenticationSuccessful == true ? "" : null;
 		}
 
 		private byte[] getHashedLoginCode( string code, byte[] salt ) {
-			using( var pbkdf2 = new Rfc2898DeriveBytes( code, salt, 10000, HashAlgorithmName.SHA1 ) )
-				// see https://security.stackexchange.com/a/167403/20277
-				return pbkdf2.GetBytes( 20 );
+			using var pbkdf2 = new Rfc2898DeriveBytes( code, salt, 10000, HashAlgorithmName.SHA1 );
+
+			// see https://security.stackexchange.com/a/167403/20277
+			return pbkdf2.GetBytes( 20 );
 		}
 	}
 }
