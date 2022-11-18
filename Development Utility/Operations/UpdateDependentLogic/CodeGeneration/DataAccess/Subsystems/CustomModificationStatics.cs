@@ -1,5 +1,3 @@
-using System;
-using System.IO;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
@@ -39,15 +37,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			if( cn.DatabaseInfo is MySqlInfo || cn.DatabaseInfo is OracleInfo )
 				return;
 
-			foreach( var mod in mods ) {
-				foreach( var command in mod.commands ) {
-					var cmd = DataAccessStatics.GetCommandFromRawQueryText( cn, command );
-					try {
-						cn.ExecuteReaderCommandWithSchemaOnlyBehavior( cmd, r => {} );
-					}
-					catch( Exception e ) {
-						throw new UserCorrectableException( "Custom modification " + mod.name + " failed.", e );
-					}
+			foreach( var mod in mods )
+			foreach( var command in mod.commands ) {
+				var cmd = DataAccessStatics.GetCommandFromRawQueryText( cn, command );
+				try {
+					cn.ExecuteReaderCommandWithSchemaOnlyBehavior( cmd, r => {} );
+				}
+				catch( Exception e ) {
+					throw new UserCorrectableException( "Custom modification " + mod.name + " failed.", e );
 				}
 			}
 		}
@@ -63,7 +60,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				var commandVariableName = "cmd" + cnt++;
 				writer.WriteLine(
 					"DbCommand " + commandVariableName + " = " + DataAccessStatics.GetConnectionExpression( database ) + ".DatabaseInfo.CreateCommand();" );
-				writer.WriteLine( commandVariableName + ".CommandText = @\"" + command + "\";" );
+				writer.WriteLine( commandVariableName + ".CommandText = @\"" + AppStatics.NormalizeLineEndingsFromXml( command ) + "\";" );
 				DataAccessStatics.WriteAddParamBlockFromCommandText( writer, commandVariableName, info, command, database );
 				writer.WriteLine( DataAccessStatics.GetConnectionExpression( database ) + ".ExecuteNonQueryCommand( " + commandVariableName + " );" );
 			}

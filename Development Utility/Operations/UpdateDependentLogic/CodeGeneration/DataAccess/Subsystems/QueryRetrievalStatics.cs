@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.InstallationSupportUtility;
@@ -39,7 +35,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				DataAccessStatics.WriteRowClasses( writer, columns, localWriter => {}, localWriter => {} );
 				writeCacheClass( writer, database, query );
 
-				writer.WriteLine( "private const string selectFromClause = @\"" + query.selectFromClause + " \";" );
+				writer.WriteLine( "private const string selectFromClause = @\"" + AppStatics.NormalizeLineEndingsFromXml( query.selectFromClause ) + " \";" );
 				foreach( var postSelectFromClause in query.postSelectFromClauses )
 					writeQueryMethod( writer, database, query, postSelectFromClause );
 				writer.WriteLine( "static partial void updateSingleRowCaches( Row row );" );
@@ -53,11 +49,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 		private static List<Column> validateQueryAndGetColumns( DBConnection cn, EnterpriseWebLibrary.Configuration.SystemDevelopment.Query query ) {
 			// Attempt to query with every postSelectFromClause to ensure validity.
-			foreach( var postSelectFromClause in query.postSelectFromClauses ) {
+			foreach( var postSelectFromClause in query.postSelectFromClauses )
 				cn.ExecuteReaderCommandWithSchemaOnlyBehavior(
 					DataAccessStatics.GetCommandFromRawQueryText( cn, query.selectFromClause + " " + postSelectFromClause.Value ),
 					r => {} );
-			}
 
 			return Column.GetColumnsInQueryResults( cn, query.selectFromClause, false, false );
 		}

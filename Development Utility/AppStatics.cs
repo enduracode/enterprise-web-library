@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using System.Reflection;
+﻿using System.Reflection;
 using EnterpriseWebLibrary.Configuration;
 using Tewl.IO;
 
@@ -42,8 +39,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility {
 					},
 				".NET Tools" );
 
-		internal static string GetLiteralDateTimeExpression( DateTimeOffset dateTime ) {
-			return "DateTimeOffset.Parse( \"" + dateTime.ToString( "o" ) + "\", null, DateTimeStyles.RoundtripKind )";
-		}
+		internal static string GetLiteralDateTimeExpression( DateTimeOffset dateTime ) =>
+			"DateTimeOffset.Parse( \"" + dateTime.ToString( "o" ) + "\", null, DateTimeStyles.RoundtripKind )";
+
+		// see https://stackoverflow.com/a/1793962/35349
+		internal static string NormalizeLineEndingsFromXml( string text ) => text.Replace( Environment.NewLine, "\n" ).Replace( "\n", Environment.NewLine );
 	}
 }
