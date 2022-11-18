@@ -95,7 +95,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			writer.WriteLine( "return Cache.Current." + getQueryCacheName( query, postSelectFromClause ) + ".GetResultSet( " + getResultSetFirstArg + "() => {" );
 
 			writer.WriteLine( "var cmd = " + DataAccessStatics.GetConnectionExpression( database ) + ".DatabaseInfo.CreateCommand();" );
-			writer.WriteLine( "cmd.CommandText = selectFromClause + @\"" + postSelectFromClause.Value + "\";" );
+			writer.WriteLine( "cmd.CommandText = selectFromClause + @\"" + AppStatics.NormalizeLineEndingsFromXml( postSelectFromClause.Value ) + "\";" );
 			DataAccessStatics.WriteAddParamBlockFromCommandText( writer, "cmd", info, query.selectFromClause + " " + postSelectFromClause.Value, database );
 			writer.WriteLine( "var results = new List<Row>();" );
 			writer.WriteLine(
