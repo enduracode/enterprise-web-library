@@ -15,7 +15,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility {
 					                   Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ),
 					                   ConfigurationStatics.MachineConfiguration.NDependFolderPathInUserProfileFolderEffective ) );
 			if( NDependIsPresent )
-				AppDomain.CurrentDomain.AssemblyResolve += ( sender, args ) => {
+				AppDomain.CurrentDomain.AssemblyResolve += ( _, args ) => {
 					var assemblyName = new AssemblyName( args.Name ).Name;
 					if( !new[] { "NDepend.API", "NDepend.Core" }.Contains( assemblyName ) )
 						return null;

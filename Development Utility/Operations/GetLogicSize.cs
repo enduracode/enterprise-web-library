@@ -29,7 +29,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			var methods = from n in codeBase.Application.Namespaces
 			              from t in n.ChildTypes
 			              where generatedCodeAttribute == null || !t.HasAttribute( generatedCodeAttribute )
-			              from m in t.MethodsAndContructors
+			              from m in t.MethodsAndConstructors
 			              where generatedCodeAttribute == null || !m.HasAttribute( generatedCodeAttribute )
 			              // We've considered excluding .designer.cs files here, but decided that they should remain part of the count since they still represent
 			              // logic that must be maintained (in the designer).
@@ -76,7 +76,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						: Enumerable.Empty<string>() );
 		}
 
-		public static Operation Instance { get { return instance; } }
+		public static Operation Instance => instance;
 		private GetLogicSize() {}
 
 		bool Operation.IsValid( Installation genericInstallation ) {

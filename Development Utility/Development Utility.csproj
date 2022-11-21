@@ -21,6 +21,7 @@
   <ItemGroup>
     <Reference Include="NDepend.API">
       <HintPath>..\Solution Files\Referenced Files\NDepend.API.dll</HintPath>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
 
