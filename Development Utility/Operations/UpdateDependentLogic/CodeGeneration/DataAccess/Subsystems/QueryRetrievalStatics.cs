@@ -51,7 +51,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			// Attempt to query with every postSelectFromClause to ensure validity.
 			foreach( var postSelectFromClause in query.postSelectFromClauses )
 				cn.ExecuteReaderCommandWithSchemaOnlyBehavior(
-					DataAccessStatics.GetCommandFromRawQueryText( cn, query.selectFromClause + " " + postSelectFromClause.Value ),
+					DataAccessStatics.GetCommandFromRawQueryText( cn, query.selectFromClause + postSelectFromClause.ValueNonNullable.PrependDelimiter( " " ) ),
 					r => {} );
 
 			return Column.GetColumnsInQueryResults( cn, query.selectFromClause, false, false );
@@ -73,7 +73,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		private static string getQueryCacheType(
 			EnterpriseWebLibrary.Configuration.SystemDevelopment.Query query,
 			EnterpriseWebLibrary.Configuration.SystemDevelopment.QueryPostSelectFromClause postSelectFromClause ) {
-			return DataAccessStatics.GetNamedParamList( info, query.selectFromClause + " " + postSelectFromClause.Value ).Any()
+			return DataAccessStatics.GetNamedParamList( info, query.selectFromClause + postSelectFromClause.ValueNonNullable.PrependDelimiter( " " ) ).Any()
 				       ? "QueryRetrievalQueryCache<Row>"
 				       : "ParameterlessQueryCache<Row>";
 		}
@@ -84,19 +84,25 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			// header
 			CodeGenerationStatics.AddSummaryDocComment( writer, "Queries the database and returns the full results collection immediately." );
 			writer.WriteLine(
-				"public static IEnumerable<Row> GetRows" + postSelectFromClause.name + "( " +
-				DataAccessStatics.GetMethodParamsFromCommandText( info, query.selectFromClause + " " + postSelectFromClause.Value ) + " ) {" );
+				"public static IEnumerable<Row> GetRows" + postSelectFromClause.name + "( " + DataAccessStatics.GetMethodParamsFromCommandText(
+					info,
+					query.selectFromClause + postSelectFromClause.ValueNonNullable.PrependDelimiter( " " ) ) + " ) {" );
 
 
 			// body
 
-			var namedParamList = DataAccessStatics.GetNamedParamList( info, query.selectFromClause + " " + postSelectFromClause.Value );
+			var namedParamList = DataAccessStatics.GetNamedParamList( info, query.selectFromClause + postSelectFromClause.ValueNonNullable.PrependDelimiter( " " ) );
 			var getResultSetFirstArg = namedParamList.Any() ? "new[] { " + StringTools.ConcatenateWithDelimiter( ", ", namedParamList.ToArray() ) + " }, " : "";
 			writer.WriteLine( "return Cache.Current." + getQueryCacheName( query, postSelectFromClause ) + ".GetResultSet( " + getResultSetFirstArg + "() => {" );
 
 			writer.WriteLine( "var cmd = " + DataAccessStatics.GetConnectionExpression( database ) + ".DatabaseInfo.CreateCommand();" );
-			writer.WriteLine( "cmd.CommandText = selectFromClause + @\"" + AppStatics.NormalizeLineEndingsFromXml( postSelectFromClause.Value ) + "\";" );
-			DataAccessStatics.WriteAddParamBlockFromCommandText( writer, "cmd", info, query.selectFromClause + " " + postSelectFromClause.Value, database );
+			writer.WriteLine( "cmd.CommandText = selectFromClause + @\"" + AppStatics.NormalizeLineEndingsFromXml( postSelectFromClause.ValueNonNullable ) + "\";" );
+			DataAccessStatics.WriteAddParamBlockFromCommandText(
+				writer,
+				"cmd",
+				info,
+				query.selectFromClause + postSelectFromClause.ValueNonNullable.PrependDelimiter( " " ),
+				database );
 			writer.WriteLine( "var results = new List<Row>();" );
 			writer.WriteLine(
 				DataAccessStatics.GetConnectionExpression( database ) +
@@ -115,9 +121,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 		private static string getQueryCacheName(
 			EnterpriseWebLibrary.Configuration.SystemDevelopment.Query query,
 			EnterpriseWebLibrary.Configuration.SystemDevelopment.QueryPostSelectFromClause postSelectFromClause ) {
-			return "Rows" + postSelectFromClause.name + ( DataAccessStatics.GetNamedParamList( info, query.selectFromClause + " " + postSelectFromClause.Value ).Any()
-				                                              ? "Queries"
-				                                              : "Query" );
+			return "Rows" + postSelectFromClause.name +
+			       ( DataAccessStatics.GetNamedParamList( info, query.selectFromClause + postSelectFromClause.ValueNonNullable.PrependDelimiter( " " ) ).Any()
+				         ? "Queries"
+				         : "Query" );
 		}
 	}
 }
