@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <NDepend AppName="Enterprise Web Library" Platform="DotNet" FileWrittenByProductVersion="2022.2.1.9665">
   <OutputDir KeepXmlFiles="False">.\NDependOut</OutputDir>
   <IDEFiles>
@@ -14,8 +14,8 @@
   <MergeCodeGeneratedByCompiler>True</MergeCodeGeneratedByCompiler>
   <ZipSourceFiles>True</ZipSourceFiles>
   <Report Kind="0" SectionsEnabled="110591" XslPath="" Flags="261120" NbItemsToUnfold="5" />
-  <BuildComparisonSetting ProjectMode="CurrentProject" BuildMode="NDaysAgoAnalysisResult" ProjectFileToCompareWith="" BuildFileToCompareWith="" NDaysAgo="30" />
-  <BaselineInUISetting ProjectMode="CurrentProject" BuildMode="NDaysAgoAnalysisResult" ProjectFileToCompareWith="" BuildFileToCompareWith="" NDaysAgo="30" />
+  <BuildComparisonSetting ProjectMode="CurrentProject" BuildMode="NDaysAgoAnalysisResult" ProjectFileToCompareWith="" BuildFileToCompareWith="" NDaysAgo="90" />
+  <BaselineInUISetting ProjectMode="CurrentProject" BuildMode="NDaysAgoAnalysisResult" ProjectFileToCompareWith="" BuildFileToCompareWith="" NDaysAgo="90" />
   <CoverageFiles CoverageDir="" CoverageDirFilter="" UncoverableAttribute="" CoverageExclusionFile="" />
   <TrendMetrics UseCustomLog="False" LogRecurrence="3" LogLabel="2" UseCustomDir="False" CustomDir="">
     <Chart Name="Size" ShowInReport="True">
@@ -78,8 +78,7 @@
       <High2Critical_SeverityThreshold>72000000000</High2Critical_SeverityThreshold>
       <Critical2Blocker_SeverityThreshold>360000000000</Critical2Blocker_SeverityThreshold>
     </DebtSettings>
-  </ProjectDebtSettings>
-  <Queries>
+  </ProjectDebtSettings><Queries>
     <Group Name="Quality Gates" Active="True" ShownInReport="False">
       <Query Active="True" DisplayList="True" DisplayStat="False" DisplaySelectionView="False" IsCriticalRule="False"><![CDATA[$Quality Gates Evolution$]]></Query>
       <Query Active="True" DisplayList="True" DisplayStat="False" DisplaySelectionView="False" IsCriticalRule="False"><![CDATA[$Percentage Coverage$]]></Query>
@@ -510,6 +509,4 @@
         <Query Active="False" DisplayList="True" DisplayStat="False" DisplaySelectionView="False" IsCriticalRule="False"><![CDATA[$ND9916$]]></Query>
       </Group>
     </Group>
-  </Queries>
-  <WarnFilter />
-</NDepend>
+  </Queries></NDepend>
