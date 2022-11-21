@@ -67,7 +67,4 @@ Global
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {ABE9478E-BE34-422C-B0F1-F9D179ECB31D}
 	EndGlobalSection
-	GlobalSection(NDepend) = preSolution
-		Project = ".\Enterprise Web Library.ndproj"
-	EndGlobalSection
 EndGlobal
