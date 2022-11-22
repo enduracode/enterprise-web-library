@@ -4,7 +4,6 @@
     <TargetFramework>net6.0-windows</TargetFramework>
     <AssemblyName>EnterpriseWebLibrary.Saml</AssemblyName>
     <RootNamespace>EnterpriseWebLibrary.Saml</RootNamespace>
-    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>

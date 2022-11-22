@@ -1,3 +1,4 @@
+using System.Threading;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.DataAccess.CommandWriting;
@@ -5,9 +6,7 @@ using EnterpriseWebLibrary.DataAccess.CommandWriting.Commands;
 using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction.Conditions;
 using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
-using Humanizer;
 using Tewl.IO;
-using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Databases {
 	public class SqlServer: Database {

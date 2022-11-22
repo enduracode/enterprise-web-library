@@ -4,7 +4,6 @@
     <TargetFramework>net6.0-windows</TargetFramework>
     <AssemblyName>EnterpriseWebLibrary.Library</AssemblyName>
     <RootNamespace>EnterpriseWebLibrary</RootNamespace>
-    <ImplicitUsings>enable</ImplicitUsings>
     <DefaultItemExcludesInProjectFolder>$(DefaultItemExcludesInProjectFolder);Files\System Template\\**\*.*</DefaultItemExcludesInProjectFolder>
   </PropertyGroup>
 

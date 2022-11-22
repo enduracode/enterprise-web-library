@@ -4,7 +4,6 @@
     <TargetFramework>net6.0-windows</TargetFramework>
     <AssemblyName>EnterpriseWebLibrary.Tests</AssemblyName>
     <RootNamespace>EnterpriseWebLibrary.Tests</RootNamespace>
-    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>

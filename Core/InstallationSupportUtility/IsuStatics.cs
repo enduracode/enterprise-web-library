@@ -1,8 +1,7 @@
-﻿using EnterpriseWebLibrary.Configuration;
+﻿using System.Threading;
+using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Configuration.InstallationStandard;
-using Humanizer;
 using Microsoft.Web.Administration;
-using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility {
 	public class IsuStatics {

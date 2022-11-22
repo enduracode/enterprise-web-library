@@ -1,9 +1,4 @@
-﻿using System;
-using System.IO;
-using EnterpriseWebLibrary.Configuration;
-using EnterpriseWebLibrary.EnterpriseWebFramework;
-using EnterpriseWebLibrary.TewlContrib;
-using Tewl;
+﻿using EnterpriseWebLibrary.Configuration;
 
 // EwlResource
 // Parameter: string fileName

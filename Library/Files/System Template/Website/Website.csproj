@@ -5,7 +5,6 @@
     <AssemblyName>@@BaseNamespace.Website</AssemblyName>
     <RootNamespace>@@BaseNamespace.Website</RootNamespace>
     <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>

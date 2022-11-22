@@ -1,4 +1,7 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Net.Http;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Xml;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
@@ -8,7 +11,6 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.ExternalFunctionality;
 using EnterpriseWebLibrary.UserManagement;
 using EnterpriseWebLibrary.WebSessionState;
-using Humanizer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
@@ -20,7 +22,6 @@ using Microsoft.Extensions.Options;
 using StackExchange.Profiling;
 using StackExchange.Profiling.Internal;
 using StackExchange.Profiling.Storage;
-using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public static class EwfOps {

@@ -1,12 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Specialized;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Email.SystemManagerInterface;
-using Humanizer;
-using Tewl;
 using Tewl.IO;
-using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.Email {
 	public static class EmailStatics {

@@ -1,4 +1,5 @@
-﻿using EnterpriseWebLibrary.ExternalFunctionality;
+﻿using System.Threading.Tasks;
+using EnterpriseWebLibrary.ExternalFunctionality;
 using EnterpriseWebLibrary.UserManagement.IdentityProviders;
 
 // EwlResource

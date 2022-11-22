@@ -1,8 +1,7 @@
-﻿using EnterpriseWebLibrary.DataAccess;
+﻿using System.Threading.Tasks;
+using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.ExternalFunctionality;
 using EnterpriseWebLibrary.UserManagement;
-using Humanizer;
-using Tewl.Tools;
 
 // EwlResource
 
