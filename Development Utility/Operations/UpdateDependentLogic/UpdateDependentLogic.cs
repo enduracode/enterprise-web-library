@@ -424,7 +424,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						StaticFile.AppStaticFilesFolderName,
 						"RequestDispatchingStatics.AppProvider.GetFrameworkUrlParent()" );
 				},
-				runtimeIdentifier: "win10-x64" );
+				runtimeIdentifier: "win10-x64",
+				includeWebFrameworkUsingDirectives: true );
 
 			var configurationFilesFolderPath = EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "Web Project Configuration" );
 			try {
@@ -552,7 +553,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 		private void generateCodeForProject(
 			DevelopmentInstallation installation, string projectName, string projectPath, Action<TextWriter> codeWriter, string runtimeIdentifier = "",
-			bool selfContained = false ) {
+			bool selfContained = false, bool includeWebFrameworkUsingDirectives = false ) {
 			using( var writer = new StreamWriter( EwlStatics.CombinePaths( projectPath, "Directory.Build.props" ), false, Encoding.UTF8 ) ) {
 				writer.WriteLine( "<Project>" );
 				writer.WriteLine( "<PropertyGroup>" );
@@ -583,6 +584,22 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				writer.WriteLine( "<IsTransformWebConfigDisabled>true</IsTransformWebConfigDisabled>" );
 
 				writer.WriteLine( "</PropertyGroup>" );
+				writer.WriteLine( "<ItemGroup>" );
+
+				writer.WriteLine( "<Using Include=\"System\" />" );
+				writer.WriteLine( "<Using Include=\"System.Collections.Generic\" />" );
+				writer.WriteLine( "<Using Include=\"System.IO\" />" );
+				writer.WriteLine( "<Using Include=\"System.Linq\" />" );
+
+				writer.WriteLine( "<Using Include=\"EnterpriseWebLibrary\" />" );
+				if( includeWebFrameworkUsingDirectives )
+					writer.WriteLine( "<Using Include=\"EnterpriseWebLibrary.EnterpriseWebFramework\" />" );
+				writer.WriteLine( "<Using Include=\"Tewl\" />" );
+				writer.WriteLine( "<Using Include=\"Tewl.Tools\" />" );
+
+				writer.WriteLine( "<Using Include=\"Humanizer.StringExtensions\"><Static>True</Static></Using>" );
+
+				writer.WriteLine( "</ItemGroup>" );
 				writer.WriteLine( "</Project>" );
 			}
 
