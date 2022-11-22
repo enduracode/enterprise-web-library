@@ -244,7 +244,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 												new ResourceInfo[]
 													{
 														new StaticFiles.Styles.Ui.ColorsCss(), new StaticFiles.Styles.Ui.FontsCss(), new StaticFiles.Styles.Ui.LayoutCss(),
-														new StaticFiles.Styles.Ui.TransitionsCss()
+														new StaticFiles.Styles.Ui.TransitionsCss(), new StaticFiles.Styles.Ui.NewUICss()
 													} );
 										foreach( var resource in BasePageStatics.AppProvider.GetStyleSheets() ) {
 											assertResourceIsIntermediateInstallationPublicResourceWhenNecessary( resource );

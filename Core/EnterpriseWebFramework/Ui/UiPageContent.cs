@@ -182,30 +182,54 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					getGlobalContainer()
 						.Append(
 							new GenericFlowContainer(
-								getEntityAndTopTabContainer()
-									.Append(
-										EwfTable.Create( style: EwfTableStyle.Raw, classes: sideTabAndContentBlockClass )
-											.AddItem(
-												EwfTableItem.Create(
-													( entityUsesTabMode( TabMode.Vertical )
-														  ? getSideTabContainer().ToCell( setup: new TableCellSetup( classes: sideTabContainerClass ) ).ToCollection()
-														  : Enumerable.Empty<EwfTableCell>() ).Append(
-														getPageActionListContainer( pageActions )
-															.Append(
-																new DisplayableElement(
-																	context => new DisplayableElementData(
-																		null,
-																		() => new DisplayableElementLocalData( "div" ),
-																		classes: omitContentBox ? null : contentClass,
-																		children: content ) ) )
-															.Concat( getContentFootBlock( isAutoDataUpdater, contentFootActions, contentFootComponents ) )
-															.Materialize()
-															.ToCell( setup: new TableCellSetup( classes: contentClass ) ) )
-													.Materialize() ) ) )
-									.Materialize(),
-								clientSideIdOverride: entityAndTabAndContentBlockId ) )
+								getEewfUiEntityAndTabsAndContent( omitContentBox, pageActions, contentFootActions, contentFootComponents, isAutoDataUpdater ).Materialize(),
+								clientSideIdOverride: entityAndTabAndContentBlockId ) ) // ewfUiEntityAndTabsAndContent
 						.Concat( getGlobalFootContainer() )
 						.Materialize() );
+		}
+
+		private IEnumerable<FlowComponent> getEewfUiEntityAndTabsAndContent(
+			bool omitContentBox, IReadOnlyCollection<ActionComponentSetup> pageActions, IReadOnlyCollection<ButtonSetup> contentFootActions,
+			IReadOnlyCollection<FlowComponent> contentFootComponents, bool isAutoDataUpdater ) {
+
+			// NOTE SJR: Commenting out for now becuase geoff's styles don't account for it
+			//yield return getEntityAndTopTabContainer(); // ewfUiEntityAndTopTabs
+
+			// NOTE SJR: Remove this table.
+			// ewfUiTabsAndContent Gone
+			foreach(var c in getEwfUiTabsAndContentCells( omitContentBox, pageActions, contentFootActions, contentFootComponents, isAutoDataUpdater ))
+				yield return c;
+		}
+
+		/// <summary>
+		/// Returns the children of ewfUiEntityAndTabsAndContent
+		/// </summary>
+		private IEnumerable<FlowComponent> getEwfUiTabsAndContentCells(
+			bool omitContentBox, IReadOnlyCollection<ActionComponentSetup> pageActions, IReadOnlyCollection<ButtonSetup> contentFootActions,
+			IReadOnlyCollection<FlowComponent> contentFootComponents, bool isAutoDataUpdater ) {
+			if( entityUsesTabMode( TabMode.Vertical ) )
+				//yield return getSideTabNavigationContainer().ToCell( setup: new TableCellSetup( classes: sideTabContainerClass ) ); // ewfUiSideTab
+				yield return getSideTabNavigationContainer(); // ewfUiSideTab
+
+			// NOTE SJR: Next, BREADCRUMBS & TABS, .ewfBreadcrumbsAndTabs
+			yield return new GenericFlowContainer( Array.Empty<FlowComponent>(), classes: new ElementClass( "ewfBreadcrumbsAndTabs" ) );
+
+			//static EwfTableCell toContentCell( FlowComponent c ) => c.ToCell( setup: new TableCellSetup( classes: contentClass ) );
+
+			// NOTE SJR: Not represented in Geoff's styles.
+			foreach( var c in getPageActionListContainer( pageActions ) )
+				yield return c;
+
+			// Why would the content box be omitted?
+			// ^ Okay it looks like the user can choose to ommit this... as a feature.
+
+			// NOTE SJR: Geoff assumed there would be one .ewfUiContent which isn't correct
+			yield return new DisplayableElement(
+				context => new DisplayableElementData( null, () => new DisplayableElementLocalData( "div" ), classes: omitContentBox ? null : contentClass, children: content ) ); // ewfUiContent
+
+			// Not to be confused with the global foot
+			foreach( var c in getContentFootBlock( isAutoDataUpdater, contentFootActions, contentFootComponents ) )
+				yield return c;
 		}
 
 		private FlowComponent getGlobalContainer() =>
@@ -219,7 +243,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							getGlobalNavListContainer()
 						}.Where( i => i != null )
 					.Materialize(),
-				clientSideIdOverride: globalContainerId );
+				clientSideIdOverride: globalContainerId ); // ewfUiGlobal
 
 		private FlowComponent getAppLogoAndUserInfoContainer() {
 			var appLogo = new GenericFlowContainer(
@@ -279,7 +303,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			if( !listItems.Any() )
 				return null;
 
-			return new GenericFlowContainer( new LineList( listItems.Select( i => (LineListItem)i ) ).ToCollection(), classes: globalNavListContainerClass );
+			// NOTE SJR: Styles only supoprt <a>, not button or textboxes
+			return new GenericFlowContainer( new LineList( listItems.Select( i => (LineListItem)i ) ).ToCollection(), classes: globalNavListContainerClass ); // ewfUiGlobalNav
 		}
 
 		private FlowComponent getEntityAndTopTabContainer() {
@@ -290,7 +315,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					throw new ApplicationException( "Top tabs are not supported with multiple resource groups." );
 				components.Add( getTopTabListContainer( resourceGroups.Single() ) );
 			}
-			return new GenericFlowContainer( components, classes: entityAndTopTabContainerClass );
+			return new GenericFlowContainer( components, classes: entityAndTopTabContainerClass ); // ewfUiEntityAndTopTabs
 		}
 
 		private FlowComponent getEntityContainer() =>
@@ -353,10 +378,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private bool entityUsesTabMode( TabMode tabMode ) =>
 			entityUiSetup != null && PageBase.Current.ParentResource == null && entityUiSetup.GetTabMode( PageBase.Current.EsAsBaseType ) == tabMode;
 
-		private FlowComponent getSideTabContainer() {
+		private FlowComponent getSideTabNavigationContainer() {
 			var components = new List<FlowComponent>();
 			foreach( var resourceGroup in PageBase.Current.EsAsBaseType.ListedResources ) {
-				var tabs = getTabHyperlinksForResources( resourceGroup, true );
+				// NOTE SJR: No icons ever
+				var tabs = getTabHyperlinksForResources( resourceGroup, false );
 				if( tabs.Any() && resourceGroup.Name.Any() )
 					components.Add( new GenericFlowContainer( resourceGroup.Name.ToComponents(), classes: sideTabGroupHeadClass ) );
 				components.AddRange( tabs );
