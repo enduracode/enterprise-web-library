@@ -8,10 +8,7 @@ using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
 using EnterpriseWebLibrary.IO;
 using EnterpriseWebLibrary.TewlContrib;
-using Humanizer;
-using Tewl;
 using Tewl.IO;
-using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 	internal class ExportLogic: Operation {
@@ -330,9 +327,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				               : "";
 			build.HgChangesetId = hgOutput.Length == 40 ? hgOutput : "";
 
-			build.LogicSize = AppStatics.NDependIsPresent && !installation.DevelopmentInstallationLogic.SystemIsEwl
-				                  ? GetLogicSize.GetNDependLocCount( installation, false )
-				                  : null;
 			var serverSideLogicFolderPath = EwlStatics.CombinePaths( logicPackagesFolderPath, "Server Side Logic" );
 			packageWebApps( installation, serverSideLogicFolderPath );
 			packageWindowsServices( installation, serverSideLogicFolderPath );
@@ -352,6 +346,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				build.ClientSideApp.Package = ZipOps.ZipFolderAsByteArray( clientSideAppFolder );
 				operationResult.NumberOfBytesTransferred += build.ClientSideApp.Package.LongLength;
 			}
+
+			// We cannot calculate the logic size until after the package… methods above produce build output for all projects.
+			build.LogicSize = AppStatics.NDependIsPresent && !installation.DevelopmentInstallationLogic.SystemIsEwl
+				                  ? GetLogicSize.GetNDependLocCount( installation, false )
+				                  : null;
 
 			// Set up the list of installation objects in the build message.
 			build.Installations = new InstallationSupportUtility.SystemManagerInterface.Messages.BuildMessage.Build.InstallationsType();
