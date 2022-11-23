@@ -10,13 +10,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// An HTTP response, minus any caching information.
 	/// </summary>
 	public class EwfResponse {
+		private static Func<HttpResponse> currentResponseGetter;
+
 		private sealed class AspNetAdapter: HttpResponse {
 			private readonly Stream body;
 			internal string RedirectUrl = "";
 
-			public AspNetAdapter( Stream body ) {
+			public AspNetAdapter( Stream body, IResponseCookies cookies ) {
 				this.body = body;
 				ContentType = ContentTypes.Html;
+				Cookies = cookies;
 			}
 
 			public override HttpContext HttpContext => throw new NotImplementedException();
@@ -25,7 +28,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			public override Stream Body { get => body; set => throw new NotImplementedException(); }
 			public override long? ContentLength { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 			public override string ContentType { get; set; }
-			public override IResponseCookies Cookies => throw new NotImplementedException();
+			public override IResponseCookies Cookies { get; }
 			public override bool HasStarted => throw new NotImplementedException();
 			public override void OnStarting( Func<object, Task> callback, object state ) => throw new NotImplementedException();
 			public override void OnCompleted( Func<object, Task> callback, object state ) => throw new NotImplementedException();
@@ -35,6 +38,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					throw new NotImplementedException();
 				RedirectUrl = location;
 			}
+		}
+
+		internal static void Init( Func<HttpResponse> currentResponseGetter ) {
+			EwfResponse.currentResponseGetter = currentResponseGetter;
 		}
 
 		/// <summary>
@@ -140,7 +147,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			AspNetAdapter aspNetResponse;
 			byte[] binaryBody;
 			using( var stream = new MemoryStream() ) {
-				aspNetResponse = new AspNetAdapter( stream );
+				aspNetResponse = new AspNetAdapter( stream, currentResponseGetter().Cookies );
 				aspNetResponseWriter( aspNetResponse );
 				if( aspNetResponse.RedirectUrl.Any() )
 					return Create(

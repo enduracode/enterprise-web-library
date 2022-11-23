@@ -180,6 +180,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 								AspNetStatics.Init( () => contextAccessor.HttpContext?.RequestServices ?? serviceScope.ServiceProvider );
 								EwfRequest.Init( providerGetter.GetProvider<AppRequestBaseUrlProvider>( "RequestBaseUrl" ), () => contextAccessor.HttpContext.Request );
+								EwfResponse.Init( () => contextAccessor.HttpContext.Response );
 								UrlHandlingStatics.Init(
 									() => RequestDispatchingStatics.AppProvider.GetBaseUrlPatterns(),
 									( baseUrlString, appRelativeUrl ) =>
