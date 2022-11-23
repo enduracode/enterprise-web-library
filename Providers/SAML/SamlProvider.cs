@@ -117,11 +117,11 @@ namespace EnterpriseWebLibrary.Saml {
 
 		async Task ExternalSamlProvider.WriteLogInResponse( HttpResponse response, string identityProvider, bool forceReauthentication, string returnUrl ) {
 			using var scope = currentServicesGetter().CreateScope();
-			var samlServiceProvider = scope.ServiceProvider.GetRequiredService<ISamlServiceProvider>();
-			await samlServiceProvider.SetConfigurationNameAsync( samlConfigurationName );
-
 			var responseContext = scope.ServiceProvider.GetRequiredService<HttpResponseContext>();
 			responseContext.SetResponse( response );
+
+			var samlServiceProvider = scope.ServiceProvider.GetRequiredService<ISamlServiceProvider>();
+			await samlServiceProvider.SetConfigurationNameAsync( samlConfigurationName );
 			await samlServiceProvider.InitiateSsoAsync(
 				partnerName: identityProvider,
 				relayState: returnUrl,
