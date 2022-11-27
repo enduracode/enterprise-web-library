@@ -73,7 +73,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 				// Strong ETags must vary by content coding. Since we don't know yet how this response will be encoded (gzip or otherwise), the best thing we can do is
 				// use the Accept-Encoding header value in the ETag.
-				eTag += StringTools.ConcatenateWithDelimiter( "", aspNetRequest.Headers.AcceptEncoding );
+				eTag += StringTools.ConcatenateWithDelimiter( "", (IEnumerable<string>)aspNetRequest.Headers.AcceptEncoding );
 
 				var typedHeaders = aspNetResponse.GetTypedHeaders();
 				eTag = "\"{0}\"".FormatWith( eTag );
