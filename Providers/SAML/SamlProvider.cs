@@ -135,7 +135,7 @@ namespace EnterpriseWebLibrary.Saml {
 			var result = await samlServiceProvider.ReceiveSsoAsync();
 			return ( result.PartnerName, result.UserID,
 				       result.Attributes.Where( i => i.AttributeValues.Any() && i.AttributeValues.First().Data != null )
-					       .ToImmutableDictionary( i => i.Name, i => i.AttributeValues.First().Data.First().OuterXml ), result.RelayState );
+					       .ToImmutableDictionary( i => i.Name, i => i.AttributeValues.First().ToString() ), result.RelayState );
 		}
 	}
 }
