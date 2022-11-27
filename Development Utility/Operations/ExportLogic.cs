@@ -163,7 +163,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						EwlStatics.SamlProviderProjectPath,
 						"EnterpriseWebLibrary.Saml",
 						samlId,
-						"<dependency id=\"ComponentSpace.Saml2.Licensed\" version=\"4.4.0\" />".ToCollection(),
+						"<dependency id=\"ComponentSpace.Saml2.Licensed\" version=\"4.5.0\" />".ToCollection(),
 						now,
 						useDebugAssembly,
 						outputFolderPath,
