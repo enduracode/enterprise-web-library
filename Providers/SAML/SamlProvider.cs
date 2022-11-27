@@ -109,7 +109,7 @@ namespace EnterpriseWebLibrary.Saml {
 			if( appProvider != null )
 				configurations.AddRange( appProvider.GetCustomConfigurations() );
 
-			currentServicesGetter().GetRequiredService<IOptionsSnapshot<SamlConfigurations>>().Value.Configurations = configurations;
+			currentServicesGetter().GetRequiredService<IOptionsMonitor<SamlConfigurations>>().CurrentValue.Configurations = configurations;
 		}
 
 		async Task<XmlElement> ExternalSamlProvider.GetMetadata() =>
