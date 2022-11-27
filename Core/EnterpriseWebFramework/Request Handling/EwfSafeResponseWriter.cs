@@ -1,10 +1,8 @@
 ﻿using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
-using Humanizer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Net.Http.Headers;
-using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -62,6 +60,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					var responseWithBufferedBody = EwfResponse.Create(
 						response.Value.ContentType,
 						response.Value.BodyCreator.GetBufferedBodyCreator(),
+						statusCodeGetter: response.Value.StatusCodeGetter,
 						fileNameCreator: response.Value.FileNameCreator,
 						additionalHeaderFieldGetter: response.Value.AdditionalHeaderFieldGetter );
 					response = new Lazy<EwfResponse>( () => responseWithBufferedBody );
