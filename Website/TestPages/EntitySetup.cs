@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using EnterpriseWebLibrary.EnterpriseWebFramework;
-using EnterpriseWebLibrary.WebSessionState;
-using Humanizer;
-using Tewl.Tools;
+﻿using EnterpriseWebLibrary.WebSessionState;
 
 // OptionalParameter: string someText
 
@@ -15,7 +9,7 @@ namespace EnterpriseWebLibrary.Website.TestPages {
 		public override string EntitySetupName => "Web Framework Demo";
 
 		protected override IEnumerable<ResourceGroup> createListedResources() =>
-			new List<ResourceGroup>
+			new[]
 				{
 					new ResourceGroup( "Layout", new BoxDemo( this ), new ComponentLists( this ) ),
 					new ResourceGroup( "Tables", new EwfTableDemo( this ), new ColumnPrimaryTableDemo( this ) ),
@@ -26,7 +20,8 @@ namespace EnterpriseWebLibrary.Website.TestPages {
 						new Checkboxes( this ),
 						new SelectListDemo( this ),
 						new CheckboxListDemo( this ),
-						new DateAndTimePickers( this ) ),
+						new DateAndTimePickers( this ),
+						new FileUploadDemo( this ) ),
 					new ResourceGroup( "Working Stuff", new ActionControls( this ), new OptionalParametersDemo( this ), new OmniDemo( this ) ),
 					new ResourceGroup( "First category", new HtmlEditing( this ), new RegexHelper( this ), new StatusMessages( this ) ),
 					new ResourceGroup( "Other", new IntermediatePostBacks( this ), new ModalBoxes( this ), new MailMerging( this ), new Charts( this ) )
@@ -39,6 +34,7 @@ namespace EnterpriseWebLibrary.Website.TestPages {
 			RequestDispatchingStatics.GetFrameworkUrlPatterns()
 				.Append( BoxDemo.UrlPatterns.Literal( this, "box" ) )
 				.Append( EwfTableDemo.UrlPatterns.Literal( this, "ewf-table" ) )
+				.Append( FileUploadDemo.UrlPatterns.Literal( this, "file-upload" ) )
 				.Append( CreateSystem.UrlPatterns.Literal( "create-system" ) )
 				.Append( ConfigurationSchemas.EntitySetup.UrlPatterns.Literal( "ConfigurationSchemas" ) )
 				.Concat( LegacyUrlStatics.GetPatterns() );
