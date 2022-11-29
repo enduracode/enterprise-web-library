@@ -124,10 +124,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		private PostBackValueValidationResult<T> validatePostBackValue( object value ) {
-			if( filePostBackValueValidator != null ) {
-				var fileValue = value as IFormFile;
-				return value == null || fileValue != null ? filePostBackValueValidator( fileValue ) : PostBackValueValidationResult<T>.CreateInvalid();
-			}
+			if( filePostBackValueValidator != null )
+				return value != null ? filePostBackValueValidator( value as IFormFile ) : PostBackValueValidationResult<T>.CreateInvalid();
 
 			var stringValue = value as string;
 			return value == null || stringValue != null ? stringPostBackValueValidator( stringValue ) : PostBackValueValidationResult<T>.CreateInvalid();
