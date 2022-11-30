@@ -4,6 +4,7 @@ using System.Linq;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
+using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages;
 using EnterpriseWebLibrary.UserManagement;
 using Humanizer;
 using JetBrains.Annotations;
@@ -15,6 +16,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private static readonly ElementClass appLogoAndUserInfoClass = new ElementClass( "ewfUiAppLogoAndUserInfo" );
 		private static readonly ElementClass appLogoClass = new ElementClass( "ewfUiAppLogo" );
 		private static readonly ElementClass userInfoClass = new ElementClass( "ewfUiUserInfo" );
+		private static readonly ElementClass userNavClass = new ElementClass( "ewfUiUserNav" );
 		private static readonly ElementClass topErrorMessageListContainerClass = new ElementClass( "ewfUiStatus" );
 		private static readonly ElementClass globalNavListContainerClass = new ElementClass( "ewfUiGlobalNav" );
 
@@ -232,18 +234,24 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				yield return c;
 		}
 
-		private FlowComponent getGlobalContainer() =>
-			new GenericFlowContainer(
+		private FlowComponent getGlobalContainer() {
+			var userInfo = new List<FlowComponent>();
+			if( AppRequestState.Instance.UserAccessible ) {
+				var changePasswordPage = new ChangePassword( PageBase.Current.GetUrl() );
+				if( changePasswordPage.UserCanAccessResource && AppTools.User != null )
+					userInfo.Add( new GenericFlowContainer( getUserInfo( changePasswordPage ), classes: userInfoClass ) );
+			}
+
+			return new GenericFlowContainer(
 				new[]
-						{
-							getAppLogoAndUserInfoContainer(),
-							new FlowErrorContainer(
-								new ErrorSourceSet( includeGeneralErrors: true ),
-								new ListErrorDisplayStyle( classes: topErrorMessageListContainerClass ) ),
-							getGlobalNavListContainer()
-						}.Where( i => i != null )
-					.Materialize(),
-				clientSideIdOverride: globalContainerId ); // ewfUiGlobal
+					{
+						getAppLogoAndUserInfoContainer(),
+						new FlowErrorContainer( new ErrorSourceSet( includeGeneralErrors: true ), new ListErrorDisplayStyle( classes: topErrorMessageListContainerClass ) ),
+						getGlobalNavListContainer()
+					}.Concat( userInfo ).Where( i => i != null ).Materialize(),
+				clientSideIdOverride: globalContainerId );
+			// ewfUiGlobal
+		}
 
 		private FlowComponent getAppLogoAndUserInfoContainer() {
 			var appLogo = new GenericFlowContainer(
@@ -254,37 +262,30 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						                : ConfigurationStatics.SystemDisplayName ).ToComponents(),
 				classes: appLogoClass );
 
-			var userInfo = new List<FlowComponent>();
-			if( AppRequestState.Instance.UserAccessible ) {
-				var changePasswordPage = new UserManagement.Pages.ChangePassword( PageBase.Current.GetUrl() );
-				if( changePasswordPage.UserCanAccessResource && AppTools.User != null )
-					userInfo.Add( new GenericFlowContainer( getUserInfo( changePasswordPage ), classes: userInfoClass ) );
-			}
-
-			return new GenericFlowContainer( appLogo.Concat( userInfo ).Materialize(), classes: appLogoAndUserInfoClass );
+			return new GenericFlowContainer( appLogo.ToCollection(), classes: appLogoAndUserInfoClass );
 		}
 
 		private IReadOnlyCollection<FlowComponent> getUserInfo( PageBase changePasswordPage ) {
 			var components = new List<FlowComponent>();
 
-			components.AddRange( "Logged in as {0}".FormatWith( AppTools.User.Email ).ToComponents() );
+			components.Add( new Paragraph( $"Logged in as {AppTools.User.Email}".ToComponents() ) );
 			if( !UserManagementStatics.LocalIdentityProviderEnabled )
 				return components;
 
 			components.Add(
 				new InlineList(
-					new EwfHyperlink( changePasswordPage, new ButtonHyperlinkStyle( "Change password", buttonSize: ButtonSize.ShrinkWrap ) ).ToCollection()
-						.ToComponentListItem()
-						.ToCollection()
-						.Append(
+					new EwfHyperlink( changePasswordPage, new ButtonHyperlinkStyle( "Change password", buttonSize: ButtonSize.ShrinkWrap ) ).ToCollection().ToComponentListItem()
+						.ToCollection().Append(
 							new EwfButton(
-									new StandardButtonStyle( "Log out", buttonSize: ButtonSize.ShrinkWrap ),
-									behavior: new PostBackBehavior(
-										postBack: PostBack.CreateFull(
-											id: "ewfLogOut",
-											modificationMethod: AuthenticationStatics.LogOutUser,
-											actionGetter: () => new PostBackAction( null, authorizationCheckDisabledPredicate: resource => true ) ) ) ).ToCollection()
-								.ToComponentListItem() ) ) );
+								new StandardButtonStyle( "Log out", buttonSize: ButtonSize.ShrinkWrap ),
+								behavior: new PostBackBehavior(
+									postBack: PostBack.CreateFull(
+										id: "ewfLogOut",
+										modificationMethod: AuthenticationStatics.LogOutUser,
+										actionGetter: () => new PostBackAction( null, authorizationCheckDisabledPredicate: resource => true ) ) ) ).ToCollection().ToComponentListItem() ),
+					setup: new ComponentListSetup( classes: userNavClass )
+					)
+				);
 
 			return components;
 		}

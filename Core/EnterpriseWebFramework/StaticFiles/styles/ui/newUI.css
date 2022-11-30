@@ -102,13 +102,13 @@ a.ewfActionShrinkWrapButton {
     color: var(--hover-color) !important;
   }
 
-.ewfUiUserContainer {
+.ewfUiUserInfo {
   flex: 1;
   text-align: right;
   color: var(--white-color);
 }
 
-  .ewfUiUserContainer p {
+  .ewfUiUserInfo p {
     margin: 0px;
     font-size: var(--default-font-size);
   }
@@ -509,7 +509,7 @@ button.ewfActionNormalButton.ewfAction {
     max-height: none;
   }
 
-  a.ewfActionShrinkWrapButton, .ewfUiUserContainer p {
+  a.ewfActionShrinkWrapButton, .ewfUiUserInfo p {
     font-size: var(--tablet-font-size);
   }
 
@@ -564,7 +564,7 @@ button.ewfActionNormalButton.ewfAction {
     margin: 0px 4vw;
   }
 
-  .ewfUiUserContainer {
+  .ewfUiUserInfo {
     background-image: url(./account.svg);
     background-repeat: no-repeat;
     background-position: center;
@@ -575,11 +575,11 @@ button.ewfActionNormalButton.ewfAction {
     flex: 0 1 auto;
   }
 
-    .ewfUiUserContainer:hover {
+    .ewfUiUserInfo:hover {
       background-color: var(--hover-color);
     }
 
-    .ewfUiUserContainer p {
+    .ewfUiUserInfo p {
       display: none;
       position: absolute;
       top: 55px;
@@ -594,7 +594,7 @@ button.ewfActionNormalButton.ewfAction {
       z-index: 0;
     }
 
-    .ewfUiUserContainer:hover p {
+    .ewfUiUserInfo:hover p {
       display: block;
       z-index: 1000;
     }
@@ -614,7 +614,7 @@ button.ewfActionNormalButton.ewfAction {
     z-index: 0;
   }
 
-  .ewfUiUserContainer:hover .ewfUiUserNav {
+  .ewfUiUserInfo:hover .ewfUiUserNav {
     transform: scaleY(1);
     transition: transform ease-in-out .2s;
     z-index: 1000;
