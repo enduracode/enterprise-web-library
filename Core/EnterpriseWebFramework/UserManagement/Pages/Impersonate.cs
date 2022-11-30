@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using EnterpriseWebLibrary.Configuration;
+﻿using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.UserManagement;
-using Humanizer;
 using JetBrains.Annotations;
-using Tewl.Tools;
 
 // EwlPage
 // Parameter: string returnUrl
@@ -15,7 +10,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 	// This page does not use the EWF UI because displaying authenticated user information would be misleading.
 	partial class Impersonate {
 		internal const string AnonymousUser = "anonymous";
-		private static readonly ElementClass elementClass = new ElementClass( "ewfSelectUser" );
+		private static readonly ElementClass elementClass = new( "ewfSelectUser" );
 
 		[ UsedImplicitly ]
 		private class CssElementCreator: ControlCssElementCreator {
@@ -38,7 +33,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages {
 		protected override bool userCanAccessResource {
 			get {
 				var user = AppRequestState.Instance.ImpersonatorExists ? AppRequestState.Instance.ImpersonatorUser : AppTools.User;
-				return ( user != null && user.Role.CanManageUsers ) || !ConfigurationStatics.IsLiveInstallation;
+				return AuthenticationStatics.UserCanImpersonate( user );
 			}
 		}
 

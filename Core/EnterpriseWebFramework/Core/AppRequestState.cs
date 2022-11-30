@@ -5,7 +5,6 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.UserManagement;
 using NodaTime;
 using StackExchange.Profiling;
-using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -128,7 +127,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public bool NewUrlParameterValuesEffective => newUrlParameterValuesEffective && !urlHandlerStateDisabled;
 
 		/// <summary>
-		/// EwfApp use only.
+		/// RequestDispatchingStatics use only.
 		/// </summary>
 		internal void EnableUser() {
 			userEnabled = true;
@@ -150,20 +149,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 		}
 
-		/// <summary>
-		/// EWL use only.
-		/// </summary>
-		public bool ImpersonatorExists => UserAndImpersonator.Item2 != null;
+		internal bool ImpersonatorExists => UserAndImpersonator.Item2 != null;
 
-		/// <summary>
-		/// EWL use only.
-		/// </summary>
-		public User ImpersonatorUser => UserAndImpersonator.Item2.Value;
+		internal User ImpersonatorUser => UserAndImpersonator.Item2.Value;
 
-		/// <summary>
-		/// EWL use only.
-		/// </summary>
-		public int? ProfilingUserId => ( ImpersonatorExists ? ImpersonatorUser : UserAndImpersonator.Item1 )?.UserId;
+		internal int? ProfilingUserId => ( ImpersonatorExists ? ImpersonatorUser : UserAndImpersonator.Item1 )?.UserId;
 
 		/// <summary>
 		/// AppTools.User and private use only.
@@ -177,20 +167,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				if( !UserAccessible )
 					throw new ApplicationException( "User cannot be accessed from a nonsecure connection in an application that supports secure connections." );
 				if( userAndImpersonator == null )
-					userAndImpersonator = UserManagementStatics.UserManagementEnabled
-						                      ? AuthenticationStatics.GetUserAndImpersonatorFromRequest()
-						                      : Tuple.Create<User, SpecifiedValue<User>>( null, null );
+					userAndImpersonator = AuthenticationStatics.GetUserAndImpersonatorFromRequest();
 				return userAndImpersonator;
 			}
 		}
 
-		/// <summary>
-		/// EWL use only.
-		/// </summary>
-		public bool UserAccessible => !EwfConfigurationStatics.AppSupportsSecureConnections || EwfRequest.Current.IsSecure;
+		internal bool UserAccessible => !EwfConfigurationStatics.AppSupportsSecureConnections || EwfRequest.Current.IsSecure;
 
-		internal void ClearUserAndImpersonator() {
-			userAndImpersonator = null;
+		internal void RefreshUserAndImpersonator() {
+			if( userAndImpersonator != null )
+				userAndImpersonator = AuthenticationStatics.RefreshUserAndImpersonator( userAndImpersonator );
 		}
 
 		/// <summary>

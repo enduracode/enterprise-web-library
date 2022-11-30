@@ -6,12 +6,10 @@ using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.UserManagement;
 using EnterpriseWebLibrary.WebSessionState;
-using Humanizer;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NodaTime;
 using StackExchange.Profiling;
-using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -29,6 +27,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private static Func<Func<Func<PageContent>, PageContent>, Func<string>, Func<string>, ( PageContent basicContent, FlowComponent component, FlowComponent
 				etherealContainer, FlowComponent jsInitElement, Action dataUpdateModificationMethod, bool isAutoDataUpdater, ActionPostBack pageLoadPostBack )>
 			contentGetter;
+
+		private static Action requestStateRefresher;
 
 		[ JsonObject( ItemRequired = Required.Always, MemberSerialization = MemberSerialization.Fields ) ]
 		private class HiddenFieldData {
@@ -72,7 +72,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal static void Init(
 			( Func<Action>, Func<string> ) appProvider,
 			Func<Func<Func<PageContent>, PageContent>, Func<string>, Func<string>, ( PageContent, FlowComponent, FlowComponent, FlowComponent, Action, bool,
-				ActionPostBack )> contentGetter ) {
+				ActionPostBack )> contentGetter, Action requestStateRefresher ) {
 			EwfValidation.Init(
 				() => Current.formState.ValidationPredicate,
 				() => Current.formState.DataModifications,
@@ -115,8 +115,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							"If the data-update modification is included, it is meaningless to include any full post-backs since these inherently update the page's data." );
 				},
 				dataModification => dataModification == Current.dataUpdate ? Current.dataUpdatePostBack : (ActionPostBack)dataModification );
+
 			PageBase.appProvider = appProvider;
 			PageBase.contentGetter = contentGetter;
+			PageBase.requestStateRefresher = requestStateRefresher;
 		}
 
 		/// <summary>
@@ -225,6 +227,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					finally {
 						DataAccessState.Current.ResetCache();
 					}
+
+					requestStateRefresher();
 				}
 
 				// Re-create page object. A big reason to do this is that some pages execute database queries or other code during initialization in order to prime the
@@ -460,6 +464,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						finally {
 							DataAccessState.Current.ResetCache();
 						}
+
+						requestStateRefresher();
 					}
 
 					if( postBack.IsIntermediate ) {
@@ -842,7 +848,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			    string.Equals( destinationUrl, AppRequestState.Instance.Url, StringComparison.Ordinal ) ) {
 				page.replaceUrlHandlers();
 				AppRequestState.Instance.SetNewUrlParameterValuesEffective( false );
-				AppRequestState.Instance.ClearUserAndImpersonator();
 				return ( nextPageObject = page ).processViewAndGetResponse( null );
 			}
 

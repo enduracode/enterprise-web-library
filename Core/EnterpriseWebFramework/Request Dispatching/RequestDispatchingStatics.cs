@@ -278,5 +278,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			return patterns;
 		}
+
+		/// <summary>
+		/// Refreshes all state for the current request that could have become stale after data modifications, e.g. the authenticated user object.
+		/// </summary>
+		public static void RefreshRequestState() {
+			AppRequestState.Instance.RefreshUserAndImpersonator();
+		}
 	}
 }

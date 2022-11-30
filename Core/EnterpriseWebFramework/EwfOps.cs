@@ -217,7 +217,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								PageBase.Init(
 									( () => BasePageStatics.AppProvider.GetPageViewDataModificationMethod(),
 										() => BasePageStatics.AppProvider.JavaScriptDocumentReadyFunctionCall ),
-									BasicPageContent.GetContent );
+									BasicPageContent.GetContent,
+									RequestDispatchingStatics.RefreshRequestState );
 								HyperlinkBehaviorExtensionCreators.Init( ModalBox.GetBrowsingModalBoxOpenStatements );
 								FileUpload.Init( () => ( (BasicPageContent)PageBase.Current.BasicContent ).FormUsesMultipartEncoding = true );
 								ModalBox.Init( () => ( (BasicPageContent)PageBase.Current.BasicContent ).BrowsingModalBoxId );

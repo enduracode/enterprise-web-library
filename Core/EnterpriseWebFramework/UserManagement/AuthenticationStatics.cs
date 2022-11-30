@@ -5,13 +5,11 @@ using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.UserManagement;
 using EnterpriseWebLibrary.UserManagement.IdentityProviders;
 using EnterpriseWebLibrary.WebSessionState;
-using Humanizer;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.DataProtection;
 using NodaTime;
 using NodaTime.Text;
 using Tewl.InputValidation;
-using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 	public static class AuthenticationStatics {
@@ -67,6 +65,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 		/// place with an impersonator who doesn't correspond to a user, or (3) a value containing the impersonator.
 		/// </summary>
 		internal static Tuple<User, SpecifiedValue<User>> GetUserAndImpersonatorFromRequest() {
+			if( !UserManagementStatics.UserManagementEnabled )
+				return Tuple.Create<User, SpecifiedValue<User>>( null, null );
+
 			User getUser() {
 				if( !CookieStatics.TryGetCookieValue( userCookieName, out var cookieValue ) )
 					return null;
@@ -75,12 +76,26 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement {
 			}
 			var user = getUser();
 
-			if( ( user != null && user.Role.CanManageUsers ) || !ConfigurationStatics.IsLiveInstallation )
+			if( UserCanImpersonate( user ) )
 				if( CookieStatics.TryGetCookieValue( UserImpersonationStatics.CookieName, out var cookieValue ) )
 					return Tuple.Create( cookieValue.Any() ? UserManagementStatics.GetUser( int.Parse( cookieValue ), false ) : null, new SpecifiedValue<User>( user ) );
 
 			return Tuple.Create( user, (SpecifiedValue<User>)null );
 		}
+
+		internal static Tuple<User, SpecifiedValue<User>> RefreshUserAndImpersonator( Tuple<User, SpecifiedValue<User>> userAndImpersonator ) {
+			SpecifiedValue<User> impersonator;
+			if( userAndImpersonator.Item2 == null )
+				impersonator = null;
+			else {
+				var impersonatorUser = userAndImpersonator.Item2.Value != null ? UserManagementStatics.GetUser( userAndImpersonator.Item2.Value.UserId, false ) : null;
+				impersonator = UserCanImpersonate( impersonatorUser ) ? new SpecifiedValue<User>( impersonatorUser ) : null;
+			}
+
+			return Tuple.Create( userAndImpersonator.Item1 != null ? UserManagementStatics.GetUser( userAndImpersonator.Item1.UserId, false ) : null, impersonator );
+		}
+
+		internal static bool UserCanImpersonate( User user ) => ( user != null && user.Role.CanManageUsers ) || !ConfigurationStatics.IsLiveInstallation;
 
 
 		// Adding a New User
