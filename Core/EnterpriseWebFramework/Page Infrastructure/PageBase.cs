@@ -229,27 +229,27 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					}
 
 					requestStateRefresher();
-				}
 
-				// Re-create page object. A big reason to do this is that some pages execute database queries or other code during initialization in order to prime the
-				// data-access cache. The code above resets the cache and we want to re-prime it right away.
-				PageBase newPageObject;
-				using( MiniProfiler.Current.Step( "EWF - Re-create page object after page-view data modifications" ) )
-					newPageObject = (PageBase)ReCreate();
-				bool urlChanged;
-				using( MiniProfiler.Current.Step( "EWF - Check URL after page-view data modifications" ) )
-					urlChanged = newPageObject.GetUrl( false, false ) != GetUrl( false, false );
-				if( urlChanged )
-					throw getPossibleDeveloperMistakeException( "The URL of the page changed after page-view data modifications." );
-				bool userAuthorized;
-				using( MiniProfiler.Current.Step( "EWF - Check page authorization after page-view data modifications" ) )
-					userAuthorized = newPageObject.UserCanAccessResource;
-				DisabledResourceMode disabledMode;
-				using( MiniProfiler.Current.Step( "EWF - Check alternative page mode after page-view data modifications" ) )
-					disabledMode = newPageObject.AlternativeMode as DisabledResourceMode;
-				if( !userAuthorized || disabledMode != null )
-					throw getPossibleDeveloperMistakeException( "The user lost access to the page or the page became disabled after page-view data modifications." );
-				return ( nextPageObject = newPageObject ).processSecondaryOperationAndGetResponse( statusCode );
+					// Re-create page object. A big reason to do this is that some pages execute database queries or other code during initialization in order to prime
+					// the data-access cache. The code above resets the cache and we want to re-prime it right away.
+					PageBase newPageObject;
+					using( MiniProfiler.Current.Step( "EWF - Re-create page object after page-view data modifications" ) )
+						newPageObject = (PageBase)ReCreate();
+					bool urlChanged;
+					using( MiniProfiler.Current.Step( "EWF - Check URL after page-view data modifications" ) )
+						urlChanged = newPageObject.GetUrl( false, false ) != GetUrl( false, false );
+					if( urlChanged )
+						throw getPossibleDeveloperMistakeException( "The URL of the page changed after page-view data modifications." );
+					bool userAuthorized;
+					using( MiniProfiler.Current.Step( "EWF - Check page authorization after page-view data modifications" ) )
+						userAuthorized = newPageObject.UserCanAccessResource;
+					DisabledResourceMode disabledMode;
+					using( MiniProfiler.Current.Step( "EWF - Check alternative page mode after page-view data modifications" ) )
+						disabledMode = newPageObject.AlternativeMode as DisabledResourceMode;
+					if( !userAuthorized || disabledMode != null )
+						throw getPossibleDeveloperMistakeException( "The user lost access to the page or the page became disabled after page-view data modifications." );
+					return ( nextPageObject = newPageObject ).processSecondaryOperationAndGetResponse( statusCode );
+				}
 			}
 
 			return processSecondaryOperationAndGetResponse( statusCode );
