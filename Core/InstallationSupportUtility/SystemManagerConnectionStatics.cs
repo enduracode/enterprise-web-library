@@ -10,6 +10,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 	public static class SystemManagerConnectionStatics {
 		public static SystemList SystemList { get; private set; }
 
+		public static bool LegacyServicesActive;
 		private static ChannelFactory<SystemManagerInterface.ServiceContracts.Isu> isuServiceFactory;
 		private static ChannelFactory<SystemManagerInterface.ServiceContracts.ProgramRunner> programRunnerServiceFactory;
 
@@ -17,8 +18,17 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 			if( refreshProgramRunnerDataOnly.HasValue )
 				RefreshLocalData( forProgramRunner: refreshProgramRunnerDataOnly.Value );
 
-			isuServiceFactory = getNetTcpChannelFactory<SystemManagerInterface.ServiceContracts.Isu>( "Isu.svc" );
-			programRunnerServiceFactory = getNetTcpChannelFactory<SystemManagerInterface.ServiceContracts.ProgramRunner>( "ProgramRunner.svc" );
+			ExecuteWithSystemManagerClient(
+				client => Task.Run(
+						async () => {
+							using var response = await client.GetAsync( "Service/Isu.svc", HttpCompletionOption.ResponseHeadersRead );
+							LegacyServicesActive = response.StatusCode == System.Net.HttpStatusCode.OK;
+						} )
+					.Wait() );
+			if( LegacyServicesActive ) {
+				isuServiceFactory = getNetTcpChannelFactory<SystemManagerInterface.ServiceContracts.Isu>( "Isu.svc" );
+				programRunnerServiceFactory = getNetTcpChannelFactory<SystemManagerInterface.ServiceContracts.ProgramRunner>( "ProgramRunner.svc" );
+			}
 		}
 
 		/// <summary>
@@ -43,7 +53,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 
 									using( var response = await client.GetAsync( "system-list", HttpCompletionOption.ResponseHeadersRead ) ) {
 										response.EnsureSuccessStatusCode();
-										using( var stream = await response.Content.ReadAsStreamAsync() )
+										await using( var stream = await response.Content.ReadAsStreamAsync() )
 											SystemList = XmlOps.DeserializeFromStream<SystemList>( stream, false );
 									}
 								} )
@@ -82,21 +92,6 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 				if( !( e is IOException ) )
 					throw new UserCorrectableException( generalMessage, e );
 			}
-		}
-
-		private static ChannelFactory<T> getHttpChannelFactory<T>( string serviceFileName ) {
-			var binding = new BasicHttpBinding { Security = { Mode = BasicHttpSecurityMode.Transport } };
-			binding.ReaderQuotas.MaxStringContentLength = int.MaxValue;
-			binding.SendTimeout = TimeSpan.FromMinutes( 10 );
-
-			// This prevents certificate validation problems on dev machines with self-signed certificates.
-			// This can probably be done anywhere before we try to get the system list. 
-			if( Configuration.HttpBaseUrl.StartsWith( "https://localhost" ) )
-				System.Net.ServicePointManager.ServerCertificateValidationCallback = ( ( sender, certificate, chain, sslPolicyErrors ) => true );
-
-			return new ChannelFactory<T>(
-				binding,
-				new EndpointAddress( Tewl.Tools.NetTools.CombineUrls( Configuration.HttpBaseUrl, "Service/" + serviceFileName ) ) );
 		}
 
 		private static ChannelFactory<T> getNetTcpChannelFactory<T>( string serviceFileName ) {
