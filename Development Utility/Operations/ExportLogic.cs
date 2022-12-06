@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Configuration.InstallationStandard;
 using EnterpriseWebLibrary.Configuration.SystemDevelopment;
@@ -400,19 +402,36 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 
 			operationResult.TimeSpentWaitingForNetwork = EwlStatics.ExecuteTimedRegion(
 				delegate {
-					using( var memoryStream = new MemoryStream() ) {
-						// Understand that by doing this, we are not really taking advantage of streaming, but at least it will be easier to do it the right way some day (probably by implementing our own BuildMessageStream)
-						XmlOps.SerializeIntoStream( build, memoryStream );
-						memoryStream.Position = 0;
+					if( SystemManagerConnectionStatics.LegacyServicesActive ) {
+						using( var memoryStream = new MemoryStream() ) {
+							// Understand that by doing this, we are not really taking advantage of streaming, but at least it will be easier to do it the right way some day (probably by implementing our own BuildMessageStream)
+							XmlOps.SerializeIntoStream( build, memoryStream );
+							memoryStream.Position = 0;
 
-						SystemManagerConnectionStatics.ExecuteIsuServiceMethod(
-							channel => channel.UploadBuild(
-								new InstallationSupportUtility.SystemManagerInterface.Messages.BuildUploadMessage
-									{
-										AuthenticationKey = SystemManagerConnectionStatics.AccessToken, BuildDocument = memoryStream
-									} ),
-							"build upload" );
+							SystemManagerConnectionStatics.ExecuteIsuServiceMethod(
+								channel => channel.UploadBuild(
+									new InstallationSupportUtility.SystemManagerInterface.Messages.BuildUploadMessage
+										{
+											AuthenticationKey = SystemManagerConnectionStatics.AccessToken, BuildDocument = memoryStream
+										} ),
+								"build upload" );
+						}
+						return;
 					}
+
+					SystemManagerConnectionStatics.ExecuteActionWithSystemManagerClient(
+						"build upload",
+						client => Task.Run(
+								async () => {
+									using var response = await client.SendAsync(
+										                     new HttpRequestMessage( HttpMethod.Post, SystemManagerConnectionStatics.BuildsUrlSegment )
+											                     {
+												                     Content = HttpClientTools.GetRequestContentFromWriter( stream => XmlOps.SerializeIntoStream( build, stream ) )
+											                     },
+										                     HttpCompletionOption.ResponseHeadersRead );
+									response.EnsureSuccessStatusCode();
+								} )
+							.Wait() );
 				} );
 		}
 

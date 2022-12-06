@@ -1,5 +1,6 @@
 ﻿using System.Net.Http;
 using System.ServiceModel;
+using System.Threading;
 using System.Threading.Tasks;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Email;
@@ -8,6 +9,15 @@ using Tewl.IO;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility {
 	public static class SystemManagerConnectionStatics {
+		public const string ServersUrlSegment = "servers";
+		public const string ServerConfigurationUrlSegment = "configuration";
+		public const string BuildsUrlSegment = "builds";
+		public const string ServerSideLogicPackageUrlSegment = "server-side-logic-package";
+		public const string ClientSideAppPackageUrlSegment = "client-side-app-package";
+		public const string InstallationConfigurationPackagesUrlSegment = "installation-configuration-packages";
+		public const string InstallationsUrlSegment = "installations";
+		public const string DataPackageUrlSegment = "data-package";
+
 		public static SystemList SystemList { get; private set; }
 
 		public static bool LegacyServicesActive;
@@ -119,13 +129,13 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 		}
 
 		public static void ExecuteWithSystemManagerClient( Action<HttpClient> method, bool useLongTimeouts = false ) {
-			using( var client = new HttpClient() ) {
-				client.Timeout = useLongTimeouts ? new TimeSpan( 0, 2, 0 ) : new TimeSpan( 0, 0, 10 );
-				client.BaseAddress = new Uri( Configuration.HttpBaseUrl + "/" );
-				client.DefaultRequestHeaders.TryAddWithoutValidation( "Authorization", Configuration.AccessToken );
+			using var client = new HttpClient();
 
-				method( client );
-			}
+			client.Timeout = useLongTimeouts ? new TimeSpan( 0, 2, 0 ) : new TimeSpan( 0, 0, 10 );
+			client.BaseAddress = new Uri( Configuration.HttpBaseUrl + "/" );
+			client.DefaultRequestHeaders.TryAddWithoutValidation( "Authorization", Configuration.AccessToken );
+
+			method( client );
 		}
 
 		/// <summary>
@@ -142,20 +152,6 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 			executeWebMethod( method, programRunnerServiceFactory, action );
 		}
 
-		/// <summary>
-		/// The action should be a noun, e.g. "logic package download".
-		/// </summary>
-		public static T ExecuteIsuServiceMethod<T>( Func<SystemManagerInterface.ServiceContracts.Isu, T> method, string action ) {
-			return executeWebMethodWithResult( method, isuServiceFactory, action );
-		}
-
-		/// <summary>
-		/// The action should be a noun, e.g. "logic package download".
-		/// </summary>
-		public static T ExecuteProgramRunnerServiceMethod<T>( Func<SystemManagerInterface.ServiceContracts.ProgramRunner, T> method, string action ) {
-			return executeWebMethodWithResult( method, programRunnerServiceFactory, action );
-		}
-
 		private static void executeWebMethod<ContractType>( Action<ContractType> method, ChannelFactory<ContractType> factory, string action ) {
 			StatusStatics.SetStatus( "Performing " + action + "." );
 			try {
@@ -168,19 +164,24 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 			StatusStatics.SetStatus( "Performed " + action + "." );
 		}
 
-		private static ResultType executeWebMethodWithResult<ContractType, ResultType>(
-			Func<ContractType, ResultType> method, ChannelFactory<ContractType> factory, string action ) {
-			StatusStatics.SetStatus( "Performing " + action + "." );
-			ResultType ret;
+		/// <summary>
+		/// The action should be a noun, e.g. “logic package download”.
+		/// </summary>
+		public static void ExecuteActionWithSystemManagerClient( string action, Action<HttpClient> method, bool supportLargePayload = false ) {
+			using var client = new HttpClient();
+
+			client.Timeout = supportLargePayload ? Timeout.InfiniteTimeSpan : new TimeSpan( 0, 2, 0 );
+			client.BaseAddress = new Uri( Configuration.HttpBaseUrl + "/" );
+			client.DefaultRequestHeaders.TryAddWithoutValidation( "Authorization", Configuration.AccessToken );
+
+			StatusStatics.SetStatus( "Performing {0}.".FormatWith( action ) );
 			try {
-				using( var channel = (IDisposable)factory.CreateChannel() )
-					ret = method( (ContractType)channel );
+				method( client );
 			}
 			catch( Exception e ) {
 				throw createWebServiceException( action, e );
 			}
-			StatusStatics.SetStatus( "Performed " + action + "." );
-			return ret;
+			StatusStatics.SetStatus( "Performed {0}.".FormatWith( action ) );
 		}
 
 		private static Exception createWebServiceException( string action, Exception innerException ) {
