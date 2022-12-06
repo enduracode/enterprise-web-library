@@ -1,5 +1,4 @@
-﻿using System.Net.Http;
-using System.Text;
+﻿using System.Text;
 using System.Threading.Tasks;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Configuration.InstallationStandard;
@@ -423,12 +422,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						"build upload",
 						client => Task.Run(
 								async () => {
-									using var response = await client.SendAsync(
-										                     new HttpRequestMessage( HttpMethod.Post, SystemManagerConnectionStatics.BuildsUrlSegment )
-											                     {
-												                     Content = HttpClientTools.GetRequestContentFromWriter( stream => XmlOps.SerializeIntoStream( build, stream ) )
-											                     },
-										                     HttpCompletionOption.ResponseHeadersRead );
+									using var content = HttpClientTools.GetRequestContentFromWriter( stream => XmlOps.SerializeIntoStream( build, stream ) );
+									using var response = await client.PostAsync( SystemManagerConnectionStatics.BuildsUrlSegment, content );
 									response.EnsureSuccessStatusCode();
 								} )
 							.Wait() );

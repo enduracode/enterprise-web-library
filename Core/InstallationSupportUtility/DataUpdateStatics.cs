@@ -137,8 +137,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 									                     $"{SystemManagerConnectionStatics.InstallationsUrlSegment}/{installation.Id}/{SystemManagerConnectionStatics.DataPackageUrlSegment}",
 									                     HttpCompletionOption.ResponseHeadersRead );
 								response.EnsureSuccessStatusCode();
-								await using var stream = await response.Content.ReadAsStreamAsync();
-								await stream.CopyToAsync( fileWriteStream );
+								await ( await response.Content.ReadAsStreamAsync() ).CopyToAsync( fileWriteStream );
 							} )
 						.Wait() );
 
