@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework.WebItems;
-using Humanizer;
-using Tewl.Tools;
+﻿using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework.WebItems;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework {
 	internal static class UrlStatics {
@@ -316,29 +310,22 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 					( entitySetup != null ? "{0} entitySetup, ".FormatWith( entitySetup.GeneralData.ClassName ) : "" ) + "string segment" +
 					getOldParameterNamePatternParameters( requiredParameters.Concat( optionalParameters ) ).PrependDelimiter( ", " ),
 					entitySetup != null
-						? includeVersionString
-							  ?
-							  "encoder is UrlEncoder local && local.CheckEntitySetup( entitySetup ) ? local.GetVersionString().Length > 0 ? EncodingUrlSegment.CreateWithVersionString( segment, local.GetVersionString() ) : EncodingUrlSegment.Create( segment ) : null"
-							  : "encoder is UrlEncoder local && local.CheckEntitySetup( entitySetup ) ? EncodingUrlSegment.Create( segment ) : null"
-						:
+						?
 						includeVersionString
-							?
-							"encoder is UrlEncoder local ? local.GetVersionString().Length > 0 ? EncodingUrlSegment.CreateWithVersionString( segment, local.GetVersionString() ) : EncodingUrlSegment.Create( segment ) : null"
+							? "encoder is UrlEncoder local && local.CheckEntitySetup( entitySetup ) ? local.GetVersionString().Length > 0 ? EncodingUrlSegment.CreateWithVersionString( segment, local.GetVersionString() ) : EncodingUrlSegment.Create( segment ) : null"
+							: "encoder is UrlEncoder local && local.CheckEntitySetup( entitySetup ) ? EncodingUrlSegment.Create( segment ) : null"
+						: includeVersionString
+							? "encoder is UrlEncoder local ? local.GetVersionString().Length > 0 ? EncodingUrlSegment.CreateWithVersionString( segment, local.GetVersionString() ) : EncodingUrlSegment.Create( segment ) : null"
 							: "encoder is UrlEncoder local ? EncodingUrlSegment.Create( segment ) : null",
 					entitySetup != null
-						? includeVersionString
-							  ?
-							  "url.HasVersionString( out var components ) && string.Equals( components.segment, segment, StringComparison.OrdinalIgnoreCase ) ? new UrlDecoder( {0}, versionString: components.versionString ) : string.Equals( url.Segment, segment, StringComparison.OrdinalIgnoreCase ) ? new UrlDecoder( {0}, versionString: \"\" ) : null"
-								  .FormatWith(
-									  "entitySetup" + getOldParameterNameDecoderArguments( requiredParameters.Concat( optionalParameters ) )
-										  .PrependDelimiter( ", " ) )
-							  : "string.Equals( url.Segment, segment, StringComparison.OrdinalIgnoreCase ) ? new UrlDecoder( entitySetup{0} ) : null"
-								  .FormatWith(
-									  getOldParameterNameDecoderArguments( requiredParameters.Concat( optionalParameters ) ).PrependDelimiter( ", " ) )
-						:
+						?
 						includeVersionString
-							?
-							"url.HasVersionString( out var components ) && string.Equals( components.segment, segment, StringComparison.OrdinalIgnoreCase ) ? new UrlDecoder( {0}versionString: components.versionString ) : string.Equals( url.Segment, segment, StringComparison.OrdinalIgnoreCase ) ? new UrlDecoder( {0}versionString: \"\" ) : null"
+							? "url.HasVersionString( out var components ) && string.Equals( components.segment, segment, StringComparison.OrdinalIgnoreCase ) ? new UrlDecoder( {0}, versionString: components.versionString ) : string.Equals( url.Segment, segment, StringComparison.OrdinalIgnoreCase ) ? new UrlDecoder( {0}, versionString: \"\" ) : null"
+								.FormatWith( "entitySetup" + getOldParameterNameDecoderArguments( requiredParameters.Concat( optionalParameters ) ).PrependDelimiter( ", " ) )
+							: "string.Equals( url.Segment, segment, StringComparison.OrdinalIgnoreCase ) ? new UrlDecoder( entitySetup{0} ) : null".FormatWith(
+								getOldParameterNameDecoderArguments( requiredParameters.Concat( optionalParameters ) ).PrependDelimiter( ", " ) )
+						: includeVersionString
+							? "url.HasVersionString( out var components ) && string.Equals( components.segment, segment, StringComparison.OrdinalIgnoreCase ) ? new UrlDecoder( {0}versionString: components.versionString ) : string.Equals( url.Segment, segment, StringComparison.OrdinalIgnoreCase ) ? new UrlDecoder( {0}versionString: \"\" ) : null"
 								.FormatWith( getOldParameterNameDecoderArguments( requiredParameters.Concat( optionalParameters ) ).AppendDelimiter( ", " ) )
 							: "string.Equals( url.Segment, segment, StringComparison.OrdinalIgnoreCase ) ? new UrlDecoder({0}) : null".FormatWith(
 								getOldParameterNameDecoderArguments( requiredParameters.Concat( optionalParameters ) ).Surround( " ", " " ) ) ) );
@@ -362,29 +349,26 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 									getOldParameterNamePatternParameters( optionalParameters ) )
 								.Surround( " ", " " ),
 							entitySetup != null
-								? parameterIsNullable
-									  ?
-									  "encoder is UrlEncoder local && local.CheckEntitySetup( entitySetup ) ? local.Get{0}().HasValue ? EncodingUrlSegment.CreatePositiveInt( local.Get{0}().Value ) : EncodingUrlSegment.Create( nullSegment ) : null"
-										  .FormatWith( parameter.PropertyName )
-									  : "encoder is UrlEncoder local && local.CheckEntitySetup( entitySetup ) ? EncodingUrlSegment.CreatePositiveInt( local.Get{0}() ) : null"
-										  .FormatWith( parameter.PropertyName )
-								:
+								?
 								parameterIsNullable
-									?
-									"encoder is UrlEncoder local ? local.Get{0}().HasValue ? EncodingUrlSegment.CreatePositiveInt( local.Get{0}().Value ) : EncodingUrlSegment.Create( nullSegment ) : null"
+									? "encoder is UrlEncoder local && local.CheckEntitySetup( entitySetup ) ? local.Get{0}().HasValue ? EncodingUrlSegment.CreatePositiveInt( local.Get{0}().Value ) : EncodingUrlSegment.Create( nullSegment ) : null"
+										.FormatWith( parameter.PropertyName )
+									: "encoder is UrlEncoder local && local.CheckEntitySetup( entitySetup ) ? EncodingUrlSegment.CreatePositiveInt( local.Get{0}() ) : null"
+										.FormatWith( parameter.PropertyName )
+								: parameterIsNullable
+									? "encoder is UrlEncoder local ? local.Get{0}().HasValue ? EncodingUrlSegment.CreatePositiveInt( local.Get{0}().Value ) : EncodingUrlSegment.Create( nullSegment ) : null"
 										.FormatWith( parameter.PropertyName )
 									: "encoder is UrlEncoder local ? EncodingUrlSegment.CreatePositiveInt( local.Get{0}() ) : null".FormatWith( parameter.PropertyName ),
 							entitySetup != null
-								? parameterIsNullable
-									  ?
-									  "url.IsPositiveInt( out var segmentInt ) ? new UrlDecoder( entitySetup, {0}: new SpecifiedValue<int?>( segmentInt ){1} ) : string.Equals( url.Segment, nullSegment, StringComparison.OrdinalIgnoreCase ) ? new UrlDecoder( entitySetup, {0}: new SpecifiedValue<int?>( null ){1} ) : null"
-										  .FormatWith( parameter.Name, getOldParameterNameDecoderArguments( optionalParameters ).PrependDelimiter( ", " ) )
-									  : "url.IsPositiveInt( out var segmentInt ) ? new UrlDecoder( entitySetup, {0}: new SpecifiedValue<int>( segmentInt ){1} ) : null"
-										  .FormatWith( parameter.Name, getOldParameterNameDecoderArguments( optionalParameters ).PrependDelimiter( ", " ) )
-								:
+								?
 								parameterIsNullable
-									?
-									"url.IsPositiveInt( out var segmentInt ) ? new UrlDecoder( {0}: new SpecifiedValue<int?>( segmentInt ){1} ) : string.Equals( url.Segment, nullSegment, StringComparison.OrdinalIgnoreCase ) ? new UrlDecoder( {0}: new SpecifiedValue<int?>( null ){1} ) : null"
+									? "url.IsPositiveInt( out var segmentInt ) ? new UrlDecoder( entitySetup, {0}: new SpecifiedValue<int?>( segmentInt ){1} ) : string.Equals( url.Segment, nullSegment, StringComparison.OrdinalIgnoreCase ) ? new UrlDecoder( entitySetup, {0}: new SpecifiedValue<int?>( null ){1} ) : null"
+										.FormatWith( parameter.Name, getOldParameterNameDecoderArguments( optionalParameters ).PrependDelimiter( ", " ) )
+									: "url.IsPositiveInt( out var segmentInt ) ? new UrlDecoder( entitySetup, {0}: new SpecifiedValue<int>( segmentInt ){1} ) : null".FormatWith(
+										parameter.Name,
+										getOldParameterNameDecoderArguments( optionalParameters ).PrependDelimiter( ", " ) )
+								: parameterIsNullable
+									? "url.IsPositiveInt( out var segmentInt ) ? new UrlDecoder( {0}: new SpecifiedValue<int?>( segmentInt ){1} ) : string.Equals( url.Segment, nullSegment, StringComparison.OrdinalIgnoreCase ) ? new UrlDecoder( {0}: new SpecifiedValue<int?>( null ){1} ) : null"
 										.FormatWith( parameter.Name, getOldParameterNameDecoderArguments( optionalParameters ).PrependDelimiter( ", " ) )
 									: "url.IsPositiveInt( out var segmentInt ) ? new UrlDecoder( {0}: new SpecifiedValue<int>( segmentInt ){1} ) : null".FormatWith(
 										parameter.Name,
