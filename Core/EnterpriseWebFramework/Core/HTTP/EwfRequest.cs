@@ -48,6 +48,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		/// <summary>
+		/// Executes a method that reads a binary request body.
+		/// </summary>
+		public void ExecuteWithBodyStream( Action<Stream> method ) {
+			method( AspNetRequest.Body );
+		}
+
+		/// <summary>
 		/// Gets whether the request is from the local computer.
 		/// </summary>
 		internal bool IsLocal {
