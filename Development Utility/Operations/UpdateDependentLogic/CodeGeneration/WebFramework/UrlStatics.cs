@@ -374,6 +374,28 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 										parameter.Name,
 										getOldParameterNameDecoderArguments( optionalParameters ).PrependDelimiter( ", " ) ) ) );
 				}
+				if( parameter.IsString ) {
+					CodeGenerationStatics.AddSummaryDocComment( writer, "Creates a string URL pattern." );
+					writer.WriteLine(
+						"public static UrlPattern {0}({1}) => new UrlPattern( encoder => {2}, url => {3} );".FormatWith(
+							parameter.PropertyName + "String",
+							StringTools.ConcatenateWithDelimiter(
+									", ",
+									entitySetup != null ? "{0} entitySetup".FormatWith( entitySetup.GeneralData.ClassName ) : "",
+									getOldParameterNamePatternParameters( optionalParameters ) )
+								.Surround( " ", " " ),
+							entitySetup != null
+								? "encoder is UrlEncoder local && local.CheckEntitySetup( entitySetup ) ? EncodingUrlSegment.Create( local.Get{0}() ) : null".FormatWith(
+									parameter.PropertyName )
+								: "encoder is UrlEncoder local ? EncodingUrlSegment.Create( local.Get{0}() ) : null".FormatWith( parameter.PropertyName ),
+							entitySetup != null
+								? "new UrlDecoder( entitySetup, {0}: url.Segment{1} )".FormatWith(
+									parameter.Name,
+									getOldParameterNameDecoderArguments( optionalParameters ).PrependDelimiter( ", " ) )
+								: "new UrlDecoder( {0}: url.Segment{1} )".FormatWith(
+									parameter.Name,
+									getOldParameterNameDecoderArguments( optionalParameters ).PrependDelimiter( ", " ) ) ) );
+				}
 			}
 
 			if( entitySetup == null && requiredParameters.Count == 0 && !includeVersionString ) {
