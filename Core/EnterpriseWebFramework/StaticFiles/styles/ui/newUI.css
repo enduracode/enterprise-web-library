@@ -25,6 +25,11 @@
 /*******************/
 /* RESET CSS 
 /*******************/
+html, body {
+  height: 100%;
+  min-height: 100%;
+}
+
 body {
   margin: 0px;
 }
@@ -142,7 +147,10 @@ a.ewfActionShrinkWrapButton {
 #ewfUiEntityAndTabsAndContent {
   display: grid;
   grid-template-areas:
-    "sidebar breadcrumb" "sidebar content";
+    "sidebar breadcrumb"
+    "sidebar content";
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto 1fr;
 }
 
 /*******************/
@@ -219,6 +227,7 @@ div.ewfPagePath {
   flex-wrap: wrap;
   grid-area: breadcrumb;
   gap: 10px 0px;
+  align-self: start;
 }
 
 .ewfBreadcrumbs, .ewfTabs {
@@ -288,7 +297,7 @@ div.ewfPagePath {
     color: var(--primary-color);
     font-weight: normal;
     transition: background-color .2s, color .2s;
-    border: .2s;
+    /*border .2s;*/
   }
 
     .ewfTabs > li a:hover:not(.ewfEditorSelectedTab) {
