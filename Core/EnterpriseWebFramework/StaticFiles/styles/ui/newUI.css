@@ -467,15 +467,16 @@ button.ewfActionNormalButton.ewfAction {
   border-radius: var(--default-border-radius);
 }
 
-#dataTable {
+table.responsiveDataTable {
   padding: 1vw 0;
+  width: 100% !important; /*This shouldn't have to be here. Should be able to get rid of important for sure. Also if we eliminate this, table.dataTable takes over which is already 100%, so...*/
 }
 
-  #dataTable tbody {
+table.responsiveDataTable tbody {
     color: var(--gray-color);
   }
 
-  #dataTable.compact thead th, table.dataTable.compact thead td {
+table.responsiveDataTable.compact thead th, table.dataTable.compact thead td {
     padding: 4px 3px;
   }
 
