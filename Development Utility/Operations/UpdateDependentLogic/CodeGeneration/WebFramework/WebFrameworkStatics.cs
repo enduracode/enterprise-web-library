@@ -7,7 +7,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 	internal static class WebFrameworkStatics {
 		internal static void Generate(
 			TextWriter writer, string projectPath, string projectNamespace, bool projectContainsFramework, IEnumerable<string> ignoredFolderPaths,
-			string staticFilesFolderPath, string staticFilesFolderUrlParentExpression ) {
+			string staticFilesFolderPath, string staticFilesFolderUrlParentExpression, out Action<string> resourceSerializationWriter ) {
+			var allResources = new List<( WebItemGeneralData entitySetup, WebItemGeneralData resource )>();
 			generateForFolder(
 				writer,
 				projectPath,
@@ -16,12 +17,98 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 				ignoredFolderPaths.ToImmutableHashSet( StringComparer.Ordinal ),
 				staticFilesFolderPath,
 				staticFilesFolderUrlParentExpression,
-				"" );
+				"",
+				allResources );
+
+			resourceSerializationWriter = interfaceName => {
+				string getString( WebItemGeneralData resource ) =>
+					"\"{0}.{1}\"".FormatWith( resource.Namespace, resource.ClassName ).Replace( "@", "", StringComparison.Ordinal );
+
+				string getIdentifier( WebItemGeneralData resource ) =>
+					( resource.Namespace.Replace( "_", "__", StringComparison.Ordinal ).Replace( ".", "_", StringComparison.Ordinal ) + "_" + resource.ClassName )
+					.Replace( "@", "", StringComparison.Ordinal );
+
+				writer.WriteLine(
+					"{0}( string name, string parameters )? {1}SerializeResource( ResourceBase resource ) => resource switch {{".FormatWith(
+						interfaceName.Length > 0 ? "" : "public static ",
+						interfaceName.AppendDelimiter( "." ) ) );
+				foreach( var (_, resource) in allResources )
+					writer.WriteLine( "{0} r => ( {1}, serialize_{2}( r ) ),".FormatWith( resource.FullClassName, getString( resource ), getIdentifier( resource ) ) );
+				writer.WriteLine( "_ => null" );
+				writer.WriteLine( "};" );
+				writer.WriteLine();
+				writer.WriteLine(
+					"{0}ResourceBase {1}DeserializeResource( string name, string parameters ) => name switch {{".FormatWith(
+						interfaceName.Length > 0 ? "" : "public static ",
+						interfaceName.AppendDelimiter( "." ) ) );
+				foreach( var (_, resource) in allResources )
+					writer.WriteLine( "{0} => deserialize_{1}( parameters ),".FormatWith( getString( resource ), getIdentifier( resource ) ) );
+				writer.WriteLine( "_ => null" );
+				writer.WriteLine( "};" );
+
+				var methodPrefix = interfaceName.Length > 0 ? "private" : "private static";
+				foreach( var (entitySetup, resource) in allResources ) {
+					writer.WriteLine();
+					writer.WriteLine( "{0} string serialize_{1}( {2} resource ) {{".FormatWith( methodPrefix, getIdentifier( resource ), resource.FullClassName ) );
+
+					string getMember( WebItemParameter parameter, string objectName ) =>
+						"new JProperty( \"{0}\", {1}.{2} == null ? JValue.CreateNull() : JToken.FromObject( {1}.{2} ) )".FormatWith(
+							parameter.Name,
+							objectName,
+							parameter.PropertyName );
+					var members = StringTools.ConcatenateWithDelimiter(
+						", ",
+						( entitySetup != null ? entitySetup.RequiredParameters.Concat( entitySetup.OptionalParameters ) : Enumerable.Empty<WebItemParameter>() )
+						.Select( i => getMember( i, "resource.Es" ) )
+						.Concat( resource.RequiredParameters.Concat( resource.OptionalParameters ).Select( i => getMember( i, "resource" ) ) ) );
+
+					if( members.Length > 0 ) {
+						writer.WriteLine( "#pragma warning disable CS0472" );
+						writer.WriteLine( "var jsonObject = new JObject( {0} );".FormatWith( members ) );
+						writer.WriteLine( "#pragma warning restore CS0472" );
+
+						writer.WriteLine( "return jsonObject.ToString( Formatting.None );" );
+					}
+					else
+						writer.WriteLine( "return \"\";" );
+					writer.WriteLine( "}" );
+
+					writer.WriteLine( "{0} ResourceBase deserialize_{1}( string parameters ) {{".FormatWith( methodPrefix, getIdentifier( resource ) ) );
+
+					string getParameter( WebItemParameter parameter ) => "jsonObject[ \"{0}\" ].ToObject<{1}>()".FormatWith( parameter.Name, parameter.TypeName );
+					var arguments = StringTools.ConcatenateWithDelimiter(
+							", ",
+							( entitySetup != null ? entitySetup.RequiredParameters : Enumerable.Empty<WebItemParameter>() ).Concat( resource.RequiredParameters )
+							.Select( getParameter )
+							.Append(
+								StringTools.ConcatenateWithDelimiter(
+										" ",
+										( entitySetup != null ? entitySetup.OptionalParameters : Enumerable.Empty<WebItemParameter>() ).Select(
+											i => "s.{0} = {1};".FormatWith( i.PropertyName, getParameter( i ) ) ) )
+									.Surround( "entitySetupOptionalParameterSetter: ( s, _ ) => { ", " }" ) )
+							.Append(
+								StringTools.ConcatenateWithDelimiter(
+										" ",
+										resource.OptionalParameters.Select( i => "s.{0} = {1};".FormatWith( i.PropertyName, getParameter( i ) ) ) )
+									.Surround( "optionalParameterSetter: ( s, {0} ) => {{ ".FormatWith( entitySetup != null ? "_, _" : "_" ), " }" ) ) )
+						.Surround( " ", " " );
+
+					if( arguments.Length > 0 )
+						writer.WriteLine( "var jsonObject = JsonConvert.DeserializeObject<JObject>( parameters );" );
+					writer.WriteLine(
+						"return {0};".FormatWith(
+							resource.IsResource()
+								? "{0}.GetInfo({1})".FormatWith( resource.FullClassName, arguments )
+								: "new {0}({1})".FormatWith( resource.FullClassName, arguments ) ) );
+					writer.WriteLine( "}" );
+				}
+			};
 		}
 
 		private static void generateForFolder(
 			TextWriter writer, string projectPath, string projectNamespace, bool projectContainsFramework, ImmutableHashSet<string> ignoredFolderPaths,
-			string staticFilesFolderPath, string staticFilesFolderUrlParentExpression, string folderPathRelativeToProject ) {
+			string staticFilesFolderPath, string staticFilesFolderUrlParentExpression, string folderPathRelativeToProject,
+			List<( WebItemGeneralData entitySetup, WebItemGeneralData resource )> allResources ) {
 			if( ignoredFolderPaths.Contains( folderPathRelativeToProject ) )
 				return;
 
@@ -33,7 +120,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 					projectContainsFramework,
 					null,
 					folderPathRelativeToProject,
-					staticFilesFolderUrlParentExpression );
+					staticFilesFolderUrlParentExpression,
+					allResources );
 				return;
 			}
 
@@ -61,6 +149,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 				if( !generalData.IsResource() )
 					continue;
 				new Resource( projectContainsFramework, generalData, entitySetup ).GenerateCode( writer );
+				allResources.Add( ( entitySetup?.GeneralData, generalData ) );
 			}
 
 			// Delve into sub folders.
@@ -76,13 +165,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 					ignoredFolderPaths,
 					staticFilesFolderPath,
 					staticFilesFolderUrlParentExpression,
-					subFolderPath );
+					subFolderPath,
+					allResources );
 			}
 		}
 
 		private static void generateStaticFileLogic(
 			TextWriter writer, string projectPath, string projectNamespace, bool inFramework, bool? inVersionedFolder, string folderPathRelativeToProject,
-			string folderParentExpression ) {
+			string folderParentExpression, List<( WebItemGeneralData entitySetup, WebItemGeneralData resource )> allResources ) {
 			var isRootFolder = !inVersionedFolder.HasValue;
 			var folderPath = EwlStatics.CombinePaths( projectPath, folderPathRelativeToProject );
 
@@ -115,8 +205,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 								subfolderName ) ) )
 					.Materialize() );
 
-			foreach( var file in files )
+			foreach( var file in files ) {
 				new StaticFile( file, inFramework, inVersionedFolder == true, folderSetupClassName ).GenerateCode( writer );
+				allResources.Add( ( null, file ) );
+			}
 
 			var staticFilesFolderPath = inFramework
 				                            ? EnterpriseWebFramework.StaticFile.FrameworkStaticFilesSourceFolderPath
@@ -139,7 +231,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 					inFramework,
 					inVersionedFolder ?? subfolderName == "versioned",
 					EwlStatics.CombinePaths( folderPathRelativeToProject, subfolderName ),
-					"new {0}.{1}()".FormatWith( folderNamespace.Separate( ".", false ).Last(), folderSetupClassName ) );
+					"new {0}.{1}()".FormatWith( folderNamespace.Separate( ".", false ).Last(), folderSetupClassName ),
+					allResources );
 		}
 
 		private static void generateStaticFileFolderSetup(
@@ -163,7 +256,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 				"",
 				Enumerable.Empty<WebItemParameter>().Materialize(),
 				Enumerable.Empty<WebItemParameter>().Materialize(),
-				p => "true",
+				_ => "true",
 				false );
 			writer.WriteLine(
 				"protected override IEnumerable<UrlPattern> getChildUrlPatterns() => {0};".FormatWith(
@@ -189,15 +282,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 			if( File.Exists( EwlStatics.CombinePaths( folderPath, className + ".cs" ) ) )
 				return;
 
-			using( var writer = new StreamWriter( templateFilePath, false, Encoding.UTF8 ) ) {
-				writer.WriteLine( "namespace {0} {{".FormatWith( itemNamespace ) );
-				writer.WriteLine( "	partial class {0} {{".FormatWith( className ) );
-				writer.WriteLine(
-					"		// IMPORTANT: Change extension from \"{0}\" to \".cs\" before including in project and editing.".FormatWith(
-						DataAccess.DataAccessStatics.CSharpTemplateFileExtension ) );
-				writer.WriteLine( "	}" );
-				writer.WriteLine( "}" );
-			}
+			using var writer = new StreamWriter( templateFilePath, false, Encoding.UTF8 );
+			writer.WriteLine( "namespace {0} {{".FormatWith( itemNamespace ) );
+			writer.WriteLine( "	partial class {0} {{".FormatWith( className ) );
+			writer.WriteLine(
+				"		// IMPORTANT: Change extension from \"{0}\" to \".cs\" before including in project and editing.".FormatWith(
+					DataAccess.DataAccessStatics.CSharpTemplateFileExtension ) );
+			writer.WriteLine( "	}" );
+			writer.WriteLine( "}" );
 		}
 
 		internal static string GetParameterDeclarations( IReadOnlyCollection<WebItemParameter> parameters ) {

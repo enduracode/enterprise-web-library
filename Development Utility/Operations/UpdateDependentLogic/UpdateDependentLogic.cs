@@ -69,6 +69,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						writer.WriteLine( "using System.Linq;" );
 						writer.WriteLine( "using System.Threading;" );
 						writer.WriteLine( "using EnterpriseWebLibrary.DataAccess;" );
+						writer.WriteLine( "using Newtonsoft.Json;" );
+						writer.WriteLine( "using Newtonsoft.Json.Linq;" );
 						writer.WriteLine( "using Tewl.InputValidation;" );
 						writer.WriteLine( "using Tewl.Tools;" );
 						writer.WriteLine();
@@ -87,7 +89,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 							true,
 							generatedCodeFolderName.ToCollection(),
 							StaticFile.FrameworkStaticFilesSourceFolderPath,
-							"" );
+							"",
+							out var resourceSerializationWriter );
+						writer.WriteLine();
+						writer.WriteLine( "namespace EnterpriseWebLibrary.EnterpriseWebFramework {" );
+						writer.WriteLine( "internal static class ResourceSerializationStatics {" );
+						resourceSerializationWriter( "" );
+						writer.WriteLine( "}" );
+						writer.WriteLine( "}" );
 					} );
 				generateCodeForProject(
 					installation,
@@ -186,6 +195,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.StandardModification;" );
 					writer.WriteLine( "using EnterpriseWebLibrary.Email;" );
 					writer.WriteLine( "using EnterpriseWebLibrary.EnterpriseWebFramework;" );
+					writer.WriteLine( "using Newtonsoft.Json;" );
+					writer.WriteLine( "using Newtonsoft.Json.Linq;" );
 					writer.WriteLine( "using NodaTime;" );
 					writer.WriteLine( "using Tewl.InputValidation;" );
 					writer.WriteLine( "using Tewl.Tools;" );
@@ -235,7 +246,15 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 							.Append( InstallationFileStatics.FilesFolderName )
 							.Append( generatedCodeFolderName ),
 						null,
-						null );
+						null,
+						out var resourceSerializationWriter );
+					writer.WriteLine();
+					writer.WriteLine(
+						"namespace {0}.Providers {{".FormatWith( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName ) );
+					writer.WriteLine( "internal class ResourceSerialization: SystemResourceSerializationProvider {" );
+					resourceSerializationWriter( "SystemResourceSerializationProvider" );
+					writer.WriteLine( "}" );
+					writer.WriteLine( "}" );
 				} );
 		}
 
@@ -401,6 +420,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					writer.WriteLine( "using EnterpriseWebLibrary;" );
 					writer.WriteLine( "using EnterpriseWebLibrary.DataAccess;" );
 					writer.WriteLine( "using EnterpriseWebLibrary.EnterpriseWebFramework;" );
+					writer.WriteLine( "using Newtonsoft.Json;" );
+					writer.WriteLine( "using Newtonsoft.Json.Linq;" );
 					writer.WriteLine( "using NodaTime;" );
 					writer.WriteLine( "using Tewl.InputValidation;" );
 					writer.WriteLine( "using Tewl.Tools;" );
@@ -419,7 +440,14 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						false,
 						generatedCodeFolderName.ToCollection(),
 						StaticFile.AppStaticFilesFolderName,
-						"RequestDispatchingStatics.AppProvider.GetFrameworkUrlParent()" );
+						"RequestDispatchingStatics.AppProvider.GetFrameworkUrlParent()",
+						out var resourceSerializationWriter );
+					writer.WriteLine();
+					writer.WriteLine( "namespace {0}.Providers {{".FormatWith( project.NamespaceAndAssemblyName ) );
+					writer.WriteLine( "internal class ResourceSerialization: AppResourceSerializationProvider {" );
+					resourceSerializationWriter( "AppResourceSerializationProvider" );
+					writer.WriteLine( "}" );
+					writer.WriteLine( "}" );
 				},
 				runtimeIdentifier: "win10-x64",
 				includeWebFrameworkUsingDirectives: true );
@@ -686,7 +714,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			writer.WriteLine( "{0}/".FormatWith( InstallationFileStatics.WebFrameworkStaticFilesFolderName ) );
 			writer.WriteLine( "Error Log.txt" );
 			writer.WriteLine( "*.csproj.user" );
-			writer.WriteLine( "*" + CodeGeneration.DataAccess.DataAccessStatics.CSharpTemplateFileExtension );
+			writer.WriteLine( "*" + DataAccessStatics.CSharpTemplateFileExtension );
 			writer.WriteLine();
 			writer.WriteLine( "Solution Files/bin/" );
 			writer.WriteLine( "Solution Files/obj/" );

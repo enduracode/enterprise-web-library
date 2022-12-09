@@ -1,11 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using EnterpriseWebLibrary.InstallationSupportUtility;
-using Humanizer;
-using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework {
 	internal class WebItemGeneralData {
@@ -19,34 +13,50 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 				       .PrependDelimiter( "." );
 		}
 
-		private readonly string pathRelativeToProject;
-		private readonly string fileName;
-		private readonly string itemNamespace;
-		private readonly string className;
+		internal readonly string PathRelativeToProject;
+		internal readonly string FileName;
+		internal readonly string Namespace;
+		internal readonly string ClassName;
 		private readonly string code;
+		internal readonly IReadOnlyCollection<WebItemParameter> RequiredParameters;
+		internal readonly IReadOnlyCollection<WebItemParameter> OptionalParameters;
 
-		internal WebItemGeneralData( string projectPath, string projectNamespace, string pathRelativeToProject, bool includeFileExtensionInClassName ) {
-			this.pathRelativeToProject = pathRelativeToProject;
+		internal WebItemGeneralData( string projectPath, string projectNamespace, string pathRelativeToProject, bool isStaticFile ) {
+			PathRelativeToProject = pathRelativeToProject;
 			var path = EwlStatics.CombinePaths( projectPath, pathRelativeToProject );
-			fileName = Path.GetFileName( path );
+			FileName = Path.GetFileName( path );
 
-			// Load this item's code if it exists.
-			code = path.EndsWith( ".cs" ) ? File.ReadAllText( path ) : "";
+			// Load this item’s code if it exists.
+			code = path.EndsWith( ".cs" ) && !isStaticFile ? File.ReadAllText( path ) : "";
 
-			// Attempt to get the namespace from the code. If this fails, use a namespace based on the item's path in the project.
+			// Attempt to get the namespace from the code. If this fails, use a namespace based on the item’s path in the project.
 			foreach( Match match in Regex.Matches( code, @"namespace\s(?<namespace>.*)\s{" ) )
-				itemNamespace = match.Groups[ "namespace" ].Value;
-			if( itemNamespace == null )
-				itemNamespace = GetNamespaceFromPath( projectNamespace, pathRelativeToProject, true );
+				Namespace = match.Groups[ "namespace" ].Value;
+			Namespace ??= GetNamespaceFromPath( projectNamespace, pathRelativeToProject, true );
 
-			className = EwlStatics.GetCSharpIdentifier(
-				Path.GetFileNameWithoutExtension( path ).CapitalizeString() + ( includeFileExtensionInClassName ? Path.GetExtension( path ).CapitalizeString() : "" ) );
+			ClassName = EwlStatics.GetCSharpIdentifier(
+				Path.GetFileNameWithoutExtension( path ).CapitalizeString() + ( isStaticFile ? Path.GetExtension( path ).CapitalizeString() : "" ) );
+
+			RequiredParameters = readParametersFromCode( false );
+			OptionalParameters = readParametersFromCode( true );
 		}
 
-		internal string PathRelativeToProject => pathRelativeToProject;
-		internal string FileName => fileName;
-		internal string Namespace => itemNamespace;
-		internal string ClassName => className;
+		private IReadOnlyCollection<WebItemParameter> readParametersFromCode( bool readOptionalParameters ) {
+			try {
+				return getVariablesFromCode( code, readOptionalParameters ? "OptionalParameter" : "Parameter" ).Materialize();
+			}
+			catch( Exception e ) {
+				throw UserCorrectableException.CreateSecondaryException( "Failed to read parameters from \"" + PathRelativeToProject + "\".", e );
+			}
+		}
+
+		private IEnumerable<WebItemParameter> getVariablesFromCode( string code, string keyword ) {
+			var pattern = @"^//\s*" + keyword + @":\s(?<type>[a-zA-Z_0-9<>]*\??)\s(?<name>\w*)(\ *//(?<comment>[^\n]*))?";
+			return from Match match in Regex.Matches( code, pattern, RegexOptions.Multiline )
+			       select new WebItemParameter( match.Groups[ "type" ].Value, match.Groups[ "name" ].Value, match.Groups[ "comment" ].Value );
+		}
+
+		internal string FullClassName => Namespace + "." + ClassName;
 
 		internal bool IsResource() =>
 			Regex.IsMatch( code, "^// {0}Resource\r?$".FormatWith( EwlStatics.EwlInitialism.EnglishToPascal() ), RegexOptions.Multiline ) || IsPage() ||
@@ -56,20 +66,5 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 
 		internal bool IsAutoCompleteService() =>
 			Regex.IsMatch( code, "^// {0}AutoCompleteService\r?$".FormatWith( EwlStatics.EwlInitialism.EnglishToPascal() ), RegexOptions.Multiline );
-
-		internal List<WebItemParameter> ReadParametersFromCode( bool readOptionalParameters ) {
-			try {
-				return getVariablesFromCode( code, readOptionalParameters ? "OptionalParameter" : "Parameter" ).ToList();
-			}
-			catch( Exception e ) {
-				throw UserCorrectableException.CreateSecondaryException( "Failed to read parameters from \"" + pathRelativeToProject + "\".", e );
-			}
-		}
-
-		private IEnumerable<WebItemParameter> getVariablesFromCode( string code, string keyword ) {
-			var pattern = @"^//\s*" + keyword + @":\s(?<type>[a-zA-Z_0-9<>]*\??)\s(?<name>\w*)(\ *//(?<comment>[^\n]*))?";
-			return from Match match in Regex.Matches( code, pattern, RegexOptions.Multiline )
-			       select new WebItemParameter( match.Groups[ "type" ].Value, match.Groups[ "name" ].Value, match.Groups[ "comment" ].Value );
-		}
 	}
 }

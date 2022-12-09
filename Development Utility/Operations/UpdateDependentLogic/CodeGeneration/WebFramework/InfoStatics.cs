@@ -1,7 +1,4 @@
-﻿using Humanizer;
-using Tewl.Tools;
-
-namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework {
+﻿namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework {
 	internal static class InfoStatics {
 		internal static void WriteSpecifyParameterDefaultsMethod( TextWriter writer, bool includeEsParameter ) {
 			CodeGenerationStatics.AddSummaryDocComment(
@@ -16,7 +13,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 						"Parameters parameters" ) ) );
 		}
 
-		internal static void WriteParameterMembers( TextWriter writer, List<WebItemParameter> requiredParameters, List<WebItemParameter> optionalParameters ) {
+		internal static void WriteParameterMembers(
+			TextWriter writer, IReadOnlyCollection<WebItemParameter> requiredParameters, IReadOnlyCollection<WebItemParameter> optionalParameters ) {
 			writeMembersForParameterList( writer, requiredParameters );
 			writeMembersForParameterList( writer, optionalParameters );
 			if( optionalParameters.Any() ) {
@@ -26,7 +24,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 			}
 		}
 
-		private static void writeMembersForParameterList( TextWriter writer, List<WebItemParameter> parameters ) {
+		private static void writeMembersForParameterList( TextWriter writer, IReadOnlyCollection<WebItemParameter> parameters ) {
 			foreach( var parameter in parameters ) {
 				CodeGenerationStatics.AddGeneratedCodeUseOnlyComment( writer );
 				writer.WriteLine(
@@ -251,7 +249,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 		}
 
 		internal static void WriteEqualsParameterComparisons(
-			TextWriter writer, List<WebItemParameter> requiredParameters, List<WebItemParameter> optionalParameters, string otherObjectName ) {
+			TextWriter writer, IReadOnlyCollection<WebItemParameter> requiredParameters, IReadOnlyCollection<WebItemParameter> optionalParameters,
+			string otherObjectName ) {
 			foreach( var parameter in requiredParameters.Concat( optionalParameters ) )
 				writer.WriteLine(
 					"if( !{0} ) return false;".FormatWith(

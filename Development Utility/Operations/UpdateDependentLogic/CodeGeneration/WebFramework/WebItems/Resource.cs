@@ -1,23 +1,13 @@
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using Humanizer;
-using Tewl.Tools;
-
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework.WebItems {
 	internal class Resource {
 		private readonly bool projectContainsFramework;
 		private readonly WebItemGeneralData generalData;
 		private readonly EntitySetup entitySetup;
-		private readonly List<WebItemParameter> requiredParameters;
-		private readonly List<WebItemParameter> optionalParameters;
 
 		internal Resource( bool projectContainsFramework, WebItemGeneralData generalData, EntitySetup entitySetup ) {
 			this.projectContainsFramework = projectContainsFramework;
 			this.generalData = generalData;
 			this.entitySetup = entitySetup;
-			requiredParameters = generalData.ReadParametersFromCode( false );
-			optionalParameters = generalData.ReadParametersFromCode( true );
 
 			// NOTE: Blow up if there is a name collision between parameters and entitySetup.Parameters.
 		}
@@ -29,33 +19,39 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 					generalData.ClassName,
 					generalData.IsPage() ? "PageBase" : generalData.IsAutoCompleteService() ? "AutoCompleteService" : "ResourceBase" ) );
 
-			OptionalParameterPackageStatics.WriteClassIfNecessary( writer, requiredParameters, optionalParameters );
+			OptionalParameterPackageStatics.WriteClassIfNecessary( writer, generalData.RequiredParameters, generalData.OptionalParameters );
 			if( generalData.IsPage() )
-				ParametersModificationStatics.WriteClassIfNecessary( writer, requiredParameters.Concat( optionalParameters ) );
-			UrlStatics.GenerateUrlClasses( writer, generalData.ClassName, entitySetup, requiredParameters, optionalParameters, false );
-			if( optionalParameters.Any() )
+				ParametersModificationStatics.WriteClassIfNecessary( writer, generalData.RequiredParameters.Concat( generalData.OptionalParameters ) );
+			UrlStatics.GenerateUrlClasses( writer, generalData.ClassName, entitySetup, generalData.RequiredParameters, generalData.OptionalParameters, false );
+			if( generalData.OptionalParameters.Any() )
 				generateSegmentParameterSpecifier( writer );
 			writeGetInfoMethod( writer );
-			if( optionalParameters.Any() )
+			if( generalData.OptionalParameters.Any() )
 				InfoStatics.WriteSpecifyParameterDefaultsMethod( writer, entitySetup != null );
 			if( entitySetup != null )
 				writer.WriteLine( "public EntitySetup Es;" );
-			InfoStatics.WriteParameterMembers( writer, requiredParameters, optionalParameters );
-			if( generalData.IsPage() && ( requiredParameters.Any() || optionalParameters.Any() ) )
+			InfoStatics.WriteParameterMembers( writer, generalData.RequiredParameters, generalData.OptionalParameters );
+			if( generalData.IsPage() && ( generalData.RequiredParameters.Any() || generalData.OptionalParameters.Any() ) )
 				writer.WriteLine( "private ParametersModification parametersModification;" );
-			if( optionalParameters.Any() ) {
+			if( generalData.OptionalParameters.Any() ) {
 				writer.WriteLine( "private readonly Lazy<SegmentParameterSpecifier> segmentParameterSpecifier;" );
 				writer.WriteLine(
 					"private Action<{0}> optionalParameterSetter;".FormatWith(
 						StringTools.ConcatenateWithDelimiter( ", ", "OptionalParameterSpecifier", entitySetup != null ? "EntitySetup" : "", "Parameters" ) ) );
 			}
-			InfoStatics.WriteConstructorAndHelperMethods( writer, generalData, requiredParameters, optionalParameters, entitySetup != null, false );
+			InfoStatics.WriteConstructorAndHelperMethods(
+				writer,
+				generalData,
+				generalData.RequiredParameters,
+				generalData.OptionalParameters,
+				entitySetup != null,
+				false );
 			writer.WriteLine( "public override EntitySetupBase EsAsBaseType => {0};".FormatWith( entitySetup != null ? "Es" : "null" ) );
 			if( generalData.IsPage() ) {
-				if( requiredParameters.Any() || optionalParameters.Any() ) {
+				if( generalData.RequiredParameters.Any() || generalData.OptionalParameters.Any() ) {
 					writer.WriteLine( "protected override void initParametersModification() {" );
 					writer.WriteLine( "parametersModification = new ParametersModification();" );
-					foreach( var i in requiredParameters.Concat( optionalParameters ) )
+					foreach( var i in generalData.RequiredParameters.Concat( generalData.OptionalParameters ) )
 						writer.WriteLine( "parametersModification.{0} = {0};".FormatWith( i.PropertyName ) );
 					writer.WriteLine( "}" );
 				}
@@ -65,11 +61,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 			UrlStatics.GenerateGetEncoderMethod(
 				writer,
 				entitySetup != null ? "Es" : "",
-				requiredParameters,
-				optionalParameters,
+				generalData.RequiredParameters,
+				generalData.OptionalParameters,
 				p => "segmentParameterSpecifier.Value.{0}IsSegmentParameter".FormatWith( p.PropertyName ),
 				false );
-			if( optionalParameters.Any() )
+			if( generalData.OptionalParameters.Any() )
 				writer.WriteLine( "partial void specifySegmentParameters( SegmentParameterSpecifier specifier );" );
 			if( !generalData.IsPage() )
 				writer.WriteLine( "public override bool MatchesCurrent() => base.MatchesCurrent();" );
@@ -80,18 +76,18 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 					StringTools.ConcatenateWithDelimiter(
 						", ",
 						entitySetup != null ? "Es.ReCreate()" : "",
-						InfoStatics.GetInfoConstructorArgumentsForRequiredParameters( requiredParameters, parameter => parameter.PropertyName ),
-						optionalParameters.Any() ? "optionalParameterSetter: optionalParameterSetter" : "",
+						InfoStatics.GetInfoConstructorArgumentsForRequiredParameters( generalData.RequiredParameters, parameter => parameter.PropertyName ),
+						generalData.OptionalParameters.Any() ? "optionalParameterSetter: optionalParameterSetter" : "",
 						"uriFragmentIdentifier: uriFragmentIdentifier" ) ) );
 			if( generalData.IsPage() )
 				WebFrameworkStatics.WriteReCreateFromNewParameterValuesMethod(
 					writer,
-					requiredParameters,
+					generalData.RequiredParameters,
 					"protected override PageBase ",
 					generalData.ClassName,
 					entitySetup != null ? "Es.ReCreateFromNewParameterValues()" : "" );
 			writeEqualsMethod( writer );
-			InfoStatics.WriteGetHashCodeMethod( writer, generalData.PathRelativeToProject, requiredParameters, optionalParameters );
+			InfoStatics.WriteGetHashCodeMethod( writer, generalData.PathRelativeToProject, generalData.RequiredParameters, generalData.OptionalParameters );
 
 			writer.WriteLine( "}" );
 			writer.WriteLine( "}" );
@@ -99,7 +95,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 
 		private void generateSegmentParameterSpecifier( TextWriter writer ) {
 			writer.WriteLine( "private class SegmentParameterSpecifier {" );
-			foreach( var i in optionalParameters )
+			foreach( var i in generalData.OptionalParameters )
 				writer.WriteLine( "public bool {0}IsSegmentParameter {{ get; set; }}".FormatWith( i.PropertyName ) );
 			writer.WriteLine( "}" );
 		}
@@ -109,7 +105,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 			writer.WriteLine( "if( !( other is {0} otherPage ) ) return false;".FormatWith( generalData.ClassName ) );
 			if( entitySetup != null )
 				writer.WriteLine( "if( !EwlStatics.AreEqual( otherPage.Es, Es ) ) return false;" );
-			InfoStatics.WriteEqualsParameterComparisons( writer, requiredParameters, optionalParameters, "otherPage" );
+			InfoStatics.WriteEqualsParameterComparisons( writer, generalData.RequiredParameters, generalData.OptionalParameters, "otherPage" );
 			writer.WriteLine( "}" );
 		}
 
@@ -121,11 +117,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 				"public static {0} GetInfo( ".FormatWith( generalData.ClassName ) + StringTools.ConcatenateWithDelimiter(
 					", ",
 					entitySetup != null ? WebFrameworkStatics.GetParameterDeclarations( entitySetup.RequiredParameters ) : "",
-					WebFrameworkStatics.GetParameterDeclarations( requiredParameters ),
+					WebFrameworkStatics.GetParameterDeclarations( generalData.RequiredParameters ),
 					entitySetup != null && entitySetup.OptionalParameters.Count > 0
 						? "Action<EntitySetup.OptionalParameterSpecifier, EntitySetup.Parameters> entitySetupOptionalParameterSetter = null"
 						: "",
-					optionalParameters.Count > 0
+					generalData.OptionalParameters.Count > 0
 						? "Action<{0}> optionalParameterSetter = null".FormatWith(
 							StringTools.ConcatenateWithDelimiter( ", ", "OptionalParameterSpecifier", entitySetup != null ? "EntitySetup" : "", "Parameters" ) )
 						: "",
@@ -140,8 +136,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 				"return new {0}( ".FormatWith( generalData.ClassName ) + StringTools.ConcatenateWithDelimiter(
 					", ",
 					entitySetupArgs,
-					InfoStatics.GetInfoConstructorArgumentsForRequiredParameters( requiredParameters, parameter => parameter.Name ),
-					optionalParameters.Count > 0 ? "optionalParameterSetter: optionalParameterSetter" : "",
+					InfoStatics.GetInfoConstructorArgumentsForRequiredParameters( generalData.RequiredParameters, parameter => parameter.Name ),
+					generalData.OptionalParameters.Count > 0 ? "optionalParameterSetter: optionalParameterSetter" : "",
 					"uriFragmentIdentifier: uriFragmentIdentifier" ) + " );" );
 			writer.WriteLine( "}" );
 		}
