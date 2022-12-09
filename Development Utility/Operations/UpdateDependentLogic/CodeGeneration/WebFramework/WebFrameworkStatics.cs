@@ -1,25 +1,13 @@
 using System.Collections.Immutable;
 using System.Text;
-using System.Text.RegularExpressions;
 using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework.WebItems;
-using Humanizer;
 using Tewl.IO;
-using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework {
 	internal static class WebFrameworkStatics {
-		private static StringBuilder legacyUrlStatics;
-		private static List<string> aspxFilePaths;
-
 		internal static void Generate(
 			TextWriter writer, string projectPath, string projectNamespace, bool projectContainsFramework, IEnumerable<string> ignoredFolderPaths,
 			string staticFilesFolderPath, string staticFilesFolderUrlParentExpression ) {
-			var legacyUrlStaticsFilePath = EwlStatics.CombinePaths( projectPath, "LegacyUrlStatics.cs" );
-			if( File.Exists( legacyUrlStaticsFilePath ) && File.ReadAllText( legacyUrlStaticsFilePath ).Length == 0 ) {
-				legacyUrlStatics = new StringBuilder();
-				aspxFilePaths = new List<string>();
-			}
-
 			generateForFolder(
 				writer,
 				projectPath,
@@ -29,12 +17,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 				staticFilesFolderPath,
 				staticFilesFolderUrlParentExpression,
 				"" );
-
-			if( legacyUrlStatics != null ) {
-				File.WriteAllText( legacyUrlStaticsFilePath, legacyUrlStatics.ToString(), Encoding.UTF8 );
-				foreach( var i in aspxFilePaths )
-					File.Delete( i );
-			}
 		}
 
 		private static void generateForFolder(
@@ -71,139 +53,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 				entitySetup.GenerateCode( writer );
 			}
 
-			if( legacyUrlStatics != null ) {
-				var files = new List<WebItemGeneralData>();
-				foreach( var fileName in IoMethods.GetFileNamesInFolder( folderPath, searchPattern: "*.aspx" ).OrderBy( i => i ) ) {
-					var filePath = EwlStatics.CombinePaths( projectPath, folderPathRelativeToProject, fileName );
-
-					var aspxLines = File.ReadAllLines( filePath );
-					if( aspxLines.Length != 1 || !Regex.IsMatch( aspxLines[ 0 ], "^<%@ .+ %>$" ) )
-						throw new Exception( "Invalid ASPX file: \"{0}\"".FormatWith( EwlStatics.CombinePaths( folderPathRelativeToProject, fileName ) ) );
-
-					var newCsLines = new List<string>();
-					var pageNeeded = true;
-					foreach( var line in File.ReadAllLines( EwlStatics.CombinePaths( projectPath, folderPathRelativeToProject, fileName + ".cs" ) ) ) {
-						if( pageNeeded && !line.StartsWith( "using " ) ) {
-							newCsLines.Add( "" );
-							newCsLines.Add( "// EwlPage" );
-							pageNeeded = false;
-						}
-						newCsLines.Add( line.Replace( ": EwfPage {", " {" ).Replace( ": EwfPage,", ":" ) );
-					}
-					var newCsFilePath = EwlStatics.CombinePaths( folderPathRelativeToProject, Path.GetFileNameWithoutExtension( fileName ) + ".cs" );
-					File.WriteAllText(
-						EwlStatics.CombinePaths( projectPath, newCsFilePath ),
-						newCsLines.Aggregate( ( text, line ) => text + Environment.NewLine + line ),
-						Encoding.UTF8 );
-					files.Add( new WebItemGeneralData( projectPath, projectNamespace, newCsFilePath, false ) );
-
-					aspxFilePaths.Add( filePath );
-					aspxFilePaths.Add( filePath + ".cs" );
-					aspxFilePaths.Add( filePath + ".designer.cs" );
-				}
-
-				const string folderSetupClassName = "LegacyUrlFolderSetup";
-				var childPatterns = files.Select(
-						file =>
-							"new UrlPattern( encoder => encoder is {0}.UrlEncoder ? EncodingUrlSegment.Create( {1} ) : null, url => string.Equals( url.Segment, {1}, StringComparison.OrdinalIgnoreCase ) ? new {0}.UrlDecoder() : null )"
-								.FormatWith( file.ClassName, "\"{0}.aspx\"".FormatWith( Path.GetFileNameWithoutExtension( file.FileName ) ) ) )
-					.Concat(
-						IoMethods.GetFolderNamesInFolder( folderPath )
-							.Where(
-								subfolderName => {
-									var subfolderPath = EwlStatics.CombinePaths( folderPathRelativeToProject, subfolderName );
-									if( subfolderPath == "bin" || subfolderPath == "obj" )
-										return false;
-
-									bool folderContainsAspxFiles( string path ) =>
-										IoMethods.GetFileNamesInFolder( path, searchPattern: "*.aspx" ).Any() || IoMethods.GetFolderNamesInFolder( path )
-											.Any( i => folderContainsAspxFiles( EwlStatics.CombinePaths( path, i ) ) );
-									return folderContainsAspxFiles( EwlStatics.CombinePaths( projectPath, subfolderPath ) );
-								} )
-							.Select(
-								subfolderName => "{0}.{1}.UrlPatterns.Literal( \"{2}\" )".FormatWith(
-									WebItemGeneralData.GetNamespaceFromPath( projectNamespace, EwlStatics.CombinePaths( folderPathRelativeToProject, subfolderName ), false )
-										.Separate( ".", false )
-										.Last(),
-									folderSetupClassName,
-									subfolderName ) ) )
-					.Materialize();
-
-				if( folderPathRelativeToProject.Length == 0 ) {
-					legacyUrlStatics.AppendLine( "using System;" );
-					legacyUrlStatics.AppendLine( "using System.Collections.Generic;" );
-					legacyUrlStatics.AppendLine( "using EnterpriseWebLibrary.EnterpriseWebFramework;" );
-					legacyUrlStatics.AppendLine();
-					legacyUrlStatics.AppendLine( "namespace {0} {{".FormatWith( projectNamespace ) );
-					legacyUrlStatics.AppendLine( "internal static class LegacyUrlStatics {" );
-					legacyUrlStatics.AppendLine( "public static IReadOnlyCollection<UrlPattern> GetPatterns() {" );
-					legacyUrlStatics.AppendLine( "var patterns = new List<UrlPattern>();" );
-					foreach( var i in childPatterns )
-						legacyUrlStatics.AppendLine( "patterns.Add( {0} );".FormatWith( i ) );
-					legacyUrlStatics.AppendLine( "return patterns;" );
-					legacyUrlStatics.AppendLine( "}" );
-					legacyUrlStatics.AppendLine( "public static UrlHandler GetParent() => new YourRootHandler();" );
-					legacyUrlStatics.AppendLine( "}" );
-					legacyUrlStatics.Append( "}" );
-				}
-				else if( childPatterns.Any() ) {
-					var folderSetup = new StringBuilder();
-					folderSetup.AppendLine( "using System;" );
-					folderSetup.AppendLine( "using System.Collections.Generic;" );
-					folderSetup.AppendLine( "using EnterpriseWebLibrary.EnterpriseWebFramework;" );
-					folderSetup.AppendLine();
-					folderSetup.AppendLine( "// EwlResource" );
-					folderSetup.AppendLine();
-					var folderNamespace = WebItemGeneralData.GetNamespaceFromPath( projectNamespace, folderPathRelativeToProject, false );
-					folderSetup.AppendLine( "namespace {0} {{".FormatWith( folderNamespace ) );
-					folderSetup.AppendLine( "partial class {0} {{".FormatWith( folderSetupClassName ) );
-
-					var namespaces = folderNamespace.Substring( projectNamespace.Length + ".".Length ).Separate( ".", false );
-					folderSetup.AppendLine(
-						"protected override UrlHandler getUrlParent() => {0};".FormatWith(
-							namespaces.Count == 1
-								? "LegacyUrlStatics.GetParent()"
-								: "new {0}.{1}()".FormatWith( namespaces[ namespaces.Count - 2 ], folderSetupClassName ) ) );
-
-					folderSetup.AppendLine( "protected override ConnectionSecurity ConnectionSecurity => ConnectionSecurity.MatchingCurrentRequest;" );
-
-					folderSetup.AppendLine( "protected override IEnumerable<UrlPattern> getChildUrlPatterns() {" );
-					folderSetup.AppendLine( "var patterns = new List<UrlPattern>();" );
-					foreach( var i in childPatterns )
-						folderSetup.AppendLine( "patterns.Add( {0} );".FormatWith( i ) );
-					folderSetup.AppendLine( "return patterns;" );
-					folderSetup.AppendLine( "}" );
-
-					folderSetup.AppendLine( "}" );
-					folderSetup.Append( "}" );
-					Directory.CreateDirectory( EwlStatics.CombinePaths( projectPath, folderPathRelativeToProject, "Legacy URLs" ) );
-					File.WriteAllText(
-						EwlStatics.CombinePaths( projectPath, folderPathRelativeToProject, "Legacy URLs", "{0}.cs".FormatWith( folderSetupClassName ) ),
-						folderSetup.ToString(),
-						Encoding.UTF8 );
-				}
-
-				foreach( var file in files ) {
-					var parentCode = new StringBuilder();
-					parentCode.AppendLine();
-					parentCode.AppendLine();
-					parentCode.AppendLine( "namespace {0} {{".FormatWith( file.Namespace ) );
-					parentCode.AppendLine( "partial class {0} {{".FormatWith( file.ClassName ) );
-					parentCode.AppendLine(
-						"protected override UrlHandler getUrlParent() => {0};".FormatWith(
-							folderPathRelativeToProject.Length == 0 ? "LegacyUrlStatics.GetParent()" : "new {0}()".FormatWith( folderSetupClassName ) ) );
-					parentCode.AppendLine( "}" );
-					parentCode.Append( "}" );
-					File.AppendAllText( EwlStatics.CombinePaths( projectPath, file.PathRelativeToProject ), parentCode.ToString(), Encoding.UTF8 );
-				}
-			}
-
 			// Generate code for files in the current folder.
 			foreach( var fileName in IoMethods.GetFileNamesInFolder( folderPath ).OrderBy( i => i ) ) {
-				if( legacyUrlStatics != null &&
-				    aspxFilePaths.Any( i => i.EqualsIgnoreCase( EwlStatics.CombinePaths( projectPath, folderPathRelativeToProject, fileName ) ) ) )
-					continue;
-
 				if( Path.GetExtension( fileName ).ToLowerInvariant() != ".cs" )
 					continue;
 				var generalData = new WebItemGeneralData( projectPath, projectNamespace, EwlStatics.CombinePaths( folderPathRelativeToProject, fileName ), false );
