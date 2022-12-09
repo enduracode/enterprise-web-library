@@ -250,7 +250,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 						out var resourceSerializationWriter );
 					writer.WriteLine();
 					writer.WriteLine(
-						"namespace {0}.Providers {{".FormatWith( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName ) );
+						"namespace {0}.Configuration.Providers {{".FormatWith(
+							installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName ) );
 					writer.WriteLine( "internal class ResourceSerialization: SystemResourceSerializationProvider {" );
 					resourceSerializationWriter( "SystemResourceSerializationProvider" );
 					writer.WriteLine( "}" );
