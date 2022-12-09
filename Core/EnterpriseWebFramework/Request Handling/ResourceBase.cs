@@ -1,10 +1,8 @@
 ﻿using System.ComponentModel;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
-using Humanizer;
 using Microsoft.AspNetCore.Http;
 using StackExchange.Profiling;
-using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -14,6 +12,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal const string ResourcePathSeparator = " > ";
 		internal const string EntityResourceSeparator = " / ";
 
+		private static Func<ResourceBase, ( string name, string parameters )?> frameworkResourceSerializer;
+		private static SystemProviderReference<SystemResourceSerializationProvider> systemSerializationProviderRef;
+		private static SystemProviderReference<AppResourceSerializationProvider> appSerializationProviderRef;
 		private static Action<bool, ResourceBase> urlHandlerStateUpdater;
 		private static Func<ResourceBase> currentResourceGetter;
 
@@ -40,10 +41,20 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				.WriteToAspNetResponse( context.Response, omitBody: context.Request.Method == "HEAD" );
 		}
 
-		internal static void Init( Action<bool, ResourceBase> urlHandlerStateUpdater, Func<ResourceBase> currentResourceGetter ) {
+		internal static void Init(
+			Func<ResourceBase, ( string, string )?> frameworkResourceSerializer,
+			SystemProviderReference<SystemResourceSerializationProvider> systemSerializationProvider,
+			SystemProviderReference<AppResourceSerializationProvider> appSerializationProvider, Action<bool, ResourceBase> urlHandlerStateUpdater,
+			Func<ResourceBase> currentResourceGetter ) {
+			ResourceBase.frameworkResourceSerializer = frameworkResourceSerializer;
+			systemSerializationProviderRef = systemSerializationProvider;
+			appSerializationProviderRef = appSerializationProvider;
 			ResourceBase.urlHandlerStateUpdater = urlHandlerStateUpdater;
 			ResourceBase.currentResourceGetter = currentResourceGetter;
 		}
+
+		private static SystemResourceSerializationProvider systemSerializationProvider => systemSerializationProviderRef.GetProvider();
+		private static AppResourceSerializationProvider appSerializationProvider => appSerializationProviderRef.GetProvider();
 
 		/// <summary>
 		/// Gets the currently executing resource, or null if the URL has not yet been resolved.
@@ -238,16 +249,23 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		internal sealed override string GetUrl( bool ensureUserCanAccessResource, bool ensureResourceNotDisabled ) {
-			string getCanonicalUrl() => UrlHandlingStatics.GetCanonicalUrl( this, ShouldBeSecureGivenCurrentRequest );
-			var url = ( EwfApp.RequestState != null ? EwfApp.RequestState.ExecuteWithUserDisabled( getCanonicalUrl ) : getCanonicalUrl() ) +
-			          uriFragmentIdentifier.PrependDelimiter( "#" );
+			try {
+				if( ensureUserCanAccessResource && !UserCanAccessResource )
+					throw new ApplicationException( "The authenticated user cannot access the resource." );
+				if( ensureResourceNotDisabled && AlternativeMode is DisabledResourceMode )
+					throw new ApplicationException( "The resource is disabled." );
 
-			if( ensureUserCanAccessResource && !UserCanAccessResource )
-				throw new ApplicationException( "GetUrl was called for a resource that the authenticated user cannot access. The URL would have been " + url + "." );
-			if( ensureResourceNotDisabled && AlternativeMode is DisabledResourceMode )
-				throw new ApplicationException( "GetUrl was called for a resource that is disabled. The URL would have been " + url + "." );
-
-			return url;
+				string getCanonicalUrl() => UrlHandlingStatics.GetCanonicalUrl( this, ShouldBeSecureGivenCurrentRequest );
+				return ( EwfApp.RequestState != null ? EwfApp.RequestState.ExecuteWithUserDisabled( getCanonicalUrl ) : getCanonicalUrl() ) +
+				       uriFragmentIdentifier.PrependDelimiter( "#" );
+			}
+			catch( Exception e ) {
+				var serializedResource = frameworkResourceSerializer( this ) ?? systemSerializationProvider.SerializeResource( this ) ??
+				                         appSerializationProvider.SerializeResource( this ) ?? throw new UnexpectedValueException( "resource", this );
+				throw new Exception(
+					"Failed to get a URL for {0}.".FormatWith( serializedResource.name + serializedResource.parameters.PrependDelimiter( " with parameters " ) ),
+					e );
+			}
 		}
 
 		UrlHandler UrlHandler.GetParent() => urlParent.Value;

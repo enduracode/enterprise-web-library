@@ -196,6 +196,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								Translation.Init( () => "en-US" );
 								CssPreprocessingStatics.Init( globalInitializer.GetType().Assembly, ConfigurationStatics.AppAssembly );
 								ResourceBase.Init(
+									ResourceSerializationStatics.SerializeResource,
+									ConfigurationStatics.GetSystemLibraryProvider<SystemResourceSerializationProvider>( "ResourceSerialization" ),
+									providerGetter.GetProvider<AppResourceSerializationProvider>( "ResourceSerialization" ),
 									( requestTransferred, resource ) => {
 										if( requestTransferred ) {
 											var urlHandlers = new List<BasicUrlHandler>();
