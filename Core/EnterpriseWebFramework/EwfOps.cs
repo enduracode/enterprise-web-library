@@ -110,7 +110,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										ContentRootPath = EwfConfigurationStatics.AppConfiguration.Path
 									} );
 
-							builder.WebHost.ConfigureKestrel( options => { options.AllowSynchronousIO = true; } );
+							builder.WebHost.ConfigureKestrel(
+								options => {
+									options.Limits.MaxRequestBodySize = null;
+									options.AllowSynchronousIO = true;
+								} );
 							if( ConfigurationStatics.IsDevelopmentInstallation && EwfConfigurationStatics.AppConfiguration.UsesKestrel.Value )
 								builder.Services.AddResponseCompression( options => { options.EnableForHttps = true; } );
 
