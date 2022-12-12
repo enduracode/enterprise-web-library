@@ -121,25 +121,17 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 		private static long downloadDataPackage( RsisInstallation installation, string packageZipFilePath ) {
 			using var fileWriteStream = IoMethods.GetFileStreamForWrite( packageZipFilePath );
 
-			if( SystemManagerConnectionStatics.LegacyServicesActive )
-				SystemManagerConnectionStatics.ExecuteIsuServiceMethod(
-					channel => {
-						using var networkStream = channel.DownloadDataPackage( SystemManagerConnectionStatics.AccessToken, installation.Id );
-						networkStream.CopyTo( fileWriteStream );
-					},
-					"data package download" );
-			else
-				SystemManagerConnectionStatics.ExecuteActionWithSystemManagerClient(
-					"data package download",
-					client => Task.Run(
-							async () => {
-								using var response = await client.GetAsync(
-									                     $"{SystemManagerConnectionStatics.InstallationsUrlSegment}/{installation.Id}/{SystemManagerConnectionStatics.DataPackageUrlSegment}",
-									                     HttpCompletionOption.ResponseHeadersRead );
-								response.EnsureSuccessStatusCode();
-								await ( await response.Content.ReadAsStreamAsync() ).CopyToAsync( fileWriteStream );
-							} )
-						.Wait() );
+			SystemManagerConnectionStatics.ExecuteActionWithSystemManagerClient(
+				"data package download",
+				client => Task.Run(
+						async () => {
+							using var response = await client.GetAsync(
+								                     $"{SystemManagerConnectionStatics.InstallationsUrlSegment}/{installation.Id}/{SystemManagerConnectionStatics.DataPackageUrlSegment}",
+								                     HttpCompletionOption.ResponseHeadersRead );
+							response.EnsureSuccessStatusCode();
+							await ( await response.Content.ReadAsStreamAsync() ).CopyToAsync( fileWriteStream );
+						} )
+					.Wait() );
 
 			return fileWriteStream.Length;
 		}

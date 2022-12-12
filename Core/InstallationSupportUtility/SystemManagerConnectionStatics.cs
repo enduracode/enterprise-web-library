@@ -1,5 +1,4 @@
 ﻿using System.Net.Http;
-using System.ServiceModel;
 using System.Threading;
 using System.Threading.Tasks;
 using EnterpriseWebLibrary.Configuration;
@@ -20,25 +19,9 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 
 		public static SystemList SystemList { get; private set; }
 
-		public static bool LegacyServicesActive;
-		private static ChannelFactory<SystemManagerInterface.ServiceContracts.Isu> isuServiceFactory;
-		private static ChannelFactory<SystemManagerInterface.ServiceContracts.ProgramRunner> programRunnerServiceFactory;
-
 		public static void Init( bool? refreshProgramRunnerDataOnly = false ) {
 			if( refreshProgramRunnerDataOnly.HasValue )
 				RefreshLocalData( forProgramRunner: refreshProgramRunnerDataOnly.Value );
-
-			ExecuteWithSystemManagerClient(
-				client => Task.Run(
-						async () => {
-							using var response = await client.GetAsync( "Service/Isu.svc", HttpCompletionOption.ResponseHeadersRead );
-							LegacyServicesActive = response.StatusCode == System.Net.HttpStatusCode.OK;
-						} )
-					.Wait() );
-			if( LegacyServicesActive ) {
-				isuServiceFactory = getNetTcpChannelFactory<SystemManagerInterface.ServiceContracts.Isu>( "Isu.svc" );
-				programRunnerServiceFactory = getNetTcpChannelFactory<SystemManagerInterface.ServiceContracts.ProgramRunner>( "ProgramRunner.svc" );
-			}
 		}
 
 		/// <summary>
@@ -104,30 +87,6 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 			}
 		}
 
-		private static ChannelFactory<T> getNetTcpChannelFactory<T>( string serviceFileName ) {
-			var binding = new NetTcpBinding
-				{
-					// Troubleshooting (we give unique values to timeouts so we can figure out which one is the culprit if we have a problem).
-					TransferMode = TransferMode.Streamed,
-					SendTimeout = TimeSpan.FromMinutes( 123 ),
-					MaxReceivedMessageSize = long.MaxValue,
-					// Ideally, ReceiveTimeout (which is really inactivity timeout) would be very low. We've found that 3 minutes is too low, though.
-					ReceiveTimeout = TimeSpan.FromMinutes( 6 ),
-					OpenTimeout = TimeSpan.FromMinutes( 17 ),
-					CloseTimeout = TimeSpan.FromMinutes( 23 )
-				};
-
-			// Performance
-			binding.MaxBufferSize = binding.ReaderQuotas.MaxBytesPerRead = 65536;
-
-			var factory = new ChannelFactory<T>(
-				binding,
-				new EndpointAddress( Tewl.Tools.NetTools.CombineUrls( Configuration.TcpBaseUrl, "Service/" + serviceFileName ) ) );
-			factory.Credentials.Windows.ClientCredential.UserName = Configuration.TcpUsername;
-			factory.Credentials.Windows.ClientCredential.Password = Configuration.TcpPassword;
-			return factory;
-		}
-
 		public static void ExecuteWithSystemManagerClient( Action<HttpClient> method, bool useLongTimeouts = false ) {
 			using var client = new HttpClient();
 
@@ -136,32 +95,6 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 			client.DefaultRequestHeaders.TryAddWithoutValidation( "Authorization", Configuration.AccessToken );
 
 			method( client );
-		}
-
-		/// <summary>
-		/// The action should be a noun, e.g. "logic package download".
-		/// </summary>
-		public static void ExecuteIsuServiceMethod( Action<SystemManagerInterface.ServiceContracts.Isu> method, string action ) {
-			executeWebMethod( method, isuServiceFactory, action );
-		}
-
-		/// <summary>
-		/// The action should be a noun, e.g. "logic package download".
-		/// </summary>
-		public static void ExecuteProgramRunnerServiceMethod( Action<SystemManagerInterface.ServiceContracts.ProgramRunner> method, string action ) {
-			executeWebMethod( method, programRunnerServiceFactory, action );
-		}
-
-		private static void executeWebMethod<ContractType>( Action<ContractType> method, ChannelFactory<ContractType> factory, string action ) {
-			StatusStatics.SetStatus( "Performing " + action + "." );
-			try {
-				using( var channel = (IDisposable)factory.CreateChannel() )
-					method( (ContractType)channel );
-			}
-			catch( Exception e ) {
-				throw createWebServiceException( action, e );
-			}
-			StatusStatics.SetStatus( "Performed " + action + "." );
 		}
 
 		/// <summary>
@@ -186,26 +119,24 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 
 		private static Exception createWebServiceException( string action, Exception innerException ) {
 			var generalMessage = "Failed during " + action + ".";
-			if( innerException is EndpointNotFoundException )
-				throw new UserCorrectableException(
-					generalMessage + " The web service could not be reached - this could be due to a network error or a configuration error.",
-					innerException );
-			if( innerException is FaultException )
-				// We do not pass the fault exception as an inner exception because its message includes a big ugly stack trace.
-				throw new UserCorrectableException(
-					generalMessage +
-					" The web service was reachable but did not execute properly. This could be due to a database error on the server. Try again, as these types of errors usually do not persist." );
+			//if( innerException is EndpointNotFoundException )
+			//	throw new UserCorrectableException(
+			//		generalMessage + " The web service could not be reached - this could be due to a network error or a configuration error.",
+			//		innerException );
+			//if( innerException is FaultException )
+			//	// We do not pass the fault exception as an inner exception because its message includes a big ugly stack trace.
+			//	throw new UserCorrectableException(
+			//		generalMessage +
+			//		" The web service was reachable but did not execute properly. This could be due to a database error on the server. Try again, as these types of errors usually do not persist." );
 
-			// EndpointNotFoundException and FaultException are derived from CommunicationException, so their conditions must be before this condition.
-			if( innerException is CommunicationException )
-				throw new UserCorrectableException( generalMessage + " There was a network problem.", innerException );
+			//// EndpointNotFoundException and FaultException are derived from CommunicationException, so their conditions must be before this condition.
+			//if( innerException is CommunicationException )
+			//	throw new UserCorrectableException( generalMessage + " There was a network problem.", innerException );
 
 			throw new UserCorrectableException(
 				generalMessage + " This may have been caused by a network problem. The exception type is " + innerException.GetType().Name + ".",
 				innerException );
 		}
-
-		public static string AccessToken => Configuration.AccessToken;
 
 		public static Configuration.Machine.MachineConfigurationSystemManager Configuration =>
 			ConfigurationStatics.MachineConfiguration == null || ConfigurationStatics.MachineConfiguration.SystemManager == null

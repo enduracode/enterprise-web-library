@@ -8,9 +8,6 @@
 				<complexType>
 					<sequence>
 						<element name="HttpBaseUrl" type="string" />
-						<element name="TcpBaseUrl" type="string" />
-						<element name="TcpUsername" type="string" />
-						<element name="TcpPassword" type="string" />
 						<element name="AccessToken" type="string" />
 					</sequence>
 				</complexType>

@@ -400,35 +400,16 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			build.SystemId = recognizedInstallation.KnownSystemLogic.RsisSystem.Id;
 
 			operationResult.TimeSpentWaitingForNetwork = EwlStatics.ExecuteTimedRegion(
-				delegate {
-					if( SystemManagerConnectionStatics.LegacyServicesActive ) {
-						using( var memoryStream = new MemoryStream() ) {
-							// Understand that by doing this, we are not really taking advantage of streaming, but at least it will be easier to do it the right way some day (probably by implementing our own BuildMessageStream)
-							XmlOps.SerializeIntoStream( build, memoryStream );
-							memoryStream.Position = 0;
-
-							SystemManagerConnectionStatics.ExecuteIsuServiceMethod(
-								channel => channel.UploadBuild(
-									new InstallationSupportUtility.SystemManagerInterface.Messages.BuildUploadMessage
-										{
-											AuthenticationKey = SystemManagerConnectionStatics.AccessToken, BuildDocument = memoryStream
-										} ),
-								"build upload" );
-						}
-						return;
-					}
-
-					SystemManagerConnectionStatics.ExecuteActionWithSystemManagerClient(
-						"build upload",
-						client => Task.Run(
-								async () => {
-									using var content = HttpClientTools.GetRequestContentFromWriter( stream => XmlOps.SerializeIntoStream( build, stream ) );
-									using var response = await client.PostAsync( SystemManagerConnectionStatics.BuildsUrlSegment, content );
-									response.EnsureSuccessStatusCode();
-								} )
-							.Wait(),
-						supportLargePayload: true );
-				} );
+				() => SystemManagerConnectionStatics.ExecuteActionWithSystemManagerClient(
+					"build upload",
+					client => Task.Run(
+							async () => {
+								using var content = HttpClientTools.GetRequestContentFromWriter( stream => XmlOps.SerializeIntoStream( build, stream ) );
+								using var response = await client.PostAsync( SystemManagerConnectionStatics.BuildsUrlSegment, content );
+								response.EnsureSuccessStatusCode();
+							} )
+						.Wait(),
+					supportLargePayload: true ) );
 		}
 
 		private void packageWebApps( DevelopmentInstallation installation, string serverSideLogicFolderPath ) {
