@@ -426,7 +426,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 									using var response = await client.PostAsync( SystemManagerConnectionStatics.BuildsUrlSegment, content );
 									response.EnsureSuccessStatusCode();
 								} )
-							.Wait() );
+							.Wait(),
+						supportLargePayload: true );
 				} );
 		}
 
