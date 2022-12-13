@@ -266,9 +266,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					.ToImmutableDictionary( i => i.keyedLinker.key );
 				var updateRegions = requestState.UpdateRegionKeysAndArguments.Select(
 					keyAndArg => {
-						if( !nodeUpdateRegionLinkersByKey.TryGetValue( keyAndArg.Item1, out var nodeLinker ) )
-							throw getPossibleDeveloperMistakeException( "An update region linker with the key \"{0}\" does not exist.".FormatWith( keyAndArg.Item1 ) );
-						return ( nodeLinker.node, nodeLinker.keyedLinker.linker.PostModificationRegionGetter( keyAndArg.Item2 ) );
+						if( !nodeUpdateRegionLinkersByKey.TryGetValue( keyAndArg.key, out var nodeLinker ) )
+							throw getPossibleDeveloperMistakeException(
+								"An update region linker with the key \"{0}\" does not exist. The post-back included {1}; the page contains {2}.".FormatWith(
+									keyAndArg.key,
+									StringTools.GetEnglishListPhrase( requestState.UpdateRegionKeysAndArguments.Select( i => $"\"{i.key}\"" ), true ),
+									nodeUpdateRegionLinkersByKey.Any()
+										? StringTools.GetEnglishListPhrase( nodeUpdateRegionLinkersByKey.Select( i => $"\"{i.Key}\"" ), true )
+										: "no linkers" ) );
+						return ( nodeLinker.node, nodeLinker.keyedLinker.linker.PostModificationRegionGetter( keyAndArg.arg ) );
 					} );
 
 				var staticRegionContents = getStaticRegionContents( updateRegions );
@@ -301,7 +307,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 						if( navigationNeeded ) {
 							requestState.DmIdAndSecondaryOp = Tuple.Create( dmIdAndSecondaryOp.Item1, SecondaryPostBackOperation.NoOperation );
-							requestState.SetStaticAndUpdateRegionState( getStaticRegionContents( null ).contents, new Tuple<string, string>[ 0 ] );
+							requestState.SetStaticAndUpdateRegionState( getStaticRegionContents( null ).contents, Enumerable.Empty<( string, string )>().Materialize() );
 						}
 					} );
 				if( navigationNeeded )
@@ -485,7 +491,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							actionPostBack.ValidationDm == lastPostBackFailingDm ? SecondaryPostBackOperation.Validate : SecondaryPostBackOperation.ValidateChangesOnly );
 						requestState.SetStaticAndUpdateRegionState(
 							staticRegionContents.contents,
-							updateRegions.Select( i => Tuple.Create( i.key, i.region.ArgumentGetter() ) ).Materialize() );
+							updateRegions.Select( i => ( i.key, i.region.ArgumentGetter() ) ).Materialize() );
 					}
 					else
 						AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( AppRequestState.RequestTime, null, null );
@@ -687,7 +693,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					throw;
 				AppRequestState.Instance.EwfPageRequestState.FocusKey = "";
 				AppRequestState.Instance.EwfPageRequestState.GeneralModificationErrors = dmException.HtmlMessages;
-				AppRequestState.Instance.EwfPageRequestState.SetStaticAndUpdateRegionState( getStaticRegionContents( null ).contents, new Tuple<string, string>[ 0 ] );
+				AppRequestState.Instance.EwfPageRequestState.SetStaticAndUpdateRegionState(
+					getStaticRegionContents( null ).contents,
+					Enumerable.Empty<( string, string )>().Materialize() );
 			}
 		}
 

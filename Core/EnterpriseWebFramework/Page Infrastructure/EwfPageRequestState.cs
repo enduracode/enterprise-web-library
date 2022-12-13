@@ -22,7 +22,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		// set before navigation and used to detect possible developer mistakes
 		public string StaticRegionContents { get; private set; }
-		public IEnumerable<Tuple<string, string>> UpdateRegionKeysAndArguments { get; private set; }
+		public IReadOnlyCollection<( string key, string arg )> UpdateRegionKeysAndArguments { get; private set; }
 
 		public EwfPageRequestState( Instant firstRequestTime, string scrollPositionX, string scrollPositionY ) {
 			FirstRequestTime = firstRequestTime;
@@ -34,7 +34,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		public bool ModificationErrorsExist => InLineModificationErrorsByDisplay.Any() || GeneralModificationErrors.Any();
 
-		public void SetStaticAndUpdateRegionState( string staticRegionContents, IEnumerable<Tuple<string, string>> updateRegionKeysAndArguments ) {
+		public void SetStaticAndUpdateRegionState( string staticRegionContents, IReadOnlyCollection<( string, string )> updateRegionKeysAndArguments ) {
 			StaticRegionContents = staticRegionContents;
 			UpdateRegionKeysAndArguments = updateRegionKeysAndArguments;
 		}
