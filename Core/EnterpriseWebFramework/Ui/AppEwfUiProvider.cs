@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Tewl.Tools;
-
-namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// Application-specific configuration for the EWF UI.
 	/// </summary>
@@ -16,6 +12,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Gets the logo to be shown at the top of the EWF user interface. Returns null if the application display name should be used instead.
 		/// </summary>
 		public virtual IReadOnlyCollection<FlowComponent> GetLogoComponent() => null;
+
+		/// <summary>
+		/// Returns the components that identify the authenticated user and let them log out, change their password, etc. Returns null for the framework’s built-in
+		/// components.
+		/// </summary>
+		public virtual IReadOnlyCollection<FlowComponent> GetUserInfoComponents() => null;
 
 		/// <summary>
 		/// Gets the global navigational action components.

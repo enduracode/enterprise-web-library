@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using EnterpriseWebLibrary.Configuration;
+﻿using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.UserManagement;
-using Humanizer;
 using JetBrains.Annotations;
-using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public class UiPageContent: PageContent {
@@ -150,7 +145,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		private readonly BasicPageContent basicContent;
 		private readonly EntityUiSetup entityUiSetup;
-		private readonly List<FlowComponent> content = new List<FlowComponent>();
+		private readonly List<FlowComponent> content = new();
 
 		/// <summary>
 		/// Creates a page content object that uses the EWF user interface.
@@ -167,7 +162,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			bool omitContentBox = false, IReadOnlyCollection<ActionComponentSetup> pageActions = null, IReadOnlyCollection<ButtonSetup> contentFootActions = null,
 			IReadOnlyCollection<FlowComponent> contentFootComponents = null, Action dataUpdateModificationMethod = null, bool isAutoDataUpdater = false,
 			ActionPostBack pageLoadPostBack = null ) {
-			pageActions = pageActions ?? Enumerable.Empty<ActionComponentSetup>().Materialize();
+			pageActions ??= Enumerable.Empty<ActionComponentSetup>().Materialize();
 			if( contentFootActions != null && contentFootComponents != null )
 				throw new ApplicationException( "Either contentFootActions or contentFootComponents may be specified, but not both." );
 			if( contentFootActions == null && contentFootComponents == null )
@@ -193,7 +188,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 														getPageActionListContainer( pageActions )
 															.Append(
 																new DisplayableElement(
-																	context => new DisplayableElementData(
+																	_ => new DisplayableElementData(
 																		null,
 																		() => new DisplayableElementLocalData( "div" ),
 																		classes: omitContentBox ? null : contentClass,
@@ -232,16 +227,20 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			var userInfo = new List<FlowComponent>();
 			if( AppRequestState.Instance.UserAccessible ) {
-				var changePasswordPage = new UserManagement.Pages.ChangePassword( PageBase.Current.GetUrl() );
-				if( changePasswordPage.UserCanAccessResource && AppTools.User != null )
-					userInfo.Add( new GenericFlowContainer( getUserInfo( changePasswordPage ), classes: userInfoClass ) );
+				var components = EwfUiStatics.AppProvider.GetUserInfoComponents() ?? getUserInfoComponents();
+				if( components.Any() )
+					userInfo.Add( new GenericFlowContainer( components, classes: userInfoClass ) );
 			}
 
 			return new GenericFlowContainer( appLogo.Concat( userInfo ).Materialize(), classes: appLogoAndUserInfoClass );
 		}
 
-		private IReadOnlyCollection<FlowComponent> getUserInfo( PageBase changePasswordPage ) {
+		private IReadOnlyCollection<FlowComponent> getUserInfoComponents() {
 			var components = new List<FlowComponent>();
+
+			var changePasswordPage = new UserManagement.Pages.ChangePassword( PageBase.Current.GetUrl() );
+			if( !changePasswordPage.UserCanAccessResource || AppTools.User == null )
+				return components;
 
 			components.AddRange( "Logged in as {0}".FormatWith( AppTools.User.Email ).ToComponents() );
 			if( !UserManagementStatics.LocalIdentityProviderEnabled )
@@ -259,7 +258,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										postBack: PostBack.CreateFull(
 											id: "ewfLogOut",
 											modificationMethod: AuthenticationStatics.LogOutUser,
-											actionGetter: () => new PostBackAction( null, authorizationCheckDisabledPredicate: resource => true ) ) ) ).ToCollection()
+											actionGetter: () => new PostBackAction( null, authorizationCheckDisabledPredicate: _ => true ) ) ) ).ToCollection()
 								.ToComponentListItem() ) ) );
 
 			return components;
