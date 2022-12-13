@@ -131,7 +131,8 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility {
 							response.EnsureSuccessStatusCode();
 							await ( await response.Content.ReadAsStreamAsync() ).CopyToAsync( fileWriteStream );
 						} )
-					.Wait() );
+					.Wait(),
+				supportLargePayload: true );
 
 			return fileWriteStream.Length;
 		}
