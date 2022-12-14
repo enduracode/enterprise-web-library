@@ -2,6 +2,11 @@
 	background-color: hsla( 215, 33%, 93%, 1 );
 	color: hsla( 215, 11%, 22%, 1 );
 }
+@media print {
+	body {
+		background-color: unset;
+	}
+}
 
 /* borders */
 ewfUiGlobalContainer {
@@ -15,6 +20,12 @@ ewfUiTopTabListContainer {
 ewfSectionBoxStyleBothStates, ewfUiContentBox {
 	box-shadow: 0 2px 6px rgba( 0, 0, 0, .5 );
 	background-color: white;
+}
+@media print {
+	ewfSectionBoxStyleBothStates, ewfUiContentBox {
+		box-shadow: unset;
+		background-color: unset;
+	}
 }
 
 /* contrast */

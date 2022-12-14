@@ -51,6 +51,11 @@ ewfUiGlobalContainer, ewfUiTopTabListContainer {
 	border-bottom-width: 1px;
 	border-bottom-style: solid;
 }
+@media print {
+	ewfUiGlobalContainer {
+		border-bottom: unset;
+	}
+}
 
 /* headings and sections */
 ewfPagePath {
@@ -299,6 +304,7 @@ ewfUiPoweredByEwlFooterContainer {
 	ewfUiGlobalNavListContainer,
 	ewfUiEntityNavAndActionContainer,
 	ewfUiSideTabContainerCell,
+	ewfUiPageActionListContainer,
 	ewfUiContentFootBlock {
 		display: none;
 	}
