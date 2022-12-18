@@ -10,9 +10,9 @@ function ApplyTimeSpanFormat( field ) {
 	var digits = field.value.replace( ":", "" ).split( "" );
 
 	// Don't allow the minutes to be greater than 59
-	if( digits.length > 1 && digits[digits.length - 2] > 5 ) {
-		digits[digits.length - 2] = 5;
-		digits[digits.length - 1] = 9;
+	if( digits.length > 1 && digits[ digits.length - 2 ] > 5 ) {
+		digits[ digits.length - 2 ] = 5;
+		digits[ digits.length - 1 ] = 9;
 	}
 
 	// Turn the string in the text box to the HHHH:MM format.
@@ -21,7 +21,7 @@ function ApplyTimeSpanFormat( field ) {
 	for( var i = 0; i < maxValueLength; i++ ) {
 		if( i == 2 ) // Insert the hour-minute separator
 			timeTextValue = ":" + timeTextValue;
-		timeTextValue = ( timeValueIndex >= 0 ? digits[timeValueIndex--] : "0" ) + timeTextValue;
+		timeTextValue = ( timeValueIndex >= 0 ? digits[ timeValueIndex-- ] : "0" ) + timeTextValue;
 		field.value = timeTextValue;
 	}
 }
@@ -71,6 +71,18 @@ function stopActivatableTableRowNestedEvents() {
 	);
 }
 
+function addSpeculationRules() {
+	if( HTMLScriptElement.supports && HTMLScriptElement.supports( "speculationrules" ) )
+		$( "a[data-ewl-prerender]" ).each( function() { addSpeculationRule( $( this ).attr( "href" ) ); } );
+}
+
+function addSpeculationRule( url ) {
+	const s = document.createElement( "script" );
+	s.type = "speculationrules";
+	s.textContent = JSON.stringify( { prerender: [ { source: "list", urls: [ url ] } ] } );
+	document.body.append( s );
+}
+
 function postBack( postBackId ) {
 	$( "#ewfForm" ).trigger( "submit", postBackId );
 }
@@ -89,7 +101,7 @@ function postBackRequestStarting( e, postBackId ) {
 
 	// see http://stackoverflow.com/a/9924844/35349
 	for( var i in CKEDITOR.instances )
-		CKEDITOR.instances[i].updateElement();
+		CKEDITOR.instances[ i ].updateElement();
 
 	$( "#ewfClickBlocker" ).removeClass().addClass( "ewfClickBlockerA" );
 	$( ".ewfProcessingDialog" ).removeClass( "ewfProcessingDialogI ewfProcessingDialogTo" ).addClass( "ewfProcessingDialogA" );
@@ -130,7 +142,7 @@ function initNumericTextControl( selector ) {
 ( function() {
 	var fieldSelection = {
 		getSelection: function() {
-			var e = this.jquery ? this[0] : this;
+			var e = this.jquery ? this[ 0 ] : this;
 			return ( ( 'selectionStart' in e && function() {
 				var l = e.selectionEnd - e.selectionStart;
 				return { start: e.selectionStart, end: e.selectionEnd, length: l, text: e.value.substr( e.selectionStart, l ) };
@@ -148,8 +160,8 @@ function initNumericTextControl( selector ) {
 			} ) || function() { return { start: 0, end: e.value.length, length: 0 }; } )();
 		},
 		replaceSelection: function() {
-			var e = this.jquery ? this[0] : this;
-			var text = arguments[0] || '';
+			var e = this.jquery ? this[ 0 ] : this;
+			var text = arguments[ 0 ] || '';
 			return ( ( 'selectionStart' in e && function() {
 				e.value = e.value.substr( 0, e.selectionStart ) + text + e.value.substr( e.selectionEnd, e.value.length );
 				return this;
@@ -163,7 +175,7 @@ function initNumericTextControl( selector ) {
 			} )();
 		}
 	};
-	jQuery.each( fieldSelection, function( i ) { jQuery.fn[i] = this; } );
+	jQuery.each( fieldSelection, function( i ) { jQuery.fn[ i ] = this; } );
 } )();
 
 function initLogInPage( passwordSelector, loginCodeButtonSelector ) {

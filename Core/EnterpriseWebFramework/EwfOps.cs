@@ -283,7 +283,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										infos.Add( new StaticFiles.Third_party.Spin_js.SpinminJs() );
 										infos.Add( new ExternalResource( "//cdn.ckeditor.com/4.5.8/full/ckeditor.js" ) );
 										infos.Add( new ExternalResource( "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js" ) );
-										infos.Add( new ExternalResource( "https://instant.page/5.1.0" ) );
+										infos.Add( new StaticFiles.Instant_pageJs() );
 										if( includeStripeCheckout )
 											infos.Add( new ExternalResource( "https://checkout.stripe.com/checkout.js" ) );
 										infos.Add( new StaticFiles.CodeJs() );

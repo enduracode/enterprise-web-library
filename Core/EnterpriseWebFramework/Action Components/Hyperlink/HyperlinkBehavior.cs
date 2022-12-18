@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using System.Web;
 using EnterpriseWebLibrary.Email;
-using Humanizer;
-using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// The behavior for a hyperlink.
 	/// </summary>
 	public sealed class HyperlinkBehavior {
-		public static implicit operator HyperlinkBehavior( ResourceInfo destination ) => new HyperlinkBehavior( destination, false, "", null );
+		public static implicit operator HyperlinkBehavior( ResourceInfo destination ) => new( destination, false, false, "", null );
 
 		private readonly bool hasDestination;
 		private readonly Func<bool> userCanNavigateToDestinationPredicate;
@@ -25,7 +20,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal readonly bool IsFocusable;
 		internal readonly Action PostBackAdder;
 
-		internal HyperlinkBehavior( ResourceInfo destination, bool disableAuthorizationCheck, string target, Func<string, string> actionStatementGetter ) {
+		internal HyperlinkBehavior(
+			ResourceInfo destination, bool disableAuthorizationCheck, bool prerenderDestination, string target, Func<string, string> actionStatementGetter ) {
 			hasDestination = destination != null;
 			userCanNavigateToDestinationPredicate = () => !hasDestination || disableAuthorizationCheck || destination.UserCanAccessResource;
 
@@ -41,9 +37,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						? new ElementAttribute( "target", target ).ToCollection()
 						: Enumerable.Empty<ElementAttribute>() )
 				.Concat(
-					// for https://instant.page/
+					// for prerendering and https://instant.page/
 					!isPostBackHyperlink.Value && destination is ResourceBase && !( destinationAlternativeMode is DisabledResourceMode ) && !forNonHyperlinkElement
-						? new ElementAttribute( "data-instant" ).ToCollection()
+						? new ElementAttribute( prerenderDestination ? "data-{0}-prerender".FormatWith( EwlStatics.EwlInitialism.ToLowerInvariant() ) : "data-instant" )
+							.ToCollection()
 						: Enumerable.Empty<ElementAttribute>() )
 				.Materialize();
 
@@ -53,7 +50,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					id,
 					( omitPreventDefaultStatement ? "" : "e.preventDefault();" ).ConcatenateWithSpace( actionStatements ) );
 			if( destinationAlternativeMode is DisabledResourceMode disabledResourceMode ) {
-				IncludesIdAttribute = forNonHyperlinkElement => true;
+				IncludesIdAttribute = _ => true;
 				EtherealChildren = new ToolTip(
 					( disabledResourceMode.Message.Any() ? disabledResourceMode.Message : Translation.ThePageYouRequestedIsDisabled ).ToComponents(),
 					out var toolTipInitStatementGetter ).ToCollection();
@@ -65,15 +62,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					isPostBackHyperlink.Value || ( hasDestination && ( actionStatementGetter != null || forNonHyperlinkElement ) );
 				EtherealChildren = null;
 				JsInitStatementGetter = ( id, forNonHyperlinkElement ) => {
-					var actionStatements = isPostBackHyperlink.Value ? postBackAction.GetJsStatements() :
-					                       hasDestination && actionStatementGetter != null ? actionStatementGetter( Url.Value ) :
-					                       hasDestination && forNonHyperlinkElement ? !target.Any()
-						                                                                  ? "window.location.href = '{0}';".FormatWith( Url.Value )
-						                                                                  :
-						                                                                  target == "_parent"
-							                                                                  ?
-							                                                                  "window.parent.location.href = '{0}';".FormatWith( Url.Value )
-							                                                                  : "window.open( '{0}', '{1}' );".FormatWith( Url.Value, target ) : "";
+					var actionStatements = isPostBackHyperlink.Value
+						                       ? postBackAction.GetJsStatements()
+						                       :
+						                       hasDestination && actionStatementGetter != null
+							                       ? actionStatementGetter( Url.Value )
+							                       :
+							                       hasDestination && forNonHyperlinkElement
+								                       ?
+								                       !target.Any() ? "window.location.href = '{0}';".FormatWith( Url.Value ) :
+								                       target == "_parent" ? "window.parent.location.href = '{0}';".FormatWith( Url.Value ) :
+								                       "window.open( '{0}', '{1}' );".FormatWith( Url.Value, target )
+								                       : "";
 					return actionStatements.Any() ? getActionInitStatements( id, forNonHyperlinkElement, actionStatements ) : "";
 				};
 			}
@@ -87,7 +87,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				postBackAction = new PostBackFormAction(
 					PageBase.Current.GetPostBack( postBackId ) ?? PostBack.CreateFull(
 						id: postBackId,
-						actionGetter: () => new PostBackAction( destination, authorizationCheckDisabledPredicate: effectiveDestination => disableAuthorizationCheck ) ) );
+						actionGetter: () => new PostBackAction( destination, authorizationCheckDisabledPredicate: _ => disableAuthorizationCheck ) ) );
 				postBackAction.AddToPageIfNecessary();
 			};
 		}
@@ -102,7 +102,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				forNonHyperlinkElement ? Enumerable.Empty<ElementAttribute>().Materialize() : new ElementAttribute( "href", Url.Value ).ToCollection();
 			IncludesIdAttribute = forNonHyperlinkElement => forNonHyperlinkElement;
 			EtherealChildren = null;
-			JsInitStatementGetter = ( id, forNonHyperlinkElement ) => forNonHyperlinkElement ? "window.location.href = '{0}';".FormatWith( Url.Value ) : "";
+			JsInitStatementGetter = ( _, forNonHyperlinkElement ) => forNonHyperlinkElement ? "window.location.href = '{0}';".FormatWith( Url.Value ) : "";
 			IsFocusable = true;
 			PostBackAdder = () => {};
 		}
@@ -128,8 +128,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		/// <param name="destination">Where to navigate. Specify null if you don’t want the link to do anything.</param>
 		/// <param name="disableAuthorizationCheck">Pass true to allow navigation to a resource that the authenticated user cannot access. Use with caution.</param>
-		public static HyperlinkBehavior ToHyperlinkDefaultBehavior( this ResourceInfo destination, bool disableAuthorizationCheck = false ) =>
-			new HyperlinkBehavior( destination, disableAuthorizationCheck, "", null );
+		/// <param name="prerenderDestination">Pass true to encourage the browser to prerender the destination if possible.</param>
+		public static HyperlinkBehavior ToHyperlinkDefaultBehavior(
+			this ResourceInfo destination, bool disableAuthorizationCheck = false, bool prerenderDestination = false ) =>
+			new( destination, disableAuthorizationCheck, prerenderDestination, "", null );
 
 		/// <summary>
 		/// Creates a behavior object that navigates to this resource in a new tab or window.
@@ -137,7 +139,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="destination">Where to navigate. Specify null if you don’t want the link to do anything.</param>
 		/// <param name="disableAuthorizationCheck">Pass true to allow navigation to a resource that the authenticated user cannot access. Use with caution.</param>
 		public static HyperlinkBehavior ToHyperlinkNewTabBehavior( this ResourceInfo destination, bool disableAuthorizationCheck = false ) =>
-			new HyperlinkBehavior( destination, disableAuthorizationCheck, "_blank", null );
+			new( destination, disableAuthorizationCheck, false, "_blank", null );
 
 		/// <summary>
 		/// Creates a behavior object that navigates to this resource in a modal box.
@@ -147,7 +149,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="browsingContextSetup">The setup object for the browsing context (i.e. the iframe).</param>
 		public static HyperlinkBehavior ToHyperlinkModalBoxBehavior(
 			this ResourceInfo destination, bool disableAuthorizationCheck = false, BrowsingContextSetup browsingContextSetup = null ) =>
-			new HyperlinkBehavior( destination, disableAuthorizationCheck, "_blank", url => browsingModalBoxOpenStatementGetter( browsingContextSetup, url ) );
+			new( destination, disableAuthorizationCheck, false, "_blank", url => browsingModalBoxOpenStatementGetter( browsingContextSetup, url ) );
 
 		/// <summary>
 		/// Creates a behavior object that navigates to this resource in the parent browsing context.
@@ -155,7 +157,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="destination">Where to navigate. Specify null if you don’t want the link to do anything.</param>
 		/// <param name="disableAuthorizationCheck">Pass true to allow navigation to a resource that the authenticated user cannot access. Use with caution.</param>
 		public static HyperlinkBehavior ToHyperlinkParentContextBehavior( this ResourceInfo destination, bool disableAuthorizationCheck = false ) =>
-			new HyperlinkBehavior( destination, disableAuthorizationCheck, "_parent", null );
+			new( destination, disableAuthorizationCheck, false, "_parent", null );
 
 		/// <summary>
 		/// Creates a behavior object that will create an email message to this address.

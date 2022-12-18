@@ -622,6 +622,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				elementJsInitStatements,
 				appProvider.javaScriptDocumentReadyFunctionCallGetter().AppendDelimiter( ";" ),
 				javaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
+				"addSpeculationRules();",
 				StringTools.ConcatenateWithDelimiter( " ", scrollStatement, modificationErrorsOccurred ? "" : pageLoadActionStatements, clientSideNavigationStatements )
 					.PrependDelimiter( "window.onload = function() { " )
 					.AppendDelimiter( " };" ) );
