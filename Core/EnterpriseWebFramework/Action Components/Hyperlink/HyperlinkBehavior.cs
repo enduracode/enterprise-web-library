@@ -39,8 +39,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				.Concat(
 					// for prerendering and https://instant.page/
 					!isPostBackHyperlink.Value && destination is ResourceBase && !( destinationAlternativeMode is DisabledResourceMode ) && !forNonHyperlinkElement
-						? new ElementAttribute( prerenderDestination ? "data-{0}-prerender".FormatWith( EwlStatics.EwlInitialism.ToLowerInvariant() ) : "data-instant" )
-							.ToCollection()
+						? new ElementAttribute(
+							prerenderDestination
+								? "data-{0}-prerender".FormatWith( EwlStatics.EwlInitialism.ToLowerInvariant() ) /* duplicated in JavaScript file */
+								: "data-instant" ).ToCollection()
 						: Enumerable.Empty<ElementAttribute>() )
 				.Materialize();
 
