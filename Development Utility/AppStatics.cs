@@ -5,6 +5,7 @@ using Tewl.IO;
 namespace EnterpriseWebLibrary.DevelopmentUtility {
 	internal static class AppStatics {
 		internal const string MercurialRepositoryFolderName = ".hg";
+		internal const string GitRepositoryFolderName = ".hg";
 		internal const string StaticFileLogicFolderName = "Logic";
 
 		internal static bool NDependIsPresent;

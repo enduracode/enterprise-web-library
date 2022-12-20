@@ -318,15 +318,20 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			build.MajorVersion = installation.CurrentMajorVersion;
 			build.BuildNumber = installation.NextBuildNumber;
 
-			var hgOutput = Directory.Exists( EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.MercurialRepositoryFolderName ) )
-				               ? TewlContrib.ProcessTools.RunProgram(
-						               @"C:\Program Files\TortoiseHg\hg",
-						               "--debug identify --id \"{0}\"".FormatWith( installation.GeneralLogic.Path ),
-						               "",
-						               true )
-					               .Trim()
-				               : "";
-			build.HgChangesetId = hgOutput.Length == 40 ? hgOutput : "";
+			if( Directory.Exists( EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.MercurialRepositoryFolderName ) ) ) {
+				var hgOutput = TewlContrib.ProcessTools.RunProgram(
+						@"C:\Program Files\TortoiseHg\hg",
+						"--debug identify --id \"{0}\"".FormatWith( installation.GeneralLogic.Path ),
+						"",
+						true )
+					.Trim();
+				build.ChangesetId = hgOutput.Length == 40 ? hgOutput : "";
+			}
+			else if( Directory.Exists( EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.GitRepositoryFolderName ) ) )
+				build.ChangesetId = TewlContrib.ProcessTools.RunProgram( "git", "rev-parse --verify HEAD", "", true );
+			else
+				build.ChangesetId = "";
+			build.HgChangesetId = "";
 
 			var serverSideLogicFolderPath = EwlStatics.CombinePaths( logicPackagesFolderPath, "Server Side Logic" );
 			packageWebApps( installation, serverSideLogicFolderPath );
@@ -360,8 +365,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					        installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath,
 					        InstallationConfiguration.InstallationConfigurationFolderName,
 					        InstallationConfiguration.InstallationsFolderName ) ) )
-				if( !new[] { InstallationConfiguration.DevelopmentInstallationFolderName, AppStatics.MercurialRepositoryFolderName }.Contains(
-					    Path.GetFileName( installationConfigurationFolderPath ) ) ) {
+				if( !new[] { InstallationConfiguration.DevelopmentInstallationFolderName, AppStatics.MercurialRepositoryFolderName, AppStatics.GitRepositoryFolderName }
+					    .Contains( Path.GetFileName( installationConfigurationFolderPath ) ) ) {
 					var buildMessageInstallation = new InstallationSupportUtility.SystemManagerInterface.Messages.BuildMessage.Installation();
 
 					// Do not perform schema validation since the schema file on disk may not match this version of the ISU.
