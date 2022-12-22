@@ -331,7 +331,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				build.ChangesetId = TewlContrib.ProcessTools.RunProgram( "git", "rev-parse --verify HEAD", "", true );
 			else
 				build.ChangesetId = "";
-			build.HgChangesetId = "";
 
 			var serverSideLogicFolderPath = EwlStatics.CombinePaths( logicPackagesFolderPath, "Server Side Logic" );
 			packageWebApps( installation, serverSideLogicFolderPath );
