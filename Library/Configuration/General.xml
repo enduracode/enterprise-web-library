@@ -6,7 +6,7 @@
 	<WebApplications>
 		<Application>
 			<Name>Website</Name>
-			<SupportsSecureConnections>false</SupportsSecureConnections>
+			<SupportsSecureConnections>true</SupportsSecureConnections>
 		</Application>
 	</WebApplications>
 	<developers>
