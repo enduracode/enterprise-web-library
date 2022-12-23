@@ -5,19 +5,17 @@
 
 namespace EnterpriseWebLibrary.Website.ConfigurationSchemas {
 	partial class GetSchema {
-		internal string FilePath { get; private set; }
+		private string filePath;
 
 		protected override void init() {
-			FilePath = EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, FileName + FileExtensions.Xsd );
-			if( !File.Exists( FilePath ) )
+			filePath = EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, FileName + FileExtensions.Xsd );
+			if( !File.Exists( filePath ) )
 				throw new ApplicationException( "File does not exist." );
 		}
 
-		protected override ConnectionSecurity ConnectionSecurity => ConnectionSecurity.NonSecure;
-
 		protected override EwfSafeRequestHandler getOrHead() =>
 			new EwfSafeResponseWriter(
-				() => EwfResponse.Create( ContentTypes.Xml, new EwfResponseBodyCreator( () => File.ReadAllText( FilePath ) ) ),
+				() => EwfResponse.Create( ContentTypes.Xml, new EwfResponseBodyCreator( () => File.ReadAllText( filePath ) ) ),
 				EwlStatics.EwlBuildDateTime,
 				() => "getSchema" + FileName );
 	}
