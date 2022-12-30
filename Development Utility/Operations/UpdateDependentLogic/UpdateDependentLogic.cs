@@ -140,7 +140,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			if( !installation.DevelopmentInstallationLogic.SystemIsEwl ) {
 				if( Directory.Exists( EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.MercurialRepositoryFolderName ) ) )
 					updateIgnoreFile( installation, false );
-				if( Directory.Exists( EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".gitignore" ) ) )
+				if( File.Exists( EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".gitignore" ) ) )
 					updateIgnoreFile( installation, true );
 			}
 		}
