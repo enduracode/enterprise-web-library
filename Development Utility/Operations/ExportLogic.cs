@@ -328,7 +328,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 				build.ChangesetId = hgOutput.Length == 40 ? hgOutput : "";
 			}
 			else if( Directory.Exists( EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.GitRepositoryFolderName ) ) )
-				build.ChangesetId = TewlContrib.ProcessTools.RunProgram( "git", "rev-parse --verify HEAD", "", true );
+				build.ChangesetId = TewlContrib.ProcessTools.RunProgram( "git", "rev-parse --verify HEAD", "", true, workingDirectory: installation.GeneralLogic.Path );
 			else
 				build.ChangesetId = "";
 
