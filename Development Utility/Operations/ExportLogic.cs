@@ -318,6 +318,16 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			build.MajorVersion = installation.CurrentMajorVersion;
 			build.BuildNumber = installation.NextBuildNumber;
 
+			bool usingGit() {
+				string output;
+				try {
+					output = TewlContrib.ProcessTools.RunProgram( "git", "rev-parse --is-inside-work-tree", "", true, workingDirectory: installation.GeneralLogic.Path );
+				}
+				catch {
+					return false;
+				}
+				return string.Equals( output.Trim(), "true", StringComparison.Ordinal );
+			}
 			if( Directory.Exists( EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.MercurialRepositoryFolderName ) ) ) {
 				var hgOutput = TewlContrib.ProcessTools.RunProgram(
 						@"C:\Program Files\TortoiseHg\hg",
@@ -327,7 +337,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 					.Trim();
 				build.ChangesetId = hgOutput.Length == 40 ? hgOutput : "";
 			}
-			else if( Directory.Exists( EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.GitRepositoryFolderName ) ) )
+			else if( usingGit() )
 				build.ChangesetId = TewlContrib.ProcessTools.RunProgram( "git", "rev-parse --verify HEAD", "", true, workingDirectory: installation.GeneralLogic.Path )
 					.Trim();
 			else
