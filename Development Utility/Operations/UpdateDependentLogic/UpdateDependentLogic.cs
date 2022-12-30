@@ -137,9 +137,12 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			generateXmlSchemaLogicForInstallationConfigurationFile( installation, "Shared" );
 			generateXmlSchemaLogicForOtherFiles( installation );
 
-			if( !installation.DevelopmentInstallationLogic.SystemIsEwl &&
-			    Directory.Exists( EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.MercurialRepositoryFolderName ) ) )
-				updateMercurialIgnoreFile( installation );
+			if( !installation.DevelopmentInstallationLogic.SystemIsEwl ) {
+				if( Directory.Exists( EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.MercurialRepositoryFolderName ) ) )
+					updateIgnoreFile( installation, false );
+				if( Directory.Exists( EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".gitignore" ) ) )
+					updateIgnoreFile( installation, true );
+			}
 		}
 
 		private void copyInEwlFiles( DevelopmentInstallation installation ) {
@@ -698,8 +701,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			}
 		}
 
-		private void updateMercurialIgnoreFile( DevelopmentInstallation installation ) {
-			var filePath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".hgignore" );
+		private void updateIgnoreFile( DevelopmentInstallation installation, bool forGit ) {
+			var filePath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, forGit ? ".gitignore" : ".hgignore" );
 			var lines = File.Exists( filePath ) ? File.ReadAllLines( filePath ) : Enumerable.Empty<string>();
 			IoMethods.DeleteFile( filePath );
 			using TextWriter writer = new StreamWriter( filePath );
@@ -708,7 +711,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
 			const string regionEnd = "# END-EWL-REGION";
 
 			writer.WriteLine( regionBegin );
-			writer.WriteLine( "syntax: glob" );
+			if( !forGit )
+				writer.WriteLine( "syntax: glob" );
 			writer.WriteLine();
 			writer.WriteLine( ".vs/" );
 			writer.WriteLine( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + ".sln.DotSettings.user" );
