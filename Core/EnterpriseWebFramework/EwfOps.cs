@@ -389,8 +389,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							if( ConfigurationStatics.IsDevelopmentInstallation && EwfConfigurationStatics.AppConfiguration.UsesKestrel.Value )
 								app.UseResponseCompression();
 							app.UseMiniProfiler(); // only used to handle MiniProfiler requests
+							RequestDispatchingStatics.AppProvider.AddCustomMiddleware( app );
 							app.Use( RequestDispatchingStatics.ProcessRequest );
 							app.UseRouting();
+							RequestDispatchingStatics.AppProvider.ConfigurePostFrameworkPipeline( app );
 							app.Use( EwfApp.EnsureUrlResolved );
 
 							app.Run();

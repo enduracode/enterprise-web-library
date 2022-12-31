@@ -1,10 +1,21 @@
 ﻿using System.Collections.Immutable;
+using Microsoft.AspNetCore.Builder;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// Application-specific request-dispatching logic.
 	/// </summary>
 	public abstract class AppRequestDispatchingProvider {
+		/// <summary>
+		/// Adds custom middleware components to the ASP.NET request pipeline.
+		/// </summary>
+		protected internal virtual void AddCustomMiddleware( IApplicationBuilder app ) {}
+
+		/// <summary>
+		/// Configures the portion of the ASP.NET pipeline that will run for requests not handled by the framework.
+		/// </summary>
+		protected internal virtual void ConfigurePostFrameworkPipeline( WebApplication app ) {}
+
 		/// <summary>
 		/// Returns the IP addresses that are allowed to access the application, or null when the application is not down for maintenance.
 		/// </summary>
