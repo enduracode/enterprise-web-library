@@ -114,6 +114,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								options => {
 									options.Limits.MaxRequestBodySize = null;
 									options.AllowSynchronousIO = true;
+									options.AddServerHeader = false;
 								} );
 							if( ConfigurationStatics.IsDevelopmentInstallation && EwfConfigurationStatics.AppConfiguration.UsesKestrel.Value )
 								builder.Services.AddResponseCompression( options => { options.EnableForHttps = true; } );
