@@ -714,7 +714,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							                                    i.Key,
 							                                    ButtonElementName,
 							                                    StringComparison.Ordinal ) )
-					                               .Select( i => KeyValuePair.Create( i.Key, (object)i.Value.Single() ) ),
+					                               .SelectMany( pair => pair.Value.Select( value => KeyValuePair.Create( pair.Key, (object)value ) ) ),
 				                               postBackValueKeys.Contains ) | requestState.PostBackValues.AddFromRequest(
 				                               EwfRequest.Current.AspNetRequest.Form.Files.Select( i => KeyValuePair.Create( i.Name, (object)i ) ),
 				                               postBackValueKeys.Contains );
