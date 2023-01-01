@@ -68,8 +68,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 						if( EwfRequest.Current.AspNetRequest.HasFormContentType ) {
 							writer.WriteLine();
-							foreach( var i in EwfRequest.Current.AspNetRequest.Form )
-								writer.WriteLine( "Form field " + i.Key + ": " + i.Value.Single() );
+							foreach( var pair in EwfRequest.Current.AspNetRequest.Form )
+							foreach( var value in pair.Value )
+								writer.WriteLine( "Form field " + pair.Key + ": " + value );
 						}
 
 						writer.WriteLine();
