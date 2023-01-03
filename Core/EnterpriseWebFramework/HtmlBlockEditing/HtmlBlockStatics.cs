@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.MailMerging;
 
@@ -69,17 +67,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var schemeRegex = new Regex( @"^([a-z][a-z0-9+.-]*://|mailto:)", RegexOptions.IgnoreCase );
 
 			// Get everything that looks like an HTML tag
-			foreach( Match match in htmlTagRegex.Matches( html ) ) {
+			foreach( Match match in htmlTagRegex.Matches( html ) )
 				// For each url reference inside that tag e.g. href="", src=''
-				foreach( Match urlReference in urlReferenceRegex.Matches( match.Value ) ) {
-					// Url inside that reference
-					var url = ( urlReference.Groups[ 3 ].Value.Any() ? urlReference.Groups[ 3 ] : urlReference.Groups[ 4 ] ).Value;
-					// The URL is definitely relative if it doesn't include a scheme. Skip scheme-less URLs that appear to be merge fields.
-					if( !schemeRegex.IsMatch( url ) && !url.StartsWith( "@@" ) ) {
-						// Passed all tests. Change this relative URL to an absolute URL.
-						var uri = new Uri( new Uri( AppRequestState.Instance.Url ), url );
-						html = html.Replace( url, uri.AbsoluteUri );
-					}
+			foreach( Match urlReference in urlReferenceRegex.Matches( match.Value ) ) {
+				// Url inside that reference
+				var url = ( urlReference.Groups[ 3 ].Value.Any() ? urlReference.Groups[ 3 ] : urlReference.Groups[ 4 ] ).Value;
+				// The URL is definitely relative if it doesn't include a scheme. Skip scheme-less URLs that appear to be merge fields.
+				if( !schemeRegex.IsMatch( url ) && !url.StartsWith( "@@" ) ) {
+					// Passed all tests. Change this relative URL to an absolute URL.
+					var uri = new Uri( new Uri( AppRequestState.Instance.Url ), url );
+					html = html.Replace( url, uri.AbsoluteUri );
 				}
 			}
 
@@ -96,16 +93,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		private static string decodeIntraSiteUris( string html ) {
-			foreach( var secure in new[] { true, false } ) {
+			foreach( var secure in new[] { true, false } )
 				// Any kind of relative URL could be a problem in an email message since there is no context. This is one reason we decode to absolute URLs.
 				//
-				// Our intra-site URI coding does not currently support multiple web applications in a system. If we want to support this, we should probably include
-				// the web app name or something in the prefix.
+				// Our intra-site URI coding does not currently distinguish between multiple web applications in a system. If we want to do this, we should probably
+				// include the web app name or something in the prefix.
 				html = Regex.Replace(
 					html,
 					secure ? MergeOps.ApplicationRelativeSecureUrlPrefix : MergeOps.ApplicationRelativeNonSecureUrlPrefix,
-					ConfigurationStatics.InstallationConfiguration.WebApplications.Single().DefaultBaseUrl.GetUrlString( secure ) );
-			}
+					( ConfigurationStatics.InstallationConfiguration.WebApplications.SingleOrDefault(
+						  i => string.Equals( i.Name, ConfigurationStatics.AppName, StringComparison.Ordinal ) ) ??
+					  ConfigurationStatics.InstallationConfiguration.WebApplications.First() ).DefaultBaseUrl.GetUrlString( secure ) );
 			return html;
 		}
 	}
