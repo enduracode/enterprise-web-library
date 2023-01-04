@@ -9,7 +9,7 @@
 }
 
 /* borders */
-ewfUiGlobalContainer {
+ewfUiOuterGlobalContainer {
 	border-color: hsla( 215, 33%, 85%, 1 );
 }
 ewfUiTopTabListContainer {
@@ -77,7 +77,7 @@ ewfErrorMessageListContainer {
 }
 
 /* master page */
-ewfUiGlobalContainer {
+ewfUiOuterGlobalContainer {
 	background-color: white;
 }
 ewfUiTopTabListContainer ewfActionComponentAllStylesAllNormalStates,

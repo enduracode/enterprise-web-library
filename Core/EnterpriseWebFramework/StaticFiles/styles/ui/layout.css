@@ -4,7 +4,7 @@
 	border: 0;
 	padding: 0;
 }
-ewfUiGlobalContainer {
+ewfUiOuterGlobalContainer {
 	padding-top: 1rem;
 }
 @media print {
@@ -17,42 +17,41 @@ ewfUiGlobalContainer {
 
 /* spacing */
 
-ewfUiEntityContainer > *, ewfUiSideTabAndContentBlock, ewfUiGlobalFootContainer {
+ewfUiEntityContainer > *, ewfUiSideTabAndContentContainer, ewfUiGlobalFootContainer {
 	margin-top: 1em;
 }
 ewfUiEntityContainer > *:first-child {
 	margin-top: 0;
 }
 ewfUiTopErrorMessageListContainer,
-ewfUiGlobalNavListContainer,
 ewfUiEntityContainer,
 ewfUiTopTabListContainer {
 	margin-top: 1rem;
 }
-ewfUiGlobalContainer {
+ewfUiOuterGlobalContainer {
 	padding-bottom: 1rem;
 }
 ewfUiTopTabListContainer ewfActionComponentAllStylesAllStates {
 	padding: .5rem 1rem;
 }
 
-ewfUiAppLogoAndUserInfoContainer {
+ewfUiInnerGlobalContainer {
 	margin-top: -.25rem;
 	margin-bottom: -.25rem;
 }
-ewfUiAppLogoAndUserInfoContainer > * {
+ewfUiInnerGlobalContainer > * {
 	margin-top: .25rem;
 	margin-bottom: .25rem;
 }
 
 
 /* borders */
-ewfUiGlobalContainer, ewfUiTopTabListContainer {
+ewfUiOuterGlobalContainer, ewfUiTopTabListContainer {
 	border-bottom-width: 1px;
 	border-bottom-style: solid;
 }
 @media print {
-	ewfUiGlobalContainer {
+	ewfUiOuterGlobalContainer {
 		border-bottom: unset;
 	}
 }
@@ -209,12 +208,12 @@ ewfErrorMessageListContainer {
 ewfNotificationSpacer {
 	display: none;
 }
-ewfUiAppLogoAndUserInfoContainer, ewfUiTopErrorMessageListContainer, ewfUiGlobalNavListContainer, ewfUiEntityAndTabAndContentBlock, ewfUiGlobalFootContainer {
+ewfUiInnerGlobalContainer, ewfUiEntityAndTabAndContentBlock, ewfUiGlobalFootContainer {
 	margin-left: auto;
 	margin-right: auto;
 	max-width: 75rem;
 }
-ewfUiAppLogoAndUserInfoContainer {
+ewfUiInnerGlobalContainer {
 	display: flex;
 	flex-flow: row wrap;
 	justify-content: space-between;
@@ -263,14 +262,9 @@ ewfUiTopTabListContainer {
 ewfUiTopTabListContainer > ewfUnorderedLineList > ewfComponentListItem {
 	margin-left: 0;
 }
-ewfUiSideTabAndContentBlock {
-	width: 100%;
-	table-layout: fixed;
+ewfUiSideTabAndContentContainer {
 }
-ewfUiSideTabContainerCell, ewfUiPageActionAndContentAndContentFootCell {
-	vertical-align: top;
-}
-ewfUiSideTabContainerCell {
+ewfUiSideTabContainer {
 	padding-right: 1rem;
 	width: 12.5em;
 }
@@ -299,11 +293,11 @@ ewfUiPoweredByEwlFooterContainer {
 	text-align: center;
 }
 @media print {
+	ewfUiGlobalNavListContainer,
 	ewfUiUserInfoContainer,
 	ewfUiTopErrorMessageListContainer,
-	ewfUiGlobalNavListContainer,
 	ewfUiEntityNavAndActionContainer,
-	ewfUiSideTabContainerCell,
+	ewfUiSideTabContainer,
 	ewfUiPageActionListContainer,
 	ewfUiContentFootBlock {
 		display: none;

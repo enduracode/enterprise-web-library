@@ -6,40 +6,40 @@ using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public class UiPageContent: PageContent {
-		private const string globalContainerId = "ewfUiGlobal";
-		private static readonly ElementClass appLogoAndUserInfoClass = new ElementClass( "ewfUiAppLogoAndUserInfo" );
-		private static readonly ElementClass appLogoClass = new ElementClass( "ewfUiAppLogo" );
-		private static readonly ElementClass userInfoClass = new ElementClass( "ewfUiUserInfo" );
-		private static readonly ElementClass topErrorMessageListContainerClass = new ElementClass( "ewfUiStatus" );
-		private static readonly ElementClass globalNavListContainerClass = new ElementClass( "ewfUiGlobalNav" );
+		private const string outerGlobalContainerId = "ewfUiOuterGlobal";
+		private static readonly ElementClass innerGlobalContainerClass = new( "ewfUiInnerGlobal" );
+		private static readonly ElementClass appLogoClass = new( "ewfUiAppLogo" );
+		private static readonly ElementClass globalNavListContainerClass = new( "ewfUiGlobalNav" );
+		private static readonly ElementClass userInfoClass = new( "ewfUiUserInfo" );
+		private static readonly ElementClass topErrorMessageListContainerClass = new( "ewfUiStatus" );
 
 		private const string entityAndTabAndContentBlockId = "ewfUiEntityAndTabsAndContent";
 
-		private static readonly ElementClass entityAndTopTabContainerClass = new ElementClass( "ewfUiEntityAndTopTabs" );
+		private static readonly ElementClass entityAndTopTabContainerClass = new( "ewfUiEntityAndTopTabs" );
 
-		private static readonly ElementClass entityContainerClass = new ElementClass( "ewfUiEntity" );
-		private static readonly ElementClass entityNavAndActionContainerClass = new ElementClass( "ewfUiEntityNavAndActions" );
-		private static readonly ElementClass entityNavListContainerClass = new ElementClass( "ewfUiEntityNav" );
-		private static readonly ElementClass entityActionListContainerClass = new ElementClass( "ewfUiEntityActions" );
-		private static readonly ElementClass entitySummaryContainerClass = new ElementClass( "ewfUiEntitySummary" );
+		private static readonly ElementClass entityContainerClass = new( "ewfUiEntity" );
+		private static readonly ElementClass entityNavAndActionContainerClass = new( "ewfUiEntityNavAndActions" );
+		private static readonly ElementClass entityNavListContainerClass = new( "ewfUiEntityNav" );
+		private static readonly ElementClass entityActionListContainerClass = new( "ewfUiEntityActions" );
+		private static readonly ElementClass entitySummaryContainerClass = new( "ewfUiEntitySummary" );
 
-		private static readonly ElementClass topTabListContainerClass = new ElementClass( "ewfUiTopTab" );
+		private static readonly ElementClass topTabListContainerClass = new( "ewfUiTopTab" );
 
-		private static readonly ElementClass sideTabAndContentBlockClass = new ElementClass( "ewfUiTabsAndContent" );
+		private static readonly ElementClass sideTabAndContentContainerClass = new( "ewfUiTabsAndContent" );
 
-		private static readonly ElementClass sideTabContainerClass = new ElementClass( "ewfUiSideTab" );
-		private static readonly ElementClass sideTabGroupHeadClass = new ElementClass( "ewfEditorTabSeparator" );
+		private static readonly ElementClass sideTabContainerClass = new( "ewfUiSideTab" );
+		private static readonly ElementClass sideTabGroupHeadClass = new( "ewfEditorTabSeparator" );
 
-		private static readonly ElementClass currentTabClass = new ElementClass( "ewfEditorSelectedTab" );
-		private static readonly ElementClass disabledTabClass = new ElementClass( "ewfUiDisabledTab" );
+		private static readonly ElementClass currentTabClass = new( "ewfEditorSelectedTab" );
+		private static readonly ElementClass disabledTabClass = new( "ewfUiDisabledTab" );
 
-		private static readonly ElementClass contentClass = new ElementClass( "ewfUiContent" );
-		private static readonly ElementClass pageActionListContainerClass = new ElementClass( "ewfUiPageAction" );
-		private static readonly ElementClass contentFootBlockClass = new ElementClass( "ewfButtons" );
-		private static readonly ElementClass contentFootActionListContainerClass = new ElementClass( "ewfUiCfActions" );
+		private static readonly ElementClass pageActionListContainerClass = new( "ewfUiPageAction" );
+		private static readonly ElementClass contentClass = new( "ewfUiContent" );
+		private static readonly ElementClass contentFootBlockClass = new( "ewfButtons" );
+		private static readonly ElementClass contentFootActionListContainerClass = new( "ewfUiCfActions" );
 
 		private const string globalFootContainerId = "ewfUiGlobalFoot";
-		private static readonly ElementClass poweredByEwlFooterClass = new ElementClass( "ewfUiPoweredBy" );
+		private static readonly ElementClass poweredByEwlFooterClass = new( "ewfUiPoweredBy" );
 
 		[ UsedImplicitly ]
 		private class CssElementCreator: ControlCssElementCreator {
@@ -55,18 +55,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 
 			private IEnumerable<CssElement> getGlobalElements() {
-				const string globalContainerSelector = "div#" + globalContainerId;
+				const string outerGlobalContainerSelector = "div#" + outerGlobalContainerId;
 				return new[]
 					{
-						new CssElement( "UiGlobalContainer", globalContainerSelector ),
-						new CssElement( "UiAppLogoAndUserInfoContainer", globalContainerSelector + " " + "div." + appLogoAndUserInfoClass.ClassName ),
-						new CssElement( "UiAppLogoContainer", globalContainerSelector + " " + "div." + appLogoClass.ClassName ),
-						new CssElement( "UiUserInfoContainer", globalContainerSelector + " " + "div." + userInfoClass.ClassName ),
+						new CssElement( "UiOuterGlobalContainer", outerGlobalContainerSelector ),
+						new CssElement( "UiInnerGlobalContainer", outerGlobalContainerSelector + " " + "div." + innerGlobalContainerClass.ClassName ),
+						new CssElement( "UiAppLogoContainer", outerGlobalContainerSelector + " " + "div." + appLogoClass.ClassName ),
+						new CssElement( "UiGlobalNavListContainer", outerGlobalContainerSelector + " " + "div." + globalNavListContainerClass.ClassName ),
+						new CssElement( "UiUserInfoContainer", outerGlobalContainerSelector + " " + "div." + userInfoClass.ClassName ),
 						new CssElement(
 							"UiTopErrorMessageListContainer",
-							ListErrorDisplayStyle.CssSelectors.Select( i => globalContainerSelector + " " + i + "." + topErrorMessageListContainerClass.ClassName )
-								.ToArray() ),
-						new CssElement( "UiGlobalNavListContainer", globalContainerSelector + " " + "div." + globalNavListContainerClass.ClassName )
+							ListErrorDisplayStyle.CssSelectors.Select( i => outerGlobalContainerSelector + " " + i + "." + topErrorMessageListContainerClass.ClassName )
+								.ToArray() )
 					};
 			}
 
@@ -102,13 +102,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				return new[]
 					{
 						new CssElement(
-							"UiSideTabAndContentBlock",
-							TableCssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " > " + i + "." + sideTabAndContentBlockClass.ClassName )
-								.ToArray() ),
-						new CssElement( "UiSideTabContainerCell", entityAndTabAndContentBlockSelector + " td." + sideTabContainerClass.ClassName ),
+							"UiSideTabAndContentContainer",
+							entityAndTabAndContentBlockSelector + " > " + "div." + sideTabAndContentContainerClass.ClassName ),
 						new CssElement( "UiSideTabContainer", entityAndTabAndContentBlockSelector + " div." + sideTabContainerClass.ClassName ),
 						new CssElement( "UiSideTabGroupHead", entityAndTabAndContentBlockSelector + " div." + sideTabGroupHeadClass.ClassName ),
-						new CssElement( "UiPageActionAndContentAndContentFootCell", entityAndTabAndContentBlockSelector + " td." + contentClass.ClassName ),
 						new CssElement( "UiPageActionListContainer", entityAndTabAndContentBlockSelector + " " + "div." + pageActionListContainerClass.ClassName ),
 						new CssElement( "UiContentBox", entityAndTabAndContentBlockSelector + " " + "div." + contentClass.ClassName ),
 						new CssElement(
@@ -179,44 +176,26 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							new GenericFlowContainer(
 								getEntityAndTopTabContainer()
 									.Append(
-										EwfTable.Create( style: EwfTableStyle.Raw, classes: sideTabAndContentBlockClass )
-											.AddItem(
-												EwfTableItem.Create(
-													( entityUsesTabMode( TabMode.Vertical )
-														  ? getSideTabContainer().ToCell( setup: new TableCellSetup( classes: sideTabContainerClass ) ).ToCollection()
-														  : Enumerable.Empty<EwfTableCell>() ).Append(
-														getPageActionListContainer( pageActions )
-															.Append(
-																new DisplayableElement(
-																	_ => new DisplayableElementData(
-																		null,
-																		() => new DisplayableElementLocalData( "div" ),
-																		classes: omitContentBox ? null : contentClass,
-																		children: content ) ) )
-															.Concat( getContentFootBlock( isAutoDataUpdater, contentFootActions, contentFootComponents ) )
-															.Materialize()
-															.ToCell( setup: new TableCellSetup( classes: contentClass ) ) )
-													.Materialize() ) ) )
+										new GenericFlowContainer(
+											( entityUsesTabMode( TabMode.Vertical ) ? getSideTabContainer().ToCollection() : Enumerable.Empty<FlowComponent>() )
+											.Concat( getPageActionListContainer( pageActions ) )
+											.Append(
+												new DisplayableElement(
+													_ => new DisplayableElementData(
+														null,
+														() => new DisplayableElementLocalData( "div" ),
+														classes: omitContentBox ? null : contentClass,
+														children: content ) ) )
+											.Concat( getContentFootBlock( isAutoDataUpdater, contentFootActions, contentFootComponents ) )
+											.Materialize(),
+											classes: sideTabAndContentContainerClass ) )
 									.Materialize(),
 								clientSideIdOverride: entityAndTabAndContentBlockId ) )
 						.Concat( getGlobalFootContainer() )
 						.Materialize() );
 		}
 
-		private FlowComponent getGlobalContainer() =>
-			new GenericFlowContainer(
-				new[]
-						{
-							getAppLogoAndUserInfoContainer(),
-							new FlowErrorContainer(
-								new ErrorSourceSet( includeGeneralErrors: true ),
-								new ListErrorDisplayStyle( classes: topErrorMessageListContainerClass ) ),
-							getGlobalNavListContainer()
-						}.Where( i => i != null )
-					.Materialize(),
-				clientSideIdOverride: globalContainerId );
-
-		private FlowComponent getAppLogoAndUserInfoContainer() {
+		private FlowComponent getGlobalContainer() {
 			var appLogo = new GenericFlowContainer(
 				( !ConfigurationStatics.IsIntermediateInstallation || AppRequestState.Instance.IntermediateUserExists
 					  ? EwfUiStatics.AppProvider.GetLogoComponent()
@@ -232,7 +211,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					userInfo.Add( new GenericFlowContainer( components, classes: userInfoClass ) );
 			}
 
-			return new GenericFlowContainer( appLogo.Concat( userInfo ).Materialize(), classes: appLogoAndUserInfoClass );
+			return new GenericFlowContainer(
+				new GenericFlowContainer(
+					appLogo.Append( getGlobalNavListContainer() )
+						.Concat( userInfo )
+						.Append(
+							new FlowErrorContainer(
+								new ErrorSourceSet( includeGeneralErrors: true ),
+								new ListErrorDisplayStyle( classes: topErrorMessageListContainerClass ) ) )
+						.Where( i => i != null )
+						.Materialize(),
+					classes: innerGlobalContainerClass ).ToCollection(),
+				clientSideIdOverride: outerGlobalContainerId );
 		}
 
 		private IReadOnlyCollection<FlowComponent> getUserInfoComponents() {
@@ -242,7 +232,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			if( !changePasswordPage.UserCanAccessResource || AppTools.User == null )
 				return components;
 
-			components.AddRange( "Logged in as {0}".FormatWith( AppTools.User.Email ).ToComponents() );
+			components.Add( new Paragraph( "Logged in as {0}".FormatWith( AppTools.User.Email ).ToComponents() ) );
 			if( !UserManagementStatics.LocalIdentityProviderEnabled )
 				return components;
 
@@ -345,7 +335,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private FlowComponent getTopTabListContainer( ResourceGroup resourceGroup ) =>
 			new GenericFlowContainer(
 				new LineList(
-					getTabHyperlinksForResources( resourceGroup, false ).Select( i => (LineListItem)i.ToComponentListItem() ),
+					getTabHyperlinksForResources( resourceGroup ).Select( i => (LineListItem)i.ToComponentListItem() ),
 					verticalAlignment: FlexboxVerticalAlignment.Bottom ).ToCollection(),
 				classes: topTabListContainerClass );
 
@@ -355,7 +345,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private FlowComponent getSideTabContainer() {
 			var components = new List<FlowComponent>();
 			foreach( var resourceGroup in PageBase.Current.EsAsBaseType.ListedResources ) {
-				var tabs = getTabHyperlinksForResources( resourceGroup, true );
+				var tabs = getTabHyperlinksForResources( resourceGroup );
 				if( tabs.Any() && resourceGroup.Name.Any() )
 					components.Add( new GenericFlowContainer( resourceGroup.Name.ToComponents(), classes: sideTabGroupHeadClass ) );
 				components.AddRange( tabs );
@@ -363,15 +353,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return new GenericFlowContainer( components, classes: sideTabContainerClass );
 		}
 
-		private IReadOnlyCollection<PhrasingComponent> getTabHyperlinksForResources( ResourceGroup resourceGroup, bool includeIcons ) {
+		private IReadOnlyCollection<PhrasingComponent> getTabHyperlinksForResources( ResourceGroup resourceGroup ) {
 			var hyperlinks = new List<PhrasingComponent>();
 			foreach( var resource in resourceGroup.Resources.Where( p => p.UserCanAccessResource ) )
 				hyperlinks.Add(
 					new EwfHyperlink(
 						resource.MatchesCurrent() ? null : resource,
-						new StandardHyperlinkStyle(
-							resource.ResourceName,
-							icon: includeIcons ? new ActionComponentIcon( new FontAwesomeIcon( resource.MatchesCurrent() ? "fa-circle" : "fa-circle-thin" ) ) : null ),
+						new StandardHyperlinkStyle( resource.ResourceName ),
 						classes: resource.MatchesCurrent() ? currentTabClass :
 						         resource.AlternativeMode is DisabledResourceMode ? disabledTabClass : ElementClassSet.Empty ) );
 			return hyperlinks;
