@@ -1,16 +1,51 @@
-﻿.vs
-packages/
+﻿.vs/
 _ReSharper*
 Enterprise Web Library.sln.DotSettings.user
 NDependOut/
 DependencyMatrixSnapshot.png
+packages/
 Logic Packages/
 Error Log.txt
 *.csproj.user
+*.ewlt.cs
 
-bin
-obj
-Generated Code
+Core/bin/
+Core/obj/
+Core/Directory.Build.props
+Core/Generated Code/
 Core/EnterpriseWebLibrary.xml
 
+Solution Files/bin/
+Solution Files/obj/
+
+Library/bin/
+Library/obj/
+Library/Configuration/Aspose Licenses/
 Library/Files/*.xsd
+Library/Directory.Build.props
+Library/Generated Code/
+
+Development Utility/bin/
+Development Utility/obj/
+Development Utility/Directory.Build.props
+Development Utility/Generated Code/
+
+Website/bin/
+Website/obj/
+Website/web.config
+Website/Directory.Build.props
+Website/Generated Code/
+Website/Properties/launchSettings.json
+
+Tests/bin/
+Tests/obj/
+
+Providers/MySQL/bin/
+Providers/MySQL/obj/
+Providers/MySQL/Directory.Build.props
+Providers/MySQL/Generated Code/
+
+Providers/SAML/bin/
+Providers/SAML/obj/
+Providers/SAML/Directory.Build.props
+Providers/SAML/Generated Code/
