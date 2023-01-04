@@ -1,4 +1,18 @@
-﻿body {
+﻿:root {
+	--primary-color: #281e3c;
+	--secondary-color: #009245;
+	--hover-color: #8cc63f;
+	--background-color: #fafafa;
+	--breadcrumb-bg-color: #E7ECF3;
+	--tab-bg-color: #ced6e0;
+	--gray-color: #767676;
+	--white-color: #ffffff;
+	--black-color: #000000;
+	--default-box-shadow: 0px 1px 7px rgb( 0 0 0 / 15% );
+	--default-form-color: #ccc;
+}
+
+body {
 	background-color: hsla( 215, 33%, 93%, 1 );
 	color: hsla( 215, 11%, 22%, 1 );
 }

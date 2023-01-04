@@ -1,4 +1,14 @@
-﻿body {
+﻿:root {
+	--default-padding: 1vw 2vw;
+	--default-font-size: 1vw;
+	--default-small-font-size: 14px;
+	--button-padding: .5vw 2vw;
+	--default-border-radius: .5em;
+	--tablet-font-size: 14px;
+	--mobile-padding: 10px 4vw;
+}
+
+body {
 	font-size: 1rem;
 	margin: 0 0 1rem 0;
 	border: 0;

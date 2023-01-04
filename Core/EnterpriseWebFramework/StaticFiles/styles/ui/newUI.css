@@ -1,28 +1,4 @@
 ﻿/*******************/
-/* VARIABLES 
-/*******************/
-:root {
-  --primary-color: #281e3c;
-  --secondary-color: #009245;
-  --hover-color: #8cc63f;
-  --background-color: #fafafa;
-  --breadcrumb-bg-color: #E7ECF3;
-  --tab-bg-color: #ced6e0;
-  --gray-color: #767676;
-  --white-color: #ffffff;
-  --black-color: #000000;
-  --default-padding: 1vw 2vw;
-  --default-font-size: 1vw;
-  --default-small-font-size: 14px;
-  --button-padding: .5vw 2vw;
-  --default-border-radius: .5em;
-  --default-box-shadow: 0px 1px 7px rgb(0 0 0 / 15%);
-  --default-form-color: #ccc;
-  --tablet-font-size: 14px;
-  --mobile-padding: 10px 4vw;
-}
-
-/*******************/
 /* RESET CSS 
 /*******************/
 html, body {
