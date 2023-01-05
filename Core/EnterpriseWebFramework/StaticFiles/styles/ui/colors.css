@@ -23,9 +23,6 @@ body {
 }
 
 /* borders */
-ewfUiOuterGlobalContainer {
-	border-color: hsla( 215, 33%, 85%, 1 );
-}
 ewfUiTopTabListContainer {
 	border-color: hsl( 0, 0%, 75% );
 }
@@ -92,7 +89,18 @@ ewfErrorMessageListContainer {
 
 /* master page */
 ewfUiOuterGlobalContainer {
-	background-color: white;
+	background-color: var( --primary-color );
+}
+ewfUiUserInfoContainer {
+	color: var( --white-color );
+}
+ewfUiUserInfoContainer > ewfUnorderedComponentList ewfActionComponentAllStylesAllStates {
+	color: var( --white-color );
+	opacity: .65;
+}
+ewfUiUserInfoContainer > ewfUnorderedComponentList ewfActionComponentAllStylesStatesWithHover {
+	color: var( --hover-color );
+	opacity: 1;
 }
 ewfUiTopTabListContainer ewfActionComponentAllStylesAllNormalStates,
 ewfUiTopTabListContainer ewfActionComponentAllStylesAllVisitedStates,
@@ -102,6 +110,34 @@ ewfUiSideTabContainer ewfActionComponentAllStylesAllVisitedStates {
 }
 ewfUiTopTabListContainer ewfUiDisabledTabActionControl, ewfUiSideTabContainer ewfUiDisabledTabActionControl {
 	opacity: .2;
+}
+@media only screen and ( max-width: 768px ) {
+	ewfUiUserInfoContainer {
+		background-image: url( ../../versioned/ui/account-v1.svg );
+		background-repeat: no-repeat;
+		background-position: center;
+		background-size: 60%;
+	}
+	ewfUiUserInfoContainer:hover {
+		background-color: var( --hover-color );
+	}
+	ewfUiUserInfoContainer > p {
+		background-color: var( --hover-color );
+	}
+	ewfUiUserInfoContainer > ewfUnorderedComponentList {
+		box-shadow: 0 10px 10px rgba( 0, 0, 0, .25 );
+		background-color: var( --secondary-color );
+	}
+	ewfUiUserInfoContainer > ewfUnorderedComponentList > ewfComponentListItem {
+		border-color: rgba( 255, 255, 255, .5 );
+	}
+	ewfUiUserInfoContainer > ewfUnorderedComponentList ewfActionComponentAllStylesAllStates {
+		opacity: 1;
+	}
+	ewfUiUserInfoContainer > ewfUnorderedComponentList ewfActionComponentAllStylesStatesWithHover {
+		background-color: var( --hover-color );
+		color: var( --white-color );
+	}
 }
 
 /* new content */

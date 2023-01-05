@@ -237,7 +237,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				return components;
 
 			components.Add(
-				new InlineList(
+				new RawList(
 					new EwfHyperlink( changePasswordPage, new ButtonHyperlinkStyle( "Change password", buttonSize: ButtonSize.ShrinkWrap ) ).ToCollection()
 						.ToComponentListItem()
 						.ToCollection()

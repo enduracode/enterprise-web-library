@@ -39,7 +39,7 @@ ewfUiTopTabListContainer {
 	margin-top: 1rem;
 }
 ewfUiOuterGlobalContainer {
-	padding-bottom: 1rem;
+	padding: var( --default-padding );
 }
 ewfUiTopTabListContainer ewfActionComponentAllStylesAllStates {
 	padding: .5rem 1rem;
@@ -56,14 +56,11 @@ ewfUiInnerGlobalContainer > * {
 
 
 /* borders */
-ewfUiOuterGlobalContainer, ewfUiTopTabListContainer {
+ewfUiTopTabListContainer {
 	border-bottom-width: 1px;
 	border-bottom-style: solid;
 }
 @media print {
-	ewfUiOuterGlobalContainer {
-		border-bottom: unset;
-	}
 }
 
 /* headings and sections */
@@ -229,11 +226,33 @@ ewfUiInnerGlobalContainer {
 	justify-content: space-between;
 	align-items: center;
 }
+ewfUiAppLogoContainer {
+	margin-right: 1vw;
+}
+ewfUiAppLogoContainer ewfImage {
+	width: 10vw;
+	max-height: 3vw;
+	object-fit: contain;
+}
 ewfUiUserInfoContainer {
+	flex: 1;
 	text-align: right;
 }
-ewfUiUserInfoContainer > ewfUnorderedInlineList {
-	margin-left: .5em;
+ewfUiUserInfoContainer > p {
+	font-size: var( --default-font-size );
+	margin: 0;
+}
+ewfUiUserInfoContainer > ewfUnorderedComponentList {
+	display: flex;
+	margin: 0;
+	margin-right: -10px;
+	justify-content: flex-end;
+	list-style-type: none;
+}
+ewfUiUserInfoContainer > ewfUnorderedComponentList ewfActionComponentAllStylesAllStates {
+	display: inline-block;
+	font-size: var( --default-small-font-size );
+	padding: 0 10px;
 }
 ewfUiTopErrorMessageListContainer {
 	font-size: 1.4em;
@@ -301,6 +320,77 @@ ewfUiContentFootActionListContainer > ewfUnorderedLineList {
 ewfUiPoweredByEwlFooterContainer {
 	font-size: .9em;
 	text-align: center;
+}
+@media only screen and ( max-width: 1200px ) {
+	ewfUiAppLogoContainer ewfImage {
+		width: 150px;
+		max-height: none;
+	}
+	ewfUiUserInfoContainer > p {
+		font-size: var( --tablet-font-size );
+	}
+}
+@media only screen and ( max-width: 768px ) {
+	ewfUiOuterGlobalContainer {
+		padding: 0px;
+		height: 55px;
+	}
+	ewfUiAppLogoContainer {
+		flex: 1;
+	}
+	ewfUiAppLogoContainer ewfImage {
+		margin: 0 4vw;
+		width: auto;
+		height: 30px;
+	}
+	ewfUiUserInfoContainer {
+		order: 1;
+		flex: 0 1 auto;
+		width: 55px;
+		height: 55px;
+	}
+	ewfUiUserInfoContainer > p {
+		display: none;
+		position: absolute;
+		font-size: 16px;
+		top: 55px;
+		left: 0;
+		width: 100%;
+		text-align: center;
+		line-height: 50px;
+		font-weight: bold;
+		z-index: 0;
+	}
+	ewfUiUserInfoContainer:hover > p {
+		display: block;
+		z-index: 1000;
+	}
+	ewfUiUserInfoContainer > ewfUnorderedComponentList {
+		display: block;
+		position: absolute;
+		top: 105px;
+		left: 0;
+		width: 100%;
+		transform-origin: 0 0;
+		transform: scaleY( 0 );
+		text-align: left;
+		z-index: 0;
+	}
+	ewfUiUserInfoContainer:hover > ewfUnorderedComponentList {
+		transform: scaleY( 1 );
+		z-index: 1000;
+	}
+	ewfUiUserInfoContainer > ewfUnorderedComponentList > ewfComponentListItem {
+		border-bottom-width: 1px;
+		border-bottom-style: solid;
+		text-align: center;
+	}
+	ewfUiUserInfoContainer > ewfUnorderedComponentList ewfActionComponentAllStylesAllStates {
+		font-size: 16px;
+		padding: 3vw 0;
+		width: 100%;
+		text-decoration: none;
+	}
 }
 @media print {
 	ewfUiGlobalNavListContainer,
