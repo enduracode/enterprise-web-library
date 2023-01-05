@@ -479,43 +479,6 @@ table.responsiveDataTable.compact thead th, table.dataTable.compact thead td {
         z-index: 1000;
       }
 
-  .ewfUiGlobalNav {
-    width: 55px;
-    height: 55px;
-    background-color: var(--secondary-color);
-    background-image: url(./menu-icon.svg);
-    background-repeat: no-repeat;
-    background-size: 65%;
-    background-position: center;
-    order: 2;
-  }
-
-    .ewfUiGlobalNav .ewfLl.ewfCl {
-      position: absolute;
-      display: grid;
-      grid-auto-columns: minmax(0, 1fr);
-      grid-auto-flow: column;
-      text-align: center;
-      top: 55px;
-      left: 0px;
-      width: 100%;
-      height: 50px;
-      background-color: var(--hover-color);
-      box-shadow: 0px 10px 10px rgba(0,0,0,.25);
-      transform-origin: 0 0;
-      transform: scaleY(0);
-      z-index: 0;
-    }
-
-    .ewfUiGlobalNav:hover, .ewfUiGlobalNav.hover-active {
-      background-color: var(--hover-color);
-    }
-
-      .ewfUiGlobalNav:hover .ewfLl.ewfCl, .ewfUiGlobalNav.hover-active .ewfLl.ewfCl {
-        transform: scaleY(1);
-        z-index: 1000;
-      }
-
   .ewfLi > a {
     padding: 0px !important;
     width: 100%;

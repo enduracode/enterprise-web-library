@@ -112,6 +112,20 @@ ewfUiTopTabListContainer ewfUiDisabledTabActionControl, ewfUiSideTabContainer ew
 	opacity: .2;
 }
 @media only screen and ( max-width: 768px ) {
+	ewfUiGlobalNavListContainer {
+		background-color: var( --secondary-color );
+		background-image: url( ../../versioned/ui/menu-icon-v1.svg );
+		background-repeat: no-repeat;
+		background-size: 65%;
+		background-position: center;
+	}
+	ewfUiGlobalNavListContainer:hover, ewfUiGlobalNavListContainer.hover-active {
+		background-color: var( --hover-color );
+	}
+	ewfUiGlobalNavListContainer > ewfUnorderedComponentList {
+		box-shadow: 0 10px 10px rgba( 0, 0, 0, .25 );
+		background-color: var( --hover-color );
+	}
 	ewfUiUserInfoContainer {
 		background-image: url( ../../versioned/ui/account-v1.svg );
 		background-repeat: no-repeat;
