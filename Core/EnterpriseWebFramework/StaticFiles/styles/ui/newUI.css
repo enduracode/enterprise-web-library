@@ -320,16 +320,6 @@ div.ewfTblIl {
   color: var(--gray-color) !important;
 }
 
-ul.ewfLl.ewfCl > li button.ewfActionShrinkWrapButton.ewfAction {
-  background-color: transparent !important;
-  color: var(--black-color) !important;
-  text-decoration: underline;
-}
-
-  ul.ewfLl.ewfCl > li button.ewfActionShrinkWrapButton.ewfAction:hover {
-    color: var(--secondary-color) !important;
-  }
-
 button.ewfActionNormalButton.ewfAction {
   background-color: var(--secondary-color) !important;
   padding: var(--button-padding) !important;
