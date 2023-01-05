@@ -16,25 +16,6 @@ ewfUiInnerGlobalContainer, ewfUiEntityAndTabAndContentBlock, ewfUiGlobalFootCont
 }
 
 /*******************/
-/* HEADER  
-/*******************/
-#mobileNav {
-  display: none;
-  position: absolute;
-  top: 0px;
-  right: 0px;
-  width: 55px;
-  height: 55px;
-  background-color: var(--secondary-color);
-  background-image: url(./menu-icon.svg);
-  background-repeat: no-repeat;
-  background-size: 65%;
-  background-position: center;
-  border: none;
-  z-index: 9999;
-}
-
-/*******************/
 /* MAIN            
 /*******************/
 #ewfUiEntityAndTabsAndContent {
@@ -439,19 +420,6 @@ table.responsiveDataTable.compact thead th, table.dataTable.compact thead td {
 
 /* MOBILE */
 @media only screen and (max-width: 768px) {
-	#mobileNav {
-    display: block;
-  }
-
-    #mobileNav:hover {
-      background-color: var(--hover-color);
-    }
-
-      #mobileNav:hover ~ ewfUiGlobalNavListContainer ewfUnorderedComponentList, #mobileNav:hover ~ .ewfBreadcrumbsAndTabs .ewfTabs {
-        transform: scaleY(1);
-        z-index: 1000;
-      }
-
   .ewfUiSideTab {
     position: absolute;
     top: 105px;
