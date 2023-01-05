@@ -91,15 +91,23 @@ ewfErrorMessageListContainer {
 ewfUiOuterGlobalContainer {
 	background-color: var( --primary-color );
 }
+ewfUiInnerGlobalContainer ewfComponentListItem {
+	border-color: rgba( 255, 255, 255, .2 );
+}
+ewfUiInnerGlobalContainer ewfActionComponentAllStylesAllStates {
+	background-color: transparent;
+	color: var( --white-color );
+}
+ewfUiInnerGlobalContainer ewfActionComponentAllStylesStatesWithHover {
+	color: var( --hover-color );
+}
 ewfUiUserInfoContainer {
 	color: var( --white-color );
 }
-ewfUiUserInfoContainer > ewfUnorderedComponentList ewfActionComponentAllStylesAllStates {
-	color: var( --white-color );
+ewfUiUserInfoContainer ewfActionComponentAllStylesAllStates {
 	opacity: .65;
 }
-ewfUiUserInfoContainer > ewfUnorderedComponentList ewfActionComponentAllStylesStatesWithHover {
-	color: var( --hover-color );
+ewfUiUserInfoContainer ewfActionComponentAllStylesStatesWithHover {
 	opacity: 1;
 }
 ewfUiTopTabListContainer ewfActionComponentAllStylesAllNormalStates,
@@ -112,6 +120,9 @@ ewfUiTopTabListContainer ewfUiDisabledTabActionControl, ewfUiSideTabContainer ew
 	opacity: .2;
 }
 @media only screen and ( max-width: 768px ) {
+	ewfUiInnerGlobalContainer ewfActionComponentAllStylesStatesWithHover {
+		color: var( --white-color );
+	}
 	ewfUiGlobalNavListContainer {
 		background-color: var( --secondary-color );
 		background-image: url( ../../versioned/ui/menu-icon-v1.svg );
@@ -142,15 +153,14 @@ ewfUiTopTabListContainer ewfUiDisabledTabActionControl, ewfUiSideTabContainer ew
 		box-shadow: 0 10px 10px rgba( 0, 0, 0, .25 );
 		background-color: var( --secondary-color );
 	}
-	ewfUiUserInfoContainer > ewfUnorderedComponentList > ewfComponentListItem {
+	ewfUiUserInfoContainer ewfComponentListItem {
 		border-color: rgba( 255, 255, 255, .5 );
 	}
-	ewfUiUserInfoContainer > ewfUnorderedComponentList ewfActionComponentAllStylesAllStates {
+	ewfUiUserInfoContainer ewfActionComponentAllStylesAllStates {
 		opacity: 1;
 	}
-	ewfUiUserInfoContainer > ewfUnorderedComponentList ewfActionComponentAllStylesStatesWithHover {
+	ewfUiUserInfoContainer ewfActionComponentAllStylesStatesWithHover {
 		background-color: var( --hover-color );
-		color: var( --white-color );
 	}
 }
 

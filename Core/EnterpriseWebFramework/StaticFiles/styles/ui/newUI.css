@@ -34,29 +34,6 @@ ewfUiInnerGlobalContainer, ewfUiEntityAndTabAndContentBlock, ewfUiGlobalFootCont
   z-index: 9999;
 }
 
-.ewfLi {
-  margin: 0px !important;
-  border-right: solid 2px rgba(255,255,255,.2);
-}
-
-  .ewfLi:last-child {
-    border-right: none;
-  }
-
-a.ewfActionShrinkWrapButton {
-  background-color: transparent !important;
-  color: var(--white-color) !important;
-  padding: .25vw 1.5vw !important;
-  font-weight: bold !important;
-  border-radius: 0px !important;
-  font-size: var(--default-font-size);
-  transition: color .2s;
-}
-
-  a.ewfActionShrinkWrapButton:hover {
-    color: var(--hover-color) !important;
-  }
-
 /*******************/
 /* MAIN            
 /*******************/
@@ -430,10 +407,6 @@ table.responsiveDataTable.compact thead th, table.dataTable.compact thead td {
 
 /* TABLET */
 @media only screen and (max-width: 1200px) {
-	a.ewfActionShrinkWrapButton {
-    font-size: var(--tablet-font-size);
-  }
-
   .ewfBreadcrumbs, .ewfTabs {
     width: 100%;
   }
@@ -478,17 +451,6 @@ table.responsiveDataTable.compact thead th, table.dataTable.compact thead td {
         transform: scaleY(1);
         z-index: 1000;
       }
-
-  .ewfLi > a {
-    padding: 0px !important;
-    width: 100%;
-    line-height: 50px;
-    font-size: 16px;
-  }
-
-    .ewfLi > a:hover {
-      color: var(--white-color) !important;
-    }
 
   .ewfUiSideTab {
     position: absolute;
