@@ -1,47 +1,35 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Humanizer;
-using Tewl.Tools;
-
-namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// EWL use only.
 	/// </summary>
 	public class TableCssElementCreator: ControlCssElementCreator {
-		internal static readonly ElementClass StandardLayoutOnlyStyleClass = new ElementClass( "ewfStandardLayoutOnly" );
-		internal static readonly ElementClass StandardExceptLayoutStyleClass = new ElementClass( "ewfTblSel" );
-		internal static readonly ElementClass StandardStyleClass = new ElementClass( "ewfStandard" );
+		internal static readonly ElementClass StandardLayoutOnlyStyleClass = new( "ewfStandardLayoutOnly" );
+		internal static readonly ElementClass StandardExceptLayoutStyleClass = new( "ewfTblSel" );
+		internal static readonly ElementClass StandardStyleClass = new( "ewfStandard" );
 
 		// This class allows the cell selectors to have the same specificity as the text alignment and cell alignment rules in the EWF CSS files.
-		internal static readonly ElementClass AllCellAlignmentsClass = new ElementClass( "ewfTc" );
+		internal static readonly ElementClass AllCellAlignmentsClass = new( "ewfTc" );
 
-		internal static readonly ElementClass ItemLimitingAndGeneralActionContainerClass = new ElementClass( "ewfTblIlga" );
-		internal static readonly ElementClass ItemLimitingControlContainerClass = new ElementClass( "ewfTblIl" );
-		internal static readonly ElementClass ItemSelectionAndActionContainerClass = new ElementClass( "ewfTblIsa" );
-		internal static readonly ElementClass ItemSelectionLabelAndControlContainerClass = new ElementClass( "ewfTblIs" );
-		internal static readonly ElementClass ItemSelectionLabelClass = new ElementClass( "ewfTblIsl" );
-		internal static readonly ElementClass ItemSelectionControlContainerClass = new ElementClass( "ewfTblIsc" );
-		internal static readonly ElementClass ItemGroupNameAndGeneralActionContainerClass = new ElementClass( "ewfTblIgnga" );
-		internal static readonly ElementClass ActionListContainerClass = new ElementClass( "ewfTblAl" );
+		internal static readonly ElementClass ItemLimitingAndGeneralActionContainerClass = new( "ewfTblIlga" );
+		internal static readonly ElementClass ItemLimitingControlContainerClass = new( "ewfTblIl" );
+		internal static readonly ElementClass ItemSelectionAndActionContainerClass = new( "ewfTblIsa" );
+		internal static readonly ElementClass ItemSelectionLabelAndControlContainerClass = new( "ewfTblIs" );
+		internal static readonly ElementClass ItemSelectionLabelClass = new( "ewfTblIsl" );
+		internal static readonly ElementClass ItemSelectionControlContainerClass = new( "ewfTblIsc" );
+		internal static readonly ElementClass ItemGroupNameAndGeneralActionContainerClass = new( "ewfTblIgnga" );
+		internal static readonly ElementClass ActionListContainerClass = new( "ewfTblAl" );
 
-		internal static readonly ElementClass ContrastClass = new ElementClass( "ewfContrast" );
-
-		/// <summary>
-		/// EWL use only.
-		/// </summary>
-		public static readonly IReadOnlyCollection<string> Selectors = new[]
-			{
-				"table", "table." + StandardLayoutOnlyStyleClass.ClassName, "table." + StandardExceptLayoutStyleClass.ClassName,
-				"table." + StandardStyleClass.ClassName
-			};
-
-		internal static readonly IReadOnlyCollection<string> CellSelectors =
-			( from e in new[] { "th", "td" } select e + "." + AllCellAlignmentsClass.ClassName ).Materialize();
+		internal static readonly ElementClass ContrastClass = new( "ewfContrast" );
 
 		IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
 			var elements = new[]
 				{
-					new CssElement( "TableAllStyles", Selectors.ToArray() ),
+					new CssElement(
+						"TableAllStyles",
+						"table",
+						"table." + StandardLayoutOnlyStyleClass.ClassName,
+						"table." + StandardExceptLayoutStyleClass.ClassName,
+						"table." + StandardStyleClass.ClassName ),
 					new CssElement(
 						"TableStandardAndStandardLayoutOnlyStyles",
 						"table." + StandardStyleClass.ClassName,
@@ -51,7 +39,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						"table." + StandardStyleClass.ClassName,
 						"table." + StandardExceptLayoutStyleClass.ClassName ),
 					new CssElement( "TableStandardStyle", "table." + StandardStyleClass.ClassName ),
-					new CssElement( "TheadAndTfootAndTbody", "thead", "tfoot", "tbody" ), new CssElement( "ThAndTd", CellSelectors.ToArray() ),
+					new CssElement( "TheadAndTfootAndTbody", "thead", "tfoot", "tbody" ),
+					new CssElement( "ThAndTd", ( from e in new[] { "th", "td" } select e + "." + AllCellAlignmentsClass.ClassName ).ToArray() ),
 					new CssElement( "Th", "th." + AllCellAlignmentsClass.ClassName ), new CssElement( "Td", "td." + AllCellAlignmentsClass.ClassName ),
 					new CssElement( "TableItemLimitingAndGeneralActionContainer", "div.{0}".FormatWith( ItemLimitingAndGeneralActionContainerClass.ClassName ) ),
 					new CssElement( "TableItemLimitingControlContainer", "div.{0}".FormatWith( ItemLimitingControlContainerClass.ClassName ) ),
@@ -104,7 +93,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			// the action row being hovered
 			elements.Add( new CssElement( "TrStatesWithActionAndWithHover", trActionHover, trActionHoverContrast ) );
 
-			return elements.ToArray();
+			return elements;
 		}
 	}
 }

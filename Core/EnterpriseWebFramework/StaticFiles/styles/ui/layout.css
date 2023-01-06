@@ -355,10 +355,11 @@ ewfUiTopTabListContainer ewfUiCurrentTabActionControl {
 ewfUiSideTabAndContentContainer {
 	display: grid;
 	grid-template-areas:
-	                   "sidebar breadcrumb"
-	                   "sidebar content";
+	                   "sidebar action"
+	                   "sidebar content"
+	                   "sidebar foot";
 	grid-template-columns: auto 1fr;
-	grid-template-rows: auto 1fr;
+	grid-template-rows: auto auto 1fr;
 }
 ewfUiSideTabContainer {
 	padding-right: 1rem;
@@ -378,13 +379,17 @@ ewfUiSideTabContainer ewfActionComponentAllStylesAllStates {
 	font-size: .9em;
 }
 ewfUiPageActionListContainer {
-	grid-area: breadcrumb;
+	grid-area: action;
 	margin-bottom: 1em;
 	margin-left: 1em;
 }
 ewfUiContentContainer {
 	grid-area: content;
 	max-width: 96vw;
+}
+ewfUiContentFootContainer {
+	grid-area: foot;
+	text-align: center;
 }
 ewfUiContentFootActionListContainer > ewfUnorderedLineList {
 	justify-content: flex-end;
@@ -564,7 +569,7 @@ ewfUiPoweredByEwlFooterContainer {
 	ewfUiEntityNavAndActionContainer,
 	ewfUiSideTabContainer,
 	ewfUiPageActionListContainer,
-	ewfUiContentFootBlock {
+	ewfUiContentFootContainer {
 		display: none;
 	}
 }

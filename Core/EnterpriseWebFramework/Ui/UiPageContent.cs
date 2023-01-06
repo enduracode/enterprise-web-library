@@ -36,7 +36,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private static readonly ElementClass pageActionListContainerClass = new( "ewfUiPageAction" );
 		private static readonly ElementClass contentContainerClass = new( "ewfUiContent" );
 		private static readonly ElementClass contentBoxClass = new( "ewfUiContentBox" );
-		private static readonly ElementClass contentFootBlockClass = new( "ewfButtons" );
+		private static readonly ElementClass contentFootContainerClass = new( "ewfUiCf" );
 		private static readonly ElementClass contentFootActionListContainerClass = new( "ewfUiCfActions" );
 
 		private const string globalFootContainerId = "ewfUiGlobalFoot";
@@ -110,10 +110,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						new CssElement( "UiPageActionListContainer", entityAndTabAndContentBlockSelector + " " + "div." + pageActionListContainerClass.ClassName ),
 						new CssElement( "UiContentContainer", entityAndTabAndContentBlockSelector + " " + "div." + contentContainerClass.ClassName ),
 						new CssElement( "UiContentBox", entityAndTabAndContentBlockSelector + " " + "div." + contentBoxClass.ClassName ),
-						new CssElement(
-							"UiContentFootBlock",
-							TableCssElementCreator.Selectors.Select( i => entityAndTabAndContentBlockSelector + " " + i + "." + contentFootBlockClass.ClassName )
-								.ToArray() ),
+						new CssElement( "UiContentFootContainer", entityAndTabAndContentBlockSelector + " " + "div." + contentFootContainerClass.ClassName ),
 						new CssElement(
 							"UiContentFootActionListContainer",
 							entityAndTabAndContentBlockSelector + " " + "div." + contentFootActionListContainerClass.ClassName )
@@ -412,16 +409,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				components.AddRange( contentFootComponents );
 			}
 
-			if( !components.Any() )
-				return Enumerable.Empty<FlowComponent>().Materialize();
-
-			var table = EwfTable.Create( style: EwfTableStyle.StandardLayoutOnly, classes: contentFootBlockClass );
-			table.AddItem(
-				EwfTableItem.Create(
-					components.ToCell(
-						new TableCellSetup(
-							textAlignment: contentFootActions == null || !contentFootActions.Any() ? TextAlignment.Center : TextAlignment.NotSpecified ) ) ) );
-			return table.ToCollection();
+			return components.Any()
+				       ? new GenericFlowContainer( components, classes: contentFootContainerClass ).ToCollection()
+				       : Enumerable.Empty<FlowComponent>().Materialize();
 		}
 
 		private IReadOnlyCollection<FlowComponent> getGlobalFootContainer() {
