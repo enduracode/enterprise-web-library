@@ -382,6 +382,10 @@ ewfUiPageActionListContainer {
 	margin-bottom: 1em;
 	margin-left: 1em;
 }
+ewfUiContentContainer {
+	grid-area: content;
+	max-width: 96vw;
+}
 ewfUiContentFootActionListContainer > ewfUnorderedLineList {
 	justify-content: flex-end;
 }
@@ -545,6 +549,12 @@ ewfUiPoweredByEwlFooterContainer {
 		padding-left: 6vw;
 		font-weight: normal;
 		font-style: italic;
+	}
+	ewfUiContentContainer {
+		padding: var( --mobile-padding );
+	}
+	ewfUiContentContainer p {
+		font-size: var( --default-small-font-size );
 	}
 }
 @media print {

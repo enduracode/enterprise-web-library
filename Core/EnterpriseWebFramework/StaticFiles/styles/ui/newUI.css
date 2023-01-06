@@ -89,18 +89,6 @@ div.ewfUiSideTab a.ewfAction.ewfActionText:hover:not(.ewfEditorSelectedTab) {
   }
 
 /*******************/
-/* MAIN CONTENT    
-/*******************/
-.ewfUiContent {
-  grid-area: content;
-  padding: var(--default-padding) !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  background-color: var(--background-color) !important;
-  padding-bottom: 2vw !important;
-  max-width: 96vw;
-}
-/*******************/
 /* FILTER/INPUT    
 /*******************/
 div.ewfFil.ewfGfil {
@@ -358,14 +346,6 @@ table.responsiveDataTable.compact thead th, table.dataTable.compact thead td {
   .breadcrumbHome {
     width: 4vw;
   }
-
-  .ewfUiContent {
-    padding: var(--mobile-padding) !important;
-  }
-
-    .ewfUiContent p {
-      font-size: var(--default-small-font-size);
-    }
 
   div.ewfFil.ewfGfil {
     grid-template-columns: 1fr 1fr;

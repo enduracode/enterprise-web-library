@@ -139,6 +139,9 @@ ewfUiTopTabListContainer ewfUiCurrentTabActionControl {
 	border-color: var( --white-color );
 	background-color: var( --background-color );
 }
+ewfUiContentContainer {
+	background-color: var( --background-color );
+}
 @media only screen and ( max-width: 768px ) {
 	ewfUiInnerGlobalContainer ewfActionComponentAllStylesStatesWithHover {
 		color: var( --white-color );
