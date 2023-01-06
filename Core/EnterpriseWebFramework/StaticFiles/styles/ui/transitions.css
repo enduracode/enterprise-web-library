@@ -16,3 +16,14 @@ ewfUiInnerGlobalContainer ewfActionComponentAllStylesAllStates {
 ewfUiUserInfoContainer > ewfUnorderedComponentList ewfActionComponentAllStylesAllStates {
 	transition: all 200ms;
 }
+@media only screen and ( max-width: 768px ) {
+	ewfUiTopTabListContainer {
+		transition: transform ease-in-out 0;
+	}
+	ewfUiTopTabListContainer.hover-active {
+		transition: transform ease-in-out 200ms;
+	}
+}
+ewfUiTopTabListContainer ewfActionComponentAllStylesAllStates {
+	transition: background-color 200ms, color 200ms;
+}

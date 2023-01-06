@@ -110,6 +110,13 @@ ewfUiUserInfoContainer ewfActionComponentAllStylesAllStates {
 ewfUiUserInfoContainer ewfActionComponentAllStylesStatesWithHover {
 	opacity: 1;
 }
+ewfUiEntityContainer, ewfUiTopTabListContainer {
+	background-color: var( --breadcrumb-bg-color );
+}
+ewfUiTopTabListContainer {
+	border-color: #ccc;
+	background-color: var( --tab-bg-color );
+}
 ewfUiTopTabListContainer ewfActionComponentAllStylesAllNormalStates,
 ewfUiTopTabListContainer ewfActionComponentAllStylesAllVisitedStates,
 ewfUiSideTabContainer ewfActionComponentAllStylesAllNormalStates,
@@ -118,6 +125,19 @@ ewfUiSideTabContainer ewfActionComponentAllStylesAllVisitedStates {
 }
 ewfUiTopTabListContainer ewfUiDisabledTabActionControl, ewfUiSideTabContainer ewfUiDisabledTabActionControl {
 	opacity: .2;
+}
+ewfUiTopTabListContainer ewfActionComponentAllStylesAllStates {
+	color: var( --primary-color );
+}
+ewfUiTopTabListContainer ewfActionComponentAllStylesStatesWithHover {
+	border-color: var( --hover-color );
+	background-color: var( --hover-color );
+	color: var( --white-color );
+}
+ewfUiTopTabListContainer ewfUiCurrentTabActionControl {
+	box-shadow: var( --default-box-shadow );
+	border-color: var( --white-color );
+	background-color: var( --background-color );
 }
 @media only screen and ( max-width: 768px ) {
 	ewfUiInnerGlobalContainer ewfActionComponentAllStylesStatesWithHover {
@@ -161,6 +181,18 @@ ewfUiTopTabListContainer ewfUiDisabledTabActionControl, ewfUiSideTabContainer ew
 	}
 	ewfUiUserInfoContainer ewfActionComponentAllStylesStatesWithHover {
 		background-color: var( --hover-color );
+	}
+	ewfUiTopTabListContainer {
+		box-shadow: 0 10px 10px rgba( 0, 0, 0, .25 );
+		background-color: var( --secondary-color );
+	}
+	ewfUiTopTabListContainer ewfActionComponentAllStylesAllStates {
+		border-color: rgba( 255, 255, 255, .3 );
+		color: var( --white-color );
+	}
+	ewfUiTopTabListContainer ewfUiCurrentTabActionControl {
+		box-shadow: none;
+		background-color: rgba( 255, 255, 255, .3 );
 	}
 }
 
