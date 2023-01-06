@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Immutable;
-using System.IO;
-using System.Linq;
+﻿using System.Collections.Immutable;
 using System.Reflection;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
-using Humanizer;
 using Tewl.IO;
-using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility {
 	internal static class Program {
@@ -19,6 +14,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility {
 				return GlobalInitializationOps.ExecuteAppWithStandardExceptionHandling(
 					() => {
 						try {
+							Console.WriteLine(
+								"{0} Development Utility, installation path {1}".FormatWith(
+									EwlStatics.EwlInitialism,
+									Path.GetFullPath( ConfigurationStatics.InstallationPath ) ) );
+
 							AppStatics.Init();
 
 							if( args.Length < 2 )
