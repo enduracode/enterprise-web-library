@@ -54,35 +54,6 @@ div.ewfUiSideTab a.ewfAction.ewfActionText:hover:not(.ewfEditorSelectedTab) {
 /*******************/
 /* BREADCRUMBS     
 /*******************/
-.ewfUiEntityAndTopTabs {
-  grid-area: breadcrumb;
-  padding: var(--default-padding);
-  background-color: var(--background-color);
-}
-
-div.ewfUiEntity {
-  margin-top: 1vw !important;
-}
-
-div.ewfPagePath {
-  font-size: var(--default-font-size);
-  ;
-  color: var(--gray-color);
-  display: flex;
-}
-
-  div.ewfPagePath > a.ewfAction.ewfActionText {
-    font-size: var(--default-font-size);
-    margin-right: .25vw !important;
-    color: var(--secondary-color) !important;
-  }
-
-  div.ewfPagePath > h1 {
-    font-size: var(--default-font-size);
-    margin-left: .25vw;
-    color: var(--gray-color);
-  }
-
   .ewfBreadcrumbs a {
     color: var(--gray-color);
     text-decoration: underline;
