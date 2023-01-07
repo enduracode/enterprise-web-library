@@ -368,21 +368,27 @@ ewfUiSideTabAndContentContainer {
 	grid-template-rows: auto auto 1fr;
 }
 ewfUiSideTabContainer {
+	grid-area: sidebar;
 	padding-right: 1rem;
-	width: 12.5em;
+	width: 16vw;
 }
 ewfUiSideTabGroupHead, ewfUiSideTabContainer ewfActionComponentAllStylesAllStates {
 	padding-top: .2rem;
 	padding-bottom: .2rem;
 }
 ewfUiSideTabGroupHead {
-	font-size: .8em;
+	font-size: var( --default-font-size );
+	padding: var( --default-padding );
+	padding-left: 1.5vw;
 }
 ewfUiSideTabGroupHead:not( :first-child ) {
 	padding-top: .5rem;
 }
 ewfUiSideTabContainer ewfActionComponentAllStylesAllStates {
-	font-size: .9em;
+	font-size: var( --default-font-size );
+	border-left-width: 4px;
+	border-left-style: solid;
+	padding: var( --default-padding );
 }
 ewfUiPageActionListContainer {
 	grid-area: action;
@@ -430,6 +436,9 @@ ewfUiPoweredByEwlFooterContainer {
 	}
 	ewfUiTopTabListContainer {
 		padding: 0 1vw;
+	}
+	ewfUiSideTabGroupHead, ewfUiSideTabContainer ewfActionComponentAllStylesAllStates {
+		font-size: var( --tablet-font-size );
 	}
 }
 @media only screen and ( max-width: 768px ) {
@@ -537,7 +546,7 @@ ewfUiPoweredByEwlFooterContainer {
 	ewfUiEntityContainer ewfPagePathContainer ewfComponentListItem:nth-last-child( -n + 3 ) {
 		display: block;
 	}
-	ewfUiTopTabListContainer {
+	ewfUiTopTabListContainer, ewfUiSideTabContainer {
 		display: block;
 		position: absolute;
 		top: 105px;
@@ -549,11 +558,11 @@ ewfUiPoweredByEwlFooterContainer {
 		transform: scaleY( 0 );
 		z-index: 0;
 	}
-	ewfUiTopTabListContainer.hover-active {
+	ewfUiTopTabListContainer.hover-active, ewfUiSideTabContainer.hover-active {
 		transform: scaleY( 1 );
 		z-index: 1000;
 	}
-	ewfUiTopTabListContainer ewfActionComponentAllStylesAllStates {
+	ewfUiTopTabListContainer ewfActionComponentAllStylesAllStates, ewfUiSideTabContainer ewfActionComponentAllStylesAllStates {
 		display: block;
 		font-size: 16px;
 		border-bottom-width: 1px;
@@ -570,6 +579,21 @@ ewfUiPoweredByEwlFooterContainer {
 		border-radius: 0;
 		padding-left: 6vw;
 		font-weight: normal;
+		font-style: italic;
+	}
+	ewfUiSideTabGroupHead {
+		display: block;
+		font-size: 16px;
+		border-left-style: none;
+		padding: 3vw 4vw;
+		text-align: center;
+		font-weight: normal;
+	}
+	ewfUiSideTabContainer ewfActionComponentAllStylesAllStates {
+		border-left-style: none;
+		font-weight: normal;
+	}
+	ewfUiSideTabContainer ewfUiCurrentTabActionControl {
 		font-style: italic;
 	}
 	ewfUiContentContainer {
