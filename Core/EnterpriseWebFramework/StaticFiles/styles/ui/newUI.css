@@ -54,30 +54,6 @@ div.ewfUiSideTab a.ewfAction.ewfActionText:hover:not(.ewfEditorSelectedTab) {
 /*******************/
 /* BREADCRUMBS     
 /*******************/
-  .ewfBreadcrumbs a {
-    color: var(--gray-color);
-    text-decoration: underline;
-    transition: color .2s;
-  }
-
-    .ewfBreadcrumbs a:hover {
-      color: var(--primary-color);
-    }
-
-  .ewfBreadcrumbs > li {
-    background: url("arrow.svg") no-repeat;
-    background-position: center right;
-    background-size: 5px;
-    padding: 1vw 0vw;
-    padding-right: 1vw;
-    white-space: nowrap;
-  }
-
-    .ewfBreadcrumbs > li:last-child {
-      padding-right: 0;
-      background: none;
-    }
-
 .breadcrumbHome {
   width: 1vw;
   opacity: .5;
@@ -263,10 +239,6 @@ table.responsiveDataTable.compact thead th, table.dataTable.compact thead td {
 
 /* TABLET */
 @media only screen and (max-width: 1200px) {
-    .ewfBreadcrumbs > li {
-      padding-right: 1.5vw;
-    }
-
   .breadcrumbHome {
     width: 1.5vw;
   }
@@ -332,16 +304,6 @@ table.responsiveDataTable.compact thead th, table.dataTable.compact thead td {
     border-left: none !important;
     display: block !important;
   }
-
-    .ewfBreadcrumbs > li {
-      padding: 5px 0px;
-      padding-right: 20px;
-      display: none;
-    }
-
-      .ewfBreadcrumbs > li:nth-last-child(-n+3) {
-        display: block;
-      }
 
   .breadcrumbHome {
     width: 4vw;

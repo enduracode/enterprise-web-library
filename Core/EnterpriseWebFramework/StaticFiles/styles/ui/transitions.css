@@ -16,6 +16,9 @@ ewfUiInnerGlobalContainer ewfActionComponentAllStylesAllStates {
 ewfUiUserInfoContainer > ewfUnorderedComponentList ewfActionComponentAllStylesAllStates {
 	transition: all 200ms;
 }
+ewfUiEntityContainer ewfPagePathContainer ewfActionComponentAllStylesAllStates {
+	transition: color 200ms;
+}
 @media only screen and ( max-width: 768px ) {
 	ewfUiTopTabListContainer {
 		transition: transform ease-in-out 0;

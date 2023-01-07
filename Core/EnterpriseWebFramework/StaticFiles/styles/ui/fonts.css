@@ -3,7 +3,7 @@ ewfTableItemGroupNameAndGeneralActionContainer > ewfTableActionListContainer {
 	font-family: 'Open Sans', sans-serif;
 }
 
-ewfPagePath,
+ewfPagePathContainer,
 ewfSectionNormalStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading,
 ewfActionComponentLargeButtonStyleAllStates,
 ewfTableStandardAndStandardExceptLayoutStyles > caption,

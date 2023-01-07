@@ -113,6 +113,17 @@ ewfUiUserInfoContainer ewfActionComponentAllStylesStatesWithHover {
 ewfUiEntityContainer, ewfUiTopTabListContainer {
 	background-color: var( --breadcrumb-bg-color );
 }
+ewfUiEntityContainer ewfPagePathContainer ewfComponentListItem {
+	background: url( ../../versioned/ui/arrow-v1.svg ) no-repeat;
+	background-position: center right;
+	background-size: 5px;
+}
+ewfUiEntityContainer ewfPagePathContainer ewfActionComponentAllStylesAllStates {
+	color: var( --gray-color );
+}
+ewfUiEntityContainer ewfPagePathContainer ewfActionComponentAllStylesStatesWithHover {
+	color: var( --primary-color );
+}
 ewfUiTopTabListContainer {
 	border-color: #ccc;
 	background-color: var( --tab-bg-color );

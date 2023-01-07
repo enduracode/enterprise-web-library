@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Humanizer;
-using JetBrains.Annotations;
-using Tewl.Tools;
+﻿using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -29,12 +25,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// A component that displays the full path to the current page, optionally including the page’s name as a first-level heading.
 	/// </summary>
 	public class PagePath: FlowComponent {
-		private static readonly ElementClass elementClass = new ElementClass( "ewfPagePath" );
+		private static readonly ElementClass elementClass = new( "ewfPagePath" );
 
 		[ UsedImplicitly ]
 		private class CssElementCreator: ControlCssElementCreator {
 			IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() =>
-				new CssElement( "PagePath", "div.{0}".FormatWith( elementClass.ClassName ) ).ToCollection();
+				new CssElement( "PagePathContainer", "div.{0}".FormatWith( elementClass.ClassName ) ).ToCollection();
 		}
 
 		private readonly PageName pageName;
@@ -49,16 +45,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					excludePageNameIfEntitySetupExists: currentPageBehavior == PagePathCurrentPageBehavior.IncludeCurrentPageAndExcludePageNameIfEntitySetupExists );
 
 			var pagePath = PageBase.Current.ResourcePath;
-			var components = new List<FlowComponent>();
-			foreach( var resource in pagePath.Take( pagePath.Count - 1 ) ) {
-				components.Add( new EwfHyperlink( resource, new StandardHyperlinkStyle( resource.ResourceFullName ) ) );
-				components.AddRange( ResourceBase.ResourcePathSeparator.ToComponents() );
-			}
-			if( pageName != null )
-				components.Add( pageName );
-			else if( components.Any() )
-				components.RemoveAt( components.Count - 1 );
-			children = new GenericFlowContainer( components, classes: elementClass ).ToCollection();
+			var items = pagePath.Take( pagePath.Count - 1 )
+				.Select( i => (WrappingListItem)new EwfHyperlink( i, new StandardHyperlinkStyle( i.ResourceFullName ) ).ToComponentListItem() )
+				.Materialize();
+			children = new GenericFlowContainer(
+				( items.Any() ? new WrappingList( items ).ToCollection() : Enumerable.Empty<FlowComponent>() )
+				.Concat( pageName != null ? pageName.ToCollection() : Enumerable.Empty<FlowComponent>() )
+				.Materialize(),
+				classes: elementClass ).ToCollection();
 		}
 
 		/// <summary>

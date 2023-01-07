@@ -64,13 +64,13 @@ ewfUiTopTabListContainer {
 }
 
 /* headings and sections */
-ewfPagePath {
+ewfPagePathContainer {
 	font-size: 1.1em;
 }
-ewfPagePath > ewfActionComponentAllStylesAllStates {
+ewfPagePathContainer ewfActionComponentAllStylesAllStates {
 	font-weight: 600;
 }
-ewfPagePath > h1 {
+ewfPagePathContainer h1 {
 	display: inline;
 	font-size: 1.3em;
 	margin: 0;
@@ -276,14 +276,11 @@ ewfUiEntityAndTopTabContainer {
 	justify-content: space-between;
 	flex-wrap: wrap;
 	gap: 10px 0;
-	align-self: start;
 }
 ewfUiEntityContainer, ewfUiTopTabListContainer {
-	display: flex;
 	font-size: var( --default-small-font-size );
 	margin: 0;
 	padding: 0;
-	align-items: center;
 	font-weight: bold;
 	letter-spacing: -.025em;
 }
@@ -298,8 +295,16 @@ ewfUiEntityContainer {
 		border-bottom: 1pt solid black;
 	}
 }
-ewfUiEntityContainer ewfPagePath {
-	margin: 0;
+ewfUiEntityContainer ewfPagePathContainer ewfUnorderedComponentList {
+	display: inline-flex;
+}
+ewfUiEntityContainer ewfPagePathContainer ewfComponentListItem {
+	padding: 1vw 0;
+	padding-right: 1vw;
+	white-space: nowrap;
+}
+ewfUiEntityContainer ewfPagePathContainer ewfActionComponentAllStylesAllStates {
+	text-decoration: underline;
 }
 ewfUiEntityNavAndActionContainer {
 	display: flex;
@@ -316,9 +321,10 @@ ewfUiEntityActionListContainer > ewfUnorderedLineList, ewfUiPageActionListContai
 	justify-content: flex-end;
 }
 ewfUiTopTabListContainer {
+	display: flex;
 	border-left-width: 1px;
 	border-left-style: solid;
-	padding: 0;
+	align-items: center;
 	gap: 0;
 }
 ewfUiTopTabListContainer ewfActionComponentAllStylesAllStates, ewfUiSideTabContainer ewfActionComponentAllStylesAllStates {
@@ -418,6 +424,9 @@ ewfUiPoweredByEwlFooterContainer {
 	ewfUiEntityContainer {
 		padding-top: .75vw;
 		padding-bottom: .75vw;
+	}
+	ewfUiEntityContainer ewfPagePathContainer ewfComponentListItem {
+		padding-right: 1.5vw;
 	}
 	ewfUiTopTabListContainer {
 		padding: 0 1vw;
@@ -519,6 +528,14 @@ ewfUiPoweredByEwlFooterContainer {
 	ewfUiEntityContainer {
 		padding: 10px 4vw;
 		gap: 0 15px;
+	}
+	ewfUiEntityContainer ewfPagePathContainer ewfComponentListItem {
+		display: none;
+		padding: 5px 0;
+		padding-right: 20px;
+	}
+	ewfUiEntityContainer ewfPagePathContainer ewfComponentListItem:nth-last-child( -n + 3 ) {
+		display: block;
 	}
 	ewfUiTopTabListContainer {
 		display: block;
