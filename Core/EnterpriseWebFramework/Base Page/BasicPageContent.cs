@@ -1,31 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿using System.Text;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.WebSessionState;
-using Humanizer;
 using JetBrains.Annotations;
-using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public sealed class BasicPageContent: PageContent {
 		// Some of these are used by the EWF JavaScript file.
-		private static readonly ElementClass topWarningContainerClass = new ElementClass( "ewfTopWarning" );
-		private static readonly ElementClass clickBlockerInactiveClass = new ElementClass( "ewfClickBlockerI" );
-		private static readonly ElementClass clickBlockerActiveClass = new ElementClass( "ewfClickBlockerA" );
-		private static readonly ElementClass processingDialogBlockInactiveClass = new ElementClass( "ewfProcessingDialogI" );
-		private static readonly ElementClass processingDialogBlockActiveClass = new ElementClass( "ewfProcessingDialogA" );
-		private static readonly ElementClass processingDialogBlockTimeOutClass = new ElementClass( "ewfProcessingDialogTo" );
-		private static readonly ElementClass processingDialogProcessingParagraphClass = new ElementClass( "ewfProcessingP" );
-		private static readonly ElementClass processingDialogTimeOutParagraphClass = new ElementClass( "ewfTimeOutP" );
-		private static readonly ElementClass notificationSectionContainerNotificationClass = new ElementClass( "ewfNotificationN" );
-		private static readonly ElementClass notificationSectionContainerDockedClass = new ElementClass( "ewfNotificationD" );
-		private static readonly ElementClass notificationSpacerClass = new ElementClass( "ewfNotificationSpacer" );
-		private static readonly ElementClass infoMessageContainerClass = new ElementClass( "ewfInfoMsg" );
-		private static readonly ElementClass warningMessageContainerClass = new ElementClass( "ewfWarnMsg" );
-		private static readonly ElementClass statusMessageTextClass = new ElementClass( "ewfStatusText" );
+		private static readonly ElementClass topWarningContainerClass = new( "ewfTopWarning" );
+		private static readonly ElementClass clickBlockerInactiveClass = new( "ewfClickBlockerI" );
+		private static readonly ElementClass clickBlockerActiveClass = new( "ewfClickBlockerA" );
+		private static readonly ElementClass processingDialogBlockInactiveClass = new( "ewfProcessingDialogI" );
+		private static readonly ElementClass processingDialogBlockActiveClass = new( "ewfProcessingDialogA" );
+		private static readonly ElementClass processingDialogBlockTimeOutClass = new( "ewfProcessingDialogTo" );
+		private static readonly ElementClass processingDialogProcessingParagraphClass = new( "ewfProcessingP" );
+		private static readonly ElementClass processingDialogTimeOutParagraphClass = new( "ewfTimeOutP" );
+		private static readonly ElementClass notificationSectionContainerNotificationClass = new( "ewfNotificationN" );
+		private static readonly ElementClass notificationSectionContainerDockedClass = new( "ewfNotificationD" );
+		private static readonly ElementClass notificationSpacerClass = new( "ewfNotificationSpacer" );
+		private static readonly ElementClass infoMessageContainerClass = new( "ewfInfoMsg" );
+		private static readonly ElementClass warningMessageContainerClass = new( "ewfWarnMsg" );
+		private static readonly ElementClass statusMessageTextClass = new( "ewfStatusText" );
 
 		private static Func<IReadOnlyCollection<PageContent>, IEnumerable<ResourceInfo>> cssInfoCreator;
 		private static Action<StringBuilder, bool> javaScriptIncludeBuilder;
@@ -173,7 +167,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		private static FlowComponent getJsInitElement( Func<string> jsInitStatementGetter ) =>
 			new ElementComponent(
-				context => new ElementData(
+				_ => new ElementData(
 					() => new ElementLocalData(
 						"script",
 						focusDependentData: new ElementFocusDependentData(
@@ -188,10 +182,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly Func<IReadOnlyCollection<PageContent>, Func<string>, FlowComponent, FlowComponent> componentGetter;
 		internal bool IncludesStripeCheckout;
 		internal bool FormUsesMultipartEncoding;
-		private readonly List<FlowComponent> bodyContent = new List<FlowComponent>();
+		private readonly List<FlowComponent> bodyContent = new();
 		private readonly FlowComponent etherealContainer;
-		internal readonly ModalBoxId BrowsingModalBoxId = new ModalBoxId();
-		private readonly List<EtherealComponent> etherealContent = new List<EtherealComponent>();
+		internal readonly ModalBoxId BrowsingModalBoxId = new();
+		private readonly List<EtherealComponent> etherealContent = new();
 		private readonly Action dataUpdateModificationMethod;
 		private readonly bool isAutoDataUpdater;
 		private readonly ActionPostBack pageLoadPostBack;
@@ -213,13 +207,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var etherealComponents = getEtherealComponents();
 
 			componentGetter = ( contentObjects, hiddenFieldValueGetter, jsInitElement ) => new ElementComponent(
-				documentContext => new ElementData(
+				_ => new ElementData(
 					() => new ElementLocalData( "html" ),
 					children: new ElementComponent(
-							headContext => new ElementData(
+							_ => new ElementData(
 								() => new ElementLocalData( "head" ),
 								children: new ElementComponent(
-										titleContext => new ElementData(
+										_ => new ElementData(
 											() => new ElementLocalData( "title" ),
 											children: ( titleOverride.Any() ? titleOverride : getTitle() ).ToComponents() ) )
 									.Append(
@@ -250,7 +244,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									.Append( ( customHeadElements ?? new TrustedHtmlString( "" ) ).ToComponent() )
 									.Materialize() ) ).Append(
 							new ElementComponent(
-								bodyContext => new ElementData(
+								_ => new ElementData(
 									() => {
 										var attributes = new List<ElementAttribute>();
 										attributes.Add( new ElementAttribute( "onpagehide", "deactivateProcessingDialog();" ) );
@@ -260,7 +254,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									},
 									classes: bodyClasses,
 									children: new ElementComponent(
-											formContext => new ElementData(
+											_ => new ElementData(
 												() => {
 													var attributes = new List<ElementAttribute>();
 													attributes.Add( new ElementAttribute( "action", PageBase.Current.GetUrl() ) );
@@ -279,7 +273,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 													.Append( etherealContainer )
 													.Append(
 														new ElementComponent(
-															context => new ElementData(
+															_ => new ElementData(
 																() => {
 																	var attributes = new List<ElementAttribute>();
 																	attributes.Add( new ElementAttribute( "type", "hidden" ) );
@@ -351,7 +345,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										etherealChildren: new ModalBox(
 											boxId,
 											true,
-											FormItemList.CreateGrid(
+											FormItemList.CreateFixedGrid(
 													1,
 													items: new[] { false, true }.Select(
 															hideWarnings => new GenericPhrasingContainer(
@@ -373,8 +367,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							impersonationWarningLine.Value.actions
 								.Select(
 									i => i.GetActionComponent(
-										( text, icon ) => new ButtonHyperlinkStyle( text, buttonSize: ButtonSize.ShrinkWrap ),
-										( text, icon ) => new StandardButtonStyle( text, buttonSize: ButtonSize.ShrinkWrap ) ) )
+										( text, _ ) => new ButtonHyperlinkStyle( text, buttonSize: ButtonSize.ShrinkWrap ),
+										( text, _ ) => new StandardButtonStyle( text, buttonSize: ButtonSize.ShrinkWrap ) ) )
 								.Where( i => i != null )
 								.Select( i => i.ToCollection() )
 								.Aggregate( ( components, action ) => components.Concat( " ".ToComponents() ).Concat( action ).Materialize() ) )
@@ -436,7 +430,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			return PageBase.Current.StatusMessages.Any() && statusMessagesDisplayAsNotification()
 				       ? new DisplayableElement(
-					       context => new DisplayableElementData(
+					       _ => new DisplayableElementData(
 						       null,
 						       () => new DisplayableElementLocalData(
 							       "div",
@@ -533,7 +527,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		private FlowComponent getLink( string href, string rel, IReadOnlyCollection<ElementAttribute> attributes = null ) =>
 			new ElementComponent(
-				context => new ElementData(
+				_ => new ElementData(
 					() => new ElementLocalData(
 						"link",
 						focusDependentData: new ElementFocusDependentData(
@@ -542,7 +536,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		private FlowComponent getMeta( string name, string content ) =>
 			new ElementComponent(
-				context => new ElementData(
+				_ => new ElementData(
 					() => {
 						var attributes = new List<ElementAttribute>();
 						attributes.Add( new ElementAttribute( "name", name ) );

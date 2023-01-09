@@ -1,15 +1,11 @@
-﻿using System.Linq;
-using EnterpriseWebLibrary.EnterpriseWebFramework;
-using Tewl.Tools;
-
-// EwlPage
+﻿// EwlPage
 
 namespace EnterpriseWebLibrary.Website.TestPages {
 	partial class OmniDemo {
 		protected override PageContent getContent() {
 			var content = new UiPageContent( isAutoDataUpdater: true );
 
-			var omni = FormItemList.CreateGrid( numberOfColumns: 7 );
+			var omni = FormItemList.CreateFixedGrid( 7 );
 
 			var boxId = new ModalBoxId();
 			omni.AddFormItems(
@@ -34,7 +30,7 @@ namespace EnterpriseWebLibrary.Website.TestPages {
 }
 
 namespace EnterpriseWebLibrary.Website.TestPages {
-partial class OmniDemo {
-protected override UrlHandler getUrlParent() => new LegacyUrlFolderSetup();
-}
+	partial class OmniDemo {
+		protected override UrlHandler getUrlParent() => new LegacyUrlFolderSetup();
+	}
 }

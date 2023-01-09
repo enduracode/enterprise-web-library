@@ -1,19 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using EnterpriseWebLibrary.MailMerging;
+﻿using EnterpriseWebLibrary.MailMerging;
 using EnterpriseWebLibrary.MailMerging.RowTree;
-using Humanizer;
 using JetBrains.Annotations;
-using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public static class MailMergingStatics {
-		private static readonly ElementClass fieldTreeClass = new ElementClass( "ewfMft" );
-		private static readonly ElementClass fieldTreeChildClass = new ElementClass( "ewfMftc" );
-		private static readonly ElementClass rowTreeClass = new ElementClass( "ewfMrt" );
-		private static readonly ElementClass rowTreeChildClass = new ElementClass( "ewfMrtc" );
+		private static readonly ElementClass fieldTreeClass = new( "ewfMft" );
+		private static readonly ElementClass fieldTreeChildClass = new( "ewfMftc" );
+		private static readonly ElementClass rowTreeClass = new( "ewfMrt" );
+		private static readonly ElementClass rowTreeChildClass = new( "ewfMrtc" );
 
 		[ UsedImplicitly ]
 		private class CssElementCreator: ControlCssElementCreator {
@@ -93,7 +87,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					} )
 				.Materialize();
 			var valueList = valueFormItems.Any()
-				                ? FormItemList.CreateGrid( 2, items: valueFormItems ).ToCollection()
+				                ? FormItemList.CreateFixedGrid( 2, items: valueFormItems ).ToCollection()
 				                : Enumerable.Empty<FlowComponent>().Materialize();
 
 			var children = ( useSubtractiveMode

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// The configuration for a form item.
 	/// </summary>
@@ -14,7 +12,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Creates a form item setup object.
 		/// </summary>
 		/// <param name="displaySetup"></param>
-		/// <param name="columnSpan">Only applies to <see cref="FormItemList.CreateGrid"/>.</param>
+		/// <param name="columnSpan">Only applies to <see cref="FormItemList.CreateFixedGrid"/>.</param>
 		/// <param name="updateRegionSets">The intermediate-post-back update-region sets that the form item will be a part of.</param>
 		/// <param name="textAlignment"></param>
 		public FormItemSetup(

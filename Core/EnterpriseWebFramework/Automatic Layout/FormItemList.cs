@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Humanizer;
-using JetBrains.Annotations;
-using Tewl.Tools;
+﻿using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -12,16 +7,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	// After https://bugs.chromium.org/p/chromium/issues/detail?id=375693 is fixed, change the top-level element to fieldset. Don't support legend.
 	public class FormItemList: FlowComponent {
 		// This class allows us to use just one selector in the FormItemList element.
-		private static readonly ElementClass allListsClass = new ElementClass( "ewfFil" );
+		private static readonly ElementClass allListsClass = new( "ewfFil" );
 
-		private static readonly ElementClass stackClass = new ElementClass( "ewfSfil" );
-		private static readonly ElementClass wrappingClass = new ElementClass( "ewfWfil" );
-		private static readonly ElementClass gridClass = new ElementClass( "ewfGfil" );
+		private static readonly ElementClass stackClass = new( "ewfSfil" );
+		private static readonly ElementClass wrappingClass = new( "ewfWfil" );
+		private static readonly ElementClass gridClass = new( "ewfGfil" );
 
-		private static readonly ElementClass itemClass = new ElementClass( "ewfFilI" );
-		private static readonly ElementClass buttonItemClass = new ElementClass( "ewfFilB" );
-		private static readonly ElementClass labelClass = new ElementClass( "ewfFilL" );
-		private static readonly ElementClass contentClass = new ElementClass( "ewfFilC" );
+		private static readonly ElementClass itemClass = new( "ewfFilI" );
+		private static readonly ElementClass buttonItemClass = new( "ewfFilB" );
+		private static readonly ElementClass labelClass = new( "ewfFilL" );
+		private static readonly ElementClass contentClass = new( "ewfFilC" );
 
 		[ UsedImplicitly ]
 		private class CssElementCreator: ControlCssElementCreator {
@@ -44,16 +39,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		public static FormItemList CreateStack(
 			FormItemListSetup generalSetup = null, ( ContentBasedLength label, ContentBasedLength content )? minWidths = null,
 			IReadOnlyCollection<FormItem> items = null ) {
-			minWidths = minWidths ?? ( 12.ToEm(), 24.ToEm() );
+			minWidths ??= ( 12.ToEm(), 24.ToEm() );
 			return new FormItemList(
 				generalSetup,
 				stackClass,
 				"",
-				i => ElementClassSet.Empty,
-				i => "",
+				_ => ElementClassSet.Empty,
+				_ => "",
 				null,
 				i => new DisplayableElement(
-						context => new DisplayableElementData(
+						_ => new DisplayableElementData(
 							null,
 							() => new DisplayableElementLocalData(
 								"div",
@@ -63,7 +58,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							children: i.Label ) ).ToCollection()
 					.Append(
 						new DisplayableElement(
-							context => new DisplayableElementData(
+							_ => new DisplayableElementData(
 								null,
 								() => new DisplayableElementLocalData(
 									"div",
@@ -86,10 +81,27 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="setup"></param>
 		/// <param name="items"></param>
 		public static FormItemList CreateWrapping( FormItemListSetup setup = null, IReadOnlyCollection<FormItem> items = null ) =>
-			new FormItemList( setup, wrappingClass, "", i => ElementClassSet.Empty, i => "", null, getItemComponents, items );
+			new( setup, wrappingClass, "", _ => ElementClassSet.Empty, _ => "", null, getItemComponents, items );
 
 		/// <summary>
-		/// Creates a list with the specified number of columns where each form item's label is placed directly on top of it.
+		/// Creates a list with a variable number of columns, depending upon available width, where each form item’s label is placed directly on top of it.
+		/// </summary>
+		// To support items with ColumnSpan > 1, we could use the technique described by https://stackoverflow.com/a/55243400/35349 when the viewport width changes.
+		public static FormItemList CreateResponsiveGrid(
+			FormItemListSetup generalSetup = null, ContentBasedLength columnMinWidth = null,
+			GridVerticalAlignment verticalAlignment = GridVerticalAlignment.NotSpecified, IReadOnlyCollection<FormItem> items = null ) =>
+			new(
+				generalSetup,
+				gridClass.Add( GridVerticalAlignmentStatics.Class( verticalAlignment ) ),
+				"grid-template-columns: repeat( auto-fit, minmax( min( {0}, 100% ), 1fr ) )".FormatWith( ( (CssLength)( columnMinWidth ?? 24.ToEm() ) ).Value ),
+				i => TextAlignmentStatics.Class( i.Setup.TextAlignment ),
+				_ => "",
+				null,
+				getItemComponents,
+				items );
+
+		/// <summary>
+		/// Creates a list with the specified number of columns where each form item’s label is placed directly on top of it.
 		/// </summary>
 		/// <param name="numberOfColumns"></param>
 		/// <param name="generalSetup"></param>
@@ -98,7 +110,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="defaultColumnSpan"></param>
 		/// <param name="verticalAlignment"></param>
 		/// <param name="items"></param>
-		public static FormItemList CreateGrid(
+		public static FormItemList CreateFixedGrid(
 			int numberOfColumns, FormItemListSetup generalSetup = null, ContentBasedLength minWidth = null, int defaultColumnSpan = 1,
 			GridVerticalAlignment verticalAlignment = GridVerticalAlignment.NotSpecified, IReadOnlyCollection<FormItem> items = null ) {
 			if( defaultColumnSpan > numberOfColumns )
@@ -131,7 +143,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="setup"></param>
 		/// <param name="items"></param>
 		public static FormItemList CreateRaw( FormItemListSetup setup = null, IReadOnlyCollection<FormItem> items = null ) =>
-			new FormItemList( setup, ElementClassSet.Empty, "", i => ElementClassSet.Empty, i => "", null, getItemComponents, items );
+			new( setup, ElementClassSet.Empty, "", _ => ElementClassSet.Empty, _ => "", null, getItemComponents, items );
 
 		private static IReadOnlyCollection<FlowComponent> getItemComponents( FormItem item ) =>
 			( item.Label.Any() ? new GenericFlowContainer( item.Label, classes: labelClass ).ToCollection() : Enumerable.Empty<FlowComponent>() ).Append(
@@ -151,12 +163,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			FormItemListSetup setup, ElementClassSet classes, string listStyleAttribute, Func<FormItem, ElementClassSet> itemClassGetter,
 			Func<FormItem, string> itemStyleAttributeGetter, Func<DisplaySetup, FormItemSetup> buttonItemSetupGetter,
 			Func<FormItem, IReadOnlyCollection<FlowComponent>> itemComponentGetter, IReadOnlyCollection<FormItem> items ) {
-			setup = setup ?? new FormItemListSetup();
-			buttonItemSetupGetter = buttonItemSetupGetter ?? ( displaySetup => new FormItemSetup( displaySetup: displaySetup ) );
+			setup ??= new FormItemListSetup();
+			buttonItemSetupGetter ??= ( displaySetup => new FormItemSetup( displaySetup: displaySetup ) );
 
 			var buttonItem = setup.ButtonItemGetter( buttonItemSetupGetter );
 			children = new DisplayableElement(
-				listContext => new DisplayableElementData(
+				_ => new DisplayableElementData(
 					setup.DisplaySetup,
 					() => new DisplayableElementLocalData(
 						"div",
