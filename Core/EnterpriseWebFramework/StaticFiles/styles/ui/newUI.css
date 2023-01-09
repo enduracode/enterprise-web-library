@@ -31,14 +31,6 @@ ewfUiInnerGlobalContainer, ewfUiEntityAndTabAndContentBlock, ewfUiGlobalFootCont
 /*******************/
 /* FILTER/INPUT    
 /*******************/
-div.ewfFil.ewfGfil {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
-  justify-items: stretch;
-  align-items: stretch;
-  margin-bottom: 1vw;
-}
-
   div.ewfFil.ewfGfil label {
     font-size: var(--default-small-font-size);
     color: var(--gray-color);
@@ -212,12 +204,5 @@ table.responsiveDataTable.compact thead th, table.dataTable.compact thead td {
 @media only screen and (max-width: 768px) {
   .breadcrumbHome {
     width: 4vw;
-  }
-
-  div.ewfFil.ewfGfil {
-    grid-template-columns: 1fr 1fr;
-    grid-gap: 10px;
-    margin-top: 0px;
-    margin-bottom: 20px;
   }
 }
