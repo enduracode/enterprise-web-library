@@ -170,9 +170,6 @@ ewfUiSideTabContainer ewfUiCurrentTabActionControl {
 	background-color: rgba( 255, 255, 255, .1 );
 	color: var( --hover-color );
 }
-ewfUiContentContainer {
-	background-color: var( --background-color );
-}
 @media only screen and ( max-width: 768px ) {
 	ewfUiInnerGlobalContainer ewfActionComponentAllStylesStatesWithHover {
 		color: var( --white-color );

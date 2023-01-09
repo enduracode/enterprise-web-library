@@ -1,21 +1,4 @@
 ﻿/*******************/
-/* RESET CSS 
-/*******************/
-html, body {
-  height: 100%;
-  min-height: 100%;
-}
-
-body {
-  margin: 0px;
-}
-
-ewfUiInnerGlobalContainer, ewfUiEntityAndTabAndContentBlock, ewfUiGlobalFootContainer {
-	max-width: none;
-  margin: 0;
-}
-
-/*******************/
 /* BREADCRUMBS     
 /*******************/
 .breadcrumbHome {
@@ -151,7 +134,7 @@ button.ewfActionNormalButton.ewfAction {
 /*******************/
 .dataTables_wrapper {
   margin: 2vw 0;
-  padding: var(--default-padding);
+  padding: var(--ewf-ui-top-level-spacing);
   background-color: var(--white-color);
   box-shadow: var(--default-box-shadow);
   border-radius: var(--default-border-radius);
