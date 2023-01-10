@@ -242,12 +242,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 											new ExternalResource(
 												"//fonts.googleapis.com/css2?family=Libre+Franklin:wght@500;600;700&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400&display=fallback" ) );
 										cssInfos.Add( new ExternalResource( "//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" ) );
-										cssInfos.Add( new StaticFiles.Versioned.Third_party.Jquery_ui.Jquery_ui_1114custom_v2.Jquery_uiminCss() );
+										cssInfos.Add( new StaticFiles.Versioned.Third_party.Jquery_ui.Jquery_ui_1132custom_v1.Jquery_uiminCss() );
 										cssInfos.Add( new ExternalResource( "//cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css" ) );
 										cssInfos.Add( new StaticFiles.Third_party.Select_cssCss() );
 										cssInfos.Add( new StaticFiles.Versioned.Third_party.Chosen.Chosen_v187.ChosenminCss() );
 										cssInfos.Add( new StaticFiles.Third_party.Time_picker.StylesCss() );
-										cssInfos.Add( new ExternalResource( "//cdn.jsdelivr.net/qtip2/2.2.1/jquery.qtip.min.css" ) );
+										cssInfos.Add( new ExternalResource( "//cdnjs.cloudflare.com/ajax/libs/qtip2/3.0.3/jquery.qtip.min.css" ) );
 										cssInfos.Add( new ExternalResource( "//cdnjs.cloudflare.com/ajax/libs/dialog-polyfill/0.4.9/dialog-polyfill.min.css" ) );
 										cssInfos.Add( new StaticFiles.Styles.BasicCss() );
 										if( contentUsesUi )
@@ -277,12 +277,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										string getElement( ResourceInfo resource ) => "<script src=\"{0}\" defer></script>".FormatWith( resource.GetUrl() );
 
 										var infos = new List<ResourceInfo>();
-										infos.Add( new ExternalResource( "//code.jquery.com/jquery-1.12.3.min.js" ) );
-										infos.Add( new StaticFiles.Versioned.Third_party.Jquery_ui.Jquery_ui_1114custom_v2.Jquery_uiminJs() );
+										infos.Add( new ExternalResource( "//code.jquery.com/jquery-3.6.3.min.js" ) );
+										infos.Add( new StaticFiles.Versioned.Third_party.Jquery_ui.Jquery_ui_1132custom_v1.Jquery_uiminJs() );
 										infos.Add( new ExternalResource( "//cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js" ) );
 										infos.Add( new StaticFiles.Versioned.Third_party.Chosen.Chosen_v187.ChosenjqueryminJs() );
 										infos.Add( new StaticFiles.Third_party.Time_picker.CodeJs() );
-										infos.Add( new ExternalResource( "//cdn.jsdelivr.net/qtip2/2.2.1/jquery.qtip.min.js" ) );
+										infos.Add( new ExternalResource( "//cdnjs.cloudflare.com/ajax/libs/qtip2/3.0.3/jquery.qtip.min.js" ) );
 										infos.Add( new ExternalResource( "//cdnjs.cloudflare.com/ajax/libs/dialog-polyfill/0.4.9/dialog-polyfill.min.js" ) );
 										infos.Add( new StaticFiles.Third_party.Spin_js.SpinminJs() );
 										infos.Add( new ExternalResource( "//cdn.ckeditor.com/4.5.8/full/ckeditor.js" ) );
