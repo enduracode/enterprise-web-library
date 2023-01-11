@@ -217,18 +217,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			components.Add(
 				new RawList(
-					new EwfHyperlink( changePasswordPage, new ButtonHyperlinkStyle( "Change password", buttonSize: ButtonSize.ShrinkWrap ) ).ToCollection()
+					new EwfHyperlink(
+							changePasswordPage,
+							new CustomHyperlinkStyle( childGetter: destinationUrl => ActionComponentIcon.GetIconAndTextComponents( null, "Change password" ) ) )
 						.ToComponentListItem()
-						.ToCollection()
 						.Append(
 							new EwfButton(
-									new StandardButtonStyle( "Log out", buttonSize: ButtonSize.ShrinkWrap ),
-									behavior: new PostBackBehavior(
-										postBack: PostBack.CreateFull(
-											id: "ewfLogOut",
-											modificationMethod: AuthenticationStatics.LogOutUser,
-											actionGetter: () => new PostBackAction( null, authorizationCheckDisabledPredicate: _ => true ) ) ) ).ToCollection()
-								.ToComponentListItem() ) ) );
+								new CustomButtonStyle( children: ActionComponentIcon.GetIconAndTextComponents( null, "Log out" ) ),
+								behavior: new PostBackBehavior(
+									postBack: PostBack.CreateFull(
+										id: "ewfLogOut",
+										modificationMethod: AuthenticationStatics.LogOutUser,
+										actionGetter: () => new PostBackAction( null, authorizationCheckDisabledPredicate: _ => true ) ) ) ).ToComponentListItem() ) ) );
 
 			return components;
 		}
@@ -338,7 +338,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				hyperlinks.Add(
 					new EwfHyperlink(
 						resource.MatchesCurrent() ? null : resource,
-						new StandardHyperlinkStyle( resource.ResourceName ),
+						new CustomHyperlinkStyle(
+							childGetter: destinationUrl => ActionComponentIcon.GetIconAndTextComponents(
+								null,
+								resource.ResourceName.Any() ? resource.ResourceName : destinationUrl ) ),
 						classes: resource.MatchesCurrent() ? currentTabClass :
 						         resource.AlternativeMode is DisabledResourceMode ? disabledTabClass : ElementClassSet.Empty ) );
 			return hyperlinks;
@@ -358,8 +361,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private IEnumerable<ComponentListItem> getActionListItems( IReadOnlyCollection<ActionComponentSetup> actions ) =>
 			from action in actions
 			let actionComponent = action.GetActionComponent(
-				( text, icon ) => new ButtonHyperlinkStyle( text, buttonSize: ButtonSize.ShrinkWrap, icon: icon ),
-				( text, icon ) => new StandardButtonStyle( text, buttonSize: ButtonSize.ShrinkWrap, icon: icon ) )
+				( text, icon ) => new CustomHyperlinkStyle(
+					childGetter: destinationUrl => ActionComponentIcon.GetIconAndTextComponents( icon, text.Any() ? text : destinationUrl ) ),
+				( text, icon ) => new CustomButtonStyle( children: ActionComponentIcon.GetIconAndTextComponents( icon, text ) ) )
 			where actionComponent != null
 			select actionComponent.ToComponentListItem( displaySetup: action.DisplaySetup );
 
