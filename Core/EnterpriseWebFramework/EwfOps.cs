@@ -48,9 +48,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Call this from your Program.cs file. Besides this call, there should be no other code in the file.
 		/// </summary>
 		/// <param name="globalInitializer">The system's global initializer. Do not pass null.</param>
+		/// <param name="dependencyInjectionServicesRegistrationMethod">A method that registers the dependency-injection services needed by the web application.
+		/// </param>
 		/// <param name="appInitializer">The application initializer, which performs web-site specific initialization and cleanup. If you have one of these you
 		/// should name the class AppInitializer.</param>
-		public static int RunApplication( SystemInitializer globalInitializer, SystemInitializer appInitializer = null ) {
+		public static int RunApplication(
+			SystemInitializer globalInitializer, Action<IServiceCollection> dependencyInjectionServicesRegistrationMethod = null,
+			SystemInitializer appInitializer = null ) {
 			// If the machine was recently started, delay initialization to give database services time to warm up. This avoids errors during data access.
 			if( TimeSpan.FromMilliseconds( GetTickCount64() ) < new TimeSpan( 0, 3, 0 ) )
 				Thread.Sleep( new TimeSpan( 0, 1, 0 ) );
@@ -143,6 +147,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 							if( ExternalFunctionalityStatics.SamlFunctionalityEnabled )
 								ExternalFunctionalityStatics.ExternalSamlProvider.RegisterDependencyInjectionServices( builder.Services );
+
+							dependencyInjectionServicesRegistrationMethod?.Invoke( builder.Services );
 
 							var app = builder.Build();
 
