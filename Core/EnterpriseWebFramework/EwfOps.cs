@@ -250,6 +250,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										cssInfos.Add( new ExternalResource( "//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" ) );
 										cssInfos.Add( new StaticFiles.Versioned.Third_party.Jquery_ui.Jquery_ui_1132custom_v1.Jquery_uiminCss() );
 										cssInfos.Add( new ExternalResource( "//cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css" ) );
+										cssInfos.Add( new ExternalResource( "//cdn.datatables.net/responsive/2.4.0/css/responsive.dataTables.min.css" ) );
 										cssInfos.Add( new StaticFiles.Third_party.Select_cssCss() );
 										cssInfos.Add( new StaticFiles.Versioned.Third_party.Chosen.Chosen_v187.ChosenminCss() );
 										cssInfos.Add( new StaticFiles.Third_party.Time_picker.StylesCss() );
@@ -286,6 +287,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										infos.Add( new ExternalResource( "//code.jquery.com/jquery-3.6.3.min.js" ) );
 										infos.Add( new StaticFiles.Versioned.Third_party.Jquery_ui.Jquery_ui_1132custom_v1.Jquery_uiminJs() );
 										infos.Add( new ExternalResource( "//cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js" ) );
+										infos.Add( new ExternalResource( "//cdn.datatables.net/responsive/2.4.0/js/dataTables.responsive.min.js" ) );
 										infos.Add( new StaticFiles.Versioned.Third_party.Chosen.Chosen_v187.ChosenjqueryminJs() );
 										infos.Add( new StaticFiles.Third_party.Time_picker.CodeJs() );
 										infos.Add( new StaticFiles.Third_party.Qtip2.JqueryqtipminJs() );
