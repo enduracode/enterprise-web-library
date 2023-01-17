@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Tewl.Tools;
-
-namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// The configuration for entity-level UI such as navigational components and tabs.
 	/// </summary>
@@ -10,27 +6,27 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates an entity-UI setup object.
 		/// </summary>
-		/// <param name="navActions">The navigational action components</param>
+		/// <param name="navActionGetter">A function that takes a post-back ID base and returns the navigational action components. Do not return null.</param>
 		/// <param name="navFormControls">The navigational form controls</param>
-		/// <param name="actions">The action components</param>
+		/// <param name="actionGetter">A function that takes a post-back ID base and returns the action components. Do not return null.</param>
 		/// <param name="entitySummaryContent">Pass a value to include an entity summary in the UI.</param>
 		/// <param name="tabMode">The tab mode</param>
 		public EntityUiSetup(
-			IReadOnlyCollection<ActionComponentSetup> navActions = null, IReadOnlyCollection<NavFormControl> navFormControls = null,
-			IReadOnlyCollection<ActionComponentSetup> actions = null, IReadOnlyCollection<FlowComponent> entitySummaryContent = null,
+			Func<string, IReadOnlyCollection<ActionComponentSetup>> navActionGetter = null, IReadOnlyCollection<NavFormControl> navFormControls = null,
+			Func<string, IReadOnlyCollection<ActionComponentSetup>> actionGetter = null, IReadOnlyCollection<FlowComponent> entitySummaryContent = null,
 			TabMode tabMode = TabMode.Automatic ) {
-			NavActions = navActions ?? Enumerable.Empty<ActionComponentSetup>().Materialize();
+			NavActionGetter = navActionGetter ?? ( _ => Enumerable.Empty<ActionComponentSetup>().Materialize() );
 			NavFormControls = navFormControls ?? Enumerable.Empty<NavFormControl>().Materialize();
-			Actions = actions ?? Enumerable.Empty<ActionComponentSetup>().Materialize();
+			ActionGetter = actionGetter ?? ( _ => Enumerable.Empty<ActionComponentSetup>().Materialize() );
 			EntitySummaryContent = entitySummaryContent;
 			this.tabMode = tabMode;
 		}
 
-		internal IReadOnlyCollection<ActionComponentSetup> NavActions { get; }
+		internal Func<string, IReadOnlyCollection<ActionComponentSetup>> NavActionGetter { get; }
 
 		internal IReadOnlyCollection<NavFormControl> NavFormControls { get; }
 
-		internal IReadOnlyCollection<ActionComponentSetup> Actions { get; }
+		internal Func<string, IReadOnlyCollection<ActionComponentSetup>> ActionGetter { get; }
 
 		internal IReadOnlyCollection<FlowComponent> EntitySummaryContent { get; }
 

@@ -11,6 +11,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private static readonly ElementClass appLogoClass = new( "ewfUiAppLogo" );
 		private static readonly ElementClass globalNavListContainerClass = new( "ewfUiGlobalNav" );
 		private static readonly ElementClass userInfoClass = new( "ewfUiUserInfo" );
+
+		private static readonly ElementClass mobileMenuClass = new( "ewfUiMobileMenu" );
+		private static readonly ElementClass mobileMenuGlobalNavListContainerClass = new( "ewfUiMobileMenuGlobalNav" );
+		private static readonly ElementClass mobileMenuEntityNavAndActionContainerClass = new( "ewfUiMobileMenuEntityNavAndActions" );
+		private static readonly ElementClass mobileMenuEntityNavListContainerClass = new( "ewfUiMobileMenuEntityNav" );
+		private static readonly ElementClass mobileMenuEntityActionListContainerClass = new( "ewfUiMobileMenuEntityActions" );
+		private static readonly ElementClass mobileMenuTabContainerClass = new( "ewfUiMobileMenuTab" );
+		private static readonly ElementClass mobileMenuTabGroupClass = new( "ewfUiMobileMenuTabGroup" );
+
 		private static readonly ElementClass topErrorMessageListContainerClass = new( "ewfUiStatus" );
 
 		private static readonly ElementClass entityAndTopTabContainerClass = new( "ewfUiEntityAndTopTabs" );
@@ -64,6 +73,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						new CssElement( "UiAppLogoContainer", formSelector + " " + "div." + appLogoClass.ClassName ),
 						new CssElement( "UiGlobalNavListContainer", formSelector + " " + "div." + globalNavListContainerClass.ClassName ),
 						new CssElement( "UiUserInfoContainer", formSelector + " " + "div." + userInfoClass.ClassName ),
+						new CssElement( "UiMobileMenuContainer", formSelector + " " + "div." + mobileMenuClass.ClassName ),
+						new CssElement( "UiMobileMenu", formSelector + " " + "nav." + mobileMenuClass.ClassName ),
+						new CssElement( "UiMobileMenuGlobalNavListContainer", formSelector + " div." + mobileMenuGlobalNavListContainerClass.ClassName ),
+						new CssElement( "UiMobileMenuEntityNavAndActionContainer", formSelector + " div." + mobileMenuEntityNavAndActionContainerClass.ClassName ),
+						new CssElement( "UiMobileMenuEntityNavListContainer", formSelector + " div." + mobileMenuEntityNavListContainerClass.ClassName ),
+						new CssElement( "UiMobileMenuEntityActionListContainer", formSelector + " div." + mobileMenuEntityActionListContainerClass.ClassName ),
+						new CssElement( "UiMobileMenuTabContainer", formSelector + " div." + mobileMenuTabContainerClass.ClassName ),
+						new CssElement( "UiMobileMenuTabGroup", formSelector + " div." + mobileMenuTabGroupClass.ClassName ),
+						new CssElement( "UiMobileMenuTabGroupName", formSelector + " p." + mobileMenuTabGroupClass.ClassName ),
 						new CssElement(
 							"UiTopErrorMessageListContainer",
 							ListErrorDisplayStyle.CssSelectors.Select( i => formSelector + " " + i + "." + topErrorMessageListContainerClass.ClassName ).ToArray() )
@@ -192,8 +210,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			return new GenericFlowContainer(
 				new GenericFlowContainer(
-					appLogo.Append( getGlobalNavListContainer() )
+					appLogo.Append( getGlobalNavListContainer( false ) )
 						.Concat( userInfo )
+						.Append( getMobileMenuContainer() )
 						.Append(
 							new FlowErrorContainer(
 								new ErrorSourceSet( includeGeneralErrors: true ),
@@ -219,8 +238,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				new RawList(
 					new EwfHyperlink(
 							changePasswordPage,
-							new CustomHyperlinkStyle( childGetter: destinationUrl => ActionComponentIcon.GetIconAndTextComponents( null, "Change password" ) ) )
-						.ToComponentListItem()
+							new CustomHyperlinkStyle( childGetter: _ => ActionComponentIcon.GetIconAndTextComponents( null, "Change password" ) ) ).ToComponentListItem()
 						.Append(
 							new EwfButton(
 								new CustomButtonStyle( children: ActionComponentIcon.GetIconAndTextComponents( null, "Log out" ) ),
@@ -233,21 +251,64 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return components;
 		}
 
-		private FlowComponent getGlobalNavListContainer() {
+		private FlowComponent getMobileMenuContainer() {
+			var menuDisplayed = new PageModificationValue<string>();
+			var hiddenFieldId = new HiddenFieldId();
+			return new GenericFlowContainer(
+				new EwfButton( new CustomButtonStyle( children: null ), behavior: new ChangeValueBehavior( hiddenFieldId, bool.TrueString ) ).Append<FlowComponent>(
+						new DisplayableElement(
+							_ => new DisplayableElementData(
+								menuDisplayed.ToCondition( bool.TrueString.ToCollection() ).ToDisplaySetup(),
+								() => new DisplayableElementLocalData( "nav" ),
+								classes: mobileMenuClass,
+								children: getGlobalNavListContainer( true )
+									.Concat( getEntityNavAndActionContainer( true ) )
+									.Concat( getMobileMenuTabContainer() )
+									.Materialize() ) ) )
+					.Materialize(),
+				classes: mobileMenuClass,
+				etherealContent: new EwfHiddenField( bool.FalseString, id: hiddenFieldId, pageModificationValue: menuDisplayed ).PageComponent.ToCollection() );
+		}
+
+		private FlowComponent getGlobalNavListContainer( bool inMobileMenu ) {
 			// This check exists to prevent the display of lookup boxes or other post back controls. With these controls we sometimes don't have a specific
 			// destination page to use for an authorization check, meaning that the system code has no way to prevent their display when there is no intermediate
 			// user.
 			if( ConfigurationStatics.IsIntermediateInstallation && !AppRequestState.Instance.IntermediateUserExists )
 				return null;
 
+			var postBackIdBase = inMobileMenu ? "mobileMenuGlobal" : "global";
 			var formItems = EwfUiStatics.AppProvider.GetGlobalNavFormControls()
-				.Select( ( control, index ) => control.GetFormItem( PostBack.GetCompositeId( "global", "nav", index.ToString() ) ) )
+				.Select( ( control, index ) => control.GetFormItem( PostBack.GetCompositeId( postBackIdBase, "nav", index.ToString() ) ) );
+			var listItems = getActionListItems( EwfUiStatics.AppProvider.GetGlobalNavActions( postBackIdBase ) )
+				.Concat( formItems.Select( i => i.ToListItem() ) )
 				.Materialize();
-			var listItems = getActionListItems( EwfUiStatics.AppProvider.GetGlobalNavActions() ).Concat( formItems.Select( i => i.ToListItem() ) ).Materialize();
 			if( !listItems.Any() )
 				return null;
 
-			return new GenericFlowContainer( new LineList( listItems.Select( i => (LineListItem)i ) ).ToCollection(), classes: globalNavListContainerClass );
+			return new GenericFlowContainer(
+				new LineList( listItems.Select( i => (LineListItem)i ) ).ToCollection(),
+				classes: inMobileMenu ? mobileMenuGlobalNavListContainerClass : globalNavListContainerClass );
+		}
+
+		private IEnumerable<FlowComponent> getMobileMenuTabContainer() {
+			if( entityUiSetup == null || PageBase.Current.ParentResource != null )
+				return Enumerable.Empty<FlowComponent>();
+
+			var components = PageBase.Current.EsAsBaseType.ListedResources.SelectMany(
+					resourceGroup => {
+						var tabs = getTabHyperlinksForResources( resourceGroup );
+						return tabs.Any()
+							       ? new GenericFlowContainer(
+								       ( resourceGroup.Name.Any()
+									         ? new Paragraph( resourceGroup.Name.ToComponents(), classes: mobileMenuTabGroupClass ).ToCollection()
+									         : Enumerable.Empty<FlowComponent>() ).Append( new RawList( tabs.Select( i => i.ToComponentListItem() ) ) )
+								       .Materialize(),
+								       classes: mobileMenuTabGroupClass ).ToCollection()
+							       : Enumerable.Empty<FlowComponent>();
+					} )
+				.Materialize();
+			return components.Any() ? new GenericFlowContainer( components, classes: mobileMenuTabContainerClass ).ToCollection() : Enumerable.Empty<FlowComponent>();
 		}
 
 		private FlowComponent getEntityAndTopTabContainer() {
@@ -263,7 +324,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		private FlowComponent getEntityContainer() =>
 			new GenericFlowContainer(
-				getPagePath().Concat( getEntityNavAndActionContainer() ).Concat( getEntitySummaryContainer() ).Materialize(),
+				getPagePath().Concat( getEntityNavAndActionContainer( false ) ).Concat( getEntitySummaryContainer() ).Materialize(),
 				classes: entityContainerClass );
 
 		private IReadOnlyCollection<FlowComponent> getPagePath() {
@@ -275,34 +336,39 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return pagePath.IsEmpty ? Enumerable.Empty<FlowComponent>().Materialize() : pagePath.ToCollection();
 		}
 
-		private IReadOnlyCollection<FlowComponent> getEntityNavAndActionContainer() {
-			var items = new[] { getEntityNavListContainer(), getEntityActionListContainer() }.Where( i => i != null ).Materialize();
+		private IReadOnlyCollection<FlowComponent> getEntityNavAndActionContainer( bool inMobileMenu ) {
+			var items = new[] { getEntityNavListContainer( inMobileMenu ), getEntityActionListContainer( inMobileMenu ) }.Where( i => i != null ).Materialize();
 			return items.Any()
-				       ? new GenericFlowContainer( items, classes: entityNavAndActionContainerClass ).ToCollection()
+				       ? new GenericFlowContainer( items, classes: inMobileMenu ? mobileMenuEntityNavAndActionContainerClass : entityNavAndActionContainerClass )
+					       .ToCollection()
 				       : Enumerable.Empty<FlowComponent>().Materialize();
 		}
 
-		private FlowComponent getEntityNavListContainer() {
+		private FlowComponent getEntityNavListContainer( bool inMobileMenu ) {
 			if( entityUiSetup == null )
 				return null;
 
-			var formItems = entityUiSetup.NavFormControls
-				.Select( ( control, index ) => control.GetFormItem( PostBack.GetCompositeId( "entity", "nav", index.ToString() ) ) )
-				.Materialize();
-			var listItems = getActionListItems( entityUiSetup.NavActions ).Concat( formItems.Select( i => i.ToListItem() ) ).Materialize();
+			var postBackIdBase = inMobileMenu ? "mobileMenuEntity" : "entity";
+			var formItems = entityUiSetup.NavFormControls.Select(
+				( control, index ) => control.GetFormItem( PostBack.GetCompositeId( postBackIdBase, "nav", index.ToString() ) ) );
+			var listItems = getActionListItems( entityUiSetup.NavActionGetter( postBackIdBase ) ).Concat( formItems.Select( i => i.ToListItem() ) ).Materialize();
 			if( !listItems.Any() )
 				return null;
 
-			return new GenericFlowContainer( new LineList( listItems.Select( i => (LineListItem)i ) ).ToCollection(), classes: entityNavListContainerClass );
+			return new GenericFlowContainer(
+				new LineList( listItems.Select( i => (LineListItem)i ) ).ToCollection(),
+				classes: inMobileMenu ? mobileMenuEntityNavListContainerClass : entityNavListContainerClass );
 		}
 
-		private FlowComponent getEntityActionListContainer() {
+		private FlowComponent getEntityActionListContainer( bool inMobileMenu ) {
 			if( entityUiSetup == null || PageBase.Current.ParentResource != null )
 				return null;
-			var listItems = getActionListItems( entityUiSetup.Actions ).Materialize();
+			var listItems = getActionListItems( entityUiSetup.ActionGetter( inMobileMenu ? "mobileMenuEntity" : "entity" ) ).Materialize();
 			if( !listItems.Any() )
 				return null;
-			return new GenericFlowContainer( new LineList( listItems.Select( i => (LineListItem)i ) ).ToCollection(), classes: entityActionListContainerClass );
+			return new GenericFlowContainer(
+				new LineList( listItems.Select( i => (LineListItem)i ) ).ToCollection(),
+				classes: inMobileMenu ? mobileMenuEntityActionListContainerClass : entityActionListContainerClass );
 		}
 
 		private IReadOnlyCollection<FlowComponent> getEntitySummaryContainer() {

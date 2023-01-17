@@ -1,6 +1,4 @@
 ﻿using EnterpriseWebLibrary.UserManagement;
-using Humanizer;
-using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin {
 	partial class EntitySetup: UiEntitySetup {
@@ -50,7 +48,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin {
 
 		EntityUiSetup UiEntitySetup.GetUiSetup() =>
 			new(
-				actions: new HyperlinkSetup(
+				actionGetter: _ => new HyperlinkSetup(
 					new EnterpriseWebFramework.UserManagement.Pages.Impersonate( PageBase.Current.GetUrl() ),
 					"Impersonate user",
 					icon: new ActionComponentIcon( new FontAwesomeIcon( "fa-key" ) ) ).ToCollection() );

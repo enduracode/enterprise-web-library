@@ -110,6 +110,37 @@ ewfUiUserInfoContainer ewfActionComponentAllStylesAllStates {
 ewfUiUserInfoContainer ewfActionComponentAllStylesStatesWithHover {
 	opacity: 1;
 }
+ewfUiMobileMenuContainer > ewfActionComponentAllStylesAllStates {
+	background-color: var( --secondary-color );
+	background-image: url( ../../versioned/ui/menu-icon-v1.svg );
+	background-repeat: no-repeat;
+	background-size: 65%;
+	background-position: center;
+}
+ewfUiMobileMenuContainer > ewfActionComponentAllStylesStatesWithHover {
+	background-color: var( --hover-color );
+}
+ewfUiMobileMenu {
+	box-shadow: 0 10px 10px rgba( 0, 0, 0, .25 );
+	background-color: var( --hover-color );
+}
+ewfUiMobileMenuTabContainer {
+	background-color: var( --secondary-color );
+}
+ewfUiMobileMenuTabGroupName {
+	background-color: var( --gray-color );
+	color: var( --white-color );
+}
+ewfUiMobileMenuTabContainer ewfActionComponentAllStylesAllStates {
+	border-color: rgba( 255, 255, 255, .3 );
+	color: var( --white-color );
+}
+ewfUiMobileMenuTabContainer ewfActionComponentAllStylesStatesWithHover {
+	background-color: var( --hover-color );
+}
+ewfUiMobileMenuTabContainer ewfUiCurrentTabActionControl {
+	background-color: rgba( 255, 255, 255, .3 );
+}
 ewfUiEntityContainer, ewfUiTopTabListContainer {
 	background-color: var( --breadcrumb-bg-color );
 }
@@ -174,20 +205,6 @@ ewfUiSideTabContainer ewfUiCurrentTabActionControl {
 	ewfUiInnerGlobalContainer ewfActionComponentAllStylesStatesWithHover {
 		color: var( --white-color );
 	}
-	ewfUiGlobalNavListContainer {
-		background-color: var( --secondary-color );
-		background-image: url( ../../versioned/ui/menu-icon-v1.svg );
-		background-repeat: no-repeat;
-		background-size: 65%;
-		background-position: center;
-	}
-	ewfUiGlobalNavListContainer:hover, ewfUiGlobalNavListContainer.hover-active {
-		background-color: var( --hover-color );
-	}
-	ewfUiGlobalNavListContainer > ewfUnorderedComponentList {
-		box-shadow: 0 10px 10px rgba( 0, 0, 0, .25 );
-		background-color: var( --hover-color );
-	}
 	ewfUiUserInfoContainer {
 		background-image: url( ../../versioned/ui/account-v1.svg );
 		background-repeat: no-repeat;
@@ -211,27 +228,6 @@ ewfUiSideTabContainer ewfUiCurrentTabActionControl {
 		opacity: 1;
 	}
 	ewfUiUserInfoContainer ewfActionComponentAllStylesStatesWithHover {
-		background-color: var( --hover-color );
-	}
-	ewfUiTopTabListContainer, ewfUiSideTabContainer {
-		box-shadow: 0 10px 10px rgba( 0, 0, 0, .25 );
-		background-color: var( --secondary-color );
-	}
-	ewfUiTopTabListContainer ewfActionComponentAllStylesAllStates, ewfUiSideTabContainer ewfActionComponentAllStylesAllStates {
-		border-color: rgba( 255, 255, 255, .3 );
-		color: var( --white-color );
-	}
-	ewfUiTopTabListContainer ewfUiCurrentTabActionControl, ewfUiSideTabContainer ewfUiCurrentTabActionControl {
-		background-color: rgba( 255, 255, 255, .3 );
-	}
-	ewfUiTopTabListContainer ewfUiCurrentTabActionControl {
-		box-shadow: none;
-	}
-	ewfUiSideTabGroupHead {
-		background-color: var( --gray-color );
-		color: var( --white-color );
-	}
-	ewfUiSideTabContainer ewfActionComponentAllStylesStatesWithHover {
 		background-color: var( --hover-color );
 	}
 }

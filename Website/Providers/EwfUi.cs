@@ -1,11 +1,8 @@
-﻿using System.Collections.Generic;
-using EnterpriseWebLibrary.EnterpriseWebFramework;
-using EnterpriseWebLibrary.WebSessionState;
-using Tewl.Tools;
+﻿using EnterpriseWebLibrary.WebSessionState;
 
 namespace EnterpriseWebLibrary.Website.Providers {
 	internal class EwfUi: AppEwfUiProvider {
-		public override IReadOnlyCollection<ActionComponentSetup> GetGlobalNavActions() {
+		public override IReadOnlyCollection<ActionComponentSetup> GetGlobalNavActions( string postBackIdBase ) {
 			var navButtonSetups = new List<ActionComponentSetup>();
 			if( CreateSystem.GetInfo().MatchesCurrent() )
 				return navButtonSetups;
@@ -22,7 +19,7 @@ namespace EnterpriseWebLibrary.Website.Providers {
 							new StandardButtonStyle( "Test method" ),
 							behavior: new PostBackBehavior(
 								postBack: PostBack.CreateFull(
-									id: "testMethod",
+									id: PostBack.GetCompositeId( postBackIdBase, "testMethod" ),
 									modificationMethod: () => PageBase.AddStatusMessage( StatusMessageType.Info, "Successful method execution." ) ) ) ).ToCollection() ) ) );
 
 			return navButtonSetups;

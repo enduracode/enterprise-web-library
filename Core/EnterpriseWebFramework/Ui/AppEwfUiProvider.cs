@@ -22,7 +22,8 @@
 		/// <summary>
 		/// Gets the global navigational action components.
 		/// </summary>
-		public virtual IReadOnlyCollection<ActionComponentSetup> GetGlobalNavActions() => Enumerable.Empty<ActionComponentSetup>().Materialize();
+		public virtual IReadOnlyCollection<ActionComponentSetup> GetGlobalNavActions( string postBackIdBase ) =>
+			Enumerable.Empty<ActionComponentSetup>().Materialize();
 
 		/// <summary>
 		/// Gets the global navigational form controls.
