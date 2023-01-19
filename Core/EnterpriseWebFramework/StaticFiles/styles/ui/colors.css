@@ -87,7 +87,35 @@ ewfErrorMessageListContainer {
 	color: hsla( 0, 100%, 47%, 1 );
 }
 
-/* master page */
+/* new content */
+ewfUiGlobalNavListContainer ewfActionComponentAllStylesAllNewContentActionStates,
+ewfUiEntityNavAndActionContainer ewfActionComponentAllStylesAllNewContentActionStates,
+ewfUiTopTabListContainer ewfActionComponentAllStylesAllNewContentActionStates,
+ewfUiSideTabContainer ewfActionComponentAllStylesAllNewContentActionStates {
+	font-weight: bold;
+}
+
+/* UI hints */
+ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionExpandLabel,
+ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionCloseLabel {
+	opacity: .5;
+}
+
+/* UiPageContent */
+ewfTopWarningContainer {
+	color: var( --primary-color );
+}
+ewfTopWarningContainer > ewfIcon {
+	color: #eb2113;
+}
+ewfTopWarningContainer ewfActionComponentAllButtonStylesAllNormalStates,
+ewfTopWarningContainer ewfActionComponentAllButtonStylesAllVisitedStates {
+	background-color: #eb2113;
+}
+ewfTopWarningContainer ewfActionComponentAllButtonStylesStatesWithHover,
+ewfTopWarningContainer ewfActionComponentAllButtonStylesStatesWithFocus {
+	background-color: #f00;
+}
 ewfUiOuterGlobalContainer {
 	background-color: var( --primary-color );
 }
@@ -230,34 +258,4 @@ ewfUiSideTabContainer ewfUiCurrentTabActionControl {
 	ewfUiUserInfoContainer ewfActionComponentAllStylesStatesWithHover {
 		background-color: var( --hover-color );
 	}
-}
-
-/* new content */
-ewfUiGlobalNavListContainer ewfActionComponentAllStylesAllNewContentActionStates,
-ewfUiEntityNavAndActionContainer ewfActionComponentAllStylesAllNewContentActionStates,
-ewfUiTopTabListContainer ewfActionComponentAllStylesAllNewContentActionStates,
-ewfUiSideTabContainer ewfActionComponentAllStylesAllNewContentActionStates {
-	font-weight: bold;
-}
-
-/* UI hints */
-ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionExpandLabel,
-ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionCloseLabel {
-	opacity: .5;
-}
-
-/* UiPageContent */
-ewfTopWarningContainer {
-	color: var( --primary-color );
-}
-ewfTopWarningContainer > ewfIcon {
-	color: #eb2113;
-}
-ewfTopWarningContainer ewfActionComponentAllButtonStylesAllNormalStates,
-ewfTopWarningContainer ewfActionComponentAllButtonStylesAllVisitedStates {
-	background-color: #eb2113;
-}
-ewfTopWarningContainer ewfActionComponentAllButtonStylesStatesWithHover,
-ewfTopWarningContainer ewfActionComponentAllButtonStylesStatesWithFocus {
-	background-color: #f00;
 }
