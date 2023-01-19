@@ -10,3 +10,7 @@ ewfTableStandardAndStandardExceptLayoutStyles > caption,
 ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > ewfTh {
 	font-family: 'Libre Franklin', sans-serif;
 }
+
+ewfTopWarningContainer ewfActionComponentAllStylesAllStates {
+	text-transform: uppercase;
+}

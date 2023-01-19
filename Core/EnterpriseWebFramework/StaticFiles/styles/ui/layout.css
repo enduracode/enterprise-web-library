@@ -72,6 +72,7 @@ ewfUiGlobalFootContainer {
 /* top-level spacing */
 ewfTopWarningContainer {
 	margin: 0;
+	padding: var( --ewf-ui-vertical-navigation-spacing ) var( --ewf-ui-horizontal-top-level-spacing );
 }
 ewfUiOuterGlobalContainer, ewfUiEntityContainer, ewfUiTopTabListContainer, ewfUiPageActionListContainer, ewfUiContentContainer, ewfUiContentFootContainer, ewfUiGlobalFootContainer {
 	padding-left: var( --ewf-ui-horizontal-top-level-spacing );
@@ -283,7 +284,15 @@ ewfNotificationSpacer {
 	display: none;
 }
 ewfTopWarningContainer {
+	font-size: .9em;
 	border-style: none;
+}
+ewfTopWarningContainer ewfActionComponentAllStylesAllStates {
+	font-size: .85em;
+	margin-left: 1px;
+	margin-right: 1px;
+	padding: 5px 12px;
+	font-weight: bold;
 }
 ewfUiInnerGlobalContainer {
 	display: flex;
