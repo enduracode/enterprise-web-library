@@ -57,6 +57,7 @@ ewfSectionBoxStyleBothStates + ewfSectionBoxStyleBothStates {
 p,
 ewfUnorderedLineList,
 ewfUnorderedStackList,
+ewfUnorderedWrappingList,
 ewfHtmlBlock ul,
 ewfFormItemList,
 ewfFormItem,
@@ -74,6 +75,7 @@ ewfHtmlBlock {
 p:first-child,
 ewfUnorderedLineList:first-child,
 ewfUnorderedStackList:first-child,
+ewfUnorderedWrappingList:first-child,
 ewfHtmlBlock ul:first-child,
 ewfFormItemList:first-child,
 ewfFormItem:first-child,
@@ -86,12 +88,6 @@ ewfMergeRowTreeChildContainer:first-child,
 ewfChart:first-child,
 ewfHtmlBlock:first-child {
 	margin-top: 0;
-}
-ewfUnorderedWrappingList {
-	margin-top: calc( 1em - .25em );
-}
-ewfUnorderedWrappingList:first-child {
-	margin-top: calc( 0em - .25em );
 }
 ewfWrappingFormItemList {
 	margin-top: calc( 1em - .5em );
@@ -109,25 +105,14 @@ ewfFlowCheckboxAllStates > ewfFlowCheckboxNestedContentContainer {
 }
 
 /* lists */
-ewfUnorderedLineList > ewfComponentListItem {
-	margin-left: .5em;
+ewfUnorderedLineList, ewfUnorderedStackList, ewfUnorderedWrappingList {
+	gap: .5em;
 }
-ewfUnorderedLineList > ewfComponentListItem:first-child {
-	margin-left: 0;
-}
-ewfUnorderedStackList > ewfComponentListItem, ewfOrderedStackList > ewfComponentListItem, ewfHtmlBlock li {
+ewfOrderedStackList > ewfComponentListItem, ewfHtmlBlock li {
 	margin-top: .5em;
 }
-ewfUnorderedStackList > ewfComponentListItem:first-child, ewfOrderedStackList > ewfComponentListItem:first-child, ewfHtmlBlock li:first-child {
+ewfOrderedStackList > ewfComponentListItem:first-child, ewfHtmlBlock li:first-child {
 	margin-top: 0;
-}
-ewfUnorderedWrappingList {
-	margin-right: -.25em;
-	margin-bottom: -.25em;
-	margin-left: -.25em;
-}
-ewfUnorderedWrappingList > ewfComponentListItem {
-	margin: .25em;
 }
 ewfStackFormItemList > ewfFormItemListItem, ewfStackFormItemList > ewfFormItemListButtonItem,
 ewfMergeRowTreeContainer ewfUnorderedStackList > ewfComponentListItem {
