@@ -274,13 +274,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var formItems = EwfUiStatics.AppProvider.GetGlobalNavFormControls()
 				.Select( ( control, index ) => control.GetFormItem( PostBack.GetCompositeId( postBackIdBase, "nav", index.ToString() ) ) );
 			var listItems = getActionListItems( EwfUiStatics.AppProvider.GetGlobalNavActions( postBackIdBase ) )
-				.Concat( formItems.Select( i => i.ToListItem() ) )
+				.Concat( formItems.Select( i => (WrappingListItem)i.ToListItem() ) )
 				.Materialize();
 			if( !listItems.Any() )
 				return null;
 
 			return new GenericFlowContainer(
-				new LineList( listItems.Select( i => (LineListItem)i ) ).ToCollection(),
+				new WrappingList( listItems ).ToCollection(),
 				classes: inMobileMenu ? mobileMenuGlobalNavListContainerClass : globalNavListContainerClass );
 		}
 
@@ -344,12 +344,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var postBackIdBase = inMobileMenu ? "mobileMenuEntity" : "entity";
 			var formItems = entityUiSetup.NavFormControls.Select(
 				( control, index ) => control.GetFormItem( PostBack.GetCompositeId( postBackIdBase, "nav", index.ToString() ) ) );
-			var listItems = getActionListItems( entityUiSetup.NavActionGetter( postBackIdBase ) ).Concat( formItems.Select( i => i.ToListItem() ) ).Materialize();
+			var listItems = getActionListItems( entityUiSetup.NavActionGetter( postBackIdBase ) )
+				.Concat( formItems.Select( i => (WrappingListItem)i.ToListItem() ) )
+				.Materialize();
 			if( !listItems.Any() )
 				return null;
 
 			return new GenericFlowContainer(
-				new LineList( listItems.Select( i => (LineListItem)i ) ).ToCollection(),
+				new WrappingList( listItems ).ToCollection(),
 				classes: inMobileMenu ? mobileMenuEntityNavListContainerClass : entityNavListContainerClass );
 		}
 
@@ -360,7 +362,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			if( !listItems.Any() )
 				return null;
 			return new GenericFlowContainer(
-				new LineList( listItems.Select( i => (LineListItem)i ) ).ToCollection(),
+				new WrappingList( listItems ).ToCollection(),
 				classes: inMobileMenu ? mobileMenuEntityActionListContainerClass : entityActionListContainerClass );
 		}
 
@@ -410,21 +412,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			var listItems = getActionListItems( pageActions ).Materialize();
 			if( !listItems.Any() )
 				return Enumerable.Empty<FlowComponent>().Materialize();
-			return new GenericFlowContainer(
-				( EwfUiStatics.AppProvider.PageActionItemsSeparatedWithPipe()
-					  ? (FlowComponent)new InlineList( listItems )
-					  : new LineList( listItems.Select( i => (LineListItem)i ) ) ).ToCollection(),
-				classes: pageActionListContainerClass ).ToCollection();
+			return new GenericFlowContainer( new WrappingList( listItems ).ToCollection(), classes: pageActionListContainerClass ).ToCollection();
 		}
 
-		private IEnumerable<ComponentListItem> getActionListItems( IReadOnlyCollection<ActionComponentSetup> actions ) =>
+		private IEnumerable<WrappingListItem> getActionListItems( IReadOnlyCollection<ActionComponentSetup> actions ) =>
 			from action in actions
 			let actionComponent = action.GetActionComponent(
 				( text, icon ) => new CustomHyperlinkStyle(
 					childGetter: destinationUrl => ActionComponentIcon.GetIconAndTextComponents( icon, text.Any() ? text : destinationUrl ) ),
 				( text, icon ) => new CustomButtonStyle( children: ActionComponentIcon.GetIconAndTextComponents( icon, text ) ) )
 			where actionComponent != null
-			select actionComponent.ToComponentListItem( displaySetup: action.DisplaySetup );
+			select (WrappingListItem)actionComponent.ToComponentListItem( displaySetup: action.DisplaySetup );
 
 		private IReadOnlyCollection<FlowComponent> getContentFootBlock(
 			bool isAutoDataUpdater, IReadOnlyCollection<ButtonSetup> contentFootActions, IReadOnlyCollection<FlowComponent> contentFootComponents ) {
@@ -433,9 +431,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				if( contentFootActions.Any() )
 					components.Add(
 						new GenericFlowContainer(
-							new LineList(
+							new WrappingList(
 								contentFootActions.Select(
-									( action, index ) => (LineListItem)action.GetActionComponent(
+									( action, index ) => (WrappingListItem)action.GetActionComponent(
 											null,
 											( text, icon ) => new StandardButtonStyle( text, buttonSize: ButtonSize.Large, icon: icon ),
 											enableSubmitButton: index == 0 )

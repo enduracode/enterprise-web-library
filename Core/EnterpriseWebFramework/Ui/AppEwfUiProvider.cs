@@ -14,12 +14,6 @@
 		public virtual IReadOnlyCollection<FlowComponent> GetLogoComponent() => null;
 
 		/// <summary>
-		/// Returns the components that identify the authenticated user and let them log out, change their password, etc. Returns null for the framework’s built-in
-		/// components.
-		/// </summary>
-		public virtual IReadOnlyCollection<FlowComponent> GetUserInfoComponents() => null;
-
-		/// <summary>
 		/// Gets the global navigational action components.
 		/// </summary>
 		public virtual IReadOnlyCollection<ActionComponentSetup> GetGlobalNavActions( string postBackIdBase ) =>
@@ -31,9 +25,10 @@
 		public virtual IReadOnlyCollection<NavFormControl> GetGlobalNavFormControls() => Enumerable.Empty<NavFormControl>().Materialize();
 
 		/// <summary>
-		/// Gets whether items in the page action control list are separated with a pipe character.
+		/// Returns the components that identify the authenticated user and let them log out, change their password, etc. Returns null for the framework’s built-in
+		/// components.
 		/// </summary>
-		public virtual bool PageActionItemsSeparatedWithPipe() => true;
+		public virtual IReadOnlyCollection<FlowComponent> GetUserInfoComponents() => null;
 
 		/// <summary>
 		/// Gets the components to be shown at the bottom of the log-in page for systems with forms authentication.
