@@ -118,6 +118,7 @@ ewfTopWarningContainer ewfActionComponentAllButtonStylesStatesWithFocus {
 }
 ewfUiOuterGlobalContainer {
 	background-color: var( --primary-color );
+	color: var( --white-color );
 }
 ewfUiInnerGlobalContainer ewfComponentListItem {
 	border-color: rgba( 255, 255, 255, .2 );
