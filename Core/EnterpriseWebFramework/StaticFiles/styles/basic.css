@@ -97,7 +97,7 @@ ewfWrappingFormItemList:first-child {
 }
 
 /* bottom */
-p, ewfUnorderedLineList, ewfUnorderedStackList, ewfHtmlBlock ul {
+p, ewfUnorderedLineList, ewfUnorderedStackList, ewfUnorderedWrappingList, ewfHtmlBlock ul {
 	margin-bottom: 0;
 }
 ewfFlowCheckboxAllStates > ewfFlowCheckboxNestedContentContainer {
