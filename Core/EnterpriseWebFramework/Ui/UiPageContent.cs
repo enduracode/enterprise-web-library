@@ -32,8 +32,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		private static readonly ElementClass topTabListContainerClass = new( "ewfUiTopTab" );
 
-		private static readonly ElementClass sideTabAndContentContainerClass = new( "ewfUiTabsAndContent" );
-
 		private static readonly ElementClass sideTabContainerClass = new( "ewfUiSideTab" );
 		private static readonly ElementClass sideTabGroupHeadClass = new( "ewfEditorTabSeparator" );
 
@@ -110,7 +108,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			private IEnumerable<CssElement> getSideTabAndContentElements() =>
 				new[]
 					{
-						new CssElement( "UiSideTabAndContentContainer", formSelector + " " + "div." + sideTabAndContentContainerClass.ClassName ),
 						new CssElement( "UiSideTabContainer", formSelector + " div." + sideTabContainerClass.ClassName ),
 						new CssElement( "UiSideTabGroupHead", formSelector + " div." + sideTabGroupHeadClass.ClassName ),
 						new CssElement( "UiPageActionListContainer", formSelector + " " + "div." + pageActionListContainerClass.ClassName ),
@@ -172,22 +169,18 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					pageLoadPostBack: pageLoadPostBack ).Add(
 					getGlobalContainer()
 						.Append( getEntityAndTopTabContainer() )
+						.Concat( entityUsesTabMode( TabMode.Vertical ) ? getSideTabContainer().ToCollection() : Enumerable.Empty<FlowComponent>() )
+						.Concat( getPageActionListContainer( pageActions ) )
 						.Append(
 							new GenericFlowContainer(
-								( entityUsesTabMode( TabMode.Vertical ) ? getSideTabContainer().ToCollection() : Enumerable.Empty<FlowComponent>() )
-								.Concat( getPageActionListContainer( pageActions ) )
-								.Append(
-									new GenericFlowContainer(
-										new DisplayableElement(
-											_ => new DisplayableElementData(
-												null,
-												() => new DisplayableElementLocalData( "div" ),
-												classes: omitContentBox ? null : contentBoxClass,
-												children: content ) ).ToCollection(),
-										classes: contentContainerClass ) )
-								.Concat( getContentFootBlock( isAutoDataUpdater, contentFootActions, contentFootComponents ) )
-								.Materialize(),
-								classes: sideTabAndContentContainerClass ) )
+								new DisplayableElement(
+									_ => new DisplayableElementData(
+										null,
+										() => new DisplayableElementLocalData( "div" ),
+										classes: omitContentBox ? null : contentBoxClass,
+										children: content ) ).ToCollection(),
+								classes: contentContainerClass ) )
+						.Concat( getContentFootBlock( isAutoDataUpdater, contentFootActions, contentFootComponents ) )
 						.Concat( getGlobalFootContainer() )
 						.Materialize() );
 		}

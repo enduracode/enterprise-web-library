@@ -4,6 +4,7 @@
 	--ewf-ui-horizontal-navigation-spacing: 1.5rem;
 	--ewf-ui-vertical-navigation-spacing: .5rem;
 	--ewf-ui-side-tab-border-width: 4px;
+	--ewf-ui-side-tab-content-width: 11em;
 
 	--default-font-size: 1rem;
 	--default-small-font-size: 14px;
@@ -24,13 +25,54 @@ body {
 		font-size: 11pt;
 	}
 }
+
+/* main grid */
 form {
-	display: flex;
+	display: grid;
 	min-height: 100vh;
-	flex-direction: column;
+	grid-template-columns: auto minmax( 0, 1fr );
+	grid-template-rows: auto auto auto auto auto auto 1fr auto;
+	grid-template-areas: "notificationSpacer notificationSpacer"
+	                     "topWarning topWarning"
+	                     "global global"
+	                     "entityAndTopTab entityAndTopTab"
+	                     "sideTab pageAction"
+	                     "sideTab content"
+	                     "sideTab contentFoot"
+	                     "globalFoot globalFoot";
+}
+ewfNotificationSpacer {
+	grid-area: notificationSpacer;
+}
+ewfTopWarningContainer {
+	grid-area: topWarning;
+}
+ewfUiOuterGlobalContainer {
+	grid-area: global;
+}
+ewfUiEntityAndTopTabContainer {
+	grid-area: entityAndTopTab;
+}
+ewfUiSideTabContainer {
+	grid-area: sideTab;
+}
+ewfUiPageActionListContainer {
+	grid-area: pageAction;
+}
+ewfUiContentContainer {
+	grid-area: content;
+}
+ewfUiContentFootContainer {
+	grid-area: contentFoot;
+}
+ewfUiGlobalFootContainer {
+	grid-area: globalFoot;
 }
 
 /* top-level spacing */
+ewfTopWarningContainer {
+	margin: 0;
+}
 ewfUiOuterGlobalContainer, ewfUiEntityContainer, ewfUiTopTabListContainer, ewfUiPageActionListContainer, ewfUiContentContainer, ewfUiContentFootContainer, ewfUiGlobalFootContainer {
 	padding-left: var( --ewf-ui-horizontal-top-level-spacing );
 	padding-right: var( --ewf-ui-horizontal-top-level-spacing );
@@ -199,6 +241,9 @@ ewfCheckboxList > ewfCheckboxListContentContainer > ewfUnorderedComponentList > 
 }
 
 /* corner rounding */
+ewfTopWarningContainer {
+	border-radius: 0;
+}
 ewfCheckboxList, ewfUiContentBox {
 	border-radius: .5em;
 }
@@ -233,9 +278,12 @@ ewfErrorMessageListContainer {
 	font-weight: bold;
 }
 
-/* master page */
+/* UiPageContent */
 ewfNotificationSpacer {
 	display: none;
+}
+ewfTopWarningContainer {
+	border-style: none;
 }
 ewfUiInnerGlobalContainer {
 	display: flex;
@@ -425,19 +473,8 @@ ewfUiTopTabListContainer ewfUiCurrentTabActionControl {
 	border-radius: 5px 5px 0 0;
 	font-weight: bold;
 }
-ewfUiSideTabAndContentContainer {
-	display: grid;
-	flex-grow: 1;
-	grid-template-areas:
-	                   "sidebar action"
-	                   "sidebar content"
-	                   "sidebar foot";
-	grid-template-columns: auto minmax( 0, 1fr );
-	grid-template-rows: auto auto 1fr;
-}
 ewfUiSideTabContainer {
-	grid-area: sidebar;
-	width: 12.5em;
+	width: calc( var( --ewf-ui-side-tab-content-width ) + var( --ewf-ui-horizontal-top-level-spacing ) * 2 );
 }
 ewfUiSideTabGroupHead {
 	font-size: .8em;
@@ -450,15 +487,10 @@ ewfUiSideTabContainer ewfActionComponentAllStylesAllStates {
 	border-left-style: solid;
 }
 ewfUiPageActionListContainer {
-	grid-area: action;
 	margin-bottom: 1em;
 	margin-left: 1em;
 }
-ewfUiContentContainer {
-	grid-area: content;
-}
 ewfUiContentFootContainer {
-	grid-area: foot;
 	text-align: center;
 }
 ewfUiContentFootActionListContainer > ewfUnorderedLineList {
