@@ -1,4 +1,6 @@
 ﻿:root {
+	--ewf-small-font-size: .9rem;
+
 	--ewf-ui-top-level-vertical-spacing: 1rem;
 	--ewf-ui-top-level-horizontal-spacing: 2rem;
 	--ewf-ui-navigation-vertical-spacing: .5rem;
@@ -6,8 +8,6 @@
 	--ewf-ui-side-tab-border-width: 4px;
 	--ewf-ui-side-tab-content-width: 11em;
 
-	--default-font-size: 1rem;
-	--default-small-font-size: 14px;
 	--button-padding: .5vw 2vw;
 	--default-border-radius: .5em;
 	--tablet-font-size: 14px;
@@ -83,7 +83,7 @@ ewfUiOuterGlobalContainer, ewfUiEntityContainer, ewfUiSideTabContainer, ewfUiGlo
 ewfUiAppLogoContainer, ewfUiEntityContainer, ewfUiTopTabListContainer, ewfUiPageActionListContainer, ewfUiContentContainer, ewfUiContentFootContainer, ewfUiGlobalFootContainer {
 	padding-left: var( --ewf-ui-top-level-horizontal-spacing );
 }
-ewfUiEntityContainer, ewfUiTopTabListContainer, ewfUiPageActionListContainer, ewfUiContentContainer, ewfUiContentFootContainer, ewfUiGlobalFootContainer {
+ewfUiUserInfoContainer, ewfUiEntityContainer, ewfUiTopTabListContainer, ewfUiPageActionListContainer, ewfUiContentContainer, ewfUiContentFootContainer, ewfUiGlobalFootContainer {
 	padding-right: var( --ewf-ui-top-level-horizontal-spacing );
 }
 ewfUiTopErrorMessageListContainer, ewfUiEntityContainer > * {
@@ -117,6 +117,13 @@ ewfUiGlobalNavListContainer ewfActionComponentAllStylesAllStates, ewfUiGlobalNav
 ewfUiGlobalNavListContainer ewfActionComponentAllStylesAllStates, ewfUiSideTabGroupHead, ewfUiSideTabContainer ewfActionComponentAllStylesAllStates {
 	padding-top: var( --ewf-ui-navigation-vertical-spacing );
 	padding-bottom: var( --ewf-ui-navigation-vertical-spacing );
+}
+ewfUiUserInfoContainer > ewfUnorderedComponentList {
+	margin: 0;
+	margin-right: calc( var( --ewf-list-item-spacing ) * -1 );
+}
+ewfUiUserInfoContainer ewfActionComponentAllStylesAllStates {
+	padding: 0 var( --ewf-list-item-spacing );
 }
 ewfUiTopTabListContainer ewfActionComponentAllStylesAllStates {
 	padding: .5rem 1rem;
@@ -289,7 +296,7 @@ ewfNotificationSpacer {
 	display: none;
 }
 ewfTopWarningContainer {
-	font-size: .9em;
+	font-size: var( --ewf-small-font-size );
 	border-style: none;
 }
 ewfTopWarningContainer ewfActionComponentAllStylesAllStates {
@@ -299,18 +306,18 @@ ewfTopWarningContainer ewfActionComponentAllStylesAllStates {
 	padding: 5px 12px;
 	font-weight: bold;
 }
+ewfUiInnerGlobalContainer ewfHyperlinkAllStylesAllStates {
+	text-decoration: none;
+}
+ewfUiInnerGlobalContainer ewfHyperlinkAllStylesStatesWithFocus,
+ewfUiInnerGlobalContainer ewfHyperlinkAllStylesStatesWithHover {
+	text-decoration: revert;
+}
 ewfUiInnerGlobalContainer {
 	display: grid;
 	grid-template-columns: auto auto 1fr auto;
 	grid-template-areas: "appLogo globalNav userInfo mobileMenu";
 	align-items: center;
-}
-ewfUiInnerGlobalContainer ewfComponentListItem {
-	border-left-width: 2px;
-	border-left-style: solid;
-}
-ewfUiInnerGlobalContainer ewfComponentListItem:first-child {
-	border-left-style: none;
 }
 ewfUiAppLogoContainer {
 	grid-area: appLogo;
@@ -320,32 +327,34 @@ ewfUiAppLogoContainer ewfImage {
 	max-height: 2.5rem;
 	object-fit: contain;
 }
+ewfUiGlobalNavListContainer, ewfUiUserInfoContainer {
+	font-size: var( --ewf-small-font-size );
+}
 ewfUiGlobalNavListContainer {
 	grid-area: globalNav;
-	font-size: .8em;
 }
-ewfUiGlobalNavListContainer ewfActionComponentAllStylesAllStates, ewfUiUserInfoContainer ewfActionComponentAllStylesAllStates {
-	border-radius: 0;
+ewfUiGlobalNavListContainer ewfComponentListItem {
+	border-left-width: 2px;
+	border-left-style: solid;
+}
+ewfUiGlobalNavListContainer ewfComponentListItem:first-child {
+	border-left-style: none;
+}
+ewfUiGlobalNavListContainer ewfActionComponentAllStylesAllStates {
 	font-weight: bold;
 }
 ewfUiUserInfoContainer {
 	grid-area: userInfo;
 	text-align: right;
+	line-height: 1.5;
 }
 ewfUiUserInfoContainer > p {
 	margin: 0;
 }
 ewfUiUserInfoContainer > ewfUnorderedComponentList {
 	display: flex;
-	margin: 0;
-	margin-right: -10px;
 	justify-content: flex-end;
 	list-style-type: none;
-}
-ewfUiUserInfoContainer ewfActionComponentAllStylesAllStates {
-	display: inline-block;
-	font-size: var( --default-small-font-size );
-	padding: 0 10px;
 }
 ewfUiMobileMenuContainer {
 	grid-area: mobileMenu;
@@ -410,7 +419,7 @@ ewfUiEntityAndTopTabContainer {
 	gap: 10px 0;
 }
 ewfUiEntityContainer, ewfUiTopTabListContainer {
-	font-size: var( --default-small-font-size );
+	font-size: var( --ewf-small-font-size );
 	font-weight: bold;
 	letter-spacing: -.025em;
 }
@@ -474,7 +483,6 @@ ewfUiTopTabListContainer ewfActionComponentAllStylesAllStates {
 	padding: 1vw;
 	white-space: nowrap;
 	font-weight: normal;
-	text-decoration: none;
 }
 ewfUiTopTabListContainer ewfActionComponentAllStylesStatesWithHover {
 	margin-top: -4px;
@@ -499,7 +507,7 @@ ewfUiSideTabGroupHead:not( :first-child ) {
 	padding-top: .5rem;
 }
 ewfUiSideTabContainer ewfActionComponentAllStylesAllStates {
-	font-size: .9em;
+	font-size: var( --ewf-small-font-size );
 	border-left-style: solid;
 }
 ewfUiPageActionListContainer {
@@ -513,7 +521,7 @@ ewfUiContentFootActionListContainer > ewfUnorderedLineList {
 	justify-content: flex-end;
 }
 ewfUiPoweredByEwlFooterContainer {
-	font-size: .9em;
+	font-size: var( --ewf-small-font-size );
 	text-align: center;
 }
 @media only screen and ( max-width: 1200px ) {
@@ -639,7 +647,7 @@ ewfUiPoweredByEwlFooterContainer {
 		padding: var( --mobile-padding );
 	}
 	ewfUiContentContainer p {
-		font-size: var( --default-small-font-size );
+		font-size: var( --ewf-small-font-size );
 	}
 }
 @media print {

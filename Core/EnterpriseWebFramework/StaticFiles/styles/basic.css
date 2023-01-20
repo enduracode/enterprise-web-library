@@ -1,4 +1,5 @@
 ﻿:root {
+	--ewf-list-item-spacing: .5em;
 	--ewf-normal-button-padding: .6em;
 }
 
@@ -110,7 +111,7 @@ ewfFlowCheckboxAllStates > ewfFlowCheckboxNestedContentContainer {
 
 /* lists */
 ewfUnorderedLineList, ewfUnorderedStackList, ewfUnorderedWrappingList {
-	gap: .5em;
+	gap: var( --ewf-list-item-spacing );
 }
 ewfOrderedStackList > ewfComponentListItem, ewfHtmlBlock li {
 	margin-top: .5em;

@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using Humanizer;
-using Tewl.Tools;
+﻿using System.Collections.Immutable;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -204,6 +200,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			return new[]
 					{
 						getElementsForAllStates( "ActionComponentAllStyles", ".{0}".FormatWith( AllStylesClass.ClassName ), HtmlBlockContainer.CssElementCreator.Selector ),
+						getElementsForAllStates( "HyperlinkAllStyles", ".{0}".FormatWith( AllStylesClass.ClassName ) ),
+						getElementsForAllStates( "ButtonAllStyles", ".{0}".FormatWith( AllStylesClass.ClassName ) ),
 						getElementsForAllStates(
 							"HyperlinkStandardStyle",
 							".{0}".FormatWith( HyperlinkStandardStyleClass.ClassName ),

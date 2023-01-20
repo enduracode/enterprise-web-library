@@ -120,15 +120,14 @@ ewfUiOuterGlobalContainer {
 	background-color: var( --primary-color );
 	color: var( --white-color );
 }
-ewfUiInnerGlobalContainer ewfComponentListItem {
-	border-color: rgba( 255, 255, 255, .2 );
-}
 ewfUiInnerGlobalContainer ewfActionComponentAllStylesAllStates {
-	background-color: transparent;
 	color: var( --white-color );
 }
 ewfUiInnerGlobalContainer ewfActionComponentAllStylesStatesWithHover {
 	color: var( --hover-color );
+}
+ewfUiGlobalNavListContainer ewfComponentListItem {
+	border-color: rgba( 255, 255, 255, .2 );
 }
 ewfUiUserInfoContainer {
 	color: var( --white-color );
