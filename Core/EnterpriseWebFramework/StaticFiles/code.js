@@ -56,7 +56,7 @@ function NumericalOnly( evt, field ) {
 // This function gets called by jQuery's on-document-ready event. This will run the following code after the page has loaded.
 function OnDocumentReady() {
 	stopActivatableTableRowNestedEvents();
-	$( "table.responsiveDataTable" ).DataTable( { responsive: true, pageLength: 25 } );
+	$( "table.responsiveDataTable" ).dataTable( { responsive: true, searching: false, paging: false, info: false } );
 	$( "dialog" ).each( function() { dialogPolyfill.registerDialog( this ); } );
 	Chart.defaults.global.defaultFontColor = $( "body" ).css( "color" );
 }
