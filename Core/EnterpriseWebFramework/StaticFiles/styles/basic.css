@@ -1,4 +1,8 @@
-﻿/* Always show vertical scroll bar to avoid the screen shifting when flipping between long and short pages. */
+﻿:root {
+	--ewf-normal-button-padding: .6em;
+}
+
+/* Always show vertical scroll bar to avoid the screen shifting when flipping between long and short pages. */
 html {
 	overflow-y: scroll;
 }
@@ -362,7 +366,7 @@ ewfActionComponentShrinkWrapButtonStyleAllStates, ewfTopWarningContainer ewfActi
 }
 ewfActionComponentNormalButtonStyleAllStates {
 	border-radius: .4em;
-	padding: .6em;
+	padding: var( --ewf-normal-button-padding );
 }
 ewfActionComponentLargeButtonStyleAllStates {
 	font-size: 1.4em;

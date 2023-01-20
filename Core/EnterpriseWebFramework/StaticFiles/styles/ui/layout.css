@@ -1,8 +1,8 @@
 ﻿:root {
-	--ewf-ui-horizontal-top-level-spacing: 2rem;
-	--ewf-ui-vertical-top-level-spacing: 1rem;
-	--ewf-ui-horizontal-navigation-spacing: 1.5rem;
-	--ewf-ui-vertical-navigation-spacing: .5rem;
+	--ewf-ui-top-level-vertical-spacing: 1rem;
+	--ewf-ui-top-level-horizontal-spacing: 2rem;
+	--ewf-ui-navigation-vertical-spacing: .5rem;
+	--ewf-ui-navigation-horizontal-spacing: 1.5rem;
 	--ewf-ui-side-tab-border-width: 4px;
 	--ewf-ui-side-tab-content-width: 11em;
 
@@ -72,49 +72,54 @@ ewfUiGlobalFootContainer {
 /* top-level spacing */
 ewfTopWarningContainer {
 	margin: 0;
-	padding: var( --ewf-ui-vertical-navigation-spacing ) var( --ewf-ui-horizontal-top-level-spacing );
+	padding: var( --ewf-ui-navigation-vertical-spacing ) var( --ewf-ui-top-level-horizontal-spacing );
 }
 ewfUiOuterGlobalContainer, ewfUiEntityContainer, ewfUiTopTabListContainer, ewfUiPageActionListContainer, ewfUiContentContainer, ewfUiContentFootContainer, ewfUiGlobalFootContainer {
-	padding-left: var( --ewf-ui-horizontal-top-level-spacing );
-	padding-right: var( --ewf-ui-horizontal-top-level-spacing );
-	padding-top: var( --ewf-ui-vertical-top-level-spacing );
+	padding-top: var( --ewf-ui-top-level-vertical-spacing );
 }
 ewfUiOuterGlobalContainer, ewfUiEntityContainer, ewfUiSideTabContainer, ewfUiGlobalFootContainer {
-	padding-bottom: var( --ewf-ui-vertical-top-level-spacing );
+	padding-bottom: var( --ewf-ui-top-level-vertical-spacing );
 }
-ewfUiInnerGlobalContainer {
-	column-gap: var( --ewf-ui-horizontal-top-level-spacing );
-	row-gap: var( --ewf-ui-vertical-top-level-spacing );
+ewfUiAppLogoContainer, ewfUiEntityContainer, ewfUiTopTabListContainer, ewfUiPageActionListContainer, ewfUiContentContainer, ewfUiContentFootContainer, ewfUiGlobalFootContainer {
+	padding-left: var( --ewf-ui-top-level-horizontal-spacing );
+}
+ewfUiEntityContainer, ewfUiTopTabListContainer, ewfUiPageActionListContainer, ewfUiContentContainer, ewfUiContentFootContainer, ewfUiGlobalFootContainer {
+	padding-right: var( --ewf-ui-top-level-horizontal-spacing );
 }
 ewfUiTopErrorMessageListContainer, ewfUiEntityContainer > * {
-	margin-top: var( --ewf-ui-vertical-top-level-spacing );
+	margin-top: var( --ewf-ui-top-level-vertical-spacing );
 }
 ewfUiEntityContainer > *:first-child {
 	margin-top: 0;
 }
 ewfUiSideTabGroupHead, ewfUiSideTabContainer ewfActionComponentAllStylesAllStates {
-	padding-right: var( --ewf-ui-horizontal-top-level-spacing );
+	padding-right: var( --ewf-ui-top-level-horizontal-spacing );
 }
 ewfUiSideTabGroupHead {
-	padding-left: calc( var( --ewf-ui-horizontal-top-level-spacing ) * .75 );
+	padding-left: calc( var( --ewf-ui-top-level-horizontal-spacing ) * .75 );
 }
 ewfUiSideTabContainer ewfActionComponentAllStylesAllStates {
 	border-left-width: var( --ewf-ui-side-tab-border-width );
-	padding-left: calc( var( --ewf-ui-horizontal-top-level-spacing ) - var( --ewf-ui-side-tab-border-width ) );
+	padding-left: calc( var( --ewf-ui-top-level-horizontal-spacing ) - var( --ewf-ui-side-tab-border-width ) );
 }
 
 /* navigation spacing */
-ewfUiGlobalNavListContainer ewfComponentListItem {
-	margin: 0;
-	padding-left: var( --ewf-ui-horizontal-navigation-spacing );
-	padding-right: var( --ewf-ui-horizontal-navigation-spacing );
+ewfUiGlobalNavListContainer {
+	margin-left: calc( var( --ewf-ui-top-level-horizontal-spacing ) - var( --ewf-ui-navigation-horizontal-spacing ) );
+}
+ewfUiGlobalNavListContainer ewfUnorderedComponentList {
+	column-gap: 0;
+}
+ewfUiGlobalNavListContainer ewfActionComponentAllStylesAllStates, ewfUiGlobalNavListContainer ewfFormItem {
+	padding-left: var( --ewf-ui-navigation-horizontal-spacing );
+	padding-right: var( --ewf-ui-navigation-horizontal-spacing );
+}
+ewfUiGlobalNavListContainer ewfActionComponentAllStylesAllStates, ewfUiSideTabGroupHead, ewfUiSideTabContainer ewfActionComponentAllStylesAllStates {
+	padding-top: var( --ewf-ui-navigation-vertical-spacing );
+	padding-bottom: var( --ewf-ui-navigation-vertical-spacing );
 }
 ewfUiTopTabListContainer ewfActionComponentAllStylesAllStates {
 	padding: .5rem 1rem;
-}
-ewfUiSideTabGroupHead, ewfUiSideTabContainer ewfActionComponentAllStylesAllStates {
-	padding-top: var( --ewf-ui-vertical-navigation-spacing );
-	padding-bottom: var( --ewf-ui-vertical-navigation-spacing );
 }
 
 /* borders */
@@ -295,38 +300,39 @@ ewfTopWarningContainer ewfActionComponentAllStylesAllStates {
 	font-weight: bold;
 }
 ewfUiInnerGlobalContainer {
-	display: flex;
-	flex-wrap: wrap;
-	justify-content: space-between;
+	display: grid;
+	grid-template-columns: auto auto 1fr auto;
+	grid-template-areas: "appLogo globalNav userInfo mobileMenu";
 	align-items: center;
 }
 ewfUiInnerGlobalContainer ewfComponentListItem {
-	border-right-width: 2px;
-	border-right-style: solid;
+	border-left-width: 2px;
+	border-left-style: solid;
 }
-ewfUiInnerGlobalContainer ewfComponentListItem:last-child {
-	border-right-style: none;
+ewfUiInnerGlobalContainer ewfComponentListItem:first-child {
+	border-left-style: none;
 }
 ewfUiAppLogoContainer {
-	margin-right: 1vw;
+	grid-area: appLogo;
 }
 ewfUiAppLogoContainer ewfImage {
-	width: 10vw;
-	max-height: 3vw;
+	width: 8rem;
+	max-height: 2.5rem;
 	object-fit: contain;
 }
+ewfUiGlobalNavListContainer {
+	grid-area: globalNav;
+	font-size: .8em;
+}
 ewfUiGlobalNavListContainer ewfActionComponentAllStylesAllStates, ewfUiUserInfoContainer ewfActionComponentAllStylesAllStates {
-	font-size: var( --default-font-size );
 	border-radius: 0;
-	padding: .25vw 1.5vw;
 	font-weight: bold;
 }
 ewfUiUserInfoContainer {
-	flex: 1;
+	grid-area: userInfo;
 	text-align: right;
 }
 ewfUiUserInfoContainer > p {
-	font-size: var( --default-font-size );
 	margin: 0;
 }
 ewfUiUserInfoContainer > ewfUnorderedComponentList {
@@ -342,6 +348,7 @@ ewfUiUserInfoContainer ewfActionComponentAllStylesAllStates {
 	padding: 0 10px;
 }
 ewfUiMobileMenuContainer {
+	grid-area: mobileMenu;
 	display: none;
 }
 ewfUiMobileMenuContainer > ewfActionComponentAllStylesAllStates {
@@ -483,7 +490,7 @@ ewfUiTopTabListContainer ewfUiCurrentTabActionControl {
 	font-weight: bold;
 }
 ewfUiSideTabContainer {
-	width: calc( var( --ewf-ui-side-tab-content-width ) + var( --ewf-ui-horizontal-top-level-spacing ) * 2 );
+	width: calc( var( --ewf-ui-side-tab-content-width ) + var( --ewf-ui-top-level-horizontal-spacing ) * 2 );
 }
 ewfUiSideTabGroupHead {
 	font-size: .8em;
