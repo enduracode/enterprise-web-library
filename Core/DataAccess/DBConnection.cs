@@ -1,19 +1,13 @@
-using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
-using System.IO;
-using System.Linq;
 using EnterpriseWebLibrary.DataAccess.RevisionHistory;
 using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
-using Humanizer;
 using NodaTime;
 using StackExchange.Profiling;
 using StackExchange.Profiling.Data;
-using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DataAccess {
 	/// <summary>
@@ -298,7 +292,7 @@ namespace EnterpriseWebLibrary.DataAccess {
 		/// not call this method when the transaction is in a state such that additional modifications may need to execute before all validation methods can be
 		/// successful.
 		/// </summary>
-		internal void PreExecuteCommitTimeValidationMethods() {
+		public void PreExecuteCommitTimeValidationMethods() {
 			executeCommitTimeValidationMethods();
 			commitTimeValidationMethods.Clear();
 		}
