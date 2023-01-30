@@ -203,14 +203,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 			return new GenericFlowContainer(
 				new GenericFlowContainer(
-					appLogo.Append( getGlobalNavListContainer( false ) )
+					appLogo.Concat( getGlobalNavListContainer( false ) )
 						.Concat( userInfo )
 						.Append( getMobileMenuContainer() )
 						.Append(
 							new FlowErrorContainer(
 								new ErrorSourceSet( includeGeneralErrors: true ),
 								new ListErrorDisplayStyle( classes: topErrorMessageListContainerClass ) ) )
-						.Where( i => i != null )
 						.Materialize(),
 					classes: innerGlobalContainerClass ).ToCollection(),
 				classes: outerGlobalContainerClass );
@@ -263,12 +262,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				etherealContent: new EwfHiddenField( bool.FalseString, id: hiddenFieldId, pageModificationValue: menuDisplayed ).PageComponent.ToCollection() );
 		}
 
-		private FlowComponent getGlobalNavListContainer( bool inMobileMenu ) {
+		private IEnumerable<FlowComponent> getGlobalNavListContainer( bool inMobileMenu ) {
 			// This check exists to prevent the display of lookup boxes or other post back controls. With these controls we sometimes don't have a specific
 			// destination page to use for an authorization check, meaning that the system code has no way to prevent their display when there is no intermediate
 			// user.
 			if( ConfigurationStatics.IsIntermediateInstallation && !AppRequestState.Instance.IntermediateUserExists )
-				return null;
+				return Enumerable.Empty<FlowComponent>();
 
 			var postBackIdBase = inMobileMenu ? "mobileMenuGlobal" : "global";
 			var formItems = EwfUiStatics.AppProvider.GetGlobalNavFormControls()
@@ -277,11 +276,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				.Concat( formItems.Select( i => (WrappingListItem)i.ToListItem() ) )
 				.Materialize();
 			if( !listItems.Any() )
-				return null;
+				return Enumerable.Empty<FlowComponent>();
 
 			return new GenericFlowContainer(
 				new WrappingList( listItems ).ToCollection(),
-				classes: inMobileMenu ? mobileMenuGlobalNavListContainerClass : globalNavListContainerClass );
+				classes: inMobileMenu ? mobileMenuGlobalNavListContainerClass : globalNavListContainerClass ).ToCollection();
 		}
 
 		private IEnumerable<FlowComponent> getMobileMenuTabContainer() {
