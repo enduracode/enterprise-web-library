@@ -12,7 +12,7 @@ namespace EnterpriseWebLibrary.Website.TestPages {
 			new[]
 				{
 					new ResourceGroup( "Layout", new BoxDemo( this ), new ComponentLists( this ) ),
-					new ResourceGroup( "Tables", new EwfTableDemo( this ), new ColumnPrimaryTableDemo( this ) ),
+					new ResourceGroup( "Tables", new EwfTableDemo( this ), new ColumnPrimaryTableDemo( this ), new ResponsiveTableDemo( this ) ),
 					new ResourceGroup(
 						"Form Controls",
 						new TextControlDemo( this ),
@@ -33,7 +33,8 @@ namespace EnterpriseWebLibrary.Website.TestPages {
 		protected override IEnumerable<UrlPattern> getChildUrlPatterns() =>
 			RequestDispatchingStatics.GetFrameworkUrlPatterns()
 				.Append( BoxDemo.UrlPatterns.Literal( this, "box" ) )
-				.Append( EwfTableDemo.UrlPatterns.Literal( this, "ewf-table" ) )
+				.Append( EwfTableDemo.UrlPatterns.Literal( this, "standard-table" ) )
+				.Append( ResponsiveTableDemo.UrlPatterns.Literal( this, "responsive-table" ) )
 				.Append( FileUploadDemo.UrlPatterns.Literal( this, "file-upload" ) )
 				.Append( CreateSystem.UrlPatterns.Literal( "create-system" ) )
 				.Append( ConfigurationSchemas.EntitySetup.UrlPatterns.Literal( "ConfigurationSchemas" ) )

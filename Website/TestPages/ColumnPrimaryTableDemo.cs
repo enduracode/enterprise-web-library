@@ -1,15 +1,10 @@
-﻿using System;
-using System.Linq;
-using EnterpriseWebLibrary.EnterpriseWebFramework;
-using EnterpriseWebLibrary.WebSessionState;
-using Humanizer;
-using Tewl.Tools;
+﻿using EnterpriseWebLibrary.WebSessionState;
 
 // EwlPage
 
 namespace EnterpriseWebLibrary.Website.TestPages {
 	partial class ColumnPrimaryTableDemo {
-		public override string ResourceName => "Column Primary";
+		public override string ResourceName => "Column Primary Table";
 
 		protected override PageContent getContent() {
 			var itemGroups = Enumerable.Range( 1, 2 )

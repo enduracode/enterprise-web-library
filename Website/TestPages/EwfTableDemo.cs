@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using EnterpriseWebLibrary.EnterpriseWebFramework;
-using EnterpriseWebLibrary.WebSessionState;
-using Humanizer;
-using Tewl.Tools;
+﻿using EnterpriseWebLibrary.WebSessionState;
 
 // EwlPage
 // OptionalParameter: int groupCount
@@ -17,7 +11,7 @@ namespace EnterpriseWebLibrary.Website.TestPages {
 			specifier.FirstGroupItemCount = 45;
 		}
 
-		public override string ResourceName => "EWF Table";
+		public override string ResourceName => "Standard Table";
 
 		protected override PageContent getContent() {
 			var content = new UiPageContent();
