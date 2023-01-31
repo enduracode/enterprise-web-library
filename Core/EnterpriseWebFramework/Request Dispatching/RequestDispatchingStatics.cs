@@ -10,13 +10,17 @@ using StackExchange.Profiling;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public static class RequestDispatchingStatics {
+		private const string requestStateKey = EwlStatics.EwlInitialism;
+
 		private static SystemProviderReference<AppRequestDispatchingProvider> provider;
 		private static Func<HttpContext> currentContextGetter;
 
 		internal static void Init( SystemProviderReference<AppRequestDispatchingProvider> provider, Func<HttpContext> currentContextGetter ) {
+			UnhandledException.Init( () => RequestState.GetLastError() );
+			EwfApp.Init( currentContextGetter );
+
 			RequestDispatchingStatics.provider = provider;
 			RequestDispatchingStatics.currentContextGetter = currentContextGetter;
-			EwfApp.Init( currentContextGetter );
 		}
 
 		/// <summary>
@@ -52,7 +56,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						          : baseUrl + appRelativeUrl;
 
 
-					EwfApp.RequestState = new AppRequestState( url, baseUrl );
+					currentContextGetter().Items.Add( requestStateKey, new AppRequestState( url, baseUrl ) );
 				},
 				false,
 				true );
@@ -66,8 +70,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					return;
 				}
 
-				EwfApp.RequestState.IntermediateUserExists = NonLiveInstallationStatics.IntermediateAuthenticationCookieExists();
-				EwfApp.RequestState.EnableUser();
+				RequestState.IntermediateUserExists = NonLiveInstallationStatics.IntermediateAuthenticationCookieExists();
+				RequestState.EnableUser();
 
 				Action<HttpContext> requestHandler;
 				using( MiniProfiler.Current.Step( "EWF - Resolve URL" ) )
@@ -82,7 +86,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				HandleError( context, exception );
 			}
 			finally {
-				HandleEndRequest();
+				// Do not set a status code since we may have already set one or set a redirect page.
+				executeWithBasicExceptionHandling( () => RequestState.CleanUp(), false, false );
 			}
 		}
 
@@ -99,10 +104,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			if( context.Request.Path.HasValue )
 				appRelativeUrl = appRelativeUrl[ 1.. ];
 
-			var handlers = EwfApp.RequestState.ExecuteWithUserDisabled(
+			var handlers = RequestState.ExecuteWithUserDisabled(
 				() => {
 					try {
-						return UrlHandlingStatics.ResolveUrl( EwfApp.RequestState.BaseUrl, appRelativeUrl );
+						return UrlHandlingStatics.ResolveUrl( RequestState.BaseUrl, appRelativeUrl );
 					}
 					catch( UnresolvableUrlException e ) {
 						throw new ResourceNotAvailableException( "Failed to resolve the URL.", e );
@@ -111,13 +116,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			if( handlers != null ) {
 				// Before URL normalization, multiple copies of the same handler can exist in the list. When a new handler object is created and it matches more than
 				// one handler in the list, we want parameters to be taken from the lowest-level segment. That’s why we reverse the handlers here.
-				EwfApp.RequestState.SetUrlHandlers( handlers.Reverse().Materialize() );
+				RequestState.SetUrlHandlers( handlers.Reverse().Materialize() );
 
 				return handlers.Last().HandleRequest;
 			}
 
 			// ACME challenge response; see https://tools.ietf.org/html/rfc8555#section-8.3
-			var absoluteUrl = new Uri( EwfApp.RequestState.Url );
+			var absoluteUrl = new Uri( RequestState.Url );
 			if( absoluteUrl.Scheme == "http" && absoluteUrl.Port == 80 && absoluteUrl.AbsolutePath.StartsWith( "/.well-known/acme-challenge/" ) ) {
 				var systemManager = ConfigurationStatics.MachineConfiguration?.SystemManager;
 				if( systemManager != null )
@@ -129,14 +134,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 
 			return null;
-		}
-
-		internal static void HandleEndRequest() {
-			if( EwfApp.RequestState == null )
-				return;
-
-			// Do not set a status code since we may have already set one or set a redirect page.
-			executeWithBasicExceptionHandling( () => EwfApp.RequestState.CleanUp(), false, false );
 		}
 
 		/// <summary>
@@ -153,33 +150,33 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 						var baseUrlRequest = new Lazy<bool>(
 							() => string.Equals(
-								EwfApp.RequestState.Url,
+								RequestState.Url,
 								EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString( EwfConfigurationStatics.AppSupportsSecureConnections ),
 								StringComparison.Ordinal ) );
 						if( exception is ResourceNotAvailableException || errorIsBogusPathException )
 							transferRequest( context, 404, getErrorPage( new ResourceNotAvailable( !baseUrlRequest.Value ) ) );
 						else if( exception is AccessDeniedException accessDeniedException ) {
 							if( accessDeniedException.CausedByIntermediateUser )
-								transferRequest( context, 403, new NonLiveLogIn( EwfApp.RequestState.Url ) );
-							else if( UserManagementStatics.UserManagementEnabled && !ConfigurationStatics.IsLiveInstallation && EwfApp.RequestState.UserAccessible &&
-							         !EwfApp.RequestState.ImpersonatorExists )
-								transferRequest( context, 403, new UserManagement.Pages.Impersonate( EwfApp.RequestState.Url ) );
+								transferRequest( context, 403, new NonLiveLogIn( RequestState.Url ) );
+							else if( UserManagementStatics.UserManagementEnabled && !ConfigurationStatics.IsLiveInstallation && RequestState.UserAccessible &&
+							         !RequestState.ImpersonatorExists )
+								transferRequest( context, 403, new UserManagement.Pages.Impersonate( RequestState.Url ) );
 							else if( accessDeniedException.LogInPage != null )
 								transferRequest( context, 403, accessDeniedException.LogInPage );
 							else if( UserManagementStatics.LocalIdentityProviderEnabled || AuthenticationStatics.SamlIdentityProviders.Count > 1 )
-								transferRequest( context, 403, new UserManagement.Pages.LogIn( EwfApp.RequestState.Url ) );
+								transferRequest( context, 403, new UserManagement.Pages.LogIn( RequestState.Url ) );
 							else if( AuthenticationStatics.SamlIdentityProviders.Any() )
 								transferRequest(
 									context,
 									403,
-									new UserManagement.SamlResources.LogIn( AuthenticationStatics.SamlIdentityProviders.Single().EntityId, EwfApp.RequestState.Url ) );
+									new UserManagement.SamlResources.LogIn( AuthenticationStatics.SamlIdentityProviders.Single().EntityId, RequestState.Url ) );
 							else
 								transferRequest( context, 403, getErrorPage( new AccessDenied( !baseUrlRequest.Value ) ) );
 						}
 						else if( exception is PageDisabledException pageDisabledException )
 							transferRequest( context, null, new ResourceDisabled( pageDisabledException.Message ) );
 						else {
-							EwfApp.RequestState.AddError( "", exception );
+							RequestState.AddError( "", exception );
 							transferRequestToUnhandledExceptionPage( context );
 						}
 					}
@@ -197,17 +194,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				handler();
 			}
 			catch( Exception e ) {
+				const string prefix = "An exception occurred that could not be handled by the main exception handler:";
 				EwlStatics.CallEveryMethod(
 					delegate {
-						const string prefix = "An exception occurred that could not be handled by the main exception handler:";
 						if( addErrorToRequestState )
-							EwfApp.RequestState.AddError( prefix, e );
+							RequestState.AddError( prefix, e );
 						else
 							TelemetryStatics.ReportError( prefix, e );
 					},
 					delegate {
 						if( write500Response )
-							RequestDispatchingStatics.write500Response( currentContextGetter(), "Exception" );
+							RequestDispatchingStatics.write500Response( currentContextGetter(), "Exception", ( prefix, e ) );
 					} );
 			}
 		}
@@ -221,7 +218,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 			catch( Exception exception ) {
 				rollbackDatabaseTransactionsAndClearResponse( context );
-				EwfApp.RequestState.AddError( "An exception occurred during a request for a handled error page or a log-in page:", exception );
+				RequestState.AddError( "An exception occurred during a request for a handled error page or a log-in page:", exception );
 				transferRequestToUnhandledExceptionPage( context );
 			}
 		}
@@ -234,26 +231,40 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			}
 			catch( Exception exception ) {
 				rollbackDatabaseTransactionsAndClearResponse( context );
-				EwfApp.RequestState.AddError( "An exception occurred during a request for the unhandled exception page:", exception );
-				write500Response( context, "Unhandled Exception Page Error" );
+				RequestState.AddError( "An exception occurred during a request for the unhandled exception page:", exception );
+				write500Response( context, "Unhandled Exception Page Error", null );
 			}
 		}
 
-		private static PageBase getErrorPage( PageBase ewfErrorPage ) => RequestDispatchingStatics.AppProvider.GetErrorPage() ?? ewfErrorPage;
+		private static PageBase getErrorPage( PageBase ewfErrorPage ) => AppProvider.GetErrorPage() ?? ewfErrorPage;
 
 		private static void rollbackDatabaseTransactionsAndClearResponse( HttpContext context ) {
-			EwfApp.RequestState.RollbackDatabaseTransactions();
+			RequestState.RollbackDatabaseTransactions();
 			DataAccessState.Current.ResetCache();
 
-			EwfApp.RequestState.EwfPageRequestState = new EwfPageRequestState( AppRequestState.RequestTime, null, null );
+			RequestState.EwfPageRequestState = new EwfPageRequestState( AppRequestState.RequestTime, null, null );
 
 			context.Response.Clear();
 		}
 
-		private static void write500Response( HttpContext context, string description ) {
+		private static void write500Response( HttpContext context, string description, ( string prefix, Exception exception )? error ) {
 			EwfResponse.Create(
 					ContentTypes.PlainText,
-					new EwfResponseBodyCreator( writer => writer.Write( "{0} in EWF Application".FormatWith( description ) ) ),
+					new EwfResponseBodyCreator(
+						writer => {
+							if( !ConfigurationStatics.IsDevelopmentInstallation ) {
+								writer.Write( "{0} in EWF Application".FormatWith( description ) );
+								return;
+							}
+
+							error ??= RequestState.GetLastError();
+
+							if( error.Value.prefix.Length > 0 ) {
+								writer.WriteLine( error.Value.prefix );
+								writer.WriteLine();
+							}
+							writer.Write( error.Value.exception.ToString() );
+						} ),
 					statusCodeGetter: () => 500 )
 				.WriteToAspNetResponse( context.Response, omitBody: string.Equals( context.Request.Method, "HEAD", StringComparison.Ordinal ) );
 		}
@@ -283,7 +294,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Refreshes all state for the current request that could have become stale after data modifications, e.g. the authenticated user object.
 		/// </summary>
 		public static void RefreshRequestState() {
-			AppRequestState.Instance.RefreshUserAndImpersonator();
+			RequestState.RefreshUserAndImpersonator();
 		}
+
+		internal static AppRequestState RequestState => (AppRequestState)currentContextGetter().Items[ requestStateKey ];
 	}
 }

@@ -61,7 +61,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private bool userDisabled;
 		private Tuple<User, SpecifiedValue<User>> userAndImpersonator;
 
-		private readonly List<( string prefix, Exception exception )> errors = new List<( string, Exception )>();
+		private readonly List<( string prefix, Exception exception )> errors = new();
 		internal EwfPageRequestState EwfPageRequestState { get; set; }
 
 		internal AppRequestState( string url, string baseUrl ) {
@@ -196,6 +196,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				                      ? Tuple.Create( user.Value, impersonator ?? new SpecifiedValue<User>( userAndImpersonator.Item1 ) )
 				                      : Tuple.Create( impersonator.Value, (SpecifiedValue<User>)null );
 		}
+
+		internal ( string prefix, Exception exception ) GetLastError() => errors.Last();
 
 		internal void AddError( string prefix, Exception exception ) {
 			errors.Add( ( prefix, exception ) );

@@ -12,10 +12,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Returns the request-state object for the current HTTP context.
 		/// </summary>
-		internal static AppRequestState RequestState {
-			get => currentContextGetter != null /* i.e. IsWebApp */ ? (AppRequestState)currentContextGetter()?.Items[ EwlStatics.EwlInitialism ] : null;
-			set => currentContextGetter().Items.Add( EwlStatics.EwlInitialism, value );
-		}
+		internal static AppRequestState RequestState =>
+			currentContextGetter != null /* i.e. IsWebApp */ && currentContextGetter() != null ? RequestDispatchingStatics.RequestState : null;
 
 		internal static async Task EnsureUrlResolved( HttpContext context, RequestDelegate next ) {
 			if( context.GetEndpoint() == null )
