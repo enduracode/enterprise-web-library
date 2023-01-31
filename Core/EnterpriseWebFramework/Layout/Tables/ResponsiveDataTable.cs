@@ -319,7 +319,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								for( var visibleGroupIndex = 0; visibleGroupIndex < visibleItemGroupsAndItems.Count; visibleGroupIndex += 1 ) {
 									var groupAndItems = visibleItemGroupsAndItems[ visibleGroupIndex ];
 									var groupSelectedItemData = selectedItemData.ItemGroupData?[ visibleGroupIndex ];
-									var useContrastForFirstRow = visibleItemGroupsAndItems.Where( ( group, i ) => i < visibleGroupIndex ).Sum( i => i.Item2.Count ) % 2 == 1;
 									var groupBodyRows = buildRows(
 										groupAndItems.Item2,
 										fields,
@@ -329,7 +328,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 											groupAndItems.Item2,
 											( checkbox, item ) => item.Setup.Id != null ? checkbox : null ),
 										TableStatics.GetReorderingControls( postBackIdBase, false, enableItemReordering, hasExplicitItemGroups.Value, groupAndItems.Item2 ),
-										useContrastForFirstRow,
+										null,
 										false,
 										allVisibleItems ).Materialize();
 									var cachedVisibleGroupIndex = visibleGroupIndex;
@@ -442,7 +441,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 												id: PostBack.GetCompositeId( postBackIdBase, "showMore" ),
 												modificationMethod: () => itemLimit.Value.Value = (int)nextLimit ) ) );
 									var item = EwfTableItem.Create( button.ToCollection().ToCell( new TableCellSetup( fieldSpan: fields.Count ) ) );
-									var useContrast = visibleItemGroupsAndItems.Sum( i => i.Item2.Count ) % 2 == 1;
 									itemLimitingRowGroup.Add(
 										new ElementComponent(
 											context => new ElementData(
@@ -452,7 +450,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 													Enumerable.Repeat( new EwfTableField(), fields.Count ).Materialize(),
 													null,
 													null,
-													useContrast,
+													null,
 													false,
 													null ).Materialize() ) ) );
 								}
