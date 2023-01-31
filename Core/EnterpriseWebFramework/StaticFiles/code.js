@@ -56,7 +56,19 @@ function NumericalOnly( evt, field ) {
 // This function gets called by jQuery's on-document-ready event. This will run the following code after the page has loaded.
 function OnDocumentReady() {
 	stopActivatableTableRowNestedEvents();
+
 	$( "table.responsiveDataTable" ).dataTable( { responsive: true, searching: false, paging: false, info: false } );
+	$( "tr.ewfAc > .dtr-control" ).click( function( e ) {
+		var table = $( this ).closest( "table" );
+		if( table.hasClass( "collapsed" ) ) {
+			var tableApi = table.DataTable();
+			var row = tableApi.row( $( this ).parent() );
+			tableApi.iterator( 'table', function( ctx ) { ctx._responsive._detailsDisplay( row, false ) } );
+
+			e.stopPropagation();
+		}
+	} );
+
 	$( "dialog" ).each( function() { dialogPolyfill.registerDialog( this ); } );
 	Chart.defaults.global.defaultFontColor = $( "body" ).css( "color" );
 }
