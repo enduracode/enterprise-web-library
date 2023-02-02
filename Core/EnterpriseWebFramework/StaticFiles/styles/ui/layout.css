@@ -312,7 +312,6 @@ ewfTopWarningContainer ewfActionComponentAllStylesAllStates {
 	font-weight: bold;
 }
 ewfUiInnerGlobalContainer ewfHyperlinkAllStylesAllStates,
-ewfUiEntityContainer > ewfPagePathContainer ewfHyperlinkAllStylesAllStates,
 ewfUiEntityNavAndActionContainer ewfHyperlinkAllStylesAllStates,
 ewfUiTopTabListContainer ewfHyperlinkAllStylesAllStates,
 ewfUiSideTabContainer ewfHyperlinkAllStylesAllStates {
@@ -320,8 +319,6 @@ ewfUiSideTabContainer ewfHyperlinkAllStylesAllStates {
 }
 ewfUiInnerGlobalContainer ewfHyperlinkAllStylesStatesWithFocus,
 ewfUiInnerGlobalContainer ewfHyperlinkAllStylesStatesWithHover,
-ewfUiEntityContainer > ewfPagePathContainer ewfHyperlinkAllStylesStatesWithFocus,
-ewfUiEntityContainer > ewfPagePathContainer ewfHyperlinkAllStylesStatesWithHover,
 ewfUiEntityNavAndActionContainer ewfHyperlinkAllStylesStatesWithFocus,
 ewfUiEntityNavAndActionContainer ewfHyperlinkAllStylesStatesWithHover {
 	text-decoration: revert;
