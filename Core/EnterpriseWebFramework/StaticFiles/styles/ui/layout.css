@@ -509,7 +509,7 @@ ewfUiPageActionListContainer {
 ewfUiContentFootContainer {
 	text-align: center;
 }
-ewfUiContentFootActionListContainer > ewfUnorderedLineList {
+ewfUiContentFootActionListContainer > ewfUnorderedWrappingList {
 	justify-content: flex-end;
 }
 ewfUiPoweredByEwlFooterContainer {
