@@ -138,8 +138,6 @@ ewfUiTopTabListContainer ewfActionComponentAllStylesAllStates {
 
 /* borders */
 ewfUiTopTabListContainer {
-	border-left-width: 1px;
-	border-left-style: solid;
 }
 @media print {
 }
@@ -338,7 +336,7 @@ ewfUiAppLogoContainer {
 	grid-area: appLogo;
 }
 ewfUiAppLogoContainer ewfImage {
-	width: 8rem;
+	max-width: 10vw;
 	max-height: 2.5rem;
 	object-fit: contain;
 }
@@ -471,7 +469,7 @@ ewfUiTopTabListContainer {
 	font-size: 1.1em;
 }
 ewfUiTopTabListContainer ewfUnorderedComponentList {
-	gap: 0;
+	gap: 1px;
 }
 ewfUiTopTabListContainer ewfActionComponentAllStylesAllStates, ewfUiSideTabContainer ewfActionComponentAllStylesAllStates {
 	display: block;
@@ -479,6 +477,7 @@ ewfUiTopTabListContainer ewfActionComponentAllStylesAllStates, ewfUiSideTabConta
 }
 ewfUiTopTabListContainer ewfActionComponentAllStylesAllStates {
 	display: inline-block;
+	border-radius: 5px 5px 0 0;
 	padding: 1vw;
 	font-weight: normal;
 }
@@ -486,13 +485,11 @@ ewfUiTopTabListContainer ewfActionComponentAllStylesStatesWithHover {
 	margin-top: -4px;
 	border-top-width: 4px;
 	border-top-style: solid;
-	border-radius: 5px 5px 0 0;
 }
 ewfUiTopTabListContainer ewfUiCurrentTabActionControl {
 	margin-top: -4px;
 	border-top-width: 4px;
 	border-top-style: solid;
-	border-radius: 5px 5px 0 0;
 	font-weight: bold;
 }
 ewfUiSideTabContainer {

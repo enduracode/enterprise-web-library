@@ -1,4 +1,6 @@
 ﻿:root {
+	--ewf-ui-background-color: hsla( 215, 33%, 93%, 1 );
+
 	--primary-color: #281e3c;
 	--secondary-color: #009245;
 	--hover-color: #8cc63f;
@@ -13,7 +15,7 @@
 }
 
 body {
-	background-color: hsla( 215, 33%, 93%, 1 );
+	background-color: var( --ewf-ui-background-color );
 	color: hsla( 215, 11%, 22%, 1 );
 }
 @media print {
@@ -65,9 +67,6 @@ ewfUiSideTabContainer ewfUiCurrentTabActionControl {
 }
 ewfActionComponentAllButtonStylesAllNormalStates, ewfActionComponentAllButtonStylesAllVisitedStates {
 	background-color: hsla( 211, 70%, 45%, 1 );
-}
-ewfUiTopTabListContainer ewfUiCurrentTabActionControl {
-	box-shadow: 0 3px hsla( 211, 70%, 45%, 1 );
 }
 ewfHyperlinkStandardStyleStatesWithHover,
 ewfHyperlinkStandardStyleStatesWithFocus,
@@ -169,8 +168,8 @@ ewfUiMobileMenuTabContainer ewfActionComponentAllStylesStatesWithHover {
 ewfUiMobileMenuTabContainer ewfUiCurrentTabActionControl {
 	background-color: rgba( 255, 255, 255, .3 );
 }
-ewfUiEntityContainer {
-	background-color: var( --white-color );
+ewfUiEntityAndTopTabContainer {
+	background-color: var( --tab-bg-color );
 }
 ewfUiEntityContainer > ewfPagePathContainer ewfComponentListItem {
 	background: url( ../../versioned/ui/arrow-v1.svg ) no-repeat;
@@ -180,10 +179,6 @@ ewfUiEntityContainer > ewfPagePathContainer ewfActionComponentAllStylesAllStates
 }
 ewfUiEntityContainer > ewfPagePathContainer ewfActionComponentAllStylesStatesWithHover, ewfUiEntityNavAndActionContainer ewfActionComponentAllStylesStatesWithHover {
 	color: var( --primary-color );
-}
-ewfUiTopTabListContainer {
-	border-color: #ccc;
-	background-color: var( --tab-bg-color );
 }
 ewfUiTopTabListContainer ewfActionComponentAllStylesAllNormalStates,
 ewfUiTopTabListContainer ewfActionComponentAllStylesAllVisitedStates,
@@ -197,15 +192,18 @@ ewfUiTopTabListContainer ewfUiDisabledTabActionControl, ewfUiSideTabContainer ew
 ewfUiTopTabListContainer ewfActionComponentAllStylesAllStates {
 	color: var( --primary-color );
 }
+ewfUiTopTabListContainer ewfActionComponentAllStylesAllActionStates {
+	background: linear-gradient( 0, rgba( 255, 255, 255, 1 ) 0, rgba( 255, 255, 255, 0.5 ) 100% );
+}
 ewfUiTopTabListContainer ewfActionComponentAllStylesStatesWithHover {
 	border-color: var( --hover-color );
+	background: none;
 	background-color: var( --hover-color );
 	color: var( --white-color );
 }
 ewfUiTopTabListContainer ewfUiCurrentTabActionControl {
-	box-shadow: var( --default-box-shadow );
-	border-color: var( --white-color );
-	background-color: var( --background-color );
+	border-color: var( --ewf-ui-background-color );
+	background-color: var( --ewf-ui-background-color );
 }
 ewfUiSideTabContainer {
 	background-color: var( --primary-color );
