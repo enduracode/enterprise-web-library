@@ -75,10 +75,10 @@ ewfTopWarningContainer {
 	margin: 0;
 	padding: var( --ewf-ui-navigation-vertical-spacing ) var( --ewf-ui-top-level-horizontal-spacing );
 }
-ewfUiOuterGlobalContainer, ewfUiEntityContainer, ewfUiTopTabListContainer, ewfUiPageActionListContainer, ewfUiContentContainer, ewfUiContentFootContainer, ewfUiGlobalFootContainer {
+ewfUiOuterGlobalContainer, ewfUiEntityContainer, ewfUiTopTabListContainer, ewfUiPageActionListContainer, ewfUiContentContainer, ewfUiGlobalFootContainer {
 	padding-top: var( --ewf-ui-top-level-vertical-spacing );
 }
-ewfUiOuterGlobalContainer, ewfUiEntityContainer, ewfUiSideTabContainer, ewfUiGlobalFootContainer {
+ewfUiOuterGlobalContainer, ewfUiEntityContainer, ewfUiSideTabContainer, ewfUiContentContainer, ewfUiContentFootContainer, ewfUiGlobalFootContainer {
 	padding-bottom: var( --ewf-ui-top-level-vertical-spacing );
 }
 ewfUiAppLogoContainer, ewfUiEntityContainer, ewfUiTopTabListContainer, ewfUiPageActionListContainer, ewfUiContentContainer, ewfUiContentFootContainer, ewfUiGlobalFootContainer {

@@ -168,7 +168,7 @@ ewfUiMobileMenuTabContainer ewfActionComponentAllStylesStatesWithHover {
 ewfUiMobileMenuTabContainer ewfUiCurrentTabActionControl {
 	background-color: rgba( 255, 255, 255, .3 );
 }
-ewfUiEntityAndTopTabContainer {
+ewfUiEntityAndTopTabContainer, ewfUiGlobalFootContainer {
 	background-color: var( --tab-bg-color );
 }
 ewfUiEntityContainer > ewfPagePathContainer ewfComponentListItem {
