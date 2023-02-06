@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -125,6 +126,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								builder.Services.AddResponseCompression( options => { options.EnableForHttps = true; } );
 
 							builder.Services.Configure<IISServerOptions>( options => { options.AllowSynchronousIO = true; } );
+
+							builder.Services.Configure<FormOptions>( options => { options.ValueCountLimit = 10000; } );
 
 							builder.Services.AddHttpContextAccessor();
 							builder.Services.AddDistributedMemoryCache();
