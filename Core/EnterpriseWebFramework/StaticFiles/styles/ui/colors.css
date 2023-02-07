@@ -1,5 +1,6 @@
 ﻿:root {
 	--ewf-ui-background-color: hsla( 215, 33%, 93%, 1 );
+	--ewf-ui-important-border-color: hsla( 0, 0%, 80%, 1 );
 	--ewf-ui-form-control-placeholder-color: rgb( 175, 175, 175 );
 
 	--primary-color: #281e3c;
@@ -30,6 +31,11 @@ ewfDropDownListContainer > ewfDropDownList > .chosen-drop > .chosen-results {
 }
 
 /* borders */
+ewfSingleLineTextControlAllStates, ewfMultilineTextControlAllStates,
+ewfDropDownListContainer > ewfDropDownList, ewfDropDownListContainer > ewfDropDownList > .chosen-single,
+ewfModalBox > ewfModalBoxCloseButtonContainer {
+	border-color: var( --ewf-ui-important-border-color );
+}
 ewfUiTopTabListContainer {
 	border-color: hsl( 0, 0%, 75% );
 }
@@ -94,9 +100,6 @@ ewfActionComponentAllButtonStylesAllStates {
 /* list controls */
 ewfDropDownListContainer > ewfDropDownList {
 	box-shadow: none;
-}
-ewfDropDownListContainer > ewfDropDownList > .chosen-single {
-	border-color: var( --default-form-color );
 }
 ewfDropDownListContainer > ewfDropDownList > .chosen-default {
 	color: var( --ewf-ui-form-control-placeholder-color );

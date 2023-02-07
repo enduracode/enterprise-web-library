@@ -14,17 +14,6 @@
 /*******************/
 /* FILTER/INPUT    
 /*******************/
-  div.ewfFil.ewfGfil label {
-    font-size: var(--default-small-font-size);
-    color: var(--gray-color);
-  }
-
-  div.ewfFil.ewfGfil input[type=text], div.ewfFil.ewfGfil select {
-    font-size: var(--default-small-font-size);
-    color: var(--gray-color);
-    border-color: var(--default-form-color) !important;
-  }
-
 .ewfFilB {
   align-self: end;
 }
