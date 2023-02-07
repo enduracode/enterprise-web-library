@@ -243,6 +243,9 @@ ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTr
 }
 
 /* list controls */
+ewfDropDownListContainer > ewfDropDownList > .chosen-drop > .chosen-results {
+	max-height: 50vh;
+}
 ewfCheckboxList {
 	padding: .5em;
 }

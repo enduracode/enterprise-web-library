@@ -25,31 +25,6 @@
     border-color: var(--default-form-color) !important;
   }
 
-  div.ewfFil.ewfGfil select {
-    box-shadow: none;
-  }
-
-  div.ewfFil.ewfGfil input::placeholder {
-    color: rgb(175, 175, 175);
-  }
-
-.chosen-container-single .chosen-single span {
-  font-size: var(--default-small-font-size);
-}
-
-.chosen-container-single .chosen-single.chosen-default {
-  height: 35px;
-  line-height: 35px;
-  color: rgb(175, 175, 175);
-  border-color: var(--default-form-color);
-}
-
-.chosen-single, .chosen-single span {
-  line-height: 35px !important;
-  height: 35px !important;
-  border-color: var(--default-form-color) !important;
-}
-
 .ewfFilB {
   align-self: end;
 }
@@ -68,20 +43,6 @@ div.ewfFil.ewfGfil button {
     background-color: var(--hover-color) !important;
   }
 
-.chosen-container .chosen-results {
-  max-height: 50vh;
-}
-
-  .chosen-container .chosen-results li.active-result.result-selected {
-    background-color: var(--secondary-color);
-    color: var(--white-color);
-  }
-
-  .chosen-container .chosen-results li.active-result.highlighted {
-    background-color: var(--hover-color);
-    background-image: none;
-    color: var(--white-color);
-  }
 /*******************/
 /* TABLE   
 /*******************/
