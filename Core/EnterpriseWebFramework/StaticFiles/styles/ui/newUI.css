@@ -14,24 +14,14 @@
 /*******************/
 /* FILTER/INPUT    
 /*******************/
-.ewfFilB {
-  align-self: end;
-}
-
 div.ewfFil.ewfGfil button {
   width: 100%;
   height: 35px;
   align-self: flex-end;
   font-size: var(--default-small-font-size);
   padding: 0px !important;
-  background-color: var(--secondary-color) !important;
   transition: all .2s;
 }
-
-  div.ewfFil.ewfGfil button:hover {
-    background-color: var(--hover-color) !important;
-  }
-
 /*******************/
 /* TABLE   
 /*******************/
@@ -69,16 +59,6 @@ div.ewfTblIl {
   margin-left: auto;
   color: var(--gray-color) !important;
 }
-
-button.ewfActionNormalButton.ewfAction {
-  background-color: var(--secondary-color) !important;
-  padding: var(--button-padding) !important;
-  transition: all .2s;
-}
-
-  button.ewfActionNormalButton.ewfAction:hover {
-    background-color: var(--hover-color) !important;
-  }
 /*******************/
 /* DATATABLE   
 /*******************/

@@ -1,4 +1,8 @@
-﻿ewfFlowCheckboxAllStates > ewfCheckbox {
+﻿ewfActionComponentAllButtonStylesAllStates {
+	transition: all 200ms;
+}
+
+ewfFlowCheckboxAllStates > ewfCheckbox {
 	transition: background-color 200ms, color 100ms;
 }
 
