@@ -12,17 +12,6 @@
   }
 
 /*******************/
-/* FILTER/INPUT    
-/*******************/
-div.ewfFil.ewfGfil button {
-  width: 100%;
-  height: 35px;
-  align-self: flex-end;
-  font-size: var(--default-small-font-size);
-  padding: 0px !important;
-  transition: all .2s;
-}
-/*******************/
 /* TABLE   
 /*******************/
 table.ewfStandard {
