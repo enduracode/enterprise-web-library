@@ -229,6 +229,13 @@ ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTr
 ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > ewfThAndTd {
 	padding: .5em;
 }
+ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > ewfTh {
+	font-weight: 600;
+}
+ewfTableStandardAndStandardExceptLayoutStyles > thead > ewfTrAllStates > ewfThAndTd {
+	border-bottom-width: 1px;
+	border-bottom-style: dotted;
+}
 @media print {
 	ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > ewfThAndTd {
 		border-bottom: 1pt solid black;
@@ -236,9 +243,6 @@ ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTr
 	ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates:first-child > ewfThAndTd {
 		border-top: 1pt solid black;
 	}
-}
-ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > ewfTh {
-	font-weight: 600;
 }
 
 /* list controls */

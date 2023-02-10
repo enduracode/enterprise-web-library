@@ -12,43 +12,6 @@
   }
 
 /*******************/
-/* TABLE   
-/*******************/
-table.ewfStandard {
-  background-color: var(--white-color);
-  background-image: none;
-  padding: 0;
-  box-shadow: var(--default-box-shadow);
-  font-size: var(--default-font-size);
-}
-
-  table.ewfStandard, table.ewfTblSel, table.ewfStandard > tbody > tr:not(.ewfAc).ewfContrast, table.ewfStandard > tbody > tr.ewfAc:not(:hover).ewfContrast, table.ewfStandard > tbody > tr.ewfAc:hover.ewfContrast, table.ewfTblSel > tbody > tr:not(.ewfAc).ewfContrast, table.ewfTblSel > tbody > tr.ewfAc:not(:hover).ewfContrast, table.ewfTblSel > tbody > tr.ewfAc:hover.ewfContrast, div.ewfCheckboxList {
-    background-image: none;
-  }
-
-.ewfContrast {
-  background-color: #fafafa;
-}
-
-table.ewfStandard thead .ewfTc {
-  padding: .75vw 1.5vw !important;
-  border-bottom: dotted 1px rgba(0,0,0,.1);
-}
-
-table.ewfStandard tbody .ewfTc {
-  padding: 1vw 1.5vw !important;
-  color: var(--gray-color);
-}
-
-div.ewfTblIlga {
-  padding-bottom: 0;
-}
-
-div.ewfTblIl {
-  margin-left: auto;
-  color: var(--gray-color) !important;
-}
-/*******************/
 /* DATATABLE   
 /*******************/
 .dataTables_wrapper {

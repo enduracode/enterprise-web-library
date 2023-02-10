@@ -4,15 +4,13 @@
 
 	--ewf-ui-background-color: hsla( 215, 33%, 93%, 1 );
 	--ewf-ui-important-border-color: hsla( 0, 0%, 80%, 1 );
+	--ewf-ui-faint-border-color: rgba( 0, 0, 0, .1 );
 	--ewf-ui-activation-color: #8cc63f;
 	--ewf-ui-form-control-placeholder-color: rgb( 175, 175, 175 );
 
-	--background-color: #fafafa;
-	--breadcrumb-bg-color: #E7ECF3;
 	--tab-bg-color: #ced6e0;
 	--gray-color: #767676;
 	--white-color: #ffffff;
-	--black-color: #000000;
 	--default-box-shadow: 0px 1px 7px rgb( 0 0 0 / 15% );
 	--default-form-color: #ccc;
 }
@@ -37,12 +35,15 @@ ewfDropDownListContainer > ewfDropDownList, ewfDropDownListContainer > ewfDropDo
 ewfModalBox > ewfModalBoxCloseButtonContainer {
 	border-color: var( --ewf-ui-important-border-color );
 }
+ewfTableStandardAndStandardExceptLayoutStyles > thead > ewfTrAllStates > ewfThAndTd {
+	border-color: var( --ewf-ui-faint-border-color );
+}
 ewfUiTopTabListContainer {
 	border-color: hsl( 0, 0%, 75% );
 }
 
 /* boxes */
-ewfSectionBoxStyleBothStates, ewfUiContentBox {
+ewfSectionBoxStyleBothStates, ewfTableStandardAndStandardExceptLayoutStyles, ewfUiContentBox {
 	box-shadow: 0 2px 6px rgba( 0, 0, 0, .5 );
 	background-color: white;
 }
@@ -57,7 +58,7 @@ ewfSectionBoxStyleBothStates, ewfUiContentBox {
 ewfTableStandardAndStandardExceptLayoutStyles,
 ewfTableStandardAndStandardExceptLayoutStyles > tbody > ewfTrStatesWithContrast,
 ewfCheckboxList {
-	background-image: linear-gradient( rgba( 0, 0, 0, .05 ), rgba( 0, 0, 0, .05 ) );
+	background-image: linear-gradient( rgba( 0, 0, 0, .02 ), rgba( 0, 0, 0, .02 ) );
 }
 
 /* block highlighting */
