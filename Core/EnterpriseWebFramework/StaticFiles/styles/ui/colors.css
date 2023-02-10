@@ -30,14 +30,17 @@ ewfDropDownListContainer > ewfDropDownList > .chosen-drop > .chosen-results {
 /* borders */
 ewfSingleLineTextControlAllStates, ewfMultilineTextControlAllStates,
 ewfDropDownListContainer > ewfDropDownList, ewfDropDownListContainer > ewfDropDownList > .chosen-single,
-ewfModalBox > ewfModalBoxCloseButtonContainer {
+ewfModalBox > ewfModalBoxCloseButtonContainer,
+ewfUiEntityAndTopTabContainer,
+ewfUiTopTabListContainer ewfUiCurrentTabActionControl,
+ewfUiGlobalFootContainer {
 	border-color: var( --ewf-ui-important-border-color );
 }
 ewfTableStandardAndStandardExceptLayoutStyles > thead > ewfTrAllStates > ewfThAndTd {
 	border-color: var( --ewf-ui-faint-border-color );
 }
-ewfUiTopTabListContainer {
-	border-color: hsl( 0, 0%, 75% );
+ewfUiTopTabListContainer ewfUiCurrentTabActionControl {
+	border-bottom-color: transparent;
 }
 
 /* boxes */
@@ -235,7 +238,6 @@ ewfUiTopTabListContainer ewfActionComponentAllStylesStatesWithHover {
 	color: var( --ewf-ui-inverted-text-color );
 }
 ewfUiTopTabListContainer ewfUiCurrentTabActionControl {
-	border-color: var( --ewf-ui-background-color );
 	background-color: var( --ewf-ui-background-color );
 }
 ewfUiSideTabContainer {
