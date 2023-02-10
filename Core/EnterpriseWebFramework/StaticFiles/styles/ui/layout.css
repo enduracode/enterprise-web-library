@@ -9,9 +9,7 @@
 	--ewf-ui-side-tab-border-width: 4px;
 	--ewf-ui-side-tab-content-width: 11em;
 
-	--default-border-radius: .5em;
-	--tablet-font-size: 14px;
-	--mobile-padding: 10px 4vw;
+	--ewf-ui-tablet-font-size: 14px;
 }
 
 body {
@@ -528,10 +526,10 @@ ewfUiPoweredByEwlFooterContainer {
 		max-height: none;
 	}
 	ewfUiInnerGlobalContainer ewfActionComponentAllStylesAllStates {
-		font-size: var( --tablet-font-size );
+		font-size: var( --ewf-ui-tablet-font-size );
 	}
 	ewfUiUserInfoContainer > p {
-		font-size: var( --tablet-font-size );
+		font-size: var( --ewf-ui-tablet-font-size );
 	}
 	ewfUiEntityAndTopTabContainer {
 		gap: 0;
@@ -550,7 +548,7 @@ ewfUiPoweredByEwlFooterContainer {
 		padding: 0 1vw;
 	}
 	ewfUiSideTabGroupHead, ewfUiSideTabContainer ewfActionComponentAllStylesAllStates {
-		font-size: var( --tablet-font-size );
+		font-size: var( --ewf-ui-tablet-font-size );
 	}
 }
 @media only screen and ( max-width: 768px ) {
@@ -642,7 +640,7 @@ ewfUiPoweredByEwlFooterContainer {
 		display: block;
 	}
 	ewfUiContentContainer {
-		padding: var( --mobile-padding );
+		padding: 10px 4vw;
 	}
 	ewfUiContentContainer p {
 		font-size: var( --ewf-small-font-size );

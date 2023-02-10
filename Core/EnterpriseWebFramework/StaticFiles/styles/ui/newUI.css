@@ -1,4 +1,10 @@
-﻿/*******************/
+﻿:root {
+	--default-border-radius: .5em;
+	--default-box-shadow: 0px 1px 7px rgb( 0 0 0 / 15% );
+	--default-form-color: #ccc;
+}
+
+/*******************/
 /* BREADCRUMBS     
 /*******************/
 .breadcrumbHome {
@@ -17,7 +23,7 @@
 .dataTables_wrapper {
   margin: 2vw 0;
   padding: var(--ewf-ui-top-level-spacing);
-  background-color: var(--white-color);
+  background-color: var(--ewf-ui-inverted-text-color);
   box-shadow: var(--default-box-shadow);
   border-radius: var(--default-border-radius);
 }
@@ -28,7 +34,7 @@ table.responsiveDataTable {
 }
 
 table.responsiveDataTable tbody {
-    color: var(--gray-color);
+    color: var(--ewf-ui-entity-action-color);
   }
 
 table.responsiveDataTable.compact thead th, table.dataTable.compact thead td {
@@ -36,12 +42,12 @@ table.responsiveDataTable.compact thead th, table.dataTable.compact thead td {
   }
 
 .dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_processing, .dataTables_wrapper .dataTables_paginate {
-  color: var(--gray-color) !important;
+  color: var(--ewf-ui-entity-action-color) !important;
   font-size: var(--default-small-font-size);
 }
 
   .dataTables_wrapper .dataTables_length select {
-    color: var(--gray-color);
+    color: var(--ewf-ui-entity-action-color);
     border-color: var(--default-form-color) !important;
     margin: 0 5px;
   }

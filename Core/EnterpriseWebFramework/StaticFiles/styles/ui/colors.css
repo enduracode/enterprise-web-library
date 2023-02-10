@@ -3,16 +3,14 @@
 	--ewf-ui-secondary-color: #009245;
 
 	--ewf-ui-background-color: hsla( 215, 33%, 93%, 1 );
+	--ewf-ui-text-color: hsla( 215, 11%, 22%, 1 );
+	--ewf-ui-inverted-text-color: #ffffff;
 	--ewf-ui-important-border-color: hsla( 0, 0%, 80%, 1 );
 	--ewf-ui-faint-border-color: rgba( 0, 0, 0, .1 );
 	--ewf-ui-activation-color: #8cc63f;
 	--ewf-ui-form-control-placeholder-color: rgb( 175, 175, 175 );
-
-	--tab-bg-color: #ced6e0;
-	--gray-color: #767676;
-	--white-color: #ffffff;
-	--default-box-shadow: 0px 1px 7px rgb( 0 0 0 / 15% );
-	--default-form-color: #ccc;
+	--ewf-ui-nav-background-color: #ced6e0;
+	--ewf-ui-entity-action-color: #767676;
 }
 
 body {
@@ -26,7 +24,7 @@ body {
 body,
 ewfDropDownListContainer > ewfDropDownList > .chosen-single,
 ewfDropDownListContainer > ewfDropDownList > .chosen-drop > .chosen-results {
-	color: hsla( 215, 11%, 22%, 1 );
+	color: var( --ewf-ui-text-color );
 }
 
 /* borders */
@@ -108,12 +106,12 @@ ewfDropDownListContainer > ewfDropDownList > .chosen-default {
 }
 ewfDropDownListContainer > ewfDropDownList > .chosen-drop > .chosen-results > li.result-selected {
 	background-color: var( --ewf-ui-secondary-color );
-	color: var( --white-color );
+	color: var( --ewf-ui-inverted-text-color );
 }
 ewfDropDownListContainer > ewfDropDownList > .chosen-drop > .chosen-results > li.highlighted {
 	background-color: var( --ewf-ui-activation-color );
 	background-image: none;
-	color: var( --white-color );
+	color: var( --ewf-ui-inverted-text-color );
 }
 
 /* error messages */
@@ -152,10 +150,10 @@ ewfTopWarningContainer ewfActionComponentAllButtonStylesStatesWithFocus {
 }
 ewfUiOuterGlobalContainer {
 	background-color: var( --ewf-ui-primary-color );
-	color: var( --white-color );
+	color: var( --ewf-ui-inverted-text-color );
 }
 ewfUiInnerGlobalContainer ewfActionComponentAllStylesAllStates {
-	color: var( --white-color );
+	color: var( --ewf-ui-inverted-text-color );
 }
 ewfUiInnerGlobalContainer ewfActionComponentAllStylesStatesWithHover {
 	color: var( --ewf-ui-activation-color );
@@ -164,7 +162,7 @@ ewfUiGlobalNavListContainer ewfComponentListItem {
 	border-color: rgba( 255, 255, 255, .2 );
 }
 ewfUiUserInfoContainer {
-	color: var( --white-color );
+	color: var( --ewf-ui-inverted-text-color );
 }
 ewfUiUserInfoContainer ewfActionComponentAllStylesAllStates {
 	opacity: .65;
@@ -190,12 +188,12 @@ ewfUiMobileMenuTabContainer {
 	background-color: var( --ewf-ui-secondary-color );
 }
 ewfUiMobileMenuTabGroupName {
-	background-color: var( --gray-color );
-	color: var( --white-color );
+	background-color: var( --ewf-ui-entity-action-color );
+	color: var( --ewf-ui-inverted-text-color );
 }
 ewfUiMobileMenuTabContainer ewfActionComponentAllStylesAllStates {
 	border-color: rgba( 255, 255, 255, .3 );
-	color: var( --white-color );
+	color: var( --ewf-ui-inverted-text-color );
 }
 ewfUiMobileMenuTabContainer ewfActionComponentAllStylesStatesWithHover {
 	background-color: var( --ewf-ui-activation-color );
@@ -204,13 +202,13 @@ ewfUiMobileMenuTabContainer ewfUiCurrentTabActionControl {
 	background-color: rgba( 255, 255, 255, .3 );
 }
 ewfUiEntityAndTopTabContainer, ewfUiGlobalFootContainer {
-	background-color: var( --tab-bg-color );
+	background-color: var( --ewf-ui-nav-background-color );
 }
 ewfUiEntityContainer > ewfPagePathContainer ewfComponentListItem {
 	background: url( ../../versioned/ui/arrow-v1.svg ) no-repeat;
 }
 ewfUiEntityContainer > ewfPagePathContainer ewfActionComponentAllStylesAllStates, ewfUiEntityNavAndActionContainer ewfActionComponentAllStylesAllStates {
-	color: var( --gray-color );
+	color: var( --ewf-ui-entity-action-color );
 }
 ewfUiEntityContainer > ewfPagePathContainer ewfActionComponentAllStylesStatesWithHover, ewfUiEntityNavAndActionContainer ewfActionComponentAllStylesStatesWithHover {
 	color: var( --ewf-ui-primary-color );
@@ -234,7 +232,7 @@ ewfUiTopTabListContainer ewfActionComponentAllStylesStatesWithHover {
 	border-color: var( --ewf-ui-activation-color );
 	background: none;
 	background-color: var( --ewf-ui-activation-color );
-	color: var( --white-color );
+	color: var( --ewf-ui-inverted-text-color );
 }
 ewfUiTopTabListContainer ewfUiCurrentTabActionControl {
 	border-color: var( --ewf-ui-background-color );
@@ -242,7 +240,7 @@ ewfUiTopTabListContainer ewfUiCurrentTabActionControl {
 }
 ewfUiSideTabContainer {
 	background-color: var( --ewf-ui-primary-color );
-	color: var( --white-color );
+	color: var( --ewf-ui-inverted-text-color );
 }
 ewfUiSideTabGroupHead {
 	color: rgba( 255, 255, 255, .5 );
@@ -253,7 +251,7 @@ ewfUiSideTabContainer ewfActionComponentAllStylesAllActionStates {
 ewfUiSideTabContainer ewfActionComponentAllStylesStatesWithHover {
 	border-color: var( --ewf-ui-activation-color );
 	background-color: rgba( 255, 255, 255, .2 );
-	color: var( --white-color );
+	color: var( --ewf-ui-inverted-text-color );
 }
 ewfUiSideTabContainer ewfUiCurrentTabActionControl {
 	border-color: var( --ewf-ui-activation-color );
@@ -262,7 +260,7 @@ ewfUiSideTabContainer ewfUiCurrentTabActionControl {
 }
 @media only screen and ( max-width: 768px ) {
 	ewfUiInnerGlobalContainer ewfActionComponentAllStylesStatesWithHover {
-		color: var( --white-color );
+		color: var( --ewf-ui-inverted-text-color );
 	}
 	ewfUiUserInfoContainer {
 		background-image: url( ../../versioned/ui/account-v1.svg );
