@@ -6,6 +6,7 @@
 	--ewf-ui-top-level-horizontal-spacing: 2rem;
 	--ewf-ui-navigation-vertical-spacing: .5rem;
 	--ewf-ui-navigation-horizontal-spacing: 1.5rem;
+	--ewf-ui-large-border-radius: .5em;
 	--ewf-ui-page-path-separator-width: 5px;
 	--ewf-ui-side-tab-border-width: 4px;
 	--ewf-ui-side-tab-content-width: 11em;
@@ -282,22 +283,22 @@ ewfTopWarningContainer {
 	border-radius: 0;
 }
 ewfCheckboxList, ewfUiContentBox {
-	border-radius: .5em;
+	border-radius: var( --ewf-ui-large-border-radius );
 }
 ewfSectionBoxStyleBothStates, ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading,
 ewfTableStandardAndStandardExceptLayoutStyles {
-	border-top-left-radius: .5em;
-	border-top-right-radius: .5em;
+	border-top-left-radius: var( --ewf-ui-large-border-radius );
+	border-top-right-radius: var( --ewf-ui-large-border-radius );
 }
 ewfSectionBoxStyleBothStates, ewfSectionBoxStyleClosedState > ewfSectionHeadingContainer > ewfSectionHeading,
 ewfTableStandardAndStandardExceptLayoutStyles,
 ewfTableStandardAndStandardExceptLayoutStyles > tbody:last-child > ewfTrStatesWithContrast:last-child > ewfThAndTd:first-child {
-	border-bottom-left-radius: .5em;
+	border-bottom-left-radius: var( --ewf-ui-large-border-radius );
 }
 ewfSectionBoxStyleBothStates, ewfSectionBoxStyleClosedState > ewfSectionHeadingContainer > ewfSectionHeading,
 ewfTableStandardAndStandardExceptLayoutStyles,
 ewfTableStandardAndStandardExceptLayoutStyles > tbody:last-child > ewfTrStatesWithContrast:last-child > ewfThAndTd:last-child {
-	border-bottom-right-radius: .5em;
+	border-bottom-right-radius: var( --ewf-ui-large-border-radius );
 }
 @media print {
 	ewfSectionBoxStyleBothStates, ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading,
