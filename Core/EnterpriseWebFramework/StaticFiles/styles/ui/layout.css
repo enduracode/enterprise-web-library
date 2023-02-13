@@ -73,17 +73,25 @@ ewfTopWarningContainer {
 	margin: 0;
 	padding: var( --ewf-ui-navigation-vertical-spacing ) var( --ewf-ui-top-level-horizontal-spacing );
 }
-ewfUiOuterGlobalContainer, ewfUiEntityContainer, ewfUiTopTabListContainer, ewfUiPageActionListContainer, ewfUiContentContainer, ewfUiGlobalFootContainer {
+ewfSectionBoxStyleBothStates, ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer, ewfUiOuterGlobalContainer, ewfUiEntityContainer, ewfUiTopTabListContainer, ewfUiPageActionListContainer, ewfUiContentContainer, ewfUiContentBox, ewfUiGlobalFootContainer {
 	padding-top: var( --ewf-ui-top-level-vertical-spacing );
 }
-ewfUiOuterGlobalContainer, ewfUiEntityContainer, ewfUiSideTabContainer, ewfUiContentContainer, ewfUiContentFootContainer, ewfUiGlobalFootContainer {
+ewfSectionBoxStyleBothStates, ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer, ewfUiOuterGlobalContainer, ewfUiEntityContainer, ewfUiSideTabContainer, ewfUiContentContainer, ewfUiContentBox, ewfUiContentFootContainer, ewfUiGlobalFootContainer {
 	padding-bottom: var( --ewf-ui-top-level-vertical-spacing );
 }
-ewfUiAppLogoContainer, ewfUiTopErrorMessageListContainer, ewfUiEntityContainer, ewfUiTopTabListContainer, ewfUiPageActionListContainer, ewfUiContentContainer, ewfUiContentFootContainer, ewfUiGlobalFootContainer {
+ewfSectionBoxStyleBothStates, ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer, ewfUiAppLogoContainer, ewfUiTopErrorMessageListContainer, ewfUiEntityContainer, ewfUiTopTabListContainer, ewfUiPageActionListContainer, ewfUiContentContainer, ewfUiContentBox, ewfUiContentFootContainer, ewfUiGlobalFootContainer {
 	padding-left: var( --ewf-ui-top-level-horizontal-spacing );
 }
-ewfUiUserInfoContainer, ewfUiTopErrorMessageListContainer, ewfUiEntityContainer, ewfUiTopTabListContainer, ewfUiSideTabGroupHead, ewfUiSideTabContainer ewfActionComponentAllStylesAllStates, ewfUiPageActionListContainer, ewfUiContentContainer, ewfUiContentFootContainer, ewfUiGlobalFootContainer {
+ewfSectionBoxStyleBothStates, ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer, ewfUiUserInfoContainer, ewfUiTopErrorMessageListContainer, ewfUiEntityContainer, ewfUiTopTabListContainer, ewfUiSideTabGroupHead, ewfUiSideTabContainer ewfActionComponentAllStylesAllStates, ewfUiPageActionListContainer, ewfUiContentContainer, ewfUiContentBox, ewfUiContentFootContainer, ewfUiGlobalFootContainer {
 	padding-right: var( --ewf-ui-top-level-horizontal-spacing );
+}
+ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer {
+	margin-top: calc( var( --ewf-ui-top-level-vertical-spacing ) * -1 );
+	margin-left: calc( var( --ewf-ui-top-level-horizontal-spacing ) * -1 );
+	margin-right: calc( var( --ewf-ui-top-level-horizontal-spacing ) * -1 );
+}
+ewfSectionBoxStyleClosedState > ewfSectionHeadingContainer {
+	margin-bottom: calc( var( --ewf-ui-top-level-vertical-spacing ) * -1 );
 }
 ewfUiTopErrorMessageListContainer, ewfUiEntityContainer > * {
 	margin-top: var( --ewf-ui-top-level-vertical-spacing );
@@ -174,17 +182,7 @@ ewfPagePathContainer h1 {
 ewfSectionBoxStyleBothStates, ewfUiContentBox {
 	margin-left: auto;
 	margin-right: auto;
-	padding: 1em;
 	max-width: 75em;
-}
-ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer {
-	margin-top: -1em;
-	margin-right: -1em;
-	margin-left: -1em;
-	padding: 1em;
-}
-ewfSectionBoxStyleClosedState > ewfSectionHeadingContainer {
-	margin-bottom: -1em;
 }
 ewfSectionBoxStyleExpandedState > ewfSectionHeadingContainer {
 	margin-bottom: 1em;
