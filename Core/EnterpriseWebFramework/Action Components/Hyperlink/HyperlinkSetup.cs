@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// The configuration for a hyperlink.
 	/// </summary>
@@ -16,11 +14,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <see cref="HyperlinkBehaviorExtensionCreators.ToHyperlinkBehavior(Email.EmailAddress, string, string, string, string)"/>.</param>
 		/// <param name="text">Do not pass null. Pass the empty string to use the destination URL.</param>
 		/// <param name="displaySetup"></param>
+		/// <param name="classes">The classes on the hyperlink.</param>
 		/// <param name="icon">The icon.</param>
-		public HyperlinkSetup( HyperlinkBehavior behavior, string text, DisplaySetup displaySetup = null, ActionComponentIcon icon = null ) {
+		public HyperlinkSetup(
+			HyperlinkBehavior behavior, string text, DisplaySetup displaySetup = null, ElementClassSet classes = null, ActionComponentIcon icon = null ) {
 			DisplaySetup = displaySetup;
 			hyperlinkGetter = hyperlinkStyleSelector =>
-				behavior.UserCanNavigateToDestination() ? new EwfHyperlink( behavior, hyperlinkStyleSelector( text, icon ) ) : null;
+				behavior.UserCanNavigateToDestination() ? new EwfHyperlink( behavior, hyperlinkStyleSelector( text, icon ), classes: classes ) : null;
 		}
 
 		/// <inheritdoc/>

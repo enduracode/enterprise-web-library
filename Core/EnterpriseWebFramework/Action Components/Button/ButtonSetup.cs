@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// The configuration for a button.
 	/// </summary>
@@ -13,9 +11,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="text">Do not pass null or the empty string.</param>
 		/// <param name="displaySetup"></param>
 		/// <param name="behavior">The behavior. Pass null to use the form default action.</param>
+		/// <param name="classes">The classes on the button.</param>
 		/// <param name="icon">The icon.</param>
-		public ButtonSetup( string text, DisplaySetup displaySetup = null, ButtonBehavior behavior = null, ActionComponentIcon icon = null ) {
-			behavior = behavior ?? new FormActionBehavior( FormState.Current.DefaultAction );
+		public ButtonSetup(
+			string text, DisplaySetup displaySetup = null, ButtonBehavior behavior = null, ElementClassSet classes = null, ActionComponentIcon icon = null ) {
+			behavior ??= new FormActionBehavior( FormState.Current.DefaultAction );
 
 			DisplaySetup = displaySetup;
 			buttonGetter = ( enableSubmitButton, buttonStyleSelector ) => {
@@ -23,8 +23,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				               behavior is FormActionBehavior formActionBehavior ? ( formActionBehavior.Action as PostBackFormAction )?.PostBack :
 				               behavior is PostBackBehavior postBackBehavior ? postBackBehavior.PostBackAction.PostBack : null;
 				return postBack != null
-					       ? (PhrasingComponent)new SubmitButton( buttonStyleSelector( text, icon ), postBack: postBack )
-					       : new EwfButton( buttonStyleSelector( text, icon ), behavior: behavior );
+					       ? new SubmitButton( buttonStyleSelector( text, icon ), classes: classes, postBack: postBack )
+					       : new EwfButton( buttonStyleSelector( text, icon ), behavior: behavior, classes: classes );
 			};
 		}
 
