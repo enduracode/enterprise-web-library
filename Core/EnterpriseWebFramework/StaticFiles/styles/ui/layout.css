@@ -4,8 +4,8 @@
 	--ewf-ui-important-border-width: 1px;
 	--ewf-ui-top-level-vertical-spacing: 1rem;
 	--ewf-ui-top-level-horizontal-spacing: 2rem;
-	--ewf-ui-navigation-vertical-spacing: .5rem;
-	--ewf-ui-navigation-horizontal-spacing: 1.5rem;
+	--ewf-ui-navigation-vertical-spacing: min( .5vw, .5rem );
+	--ewf-ui-navigation-horizontal-spacing: min( 1vw, 1.5rem );
 	--ewf-ui-large-border-radius: .5em;
 	--ewf-ui-page-path-separator-width: 5px;
 	--ewf-ui-side-tab-border-width: 4px;
@@ -491,7 +491,7 @@ ewfUiEntityActionListContainer > ewfUnorderedLineList, ewfUiPageActionListContai
 ewfUiTopTabListContainer {
 	display: flex;
 	flex-grow: 10000;
-	font-size: 1.1em;
+	font-size: clamp( .8rem, 1.5vw, 1.1em );
 }
 ewfUiTopTabListContainer ewfUnorderedComponentList {
 	gap: 1px;
