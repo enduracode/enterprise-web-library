@@ -277,10 +277,29 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						return ( nodeLinker.node, nodeLinker.keyedLinker.linker.PostModificationRegionGetter( keyAndArg.arg ) );
 					} );
 
+				var message = new StringBuilder();
 				var staticRegionContents = getStaticRegionContents( updateRegions );
-				if( !string.Equals( staticRegionContents.contents, requestState.StaticRegionContents, StringComparison.Ordinal ) ||
-				    componentStateItemsById.Values.Any( i => i.ValueIsInvalid() ) ||
-				    formValues.Any( i => i.GetPostBackValueKey().Any() && i.PostBackValueIsInvalid() ) )
+				message.Append(
+					!string.Equals( staticRegionContents.contents, requestState.StaticRegionContents, StringComparison.Ordinal )
+						? "Previous static-region contents: " + Environment.NewLine + Environment.NewLine + requestState.StaticRegionContents + Environment.NewLine +
+						  "Current static-region contents: " + Environment.NewLine + Environment.NewLine + staticRegionContents.contents + Environment.NewLine
+						: "" );
+				message.Append(
+					StringTools
+						.ConcatenateWithDelimiter(
+							Environment.NewLine,
+							componentStateItemsById.Where( i => i.Value.ValueIsInvalid() ).Select( i => i.Key ).OrderBy( i => i ) )
+						.Surround(
+							"Component-state items whose values became invalid:" + Environment.NewLine + Environment.NewLine,
+							Environment.NewLine + Environment.NewLine ) );
+				message.Append(
+					StringTools.ConcatenateWithDelimiter(
+							Environment.NewLine,
+							formValues.Where( i => i.GetPostBackValueKey().Any() && i.PostBackValueIsInvalid() ).Select( i => i.GetPostBackValueKey() ).OrderBy( i => i ) )
+						.Surround(
+							"Form values whose post-back values became invalid:" + Environment.NewLine + Environment.NewLine,
+							Environment.NewLine + Environment.NewLine ) );
+				if( message.Length > 0 )
 					throw getPossibleDeveloperMistakeException(
 						" " + ( requestState.ModificationErrorsExist
 							        ?
@@ -289,9 +308,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							        : new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains( dmIdAndSecondaryOp.Item2 )
 								        ? "Form controls and component-state items outside of update regions may not change on an intermediate post-back."
 								        : "Post-backs, form controls, and component-state items may not change during the validation stage of an intermediate post-back." ) +
-						Environment.NewLine + Environment.NewLine + "Previous static-region contents: " + Environment.NewLine + Environment.NewLine +
-						requestState.StaticRegionContents + Environment.NewLine + "Current static-region contents: " + Environment.NewLine + Environment.NewLine +
-						staticRegionContents.contents + Environment.NewLine );
+						Environment.NewLine + Environment.NewLine + message );
 			}
 
 			if( !requestState.ModificationErrorsExist && dmIdAndSecondaryOp != null && dmIdAndSecondaryOp.Item2 == SecondaryPostBackOperation.Validate ) {
@@ -799,7 +816,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					contents.Append( ": " + pair.Value.DurableValue );
 				contents.AppendLine();
 			}
-			contents.AppendLine( "Form controls:" );
+			contents.AppendLine( "Form values:" );
 			foreach( var formValue in staticFormValues ) {
 				contents.Append( "\t" + formValue.GetPostBackValueKey() );
 				if( durableValueChangesNotAllowed )
