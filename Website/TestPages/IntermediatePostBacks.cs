@@ -1,9 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using EnterpriseWebLibrary.EnterpriseWebFramework;
-using EnterpriseWebLibrary.WebSessionState;
-using Humanizer;
-using Tewl.Tools;
+﻿using EnterpriseWebLibrary.WebSessionState;
 
 // EwlPage
 // OptionalParameter: bool toggled
@@ -184,11 +179,5 @@ namespace EnterpriseWebLibrary.Website.TestPages {
 
 			return new StackList( items ).ToCollection().ToComponentListItem( id.ToString(), removalUpdateRegionSets: rs.ToCollection() );
 		}
-	}
-}
-
-namespace EnterpriseWebLibrary.Website.TestPages {
-	partial class IntermediatePostBacks {
-		protected override UrlHandler getUrlParent() => new LegacyUrlFolderSetup();
 	}
 }

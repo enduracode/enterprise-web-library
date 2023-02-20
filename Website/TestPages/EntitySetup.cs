@@ -36,6 +36,7 @@ namespace EnterpriseWebLibrary.Website.TestPages {
 				.Append( EwfTableDemo.UrlPatterns.Literal( this, "standard-table" ) )
 				.Append( ResponsiveTableDemo.UrlPatterns.Literal( this, "responsive-table" ) )
 				.Append( FileUploadDemo.UrlPatterns.Literal( this, "file-upload" ) )
+				.Append( IntermediatePostBacks.UrlPatterns.Literal( this, "intermediate-post-backs" ) )
 				.Append( CreateSystem.UrlPatterns.Literal( "create-system" ) )
 				.Append( ConfigurationSchemas.EntitySetup.UrlPatterns.Literal( "ConfigurationSchemas" ) )
 				.Concat( LegacyUrlStatics.GetPatterns() );

@@ -278,16 +278,20 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 					} );
 
 				var staticRegionContents = getStaticRegionContents( updateRegions );
-				if( staticRegionContents.contents != requestState.StaticRegionContents || componentStateItemsById.Values.Any( i => i.ValueIsInvalid() ) ||
+				if( !string.Equals( staticRegionContents.contents, requestState.StaticRegionContents, StringComparison.Ordinal ) ||
+				    componentStateItemsById.Values.Any( i => i.ValueIsInvalid() ) ||
 				    formValues.Any( i => i.GetPostBackValueKey().Any() && i.PostBackValueIsInvalid() ) )
 					throw getPossibleDeveloperMistakeException(
-						requestState.ModificationErrorsExist
-							?
-							"Post-backs, form controls, component-state items, and modification-error-display keys may not change if modification errors exist." +
-							" (IMPORTANT: This exception may have been thrown because EWL Goal 588 hasn't been completed. See the note in the goal about the EwfPage bug and disregard the rest of this error message.)"
-							: new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains( dmIdAndSecondaryOp.Item2 )
-								? "Form controls and component-state items outside of update regions may not change on an intermediate post-back."
-								: "Post-backs, form controls, and component-state items may not change during the validation stage of an intermediate post-back." );
+						" " + ( requestState.ModificationErrorsExist
+							        ?
+							        "Post-backs, form controls, component-state items, and modification-error-display keys may not change if modification errors exist." +
+							        " (IMPORTANT: This exception may have been thrown because EWL Goal 588 hasn't been completed. See the note in the goal about the EwfPage bug and disregard the rest of this error message.)"
+							        : new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains( dmIdAndSecondaryOp.Item2 )
+								        ? "Form controls and component-state items outside of update regions may not change on an intermediate post-back."
+								        : "Post-backs, form controls, and component-state items may not change during the validation stage of an intermediate post-back." ) +
+						Environment.NewLine + Environment.NewLine + "Previous static-region contents: " + Environment.NewLine + Environment.NewLine +
+						requestState.StaticRegionContents + Environment.NewLine + "Current static-region contents: " + Environment.NewLine + Environment.NewLine +
+						staticRegionContents.contents + Environment.NewLine );
 			}
 
 			if( !requestState.ModificationErrorsExist && dmIdAndSecondaryOp != null && dmIdAndSecondaryOp.Item2 == SecondaryPostBackOperation.Validate ) {
@@ -768,6 +772,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			IEnumerable<( PageNode node, IEnumerable<PageComponent> components )> updateRegions ) {
 			var contents = new StringBuilder();
 
+			var requestState = AppRequestState.Instance.EwfPageRequestState;
+			if( requestState.ModificationErrorsExist ||
+			    ( requestState.DmIdAndSecondaryOp != null && requestState.DmIdAndSecondaryOp.Item2 == SecondaryPostBackOperation.NoOperation ) ) {
+				// It’s probably bad if a developer puts a post-back object in the page because of a modification error. It will be gone on the post-back and cannot be
+				// processed.
+				contents.AppendLine( "Post-backs:" );
+				foreach( var postBack in postBacksById.Values.OrderBy( i => i.Id ) )
+					contents.AppendLine( "\t" + postBack.Id );
+			}
+
 			var staticNodes = pageTree.GetStaticRegionNodes( updateRegions );
 			var staticStateItems = staticNodes.Select( i => i.StateItem ).Where( i => i != null ).ToImmutableHashSet();
 			var staticFormValues = staticNodes.Select( i => i.FormValue ).Where( i => i != null ).Distinct().OrderBy( i => i.GetPostBackValueKey() ).Materialize();
@@ -775,33 +789,31 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			// Intermediate post-backs sometimes have good reason to change durable values outside of update regions, e.g. when updating filters on a search page. We
 			// allow this under the assumption that all durable values are retrieved using a technique such as snapshot isolation to protect against concurrent
 			// modifications during the request. If concurrent modifications did occur they would be unintentionally ignored.
-			var requestState = AppRequestState.Instance.EwfPageRequestState;
 			var durableValueChangesNotAllowed = requestState.ModificationErrorsExist ||
 			                                    ( requestState.DmIdAndSecondaryOp != null &&
 			                                      requestState.DmIdAndSecondaryOp.Item2 == SecondaryPostBackOperation.NoOperation );
+			contents.AppendLine( "Component-state items:" );
 			foreach( var pair in componentStateItemsById.Where( i => staticStateItems.Contains( i.Value ) ).OrderBy( i => i.Key ) ) {
-				contents.Append( pair.Key );
+				contents.Append( "\t" + pair.Key );
 				if( durableValueChangesNotAllowed )
-					contents.Append( pair.Value.DurableValue );
+					contents.Append( ": " + pair.Value.DurableValue );
+				contents.AppendLine();
 			}
+			contents.AppendLine( "Form controls:" );
 			foreach( var formValue in staticFormValues ) {
-				contents.Append( formValue.GetPostBackValueKey() );
+				contents.Append( "\t" + formValue.GetPostBackValueKey() );
 				if( durableValueChangesNotAllowed )
-					contents.Append( formValue.GetDurableValueAsString() );
+					contents.Append( ": " + formValue.GetDurableValueAsString() );
+				contents.AppendLine();
 			}
 
-			if( requestState.ModificationErrorsExist )
+			if( requestState.ModificationErrorsExist ) {
 				// Include mod error display keys. They shouldn't change across a transfer when there are modification errors because that could prevent some of the
 				// errors from being displayed.
+				contents.AppendLine( "Modification-error-display keys:" );
 				foreach( var modErrorDisplayKey in modErrorDisplaysByValidation.Values.SelectMany( i => i ) )
-					contents.Append( modErrorDisplayKey + " " );
-
-			if( requestState.ModificationErrorsExist ||
-			    ( requestState.DmIdAndSecondaryOp != null && requestState.DmIdAndSecondaryOp.Item2 == SecondaryPostBackOperation.NoOperation ) )
-				// It's probably bad if a developer puts a post-back object in the page because of a modification error. It will be gone on the post-back and cannot be
-				// processed.
-				foreach( var postBack in postBacksById.Values.OrderBy( i => i.Id ) )
-					contents.Append( postBack.Id );
+					contents.AppendLine( "\t" + modErrorDisplayKey );
+			}
 
 			return ( contents.ToString(), staticStateItems, staticFormValues );
 		}
@@ -872,12 +884,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		}
 
 		private ApplicationException getPossibleDeveloperMistakeException( string messageSentence, Exception innerException = null ) {
-			var sentences = new[]
-				{
-					"Possible developer mistake.", messageSentence,
-					"There is a chance that this was caused by something outside the request, but it's more likely that a developer incorrectly modified something."
-				};
-			throw new ApplicationException( StringTools.ConcatenateWithDelimiter( " ", sentences ), innerException );
+			const string firstSentence = "Possible developer mistake.";
+			const string lastSentence =
+				"There is a chance that this was caused by something outside the request, but it's more likely that a developer incorrectly modified something.";
+			throw new Exception(
+				messageSentence.Contains( Environment.NewLine, StringComparison.Ordinal )
+					? firstSentence + messageSentence + lastSentence
+					: StringTools.ConcatenateWithDelimiter( " ", firstSentence, messageSentence, lastSentence ),
+				innerException );
 		}
 
 		private void replaceUrlHandlers() {
