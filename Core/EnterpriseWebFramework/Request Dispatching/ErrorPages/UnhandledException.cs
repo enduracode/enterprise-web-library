@@ -21,12 +21,26 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.ErrorPages {
 				var error = errorGetter();
 				if( error.prefix.Length > 0 )
 					content.Add( new Paragraph( error.prefix.ToComponents() ) );
-				content.Add( new Paragraph( error.exception.ToString().ToComponents() ) );
+				content.Add(
+					new DisplayableElement(
+						_ => new DisplayableElementData(
+							null,
+							() => new DisplayableElementLocalData( "pre" ),
+							children: new DisplayableElement(
+									_ => new DisplayableElementData(
+										null,
+										() => new DisplayableElementLocalData( "samp" ),
+										children: error.exception.ToString().ToComponents() ) )
+								.ToCollection() ) ) );
 			}
 			else
 				content.Add( new Paragraph( Translation.AnErrorHasOccurred.ToComponents() ) );
 
-			return new ErrorPageContent( content );
+			return new ErrorPageContent(
+				content,
+				bodyClasses: ConfigurationStatics.IsDevelopmentInstallation
+					             ? new ElementClass( "ewfUnhandledExceptionDisplay" /* This is used by EWF CSS files. */ )
+					             : null );
 		}
 	}
 }

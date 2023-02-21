@@ -249,7 +249,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										var cssInfos = new List<ResourceInfo>();
 										cssInfos.Add(
 											new ExternalResource(
-												"//fonts.googleapis.com/css2?family=Libre+Franklin:wght@500;600;700&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400&display=fallback" ) );
+												"//fonts.googleapis.com/css2?family=Libre+Franklin:wght@500;600;700&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400&family=Roboto+Mono&display=fallback" ) );
 										cssInfos.Add( new ExternalResource( "//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" ) );
 										cssInfos.Add( new StaticFiles.Versioned.Third_party.Jquery_ui.Jquery_ui_1132custom_v1.Jquery_uiminCss() );
 										cssInfos.Add( new ExternalResource( "//cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css" ) );

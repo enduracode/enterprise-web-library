@@ -1,11 +1,8 @@
-﻿using System.Collections.Generic;
-using Humanizer;
-using JetBrains.Annotations;
-using Tewl.Tools;
+﻿using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.ErrorPages {
 	public class ErrorPageContent: PageContent {
-		private static readonly ElementClass elementClass = new ElementClass( "ewfError" );
+		private static readonly ElementClass elementClass = new( "ewfError" );
 
 		[ UsedImplicitly ]
 		private class CssElementCreator: ControlCssElementCreator {
@@ -15,8 +12,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.ErrorPages {
 
 		private readonly BasicPageContent basicContent;
 
-		public ErrorPageContent( IReadOnlyCollection<FlowComponent> content ) {
-			basicContent = new BasicPageContent( bodyClasses: elementClass ).Add( content );
+		public ErrorPageContent( IReadOnlyCollection<FlowComponent> content, ElementClassSet bodyClasses = null ) {
+			basicContent = new BasicPageContent( bodyClasses: elementClass.Add( bodyClasses ?? ElementClassSet.Empty ) ).Add( content );
 		}
 
 		protected internal override PageContent GetContent() => basicContent;

@@ -949,6 +949,16 @@ ewfErrorPageBody ewfActionComponentLargeButtonStyleAllStates {
 	padding: 1em;
 	font-weight: 600;
 }
+ewfErrorPageBody.ewfUnhandledExceptionDisplay {
+	margin-left: 1rem;
+	margin-right: 1rem;
+	max-width: revert;
+}
+ewfErrorPageBody.ewfUnhandledExceptionDisplay pre {
+	font-size: min( 2.5vw, 1rem );
+	white-space: pre-wrap;
+	tab-size: 4;
+}
 
 /* fonts */
 ewfTopWarningContainer, ewfProcessingDialogBlockAllStates, ewfNotificationSectionContainerBothStates, ewfSelectUserPageBody, ewfErrorPageBody {
@@ -956,4 +966,7 @@ ewfTopWarningContainer, ewfProcessingDialogBlockAllStates, ewfNotificationSectio
 }
 ewfSelectUserPageBody h1, ewfErrorPageBody h1 {
 	font-family: 'Libre Franklin', sans-serif;
+}
+ewfErrorPageBody.ewfUnhandledExceptionDisplay samp {
+	font-family: 'Roboto Mono', monospace;
 }
