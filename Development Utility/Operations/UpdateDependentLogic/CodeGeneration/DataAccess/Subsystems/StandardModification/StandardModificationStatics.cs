@@ -1,11 +1,6 @@
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
-using Humanizer;
 using Tewl.IO;
-using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems.StandardModification {
 	internal static class StandardModificationStatics {
@@ -97,6 +92,15 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				writeCreateForSingleRowUpdateMethod( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass, revisionHistorySuffix );
 			writeGetConditionListMethod( cn, tableName );
 			writer.WriteLine( "private " + GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass ) + "() {}" );
+
+			CodeGenerationStatics.AddSummaryDocComment(
+				writer,
+				"Gets whether the value for any column has been set since object creation or the last call to Execute, whichever was latest." );
+			writer.WriteLine(
+				"public bool AnyColumnValueHasChanged => {0};".FormatWith(
+					StringTools.ConcatenateWithDelimiter(
+						" || ",
+						columns.AllColumnsExceptRowVersion.Select( i => "{0}.Changed".FormatWith( getColumnFieldName( i ) ) ) ) ) );
 
 			if( columns.DataColumns.Any() )
 				writeSetAllDataMethod();
@@ -350,11 +354,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 
 			// Use the values of key columns as conditions.
 			writer.WriteLine( "mod.conditions = new List<" + DataAccessStatics.GetTableConditionInterfaceName( cn, database, tableName ) + ">();" );
-			foreach( var column in columns.KeyColumns ) {
+			foreach( var column in columns.KeyColumns )
 				writer.WriteLine(
 					"mod.conditions.Add( new " + DataAccessStatics.GetEqualityConditionClassName( cn, database, tableName, column ) + "( " +
 					EwlStatics.GetCSharpIdentifier( column.CamelCasedName ) + " ) );" );
-			}
 
 			writeColumnValueAssignmentsFromParameters( columns.AllColumnsExceptRowVersion, "mod" );
 			writer.WriteLine( "mod.markColumnValuesUnchanged();" );
@@ -502,11 +505,10 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			// Future calls to Execute should perform updates, not inserts. Use the values of key columns as conditions.
 			writer.WriteLine( "modType = ModificationType.Update;" );
 			writer.WriteLine( "conditions = new List<" + DataAccessStatics.GetTableConditionInterfaceName( cn, database, tableName ) + ">();" );
-			foreach( var column in keyColumns ) {
+			foreach( var column in keyColumns )
 				writer.WriteLine(
 					"conditions.Add( new " + DataAccessStatics.GetEqualityConditionClassName( cn, database, tableName, column ) + "( " +
 					EwlStatics.GetCSharpIdentifier( column.PascalCasedNameExceptForOracle ) + " ) );" );
-			}
 
 			writer.WriteLine( "}" ); // if insert
 
@@ -588,7 +590,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 			// Insert a copy of the data row and make it correspond to the copy of the latest revision.
 			writer.WriteLine( "var copyCommand = " + DataAccessStatics.GetConnectionExpression( database ) + ".DatabaseInfo.CreateCommand();" );
 			writer.WriteLine( "copyCommand.CommandText = \"INSERT INTO " + tableName + " SELECT \";" );
-			foreach( var column in nonIdentityColumns ) {
+			foreach( var column in nonIdentityColumns )
 				if( column == columns.PrimaryKeyAndRevisionIdColumn ) {
 					writer.WriteLine( "var revisionIdParameter = new DbCommandParameter( \"copiedRevisionId\", new DbParameterValue( copiedRevisionId ) );" );
 					writer.WriteLine(
@@ -600,7 +602,6 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.Data
 				}
 				else
 					writer.WriteLine( "copyCommand.CommandText += \"" + column.Name + ", \";" );
-			}
 			writer.WriteLine( "copyCommand.CommandText = copyCommand.CommandText.Remove( copyCommand.CommandText.Length - 2 );" );
 			writer.WriteLine( "copyCommand.CommandText += \" FROM " + tableName + " WHERE \";" );
 			writer.WriteLine(
