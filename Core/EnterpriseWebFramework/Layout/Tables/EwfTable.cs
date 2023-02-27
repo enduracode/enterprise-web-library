@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
+﻿using System.Collections.Immutable;
 using Humanizer;
 using StackExchange.Profiling;
 using Tewl.IO;
-using Tewl.Tools;
 using static MoreLinq.Extensions.EquiZipExtension;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -48,7 +44,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			IReadOnlyCollection<EwfTableItem> headItems = null, DataRowLimit defaultItemLimit = DataRowLimit.Unlimited, bool enableItemReordering = false,
 			bool disableEmptyFieldDetection = false, IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions = null,
 			IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
-			new EwfTable(
+			new(
 				displaySetup,
 				style,
 				classes,
@@ -101,7 +97,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			IReadOnlyCollection<EwfTableItem> headItems = null, DataRowLimit defaultItemLimit = DataRowLimit.Unlimited, bool enableItemReordering = false,
 			bool disableEmptyFieldDetection = false, IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions = null,
 			IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
-			new EwfTable<ItemIdType>(
+			new(
 				displaySetup,
 				style,
 				classes,
@@ -150,8 +146,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		private readonly string postBackIdBase;
 		private readonly PostBack exportToExcelPostBack;
 		private readonly IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions;
-		private readonly TableSelectedItemData<ItemIdType> selectedItemData = new TableSelectedItemData<ItemIdType>();
-		private readonly List<EwfTableItemGroup<ItemIdType>> itemGroups = new List<EwfTableItemGroup<ItemIdType>>();
+		private readonly TableSelectedItemData<ItemIdType> selectedItemData = new();
+		private readonly List<EwfTableItemGroup<ItemIdType>> itemGroups = new();
 		private bool? hasExplicitItemGroups;
 		private IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions;
 
@@ -161,19 +157,19 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			IReadOnlyCollection<EwfTableField> fields, IReadOnlyCollection<EwfTableItem> headItems, DataRowLimit defaultItemLimit, bool enableItemReordering,
 			bool disableEmptyFieldDetection, IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions, IReadOnlyCollection<EtherealComponent> etherealContent ) {
 			postBackIdBase = PostBack.GetCompositeId( "ewfTable", postBackIdBase );
-			tableActions = tableActions ?? Enumerable.Empty<ActionComponentSetup>().Materialize();
+			tableActions ??= Enumerable.Empty<ActionComponentSetup>().Materialize();
 
 			if( fields != null && !fields.Any() )
 				throw new ApplicationException( "If fields are specified, there must be at least one of them." );
 
-			headItems = headItems ?? Enumerable.Empty<EwfTableItem>().Materialize();
-			tailUpdateRegions = tailUpdateRegions ?? Enumerable.Empty<TailUpdateRegion>().Materialize();
+			headItems ??= Enumerable.Empty<EwfTableItem>().Materialize();
+			tailUpdateRegions ??= Enumerable.Empty<TailUpdateRegion>().Materialize();
 
 			var dataModifications = FormState.Current.DataModifications;
 
 			var excelRowAdders = new List<Action<ExcelWorksheet>>();
 			outerChildren = new DisplayableElement(
-				tableContext => {
+				_ => {
 					if( selectedItemData.Buttons == null )
 						TableStatics.AddCheckboxes(
 							postBackIdBase,
@@ -230,9 +226,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 															.SelectMany( i => i.Sets ),
 														columnIdentifiedComponent.ToCollection,
 														() => "" ).ToCollection(),
-												arg => columnIdentifiedComponent.ToCollection() ).ToCollection(),
+												_ => columnIdentifiedComponent.ToCollection() ).ToCollection(),
 											new ErrorSourceSet(),
-											errorsBySource => getColumnSpecifications( fields ) ) ) );
+											_ => getColumnSpecifications( fields ) ) ) );
 
 								var allVisibleItems = new List<IReadOnlyCollection<EwfTableCell>>();
 
@@ -279,7 +275,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 											allVisibleItems ) )
 									.Materialize();
 								if( headRows.Any() )
-									children.Add( new ElementComponent( context => new ElementData( () => new ElementLocalData( "thead" ), children: headRows ) ) );
+									children.Add( new ElementComponent( _ => new ElementData( () => new ElementLocalData( "thead" ), children: headRows ) ) );
 								excelRowAdders.AddRange( headItems.Select( i => TableStatics.GetExcelRowAdder( true, i.Cells ) ) );
 
 								var bodyRowGroupsAndRows = new List<Tuple<FlowComponent, IReadOnlyCollection<FlowComponent>>>();
@@ -287,7 +283,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								for( var visibleGroupIndex = 0; visibleGroupIndex < visibleItemGroupsAndItems.Count; visibleGroupIndex += 1 ) {
 									var groupAndItems = visibleItemGroupsAndItems[ visibleGroupIndex ];
 									var groupSelectedItemData = selectedItemData.ItemGroupData?[ visibleGroupIndex ];
-									var useContrastForFirstRow = visibleItemGroupsAndItems.Where( ( group, i ) => i < visibleGroupIndex ).Sum( i => i.Item2.Count ) % 2 == 1;
+									var useContrastForFirstRow = visibleItemGroupsAndItems.Where( ( _, i ) => i < visibleGroupIndex ).Sum( i => i.Item2.Count ) % 2 == 1;
 									var groupBodyRows = buildRows(
 											groupAndItems.Item2,
 											fields,
@@ -302,7 +298,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										.Materialize();
 									var cachedVisibleGroupIndex = visibleGroupIndex;
 									FlowComponent rowGroup = new ElementComponent(
-										context => new ElementData(
+										_ => new ElementData(
 											() => new ElementLocalData( "tbody" ),
 											children:
 											buildRows(
@@ -343,7 +339,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 																select new PreModificationUpdateRegion( region.Sets, () => groupBodyRows.Skip( staticRowCount ), staticRowCount.ToString ),
 																arg => groupBodyRows.Skip( int.Parse( arg ) ) ).ToCollection(),
 															new ErrorSourceSet(),
-															errorsBySource => groupBodyRows ) ) )
+															_ => groupBodyRows ) ) )
 												.Materialize() ) );
 									bodyRowGroupsAndRows.Add( Tuple.Create( rowGroup, groupBodyRows ) );
 									excelRowAdders.AddRange( groupAndItems.Item2.Select( i => TableStatics.GetExcelRowAdder( false, i.Cells ) ) );
@@ -362,7 +358,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 											"",
 											linkers,
 											new ErrorSourceSet(),
-											errorsBySource => bodyRowGroupsAndRows.Select( i => i.Item1 ) ) ) );
+											_ => bodyRowGroupsAndRows.Select( i => i.Item1 ) ) ) );
 
 								if( defaultItemLimit != DataRowLimit.Unlimited ) {
 									var oldItemLimit = itemLimit.Value.Value;
@@ -424,7 +420,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 									var useContrast = visibleItemGroupsAndItems.Sum( i => i.Item2.Count ) % 2 == 1;
 									itemLimitingRowGroup.Add(
 										new ElementComponent(
-											context => new ElementData(
+											_ => new ElementData(
 												() => new ElementLocalData( "tbody" ),
 												children: buildRows(
 														item.ToCollection(),
