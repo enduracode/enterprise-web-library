@@ -13,9 +13,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Creates a table.
 		/// </summary>
 		/// <param name="displaySetup"></param>
-		/// <param name="style">The table's style.</param>
+		/// <param name="style">The table’s style.</param>
 		/// <param name="classes">The classes on the table.</param>
-		/// <param name="postBackIdBase">Do not pass null.</param>
+		/// <param name="idBase">The base for the table’s post-back and component-state-item IDs. This must be unique on the page, meaning that if the page includes
+		/// multiple tables, you must pass a different value for each. Do not pass null.</param>
 		/// <param name="caption">The caption that appears above the table. Do not pass null. Setting this to the empty string means the table will have no caption.
 		/// </param>
 		/// <param name="subCaption">The sub caption that appears directly under the caption. Do not pass null. Setting this to the empty string means there will be
@@ -26,8 +27,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="selectedItemActions">Table selected-item actions. Passing one or more of these will add a new column to the table containing a checkbox for
 		/// each item with an ID. If you would like the table to support item-group-level selected-item actions, you must pass a collection here even if it is
 		/// empty.</param>
-		/// <param name="fields">The table's fields. Do not pass an empty collection.</param>
-		/// <param name="headItems">The table's head items.</param>
+		/// <param name="fields">The table’s fields. Do not pass an empty collection.</param>
+		/// <param name="headItems">The table’s head items.</param>
 		/// <param name="defaultItemLimit">The maximum number of result items that will be shown. Default is DataRowLimit.Unlimited. A default item limit of
 		/// anything other than Unlimited will cause the table to show a control allowing the user to select how many results they want to see, as well as an
 		/// indicator of the total number of results that would be shown if there was no limit.</param>
@@ -38,8 +39,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// you add item groups.</param>
 		/// <param name="etherealContent"></param>
 		public static EwfTable Create(
-			DisplaySetup displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string postBackIdBase = "",
-			string caption = "", string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
+			DisplaySetup displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string idBase = "", string caption = "",
+			string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
 			IReadOnlyCollection<SelectedItemAction<int>> selectedItemActions = null, IReadOnlyCollection<EwfTableField> fields = null,
 			IReadOnlyCollection<EwfTableItem> headItems = null, DataRowLimit defaultItemLimit = DataRowLimit.Unlimited, bool enableItemReordering = false,
 			bool disableEmptyFieldDetection = false, IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions = null,
@@ -48,7 +49,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				displaySetup,
 				style,
 				classes,
-				postBackIdBase,
+				idBase,
 				caption,
 				subCaption,
 				allowExportToExcel,
@@ -66,9 +67,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Creates a table with a specified item ID type.
 		/// </summary>
 		/// <param name="displaySetup"></param>
-		/// <param name="style">The table's style.</param>
+		/// <param name="style">The table’s style.</param>
 		/// <param name="classes">The classes on the table.</param>
-		/// <param name="postBackIdBase">Do not pass null.</param>
+		/// <param name="idBase">The base for the table’s post-back and component-state-item IDs. This must be unique on the page, meaning that if the page includes
+		/// multiple tables, you must pass a different value for each. Do not pass null.</param>
 		/// <param name="caption">The caption that appears above the table. Do not pass null. Setting this to the empty string means the table will have no caption.
 		/// </param>
 		/// <param name="subCaption">The sub caption that appears directly under the caption. Do not pass null. Setting this to the empty string means there will be
@@ -79,8 +81,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="selectedItemActions">Table selected-item actions. Passing one or more of these will add a new column to the table containing a checkbox for
 		/// each item with an ID. If you would like the table to support item-group-level selected-item actions, you must pass a collection here even if it is
 		/// empty.</param>
-		/// <param name="fields">The table's fields. Do not pass an empty collection.</param>
-		/// <param name="headItems">The table's head items.</param>
+		/// <param name="fields">The table’s fields. Do not pass an empty collection.</param>
+		/// <param name="headItems">The table’s head items.</param>
 		/// <param name="defaultItemLimit">The maximum number of result items that will be shown. Default is DataRowLimit.Unlimited. A default item limit of
 		/// anything other than Unlimited will cause the table to show a control allowing the user to select how many results they want to see, as well as an
 		/// indicator of the total number of results that would be shown if there was no limit.</param>
@@ -91,8 +93,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// you add item groups.</param>
 		/// <param name="etherealContent"></param>
 		public static EwfTable<ItemIdType> CreateWithItemIdType<ItemIdType>(
-			DisplaySetup displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string postBackIdBase = "",
-			string caption = "", string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
+			DisplaySetup displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string idBase = "", string caption = "",
+			string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
 			IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions = null, IReadOnlyCollection<EwfTableField> fields = null,
 			IReadOnlyCollection<EwfTableItem> headItems = null, DataRowLimit defaultItemLimit = DataRowLimit.Unlimited, bool enableItemReordering = false,
 			bool disableEmptyFieldDetection = false, IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions = null,
@@ -101,7 +103,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				displaySetup,
 				style,
 				classes,
-				postBackIdBase,
+				idBase,
 				caption,
 				subCaption,
 				allowExportToExcel,
@@ -143,20 +145,21 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// </summary>
 	public class EwfTable<ItemIdType>: FlowComponent {
 		private readonly IReadOnlyCollection<DisplayableElement> outerChildren;
-		private readonly string postBackIdBase;
+		private readonly string idBase;
 		private readonly PostBack exportToExcelPostBack;
 		private readonly IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions;
 		private readonly TableSelectedItemData<ItemIdType> selectedItemData = new();
+		private readonly ComponentStateItem<int> itemLimit;
 		private readonly List<EwfTableItemGroup<ItemIdType>> itemGroups = new();
 		private bool? hasExplicitItemGroups;
 		private IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions;
 
 		internal EwfTable(
-			DisplaySetup displaySetup, EwfTableStyle style, ElementClassSet classes, string postBackIdBase, string caption, string subCaption,
-			bool allowExportToExcel, IReadOnlyCollection<ActionComponentSetup> tableActions, IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions,
+			DisplaySetup displaySetup, EwfTableStyle style, ElementClassSet classes, string idBase, string caption, string subCaption, bool allowExportToExcel,
+			IReadOnlyCollection<ActionComponentSetup> tableActions, IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions,
 			IReadOnlyCollection<EwfTableField> fields, IReadOnlyCollection<EwfTableItem> headItems, DataRowLimit defaultItemLimit, bool enableItemReordering,
 			bool disableEmptyFieldDetection, IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions, IReadOnlyCollection<EtherealComponent> etherealContent ) {
-			postBackIdBase = PostBack.GetCompositeId( "ewfTable", postBackIdBase );
+			idBase = PostBack.GetCompositeId( idBase, "ewfTable" );
 			tableActions ??= Enumerable.Empty<ActionComponentSetup>().Materialize();
 
 			if( fields != null && !fields.Any() )
@@ -172,7 +175,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 				_ => {
 					if( selectedItemData.Buttons == null )
 						TableStatics.AddCheckboxes(
-							postBackIdBase,
+							idBase,
 							selectedItemActions,
 							selectedItemData,
 							itemGroups.Select( group => ( group.SelectedItemActions, group.Items.Select( i => new Func<EwfTableItem<ItemIdType>>( () => i.Value ) ) ) ),
@@ -180,15 +183,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 							Enumerable.Empty<DataModification>().Materialize() );
 
 					var children = new List<FlowComponentOrNode>();
-					ComponentStateItem<int> itemLimit = null;
 					using( MiniProfiler.Current.Step( "EWF - Load table data" ) )
 						FormState.ExecuteWithDataModificationsAndDefaultAction(
 							dataModifications,
 							() => {
 								children.AddRange( TableStatics.GetCaption( caption, subCaption ) );
-
-								// the maximum number of items that will be shown in this table
-								itemLimit = ComponentStateItem.Create( "itemLimit", (int)defaultItemLimit, value => Enum.IsDefined( typeof( DataRowLimit ), value ), false );
 
 								var visibleItemGroupsAndItems = new List<( EwfTableItemGroup<ItemIdType>, IReadOnlyList<EwfTableItem<ItemIdType>> )>();
 								foreach( var itemGroup in itemGroups ) {
@@ -235,7 +234,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 								var itemLimitingUpdateRegionSet = new UpdateRegionSet();
 								var itemLimitingAndGeneralActionComponents =
 									( defaultItemLimit != DataRowLimit.Unlimited
-										  ? getItemLimitingControlContainer( postBackIdBase, itemLimit.Value, itemLimitingUpdateRegionSet, this.tailUpdateRegions ).ToCollection()
+										  ? getItemLimitingControlContainer( idBase, itemLimit.Value, itemLimitingUpdateRegionSet, this.tailUpdateRegions ).ToCollection()
 										  : Enumerable.Empty<FlowComponent>() )
 									.Concat( TableStatics.GetGeneralActionList( allowExportToExcel ? exportToExcelPostBack : null, tableActions ) )
 									.Materialize();
@@ -291,7 +290,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 											!groupSelectedItemData.HasValue ? Enumerable.Repeat( (PhrasingComponent)null, groupAndItems.Item2.Count ) :
 											groupSelectedItemData.Value.checkboxes.Take( groupAndItems.Item2.Count )
 												.EquiZip( groupAndItems.Item2, ( checkbox, item ) => item.Setup.Id != null ? checkbox : null ),
-											TableStatics.GetReorderingControls( postBackIdBase, false, enableItemReordering, hasExplicitItemGroups.Value, groupAndItems.Item2 ),
+											TableStatics.GetReorderingControls( idBase, false, enableItemReordering, hasExplicitItemGroups.Value, groupAndItems.Item2 ),
 											useContrastForFirstRow,
 											false,
 											allVisibleItems )
@@ -414,7 +413,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 										behavior: new PostBackBehavior(
 											postBack: PostBack.CreateIntermediate(
 												itemLimitingUpdateRegionSet.ToCollection(),
-												id: PostBack.GetCompositeId( postBackIdBase, "showMore" ),
+												id: PostBack.GetCompositeId( idBase, "showMore" ),
 												modificationMethod: () => itemLimit.Value.Value = (int)nextLimit ) ) );
 									var item = EwfTableItem.Create( button.ToCollection().ToCell( new TableCellSetup( fieldSpan: fields.Count ) ) );
 									var useContrast = visibleItemGroupsAndItems.Sum( i => i.Item2.Count ) % 2 == 1;
@@ -459,9 +458,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 						.Materialize() );
 				} ).ToCollection();
 
-			this.postBackIdBase = postBackIdBase;
-			exportToExcelPostBack = TableStatics.GetExportToExcelPostBack( postBackIdBase, caption, excelRowAdders );
+			this.idBase = idBase;
+			exportToExcelPostBack = TableStatics.GetExportToExcelPostBack( idBase, caption, excelRowAdders );
 			this.selectedItemActions = selectedItemActions;
+			itemLimit = ComponentStateItem.Create(
+				PostBack.GetCompositeId( idBase, "itemLimit" ),
+				(int)defaultItemLimit,
+				value => Enum.IsDefined( typeof( DataRowLimit ), value ),
+				false );
 			this.tailUpdateRegions = tailUpdateRegions;
 		}
 
@@ -488,6 +492,32 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			else
 				foreach( var i in data )
 					AddItem( () => itemSelector( i ) );
+			return this;
+		}
+
+		/// <summary>
+		/// Adds items to the table based on the current item limit.
+		/// 
+		/// You can pass EwfTableItem wherever EwfTableItem&lt;int&gt; is expected.
+		/// </summary>
+		/// <param name="itemGetter">A function that takes the remaining number of items that can be shown based on the current limit and returns the items to add
+		/// along with the total number of items that could be added if there was no limit.</param>
+		public EwfTable<ItemIdType> AddLimitedItems<T>( Func<int, ( IEnumerable<EwfTableItem<ItemIdType>> items, int totalItemCount )> itemGetter ) {
+			var itemsAndCount = itemGetter( itemLimit.Value.Value - itemGroups.Sum( i => i.Items.Count ) );
+
+			var count = 0;
+			foreach( var i in itemsAndCount.items ) {
+				AddItem( i );
+				count += 1;
+			}
+
+			if( itemsAndCount.totalItemCount < count )
+				throw new Exception( "The total item count must be greater than or equal to the number of items." );
+			foreach( var i in Enumerable.Repeat(
+				        new Func<EwfTableItem<ItemIdType>>( () => throw new Exception( "Item-count placeholder items cannot be displayed." ) ),
+				        itemsAndCount.totalItemCount - count ) )
+				AddItem( i );
+
 			return this;
 		}
 
@@ -571,7 +601,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="selectedItemIds">Do not pass null.</param>
 		public EwfTable<ItemIdType> AddCheckboxes( DataValue<IReadOnlyCollection<ItemIdType>> selectedItemIds ) {
 			TableStatics.AddCheckboxes(
-				postBackIdBase,
+				idBase,
 				selectedItemActions,
 				selectedItemData,
 				itemGroups.Select( group => ( group.SelectedItemActions, group.Items.Select( i => new Func<EwfTableItem<ItemIdType>>( () => i.Value ) ) ) ),

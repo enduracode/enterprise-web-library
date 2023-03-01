@@ -1,11 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using EnterpriseWebLibrary.DataAccess.BlobStorage;
 using EnterpriseWebLibrary.IO;
 using EnterpriseWebLibrary.WebSessionState;
 using Tewl.InputValidation;
-using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
@@ -45,7 +41,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 			columnSetups.Add( new EwfTableField( size: 7.ToPercentage() ) );
 
 			var table = EwfTable.Create(
-				postBackIdBase: postBackIdBase,
+				idBase: postBackIdBase,
 				caption: "Files",
 				selectedItemActions: disableModifications
 					                     ? null
