@@ -502,7 +502,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		/// <param name="itemGetter">A function that takes the remaining number of items that can be shown based on the current limit and returns the items to add
 		/// along with the total number of items that could be added if there was no limit.</param>
-		public EwfTable<ItemIdType> AddLimitedItems<T>( Func<int, ( IEnumerable<EwfTableItem<ItemIdType>> items, int totalItemCount )> itemGetter ) {
+		public EwfTable<ItemIdType> AddLimitedItems( Func<int, ( IEnumerable<EwfTableItem<ItemIdType>> items, int totalItemCount )> itemGetter ) {
 			var itemsAndCount = itemGetter( itemLimit.Value.Value - itemGroups.Sum( i => i.Items.Count ) );
 
 			var count = 0;
