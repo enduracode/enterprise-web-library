@@ -132,10 +132,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal void EnableUser() {
 			userEnabled = true;
 
-			// Abandon the profiling session if it's not needed. The boolean expressions are in this order because we don't want to short circuit the user check if
-			// the installation is not live or the request is local; doing so would prevent adequate testing of the user check.
+			// Abandon the profiling session if it’s not needed. The boolean expressions are in this order because we don’t want to short circuit the user check if
+			// the installation is not live; doing so would prevent adequate testing of the user check.
 			var userIsProfiling = UserAccessible && ( ProfilingUserId.HasValue || ImpersonatorExists ) && AppMemoryCache.UserIsProfilingRequests( ProfilingUserId );
-			if( !userIsProfiling && !EwfRequest.Current.IsLocal && ConfigurationStatics.IsLiveInstallation )
+			if( !userIsProfiling && ( ConfigurationStatics.IsLiveInstallation || AppMemoryCache.UnconditionalRequestProfilingDisabled() ) )
 				MiniProfiler.Current.Stop( discardResults: true );
 		}
 

@@ -1,9 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
 using EnterpriseWebLibrary.Configuration.Machine;
-using Humanizer;
 using Tewl.IO;
-using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.Configuration {
 	public static class ConfigurationStatics {
@@ -101,18 +99,15 @@ namespace EnterpriseWebLibrary.Configuration {
 
 		internal static bool DatabaseExists { get { return InstallationConfiguration.PrimaryDatabaseInfo != null; } }
 
-		internal static bool IsDevelopmentInstallation { get { return InstallationConfiguration.InstallationType == InstallationType.Development; } }
+		internal static bool IsDevelopmentInstallation => InstallationConfiguration.InstallationType == InstallationType.Development;
 
 		/// <summary>
 		/// Gets whether this is a live installation. Use with caution. If you do not deliberately test code that only runs in live installations, you may not
 		/// discover problems with it until it is live.
 		/// </summary>
-		public static bool IsLiveInstallation { get { return InstallationConfiguration.InstallationType == InstallationType.Live; } }
+		public static bool IsLiveInstallation => InstallationConfiguration.InstallationType == InstallationType.Live;
 
-		/// <summary>
-		/// Framework use only.
-		/// </summary>
-		public static bool IsIntermediateInstallation { get { return InstallationConfiguration.InstallationType == InstallationType.Intermediate; } }
+		internal static bool IsIntermediateInstallation => InstallationConfiguration.InstallationType == InstallationType.Intermediate;
 
 		/// <summary>
 		/// Development Utility use only.

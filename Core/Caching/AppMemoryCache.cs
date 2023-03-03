@@ -1,15 +1,13 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Runtime.Caching;
 using System.Threading;
-using Humanizer;
 
 namespace EnterpriseWebLibrary.Caching {
 	/// <summary>
 	/// An intra-app memory cache.
 	/// </summary>
 	public static class AppMemoryCache {
-		private const string keyPrefix = "ewl-";
+		private static readonly string keyPrefix = "{0}-".FormatWith( EwlStatics.EwlInitialism.ToLowerInvariant() );
 		private const int tickInterval = 10000;
 
 		private static Timer timer;
@@ -76,34 +74,38 @@ namespace EnterpriseWebLibrary.Caching {
 		}
 
 
-		// EWF request profiling
+		// Framework request profiling
 
-		/// <summary>
-		/// Standard library use only.
-		/// </summary>
-		public static bool UserIsProfilingRequests( int? userId ) {
-			return cache.Contains( getRequestProfilingKey( userId ) );
+		internal static bool UnconditionalRequestProfilingDisabled() => cache.Contains( getUnconditionalRequestProfilingDisabledKey() );
+
+		internal static void SetUnconditionalRequestProfilingDisabled( TimeSpan duration ) {
+			if( duration != TimeSpan.Zero )
+				cache.Set(
+					getUnconditionalRequestProfilingDisabledKey(),
+					"dummy",
+					new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.UtcNow + duration, Priority = CacheItemPriority.NotRemovable } );
+			else
+				cache.Remove( getUnconditionalRequestProfilingDisabledKey() );
 		}
 
-		/// <summary>
-		/// Standard library use only.
-		/// </summary>
-		public static void SetRequestProfilingForUser( int? userId, TimeSpan duration ) {
-			if( duration != TimeSpan.Zero ) {
+		private static string getUnconditionalRequestProfilingDisabledKey() => keyPrefix + "unconditionalRequestProfilingDisabled";
+
+		internal static bool UserIsProfilingRequests( int? userId ) => cache.Contains( getRequestProfilingKey( userId ) );
+
+		internal static void SetRequestProfilingForUser( int? userId, TimeSpan duration ) {
+			if( duration != TimeSpan.Zero )
 				cache.Set(
 					getRequestProfilingKey( userId ),
 					"dummy",
 					new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.UtcNow + duration, Priority = CacheItemPriority.NotRemovable } );
-			}
 			else
 				cache.Remove( getRequestProfilingKey( userId ) );
 		}
 
-		private static string getRequestProfilingKey( int? userId ) {
-			return keyPrefix + "requestProfiling-{0}".FormatWith( userId.HasValue ? userId.Value.ToString() : "unrecognized" );
-		}
+		private static string getRequestProfilingKey( int? userId ) =>
+			keyPrefix + "requestProfiling-{0}".FormatWith( userId.HasValue ? userId.Value.ToString() : "unrecognized" );
 
 
-		private static MemoryCache cache { get { return MemoryCache.Default; } }
+		private static MemoryCache cache => MemoryCache.Default;
 	}
 }
