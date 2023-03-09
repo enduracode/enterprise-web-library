@@ -24,7 +24,7 @@ using StackExchange.Profiling;
 using StackExchange.Profiling.Internal;
 using StackExchange.Profiling.Storage;
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework; 
+namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 public static class EwfOps {
 	/// <summary>
@@ -68,7 +68,7 @@ public static class EwfOps {
 			false,
 			telemetryAppErrorContextWriter: writer => {
 				// This check ensures that there is an actual request, which is not the case during application initialization.
-				if( EwfApp.RequestState != null ) {
+				if( EwfRequest.Current != null ) {
 					writer.WriteLine();
 					writer.WriteLine( "URL: " + AppRequestState.Instance.Url );
 
@@ -101,7 +101,7 @@ public static class EwfOps {
 						writer.WriteLine( "User: {0}{1}".FormatWith( user.Email, impersonator != null ? " (impersonated by {0})".FormatWith( impersonator.Email ) : "" ) );
 				}
 			},
-			mainDataAccessStateGetter: () => EwfApp.RequestState != null ? EwfApp.RequestState.DataAccessState : initTimeDataAccessState.Value );
+			mainDataAccessStateGetter: () => EwfRequest.Current != null ? RequestDispatchingStatics.RequestState.DataAccessState : initTimeDataAccessState.Value );
 		var frameworkInitialized = false;
 		try {
 			return GlobalInitializationOps.ExecuteAppWithStandardExceptionHandling(
@@ -194,7 +194,12 @@ public static class EwfOps {
 										.Materialize() );
 
 							AspNetStatics.Init( () => contextAccessor.HttpContext?.RequestServices ?? serviceScope.ServiceProvider );
-							EwfRequest.Init( providerGetter.GetProvider<AppRequestBaseUrlProvider>( "RequestBaseUrl" ), () => contextAccessor.HttpContext.Request );
+							EwfRequest.Init(
+								providerGetter.GetProvider<AppRequestBaseUrlProvider>( "RequestBaseUrl" ),
+								() => {
+									var context = contextAccessor.HttpContext;
+									return context != null && context.Items.ContainsKey( RequestDispatchingStatics.RequestStateKey ) ? context.Request : null;
+								} );
 							EwfResponse.Init( () => contextAccessor.HttpContext.Response );
 							UrlHandlingStatics.Init(
 								() => RequestDispatchingStatics.AppProvider.GetBaseUrlPatterns(),
@@ -343,11 +348,11 @@ public static class EwfOps {
 									if( AppRequestState.Instance.UserAccessible && AppRequestState.Instance.ImpersonatorExists )
 										url = new UserManagement.Pages.Impersonate(
 											url,
-											optionalParameterSetter: ( specifier, parameters ) =>
+											optionalParameterSetter: ( specifier, _ ) =>
 												specifier.User = AppTools.User != null ? AppTools.User.Email : UserManagement.Pages.Impersonate.AnonymousUser ).GetUrl();
 									return new NonLiveLogIn(
 										url,
-										optionalParameterSetter: ( specifier, parameters ) => {
+										optionalParameterSetter: ( specifier, _ ) => {
 											specifier.Password = ConfigurationStatics.SystemGeneralProvider.IntermediateLogInPassword;
 											specifier.HideWarnings = hideWarnings;
 										} ).GetUrl();
