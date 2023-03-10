@@ -408,9 +408,11 @@ public abstract class PageBase: ResourceBase {
 		IFormCollection formSubmission;
 		HiddenFieldData hiddenFieldData;
 		try {
-			var requestBodyReadBeginTime = SystemClock.Instance.GetCurrentInstant();
-			formSubmission = Task.Run( async () => await EwfRequest.Current.AspNetRequest.ReadFormAsync() ).Result;
-			AppRequestState.Instance.AddNetworkWaitTime( SystemClock.Instance.GetCurrentInstant() - requestBodyReadBeginTime );
+			using( MiniProfiler.Current.Step( "EWF - Wait for request body to be received" ) ) {
+				var requestBodyReadBeginTime = SystemClock.Instance.GetCurrentInstant();
+				formSubmission = Task.Run( async () => await EwfRequest.Current.AspNetRequest.ReadFormAsync() ).Result;
+				AppRequestState.Instance.AddNetworkWaitTime( SystemClock.Instance.GetCurrentInstant() - requestBodyReadBeginTime );
+			}
 
 			// throws exception if field missing, because Request.Form returns null
 			hiddenFieldData = JsonConvert.DeserializeObject<HiddenFieldData>(
