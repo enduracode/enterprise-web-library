@@ -64,6 +64,10 @@ public class AppRequestState {
 	private Tuple<User, SpecifiedValue<User>> userAndImpersonator;
 
 	private readonly List<( string prefix, Exception exception )> errors = new();
+
+	private Duration networkWaitDuration = Duration.Zero;
+	private Duration slowRequestErrorThreshold = Duration.FromMilliseconds( 5000 );
+
 	internal EwfPageRequestState EwfPageRequestState { get; set; }
 
 	internal AppRequestState( HttpContext context, string url, string baseUrl ) {
@@ -205,6 +209,10 @@ public class AppRequestState {
 		errors.Add( ( prefix, exception ) );
 	}
 
+	internal void AddNetworkWaitTime( Duration duration ) {
+		networkWaitDuration += duration;
+	}
+
 	internal void CleanUp() {
 		// Skip non-transactional modification methods because they could cause database connections to be reinitialized.
 		databaseConnectionManager.CleanUpConnectionsAndExecuteNonTransactionalModificationMethods( true, skipNonTransactionalModificationMethods: true );
@@ -219,10 +227,12 @@ public class AppRequestState {
 			MiniProfiler.Current?.Stop();
 			if( MiniProfiler.Current != null )
 				duration = Duration.FromMilliseconds( (double)MiniProfiler.Current.DurationMilliseconds );
-			const int thresholdInSeconds = 30;
-			if( duration > Duration.FromSeconds( thresholdInSeconds ) && !ConfigurationStatics.IsDevelopmentInstallation )
+			duration -= networkWaitDuration;
+			if( duration > slowRequestErrorThreshold && !ConfigurationStatics.IsDevelopmentInstallation )
 				TelemetryStatics.ReportError(
-					"Request took " + duration.TotalSeconds + " seconds to process. The threshold is " + thresholdInSeconds + " seconds.",
+					"Request took {0} to process. The threshold is {1}.".FormatWith(
+						duration.ToTimeSpan().ToConciseString(),
+						slowRequestErrorThreshold.ToTimeSpan().ToConciseString() ),
 					null );
 		}
 	}
