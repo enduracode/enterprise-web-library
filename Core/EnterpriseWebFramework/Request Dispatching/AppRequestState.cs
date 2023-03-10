@@ -3,6 +3,7 @@ using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.UserManagement;
+using Microsoft.AspNetCore.Http;
 using NodaTime;
 using StackExchange.Profiling;
 
@@ -65,11 +66,11 @@ public class AppRequestState {
 	private readonly List<( string prefix, Exception exception )> errors = new();
 	internal EwfPageRequestState EwfPageRequestState { get; set; }
 
-	internal AppRequestState( string url, string baseUrl ) {
+	internal AppRequestState( HttpContext context, string url, string baseUrl ) {
 		beginInstant = SystemClock.Instance.GetCurrentInstant();
 
 		var profiler = MiniProfiler.StartNew( profilerName: url );
-		profiler.User = ( (MiniProfilerOptions)profiler.Options ).UserIdProvider( EwfRequest.Current.AspNetRequest );
+		profiler.User = ( (MiniProfilerOptions)profiler.Options ).UserIdProvider( context.Request );
 
 		this.url = url;
 		this.baseUrl = baseUrl;

@@ -56,7 +56,7 @@ public static class RequestDispatchingStatics {
 					          : baseUrl + appRelativeUrl;
 
 
-				context.Items.Add( RequestStateKey, new AppRequestState( url, baseUrl ) );
+				context.Items.Add( RequestStateKey, new AppRequestState( context, url, baseUrl ) );
 			},
 			false,
 			true );
