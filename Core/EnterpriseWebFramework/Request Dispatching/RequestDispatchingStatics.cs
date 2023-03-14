@@ -110,6 +110,9 @@ public static class RequestDispatchingStatics {
 					return UrlHandlingStatics.ResolveUrl( RequestState.BaseUrl, appRelativeUrl );
 				}
 				catch( UnresolvableUrlException e ) {
+					// An init method could take a long time to run, and then throw an exception, and there’d be no way for the resource to prevent slow-request errors.
+					RequestState.AllowSlowRequest( allowUnlimitedTime: true );
+
 					throw new ResourceNotAvailableException( "Failed to resolve the URL.", e );
 				}
 			} );
@@ -118,7 +121,10 @@ public static class RequestDispatchingStatics {
 			// one handler in the list, we want parameters to be taken from the lowest-level segment. That’s why we reverse the handlers here.
 			RequestState.SetUrlHandlers( handlers.Reverse().Materialize() );
 
-			return handlers.Last().HandleRequest;
+			var handler = handlers.Last();
+			allowSlowRequestIfNecessary( handler );
+
+			return handler.HandleRequest;
 		}
 
 		// ACME challenge response; see https://tools.ietf.org/html/rfc8555#section-8.3
@@ -214,6 +220,7 @@ public static class RequestDispatchingStatics {
 			context.Response.StatusCode = statusCode.Value;
 
 		try {
+			allowSlowRequestIfNecessary( resource );
 			resource.HandleRequest( context, true );
 		}
 		catch( Exception exception ) {
@@ -223,11 +230,23 @@ public static class RequestDispatchingStatics {
 		}
 	}
 
+	private static void allowSlowRequestIfNecessary( BasicUrlHandler handler ) {
+		if( handler is PageBase page ) {
+			if( page.IsSlow )
+				RequestState.AllowSlowRequest();
+		}
+		else
+			RequestState.AllowSlowRequest( allowUnlimitedTime: true );
+	}
+
 	private static void transferRequestToUnhandledExceptionPage( HttpContext context ) {
 		context.Response.StatusCode = 500;
 
 		try {
-			getErrorPage( new UnhandledException() ).HandleRequest( context, true );
+			var page = getErrorPage( new UnhandledException() );
+			if( page.IsSlow )
+				RequestState.AllowSlowRequest();
+			page.HandleRequest( context, true );
 		}
 		catch( Exception exception ) {
 			rollbackDatabaseTransactionsAndClearResponse( context );

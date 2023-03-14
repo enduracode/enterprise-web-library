@@ -66,7 +66,7 @@ public class AppRequestState {
 	private readonly List<( string prefix, Exception exception )> errors = new();
 
 	private Duration networkWaitDuration = Duration.Zero;
-	private Duration slowRequestErrorThreshold = Duration.FromMilliseconds( 5000 );
+	private Duration slowRequestThreshold = Duration.FromMilliseconds( 5000 );
 
 	internal EwfPageRequestState EwfPageRequestState { get; set; }
 
@@ -213,6 +213,10 @@ public class AppRequestState {
 		networkWaitDuration += duration;
 	}
 
+	internal void AllowSlowRequest( bool allowUnlimitedTime = false ) {
+		slowRequestThreshold = Duration.Max( allowUnlimitedTime ? Duration.MaxValue : Duration.FromMinutes( 3 ), slowRequestThreshold );
+	}
+
 	internal void CleanUp() {
 		// Skip non-transactional modification methods because they could cause database connections to be reinitialized.
 		databaseConnectionManager.CleanUpConnectionsAndExecuteNonTransactionalModificationMethods( true, skipNonTransactionalModificationMethods: true );
@@ -228,11 +232,11 @@ public class AppRequestState {
 			if( MiniProfiler.Current != null )
 				duration = Duration.FromMilliseconds( (double)MiniProfiler.Current.DurationMilliseconds );
 			duration -= networkWaitDuration;
-			if( duration > slowRequestErrorThreshold && !ConfigurationStatics.IsDevelopmentInstallation )
+			if( duration > slowRequestThreshold && !ConfigurationStatics.IsDevelopmentInstallation )
 				TelemetryStatics.ReportError(
 					"Request took {0} to process. The threshold is {1}.".FormatWith(
 						duration.ToTimeSpan().ToConciseString(),
-						slowRequestErrorThreshold.ToTimeSpan().ToConciseString() ),
+						slowRequestThreshold.ToTimeSpan().ToConciseString() ),
 					null );
 		}
 	}

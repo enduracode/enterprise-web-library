@@ -174,22 +174,20 @@ public static class EwfOps {
 									providerGetter,
 									() => AuthenticationStatics.SamlIdentityProviders.Select(
 											identityProvider => {
-												using( var client = new HttpClient() ) {
-													client.Timeout = new TimeSpan( 0, 0, 10 );
-													var metadata = Task.Run(
-															async () => {
-																using( var response = await client.GetAsync( identityProvider.MetadataUrl, HttpCompletionOption.ResponseHeadersRead ) ) {
-																	response.EnsureSuccessStatusCode();
-																	var document = new XmlDocument();
-																	using( var stream = await response.Content.ReadAsStreamAsync() )
-																		using( var reader = XmlReader.Create( stream ) )
-																			document.Load( reader );
-																	return document.DocumentElement;
-																}
-															} )
-														.Result;
-													return ( metadata, identityProvider.EntityId );
-												}
+												using var client = new HttpClient();
+												client.Timeout = new TimeSpan( 0, 0, 10 );
+												var metadata = Task.Run(
+														async () => {
+															using var response = await client.GetAsync( identityProvider.MetadataUrl, HttpCompletionOption.ResponseHeadersRead );
+															response.EnsureSuccessStatusCode();
+															var document = new XmlDocument();
+															await using( var stream = await response.Content.ReadAsStreamAsync() )
+																using( var reader = XmlReader.Create( stream ) )
+																	document.Load( reader );
+															return document.DocumentElement;
+														} )
+													.Result;
+												return ( metadata, identityProvider.EntityId );
 											} )
 										.Materialize() );
 
@@ -241,6 +239,7 @@ public static class EwfOps {
 								( () => BasePageStatics.AppProvider.GetPageViewDataModificationMethod(),
 									() => BasePageStatics.AppProvider.JavaScriptDocumentReadyFunctionCall ),
 								BasicPageContent.GetContent,
+								() => RequestDispatchingStatics.RequestState.AllowSlowRequest(),
 								RequestDispatchingStatics.RefreshRequestState );
 							HyperlinkBehaviorExtensionCreators.Init( ModalBox.GetBrowsingModalBoxOpenStatements );
 							FileUpload.Init( () => ( (BasicPageContent)PageBase.Current.BasicContent ).FormUsesMultipartEncoding = true );

@@ -75,12 +75,13 @@ public abstract class PageBase: ResourceBase {
 	internal static void Init(
 		( Func<Action>, Func<string> ) appProvider,
 		Func<Func<Func<PageContent>, PageContent>, Func<string>, Func<string>, ( PageContent, FlowComponent, FlowComponent, FlowComponent, Action, bool,
-			ActionPostBack )> contentGetter, Action requestStateRefresher ) {
+			ActionPostBack )> contentGetter, Action slowDataModificationNotifier, Action requestStateRefresher ) {
 		EwfValidation.Init(
 			() => Current.formState.ValidationPredicate,
 			() => Current.formState.DataModifications,
 			() => Current.formState.DataModificationsWithValidationsFromOtherElements,
 			() => Current.formState.ReportValidationCreated() );
+		BasicDataModification.Init( slowDataModificationNotifier );
 		FormValueStatics.Init(
 			formValue => Current.formValues.Add( formValue ),
 			() => Current.formState.DataModifications,
@@ -159,7 +160,7 @@ public abstract class PageBase: ResourceBase {
 	internal PageContent BasicContent;
 	private PageTree pageTree;
 	private Func<string> elementOrIdentifiedComponentIdGetter = () => "";
-	private readonly BasicDataModification dataUpdate = new();
+	private BasicDataModification dataUpdate;
 	private readonly PostBack dataUpdatePostBack = PostBack.CreateDataUpdate();
 	internal bool? IsAutoDataUpdater;
 	private readonly Dictionary<string, PostBack> postBacksById = new();
@@ -176,6 +177,11 @@ public abstract class PageBase: ResourceBase {
 	/// Initializes the parameters modification object for this page.
 	/// </summary>
 	protected abstract void initParametersModification();
+
+	/// <summary>
+	/// Gets whether the page takes more than about a second to handle a GET request.
+	/// </summary>
+	protected internal virtual bool IsSlow => false;
 
 	protected sealed override bool disablesUrlNormalization => base.disablesUrlNormalization;
 
@@ -322,10 +328,9 @@ public abstract class PageBase: ResourceBase {
 				() => {
 					var changesExist = componentStateItemsById.Values.Any( i => i.DataModifications.Contains( secondaryDm ) && i.ValueChanged() ) || formValues.Any(
 						                   i => i.DataModifications.Contains( secondaryDm ) && i.ValueChangedOnPostBack() );
-					if( secondaryDm == dataUpdate )
-						navigationNeeded = dataUpdate.Execute( true, changesExist, handleValidationErrors, performValidationOnly: true );
-					else
-						navigationNeeded = ( (ActionPostBack)secondaryDm ).Execute( changesExist, handleValidationErrors, null );
+					navigationNeeded = secondaryDm == dataUpdate
+						                   ? dataUpdate.Execute( true, changesExist, handleValidationErrors, performValidationOnly: true )
+						                   : ( (ActionPostBack)secondaryDm ).Execute( changesExist, handleValidationErrors, null );
 
 					if( navigationNeeded ) {
 						requestState.DmIdAndSecondaryOp = Tuple.Create( dmIdAndSecondaryOp.Item1, SecondaryPostBackOperation.NoOperation );
@@ -545,6 +550,7 @@ public abstract class PageBase: ResourceBase {
 		while( ( urlHandler = urlHandler.GetParent() ) != null );
 
 		formState = new FormState();
+		dataUpdate = new BasicDataModification( dataUpdateIsSlow );
 		FormAction pageLoadAction = null;
 		var elementJsInitStatements = new StringBuilder();
 		var content = contentGetter(
@@ -609,6 +615,11 @@ public abstract class PageBase: ResourceBase {
 		// This must happen after LoadData and before modifications are executed.
 		statusMessages.Clear();
 	}
+
+	/// <summary>
+	/// Gets whether the page’s data-update modification takes more than about a second to execute.
+	/// </summary>
+	protected virtual bool dataUpdateIsSlow => false;
 
 	/// <summary>
 	/// Returns the page content.
@@ -687,7 +698,7 @@ public abstract class PageBase: ResourceBase {
 	public Instant FirstRequestTime => AppRequestState.Instance.EwfPageRequestState.FirstRequestTime;
 
 	/// <summary>
-	/// Gets the page's data-update modification, which executes on every full post-back prior to the post-back object. WARNING: Do *not* use this for
+	/// Gets the page’s data-update modification, which executes on every full post-back prior to the post-back object. WARNING: Do *not* use this for
 	/// modifications that should happen because of a specific post-back action, e.g. adding a new item to the database when a button is clicked. There are two
 	/// reasons for this. First, there may be other post-back controls such as buttons or lookup boxes on the page, any of which could also cause the update to
 	/// execute. Second, by default the update only runs if form values were modified, which would not be the case if a user clicks the button on an add-item
@@ -696,7 +707,7 @@ public abstract class PageBase: ResourceBase {
 	public DataModification DataUpdate => dataUpdate;
 
 	/// <summary>
-	/// Gets a post-back that updates the page's data without performing any other actions.
+	/// Gets a post-back that updates the page’s data without performing any other actions.
 	/// </summary>
 	public PostBack DataUpdatePostBack => dataUpdatePostBack;
 
