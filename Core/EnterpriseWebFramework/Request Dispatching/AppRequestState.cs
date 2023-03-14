@@ -234,9 +234,12 @@ public class AppRequestState {
 			duration -= networkWaitDuration;
 			if( duration > slowRequestThreshold && !ConfigurationStatics.IsDevelopmentInstallation )
 				TelemetryStatics.ReportError(
-					"Request took {0} to process. The threshold is {1}.".FormatWith(
-						duration.ToTimeSpan().ToConciseString(),
-						slowRequestThreshold.ToTimeSpan().ToConciseString() ),
+					"Request took {0} to process. The threshold is {1}. If the performance problem is too difficult to fix, you can suppress this error by {2} or by {3}."
+						.FormatWith(
+							duration.ToTimeSpan().ToConciseString(),
+							slowRequestThreshold.ToTimeSpan().ToConciseString(),
+							"overriding PageBase.IsSlow (for GET request issues)",
+							"overriding PageBase.dataUpdateIsSlow or using the isSlow parameter on the PostBack constructors (for post-back issues)" ),
 					null );
 		}
 	}
