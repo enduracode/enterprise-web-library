@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework {
-	public interface ButtonStyle {
-		ElementClassSet GetClasses();
-		IReadOnlyCollection<FlowComponent> GetChildren();
-		string GetJsInitStatements( string id );
-	}
+public interface ButtonStyle {
+	ElementClassSet GetClasses();
+	IEnumerable<ElementAttribute> GetAttributes();
+	IReadOnlyCollection<FlowComponent> GetChildren();
+	string GetJsInitStatements( string id );
 }
