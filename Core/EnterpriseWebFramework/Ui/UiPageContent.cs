@@ -146,7 +146,8 @@ public class UiPageContent: PageContent {
 	/// </summary>
 	/// <param name="omitContentBox">Pass true to omit the box-style effect around the page content. Useful when all content is contained within multiple
 	/// box-style sections.</param>
-	/// <param name="pageActions">The page actions.</param>
+	/// <param name="pageActions">The page actions. Any hyperlink with a destination to which the user cannot navigate (due to authorization logic) will be
+	/// automatically hidden by the framework.</param>
 	/// <param name="contentFootActions">The content-foot actions. The first action, if it is a post-back, will produce a submit button.</param>
 	/// <param name="contentFootComponents">The content-foot components.</param>
 	/// <param name="dataUpdateModificationMethod">The modification method for the page’s data-update modification.</param>

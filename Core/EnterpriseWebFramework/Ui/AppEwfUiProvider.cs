@@ -14,7 +14,8 @@
 		public virtual IReadOnlyCollection<FlowComponent> GetLogoComponent() => null;
 
 		/// <summary>
-		/// Gets the global navigational action components.
+		/// Gets the global navigational action components. Any hyperlink with a destination to which the user cannot navigate (due to authorization logic) will be
+		/// automatically hidden by the framework.
 		/// </summary>
 		public virtual IReadOnlyCollection<ActionComponentSetup> GetGlobalNavActions( string postBackIdBase ) =>
 			Enumerable.Empty<ActionComponentSetup>().Materialize();

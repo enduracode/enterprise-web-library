@@ -26,7 +26,8 @@ public class EwfTable: EwfTable<int> {
 	/// no sub caption.</param>
 	/// <param name="allowExportToExcel">Set to true if you want an Export to Excel action component to appear. This will only work if the table consists of
 	/// simple text (no controls).</param>
-	/// <param name="tableActions">Table action components. This could be used to add a new customer or other entity to the table, for example.</param>
+	/// <param name="tableActions">Table action components. This could be used to add a new customer or other entity to the table, for example. Any hyperlink with
+	/// a destination to which the user cannot navigate (due to authorization logic) will be automatically hidden by the framework.</param>
 	/// <param name="selectedItemActions">Table selected-item actions. Passing one or more of these will add a new column to the table containing a checkbox for
 	/// each item with an ID. If you would like the table to support item-group-level selected-item actions, you must pass a collection here even if it is
 	/// empty.</param>
@@ -80,7 +81,8 @@ public class EwfTable: EwfTable<int> {
 	/// no sub caption.</param>
 	/// <param name="allowExportToExcel">Set to true if you want an Export to Excel action component to appear. This will only work if the table consists of
 	/// simple text (no controls).</param>
-	/// <param name="tableActions">Table action components. This could be used to add a new customer or other entity to the table, for example.</param>
+	/// <param name="tableActions">Table action components. This could be used to add a new customer or other entity to the table, for example. Any hyperlink with
+	/// a destination to which the user cannot navigate (due to authorization logic) will be automatically hidden by the framework.</param>
 	/// <param name="selectedItemActions">Table selected-item actions. Passing one or more of these will add a new column to the table containing a checkbox for
 	/// each item with an ID. If you would like the table to support item-group-level selected-item actions, you must pass a collection here even if it is
 	/// empty.</param>
