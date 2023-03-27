@@ -211,6 +211,9 @@ public static class EwfOps {
 									else
 										cookies.Delete( name, options );
 								} );
+							NonLiveInstallationStatics.Init(
+								() => RequestDispatchingStatics.RequestState.NonLiveWarningsHidden,
+								v => RequestDispatchingStatics.RequestState.NonLiveWarningsHidden = v );
 							Translation.Init( () => "en-US" );
 							CssPreprocessingStatics.Init( globalInitializer.GetType().Assembly, ConfigurationStatics.AppAssembly );
 							ResourceBase.Init(
