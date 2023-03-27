@@ -74,7 +74,7 @@ ewfTopWarningContainer {
 	margin: 0;
 	padding: var( --ewf-ui-navigation-vertical-spacing ) var( --ewf-ui-top-level-horizontal-spacing );
 }
-ewfSectionBoxStyleBothStates, ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer, ewfUiOuterGlobalContainer, ewfUiEntityContainer, ewfUiTopTabListContainer, ewfUiPageActionListContainer, ewfUiContentContainer, ewfUiContentBox, ewfUiGlobalFootContainer {
+ewfSectionBoxStyleBothStates, ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer, ewfUiOuterGlobalContainer, ewfUiEntityAndTopTabContainer, ewfUiPageActionListContainer, ewfUiContentContainer, ewfUiContentBox, ewfUiGlobalFootContainer {
 	padding-top: var( --ewf-ui-top-level-vertical-spacing );
 }
 ewfSectionBoxStyleBothStates, ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer, ewfUiOuterGlobalContainer, ewfUiEntityContainer, ewfUiSideTabContainer, ewfUiContentContainer, ewfUiContentBox, ewfUiContentFootContainer, ewfUiGlobalFootContainer {
