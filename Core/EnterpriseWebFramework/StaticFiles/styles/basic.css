@@ -623,7 +623,7 @@ ewfChart > div:first-child {
 ewfTopWarningContainer {
 	z-index: 9998;
 }
-ewfNotificationSectionContainerBothStates {
+ewfNotificationSectionContainer {
 	z-index: 9999;
 }
 ewfClickBlockerBothStates {
@@ -761,41 +761,26 @@ ewfProcessingDialogTimeOutParagraphActiveState {
 ewfProcessingDialogTimeOutParagraphBothStates > ewfActionComponentAllButtonStylesAllStates {
 	white-space: unset;
 }
-ewfNotificationSectionContainerBothStates {
-	position: fixed;
+ewfNotificationSectionContainer {
+	position: sticky;
 	font-size: 1rem;
-	top: 0;
-	left: 50%;
-	width: 80%;
-	min-width: 10rem;
-	max-width: 40rem;
+	bottom: 0;
 }
-ewfNotificationSectionContainerNotificationState {
-	transform: translateX( -50% ) translateY( 50vh ) translateY( -50% );
-}
-ewfNotificationSectionContainerDockedState {
-	transform: translateX( -50% );
-	animation-name: notificationSectionPosition;
-}
-ewfNotificationSectionContainerBothStates > ewfSectionBoxStyleBothStates {
+ewfNotificationSectionContainer > ewfSectionBoxStyleBothStates {
+	box-shadow: 0 2px 6px rgba( 0, 0, 0, .5 );
+	border-radius: revert;
 	background-color: white;
+	padding: .2rem 1em;
+	max-width: revert;
 	color: black;
 }
-ewfNotificationSectionContainerNotificationState > ewfSectionBoxStyleBothStates {
-	font-size: 1.2em;
-	box-shadow: 0 0 15px black;
-	border-radius: 1em;
-	padding: 2em;
-}
-ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleBothStates {
-	font-size: 1rem;
-	box-shadow: 0 2px 6px rgba( 0, 0, 0, .5 );
-	border-radius: 0 0 .5em .5em;
-	padding: .2rem 1em;
-	transition-property: font-size, box-shadow, border-radius, padding;
-}
-ewfNotificationSectionContainerBothStates > ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer {
+ewfNotificationSectionContainer > ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer {
+	margin-top: -.2rem;
+	margin-left: -1em;
+	margin-right: -1em;
 	border-style: none;
+	background-color: rgba( 0, 0, 0, .05 );
+	padding: .2rem 1em;
 	overflow: hidden;
 
 	/* See http://stackoverflow.com/a/4407335/35349. */
@@ -806,44 +791,24 @@ ewfNotificationSectionContainerBothStates > ewfSectionBoxStyleBothStates > ewfSe
 	-ms-user-select: none;
 	user-select: none;
 }
-ewfNotificationSectionContainerNotificationState > ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer {
-	margin: 0;
-	padding: 0;
-	height: 0;
-}
-ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer {
-	margin-top: -.2rem;
-	margin-left: -1em;
-	margin-right: -1em;
-	background-color: rgba( 0, 0, 0, .05 );
-	padding: .2rem 1em;
-	animation-name: notificationSectionDisplay;
-}
-ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleClosedState > ewfSectionHeadingContainer {
+ewfNotificationSectionContainer > ewfSectionBoxStyleClosedState > ewfSectionHeadingContainer {
 	margin-bottom: -.2rem;
 }
-ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleExpandedState > ewfSectionHeadingContainer {
+ewfNotificationSectionContainer > ewfSectionBoxStyleExpandedState > ewfSectionHeadingContainer {
 	margin-bottom: .2rem;
 }
-ewfNotificationSectionContainerBothStates > ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
+ewfNotificationSectionContainer > ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading {
 	font-size: 1em;
 	margin: 0;
+	border-radius: revert;
 }
-ewfNotificationSectionContainerBothStates > ewfSectionBoxStyleBothStates > ewfSectionContentContainer {
+ewfNotificationSectionContainer > ewfSectionBoxStyleBothStates > ewfSectionContentContainer {
 	display: block;
 	overflow: hidden;
+	transition-property: height;
 }
-/* Using max-height in these two rules is a hack. We'd like to remove the first rule and use height in the second, but height doesn't transition properly when
-	"auto" is involved. */
-ewfNotificationSectionContainerNotificationState > ewfSectionBoxStyleClosedState > ewfSectionContentContainer {
-	max-height: 100em;
-}
-ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleClosedState > ewfSectionContentContainer {
-	max-height: 0;
-	transition-property: max-height;
-}
-ewfNotificationSpacer {
-	height: 1.8rem;
+ewfNotificationSectionContainer > ewfSectionBoxStyleClosedState > ewfSectionContentContainer {
+	height: 0;
 }
 ewfInfoMessageContainer > ewfIcon {
 	color: rgb( 120, 160, 195 );
@@ -853,40 +818,6 @@ ewfWarningMessageContainer > ewfIcon {
 }
 ewfWarningMessageContainer > ewfStatusMessageText {
 	font-weight: bold;
-}
-ewfNotificationSectionContainerDockedState {
-	animation-duration: 800ms;
-}
-ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleBothStates, ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleClosedState > ewfSectionContentContainer {
-	transition-delay: 400ms;
-}
-ewfNotificationSectionContainerDockedState > ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer {
-	animation-duration: 400ms;
-}
-@keyframes notificationSectionPosition {
-	0% {
-		transform: translateX( -50% ) translateY( 50vh ) translateY( -50% );
-		animation-timing-function: ease-in;
-	}
-	50% {
-		transform: translateX( -50% ) translateY( -50vh ) translateY( -50% );
-	}
-	75% {
-		transform: translateX( -50% ) translateY( -1.7em );
-		animation-timing-function: ease-out;
-	}
-}
-@keyframes notificationSectionDisplay {
-	0% {
-		margin: 0;
-		padding: 0;
-		height: 0;
-	}
-	99.9% {
-		margin: 0;
-		padding: 0;
-		height: 0;
-	}
 }
 .mp-results {
 	opacity: .4;
@@ -961,7 +892,7 @@ ewfErrorPageBody.ewfUnhandledExceptionDisplay pre {
 }
 
 /* fonts */
-ewfTopWarningContainer, ewfProcessingDialogBlockAllStates, ewfNotificationSectionContainerBothStates, ewfSelectUserPageBody, ewfErrorPageBody {
+ewfTopWarningContainer, ewfProcessingDialogBlockAllStates, ewfNotificationSectionContainer, ewfSelectUserPageBody, ewfErrorPageBody {
 	font-family: 'Open Sans', sans-serif;
 }
 ewfSelectUserPageBody h1, ewfErrorPageBody h1 {

@@ -135,10 +135,6 @@ function deactivateProcessingDialog() {
 	$( ".ewfProcessingDialog" ).removeClass( "ewfProcessingDialogA ewfProcessingDialogTo" ).addClass( "ewfProcessingDialogI" );
 }
 
-function dockNotificationSection() {
-	$( "#ewfNotification" ).removeClass().addClass( "ewfNotificationD" );
-}
-
 function initNumericTextControl( selector ) {
 	$( selector ).on( "paste",
 		function( e ) {

@@ -15,9 +15,7 @@ public sealed class BasicPageContent: PageContent {
 	private static readonly ElementClass processingDialogBlockTimeOutClass = new( "ewfProcessingDialogTo" );
 	private static readonly ElementClass processingDialogProcessingParagraphClass = new( "ewfProcessingP" );
 	private static readonly ElementClass processingDialogTimeOutParagraphClass = new( "ewfTimeOutP" );
-	private static readonly ElementClass notificationSectionContainerNotificationClass = new( "ewfNotificationN" );
-	private static readonly ElementClass notificationSectionContainerDockedClass = new( "ewfNotificationD" );
-	private static readonly ElementClass notificationSpacerClass = new( "ewfNotificationSpacer" );
+	private static readonly ElementClass notificationSectionContainerClass = new( "ewfNotification" );
 	private static readonly ElementClass infoMessageContainerClass = new( "ewfInfoMsg" );
 	private static readonly ElementClass warningMessageContainerClass = new( "ewfWarnMsg" );
 	private static readonly ElementClass statusMessageTextClass = new( "ewfStatusText" );
@@ -80,26 +78,11 @@ public sealed class BasicPageContent: PageContent {
 			return elements;
 		}
 
-		private IEnumerable<CssElement> getNotificationElements() {
-			var elements = new List<CssElement>();
-
-			var containerNotificationSelector = "div." + notificationSectionContainerNotificationClass.ClassName;
-			var containerDockedSelector = "div." + notificationSectionContainerDockedClass.ClassName;
-			elements.AddRange(
-				new[]
-					{
-						new CssElement( "NotificationSectionContainerBothStates", containerNotificationSelector, containerDockedSelector ),
-						new CssElement( "NotificationSectionContainerNotificationState", containerNotificationSelector ),
-						new CssElement( "NotificationSectionContainerDockedState", containerDockedSelector )
-					} );
-
-			elements.Add( new CssElement( "NotificationSpacer", "div." + notificationSpacerClass.ClassName ) );
-			elements.Add( new CssElement( "InfoMessageContainer", "div." + infoMessageContainerClass.ClassName ) );
-			elements.Add( new CssElement( "WarningMessageContainer", "div." + warningMessageContainerClass.ClassName ) );
-			elements.Add( new CssElement( "StatusMessageText", "span." + statusMessageTextClass.ClassName ) );
-
-			return elements;
-		}
+		private IEnumerable<CssElement> getNotificationElements() =>
+			new CssElement( "NotificationSectionContainer", "div.{0}".FormatWith( notificationSectionContainerClass.ClassName ) ).ToCollection()
+				.Append( new CssElement( "InfoMessageContainer", "div." + infoMessageContainerClass.ClassName ) )
+				.Append( new CssElement( "WarningMessageContainer", "div." + warningMessageContainerClass.ClassName ) )
+				.Append( new CssElement( "StatusMessageText", "span." + statusMessageTextClass.ClassName ) );
 	}
 
 	// We can remove this and just use Font Awesome as soon as https://github.com/FortAwesome/Font-Awesome/issues/671 is fixed.
@@ -300,12 +283,6 @@ public sealed class BasicPageContent: PageContent {
 	private IReadOnlyCollection<FlowComponent> getPreContentComponents() {
 		var outerComponents = new List<FlowComponent>();
 
-		outerComponents.Add(
-			new FlowIdContainer(
-				PageBase.Current.StatusMessages.Any() && statusMessagesDisplayAsNotification()
-					? new GenericFlowContainer( null, classes: notificationSpacerClass ).ToCollection()
-					: Enumerable.Empty<FlowComponent>() ) );
-
 		var warningLines = new List<IReadOnlyCollection<PhrasingComponent>>();
 		if( !ConfigurationStatics.IsLiveInstallation ) {
 			var components = new List<PhrasingComponent>();
@@ -425,25 +402,12 @@ public sealed class BasicPageContent: PageContent {
 		return new GenericPhrasingContainer( ".".ToComponents(), classes: dotClass ).ToCollection();
 	}
 
-	private IReadOnlyCollection<FlowComponent> getNotificationSectionContainer() {
-		// This is used by the EWF JavaScript file.
-		const string notificationSectionContainerId = "ewfNotification";
-
-		return PageBase.Current.StatusMessages.Any() && statusMessagesDisplayAsNotification()
-			       ? new DisplayableElement(
-				       _ => new DisplayableElementData(
-					       null,
-					       () => new DisplayableElementLocalData(
-						       "div",
-						       focusDependentData: new DisplayableElementFocusDependentData(
-							       includeIdAttribute: true,
-							       jsInitStatements: "setTimeout( 'dockNotificationSection();', " + PageBase.Current.StatusMessages.Count() * 1000 + " );" ) ),
-					       classes: notificationSectionContainerNotificationClass,
-					       clientSideIdOverride: notificationSectionContainerId,
-					       children: new Section( null, SectionStyle.Box, null, "Messages", null, getStatusMessageComponentList().ToCollection(), false, true, null )
-						       .ToCollection() ) ).ToCollection()
-			       : Enumerable.Empty<FlowComponent>().Materialize();
-	}
+	private IReadOnlyCollection<FlowComponent> getNotificationSectionContainer() =>
+		PageBase.Current.StatusMessages.Any() && statusMessagesDisplayAsNotification()
+			? new GenericFlowContainer(
+				new Section( null, SectionStyle.Box, null, "Messages", null, getStatusMessageComponentList().ToCollection(), true, true, null ).ToCollection(),
+				classes: notificationSectionContainerClass ).ToCollection()
+			: Enumerable.Empty<FlowComponent>().Materialize();
 
 	private IReadOnlyCollection<EtherealComponent> getEtherealComponents() =>
 		ModalBox.CreateBrowsingModalBox( BrowsingModalBoxId )

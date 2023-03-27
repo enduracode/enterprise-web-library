@@ -32,17 +32,14 @@ form {
 	min-height: 100vh;
 	grid-template-columns: auto minmax( 0, 1fr );
 	grid-template-rows: auto auto auto auto auto auto 1fr auto;
-	grid-template-areas: "notificationSpacer notificationSpacer"
-	                     "topWarning topWarning"
+	grid-template-areas: "topWarning topWarning"
 	                     "global global"
 	                     "entityAndTopTab entityAndTopTab"
 	                     "sideTab pageAction"
 	                     "sideTab content"
 	                     "sideTab contentFoot"
-	                     "globalFoot globalFoot";
-}
-ewfNotificationSpacer {
-	grid-area: notificationSpacer;
+	                     "globalFoot globalFoot"
+	                     "notification notification";
 }
 ewfTopWarningContainer {
 	grid-area: topWarning;
@@ -67,6 +64,9 @@ ewfUiContentFootContainer {
 }
 ewfUiGlobalFootContainer {
 	grid-area: globalFoot;
+}
+ewfNotificationSectionContainer {
+	grid-area: notification;
 }
 
 /* top-level spacing */
@@ -317,9 +317,6 @@ ewfErrorMessageListContainer {
 }
 
 /* UiPageContent */
-ewfNotificationSpacer {
-	display: none;
-}
 ewfTopWarningContainer {
 	font-size: var( --ewf-small-font-size );
 	border-style: none;
