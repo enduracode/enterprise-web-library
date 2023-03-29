@@ -32,7 +32,7 @@ form {
 	display: grid;
 	min-height: 100vh;
 	grid-template-columns: auto minmax( 0, 1fr );
-	grid-template-rows: auto auto auto auto auto auto 1fr auto;
+	grid-template-rows: auto auto auto auto auto 1fr auto auto;
 	grid-template-areas: "topWarning topWarning"
 	                     "global global"
 	                     "entityAndTopTab entityAndTopTab"
