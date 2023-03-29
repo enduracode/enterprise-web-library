@@ -6,6 +6,7 @@
 	--ewf-ui-top-level-horizontal-spacing: 2rem;
 	--ewf-ui-navigation-vertical-spacing: min( .5vw, .5rem );
 	--ewf-ui-navigation-horizontal-spacing: min( 1vw, 1.5rem );
+	--ewf-ui-minor-navigation-spacing: .5rem;
 	--ewf-ui-large-border-radius: .5em;
 	--ewf-ui-page-path-separator-width: 5px;
 	--ewf-ui-side-tab-border-width: 4px;
@@ -127,14 +128,14 @@ ewfUiGlobalNavListContainer ewfActionComponentAllStylesAllStates, ewfUiTopTabLis
 	padding-bottom: var( --ewf-ui-navigation-vertical-spacing );
 }
 ewfUiUserInfoContainer > ewfUnorderedComponentList, ewfUiEntityContainer > ewfPagePathContainer, ewfUiEntityNavAndActionContainer {
-	margin: 0 calc( var( --ewf-list-item-spacing ) * -1 );
+	margin: 0 calc( var( --ewf-ui-minor-navigation-spacing ) * -1 );
 }
 ewfUiUserInfoContainer ewfActionComponentAllStylesAllStates,
 ewfUiEntityContainer > ewfPagePathContainer ewfHyperlinkAllStylesAllStates,
 ewfUiEntityContainer > ewfPagePathContainer h1,
 ewfUiEntityNavAndActionContainer ewfActionComponentAllStylesAllStates,
 ewfUiEntityNavAndActionContainer ewfFormItem {
-	padding: 0 var( --ewf-list-item-spacing );
+	padding: 0 var( --ewf-ui-minor-navigation-spacing );
 }
 ewfUiEntityNavAndActionContainer {
 	margin-top: var( --ewf-ui-navigation-vertical-spacing );
