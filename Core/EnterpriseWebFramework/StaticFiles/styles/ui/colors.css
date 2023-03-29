@@ -10,7 +10,8 @@
 	--ewf-ui-activation-color: #8cc63f;
 	--ewf-ui-form-control-placeholder-color: rgb( 175, 175, 175 );
 	--ewf-ui-nav-background-color: #ced6e0;
-	--ewf-ui-entity-action-color: #767676;
+	--ewf-ui-entity-action-color: hsla( 0, 0%, 33%, 1 );
+	--ewf-ui-entity-action-activation-color: var( --ewf-ui-primary-color );
 }
 
 body {
@@ -214,7 +215,7 @@ ewfUiEntityContainer > ewfPagePathContainer ewfActionComponentAllStylesAllStates
 	color: var( --ewf-ui-entity-action-color );
 }
 ewfUiEntityContainer > ewfPagePathContainer ewfActionComponentAllStylesStatesWithHover, ewfUiEntityNavAndActionContainer ewfActionComponentAllStylesStatesWithHover {
-	color: var( --ewf-ui-primary-color );
+	color: var( --ewf-ui-entity-action-activation-color );
 }
 ewfUiTopTabListContainer ewfActionComponentAllStylesAllNormalStates,
 ewfUiTopTabListContainer ewfActionComponentAllStylesAllVisitedStates,

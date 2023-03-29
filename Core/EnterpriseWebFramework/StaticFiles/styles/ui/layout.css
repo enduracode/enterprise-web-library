@@ -324,8 +324,7 @@ ewfTopWarningContainer {
 }
 ewfTopWarningContainer ewfActionComponentAllStylesAllStates {
 	font-size: .85em;
-	margin-left: 1px;
-	margin-right: 1px;
+	margin: .1em 1px;
 	padding: 5px 12px;
 	font-weight: bold;
 }
@@ -455,7 +454,6 @@ ewfUiEntityAndTopTabContainer {
 }
 ewfUiEntityContainer, ewfUiTopTabListContainer {
 	font-size: var( --ewf-small-font-size );
-	font-weight: bold;
 	letter-spacing: -.025em;
 }
 ewfUiEntityContainer {
@@ -479,6 +477,7 @@ ewfUiEntityNavAndActionContainer {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
+	font-weight: 600;
 }
 ewfUiEntityActionListContainer, ewfUiPageActionListContainer {
 	text-align: right;
