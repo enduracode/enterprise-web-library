@@ -163,7 +163,6 @@ ewfUiTopTabListContainer ewfUiCurrentTabActionControl {
 }
 ewfUiSideTabContainer {
 	margin-top: calc( var( --ewf-ui-important-border-width ) * -1 );
-	margin-bottom: calc( var( --ewf-ui-important-border-width ) * -1 );
 	border-right-width: var( --ewf-ui-important-border-width );
 	border-right-style: solid;
 	z-index: 1; /* ensures adjacent-element borders get covered */

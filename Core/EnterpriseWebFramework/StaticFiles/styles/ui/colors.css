@@ -16,6 +16,7 @@
 	--ewf-ui-side-tab-group-head-color: hsla( 215, 11%, 40%, 1 );
 	--ewf-ui-side-tab-activation-color: hsla( 213, 22%, 93%, 1 );
 	--ewf-ui-current-side-tab-background-color: hsla( 213, 22%, 89%, 1 );
+	--ewf-ui-global-foot-background-color: hsla( 215, 33%, 96%, 1 );
 }
 
 body {
@@ -210,7 +211,7 @@ ewfUiMobileMenuTabContainer ewfActionComponentAllStylesStatesWithHover {
 ewfUiMobileMenuTabContainer ewfUiCurrentTabActionControl {
 	background-color: rgba( 255, 255, 255, .3 );
 }
-ewfUiEntityAndTopTabContainer, ewfUiSideTabContainer, ewfUiGlobalFootContainer {
+ewfUiEntityAndTopTabContainer, ewfUiSideTabContainer {
 	background-color: var( --ewf-ui-nav-background-color );
 }
 ewfUiEntityContainer > ewfPagePathContainer ewfComponentListItem {
@@ -260,6 +261,9 @@ ewfUiSideTabContainer ewfActionComponentAllStylesStatesWithHover {
 }
 ewfUiSideTabContainer ewfUiCurrentTabActionControl {
 	background: linear-gradient( to right, var( --ewf-ui-current-side-tab-background-color ), var( --ewf-ui-background-color ) );
+}
+ewfUiGlobalFootContainer {
+	background-color: var( --ewf-ui-global-foot-background-color );
 }
 @media only screen and ( max-width: 768px ) {
 	ewfUiInnerGlobalContainer ewfActionComponentAllStylesStatesWithHover {
