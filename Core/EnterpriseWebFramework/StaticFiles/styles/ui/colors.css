@@ -12,6 +12,9 @@
 	--ewf-ui-nav-background-color: #ced6e0;
 	--ewf-ui-entity-action-color: hsla( 0, 0%, 33%, 1 );
 	--ewf-ui-entity-action-activation-color: var( --ewf-ui-primary-color );
+	--ewf-ui-side-tab-group-head-color: hsla( 215, 11%, 40%, 1 );
+	--ewf-ui-side-tab-activation-color: hsla( 213, 22%, 93%, 1 );
+	--ewf-ui-current-side-tab-background-color: hsla( 213, 22%, 89%, 1 );
 }
 
 body {
@@ -34,6 +37,7 @@ ewfDropDownListContainer > ewfDropDownList, ewfDropDownListContainer > ewfDropDo
 ewfModalBox > ewfModalBoxCloseButtonContainer,
 ewfUiEntityAndTopTabContainer,
 ewfUiTopTabListContainer ewfUiCurrentTabActionControl,
+ewfUiSideTabContainer,
 ewfUiGlobalFootContainer {
 	border-color: var( --ewf-ui-important-border-color );
 }
@@ -205,7 +209,7 @@ ewfUiMobileMenuTabContainer ewfActionComponentAllStylesStatesWithHover {
 ewfUiMobileMenuTabContainer ewfUiCurrentTabActionControl {
 	background-color: rgba( 255, 255, 255, .3 );
 }
-ewfUiEntityAndTopTabContainer, ewfUiGlobalFootContainer {
+ewfUiEntityAndTopTabContainer, ewfUiSideTabContainer, ewfUiGlobalFootContainer {
 	background-color: var( --ewf-ui-nav-background-color );
 }
 ewfUiEntityContainer > ewfPagePathContainer ewfComponentListItem {
@@ -233,7 +237,6 @@ ewfUiTopTabListContainer ewfActionComponentAllStylesAllActionStates {
 	background: linear-gradient( 0, rgba( 255, 255, 255, 1 ) 0, rgba( 255, 255, 255, 0.5 ) 100% );
 }
 ewfUiTopTabListContainer ewfActionComponentAllStylesStatesWithHover {
-	border-color: var( --ewf-ui-activation-color );
 	background: none;
 	background-color: var( --ewf-ui-activation-color );
 	color: var( --ewf-ui-inverted-text-color );
@@ -241,25 +244,20 @@ ewfUiTopTabListContainer ewfActionComponentAllStylesStatesWithHover {
 ewfUiTopTabListContainer ewfUiCurrentTabActionControl {
 	background-color: var( --ewf-ui-background-color );
 }
-ewfUiSideTabContainer {
-	background-color: var( --ewf-ui-primary-color );
-	color: var( --ewf-ui-inverted-text-color );
-}
 ewfUiSideTabGroupHead {
-	color: rgba( 255, 255, 255, .5 );
+	color: var( --ewf-ui-side-tab-group-head-color );
 }
-ewfUiSideTabContainer ewfActionComponentAllStylesAllActionStates {
-	border-color: var( --ewf-ui-primary-color );
+ewfUiSideTabContainer ewfActionComponentAllStylesAllStates {
+	color: inherit;
+}
+ewfUiSideTabContainer ewfActionComponentAllStylesStatesWithHover, ewfUiSideTabContainer ewfUiCurrentTabActionControl {
+	border-left-color: var( --ewf-ui-secondary-color );
 }
 ewfUiSideTabContainer ewfActionComponentAllStylesStatesWithHover {
-	border-color: var( --ewf-ui-activation-color );
-	background-color: rgba( 255, 255, 255, .2 );
-	color: var( --ewf-ui-inverted-text-color );
+	background-color: var( --ewf-ui-side-tab-activation-color );
 }
 ewfUiSideTabContainer ewfUiCurrentTabActionControl {
-	border-color: var( --ewf-ui-activation-color );
-	background-color: rgba( 255, 255, 255, .1 );
-	color: var( --ewf-ui-activation-color );
+	background: linear-gradient( to right, var( --ewf-ui-current-side-tab-background-color ), var( --ewf-ui-background-color ) );
 }
 @media only screen and ( max-width: 768px ) {
 	ewfUiInnerGlobalContainer ewfActionComponentAllStylesStatesWithHover {
