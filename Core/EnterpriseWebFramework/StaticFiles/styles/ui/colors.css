@@ -158,7 +158,7 @@ ewfTopWarningContainer ewfActionComponentAllButtonStylesStatesWithHover,
 ewfTopWarningContainer ewfActionComponentAllButtonStylesStatesWithFocus {
 	background-color: #f00;
 }
-ewfUiOuterGlobalContainer {
+ewfUiOuterGlobalContainer, ewfNotificationSectionContainer > ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer {
 	background-color: var( --ewf-ui-primary-color );
 	color: var( --ewf-ui-inverted-text-color );
 }
@@ -264,6 +264,9 @@ ewfUiSideTabContainer ewfUiCurrentTabActionControl {
 }
 ewfUiGlobalFootContainer {
 	background-color: var( --ewf-ui-global-foot-background-color );
+}
+ewfNotificationSectionContainer > ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer {
+	box-shadow: revert;
 }
 @media only screen and ( max-width: 768px ) {
 	ewfUiInnerGlobalContainer ewfActionComponentAllStylesStatesWithHover {

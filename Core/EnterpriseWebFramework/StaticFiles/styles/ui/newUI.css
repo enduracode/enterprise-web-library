@@ -1,7 +1,6 @@
 ﻿:root {
-	--default-border-radius: .5em;
-	--default-box-shadow: 0px 1px 7px rgb( 0 0 0 / 15% );
-	--default-form-color: #ccc;
+  --default-border-radius: .5em;
+  --default-form-color: #ccc;
 }
 
 /*******************/
@@ -24,7 +23,7 @@
   margin: 2vw 0;
   padding: var(--ewf-ui-top-level-spacing);
   background-color: var(--ewf-ui-inverted-text-color);
-  box-shadow: var(--default-box-shadow);
+  box-shadow:none;
   border-radius: var(--default-border-radius);
 }
 

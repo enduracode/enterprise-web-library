@@ -2,8 +2,8 @@
 	--ewf-small-font-size: .9rem;
 
 	--ewf-ui-important-border-width: 1px;
-	--ewf-ui-top-level-vertical-spacing: 1rem;
-	--ewf-ui-top-level-horizontal-spacing: 2rem;
+	--ewf-ui-top-level-vertical-spacing: .75rem;
+	--ewf-ui-top-level-horizontal-spacing: 1.5rem;
 	--ewf-ui-navigation-vertical-spacing: min( .5vw, .5rem );
 	--ewf-ui-navigation-horizontal-spacing: min( 1vw, 1.5rem );
 	--ewf-ui-minor-navigation-spacing: .5rem;
@@ -76,16 +76,16 @@ ewfTopWarningContainer {
 	margin: 0;
 	padding: var( --ewf-ui-navigation-vertical-spacing ) var( --ewf-ui-top-level-horizontal-spacing );
 }
-ewfSectionBoxStyleBothStates, ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer, ewfUiOuterGlobalContainer, ewfUiEntityAndTopTabContainer, ewfUiPageActionListContainer, ewfUiContentContainer, ewfUiContentBox, ewfUiGlobalFootContainer {
+ewfSectionBoxStyleBothStates, ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer, ewfUiOuterGlobalContainer, ewfUiEntityAndTopTabContainer, ewfUiPageActionListContainer, ewfUiContentContainer, ewfUiContentBox, ewfUiGlobalFootContainer, ewfNotificationSectionContainer > ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer {
 	padding-top: var( --ewf-ui-top-level-vertical-spacing );
 }
-ewfSectionBoxStyleBothStates, ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer, ewfUiOuterGlobalContainer, ewfUiEntityContainer, ewfUiSideTabContainer, ewfUiContentContainer, ewfUiContentBox, ewfUiContentFootContainer, ewfUiGlobalFootContainer {
+ewfSectionBoxStyleBothStates, ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer, ewfUiOuterGlobalContainer, ewfUiEntityContainer, ewfUiSideTabContainer, ewfUiContentContainer, ewfUiContentBox, ewfUiContentFootContainer, ewfUiGlobalFootContainer, ewfNotificationSectionContainer > ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer {
 	padding-bottom: var( --ewf-ui-top-level-vertical-spacing );
 }
-ewfSectionBoxStyleBothStates, ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer, ewfUiAppLogoContainer, ewfUiTopErrorMessageListContainer, ewfUiEntityContainer, ewfUiTopTabListContainer, ewfUiSideTabContainer ewfActionComponentAllStylesAllStates, ewfUiPageActionListContainer, ewfUiContentContainer, ewfUiContentBox, ewfUiContentFootContainer, ewfUiGlobalFootContainer {
+ewfSectionBoxStyleBothStates, ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer, ewfUiAppLogoContainer, ewfUiTopErrorMessageListContainer, ewfUiEntityContainer, ewfUiTopTabListContainer, ewfUiSideTabContainer ewfActionComponentAllStylesAllStates, ewfUiPageActionListContainer, ewfUiContentContainer, ewfUiContentBox, ewfUiContentFootContainer, ewfUiGlobalFootContainer, ewfNotificationSectionContainer > ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer {
 	padding-left: var( --ewf-ui-top-level-horizontal-spacing );
 }
-ewfSectionBoxStyleBothStates, ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer, ewfUiUserInfoContainer, ewfUiTopErrorMessageListContainer, ewfUiEntityContainer, ewfUiTopTabListContainer, ewfUiSideTabGroupHead, ewfUiSideTabContainer ewfActionComponentAllStylesAllStates, ewfUiPageActionListContainer, ewfUiContentContainer, ewfUiContentBox, ewfUiContentFootContainer, ewfUiGlobalFootContainer {
+ewfSectionBoxStyleBothStates, ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer, ewfUiUserInfoContainer, ewfUiTopErrorMessageListContainer, ewfUiEntityContainer, ewfUiTopTabListContainer, ewfUiSideTabGroupHead, ewfUiSideTabContainer ewfActionComponentAllStylesAllStates, ewfUiPageActionListContainer, ewfUiContentContainer, ewfUiContentBox, ewfUiContentFootContainer, ewfUiGlobalFootContainer, ewfNotificationSectionContainer > ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer {
 	padding-right: var( --ewf-ui-top-level-horizontal-spacing );
 }
 ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer {
@@ -106,7 +106,7 @@ ewfUiEntityAndTopTabContainer {
 	row-gap: var( --ewf-ui-top-level-vertical-spacing );
 }
 ewfUiSideTabGroupHead {
-	padding-left: calc( var( --ewf-ui-top-level-horizontal-spacing ) * .75 );
+	padding-left: calc( var( --ewf-ui-top-level-horizontal-spacing ) * .5 );
 }
 ewfUiSideTabContainer ewfActionComponentAllStylesStatesWithHover, ewfUiSideTabContainer ewfUiCurrentTabActionControl {
 	border-left-width: var( --ewf-ui-side-tab-border-width );
