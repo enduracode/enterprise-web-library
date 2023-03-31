@@ -168,12 +168,12 @@ ewfUiSideTabContainer {
 	border-right-style: solid;
 	z-index: 1; /* ensures adjacent-element borders get covered */
 }
-ewfUiSideTabContainer ewfUiCurrentTabActionControl {
-	margin-right: calc( var( --ewf-ui-important-border-width ) * -1 );
-}
-ewfUiGlobalFootContainer {
+ewfUiSideTabContainer ewfActionComponentAllStylesAllStates:nth-child( n + 2 ), ewfUiGlobalFootContainer {
 	border-top-width: var( --ewf-ui-important-border-width );
 	border-top-style: solid;
+}
+ewfUiSideTabContainer ewfUiCurrentTabActionControl {
+	margin-right: calc( var( --ewf-ui-important-border-width ) * -1 );
 }
 @media print {
 }

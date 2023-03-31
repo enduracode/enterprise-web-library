@@ -12,6 +12,7 @@
 	--ewf-ui-nav-background-color: #ced6e0;
 	--ewf-ui-entity-action-color: hsla( 0, 0%, 33%, 1 );
 	--ewf-ui-entity-action-activation-color: var( --ewf-ui-primary-color );
+	--ewf-ui-side-tab-border-color: hsla( 0, 0%, 70%, 1 );
 	--ewf-ui-side-tab-group-head-color: hsla( 215, 11%, 40%, 1 );
 	--ewf-ui-side-tab-activation-color: hsla( 213, 22%, 93%, 1 );
 	--ewf-ui-current-side-tab-background-color: hsla( 213, 22%, 89%, 1 );
@@ -248,6 +249,7 @@ ewfUiSideTabGroupHead {
 	color: var( --ewf-ui-side-tab-group-head-color );
 }
 ewfUiSideTabContainer ewfActionComponentAllStylesAllStates {
+	border-top-color: var( --ewf-ui-side-tab-border-color );
 	color: inherit;
 }
 ewfUiSideTabContainer ewfActionComponentAllStylesStatesWithHover, ewfUiSideTabContainer ewfUiCurrentTabActionControl {
