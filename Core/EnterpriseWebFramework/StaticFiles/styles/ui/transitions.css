@@ -27,5 +27,5 @@ ewfUiTopTabListContainer ewfActionComponentAllStylesAllStates {
 	transition: background-color 200ms, color 200ms;
 }
 ewfUiSideTabContainer ewfActionComponentAllStylesAllStates {
-	transition: all 200ms;
+	transition: background-color 200ms;
 }
