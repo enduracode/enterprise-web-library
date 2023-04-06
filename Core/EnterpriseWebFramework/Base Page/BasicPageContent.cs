@@ -8,11 +8,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 public sealed class BasicPageContent: PageContent {
 	// Some of these are used by the EWF JavaScript file.
 	private static readonly ElementClass topWarningContainerClass = new( "ewfTopWarning" );
-	private static readonly ElementClass clickBlockerInactiveClass = new( "ewfClickBlockerI" );
-	private static readonly ElementClass clickBlockerActiveClass = new( "ewfClickBlockerA" );
-	private static readonly ElementClass processingDialogBlockInactiveClass = new( "ewfProcessingDialogI" );
-	private static readonly ElementClass processingDialogBlockActiveClass = new( "ewfProcessingDialogA" );
-	private static readonly ElementClass processingDialogBlockTimeOutClass = new( "ewfProcessingDialogTo" );
+	private static readonly ElementClass processingDialogAllStatesClass = new( "ewfProcessingDialog" );
+	private static readonly ElementClass processingDialogNormalStateClass = new( "ewfProcessingDialogN" );
+	private static readonly ElementClass processingDialogTimeOutStateClass = new( "ewfProcessingDialogTo" );
 	private static readonly ElementClass processingDialogProcessingParagraphClass = new( "ewfProcessingP" );
 	private static readonly ElementClass processingDialogTimeOutParagraphClass = new( "ewfTimeOutP" );
 	private static readonly ElementClass notificationSectionContainerClass = new( "ewfNotification" );
@@ -31,49 +29,58 @@ public sealed class BasicPageContent: PageContent {
 		IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
 			var elements = new List<CssElement>();
 			elements.Add( new CssElement( "TopWarningContainer", "div.{0}".FormatWith( topWarningContainerClass.ClassName ) ) );
-
-			var clickBlockingBlockInactiveSelector = "div." + clickBlockerInactiveClass.ClassName;
-			var clickBlockingBlockActiveSelector = "div." + clickBlockerActiveClass.ClassName;
-			elements.Add( new CssElement( "ClickBlockerBothStates", clickBlockingBlockInactiveSelector, clickBlockingBlockActiveSelector ) );
-			elements.Add( new CssElement( "ClickBlockerInactiveState", clickBlockingBlockInactiveSelector ) );
-			elements.Add( new CssElement( "ClickBlockerActiveState", clickBlockingBlockActiveSelector ) );
-
 			elements.AddRange( getProcessingDialogElements() );
 			elements.AddRange( getNotificationElements() );
-			return elements.ToArray();
+			return elements;
 		}
 
 		private IEnumerable<CssElement> getProcessingDialogElements() {
 			var elements = new List<CssElement>();
 
-			var blockInactiveSelector = "div." + processingDialogBlockInactiveClass.ClassName;
-			var blockActiveSelector = "div." + processingDialogBlockActiveClass.ClassName;
-			var blockTimeOutSelector = "div." + processingDialogBlockTimeOutClass.ClassName;
-			var allBlockSelectors = new[] { blockInactiveSelector, blockActiveSelector, blockTimeOutSelector };
+			var formSelector = "form#{0} ".FormatWith( PageBase.FormId );
+			var dialogAllStatesSelectors = ModalBox.CssElementCreator.GetContainerSelectors( ".{0}".FormatWith( processingDialogAllStatesClass.ClassName ) )
+				.Select( i => formSelector + i )
+				.ToArray();
+			var dialogNormalStateSelectors = ModalBox.CssElementCreator.GetContainerSelectors( ".{0}".FormatWith( processingDialogNormalStateClass.ClassName ) )
+				.Select( i => formSelector + i )
+				.ToArray();
+			var dialogTimeOutStateSelectors = ModalBox.CssElementCreator.GetContainerSelectors( ".{0}".FormatWith( processingDialogTimeOutStateClass.ClassName ) )
+				.Select( i => formSelector + i )
+				.ToArray();
 			elements.AddRange(
 				new[]
 					{
-						new CssElement( "ProcessingDialogBlockAllStates", allBlockSelectors ),
-						new CssElement( "ProcessingDialogBlockInactiveState", blockInactiveSelector ),
-						new CssElement( "ProcessingDialogBlockActiveState", blockActiveSelector ),
-						new CssElement( "ProcessingDialogBlockTimeOutState", blockTimeOutSelector )
+						new CssElement( "ProcessingDialogModalBoxContainerAllStates", dialogAllStatesSelectors ),
+						new CssElement( "ProcessingDialogModalBoxContainerNormalState", dialogNormalStateSelectors ),
+						new CssElement( "ProcessingDialogModalBoxContainerTimeOutState", dialogTimeOutStateSelectors )
 					} );
 
 			elements.Add(
 				new CssElement(
 					"ProcessingDialogProcessingParagraph",
-					allBlockSelectors.Select( i => i + " > p." + processingDialogProcessingParagraphClass.ClassName ).ToArray() ) );
+					dialogAllStatesSelectors.Select( i => "{0} p.{1}".FormatWith( i, processingDialogProcessingParagraphClass.ClassName ) ).ToArray() ) );
 
 			var timeOutParagraphSelector = "p." + processingDialogTimeOutParagraphClass.ClassName;
 			elements.AddRange(
 				new[]
 					{
-						new CssElement( "ProcessingDialogTimeOutParagraphBothStates", allBlockSelectors.Select( i => i + " > " + timeOutParagraphSelector ).ToArray() ),
+						new CssElement(
+							"ProcessingDialogTimeOutParagraphBothStates",
+							dialogAllStatesSelectors.Select( i => "{0} {1}".FormatWith( i, timeOutParagraphSelector ) ).ToArray() ),
 						new CssElement(
 							"ProcessingDialogTimeOutParagraphInactiveState",
-							new[] { blockInactiveSelector, blockActiveSelector }.Select( i => i + " > " + timeOutParagraphSelector ).ToArray() ),
-						new CssElement( "ProcessingDialogTimeOutParagraphActiveState", blockTimeOutSelector + " > " + timeOutParagraphSelector )
+							dialogNormalStateSelectors.Select( i => "{0} {1}".FormatWith( i, timeOutParagraphSelector ) ).ToArray() ),
+						new CssElement(
+							"ProcessingDialogTimeOutParagraphActiveState",
+							dialogTimeOutStateSelectors.Select( i => "{0} {1}".FormatWith( i, timeOutParagraphSelector ) ).ToArray() )
 					} );
+
+			elements.Add(
+				new CssElement(
+					"ProcessingDialogModalBoxBackdrop",
+					ModalBox.CssElementCreator.GetBackdropSelectors( ".{0}".FormatWith( processingDialogAllStatesClass.ClassName ) )
+						.Select( i => formSelector + i )
+						.ToArray() ) );
 
 			return elements;
 		}
@@ -187,7 +194,7 @@ public sealed class BasicPageContent: PageContent {
 		string titleOverride = "", TrustedHtmlString customHeadElements = null, ElementClassSet bodyClasses = null, Action dataUpdateModificationMethod = null,
 		bool isAutoDataUpdater = false, ActionPostBack pageLoadPostBack = null ) {
 		var preContentComponents = getPreContentComponents();
-		var postContentComponents = getPostContentComponents();
+		var postContentComponents = new FlowIdContainer( getNotificationSectionContainer() );
 		var etherealComponents = getEtherealComponents();
 
 		componentGetter = ( contentObjects, hiddenFieldValueGetter, jsInitElement ) => new ElementComponent(
@@ -362,20 +369,33 @@ public sealed class BasicPageContent: PageContent {
 		return outerComponents;
 	}
 
-	private IReadOnlyCollection<FlowComponent> getPostContentComponents() {
-		// This is used by the EWF JavaScript file.
-		const string clickBlockerId = "ewfClickBlocker";
+	private IReadOnlyCollection<FlowComponent> getNotificationSectionContainer() =>
+		PageBase.Current.StatusMessages.Any() && statusMessagesDisplayAsNotification()
+			? new GenericFlowContainer(
+				new Section( null, SectionStyle.Box, null, "Messages", null, getStatusMessageComponentList().ToCollection(), true, true, null ).ToCollection(),
+				classes: notificationSectionContainerClass ).ToCollection()
+			: Enumerable.Empty<FlowComponent>().Materialize();
 
-		return new GenericFlowContainer( null, classes: clickBlockerInactiveClass, clientSideIdOverride: clickBlockerId ).Append( getProcessingDialog() )
-			.Append( new FlowIdContainer( getNotificationSectionContainer() ) )
+	private IReadOnlyCollection<EtherealComponent> getEtherealComponents() =>
+		ModalBox.CreateBrowsingModalBox( BrowsingModalBoxId )
+			.Append( getProcessingDialog() )
+			.Append(
+				new ModalBox(
+					new ModalBoxId(),
+					true,
+					new FlowIdContainer(
+						new Section(
+							"Messages",
+							PageBase.Current.StatusMessages.Any() && !statusMessagesDisplayAsNotification()
+								? getStatusMessageComponentList().ToCollection()
+								: Enumerable.Empty<FlowComponent>().Materialize() ).ToCollection() ).ToCollection(),
+					open: PageBase.Current.StatusMessages.Any() && !statusMessagesDisplayAsNotification() ) )
 			.Materialize();
-	}
 
-	private FlowComponent getProcessingDialog() {
-		// This is used by the EWF JavaScript file.
-		var dialogClass = new ElementClass( "ewfProcessingDialog" );
-
-		return new GenericFlowContainer(
+	private EtherealComponent getProcessingDialog() =>
+		new ModalBox(
+			new ModalBoxId(),
+			false,
 			new Paragraph(
 					new Spinner().ToCollection<PhrasingComponent>()
 						.Concat( Translation.Processing.ToComponents() )
@@ -391,8 +411,7 @@ public sealed class BasicPageContent: PageContent {
 							behavior: new CustomButtonBehavior( () => "stopPostBackRequest();" ) ).ToCollection(),
 						classes: processingDialogTimeOutParagraphClass ) )
 				.Materialize(),
-			classes: dialogClass.Add( processingDialogBlockInactiveClass ) );
-	}
+			classes: processingDialogAllStatesClass.Add( processingDialogNormalStateClass ) );
 
 	// This supports the animated ellipsis. Browsers that don't support CSS3 animations will still see the static dots.
 	private IReadOnlyCollection<PhrasingComponent> getProcessingDialogEllipsisDot( int dotNumber ) {
@@ -401,28 +420,6 @@ public sealed class BasicPageContent: PageContent {
 
 		return new GenericPhrasingContainer( ".".ToComponents(), classes: dotClass ).ToCollection();
 	}
-
-	private IReadOnlyCollection<FlowComponent> getNotificationSectionContainer() =>
-		PageBase.Current.StatusMessages.Any() && statusMessagesDisplayAsNotification()
-			? new GenericFlowContainer(
-				new Section( null, SectionStyle.Box, null, "Messages", null, getStatusMessageComponentList().ToCollection(), true, true, null ).ToCollection(),
-				classes: notificationSectionContainerClass ).ToCollection()
-			: Enumerable.Empty<FlowComponent>().Materialize();
-
-	private IReadOnlyCollection<EtherealComponent> getEtherealComponents() =>
-		ModalBox.CreateBrowsingModalBox( BrowsingModalBoxId )
-			.Append(
-				new ModalBox(
-					new ModalBoxId(),
-					true,
-					new FlowIdContainer(
-						new Section(
-							"Messages",
-							PageBase.Current.StatusMessages.Any() && !statusMessagesDisplayAsNotification()
-								? getStatusMessageComponentList().ToCollection()
-								: Enumerable.Empty<FlowComponent>().Materialize() ).ToCollection() ).ToCollection(),
-					open: PageBase.Current.StatusMessages.Any() && !statusMessagesDisplayAsNotification() ) )
-			.Materialize();
 
 	private FlowComponent getStatusMessageComponentList() =>
 		new StackList(
@@ -433,9 +430,8 @@ public sealed class BasicPageContent: PageContent {
 						.Materialize(),
 					classes: i.Item1 == StatusMessageType.Info ? infoMessageContainerClass : warningMessageContainerClass ).ToComponentListItem() ) );
 
-	private bool statusMessagesDisplayAsNotification() {
-		return PageBase.Current.StatusMessages.All( i => i.Item1 == StatusMessageType.Info ) && PageBase.Current.StatusMessages.Count() <= 3;
-	}
+	private bool statusMessagesDisplayAsNotification() =>
+		PageBase.Current.StatusMessages.All( i => i.Item1 == StatusMessageType.Info ) && PageBase.Current.StatusMessages.Count() <= 3;
 
 	private string getTitle() =>
 		StringTools.ConcatenateWithDelimiter(

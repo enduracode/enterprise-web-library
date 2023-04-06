@@ -71,6 +71,7 @@ function OnDocumentReady() {
 
 	$( "dialog" ).each( function() { dialogPolyfill.registerDialog( this ); } );
 	Chart.defaults.global.defaultFontColor = $( "body" ).css( "color" );
+	$( document ).keydown( function( e ) { if( $( ".ewfProcessingDialog" ).get( 0 ).open && e.key === "Escape" ) e.preventDefault(); } );
 }
 
 function stopActivatableTableRowNestedEvents() {
@@ -101,7 +102,7 @@ function postBack( postBackId ) {
 }
 
 function postBackRequestStarting( e, postBackId ) {
-	if( $( "#ewfClickBlocker" ).hasClass( "ewfClickBlockerA" ) ) {
+	if( $( ".ewfProcessingDialog" ).get( 0 ).open ) {
 		e.preventDefault();
 		return;
 	}
@@ -116,10 +117,9 @@ function postBackRequestStarting( e, postBackId ) {
 	for( var i in CKEDITOR.instances )
 		CKEDITOR.instances[ i ].updateElement();
 
-	$( "#ewfClickBlocker" ).removeClass().addClass( "ewfClickBlockerA" );
-	$( ".ewfProcessingDialog" ).removeClass( "ewfProcessingDialogI ewfProcessingDialogTo" ).addClass( "ewfProcessingDialogA" );
+	$( ".ewfProcessingDialog" ).removeClass( "ewfProcessingDialogTo" ).addClass( "ewfProcessingDialogN" ).get( 0 ).showModal();
 
-	setTimeout( '$( ".ewfProcessingDialog" ).removeClass( "ewfProcessingDialogI ewfProcessingDialogA" ).addClass( "ewfProcessingDialogTo" );', 10000 );
+	setTimeout( '$( ".ewfProcessingDialog" ).removeClass( "ewfProcessingDialogN" ).addClass( "ewfProcessingDialogTo" );', 10000 );
 }
 
 function stopPostBackRequest() {
@@ -131,8 +131,7 @@ function stopPostBackRequest() {
 }
 
 function deactivateProcessingDialog() {
-	$( "#ewfClickBlocker" ).removeClass().addClass( "ewfClickBlockerI" );
-	$( ".ewfProcessingDialog" ).removeClass( "ewfProcessingDialogA ewfProcessingDialogTo" ).addClass( "ewfProcessingDialogI" );
+	$( ".ewfProcessingDialog" ).removeClass( "ewfProcessingDialogTo" ).addClass( "ewfProcessingDialogN" ).get( 0 ).close();
 }
 
 function initNumericTextControl( selector ) {

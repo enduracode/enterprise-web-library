@@ -626,12 +626,6 @@ ewfTopWarningContainer {
 ewfNotificationSectionContainer {
 	z-index: 9999;
 }
-ewfClickBlockerBothStates {
-	z-index: 10000;
-}
-ewfProcessingDialogBlockAllStates {
-	z-index: 10001;
-}
 ewfTopWarningContainer {
 	position: relative;
 	font-size: 1rem;
@@ -663,52 +657,42 @@ ewfTopWarningContainer ewfActionComponentAllButtonStylesStatesWithFocus {
 span.ewfIntermediateUrl {
 	word-break: break-all;
 }
-ewfClickBlockerBothStates {
-	position: fixed;
-	top: 0;
-	right: 0;
-	bottom: 0;
-	left: 0;
-	background-color: gray;
+ewfProcessingDialogModalBoxContainerAllStates {
+	animation: 400ms both processingDialogFade_EWF;
 }
-ewfClickBlockerInactiveState {
-	visibility: hidden;
-	opacity: 0;
-	transition: visibility 400ms, opacity 400ms;
+ewfProcessingDialogModalBoxBackdrop {
+	animation: 400ms both processingDialogBackdropFade_EWF;
 }
-ewfClickBlockerActiveState {
-	opacity: 0.3;
-	transition: opacity 400ms;
-}
-ewfProcessingDialogBlockAllStates {
-	position: fixed;
+ewfProcessingDialogModalBoxContainerAllStates {
 	font-size: .8rem;
 	top: 50%;
-	left: 50%;
 	margin-top: -4.5rem;
-	margin-left: -9rem;
 	box-shadow: 0 0 15px black;
 	border-radius: 15px;
 	background-color: white;
 	padding: .5rem;
 	width: 17rem;
+	overflow: hidden;
 	text-align: center;
 	color: black;
 }
-ewfProcessingDialogBlockInactiveState, ewfProcessingDialogBlockActiveState {
+ewfProcessingDialogModalBoxContainerNormalState {
 	height: 4rem;
 }
-ewfProcessingDialogBlockInactiveState {
-	visibility: hidden;
-	opacity: 0;
-	transition: height 0 400ms, visibility 400ms, opacity 400ms;
-}
-ewfProcessingDialogBlockActiveState {
-	transition: opacity 400ms;
-}
-ewfProcessingDialogBlockTimeOutState {
+ewfProcessingDialogModalBoxContainerTimeOutState {
 	height: 8rem;
 	transition: height 200ms;
+}
+@keyframes processingDialogFade_EWF {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+ewfProcessingDialogModalBoxContainerAllStates > ewfModalBox > ewfModalBoxContentContainer {
+	padding: 0;
 }
 ewfProcessingDialogProcessingParagraph {
 	font-size: 2em;
@@ -722,7 +706,7 @@ ewfProcessingDialogProcessingParagraph {
 ewfProcessingDialogProcessingParagraph > .ewfProcessingEllipsis1,
 ewfProcessingDialogProcessingParagraph > .ewfProcessingEllipsis2,
 ewfProcessingDialogProcessingParagraph > .ewfProcessingEllipsis3 {
-	animation: pulse 2s infinite;
+	animation: 2s infinite pulse;
 }
 @keyframes pulse {
 	0% {
@@ -752,14 +736,30 @@ ewfProcessingDialogTimeOutParagraphBothStates {
 	align-items: center;
 }
 ewfProcessingDialogTimeOutParagraphInactiveState {
-	visibility: hidden;
-	transition: visibility 400ms;
+	display: none;
 }
 ewfProcessingDialogTimeOutParagraphActiveState {
 	transition: visibility 0 200ms;
+	animation: 200ms 200ms both processingDialogTimeOutParagraphFade_EWF;
+}
+@keyframes processingDialogTimeOutParagraphFade_EWF {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
 }
 ewfProcessingDialogTimeOutParagraphBothStates > ewfActionComponentAllButtonStylesAllStates {
 	white-space: unset;
+}
+@keyframes processingDialogBackdropFade_EWF {
+	from {
+		background-color: hsla( 0, 0%, 50%, 0 );
+	}
+	to {
+		background-color: hsla( 0, 0%, 50%, .3 );
+	}
 }
 ewfNotificationSectionContainer {
 	position: sticky;
@@ -892,7 +892,7 @@ ewfErrorPageBody.ewfUnhandledExceptionDisplay pre {
 }
 
 /* fonts */
-ewfTopWarningContainer, ewfProcessingDialogBlockAllStates, ewfNotificationSectionContainer, ewfSelectUserPageBody, ewfErrorPageBody {
+ewfTopWarningContainer, ewfProcessingDialogModalBoxContainerAllStates, ewfNotificationSectionContainer, ewfSelectUserPageBody, ewfErrorPageBody {
 	font-family: 'Open Sans', sans-serif;
 }
 ewfSelectUserPageBody h1, ewfErrorPageBody h1 {
