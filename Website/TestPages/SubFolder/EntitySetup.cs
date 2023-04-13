@@ -1,19 +1,17 @@
-﻿using System.Collections.Generic;
-using EnterpriseWebLibrary.EnterpriseWebFramework;
-using Tewl.Tools;
+﻿namespace EnterpriseWebLibrary.Website.TestPages.SubFolder;
 
-namespace EnterpriseWebLibrary.Website.TestPages.SubFolder {
-	partial class EntitySetup: UiEntitySetup {
-		protected override ResourceBase createParentResource() => ActionControls.GetInfo();
+partial class EntitySetup: UiEntitySetup {
+	protected override ResourceBase createParent() => ActionControls.GetInfo();
 
-		public override string EntitySetupName => "Nested";
+	protected override string getEntitySetupName() => "Nested";
 
-		protected override IEnumerable<ResourceGroup> createListedResources() =>
-			new List<ResourceGroup> { new ResourceGroup( new General( this ), new Details( this ), new Disabled( this ), new New( this ) ) };
+	public override ResourceBase DefaultResource => new General( this );
 
-		protected override UrlHandler getRequestHandler() => null;
+	protected override IEnumerable<ResourceGroup> createListedResources() =>
+		new[] { new ResourceGroup( new General( this ), new Details( this ), new Disabled( this ), new New( this ) ) };
 
-		EntityUiSetup UiEntitySetup.GetUiSetup() =>
-			new EntityUiSetup( entitySummaryContent: new Paragraph( "Awesome content goes here.".ToComponents() ).ToCollection(), tabMode: TabMode.Horizontal );
-	}
+	protected override UrlHandler getRequestHandler() => null;
+
+	EntityUiSetup UiEntitySetup.GetUiSetup() =>
+		new( entitySummaryContent: new Paragraph( "Awesome content goes here.".ToComponents() ).ToCollection(), tabMode: TabMode.Horizontal );
 }

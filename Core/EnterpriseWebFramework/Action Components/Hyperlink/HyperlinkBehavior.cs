@@ -24,7 +24,7 @@ public sealed class HyperlinkBehavior {
 	internal HyperlinkBehavior(
 		ResourceInfo destination, bool disableAuthorizationCheck, bool prerenderDestination, string target, Func<string, string> actionStatementGetter ) {
 		hasDestination = destination != null;
-		userCanNavigateToDestinationPredicate = () => !hasDestination || disableAuthorizationCheck || destination.UserCanAccessResource;
+		userCanNavigateToDestinationPredicate = () => !hasDestination || disableAuthorizationCheck || destination.UserCanAccess;
 
 		var destinationAlternativeMode = hasDestination && !disableAuthorizationCheck ? destination.AlternativeMode : null;
 		Classes = destinationAlternativeMode is NewContentResourceMode ? ActionComponentCssElementCreator.NewContentClass : ElementClassSet.Empty;

@@ -1,11 +1,8 @@
-﻿using System.Linq;
-using EnterpriseWebLibrary.EnterpriseWebFramework;
-
-// EwlPage
+﻿// EwlPage
 
 namespace EnterpriseWebLibrary.Website.TestPages {
 	partial class CheckboxListDemo {
-		public override string ResourceName => "Checkbox List";
+		protected override string getResourceName() => "Checkbox List";
 
 		protected override PageContent getContent() =>
 			new UiPageContent( isAutoDataUpdater: true ).Add(

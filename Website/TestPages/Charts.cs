@@ -1,13 +1,8 @@
-﻿using System;
-using System.Linq;
-using EnterpriseWebLibrary.EnterpriseWebFramework;
-using Tewl.Tools;
-
-// EwlPage
+﻿// EwlPage
 
 namespace EnterpriseWebLibrary.Website.TestPages {
 	partial class Charts {
-		public override string ResourceName => "Chart";
+		protected override string getResourceName() => "Chart";
 
 		protected override PageContent getContent() {
 			var content = new UiPageContent( omitContentBox: true );

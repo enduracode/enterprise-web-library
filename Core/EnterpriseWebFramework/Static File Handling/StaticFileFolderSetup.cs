@@ -1,40 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework {
-	public abstract class StaticFileFolderSetup: EntitySetupBase {
-		protected readonly Lazy<StaticFileFolderSetup> parentFolderSetup;
+public abstract class StaticFileFolderSetup: EntitySetupBase {
+	protected sealed override void init() => base.init();
 
-		protected StaticFileFolderSetup() {
-			parentFolderSetup = new Lazy<StaticFileFolderSetup>( createParentFolderSetup );
-		}
+	protected override string getEntitySetupName() => "";
 
-		protected sealed override void init() => base.init();
+	protected internal sealed override void InitParametersModification() {}
 
-		protected override ResourceBase createParentResource() => parentFolderSetup.Value?.ParentResource;
+	public sealed override ResourceBase DefaultResource => throw new NotSupportedException();
 
-		protected abstract StaticFileFolderSetup createParentFolderSetup();
+	protected sealed override IEnumerable<ResourceGroup> createListedResources() => Enumerable.Empty<ResourceGroup>();
 
-		public sealed override string EntitySetupName => "";
+	public override ConnectionSecurity ConnectionSecurity => Parent?.ConnectionSecurity ?? ConnectionSecurity.MatchingCurrentRequest;
 
-		protected internal sealed override void InitParametersModification() {}
+	protected sealed override UrlHandler getRequestHandler() => null;
 
-		protected sealed override IEnumerable<ResourceGroup> createListedResources() => Enumerable.Empty<ResourceGroup>();
+	protected sealed override bool canRepresentRequestHandler() => base.canRepresentRequestHandler();
 
-		protected internal override ConnectionSecurity ConnectionSecurity => ParentResource?.ConnectionSecurity ?? ConnectionSecurity.MatchingCurrentRequest;
+	protected abstract bool isFrameworkFolder { get; }
 
-		protected sealed override UrlHandler getRequestHandler() => null;
+	protected abstract string folderPath { get; }
 
-		protected sealed override bool canRepresentRequestHandler() => base.canRepresentRequestHandler();
+	public sealed override bool Equals( BasicUrlHandler other ) =>
+		other is StaticFileFolderSetup otherFs && otherFs.isFrameworkFolder == isFrameworkFolder && otherFs.folderPath == folderPath;
 
-		protected abstract bool isFrameworkFolder { get; }
-
-		protected abstract string folderPath { get; }
-
-		public sealed override bool Equals( BasicUrlHandler other ) =>
-			other is StaticFileFolderSetup otherFs && otherFs.isFrameworkFolder == isFrameworkFolder && otherFs.folderPath == folderPath;
-
-		public sealed override int GetHashCode() => ( isFrameworkFolder, folderPath ).GetHashCode();
-	}
+	public sealed override int GetHashCode() => ( isFrameworkFolder, folderPath ).GetHashCode();
 }

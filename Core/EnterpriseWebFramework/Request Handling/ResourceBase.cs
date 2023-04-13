@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
+using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
 using StackExchange.Profiling;
 
@@ -9,22 +10,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 /// <summary>
 /// A base set of functionality that can be used to discover information about a resource before actually requesting it.
 /// </summary>
-public abstract class ResourceBase: ResourceInfo, UrlHandler {
-	internal const string ResourcePathSeparator = " > ";
-	internal const string EntityResourceSeparator = " / ";
-
+[ PublicAPI ]
+public abstract class ResourceBase: ResourceInfo, ResourceParent {
 	private static Func<ResourceBase, ( string name, string parameters )?> frameworkResourceSerializer;
 	private static SystemProviderReference<SystemResourceSerializationProvider> systemSerializationProviderRef;
 	private static SystemProviderReference<AppResourceSerializationProvider> appSerializationProviderRef;
 	private static Action<bool, ResourceBase> urlHandlerStateUpdater;
 	private static Func<ResourceBase> currentResourceGetter;
-
-	internal static string CombineResourcePathStrings( string separator, string one, string two, params string[] pathStrings ) {
-		var pathString = StringTools.ConcatenateWithDelimiter( separator, one, two );
-		foreach( var s in pathStrings )
-			pathString = StringTools.ConcatenateWithDelimiter( separator, pathString, s );
-		return pathString;
-	}
 
 	internal static void WriteRedirectResponse( HttpContext context, string url, bool permanent ) {
 		if( context.Request.Method == "GET" || context.Request.Method == "HEAD" )
@@ -32,7 +24,7 @@ public abstract class ResourceBase: ResourceInfo, UrlHandler {
 				context.Response,
 				EwfRequest.AppBaseUrlProvider.RequestIsSecure( context.Request ),
 				false,
-				permanent && !ConfigurationStatics.IsDevelopmentInstallation ? (bool?)null : false );
+				permanent && !ConfigurationStatics.IsDevelopmentInstallation ? null : false );
 
 		EwfResponse.Create(
 				ContentTypes.PlainText,
@@ -63,15 +55,17 @@ public abstract class ResourceBase: ResourceInfo, UrlHandler {
 	internal static ResourceBase Current => currentResourceGetter();
 
 	private string uriFragmentIdentifierField = "";
-	private readonly Lazy<ResourceBase> parentResource;
+	private readonly Lazy<ResourceParent> parent;
+	private readonly Lazy<string> name;
 	private readonly Lazy<AlternativeResourceMode> alternativeMode;
 	private readonly Lazy<UrlHandler> urlParent;
 
 	/// <summary>
-	/// Creates a resource info object.
+	/// Creates a resource object.
 	/// </summary>
 	protected ResourceBase() {
-		parentResource = new Lazy<ResourceBase>( createParentResource );
+		parent = new Lazy<ResourceParent>( createParent );
+		name = new Lazy<string>( getResourceName );
 		alternativeMode = new Lazy<AlternativeResourceMode>( createAlternativeMode );
 		urlParent = new Lazy<UrlHandler>( getUrlParent );
 	}
@@ -102,7 +96,7 @@ public abstract class ResourceBase: ResourceInfo, UrlHandler {
 	/// </summary>
 	[ EditorBrowsable( EditorBrowsableState.Never ) ]
 	protected string uriFragmentIdentifier {
-		get { return uriFragmentIdentifierField; }
+		get => uriFragmentIdentifierField;
 		set {
 			// We think the validation will be better if we tell the URI class the scheme via an absolute URI instead of just giving it the fragment identifier
 			// by itself and using UriKind.Relative. The scheme can affect the validation that is performed.
@@ -119,68 +113,72 @@ public abstract class ResourceBase: ResourceInfo, UrlHandler {
 	public abstract EntitySetupBase EsAsBaseType { get; }
 
 	/// <summary>
-	/// Gets the parent resource, or null if there is no parent.
+	/// Gets the parent of this resource, or null if there isn’t one.
 	/// </summary>
-	public ResourceBase ParentResource => parentResource.Value;
+	public ResourceParent Parent => parent.Value ?? EsAsBaseType;
 
 	/// <summary>
-	/// Creates the parent resource. Returns null if there is no parent.
+	/// Gets the parent resource of this resource. Throws an exception if there is no parent or the parent is an entity setup.
 	/// </summary>
-	protected virtual ResourceBase createParentResource() => null;
+	public ResourceBase ParentResource =>
+		Parent as ResourceBase ?? throw new Exception( "The resource either doesn’t have a parent or the parent is an entity setup." );
 
 	/// <summary>
-	/// Gets the resource path from the root all the way down to the current resource.
+	/// Gets whether an entity setup exists and is also the parent.
 	/// </summary>
-	public List<ResourceBase> ResourcePath {
+	internal bool EntitySetupIsParent => EsAsBaseType is not null && ReferenceEquals( Parent, EsAsBaseType );
+
+	/// <summary>
+	/// Creates the parent of this resource. Returns null if there is no parent.
+	/// </summary>
+	protected virtual ResourceParent createParent() => null;
+
+	/// <summary>
+	/// Gets the ancestors of this resource, from the parent all the way up to the root.
+	/// </summary>
+	public IEnumerable<ResourceParent> Ancestors {
 		get {
-			// NOTE: If we used recursion this would be much simpler.
-			var path = new List<ResourceBase>();
-			var resource = this;
-			do
-				path.Add( resource );
-			while( ( resource = resource.ParentResource ?? resource.EsAsBaseType?.ParentResource ) != null );
-			path.Reverse();
-			return path;
+			var ancestors = new List<ResourceParent>();
+			ResourceParent p = this;
+			while( ( p = p.Parent ) != null )
+				ancestors.Add( p );
+			return ancestors;
+		}
+	}
+
+	string ResourceParent.Name => ResourceName;
+
+	/// <summary>
+	/// Gets the name of this resource.
+	/// </summary>
+	public string ResourceName => name.Value.Length == 0 && Parent is not null ? throw new Exception( "Every non-root resource must have a name." ) : name.Value;
+
+	/// <summary>
+	/// Returns the name of this resource. Never return null.
+	/// </summary>
+	protected virtual string getResourceName() => GetType().Name.CamelToEnglish();
+
+	/// <summary>
+	/// Gets the name of this resource, including the entity setup name if an entity setup exists.
+	/// </summary>
+	public string ResourceFullName {
+		get {
+			var fullName = ResourceName;
+			if( EsAsBaseType is not null )
+				foreach( var i in Ancestors ) {
+					var entitySetup = i as EntitySetupBase ?? ( (ResourceBase)i ).EsAsBaseType;
+					if( !ReferenceEquals( entitySetup, EsAsBaseType ) )
+						break;
+					fullName = StringTools.ConcatenateWithDelimiter( " > ", i.Name.Length == 0 && i.Parent is null ? "Home" : i.Name, fullName );
+				}
+			return fullName;
 		}
 	}
 
 	/// <summary>
-	/// Returns the name of the resource.
+	/// Gets whether the authenticated user is authorized to access this resource.
 	/// </summary>
-	public virtual string ResourceName => GetType().Name.CamelToEnglish();
-
-	/// <summary>
-	/// Returns the name of the resource, including the entity setup name if an entity setup exists.
-	/// </summary>
-	public string ResourceFullName =>
-		CombineResourcePathStrings( EntityResourceSeparator, EsAsBaseType != null && ParentResource == null ? EsAsBaseType.EntitySetupName : "", ResourceName );
-
-	/// <summary>
-	/// Returns the string representing the parent resource's path within the entity.
-	/// </summary>
-	internal string ParentResourceEntityPathString {
-		get {
-			if( EsAsBaseType == null )
-				return "";
-			var pathString = "";
-			for( var i = 0; i < ResourcePath.Count - 1; i += 1 ) {
-				// Traverse the path backwards, excluding this resource.
-				var resource = ResourcePath[ ResourcePath.Count - 2 - i ];
-
-				// NOTE: There should be a third part of this condition that tests if all the parameters in the entity setups are the same.
-				if( resource.EsAsBaseType == null || !resource.EsAsBaseType.GetType().Equals( EsAsBaseType.GetType() ) )
-					break;
-
-				pathString = CombineResourcePathStrings( ResourcePathSeparator, resource.ResourceFullName, pathString );
-			}
-			return pathString;
-		}
-	}
-
-	/// <summary>
-	/// Returns true if the authenticated user is authorized to access the resource.
-	/// </summary>
-	public sealed override bool UserCanAccessResource {
+	public sealed override bool UserCanAccess {
 		get {
 			if( ConfigurationStatics.IsIntermediateInstallation ) {
 				if( IsIntermediateInstallationPublicResource )
@@ -189,11 +187,9 @@ public abstract class ResourceBase: ResourceInfo, UrlHandler {
 					return false;
 			}
 
-			// It's important to do the entity setup check first so the resource doesn't have to repeat any of it. For example, if the entity setup verifies that
-			// the authenticated user is not null, the resource should be able to assume this when doing its own checks.
-			return ( EsAsBaseType != null
-				         ? ( EsAsBaseType.ParentResource != null ? EsAsBaseType.ParentResource.UserCanAccessResource : true ) && EsAsBaseType.UserCanAccessEntitySetup
-				         : true ) && ( ParentResource != null ? ParentResource.UserCanAccessResource : true ) && userCanAccessResource;
+			// It’s important to do the entity setup and parent checks first so the resource doesn’t have to repeat any of it. For example, if the entity setup
+			// verifies that the authenticated user is not null, the resource should be able to assume this when doing its own checks.
+			return ( EsAsBaseType is null || EntitySetupIsParent || EsAsBaseType.UserCanAccess ) && ( Parent is null || Parent.UserCanAccess ) && userCanAccess;
 		}
 	}
 
@@ -203,37 +199,23 @@ public abstract class ResourceBase: ResourceInfo, UrlHandler {
 	protected internal virtual bool IsIntermediateInstallationPublicResource => false;
 
 	/// <summary>
-	/// Returns true if the authenticated user passes resource-level authorization checks.
+	/// Gets whether the authenticated user passes resource-level authorization checks.
 	/// </summary>
-	protected virtual bool userCanAccessResource => true;
+	protected virtual bool userCanAccess => true;
 
 	/// <summary>
 	/// Gets the log-in page to use for this resource, or null for default behavior.
 	/// </summary>
-	protected internal virtual ResourceBase LogInPage {
-		get {
-			if( ParentResource != null )
-				return ParentResource.LogInPage;
-			if( EsAsBaseType != null )
-				return EsAsBaseType.LogInPage;
-			return null;
-		}
-	}
+	public virtual ResourceBase LogInPage => Parent?.LogInPage;
 
 	/// <summary>
 	/// Gets the alternative mode for this resource or null if it is in normal mode. Do not call this from the createAlternativeMode method of an ancestor;
 	/// doing so will result in a stack overflow.
 	/// </summary>
-	public sealed override AlternativeResourceMode AlternativeMode {
-		get {
-			// It's important to do the entity setup and parent disabled checks first so the resource doesn't have to repeat any of them in its disabled check.
-			if( EsAsBaseType != null && EsAsBaseType.AlternativeMode is DisabledResourceMode )
-				return EsAsBaseType.AlternativeMode;
-			if( ParentResource != null && ParentResource.AlternativeMode is DisabledResourceMode )
-				return ParentResource.AlternativeMode;
-			return AlternativeModeDirect;
-		}
-	}
+	public sealed override AlternativeResourceMode AlternativeMode =>
+		// It’s important to do the entity setup and parent disabled checks first so the resource doesn’t have to repeat any of them in its disabled check.
+		EsAsBaseType is not null && !EntitySetupIsParent && EsAsBaseType.AlternativeMode is DisabledResourceMode ? EsAsBaseType.AlternativeMode :
+		Parent?.AlternativeMode is DisabledResourceMode ? Parent.AlternativeMode : AlternativeModeDirect;
 
 	/// <summary>
 	/// Gets the alternative mode for this resource without using ancestor logic. Useful when called from the createAlternativeMode method of an ancestor, e.g.
@@ -245,13 +227,11 @@ public abstract class ResourceBase: ResourceInfo, UrlHandler {
 	/// <summary>
 	/// Creates the alternative mode for this resource or returns null if it is in normal mode.
 	/// </summary>
-	protected virtual AlternativeResourceMode createAlternativeMode() {
-		return null;
-	}
+	protected virtual AlternativeResourceMode createAlternativeMode() => null;
 
 	internal sealed override string GetUrl( bool ensureUserCanAccessResource, bool ensureResourceNotDisabled ) {
 		try {
-			if( ensureUserCanAccessResource && !UserCanAccessResource )
+			if( ensureUserCanAccessResource && !UserCanAccess )
 				throw new ApplicationException( "The authenticated user cannot access the resource." );
 			if( ensureResourceNotDisabled && AlternativeMode is DisabledResourceMode )
 				throw new ApplicationException( "The resource is disabled." );
@@ -272,10 +252,10 @@ public abstract class ResourceBase: ResourceInfo, UrlHandler {
 	UrlHandler UrlHandler.GetParent() => urlParent.Value;
 
 	/// <summary>
-	/// Returns the resource or entity setup that will determine this resource’s canonical URL. One reason to override is if <see cref="createParentResource"/>
-	/// depends on the authenticated user since the URL must not have this dependency.
+	/// Returns the resource or entity setup that will determine this resource’s canonical URL. One reason to override is if <see cref="createParent"/> depends on
+	/// the authenticated user since the URL must not have this dependency.
 	/// </summary>
-	protected virtual UrlHandler getUrlParent() => (UrlHandler)ParentResource ?? EsAsBaseType;
+	protected virtual UrlHandler getUrlParent() => Parent;
 
 	UrlEncoder BasicUrlHandler.GetEncoder() => getUrlEncoder();
 
@@ -300,15 +280,7 @@ public abstract class ResourceBase: ResourceInfo, UrlHandler {
 	/// <summary>
 	/// Gets the desired security setting for requests to the resource.
 	/// </summary>
-	protected internal virtual ConnectionSecurity ConnectionSecurity {
-		get {
-			if( ParentResource != null )
-				return ParentResource.ConnectionSecurity;
-			if( EsAsBaseType != null )
-				return EsAsBaseType.ConnectionSecurity;
-			return ConnectionSecurity.SecureIfPossible;
-		}
-	}
+	public virtual ConnectionSecurity ConnectionSecurity => Parent?.ConnectionSecurity ?? ConnectionSecurity.SecureIfPossible;
 
 	( UrlHandler parent, UrlHandler child ) UrlHandler.GetCanonicalHandlerPair( UrlHandler child ) => ( this, child );
 
@@ -346,7 +318,7 @@ public abstract class ResourceBase: ResourceInfo, UrlHandler {
 
 		bool userAuthorized;
 		using( MiniProfiler.Current.Step( "EWF - Check resource authorization" ) )
-			userAuthorized = UserCanAccessResource;
+			userAuthorized = UserCanAccess;
 		if( !userAuthorized )
 			throw new AccessDeniedException(
 				ConfigurationStatics.IsIntermediateInstallation && !IsIntermediateInstallationPublicResource && !AppRequestState.Instance.IntermediateUserExists,
@@ -385,30 +357,18 @@ public abstract class ResourceBase: ResourceInfo, UrlHandler {
 			return;
 		}
 
-		EwfResponse response;
-		switch( context.Request.Method ) {
-			case "PUT":
-				response = executeUnsafeRequestMethod( put );
-				break;
-			case "PATCH":
-				response = executeUnsafeRequestMethod( patch );
-				break;
-			case "DELETE":
-				response = executeUnsafeRequestMethod( delete );
-				break;
-			case "POST":
-				response = executeUnsafeRequestMethod( post );
-				break;
-			default:
-				response = EwfResponse.Create( "", new EwfResponseBodyCreator( () => "" ), statusCodeGetter: () => 501 );
-				break;
-		}
-		if( response == null )
-			response = EwfResponse.Create(
-				"",
-				new EwfResponseBodyCreator( () => "" ),
-				statusCodeGetter: () => 405,
-				additionalHeaderFieldGetter: () => ( "Allow", "" ).ToCollection() );
+		var response = context.Request.Method switch
+			{
+				"PUT" => executeUnsafeRequestMethod( put ),
+				"PATCH" => executeUnsafeRequestMethod( patch ),
+				"DELETE" => executeUnsafeRequestMethod( delete ),
+				"POST" => executeUnsafeRequestMethod( post ),
+				_ => EwfResponse.Create( "", new EwfResponseBodyCreator( () => "" ), statusCodeGetter: () => 501 )
+			} ?? EwfResponse.Create(
+			"",
+			new EwfResponseBodyCreator( () => "" ),
+			statusCodeGetter: () => 405,
+			additionalHeaderFieldGetter: () => ( "Allow", "" ).ToCollection() );
 		response.WriteToAspNetResponse( context.Response );
 	}
 
@@ -447,15 +407,7 @@ public abstract class ResourceBase: ResourceInfo, UrlHandler {
 	protected virtual EwfResponse delete() => null;
 	protected virtual EwfResponse post() => null;
 
-	protected internal virtual bool AllowsSearchEngineIndexing {
-		get {
-			if( ParentResource != null )
-				return ParentResource.AllowsSearchEngineIndexing;
-			if( EsAsBaseType != null )
-				return EsAsBaseType.AllowsSearchEngineIndexing;
-			return true;
-		}
-	}
+	public virtual bool AllowsSearchEngineIndexing => Parent?.AllowsSearchEngineIndexing ?? true;
 
 	/// <summary>
 	/// Returns true if this resource is identical to the current resource.

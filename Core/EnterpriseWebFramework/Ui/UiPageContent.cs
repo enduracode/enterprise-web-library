@@ -221,7 +221,7 @@ public class UiPageContent: PageContent {
 		var components = new List<FlowComponent>();
 
 		var changePasswordPage = new UserManagement.Pages.ChangePassword( PageBase.Current.GetUrl() );
-		if( !changePasswordPage.UserCanAccessResource || AppTools.User == null )
+		if( !changePasswordPage.UserCanAccess || AppTools.User == null )
 			return components;
 
 		components.Add( new Paragraph( "Logged in as {0}".FormatWith( AppTools.User.Email ).ToComponents() ) );
@@ -288,7 +288,7 @@ public class UiPageContent: PageContent {
 	}
 
 	private IEnumerable<FlowComponent> getMobileMenuTabContainer() {
-		if( entityUiSetup == null || PageBase.Current.ParentResource != null )
+		if( entityUiSetup == null || !PageBase.Current.EntitySetupIsParent )
 			return Enumerable.Empty<FlowComponent>();
 
 		var components = PageBase.Current.EsAsBaseType.ListedResources.SelectMany(
@@ -324,10 +324,9 @@ public class UiPageContent: PageContent {
 			classes: entityContainerClass );
 
 	private IReadOnlyCollection<FlowComponent> getPagePath() {
-		var entitySetup = PageBase.Current.EsAsBaseType;
 		var pagePath = new PagePath(
-			currentPageBehavior: entitySetup != null && PageBase.Current.ParentResource == null && entitySetup.ListedResources.Any()
-				                     ? PagePathCurrentPageBehavior.IncludeCurrentPageAndExcludePageNameIfEntitySetupExists
+			currentPageBehavior: PageBase.Current.EsAsBaseType?.ListedResources.Any() == true
+				                     ? PagePathCurrentPageBehavior.IncludeCurrentPageAndUseEntitySetupNameIfEntitySetupIsParent
 				                     : PagePathCurrentPageBehavior.IncludeCurrentPage );
 		return pagePath.IsEmpty ? Enumerable.Empty<FlowComponent>().Materialize() : pagePath.ToCollection();
 	}
@@ -359,7 +358,7 @@ public class UiPageContent: PageContent {
 	}
 
 	private FlowComponent getEntityActionListContainer( bool inMobileMenu ) {
-		if( entityUiSetup == null || PageBase.Current.ParentResource != null )
+		if( entityUiSetup == null || !PageBase.Current.EntitySetupIsParent )
 			return null;
 		var listItems = getActionListItems( entityUiSetup.ActionGetter( inMobileMenu ? "mobileMenuEntity" : "entity" ) ).Materialize();
 		if( !listItems.Any() )
@@ -383,7 +382,7 @@ public class UiPageContent: PageContent {
 			classes: topTabListContainerClass );
 
 	private bool entityUsesTabMode( TabMode tabMode ) =>
-		entityUiSetup != null && PageBase.Current.ParentResource == null && entityUiSetup.GetTabMode( PageBase.Current.EsAsBaseType ) == tabMode;
+		entityUiSetup != null && PageBase.Current.EntitySetupIsParent && entityUiSetup.GetTabMode( PageBase.Current.EsAsBaseType ) == tabMode;
 
 	private FlowComponent getSideTabContainer() {
 		var components = new List<FlowComponent>();
@@ -398,7 +397,7 @@ public class UiPageContent: PageContent {
 
 	private IReadOnlyCollection<PhrasingComponent> getTabHyperlinksForResources( ResourceGroup resourceGroup ) {
 		var hyperlinks = new List<PhrasingComponent>();
-		foreach( var resource in resourceGroup.Resources.Where( p => p.UserCanAccessResource ) )
+		foreach( var resource in resourceGroup.Resources.Where( p => p.UserCanAccess ) )
 			hyperlinks.Add(
 				new EwfHyperlink(
 					resource.MatchesCurrent() ? null : resource,
@@ -465,7 +464,7 @@ public class UiPageContent: PageContent {
 			components.AddRange( EwfUiStatics.AppProvider.GetGlobalFootComponents() );
 
 		var ewlWebSite = new ExternalResource( "http://enterpriseweblibrary.org/" );
-		if( ewlWebSite.UserCanAccessResource && !EwfUiStatics.AppProvider.PoweredByEwlFooterDisabled() )
+		if( ewlWebSite.UserCanAccess && !EwfUiStatics.AppProvider.PoweredByEwlFooterDisabled() )
 			components.Add(
 				new Paragraph(
 					"Powered by the ".ToComponents()

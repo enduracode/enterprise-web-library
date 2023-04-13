@@ -4,7 +4,7 @@
 
 namespace EnterpriseWebLibrary.Website.TestPages {
 	partial class ColumnPrimaryTableDemo {
-		public override string ResourceName => "Column Primary Table";
+		protected override string getResourceName() => "Column Primary Table";
 
 		protected override PageContent getContent() {
 			var itemGroups = Enumerable.Range( 1, 2 )

@@ -1,13 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using EnterpriseWebLibrary.EnterpriseWebFramework;
-using Tewl.Tools;
-
-// EwlPage
+﻿// EwlPage
 
 namespace EnterpriseWebLibrary.Website.TestPages {
 	partial class SelectListDemo {
-		public override string ResourceName => "Select List";
+		protected override string getResourceName() => "Select List";
 
 		protected override PageContent getContent() =>
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
@@ -21,14 +16,14 @@ namespace EnterpriseWebLibrary.Website.TestPages {
 
 		private IEnumerable<FormItem> getRadioItems( bool useHorizontalLayout ) {
 			foreach( var items in new[]
-				{
-					new[]
-						{
-							SelectListItem.Create( null as int?, "NULL" ), SelectListItem.Create( 1 as int?, "One" ), SelectListItem.Create( 2 as int?, "Two" ),
-							SelectListItem.Create( 3 as int?, "Three" )
-						},
-					new[] { SelectListItem.Create( 1 as int?, "One" ), SelectListItem.Create( 2 as int?, "Two" ), SelectListItem.Create( 3 as int?, "Three" ) }
-				} )
+				        {
+					        new[]
+						        {
+							        SelectListItem.Create( null as int?, "NULL" ), SelectListItem.Create( 1 as int?, "One" ), SelectListItem.Create( 2 as int?, "Two" ),
+							        SelectListItem.Create( 3 as int?, "Three" )
+						        },
+					        new[] { SelectListItem.Create( 1 as int?, "One" ), SelectListItem.Create( 2 as int?, "Two" ), SelectListItem.Create( 3 as int?, "Three" ) }
+				        } )
 			foreach( var selectedItemId in new int?[] { null, 1 } )
 			foreach( var defaultValueItemLabel in new[] { "", "None" } )
 				yield return SelectList
@@ -62,18 +57,18 @@ namespace EnterpriseWebLibrary.Website.TestPages {
 
 		private IEnumerable<FormItem> getDropDownItems() {
 			foreach( var items in new[]
-				{
-					new[]
-						{
-							SelectListItem.Create( null as int?, "NULL" ), SelectListItem.Create( 1 as int?, "This is item One" ),
-							SelectListItem.Create( 2 as int?, "This is item Two" ), SelectListItem.Create( 3 as int?, "This is item Three" )
-						},
-					new[]
-						{
-							SelectListItem.Create( 1 as int?, "This is item One" ), SelectListItem.Create( 2 as int?, "This is item Two" ),
-							SelectListItem.Create( 3 as int?, "This is item Three" )
-						}
-				} )
+				        {
+					        new[]
+						        {
+							        SelectListItem.Create( null as int?, "NULL" ), SelectListItem.Create( 1 as int?, "This is item One" ),
+							        SelectListItem.Create( 2 as int?, "This is item Two" ), SelectListItem.Create( 3 as int?, "This is item Three" )
+						        },
+					        new[]
+						        {
+							        SelectListItem.Create( 1 as int?, "This is item One" ), SelectListItem.Create( 2 as int?, "This is item Two" ),
+							        SelectListItem.Create( 3 as int?, "This is item Three" )
+						        }
+				        } )
 			foreach( var selectedItemId in new int?[] { null, 1 } )
 			foreach( var defaultValueItemLabel in new[] { "", "None" } )
 			foreach( var placeholderIsValid in new[] { false, true } )

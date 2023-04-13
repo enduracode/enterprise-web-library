@@ -1,12 +1,15 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using JetBrains.Annotations;
+using Microsoft.AspNetCore.Http;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 /// <summary>
 /// An object that allows several pages and resources to share query parameters, authorization logic, data, etc.
 /// </summary>
-public abstract class EntitySetupBase: UrlHandler {
-	private readonly Lazy<ResourceBase> parentResource;
+[ PublicAPI ]
+public abstract class EntitySetupBase: ResourceParent {
+	private readonly Lazy<ResourceParent> parent;
+	private readonly Lazy<string> name;
 	private readonly Lazy<AlternativeResourceMode> alternativeMode;
 	private readonly Lazy<IReadOnlyCollection<ResourceGroup>> listedResources;
 	private readonly Lazy<UrlHandler> urlParent;
@@ -15,7 +18,8 @@ public abstract class EntitySetupBase: UrlHandler {
 	/// Creates an entity setup object.
 	/// </summary>
 	protected EntitySetupBase() {
-		parentResource = new Lazy<ResourceBase>( createParentResource );
+		parent = new Lazy<ResourceParent>( createParent );
+		name = new Lazy<string>( getEntitySetupName );
 		alternativeMode = new Lazy<AlternativeResourceMode>( createAlternativeMode );
 		listedResources = new Lazy<IReadOnlyCollection<ResourceGroup>>( () => createListedResources().Materialize() );
 		urlParent = new Lazy<UrlHandler>( getUrlParent );
@@ -27,42 +31,50 @@ public abstract class EntitySetupBase: UrlHandler {
 	protected virtual void init() {}
 
 	/// <summary>
-	/// Gets the parent resource, or null if there is no parent.
+	/// Gets the parent of this entity setup, or null if there isn’t one.
 	/// </summary>
-	public ResourceBase ParentResource => parentResource.Value;
+	public ResourceParent Parent => parent.Value;
 
 	/// <summary>
-	/// Creates the parent resource. Returns null if there is no parent.
+	/// Creates the parent of this entity setup. Returns null if there is no parent.
 	/// </summary>
-	protected abstract ResourceBase createParentResource();
+	protected abstract ResourceParent createParent();
+
+	string ResourceParent.Name => EntitySetupName;
 
 	/// <summary>
-	/// Returns the name of the entity setup.
+	/// Gets the name of this entity setup.
 	/// </summary>
-	public abstract string EntitySetupName { get; }
+	public string EntitySetupName =>
+		name.Value.Length == 0 && Parent is not null ? throw new Exception( "Every non-root entity setup must have a name." ) : name.Value;
 
 	/// <summary>
-	/// Returns true if the authenticated user passes entity setup authorization checks.
+	/// Returns the name of this entity setup. Never return null.
 	/// </summary>
-	protected internal virtual bool UserCanAccessEntitySetup => true;
+	protected abstract string getEntitySetupName();
+
+	/// <summary>
+	/// Gets whether the authenticated user is authorized to access this entity setup.
+	/// </summary>
+	public bool UserCanAccess => ( Parent is null || Parent.UserCanAccess ) && userCanAccess;
+
+	/// <summary>
+	/// Gets whether the authenticated user passes entity setup authorization checks.
+	/// </summary>
+	protected virtual bool userCanAccess => true;
 
 	/// <summary>
 	/// Gets the log-in page to use for resources that are part of this entity setup, or null for default behavior.
 	/// </summary>
-	protected internal virtual ResourceBase LogInPage => ParentResource?.LogInPage;
+	public virtual ResourceBase LogInPage => Parent?.LogInPage;
 
 	/// <summary>
 	/// Gets the alternative mode for this entity setup or null if it is in normal mode. Do not call this from the createAlternativeMode method of an ancestor;
 	/// doing so will result in a stack overflow.
 	/// </summary>
-	public AlternativeResourceMode AlternativeMode {
-		get {
-			// It's important to do the parent disabled check first so the entity setup doesn't have to repeat any of it in its disabled check.
-			if( ParentResource != null && ParentResource.AlternativeMode is DisabledResourceMode )
-				return ParentResource.AlternativeMode;
-			return AlternativeModeDirect;
-		}
-	}
+	public AlternativeResourceMode AlternativeMode =>
+		// It’s important to do the parent disabled check first so the entity setup doesn’t have to repeat any of it in its disabled check.
+		Parent?.AlternativeMode is DisabledResourceMode ? Parent.AlternativeMode : AlternativeModeDirect;
 
 	/// <summary>
 	/// Gets the alternative mode for this entity setup without using ancestor logic. Useful when called from the createAlternativeMode method of an ancestor,
@@ -74,14 +86,18 @@ public abstract class EntitySetupBase: UrlHandler {
 	/// <summary>
 	/// Creates the alternative mode for this entity setup or returns null if it is in normal mode.
 	/// </summary>
-	protected virtual AlternativeResourceMode createAlternativeMode() {
-		return null;
-	}
+	protected virtual AlternativeResourceMode createAlternativeMode() => null;
 
 	/// <summary>
 	/// Initializes the parameters modification object for this entity setup.
 	/// </summary>
 	protected internal abstract void InitParametersModification();
+
+	/// <summary>
+	/// Gets a resource that can serve as a destination for navigation to the entity as a whole. Often this should be the first of the listed resources. Never
+	/// returns null.
+	/// </summary>
+	public abstract ResourceBase DefaultResource { get; }
 
 	/// <summary>
 	/// Gets a list of groups containing this entity setup’s listed resources.
@@ -97,9 +113,9 @@ public abstract class EntitySetupBase: UrlHandler {
 
 	/// <summary>
 	/// Returns the resource or entity setup that will determine this entity setup’s canonical URL. One reason to override is if
-	/// <see cref="createParentResource"/> depends on the authenticated user since the URL must not have this dependency.
+	/// <see cref="createParent"/> depends on the authenticated user since the URL must not have this dependency.
 	/// </summary>
-	protected virtual UrlHandler getUrlParent() => ParentResource;
+	protected virtual UrlHandler getUrlParent() => Parent;
 
 	UrlEncoder BasicUrlHandler.GetEncoder() => getUrlEncoder();
 
@@ -111,7 +127,7 @@ public abstract class EntitySetupBase: UrlHandler {
 	/// <summary>
 	/// Gets the desired security setting for requests to resources that are part of this entity setup.
 	/// </summary>
-	protected internal virtual ConnectionSecurity ConnectionSecurity => ParentResource?.ConnectionSecurity ?? ConnectionSecurity.SecureIfPossible;
+	public virtual ConnectionSecurity ConnectionSecurity => Parent?.ConnectionSecurity ?? ConnectionSecurity.SecureIfPossible;
 
 	( UrlHandler parent, UrlHandler child ) UrlHandler.GetCanonicalHandlerPair( UrlHandler child ) {
 		var requestHandler = AppRequestState.ExecuteWithUrlHandlerStateDisabled( getRequestHandler );
@@ -157,7 +173,7 @@ public abstract class EntitySetupBase: UrlHandler {
 		throw new ResourceNotAvailableException( "An entity setup cannot handle a request.", null );
 	}
 
-	protected internal virtual bool AllowsSearchEngineIndexing => ParentResource?.AllowsSearchEngineIndexing ?? true;
+	public virtual bool AllowsSearchEngineIndexing => Parent?.AllowsSearchEngineIndexing ?? true;
 
 	public sealed override bool Equals( object obj ) => Equals( obj as BasicUrlHandler );
 	public abstract bool Equals( BasicUrlHandler other );

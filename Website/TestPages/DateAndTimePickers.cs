@@ -1,10 +1,8 @@
-﻿using EnterpriseWebLibrary.EnterpriseWebFramework;
-
-// EwlPage
+﻿// EwlPage
 
 namespace EnterpriseWebLibrary.Website.TestPages {
 	partial class DateAndTimePickers {
-		public override string ResourceName => "Date/Time Controls";
+		protected override string getResourceName() => "Date/Time Controls";
 
 		protected override PageContent getContent() {
 			var list = FormItemList.CreateStack();

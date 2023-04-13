@@ -249,7 +249,7 @@ public abstract class PageBase: ResourceBase {
 					throw getPossibleDeveloperMistakeException( "The URL of the page changed after page-view data modifications." );
 				bool userAuthorized;
 				using( MiniProfiler.Current.Step( "EWF - Check page authorization after page-view data modifications" ) )
-					userAuthorized = newPageObject.UserCanAccessResource;
+					userAuthorized = newPageObject.UserCanAccess;
 				DisabledResourceMode disabledMode;
 				using( MiniProfiler.Current.Step( "EWF - Check alternative page mode after page-view data modifications" ) )
 					disabledMode = newPageObject.AlternativeMode as DisabledResourceMode;

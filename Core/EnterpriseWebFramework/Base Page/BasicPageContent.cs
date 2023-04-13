@@ -437,10 +437,7 @@ public sealed class BasicPageContent: PageContent {
 		StringTools.ConcatenateWithDelimiter(
 			" - ",
 			BasePageStatics.AppProvider.AppDisplayName.Length > 0 ? BasePageStatics.AppProvider.AppDisplayName : ConfigurationStatics.SystemDisplayName,
-			ResourceBase.CombineResourcePathStrings(
-				ResourceBase.ResourcePathSeparator,
-				PageBase.Current.ParentResourceEntityPathString,
-				PageBase.Current.ResourceFullName ) );
+			PageBase.Current.ResourceFullName );
 
 	private IEnumerable<FlowComponent> getTypekitLogicIfNecessary() {
 		if( BasePageStatics.AppProvider.TypekitId.Any() ) {

@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using EnterpriseWebLibrary.EnterpriseWebFramework;
-using EnterpriseWebLibrary.WebSessionState;
-using Humanizer;
-using Tewl.Tools;
+﻿using EnterpriseWebLibrary.WebSessionState;
 
 // EwlPage
 
 namespace EnterpriseWebLibrary.Website.TestPages {
 	partial class TextControlDemo {
-		public override string ResourceName => "Text Control";
+		protected override string getResourceName() => "Text Control";
 
 		protected override PageContent getContent() =>
 			new UiPageContent().Add(

@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using EnterpriseWebLibrary.EnterpriseWebFramework;
-using EnterpriseWebLibrary.WebSessionState;
-using Humanizer;
-using Tewl.Tools;
+﻿using EnterpriseWebLibrary.WebSessionState;
 
 // EwlPage
 
 namespace EnterpriseWebLibrary.Website.TestPages {
 	partial class NumberControlDemo {
-		public override string ResourceName => "Number Control";
+		protected override string getResourceName() => "Number Control";
 
 		protected override PageContent getContent() =>
 			new UiPageContent().Add(
