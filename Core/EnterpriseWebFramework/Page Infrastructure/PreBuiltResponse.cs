@@ -2,14 +2,14 @@
 
 // EwlResource
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework;
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+	partial class PreBuiltResponse {
+		protected override AlternativeResourceMode createAlternativeMode() =>
+			!StandardLibrarySessionState.HasResponseToSend ? new DisabledResourceMode( "There is no response to send." ) : null;
 
-partial class PreBuiltResponse {
-	protected override AlternativeResourceMode createAlternativeMode() =>
-		!StandardLibrarySessionState.HasResponseToSend ? new DisabledResourceMode( "There is no response to send." ) : null;
+		protected override UrlHandler getUrlParent() => new Admin.EntitySetup();
+		public override ConnectionSecurity ConnectionSecurity => ConnectionSecurity.MatchingCurrentRequest;
 
-	protected override UrlHandler getUrlParent() => new Admin.EntitySetup();
-	public override ConnectionSecurity ConnectionSecurity => ConnectionSecurity.MatchingCurrentRequest;
-
-	protected override EwfSafeRequestHandler getOrHead() => new EwfSafeResponseWriter( new EwfResponse( StandardLibrarySessionState.ResponseToSend ) );
+		protected override EwfSafeRequestHandler getOrHead() => new EwfSafeResponseWriter( new EwfResponse( StandardLibrarySessionState.ResponseToSend ) );
+	}
 }
