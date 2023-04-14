@@ -170,7 +170,7 @@ public class UiPageContent: PageContent {
 				isAutoDataUpdater: isAutoDataUpdater,
 				pageLoadPostBack: pageLoadPostBack ).Add(
 				getGlobalContainer()
-					.Append( getEntityAndTopTabContainer() )
+					.Concat( getEntityAndTopTabContainer() )
 					.Concat( entityUsesTabMode( TabMode.Vertical ) ? getSideTabContainer().ToCollection() : Enumerable.Empty<FlowComponent>() )
 					.Concat( getPageActionListContainer( pageActions ) )
 					.Append(
@@ -307,21 +307,22 @@ public class UiPageContent: PageContent {
 		return components.Any() ? new GenericFlowContainer( components, classes: mobileMenuTabContainerClass ).ToCollection() : Enumerable.Empty<FlowComponent>();
 	}
 
-	private FlowComponent getEntityAndTopTabContainer() {
-		var components = new List<FlowComponent> { getEntityContainer() };
+	private IEnumerable<FlowComponent> getEntityAndTopTabContainer() {
+		var components = new List<FlowComponent>();
+		components.AddRange( getEntityContainer() );
 		if( entityUsesTabMode( TabMode.Horizontal ) ) {
 			var resourceGroups = PageBase.Current.EsAsBaseType.ListedResources;
 			if( resourceGroups.Count > 1 )
 				throw new ApplicationException( "Top tabs are not supported with multiple resource groups." );
 			components.Add( getTopTabListContainer( resourceGroups.Single() ) );
 		}
-		return new GenericFlowContainer( components, classes: entityAndTopTabContainerClass );
+		return components.Any() ? new GenericFlowContainer( components, classes: entityAndTopTabContainerClass ).ToCollection() : Enumerable.Empty<FlowComponent>();
 	}
 
-	private FlowComponent getEntityContainer() =>
-		new GenericFlowContainer(
-			getPagePath().Concat( getEntityNavAndActionContainer( false ) ).Concat( getEntitySummaryContainer() ).Materialize(),
-			classes: entityContainerClass );
+	private IEnumerable<FlowComponent> getEntityContainer() {
+		var components = getPagePath().Concat( getEntityNavAndActionContainer( false ) ).Concat( getEntitySummaryContainer() ).Materialize();
+		return components.Any() ? new GenericFlowContainer( components, classes: entityContainerClass ).ToCollection() : Enumerable.Empty<FlowComponent>();
+	}
 
 	private IReadOnlyCollection<FlowComponent> getPagePath() {
 		var pagePath = new PagePath(
