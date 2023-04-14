@@ -49,7 +49,7 @@ public abstract class EntitySetupBase: ResourceParent {
 		name.Value.Length == 0 && Parent is not null ? throw new Exception( "Every non-root entity setup must have a name." ) : name.Value;
 
 	/// <summary>
-	/// Returns the name of this entity setup. Never return null.
+	/// Returns the name of this entity setup. Never return null. If this is a root entity setup, return the empty string to make it a home.
 	/// </summary>
 	protected abstract string getEntitySetupName();
 

@@ -154,7 +154,7 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 	public string ResourceName => name.Value.Length == 0 && Parent is not null ? throw new Exception( "Every non-root resource must have a name." ) : name.Value;
 
 	/// <summary>
-	/// Returns the name of this resource. Never return null.
+	/// Returns the name of this resource. Never return null. If this is a root resource, return the empty string to make it a home.
 	/// </summary>
 	protected virtual string getResourceName() => GetType().Name.CamelToEnglish();
 

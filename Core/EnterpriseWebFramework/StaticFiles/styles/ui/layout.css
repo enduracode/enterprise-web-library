@@ -96,11 +96,8 @@ ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer {
 ewfSectionBoxStyleClosedState > ewfSectionHeadingContainer {
 	margin-bottom: calc( var( --ewf-ui-top-level-vertical-spacing ) * -1 );
 }
-ewfUiTopErrorMessageListContainer, ewfUiEntityContainer > * {
+ewfUiTopErrorMessageListContainer, ewfUiEntitySummaryContainer:nth-child( n + 2 ) {
 	margin-top: var( --ewf-ui-top-level-vertical-spacing );
-}
-ewfUiEntityContainer > *:first-child {
-	margin-top: 0;
 }
 ewfUiEntityAndTopTabContainer {
 	row-gap: var( --ewf-ui-top-level-vertical-spacing );
@@ -118,7 +115,7 @@ ewfUiSideTabContainer ewfActionComponentAllStylesStatesWithHover, ewfUiSideTabCo
 ewfUiGlobalNavListContainer {
 	margin-left: calc( var( --ewf-ui-top-level-horizontal-spacing ) - var( --ewf-ui-navigation-horizontal-spacing ) );
 }
-ewfUiGlobalNavListContainer ewfUnorderedComponentList, ewfUiEntityNavAndActionContainer ewfUnorderedComponentList {
+ewfUiGlobalNavListContainer ewfUnorderedComponentList, ewfUiEntityContainer > ewfPagePathContainer > ewfUnorderedComponentList, ewfUiEntityNavAndActionContainer ewfUnorderedComponentList {
 	column-gap: 0;
 }
 ewfUiGlobalNavListContainer ewfActionComponentAllStylesAllStates, ewfUiGlobalNavListContainer ewfFormItem, ewfUiTopTabListContainer ewfActionComponentAllStylesAllStates {
@@ -139,7 +136,7 @@ ewfUiEntityNavAndActionContainer ewfActionComponentAllStylesAllStates,
 ewfUiEntityNavAndActionContainer ewfFormItem {
 	padding: 0 var( --ewf-ui-minor-navigation-spacing );
 }
-ewfUiEntityNavAndActionContainer {
+ewfUiEntityNavAndActionContainer:nth-child( n + 2 ) {
 	margin-top: var( --ewf-ui-navigation-vertical-spacing );
 }
 ewfUiTopTabListContainer ewfActionComponentAllStylesStatesWithHover, ewfUiTopTabListContainer ewfUiCurrentTabActionControl {
@@ -474,13 +471,18 @@ ewfUiEntityContainer {
 		border-bottom: 1pt solid black;
 	}
 }
-ewfUiEntityContainer > ewfPagePathContainer ewfUnorderedComponentList {
-	display: inline-flex;
+ewfUiEntityContainer > ewfPagePathContainer {
+	display: flex;
+	align-items: center;
 }
 ewfUiEntityContainer > ewfPagePathContainer ewfComponentListItem {
 	background-position: center right;
 	background-size: var( --ewf-ui-page-path-separator-width );
 	padding-right: var( --ewf-ui-page-path-separator-width );
+}
+ewfUiEntityContainer > ewfPagePathContainer ewfImage {
+	display: revert;
+	width: 1.5em;
 }
 ewfUiEntityNavAndActionContainer {
 	display: flex;

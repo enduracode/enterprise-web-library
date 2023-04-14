@@ -49,7 +49,9 @@ public class PagePath: FlowComponent {
 
 		hyperlinkItems = ancestors.Reverse()
 			.Select(
-				i => (WrappingListItem)new EwfHyperlink( i is EntitySetupBase es ? es.DefaultResource : (ResourceBase)i, new StandardHyperlinkStyle( i.Name ) )
+				ancestor => (WrappingListItem)new EwfHyperlink(
+						ancestor is EntitySetupBase es ? es.DefaultResource : (ResourceBase)ancestor,
+						ancestor.Name.Length > 0 ? new StandardHyperlinkStyle( ancestor.Name ) : new ImageHyperlinkStyle( new StaticFiles.Ui.Home_iconSvg(), "Home" ) )
 					.ToComponentListItem() )
 			.Materialize();
 
