@@ -36,6 +36,12 @@ public abstract class EntitySetupBase: ResourceParent {
 	public ResourceParent Parent => parent.Value;
 
 	/// <summary>
+	/// Gets the parent resource of this entity setup. Throws an exception if there is no parent or the parent is an entity setup.
+	/// </summary>
+	public ResourceBase ParentResource =>
+		Parent as ResourceBase ?? throw new Exception( "The entity setup either doesn’t have a parent or the parent is an entity setup." );
+
+	/// <summary>
 	/// Creates the parent of this entity setup. Returns null if there is no parent.
 	/// </summary>
 	protected abstract ResourceParent createParent();
