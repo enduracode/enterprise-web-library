@@ -1,2 +1,2 @@
-cd ..\packages\EWL\Ewl*\tools\Development Utility
-EnterpriseWebLibrary.DevelopmentUtility ..\..\..\..\.. ExportEwlToLocalFeed
+cd ..\Latest Package\Ewl*\tools\Development Utility
+EnterpriseWebLibrary.DevelopmentUtility ..\..\..\.. ExportEwlToLocalFeed
