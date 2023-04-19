@@ -251,7 +251,13 @@ public class UiPageContent: PageContent {
 		return new GenericFlowContainer(
 			new EwfButton(
 					new CustomButtonStyle( attributes: new ElementAttribute( "aria-label", "Menu" ).ToCollection(), children: null ),
-					behavior: new ChangeValueBehavior( hiddenFieldId, bool.TrueString ) ).Append<FlowComponent>(
+					behavior: new CustomButtonBehavior(
+						() => hiddenFieldId.GetJsValueModificationStatements(
+							"document.getElementById( '{0}' ).value === '{2}' ? '{1}' : '{2}'".FormatWith(
+								hiddenFieldId.ElementId.Id,
+								bool.FalseString,
+								bool.TrueString ) ) ) )
+				.Append<FlowComponent>(
 					new DisplayableElement(
 						_ => new DisplayableElementData(
 							menuDisplayed.ToCondition( bool.TrueString.ToCollection() ).ToDisplaySetup(),
@@ -298,7 +304,7 @@ public class UiPageContent: PageContent {
 						       ? new GenericFlowContainer(
 							       ( resourceGroup.Name.Any()
 								         ? new Paragraph( resourceGroup.Name.ToComponents(), classes: mobileMenuTabGroupClass ).ToCollection()
-								         : Enumerable.Empty<FlowComponent>() ).Append( new RawList( tabs.Select( i => i.ToComponentListItem() ) ) )
+								         : Enumerable.Empty<FlowComponent>() ).Append( new StackList( tabs.Select( i => i.ToComponentListItem() ) ) )
 							       .Materialize(),
 							       classes: mobileMenuTabGroupClass ).ToCollection()
 						       : Enumerable.Empty<FlowComponent>();

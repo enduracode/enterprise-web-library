@@ -187,11 +187,10 @@ ewfUiMobileMenuContainer > ewfActionComponentAllStylesAllStates {
 	background-size: 65%;
 	background-position: center;
 }
-ewfUiMobileMenuContainer > ewfActionComponentAllStylesStatesWithHover {
-	background-color: var( --ewf-ui-activation-color );
-}
 ewfUiMobileMenu {
 	box-shadow: 0 10px 10px rgba( 0, 0, 0, .25 );
+}
+ewfUiMobileMenuGlobalNavListContainer, ewfUiMobileMenuEntityNavAndActionContainer {
 	background-color: var( --ewf-ui-activation-color );
 }
 ewfUiMobileMenuTabContainer {
@@ -201,14 +200,14 @@ ewfUiMobileMenuTabGroupName {
 	background-color: var( --ewf-ui-entity-action-color );
 	color: var( --ewf-ui-inverted-text-color );
 }
-ewfUiMobileMenuTabContainer ewfActionComponentAllStylesAllStates {
+ewfUiMobileMenuTabGroup ewfActionComponentAllStylesAllStates {
 	border-color: rgba( 255, 255, 255, .3 );
 	color: var( --ewf-ui-inverted-text-color );
 }
-ewfUiMobileMenuTabContainer ewfActionComponentAllStylesStatesWithHover {
+ewfUiMobileMenuTabGroup ewfActionComponentAllStylesStatesWithHover {
 	background-color: var( --ewf-ui-activation-color );
 }
-ewfUiMobileMenuTabContainer ewfUiCurrentTabActionControl {
+ewfUiMobileMenuTabGroup ewfUiCurrentTabActionControl {
 	background-color: rgba( 255, 255, 255, .3 );
 }
 ewfUiEntityAndTopTabContainer, ewfUiSideTabContainer {
@@ -269,9 +268,6 @@ ewfNotificationSectionContainer > ewfSectionBoxStyleBothStates > ewfSectionHeadi
 	box-shadow: revert;
 }
 @media only screen and ( max-width: 768px ) {
-	ewfUiInnerGlobalContainer ewfActionComponentAllStylesStatesWithHover {
-		color: var( --ewf-ui-inverted-text-color );
-	}
 	ewfUiUserInfoContainer {
 		background-image: url( ../../versioned/ui/account-v1.svg );
 		background-repeat: no-repeat;
