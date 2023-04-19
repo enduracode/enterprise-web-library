@@ -600,6 +600,9 @@ ewfUiPoweredByEwlFooterContainer {
 	ewfUiOuterGlobalContainer {
 		padding: 0;
 	}
+	ewfUiInnerGlobalContainer {
+		grid-template-columns: auto 1fr auto auto;
+	}
 	ewfUiAppLogoContainer {
 		flex: 1;
 	}
@@ -613,6 +616,7 @@ ewfUiPoweredByEwlFooterContainer {
 	}
 	ewfUiUserInfoContainer {
 		order: 1;
+		padding: 0;
 		flex: 0 1 auto;
 		width: 55px;
 		height: 55px;
