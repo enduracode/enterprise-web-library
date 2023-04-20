@@ -197,7 +197,8 @@ public static class EwfOps {
 								() => {
 									var context = contextAccessor.HttpContext;
 									return context != null && context.Items.ContainsKey( RequestDispatchingStatics.RequestStateKey ) ? context.Request : null;
-								} );
+								},
+								networkWaitTime => AppRequestState.Instance.AddNetworkWaitTime( networkWaitTime ) );
 							EwfResponse.Init( () => contextAccessor.HttpContext.Response );
 							UrlHandlingStatics.Init(
 								() => RequestDispatchingStatics.AppProvider.GetBaseUrlPatterns(),

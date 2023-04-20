@@ -1,19 +1,26 @@
 ﻿using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 using EnterpriseWebLibrary.Configuration;
+using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
+using NodaTime;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
+[ PublicAPI ]
 public class EwfRequest {
 	private static AppRequestBaseUrlProvider baseUrlDefaultProvider;
 	private static SystemProviderReference<AppRequestBaseUrlProvider> baseUrlProvider;
 	private static Func<HttpRequest> currentRequestGetter;
+	private static Action<Duration> networkWaitTimeAdder;
 
-	internal static void Init( SystemProviderReference<AppRequestBaseUrlProvider> baseUrlProvider, Func<HttpRequest> currentRequestGetter ) {
+	internal static void Init(
+		SystemProviderReference<AppRequestBaseUrlProvider> baseUrlProvider, Func<HttpRequest> currentRequestGetter, Action<Duration> networkWaitTimeAdder ) {
 		baseUrlDefaultProvider = new AppRequestBaseUrlProvider();
 		EwfRequest.baseUrlProvider = baseUrlProvider;
 		EwfRequest.currentRequestGetter = currentRequestGetter;
+		EwfRequest.networkWaitTimeAdder = networkWaitTimeAdder;
 	}
 
 	internal static AppRequestBaseUrlProvider AppBaseUrlProvider => baseUrlProvider.GetProvider( returnNullIfNotFound: true ) ?? baseUrlDefaultProvider;
@@ -43,6 +50,17 @@ public class EwfRequest {
 	/// Gets the request headers.
 	/// </summary>
 	public IHeaderDictionary Headers => AspNetRequest.Headers;
+
+	/// <summary>
+	/// Parses the request body as a form and returns the values.
+	/// </summary>
+	public IFormCollection GetFormSubmission() {
+		var requestBodyReadBeginTime = SystemClock.Instance.GetCurrentInstant();
+		var formSubmission = Task.Run( async () => await AspNetRequest.ReadFormAsync() ).Result;
+		networkWaitTimeAdder( SystemClock.Instance.GetCurrentInstant() - requestBodyReadBeginTime );
+
+		return formSubmission;
+	}
 
 	/// <summary>
 	/// Executes a method that reads a text request body.

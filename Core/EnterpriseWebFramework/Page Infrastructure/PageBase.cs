@@ -1,7 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
@@ -413,11 +412,8 @@ public abstract class PageBase: ResourceBase {
 		IFormCollection formSubmission;
 		HiddenFieldData hiddenFieldData;
 		try {
-			using( MiniProfiler.Current.Step( "EWF - Wait for request body to be received" ) ) {
-				var requestBodyReadBeginTime = SystemClock.Instance.GetCurrentInstant();
-				formSubmission = Task.Run( async () => await EwfRequest.Current.AspNetRequest.ReadFormAsync() ).Result;
-				AppRequestState.Instance.AddNetworkWaitTime( SystemClock.Instance.GetCurrentInstant() - requestBodyReadBeginTime );
-			}
+			using( MiniProfiler.Current.Step( "EWF - Wait for request body to be received" ) )
+				formSubmission = EwfRequest.Current.GetFormSubmission();
 
 			// throws exception if field missing, because Request.Form returns null
 			hiddenFieldData = JsonConvert.DeserializeObject<HiddenFieldData>(
