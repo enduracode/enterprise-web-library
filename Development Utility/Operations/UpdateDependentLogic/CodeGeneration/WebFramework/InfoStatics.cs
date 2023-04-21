@@ -55,7 +55,7 @@ internal static class InfoStatics {
 						                            "Parameters" ) )
 				                            : "",
 			                            !isEs ? "string uriFragmentIdentifier = \"\"" : "" ) + " ) {";
-		writer.WriteLine( "internal {0}".FormatWith( generalData.ClassName ) + constructorParameters );
+		writer.WriteLine( "public {0}".FormatWith( generalData.ClassName ) + constructorParameters );
 		writer.WriteLine( "DataAccessState.Current.ExecuteWithCache( () => {" );
 
 		// Initialize parameter fields. We want to create and call this method even if there are no parameters so that non-generated constructors can still call
