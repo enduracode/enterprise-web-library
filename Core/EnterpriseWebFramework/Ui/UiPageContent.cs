@@ -144,19 +144,20 @@ public class UiPageContent: PageContent {
 	/// <summary>
 	/// Creates a page content object that uses the EWF user interface.
 	/// </summary>
-	/// <param name="omitContentBox">Pass true to omit the box-style effect around the page content. Useful when all content is contained within multiple
-	/// box-style sections.</param>
+	/// <param name="bodyClasses"></param>
 	/// <param name="pageActions">The page actions. Any hyperlink with a destination to which the user cannot navigate (due to authorization logic) will be
 	/// automatically hidden by the framework.</param>
+	/// <param name="omitContentBox">Pass true to omit the box-style effect around the page content. Useful when all content is contained within multiple
+	/// box-style sections.</param>
 	/// <param name="contentFootActions">The content-foot actions. The first action, if it is a post-back, will produce a submit button.</param>
 	/// <param name="contentFootComponents">The content-foot components.</param>
 	/// <param name="dataUpdateModificationMethod">The modification method for the page’s data-update modification.</param>
 	/// <param name="isAutoDataUpdater">Pass true to force a post-back when a hyperlink is clicked.</param>
 	/// <param name="pageLoadPostBack">A post-back that will be triggered automatically by the browser when the page is finished loading.</param>
 	public UiPageContent(
-		bool omitContentBox = false, IReadOnlyCollection<ActionComponentSetup> pageActions = null, IReadOnlyCollection<ButtonSetup> contentFootActions = null,
-		IReadOnlyCollection<FlowComponent> contentFootComponents = null, Action dataUpdateModificationMethod = null, bool isAutoDataUpdater = false,
-		ActionPostBack pageLoadPostBack = null ) {
+		ElementClassSet bodyClasses = null, IReadOnlyCollection<ActionComponentSetup> pageActions = null, bool omitContentBox = false,
+		IReadOnlyCollection<ButtonSetup> contentFootActions = null, IReadOnlyCollection<FlowComponent> contentFootComponents = null,
+		Action dataUpdateModificationMethod = null, bool isAutoDataUpdater = false, ActionPostBack pageLoadPostBack = null ) {
 		pageActions ??= Enumerable.Empty<ActionComponentSetup>().Materialize();
 		if( contentFootActions != null && contentFootComponents != null )
 			throw new ApplicationException( "Either contentFootActions or contentFootComponents may be specified, but not both." );
@@ -166,6 +167,7 @@ public class UiPageContent: PageContent {
 		entityUiSetup = ( PageBase.Current.EsAsBaseType as UiEntitySetup )?.GetUiSetup();
 		basicContent =
 			new BasicPageContent(
+				bodyClasses: bodyClasses,
 				dataUpdateModificationMethod: dataUpdateModificationMethod,
 				isAutoDataUpdater: isAutoDataUpdater,
 				pageLoadPostBack: pageLoadPostBack ).Add(
