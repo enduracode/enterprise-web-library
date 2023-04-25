@@ -772,7 +772,7 @@ public abstract class PageBase: ResourceBase {
 		var formValueString = new StringBuilder();
 		foreach( var pair in componentStateItemsById.Where( i => i.Value.DataModifications.Any() ).OrderBy( i => i.Key ) ) {
 			formValueString.Append( pair.Key );
-			formValueString.Append( pair.Value.DurableValue );
+			formValueString.Append( pair.Value.DurableValueAsString );
 		}
 		foreach( var formValue in formValues.Where( i => i.GetPostBackValueKey().Any() && i.DataModifications.Any() ) ) {
 			formValueString.Append( formValue.GetPostBackValueKey() );
@@ -825,7 +825,7 @@ public abstract class PageBase: ResourceBase {
 		foreach( var pair in componentStateItemsById.Where( i => staticStateItems.Contains( i.Value ) ).OrderBy( i => i.Key ) ) {
 			contents.Append( "\t" + pair.Key );
 			if( durableValueChangesNotAllowed )
-				contents.Append( ": " + pair.Value.DurableValue );
+				contents.Append( ": " + pair.Value.DurableValueAsString );
 			contents.AppendLine();
 		}
 		contents.AppendLine( "Form values:" );
