@@ -50,9 +50,6 @@ public class UiPageContent: PageContent {
 
 	[ UsedImplicitly ]
 	private class CssElementCreator: ControlCssElementCreator {
-		private const string formSelector = "form#" + PageBase.FormId;
-
-
 		// Some of the elements below cover a subset of other CSS elements in a more specific way. For example, UiGlobalNavControlList selects the control list
 		// used for global navigation. This control list is also selected, with lower specificity, by the CSS element that selects all control lists. In general
 		// this is a bad situation, but in this case we think it's ok because web apps are not permitted to add their own CSS classes to the controls selected
@@ -135,6 +132,9 @@ public class UiPageContent: PageContent {
 					new CssElement( "UiGlobalFootContainer", formSelector + " div." + globalFootContainerClass.ClassName ),
 					new CssElement( "UiPoweredByEwlFooterContainer", formSelector + " ." + poweredByEwlFooterClass.ClassName )
 				};
+
+
+		private string formSelector => BasicPageContent.FormSelector;
 	}
 
 	private readonly BasicPageContent basicContent;

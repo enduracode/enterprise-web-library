@@ -6,6 +6,8 @@ using JetBrains.Annotations;
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 public sealed class BasicPageContent: PageContent {
+	internal const string FormSelector = "form#" + PageBase.FormId;
+
 	// Some of these are used by the EWF JavaScript file.
 	private static readonly ElementClass topWarningContainerClass = new( "ewfTopWarning" );
 	private static readonly ElementClass processingDialogAllStatesClass = new( "ewfProcessingDialog" );
@@ -37,7 +39,7 @@ public sealed class BasicPageContent: PageContent {
 		private IEnumerable<CssElement> getProcessingDialogElements() {
 			var elements = new List<CssElement>();
 
-			var formSelector = "form#{0} ".FormatWith( PageBase.FormId );
+			const string formSelector = FormSelector + " ";
 			var dialogAllStatesSelectors = ModalBox.CssElementCreator.GetContainerSelectors( ".{0}".FormatWith( processingDialogAllStatesClass.ClassName ) )
 				.Select( i => formSelector + i )
 				.ToArray();
@@ -86,10 +88,10 @@ public sealed class BasicPageContent: PageContent {
 		}
 
 		private IEnumerable<CssElement> getNotificationElements() =>
-			new CssElement( "NotificationSectionContainer", "div.{0}".FormatWith( notificationSectionContainerClass.ClassName ) ).ToCollection()
-				.Append( new CssElement( "InfoMessageContainer", "div." + infoMessageContainerClass.ClassName ) )
-				.Append( new CssElement( "WarningMessageContainer", "div." + warningMessageContainerClass.ClassName ) )
-				.Append( new CssElement( "StatusMessageText", "span." + statusMessageTextClass.ClassName ) );
+			new CssElement( "NotificationSectionContainer", "{0} div.{1}".FormatWith( FormSelector, notificationSectionContainerClass.ClassName ) ).ToCollection()
+				.Append( new CssElement( "InfoMessageContainer", "{0} div.{1}".FormatWith( FormSelector, infoMessageContainerClass.ClassName ) ) )
+				.Append( new CssElement( "WarningMessageContainer", "{0} div.{1}".FormatWith( FormSelector, warningMessageContainerClass.ClassName ) ) )
+				.Append( new CssElement( "StatusMessageText", "{0} span.{1}".FormatWith( FormSelector, statusMessageTextClass.ClassName ) ) );
 	}
 
 	// We can remove this and just use Font Awesome as soon as https://github.com/FortAwesome/Font-Awesome/issues/671 is fixed.
