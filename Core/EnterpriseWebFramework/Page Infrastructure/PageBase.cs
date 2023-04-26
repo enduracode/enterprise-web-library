@@ -815,25 +815,14 @@ public abstract class PageBase: ResourceBase {
 		var staticFormValues = staticNodes.Select( i => i.FormValue ).Where( i => i != null ).Distinct().OrderBy( i => i.GetPostBackValueKey() ).Materialize();
 
 		// Intermediate post-backs sometimes have good reason to change durable values outside of update regions, e.g. when updating filters on a search page. We
-		// allow this under the assumption that all durable values are retrieved using a technique such as snapshot isolation to protect against concurrent
-		// modifications during the request. If concurrent modifications did occur they would be unintentionally ignored.
-		var durableValueChangesNotAllowed = requestState.ModificationErrorsExist ||
-		                                    ( requestState.DmIdAndSecondaryOp != null &&
-		                                      requestState.DmIdAndSecondaryOp.Item2 == SecondaryPostBackOperation.NoOperation );
+		// allow this (by omitting durable values here) under the assumption that all durable values are retrieved using a technique such as snapshot isolation to
+		// protect against concurrent modifications during the request. If concurrent modifications did occur they would be unintentionally ignored.
 		contents.AppendLine( "Component-state items:" );
-		foreach( var pair in componentStateItemsById.Where( i => staticStateItems.Contains( i.Value ) ).OrderBy( i => i.Key ) ) {
-			contents.Append( "\t" + pair.Key );
-			if( durableValueChangesNotAllowed )
-				contents.Append( ": " + pair.Value.DurableValueAsString );
-			contents.AppendLine();
-		}
+		foreach( var pair in componentStateItemsById.Where( i => staticStateItems.Contains( i.Value ) ).OrderBy( i => i.Key ) )
+			contents.AppendLine( "\t" + pair.Key );
 		contents.AppendLine( "Form values:" );
-		foreach( var formValue in staticFormValues ) {
-			contents.Append( "\t" + formValue.GetPostBackValueKey() );
-			if( durableValueChangesNotAllowed )
-				contents.Append( ": " + formValue.GetDurableValueAsString() );
-			contents.AppendLine();
-		}
+		foreach( var formValue in staticFormValues )
+			contents.AppendLine( "\t" + formValue.GetPostBackValueKey() );
 
 		if( requestState.ModificationErrorsExist ) {
 			// Include mod error display keys. They shouldn't change across a transfer when there are modification errors because that could prevent some of the
