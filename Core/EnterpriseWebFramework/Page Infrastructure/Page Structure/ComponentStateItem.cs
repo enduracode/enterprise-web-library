@@ -25,12 +25,12 @@ public abstract class ComponentStateItem {
 	/// </summary>
 	/// <param name="id">The ID of this state item, which must be unique within the page or current ID context. Do not pass null or the empty string.</param>
 	/// <param name="durableValue">The current value of this state item in persistent storage. For transient state that is used only to support intermediate
-	/// post-backs, pass the default value.</param>
+	/// post-backs, or non-deterministic state such as a randomly generated string, pass the default value.</param>
 	/// <param name="valueValidator">A predicate that takes a value and returns true if it is valid for this state item. Used primarily to validate post-back
 	/// values.</param>
-	/// <param name="includeInChangeDetection">Pass true to include this state item in change detection for the current data modifications. This is necessary
-	/// when the value of this state item affects what will be persisted by the data modifications. For transient state that is used only to support
-	/// intermediate post-backs, pass false.</param>
+	/// <param name="includeInChangeDetection">Pass true to include this state item in change detection for the current data modifications. This is necessary when
+	/// a change in the value of this state item affects what will be persisted by the data modifications. For transient state that is used only to support intermediate
+	/// post-backs, or non-deterministic state such as a randomly generated string, pass false.</param>
 	public static ComponentStateItem<T> Create<T>( string id, T durableValue, Func<T, bool> valueValidator, bool includeInChangeDetection ) {
 		creationTimeAsserter();
 
@@ -52,7 +52,7 @@ public abstract class ComponentStateItem {
 }
 
 public sealed class ComponentStateItem<T>: ComponentStateItem, EtherealComponent {
-	private readonly T durableValue;
+	private readonly SpecifiedValue<T> durableValue;
 	private readonly DataValue<T> value;
 	private readonly bool valueIsInvalid;
 	private readonly IReadOnlyCollection<DataModification> dataModifications;
@@ -60,7 +60,8 @@ public sealed class ComponentStateItem<T>: ComponentStateItem, EtherealComponent
 	internal ComponentStateItem( T durableValue, JToken value, Func<T, bool> valueValidator, IReadOnlyCollection<DataModification> dataModifications ) {
 		if( !valueValidator( durableValue ) )
 			throw new ApplicationException( "The specified durable value is invalid according to the specified value validator." );
-		this.durableValue = durableValue;
+		if( dataModifications.Any() )
+			this.durableValue = new SpecifiedValue<T>( durableValue );
 
 		if( value != null && tryConvertValue( value, out var convertedValue ) && valueValidator( convertedValue ) )
 			this.value = new DataValue<T> { Value = convertedValue };
@@ -89,9 +90,9 @@ public sealed class ComponentStateItem<T>: ComponentStateItem, EtherealComponent
 	public DataValue<T> Value => value;
 
 	IReadOnlyCollection<EtherealComponentOrElement> EtherealComponent.GetChildren() => Enumerable.Empty<EtherealComponentOrElement>().Materialize();
-	internal override string DurableValueAsString => JsonConvert.SerializeObject( durableValue, Formatting.None );
+	internal override string DurableValueAsString => JsonConvert.SerializeObject( durableValue.Value, Formatting.None );
 	internal override bool ValueIsInvalid() => valueIsInvalid;
 	internal override IReadOnlyCollection<DataModification> DataModifications => dataModifications;
-	internal override bool ValueChanged() => !EwlStatics.AreEqual( value.Value, durableValue );
+	internal override bool ValueChanged() => !EwlStatics.AreEqual( value.Value, durableValue.Value );
 	internal override JToken ValueAsJson => value.Value == null ? JValue.CreateNull() : JToken.FromObject( value.Value );
 }
