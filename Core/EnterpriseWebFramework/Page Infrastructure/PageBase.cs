@@ -770,14 +770,13 @@ public abstract class PageBase: ResourceBase {
 
 	private string generateFormValueHash() {
 		var formValueString = new StringBuilder();
-		foreach( var pair in componentStateItemsById.Where( i => i.Value.DataModifications.Any() ).OrderBy( i => i.Key ) ) {
-			formValueString.Append( pair.Key );
-			formValueString.Append( pair.Value.DurableValueAsString );
-		}
-		foreach( var formValue in formValues.Where( i => i.GetPostBackValueKey().Any() && i.DataModifications.Any() ) ) {
-			formValueString.Append( formValue.GetPostBackValueKey() );
-			formValueString.Append( formValue.GetDurableValueAsString() );
-		}
+
+		formValueString.AppendLine( "Component-state items:" );
+		foreach( var pair in componentStateItemsById.Where( i => i.Value.DataModifications.Any() ).OrderBy( i => i.Key ) )
+			formValueString.AppendLine( "\t{0}: {1}".FormatWith( pair.Key, pair.Value.DurableValueAsString ) );
+		formValueString.AppendLine( "Form values:" );
+		foreach( var formValue in formValues.Where( i => i.GetPostBackValueKey().Any() && i.DataModifications.Any() ) )
+			formValueString.AppendLine( "\t{0}: {1}".FormatWith( formValue.GetPostBackValueKey(), formValue.GetDurableValueAsString() ) );
 
 		var hash = MD5.Create().ComputeHash( Encoding.ASCII.GetBytes( formValueString.ToString() ) );
 		var hashString = "";
