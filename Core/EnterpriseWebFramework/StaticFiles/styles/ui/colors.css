@@ -9,6 +9,7 @@
 	--ewf-ui-faint-border-color: rgba( 0, 0, 0, .1 );
 	--ewf-ui-activation-color: #8cc63f;
 	--ewf-ui-form-control-placeholder-color: rgb( 175, 175, 175 );
+	--ewf-ui-top-error-color: hsla( 0, 100%, 70%, 1 );
 	--ewf-ui-nav-background-color: #ced6e0;
 	--ewf-ui-entity-action-color: hsla( 0, 0%, 33%, 1 );
 	--ewf-ui-entity-action-activation-color: var( --ewf-ui-primary-color );
@@ -162,7 +163,7 @@ ewfUiOuterGlobalContainer, ewfNotificationSectionContainer > ewfSectionBoxStyleB
 	background-color: var( --ewf-ui-primary-color );
 	color: var( --ewf-ui-inverted-text-color );
 }
-ewfUiInnerGlobalContainer ewfActionComponentAllStylesAllStates {
+ewfUiInnerGlobalContainer ewfActionComponentAllStylesAllStates, ewfUiTopErrorMessageListContainer a {
 	color: var( --ewf-ui-inverted-text-color );
 }
 ewfUiInnerGlobalContainer ewfActionComponentAllStylesStatesWithHover {
@@ -209,6 +210,9 @@ ewfUiMobileMenuTabGroup ewfActionComponentAllStylesStatesWithHover {
 }
 ewfUiMobileMenuTabGroup ewfUiCurrentTabActionControl {
 	background-color: rgba( 255, 255, 255, .3 );
+}
+ewfUiTopErrorMessageListContainer {
+	color: var( --ewf-ui-top-error-color );
 }
 ewfUiEntityAndTopTabContainer, ewfUiSideTabContainer {
 	background-color: var( --ewf-ui-nav-background-color );
