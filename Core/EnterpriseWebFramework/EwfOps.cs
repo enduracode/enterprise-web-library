@@ -101,6 +101,7 @@ public static class EwfOps {
 						writer.WriteLine( "User: {0}{1}".FormatWith( user.Email, impersonator != null ? " (impersonated by {0})".FormatWith( impersonator.Email ) : "" ) );
 				}
 			},
+			memoryCacheGetter: () => AspNetStatics.Services.GetRequiredService<IMemoryCache>(),
 			mainDataAccessStateGetter: () => EwfRequest.Current != null ? RequestDispatchingStatics.RequestState.DataAccessState : initTimeDataAccessState.Value );
 		var frameworkInitialized = false;
 		try {

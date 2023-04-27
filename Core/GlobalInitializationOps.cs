@@ -9,142 +9,144 @@ using EnterpriseWebLibrary.Encryption;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.ExternalFunctionality;
 using EnterpriseWebLibrary.UserManagement;
+using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 using NodaTime;
 using NodaTime.Serialization.JsonNet;
-using Tewl;
 
-namespace EnterpriseWebLibrary {
-	public static class GlobalInitializationOps {
-		private static bool initialized;
-		private static SystemInitializer globalInitializer;
-		private static bool secondaryInitFailed;
+namespace EnterpriseWebLibrary;
 
-		/// <summary>
-		/// Initializes the system. This includes loading application settings from the configuration file. The application name should be scoped within the system.
-		/// For non web applications, this method must be called directly from the main executable assembly and not from a supporting library.
-		/// 
-		/// To debug this method, create a folder called C:\AnyoneFullControl and give Everyone full control. A file will appear in that folder explaining how far
-		/// it got in init.
-		/// </summary>
-		/// <param name="globalInitializer">The system's global initializer. Do not pass null.</param>
-		/// <param name="appName"></param>
-		/// <param name="isClientSideApp"></param>
-		/// <param name="assemblyFolderPath">Pass a nonempty string to override the assembly folder path, which is used to locate the installation folder. Use with
-		/// caution.</param>
-		/// <param name="telemetryAppErrorContextWriter"></param>
-		/// <param name="mainDataAccessStateGetter">A method that returns the current main data-access state whenever it is requested, including during this
-		/// InitStatics call. Do not allow multiple threads to use the same state at the same time. If you pass null, the data-access subsystem will not be
-		/// available in the application.</param>
-		/// <param name="useLongDatabaseTimeouts">Pass true if the application is a background process that can tolerate slow database access.</param>
-		public static void InitStatics(
-			SystemInitializer globalInitializer, string appName, bool isClientSideApp, string assemblyFolderPath = "",
-			Action<TextWriter> telemetryAppErrorContextWriter = null, Func<DataAccessState> mainDataAccessStateGetter = null, bool useLongDatabaseTimeouts = false ) {
-			var initializationLog = "Starting init";
-			try {
-				if( initialized )
-					throw new ApplicationException( "This class can only be initialized once." );
+public static class GlobalInitializationOps {
+	private static bool initialized;
+	private static SystemInitializer globalInitializer;
+	private static bool secondaryInitFailed;
 
-				if( globalInitializer == null )
-					throw new ApplicationException( "The system must have a global initializer." );
+	/// <summary>
+	/// Initializes the system. This includes loading application settings from the configuration file. The application name should be scoped within the system.
+	/// For non web applications, this method must be called directly from the main executable assembly and not from a supporting library.
+	/// 
+	/// To debug this method, create a folder called C:\AnyoneFullControl and give Everyone full control. A file will appear in that folder explaining how far
+	/// it got in init.
+	/// </summary>
+	/// <param name="globalInitializer">The system's global initializer. Do not pass null.</param>
+	/// <param name="appName"></param>
+	/// <param name="isClientSideApp"></param>
+	/// <param name="assemblyFolderPath">Pass a nonempty string to override the assembly folder path, which is used to locate the installation folder. Use with
+	/// caution.</param>
+	/// <param name="telemetryAppErrorContextWriter"></param>
+	/// <param name="memoryCacheGetter"></param>
+	/// <param name="mainDataAccessStateGetter">A method that returns the current main data-access state whenever it is requested, including during this
+	/// InitStatics call. Do not allow multiple threads to use the same state at the same time. If you pass null, the data-access subsystem will not be
+	/// available in the application.</param>
+	/// <param name="useLongDatabaseTimeouts">Pass true if the application is a background process that can tolerate slow database access.</param>
+	public static void InitStatics(
+		SystemInitializer globalInitializer, string appName, bool isClientSideApp, string assemblyFolderPath = "",
+		Action<TextWriter> telemetryAppErrorContextWriter = null, Func<IMemoryCache> memoryCacheGetter = null,
+		Func<DataAccessState> mainDataAccessStateGetter = null, bool useLongDatabaseTimeouts = false ) {
+		var initializationLog = "Starting init";
+		try {
+			if( initialized )
+				throw new ApplicationException( "This class can only be initialized once." );
 
-				// Initialize these before the exception handling block below because it's reasonable for the exception handling to depend on them.
-				ConfigurationStatics.Init( assemblyFolderPath, globalInitializer.GetType(), appName, isClientSideApp, ref initializationLog );
-				EmailStatics.Init();
-				TelemetryStatics.Init( telemetryAppErrorContextWriter );
+			if( globalInitializer == null )
+				throw new ApplicationException( "The system must have a global initializer." );
 
-				// Setting the initialized flag to true must be done before executing the secondary init block below so that exception handling works.
-				initialized = true;
-				initializationLog += Environment.NewLine + "Succeeded in primary init.";
-			}
-			catch( Exception e ) {
-				initializationLog += Environment.NewLine + e;
-				EwlStatics.EmergencyLog( "Initialization log", initializationLog );
-				throw;
-			}
+			// Initialize these before the exception handling block below because it's reasonable for the exception handling to depend on them.
+			ConfigurationStatics.Init( assemblyFolderPath, globalInitializer.GetType(), appName, isClientSideApp, ref initializationLog );
+			EmailStatics.Init();
+			TelemetryStatics.Init( telemetryAppErrorContextWriter );
 
-			try {
-				CultureInfo.DefaultThreadCurrentCulture = Cultures.EnglishUnitedStates;
-
-				JsonConvert.DefaultSettings = () => new JsonSerializerSettings().ConfigureForNodaTime( DateTimeZoneProviders.Tzdb );
-
-				var asposePdfLicensePath = EwlStatics.CombinePaths( ConfigurationStatics.InstallationConfiguration.AsposeLicenseFolderPath, "Aspose.Pdf.lic" );
-				if( File.Exists( asposePdfLicensePath ) )
-					new Aspose.Pdf.License().SetLicense( asposePdfLicensePath );
-				var asposeWordsLicensePath = EwlStatics.CombinePaths( ConfigurationStatics.InstallationConfiguration.AsposeLicenseFolderPath, "Aspose.Words.lic" );
-				if( File.Exists( asposeWordsLicensePath ) )
-					new Aspose.Words.License().SetLicense( asposeWordsLicensePath );
-
-				AppMemoryCache.Init();
-				EncryptionOps.Init();
-
-				// data access
-				MySqlInfo.Init( () => ExternalFunctionalityStatics.ExternalMySqlProvider.GetDbProviderFactory() );
-				DataAccessStatics.Init();
-				DataAccessState.Init( mainDataAccessStateGetter, useLongDatabaseTimeouts );
-
-				BlobStorageStatics.Init();
-				HtmlBlockStatics.Init();
-
-				UserManagementStatics.Init(
-					() => {
-						if( ExternalFunctionalityStatics.SamlFunctionalityEnabled )
-							ExternalFunctionalityStatics.ExternalSamlProvider.RefreshConfiguration();
-					} );
-
-				ExternalFunctionalityStatics.Init();
-
-				GlobalInitializationOps.globalInitializer = globalInitializer;
-				globalInitializer.InitStatics();
-
-				UserManagementStatics.InitSystemSpecificLogicDependencies();
-			}
-			catch( Exception e ) {
-				secondaryInitFailed = true;
-
-				// Suppress all exceptions since they would prevent apps from knowing that primary initialization succeeded. EWF apps need to know this in order to
-				// automatically restart themselves. Other apps could find this knowledge useful as well.
-				try {
-					TelemetryStatics.ReportError( "An exception occurred during application initialization:", e );
-				}
-				catch {}
-			}
+			// Setting the initialized flag to true must be done before executing the secondary init block below so that exception handling works.
+			initialized = true;
+			initializationLog += Environment.NewLine + "Succeeded in primary init.";
+		}
+		catch( Exception e ) {
+			initializationLog += Environment.NewLine + e;
+			EwlStatics.EmergencyLog( "Initialization log", initializationLog );
+			throw;
 		}
 
-		internal static bool SecondaryInitFailed => secondaryInitFailed;
+		try {
+			CultureInfo.DefaultThreadCurrentCulture = Cultures.EnglishUnitedStates;
 
-		/// <summary>
-		/// Performs cleanup activities so the application can be shut down.
-		/// </summary>
-		public static void CleanUpStatics() {
-			try {
-				globalInitializer?.CleanUpStatics();
+			JsonConvert.DefaultSettings = () => new JsonSerializerSettings().ConfigureForNodaTime( DateTimeZoneProviders.Tzdb );
 
-				AppMemoryCache.CleanUp();
-			}
-			catch( Exception e ) {
-				TelemetryStatics.ReportError( "An exception occurred during application cleanup:", e );
-			}
+			var asposePdfLicensePath = EwlStatics.CombinePaths( ConfigurationStatics.InstallationConfiguration.AsposeLicenseFolderPath, "Aspose.Pdf.lic" );
+			if( File.Exists( asposePdfLicensePath ) )
+				new Aspose.Pdf.License().SetLicense( asposePdfLicensePath );
+			var asposeWordsLicensePath = EwlStatics.CombinePaths( ConfigurationStatics.InstallationConfiguration.AsposeLicenseFolderPath, "Aspose.Words.lic" );
+			if( File.Exists( asposeWordsLicensePath ) )
+				new Aspose.Words.License().SetLicense( asposeWordsLicensePath );
+
+			AppMemoryCache.Init( memoryCacheGetter );
+			EncryptionOps.Init();
+
+			// data access
+			MySqlInfo.Init( () => ExternalFunctionalityStatics.ExternalMySqlProvider.GetDbProviderFactory() );
+			DataAccessStatics.Init();
+			DataAccessState.Init( mainDataAccessStateGetter, useLongDatabaseTimeouts );
+
+			BlobStorageStatics.Init();
+			HtmlBlockStatics.Init();
+
+			UserManagementStatics.Init(
+				() => {
+					if( ExternalFunctionalityStatics.SamlFunctionalityEnabled )
+						ExternalFunctionalityStatics.ExternalSamlProvider.RefreshConfiguration();
+				} );
+
+			ExternalFunctionalityStatics.Init();
+
+			GlobalInitializationOps.globalInitializer = globalInitializer;
+			globalInitializer.InitStatics();
+
+			UserManagementStatics.InitSystemSpecificLogicDependencies();
 		}
+		catch( Exception e ) {
+			secondaryInitFailed = true;
 
-		/// <summary>
-		/// Executes the specified method. Returns 0 if it is successful. If an exception occurs, this method returns 1 and details about the exception are emailed
-		/// to the developers and logged. This should only be used at the root level of a console application because it checks to ensure the system logic has
-		/// initialized properly and its return code is designed to be useful from the command line of such an application. Throw a DoNotEmailOrLogException to
-		/// cause this method to return 1 without emailing or logging the exception.
-		/// </summary>
-		public static int ExecuteAppWithStandardExceptionHandling( Action method ) {
-			if( secondaryInitFailed )
-				return 1;
+			// Suppress all exceptions since they would prevent apps from knowing that primary initialization succeeded. EWF apps need to know this in order to
+			// automatically restart themselves. Other apps could find this knowledge useful as well.
 			try {
-				method();
+				TelemetryStatics.ReportError( "An exception occurred during application initialization:", e );
 			}
-			catch( Exception e ) {
-				if( !( e is DoNotEmailOrLogException ) )
-					TelemetryStatics.ReportError( e );
-				return 1;
-			}
-			return 0;
+			catch {}
 		}
+	}
+
+	internal static bool SecondaryInitFailed => secondaryInitFailed;
+
+	/// <summary>
+	/// Performs cleanup activities so the application can be shut down.
+	/// </summary>
+	public static void CleanUpStatics() {
+		try {
+			globalInitializer?.CleanUpStatics();
+
+			AppMemoryCache.CleanUp();
+		}
+		catch( Exception e ) {
+			TelemetryStatics.ReportError( "An exception occurred during application cleanup:", e );
+		}
+	}
+
+	/// <summary>
+	/// Executes the specified method. Returns 0 if it is successful. If an exception occurs, this method returns 1 and details about the exception are emailed
+	/// to the developers and logged. This should only be used at the root level of a console application because it checks to ensure the system logic has
+	/// initialized properly and its return code is designed to be useful from the command line of such an application. Throw a DoNotEmailOrLogException to
+	/// cause this method to return 1 without emailing or logging the exception.
+	/// </summary>
+	public static int ExecuteAppWithStandardExceptionHandling( Action method ) {
+		if( secondaryInitFailed )
+			return 1;
+		try {
+			method();
+		}
+		catch( Exception e ) {
+			if( !( e is DoNotEmailOrLogException ) )
+				TelemetryStatics.ReportError( e );
+			return 1;
+		}
+		return 0;
 	}
 }
