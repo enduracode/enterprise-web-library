@@ -61,6 +61,7 @@ public static class EwfOps {
 		if( TimeSpan.FromMilliseconds( GetTickCount64() ) < new TimeSpan( 0, 3, 0 ) )
 			Thread.Sleep( new TimeSpan( 0, 1, 0 ) );
 
+		IMemoryCache memoryCache = null;
 		var initTimeDataAccessState = new ThreadLocal<DataAccessState>( () => new DataAccessState() );
 		GlobalInitializationOps.InitStatics(
 			globalInitializer,
@@ -101,7 +102,7 @@ public static class EwfOps {
 						writer.WriteLine( "User: {0}{1}".FormatWith( user.Email, impersonator != null ? " (impersonated by {0})".FormatWith( impersonator.Email ) : "" ) );
 				}
 			},
-			memoryCacheGetter: () => AspNetStatics.Services.GetRequiredService<IMemoryCache>(),
+			memoryCacheGetter: () => memoryCache,
 			mainDataAccessStateGetter: () => EwfRequest.Current != null ? RequestDispatchingStatics.RequestState.DataAccessState : initTimeDataAccessState.Value );
 		var frameworkInitialized = false;
 		try {
@@ -155,6 +156,8 @@ public static class EwfOps {
 						dependencyInjectionServicesRegistrationMethod?.Invoke( builder.Services );
 
 						var app = builder.Build();
+
+						memoryCache = app.Services.GetRequiredService<IMemoryCache>();
 
 						using( var serviceScope = app.Services.CreateScope() ) {
 							MiniProfiler.Configure( app.Services.GetRequiredService<IOptions<MiniProfilerOptions>>().Value );
