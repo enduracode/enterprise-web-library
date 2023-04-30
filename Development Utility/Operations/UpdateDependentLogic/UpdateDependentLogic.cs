@@ -21,6 +21,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations;
 
 internal class UpdateDependentLogic: Operation {
 	private const string generatedCodeFolderName = "Generated Code";
+	private static readonly string serverSideConsoleAppJsonArgument = "{0}UseJsonArguments".FormatWith( EwlStatics.EwlInitialism.ToLowerInvariant() );
 
 	private static readonly Operation instance = new UpdateDependentLogic();
 	public static Operation Instance => instance;
@@ -271,8 +272,9 @@ internal class UpdateDependentLogic: Operation {
 
 			var programPath = "EwlStatics.CombinePaths( ConfigurationStatics.InstallationPath, \"" + project.Name +
 			                  "\", ConfigurationStatics.ServerSideConsoleAppRelativeFolderPath, \"" + project.NamespaceAndAssemblyName + "\" )";
-			var runProgramExpression = "EnterpriseWebLibrary.TewlContrib.ProcessTools.RunProgram( " + programPath +
-			                           ", \"\", Newtonsoft.Json.JsonConvert.SerializeObject( arguments, Newtonsoft.Json.Formatting.None ) + System.Environment.NewLine + input, false )";
+			var runProgramExpression =
+				"EnterpriseWebLibrary.TewlContrib.ProcessTools.RunProgram( {0}, \"{1}\", Newtonsoft.Json.JsonConvert.SerializeObject( arguments, Newtonsoft.Json.Formatting.None ) + System.Environment.NewLine + input, false )"
+					.FormatWith( programPath, serverSideConsoleAppJsonArgument );
 
 			writer.WriteLine( "if( EwfRequest.Current != null )" );
 			writer.WriteLine( "AppRequestState.AddNonTransactionalModificationMethod( () => " + runProgramExpression + " );" );
@@ -532,32 +534,30 @@ internal class UpdateDependentLogic: Operation {
 			project.Name,
 			EwlStatics.CombinePaths( installation.GeneralLogic.Path, project.Name ),
 			writer => {
-				writer.WriteLine( "using System;" );
-				writer.WriteLine( "using System.Collections.Generic;" );
 				writer.WriteLine( "using System.Collections.Immutable;" );
-				writer.WriteLine( "using System.IO;" );
 				writer.WriteLine( "using System.Threading;" );
-				writer.WriteLine( "using EnterpriseWebLibrary;" );
 				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess;" );
 				writer.WriteLine();
-				writer.WriteLine( "namespace " + project.NamespaceAndAssemblyName + " {" );
+				writer.WriteLine( "namespace {0};".FormatWith( project.NamespaceAndAssemblyName ) );
+				writer.WriteLine();
 				writer.WriteLine( "internal static partial class Program {" );
 
-				writer.WriteLine( "[ MTAThread ]" );
 				writer.WriteLine( "private static int Main( string[] args ) {" );
 				writer.WriteLine( "SystemInitializer globalInitializer = null;" );
 				writer.WriteLine( "initGlobalInitializer( ref globalInitializer );" );
 				writer.WriteLine( "var dataAccessState = new ThreadLocal<DataAccessState>( () => new DataAccessState() );" );
 				writer.WriteLine(
-					"GlobalInitializationOps.InitStatics( globalInitializer, \"" + project.Name +
-					"\", false, mainDataAccessStateGetter: () => dataAccessState.Value );" );
+					"GlobalInitializationOps.InitStatics( globalInitializer, \"{0}\", false, mainDataAccessStateGetter: () => dataAccessState.Value );".FormatWith(
+						project.Name ) );
 				writer.WriteLine( "try {" );
 				writer.WriteLine( "return GlobalInitializationOps.ExecuteAppWithStandardExceptionHandling( () => {" );
 
 				// See https://stackoverflow.com/a/44135529/35349.
 				writer.WriteLine( "Console.SetIn( new StreamReader( Console.OpenStandardInput(), Console.InputEncoding, false, 4096 ) );" );
 
-				writer.WriteLine( "ewlMain( Newtonsoft.Json.JsonConvert.DeserializeObject<ImmutableArray<string>>( Console.ReadLine() ) );" );
+				writer.WriteLine(
+					"ewlMain( args.Any() && string.Equals( args[ 0 ], \"{0}\", StringComparison.Ordinal ) ? Newtonsoft.Json.JsonConvert.DeserializeObject<ImmutableArray<string>>( Console.ReadLine() ) : args );"
+						.FormatWith( serverSideConsoleAppJsonArgument ) );
 				writer.WriteLine( "} );" );
 				writer.WriteLine( "}" );
 				writer.WriteLine( "finally {" );
@@ -568,7 +568,6 @@ internal class UpdateDependentLogic: Operation {
 				writer.WriteLine( "static partial void initGlobalInitializer( ref SystemInitializer globalInitializer );" );
 				writer.WriteLine( "static partial void ewlMain( IReadOnlyList<string> arguments );" );
 
-				writer.WriteLine( "}" );
 				writer.WriteLine( "}" );
 			},
 			runtimeIdentifier: "win10-x64" );
