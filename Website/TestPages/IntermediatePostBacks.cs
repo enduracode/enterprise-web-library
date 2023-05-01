@@ -1,4 +1,5 @@
-﻿using EnterpriseWebLibrary.WebSessionState;
+﻿using System.Threading;
+using EnterpriseWebLibrary.WebSessionState;
 
 // EwlPage
 // OptionalParameter: bool toggled
@@ -16,7 +17,17 @@ partial class IntermediatePostBacks {
 	protected override string getResourceName() => "Intermediate Post-Backs";
 
 	protected override PageContent getContent() {
-		var content = new UiPageContent();
+		var includePageLoadPostBack = ComponentStateItem.Create( "includePageLoadPostBack", false, _ => true, false );
+		var content = new UiPageContent(
+			pageLoadPostBack: includePageLoadPostBack.Value.Value
+				                  ? PostBack.CreateIntermediate(
+					                  null,
+					                  id: "pageLoadPostBack",
+					                  modificationMethod: () => {
+						                  includePageLoadPostBack.Value.Value = false;
+						                  Thread.Sleep( TimeSpan.FromSeconds( 2 ) );
+					                  } )
+				                  : null );
 
 		var staticFil = FormItemList.CreateStack( generalSetup: new FormItemListSetup( buttonSetup: new ButtonSetup( "Submit" ) ) );
 		staticFil.AddFormItems(
@@ -26,7 +37,7 @@ partial class IntermediatePostBacks {
 				"Edit this one to get a validation error",
 				true,
 				setup: TextControlSetup.Create( validationPredicate: valueChangedOnPostBack => valueChangedOnPostBack ),
-				validationMethod: ( postBackValue, validator ) => validator.NoteErrorAndAddMessage( "You can't change the value in this box!" ) ).ToFormItem(
+				validationMethod: ( _, validator ) => validator.NoteErrorAndAddMessage( "You can't change the value in this box!" ) ).ToFormItem(
 				label: "Static Field".ToComponents() ) );
 		content.Add( staticFil );
 
@@ -42,6 +53,20 @@ partial class IntermediatePostBacks {
 				"".ToCell(),
 				getIdListRegionComponents().ToCell() ) );
 		content.Add( listTable );
+
+		content.Add(
+			new Paragraph(
+				new EwfButton(
+					new StandardButtonStyle( "Add Page-Load Post-Back" ),
+					behavior: new PostBackBehavior(
+						postBack: PostBack.CreateIntermediate(
+							null,
+							id: PostBack.GetCompositeId( "pageLoadPostBack", "add" ),
+							modificationMethod: () => {
+								includePageLoadPostBack.Value.Value = true;
+								Thread.Sleep( TimeSpan.FromSeconds( 1 ) );
+							} ) ) ).ToCollection(),
+				etherealContent: includePageLoadPostBack.ToCollection() ) );
 
 		return content;
 	}
