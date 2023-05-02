@@ -265,7 +265,7 @@ public abstract class PageBase: ResourceBase {
 		var requestState = AppRequestState.Instance.EwfPageRequestState;
 		var dmIdAndSecondaryOp = requestState.DmIdAndSecondaryOp;
 
-		buildPage();
+		var pageLoadPostBackExists = buildPage();
 
 		if( requestState.StaticRegionContents != null ) {
 			var nodeUpdateRegionLinkersByKey = updateRegionLinkerNodes.SelectMany( i => i.KeyedUpdateRegionLinkers, ( node, keyedLinker ) => ( node, keyedLinker ) )
@@ -340,7 +340,7 @@ public abstract class PageBase: ResourceBase {
 				return navigate( null, null, null );
 		}
 
-		return getResponse( statusCode );
+		return getResponse( pageLoadPostBackExists, statusCode );
 	}
 
 	/// <summary>
@@ -532,7 +532,7 @@ public abstract class PageBase: ResourceBase {
 			AppRequestState.Instance.EwfPageRequestState.ModificationErrorsExist ? null : fullSecondaryResponse );
 	}
 
-	private void buildPage() {
+	private bool buildPage() {
 		UrlHandler urlHandler = this;
 		do {
 			if( urlHandler is ResourceBase resource ) {
@@ -610,6 +610,8 @@ public abstract class PageBase: ResourceBase {
 
 		// This must happen after LoadData and before modifications are executed.
 		statusMessages.Clear();
+
+		return pageLoadAction is not null;
 	}
 
 	/// <summary>
@@ -920,7 +922,7 @@ public abstract class PageBase: ResourceBase {
 		AppRequestState.Instance.SetUrlHandlers( urlHandlers );
 	}
 
-	private EwfResponse getResponse( int? statusCode ) {
+	private EwfResponse getResponse( bool pageLoadPostBackExists, int? statusCode ) {
 		var requestState = AppRequestState.Instance.EwfPageRequestState;
 		var modificationErrorsOccurred = requestState.ModificationErrorsExist &&
 		                                 ( requestState.DmIdAndSecondaryOp == null ||
@@ -945,7 +947,8 @@ public abstract class PageBase: ResourceBase {
 
 					pageTree.WriteMarkup( writer );
 
-					StandardLibrarySessionState.StatusMessages = Enumerable.Empty<( StatusMessageType, string )>().Materialize();
+					if( !pageLoadPostBackExists || modificationErrorsOccurred )
+						StandardLibrarySessionState.StatusMessages = Enumerable.Empty<( StatusMessageType, string )>().Materialize();
 					StandardLibrarySessionState.ClearClientSideNavigation();
 				} ),
 			statusCodeGetter: () => statusCode,
