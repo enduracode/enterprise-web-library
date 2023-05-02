@@ -25,7 +25,7 @@ partial class NonLiveLogIn {
 			return new UiPageContent(
 				pageLoadPostBack: PostBack.CreateFull(
 					modificationMethod: () => logIn( HideWarnings ),
-					actionGetter: () => new PostBackAction( new ExternalResource( ReturnUrl ) ) ) ).Add( new Paragraph( "Please wait.".ToComponents() ) );
+					actionGetter: () => new PostBackAction( new ExternalResource( ReturnUrl ) ) ) );
 
 		return FormState.ExecuteWithDataModificationsAndDefaultAction(
 			PostBack.CreateFull( modificationMethod: () => logIn( false ), actionGetter: () => new PostBackAction( new ExternalResource( ReturnUrl ) ) )

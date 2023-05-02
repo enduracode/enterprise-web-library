@@ -41,8 +41,7 @@ partial class LogIn {
 				() => {
 					var logInHiddenFieldsAndMethods = AuthenticationStatics.GetLogInHiddenFieldsAndMethods();
 					codeLoginMethod = logInHiddenFieldsAndMethods.modificationMethods.codeLoginMethod;
-					return new UiPageContent( pageLoadPostBack: postBack ).Add( new Paragraph( "Please wait.".ToComponents() ) )
-						.Add( logInHiddenFieldsAndMethods.hiddenFields );
+					return new UiPageContent( pageLoadPostBack: postBack ).Add( logInHiddenFieldsAndMethods.hiddenFields );
 				} );
 		}
 

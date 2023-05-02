@@ -36,7 +36,7 @@ partial class VerifyClientFunctionality {
 				content.Add( new Paragraph( AuthenticationStatics.GetClockWrongMessage().ToComponents() ) );
 		}
 		else
-			content.Add( new Paragraph( "Please wait.".ToComponents() ) ).Add( AuthenticationStatics.GetLogInHiddenFieldsAndSetUpClientSideLogic( clientTime ) );
+			content.Add( AuthenticationStatics.GetLogInHiddenFieldsAndSetUpClientSideLogic( clientTime ) );
 		return content;
 	}
 

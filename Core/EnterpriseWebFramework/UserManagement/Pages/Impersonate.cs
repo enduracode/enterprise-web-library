@@ -46,7 +46,7 @@ partial class Impersonate {
 				bodyClasses: elementClass,
 				pageLoadPostBack: PostBack.CreateFull(
 					modificationMethod: () => UserImpersonationStatics.BeginImpersonation( UserObject ),
-					actionGetter: () => new PostBackAction( new ExternalResource( ReturnUrl ) ) ) ).Add( new Paragraph( "Please wait.".ToComponents() ) );
+					actionGetter: () => new PostBackAction( new ExternalResource( ReturnUrl ) ) ) );
 
 		var content = new BasicPageContent( bodyClasses: elementClass );
 		content.Add( new PageName() );
