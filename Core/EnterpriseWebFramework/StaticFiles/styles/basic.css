@@ -832,8 +832,9 @@ ewfWarningMessageContainer > ewfStatusMessageText {
 }
 ewfPageLoadPostBackImageContainer > ewfImage {
 	--ewf-size: 15vw;
-	margin-top: calc( 50vh - var( --ewf-size ) / 2 );
-	margin-left: calc( 50vw - var( --ewf-size ) / 2 );
+	position: fixed;
+	top: calc( 50vh - var( --ewf-size ) / 2 );
+	left: calc( 50vw - var( --ewf-size ) / 2 );
 	width: var( --ewf-size );
 }
 
