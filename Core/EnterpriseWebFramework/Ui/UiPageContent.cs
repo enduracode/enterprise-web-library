@@ -134,7 +134,7 @@ public class UiPageContent: PageContent {
 				};
 
 
-		private string formSelector => BasicPageContent.FormSelector;
+		private string formSelector => BasePageStatics.FormSelector;
 	}
 
 	private readonly BasicPageContent basicContent;

@@ -1,13 +1,10 @@
 ﻿using System.Text;
 using EnterpriseWebLibrary.Configuration;
-using EnterpriseWebLibrary.WebSessionState;
 using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 public sealed class BasicPageContent: PageContent {
-	internal const string FormSelector = "form#" + PageBase.FormId;
-
 	// Some of these are used by the EWF JavaScript file.
 	private static readonly ElementClass topWarningContainerClass = new( "ewfTopWarning" );
 	private static readonly ElementClass processingDialogAllStatesClass = new( "ewfProcessingDialog" );
@@ -15,10 +12,6 @@ public sealed class BasicPageContent: PageContent {
 	private static readonly ElementClass processingDialogTimeOutStateClass = new( "ewfProcessingDialogTo" );
 	private static readonly ElementClass processingDialogProcessingParagraphClass = new( "ewfProcessingP" );
 	private static readonly ElementClass processingDialogTimeOutParagraphClass = new( "ewfTimeOutP" );
-	private static readonly ElementClass notificationSectionContainerClass = new( "ewfNotification" );
-	private static readonly ElementClass infoMessageContainerClass = new( "ewfInfoMsg" );
-	private static readonly ElementClass warningMessageContainerClass = new( "ewfWarnMsg" );
-	private static readonly ElementClass statusMessageTextClass = new( "ewfStatusText" );
 
 	private static Func<IReadOnlyCollection<PageContent>, IEnumerable<ResourceInfo>> cssInfoCreator;
 	private static Action<StringBuilder, bool> javaScriptIncludeBuilder;
@@ -32,14 +25,13 @@ public sealed class BasicPageContent: PageContent {
 			var elements = new List<CssElement>();
 			elements.Add( new CssElement( "TopWarningContainer", "div.{0}".FormatWith( topWarningContainerClass.ClassName ) ) );
 			elements.AddRange( getProcessingDialogElements() );
-			elements.AddRange( getNotificationElements() );
 			return elements;
 		}
 
 		private IEnumerable<CssElement> getProcessingDialogElements() {
 			var elements = new List<CssElement>();
 
-			const string formSelector = FormSelector + " ";
+			const string formSelector = BasePageStatics.FormSelector + " ";
 			var dialogAllStatesSelectors = ModalBox.CssElementCreator.GetContainerSelectors( ".{0}".FormatWith( processingDialogAllStatesClass.ClassName ) )
 				.Select( i => formSelector + i )
 				.ToArray();
@@ -86,12 +78,6 @@ public sealed class BasicPageContent: PageContent {
 
 			return elements;
 		}
-
-		private IEnumerable<CssElement> getNotificationElements() =>
-			new CssElement( "NotificationSectionContainer", "{0} div.{1}".FormatWith( FormSelector, notificationSectionContainerClass.ClassName ) ).ToCollection()
-				.Append( new CssElement( "InfoMessageContainer", "{0} div.{1}".FormatWith( FormSelector, infoMessageContainerClass.ClassName ) ) )
-				.Append( new CssElement( "WarningMessageContainer", "{0} div.{1}".FormatWith( FormSelector, warningMessageContainerClass.ClassName ) ) )
-				.Append( new CssElement( "StatusMessageText", "{0} span.{1}".FormatWith( FormSelector, statusMessageTextClass.ClassName ) ) );
 	}
 
 	// We can remove this and just use Font Awesome as soon as https://github.com/FortAwesome/Font-Awesome/issues/671 is fixed.
@@ -196,7 +182,7 @@ public sealed class BasicPageContent: PageContent {
 		string titleOverride = "", TrustedHtmlString customHeadElements = null, ElementClassSet bodyClasses = null, Action dataUpdateModificationMethod = null,
 		bool isAutoDataUpdater = false, ActionPostBack pageLoadPostBack = null ) {
 		var preContentComponents = getPreContentComponents();
-		var postContentComponents = new FlowIdContainer( getNotificationSectionContainer() );
+		var postContentComponents = new NotificationSectionContainer().ToCollection();
 		var etherealComponents = getEtherealComponents();
 
 		componentGetter = ( contentObjects, hiddenFieldValueGetter, jsInitElement ) => new ElementComponent(
@@ -371,28 +357,8 @@ public sealed class BasicPageContent: PageContent {
 		return outerComponents;
 	}
 
-	private IReadOnlyCollection<FlowComponent> getNotificationSectionContainer() =>
-		PageBase.Current.StatusMessages.Any() && statusMessagesDisplayAsNotification()
-			? new GenericFlowContainer(
-				new Section( null, SectionStyle.Box, null, "Messages", null, getStatusMessageComponentList().ToCollection(), true, true, null ).ToCollection(),
-				classes: notificationSectionContainerClass ).ToCollection()
-			: Enumerable.Empty<FlowComponent>().Materialize();
-
 	private IReadOnlyCollection<EtherealComponent> getEtherealComponents() =>
-		ModalBox.CreateBrowsingModalBox( BrowsingModalBoxId )
-			.Append( getProcessingDialog() )
-			.Append(
-				new ModalBox(
-					new ModalBoxId(),
-					true,
-					new FlowIdContainer(
-						new Section(
-							"Messages",
-							PageBase.Current.StatusMessages.Any() && !statusMessagesDisplayAsNotification()
-								? getStatusMessageComponentList().ToCollection()
-								: Enumerable.Empty<FlowComponent>().Materialize() ).ToCollection() ).ToCollection(),
-					open: PageBase.Current.StatusMessages.Any() && !statusMessagesDisplayAsNotification() ) )
-			.Materialize();
+		ModalBox.CreateBrowsingModalBox( BrowsingModalBoxId ).Append( getProcessingDialog() ).Append( new StatusMessageModalBox() ).Materialize();
 
 	private EtherealComponent getProcessingDialog() =>
 		new ModalBox(
@@ -422,18 +388,6 @@ public sealed class BasicPageContent: PageContent {
 
 		return new GenericPhrasingContainer( ".".ToComponents(), classes: dotClass ).ToCollection();
 	}
-
-	private FlowComponent getStatusMessageComponentList() =>
-		new StackList(
-			PageBase.Current.StatusMessages.Select(
-				i => new GenericFlowContainer(
-					new FontAwesomeIcon( i.Item1 == StatusMessageType.Info ? "fa-info-circle" : "fa-exclamation-triangle", "fa-lg", "fa-fw" )
-						.Append<PhrasingComponent>( new GenericPhrasingContainer( i.Item2.ToComponents(), classes: statusMessageTextClass ) )
-						.Materialize(),
-					classes: i.Item1 == StatusMessageType.Info ? infoMessageContainerClass : warningMessageContainerClass ).ToComponentListItem() ) );
-
-	private bool statusMessagesDisplayAsNotification() =>
-		PageBase.Current.StatusMessages.All( i => i.Item1 == StatusMessageType.Info ) && PageBase.Current.StatusMessages.Count() <= 3;
 
 	private string getTitle() =>
 		StringTools.ConcatenateWithDelimiter(

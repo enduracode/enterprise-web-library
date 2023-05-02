@@ -1,13 +1,19 @@
 ﻿using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.WebSessionState;
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework {
-	internal static class BasePageStatics {
-		private static SystemProviderReference<AppStandardPageLogicProvider> provider;
+namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
-		internal static void Init( SystemProviderReference<AppStandardPageLogicProvider> provider ) {
-			BasePageStatics.provider = provider;
-		}
+internal static class BasePageStatics {
+	internal const string FormSelector = "form#" + PageBase.FormId;
 
-		internal static AppStandardPageLogicProvider AppProvider => provider.GetProvider();
+	private static SystemProviderReference<AppStandardPageLogicProvider> provider;
+
+	internal static void Init( SystemProviderReference<AppStandardPageLogicProvider> provider ) {
+		BasePageStatics.provider = provider;
 	}
+
+	internal static AppStandardPageLogicProvider AppProvider => provider.GetProvider();
+
+	internal static bool StatusMessagesDisplayAsNotification() =>
+		PageBase.Current.StatusMessages.All( i => i.Item1 == StatusMessageType.Info ) && PageBase.Current.StatusMessages.Count() <= 3;
 }
