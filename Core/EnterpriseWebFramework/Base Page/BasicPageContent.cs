@@ -12,6 +12,7 @@ public sealed class BasicPageContent: PageContent {
 	private static readonly ElementClass processingDialogTimeOutStateClass = new( "ewfProcessingDialogTo" );
 	private static readonly ElementClass processingDialogProcessingParagraphClass = new( "ewfProcessingP" );
 	private static readonly ElementClass processingDialogTimeOutParagraphClass = new( "ewfTimeOutP" );
+	private static readonly ElementClass pageLoadPostBackImageContainerClass = new( "ewfPlpb" );
 
 	private static Func<IReadOnlyCollection<PageContent>, IEnumerable<ResourceInfo>> cssInfoCreator;
 	private static Action<StringBuilder, bool> javaScriptIncludeBuilder;
@@ -25,6 +26,7 @@ public sealed class BasicPageContent: PageContent {
 			var elements = new List<CssElement>();
 			elements.Add( new CssElement( "TopWarningContainer", "div.{0}".FormatWith( topWarningContainerClass.ClassName ) ) );
 			elements.AddRange( getProcessingDialogElements() );
+			elements.Add( new CssElement( "PageLoadPostBackImageContainer", "div.{0}".FormatWith( pageLoadPostBackImageContainerClass.ClassName ) ) );
 			return elements;
 		}
 
@@ -177,7 +179,8 @@ public sealed class BasicPageContent: PageContent {
 	/// <param name="bodyClasses"></param>
 	/// <param name="dataUpdateModificationMethod">The modification method for the page’s data-update modification.</param>
 	/// <param name="isAutoDataUpdater">Pass true to force a post-back when a hyperlink is clicked.</param>
-	/// <param name="pageLoadPostBack">A post-back that will be triggered automatically by the browser when the page is finished loading.</param>
+	/// <param name="pageLoadPostBack">A post-back that will be triggered automatically by the browser when the page is finished loading. If this is not null, the
+	/// framework will hide all content on the page and show a loading icon instead.</param>
 	public BasicPageContent(
 		string titleOverride = "", TrustedHtmlString customHeadElements = null, ElementClassSet bodyClasses = null, Action dataUpdateModificationMethod = null,
 		bool isAutoDataUpdater = false, ActionPostBack pageLoadPostBack = null ) {
@@ -232,8 +235,9 @@ public sealed class BasicPageContent: PageContent {
 									return new ElementLocalData( "body", focusDependentData: new ElementFocusDependentData( attributes: attributes ) );
 								},
 								classes: bodyClasses,
-								children: new ElementComponent(
-										_ => new ElementData(
+								children: new DisplayableElement(
+										_ => new DisplayableElementData(
+											new DisplaySetup( pageLoadPostBack is null ),
 											() => {
 												var attributes = new List<ElementAttribute>();
 												attributes.Add( new ElementAttribute( "action", PageBase.Current.GetUrl() ) );
@@ -242,9 +246,9 @@ public sealed class BasicPageContent: PageContent {
 													attributes.Add( new ElementAttribute( "enctype", "multipart/form-data" ) );
 												attributes.Add( new ElementAttribute( "novalidate" ) );
 
-												return new ElementLocalData(
+												return new DisplayableElementLocalData(
 													"form",
-													focusDependentData: new ElementFocusDependentData( attributes: attributes, includeIdAttribute: true ) );
+													focusDependentData: new DisplayableElementFocusDependentData( attributes: attributes, includeIdAttribute: true ) );
 											},
 											clientSideIdOverride: PageBase.FormId,
 											children: preContentComponents.Concat( bodyContent )
@@ -265,7 +269,13 @@ public sealed class BasicPageContent: PageContent {
 															},
 															clientSideIdOverride: PageBase.HiddenFieldName ) ) )
 												.Materialize(),
-											etherealChildren: etherealComponents.Concat( etherealContent ).Materialize() ) ).Append( jsInitElement )
+											etherealChildren: etherealComponents.Concat( etherealContent ).Materialize() ) ).Concat(
+										pageLoadPostBack is null
+											? Enumerable.Empty<FlowComponent>()
+											: new GenericFlowContainer(
+												new EwfImage( new ImageSetup( "Loading icon" ), new StaticFiles.SpinnerSvg() ).ToCollection(),
+												classes: pageLoadPostBackImageContainerClass ).ToCollection() )
+									.Append( jsInitElement )
 									.Materialize() ) ) )
 					.Materialize() ) );
 

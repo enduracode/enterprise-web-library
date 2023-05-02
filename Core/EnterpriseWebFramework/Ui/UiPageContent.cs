@@ -153,7 +153,8 @@ public class UiPageContent: PageContent {
 	/// <param name="contentFootComponents">The content-foot components.</param>
 	/// <param name="dataUpdateModificationMethod">The modification method for the page’s data-update modification.</param>
 	/// <param name="isAutoDataUpdater">Pass true to force a post-back when a hyperlink is clicked.</param>
-	/// <param name="pageLoadPostBack">A post-back that will be triggered automatically by the browser when the page is finished loading.</param>
+	/// <param name="pageLoadPostBack">A post-back that will be triggered automatically by the browser when the page is finished loading. If this is not null, the
+	/// framework will hide all content on the page and show a loading icon instead.</param>
 	public UiPageContent(
 		ElementClassSet bodyClasses = null, IReadOnlyCollection<ActionComponentSetup> pageActions = null, bool omitContentBox = false,
 		IReadOnlyCollection<ButtonSetup> contentFootActions = null, IReadOnlyCollection<FlowComponent> contentFootComponents = null,
