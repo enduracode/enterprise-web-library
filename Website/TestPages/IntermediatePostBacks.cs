@@ -25,6 +25,7 @@ partial class IntermediatePostBacks {
 					                  id: "pageLoadPostBack",
 					                  modificationMethod: () => {
 						                  includePageLoadPostBack.Value.Value = false;
+						                  AddStatusMessage( StatusMessageType.Info, "Page-load post-back executed." );
 						                  Thread.Sleep( TimeSpan.FromSeconds( 2 ) );
 					                  } )
 				                  : null );
@@ -64,6 +65,7 @@ partial class IntermediatePostBacks {
 							id: PostBack.GetCompositeId( "pageLoadPostBack", "add" ),
 							modificationMethod: () => {
 								includePageLoadPostBack.Value.Value = true;
+								AddStatusMessage( StatusMessageType.Info, "Page-load post-back added." );
 								Thread.Sleep( TimeSpan.FromSeconds( 1 ) );
 							} ) ) ).ToCollection(),
 				etherealContent: includePageLoadPostBack.ToCollection() ) );
