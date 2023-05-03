@@ -1,4 +1,5 @@
 ﻿:root {
+	--ewf-column-width: 60em;
 	--ewf-list-item-spacing: .5em;
 	--ewf-normal-button-padding: .6em;
 }
@@ -844,7 +845,7 @@ ewfSelectUserPageBody, ewfErrorPageBody {
 	margin-left: auto;
 	margin-right: auto;
 	background-color: white;
-	max-width: 60em;
+	max-width: var( --ewf-column-width );
 	color: black;
 }
 ewfSelectUserPageBody ewfHyperlinkStandardStyleAllNormalStates,

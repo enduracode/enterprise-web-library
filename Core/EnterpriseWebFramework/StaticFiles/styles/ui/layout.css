@@ -1,5 +1,6 @@
 ﻿:root {
 	--ewf-base-font-size: clamp( .9rem, 2vw, 1rem );
+	--ewf-column-width: 75em;
 
 	--ewf-ui-important-border-width: 1px;
 	--ewf-ui-top-level-vertical-spacing:min( 1vw, .75rem );
@@ -215,6 +216,18 @@ ewfUiSideTabContainer ewfUiCurrentTabActionControl {
 @media print {
 }
 
+/* max width */
+ewfSectionBoxStyleBothStates, ewfUiContentBox, ewfUiContentFootActionListContainer {
+	margin-left: auto;
+	margin-right: auto;
+}
+ewfSectionBoxStyleBothStates, ewfUiContentBox {
+	max-width: var( --ewf-column-width );
+}
+ewfUiContentFootActionListContainer {
+	max-width: calc( var( --ewf-column-width ) + var( --ewf-ui-top-level-horizontal-spacing ) * 2 );
+}
+
 /* headings and sections */
 ewfPagePathContainer {
 	font-size: 1.1em;
@@ -230,11 +243,6 @@ ewfPagePathContainer h1 {
 }
 
 /* boxes */
-ewfSectionBoxStyleBothStates, ewfUiContentBox {
-	margin-left: auto;
-	margin-right: auto;
-	max-width: 75em;
-}
 ewfSectionBoxStyleExpandedState > ewfSectionHeadingContainer {
 	margin-bottom: 1em;
 	border-bottom-width: 1px;
