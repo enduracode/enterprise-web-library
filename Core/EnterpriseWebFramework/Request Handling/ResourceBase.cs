@@ -115,7 +115,7 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 	/// <summary>
 	/// Gets the parent of this resource, or null if there isn’t one.
 	/// </summary>
-	public ResourceParent Parent => parent.Value ?? EsAsBaseType;
+	public ResourceParent Parent => parent.Value;
 
 	/// <summary>
 	/// Gets the parent resource of this resource. Throws an exception if there is no parent or the parent is an entity setup.
@@ -131,7 +131,7 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 	/// <summary>
 	/// Creates the parent of this resource. Returns null if there is no parent.
 	/// </summary>
-	protected virtual ResourceParent createParent() => null;
+	protected virtual ResourceParent createParent() => EsAsBaseType;
 
 	/// <summary>
 	/// Gets the ancestors of this resource, from the parent all the way up to the root.
