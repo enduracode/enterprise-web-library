@@ -131,7 +131,6 @@ public static class EwfOps {
 
 						builder.Services.Configure<FormOptions>( options => { options.ValueCountLimit = 10000; } );
 
-						builder.Services.AddHttpContextAccessor();
 						builder.Services.AddDistributedMemoryCache();
 						builder.Services.AddSession(
 							options => {
@@ -154,6 +153,9 @@ public static class EwfOps {
 							ExternalFunctionalityStatics.ExternalSamlProvider.RegisterDependencyInjectionServices( builder.Services );
 
 						dependencyInjectionServicesRegistrationMethod?.Invoke( builder.Services );
+
+						// Register this last so it cannot be overridden.
+						builder.Services.AddSingleton<IHttpContextAccessor, EwfHttpContextAccessor>();
 
 						var app = builder.Build();
 

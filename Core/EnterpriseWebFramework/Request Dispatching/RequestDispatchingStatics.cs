@@ -6,6 +6,7 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.ErrorPages;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.UserManagement;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Profiling;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -29,65 +30,81 @@ public static class RequestDispatchingStatics {
 	public static AppRequestDispatchingProvider AppProvider => provider.GetProvider();
 
 	internal static async Task ProcessRequest( HttpContext context, RequestDelegate next ) {
-		string appRelativeUrl = null;
-		executeWithBasicExceptionHandling(
-			() => {
-				// This used to be just HttpContext.Current.Request.Url, but that doesn't work with Azure due to the use of load balancing. An Azure load balancer
-				// will bind to the ip/host/port through which all web requests should come in, and then the request is redirected to one of the server instances
-				// running this web application. For example, a user will request mydomain.com. In Azure, there may be two instances running this web site, on
-				// someIp:81 and someIp:82. For some reason, HttpContext.Current.Request.Url ends up using the host and port from one of these addresses instead of
-				// using the host and port from the HTTP Host header, which is what the client is actually "viewing". Basically, HttpContext.Current.Request.Url
-				// returns http://someIp:81?something=1 instead of http://mydomain.com?something=1. See
-				// http://stackoverflow.com/questions/9560838/azure-load-balancer-causes-400-error-invalid-hostname-on-postback.
+		var contextAccessor = (EwfHttpContextAccessor)context.RequestServices.GetRequiredService<IHttpContextAccessor>();
+		contextAccessor.UseFrameworkContext = true;
 
-				var baseUrl = getRequestBaseUrl( context.Request );
-				if( !baseUrl.Any() ) {
-					EwfResponse.Create( "", new EwfResponseBodyCreator( () => "" ), statusCodeGetter: () => 400 ).WriteToAspNetResponse( context.Response );
+		try {
+			string appRelativeUrl = null;
+			executeWithBasicExceptionHandling(
+				context,
+				() => {
+					// This used to be just HttpContext.Current.Request.Url, but that doesn't work with Azure due to the use of load balancing. An Azure load balancer
+					// will bind to the ip/host/port through which all web requests should come in, and then the request is redirected to one of the server instances
+					// running this web application. For example, a user will request mydomain.com. In Azure, there may be two instances running this web site, on
+					// someIp:81 and someIp:82. For some reason, HttpContext.Current.Request.Url ends up using the host and port from one of these addresses instead of
+					// using the host and port from the HTTP Host header, which is what the client is actually "viewing". Basically, HttpContext.Current.Request.Url
+					// returns http://someIp:81?something=1 instead of http://mydomain.com?something=1. See
+					// http://stackoverflow.com/questions/9560838/azure-load-balancer-causes-400-error-invalid-hostname-on-postback.
+
+					var baseUrl = getRequestBaseUrl( context.Request );
+					if( !baseUrl.Any() ) {
+						EwfResponse.Create( "", new EwfResponseBodyCreator( () => "" ), statusCodeGetter: () => 400 ).WriteToAspNetResponse( context.Response );
+						return;
+					}
+
+					appRelativeUrl = UrlHandlingStatics.EncodePathForPredictableNormalization( context.Request.Path.ToUriComponent() ) +
+					                 context.Request.QueryString.ToUriComponent();
+
+					// If the base URL doesn't include a path and the app-relative URL is just a slash, don't include this trailing slash in the URL since it will not be
+					// present in the canonical URLs that we construct and therefore it would cause problems with URL normalization.
+					var url = !EwfRequest.AppBaseUrlProvider.GetRequestBasePath( context.Request ).Any() && appRelativeUrl.Length == "/".Length
+						          ? baseUrl
+						          : baseUrl + appRelativeUrl;
+
+
+					context.Items.Add( RequestStateKey, new AppRequestState( context, url, baseUrl ) );
+				},
+				false,
+				true );
+			if( context.Response.StatusCode != 200 )
+				return;
+
+			try {
+				var ipAddresses = AppProvider.GetWhitelistedIpAddressesForMaintenance();
+				if( ipAddresses != null && !ipAddresses.Contains( context.Connection.RemoteIpAddress?.ToString() ) ) {
+					EwfResponse.Create( "", new EwfResponseBodyCreator( () => "" ), statusCodeGetter: () => 503 ).WriteToAspNetResponse( context.Response );
 					return;
 				}
 
-				appRelativeUrl = UrlHandlingStatics.EncodePathForPredictableNormalization( context.Request.Path.ToUriComponent() ) +
-				                 context.Request.QueryString.ToUriComponent();
+				RequestState.IntermediateUserExists = NonLiveInstallationStatics.IntermediateAuthenticationCookieExists();
+				RequestState.EnableUser();
 
-				// If the base URL doesn't include a path and the app-relative URL is just a slash, don't include this trailing slash in the URL since it will not be
-				// present in the canonical URLs that we construct and therefore it would cause problems with URL normalization.
-				var url = !EwfRequest.AppBaseUrlProvider.GetRequestBasePath( context.Request ).Any() && appRelativeUrl.Length == "/".Length
-					          ? baseUrl
-					          : baseUrl + appRelativeUrl;
+				Action<HttpContext> requestHandler;
+				using( MiniProfiler.Current.Step( "EWF - Resolve URL" ) )
+					requestHandler = resolveUrl( context, appRelativeUrl );
 
-
-				context.Items.Add( RequestStateKey, new AppRequestState( context, url, baseUrl ) );
-			},
-			false,
-			true );
-		if( context.Response.StatusCode != 200 )
-			return;
-
-		try {
-			var ipAddresses = AppProvider.GetWhitelistedIpAddressesForMaintenance();
-			if( ipAddresses != null && !ipAddresses.Contains( context.Connection.RemoteIpAddress?.ToString() ) ) {
-				EwfResponse.Create( "", new EwfResponseBodyCreator( () => "" ), statusCodeGetter: () => 503 ).WriteToAspNetResponse( context.Response );
-				return;
+				if( requestHandler != null )
+					requestHandler( context );
+				else {
+					contextAccessor.UseFrameworkContext = false;
+					try {
+						await next( context );
+					}
+					finally {
+						contextAccessor.UseFrameworkContext = true;
+					}
+				}
 			}
-
-			RequestState.IntermediateUserExists = NonLiveInstallationStatics.IntermediateAuthenticationCookieExists();
-			RequestState.EnableUser();
-
-			Action<HttpContext> requestHandler;
-			using( MiniProfiler.Current.Step( "EWF - Resolve URL" ) )
-				requestHandler = resolveUrl( context, appRelativeUrl );
-
-			if( requestHandler != null )
-				requestHandler( context );
-			else
-				await next( context );
-		}
-		catch( Exception exception ) {
-			HandleError( context, exception );
+			catch( Exception exception ) {
+				handleError( context, exception );
+			}
+			finally {
+				// Do not set a status code since we may have already set one or set a redirect page.
+				executeWithBasicExceptionHandling( context, () => RequestState.CleanUp(), false, false );
+			}
 		}
 		finally {
-			// Do not set a status code since we may have already set one or set a redirect page.
-			executeWithBasicExceptionHandling( () => RequestState.CleanUp(), false, false );
+			contextAccessor.UseFrameworkContext = false;
 		}
 	}
 
@@ -145,8 +162,9 @@ public static class RequestDispatchingStatics {
 	/// <summary>
 	/// This method will not work properly unless RequestState is not null and the authenticated user is available.
 	/// </summary>
-	internal static void HandleError( HttpContext context, Exception exception ) {
+	private static void handleError( HttpContext context, Exception exception ) {
 		executeWithBasicExceptionHandling(
+			context,
 			() => {
 				try {
 					rollbackDatabaseTransactionsAndClearResponse( context );
@@ -195,7 +213,7 @@ public static class RequestDispatchingStatics {
 			true );
 	}
 
-	private static void executeWithBasicExceptionHandling( Action handler, bool addErrorToRequestState, bool write500Response ) {
+	private static void executeWithBasicExceptionHandling( HttpContext context, Action handler, bool addErrorToRequestState, bool write500Response ) {
 		try {
 			handler();
 		}
@@ -210,7 +228,7 @@ public static class RequestDispatchingStatics {
 				},
 				delegate {
 					if( write500Response )
-						RequestDispatchingStatics.write500Response( currentContextGetter(), "Exception", ( prefix, e ) );
+						RequestDispatchingStatics.write500Response( context, "Exception", ( prefix, e ) );
 				} );
 		}
 	}
