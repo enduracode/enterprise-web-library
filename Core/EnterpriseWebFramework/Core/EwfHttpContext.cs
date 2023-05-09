@@ -21,7 +21,7 @@ internal sealed class EwfHttpContext: HttpContext {
 	public override ClaimsPrincipal User { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 	public override IDictionary<object, object> Items { get => aspNetContext.Items; set => throw new NotImplementedException(); }
 	public override IServiceProvider RequestServices { get => aspNetContext.RequestServices; set => throw new NotImplementedException(); }
-	public override CancellationToken RequestAborted { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+	public override CancellationToken RequestAborted { get => aspNetContext.RequestAborted; set => throw new NotImplementedException(); }
 	public override string TraceIdentifier { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 	public override ISession Session { get => aspNetContext.Session; set => throw new NotImplementedException(); }
 	public override void Abort() => throw new NotImplementedException();
