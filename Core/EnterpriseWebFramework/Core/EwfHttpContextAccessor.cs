@@ -10,9 +10,9 @@ internal sealed class EwfHttpContextAccessor: IHttpContextAccessor {
 		set {
 			var aspNetContext = aspNetAccessor.HttpContext;
 			if( value )
-				aspNetContext.Items.Remove( frameworkContextKey );
-			else
 				aspNetContext.Items.Add( frameworkContextKey, new EwfHttpContext( aspNetContext ) );
+			else
+				aspNetContext.Items.Remove( frameworkContextKey );
 		}
 	}
 
