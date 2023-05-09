@@ -19,7 +19,9 @@ internal sealed class EwfHttpContextAccessor: IHttpContextAccessor {
 	HttpContext IHttpContextAccessor.HttpContext {
 		get {
 			var aspNetContext = aspNetAccessor.HttpContext;
-			return aspNetContext.Items.TryGetValue( frameworkContextKey, out var frameworkContext ) ? (EwfHttpContext)frameworkContext : aspNetContext;
+			return aspNetContext is not null && aspNetContext.Items.TryGetValue( frameworkContextKey, out var frameworkContext )
+				       ? (EwfHttpContext)frameworkContext
+				       : aspNetContext;
 		}
 		set {
 			var aspNetContext = aspNetAccessor.HttpContext;
