@@ -3,6 +3,9 @@ using EnterpriseWebLibrary.MailMerging;
 using EnterpriseWebLibrary.MailMerging.RowTree;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Net.Http.Headers;
 using Tewl.IO;
 
@@ -13,9 +16,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 /// </summary>
 [ PublicAPI ]
 public class EwfResponse {
-	private static Func<HttpResponse> currentResponseGetter;
+	private static Func<HttpContext> currentContextGetter;
 
 	internal sealed class AspNetAdapter: HttpResponse {
+		internal int? StatusCodeNullable;
 		private Stream body;
 		private string contentType;
 		internal string RedirectUrl = "";
@@ -34,7 +38,15 @@ public class EwfResponse {
 		}
 
 		public override HttpContext HttpContext => throw new NotImplementedException();
-		public override int StatusCode { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+		public override int StatusCode {
+			get => throw new NotImplementedException();
+			set {
+				assertEnabled();
+				StatusCodeNullable = value;
+			}
+		}
+
 		public override IHeaderDictionary Headers => throw new NotImplementedException();
 
 		public override Stream Body {
@@ -77,8 +89,8 @@ public class EwfResponse {
 		}
 	}
 
-	internal static void Init( Func<HttpResponse> currentResponseGetter ) {
-		EwfResponse.currentResponseGetter = currentResponseGetter;
+	internal static void Init( Func<HttpContext> currentContextGetter ) {
+		EwfResponse.currentContextGetter = currentContextGetter;
 	}
 
 	/// <summary>
@@ -177,7 +189,7 @@ public class EwfResponse {
 	/// throughout the request via dependency injection, but within this method it is fully enabled for writing.</param>
 	public static EwfResponse CreateFromAspNetResponse( Action<HttpResponse> aspNetResponseWriter ) {
 		using var stream = new MemoryStream();
-		var aspNetResponse = (AspNetAdapter)currentResponseGetter();
+		var aspNetResponse = (AspNetAdapter)currentContextGetter().Response;
 		aspNetResponse.Enable( stream );
 		try {
 			aspNetResponseWriter( aspNetResponse );
@@ -187,12 +199,23 @@ public class EwfResponse {
 					new EwfResponseBodyCreator( writer => writer.Write( "Temporary Redirect: {0}".FormatWith( aspNetResponse.RedirectUrl ) ) ),
 					statusCodeGetter: () => 307,
 					additionalHeaderFieldGetter: () => ( "Location", aspNetResponse.RedirectUrl ).ToCollection() );
+			var statusCode = aspNetResponse.StatusCodeNullable;
 			var binaryBody = stream.ToArray();
-			return Create( aspNetResponse.ContentType, new EwfResponseBodyCreator( () => binaryBody ) );
+			return Create( aspNetResponse.ContentType, new EwfResponseBodyCreator( () => binaryBody ), statusCodeGetter: () => statusCode );
 		}
 		finally {
 			aspNetResponse.Disable();
 		}
+	}
+
+	/// <summary>
+	/// Creates a response from an ASP.NET MVC <see cref="IActionResult"/> object.
+	/// </summary>
+	/// <param name="result">The MVC action result. Do not pass null.</param>
+	public static EwfResponse CreateFromAspNetMvcResult( IActionResult result ) {
+		var context = currentContextGetter();
+		return CreateFromAspNetResponse(
+			_ => Task.Run( async () => await result.ExecuteResultAsync( new ActionContext( context, new RouteData(), new ActionDescriptor() ) ) ).Wait() );
 	}
 
 	internal readonly string ContentType;

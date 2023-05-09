@@ -144,6 +144,7 @@ public static class EwfOps {
 								options.IdleTimeout = AuthenticationStatics.SessionDuration.ToTimeSpan();
 							} );
 						builder.Services.AddDataProtection();
+						builder.Services.AddMvcCore();
 
 						// MiniProfiler
 						builder.Services.AddMemoryCache();
@@ -205,7 +206,7 @@ public static class EwfOps {
 									return context != null && context.Items.ContainsKey( RequestDispatchingStatics.RequestStateKey ) ? context.Request : null;
 								},
 								networkWaitTime => AppRequestState.Instance.AddNetworkWaitTime( networkWaitTime ) );
-							EwfResponse.Init( () => contextAccessor.HttpContext.Response );
+							EwfResponse.Init( () => contextAccessor.HttpContext );
 							UrlHandlingStatics.Init(
 								() => RequestDispatchingStatics.AppProvider.GetBaseUrlPatterns(),
 								( baseUrlString, appRelativeUrl ) =>
