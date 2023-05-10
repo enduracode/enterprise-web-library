@@ -254,12 +254,10 @@ public class EwfResponse {
 			aspNetResponse.StatusCode = statusCode.Value;
 
 		var typedHeaders = aspNetResponse.GetTypedHeaders();
-		if( ContentType.Length > 0 ) {
-			var headerValue = new MediaTypeHeaderValue( ContentType );
-			if( BodyCreator.BodyIsText )
-				headerValue.Encoding = EwfResponseBodyCreator.TextEncoding;
-			typedHeaders.ContentType = headerValue;
-		}
+		if( ContentType.Length > 0 )
+			typedHeaders.ContentType = BodyCreator.BodyIsText
+				                           ? new MediaTypeHeaderValue( ContentType ) { Encoding = EwfResponseBodyCreator.TextEncoding }
+				                           : MediaTypeHeaderValue.Parse( ContentType );
 
 		var fileName = FileNameCreator();
 		if( fileName.Any() )
