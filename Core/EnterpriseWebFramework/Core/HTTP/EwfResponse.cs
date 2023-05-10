@@ -21,7 +21,7 @@ public class EwfResponse {
 	internal sealed class AspNetAdapter: HttpResponse {
 		internal int? StatusCodeNullable;
 		private Stream body;
-		private string contentType;
+		private string contentType = "";
 		internal string RedirectUrl = "";
 
 		public AspNetAdapter( IResponseCookies cookies ) {
@@ -30,7 +30,6 @@ public class EwfResponse {
 
 		internal void Enable( Stream body ) {
 			this.body = body;
-			contentType = ContentTypes.Html;
 		}
 
 		internal void Disable() {
@@ -66,7 +65,7 @@ public class EwfResponse {
 			}
 			set {
 				assertEnabled();
-				contentType = value;
+				contentType = value ?? "";
 			}
 		}
 
