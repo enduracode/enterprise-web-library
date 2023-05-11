@@ -20,6 +20,7 @@ public class EwfResponse {
 
 	internal sealed class AspNetAdapter: HttpResponse {
 		internal int? StatusCodeNullable;
+		private readonly HeaderDictionary headers = new();
 		private Stream body;
 		private string contentType = "";
 		internal string RedirectUrl = "";
@@ -46,7 +47,12 @@ public class EwfResponse {
 			}
 		}
 
-		public override IHeaderDictionary Headers => throw new NotImplementedException();
+		public override IHeaderDictionary Headers {
+			get {
+				assertEnabled();
+				return headers;
+			}
+		}
 
 		public override Stream Body {
 			get {
@@ -199,8 +205,18 @@ public class EwfResponse {
 					statusCodeGetter: () => 307,
 					additionalHeaderFieldGetter: () => ( "Location", aspNetResponse.RedirectUrl ).ToCollection() );
 			var statusCode = aspNetResponse.StatusCodeNullable;
+			var headers = aspNetResponse.Headers;
 			var binaryBody = stream.ToArray();
-			return Create( aspNetResponse.ContentType, new EwfResponseBodyCreator( () => binaryBody ), statusCodeGetter: () => statusCode );
+			return Create(
+				aspNetResponse.ContentType,
+				new EwfResponseBodyCreator( () => binaryBody ),
+				statusCodeGetter: () => statusCode,
+				additionalHeaderFieldGetter: () => headers.SelectMany(
+						pair => string.Equals( pair.Key, HeaderNames.ContentType, StringComparison.Ordinal )
+							        ? throw new Exception( "{0} is not supported in HttpResponse.Headers.".FormatWith( HeaderNames.ContentType ) )
+							        : pair.Value,
+						( pair, value ) => ( pair.Key, value ) )
+					.Materialize() );
 		}
 		finally {
 			aspNetResponse.Disable();
