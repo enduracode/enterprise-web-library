@@ -224,13 +224,14 @@ public class EwfResponse {
 	}
 
 	/// <summary>
-	/// Creates a response from an ASP.NET MVC <see cref="IActionResult"/> object.
+	/// Creates a response from an ASP.NET MVC action.
 	/// </summary>
-	/// <param name="result">The MVC action result. Do not pass null.</param>
-	public static EwfResponse CreateFromAspNetMvcResult( IActionResult result ) {
+	/// <param name="method">A function that executes an MVC action and returns the result. Do not pass or return null.</param>
+	public static EwfResponse CreateFromAspNetMvcAction( Func<Task<IActionResult>> method ) {
 		var context = currentContextGetter();
 		return CreateFromAspNetResponse(
-			_ => Task.Run( async () => await result.ExecuteResultAsync( new ActionContext( context, new RouteData(), new ActionDescriptor() ) ) ).Wait() );
+			_ => Task.Run( async () => await ( await method() ).ExecuteResultAsync( new ActionContext( context, new RouteData(), new ActionDescriptor() ) ) )
+				.Wait() );
 	}
 
 	internal readonly string ContentType;
