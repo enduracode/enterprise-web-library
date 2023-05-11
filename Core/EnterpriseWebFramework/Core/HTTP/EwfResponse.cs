@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 using Tewl.IO;
 
@@ -22,7 +23,6 @@ public class EwfResponse {
 		internal int? StatusCodeNullable;
 		private readonly HeaderDictionary headers = new();
 		private Stream body;
-		private string contentType = "";
 		internal string RedirectUrl = "";
 
 		public AspNetAdapter( IResponseCookies cookies ) {
@@ -63,18 +63,7 @@ public class EwfResponse {
 		}
 
 		public override long? ContentLength { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
-		public override string ContentType {
-			get {
-				assertEnabled();
-				return contentType;
-			}
-			set {
-				assertEnabled();
-				contentType = value ?? "";
-			}
-		}
-
+		public override string ContentType { get => Headers.ContentType; set => Headers.ContentType = value.IsNullOrEmpty() ? value : default( StringValues ); }
 		public override IResponseCookies Cookies { get; }
 		public override bool HasStarted => throw new NotImplementedException();
 		public override void OnStarting( Func<object, Task> callback, object state ) => throw new NotImplementedException();
@@ -208,13 +197,11 @@ public class EwfResponse {
 			var headers = aspNetResponse.Headers;
 			var binaryBody = stream.ToArray();
 			return Create(
-				aspNetResponse.ContentType,
+				aspNetResponse.ContentType ?? "",
 				new EwfResponseBodyCreator( () => binaryBody ),
 				statusCodeGetter: () => statusCode,
 				additionalHeaderFieldGetter: () => headers.SelectMany(
-						pair => string.Equals( pair.Key, HeaderNames.ContentType, StringComparison.Ordinal )
-							        ? throw new Exception( "{0} is not supported in HttpResponse.Headers.".FormatWith( HeaderNames.ContentType ) )
-							        : pair.Value,
+						pair => string.Equals( pair.Key, HeaderNames.ContentType, StringComparison.Ordinal ) ? Enumerable.Empty<string>() : pair.Value,
 						( pair, value ) => ( pair.Key, value ) )
 					.Materialize() );
 		}
