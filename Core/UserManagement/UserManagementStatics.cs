@@ -1,70 +1,67 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using EnterpriseWebLibrary.Configuration;
+﻿using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.UserManagement.IdentityProviders;
-using Humanizer;
-using Tewl.Tools;
 
-namespace EnterpriseWebLibrary.UserManagement {
+namespace EnterpriseWebLibrary.UserManagement;
+
+/// <summary>
+/// Provides useful constants and methods pertaining to user management.
+/// </summary>
+public static class UserManagementStatics {
+	private const string providerName = "UserManagement";
+	internal const string CertificatePassword = "password";
+
+	private static SystemProviderReference<SystemUserManagementProvider> provider;
+	private static Action certificateUpdateNotifier;
+
+	private static IReadOnlyCollection<IdentityProvider> identityProviders;
+	private static LocalIdentityProvider localIdentityProvider;
+	private static ( Func<string> getter, Action<string> updater )? certificateMethods;
+
+	internal static void Init( Action certificateUpdateNotifier, Func<User> currentUserGetter ) {
+		User.Init( currentUserGetter );
+
+		provider = ConfigurationStatics.GetSystemLibraryProvider<SystemUserManagementProvider>( providerName );
+		UserManagementStatics.certificateUpdateNotifier = certificateUpdateNotifier;
+	}
+
 	/// <summary>
-	/// Provides useful constants and methods pertaining to user management.
+	/// EWL use only.
 	/// </summary>
-	public static class UserManagementStatics {
-		private const string providerName = "UserManagement";
-		internal const string CertificatePassword = "password";
+	public static bool UserManagementEnabled => provider.GetProvider( returnNullIfNotFound: true ) != null;
 
-		private static SystemProviderReference<SystemUserManagementProvider> provider;
-		private static Action certificateUpdateNotifier;
+	/// <summary>
+	/// EWL use only.
+	/// </summary>
+	public static SystemUserManagementProvider SystemProvider => provider.GetProvider();
 
-		private static IReadOnlyCollection<IdentityProvider> identityProviders;
-		private static LocalIdentityProvider localIdentityProvider;
-		private static ( Func<string> getter, Action<string> updater )? certificateMethods;
+	internal static void InitSystemSpecificLogicDependencies() {
+		if( !UserManagementEnabled )
+			return;
+		identityProviders = SystemProvider.GetIdentityProviders().Materialize();
+		localIdentityProvider = identityProviders.OfType<LocalIdentityProvider>().SingleOrDefault();
+		certificateMethods = SystemProvider.GetCertificateMethods();
+	}
 
-		internal static void Init( Action certificateUpdateNotifier ) {
-			provider = ConfigurationStatics.GetSystemLibraryProvider<SystemUserManagementProvider>( providerName );
-			UserManagementStatics.certificateUpdateNotifier = certificateUpdateNotifier;
-		}
+	internal static IReadOnlyCollection<IdentityProvider> IdentityProviders => identityProviders;
 
-		/// <summary>
-		/// EWL use only.
-		/// </summary>
-		public static bool UserManagementEnabled => provider.GetProvider( returnNullIfNotFound: true ) != null;
+	internal static bool LocalIdentityProviderEnabled => localIdentityProvider != null;
 
-		/// <summary>
-		/// EWL use only.
-		/// </summary>
-		public static SystemUserManagementProvider SystemProvider => provider.GetProvider();
+	internal static LocalIdentityProvider LocalIdentityProvider => localIdentityProvider;
 
-		internal static void InitSystemSpecificLogicDependencies() {
-			if( !UserManagementEnabled )
-				return;
-			identityProviders = SystemProvider.GetIdentityProviders().Materialize();
-			localIdentityProvider = identityProviders.OfType<LocalIdentityProvider>().SingleOrDefault();
-			certificateMethods = SystemProvider.GetCertificateMethods();
-		}
+	internal static string GetCertificate() =>
+		certificateMethods.HasValue ? certificateMethods.Value.getter() : throw new ApplicationException( "Self-signed certificate methods not available." );
 
-		internal static IReadOnlyCollection<IdentityProvider> IdentityProviders => identityProviders;
+	internal static void UpdateCertificate( string certificate ) {
+		if( !certificateMethods.HasValue )
+			throw new ApplicationException( "Self-signed certificate methods not available." );
+		certificateMethods.Value.updater( certificate );
+		certificateUpdateNotifier();
+	}
 
-		internal static bool LocalIdentityProviderEnabled => localIdentityProvider != null;
-
-		internal static LocalIdentityProvider LocalIdentityProvider => localIdentityProvider;
-
-		internal static string GetCertificate() =>
-			certificateMethods.HasValue ? certificateMethods.Value.getter() : throw new ApplicationException( "Self-signed certificate methods not available." );
-
-		internal static void UpdateCertificate( string certificate ) {
-			if( !certificateMethods.HasValue )
-				throw new ApplicationException( "Self-signed certificate methods not available." );
-			certificateMethods.Value.updater( certificate );
-			certificateUpdateNotifier();
-		}
-
-		internal static User GetUser( int userId, bool ensureUserExists ) {
-			var user = SystemProvider.GetUser( userId );
-			if( user == null && ensureUserExists )
-				throw new ApplicationException( "A user with an ID of {0} does not exist.".FormatWith( userId ) );
-			return user;
-		}
+	internal static User GetUser( int userId, bool ensureUserExists ) {
+		var user = SystemProvider.GetUser( userId );
+		if( user == null && ensureUserExists )
+			throw new ApplicationException( "A user with an ID of {0} does not exist.".FormatWith( userId ) );
+		return user;
 	}
 }

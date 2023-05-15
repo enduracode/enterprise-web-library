@@ -103,7 +103,8 @@ public static class EwfOps {
 				}
 			},
 			memoryCacheGetter: () => memoryCache,
-			mainDataAccessStateGetter: () => EwfRequest.Current != null ? RequestDispatchingStatics.RequestState.DataAccessState : initTimeDataAccessState.Value );
+			mainDataAccessStateGetter: () => EwfRequest.Current != null ? RequestDispatchingStatics.RequestState.DataAccessState : initTimeDataAccessState.Value,
+			currentUserGetter: () => EwfRequest.Current != null ? RequestDispatchingStatics.RequestState.UserAndImpersonator.Item1 : null );
 		var frameworkInitialized = false;
 		try {
 			return GlobalInitializationOps.ExecuteAppWithStandardExceptionHandling(
