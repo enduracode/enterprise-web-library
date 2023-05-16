@@ -159,9 +159,6 @@ public static class RequestDispatchingStatics {
 		return null;
 	}
 
-	/// <summary>
-	/// This method will not work properly unless RequestState is not null and the authenticated user is available.
-	/// </summary>
 	private static void handleError( HttpContext context, Exception exception ) {
 		executeWithBasicExceptionHandling(
 			context,
@@ -187,9 +184,11 @@ public static class RequestDispatchingStatics {
 							transferRequest( context, 403, new UserManagement.Pages.Impersonate( RequestState.Url ) );
 						else if( accessDeniedException.LogInPage != null )
 							transferRequest( context, 403, accessDeniedException.LogInPage );
-						else if( UserManagementStatics.LocalIdentityProviderEnabled || AuthenticationStatics.SamlIdentityProviders.Count > 1 )
+						else if( RequestState.UserAccessible && ( UserManagementStatics.LocalIdentityProviderEnabled ||
+						                                          AuthenticationStatics.SamlIdentityProviders.Count > 1 ||
+						                                          ( AuthenticationStatics.SamlIdentityProviders.Any() && User.Current is not null ) ) )
 							transferRequest( context, 403, new UserManagement.Pages.LogIn( RequestState.Url ) );
-						else if( AuthenticationStatics.SamlIdentityProviders.Any() )
+						else if( RequestState.UserAccessible && AuthenticationStatics.SamlIdentityProviders.Any() )
 							transferRequest(
 								context,
 								403,

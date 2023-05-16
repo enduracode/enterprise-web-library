@@ -40,6 +40,7 @@ partial class EntitySetup: UiEntitySetup {
 			.Append( ResponsiveTableDemo.UrlPatterns.Literal( this, "responsive-table" ) )
 			.Append( FileUploadDemo.UrlPatterns.Literal( this, "file-upload" ) )
 			.Append( IntermediatePostBacks.UrlPatterns.Literal( this, "intermediate-post-backs" ) )
+			.Append( UnauthorizedPage.UrlPatterns.Literal( this, "unauthorized-page" ) )
 			.Append( CreateSystem.UrlPatterns.Literal( "create-system" ) )
 			.Append( ConfigurationSchemas.EntitySetup.UrlPatterns.Literal( "ConfigurationSchemas" ) )
 			.Concat( LegacyUrlStatics.GetPatterns() );
@@ -49,6 +50,7 @@ partial class EntitySetup: UiEntitySetup {
 			navActionGetter: _ => {
 				var one = new ModalBoxId();
 				var two = new ModalBoxId();
+				var unauthorizedPage = new UnauthorizedPage( this );
 				return new HyperlinkSetup( new ExternalResource( "http://www.microsoft.com" ), "Go to Microsoft" )
 					.Append<ActionComponentSetup>( new ButtonSetup( "Custom script", behavior: new CustomButtonBehavior( () => "alert('test');" ) ) )
 					.Append(
@@ -83,6 +85,7 @@ partial class EntitySetup: UiEntitySetup {
 									true,
 									new EwfImage( new ImageSetup( "Houses in the mountains" ), new ExternalResource( "http://r0k.us/graphics/kodak/kodak/kodim08.png" ) )
 										.ToCollection() ).ToCollection() ) ) )
+					.Append( new HyperlinkSetup( unauthorizedPage.ToHyperlinkDefaultBehavior( disableAuthorizationCheck: true ), unauthorizedPage.ResourceName ) )
 					.Materialize();
 			},
 			navFormControls:

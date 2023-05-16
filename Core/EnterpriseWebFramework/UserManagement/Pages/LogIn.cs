@@ -15,13 +15,15 @@ partial class LogIn {
 	private static readonly ElementClass passwordClass = new( "ewfLogInPassword" );
 	private static readonly ElementClass loginCodeButtonClass = new( "ewfLogInLcB" );
 
+	protected override string getResourceName() => authenticatedUserDeniedAccess ? "Access Denied" : base.getResourceName();
+
 	protected override UrlHandler getUrlParent() => new Admin.EntitySetup();
 
 	protected override PageContent getContent() {
 		parametersModification.User = "";
 		parametersModification.Code = "";
 
-		var customContent = AuthenticationStatics.AppProvider.GetLogInPageContent( ReturnUrl, User, Code );
+		var customContent = AuthenticationStatics.AppProvider.GetLogInPageContent( ReturnUrl, User, Code, authenticatedUserDeniedAccess );
 		if( customContent != null )
 			return customContent;
 
@@ -45,7 +47,30 @@ partial class LogIn {
 				} );
 		}
 
-		var content = new UiPageContent( omitContentBox: true );
+		return new UiPageContent( omitContentBox: true ).Add( authenticatedUserDeniedAccess ? getAuthenticatedUserDeniedAccessComponents() : getLogInComponents() );
+	}
+
+	private bool authenticatedUserDeniedAccess =>
+		EnterpriseWebLibrary.UserManagement.User.Current is not null && !string.Equals( GetUrl(), AppRequestState.Instance.Url, StringComparison.Ordinal );
+
+	private IReadOnlyCollection<FlowComponent> getAuthenticatedUserDeniedAccessComponents() {
+		return new Section(
+			new Paragraph(
+					"You’re already logged in, but do not have access to this page. It’s possible that you had access in the past and that it was revoked."
+						.ToComponents() )
+				.Append(
+					new Paragraph(
+						new EwfHyperlink(
+							UserManagementStatics.LocalIdentityProviderEnabled || AuthenticationStatics.SamlIdentityProviders.Count > 1
+								? this
+								: new SamlResources.LogIn( AuthenticationStatics.SamlIdentityProviders.Single().EntityId, ReturnUrl ),
+							new ButtonHyperlinkStyle( "Log In as Another User" ) ).ToCollection() ) )
+				.Materialize(),
+			style: SectionStyle.Box ).ToCollection();
+	}
+
+	private IReadOnlyCollection<FlowComponent> getLogInComponents() {
+		var components = new List<FlowComponent>();
 
 		var codeEntryIsForPasswordReset = ComponentStateItem.Create<bool?>( "codeEntryIsForPasswordReset", null, _ => true, false );
 
@@ -54,7 +79,9 @@ partial class LogIn {
 		var loginCode = new DataValue<string>();
 		AuthenticationStatics.PasswordLoginModificationMethod passwordLoginMethod = null;
 		AuthenticationStatics.LoginCodeSenderMethod loginCodeSender = null;
+		AuthenticationStatics.CodeLoginModificationMethod codeLoginMethod = null;
 
+		string destinationUrl = null;
 		var logInPb = PostBack.CreateFull(
 			modificationMethod: () => {
 				if( codeEntryIsForPasswordReset.Value.Value.HasValue )
@@ -156,7 +183,7 @@ partial class LogIn {
 					new[] { logInPb, sendCodePb, newPasswordPb }.Where( i => i != null ),
 					AuthenticationStatics.GetLogInHiddenFieldsAndMethods );
 
-				content.Add(
+				components.Add(
 					new FlowAutofocusRegion(
 						AutofocusCondition.InitialRequest(),
 						new Section(
@@ -172,16 +199,16 @@ partial class LogIn {
 
 		var specialInstructions = EwfUiStatics.AppProvider.GetSpecialInstructionsForLogInPage();
 		if( specialInstructions.Any() )
-			content.Add( specialInstructions );
+			components.AddRange( specialInstructions );
 		else {
 			var unregisteredComponents = new List<FlowComponent>();
 			unregisteredComponents.Add(
 				new Paragraph(
 					"If you have difficulty logging in, please {0}".FormatWith( UserManagementStatics.LocalIdentityProvider.LogInHelpInstructions ).ToComponents() ) );
-			content.Add( new Section( "Unregistered users", unregisteredComponents, style: SectionStyle.Box ) );
+			components.Add( new Section( "Unregistered users", unregisteredComponents, style: SectionStyle.Box ) );
 		}
 
-		return content;
+		return components;
 	}
 
 	private FormItem getPasswordFormItem(
