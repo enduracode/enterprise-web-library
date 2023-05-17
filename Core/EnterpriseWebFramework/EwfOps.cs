@@ -20,6 +20,8 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using Serilog;
+using Serilog.Events;
 using StackExchange.Profiling;
 using StackExchange.Profiling.Internal;
 using StackExchange.Profiling.Storage;
@@ -112,6 +114,19 @@ public static class EwfOps {
 					try {
 						EwfConfigurationStatics.Init();
 
+						var loggerConfiguration = new LoggerConfiguration().MinimumLevel.ControlledBy( Admin.DiagnosticLog.LevelSwitch )
+							.MinimumLevel.Override( "Microsoft.AspNetCore", LogEventLevel.Warning );
+						if( ConfigurationStatics.IsDevelopmentInstallation )
+							loggerConfiguration = loggerConfiguration.WriteTo.Console();
+						else
+							loggerConfiguration = loggerConfiguration.WriteTo.Async(
+								c => c.File(
+									EwfConfigurationStatics.AppConfiguration.DiagnosticLogFilePath,
+									levelSwitch: Admin.DiagnosticLog.LevelSwitch,
+									rollingInterval: RollingInterval.Infinite,
+									rollOnFileSizeLimit: false ) );
+						Log.Logger = loggerConfiguration.CreateLogger();
+
 						var builder = Microsoft.AspNetCore.Builder.WebApplication.CreateBuilder(
 							new WebApplicationOptions
 								{
@@ -146,6 +161,8 @@ public static class EwfOps {
 							} );
 						builder.Services.AddDataProtection();
 						builder.Services.AddMvcCore();
+
+						builder.Host.UseSerilog();
 
 						// MiniProfiler
 						builder.Services.AddMemoryCache();
@@ -420,6 +437,7 @@ public static class EwfOps {
 						// updating to .NET 7.
 						//if( ConfigurationStatics.IsDevelopmentInstallation && EwfConfigurationStatics.AppConfiguration.UsesKestrel.Value )
 						//	app.UseResponseCompression();
+						app.UseSerilogRequestLogging();
 						app.UseMiniProfiler(); // only used to handle MiniProfiler requests
 						RequestDispatchingStatics.AppProvider.AddCustomMiddleware( app );
 						app.Use( RequestDispatchingStatics.ProcessRequest );
@@ -431,6 +449,7 @@ public static class EwfOps {
 					}
 					finally {
 						appInitializer?.CleanUpStatics();
+						Log.CloseAndFlush();
 					}
 				} );
 		}
