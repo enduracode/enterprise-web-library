@@ -6,9 +6,15 @@ using Serilog.Events;
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin;
 
 partial class DiagnosticLog {
-	private const LogEventLevel debugDisabledLevel = LogEventLevel.Warning;
 	private const LogEventLevel debugEnabledLevel = LogEventLevel.Debug;
-	internal static readonly LoggingLevelSwitch LevelSwitch = new( initialMinimumLevel: debugDisabledLevel );
+
+	private static LoggingLevelSwitch levelSwitch;
+	private static LogEventLevel debugDisabledLevel;
+
+	internal static void Init( LoggingLevelSwitch levelSwitch ) {
+		DiagnosticLog.levelSwitch = levelSwitch;
+		debugDisabledLevel = levelSwitch.MinimumLevel;
+	}
 
 	protected override PageContent getContent() {
 		var logText = "";
@@ -20,12 +26,12 @@ partial class DiagnosticLog {
 		return new UiPageContent(
 			bodyClasses: new ElementClass( "ewfDiagnosticLog" /* This is used by EWF CSS files. */ ),
 			pageActions: new ButtonSetup(
-				"{0} Debug Logging".FormatWith( LevelSwitch.MinimumLevel is debugEnabledLevel ? "Disable" : "Enable" ),
+				"{0} Debug Logging".FormatWith( levelSwitch.MinimumLevel is debugEnabledLevel ? "Disable" : "Enable" ),
 				behavior: new PostBackBehavior(
 					postBack: PostBack.CreateFull(
 						id: "debug",
 						modificationMethod: () => {
-							LevelSwitch.MinimumLevel = LevelSwitch.MinimumLevel is debugEnabledLevel ? debugDisabledLevel : debugEnabledLevel;
+							levelSwitch.MinimumLevel = levelSwitch.MinimumLevel is debugEnabledLevel ? debugDisabledLevel : debugEnabledLevel;
 						} ) ) ).ToCollection() ).Add(
 			(FlowComponent)new DisplayableElement(
 				_ => new DisplayableElementData(

@@ -21,6 +21,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Serilog;
+using Serilog.Core;
 using Serilog.Events;
 using StackExchange.Profiling;
 using StackExchange.Profiling.Internal;
@@ -114,17 +115,17 @@ public static class EwfOps {
 					try {
 						EwfConfigurationStatics.Init();
 
-						var loggerConfiguration = new LoggerConfiguration().MinimumLevel.ControlledBy( Admin.DiagnosticLog.LevelSwitch )
+						var diagnosticLogLevelSwitch = new LoggingLevelSwitch(
+							initialMinimumLevel: ConfigurationStatics.IsDevelopmentInstallation ? LogEventLevel.Information : LogEventLevel.Warning );
+						var loggerConfiguration = new LoggerConfiguration().MinimumLevel.ControlledBy( diagnosticLogLevelSwitch )
 							.MinimumLevel.Override( "Microsoft.AspNetCore", LogEventLevel.Warning );
-						if( ConfigurationStatics.IsDevelopmentInstallation )
-							loggerConfiguration = loggerConfiguration.WriteTo.Console();
-						else
-							loggerConfiguration = loggerConfiguration.WriteTo.Async(
-								c => c.File(
-									EwfConfigurationStatics.AppConfiguration.DiagnosticLogFilePath,
-									levelSwitch: Admin.DiagnosticLog.LevelSwitch,
-									rollingInterval: RollingInterval.Infinite,
-									rollOnFileSizeLimit: false ) );
+						loggerConfiguration = ConfigurationStatics.IsDevelopmentInstallation
+							                      ? loggerConfiguration.WriteTo.Console()
+							                      : loggerConfiguration.WriteTo.Async(
+								                      c => c.File(
+									                      EwfConfigurationStatics.AppConfiguration.DiagnosticLogFilePath,
+									                      rollingInterval: RollingInterval.Infinite,
+									                      rollOnFileSizeLimit: false ) );
 						Log.Logger = loggerConfiguration.CreateLogger();
 
 						var builder = Microsoft.AspNetCore.Builder.WebApplication.CreateBuilder(
@@ -415,7 +416,7 @@ public static class EwfOps {
 										specifier.Code = code;
 									} ).GetUrl(),
 								destinationUrl => new UserManagement.Pages.ChangePassword( destinationUrl ).GetUrl( disableAuthorizationCheck: true ) );
-							Admin.EntitySetup.Init( () => RequestDispatchingStatics.AppProvider.GetFrameworkUrlParent() );
+							Admin.EntitySetup.Init( () => RequestDispatchingStatics.AppProvider.GetFrameworkUrlParent(), diagnosticLogLevelSwitch );
 							RequestDispatchingStatics.Init(
 								providerGetter.GetProvider<AppRequestDispatchingProvider>( "RequestDispatching" ),
 								() => contextAccessor.HttpContext );

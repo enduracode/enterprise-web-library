@@ -1,11 +1,14 @@
 ﻿using EnterpriseWebLibrary.UserManagement;
+using Serilog.Core;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin;
 
 partial class EntitySetup: UiEntitySetup {
 	private static Func<UrlHandler> frameworkUrlParentGetter;
 
-	internal static void Init( Func<UrlHandler> frameworkUrlParentGetter ) {
+	internal static void Init( Func<UrlHandler> frameworkUrlParentGetter, LoggingLevelSwitch diagnosticLogLevelSwitch ) {
+		DiagnosticLog.Init( diagnosticLogLevelSwitch );
+
 		EntitySetup.frameworkUrlParentGetter = frameworkUrlParentGetter;
 	}
 
