@@ -61,6 +61,7 @@ ewfSectionBoxStyleBothStates + ewfSectionBoxStyleBothStates {
 
 /* top */
 p,
+pre,
 ewfUnorderedLineList,
 ewfUnorderedStackList,
 ewfUnorderedWrappingList,
@@ -79,6 +80,7 @@ ewfHtmlBlock {
 	margin-top: 1em;
 }
 p:first-child,
+pre:first-child,
 ewfUnorderedLineList:first-child,
 ewfUnorderedStackList:first-child,
 ewfUnorderedWrappingList:first-child,

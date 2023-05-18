@@ -701,3 +701,12 @@ ewfUiPoweredByEwlFooterContainer {
 .ewfLogInPasswordContainer > div > span {
 	margin-right: .5em;
 }
+
+/* diagnostic log page */
+body.ewfDiagnosticLog ewfSectionBoxStyleBothStates, body.ewfDiagnosticLog ewfUiContentBox, body.ewfDiagnosticLog ewfUiContentFootActionListContainer {
+	max-width: revert;
+}
+body.ewfDiagnosticLog pre {
+	font-size: min( 2.5vw, 1rem );
+	white-space: pre-wrap;
+}

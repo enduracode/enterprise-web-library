@@ -11,6 +11,10 @@ ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTr
 	font-family: 'Libre Franklin', sans-serif;
 }
 
+body.ewfDiagnosticLog samp {
+	font-family: 'Roboto Mono', monospace;
+}
+
 ewfTopWarningContainer ewfActionComponentAllStylesAllStates {
 	text-transform: uppercase;
 }
