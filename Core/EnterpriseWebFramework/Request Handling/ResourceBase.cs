@@ -194,7 +194,7 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 	}
 
 	/// <summary>
-	/// Gets whether the resource is public in intermediate installations.
+	/// Gets whether the resource is public in intermediate installations, regardless of other authorization logic that may exist.
 	/// </summary>
 	protected internal virtual bool IsIntermediateInstallationPublicResource => false;
 
