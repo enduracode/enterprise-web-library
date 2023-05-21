@@ -113,6 +113,11 @@ internal class UpdateDependentLogic: Operation {
 				_ => {} );
 			generateCodeForProject(
 				installation,
+				"OpenID Connect Provider",
+				EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.OpenIdConnectProviderProjectPath ),
+				_ => {} );
+			generateCodeForProject(
+				installation,
 				"SAML Provider",
 				EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.SamlProviderProjectPath ),
 				_ => {} );

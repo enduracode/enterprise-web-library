@@ -6,6 +6,7 @@ using System.Xml;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core;
+using EnterpriseWebLibrary.EnterpriseWebFramework.OpenIdProvider;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.ExternalFunctionality;
@@ -169,6 +170,8 @@ public static class EwfOps {
 						builder.Services.AddMemoryCache();
 						builder.Services.AddSingleton<IConfigureOptions<MiniProfilerOptions>, MiniProfilerConfigureOptions>();
 
+						if( ExternalFunctionalityStatics.OpenIdConnectFunctionalityEnabled )
+							ExternalFunctionalityStatics.ExternalOpenIdConnectProvider.RegisterDependencyInjectionServices( builder.Services );
 						if( ExternalFunctionalityStatics.SamlFunctionalityEnabled )
 							ExternalFunctionalityStatics.ExternalSamlProvider.RegisterDependencyInjectionServices( builder.Services );
 
@@ -193,7 +196,12 @@ public static class EwfOps {
 									@"{0} provider not found in application. To implement, create a class named {0} in ""Your Website\Providers"" that derives from App{0}Provider."
 										.FormatWith( providerName ) );
 
-							var contextAccessor = app.Services.GetRequiredService<IHttpContextAccessor>();
+							if( ExternalFunctionalityStatics.OpenIdConnectFunctionalityEnabled )
+								ExternalFunctionalityStatics.ExternalOpenIdConnectProvider.InitAppStatics(
+									() => AspNetStatics.Services,
+									EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString( true ),
+									OpenIdProviderStatics.GetCertificate,
+									OpenIdProviderStatics.CertificatePassword );
 							if( ExternalFunctionalityStatics.SamlFunctionalityEnabled )
 								ExternalFunctionalityStatics.ExternalSamlProvider.InitAppStatics(
 									() => AspNetStatics.Services,
@@ -217,6 +225,7 @@ public static class EwfOps {
 											} )
 										.Materialize() );
 
+							var contextAccessor = app.Services.GetRequiredService<IHttpContextAccessor>();
 							AspNetStatics.Init( () => contextAccessor.HttpContext?.RequestServices ?? serviceScope.ServiceProvider );
 							EwfRequest.Init(
 								providerGetter.GetProvider<AppRequestBaseUrlProvider>( "RequestBaseUrl" ),
@@ -416,6 +425,7 @@ public static class EwfOps {
 										specifier.Code = code;
 									} ).GetUrl(),
 								destinationUrl => new UserManagement.Pages.ChangePassword( destinationUrl ).GetUrl( disableAuthorizationCheck: true ) );
+							OpenIdProviderStatics.Init( providerGetter.GetProvider<AppOpenIdProviderProvider>( "OpenIdProvider" ) );
 							Admin.EntitySetup.Init( () => RequestDispatchingStatics.AppProvider.GetFrameworkUrlParent(), diagnosticLogLevelSwitch );
 							RequestDispatchingStatics.Init(
 								providerGetter.GetProvider<AppRequestDispatchingProvider>( "RequestDispatching" ),
@@ -424,6 +434,9 @@ public static class EwfOps {
 							appInitializer?.InitStatics();
 
 							executeWithAutomaticDatabaseConnections( AuthenticationStatics.InitAppSpecificLogicDependencies );
+							executeWithAutomaticDatabaseConnections( OpenIdProviderStatics.InitAppSpecificLogicDependencies );
+							if( OpenIdProviderStatics.OpenIdProviderEnabled )
+								executeWithAutomaticDatabaseConnections( ExternalFunctionalityStatics.ExternalOpenIdConnectProvider.InitAppSpecificLogicDependencies );
 							if( AuthenticationStatics.SamlIdentityProviders.Any() || ExternalFunctionalityStatics.SamlFunctionalityEnabled )
 								executeWithAutomaticDatabaseConnections( ExternalFunctionalityStatics.ExternalSamlProvider.InitAppSpecificLogicDependencies );
 						}
