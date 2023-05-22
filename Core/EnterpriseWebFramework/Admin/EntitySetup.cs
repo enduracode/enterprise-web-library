@@ -27,8 +27,13 @@ partial class EntitySetup: UiEntitySetup {
 	public override ResourceBase DefaultResource => new BasicTests( this );
 
 	protected override IEnumerable<ResourceGroup> createListedResources() =>
-		new ResourceGroup( new BasicTests( this ), new RequestProfiling( this ), new DiagnosticLog( this ), new UserManagement( this ), new CssElements( this ) )
-			.ToCollection();
+		new ResourceGroup(
+			new BasicTests( this ),
+			new RequestProfiling( this ),
+			new DiagnosticLog( this ),
+			new UserManagement( this ),
+			new OpenIdProvider( this ),
+			new CssElements( this ) ).ToCollection();
 
 	protected override UrlHandler getUrlParent() => frameworkUrlParentGetter();
 
@@ -52,6 +57,7 @@ partial class EntitySetup: UiEntitySetup {
 			.Append( RequestProfiling.UrlPatterns.Literal( this, "profiling" ) )
 			.Append( DiagnosticLog.UrlPatterns.Literal( this, "log" ) )
 			.Append( UserManagement.UrlPatterns.Literal( this, "users" ) )
+			.Append( OpenIdProvider.UrlPatterns.Literal( this, "open-id-provider" ) )
 			.Append( CssElements.UrlPatterns.Literal( this, "css-elements" ) );
 
 	EntityUiSetup UiEntitySetup.GetUiSetup() =>
