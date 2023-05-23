@@ -32,4 +32,8 @@ public interface ExternalOpenIdConnectProvider {
 		string clientIdentifier, string subjectIdentifier, IEnumerable<( string name, string value )> additionalClaims );
 
 	Task<IActionResult> WriteAuthenticationErrorResponse();
+
+	Task<IActionResult> WriteTokenResponse();
+
+	Task<IActionResult> WriteUserInfoResponse();
 }

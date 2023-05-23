@@ -40,20 +40,22 @@ public class OpenIdConnectProvider: ExternalOpenIdConnectProvider {
 	}
 
 	private void configureOpenIdProvider() {
+		var entitySetup = new EntitySetup();
 		currentServicesGetter().GetRequiredService<IOptionsMonitor<OpenIDConfigurations>>().CurrentValue.Configurations = new OpenIDConfiguration[]
 			{
 				new()
 					{
 						ProviderConfiguration = new ProviderConfiguration
 							{
-								ProviderMetadata =
-									new ProviderMetadata
-										{
-											Issuer = issuerIdentifier,
-											AuthorizationEndpoint = Authenticate.GetInfo().GetUrl( disableAuthorizationCheck: true ),
-											JwksUri = Keys.GetInfo().GetUrl(),
-											ScopesSupported = new[] { "openid", "profile", "email" }
-										},
+								ProviderMetadata = new ProviderMetadata
+									{
+										Issuer = issuerIdentifier,
+										AuthorizationEndpoint = new Authenticate( entitySetup ).GetUrl( disableAuthorizationCheck: true ),
+										TokenEndpoint = new Token( entitySetup ).GetUrl(),
+										UserinfoEndpoint = new UserInfo( entitySetup ).GetUrl(),
+										JwksUri = new Keys( entitySetup ).GetUrl(),
+										ScopesSupported = new[] { "openid", "profile", "email" }
+									},
 								ProviderCertificates = new Certificate[] { new() { String = certificateGetter(), Password = certificatePassword } }
 							},
 						ClientConfigurations = new ClientConfiguration[] {}
@@ -109,5 +111,15 @@ public class OpenIdConnectProvider: ExternalOpenIdConnectProvider {
 	Task<IActionResult> ExternalOpenIdConnectProvider.WriteAuthenticationErrorResponse() {
 		var openIdProvider = currentServicesGetter().GetRequiredService<IOpenIDProvider>();
 		return openIdProvider.SendAuthnErrorResponseAsync( OpenIDConstants.ErrorCodes.InvalidRequest );
+	}
+
+	Task<IActionResult> ExternalOpenIdConnectProvider.WriteTokenResponse() {
+		var openIdProvider = currentServicesGetter().GetRequiredService<IOpenIDProvider>();
+		return openIdProvider.GetTokensAsync();
+	}
+
+	Task<IActionResult> ExternalOpenIdConnectProvider.WriteUserInfoResponse() {
+		var openIdProvider = currentServicesGetter().GetRequiredService<IOpenIDProvider>();
+		return openIdProvider.GetUserInfoAsync();
 	}
 }
