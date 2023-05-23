@@ -306,7 +306,7 @@ public static class RequestDispatchingStatics {
 	}
 
 	/// <summary>
-	/// Returns a list of URL patterns for the framework.
+	/// Returns a list of URL patterns for the framework, including one for well-known resources (i.e. the “.well-known” segment defined in RFC 8615).
 	/// </summary>
 	/// <param name="frameworkUrlSegment">The URL segment that will be a base for the framework’s own pages and resources. Pass the empty string to use the
 	/// default of “ewl”. Do not pass null.</param>
@@ -322,6 +322,15 @@ public static class RequestDispatchingStatics {
 		if( !appStaticFileUrlSegment.Any() )
 			appStaticFileUrlSegment = "static";
 		patterns.Add( AppProvider.GetStaticFilesFolderUrlPattern( appStaticFileUrlSegment ) );
+
+		patterns.Add(
+			new UrlPattern(
+				encoder => encoder is WellKnownUrlHandling.WellKnownResource.UrlEncoder wellKnownResource && wellKnownResource.GetSuffix().Length == 0
+					           ? EncodingUrlSegment.Create( ".well-known" )
+					           : null,
+				url => string.Equals( url.Segment, ".well-known", StringComparison.OrdinalIgnoreCase )
+					       ? new WellKnownUrlHandling.WellKnownResource.UrlDecoder( suffix: "" )
+					       : null ) );
 
 		return patterns;
 	}

@@ -1,5 +1,8 @@
-﻿using ComponentSpace.OpenID.Configuration;
+﻿using System.Threading.Tasks;
+using ComponentSpace.OpenID;
+using ComponentSpace.OpenID.Configuration;
 using EnterpriseWebLibrary.ExternalFunctionality;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -44,5 +47,15 @@ public class OpenIdConnectProvider: ExternalOpenIdConnectProvider {
 						ClientConfigurations = new ClientConfiguration[] {}
 					}
 			};
+	}
+
+	Task<IActionResult> ExternalOpenIdConnectProvider.WriteMetadata() {
+		var openIdProvider = currentServicesGetter().GetRequiredService<IOpenIDProvider>();
+		return openIdProvider.GetMetadataAsync();
+	}
+
+	Task<IActionResult> ExternalOpenIdConnectProvider.WriteKeys() {
+		var openIdProvider = currentServicesGetter().GetRequiredService<IOpenIDProvider>();
+		return openIdProvider.GetKeysAsync();
 	}
 }

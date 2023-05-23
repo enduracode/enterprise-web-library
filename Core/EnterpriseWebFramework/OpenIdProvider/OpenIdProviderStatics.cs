@@ -1,4 +1,5 @@
 ﻿using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.EnterpriseWebFramework.WellKnownUrlHandling;
 using EnterpriseWebLibrary.ExternalFunctionality;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.OpenIdProvider;
@@ -34,4 +35,12 @@ internal static class OpenIdProviderStatics {
 		if( ExternalFunctionalityStatics.OpenIdConnectFunctionalityEnabled )
 			ExternalFunctionalityStatics.ExternalOpenIdConnectProvider.RefreshConfiguration();
 	}
+
+	internal static IEnumerable<WellKnownUrl> GetWellKnownUrls() =>
+		OpenIdProviderEnabled
+			? new WellKnownUrl(
+					"openid-configuration",
+					() => new EwfSafeResponseWriter( EwfResponse.CreateFromAspNetMvcAction( ExternalFunctionalityStatics.ExternalOpenIdConnectProvider.WriteMetadata ) ) )
+				.ToCollection()
+			: Enumerable.Empty<WellKnownUrl>();
 }

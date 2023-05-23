@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EnterpriseWebLibrary.ExternalFunctionality;
 
@@ -19,4 +21,8 @@ public interface ExternalOpenIdConnectProvider {
 	void InitAppSpecificLogicDependencies();
 
 	void RefreshConfiguration();
+
+	Task<IActionResult> WriteMetadata();
+
+	Task<IActionResult> WriteKeys();
 }

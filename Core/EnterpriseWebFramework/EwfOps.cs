@@ -9,6 +9,7 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.Core;
 using EnterpriseWebLibrary.EnterpriseWebFramework.OpenIdProvider;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
+using EnterpriseWebLibrary.EnterpriseWebFramework.WellKnownUrlHandling;
 using EnterpriseWebLibrary.ExternalFunctionality;
 using EnterpriseWebLibrary.UserManagement;
 using EnterpriseWebLibrary.WebSessionState;
@@ -272,6 +273,9 @@ public static class EwfOps {
 										AppRequestState.Instance.SetResource( resource );
 								},
 								() => AppRequestState.Instance.Resource );
+							WellKnownResource.Init(
+								() => RequestDispatchingStatics.AppProvider.GetFrameworkUrlParent(),
+								() => OpenIdProviderStatics.GetWellKnownUrls().Concat( RequestDispatchingStatics.AppProvider.GetWellKnownUrls() ) );
 							StaticFile.Init( providerGetter.GetProvider<AppStaticFileHandlingProvider>( "StaticFileHandling" ) );
 							StandardLibrarySessionState.Init( () => contextAccessor.HttpContext );
 							PageBase.Init(

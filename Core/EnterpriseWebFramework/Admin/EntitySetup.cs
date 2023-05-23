@@ -47,6 +47,7 @@ partial class EntitySetup: UiEntitySetup {
 			.Append( EnterpriseWebFramework.UserManagement.Pages.ChangePassword.UrlPatterns.Literal( "change-password" ) )
 			.Append( EnterpriseWebFramework.UserManagement.SamlResources.Metadata.UrlPatterns.Literal( "saml" ) )
 			.Append( EnterpriseWebFramework.UserManagement.Pages.Impersonate.UrlPatterns.Literal( "impersonate" ) )
+			.Append( EnterpriseWebFramework.OpenIdProvider.Resources.EntitySetup.UrlPatterns.Literal( "oauth" ) )
 			.Append( PreBuiltResponse.UrlPatterns.Literal( "pre-built-response" ) )
 			.Append( ContactSupport.UrlPatterns.Literal( "contact-support" ) )
 			.Append( ErrorPages.AccessDenied.UrlPatterns.Literal( "access-denied" ) )
@@ -57,7 +58,7 @@ partial class EntitySetup: UiEntitySetup {
 			.Append( RequestProfiling.UrlPatterns.Literal( this, "profiling" ) )
 			.Append( DiagnosticLog.UrlPatterns.Literal( this, "log" ) )
 			.Append( UserManagement.UrlPatterns.Literal( this, "users" ) )
-			.Append( OpenIdProvider.UrlPatterns.Literal( this, "open-id-provider" ) )
+			.Append( OpenIdProvider.UrlPatterns.Literal( this, "openid-provider" ) )
 			.Append( CssElements.UrlPatterns.Literal( this, "css-elements" ) );
 
 	EntityUiSetup UiEntitySetup.GetUiSetup() =>
