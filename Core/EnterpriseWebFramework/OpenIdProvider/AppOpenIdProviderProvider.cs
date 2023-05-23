@@ -8,4 +8,9 @@ public abstract class AppOpenIdProviderProvider {
 	/// Returns a pair of methods for managing the installation’s self-signed certificate, or null if a certificate is not supported.
 	/// </summary>
 	protected internal virtual ( Func<string> getter, Action<string> updater )? GetCertificateMethods() => null;
+
+	/// <summary>
+	/// Authenticates the user for the Authorization Endpoint. 
+	/// </summary>
+	protected internal abstract OpenIdAuthenticationResult AuthenticateUser( string clientIdentifier );
 }

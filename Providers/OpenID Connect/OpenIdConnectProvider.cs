@@ -1,6 +1,11 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Immutable;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using ComponentSpace.OpenID;
 using ComponentSpace.OpenID.Configuration;
+using ComponentSpace.OpenID.Exceptions;
+using ComponentSpace.OpenID.Messages;
+using EnterpriseWebLibrary.EnterpriseWebFramework.OpenIdProvider.Resources;
 using EnterpriseWebLibrary.ExternalFunctionality;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
@@ -41,7 +46,14 @@ public class OpenIdConnectProvider: ExternalOpenIdConnectProvider {
 					{
 						ProviderConfiguration = new ProviderConfiguration
 							{
-								ProviderMetadata = new ProviderMetadata { Issuer = issuerIdentifier, ScopesSupported = new[] { "openid", "profile", "email" } },
+								ProviderMetadata =
+									new ProviderMetadata
+										{
+											Issuer = issuerIdentifier,
+											AuthorizationEndpoint = Authenticate.GetInfo().GetUrl( disableAuthorizationCheck: true ),
+											JwksUri = Keys.GetInfo().GetUrl(),
+											ScopesSupported = new[] { "openid", "profile", "email" }
+										},
 								ProviderCertificates = new Certificate[] { new() { String = certificateGetter(), Password = certificatePassword } }
 							},
 						ClientConfigurations = new ClientConfiguration[] {}
@@ -57,5 +69,45 @@ public class OpenIdConnectProvider: ExternalOpenIdConnectProvider {
 	Task<IActionResult> ExternalOpenIdConnectProvider.WriteKeys() {
 		var openIdProvider = currentServicesGetter().GetRequiredService<IOpenIDProvider>();
 		return openIdProvider.GetKeysAsync();
+	}
+
+	bool ExternalOpenIdConnectProvider.ReadAuthenticationRequest( out string clientIdentifier ) {
+		var openIdProvider = currentServicesGetter().GetRequiredService<IOpenIDProvider>();
+
+		AuthenticationRequest request = null;
+		Task.Run(
+				async () => {
+					try {
+						request = await openIdProvider.ReceiveAuthnRequestAsync();
+					}
+					catch( OpenIDException ) {}
+				} )
+			.Wait();
+		if( request is null ) {
+			clientIdentifier = "";
+			return false;
+		}
+
+		clientIdentifier = request.ClientID;
+		return true;
+	}
+
+	async Task<IActionResult> ExternalOpenIdConnectProvider.WriteAuthenticationResponse(
+		string clientIdentifier, string subjectIdentifier, IEnumerable<( string name, string value )> additionalClaims ) {
+		var openIdProvider = currentServicesGetter().GetRequiredService<IOpenIDProvider>();
+		return await openIdProvider.SendAuthnResponseAsync(
+			       subjectIdentifier,
+			       null,
+			       accessToken: await openIdProvider.CreateJwtAccessTokenAsync(
+				                    clientIdentifier,
+				                    null,
+				                    subjectIdentifier,
+				                    null,
+				                    claims: additionalClaims.Select( i => new Claim( i.name, i.value ) ).ToImmutableArray() ) );
+	}
+
+	Task<IActionResult> ExternalOpenIdConnectProvider.WriteAuthenticationErrorResponse() {
+		var openIdProvider = currentServicesGetter().GetRequiredService<IOpenIDProvider>();
+		return openIdProvider.SendAuthnErrorResponseAsync( OpenIDConstants.ErrorCodes.InvalidRequest );
 	}
 }

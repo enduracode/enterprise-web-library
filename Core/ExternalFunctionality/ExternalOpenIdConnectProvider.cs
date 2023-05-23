@@ -25,4 +25,11 @@ public interface ExternalOpenIdConnectProvider {
 	Task<IActionResult> WriteMetadata();
 
 	Task<IActionResult> WriteKeys();
+
+	bool ReadAuthenticationRequest( out string clientIdentifier );
+
+	Task<IActionResult> WriteAuthenticationResponse(
+		string clientIdentifier, string subjectIdentifier, IEnumerable<( string name, string value )> additionalClaims );
+
+	Task<IActionResult> WriteAuthenticationErrorResponse();
 }

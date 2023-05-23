@@ -1,12 +1,14 @@
 ﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework.OpenIdProvider.Resources;
 
 partial class EntitySetup {
+	protected override void init() {
+		if( !OpenIdProviderStatics.OpenIdProviderEnabled )
+			throw new Exception( "The OpenID Provider is not enabled in this system." );
+	}
+
 	protected override ResourceParent createParent() => null;
 
 	protected override string getEntitySetupName() => "OpenID Provider";
-
-	protected override AlternativeResourceMode createAlternativeMode() =>
-		OpenIdProviderStatics.OpenIdProviderEnabled ? null : new DisabledResourceMode( "The OpenID Provider is not enabled in this system." );
 
 	public override ResourceBase DefaultResource => throw new NotSupportedException();
 
@@ -16,5 +18,6 @@ partial class EntitySetup {
 
 	protected override UrlHandler getRequestHandler() => null;
 
-	protected override IEnumerable<UrlPattern> getChildUrlPatterns() => Keys.UrlPatterns.Literal( this, "jwks" ).ToCollection();
+	protected override IEnumerable<UrlPattern> getChildUrlPatterns() =>
+		Keys.UrlPatterns.Literal( this, "jwks" ).ToCollection().Append( Authenticate.UrlPatterns.Literal( this, "authenticate" ) );
 }
