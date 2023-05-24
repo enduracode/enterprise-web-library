@@ -21,7 +21,7 @@ partial class UserManagement {
 			RSASignaturePadding.Pkcs1 );
 		request.CertificateExtensions.Add(
 			new X509KeyUsageExtension( X509KeyUsageFlags.DigitalSignature | X509KeyUsageFlags.DataEncipherment | X509KeyUsageFlags.KeyEncipherment, false ) );
-		using var certificate = request.CreateSelfSigned( currentTime, currentTime.AddYears( 10 ) );
+		using var certificate = request.CreateSelfSigned( currentTime, currentTime.AddYears( 25 ) );
 		return Convert.ToBase64String( certificate.Export( X509ContentType.Pfx, password ) );
 	}
 
