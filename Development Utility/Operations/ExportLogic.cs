@@ -165,7 +165,7 @@ internal class ExportLogic: Operation {
 					EwlStatics.OpenIdConnectProviderProjectPath,
 					"EnterpriseWebLibrary.OpenIdConnect",
 					openIdConnectId,
-					"<dependency id=\"ComponentSpace.OpenID\" version=\"3.2.0\" />".ToCollection(),
+					"<dependency id=\"ComponentSpace.OpenID.Licensed\" version=\"3.2.0\" />".ToCollection(),
 					now,
 					useDebugAssembly,
 					outputFolderPath,
