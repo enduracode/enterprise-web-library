@@ -27,7 +27,9 @@ partial class OpenIdProvider {
 						"Are you sure?".ToComponents(),
 						postBack: PostBack.CreateFull(
 							"certificate",
-							modificationMethod: () => OpenIdProviderStatics.UpdateCertificate( UserManagement.GenerateCertificate( DateTimeOffset.UtcNow ) ) ) ) ) )
+							modificationMethod: () =>
+								OpenIdProviderStatics.UpdateCertificate(
+									UserManagement.GenerateCertificate( DateTimeOffset.UtcNow, OpenIdProviderStatics.CertificatePassword ) ) ) ) ) )
 			.Materialize()
 			.ToFormItem( label: "System self-signed certificate".ToComponents() )
 			.ToComponentCollection() );

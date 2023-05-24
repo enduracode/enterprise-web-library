@@ -10,7 +10,7 @@ using EnterpriseWebLibrary.UserManagement.IdentityProviders;
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin;
 
 partial class UserManagement {
-	internal static string GenerateCertificate( DateTimeOffset currentTime ) {
+	internal static string GenerateCertificate( DateTimeOffset currentTime, string password ) {
 		using var algorithm = new RSACryptoServiceProvider(
 			3072,
 			new CspParameters( 24, "Microsoft Enhanced RSA and AES Cryptographic Provider", Guid.NewGuid().ToString() ) );
@@ -22,7 +22,7 @@ partial class UserManagement {
 		request.CertificateExtensions.Add(
 			new X509KeyUsageExtension( X509KeyUsageFlags.DigitalSignature | X509KeyUsageFlags.DataEncipherment | X509KeyUsageFlags.KeyEncipherment, false ) );
 		using var certificate = request.CreateSelfSigned( currentTime, currentTime.AddYears( 10 ) );
-		return Convert.ToBase64String( certificate.Export( X509ContentType.Pfx, UserManagementStatics.CertificatePassword ) );
+		return Convert.ToBase64String( certificate.Export( X509ContentType.Pfx, password ) );
 	}
 
 	protected override AlternativeResourceMode createAlternativeMode() =>
@@ -52,7 +52,9 @@ partial class UserManagement {
 										"Are you sure?".ToComponents(),
 										postBack: PostBack.CreateFull(
 											"certificate",
-											modificationMethod: () => UserManagementStatics.UpdateCertificate( GenerateCertificate( DateTimeOffset.UtcNow ) ) ) ) ) )
+											modificationMethod: () =>
+												UserManagementStatics.UpdateCertificate(
+													GenerateCertificate( DateTimeOffset.UtcNow, UserManagementStatics.CertificatePassword ) ) ) ) ) )
 							.Materialize()
 							.ToFormItem( label: "System self-signed certificate".ToComponents() )
 							.Concat(
