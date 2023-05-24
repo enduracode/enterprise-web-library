@@ -202,7 +202,8 @@ public static class EwfOps {
 									() => AspNetStatics.Services,
 									EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString( true ),
 									OpenIdProviderStatics.GetCertificate,
-									OpenIdProviderStatics.CertificatePassword );
+									OpenIdProviderStatics.CertificatePassword,
+									() => OpenIdProviderStatics.AppProvider.GetClients() );
 							if( ExternalFunctionalityStatics.SamlFunctionalityEnabled )
 								ExternalFunctionalityStatics.ExternalSamlProvider.InitAppStatics(
 									() => AspNetStatics.Services,
