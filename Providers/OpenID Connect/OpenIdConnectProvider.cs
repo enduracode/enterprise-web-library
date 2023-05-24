@@ -5,6 +5,7 @@ using ComponentSpace.OpenID;
 using ComponentSpace.OpenID.Configuration;
 using ComponentSpace.OpenID.Exceptions;
 using ComponentSpace.OpenID.Messages;
+using EnterpriseWebLibrary.EnterpriseWebFramework.OpenIdProvider;
 using EnterpriseWebLibrary.EnterpriseWebFramework.OpenIdProvider.Resources;
 using EnterpriseWebLibrary.ExternalFunctionality;
 using Microsoft.AspNetCore.Mvc;
@@ -18,17 +19,20 @@ public class OpenIdConnectProvider: ExternalOpenIdConnectProvider {
 	private static string issuerIdentifier;
 	private static Func<string> certificateGetter;
 	private static string certificatePassword;
+	private static Func<IEnumerable<OpenIdClient>> clientGetter;
 
 	void ExternalOpenIdConnectProvider.RegisterDependencyInjectionServices( IServiceCollection services ) {
 		services.AddOpenIDProvider();
 	}
 
 	void ExternalOpenIdConnectProvider.InitAppStatics(
-		Func<IServiceProvider> currentServicesGetter, string issuerIdentifier, Func<string> certificateGetter, string certificatePassword ) {
+		Func<IServiceProvider> currentServicesGetter, string issuerIdentifier, Func<string> certificateGetter, string certificatePassword,
+		Func<IEnumerable<OpenIdClient>> clientGetter ) {
 		OpenIdConnectProvider.currentServicesGetter = currentServicesGetter;
 		OpenIdConnectProvider.issuerIdentifier = issuerIdentifier;
 		OpenIdConnectProvider.certificateGetter = certificateGetter;
 		OpenIdConnectProvider.certificatePassword = certificatePassword;
+		OpenIdConnectProvider.clientGetter = clientGetter;
 	}
 
 	void ExternalOpenIdConnectProvider.InitAppSpecificLogicDependencies() {
@@ -58,7 +62,10 @@ public class OpenIdConnectProvider: ExternalOpenIdConnectProvider {
 									},
 								ProviderCertificates = new Certificate[] { new() { String = certificateGetter(), Password = certificatePassword } }
 							},
-						ClientConfigurations = new ClientConfiguration[] {}
+						ClientConfigurations = clientGetter()
+							.Select(
+								i => new ClientConfiguration { Description = i.ClientName, ClientID = i.ClientIdentifier, RedirectUris = i.RedirectionUrls.ToArray() } )
+							.ToArray()
 					}
 			};
 	}

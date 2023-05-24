@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using EnterpriseWebLibrary.EnterpriseWebFramework.OpenIdProvider;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -16,7 +17,9 @@ public interface ExternalOpenIdConnectProvider {
 	/// <summary>
 	/// Initializes the application-level functionality in the provider.
 	/// </summary>
-	void InitAppStatics( Func<IServiceProvider> currentServicesGetter, string issuerIdentifier, Func<string> certificateGetter, string certificatePassword );
+	void InitAppStatics(
+		Func<IServiceProvider> currentServicesGetter, string issuerIdentifier, Func<string> certificateGetter, string certificatePassword,
+		Func<IEnumerable<OpenIdClient>> clientGetter );
 
 	void InitAppSpecificLogicDependencies();
 
