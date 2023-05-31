@@ -10,6 +10,7 @@
 	<installedInstallation>
 		<name>Live</name>
 		<shortName>Live</shortName>
+		<DeveloperNotificationEmailFromAddress>enterprise-web-library@notifications.example.com</DeveloperNotificationEmailFromAddress>
 		<InstallationTypeConfiguration xsi:type="LiveInstallationConfiguration">
 			<EmailSendingService xsi:type="SendGrid">
 				<ApiKey>your-send-grid-api-key</ApiKey>

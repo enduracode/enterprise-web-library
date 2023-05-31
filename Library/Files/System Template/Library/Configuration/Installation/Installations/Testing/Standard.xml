@@ -10,6 +10,7 @@
 	<installedInstallation>
 		<name>Testing</name>
 		<shortName>Testing</shortName>
+		<DeveloperNotificationEmailFromAddress>enterprise-web-library@notifications.example.com</DeveloperNotificationEmailFromAddress>
 		<InstallationTypeConfiguration xsi:type="IntermediateInstallationConfiguration">
 			<EmailFromName>Your Organization</EmailFromName>
 			<EmailFromAddress>contact@example.com</EmailFromAddress>
