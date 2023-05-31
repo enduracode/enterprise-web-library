@@ -24,6 +24,7 @@
 					<sequence>
 						<element name="name" type="string" />
 						<element name="shortName" type="string" />
+						<element name="DeveloperNotificationEmailFromAddress" type="string" />
 						<element name="InstallationTypeConfiguration" type="rs:InstallationTypeConfiguration" />
 					</sequence>
 				</complexType>

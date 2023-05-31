@@ -168,43 +168,40 @@ public class InstallationConfiguration {
 	/// <summary>
 	/// Gets the name of the system.
 	/// </summary>
-	public string SystemName { get { return systemGeneralConfiguration.systemName; } }
+	public string SystemName => systemGeneralConfiguration.systemName;
 
 	/// <summary>
 	/// Gets the short name of the system.
 	/// </summary>
-	public string SystemShortName { get { return systemGeneralConfiguration.systemShortName; } }
+	public string SystemShortName => systemGeneralConfiguration.systemShortName;
 
 	/// <summary>
 	/// Gets the full name of this installation.  For example, 'Red Stapler Information System - Live'.
 	/// </summary>
-	public string FullName { get { return GetFullNameFromSystemAndInstallationNames( SystemName, InstallationName ); } }
+	public string FullName => GetFullNameFromSystemAndInstallationNames( SystemName, InstallationName );
 
 	/// <summary>
 	/// Gets the full short name of this installation.  For example, 'RsisLive'.
 	/// </summary>
-	public string FullShortName { get { return GetFullShortNameFromSystemAndInstallationNames( SystemShortName, InstallationShortName ); } }
+	public string FullShortName => GetFullShortNameFromSystemAndInstallationNames( SystemShortName, InstallationShortName );
 
 	/// <summary>
 	/// Gets a list of the web applications in the system.
 	/// </summary>
-	public IReadOnlyCollection<WebApplication> WebApplications { get { return webApplications; } }
+	public IReadOnlyCollection<WebApplication> WebApplications => webApplications;
 
 	/// <summary>
 	/// Gets a list of the services in the system.
 	/// </summary>
-	public IEnumerable<WindowsService> WindowsServices {
-		get {
-			return systemGeneralConfiguration.WindowsServices != null
-				       ? systemGeneralConfiguration.WindowsServices.Select( ws => new WindowsService( ws, FullShortName ) )
-				       : new WindowsService[ 0 ];
-		}
-	}
+	public IEnumerable<WindowsService> WindowsServices =>
+		systemGeneralConfiguration.WindowsServices != null
+			? systemGeneralConfiguration.WindowsServices.Select( ws => new WindowsService( ws, FullShortName ) )
+			: new WindowsService[ 0 ];
 
 	/// <summary>
 	/// Gets a list of the developers for the system.
 	/// </summary>
-	public List<NameAndEmailAddress> Developers { get { return new List<NameAndEmailAddress>( systemGeneralConfiguration.developers ); } }
+	public List<NameAndEmailAddress> Developers => new( systemGeneralConfiguration.developers );
 
 	/// <summary>
 	/// Installation Support Utility use only.
@@ -222,33 +219,28 @@ public class InstallationConfiguration {
 	/// <summary>
 	/// Gets the RSIS installation ID for the installation.
 	/// </summary>
-	public int? RsisInstallationId {
-		get { return installationStandardConfiguration.rsisInstallationIdSpecified ? installationStandardConfiguration.rsisInstallationId as int? : null; }
-	}
+	public int? RsisInstallationId => installationStandardConfiguration.rsisInstallationIdSpecified ? installationStandardConfiguration.rsisInstallationId : null;
 
 	/// <summary>
 	/// Gets the name of the installation.
 	/// </summary>
-	public string InstallationName { get { return isDevelopmentInstallation ? "Development" : installationStandardConfiguration.installedInstallation.name; } }
+	public string InstallationName => isDevelopmentInstallation ? "Development" : installationStandardConfiguration.installedInstallation.name;
 
 	/// <summary>
 	/// Gets the short name of the installation.
 	/// </summary>
-	public string InstallationShortName { get { return isDevelopmentInstallation ? "Dev" : installationStandardConfiguration.installedInstallation.shortName; } }
+	public string InstallationShortName => isDevelopmentInstallation ? "Dev" : installationStandardConfiguration.installedInstallation.shortName;
 
 	/// <summary>
 	/// Gets a list of the administrators for the installation.
 	/// </summary>
-	public List<InstallationStandardNameAndEmailAddress> Administrators {
-		get { return new List<InstallationStandardNameAndEmailAddress>( installationStandardConfiguration.administrators ); }
-	}
+	public List<InstallationStandardNameAndEmailAddress> Administrators => new( installationStandardConfiguration.administrators );
 
 	/// <summary>
 	/// Gets a database information object corresponding to the primary database for this configuration. Returns null if there is no database configured.
 	/// </summary>
-	public DatabaseInfo PrimaryDatabaseInfo {
-		get { return installationStandardConfiguration.database != null ? getDatabaseInfo( "", installationStandardConfiguration.database ) : null; }
-	}
+	public DatabaseInfo PrimaryDatabaseInfo =>
+		installationStandardConfiguration.database != null ? getDatabaseInfo( "", installationStandardConfiguration.database ) : null;
 
 	/// <summary>
 	/// Gets a database information object corresponding to the secondary database for this configuration with the specified name.
@@ -292,32 +284,29 @@ public class InstallationConfiguration {
 	/// <summary>
 	/// Gets the type of the installation.
 	/// </summary>
-	public InstallationType InstallationType {
-		get {
-			return isDevelopmentInstallation ? InstallationType.Development :
-			       installationStandardConfiguration.installedInstallation.InstallationTypeConfiguration is LiveInstallationConfiguration ? InstallationType.Live :
-			       InstallationType.Intermediate;
-		}
-	}
+	public InstallationType InstallationType =>
+		isDevelopmentInstallation ? InstallationType.Development :
+		installationStandardConfiguration.installedInstallation.InstallationTypeConfiguration is LiveInstallationConfiguration ? InstallationType.Live :
+		InstallationType.Intermediate;
 
-	private bool isDevelopmentInstallation { get { return systemDevelopmentConfiguration != null; } }
+	private bool isDevelopmentInstallation => systemDevelopmentConfiguration != null;
 
-	public SystemDevelopment.SystemDevelopmentConfiguration SystemDevelopmentConfiguration { get { return systemDevelopmentConfiguration; } }
+	public SystemDevelopment.SystemDevelopmentConfiguration SystemDevelopmentConfiguration => systemDevelopmentConfiguration;
 
-	internal LiveInstallationConfiguration LiveInstallationConfiguration {
-		get { return (LiveInstallationConfiguration)installationStandardConfiguration.installedInstallation.InstallationTypeConfiguration; }
-	}
+	internal string DeveloperNotificationEmailFromAddress => installationStandardConfiguration.installedInstallation.DeveloperNotificationEmailFromAddress;
 
-	internal IntermediateInstallationConfiguration IntermediateInstallationConfiguration {
-		get { return (IntermediateInstallationConfiguration)installationStandardConfiguration.installedInstallation.InstallationTypeConfiguration; }
-	}
+	internal LiveInstallationConfiguration LiveInstallationConfiguration =>
+		(LiveInstallationConfiguration)installationStandardConfiguration.installedInstallation.InstallationTypeConfiguration;
 
-	internal string InstallationPath { get { return installationPath; } }
+	internal IntermediateInstallationConfiguration IntermediateInstallationConfiguration =>
+		(IntermediateInstallationConfiguration)installationStandardConfiguration.installedInstallation.InstallationTypeConfiguration;
+
+	internal string InstallationPath => installationPath;
 
 	/// <summary>
 	/// Gets the path of the configuration folder.
 	/// </summary>
-	public string ConfigurationFolderPath { get { return configurationFolderPath; } }
+	public string ConfigurationFolderPath => configurationFolderPath;
 
 	internal string InstallationCustomConfigurationFilePath => installationCustomConfigurationFilePath;
 
