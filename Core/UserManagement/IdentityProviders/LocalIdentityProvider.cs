@@ -2,6 +2,7 @@
 using System.Text;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Email;
+using JetBrains.Annotations;
 using NodaTime;
 using Tewl.InputValidation;
 
@@ -10,6 +11,7 @@ namespace EnterpriseWebLibrary.UserManagement.IdentityProviders;
 /// <summary>
 /// An identity provider that uses the system’s own user-management functionality.
 /// </summary>
+[ PublicAPI ]
 public class LocalIdentityProvider: IdentityProvider {
 	/// <summary>
 	/// Class for generating and hashing passwords.
@@ -17,11 +19,11 @@ public class LocalIdentityProvider: IdentityProvider {
 	/// </summary>
 	internal class Password {
 		private static int createRandomSalt() {
-			var saltBytes = new Byte[ 4 ];
+			var saltBytes = new byte[ 4 ];
 			var rng = new RNGCryptoServiceProvider();
 			rng.GetBytes( saltBytes );
 
-			return ( ( saltBytes[ 0 ] << 24 ) + ( saltBytes[ 1 ] << 16 ) + ( saltBytes[ 2 ] << 8 ) + saltBytes[ 3 ] );
+			return ( saltBytes[ 0 ] << 24 ) + ( saltBytes[ 1 ] << 16 ) + ( saltBytes[ 2 ] << 8 ) + saltBytes[ 3 ];
 		}
 
 		private readonly string password;
@@ -44,7 +46,7 @@ public class LocalIdentityProvider: IdentityProvider {
 
 		public byte[] ComputeSaltedHash() {
 			// Create a new salt
-			var saltBytes = new Byte[ 4 ];
+			var saltBytes = new byte[ 4 ];
 			saltBytes[ 0 ] = (byte)( salt >> 24 );
 			saltBytes[ 1 ] = (byte)( salt >> 16 );
 			saltBytes[ 2 ] = (byte)( salt >> 8 );
@@ -55,7 +57,7 @@ public class LocalIdentityProvider: IdentityProvider {
 			var secretBytes = encoder.GetBytes( password );
 
 			// append the two arrays
-			var toHash = new Byte[ secretBytes.Length + saltBytes.Length ];
+			var toHash = new byte[ secretBytes.Length + saltBytes.Length ];
 			Array.Copy( secretBytes, 0, toHash, 0, secretBytes.Length );
 			Array.Copy( saltBytes, 0, toHash, secretBytes.Length, saltBytes.Length );
 
