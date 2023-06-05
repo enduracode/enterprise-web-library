@@ -86,7 +86,7 @@ public sealed class HyperlinkBehavior {
 		PostBackAdder = () => {
 			if( !isPostBackHyperlink.Value )
 				return;
-			var postBackId = PostBack.GetCompositeId( "hyperlink", destination.GetUrl(), disableAuthorizationCheck.ToString() );
+			var postBackId = PostBack.GetCompositeId( "hyperlink", Url.Value, disableAuthorizationCheck.ToString() );
 			postBackAction = new PostBackFormAction(
 				PageBase.Current.GetPostBack( postBackId ) ?? PostBack.CreateFull(
 					id: postBackId,
