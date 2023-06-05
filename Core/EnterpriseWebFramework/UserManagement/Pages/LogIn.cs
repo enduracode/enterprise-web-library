@@ -1,5 +1,6 @@
 ﻿using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.UserManagement;
+using Tewl.InputValidation;
 
 // EwlPage
 // Parameter: string returnUrl
@@ -14,6 +15,13 @@ partial class LogIn {
 
 	private static readonly ElementClass passwordClass = new( "ewfLogInPassword" );
 	private static readonly ElementClass loginCodeButtonClass = new( "ewfLogInLcB" );
+
+	protected override void init() {
+		var userErrorHandler = new ValidationErrorHandler( "value" );
+		var validatedUser = new Validator().GetEmailAddress( userErrorHandler, User, true );
+		if( userErrorHandler.LastResult is not ErrorCondition.NoError || !string.Equals( validatedUser, User, StringComparison.Ordinal ) )
+			throw new Exception( "user" );
+	}
 
 	protected override string getResourceName() => authenticatedUserDeniedAccess ? "Access Denied" : base.getResourceName();
 
