@@ -14,6 +14,7 @@ public sealed class BasicPageContent: PageContent {
 	private static readonly ElementClass processingDialogTimeOutParagraphClass = new( "ewfTimeOutP" );
 	private static readonly ElementClass pageLoadPostBackImageContainerClass = new( "ewfPlpb" );
 
+	private static Func<string> clientSideNewUrlGetter;
 	private static Func<IReadOnlyCollection<PageContent>, IEnumerable<ResourceInfo>> cssInfoCreator;
 	private static Action<StringBuilder, bool> javaScriptIncludeBuilder;
 	private static Func<IEnumerable<( ResourceInfo resource, string rel, string sizes )>> appIconGetter;
@@ -120,9 +121,10 @@ public sealed class BasicPageContent: PageContent {
 	}
 
 	internal static void Init(
-		Func<IReadOnlyCollection<PageContent>, IEnumerable<ResourceInfo>> cssInfoCreator, Action<StringBuilder, bool> javaScriptIncludeBuilder,
-		Func<IEnumerable<( ResourceInfo, string, string )>> appIconGetter, Func<bool, string> intermediateUrlGetter,
-		Func<( string, IReadOnlyCollection<ActionComponentSetup> )?> impersonationWarningLineGetter ) {
+		Func<string> clientSideNewUrlGetter, Func<IReadOnlyCollection<PageContent>, IEnumerable<ResourceInfo>> cssInfoCreator,
+		Action<StringBuilder, bool> javaScriptIncludeBuilder, Func<IEnumerable<( ResourceInfo, string, string )>> appIconGetter,
+		Func<bool, string> intermediateUrlGetter, Func<( string, IReadOnlyCollection<ActionComponentSetup> )?> impersonationWarningLineGetter ) {
+		BasicPageContent.clientSideNewUrlGetter = clientSideNewUrlGetter;
 		BasicPageContent.cssInfoCreator = cssInfoCreator;
 		BasicPageContent.javaScriptIncludeBuilder = javaScriptIncludeBuilder;
 		BasicPageContent.appIconGetter = appIconGetter;
@@ -196,8 +198,13 @@ public sealed class BasicPageContent: PageContent {
 				children: new ElementComponent(
 						_ => new ElementData(
 							() => new ElementLocalData( "head" ),
-							children: new ElementComponent(
-									_ => new ElementData( () => new ElementLocalData( "title" ), children: ( titleOverride.Any() ? titleOverride : getTitle() ).ToComponents() ) )
+							children: new TrustedHtmlString( clientSideNewUrlGetter().Surround( "<script>history.replaceState( null, \"\", \"", "\" );</script>" ) )
+								.ToComponent()
+								.Append(
+									new ElementComponent(
+										_ => new ElementData(
+											() => new ElementLocalData( "title" ),
+											children: ( titleOverride.Any() ? titleOverride : getTitle() ).ToComponents() ) ) )
 								.Append(
 									getMeta(
 										"application-name",

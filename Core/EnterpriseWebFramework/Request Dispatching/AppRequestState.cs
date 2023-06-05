@@ -65,6 +65,8 @@ public class AppRequestState {
 
 	internal bool NonLiveWarningsHidden { get; set; }
 
+	internal string ClientSideNewUrl { get; set; }
+
 	private readonly List<( string prefix, Exception exception )> errors = new();
 
 	private Duration networkWaitDuration = Duration.Zero;
@@ -83,6 +85,8 @@ public class AppRequestState {
 
 		databaseConnectionManager = new AutomaticDatabaseConnectionManager();
 		databaseConnectionManager.DataAccessState.ResetCache();
+
+		ClientSideNewUrl = "";
 	}
 
 	/// <summary>

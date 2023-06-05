@@ -30,6 +30,7 @@ public abstract class PageBase: ResourceBase {
 			etherealContainer, FlowComponent jsInitElement, Action dataUpdateModificationMethod, bool isAutoDataUpdater, ActionPostBack pageLoadPostBack )>
 		contentGetter;
 
+	private static Action<string> clientSideNewUrlSetter;
 	private static Action requestStateRefresher;
 
 	[ JsonObject( ItemRequired = Required.Always, MemberSerialization = MemberSerialization.Fields ) ]
@@ -74,7 +75,7 @@ public abstract class PageBase: ResourceBase {
 	internal static void Init(
 		( Func<Action>, Func<string> ) appProvider,
 		Func<Func<Func<PageContent>, PageContent>, Func<string>, Func<string>, ( PageContent, FlowComponent, FlowComponent, FlowComponent, Action, bool,
-			ActionPostBack )> contentGetter, Action slowDataModificationNotifier, Action requestStateRefresher ) {
+			ActionPostBack )> contentGetter, Action<string> clientSideNewUrlSetter, Action slowDataModificationNotifier, Action requestStateRefresher ) {
 		EwfValidation.Init(
 			() => Current.formState.ValidationPredicate,
 			() => Current.formState.DataModifications,
@@ -119,6 +120,7 @@ public abstract class PageBase: ResourceBase {
 
 		PageBase.appProvider = appProvider;
 		PageBase.contentGetter = contentGetter;
+		PageBase.clientSideNewUrlSetter = clientSideNewUrlSetter;
 		PageBase.requestStateRefresher = requestStateRefresher;
 	}
 
@@ -881,13 +883,18 @@ public abstract class PageBase: ResourceBase {
 			StandardLibrarySessionState.SetClientSideNavigation( new PreBuiltResponse().GetUrl(), !secondaryResponse.FileName.Any() );
 		}
 
-		// If the destination resource is identical to the current page, do a transfer instead of a redirect. Don’t do this if the authorization check was
-		// disabled since, if there is a possibility of the destination page sending a 403 status code, we need to always send a 303 code first (below) so the
-		// client knows the POST worked.
-		if( destination is PageBase page && !authorizationCheckDisabled &&
-		    string.Equals( destinationUrl, AppRequestState.Instance.Url, StringComparison.Ordinal ) ) {
+		// If the destination resource is a page with the same origin as the current page, do a transfer instead of a redirect. Don’t do this if the authorization
+		// check was disabled since, if there is a possibility of the destination page sending a 403 status code, we need to always send a 303 code first (below) so
+		// the client knows the POST worked.
+		if( destination is PageBase page && !authorizationCheckDisabled && Uri.Compare(
+			    new Uri( destinationUrl ),
+			    new Uri( AppRequestState.Instance.Url ),
+			    UriComponents.SchemeAndServer,
+			    UriFormat.UriEscaped,
+			    StringComparison.Ordinal ) == 0 ) {
 			page.replaceUrlHandlers();
 			AppRequestState.Instance.SetNewUrlParameterValuesEffective( false );
+			clientSideNewUrlSetter( destinationUrl );
 			return ( nextPageObject = page ).processViewAndGetResponse( null );
 		}
 

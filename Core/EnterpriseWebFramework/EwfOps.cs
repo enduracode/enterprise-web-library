@@ -283,6 +283,7 @@ public static class EwfOps {
 								( () => BasePageStatics.AppProvider.GetPageViewDataModificationMethod(),
 									() => BasePageStatics.AppProvider.JavaScriptDocumentReadyFunctionCall ),
 								BasicPageContent.GetContent,
+								url => RequestDispatchingStatics.RequestState.ClientSideNewUrl = url,
 								() => RequestDispatchingStatics.RequestState.AllowSlowRequest(),
 								RequestDispatchingStatics.RefreshRequestState );
 							HyperlinkBehaviorExtensionCreators.Init( ModalBox.GetBrowsingModalBoxOpenStatements );
@@ -291,6 +292,7 @@ public static class EwfOps {
 							CreditCardCollector.Init( () => ( (BasicPageContent)PageBase.Current.BasicContent ).IncludesStripeCheckout = true );
 							BasePageStatics.Init( providerGetter.GetProvider<AppStandardPageLogicProvider>( "StandardPageLogic" ) );
 							BasicPageContent.Init(
+								() => RequestDispatchingStatics.RequestState.ClientSideNewUrl,
 								contentObjects => {
 									var contentUsesUi = contentObjects.Any( i => i is UiPageContent );
 
