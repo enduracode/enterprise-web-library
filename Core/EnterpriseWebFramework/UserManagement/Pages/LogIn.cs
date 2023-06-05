@@ -35,7 +35,7 @@ partial class LogIn {
 						                          User,
 						                          Code,
 						                          errorMessage:
-						                          "The login link you just used has expired. Please return to the page you were trying to access and send yourself another login email." )
+						                          "The login link you just used has expired. Please return to the page you were on and send yourself another login email." )
 					                          .destinationUrl,
 				actionGetter: () => new PostBackAction( new ExternalResource( destinationUrl ) ) );
 			return FormState.ExecuteWithDataModificationsAndDefaultAction(
