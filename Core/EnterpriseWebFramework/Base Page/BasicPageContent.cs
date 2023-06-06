@@ -12,7 +12,7 @@ public sealed class BasicPageContent: PageContent {
 	private static readonly ElementClass processingDialogTimeOutStateClass = new( "ewfProcessingDialogTo" );
 	private static readonly ElementClass processingDialogProcessingParagraphClass = new( "ewfProcessingP" );
 	private static readonly ElementClass processingDialogTimeOutParagraphClass = new( "ewfTimeOutP" );
-	private static readonly ElementClass pageLoadPostBackImageContainerClass = new( "ewfPlpb" );
+	private static readonly ElementClass pageLoadPostBackContentContainerClass = new( "ewfPlpb" );
 
 	private static Func<string> clientSideNewUrlGetter;
 	private static Func<IReadOnlyCollection<PageContent>, IEnumerable<ResourceInfo>> cssInfoCreator;
@@ -27,7 +27,7 @@ public sealed class BasicPageContent: PageContent {
 			var elements = new List<CssElement>();
 			elements.Add( new CssElement( "TopWarningContainer", "div.{0}".FormatWith( topWarningContainerClass.ClassName ) ) );
 			elements.AddRange( getProcessingDialogElements() );
-			elements.Add( new CssElement( "PageLoadPostBackImageContainer", "div.{0}".FormatWith( pageLoadPostBackImageContainerClass.ClassName ) ) );
+			elements.Add( new CssElement( "PageLoadPostBackContentContainer", "div.{0}".FormatWith( pageLoadPostBackContentContainerClass.ClassName ) ) );
 			return elements;
 		}
 
@@ -280,8 +280,17 @@ public sealed class BasicPageContent: PageContent {
 										pageLoadPostBack is null
 											? Enumerable.Empty<FlowComponent>()
 											: new GenericFlowContainer(
-												new EwfImage( new ImageSetup( "Loading icon" ), new StaticFiles.SpinnerSvg() ).ToCollection(),
-												classes: pageLoadPostBackImageContainerClass ).ToCollection() )
+												new FlowErrorContainer(
+													new ErrorSourceSet( includeGeneralErrors: true ),
+													new CustomErrorDisplayStyle(
+														( errorSources, errors, componentsFocusableOnError ) => errors.Any()
+															                                                        ? ( (ErrorDisplayStyle<FlowComponent>)new ListErrorDisplayStyle() )
+															                                                        .GetComponents( errorSources, errors, componentsFocusableOnError )
+															                                                        : new EwfImage(
+																                                                        new ImageSetup( "Loading icon" ),
+																                                                        new StaticFiles.SpinnerSvg() ).ToCollection() ),
+													disableFocusabilityOnError: true ).ToCollection(),
+												classes: pageLoadPostBackContentContainerClass ).ToCollection() )
 									.Append( jsInitElement )
 									.Materialize() ) ) )
 					.Materialize() ) );

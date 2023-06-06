@@ -833,12 +833,24 @@ ewfWarningMessageContainer > ewfStatusMessageText {
 		display: none;
 	}
 }
-ewfPageLoadPostBackImageContainer > ewfImage {
+ewfPageLoadPostBackContentContainer > ewfImage {
 	--ewf-size: 15vw;
 	position: fixed;
 	top: calc( 50vh - var( --ewf-size ) / 2 );
 	left: calc( 50vw - var( --ewf-size ) / 2 );
 	width: var( --ewf-size );
+}
+ewfPageLoadPostBackContentContainer > ewfErrorMessageListContainer {
+	font-size: 1.5em;
+	display: flex;
+	margin-left: auto;
+	margin-right: auto;
+	padding-left: 1rem;
+	padding-right: 1rem;
+	min-height: 100vh;
+	max-width: var( --ewf-column-width );
+	justify-content: center;
+	align-items: center;
 }
 
 /* SelectUser and error pages */
