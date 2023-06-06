@@ -191,15 +191,7 @@ public abstract class PageBase: ResourceBase {
 	protected sealed override EwfSafeRequestHandler getOrHead() => new EwfSafeResponseWriter( processViewAndGetResponse( null ) );
 
 	private EwfResponse processViewAndGetResponse( int? statusCode ) {
-		if( AppRequestState.Instance.EwfPageRequestState == null ) {
-			var sessionValue = StandardLibrarySessionState.EwfPageRequestState;
-			if( sessionValue != null ) {
-				AppRequestState.Instance.EwfPageRequestState = sessionValue;
-				StandardLibrarySessionState.EwfPageRequestState = null;
-			}
-			else
-				AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( AppRequestState.RequestTime, null, null );
-		}
+		AppRequestState.Instance.EwfPageRequestState ??= new EwfPageRequestState( AppRequestState.RequestTime, null, null );
 
 		var requestState = AppRequestState.Instance.EwfPageRequestState;
 		var dmIdAndSecondaryOp = requestState.DmIdAndSecondaryOp;
@@ -900,7 +892,7 @@ public abstract class PageBase: ResourceBase {
 
 		// If modification errors exist or this is not full post-back navigation, save request state in session state until the next request.
 		if( requestState.ModificationErrorsExist || requestState.DmIdAndSecondaryOp != null )
-			StandardLibrarySessionState.EwfPageRequestState = requestState;
+			throw new NotImplementedException( "Persisting request state across a redirect is not currently supported. See EnduraCode Goal 2510." );
 
 		return EwfResponse.Create(
 			ContentTypes.PlainText,
