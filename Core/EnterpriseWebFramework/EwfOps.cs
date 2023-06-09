@@ -242,12 +242,15 @@ public static class EwfOps {
 								( baseUrlString, appRelativeUrl ) =>
 									AppRequestState.ExecuteWithUrlHandlerStateDisabled( () => UrlHandlingStatics.ResolveUrl( baseUrlString, appRelativeUrl )?.Last() ) );
 							CookieStatics.Init(
+								() => RequestDispatchingStatics.RequestState.ResponseCookies,
 								( name, value, options ) => {
 									var cookies = contextAccessor.HttpContext.Response.Cookies;
 									if( value != null )
 										cookies.Append( name, value, options );
 									else
 										cookies.Delete( name, options );
+
+									RequestDispatchingStatics.RequestState.ResponseCookies.Add( ( name, value, options ) );
 								} );
 							NonLiveInstallationStatics.Init(
 								() => RequestDispatchingStatics.RequestState.NonLiveWarningsHidden,

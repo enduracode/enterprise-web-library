@@ -47,6 +47,8 @@ public class AppRequestState {
 	private readonly string url;
 	private readonly string baseUrl;
 
+	internal readonly List<( string, string, CookieOptions )> ResponseCookies;
+
 	private readonly AutomaticDatabaseConnectionManager databaseConnectionManager;
 
 	private bool urlHandlerStateDisabled;
@@ -82,6 +84,8 @@ public class AppRequestState {
 
 		this.url = url;
 		this.baseUrl = baseUrl;
+
+		ResponseCookies = new List<( string, string, CookieOptions )>();
 
 		databaseConnectionManager = new AutomaticDatabaseConnectionManager();
 		databaseConnectionManager.DataAccessState.ResetCache();

@@ -6,16 +6,44 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 [ PublicAPI ]
 public class CookieStatics {
+	private static Func<IReadOnlyCollection<( string, string, CookieOptions )>> responseCookieGetter;
 	private static Action<string, string, CookieOptions> responseCookieAdder;
 
-	internal static void Init( Action<string, string, CookieOptions> responseCookieAdder ) {
+	internal static void Init(
+		Func<IReadOnlyCollection<( string, string, CookieOptions )>> responseCookieGetter, Action<string, string, CookieOptions> responseCookieAdder ) {
+		CookieStatics.responseCookieGetter = responseCookieGetter;
 		CookieStatics.responseCookieAdder = responseCookieAdder;
 	}
 
+	/// <summary>
+	/// Gets the value associated with the specified cookie name. Searches only the request.
+	/// </summary>
 	public static bool TryGetCookieValue( string name, out string value, bool omitNamePrefix = false ) {
 		var defaultAttributes = EwfConfigurationStatics.AppConfiguration.DefaultCookieAttributes;
 		return EwfRequest.Current.AspNetRequest.Cookies.TryGetValue( ( omitNamePrefix ? "" : defaultAttributes.NamePrefix ?? "" ) + name, out value );
 	}
+
+	/// <summary>
+	/// Gets the value associated with the specified cookie name, by first searching the response cookies and then searching the request. A null value represents
+	/// a cookie that is being cleared. Throws an exception if multiple cookies with the specified name have been added to the response.
+	/// </summary>
+	public static bool TryGetCookieValueFromResponseOrRequest( string name, out string value, bool omitNamePrefix = false ) {
+		var defaultAttributes = EwfConfigurationStatics.AppConfiguration.DefaultCookieAttributes;
+		var responseCookies = ResponseCookies
+			.Where( i => string.Equals( i.name, ( omitNamePrefix ? "" : defaultAttributes.NamePrefix ?? "" ) + name, StringComparison.Ordinal ) )
+			.Materialize();
+		if( responseCookies.Any() ) {
+			value = responseCookies.Single().value;
+			return true;
+		}
+
+		return TryGetCookieValue( name, out value, omitNamePrefix: omitNamePrefix );
+	}
+
+	/// <summary>
+	/// Gets the cookies that have already been added to the response. A null value represents a cookie that is being cleared.
+	/// </summary>
+	public static IReadOnlyCollection<( string name, string value, CookieOptions options )> ResponseCookies => responseCookieGetter();
 
 	public static void SetCookie(
 		string name, string value, Instant? expires, bool secure, bool httpOnly, string domain = null, string path = null, bool omitNamePrefix = false ) {
