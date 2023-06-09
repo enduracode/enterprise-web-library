@@ -65,8 +65,6 @@ public class AppRequestState {
 	private bool userDisabled;
 	private Tuple<User, SpecifiedValue<User>> userAndImpersonator;
 
-	internal bool NonLiveWarningsHidden { get; set; }
-
 	internal string ClientSideNewUrl { get; set; }
 
 	private readonly List<( string prefix, Exception exception )> errors = new();

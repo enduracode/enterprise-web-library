@@ -18,7 +18,7 @@ public class CookieStatics {
 	/// <summary>
 	/// Gets the value associated with the specified cookie name. Searches only the request.
 	/// </summary>
-	public static bool TryGetCookieValue( string name, out string value, bool omitNamePrefix = false ) {
+	public static bool TryGetCookieValueFromRequestOnly( string name, out string value, bool omitNamePrefix = false ) {
 		var defaultAttributes = EwfConfigurationStatics.AppConfiguration.DefaultCookieAttributes;
 		return EwfRequest.Current.AspNetRequest.Cookies.TryGetValue( ( omitNamePrefix ? "" : defaultAttributes.NamePrefix ?? "" ) + name, out value );
 	}
@@ -37,7 +37,7 @@ public class CookieStatics {
 			return true;
 		}
 
-		return TryGetCookieValue( name, out value, omitNamePrefix: omitNamePrefix );
+		return TryGetCookieValueFromRequestOnly( name, out value, omitNamePrefix: omitNamePrefix );
 	}
 
 	/// <summary>
