@@ -30,11 +30,11 @@ public static class AuthenticationStatics {
 
 	private static IReadOnlyCollection<SamlIdentityProvider> samlIdentityProviders;
 
-	public delegate User PasswordLoginModificationMethod( DataValue<string> emailAddress, DataValue<string> password, string errorMessage = "" );
+	public delegate SystemUser PasswordLoginModificationMethod( DataValue<string> emailAddress, DataValue<string> password, string errorMessage = "" );
 
 	public delegate void LoginCodeSenderMethod( DataValue<string> emailAddress, bool isPasswordReset, string destinationUrl, int? newUserRoleId = null );
 
-	public delegate ( User user, string destinationUrl ) CodeLoginModificationMethod( string emailAddress, string code, string errorMessage = "" );
+	public delegate ( SystemUser user, string destinationUrl ) CodeLoginModificationMethod( string emailAddress, string code, string errorMessage = "" );
 
 	public delegate void SpecifiedUserLoginModificationMethod( int userId );
 
@@ -65,11 +65,11 @@ public static class AuthenticationStatics {
 	/// The second item in the returned tuple will be (1) null if impersonation is not taking place, (2) a value with a null user if impersonation is taking
 	/// place with an impersonator who doesn't correspond to a user, or (3) a value containing the impersonator.
 	/// </summary>
-	internal static Tuple<User, SpecifiedValue<User>> GetUserAndImpersonatorFromRequest() {
+	internal static Tuple<SystemUser, SpecifiedValue<SystemUser>> GetUserAndImpersonatorFromRequest() {
 		if( !UserManagementStatics.UserManagementEnabled )
-			return Tuple.Create<User, SpecifiedValue<User>>( null, null );
+			return Tuple.Create<SystemUser, SpecifiedValue<SystemUser>>( null, null );
 
-		User getUser() {
+		SystemUser getUser() {
 			if( !CookieStatics.TryGetCookieValueFromRequestOnly( userCookieName, out var cookieValue ) )
 				return null;
 			var ticket = GetFormsAuthTicket( cookieValue );
@@ -79,24 +79,27 @@ public static class AuthenticationStatics {
 
 		if( UserCanImpersonate( user ) )
 			if( CookieStatics.TryGetCookieValueFromRequestOnly( UserImpersonationStatics.CookieName, out var cookieValue ) )
-				return Tuple.Create( cookieValue.Any() ? UserManagementStatics.GetUser( int.Parse( cookieValue ), false ) : null, new SpecifiedValue<User>( user ) );
+				return Tuple.Create(
+					cookieValue.Any() ? UserManagementStatics.GetUser( int.Parse( cookieValue ), false ) : null,
+					new SpecifiedValue<SystemUser>( user ) );
 
-		return Tuple.Create( user, (SpecifiedValue<User>)null );
+		return Tuple.Create( user, (SpecifiedValue<SystemUser>)null );
 	}
 
-	internal static Tuple<User, SpecifiedValue<User>> RefreshUserAndImpersonator( Tuple<User, SpecifiedValue<User>> userAndImpersonator ) {
-		SpecifiedValue<User> impersonator;
+	internal static Tuple<SystemUser, SpecifiedValue<SystemUser>> RefreshUserAndImpersonator(
+		Tuple<SystemUser, SpecifiedValue<SystemUser>> userAndImpersonator ) {
+		SpecifiedValue<SystemUser> impersonator;
 		if( userAndImpersonator.Item2 == null )
 			impersonator = null;
 		else {
 			var impersonatorUser = userAndImpersonator.Item2.Value != null ? UserManagementStatics.GetUser( userAndImpersonator.Item2.Value.UserId, false ) : null;
-			impersonator = UserCanImpersonate( impersonatorUser ) ? new SpecifiedValue<User>( impersonatorUser ) : null;
+			impersonator = UserCanImpersonate( impersonatorUser ) ? new SpecifiedValue<SystemUser>( impersonatorUser ) : null;
 		}
 
 		return Tuple.Create( userAndImpersonator.Item1 != null ? UserManagementStatics.GetUser( userAndImpersonator.Item1.UserId, false ) : null, impersonator );
 	}
 
-	internal static bool UserCanImpersonate( User user ) => ( user != null && user.Role.CanManageUsers ) || !ConfigurationStatics.IsLiveInstallation;
+	internal static bool UserCanImpersonate( SystemUser user ) => ( user != null && user.Role.CanManageUsers ) || !ConfigurationStatics.IsLiveInstallation;
 
 
 	// Adding a New User
@@ -250,7 +253,7 @@ public static class AuthenticationStatics {
 	/// <summary>
 	/// MVC and private use only.
 	/// </summary>
-	public static void SetFormsAuthCookieAndUser( User user, IdentityProvider identityProvider = null ) {
+	public static void SetFormsAuthCookieAndUser( SystemUser user, IdentityProvider identityProvider = null ) {
 		if( AppRequestState.Instance.ImpersonatorExists )
 			UserImpersonationStatics.SetCookie( user );
 		else {

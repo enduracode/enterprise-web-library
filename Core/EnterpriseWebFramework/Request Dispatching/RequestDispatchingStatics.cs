@@ -186,7 +186,7 @@ public static class RequestDispatchingStatics {
 							transferRequest( context, 403, accessDeniedException.LogInPage );
 						else if( RequestState.UserAccessible && ( UserManagementStatics.LocalIdentityProviderEnabled ||
 						                                          AuthenticationStatics.SamlIdentityProviders.Count > 1 ||
-						                                          ( AuthenticationStatics.SamlIdentityProviders.Any() && User.Current is not null ) ) )
+						                                          ( AuthenticationStatics.SamlIdentityProviders.Any() && SystemUser.Current is not null ) ) )
 							transferRequest( context, 403, new UserManagement.Pages.LogIn( RequestState.Url ) );
 						else if( RequestState.UserAccessible && AuthenticationStatics.SamlIdentityProviders.Any() )
 							transferRequest(

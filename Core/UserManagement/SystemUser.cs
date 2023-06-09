@@ -5,11 +5,11 @@ namespace EnterpriseWebLibrary.UserManagement;
 /// <summary>
 /// A user of the system.
 /// </summary>
-public class User {
-	private static Func<User> currentUserGetter;
+public class SystemUser {
+	private static Func<SystemUser> currentUserGetter;
 
-	internal static void Init( Func<User> currentUserGetter ) {
-		User.currentUserGetter = currentUserGetter;
+	internal static void Init( Func<SystemUser> currentUserGetter ) {
+		SystemUser.currentUserGetter = currentUserGetter;
 	}
 
 	/// <summary>
@@ -23,7 +23,7 @@ public class User {
 	///
 	/// Does not currently work outside of web applications.
 	/// </summary>
-	public static User Current => currentUserGetter();
+	public static SystemUser Current => currentUserGetter();
 
 	private readonly int userId;
 	private readonly string email;
@@ -34,7 +34,7 @@ public class User {
 	/// <summary>
 	/// Creates a user object. FriendlyName defaults to the empty string. Do not pass null.
 	/// </summary>
-	public User( int userId, string email, Role role, Instant? lastRequestTime, string friendlyName = "" ) {
+	public SystemUser( int userId, string email, Role role, Instant? lastRequestTime, string friendlyName = "" ) {
 		this.userId = userId;
 		this.email = email;
 		this.role = role;

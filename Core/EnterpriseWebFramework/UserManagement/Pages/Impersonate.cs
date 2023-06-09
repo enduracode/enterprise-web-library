@@ -19,7 +19,7 @@ partial class Impersonate {
 			new CssElement( "SelectUserPageBody", "body.{0}".FormatWith( elementClass.ClassName ) ).ToCollection();
 	}
 
-	internal User UserObject { get; private set; }
+	internal SystemUser UserObject { get; private set; }
 
 	protected override void init() {
 		if( !UserManagementStatics.UserManagementEnabled )
@@ -59,7 +59,7 @@ partial class Impersonate {
 							" Do not impersonate a user without permission. Your actions will be attributed to the user you are impersonating, not to you.".ToComponents() )
 						.Materialize() ) );
 
-		var user = new DataValue<User>();
+		var user = new DataValue<SystemUser>();
 		var pb = PostBack.CreateFull(
 			modificationMethod: () => UserImpersonationStatics.BeginImpersonation( user.Value ),
 			actionGetter: () => new PostBackAction(

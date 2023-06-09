@@ -7,7 +7,7 @@ using EnterpriseWebLibrary.UserManagement;
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin;
 
 partial class SystemUser {
-	internal User User { get; private set; }
+	internal EnterpriseWebLibrary.UserManagement.SystemUser User { get; private set; }
 
 	protected override void init() {
 		if( UserId.HasValue )

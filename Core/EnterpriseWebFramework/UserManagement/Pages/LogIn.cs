@@ -59,7 +59,7 @@ partial class LogIn {
 	}
 
 	private bool authenticatedUserDeniedAccess =>
-		EnterpriseWebLibrary.UserManagement.User.Current is not null && !string.Equals( GetUrl(), AppRequestState.Instance.Url, StringComparison.Ordinal );
+		SystemUser.Current is not null && !string.Equals( GetUrl(), AppRequestState.Instance.Url, StringComparison.Ordinal );
 
 	private IReadOnlyCollection<FlowComponent> getAuthenticatedUserDeniedAccessComponents() {
 		return new Section(

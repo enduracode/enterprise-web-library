@@ -1,35 +1,34 @@
-﻿using System.Collections.Generic;
-using EnterpriseWebLibrary.UserManagement;
+﻿using EnterpriseWebLibrary.UserManagement;
 using EnterpriseWebLibrary.UserManagement.IdentityProviders;
-using Humanizer;
+using JetBrains.Annotations;
 using NodaTime;
-using Tewl.Tools;
 
-namespace EnterpriseWebLibrary.Configuration.Providers {
-	internal class UserManagement: SystemUserManagementProvider {
-		protected override IEnumerable<IdentityProvider> GetIdentityProviders() =>
-			new LocalIdentityProvider(
-				"{0} Team".FormatWith( EwlStatics.EwlInitialism ),
-				"contact the {0} Team.".FormatWith( EwlStatics.EwlInitialism ),
-				emailAddress => ( createUser(), 1, null ),
-				userId => ( null, null, null, null, "" ),
-				( userId, salt, saltedPassword ) => {},
-				( userId, salt, hashedCode, expirationTime, remainingAttemptCount, destinationUrl ) => {} ).ToCollection();
+namespace EnterpriseWebLibrary.Configuration.Providers;
 
-		protected override IEnumerable<User> GetUsers() => createUser().ToCollection();
+[ UsedImplicitly ]
+internal class UserManagement: SystemUserManagementProvider {
+	protected override IEnumerable<IdentityProvider> GetIdentityProviders() =>
+		new LocalIdentityProvider(
+			"{0} Team".FormatWith( EwlStatics.EwlInitialism ),
+			"contact the {0} Team.".FormatWith( EwlStatics.EwlInitialism ),
+			emailAddress => ( createUser(), 1, null ),
+			userId => ( null, null, null, null, "" ),
+			( userId, salt, saltedPassword ) => {},
+			( userId, salt, hashedCode, expirationTime, remainingAttemptCount, destinationUrl ) => {} ).ToCollection();
 
-		protected override User GetUser( int userId ) => createUser();
+	protected override IEnumerable<SystemUser> GetUsers() => createUser().ToCollection();
 
-		protected override User GetUser( string emailAddress ) => createUser();
+	protected override SystemUser GetUser( int userId ) => createUser();
 
-		private User createUser() => new User( 1, "john.doe@example.com", createRole(), null );
+	protected override SystemUser GetUser( string emailAddress ) => createUser();
 
-		protected override int InsertOrUpdateUser( int? userId, string emailAddress, int roleId, Instant? lastRequestTime ) => 1;
+	private SystemUser createUser() => new( 1, "john.doe@example.com", createRole(), null );
 
-		protected override void DeleteUser( int userId ) {}
+	protected override int InsertOrUpdateUser( int? userId, string emailAddress, int roleId, Instant? lastRequestTime ) => 1;
 
-		protected override IEnumerable<Role> GetRoles() => createRole().ToCollection();
+	protected override void DeleteUser( int userId ) {}
 
-		private Role createRole() => new Role( 1, "Admin", true, false );
-	}
+	protected override IEnumerable<Role> GetRoles() => createRole().ToCollection();
+
+	private Role createRole() => new( 1, "Admin", true, false );
 }

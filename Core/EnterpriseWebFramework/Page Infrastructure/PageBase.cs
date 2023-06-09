@@ -341,7 +341,7 @@ public abstract class PageBase: ResourceBase {
 	/// It's important to call this from EwfPage instead of EwfApp because requests for some pages, with their associated images, CSS files, etc., can easily
 	/// cause 20-30 server requests, and we only want to update the time stamp once for all of these.
 	/// </summary>
-	private Action getLastPageRequestTimeUpdateMethod( User user ) {
+	private Action getLastPageRequestTimeUpdateMethod( SystemUser user ) {
 		// Only update the request time if a significant amount of time has passed since we did it last. This can dramatically reduce concurrency issues caused by
 		// people rapidly assigning tasks to one another in the System Manager or similar situations.
 		if( AppRequestState.RequestTime - user.LastRequestTime < Duration.FromMinutes( 60 ) )
@@ -354,7 +354,7 @@ public abstract class PageBase: ResourceBase {
 		// another transaction has modified its value during this transaction.
 		var newlyQueriedUser = new DataAccessState().ExecuteWithThis(
 			() => {
-				User getUser() => UserManagementStatics.GetUser( user.UserId, false );
+				SystemUser getUser() => UserManagementStatics.GetUser( user.UserId, false );
 				return ConfigurationStatics.DatabaseExists ? DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( getUser ) : getUser();
 			} );
 		if( newlyQueriedUser == null || newlyQueriedUser.LastRequestTime > user.LastRequestTime )

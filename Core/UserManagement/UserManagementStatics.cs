@@ -17,8 +17,8 @@ public static class UserManagementStatics {
 	private static LocalIdentityProvider localIdentityProvider;
 	private static ( Func<string> getter, Action<string> updater )? certificateMethods;
 
-	internal static void Init( Action certificateUpdateNotifier, Func<User> currentUserGetter ) {
-		User.Init( currentUserGetter );
+	internal static void Init( Action certificateUpdateNotifier, Func<SystemUser> currentUserGetter ) {
+		SystemUser.Init( currentUserGetter );
 
 		provider = ConfigurationStatics.GetSystemLibraryProvider<SystemUserManagementProvider>( providerName );
 		UserManagementStatics.certificateUpdateNotifier = certificateUpdateNotifier;
@@ -58,7 +58,7 @@ public static class UserManagementStatics {
 		certificateUpdateNotifier();
 	}
 
-	internal static User GetUser( int userId, bool ensureUserExists ) {
+	internal static SystemUser GetUser( int userId, bool ensureUserExists ) {
 		var user = SystemProvider.GetUser( userId );
 		if( user == null && ensureUserExists )
 			throw new ApplicationException( "A user with an ID of {0} does not exist.".FormatWith( userId ) );

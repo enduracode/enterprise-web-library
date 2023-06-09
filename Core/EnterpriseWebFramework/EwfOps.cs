@@ -93,8 +93,8 @@ public static class EwfOps {
 					writer.WriteLine( "User agent: " + EwfRequest.Current.Headers.UserAgent );
 					writer.WriteLine( "Referrer: " + EwfRequest.Current.Headers.Referer );
 
-					User user = null;
-					User impersonator = null;
+					SystemUser user = null;
+					SystemUser impersonator = null;
 
 					// exception-prone code
 					try {

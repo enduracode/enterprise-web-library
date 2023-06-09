@@ -63,7 +63,7 @@ public class AppRequestState {
 
 	private bool userEnabled;
 	private bool userDisabled;
-	private Tuple<User, SpecifiedValue<User>> userAndImpersonator;
+	private Tuple<SystemUser, SpecifiedValue<SystemUser>> userAndImpersonator;
 
 	internal string ClientSideNewUrl { get; set; }
 
@@ -165,14 +165,14 @@ public class AppRequestState {
 
 	internal bool ImpersonatorExists => UserAndImpersonator.Item2 != null;
 
-	internal User ImpersonatorUser => UserAndImpersonator.Item2.Value;
+	internal SystemUser ImpersonatorUser => UserAndImpersonator.Item2.Value;
 
 	internal int? ProfilingUserId => ( ImpersonatorExists ? ImpersonatorUser : UserAndImpersonator.Item1 )?.UserId;
 
 	/// <summary>
 	/// AppTools.User and private use only.
 	/// </summary>
-	internal Tuple<User, SpecifiedValue<User>> UserAndImpersonator {
+	internal Tuple<SystemUser, SpecifiedValue<SystemUser>> UserAndImpersonator {
 		get {
 			if( !userEnabled )
 				throw new ApplicationException( "User cannot be accessed this early in the request life cycle." );
@@ -196,7 +196,7 @@ public class AppRequestState {
 	/// <summary>
 	/// For use by user-management post back logic only. Assumes the user and impersonator (if one exists) are loaded.
 	/// </summary>
-	internal void SetUser( User user ) {
+	internal void SetUser( SystemUser user ) {
 		userAndImpersonator = Tuple.Create( user, userAndImpersonator.Item2 );
 	}
 
@@ -204,11 +204,11 @@ public class AppRequestState {
 	/// For use by impersonation post back logic only. Assumes the user and impersonator (if one exists) are loaded.
 	/// </summary>
 	/// <param name="user">Pass null to end impersonation. Pass a value to begin impersonation for the specified user or an anonymous user.</param>
-	internal void SetUserAndImpersonator( SpecifiedValue<User> user ) {
+	internal void SetUserAndImpersonator( SpecifiedValue<SystemUser> user ) {
 		var impersonator = userAndImpersonator.Item2;
 		userAndImpersonator = user != null
-			                      ? Tuple.Create( user.Value, impersonator ?? new SpecifiedValue<User>( userAndImpersonator.Item1 ) )
-			                      : Tuple.Create( impersonator.Value, (SpecifiedValue<User>)null );
+			                      ? Tuple.Create( user.Value, impersonator ?? new SpecifiedValue<SystemUser>( userAndImpersonator.Item1 ) )
+			                      : Tuple.Create( impersonator.Value, (SpecifiedValue<SystemUser>)null );
 	}
 
 	internal ( string prefix, Exception exception ) GetLastError() => errors.Last();

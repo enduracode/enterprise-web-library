@@ -80,9 +80,9 @@ public class LocalIdentityProvider: IdentityProvider {
 
 	internal readonly string AdministratingOrganizationName;
 	internal readonly string LogInHelpInstructions;
-	private readonly Func<string, ( User user, int salt, byte[] saltedPassword )?> passwordLoginUserGetter;
+	private readonly Func<string, ( SystemUser user, int salt, byte[] saltedPassword )?> passwordLoginUserGetter;
 	private readonly LoginCodeGetterMethod loginCodeGetter;
-	private readonly Func<User, bool, bool?> postAuthenticationMethod;
+	private readonly Func<SystemUser, bool, bool?> postAuthenticationMethod;
 	internal readonly int? AuthenticationTimeoutMinutes;
 	internal readonly Action<Validator, string> PasswordValidationMethod;
 	internal readonly PasswordUpdaterMethod PasswordUpdater;
@@ -109,10 +109,10 @@ public class LocalIdentityProvider: IdentityProvider {
 	/// <param name="passwordValidationMethod">Validates the specified password. Called when a user changes their password. Do not use unless the system
 	/// absolutely requires micromanagement of authentication behavior.</param>
 	public LocalIdentityProvider(
-		string administratingOrganizationName, string logInHelpInstructions, Func<string, ( User user, int salt, byte[] saltedPassword )?> passwordLoginUserGetter,
-		LoginCodeGetterMethod loginCodeGetter, PasswordUpdaterMethod passwordUpdater, LoginCodeUpdaterMethod loginCodeUpdater,
-		Func<User, bool, bool?> postAuthenticationMethod = null, int? authenticationTimeoutMinutes = null,
-		Action<Validator, string> passwordValidationMethod = null ) {
+		string administratingOrganizationName, string logInHelpInstructions,
+		Func<string, ( SystemUser user, int salt, byte[] saltedPassword )?> passwordLoginUserGetter, LoginCodeGetterMethod loginCodeGetter,
+		PasswordUpdaterMethod passwordUpdater, LoginCodeUpdaterMethod loginCodeUpdater, Func<SystemUser, bool, bool?> postAuthenticationMethod = null,
+		int? authenticationTimeoutMinutes = null, Action<Validator, string> passwordValidationMethod = null ) {
 		AdministratingOrganizationName = administratingOrganizationName;
 		LogInHelpInstructions = logInHelpInstructions;
 		this.passwordLoginUserGetter = passwordLoginUserGetter;
@@ -124,7 +124,7 @@ public class LocalIdentityProvider: IdentityProvider {
 		this.loginCodeUpdater = loginCodeUpdater;
 	}
 
-	internal string LogInUserWithPassword( string emailAddress, string password, out User user, string errorMessage = "" ) {
+	internal string LogInUserWithPassword( string emailAddress, string password, out SystemUser user, string errorMessage = "" ) {
 		if( errorMessage.Length == 0 )
 			errorMessage =
 				"Login failed. Please check your email address and password. If you do not know your password, please set a new one using the button below.";
@@ -221,7 +221,7 @@ public class LocalIdentityProvider: IdentityProvider {
 		EmailStatics.SendEmailWithDefaultFromAddress( message );
 	}
 
-	internal string LogInUserWithCode( string emailAddress, string code, out User user, out string destinationUrl, string errorMessage = "" ) {
+	internal string LogInUserWithCode( string emailAddress, string code, out SystemUser user, out string destinationUrl, string errorMessage = "" ) {
 		if( errorMessage.Length == 0 )
 			errorMessage = "The login code you entered is incorrect or has expired. Please check for typos. If there aren’t any, please send yourself another code.";
 
