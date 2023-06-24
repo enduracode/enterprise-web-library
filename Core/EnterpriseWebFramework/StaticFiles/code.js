@@ -117,6 +117,8 @@ function postBackRequestStarting( e, postBackId ) {
 	for( var i in CKEDITOR.instances )
 		CKEDITOR.instances[ i ].updateElement();
 
+	// In addition to showing the dialog, this causes form controls to lose focus before their values are posted, which is important for those that perform
+	// client-side formatting in the change or blur events.
 	$( ".ewfProcessingDialog" ).removeClass( "ewfProcessingDialogTo" ).addClass( "ewfProcessingDialogN" ).get( 0 ).showModal();
 
 	setTimeout( '$( ".ewfProcessingDialog" ).removeClass( "ewfProcessingDialogN" ).addClass( "ewfProcessingDialogTo" );', 10000 );
@@ -140,6 +142,26 @@ function initNumericTextControl( selector ) {
 			e.preventDefault();
 			this.setRangeText( e.originalEvent.clipboardData.getData( "text" ).replace( /\D/g, "" ), this.selectionStart, this.selectionEnd, "end" );
 		} );
+}
+
+// derived from https://github.com/qwertie/simplertime and https://stackoverflow.com/a/50769298/35349
+function formatTime( value ) {
+	var match = value.match( /^\s*(\d\d?)\s*:?\s*(\d\d)?\s*(am?|pm?)?\s*$/i );
+	if( match ) {
+		var meridiem = ( match[ 3 ] || ' ' )[ 0 ].toUpperCase();
+		var hour = parseInt( match[ 1 ] );
+		var minute = match[ 2 ] ? parseInt( match[ 2 ] ) : 0;
+		if( meridiem !== ' ' && ( hour == 0 || hour > 12 ) || hour >= 24 || minute >= 60 )
+			return value;
+		if( meridiem === 'A' && hour === 12 )
+			hour = 0;
+		if( meridiem === 'P' && hour !== 12 )
+			hour += 12;
+
+		var time = luxon.DateTime.fromObject( { hour: hour, minute: minute } );
+		return time.toFormat( "h:mm" ) + ( time.hour < 12 ? "a" : "p" );
+	}
+	return value;
 }
 
 // Supports DurationControl.

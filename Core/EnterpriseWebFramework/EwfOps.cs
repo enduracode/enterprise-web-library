@@ -302,12 +302,11 @@ public static class EwfOps {
 										new ExternalResource(
 											"//fonts.googleapis.com/css2?family=Libre+Franklin:wght@500;600;700&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400&family=Roboto+Mono&display=fallback" ) );
 									cssInfos.Add( new ExternalResource( "//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" ) );
-									cssInfos.Add( new StaticFiles.Versioned.Third_party.Jquery_ui.Jquery_ui_1132custom_v1.Jquery_uiminCss() );
+									cssInfos.Add( new StaticFiles.Versioned.Third_party.Jquery_ui.Jquery_ui_1132custom_v2.Jquery_uiminCss() );
 									cssInfos.Add( new ExternalResource( "//cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css" ) );
 									cssInfos.Add( new ExternalResource( "//cdn.datatables.net/responsive/2.4.0/css/responsive.dataTables.min.css" ) );
 									cssInfos.Add( new StaticFiles.Third_party.Select_cssCss() );
 									cssInfos.Add( new StaticFiles.Versioned.Third_party.Chosen.Chosen_v187.ChosenminCss() );
-									cssInfos.Add( new StaticFiles.Third_party.Time_picker.StylesCss() );
 									cssInfos.Add( new StaticFiles.Third_party.Qtip2.JqueryqtipminCss() );
 									cssInfos.Add( new ExternalResource( "//cdnjs.cloudflare.com/ajax/libs/dialog-polyfill/0.4.9/dialog-polyfill.min.css" ) );
 									cssInfos.Add( new StaticFiles.Styles.BasicCss() );
@@ -337,24 +336,23 @@ public static class EwfOps {
 								( markup, includeStripeCheckout ) => {
 									string getElement( ResourceInfo resource ) => "<script src=\"{0}\" defer></script>".FormatWith( resource.GetUrl() );
 
-									var infos = new List<ResourceInfo>();
-									infos.Add( new ExternalResource( "//code.jquery.com/jquery-3.6.3.min.js" ) );
-									infos.Add( new StaticFiles.Versioned.Third_party.Jquery_ui.Jquery_ui_1132custom_v1.Jquery_uiminJs() );
-									infos.Add( new ExternalResource( "//cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js" ) );
-									infos.Add( new ExternalResource( "//cdn.datatables.net/responsive/2.4.0/js/dataTables.responsive.min.js" ) );
-									infos.Add( new StaticFiles.Versioned.Third_party.Chosen.Chosen_v187.ChosenjqueryminJs() );
-									infos.Add( new StaticFiles.Third_party.Time_picker.CodeJs() );
-									infos.Add( new StaticFiles.Third_party.Qtip2.JqueryqtipminJs() );
-									infos.Add( new ExternalResource( "//cdnjs.cloudflare.com/ajax/libs/dialog-polyfill/0.4.9/dialog-polyfill.min.js" ) );
-									infos.Add( new StaticFiles.Third_party.Spin_js.SpinminJs() );
-									infos.Add( new ExternalResource( "//cdn.ckeditor.com/4.5.8/full/ckeditor.js" ) );
-									infos.Add( new ExternalResource( "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js" ) );
-									infos.Add( new StaticFiles.Instant_pageJs() );
+									markup.Append( getElement( new ExternalResource( "https://cdn.jsdelivr.net/npm/luxon@3.3.0/build/global/luxon.min.js" ) ) );
+									markup.Append( getElement( new ExternalResource( "//code.jquery.com/jquery-3.6.3.min.js" ) ) );
+									markup.Append( getElement( new StaticFiles.Versioned.Third_party.Jquery_ui.Jquery_ui_1132custom_v2.Jquery_uiminJs() ) );
+									markup.Append( getElement( new ExternalResource( "//cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js" ) ) );
+									markup.Append( getElement( new ExternalResource( "//cdn.datatables.net/responsive/2.4.0/js/dataTables.responsive.min.js" ) ) );
+									markup.Append( getElement( new StaticFiles.Versioned.Third_party.Chosen.Chosen_v187.ChosenjqueryminJs() ) );
+									markup.Append( "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@duetds/date-picker@1.4.0/dist/duet/duet.esm.js\"></script>" );
+									markup.Append( "<script nomodule src=\"https://cdn.jsdelivr.net/npm/@duetds/date-picker@1.4.0/dist/duet/duet.js\"></script>" );
+									markup.Append( getElement( new StaticFiles.Third_party.Qtip2.JqueryqtipminJs() ) );
+									markup.Append( getElement( new ExternalResource( "//cdnjs.cloudflare.com/ajax/libs/dialog-polyfill/0.4.9/dialog-polyfill.min.js" ) ) );
+									markup.Append( getElement( new StaticFiles.Third_party.Spin_js.SpinminJs() ) );
+									markup.Append( getElement( new ExternalResource( "//cdn.ckeditor.com/4.5.8/full/ckeditor.js" ) ) );
+									markup.Append( getElement( new ExternalResource( "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js" ) ) );
+									markup.Append( getElement( new StaticFiles.Instant_pageJs() ) );
 									if( includeStripeCheckout )
-										infos.Add( new ExternalResource( "https://checkout.stripe.com/checkout.js" ) );
-									infos.Add( new StaticFiles.CodeJs() );
-									foreach( var i in infos.Select( getElement ) )
-										markup.Append( i );
+										markup.Append( getElement( new ExternalResource( "https://checkout.stripe.com/checkout.js" ) ) );
+									markup.Append( getElement( new StaticFiles.CodeJs() ) );
 									if( MiniProfiler.Current != null ) {
 										var profiler = MiniProfiler.Current;
 										var ids = profiler.Options.ExpireAndGetUnviewed( profiler.User ) ?? new List<Guid>( 1 );

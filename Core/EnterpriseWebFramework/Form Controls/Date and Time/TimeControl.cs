@@ -45,6 +45,7 @@ public class TimeControl: FormControl<FlowComponent> {
 					       ? TextControlSetup.CreateReadOnly( validationPredicate: setup.ValidationPredicate, validationErrorNotifier: setup.ValidationErrorNotifier )
 					       : TextControlSetup.Create(
 						       autoFillTokens: setup.AutoFillTokens,
+						       formattedValueExpressionGetter: valueExpression => "formatTime( {0} )".FormatWith( valueExpression ),
 						       action: new SpecifiedValue<FormAction>( setup.Action ),
 						       valueChangedAction: setup.ValueChangedAction,
 						       pageModificationValue: setup.PageModificationValue,
@@ -78,34 +79,7 @@ public class TimeControl: FormControl<FlowComponent> {
 					                  } );
 
 			Labeler = textControl.Labeler;
-
-			PageComponent = new DisplayableElement(
-				context => new DisplayableElementData(
-					setup.DisplaySetup,
-					() => new DisplayableElementLocalData(
-						"div",
-						focusDependentData: new DisplayableElementFocusDependentData(
-							includeIdAttribute: true,
-							jsInitStatements: "{0}.timepicker( {{ {1} }} );".FormatWith(
-								getTextControlExpression( context.Id ),
-								StringTools.ConcatenateWithDelimiter(
-									", ",
-									"timeFormat: 'h:mmt'",
-									"stepMinute: {0}".FormatWith( minuteInterval ),
-									"showButtonPanel: false" ) ) ) ),
-					classes: elementClass.Add( setup.Classes ?? ElementClassSet.Empty ),
-					children: textControl.PageComponent.ToCollection()
-						.Concat(
-							setup.IsReadOnly
-								? Enumerable.Empty<PhrasingComponent>()
-								: new EwfButton(
-									new CustomButtonStyle(
-										attributes: new ElementAttribute( "aria-label", "Time picker" ).ToCollection(),
-										children: new FontAwesomeIcon( "fa-clock-o" ).ToCollection() ),
-									behavior: new CustomButtonBehavior( () => "{0}.timepicker( 'show' );".FormatWith( getTextControlExpression( context.Id ) ) ),
-									classes: new ElementClass( "icon" ) ).ToCollection() )
-						.Materialize() ) );
-
+			PageComponent = getContainer( setup, textControl );
 			Validation = textControl.Validation;
 		}
 		else {
@@ -132,17 +106,10 @@ public class TimeControl: FormControl<FlowComponent> {
 				validationMethod: validationMethod );
 
 			Labeler = selectList.Labeler;
-
-			PageComponent = new GenericFlowContainer(
-				selectList.PageComponent.ToCollection(),
-				displaySetup: setup.DisplaySetup,
-				classes: elementClass.Add( setup.Classes ?? ElementClassSet.Empty ) );
-
+			PageComponent = getContainer( setup, selectList );
 			Validation = selectList.Validation;
 		}
 	}
-
-	private string getTextControlExpression( string containerId ) => "$( '#{0}' ).children( 'input' )".FormatWith( containerId );
 
 	private IReadOnlyCollection<LocalTime> getTimes( LocalTime minValue, LocalTime? maxValue, int minuteInterval ) {
 		var times = new List<LocalTime>();
@@ -163,4 +130,10 @@ public class TimeControl: FormControl<FlowComponent> {
 		}
 		return times;
 	}
+
+	private FlowComponent getContainer( TimeControlSetup setup, FormControl<FlowComponent> control ) =>
+		new GenericFlowContainer(
+			control.PageComponent.ToCollection(),
+			displaySetup: setup.DisplaySetup,
+			classes: elementClass.Add( setup.Classes ?? ElementClassSet.Empty ) );
 }
