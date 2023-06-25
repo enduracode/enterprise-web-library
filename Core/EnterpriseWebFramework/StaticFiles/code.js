@@ -1,58 +1,3 @@
-// Supports DurationControl
-// Formats numbers entered in the textbox to HH:MM and prevents input out of the range of TimeSpan.
-var maxValueLength = 6;
-
-function ApplyTimeSpanFormat( field ) {
-	if( field.value === "" )
-		return;
-
-	// Turn the string HHHH:MM into an an array of { H, H, H, H, M, M }
-	var digits = field.value.replace( ":", "" ).split( "" );
-
-	// Don't allow the minutes to be greater than 59
-	if( digits.length > 1 && digits[ digits.length - 2 ] > 5 ) {
-		digits[ digits.length - 2 ] = 5;
-		digits[ digits.length - 1 ] = 9;
-	}
-
-	// Turn the string in the text box to the HHHH:MM format.
-	var timeTextValue = ""; // The new text box value
-	var timeValueIndex = digits.length - 1; // The greatest index is the right-most digit
-	for( var i = 0; i < maxValueLength; i++ ) {
-		if( i == 2 ) // Insert the hour-minute separator
-			timeTextValue = ":" + timeTextValue;
-		timeTextValue = ( timeValueIndex >= 0 ? digits[ timeValueIndex-- ] : "0" ) + timeTextValue;
-		field.value = timeTextValue;
-	}
-}
-
-// Returns true if...
-// Key pressed is a command or function key
-// There is a selection or Length is <= maxValueLength and
-// Key pressed is numerical
-
-function NumericalOnly( evt, field ) {
-
-	if( evt.ctrlKey || evt.altKey )
-		return true;
-
-	var charCode = ( evt.which || evt.which == 0 ) ? evt.which : evt.keyCode;
-	switch( charCode ) {
-		//Enter
-		case 13:
-			ApplyTimeSpanFormat( field );
-		//Backspace
-		case 8:
-		// Keys that don't produce a character
-		case 0:
-			return true;
-		default:
-			// Max of maxValueLength digits, numbers only.
-			// If some of the field is selected, let them replace the contents even if it's full
-			return ( $( field ).getSelection().text != "" || field.value.length < maxValueLength ) && ( 48 <= charCode && charCode <= 57 );
-	}
-}
-
 // This function gets called by jQuery's on-document-ready event. This will run the following code after the page has loaded.
 function OnDocumentReady() {
 	stopActivatableTableRowNestedEvents();
@@ -162,6 +107,61 @@ function formatTime( value ) {
 		return time.toFormat( "h:mm" ) + ( time.hour < 12 ? "a" : "p" );
 	}
 	return value;
+}
+
+// Supports DurationControl
+// Formats numbers entered in the textbox to HH:MM and prevents input out of the range of TimeSpan.
+var maxValueLength = 6;
+
+function ApplyTimeSpanFormat( field ) {
+	if( field.value === "" )
+		return;
+
+	// Turn the string HHHH:MM into an an array of { H, H, H, H, M, M }
+	var digits = field.value.replace( ":", "" ).split( "" );
+
+	// Don't allow the minutes to be greater than 59
+	if( digits.length > 1 && digits[ digits.length - 2 ] > 5 ) {
+		digits[ digits.length - 2 ] = 5;
+		digits[ digits.length - 1 ] = 9;
+	}
+
+	// Turn the string in the text box to the HHHH:MM format.
+	var timeTextValue = ""; // The new text box value
+	var timeValueIndex = digits.length - 1; // The greatest index is the right-most digit
+	for( var i = 0; i < maxValueLength; i++ ) {
+		if( i == 2 ) // Insert the hour-minute separator
+			timeTextValue = ":" + timeTextValue;
+		timeTextValue = ( timeValueIndex >= 0 ? digits[ timeValueIndex-- ] : "0" ) + timeTextValue;
+		field.value = timeTextValue;
+	}
+}
+
+// Returns true if...
+// Key pressed is a command or function key
+// There is a selection or Length is <= maxValueLength and
+// Key pressed is numerical
+
+function NumericalOnly( evt, field ) {
+
+	if( evt.ctrlKey || evt.altKey )
+		return true;
+
+	var charCode = ( evt.which || evt.which == 0 ) ? evt.which : evt.keyCode;
+	switch( charCode ) {
+		//Enter
+		case 13:
+			ApplyTimeSpanFormat( field );
+		//Backspace
+		case 8:
+		// Keys that don't produce a character
+		case 0:
+			return true;
+		default:
+			// Max of maxValueLength digits, numbers only.
+			// If some of the field is selected, let them replace the contents even if it's full
+			return ( $( field ).getSelection().text != "" || field.value.length < maxValueLength ) && ( 48 <= charCode && charCode <= 57 );
+	}
 }
 
 // Supports DurationControl.
