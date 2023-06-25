@@ -79,7 +79,23 @@ public class TimeControl: FormControl<FlowComponent> {
 					                  } );
 
 			Labeler = textControl.Labeler;
-			PageComponent = getContainer( setup, textControl );
+			var helpBoxId = new ModalBoxId();
+			PageComponent = getContainer(
+				setup,
+				textControl,
+				setup.IsReadOnly
+					? Enumerable.Empty<PhrasingComponent>()
+					: new EwfButton(
+						new CustomButtonStyle(
+							attributes: new ElementAttribute( "aria-label", "Help" ).ToCollection(),
+							children: new FontAwesomeIcon( "fa-question-circle-o" ).ToCollection() ),
+						behavior: new OpenModalBehavior(
+							helpBoxId,
+							etherealChildren: new ModalBox(
+								helpBoxId,
+								true,
+								"Examples:".ToComponents().Append( new LineBreak() ).Concat( "9 am, 2:30p, 1600".ToComponents() ).Materialize() ).ToCollection() ),
+						classes: new ElementClass( "icon" ) ).ToCollection() );
 			Validation = textControl.Validation;
 		}
 		else {
@@ -106,7 +122,7 @@ public class TimeControl: FormControl<FlowComponent> {
 				validationMethod: validationMethod );
 
 			Labeler = selectList.Labeler;
-			PageComponent = getContainer( setup, selectList );
+			PageComponent = getContainer( setup, selectList, Enumerable.Empty<PhrasingComponent>() );
 			Validation = selectList.Validation;
 		}
 	}
@@ -131,9 +147,9 @@ public class TimeControl: FormControl<FlowComponent> {
 		return times;
 	}
 
-	private FlowComponent getContainer( TimeControlSetup setup, FormControl<FlowComponent> control ) =>
+	private FlowComponent getContainer( TimeControlSetup setup, FormControl<FlowComponent> control, IEnumerable<PhrasingComponent> additionalContent ) =>
 		new GenericFlowContainer(
-			control.PageComponent.ToCollection(),
+			control.PageComponent.Concat( additionalContent ).Materialize(),
 			displaySetup: setup.DisplaySetup,
 			classes: elementClass.Add( setup.Classes ?? ElementClassSet.Empty ) );
 }

@@ -525,8 +525,12 @@ ewfDateControl > ewfSingleLineTextControlAllStates {
 	max-width: 8em;
 }
 ewfTimeControl > ewfSingleLineTextControlAllStates {
+	margin-right: .5em;
 	width: 100%;
 	max-width: 5em;
+}
+ewfTimeControl ewfIcon {
+	font-size: 1.4em;
 }
 ewfTimeControl > ewfDropDownListContainer {
 	width: 100%;
