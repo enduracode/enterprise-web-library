@@ -1,5 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 using JetBrains.Annotations;
+using NodaTime;
 using Tewl.InputValidation;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -27,8 +28,8 @@ public class DurationControl: FormControl<PhrasingComponent> {
 	/// <param name="allowEmpty"></param>
 	/// <param name="setup">The setup object for the duration control.</param>
 	/// <param name="validationMethod">The validation method. Pass null if you’re only using this control for page modification.</param>
-	public DurationControl( TimeSpan? value, bool allowEmpty, DurationControlSetup setup = null, Action<TimeSpan?, Validator> validationMethod = null ) {
-		setup = setup ?? DurationControlSetup.Create();
+	public DurationControl( Duration? value, bool allowEmpty, DurationControlSetup setup = null, Action<Duration?, Validator> validationMethod = null ) {
+		setup ??= DurationControlSetup.Create();
 
 		var textControl = new TextControl(
 			value.HasValue ? Math.Floor( value.Value.TotalHours ).ToString( "0000" ) + ":" + value.Value.Minutes.ToString( "00" ) : "",
@@ -43,7 +44,7 @@ public class DurationControl: FormControl<PhrasingComponent> {
 					       validationPredicate: setup.ValidationPredicate,
 					       validationErrorNotifier: setup.ValidationErrorNotifier ),
 			validationMethod: validationMethod == null
-				                  ? (Action<string, Validator>)null
+				                  ? null
 				                  : ( postBackValue, validator ) => {
 					                  if( tooLongOrInvalidCharacters( postBackValue ) ) {
 						                  validator.NoteErrorAndAddMessage( "Please enter a valid duration." );
@@ -53,12 +54,12 @@ public class DurationControl: FormControl<PhrasingComponent> {
 
 					                  var errorHandler = new ValidationErrorHandler( "duration" );
 					                  var validatedValue = validator.GetNullableTimeSpan( errorHandler, parseTimeSpan( postBackValue ), allowEmpty );
-					                  if( errorHandler.LastResult != ErrorCondition.NoError ) {
+					                  if( errorHandler.LastResult is not ErrorCondition.NoError ) {
 						                  setup.ValidationErrorNotifier?.Invoke();
 						                  return;
 					                  }
 
-					                  validationMethod( validatedValue, validator );
+					                  validationMethod( validatedValue.ToNewUnderlyingValue( Duration.FromTimeSpan ), validator );
 				                  } );
 
 		Labeler = textControl.Labeler;

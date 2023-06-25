@@ -1041,7 +1041,7 @@ public static class FormControlExtensionCreators {
 			} );
 
 	public static DurationControl ToDurationControl(
-		this DataValue<TimeSpan> dataValue, DurationControlSetup setup = null, SpecifiedValue<TimeSpan?> value = null,
+		this DataValue<Duration> dataValue, DurationControlSetup setup = null, SpecifiedValue<Duration?> value = null,
 		Action<Validator> additionalValidationMethod = null ) {
 		return new DurationControl(
 			value != null ? value.Value : dataValue.Value,
@@ -1054,7 +1054,7 @@ public static class FormControlExtensionCreators {
 	}
 
 	public static DurationControl ToDurationControl(
-		this DataValue<TimeSpan?> dataValue, DurationControlSetup setup = null, SpecifiedValue<TimeSpan?> value = null, bool allowEmpty = true,
+		this DataValue<Duration?> dataValue, DurationControlSetup setup = null, SpecifiedValue<Duration?> value = null, bool allowEmpty = true,
 		Action<Validator> additionalValidationMethod = null ) {
 		return new DurationControl(
 			value != null ? value.Value : dataValue.Value,
@@ -1081,15 +1081,15 @@ public static class FormControlExtensionCreators {
 	public static DurationControl ToDurationControl(
 		this DataValue<int?> dataValue, DurationControlSetup setup = null, SpecifiedValue<int?> value = null, bool allowEmpty = true,
 		Action<Validator> additionalValidationMethod = null ) {
-		var timeSpanValue = new DataValue<TimeSpan?>
+		var durationValue = new DataValue<Duration?>
 			{
-				Value = ( value != null ? value.Value : dataValue.Value ).ToNewUnderlyingValue( v => TimeSpan.FromSeconds( v ) )
+				Value = ( value != null ? value.Value : dataValue.Value ).ToNewUnderlyingValue( v => Duration.FromSeconds( v ) )
 			};
-		return timeSpanValue.ToDurationControl(
+		return durationValue.ToDurationControl(
 			setup: setup,
 			allowEmpty: allowEmpty,
 			additionalValidationMethod: validator => {
-				dataValue.Value = timeSpanValue.Value.ToNewUnderlyingValue( i => (int)i.TotalSeconds );
+				dataValue.Value = durationValue.Value.ToNewUnderlyingValue( i => (int)i.TotalSeconds );
 				additionalValidationMethod?.Invoke( validator );
 			} );
 	}
