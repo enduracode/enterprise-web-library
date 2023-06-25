@@ -38,6 +38,7 @@ public class DurationControl: FormControl<PhrasingComponent> {
 				       ? TextControlSetup.CreateReadOnly( validationPredicate: setup.ValidationPredicate, validationErrorNotifier: setup.ValidationErrorNotifier )
 				       : TextControlSetup.Create(
 					       placeholder: "h:m",
+					       formattedValueExpressionGetter: valueExpression => "formatDuration( {0} )".FormatWith( valueExpression ),
 					       action: new SpecifiedValue<FormAction>( setup.Action ),
 					       valueChangedAction: setup.ValueChangedAction,
 					       pageModificationValue: setup.PageModificationValue,
@@ -72,14 +73,11 @@ public class DurationControl: FormControl<PhrasingComponent> {
 						"span",
 						focusDependentData: new DisplayableElementFocusDependentData(
 							includeIdAttribute: true,
-							jsInitStatements:
-							"{0}.blur( function() {{ {1} }} ).keypress( function( e ) {{ {2} }} ).focus( function() {{ {3} }} ).mouseup( function( e ) {{ {4} }} );"
-								.FormatWith(
-									getTextControlExpression( context.Id ),
-									"ApplyTimeSpanFormat( this );",
-									"if( !NumericalOnly( e, this ) ) e.preventDefault();",
-									"this.value = this.value.replace( ':', '' ); this.select();",
-									"e.preventDefault();" ) ) ),
+							jsInitStatements: "{0}.keypress( function( e ) {{ {1} }} ).focus( function() {{ {2} }} ).mouseup( function( e ) {{ {3} }} );".FormatWith(
+								getTextControlExpression( context.Id ),
+								"if( !NumericalOnly( e, this ) ) e.preventDefault();",
+								"this.value = this.value.replace( ':', '' ); this.select();",
+								"e.preventDefault();" ) ) ),
 					classes: elementClass.Add( setup.Classes ?? ElementClassSet.Empty ),
 					children: textControl.PageComponent.ToCollection() ) ).ToCollection() );
 

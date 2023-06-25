@@ -113,12 +113,12 @@ function formatTime( value ) {
 // Formats numbers entered in the textbox to HH:MM and prevents input out of the range of TimeSpan.
 var maxValueLength = 6;
 
-function ApplyTimeSpanFormat( field ) {
-	if( field.value === "" )
-		return;
+function formatDuration( value ) {
+	if( value === "" )
+		return "";
 
 	// Turn the string HHHH:MM into an an array of { H, H, H, H, M, M }
-	var digits = field.value.replace( ":", "" ).split( "" );
+	var digits = value.replace( ":", "" ).split( "" );
 
 	// Don't allow the minutes to be greater than 59
 	if( digits.length > 1 && digits[ digits.length - 2 ] > 5 ) {
@@ -133,8 +133,9 @@ function ApplyTimeSpanFormat( field ) {
 		if( i == 2 ) // Insert the hour-minute separator
 			timeTextValue = ":" + timeTextValue;
 		timeTextValue = ( timeValueIndex >= 0 ? digits[ timeValueIndex-- ] : "0" ) + timeTextValue;
-		field.value = timeTextValue;
 	}
+
+	return timeTextValue;
 }
 
 // Returns true if...
