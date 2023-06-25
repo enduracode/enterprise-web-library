@@ -9,6 +9,14 @@
 	--ewf-ui-faint-border-color: rgba( 0, 0, 0, .1 );
 	--ewf-ui-activation-color: #8cc63f;
 	--ewf-ui-form-control-placeholder-color: rgb( 175, 175, 175 );
+
+	/* date picker */
+	--duet-color-primary: var( --ewf-ui-secondary-color );
+	--duet-color-text: var( --ewf-ui-text-color );
+	--duet-color-text-active: var( --ewf-ui-inverted-text-color );
+	--duet-color-border: var( --ewf-ui-important-border-color );
+	--duet-color-placeholder: var( --ewf-ui-form-control-placeholder-color ) ;
+
 	--ewf-ui-top-error-color: hsla( 0, 100%, 70%, 1 );
 	--ewf-ui-nav-background-color: #ced6e0;
 	--ewf-ui-entity-action-color: hsla( 0, 0%, 33%, 1 );

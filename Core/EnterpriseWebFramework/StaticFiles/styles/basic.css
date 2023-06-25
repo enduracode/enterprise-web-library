@@ -2,6 +2,7 @@
 	--ewf-column-width: 60em;
 	--ewf-list-item-spacing: .5em;
 	--ewf-normal-button-padding: .6em;
+	--ewf-form-control-border-radius: .4em;
 	--ewf-text-control-vertical-padding: .5em;
 	--ewf-text-control-horizontal-padding: .75em;
 
@@ -17,7 +18,7 @@
 	--duet-font: inherit;
 	--duet-font-normal: 400;
 	--duet-font-bold: 600;
-	--duet-radius: 4px;
+	--duet-radius: var( --ewf-form-control-border-radius );
 	--duet-z-index: 600;
 }
 
@@ -469,7 +470,7 @@ ewfSingleLineTextControlAllStates, ewfMultilineTextControlAllStates {
 	max-width: 100%;
 	border-width: 1px;
 	border-style: solid;
-	border-radius: .4em;
+	border-radius: var( --ewf-form-control-border-radius );
 	padding: var( --ewf-text-control-vertical-padding ) var( --ewf-text-control-horizontal-padding );
 	color: hsla( 215, 11%, 22%, 1 );
 }
@@ -525,6 +526,9 @@ ewfDateControl {
 ewfDateControl input.duet-date__input {
 	padding: var( --ewf-text-control-vertical-padding ) var( --ewf-text-control-horizontal-padding );
 	padding-right: calc( var( --ewf-text-control-horizontal-padding ) + 48px );
+}
+ewfDateControl table.duet-date__table th {
+	text-align: center;
 }
 ewfTimeControl > ewfSingleLineTextControlAllStates {
 	margin-right: .5em;
