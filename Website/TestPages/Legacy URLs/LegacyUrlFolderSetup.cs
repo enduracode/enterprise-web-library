@@ -40,10 +40,6 @@ partial class LegacyUrlFolderSetup {
 				url => string.Equals( url.Segment, "ComponentLists.aspx", StringComparison.OrdinalIgnoreCase ) ? new ComponentLists.UrlDecoder() : null ) );
 		patterns.Add(
 			new UrlPattern(
-				encoder => encoder is DateAndTimePickers.UrlEncoder ? EncodingUrlSegment.Create( "DateAndTimePickers.aspx" ) : null,
-				url => string.Equals( url.Segment, "DateAndTimePickers.aspx", StringComparison.OrdinalIgnoreCase ) ? new DateAndTimePickers.UrlDecoder() : null ) );
-		patterns.Add(
-			new UrlPattern(
 				encoder => encoder is EwfTableDemo.UrlEncoder ? EncodingUrlSegment.Create( "EwfTableDemo.aspx" ) : null,
 				url => string.Equals( url.Segment, "EwfTableDemo.aspx", StringComparison.OrdinalIgnoreCase ) ? new EwfTableDemo.UrlDecoder() : null ) );
 		patterns.Add(

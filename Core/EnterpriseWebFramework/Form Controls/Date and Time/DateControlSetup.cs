@@ -108,9 +108,8 @@ public class DateControlSetup {
 
 									       // Use the value of the text control instead of the hidden field to enable round-tripping of invalid dates.
 									       attributes.Add( new ElementAttribute( "name", "" ) );
-									       var textControlNameAndValueAdder =
-										       "picker.componentOnReady().then( () => {{ const tc = document.querySelector( '#{0}' ); tc.name = '{1}'; tc.value = '{2}'; }} );"
-											       .FormatWith( textControlId, context.Id, pageModificationValue.Value );
+									       var textControlNameAndValueAddStatements =
+										       "textControl.name = '{0}'; textControl.value = '{1}';".FormatWith( context.Id, pageModificationValue.Value );
 
 									       var errorHandler = new ValidationErrorHandler( "value" );
 									       var validatedValue = new Validator().GetNullableDateTime(
@@ -127,7 +126,6 @@ public class DateControlSetup {
 											       "value",
 											       validatedValue.HasValue ? LocalDatePattern.Iso.Format( LocalDate.FromDateTime( validatedValue.Value ) ) : "" ) );
 
-									       // NOTE: Implement additional JS behavior.
 									       return new DisplayableElementLocalData(
 										       "duet-date-picker",
 										       new FocusabilityCondition( !isReadOnly ),
@@ -164,7 +162,18 @@ picker.localization = {{
 	locale: '{0}'
 }};
 ".FormatWith( Cultures.EnglishUnitedStates.Name ),
-												       textControlNameAndValueAdder,
+												       "picker.componentOnReady().then( () => {{ const textControl = document.querySelector( '#{0}' ); {1} }} );".FormatWith(
+													       textControlId,
+													       textControlNameAndValueAddStatements + ( isReadOnly
+														                                                ? ""
+														                                                : SubmitButton.GetImplicitSubmissionKeyPressStatements( action, false )
+															                                                .Surround( "$( textControl ).keypress( function( e ) { ", " } );" ) )
+													       .PrependDelimiter( " " ) ),
+												       "$( picker ).on( 'duetChange', function( e ) {{ {0} }} );".FormatWith(
+													       StringTools.ConcatenateWithDelimiter(
+														       " ",
+														       valueChangedAction is null ? "" : valueChangedAction.GetJsStatements(),
+														       pageModificationValue.GetJsModificationStatements( "e.originalEvent.detail.value" ) ) ),
 												       isFocused ? "picker.setFocus();" : "" ) ) );
 								       },
 								       classes: elementClass.Add( classes ?? ElementClassSet.Empty ),
