@@ -32,19 +32,9 @@ public class DateControlSetup {
 	/// <param name="validationErrorNotifier"></param>
 	public static DateControlSetup Create(
 		DisplaySetup displaySetup = null, ElementClassSet classes = null, string autoFillTokens = "", SpecifiedValue<FormAction> action = null,
-		FormAction valueChangedAction = null, PageModificationValue<string> pageModificationValue = null, Func<bool, bool> validationPredicate = null,
-		Action validationErrorNotifier = null ) {
-		return new DateControlSetup(
-			displaySetup,
-			false,
-			classes,
-			autoFillTokens,
-			action,
-			valueChangedAction,
-			pageModificationValue,
-			validationPredicate,
-			validationErrorNotifier );
-	}
+		FormAction valueChangedAction = null, PageModificationValue<LocalDate?> pageModificationValue = null, Func<bool, bool> validationPredicate = null,
+		Action validationErrorNotifier = null ) =>
+		new( displaySetup, false, classes, autoFillTokens, action, valueChangedAction, pageModificationValue, validationPredicate, validationErrorNotifier );
 
 	/// <summary>
 	/// Creates a setup object for a read-only date control.
@@ -54,21 +44,21 @@ public class DateControlSetup {
 	/// <param name="validationPredicate"></param>
 	/// <param name="validationErrorNotifier"></param>
 	public static DateControlSetup CreateReadOnly(
-		DisplaySetup displaySetup = null, ElementClassSet classes = null, Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
-		return new DateControlSetup( displaySetup, true, classes, "", null, null, null, validationPredicate, validationErrorNotifier );
-	}
+		DisplaySetup displaySetup = null, ElementClassSet classes = null, Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) =>
+		new( displaySetup, true, classes, "", null, null, null, validationPredicate, validationErrorNotifier );
 
 	internal readonly Func<LocalDate?, bool, LocalDate?, LocalDate?, Action<LocalDate?, Validator>, ( FormControlLabeler, PhrasingComponent, EwfValidation )>
 		LabelerAndComponentAndValidationGetter;
 
 	internal DateControlSetup(
 		DisplaySetup displaySetup, bool isReadOnly, ElementClassSet classes, string autoFillTokens, SpecifiedValue<FormAction> specifiedAction,
-		FormAction valueChangedAction, PageModificationValue<string> pageModificationValue, Func<bool, bool> validationPredicate, Action validationErrorNotifier ) {
+		FormAction valueChangedAction, PageModificationValue<LocalDate?> datePageModificationValue, Func<bool, bool> validationPredicate,
+		Action validationErrorNotifier ) {
 		var labeler = new FormControlLabeler();
 		if( autoFillTokens.Length > 0 )
 			throw new NotSupportedException( "Auto-fill detail tokens are not supported with the current implementation of the date control." );
 		var action = specifiedAction != null ? specifiedAction.Value : FormState.Current.FormControlDefaultAction;
-		pageModificationValue ??= new PageModificationValue<string>();
+		datePageModificationValue ??= new PageModificationValue<LocalDate?>();
 
 		LabelerAndComponentAndValidationGetter = ( value, allowEmpty, minValue, maxValue, validationMethod ) => {
 			var id = new ElementId();
@@ -81,7 +71,17 @@ public class DateControlSetup {
 				            rawValue.Length > textControlMaxLength ? PostBackValueValidationResult<string>.CreateInvalid() :
 				            PostBackValueValidationResult<string>.CreateValid( rawValue ) );
 
+			var pageModificationValue = new PageModificationValue<string>();
 			formValue.AddPageModificationValue( pageModificationValue, v => v.Trim() );
+			formValue.AddPageModificationValue(
+				datePageModificationValue,
+				v => {
+					var errorHandler = new ValidationErrorHandler( "value" );
+					var validatedValue = new Validator().GetNullableDateTime( errorHandler, v, null, true, DateTime.MinValue, DateTime.MaxValue );
+					if( errorHandler.LastResult is not ErrorCondition.NoError )
+						validatedValue = null;
+					return validatedValue.ToNewUnderlyingValue( LocalDate.FromDateTime );
+				} );
 
 			return ( labeler, new CustomPhrasingComponent(
 					       new DisplayableElement(
@@ -111,20 +111,10 @@ public class DateControlSetup {
 									       var textControlNameAndValueAddStatements =
 										       "textControl.name = '{0}'; textControl.value = '{1}';".FormatWith( context.Id, pageModificationValue.Value );
 
-									       var errorHandler = new ValidationErrorHandler( "value" );
-									       var validatedValue = new Validator().GetNullableDateTime(
-										       errorHandler,
-										       pageModificationValue.Value,
-										       null,
-										       true,
-										       DateTime.MinValue,
-										       DateTime.MaxValue );
-									       if( errorHandler.LastResult is not ErrorCondition.NoError )
-										       validatedValue = null;
 									       attributes.Add(
 										       new ElementAttribute(
 											       "value",
-											       validatedValue.HasValue ? LocalDatePattern.Iso.Format( LocalDate.FromDateTime( validatedValue.Value ) ) : "" ) );
+											       datePageModificationValue.Value.HasValue ? LocalDatePattern.Iso.Format( datePageModificationValue.Value.Value ) : "" ) );
 
 									       return new DisplayableElementLocalData(
 										       "duet-date-picker",
@@ -173,7 +163,7 @@ picker.localization = {{
 													       StringTools.ConcatenateWithDelimiter(
 														       " ",
 														       valueChangedAction is null ? "" : valueChangedAction.GetJsStatements(),
-														       pageModificationValue.GetJsModificationStatements( "e.originalEvent.detail.value" ) ) ),
+														       datePageModificationValue.GetJsModificationStatements( "e.originalEvent.detail.value" ) ) ),
 												       isFocused ? "picker.setFocus();" : "" ) ) );
 								       },
 								       classes: elementClass.Add( classes ?? ElementClassSet.Empty ),

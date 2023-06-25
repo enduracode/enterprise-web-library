@@ -1,4 +1,7 @@
-﻿// EwlPage
+﻿using NodaTime;
+using NodaTime.Text;
+
+// EwlPage
 
 namespace EnterpriseWebLibrary.Website.TestPages;
 
@@ -8,14 +11,17 @@ partial class DateAndTimePickers {
 	protected override PageContent getContent() {
 		var list = FormItemList.CreateStack();
 
-		var datePmv = new PageModificationValue<string>();
+		var datePmv = new PageModificationValue<LocalDate?>();
 		list.AddItem(
 			new DateControl( null, true, setup: DateControlSetup.Create( pageModificationValue: datePmv ), validationMethod: ( _, _ ) => {} ).ToFormItem(
 				label: "Date control".ToComponents()
 					.Append( new LineBreak() )
 					.Append(
 						new SideComments(
-							"Value: ".ToComponents().Concat( datePmv.ToGenericPhrasingContainer( v => v, valueExpression => valueExpression ) ).Materialize() ) )
+							"Value: ".ToComponents()
+								.Concat(
+									datePmv.ToGenericPhrasingContainer( v => v.HasValue ? LocalDatePattern.Iso.Format( v.Value ) : "", valueExpression => valueExpression ) )
+								.Materialize() ) )
 					.Materialize() ) );
 
 		list.AddFormItems(
