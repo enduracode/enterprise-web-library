@@ -14,7 +14,7 @@ public class DateControlSetup {
 	[ UsedImplicitly ]
 	private class CssElementCreator: ControlCssElementCreator {
 		IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() =>
-			new CssElement( "DateControl", "span.{0}".FormatWith( elementClass.ClassName ) ).ToCollection();
+			new CssElement( "DateControl", "duet-date-picker.{0}".FormatWith( elementClass.ClassName ) ).ToCollection();
 	}
 
 	/// <summary>
@@ -91,7 +91,7 @@ public class DateControlSetup {
 								       valueChangedAction?.AddToPageIfNecessary();
 							       }
 
-							       var textControlId = context.Id + "text";
+							       var textControlId = context.Id + "__text";
 							       labeler.ControlId.AddId( textControlId );
 							       return new DisplayableElementData(
 								       displaySetup,
@@ -99,13 +99,33 @@ public class DateControlSetup {
 									       var attributes = new List<ElementAttribute>();
 									       if( isReadOnly )
 										       attributes.Add( new ElementAttribute( "disabled" ) );
+									       attributes.Add( new ElementAttribute( "first-day-of-week", "0" ) );
 									       attributes.Add( new ElementAttribute( "identifier", textControlId ) );
 									       if( maxValue.HasValue )
 										       attributes.Add( new ElementAttribute( "max", LocalDatePattern.Iso.Format( maxValue.Value ) ) );
 									       if( minValue.HasValue )
 										       attributes.Add( new ElementAttribute( "min", LocalDatePattern.Iso.Format( minValue.Value ) ) );
-									       attributes.Add( new ElementAttribute( "name", context.Id ) );
-									       attributes.Add( new ElementAttribute( "value", pageModificationValue.Value ) );
+
+									       // Use the value of the text control instead of the hidden field to enable round-tripping of invalid dates.
+									       attributes.Add( new ElementAttribute( "name", "" ) );
+									       var textControlNameAndValueAdder =
+										       "picker.componentOnReady().then( () => {{ const tc = document.querySelector( '#{0}' ); tc.name = '{1}'; tc.value = '{2}'; }} );"
+											       .FormatWith( textControlId, context.Id, pageModificationValue.Value );
+
+									       var errorHandler = new ValidationErrorHandler( "value" );
+									       var validatedValue = new Validator().GetNullableDateTime(
+										       errorHandler,
+										       pageModificationValue.Value,
+										       null,
+										       true,
+										       DateTime.MinValue,
+										       DateTime.MaxValue );
+									       if( errorHandler.LastResult is not ErrorCondition.NoError )
+										       validatedValue = null;
+									       attributes.Add(
+										       new ElementAttribute(
+											       "value",
+											       validatedValue.HasValue ? LocalDatePattern.Iso.Format( LocalDate.FromDateTime( validatedValue.Value ) ) : "" ) );
 
 									       // NOTE: Implement additional JS behavior.
 									       return new DisplayableElementLocalData(
@@ -117,6 +137,34 @@ public class DateControlSetup {
 											       jsInitStatements: StringTools.ConcatenateWithDelimiter(
 												       " ",
 												       "const picker = document.querySelector( '#{0}' );".FormatWith( context.Id ),
+												       @"
+picker.dateAdapter = {
+	parse( value = '', createDate ) {
+		const match = value.match( /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/ ); if( match ) return createDate( match[3], match[1], match[2] );
+	},
+	format( date ) {
+		return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+	}
+};
+",
+												       @"
+picker.localization = {{
+	buttonLabel: 'Choose date',
+	placeholder: 'm/d/y',
+	selectedDateMessage: 'Selected date is',
+	prevMonthLabel: 'Previous month',
+	nextMonthLabel: 'Next month',
+	monthSelectLabel: 'Month',
+	yearSelectLabel: 'Year',
+	closeLabel: 'Close window',
+	calendarHeading: 'Choose a date',
+	dayNames: [ 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday' ],
+	monthNames: [ 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December' ],
+	monthNamesShort: [ 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec' ],
+	locale: '{0}'
+}};
+".FormatWith( Cultures.EnglishUnitedStates.Name ),
+												       textControlNameAndValueAdder,
 												       isFocused ? "picker.setFocus();" : "" ) ) );
 								       },
 								       classes: elementClass.Add( classes ?? ElementClassSet.Empty ),

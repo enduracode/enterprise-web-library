@@ -2,6 +2,8 @@
 	--ewf-column-width: 60em;
 	--ewf-list-item-spacing: .5em;
 	--ewf-normal-button-padding: .6em;
+	--ewf-text-control-vertical-padding: .5em;
+	--ewf-text-control-horizontal-padding: .75em;
 
 	/* date picker */
 	--duet-color-primary: #005fcc;
@@ -12,7 +14,7 @@
 	--duet-color-surface: #fff;
 	--duet-color-overlay: rgba( 0, 0, 0, 0.8 );
 	--duet-color-border: #333;
-	--duet-font: -apple-system,   BlinkMacSystemFont,   "Segoe UI",   Roboto,   Helvetica,   Arial,   sans-serif;
+	--duet-font: inherit;
 	--duet-font-normal: 400;
 	--duet-font-bold: 600;
 	--duet-radius: 4px;
@@ -468,7 +470,7 @@ ewfSingleLineTextControlAllStates, ewfMultilineTextControlAllStates {
 	border-width: 1px;
 	border-style: solid;
 	border-radius: .4em;
-	padding: .5em .75em;
+	padding: var( --ewf-text-control-vertical-padding ) var( --ewf-text-control-horizontal-padding );
 	color: hsla( 215, 11%, 22%, 1 );
 }
 ewfMultilineTextControlAllStates {
@@ -516,13 +518,13 @@ ewfCheckboxList > ewfCheckboxListContentContainer > ewfUnorderedComponentList {
 ewfDateControl, ewfTimeControl {
 	display: flex;
 }
-ewfDateControl ewfIcon, ewfTimeControl ewfIcon {
-	font-size: 1.4em;
-}
-ewfDateControl > ewfSingleLineTextControlAllStates {
-	margin-right: .5em;
+ewfDateControl {
 	width: 100%;
-	max-width: 8em;
+	max-width: 10.5em;
+}
+ewfDateControl input.duet-date__input {
+	padding: var( --ewf-text-control-vertical-padding ) var( --ewf-text-control-horizontal-padding );
+	padding-right: calc( var( --ewf-text-control-horizontal-padding ) + 48px );
 }
 ewfTimeControl > ewfSingleLineTextControlAllStates {
 	margin-right: .5em;
