@@ -44,71 +44,40 @@ public class DurationControl: FormControl<PhrasingComponent> {
 					       pageModificationValue: setup.PageModificationValue,
 					       validationPredicate: setup.ValidationPredicate,
 					       validationErrorNotifier: setup.ValidationErrorNotifier ),
+			maxLength: 7,
 			validationMethod: validationMethod == null
 				                  ? null
 				                  : ( postBackValue, validator ) => {
-					                  if( tooLongOrInvalidCharacters( postBackValue ) ) {
-						                  validator.NoteErrorAndAddMessage( "Please enter a valid duration." );
-						                  setup.ValidationErrorNotifier?.Invoke();
-						                  return;
+					                  Duration? validatedValue = null;
+					                  if( postBackValue.Length > 0 ) {
+						                  var match = Regex.Match( postBackValue, @"^(?<h>[0-9]{1,4}):(?<m>[0-9]{2})\z" );
+						                  if( !match.Success ) {
+							                  validator.NoteErrorAndAddMessage( "Please enter a valid duration." );
+							                  setup.ValidationErrorNotifier?.Invoke();
+							                  return;
+						                  }
+
+						                  var hours = int.Parse( match.Groups[ "h" ].Value );
+						                  var minutes = int.Parse( match.Groups[ "m" ].Value );
+						                  if( minutes > 59 ) {
+							                  validator.NoteErrorAndAddMessage( "Please enter a valid duration." );
+							                  setup.ValidationErrorNotifier?.Invoke();
+							                  return;
+						                  }
+
+						                  validatedValue = Duration.FromMinutes( hours * 60 + minutes );
 					                  }
 
-					                  var errorHandler = new ValidationErrorHandler( "duration" );
-					                  var validatedValue = validator.GetNullableTimeSpan( errorHandler, parseTimeSpan( postBackValue ), allowEmpty );
-					                  if( errorHandler.LastResult is not ErrorCondition.NoError ) {
-						                  setup.ValidationErrorNotifier?.Invoke();
-						                  return;
-					                  }
-
-					                  validationMethod( validatedValue.ToNewUnderlyingValue( Duration.FromTimeSpan ), validator );
+					                  validationMethod( validatedValue, validator );
 				                  } );
 
 		Labeler = textControl.Labeler;
 
-		PageComponent = new CustomPhrasingComponent(
-			new DisplayableElement(
-				context => new DisplayableElementData(
-					setup.DisplaySetup,
-					() => new DisplayableElementLocalData(
-						"span",
-						focusDependentData: new DisplayableElementFocusDependentData(
-							includeIdAttribute: true,
-							jsInitStatements: "{0}.keypress( function( e ) {{ {1} }} ).focus( function() {{ {2} }} ).mouseup( function( e ) {{ {3} }} );".FormatWith(
-								getTextControlExpression( context.Id ),
-								"if( !NumericalOnly( e, this ) ) e.preventDefault();",
-								"this.value = this.value.replace( ':', '' ); this.select();",
-								"e.preventDefault();" ) ) ),
-					classes: elementClass.Add( setup.Classes ?? ElementClassSet.Empty ),
-					children: textControl.PageComponent.ToCollection() ) ).ToCollection() );
+		PageComponent = new GenericPhrasingContainer(
+			textControl.PageComponent.ToCollection(),
+			displaySetup: setup.DisplaySetup,
+			classes: elementClass.Add( setup.Classes ?? ElementClassSet.Empty ) );
 
 		Validation = textControl.Validation;
 	}
-
-	private bool tooLongOrInvalidCharacters( string value ) {
-		const int maxValueLength = 6; // also defined in JavaScript
-		return value.Length > ( value.Contains( ":" ) ? maxValueLength + 1 : maxValueLength ) || !value.Equals( Regex.Replace( value, "[^0-9:]", "" ) );
-	}
-
-	/// <summary>
-	/// Supports browsers with Javascript disabled.
-	/// </summary>
-	private TimeSpan? parseTimeSpan( string value ) {
-		if( !value.Any() )
-			return null;
-
-		if( value.Contains( ":" ) ) {
-			var splitPartsArray = value.Split( ':' );
-			return new TimeSpan( int.Parse( splitPartsArray[ 0 ] ), int.Parse( splitPartsArray[ 1 ] ), 0 );
-		}
-		// This section supports browsers without script, which we typically don't actually support. However, this code already
-		// supported no Javascript, and now despite no evidence to support it, I fear something may be relying on this behavior.
-		var intValue = int.Parse( value );
-		var hours = (int)( intValue * .01 );
-		var minutes = intValue % 100;
-		if( minutes > 59 )
-			minutes = 59;
-		return new TimeSpan( hours, minutes, 0 );
-	}
-
-	private string getTextControlExpression( string containerId ) => "$( '#{0}' ).children( 'input' )".FormatWith( containerId );
 }
