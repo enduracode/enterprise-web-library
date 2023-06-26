@@ -1040,6 +1040,67 @@ public static class FormControlExtensionCreators {
 				additionalValidationMethod?.Invoke( validator );
 			} );
 
+	public static DateAndTimeControl ToDateAndTimeControl(
+		this DataValue<LocalDateTime> dataValue, DateAndTimeControlSetup setup = null, SpecifiedValue<LocalDateTime?> value = null, LocalDate? minValue = null,
+		LocalDate? maxValue = null, Action<Validator> additionalValidationMethod = null ) {
+		return new DateAndTimeControl(
+			value != null ? value.Value : dataValue.Value,
+			false,
+			setup: setup,
+			minValue: minValue,
+			maxValue: maxValue,
+			validationMethod: ( postBackValue, validator ) => {
+				dataValue.Value = postBackValue.Value;
+				additionalValidationMethod?.Invoke( validator );
+			} );
+	}
+
+	public static DateAndTimeControl ToDateAndTimeControl(
+		this DataValue<LocalDateTime?> dataValue, DateAndTimeControlSetup setup = null, SpecifiedValue<LocalDateTime?> value = null, bool allowEmpty = true,
+		LocalDate? minValue = null, LocalDate? maxValue = null, Action<Validator> additionalValidationMethod = null ) {
+		return new DateAndTimeControl(
+			value != null ? value.Value : dataValue.Value,
+			allowEmpty,
+			setup: setup,
+			minValue: minValue,
+			maxValue: maxValue,
+			validationMethod: ( postBackValue, validator ) => {
+				dataValue.Value = postBackValue;
+				additionalValidationMethod?.Invoke( validator );
+			} );
+	}
+
+	public static DateAndTimeControl ToDateAndTimeControl(
+		this DataValue<DateTime> dataValue, DateAndTimeControlSetup setup = null, SpecifiedValue<DateTime?> value = null, LocalDate? minValue = null,
+		LocalDate? maxValue = null, Action<Validator> additionalValidationMethod = null ) {
+		var nullableValue = new DataValue<DateTime?> { Value = value != null ? value.Value : dataValue.Value };
+		return nullableValue.ToDateAndTimeControl(
+			setup: setup,
+			allowEmpty: false,
+			minValue: minValue,
+			maxValue: maxValue,
+			additionalValidationMethod: validator => {
+				dataValue.Value = nullableValue.Value.Value;
+				additionalValidationMethod?.Invoke( validator );
+			} );
+	}
+
+	public static DateAndTimeControl ToDateAndTimeControl(
+		this DataValue<DateTime?> dataValue, DateAndTimeControlSetup setup = null, SpecifiedValue<DateTime?> value = null, bool allowEmpty = true,
+		LocalDate? minValue = null, LocalDate? maxValue = null, Action<Validator> additionalValidationMethod = null ) {
+		var localDateTimeValue =
+			new DataValue<LocalDateTime?> { Value = ( value != null ? value.Value : dataValue.Value ).ToNewUnderlyingValue( LocalDateTime.FromDateTime ) };
+		return localDateTimeValue.ToDateAndTimeControl(
+			setup: setup,
+			allowEmpty: allowEmpty,
+			minValue: minValue,
+			maxValue: maxValue,
+			additionalValidationMethod: validator => {
+				dataValue.Value = localDateTimeValue.Value.ToNewUnderlyingValue( i => i.ToDateTimeUnspecified() );
+				additionalValidationMethod?.Invoke( validator );
+			} );
+	}
+
 	public static DurationControl ToDurationControl(
 		this DataValue<Duration> dataValue, DurationControlSetup setup = null, SpecifiedValue<Duration?> value = null,
 		Action<Validator> additionalValidationMethod = null ) {
