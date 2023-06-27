@@ -356,6 +356,11 @@ ewfGridFormItemList > ewfFormItemListButtonItem {
 	align-self: stretch;
 }
 
+/* form items outside of a list */
+ewfFormItemLabel {
+	display: block;
+}
+
 /* action components */
 ewfActionComponentAllStylesAllStates {
 	margin: 0;
