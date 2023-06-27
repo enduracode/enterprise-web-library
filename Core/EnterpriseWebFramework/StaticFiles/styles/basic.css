@@ -550,6 +550,12 @@ ewfTimeControl > ewfDropDownListContainer {
 ewfTimeControl > ewfDropDownListContainer > ewfDropDownList {
 	width: 100%;
 }
+ewfDateAndTimeControl ewfUnorderedComponentList {
+	gap: 1em;
+}
+ewfDateAndTimeControl ewfFormItemLabel {
+	font-size: .8em;
+}
 ewfDurationControlContainer > ewfSingleLineTextControlAllStates {
 	width: 100%;
 	max-width: 6em;
