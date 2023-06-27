@@ -515,7 +515,7 @@ ewfCheckboxList > ewfCheckboxListContentContainer > ewfUnorderedComponentList {
 	list-style-type: none;
 }
 
-/* date pickers, time pickers, and date and time pickers */
+/* date/time controls */
 ewfDateControl, ewfTimeControl {
 	display: flex;
 }

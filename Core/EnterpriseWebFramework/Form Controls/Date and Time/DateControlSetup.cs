@@ -122,10 +122,11 @@ public class DateControlSetup {
 										       isFocused => new DisplayableElementFocusDependentData(
 											       attributes: attributes,
 											       includeIdAttribute: true,
-											       jsInitStatements: StringTools.ConcatenateWithDelimiter(
-												       " ",
-												       "const picker = document.querySelector( '#{0}' );".FormatWith( context.Id ),
-												       @"
+											       jsInitStatements: "{{ {0} }}".FormatWith(
+												       StringTools.ConcatenateWithDelimiter(
+													       " ",
+													       "const picker = document.querySelector( '#{0}' );".FormatWith( context.Id ),
+													       @"
 picker.dateAdapter = {
 	parse( value = '', createDate ) {
 		const match = value.match( /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/ ); if( match ) return createDate( match[3], match[1], match[2] );
@@ -135,7 +136,7 @@ picker.dateAdapter = {
 	}
 };
 ",
-												       @"
+													       @"
 picker.localization = {{
 	buttonLabel: 'Choose date',
 	placeholder: 'm/d/y',
@@ -152,19 +153,19 @@ picker.localization = {{
 	locale: '{0}'
 }};
 ".FormatWith( Cultures.EnglishUnitedStates.Name ),
-												       "picker.componentOnReady().then( () => {{ const textControl = document.querySelector( '#{0}' ); {1} }} );".FormatWith(
-													       textControlId,
-													       textControlNameAndValueAddStatements + ( isReadOnly
-														                                                ? ""
-														                                                : SubmitButton.GetImplicitSubmissionKeyPressStatements( action, false )
-															                                                .Surround( "$( textControl ).keypress( function( e ) { ", " } );" ) )
-													       .PrependDelimiter( " " ) ),
-												       "$( picker ).on( 'duetChange', function( e ) {{ {0} }} );".FormatWith(
-													       StringTools.ConcatenateWithDelimiter(
-														       " ",
-														       valueChangedAction is null ? "" : valueChangedAction.GetJsStatements(),
-														       datePageModificationValue.GetJsModificationStatements( "e.originalEvent.detail.value" ) ) ),
-												       isFocused ? "picker.setFocus();" : "" ) ) );
+													       "picker.componentOnReady().then( () => {{ const textControl = document.querySelector( '#{0}' ); {1} }} );".FormatWith(
+														       textControlId,
+														       textControlNameAndValueAddStatements + ( isReadOnly
+															                                                ? ""
+															                                                : SubmitButton.GetImplicitSubmissionKeyPressStatements( action, false )
+																                                                .Surround( "$( textControl ).keypress( function( e ) { ", " } );" ) )
+														       .PrependDelimiter( " " ) ),
+													       "$( picker ).on( 'duetChange', function( e ) {{ {0} }} );".FormatWith(
+														       StringTools.ConcatenateWithDelimiter(
+															       " ",
+															       valueChangedAction is null ? "" : valueChangedAction.GetJsStatements(),
+															       datePageModificationValue.GetJsModificationStatements( "e.originalEvent.detail.value" ) ) ),
+													       isFocused ? "picker.setFocus();" : "" ) ) ) );
 								       },
 								       classes: elementClass.Add( classes ?? ElementClassSet.Empty ),
 								       clientSideIdReferences: id.ToCollection() );

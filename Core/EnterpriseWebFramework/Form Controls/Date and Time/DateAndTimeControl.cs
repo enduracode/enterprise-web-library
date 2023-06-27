@@ -7,17 +7,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 /// <summary>
 /// A date-and-time edit control.
 /// </summary>
-public class DateAndTimeControl: FormControl<PhrasingComponent> {
+public class DateAndTimeControl: FormControl<FlowComponent> {
 	private static readonly ElementClass elementClass = new( "ewfDtc" );
 
 	[ UsedImplicitly ]
 	private class CssElementCreator: ControlCssElementCreator {
 		IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() =>
-			new CssElement( "DateAndTimeControl", "span.{0}".FormatWith( elementClass.ClassName ) ).ToCollection();
+			new CssElement( "DateAndTimeControl", "div.{0}".FormatWith( elementClass.ClassName ) ).ToCollection();
 	}
 
 	public FormControlLabeler Labeler { get; }
-	public PhrasingComponent PageComponent { get; }
+	public FlowComponent PageComponent { get; }
 	public EwfValidation Validation { get; }
 
 	/// <summary>
@@ -34,76 +34,56 @@ public class DateAndTimeControl: FormControl<PhrasingComponent> {
 		Action<LocalDateTime?, Validator> validationMethod = null ) {
 		setup ??= DateAndTimeControlSetup.Create();
 
-		var textControl = new TextControl(
-			value.HasValue ? value.Value.ToDateTimeUnspecified().ToMonthDayYearString() + " " + value.Value.ToDateTimeUnspecified().ToHourAndMinuteString() : "",
+		var date = new InitializationAwareValue<LocalDate?>();
+		var dateControl = new DateControl(
+			value.ToNewUnderlyingValue( v => v.Date ),
 			allowEmpty,
 			setup: setup.IsReadOnly
-				       ? TextControlSetup.CreateReadOnly( validationPredicate: setup.ValidationPredicate, validationErrorNotifier: setup.ValidationErrorNotifier )
-				       : TextControlSetup.Create(
+				       ? DateControlSetup.CreateReadOnly( validationPredicate: setup.ValidationPredicate, validationErrorNotifier: setup.ValidationErrorNotifier )
+				       : DateControlSetup.Create(
 					       autoFillTokens: setup.AutoFillTokens,
 					       action: new SpecifiedValue<FormAction>( setup.Action ),
 					       valueChangedAction: setup.ValueChangedAction,
-					       pageModificationValue: setup.PageModificationValue,
+					       pageModificationValue: setup.DatePageModificationValue,
 					       validationPredicate: setup.ValidationPredicate,
 					       validationErrorNotifier: setup.ValidationErrorNotifier ),
-			validationMethod: validationMethod == null
-				                  ? null
-				                  : ( postBackValue, validator ) => {
-					                  var errorHandler = new ValidationErrorHandler( "date and time" );
-					                  var validatedValue = validator.GetNullableDateTime(
-						                  errorHandler,
-						                  postBackValue.ToUpper(),
-						                  TewlContrib.DateTimeTools.MonthDayYearFormats.Select( i => i + " " + TewlContrib.DateTimeTools.HourAndMinuteFormat ).ToArray(),
-						                  allowEmpty,
-						                  minValue?.ToDateTimeUnspecified() ?? DateTime.MinValue,
-						                  maxValue?.PlusDays( 1 ).ToDateTimeUnspecified() ?? DateTime.MaxValue );
-					                  if( errorHandler.LastResult != ErrorCondition.NoError ) {
-						                  setup.ValidationErrorNotifier?.Invoke();
-						                  return;
-					                  }
+			minValue: minValue,
+			maxValue: maxValue,
+			validationMethod: validationMethod is null ? null : ( postBackValue, _ ) => date.Value = postBackValue );
 
-					                  validationMethod( validatedValue.HasValue ? LocalDateTime.FromDateTime( validatedValue.Value ) : null, validator );
-				                  } );
+		var time = new InitializationAwareValue<LocalTime?>();
+		var timeControl = new TimeControl(
+			value.ToNewUnderlyingValue( v => v.TimeOfDay ),
+			allowEmpty,
+			setup: setup.IsReadOnly
+				       ? TimeControlSetup.CreateReadOnly( validationPredicate: setup.ValidationPredicate, validationErrorNotifier: setup.ValidationErrorNotifier )
+				       : TimeControlSetup.Create(
+					       autoFillTokens: setup.AutoFillTokens,
+					       action: new SpecifiedValue<FormAction>( setup.Action ),
+					       valueChangedAction: setup.ValueChangedAction,
+					       pageModificationValue: setup.TimePageModificationValue,
+					       validationPredicate: setup.ValidationPredicate,
+					       validationErrorNotifier: setup.ValidationErrorNotifier ),
+			minuteInterval: setup.MinuteInterval ?? 1,
+			validationMethod: validationMethod is null ? null : ( postBackValue, _ ) => time.Value = postBackValue );
 
-		Labeler = textControl.Labeler;
+		Labeler = dateControl.Labeler;
 
-		PageComponent = new CustomPhrasingComponent(
-			new DisplayableElement(
-				context => new DisplayableElementData(
-					setup.DisplaySetup,
-					() => new DisplayableElementLocalData(
-						"span",
-						focusDependentData: new DisplayableElementFocusDependentData(
-							includeIdAttribute: true,
-							jsInitStatements: "{0}.datetimepicker( {{ {1} }} );".FormatWith(
-								getTextControlExpression( context.Id ),
-								StringTools.ConcatenateWithDelimiter(
-									", ",
-									minValue.HasValue
-										? "minDate: {0}".FormatWith( "new Date( {0}, {1} - 1, {2} )".FormatWith( minValue.Value.Year, minValue.Value.Month, minValue.Value.Day ) )
-										: "",
-									maxValue.HasValue
-										? "maxDate: {0}".FormatWith( "new Date( {0}, {1} - 1, {2} )".FormatWith( maxValue.Value.Year, maxValue.Value.Month, maxValue.Value.Day ) )
-										: "",
-									"timeFormat: 'h:mmt'",
-									"stepMinute: {0}".FormatWith( setup.MinuteInterval.Value ) ) ) ) ),
-					classes: elementClass.Add( setup.Classes ?? ElementClassSet.Empty ),
-					children: textControl.PageComponent.ToCollection()
-						.Concat(
-							setup.IsReadOnly
-								? Enumerable.Empty<PhrasingComponent>()
-								: new EwfButton(
-									new CustomButtonStyle(
-										attributes: new ElementAttribute( "aria-label", "Date and time picker" ).ToCollection(),
-										children: new GenericPhrasingContainer(
-											new FontAwesomeIcon( "fa-calendar-o", "fa-stack-2x" ).Append( new FontAwesomeIcon( "fa-clock-o", "fa-stack-1x" ) ).Materialize(),
-											classes: new ElementClass( "fa-stack" ) ).ToCollection() ),
-									behavior: new CustomButtonBehavior( () => "{0}.datetimepicker( 'show' );".FormatWith( getTextControlExpression( context.Id ) ) ),
-									classes: new ElementClass( "icon" ) ).ToCollection() )
-						.Materialize() ) ).ToCollection() );
+		PageComponent = new GenericFlowContainer(
+			new WrappingList(
+				dateControl.ToFormItem( label: "Date".ToComponents() )
+					.ToComponentCollection()
+					.ToComponentListItem()
+					.AppendWrappingListItem( timeControl.ToFormItem( label: "Time".ToComponents() ).ToComponentCollection().ToComponentListItem() ) ).ToCollection(),
+			displaySetup: setup.DisplaySetup,
+			classes: elementClass.Add( setup.Classes ?? ElementClassSet.Empty ) );
 
-		Validation = textControl.Validation;
+		if( validationMethod is not null )
+			Validation = new EwfValidation(
+				validator => {
+					if( !date.Initialized || !time.Initialized )
+						return;
+					validationMethod( date.Value + time.Value, validator );
+				} );
 	}
-
-	private string getTextControlExpression( string containerId ) => "$( '#{0}' ).children( 'input' )".FormatWith( containerId );
 }
