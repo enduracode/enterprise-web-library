@@ -64,7 +64,7 @@ public class DateControlSetup {
 			var id = new ElementId();
 			const int textControlMaxLength = 50;
 			var formValue = new FormValue<string>(
-				() => value.HasValue ? LocalDatePattern.Iso.Format( value.Value ) : "",
+				() => value.HasValue ? LocalDatePattern.Create( "M/d/yyyy", Cultures.EnglishUnitedStates ).Format( value.Value ) : "",
 				() => id.Id,
 				v => v,
 				rawValue => rawValue is null ? PostBackValueValidationResult<string>.CreateInvalid() :
