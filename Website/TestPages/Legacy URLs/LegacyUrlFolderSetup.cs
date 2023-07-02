@@ -92,10 +92,6 @@ partial class LegacyUrlFolderSetup {
 			new UrlPattern(
 				encoder => encoder is TestService.UrlEncoder ? EncodingUrlSegment.Create( "TestService.aspx" ) : null,
 				url => string.Equals( url.Segment, "TestService.aspx", StringComparison.OrdinalIgnoreCase ) ? new TestService.UrlDecoder() : null ) );
-		patterns.Add(
-			new UrlPattern(
-				encoder => encoder is TextControlDemo.UrlEncoder ? EncodingUrlSegment.Create( "TextControlDemo.aspx" ) : null,
-				url => string.Equals( url.Segment, "TextControlDemo.aspx", StringComparison.OrdinalIgnoreCase ) ? new TextControlDemo.UrlDecoder() : null ) );
 		patterns.Add( Basic.LegacyUrlFolderSetup.UrlPatterns.Literal( "Basic" ) );
 		patterns.Add( SubFolder.LegacyUrlFolderSetup.UrlPatterns.Literal( "SubFolder" ) );
 		return patterns;

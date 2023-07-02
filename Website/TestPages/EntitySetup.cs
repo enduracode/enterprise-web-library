@@ -38,6 +38,7 @@ partial class EntitySetup: UiEntitySetup {
 			.Append( BoxDemo.UrlPatterns.Literal( this, "box" ) )
 			.Append( EwfTableDemo.UrlPatterns.Literal( this, "standard-table" ) )
 			.Append( ResponsiveTableDemo.UrlPatterns.Literal( this, "responsive-table" ) )
+			.Append( TextControlDemo.UrlPatterns.Literal( this, "text-control" ) )
 			.Append( DateAndTimePickers.UrlPatterns.Literal( this, "date-time-controls" ) )
 			.Append( FileUploadDemo.UrlPatterns.Literal( this, "file-upload" ) )
 			.Append( IntermediatePostBacks.UrlPatterns.Literal( this, "intermediate-post-backs" ) )
