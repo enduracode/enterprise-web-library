@@ -66,10 +66,6 @@ partial class LegacyUrlFolderSetup {
 				url => string.Equals( url.Segment, "ModalBoxes.aspx", StringComparison.OrdinalIgnoreCase ) ? new ModalBoxes.UrlDecoder() : null ) );
 		patterns.Add(
 			new UrlPattern(
-				encoder => encoder is NumberControlDemo.UrlEncoder ? EncodingUrlSegment.Create( "NumberControlDemo.aspx" ) : null,
-				url => string.Equals( url.Segment, "NumberControlDemo.aspx", StringComparison.OrdinalIgnoreCase ) ? new NumberControlDemo.UrlDecoder() : null ) );
-		patterns.Add(
-			new UrlPattern(
 				encoder => encoder is OmniDemo.UrlEncoder ? EncodingUrlSegment.Create( "OmniDemo.aspx" ) : null,
 				url => string.Equals( url.Segment, "OmniDemo.aspx", StringComparison.OrdinalIgnoreCase ) ? new OmniDemo.UrlDecoder() : null ) );
 		patterns.Add(
