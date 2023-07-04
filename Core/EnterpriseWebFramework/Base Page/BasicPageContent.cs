@@ -436,24 +436,22 @@ public sealed class BasicPageContent: PageContent {
 		new TrustedHtmlString( "<script type=\"text/javascript\" src=\"" + new StaticFiles.ModernizrJs().GetUrl() + "\"></script>" ).ToComponent();
 
 	private IEnumerable<FlowComponent> getGoogleAnalyticsLogicIfNecessary() {
-		if( BasePageStatics.AppProvider.GoogleAnalyticsWebPropertyId.Length == 0 )
+		var measurementId = BasePageStatics.AppProvider.GoogleAnalyticsMeasurementId;
+		if( measurementId.Length == 0 )
 			yield break;
 
-		using var sw = new StringWriter();
-		sw.WriteLine( "<script>" );
-		sw.WriteLine( "(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){" );
-		sw.WriteLine( "(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o)," );
-		sw.WriteLine( "m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)" );
-		sw.WriteLine( "})(window,document,'script','//www.google-analytics.com/analytics.js','ga');" );
+		var html = new StringBuilder();
+		html.AppendLine( "<script async src=\"https://www.googletagmanager.com/gtag/js?id={0}\"></script>".FormatWith( measurementId ) );
+		html.AppendLine( "<script>" );
+		html.AppendLine( "window.dataLayer = window.dataLayer || [];" );
+		html.AppendLine( "function gtag() { dataLayer.push( arguments ); }" );
+		html.AppendLine( "gtag( 'js', new Date() );" );
 
 		var userId = BasePageStatics.AppProvider.GetGoogleAnalyticsUserId();
-		sw.WriteLine(
-			"ga('create', '" + BasePageStatics.AppProvider.GoogleAnalyticsWebPropertyId + "', 'auto'{0});",
-			userId.Any() ? ", {{'userId': '{0}'}}".FormatWith( userId ) : "" );
+		html.AppendLine( "gtag( 'config', '{0}'{1} );".FormatWith( measurementId, userId.Length > 0 ? ", {{ 'user_id': '{0}' }}".FormatWith( userId ) : "" ) );
 
-		sw.WriteLine( "ga('send', 'pageview');" );
-		sw.WriteLine( "</script>" );
-		yield return new TrustedHtmlString( sw.ToString() ).ToComponent();
+		html.AppendLine( "</script>" );
+		yield return new TrustedHtmlString( html.ToString() ).ToComponent();
 	}
 
 	private FlowComponentOrNode getJavaScriptIncludes() =>
