@@ -164,7 +164,7 @@ public static class RequestDispatchingStatics {
 			context,
 			() => {
 				try {
-					rollbackDatabaseTransactionsAndClearResponse( context );
+					rollbackDatabaseTransactionsAndClearResponseIfPossible( context );
 
 					// We can remove this as soon as requesting a URL with a vertical pipe doesn't blow up our web applications.
 					var errorIsBogusPathException = exception is ArgumentException argException && argException.Message == "Illegal characters in path.";
@@ -200,7 +200,8 @@ public static class RequestDispatchingStatics {
 						transferRequest( context, null, new ResourceDisabled( pageDisabledException.Message ) );
 					else {
 						RequestState.AddError( "", exception );
-						transferRequestToUnhandledExceptionPage( context );
+						if( !context.Response.HasStarted )
+							transferRequestToUnhandledExceptionPage( context );
 					}
 				}
 				catch {
@@ -242,9 +243,10 @@ public static class RequestDispatchingStatics {
 			resource.HandleRequest( context, true );
 		}
 		catch( Exception exception ) {
-			rollbackDatabaseTransactionsAndClearResponse( context );
+			rollbackDatabaseTransactionsAndClearResponseIfPossible( context );
 			RequestState.AddError( "An exception occurred during a request for a handled error page or a log-in page:", exception );
-			transferRequestToUnhandledExceptionPage( context );
+			if( !context.Response.HasStarted )
+				transferRequestToUnhandledExceptionPage( context );
 		}
 	}
 
@@ -267,21 +269,23 @@ public static class RequestDispatchingStatics {
 			page.HandleRequest( context, true );
 		}
 		catch( Exception exception ) {
-			rollbackDatabaseTransactionsAndClearResponse( context );
+			rollbackDatabaseTransactionsAndClearResponseIfPossible( context );
 			RequestState.AddError( "An exception occurred during a request for the unhandled exception page:", exception );
-			write500Response( context, "Unhandled Exception Page Error", null );
+			if( !context.Response.HasStarted )
+				write500Response( context, "Unhandled Exception Page Error", null );
 		}
 	}
 
 	private static PageBase getErrorPage( PageBase ewfErrorPage ) => AppProvider.GetErrorPage() ?? ewfErrorPage;
 
-	private static void rollbackDatabaseTransactionsAndClearResponse( HttpContext context ) {
+	private static void rollbackDatabaseTransactionsAndClearResponseIfPossible( HttpContext context ) {
 		RequestState.RollbackDatabaseTransactions();
 		DataAccessState.Current.ResetCache();
 
 		RequestState.EwfPageRequestState = new EwfPageRequestState( AppRequestState.RequestTime, null, null );
 
-		context.Response.Clear();
+		if( !context.Response.HasStarted )
+			context.Response.Clear();
 	}
 
 	private static void write500Response( HttpContext context, string description, ( string prefix, Exception exception )? error ) {
