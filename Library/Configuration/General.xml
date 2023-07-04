@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <systemGeneralConfiguration xmlns="http://redstapler.biz" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                            xsi:schemaLocation="http://redstapler.biz http://ewl.enterpriseweblibrary.org/ConfigurationSchemas/SystemGeneral">
+                            xsi:schemaLocation="http://redstapler.biz https://ewl.enterpriseweblibrary.org/ConfigurationSchemas/SystemGeneral">
 	<systemName>Enterprise Web Library</systemName>
 	<systemShortName>Ewl</systemShortName>
 	<WebApplications>
