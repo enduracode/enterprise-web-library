@@ -204,7 +204,8 @@ public static class RequestDispatchingStatics {
 					}
 				}
 				catch {
-					context.Response.Clear();
+					if( !context.Response.HasStarted )
+						context.Response.Clear();
 					throw;
 				}
 			},
@@ -226,7 +227,7 @@ public static class RequestDispatchingStatics {
 						TelemetryStatics.ReportError( prefix, e );
 				},
 				delegate {
-					if( write500Response )
+					if( write500Response && !context.Response.HasStarted )
 						RequestDispatchingStatics.write500Response( context, "Exception", ( prefix, e ) );
 				} );
 		}
