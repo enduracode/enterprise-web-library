@@ -439,6 +439,7 @@ public static class EwfOps {
 
 							appInitializer?.InitStatics();
 
+							var executeWithAutomaticDatabaseConnections = GlobalInitializationOps.ExecuteWithAutomaticDatabaseConnections;
 							executeWithAutomaticDatabaseConnections( AuthenticationStatics.InitAppSpecificLogicDependencies );
 							executeWithAutomaticDatabaseConnections( OpenIdProviderStatics.InitAppSpecificLogicDependencies );
 							if( OpenIdProviderStatics.OpenIdProviderEnabled )
@@ -493,18 +494,6 @@ public static class EwfOps {
 			throw new Exception(
 				"You must specify resource {0} as an intermediate-installation public resource because it is used on an intermediate-installation public page."
 					.FormatWith( resource.GetUrl( false, false ) ) );
-	}
-
-	private static void executeWithAutomaticDatabaseConnections( Action method ) {
-		var connectionManager = new AutomaticDatabaseConnectionManager();
-		try {
-			connectionManager.DataAccessState.ExecuteWithThis( method );
-			connectionManager.CommitTransactionsAndExecuteNonTransactionalModificationMethods( false );
-		}
-		catch {
-			connectionManager.RollbackTransactions( false );
-			throw;
-		}
 	}
 
 	private static async Task ensureUrlResolved( HttpContext context, RequestDelegate next ) {
