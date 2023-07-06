@@ -18,6 +18,9 @@ public static class UserManagementStatics {
 	private static ( Func<string> getter, Action<string> updater )? certificateMethods;
 
 	internal static void Init( Action certificateUpdateNotifier, Func<SystemUser> currentUserGetter ) {
+		if( ConfigurationStatics.IsClientSideApp )
+			return;
+
 		SystemUser.Init( currentUserGetter );
 
 		provider = ConfigurationStatics.GetSystemLibraryProvider<SystemUserManagementProvider>( providerName );
@@ -35,7 +38,7 @@ public static class UserManagementStatics {
 	public static SystemUserManagementProvider SystemProvider => provider.GetProvider();
 
 	internal static void InitSystemSpecificLogicDependencies() {
-		if( !UserManagementEnabled )
+		if( ConfigurationStatics.IsClientSideApp || !UserManagementEnabled )
 			return;
 		identityProviders = SystemProvider.GetIdentityProviders().Materialize();
 		localIdentityProvider = identityProviders.OfType<LocalIdentityProvider>().SingleOrDefault();
