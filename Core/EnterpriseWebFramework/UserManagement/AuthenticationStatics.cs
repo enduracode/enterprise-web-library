@@ -5,6 +5,7 @@ using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.UserManagement;
 using EnterpriseWebLibrary.UserManagement.IdentityProviders;
 using EnterpriseWebLibrary.WebSessionState;
+using JetBrains.Annotations;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.DataProtection;
 using NodaTime;
@@ -13,6 +14,7 @@ using Tewl.InputValidation;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 
+[ PublicAPI ]
 public static class AuthenticationStatics {
 	private const string userCookieName = "User";
 	private const string identityProviderCookieName = "IdentityProvider";
@@ -25,6 +27,7 @@ public static class AuthenticationStatics {
 
 	private static AppAuthenticationProvider provider;
 	private static TicketDataFormat authenticationTicketProtector;
+	private static Func<string, ResourceBase> defaultLogInPageGetter;
 	private static LocalIdentityProvider.AutoLogInPageUrlGetterMethod autoLogInPageUrlGetter;
 	private static LocalIdentityProvider.ChangePasswordPageUrlGetterMethod changePasswordPageUrlGetter;
 
@@ -40,10 +43,11 @@ public static class AuthenticationStatics {
 
 	internal static void Init(
 		SystemProviderReference<AppAuthenticationProvider> provider, IDataProtectionProvider dataProtectionProvider,
-		LocalIdentityProvider.AutoLogInPageUrlGetterMethod autoLogInPageUrlGetter,
+		Func<string, ResourceBase> defaultLogInPageGetter, LocalIdentityProvider.AutoLogInPageUrlGetterMethod autoLogInPageUrlGetter,
 		LocalIdentityProvider.ChangePasswordPageUrlGetterMethod changePasswordPageUrlGetter ) {
 		AuthenticationStatics.provider = provider.GetProvider( returnNullIfNotFound: true ) ?? new AppAuthenticationProvider();
 		authenticationTicketProtector = new TicketDataFormat( dataProtectionProvider.CreateProtector( "EnterpriseWebLibrary.WebFramework.UserManagement" ) );
+		AuthenticationStatics.defaultLogInPageGetter = defaultLogInPageGetter;
 		AuthenticationStatics.autoLogInPageUrlGetter = autoLogInPageUrlGetter;
 		AuthenticationStatics.changePasswordPageUrlGetter = changePasswordPageUrlGetter;
 	}
@@ -59,6 +63,11 @@ public static class AuthenticationStatics {
 	}
 
 	internal static IReadOnlyCollection<SamlIdentityProvider> SamlIdentityProviders => samlIdentityProviders;
+
+	/// <summary>
+	/// Returns the default log-in page for the application. This is useful if you need a direct hyperlink to it.
+	/// </summary>
+	public static ResourceBase GetDefaultLogInPage( string returnUrl ) => defaultLogInPageGetter( returnUrl );
 
 
 	/// <summary>

@@ -68,11 +68,7 @@ partial class LogIn {
 						.ToComponents() )
 				.Append(
 					new Paragraph(
-						new EwfHyperlink(
-							UserManagementStatics.LocalIdentityProviderEnabled || AuthenticationStatics.SamlIdentityProviders.Count > 1
-								? this
-								: new SamlResources.LogIn( AuthenticationStatics.SamlIdentityProviders.Single().EntityId, ReturnUrl ),
-							new ButtonHyperlinkStyle( "Log In as Another User" ) ).ToCollection() ) )
+						new EwfHyperlink( AuthenticationStatics.GetDefaultLogInPage( ReturnUrl ), new ButtonHyperlinkStyle( "Log In as Another User" ) ).ToCollection() ) )
 				.Materialize(),
 			style: SectionStyle.Box ).ToCollection();
 	}

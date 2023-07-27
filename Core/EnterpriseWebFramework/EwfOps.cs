@@ -424,6 +424,9 @@ public static class EwfOps {
 							AuthenticationStatics.Init(
 								providerGetter.GetProvider<AppAuthenticationProvider>( "Authentication" ),
 								app.Services.GetRequiredService<IDataProtectionProvider>(),
+								returnUrl => UserManagementStatics.LocalIdentityProviderEnabled || AuthenticationStatics.SamlIdentityProviders.Count > 1
+									             ? new UserManagement.Pages.LogIn( returnUrl )
+									             : new UserManagement.SamlResources.LogIn( AuthenticationStatics.SamlIdentityProviders.Single().EntityId, returnUrl ),
 								( user, code ) => new UserManagement.Pages.LogIn(
 									"",
 									optionalParameterSetter: ( specifier, _ ) => {
