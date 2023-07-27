@@ -83,7 +83,7 @@ public class LocalIdentityProvider: IdentityProvider {
 	private readonly Func<string, ( SystemUser user, int salt, byte[] saltedPassword )?> passwordLoginUserGetter;
 	private readonly LoginCodeGetterMethod loginCodeGetter;
 	private readonly Func<SystemUser, bool, bool?> postAuthenticationMethod;
-	internal readonly int? AuthenticationTimeoutMinutes;
+	internal readonly Duration? AuthenticationDuration;
 	internal readonly Action<Validator, string> PasswordValidationMethod;
 	internal readonly PasswordUpdaterMethod PasswordUpdater;
 	private readonly LoginCodeUpdaterMethod loginCodeUpdater;
@@ -104,21 +104,21 @@ public class LocalIdentityProvider: IdentityProvider {
 	/// authentication attempts or preventing a user from logging in. Takes a user object and whether built-in authentication was successful, and returns true
 	/// if authentication is successful, false if it failed for any reason, and null if it did not fail but is incomplete. Do not use unless the system
 	/// absolutely requires micromanagement of authentication behavior.</param>
-	/// <param name="authenticationTimeoutMinutes">The authentication timeout. Pass null to use the default. Do not use unless the system absolutely requires
-	/// micromanagement of authentication behavior.</param>
+	/// <param name="authenticationDuration">The duration of an authentication session. Pass null to use the default. Do not use unless the system absolutely
+	/// requires micromanagement of authentication behavior.</param>
 	/// <param name="passwordValidationMethod">Validates the specified password. Called when a user changes their password. Do not use unless the system
 	/// absolutely requires micromanagement of authentication behavior.</param>
 	public LocalIdentityProvider(
 		string administratingOrganizationName, string logInHelpInstructions,
 		Func<string, ( SystemUser user, int salt, byte[] saltedPassword )?> passwordLoginUserGetter, LoginCodeGetterMethod loginCodeGetter,
 		PasswordUpdaterMethod passwordUpdater, LoginCodeUpdaterMethod loginCodeUpdater, Func<SystemUser, bool, bool?> postAuthenticationMethod = null,
-		int? authenticationTimeoutMinutes = null, Action<Validator, string> passwordValidationMethod = null ) {
+		Duration? authenticationDuration = null, Action<Validator, string> passwordValidationMethod = null ) {
 		AdministratingOrganizationName = administratingOrganizationName;
 		LogInHelpInstructions = logInHelpInstructions;
 		this.passwordLoginUserGetter = passwordLoginUserGetter;
 		this.loginCodeGetter = loginCodeGetter;
 		this.postAuthenticationMethod = postAuthenticationMethod;
-		AuthenticationTimeoutMinutes = authenticationTimeoutMinutes;
+		AuthenticationDuration = authenticationDuration;
 		PasswordValidationMethod = passwordValidationMethod;
 		PasswordUpdater = passwordUpdater;
 		this.loginCodeUpdater = loginCodeUpdater;

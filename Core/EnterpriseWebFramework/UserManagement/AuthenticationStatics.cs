@@ -257,13 +257,9 @@ public static class AuthenticationStatics {
 		if( AppRequestState.Instance.ImpersonatorExists )
 			UserImpersonationStatics.SetCookie( user );
 		else {
-			// If the user's role requires enhanced security, require re-authentication every 12 minutes. Otherwise, make it the same as a session timeout.
-			var authenticationDuration = identityProvider is LocalIdentityProvider local && local.AuthenticationTimeoutMinutes.HasValue
-				                             ?
-				                             Duration.FromMinutes( local.AuthenticationTimeoutMinutes.Value )
-				                             : user.Role.RequiresEnhancedSecurity
-					                             ? Duration.FromMinutes( 12 )
-					                             : SessionDuration;
+			var authenticationDuration = identityProvider is LocalIdentityProvider { AuthenticationDuration: {} } local ? local.AuthenticationDuration.Value :
+			                             identityProvider is SamlIdentityProvider { AuthenticationDuration: {} } saml ? saml.AuthenticationDuration.Value :
+			                             user.Role.RequiresEnhancedSecurity ? Duration.FromMinutes( 12 ) : SessionDuration;
 
 			var ticket = new AuthenticationTicket(
 				new ClaimsPrincipal( new GenericIdentity( user.UserId.ToString() ) ),
