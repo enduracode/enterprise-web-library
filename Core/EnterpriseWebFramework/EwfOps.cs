@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
+using Destructurama;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core;
@@ -119,7 +120,8 @@ public static class EwfOps {
 
 						var diagnosticLogLevelSwitch = new LoggingLevelSwitch(
 							initialMinimumLevel: ConfigurationStatics.IsDevelopmentInstallation ? LogEventLevel.Information : LogEventLevel.Warning );
-						var loggerConfiguration = new LoggerConfiguration().MinimumLevel.ControlledBy( diagnosticLogLevelSwitch )
+						var loggerConfiguration = new LoggerConfiguration().Destructure.JsonNetTypes()
+							.MinimumLevel.ControlledBy( diagnosticLogLevelSwitch )
 							.MinimumLevel.Override( "Microsoft.AspNetCore", LogEventLevel.Warning );
 						loggerConfiguration = ConfigurationStatics.IsDevelopmentInstallation
 							                      ? loggerConfiguration.WriteTo.Console()

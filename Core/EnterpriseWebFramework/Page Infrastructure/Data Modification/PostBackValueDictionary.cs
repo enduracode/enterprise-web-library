@@ -8,18 +8,18 @@ internal class PostBackValueDictionary {
 	private HashSet<string> nonRemovedKeys;
 
 	/// <summary>
-	/// Returns true if extra post-back values exist.
+	/// Returns the keys of the extra post-back values.
 	/// </summary>
 	/// <param name="keyValuePairs">Values cannot be null.</param>
 	/// <param name="keyPredicate"></param>
-	internal bool AddFromRequest( IEnumerable<KeyValuePair<string, object>> keyValuePairs, Func<string, bool> keyPredicate ) {
-		var extraPostBackValuesExist = false;
+	internal IReadOnlyCollection<string> AddFromRequest( IEnumerable<KeyValuePair<string, object>> keyValuePairs, Func<string, bool> keyPredicate ) {
+		var extraPostBackValueKeys = new List<string>();
 		foreach( var pair in keyValuePairs )
 			if( keyPredicate( pair.Key ) && !dictionary.ContainsKey( pair.Key ) )
 				dictionary.Add( pair.Key, pair.Value );
 			else
-				extraPostBackValuesExist = true;
-		return extraPostBackValuesExist;
+				extraPostBackValueKeys.Add( pair.Key );
+		return extraPostBackValueKeys;
 	}
 
 	// This method and the nonRemovedKeys field are ultimately necessary because, for a group of radio buttons, we need to know the difference between

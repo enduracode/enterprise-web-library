@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NodaTime;
+using Serilog;
 using StackExchange.Profiling;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -733,27 +734,50 @@ public abstract class PageBase: ResourceBase {
 	private void validateFormSubmission( IFormCollection submission, string formValueHash ) {
 		var requestState = AppRequestState.Instance.EwfPageRequestState;
 
+		var extraComponentStateValues = requestState.ComponentStateValuesById.Keys.Where( i => !componentStateItemsById.ContainsKey( i ) ).Materialize();
+		var invalidComponentStateValues = componentStateItemsById
+			.Where( i => !requestState.ComponentStateValuesById.ContainsKey( i.Key ) || i.Value.ValueIsInvalid() )
+			.Select( i => i.Key )
+			.Materialize();
+
 		var activeFormValues = formValues.Where( i => i.GetPostBackValueKey().Any() ).ToArray();
 		var postBackValueKeys = new HashSet<string>( activeFormValues.Select( i => i.GetPostBackValueKey() ) );
 		requestState.PostBackValues = new PostBackValueDictionary();
-		var extraPostBackValuesExist = requestState.ComponentStateValuesById.Keys.Any( i => !componentStateItemsById.ContainsKey( i ) ) |
-		                               requestState.PostBackValues.AddFromRequest(
-			                               submission.Where(
-					                               i => !string.Equals( i.Key, HiddenFieldName, StringComparison.Ordinal ) && !string.Equals(
-						                                    i.Key,
-						                                    ButtonElementName,
-						                                    StringComparison.Ordinal ) )
-				                               .SelectMany( pair => pair.Value.Select( value => KeyValuePair.Create( pair.Key, (object)value ) ) ),
-			                               postBackValueKeys.Contains ) | requestState.PostBackValues.AddFromRequest(
-			                               submission.Files.Select( i => KeyValuePair.Create( i.Name, (object)i ) ),
-			                               postBackValueKeys.Contains );
+		var extraPostBackValues = requestState.PostBackValues.AddFromRequest(
+				submission.Where(
+						i => !string.Equals( i.Key, HiddenFieldName, StringComparison.Ordinal ) && !string.Equals( i.Key, ButtonElementName, StringComparison.Ordinal ) )
+					.SelectMany( pair => pair.Value.Select( value => KeyValuePair.Create( pair.Key, (object)value ) ) ),
+				postBackValueKeys.Contains )
+			.Concat(
+				requestState.PostBackValues.AddFromRequest( submission.Files.Select( i => KeyValuePair.Create( i.Name, (object)i ) ), postBackValueKeys.Contains ) )
+			.Materialize();
 
-		// Make sure data didn't change under this page's feet since the last request.
-		var invalidPostBackValuesExist =
-			componentStateItemsById.Any( i => !requestState.ComponentStateValuesById.ContainsKey( i.Key ) || i.Value.ValueIsInvalid() ) ||
-			activeFormValues.Any( i => i.PostBackValueIsInvalid() );
+		var invalidPostBackValues = activeFormValues.Where( i => i.PostBackValueIsInvalid() ).Select( i => i.GetPostBackValueKey() ).Materialize();
 		var formValueHashesDisagree = generateFormValueHash() != formValueHash;
-		if( extraPostBackValuesExist || invalidPostBackValuesExist || formValueHashesDisagree ) {
+
+		// Make sure data didn’t change under this page’s feet since the last request.
+		if( extraComponentStateValues.Any() || invalidComponentStateValues.Any() || extraPostBackValues.Any() || invalidPostBackValues.Any() ||
+		    formValueHashesDisagree ) {
+			if( extraComponentStateValues.Any() )
+				Log.Debug( "Form-submission validation failed due to extra component-state values: {Values}", extraComponentStateValues );
+			else if( invalidComponentStateValues.Any() )
+				Log.Debug(
+					"Form-submission validation failed due to invalid component-state values: {@Values}",
+					invalidComponentStateValues.Select(
+						i => new { Id = i, Value = requestState.ComponentStateValuesById.TryGetValue( i, out var value ) ? value : "missing" } ) );
+			else if( extraPostBackValues.Any() )
+				Log.Debug( "Form-submission validation failed due to extra post-back values: {Values}", extraPostBackValues );
+			else if( invalidPostBackValues.Any() )
+				Log.Debug(
+					"Form-submission validation failed due to invalid post-back values: {@Values}",
+					invalidPostBackValues.Select(
+						i => {
+							var value = requestState.PostBackValues.GetValue( i );
+							return new { Key = i, Value = value is not null ? "{0}".FormatWith( value ) : "missing" };
+						} ) );
+			else if( formValueHashesDisagree )
+				Log.Debug( "Form-submission validation failed due to disagreeing form-value hashes" );
+
 			// Remove invalid post-back values so they don't cause a false developer-mistake exception after the transfer.
 			requestState.ComponentStateValuesById = requestState.ComponentStateValuesById.RemoveRange(
 				from i in componentStateItemsById where i.Value.ValueIsInvalid() select i.Key );
@@ -778,6 +802,9 @@ public abstract class PageBase: ResourceBase {
 		var hashString = "";
 		foreach( var b in hash )
 			hashString += b.ToString( "x2" );
+
+		Log.Debug( "Form-value hash generated from {Values}", Environment.NewLine + formValueString );
+
 		return hashString;
 	}
 
