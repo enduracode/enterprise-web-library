@@ -606,6 +606,7 @@ internal class UpdateDependentLogic: Operation {
 
 			// build-related properties; see https://learn.microsoft.com/en-us/dotnet/core/project-sdk/msbuild-props#build-related-properties
 			writer.WriteLine( "<Nullable>enable</Nullable>" );
+			writer.WriteLine( "<CopyDebugSymbolFilesFromPackages>true</CopyDebugSymbolFilesFromPackages>" );
 
 			writer.WriteLine(
 				"<DefaultItemExcludesInProjectFolder>$(DefaultItemExcludesInProjectFolder);Directory.Build.props;**/*.ewlt.cs</DefaultItemExcludesInProjectFolder>" );
