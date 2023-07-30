@@ -1,4 +1,5 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+﻿#nullable disable
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	internal class PostBackValueValidationResult<T> {
 		internal static PostBackValueValidationResult<T> CreateInvalid() {
 			return new PostBackValueValidationResult<T>( false );

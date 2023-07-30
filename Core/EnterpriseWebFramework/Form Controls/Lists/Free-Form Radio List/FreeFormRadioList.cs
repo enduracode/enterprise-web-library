@@ -1,3 +1,4 @@
+ï»¿#nullable disable
 using MoreLinq;
 using Tewl.InputValidation;
 
@@ -17,7 +18,7 @@ public static class FreeFormRadioList {
 	/// state to be valid.</param>
 	/// <param name="selectedItemId"></param>
 	/// <param name="setup">The setup object for the free-form radio list.</param>
-	/// <param name="validationMethod">The validation method. Pass null if you’re only using this radio-button list for page modification.</param>
+	/// <param name="validationMethod">The validation method. Pass null if youï¿½re only using this radio-button list for page modification.</param>
 	public static FreeFormRadioList<ItemIdType> Create<ItemIdType>(
 		bool? noSelectionIsValid, ItemIdType selectedItemId, FreeFormRadioListSetup<ItemIdType> setup = null,
 		Action<ItemIdType, Validator> validationMethod = null ) {

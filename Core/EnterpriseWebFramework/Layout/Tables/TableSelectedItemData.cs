@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿#nullable disable
+using System.Collections.Generic;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	internal class TableSelectedItemData<ItemIdType> {

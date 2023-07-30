@@ -1,4 +1,5 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+﻿#nullable disable
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public sealed class ElementContext {
 		/// <summary>
 		/// The generated ID for the element.

@@ -1,4 +1,5 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework.OpenIdProvider;
+﻿#nullable disable
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.OpenIdProvider;
 
 public class OpenIdClient {
 	public readonly string ClientIdentifier;

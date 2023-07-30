@@ -1,4 +1,5 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+﻿#nullable disable
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public class StatusMessageAndDestination {
 		private readonly string message;
 		private readonly ResourceInfo destination;

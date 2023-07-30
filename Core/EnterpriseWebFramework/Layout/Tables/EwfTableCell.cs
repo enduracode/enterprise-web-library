@@ -1,3 +1,4 @@
+ï»¿#nullable disable
 using System.Collections.Generic;
 using System.Linq;
 using Tewl.Tools;
@@ -42,7 +43,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="text"></param>
 		/// <param name="setup"></param>
 		public static EwfTableCell ToCell( this string text, TableCellSetup setup = null ) =>
-			// Remove null handling when we’re confident it won’t break too many things.
+			// Remove null handling when weï¿½re confident it wonï¿½t break too many things.
 			new EwfTableCell( setup ?? new TableCellSetup(), ( text ?? "" ).ToComponents(), simpleText: text ?? "" );
 
 		/// <summary>

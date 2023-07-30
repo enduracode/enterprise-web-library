@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿#nullable disable
+using System.Collections.Immutable;
 using System.Security.Cryptography;
 using System.Text;
 using EnterpriseWebLibrary.Configuration;

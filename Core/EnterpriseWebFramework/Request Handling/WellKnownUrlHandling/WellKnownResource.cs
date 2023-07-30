@@ -1,4 +1,5 @@
-﻿// EwlResource
+﻿#nullable disable
+// EwlResource
 // Parameter: string suffix
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.WellKnownUrlHandling;

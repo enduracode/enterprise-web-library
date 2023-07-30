@@ -1,4 +1,5 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+﻿#nullable disable
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A vertical alignment for a table cell.
 	/// </summary>

@@ -1,4 +1,5 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+﻿#nullable disable
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public sealed class ConfirmationDialogId {
 		internal readonly ModalBoxId ModalBoxId;
 

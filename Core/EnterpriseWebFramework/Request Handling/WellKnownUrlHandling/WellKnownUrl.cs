@@ -1,4 +1,5 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework.WellKnownUrlHandling;
+﻿#nullable disable
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.WellKnownUrlHandling;
 
 public class WellKnownUrl {
 	internal readonly string SuffixSegment;

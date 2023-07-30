@@ -1,4 +1,5 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
+﻿#nullable disable
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 
 /// <summary>
 /// Application-specific authentication logic.

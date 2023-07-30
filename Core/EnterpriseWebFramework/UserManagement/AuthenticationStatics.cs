@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿#nullable disable
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Security.Principal;
 using EnterpriseWebLibrary.Configuration;

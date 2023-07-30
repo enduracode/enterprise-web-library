@@ -1,4 +1,5 @@
-﻿using EnterpriseWebLibrary.ExternalFunctionality;
+﻿#nullable disable
+using EnterpriseWebLibrary.ExternalFunctionality;
 
 // EwlResource
 

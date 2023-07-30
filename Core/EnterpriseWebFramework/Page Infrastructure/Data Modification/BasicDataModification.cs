@@ -1,4 +1,5 @@
-﻿using EnterpriseWebLibrary.DataAccess;
+﻿#nullable disable
+using EnterpriseWebLibrary.DataAccess;
 using Tewl.InputValidation;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;

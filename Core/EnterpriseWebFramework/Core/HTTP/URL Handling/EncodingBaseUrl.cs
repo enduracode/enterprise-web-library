@@ -1,4 +1,5 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+﻿#nullable disable
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public sealed class EncodingBaseUrl {
 		internal readonly BaseUrl BaseUrl;
 		internal readonly EncodingUrlParameterCollection Parameters;

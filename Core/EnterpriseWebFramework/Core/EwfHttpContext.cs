@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿#nullable disable
+using System.Security.Claims;
 using System.Threading;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;

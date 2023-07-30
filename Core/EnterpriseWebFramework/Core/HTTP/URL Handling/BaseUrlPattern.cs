@@ -1,4 +1,5 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework;
+﻿#nullable disable
+namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 /// <summary>
 /// A pattern that can generate and parse application base URLs.

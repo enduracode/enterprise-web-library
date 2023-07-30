@@ -1,4 +1,5 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework;
+﻿#nullable disable
+namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 /// <summary>
 /// Lazy loaded data used by an EWF table item group.

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿#nullable disable
+using System.Collections.Generic;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public sealed class ElementIdSet: ElementIdReference {

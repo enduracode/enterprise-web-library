@@ -1,4 +1,5 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework;
+﻿#nullable disable
+namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 /// <summary>
 /// A web resource outside of the system.

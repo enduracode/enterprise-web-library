@@ -1,4 +1,5 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework;
+﻿#nullable disable
+namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 /// <summary>
 /// Application-specific logic for JSON serialization of resources.

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿#nullable disable
+using System.ComponentModel;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
 using JetBrains.Annotations;

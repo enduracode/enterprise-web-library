@@ -1,4 +1,5 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework.Core {
+﻿#nullable disable
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.Core {
 	public static class AspNetStatics {
 		private static Func<IServiceProvider> currentServicesGetter;
 

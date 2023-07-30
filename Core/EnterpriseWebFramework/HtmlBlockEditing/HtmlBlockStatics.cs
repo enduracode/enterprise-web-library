@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿#nullable disable
+using System.Text.RegularExpressions;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.MailMerging;
 

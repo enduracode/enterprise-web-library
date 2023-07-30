@@ -1,4 +1,5 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework.StaticFiles {
+﻿#nullable disable
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.StaticFiles {
 	partial class FolderSetup {
 		protected override UrlHandler getUrlParent() => new Admin.EntitySetup();
 	}

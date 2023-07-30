@@ -1,4 +1,5 @@
-﻿using EnterpriseWebLibrary.Configuration;
+﻿#nullable disable
+using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.UserManagement;
 using JetBrains.Annotations;
 

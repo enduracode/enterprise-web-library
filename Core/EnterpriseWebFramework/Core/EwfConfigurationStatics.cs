@@ -1,4 +1,5 @@
-﻿using EnterpriseWebLibrary.Configuration;
+﻿#nullable disable
+using EnterpriseWebLibrary.Configuration;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public static class EwfConfigurationStatics {

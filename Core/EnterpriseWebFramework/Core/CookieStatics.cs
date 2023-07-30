@@ -1,4 +1,5 @@
-﻿using JetBrains.Annotations;
+﻿#nullable disable
+using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
 using NodaTime;
 

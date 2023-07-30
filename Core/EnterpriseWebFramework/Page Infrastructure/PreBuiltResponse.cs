@@ -1,4 +1,5 @@
-﻿using EnterpriseWebLibrary.WebSessionState;
+﻿#nullable disable
+using EnterpriseWebLibrary.WebSessionState;
 
 // EwlResource
 

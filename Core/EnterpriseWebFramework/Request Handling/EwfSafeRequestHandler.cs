@@ -1,4 +1,5 @@
-﻿using EnterpriseWebLibrary.DataAccess;
+﻿#nullable disable
+using EnterpriseWebLibrary.DataAccess;
 using Microsoft.AspNetCore.Http;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {

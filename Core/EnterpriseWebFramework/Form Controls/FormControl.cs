@@ -1,4 +1,5 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+﻿#nullable disable
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public interface FormControl<out T> where T: PageComponent {
 		/// <summary>
 		/// Gets the labeler, or null if this control is not labelable.

@@ -1,3 +1,4 @@
+ï»¿#nullable disable
 using EnterpriseWebLibrary.DataAccess.BlobStorage;
 using EnterpriseWebLibrary.IO;
 using EnterpriseWebLibrary.WebSessionState;
@@ -18,9 +19,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="postBackIdBase">Do not pass null.</param>
 		/// <param name="sortByName"></param>
 		/// <param name="thumbnailResourceGetter">A function that takes a file ID and returns the corresponding thumbnail resource. Do not return null.</param>
-		/// <param name="openedFileIds">The file IDs that should not be marked with a UI element drawing the user’s attention to the fact that they haven’t read it.
+		/// <param name="openedFileIds">The file IDs that should not be marked with a UI element drawing the userï¿½s attention to the fact that they havenï¿½t read it.
 		/// All other files not in this collection will be marked. The collection can be null, and will result as nothing being shown as new.</param>
-		/// <param name="unopenedFileOpenedNotifier">A method that executes when an unopened file is opened. Use to update the app’s database with an indication
+		/// <param name="unopenedFileOpenedNotifier">A method that executes when an unopened file is opened. Use to update the appï¿½s database with an indication
 		/// that the file has been seen by the user.</param>
 		/// <param name="disableModifications">Pass true if there should be no way to upload or delete files.</param>
 		/// <param name="uploadValidationMethod"></param>

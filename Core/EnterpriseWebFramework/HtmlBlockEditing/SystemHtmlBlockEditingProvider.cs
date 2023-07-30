@@ -1,3 +1,4 @@
+﻿#nullable disable
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// Defines how HTML block editing operations will be carried out against a database.

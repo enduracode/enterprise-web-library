@@ -1,3 +1,4 @@
+﻿#nullable disable
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A desired location on a web page for a browser to scroll to.

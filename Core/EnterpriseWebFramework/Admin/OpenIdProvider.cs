@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography.X509Certificates;
+﻿#nullable disable
+using System.Security.Cryptography.X509Certificates;
 using EnterpriseWebLibrary.EnterpriseWebFramework.OpenIdProvider;
 
 // EwlPage

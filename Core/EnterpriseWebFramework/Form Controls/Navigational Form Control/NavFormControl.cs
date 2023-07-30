@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable disable
+using System;
 using Humanizer;
 using Tewl.InputValidation;
 using Tewl.Tools;

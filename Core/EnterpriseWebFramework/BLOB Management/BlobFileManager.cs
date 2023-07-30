@@ -1,3 +1,4 @@
+﻿#nullable disable
 using EnterpriseWebLibrary.DataAccess.BlobStorage;
 using EnterpriseWebLibrary.IO;
 

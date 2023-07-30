@@ -1,3 +1,4 @@
+﻿#nullable disable
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// Represents either a cell or the space taken up be a spanning cell.

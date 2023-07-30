@@ -1,4 +1,5 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+﻿#nullable disable
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	///  The configuration for an item in a table. Options specified on individual cells take precedence over equivalent options specified here.
 	/// </summary>

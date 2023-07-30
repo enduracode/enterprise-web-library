@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿#nullable disable
+using System.Collections.Immutable;
 using Tewl.IO;
 using static MoreLinq.Extensions.EquiZipExtension;
 

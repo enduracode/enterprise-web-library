@@ -1,4 +1,5 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework.OpenIdProvider.Resources;
+﻿#nullable disable
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.OpenIdProvider.Resources;
 
 partial class EntitySetup {
 	protected override void init() {

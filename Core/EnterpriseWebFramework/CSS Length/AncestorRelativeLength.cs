@@ -1,4 +1,5 @@
-﻿using Humanizer;
+﻿#nullable disable
+using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>

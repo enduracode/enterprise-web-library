@@ -1,4 +1,5 @@
-﻿using System.Web;
+﻿#nullable disable
+using System.Web;
 using EnterpriseWebLibrary.Email;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;

@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿#nullable disable
+using System.Collections.Immutable;
 using Humanizer;
 using JetBrains.Annotations;
 using StackExchange.Profiling;

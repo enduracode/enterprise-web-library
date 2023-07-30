@@ -1,4 +1,5 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+﻿#nullable disable
+namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public class NavFormControlValidationResult {
 		internal ResourceInfo Destination { get; }
 		internal string ErrorMessage { get; }

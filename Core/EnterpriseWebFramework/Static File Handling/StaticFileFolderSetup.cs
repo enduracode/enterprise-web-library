@@ -1,4 +1,5 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework;
+﻿#nullable disable
+namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 public abstract class StaticFileFolderSetup: EntitySetupBase {
 	protected sealed override void init() => base.init();

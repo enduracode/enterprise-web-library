@@ -1,3 +1,4 @@
+﻿#nullable disable
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A limit on the number of data rows displayed in a dynamic table.
