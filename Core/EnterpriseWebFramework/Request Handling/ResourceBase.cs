@@ -110,7 +110,7 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 	/// <summary>
 	/// Gets the entity setup for this resource, if one exists.
 	/// </summary>
-	public abstract EntitySetupBase EsAsBaseType { get; }
+	public abstract EntitySetupBase? EsAsBaseType { get; }
 
 	/// <summary>
 	/// Gets the parent of this resource, or null if there isn’t one.

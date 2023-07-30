@@ -23,10 +23,10 @@ public class FormItem {
 	private readonly IReadOnlyCollection<PhrasingComponent> label;
 	private readonly IReadOnlyCollection<FlowComponent> content;
 	private readonly IReadOnlyCollection<EwfValidation> validations;
-	internal readonly ErrorSourceSet ErrorSourceSet;
+	internal readonly ErrorSourceSet? ErrorSourceSet;
 
 	internal FormItem(
-		FormItemSetup setup, IReadOnlyCollection<PhrasingComponent> label, IReadOnlyCollection<FlowComponent> content,
+		FormItemSetup? setup, IReadOnlyCollection<PhrasingComponent> label, IReadOnlyCollection<FlowComponent> content,
 		IReadOnlyCollection<EwfValidation> validations ) {
 		Setup = setup ?? new FormItemSetup();
 		this.label = label;
@@ -69,7 +69,7 @@ public class FormItem {
 	/// </summary>
 	/// <param name="visualOrderRank"></param>
 	/// <param name="etherealContent"></param>
-	public ComponentListItem ToListItem( int? visualOrderRank = null, IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
+	public ComponentListItem ToListItem( int? visualOrderRank = null, IReadOnlyCollection<EtherealComponent>? etherealContent = null ) =>
 		getListItemContent()
 			.ToComponentListItem( Setup.DisplaySetup, null, visualOrderRank, Setup.UpdateRegionSets, etherealContent, getErrorFocusableElementLocalData );
 
@@ -82,8 +82,8 @@ public class FormItem {
 	/// <param name="removalUpdateRegionSets">The intermediate-post-back update-region sets that this item's removal will be a part of.</param>
 	/// <param name="etherealContent"></param>
 	public ComponentListItem ToListItem(
-		string id, int? visualOrderRank = null, IEnumerable<UpdateRegionSet> removalUpdateRegionSets = null,
-		IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
+		string id, int? visualOrderRank = null, IEnumerable<UpdateRegionSet>? removalUpdateRegionSets = null,
+		IReadOnlyCollection<EtherealComponent>? etherealContent = null ) =>
 		getListItemContent()
 			.ToComponentListItem(
 				id,
@@ -126,7 +126,7 @@ public static class FormItemExtensionCreators {
 	/// <param name="setup"></param>
 	/// <param name="label">The form-item label.</param>
 	public static FormItem ToFormItem(
-		this FormControl<FlowComponent> formControl, FormItemSetup setup = null, IReadOnlyCollection<PhrasingComponent> label = null ) {
+		this FormControl<FlowComponent> formControl, FormItemSetup? setup = null, IReadOnlyCollection<PhrasingComponent>? label = null ) {
 		label = label ?? Enumerable.Empty<PhrasingComponent>().Materialize();
 		return formControl.PageComponent.ToFormItem(
 			setup: setup,
@@ -142,8 +142,8 @@ public static class FormItemExtensionCreators {
 	/// <param name="label">The form-item label.</param>
 	/// <param name="validation"></param>
 	public static FormItem ToFormItem(
-		this IReadOnlyCollection<FlowComponent> content, FormItemSetup setup = null, IReadOnlyCollection<PhrasingComponent> label = null,
-		EwfValidation validation = null ) {
+		this IReadOnlyCollection<FlowComponent> content, FormItemSetup? setup = null, IReadOnlyCollection<PhrasingComponent>? label = null,
+		EwfValidation? validation = null ) {
 		label = label ?? Enumerable.Empty<PhrasingComponent>().Materialize();
 		return new FormItem( setup, label, content, validation != null ? validation.ToCollection() : Enumerable.Empty<EwfValidation>().Materialize() );
 	}
@@ -156,7 +156,7 @@ public static class FormItemExtensionCreators {
 	/// <param name="label">The form-item label.</param>
 	/// <param name="validation"></param>
 	public static FormItem ToFormItem(
-		this FlowComponent content, FormItemSetup setup = null, IReadOnlyCollection<PhrasingComponent> label = null, EwfValidation validation = null ) =>
+		this FlowComponent content, FormItemSetup? setup = null, IReadOnlyCollection<PhrasingComponent>? label = null, EwfValidation? validation = null ) =>
 		content.ToCollection().ToFormItem( setup: setup, label: label, validation: validation );
 
 	/// <summary>

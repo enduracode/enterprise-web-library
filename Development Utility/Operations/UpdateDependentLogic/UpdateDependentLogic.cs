@@ -67,6 +67,7 @@ internal class UpdateDependentLogic: Operation {
 				writer => {
 					writer.WriteLine( "using System;" );
 					writer.WriteLine( "using System.Collections.Generic;" );
+					writer.WriteLine( "using System.Diagnostics.CodeAnalysis;" );
 					writer.WriteLine( "using System.Globalization;" );
 					writer.WriteLine( "using System.Linq;" );
 					writer.WriteLine( "using System.Threading;" );
@@ -188,6 +189,7 @@ internal class UpdateDependentLogic: Operation {
 				writer.WriteLine( "using System.Data;" ); // Necessary for stored procedure logic
 				writer.WriteLine( "using System.Data.Common;" );
 				writer.WriteLine( "using System.Diagnostics;" ); // Necessary for ServerSideConsoleAppStatics
+				writer.WriteLine( "using System.Diagnostics.CodeAnalysis;" );
 				writer.WriteLine( "using System.Linq;" );
 				writer.WriteLine( "using EnterpriseWebLibrary;" );
 				writer.WriteLine( "using EnterpriseWebLibrary.Caching;" );
@@ -419,6 +421,7 @@ internal class UpdateDependentLogic: Operation {
 				writer.WriteLine( "using System;" );
 				writer.WriteLine( "using System.Collections.Generic;" );
 				writer.WriteLine( "using System.Collections.ObjectModel;" );
+				writer.WriteLine( "using System.Diagnostics.CodeAnalysis;" );
 				writer.WriteLine( "using System.Globalization;" );
 				writer.WriteLine( "using System.Linq;" );
 				writer.WriteLine( "using System.Threading;" );

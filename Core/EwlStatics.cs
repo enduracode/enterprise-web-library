@@ -66,7 +66,7 @@ public static partial class EwlStatics {
 	/// This method was written by Peter Johnson at:
 	/// http://aspalliance.com/author.aspx?uId=1026.
 	/// </remarks>
-	public static object ChangeType( object value, Type conversionType ) {
+	public static object ChangeType( object? value, Type conversionType ) {
 		// This if block was taken from Convert.ChangeType as is, and is needed here since we're
 		// checking properties on conversionType below.
 		if( conversionType == null )

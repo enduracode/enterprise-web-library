@@ -19,7 +19,7 @@ partial class Impersonate {
 			new CssElement( "SelectUserPageBody", "body.{0}".FormatWith( elementClass.ClassName ) ).ToCollection();
 	}
 
-	internal SystemUser UserObject { get; private set; }
+	internal SystemUser? UserObject { get; private set; }
 
 	protected override void init() {
 		if( !UserManagementStatics.UserManagementEnabled )

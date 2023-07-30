@@ -7,7 +7,7 @@ public interface ResourceParent: UrlHandler {
 	/// <summary>
 	/// Gets the parent of this parent, or null if there isn’t one.
 	/// </summary>
-	ResourceParent Parent { get; }
+	ResourceParent? Parent { get; }
 
 	/// <summary>
 	/// Gets the name of this parent.

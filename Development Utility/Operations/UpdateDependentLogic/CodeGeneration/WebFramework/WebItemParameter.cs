@@ -2,11 +2,9 @@
 using System.Reflection;
 using System.Text.RegularExpressions;
 using EnterpriseWebLibrary.InstallationSupportUtility;
-using Humanizer;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CSharp;
-using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework {
 	/// <summary>
@@ -99,6 +97,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 		}
 
 		public string TypeName => normalizedTypeName;
+		public bool TypeIsNullable => type.IsValueType && Nullable.GetUnderlyingType( type ) is not null;
 		public bool IsString => type == typeof( string );
 		internal bool IsEnumerable => normalizedElementTypeName.Any();
 		internal string EnumerableInitExpression => IsEnumerable ? "new " + normalizedElementTypeName + "[ 0 ]" : "";
@@ -129,15 +128,17 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 			return "(" + TypeName + ")EwlStatics.ChangeType( " + expressionToConvert + ", typeof( " + TypeName + " ) )";
 		}
 
-		internal ModificationField GetModificationField() {
-			var nullableTypeName = normalizedTypeName;
-
-			// If type is a value type and is not already Nullable, make the type name use Nullable via the ? syntax.
-			if( type.IsValueType && Nullable.GetUnderlyingType( type ) == null )
-				nullableTypeName += "?";
-
-			return new ModificationField( PropertyName, PropertyName, name, type, normalizedTypeName, nullableTypeName, normalizedElementTypeName, null, null );
-		}
+		internal ModificationField GetModificationField() =>
+			new(
+				PropertyName,
+				PropertyName,
+				name,
+				type,
+				normalizedTypeName,
+				normalizedTypeName + ( TypeIsNullable ? "" : "?" ),
+				normalizedElementTypeName,
+				null,
+				null );
 
 		internal string GetEqualityExpression( string x, string y ) =>
 			IsEnumerable ? "{0}.SequenceEqual( {1} )".FormatWith( x, y ) : "EwlStatics.AreEqual( {0}, {1} )".FormatWith( x, y );

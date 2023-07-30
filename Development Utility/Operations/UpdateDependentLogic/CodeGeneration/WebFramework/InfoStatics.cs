@@ -47,7 +47,7 @@ internal static class InfoStatics {
 			                            includeEsParameter ? "EntitySetup es" : "",
 			                            WebFrameworkStatics.GetParameterDeclarations( requiredParameters ),
 			                            optionalParameters.Count > 0
-				                            ? "Action<{0}> optionalParameterSetter = null".FormatWith(
+				                            ? "Action<{0}>? optionalParameterSetter = null".FormatWith(
 					                            StringTools.ConcatenateWithDelimiter(
 						                            ", ",
 						                            "OptionalParameterSpecifier",
@@ -98,6 +98,8 @@ internal static class InfoStatics {
 		CodeGenerationStatics.AddSummaryDocComment(
 			writer,
 			"Initializes required and optional parameters. A call to this should be the first line of every non-generated constructor." );
+		if( includeEsParameter )
+			writer.WriteLine( "[ MemberNotNull( nameof(Es) ) ]" );
 		writer.WriteLine( "private void initParameters" + constructorParameters );
 
 		if( includeEsParameter )
@@ -234,7 +236,7 @@ internal static class InfoStatics {
 		foreach( var i in optionalParameters )
 			writer.WriteLine(
 				useNewParameterValues
-					? "{0} = match.parametersModification.{1};".FormatWith( i.FieldName, i.PropertyName )
+					? "{0} = match.parametersModification!.{1};".FormatWith( i.FieldName, i.PropertyName )
 					: "{0} = match.{1};".FormatWith( i.FieldName, i.PropertyName ) );
 		writer.WriteLine( "optionalParametersInitializedFromCurrent = true;" );
 		writer.WriteLine( "break;" );

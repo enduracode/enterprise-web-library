@@ -23,8 +23,8 @@ internal static class FormItemStatics {
 				"TextControl",
 				getAllowEmptyParameter( false ).ToCollection(),
 				false,
-				new CSharpParameter( "TextControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
-				"string",
+				new CSharpParameter( "TextControlSetup?", "controlSetup", defaultValue: "null" ).ToCollection(),
+				"string?",
 				Enumerable.Empty<CSharpParameter>(),
 				true,
 				dv => "{0}.ToTextControl( allowEmpty, setup: controlSetup, value: value, maxLength: {1}, additionalValidationMethod: additionalValidationMethod )"
@@ -35,8 +35,8 @@ internal static class FormItemStatics {
 				"EmailAddressControl",
 				getAllowEmptyParameter( false ).ToCollection(),
 				false,
-				new CSharpParameter( "EmailAddressControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
-				"string",
+				new CSharpParameter( "EmailAddressControlSetup?", "controlSetup", defaultValue: "null" ).ToCollection(),
+				"string?",
 				Enumerable.Empty<CSharpParameter>(),
 				true,
 				dv =>
@@ -48,8 +48,8 @@ internal static class FormItemStatics {
 				"TelephoneNumberControl",
 				getAllowEmptyParameter( false ).ToCollection(),
 				false,
-				new CSharpParameter( "TelephoneNumberControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
-				"string",
+				new CSharpParameter( "TelephoneNumberControlSetup?", "controlSetup", defaultValue: "null" ).ToCollection(),
+				"string?",
 				Enumerable.Empty<CSharpParameter>(),
 				true,
 				dv =>
@@ -61,8 +61,8 @@ internal static class FormItemStatics {
 				"UrlControl",
 				getAllowEmptyParameter( false ).ToCollection(),
 				false,
-				new CSharpParameter( "UrlControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
-				"string",
+				new CSharpParameter( "UrlControlSetup?", "controlSetup", defaultValue: "null" ).ToCollection(),
+				"string?",
 				Enumerable.Empty<CSharpParameter>(),
 				true,
 				dv => "{0}.ToUrlControl( allowEmpty, setup: controlSetup, value: value, maxLength: {1}, additionalValidationMethod: additionalValidationMethod )"
@@ -76,8 +76,8 @@ internal static class FormItemStatics {
 				"NumericTextControl",
 				getAllowEmptyParameter( false ).ToCollection(),
 				false,
-				new CSharpParameter( "NumericTextControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
-				"string",
+				new CSharpParameter( "NumericTextControlSetup?", "controlSetup", defaultValue: "null" ).ToCollection(),
+				"string?",
 				new CSharpParameter( "int?", "minLength", defaultValue: "null" ).ToCollection(),
 				true,
 				dv =>
@@ -90,8 +90,8 @@ internal static class FormItemStatics {
 				"TextControl",
 				Enumerable.Empty<CSharpParameter>(),
 				false,
-				new CSharpParameter( "NumericTextControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
-				"SpecifiedValue<{0}>".FormatWith( field.NullableTypeName ),
+				new CSharpParameter( "NumericTextControlSetup?", "controlSetup", defaultValue: "null" ).ToCollection(),
+				"SpecifiedValue<{0}>?".FormatWith( field.NullableTypeName ),
 				new CSharpParameter( field.NullableTypeName, "minValue", "null" ).ToCollection()
 					.Append( new CSharpParameter( field.NullableTypeName, "maxValue", "null" ) ),
 				true,
@@ -105,8 +105,8 @@ internal static class FormItemStatics {
 				"TextControl",
 				Enumerable.Empty<CSharpParameter>(),
 				false,
-				new CSharpParameter( "NumericTextControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
-				"SpecifiedValue<{0}>".FormatWith( field.NullableTypeName ),
+				new CSharpParameter( "NumericTextControlSetup?", "controlSetup", defaultValue: "null" ).ToCollection(),
+				"SpecifiedValue<{0}>?".FormatWith( field.NullableTypeName ),
 				getAllowEmptyParameter( true )
 					.ToCollection()
 					.Append( new CSharpParameter( field.NullableTypeName, "minValue", "null" ) )
@@ -123,8 +123,8 @@ internal static class FormItemStatics {
 				"Html",
 				getAllowEmptyParameter( false ).ToCollection(),
 				false,
-				new CSharpParameter( "WysiwygHtmlEditorSetup", "editorSetup", "null" ).ToCollection(),
-				"string",
+				new CSharpParameter( "WysiwygHtmlEditorSetup?", "editorSetup", "null" ).ToCollection(),
+				"string?",
 				new CSharpParameter[ 0 ],
 				true,
 				dv => "{0}.ToHtmlEditor( allowEmpty, setup: editorSetup, value: value, maxLength: {1}, additionalValidationMethod: additionalValidationMethod )"
@@ -147,8 +147,8 @@ internal static class FormItemStatics {
 				"NumberControl",
 				Enumerable.Empty<CSharpParameter>(),
 				false,
-				new CSharpParameter( "NumberControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
-				"SpecifiedValue<{0}>".FormatWith( field.NullableTypeName ),
+				new CSharpParameter( "NumberControlSetup?", "controlSetup", defaultValue: "null" ).ToCollection(),
+				"SpecifiedValue<{0}>?".FormatWith( field.NullableTypeName ),
 				new CSharpParameter( field.NullableTypeName, "minValue", "null" ).ToCollection()
 					.Append( new CSharpParameter( field.NullableTypeName, "maxValue", "null" ) )
 					.Append( new CSharpParameter( field.NullableTypeName, "valueStep", "null" ) ),
@@ -165,8 +165,8 @@ internal static class FormItemStatics {
 				"NumberControl",
 				Enumerable.Empty<CSharpParameter>(),
 				false,
-				new CSharpParameter( "NumberControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
-				"SpecifiedValue<{0}>".FormatWith( field.NullableTypeName ),
+				new CSharpParameter( "NumberControlSetup?", "controlSetup", defaultValue: "null" ).ToCollection(),
+				"SpecifiedValue<{0}>?".FormatWith( field.NullableTypeName ),
 				getAllowEmptyParameter( true )
 					.ToCollection()
 					.Append( new CSharpParameter( field.NullableTypeName, "minValue", "null" ) )
@@ -186,7 +186,7 @@ internal static class FormItemStatics {
 				"ImpreciseNumberControl",
 				new CSharpParameter( field.TypeName, "minValue" ).ToCollection().Append( new CSharpParameter( field.TypeName, "maxValue" ) ),
 				false,
-				new CSharpParameter( "ImpreciseNumberControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
+				new CSharpParameter( "ImpreciseNumberControlSetup?", "controlSetup", defaultValue: "null" ).ToCollection(),
 				field.NullableTypeName,
 				new CSharpParameter( field.NullableTypeName, "valueStep", "null" ).ToCollection(),
 				true,
@@ -242,7 +242,7 @@ internal static class FormItemStatics {
 			"Checkbox",
 			new CSharpParameter[ 0 ],
 			true,
-			new[] { new CSharpParameter( "CheckboxSetup", "checkboxSetup", "null" ) },
+			new[] { new CSharpParameter( "CheckboxSetup?", "checkboxSetup", "null" ) },
 			field.NullableTypeName,
 			new CSharpParameter[ 0 ],
 			true,
@@ -257,7 +257,7 @@ internal static class FormItemStatics {
 			"FlowCheckbox",
 			new CSharpParameter[ 0 ],
 			true,
-			new[] { new CSharpParameter( "FlowCheckboxSetup", "checkboxSetup", "null" ) },
+			new[] { new CSharpParameter( "FlowCheckboxSetup?", "checkboxSetup", "null" ) },
 			field.NullableTypeName,
 			new CSharpParameter[ 0 ],
 			true,
@@ -274,7 +274,7 @@ internal static class FormItemStatics {
 			"RadioButton",
 			new CSharpParameter( "RadioButtonGroup", "group" ).ToCollection(),
 			true,
-			new[] { new CSharpParameter( "RadioButtonSetup", "radioButtonSetup", "null" ) },
+			new[] { new CSharpParameter( "RadioButtonSetup?", "radioButtonSetup", "null" ) },
 			field.NullableTypeName,
 			new CSharpParameter[ 0 ],
 			true,
@@ -289,7 +289,7 @@ internal static class FormItemStatics {
 			"FlowRadioButton",
 			new CSharpParameter( "RadioButtonGroup", "group" ).ToCollection(),
 			true,
-			new[] { new CSharpParameter( "FlowRadioButtonSetup", "radioButtonSetup", "null" ) },
+			new[] { new CSharpParameter( "FlowRadioButtonSetup?", "radioButtonSetup", "null" ) },
 			field.NullableTypeName,
 			new CSharpParameter[ 0 ],
 			true,
@@ -307,21 +307,19 @@ internal static class FormItemStatics {
 			"Html",
 			new CSharpParameter( "out HtmlBlockEditorModification", "mod" ).ToCollection(),
 			false,
-			new CSharpParameter( "HtmlBlockEditorSetup", "editorSetup", "null" ).ToCollection(),
-			"SpecifiedValue<{0}>".FormatWith( valueParamTypeName ),
+			new CSharpParameter( "HtmlBlockEditorSetup?", "editorSetup", "null" ).ToCollection(),
+			"SpecifiedValue<{0}>?".FormatWith( valueParamTypeName ),
 			new CSharpParameter[ 0 ],
 			false,
-			dv => "new HtmlBlockEditor( (int?)( value != null ? value.Value : {0}.Value ), id => {0}.Value = id, out m, setup: editorSetup )".FormatWith( dv ),
-			preFormItemStatements: "HtmlBlockEditorModification m = null;",
-			postFormItemStatements: "mod = m;" );
+			dv => "new HtmlBlockEditor( (int?)( value != null ? value.Value : {0}.Value ), id => {0}.Value = id, out mod, setup: editorSetup )".FormatWith( dv ) );
 		writeFormItemGetter(
 			writer,
 			field,
 			"File",
 			new CSharpParameter( "out System.Action", "modificationMethod" ).ToCollection(),
 			false,
-			new CSharpParameter( "BlobFileManagerSetup", "managerSetup", "null" ).ToCollection(),
-			"SpecifiedValue<{0}>".FormatWith( valueParamTypeName ),
+			new CSharpParameter( "BlobFileManagerSetup?", "managerSetup", "null" ).ToCollection(),
+			"SpecifiedValue<{0}>?".FormatWith( valueParamTypeName ),
 			new CSharpParameter( "bool", "requireUploadIfNoFile", "false" ).ToCollection(),
 			false,
 			dv =>
@@ -338,7 +336,7 @@ internal static class FormItemStatics {
 				new CSharpParameter( "RadioListSetup<{0}>".FormatWith( field.NullableTypeName ), "controlSetup" ).ToCollection(),
 				false,
 				Enumerable.Empty<CSharpParameter>(),
-				"SpecifiedValue<{0}>".FormatWith( field.NullableTypeName ),
+				"SpecifiedValue<{0}>?".FormatWith( field.NullableTypeName ),
 				Enumerable.Empty<CSharpParameter>(),
 				true,
 				dv => "{0}.ToRadioList( controlSetup, value: value, additionalValidationMethod: additionalValidationMethod )".FormatWith( dv ) );
@@ -348,10 +346,10 @@ internal static class FormItemStatics {
 				writer,
 				field,
 				"RadioList",
-				new CSharpParameter( "RadioListSetup<{0}>".FormatWith( field.NullableTypeName ), "controlSetup" ).ToCollection(),
+				new CSharpParameter( "RadioListSetup<{0}>".FormatWith( field.TypeName ), "controlSetup" ).ToCollection(),
 				false,
 				new CSharpParameter( "string", "defaultValueItemLabel", defaultValue: field.TypeIs( typeof( string ) ) ? "\"\"" : "\"None\"" ).ToCollection(),
-				field.TypeIs( typeof( string ) ) ? field.NullableTypeName : "SpecifiedValue<{0}>".FormatWith( field.NullableTypeName ),
+				field.TypeIs( typeof( string ) ) ? field.NullableTypeName : "SpecifiedValue<{0}>?".FormatWith( field.NullableTypeName ),
 				Enumerable.Empty<CSharpParameter>(),
 				true,
 				dv =>
@@ -366,7 +364,7 @@ internal static class FormItemStatics {
 				new CSharpParameter( "DropDownSetup<{0}>".FormatWith( field.NullableTypeName ), "controlSetup" ).ToCollection(),
 				false,
 				Enumerable.Empty<CSharpParameter>(),
-				"SpecifiedValue<{0}>".FormatWith( field.NullableTypeName ),
+				"SpecifiedValue<{0}>?".FormatWith( field.NullableTypeName ),
 				Enumerable.Empty<CSharpParameter>(),
 				true,
 				dv => "{0}.ToDropDown( controlSetup, value: value, additionalValidationMethod: additionalValidationMethod )".FormatWith( dv ) );
@@ -376,7 +374,7 @@ internal static class FormItemStatics {
 				writer,
 				field,
 				"DropDown",
-				new CSharpParameter( "DropDownSetup<{0}>".FormatWith( field.NullableTypeName ), "controlSetup" ).ToCollection()
+				new CSharpParameter( "DropDownSetup<{0}>".FormatWith( field.TypeName ), "controlSetup" ).ToCollection()
 					.Concat(
 						field.TypeIs( typeof( string ) ) ? Enumerable.Empty<CSharpParameter>() : new CSharpParameter( "string", "defaultValueItemLabel" ).ToCollection() ),
 				false,
@@ -384,7 +382,7 @@ internal static class FormItemStatics {
 					  ? new CSharpParameter( "string", "defaultValueItemLabel", defaultValue: "\"\"" ).ToCollection()
 					  : Enumerable.Empty<CSharpParameter>() ).Append(
 					new CSharpParameter( "bool", "placeholderIsValid", field.TypeIs( typeof( string ) ) ? "false" : "true" ) ),
-				field.TypeIs( typeof( string ) ) ? field.NullableTypeName : "SpecifiedValue<{0}>".FormatWith( field.NullableTypeName ),
+				field.TypeIs( typeof( string ) ) ? field.NullableTypeName : "SpecifiedValue<{0}>?".FormatWith( field.NullableTypeName ),
 				Enumerable.Empty<CSharpParameter>(),
 				true,
 				dv =>
@@ -399,7 +397,7 @@ internal static class FormItemStatics {
 				new CSharpParameter( "CheckboxListSetup<{0}>".FormatWith( field.EnumerableElementTypeName ), "checkboxListSetup" ).ToCollection(),
 				false,
 				Enumerable.Empty<CSharpParameter>(),
-				field.TypeName,
+				field.NullableTypeName,
 				Enumerable.Empty<CSharpParameter>(),
 				true,
 				dv => "{0}.ToCheckboxList( checkboxListSetup, value: value, additionalValidationMethod: additionalValidationMethod )".FormatWith( dv ) );
@@ -413,8 +411,8 @@ internal static class FormItemStatics {
 				"DateControl",
 				Enumerable.Empty<CSharpParameter>(),
 				false,
-				new CSharpParameter( "DateControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
-				"SpecifiedValue<{0}>".FormatWith( field.NullableTypeName ),
+				new CSharpParameter( "DateControlSetup?", "controlSetup", defaultValue: "null" ).ToCollection(),
+				"SpecifiedValue<{0}>?".FormatWith( field.NullableTypeName ),
 				new CSharpParameter( "LocalDate?", "minValue", "null" ).ToCollection().Append( new CSharpParameter( "LocalDate?", "maxValue", "null" ) ),
 				true,
 				dv =>
@@ -427,8 +425,8 @@ internal static class FormItemStatics {
 				"DateControl",
 				Enumerable.Empty<CSharpParameter>(),
 				false,
-				new CSharpParameter( "DateControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
-				"SpecifiedValue<{0}>".FormatWith( field.NullableTypeName ),
+				new CSharpParameter( "DateControlSetup?", "controlSetup", defaultValue: "null" ).ToCollection(),
+				"SpecifiedValue<{0}>?".FormatWith( field.NullableTypeName ),
 				getAllowEmptyParameter( true )
 					.ToCollection()
 					.Append( new CSharpParameter( "LocalDate?", "minValue", "null" ) )
@@ -445,8 +443,8 @@ internal static class FormItemStatics {
 				"DateAndTimeControl",
 				Enumerable.Empty<CSharpParameter>(),
 				false,
-				new CSharpParameter( "DateAndTimeControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
-				"SpecifiedValue<{0}>".FormatWith( field.NullableTypeName ),
+				new CSharpParameter( "DateAndTimeControlSetup?", "controlSetup", defaultValue: "null" ).ToCollection(),
+				"SpecifiedValue<{0}>?".FormatWith( field.NullableTypeName ),
 				new CSharpParameter( "LocalDate?", "minValue", "null" ).ToCollection().Append( new CSharpParameter( "LocalDate?", "maxValue", "null" ) ),
 				true,
 				dv =>
@@ -459,8 +457,8 @@ internal static class FormItemStatics {
 				"DateAndTimeControl",
 				Enumerable.Empty<CSharpParameter>(),
 				false,
-				new CSharpParameter( "DateAndTimeControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
-				"SpecifiedValue<{0}>".FormatWith( field.NullableTypeName ),
+				new CSharpParameter( "DateAndTimeControlSetup?", "controlSetup", defaultValue: "null" ).ToCollection(),
+				"SpecifiedValue<{0}>?".FormatWith( field.NullableTypeName ),
 				getAllowEmptyParameter( true )
 					.ToCollection()
 					.Append( new CSharpParameter( "LocalDate?", "minValue", "null" ) )
@@ -477,8 +475,8 @@ internal static class FormItemStatics {
 				"DurationControl",
 				Enumerable.Empty<CSharpParameter>(),
 				false,
-				new CSharpParameter( "DurationControlSetup", "controlSetup", defaultValue: "null" ).ToCollection(),
-				"SpecifiedValue<{0}>".FormatWith( field.NullableTypeName ),
+				new CSharpParameter( "DurationControlSetup?", "controlSetup", defaultValue: "null" ).ToCollection(),
+				"SpecifiedValue<{0}>?".FormatWith( field.NullableTypeName ),
 				field.TypeName == field.NullableTypeName ? getAllowEmptyParameter( true ).ToCollection() : Enumerable.Empty<CSharpParameter>(),
 				true,
 				dv => field.TypeName == field.NullableTypeName
@@ -494,17 +492,17 @@ internal static class FormItemStatics {
 		string postFormItemStatements = "", IEnumerable<string> additionalSummarySentences = null ) {
 		var parameters = new List<CSharpParameter>();
 		parameters.AddRange( requiredParams );
-		parameters.Add( new CSharpParameter( "FormItemSetup", "formItemSetup", "null" ) );
-		parameters.Add( new CSharpParameter( "IReadOnlyCollection<PhrasingComponent>", "label", "null" ) );
+		parameters.Add( new CSharpParameter( "FormItemSetup?", "formItemSetup", "null" ) );
+		parameters.Add( new CSharpParameter( "IReadOnlyCollection<PhrasingComponent>?", "label", "null" ) );
 		if( controlIsLabeled )
-			parameters.Add( new CSharpParameter( "IReadOnlyCollection<PhrasingComponent>", "formItemLabel", "null" ) );
+			parameters.Add( new CSharpParameter( "IReadOnlyCollection<PhrasingComponent>?", "formItemLabel", "null" ) );
 		parameters.AddRange( preValueOptionalParams );
 		parameters.Add( new CSharpParameter( valueParamTypeName, "value", "null" ) );
 		parameters.AddRange( postValueOptionalParams );
 		if( includeAdditionalValidationMethodParam )
 			parameters.Add(
 				new CSharpParameter(
-					"System.Action<Validator>",
+					"System.Action<Validator>?",
 					"additionalValidationMethod",
 					defaultValue: "null",
 					description: "A method that takes the form control’s validator and performs additional validation." ) );
@@ -537,14 +535,16 @@ internal static class FormItemStatics {
 
 		var parameters = new List<CSharpParameter>();
 		parameters.Add( new CSharpParameter( "System.Func<{0},IReadOnlyCollection<FlowComponent>>".FormatWith( field.NullableTypeName ), "contentGetter" ) );
-		parameters.Add( new CSharpParameter( "FormItemSetup", "setup", "null" ) );
-		parameters.Add( new CSharpParameter( "IReadOnlyCollection<PhrasingComponent>", "label", "null" ) );
+		parameters.Add( new CSharpParameter( "FormItemSetup?", "setup", "null" ) );
+		parameters.Add( new CSharpParameter( "IReadOnlyCollection<PhrasingComponent>?", "label", "null" ) );
 		parameters.Add(
 			new CSharpParameter(
-				field.TypeIs( typeof( string ) ) ? field.NullableTypeName : "SpecifiedValue<{0}>".FormatWith( field.NullableTypeName ),
+				field.TypeIs( typeof( string ) ) || field.EnumerableElementTypeName.Length > 0
+					? field.NullableTypeName
+					: "SpecifiedValue<{0}>?".FormatWith( field.NullableTypeName ),
 				"value",
 				"null" ) );
-		parameters.Add( new CSharpParameter( "System.Func<System.Action<{0}>,EwfValidation>".FormatWith( field.TypeName ), "validationGetter", "null" ) );
+		parameters.Add( new CSharpParameter( "System.Func<System.Action<{0}>,EwfValidation>?".FormatWith( field.TypeName ), "validationGetter", "null" ) );
 
 		writer.WriteLine(
 			"public FormItem " + EwlStatics.GetCSharpIdentifier( "Get" + field.PascalCasedName + "FormItem" ) + "( " +
@@ -553,7 +553,7 @@ internal static class FormItemStatics {
 		writer.WriteLine(
 			"return {0}.ToFormItem( setup: setup, label: label, validation: {1} );".FormatWith(
 				"contentGetter( {0} )".FormatWith(
-					field.TypeIs( typeof( string ) )
+					field.TypeIs( typeof( string ) ) || field.EnumerableElementTypeName.Length > 0
 						? "value ?? {0}".FormatWith( EwlStatics.GetCSharpIdentifier( field.Name ) )
 						: "value != null ? value.Value : {0}".FormatWith( EwlStatics.GetCSharpIdentifier( field.Name ) ) ),
 				"validationGetter?.Invoke( v => {0} = v )".FormatWith( EwlStatics.GetCSharpIdentifier( field.Name ) ) ) );

@@ -5,8 +5,8 @@
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.OpenIdProvider.Resources;
 
 partial class Authenticate {
-	private string clientIdentifier;
-	private Lazy<OpenIdAuthenticationResult> result;
+	private string clientIdentifier = null!;
+	private Lazy<OpenIdAuthenticationResult?> result = null!;
 
 	protected override void init() {
 		result = new Lazy<OpenIdAuthenticationResult>(

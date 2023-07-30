@@ -41,7 +41,7 @@ internal static class WebFrameworkStatics {
 			writer.WriteLine( "};" );
 			writer.WriteLine();
 			writer.WriteLine(
-				"{0}ResourceBase {1}DeserializeResource( string name, string parameters ) => name switch {{".FormatWith(
+				"{0}ResourceBase? {1}DeserializeResource( string name, string parameters ) => name switch {{".FormatWith(
 					interfaceName.Length > 0 ? "" : "public static ",
 					interfaceName.AppendDelimiter( "." ) ) );
 			foreach( var (_, resource) in allResources )
@@ -78,7 +78,8 @@ internal static class WebFrameworkStatics {
 
 				writer.WriteLine( "{0} ResourceBase deserialize_{1}( string parameters ) {{".FormatWith( methodPrefix, getIdentifier( resource ) ) );
 
-				string getParameter( WebItemParameter parameter ) => "jsonObject[ \"{0}\" ].ToObject<{1}>()".FormatWith( parameter.Name, parameter.TypeName );
+				string getParameter( WebItemParameter parameter ) =>
+					"jsonObject[ \"{0}\" ]!.ToObject<{1}>(){2}".FormatWith( parameter.Name, parameter.TypeName, parameter.TypeIsNullable ? "" : "!" );
 				var arguments = StringTools.ConcatenateWithDelimiter(
 						", ",
 						( entitySetup != null ? entitySetup.RequiredParameters : Enumerable.Empty<WebItemParameter>() ).Concat( resource.RequiredParameters )
@@ -97,7 +98,7 @@ internal static class WebFrameworkStatics {
 					.Surround( " ", " " );
 
 				if( arguments.Length > 0 )
-					writer.WriteLine( "var jsonObject = JsonConvert.DeserializeObject<JObject>( parameters );" );
+					writer.WriteLine( "var jsonObject = JsonConvert.DeserializeObject<JObject>( parameters )!;" );
 				writer.WriteLine(
 					"return {0};".FormatWith(
 						resource.IsResource()
@@ -251,7 +252,7 @@ internal static class WebFrameworkStatics {
 			Enumerable.Empty<WebItemParameter>().Materialize(),
 			Enumerable.Empty<WebItemParameter>().Materialize(),
 			false );
-		writer.WriteLine( "protected override ResourceParent createParent() => {0};".FormatWith( isRootFolder ? "null" : parentExpression ) );
+		writer.WriteLine( "protected override ResourceParent? createParent() => {0};".FormatWith( isRootFolder ? "null" : parentExpression ) );
 		if( !isRootFolder || parentExpression.Any() )
 			writer.WriteLine( "protected override UrlHandler getUrlParent() => {0};".FormatWith( isRootFolder ? parentExpression : "base.getUrlParent()" ) );
 		UrlStatics.GenerateGetEncoderMethod(
@@ -308,7 +309,7 @@ internal static class WebFrameworkStatics {
 			"return new {0}( ".FormatWith( className ) + StringTools.ConcatenateWithDelimiter(
 				", ",
 				infoConstructorArgPrefix,
-				InfoStatics.GetInfoConstructorArgumentsForRequiredParameters( requiredParameters, parameter => "parametersModification." + parameter.PropertyName ) ) +
+				InfoStatics.GetInfoConstructorArgumentsForRequiredParameters( requiredParameters, parameter => "parametersModification!." + parameter.PropertyName ) ) +
 			" );" );
 		writer.WriteLine( "}" );
 	}

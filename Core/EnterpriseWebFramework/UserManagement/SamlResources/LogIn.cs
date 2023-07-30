@@ -9,7 +9,7 @@ using EnterpriseWebLibrary.UserManagement.IdentityProviders;
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.SamlResources;
 
 partial class LogIn {
-	private SamlIdentityProvider identityProvider;
+	private SamlIdentityProvider identityProvider = null!;
 
 	protected override void init() {
 		identityProvider = AuthenticationStatics.SamlIdentityProviders.Single( i => string.Equals( i.EntityId, Provider, StringComparison.Ordinal ) );

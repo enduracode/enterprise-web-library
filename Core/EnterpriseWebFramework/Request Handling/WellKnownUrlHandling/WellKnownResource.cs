@@ -12,7 +12,7 @@ partial class WellKnownResource {
 		WellKnownResource.wellKnownUrlGetter = wellKnownUrlGetter;
 	}
 
-	private WellKnownUrl url;
+	private WellKnownUrl? url;
 
 	protected override void init() {
 		if( Suffix.Length > 0 )

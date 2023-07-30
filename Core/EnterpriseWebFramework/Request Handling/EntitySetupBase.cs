@@ -8,7 +8,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 /// </summary>
 [ PublicAPI ]
 public abstract class EntitySetupBase: ResourceParent {
-	private readonly Lazy<ResourceParent> parent;
+	private readonly Lazy<ResourceParent?> parent;
 	private readonly Lazy<string> name;
 	private readonly Lazy<AlternativeResourceMode> alternativeMode;
 	private readonly Lazy<IReadOnlyCollection<ResourceGroup>> listedResources;
@@ -18,7 +18,7 @@ public abstract class EntitySetupBase: ResourceParent {
 	/// Creates an entity setup object.
 	/// </summary>
 	protected EntitySetupBase() {
-		parent = new Lazy<ResourceParent>( createParent );
+		parent = new Lazy<ResourceParent?>( createParent );
 		name = new Lazy<string>( getEntitySetupName );
 		alternativeMode = new Lazy<AlternativeResourceMode>( createAlternativeMode );
 		listedResources = new Lazy<IReadOnlyCollection<ResourceGroup>>( () => createListedResources().Materialize() );
@@ -33,7 +33,7 @@ public abstract class EntitySetupBase: ResourceParent {
 	/// <summary>
 	/// Gets the parent of this entity setup, or null if there isn’t one.
 	/// </summary>
-	public ResourceParent Parent => parent.Value;
+	public ResourceParent? Parent => parent.Value;
 
 	/// <summary>
 	/// Gets the parent resource of this entity setup. Throws an exception if there is no parent or the parent is an entity setup.
@@ -44,7 +44,7 @@ public abstract class EntitySetupBase: ResourceParent {
 	/// <summary>
 	/// Creates the parent of this entity setup. Returns null if there is no parent.
 	/// </summary>
-	protected abstract ResourceParent createParent();
+	protected abstract ResourceParent? createParent();
 
 	string ResourceParent.Name => EntitySetupName;
 
