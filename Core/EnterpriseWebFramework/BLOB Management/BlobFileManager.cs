@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.DataAccess.BlobStorage;
+﻿using EnterpriseWebLibrary.DataAccess.BlobStorage;
 using EnterpriseWebLibrary.IO;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -27,7 +26,7 @@ public sealed class BlobFileManager: FlowComponent {
 							return new PostBackAction(
 								new PageReloadBehavior(
 									secondaryResponse: new SecondaryResponse(
-										new BlobFileResponse( BlobStorageStatics.GetFirstFileFromCollection( fileCollectionId.Value ).FileId, () => true ),
+										new BlobFileResponse( BlobStorageStatics.GetFirstFileFromCollection( fileCollectionId!.Value ).FileId, () => true ),
 										false ) ) );
 						} ) ) );
 			components.Add( download );
@@ -35,7 +34,7 @@ public sealed class BlobFileManager: FlowComponent {
 		else if( !setup.OmitNoExistingFileMessage )
 			components.Add( new GenericPhrasingContainer( Translation.NoExistingFile.ToComponents() ) );
 
-		RsFile uploadedFile = null;
+		RsFile? uploadedFile = null;
 		var fileUploadDisplayedPmv = new PageModificationValue<string>();
 		components.AddRange(
 			new FileUpload(

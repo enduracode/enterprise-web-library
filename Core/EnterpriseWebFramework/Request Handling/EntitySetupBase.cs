@@ -1,5 +1,4 @@
-﻿#nullable disable
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -182,7 +181,7 @@ public abstract class EntitySetupBase: ResourceParent {
 
 	public virtual bool AllowsSearchEngineIndexing => Parent?.AllowsSearchEngineIndexing ?? true;
 
-	public sealed override bool Equals( object obj ) => Equals( obj as BasicUrlHandler );
-	public abstract bool Equals( BasicUrlHandler other );
+	public sealed override bool Equals( object? obj ) => Equals( obj as BasicUrlHandler );
+	public abstract bool Equals( BasicUrlHandler? other );
 	public abstract override int GetHashCode();
 }

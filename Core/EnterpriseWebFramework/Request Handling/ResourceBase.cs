@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
 using JetBrains.Annotations;
@@ -420,7 +419,7 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 	/// </summary>
 	protected internal abstract ResourceBase ReCreate();
 
-	public sealed override bool Equals( object obj ) => Equals( obj as BasicUrlHandler );
-	public abstract bool Equals( BasicUrlHandler other );
+	public sealed override bool Equals( object? obj ) => Equals( obj as BasicUrlHandler );
+	public abstract bool Equals( BasicUrlHandler? other );
 	public abstract override int GetHashCode();
 }

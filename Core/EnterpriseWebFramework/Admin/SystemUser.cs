@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.UserManagement;
 
 // EwlPage
@@ -20,9 +19,9 @@ partial class SystemUser {
 	protected override string getResourceName() => User == null ? "New User" : User.Email;
 
 	protected override PageContent getContent() {
-		Action userModMethod = null;
+		Action? userModMethod = null;
 		return FormState.ExecuteWithDataModificationsAndDefaultAction(
-			PostBack.CreateFull( modificationMethod: () => userModMethod(), actionGetter: () => new PostBackAction( ParentResource ) ).ToCollection(),
+			PostBack.CreateFull( modificationMethod: () => userModMethod!(), actionGetter: () => new PostBackAction( ParentResource ) ).ToCollection(),
 			() => new UiPageContent(
 				pageActions: UserId.HasValue
 					             ? new ButtonSetup(
@@ -37,6 +36,6 @@ partial class SystemUser {
 	}
 
 	private void deleteUser() {
-		UserManagementStatics.SystemProvider.DeleteUser( User.UserId );
+		UserManagementStatics.SystemProvider.DeleteUser( User!.UserId );
 	}
 }

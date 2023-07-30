@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.ExternalFunctionality;
+﻿using EnterpriseWebLibrary.ExternalFunctionality;
 
 // EwlResource
 
@@ -10,7 +9,7 @@ partial class Authenticate {
 	private Lazy<OpenIdAuthenticationResult?> result = null!;
 
 	protected override void init() {
-		result = new Lazy<OpenIdAuthenticationResult>(
+		result = new Lazy<OpenIdAuthenticationResult?>(
 			() => ExternalFunctionalityStatics.ExternalOpenIdConnectProvider.ReadAuthenticationRequest( out clientIdentifier )
 				      ? OpenIdProviderStatics.AppProvider.AuthenticateUser( clientIdentifier )
 				      : null );

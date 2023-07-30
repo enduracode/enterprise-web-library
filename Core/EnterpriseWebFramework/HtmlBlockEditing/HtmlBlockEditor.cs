@@ -1,9 +1,11 @@
-﻿#nullable disable
+﻿using JetBrains.Annotations;
+
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 /// <summary>
 /// A control for editing an HTML block.
 /// </summary>
+[ PublicAPI ]
 public class HtmlBlockEditor: FormControl<FlowComponent> {
 	internal class CssElementCreator: ControlCssElementCreator {
 		internal const string CssClass = "ewfHtmlBlockEditor";
@@ -39,7 +41,7 @@ public class HtmlBlockEditor: FormControl<FlowComponent> {
 			setup: setup.WysiwygSetup );
 
 		component = new DisplayableElement(
-			context => {
+			_ => {
 				return new DisplayableElementData(
 					setup.DisplaySetup,
 					() => new DisplayableElementLocalData( "div" ),

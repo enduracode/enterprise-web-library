@@ -1,12 +1,11 @@
-﻿#nullable disable
-// EwlResource
+﻿// EwlResource
 // Parameter: string suffix
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.WellKnownUrlHandling;
 
 partial class WellKnownResource {
-	private static Func<UrlHandler> frameworkUrlParentGetter;
-	private static Func<IEnumerable<WellKnownUrl>> wellKnownUrlGetter;
+	private static Func<UrlHandler> frameworkUrlParentGetter = null!;
+	private static Func<IEnumerable<WellKnownUrl>> wellKnownUrlGetter = null!;
 
 	internal static void Init( Func<UrlHandler> frameworkUrlParentGetter, Func<IEnumerable<WellKnownUrl>> wellKnownUrlGetter ) {
 		WellKnownResource.frameworkUrlParentGetter = frameworkUrlParentGetter;
@@ -34,5 +33,5 @@ partial class WellKnownResource {
 					return wellKnownUrl is not null ? new UrlDecoder( suffix: wellKnownUrl.SuffixSegment ) : null;
 				} ).ToCollection();
 
-	protected override EwfSafeRequestHandler getOrHead() => Suffix.Length > 0 ? url.GetOrHeadHandlerGetter() : base.getOrHead();
+	protected override EwfSafeRequestHandler getOrHead() => Suffix.Length > 0 ? url!.GetOrHeadHandlerGetter() : base.getOrHead();
 }
