@@ -1,9 +1,12 @@
-﻿using System.Globalization;
+﻿#nullable disable warnings
+using System.Globalization;
+using JetBrains.Annotations;
 using NodaTime;
 using Tewl.InputValidation;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
+[ PublicAPI ]
 public static class FormControlExtensionCreators {
 	public static TextControl ToTextControl(
 		this DataValue<string> dataValue, bool allowEmpty, TextControlSetup? setup = null, string? value = null, int? maxLength = null,
