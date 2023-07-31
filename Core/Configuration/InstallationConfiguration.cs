@@ -1,3 +1,4 @@
+#nullable disable
 using System.Collections.Immutable;
 using EnterpriseWebLibrary.Configuration.InstallationStandard;
 using EnterpriseWebLibrary.Configuration.SystemGeneral;
