@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿#nullable disable
+using System.IO;
 
 namespace EnterpriseWebLibrary.Email {
 	/// <summary>
