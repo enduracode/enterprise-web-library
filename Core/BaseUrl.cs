@@ -42,7 +42,7 @@ public class BaseUrl {
 		new( Host.Any() ? Host : defaults.Host, nonsecurePort ?? defaults.nonsecurePort, securePort ?? defaults.securePort, Path ?? defaults.Path );
 
 	internal string GetUrlString( bool secure ) {
-		var port = secure ? securePort.Value : nonsecurePort.Value;
-		return GetUrlString( secure, Host + ":" + port, Path );
+		var port = secure ? securePort!.Value : nonsecurePort!.Value;
+		return GetUrlString( secure, Host + ":" + port, Path! );
 	}
 }

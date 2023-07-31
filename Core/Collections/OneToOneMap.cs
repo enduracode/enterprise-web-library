@@ -1,67 +1,68 @@
-﻿using System.Collections.Generic;
+﻿using JetBrains.Annotations;
 
-namespace EnterpriseWebLibrary.Collections {
+namespace EnterpriseWebLibrary.Collections;
+
+/// <summary>
+/// A collection of value pairs that provides bidirectional lookup.  Preserves order.
+/// All left values must be unique.
+/// All right values must be unique.
+/// </summary>
+[ PublicAPI ]
+public class OneToOneMap<T1, T2> where T1: notnull where T2: notnull {
+	private readonly Dictionary<T1, T2> leftToRight;
+	private readonly Dictionary<T2, T1> rightToLeft;
+	private readonly List<T1> leftValues = new();
+	private readonly List<T2> rightValues = new();
+	private readonly List<KeyValuePair<T1, T2>> pairs = new();
+
+	public OneToOneMap( IEqualityComparer<T1>? leftComparer = null, IEqualityComparer<T2>? rightComparer = null ) {
+		leftToRight = new Dictionary<T1, T2>( leftComparer );
+		rightToLeft = new Dictionary<T2, T1>( rightComparer );
+	}
+
 	/// <summary>
-	/// A collection of value pairs that provides bidirectional lookup.  Preserves order.
-	/// All left values must be unique.
-	/// All right values must be unique.
+	/// Add a pair of values.
 	/// </summary>
-	public class OneToOneMap<T1, T2> {
-		private readonly Dictionary<T1, T2> leftToRight;
-		private readonly Dictionary<T2, T1> rightToLeft;
-		private readonly List<T1> leftValues = new List<T1>();
-		private readonly List<T2> rightValues = new List<T2>();
-		private readonly List<KeyValuePair<T1, T2>> pairs = new List<KeyValuePair<T1, T2>>();
+	public void Add( T1 left, T2 right ) {
+		leftToRight.Add( left, right );
+		rightToLeft.Add( right, left );
+		leftValues.Add( left );
+		rightValues.Add( right );
+		pairs.Add( new KeyValuePair<T1, T2>( left, right ) );
+	}
 
-		public OneToOneMap( IEqualityComparer<T1> leftComparer = null, IEqualityComparer<T2> rightComparer = null ) {
-			leftToRight = new Dictionary<T1, T2>( leftComparer );
-			rightToLeft = new Dictionary<T2, T1>( rightComparer );
-		}
+	/// <summary>
+	/// Given the right value of a pair, returns the corresponding left value.
+	/// </summary>
+	public T1 GetLeftFromRight( T2 right ) {
+		return rightToLeft[ right ];
+	}
 
-		/// <summary>
-		/// Add a pair of values.
-		/// </summary>
-		public void Add( T1 left, T2 right ) {
-			leftToRight.Add( left, right );
-			rightToLeft.Add( right, left );
-			leftValues.Add( left );
-			rightValues.Add( right );
-			pairs.Add( new KeyValuePair<T1, T2>( left, right ) );
-		}
+	/// <summary>
+	/// Given the left value of a pair, returns the corresponding right value.
+	/// </summary>
+	public T2 GetRightFromLeft( T1 left ) {
+		return leftToRight[ left ];
+	}
 
-		/// <summary>
-		/// Given the right value of a pair, returns the corresponding left value.
-		/// </summary>
-		public T1 GetLeftFromRight( T2 right ) {
-			return rightToLeft[ right ];
-		}
+	/// <summary>
+	/// Returns a collection of all of the left values.
+	/// </summary>
+	public ICollection<T1> GetAllLeftValues() {
+		return leftValues.AsReadOnly();
+	}
 
-		/// <summary>
-		/// Given the left value of a pair, returns the corresponding right value.
-		/// </summary>
-		public T2 GetRightFromLeft( T1 left ) {
-			return leftToRight[ left ];
-		}
+	/// <summary>
+	/// Returns a collection of all of the right values.
+	/// </summary>
+	public ICollection<T2> GetAllRightValues() {
+		return rightValues.AsReadOnly();
+	}
 
-		/// <summary>
-		/// Returns a collection of all of the left values.
-		/// </summary>
-		public ICollection<T1> GetAllLeftValues() {
-			return leftValues.AsReadOnly();
-		}
-
-		/// <summary>
-		/// Returns a collection of all of the right values.
-		/// </summary>
-		public ICollection<T2> GetAllRightValues() {
-			return rightValues.AsReadOnly();
-		}
-
-		/// <summary>
-		/// Returns a list of (left, right) key value pairs.
-		/// </summary>
-		public ICollection<KeyValuePair<T1, T2>> GetAllPairs() {
-			return pairs.AsReadOnly();
-		}
+	/// <summary>
+	/// Returns a list of (left, right) key value pairs.
+	/// </summary>
+	public ICollection<KeyValuePair<T1, T2>> GetAllPairs() {
+		return pairs.AsReadOnly();
 	}
 }
