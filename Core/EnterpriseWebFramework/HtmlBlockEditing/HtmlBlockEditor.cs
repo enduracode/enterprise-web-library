@@ -52,7 +52,7 @@ public class HtmlBlockEditor: FormControl<FlowComponent> {
 		validation = wysiwygEditor.Validation;
 	}
 
-	FormControlLabeler FormControl<FlowComponent>.Labeler => null;
+	FormControlLabeler? FormControl<FlowComponent>.Labeler => null;
 	public FlowComponent PageComponent => component;
 	public EwfValidation Validation => validation;
 
