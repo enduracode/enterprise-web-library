@@ -58,7 +58,7 @@ internal class EntitySetup {
 	}
 
 	private void writeEqualsMethod( TextWriter writer ) {
-		writer.WriteLine( "public override bool Equals( BasicUrlHandler other ) {" );
+		writer.WriteLine( "public override bool Equals( BasicUrlHandler? other ) {" );
 		writer.WriteLine( "if( !( other is {0} otherEs ) ) return false;".FormatWith( generalData.ClassName ) );
 		InfoStatics.WriteEqualsParameterComparisons( writer, generalData.RequiredParameters, generalData.OptionalParameters, "otherEs" );
 		writer.WriteLine( "}" );

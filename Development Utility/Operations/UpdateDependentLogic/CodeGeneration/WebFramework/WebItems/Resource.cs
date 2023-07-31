@@ -3,9 +3,9 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 internal class Resource {
 	private readonly bool projectContainsFramework;
 	private readonly WebItemGeneralData generalData;
-	private readonly EntitySetup entitySetup;
+	private readonly EntitySetup? entitySetup;
 
-	internal Resource( bool projectContainsFramework, WebItemGeneralData generalData, EntitySetup entitySetup ) {
+	internal Resource( bool projectContainsFramework, WebItemGeneralData generalData, EntitySetup? entitySetup ) {
 		this.projectContainsFramework = projectContainsFramework;
 		this.generalData = generalData;
 		this.entitySetup = entitySetup;
@@ -102,7 +102,7 @@ internal class Resource {
 	}
 
 	private void writeEqualsMethod( TextWriter writer ) {
-		writer.WriteLine( "public override bool Equals( BasicUrlHandler other ) {" );
+		writer.WriteLine( "public override bool Equals( BasicUrlHandler? other ) {" );
 		writer.WriteLine( "if( !( other is {0} otherPage ) ) return false;".FormatWith( generalData.ClassName ) );
 		if( entitySetup != null )
 			writer.WriteLine( "if( !EwlStatics.AreEqual( otherPage.Es, Es ) ) return false;" );
