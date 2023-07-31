@@ -26,7 +26,7 @@ public sealed class BlobFileManager: FlowComponent {
 							return new PostBackAction(
 								new PageReloadBehavior(
 									secondaryResponse: new SecondaryResponse(
-										new BlobFileResponse( BlobStorageStatics.GetFirstFileFromCollection( fileCollectionId!.Value ).FileId, () => true ),
+										new BlobFileResponse( BlobStorageStatics.GetFirstFileFromCollection( fileCollectionId!.Value )!.FileId, () => true ),
 										false ) ) );
 						} ) ) );
 			components.Add( download );
