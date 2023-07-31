@@ -1,4 +1,5 @@
-﻿using System.Data.Common;
+﻿#nullable disable
+using System.Data.Common;
 using StackExchange.Profiling;
 using StackExchange.Profiling.Data;
 
