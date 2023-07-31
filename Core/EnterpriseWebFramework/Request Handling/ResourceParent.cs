@@ -22,12 +22,12 @@ public interface ResourceParent: UrlHandler {
 	/// <summary>
 	/// Gets the log-in page to use for this parent, or null for default behavior.
 	/// </summary>
-	ResourceBase LogInPage { get; }
+	ResourceBase? LogInPage { get; }
 
 	/// <summary>
 	/// Gets the alternative mode for this parent, or null if it is in normal mode.
 	/// </summary>
-	AlternativeResourceMode AlternativeMode { get; }
+	AlternativeResourceMode? AlternativeMode { get; }
 
 	/// <summary>
 	/// Gets the desired security setting for requests to this parent.

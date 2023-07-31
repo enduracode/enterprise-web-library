@@ -17,7 +17,7 @@ partial class Authenticate {
 
 	protected override bool userCanAccess => result.Value is null || result.Value.ResponseWriter is not null;
 
-	public override ResourceBase LogInPage => result.Value?.LogInPage;
+	public override ResourceBase? LogInPage => result.Value?.LogInPage;
 
 	protected override bool disablesUrlNormalization => true;
 

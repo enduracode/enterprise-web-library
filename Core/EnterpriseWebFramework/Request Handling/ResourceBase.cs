@@ -16,7 +16,7 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 	private static SystemProviderReference<SystemResourceSerializationProvider> systemSerializationProviderRef;
 	private static SystemProviderReference<AppResourceSerializationProvider> appSerializationProviderRef;
 	private static Action<bool, ResourceBase> urlHandlerStateUpdater;
-	private static Func<ResourceBase> currentResourceGetter;
+	private static Func<ResourceBase?> currentResourceGetter;
 
 	internal static void WriteRedirectResponse( HttpContext context, string url, bool permanent ) {
 		if( context.Request.Method == "GET" || context.Request.Method == "HEAD" )
@@ -38,7 +38,7 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 		Func<ResourceBase, ( string, string )?> frameworkResourceSerializer,
 		SystemProviderReference<SystemResourceSerializationProvider> systemSerializationProvider,
 		SystemProviderReference<AppResourceSerializationProvider> appSerializationProvider, Action<bool, ResourceBase> urlHandlerStateUpdater,
-		Func<ResourceBase> currentResourceGetter ) {
+		Func<ResourceBase?> currentResourceGetter ) {
 		ResourceBase.frameworkResourceSerializer = frameworkResourceSerializer;
 		systemSerializationProviderRef = systemSerializationProvider;
 		appSerializationProviderRef = appSerializationProvider;
@@ -52,22 +52,22 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 	/// <summary>
 	/// Gets the currently executing resource, or null if the URL has not yet been resolved.
 	/// </summary>
-	internal static ResourceBase Current => currentResourceGetter();
+	internal static ResourceBase? Current => currentResourceGetter();
 
 	private string uriFragmentIdentifierField = "";
-	private readonly Lazy<ResourceParent> parent;
+	private readonly Lazy<ResourceParent?> parent;
 	private readonly Lazy<string> name;
-	private readonly Lazy<AlternativeResourceMode> alternativeMode;
-	private readonly Lazy<UrlHandler> urlParent;
+	private readonly Lazy<AlternativeResourceMode?> alternativeMode;
+	private readonly Lazy<UrlHandler?> urlParent;
 
 	/// <summary>
 	/// Creates a resource object.
 	/// </summary>
 	protected ResourceBase() {
-		parent = new Lazy<ResourceParent>( createParent );
+		parent = new Lazy<ResourceParent?>( createParent );
 		name = new Lazy<string>( getResourceName );
-		alternativeMode = new Lazy<AlternativeResourceMode>( createAlternativeMode );
-		urlParent = new Lazy<UrlHandler>( getUrlParent );
+		alternativeMode = new Lazy<AlternativeResourceMode?>( createAlternativeMode );
+		urlParent = new Lazy<UrlHandler?>( getUrlParent );
 	}
 
 	/// <summary>
@@ -115,7 +115,7 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 	/// <summary>
 	/// Gets the parent of this resource, or null if there isn’t one.
 	/// </summary>
-	public ResourceParent Parent => parent.Value;
+	public ResourceParent? Parent => parent.Value;
 
 	/// <summary>
 	/// Gets the parent resource of this resource. Throws an exception if there is no parent or the parent is an entity setup.
@@ -131,7 +131,7 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 	/// <summary>
 	/// Creates the parent of this resource. Returns null if there is no parent.
 	/// </summary>
-	protected virtual ResourceParent createParent() => EsAsBaseType;
+	protected virtual ResourceParent? createParent() => EsAsBaseType;
 
 	/// <summary>
 	/// Gets the ancestors of this resource, from the parent all the way up to the root.
@@ -139,7 +139,7 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 	public IEnumerable<ResourceParent> Ancestors {
 		get {
 			var ancestors = new List<ResourceParent>();
-			ResourceParent p = this;
+			ResourceParent? p = this;
 			while( ( p = p.Parent ) != null )
 				ancestors.Add( p );
 			return ancestors;
@@ -206,13 +206,13 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 	/// <summary>
 	/// Gets the log-in page to use for this resource, or null for default behavior.
 	/// </summary>
-	public virtual ResourceBase LogInPage => Parent?.LogInPage;
+	public virtual ResourceBase? LogInPage => Parent?.LogInPage;
 
 	/// <summary>
 	/// Gets the alternative mode for this resource or null if it is in normal mode. Do not call this from the createAlternativeMode method of an ancestor;
 	/// doing so will result in a stack overflow.
 	/// </summary>
-	public sealed override AlternativeResourceMode AlternativeMode =>
+	public sealed override AlternativeResourceMode? AlternativeMode =>
 		// It’s important to do the entity setup and parent disabled checks first so the resource doesn’t have to repeat any of them in its disabled check.
 		EsAsBaseType is not null && !EntitySetupIsParent && EsAsBaseType.AlternativeMode is DisabledResourceMode ? EsAsBaseType.AlternativeMode :
 		Parent?.AlternativeMode is DisabledResourceMode ? Parent.AlternativeMode : AlternativeModeDirect;
@@ -222,12 +222,12 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 	/// when implementing a parent that should have new content when one or more children have new content. When calling this property take care to meet any
 	/// preconditions that would normally be handled by ancestor logic.
 	/// </summary>
-	public AlternativeResourceMode AlternativeModeDirect => alternativeMode.Value;
+	public AlternativeResourceMode? AlternativeModeDirect => alternativeMode.Value;
 
 	/// <summary>
 	/// Creates the alternative mode for this resource or returns null if it is in normal mode.
 	/// </summary>
-	protected virtual AlternativeResourceMode createAlternativeMode() => null;
+	protected virtual AlternativeResourceMode? createAlternativeMode() => null;
 
 	internal sealed override string GetUrl( bool ensureUserCanAccessResource, bool ensureResourceNotDisabled ) {
 		try {
@@ -249,13 +249,13 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 		}
 	}
 
-	UrlHandler UrlHandler.GetParent() => urlParent.Value;
+	UrlHandler? UrlHandler.GetParent() => urlParent.Value;
 
 	/// <summary>
 	/// Returns the resource or entity setup that will determine this resource’s canonical URL. One reason to override is if <see cref="createParent"/> depends on
 	/// the authenticated user since the URL must not have this dependency.
 	/// </summary>
-	protected virtual UrlHandler getUrlParent() => Parent;
+	protected virtual UrlHandler? getUrlParent() => Parent;
 
 	UrlEncoder BasicUrlHandler.GetEncoder() => getUrlEncoder();
 
@@ -324,7 +324,7 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 				ConfigurationStatics.IsIntermediateInstallation && !IsIntermediateInstallationPublicResource && !AppRequestState.Instance.IntermediateUserExists,
 				LogInPage );
 
-		DisabledResourceMode disabledMode;
+		DisabledResourceMode? disabledMode;
 		using( MiniProfiler.Current.Step( "EWF - Check alternative resource mode" ) )
 			disabledMode = AlternativeMode as DisabledResourceMode;
 		if( disabledMode != null )
@@ -380,14 +380,14 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 	/// <summary>
 	/// Returns the redirect for the resource, if it is located outside of the application.
 	/// </summary>
-	protected virtual ExternalRedirect getRedirect() => null;
+	protected virtual ExternalRedirect? getRedirect() => null;
 
 	/// <summary>
 	/// Returns the handler for a GET or HEAD request.
 	/// </summary>
-	protected virtual EwfSafeRequestHandler getOrHead() => null;
+	protected virtual EwfSafeRequestHandler? getOrHead() => null;
 
-	private EwfResponse executeUnsafeRequestMethod( Func<EwfResponse> method ) {
+	private EwfResponse? executeUnsafeRequestMethod( Func<EwfResponse?> method ) {
 		if( managesDataAccessCacheInUnsafeRequestMethods )
 			return method();
 
@@ -402,10 +402,10 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 
 	protected virtual bool managesDataAccessCacheInUnsafeRequestMethods => false;
 
-	protected virtual EwfResponse put() => null;
-	protected virtual EwfResponse patch() => null;
-	protected virtual EwfResponse delete() => null;
-	protected virtual EwfResponse post() => null;
+	protected virtual EwfResponse? put() => null;
+	protected virtual EwfResponse? patch() => null;
+	protected virtual EwfResponse? delete() => null;
+	protected virtual EwfResponse? post() => null;
 
 	public virtual bool AllowsSearchEngineIndexing => Parent?.AllowsSearchEngineIndexing ?? true;
 
