@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 
-namespace EnterpriseWebLibrary.DataAccess.RetrievalCaching {
-	/// <summary>
-	/// EWL use only.
-	/// </summary>
-	public class ParameterlessQueryCache<RowType> {
-		private IEnumerable<RowType> resultSet;
+namespace EnterpriseWebLibrary.DataAccess.RetrievalCaching;
 
-		[ EditorBrowsable( EditorBrowsableState.Never ) ]
-		public IEnumerable<RowType> GetResultSet( Func<IEnumerable<RowType>> resultSetCreator ) {
-			return resultSet ?? ( resultSet = resultSetCreator() );
-		}
-	}
+/// <summary>
+/// EWL use only.
+/// </summary>
+public class ParameterlessQueryCache<RowType> {
+	private IEnumerable<RowType>? resultSet;
+
+	[ EditorBrowsable( EditorBrowsableState.Never ) ]
+	public IEnumerable<RowType> GetResultSet( Func<IEnumerable<RowType>> resultSetCreator ) => resultSet ??= resultSetCreator();
 }
