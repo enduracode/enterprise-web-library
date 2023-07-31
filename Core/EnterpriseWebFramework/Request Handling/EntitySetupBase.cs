@@ -10,9 +10,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 public abstract class EntitySetupBase: ResourceParent {
 	private readonly Lazy<ResourceParent?> parent;
 	private readonly Lazy<string> name;
-	private readonly Lazy<AlternativeResourceMode> alternativeMode;
+	private readonly Lazy<AlternativeResourceMode?> alternativeMode;
 	private readonly Lazy<IReadOnlyCollection<ResourceGroup>> listedResources;
-	private readonly Lazy<UrlHandler> urlParent;
+	private readonly Lazy<UrlHandler?> urlParent;
 
 	/// <summary>
 	/// Creates an entity setup object.
@@ -20,9 +20,9 @@ public abstract class EntitySetupBase: ResourceParent {
 	protected EntitySetupBase() {
 		parent = new Lazy<ResourceParent?>( createParent );
 		name = new Lazy<string>( getEntitySetupName );
-		alternativeMode = new Lazy<AlternativeResourceMode>( createAlternativeMode );
+		alternativeMode = new Lazy<AlternativeResourceMode?>( createAlternativeMode );
 		listedResources = new Lazy<IReadOnlyCollection<ResourceGroup>>( () => createListedResources().Materialize() );
-		urlParent = new Lazy<UrlHandler>( getUrlParent );
+		urlParent = new Lazy<UrlHandler?>( getUrlParent );
 	}
 
 	/// <summary>
@@ -72,13 +72,13 @@ public abstract class EntitySetupBase: ResourceParent {
 	/// <summary>
 	/// Gets the log-in page to use for resources that are part of this entity setup, or null for default behavior.
 	/// </summary>
-	public virtual ResourceBase LogInPage => Parent?.LogInPage;
+	public virtual ResourceBase? LogInPage => Parent?.LogInPage;
 
 	/// <summary>
 	/// Gets the alternative mode for this entity setup or null if it is in normal mode. Do not call this from the createAlternativeMode method of an ancestor;
 	/// doing so will result in a stack overflow.
 	/// </summary>
-	public AlternativeResourceMode AlternativeMode =>
+	public AlternativeResourceMode? AlternativeMode =>
 		// It’s important to do the parent disabled check first so the entity setup doesn’t have to repeat any of it in its disabled check.
 		Parent?.AlternativeMode is DisabledResourceMode ? Parent.AlternativeMode : AlternativeModeDirect;
 
@@ -87,12 +87,12 @@ public abstract class EntitySetupBase: ResourceParent {
 	/// e.g. when implementing a parent that should have new content when one or more children have new content. When calling this property take care to meet
 	/// any preconditions that would normally be handled by ancestor logic.
 	/// </summary>
-	public AlternativeResourceMode AlternativeModeDirect => alternativeMode.Value;
+	public AlternativeResourceMode? AlternativeModeDirect => alternativeMode.Value;
 
 	/// <summary>
 	/// Creates the alternative mode for this entity setup or returns null if it is in normal mode.
 	/// </summary>
-	protected virtual AlternativeResourceMode createAlternativeMode() => null;
+	protected virtual AlternativeResourceMode? createAlternativeMode() => null;
 
 	/// <summary>
 	/// Initializes the parameters modification object for this entity setup.
@@ -115,13 +115,13 @@ public abstract class EntitySetupBase: ResourceParent {
 	/// </summary>
 	protected abstract IEnumerable<ResourceGroup> createListedResources();
 
-	UrlHandler UrlHandler.GetParent() => urlParent.Value;
+	UrlHandler? UrlHandler.GetParent() => urlParent.Value;
 
 	/// <summary>
 	/// Returns the resource or entity setup that will determine this entity setup’s canonical URL. One reason to override is if
 	/// <see cref="createParent"/> depends on the authenticated user since the URL must not have this dependency.
 	/// </summary>
-	protected virtual UrlHandler getUrlParent() => Parent;
+	protected virtual UrlHandler? getUrlParent() => Parent;
 
 	UrlEncoder BasicUrlHandler.GetEncoder() => getUrlEncoder();
 
@@ -143,7 +143,7 @@ public abstract class EntitySetupBase: ResourceParent {
 	}
 
 	IEnumerable<UrlHandler> UrlHandler.GetRequestHandlingDescendants() {
-		UrlHandler requestHandler;
+		UrlHandler? requestHandler;
 		try {
 			requestHandler = getRequestHandler();
 		}
@@ -160,7 +160,7 @@ public abstract class EntitySetupBase: ResourceParent {
 	/// Returns the resource or entity setup that will handle an HTTP request to this entity setup. Normally this should be the first of the listed resources.
 	/// We do not recommend returning null; doing so will make the entity setup URL unusable. Must not depend on the authenticated user.
 	/// </summary>
-	protected abstract UrlHandler getRequestHandler();
+	protected abstract UrlHandler? getRequestHandler();
 
 	/// <summary>
 	/// Returns whether this entity setup’s canonical URL will be the canonical URL for the request handler, if the request handler specifies this entity setup

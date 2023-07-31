@@ -33,5 +33,5 @@ partial class WellKnownResource {
 					return wellKnownUrl is not null ? new UrlDecoder( suffix: wellKnownUrl.SuffixSegment ) : null;
 				} ).ToCollection();
 
-	protected override EwfSafeRequestHandler getOrHead() => Suffix.Length > 0 ? url!.GetOrHeadHandlerGetter() : base.getOrHead();
+	protected override EwfSafeRequestHandler? getOrHead() => Suffix.Length > 0 ? url!.GetOrHeadHandlerGetter() : base.getOrHead();
 }
