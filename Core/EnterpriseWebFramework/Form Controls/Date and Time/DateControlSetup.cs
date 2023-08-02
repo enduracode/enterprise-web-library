@@ -123,7 +123,7 @@ public class DateControlSetup {
 										       isFocused => new DisplayableElementFocusDependentData(
 											       attributes: attributes,
 											       includeIdAttribute: true,
-											       jsInitStatements: "{{ {0} }}".FormatWith(
+											       jsInitStatements: "customElements.whenDefined( 'duet-date-picker' ).then( () => {{ {0} }} );".FormatWith(
 												       StringTools.ConcatenateWithDelimiter(
 													       " ",
 													       "const picker = document.querySelector( '#{0}' );".FormatWith( context.Id ),
