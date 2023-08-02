@@ -24,13 +24,13 @@ public abstract class SystemUserManagementProvider {
 	/// <summary>
 	/// Returns the user with the specified ID, or null if a user with that ID does not exist.
 	/// </summary>
-	protected internal abstract SystemUser GetUser( int userId );
+	protected internal abstract SystemUser? GetUser( int userId );
 
 	/// <summary>
 	/// Returns the user with the specified email address, or null if a user with that email address does not exist. Do not pass null. We recommend that you use
 	/// case-insensitive comparison. This method exists to support passwordless authentication and user impersonation.
 	/// </summary>
-	protected internal abstract SystemUser GetUser( string emailAddress );
+	protected internal abstract SystemUser? GetUser( string emailAddress );
 
 	/// <summary>
 	/// Inserts a new user (if no user ID is passed) or updates an existing user with the specified parameters. Returns the user’s ID.

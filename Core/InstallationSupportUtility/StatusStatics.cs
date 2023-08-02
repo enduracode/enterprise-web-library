@@ -1,19 +1,17 @@
-﻿using System;
-using Tewl.IO;
+﻿using Tewl.IO;
 
-namespace EnterpriseWebLibrary.InstallationSupportUtility {
-	public static class StatusStatics {
-		public static event Action<string> StatusChanged;
+namespace EnterpriseWebLibrary.InstallationSupportUtility;
 
-		public static void SetStatus( string status ) {
-			Output.WriteTimeStampedOutput( status );
+public static class StatusStatics {
+	public static event Action<string>? StatusChanged;
 
-			// According to .NET framework event guidelines (http://msdn.microsoft.com/en-us/library/w369ty8x.aspx), you are supposed to cache an event before raising
-			// it in case the last subscriber unsubscribes in another thread between the null check and the raising.
-			var sc = StatusChanged;
+	public static void SetStatus( string status ) {
+		Output.WriteTimeStampedOutput( status );
 
-			if( sc != null )
-				sc( status );
-		}
+		// According to .NET framework event guidelines (http://msdn.microsoft.com/en-us/library/w369ty8x.aspx), you are supposed to cache an event before raising
+		// it in case the last subscriber unsubscribes in another thread between the null check and the raising.
+		var sc = StatusChanged;
+
+		sc?.Invoke( status );
 	}
 }

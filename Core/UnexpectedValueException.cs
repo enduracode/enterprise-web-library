@@ -11,7 +11,7 @@ public class UnexpectedValueException: Exception {
 	/// </summary>
 	/// <param name="valueType">Do not pass null.</param>
 	/// <param name="value"></param>
-	public UnexpectedValueException( string valueType, object value ): base( getMessage( valueType, value.ToString() ) ) {}
+	public UnexpectedValueException( string valueType, object value ): base( getMessage( valueType, value.ToString()! ) ) {}
 
 	/// <summary>
 	/// Creates an exception from an enumeration value.

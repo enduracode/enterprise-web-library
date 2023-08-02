@@ -6,7 +6,7 @@ namespace EnterpriseWebLibrary.UserManagement;
 /// A user of the system.
 /// </summary>
 public class SystemUser {
-	private static Func<SystemUser> currentUserGetter;
+	private static Func<SystemUser>? currentUserGetter;
 
 	internal static void Init( Func<SystemUser> currentUserGetter ) {
 		SystemUser.currentUserGetter = currentUserGetter;
@@ -23,7 +23,7 @@ public class SystemUser {
 	///
 	/// Does not currently work outside of web applications.
 	/// </summary>
-	public static SystemUser Current => currentUserGetter();
+	public static SystemUser Current => currentUserGetter!();
 
 	private readonly int userId;
 	private readonly string email;

@@ -66,13 +66,13 @@ public class LocalIdentityProvider: IdentityProvider {
 		}
 	}
 
-	public delegate ( byte[] salt, byte[] hashedCode, Instant? expirationTime, byte? remainingAttemptCount, string destinationUrl ) LoginCodeGetterMethod(
+	public delegate ( byte[]? salt, byte[]? hashedCode, Instant? expirationTime, byte? remainingAttemptCount, string destinationUrl ) LoginCodeGetterMethod(
 		int userId );
 
 	public delegate void PasswordUpdaterMethod( int userId, int salt, byte[] saltedPassword );
 
 	public delegate void LoginCodeUpdaterMethod(
-		int userId, byte[] salt, byte[] hashedCode, Instant? expirationTime, byte? remainingAttemptCount, string destinationUrl );
+		int userId, byte[]? salt, byte[]? hashedCode, Instant? expirationTime, byte? remainingAttemptCount, string destinationUrl );
 
 	internal delegate string AutoLogInPageUrlGetterMethod( string user, string code );
 
@@ -80,11 +80,11 @@ public class LocalIdentityProvider: IdentityProvider {
 
 	internal readonly string AdministratingOrganizationName;
 	internal readonly string LogInHelpInstructions;
-	private readonly Func<string, ( SystemUser user, int salt, byte[] saltedPassword )?> passwordLoginUserGetter;
+	private readonly Func<string, ( SystemUser user, int salt, byte[]? saltedPassword )?> passwordLoginUserGetter;
 	private readonly LoginCodeGetterMethod loginCodeGetter;
-	private readonly Func<SystemUser, bool, bool?> postAuthenticationMethod;
+	private readonly Func<SystemUser, bool, bool?>? postAuthenticationMethod;
 	internal readonly Duration? AuthenticationDuration;
-	internal readonly Action<Validator, string> PasswordValidationMethod;
+	internal readonly Action<Validator, string>? PasswordValidationMethod;
 	internal readonly PasswordUpdaterMethod PasswordUpdater;
 	private readonly LoginCodeUpdaterMethod loginCodeUpdater;
 
@@ -110,9 +110,9 @@ public class LocalIdentityProvider: IdentityProvider {
 	/// absolutely requires micromanagement of authentication behavior.</param>
 	public LocalIdentityProvider(
 		string administratingOrganizationName, string logInHelpInstructions,
-		Func<string, ( SystemUser user, int salt, byte[] saltedPassword )?> passwordLoginUserGetter, LoginCodeGetterMethod loginCodeGetter,
-		PasswordUpdaterMethod passwordUpdater, LoginCodeUpdaterMethod loginCodeUpdater, Func<SystemUser, bool, bool?> postAuthenticationMethod = null,
-		Duration? authenticationDuration = null, Action<Validator, string> passwordValidationMethod = null ) {
+		Func<string, ( SystemUser user, int salt, byte[]? saltedPassword )?> passwordLoginUserGetter, LoginCodeGetterMethod loginCodeGetter,
+		PasswordUpdaterMethod passwordUpdater, LoginCodeUpdaterMethod loginCodeUpdater, Func<SystemUser, bool, bool?>? postAuthenticationMethod = null,
+		Duration? authenticationDuration = null, Action<Validator, string>? passwordValidationMethod = null ) {
 		AdministratingOrganizationName = administratingOrganizationName;
 		LogInHelpInstructions = logInHelpInstructions;
 		this.passwordLoginUserGetter = passwordLoginUserGetter;
@@ -124,7 +124,7 @@ public class LocalIdentityProvider: IdentityProvider {
 		this.loginCodeUpdater = loginCodeUpdater;
 	}
 
-	internal string LogInUserWithPassword( string emailAddress, string password, out SystemUser user, string errorMessage = "" ) {
+	internal string? LogInUserWithPassword( string emailAddress, string password, out SystemUser? user, string errorMessage = "" ) {
 		if( errorMessage.Length == 0 )
 			errorMessage =
 				"Login failed. Please check your email address and password. If you do not know your password, please set a new one using the button below.";
@@ -221,7 +221,7 @@ public class LocalIdentityProvider: IdentityProvider {
 		EmailStatics.SendEmailWithDefaultFromAddress( message );
 	}
 
-	internal string LogInUserWithCode( string emailAddress, string code, out SystemUser user, out string destinationUrl, string errorMessage = "" ) {
+	internal string? LogInUserWithCode( string emailAddress, string code, out SystemUser? user, out string destinationUrl, string errorMessage = "" ) {
 		if( errorMessage.Length == 0 )
 			errorMessage = "The login code you entered is incorrect or has expired. Please check for typos. If there aren’t any, please send yourself another code.";
 
@@ -237,11 +237,11 @@ public class LocalIdentityProvider: IdentityProvider {
 		var codeData = loginCodeGetter( userLocal.UserId );
 		if( codeData.hashedCode == null )
 			codeValid = false;
-		else if( codeData.expirationTime.Value <= SystemClock.Instance.GetCurrentInstant() )
+		else if( codeData.expirationTime!.Value <= SystemClock.Instance.GetCurrentInstant() )
 			codeValid = false;
-		else if( codeData.remainingAttemptCount.Value == 0 )
+		else if( codeData.remainingAttemptCount!.Value == 0 )
 			codeValid = false;
-		else if( !codeData.hashedCode.SequenceEqual( getHashedLoginCode( code, codeData.salt ) ) ) {
+		else if( !codeData.hashedCode.SequenceEqual( getHashedLoginCode( code, codeData.salt! ) ) ) {
 			codeValid = false;
 			loginCodeUpdater(
 				userLocal.UserId,
@@ -257,7 +257,7 @@ public class LocalIdentityProvider: IdentityProvider {
 			authenticationSuccessful = postAuthenticationMethod( userLocal, codeValid );
 
 			// Re-retrieve the user in case postAuthenticationMethod modified it.
-			userLocal = UserManagementStatics.SystemProvider.GetUser( userLocal.UserId );
+			userLocal = UserManagementStatics.SystemProvider.GetUser( userLocal.UserId )!;
 		}
 
 		if( !codeValid || authenticationSuccessful == false )

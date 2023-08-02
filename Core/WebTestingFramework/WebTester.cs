@@ -1,11 +1,9 @@
-﻿using System;
-using System.Linq;
+﻿#nullable disable
 using System.Reflection;
 using System.Text.RegularExpressions;
-using NUnit.Framework;
 using EnterpriseWebLibrary.Configuration;
-using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.UserManagement;
+using NUnit.Framework;
 using Selenium;
 
 namespace EnterpriseWebLibrary.WebTestingFramework {
@@ -31,8 +29,10 @@ namespace EnterpriseWebLibrary.WebTestingFramework {
 
 				// Only do this if the intermediate log on didn't fail.
 				if( Environment.ExitCode == 0 ) {
-					foreach( var testClass in
-						Assembly.GetCallingAssembly().GetTypes().Where( t => t.GetCustomAttributes( typeof( TestFixtureAttribute ), true ).Any() ).OrderBy( tc => tc.Name ) )
+					foreach( var testClass in Assembly.GetCallingAssembly()
+						        .GetTypes()
+						        .Where( t => t.GetCustomAttributes( typeof( TestFixtureAttribute ), true ).Any() )
+						        .OrderBy( tc => tc.Name ) )
 						webTester.executeTest( testClass );
 					Console.WriteLine( "Web tests complete." );
 				}
@@ -72,10 +72,14 @@ namespace EnterpriseWebLibrary.WebTestingFramework {
 			}
 
 
-			selenium = new DefaultSelenium( "localhost" /*location of Selenium server*/, 4444, @"*firefox3 C:\Program Files (x86)\Mozilla Firefox\firefox.exe", baseUrl );
+			selenium = new DefaultSelenium(
+				"localhost" /*location of Selenium server*/,
+				4444,
+				@"*firefox3 C:\Program Files (x86)\Mozilla Firefox\firefox.exe",
+				baseUrl );
 			selenium.Start();
 
-			if( ConfigurationStatics.IsIntermediateInstallation ) {
+			if( ConfigurationStatics.IsIntermediateInstallation )
 				executeSeleniumBlock(
 					"Intermediate log on",
 					delegate {
@@ -87,8 +91,7 @@ namespace EnterpriseWebLibrary.WebTestingFramework {
 						SubmitForm( selenium );
 						selenium.WaitForPageToLoad( "30000" );
 					} );
-			}
-			if( UserManagementStatics.UserManagementEnabled /* && FormsAuthStatics.FormsAuthEnabled */ ) {
+			if( UserManagementStatics.UserManagementEnabled /* && FormsAuthStatics.FormsAuthEnabled */ )
 				executeSeleniumBlock(
 					"Forms log on",
 					delegate {
@@ -104,7 +107,6 @@ namespace EnterpriseWebLibrary.WebTestingFramework {
 						SubmitForm( selenium );
 						selenium.WaitForPageToLoad( "30000" );
 					} );
-			}
 		}
 
 		/// <summary>
@@ -123,7 +125,10 @@ namespace EnterpriseWebLibrary.WebTestingFramework {
 				testClass.Name,
 				delegate {
 					try {
-						testClass.GetMethods().Where( m => m.GetCustomAttributes( typeof( TestAttribute ), true ).Length > 0 ).Single().Invoke( null, new object[] { selenium } );
+						testClass.GetMethods()
+							.Where( m => m.GetCustomAttributes( typeof( TestAttribute ), true ).Length > 0 )
+							.Single()
+							.Invoke( null, new object[] { selenium } );
 					}
 					catch( TargetInvocationException e ) {
 						throw e.InnerException;
@@ -166,10 +171,9 @@ namespace EnterpriseWebLibrary.WebTestingFramework {
 			}
 			else if( e is AssertionException )
 				Console.Error.WriteLine( "Assertion failed. No message provided." );
-			else {
+			else
 				Console.Error.WriteLine(
 					"No useful exception message. Try to improve exception handling in WebTester once underlying problem is discovered. Main exception ToString: " + e );
-			}
 		}
 
 		/// <summary>

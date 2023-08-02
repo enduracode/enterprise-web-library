@@ -10,11 +10,11 @@ public static class UserManagementStatics {
 	private const string providerName = "UserManagement";
 	internal const string CertificatePassword = "password";
 
-	private static SystemProviderReference<SystemUserManagementProvider> provider;
-	private static Action certificateUpdateNotifier;
+	private static SystemProviderReference<SystemUserManagementProvider>? provider;
+	private static Action? certificateUpdateNotifier;
 
-	private static IReadOnlyCollection<IdentityProvider> identityProviders;
-	private static LocalIdentityProvider localIdentityProvider;
+	private static IReadOnlyCollection<IdentityProvider>? identityProviders;
+	private static LocalIdentityProvider? localIdentityProvider;
 	private static ( Func<string> getter, Action<string> updater )? certificateMethods;
 
 	internal static void Init( Action certificateUpdateNotifier, Func<SystemUser> currentUserGetter ) {
@@ -30,12 +30,12 @@ public static class UserManagementStatics {
 	/// <summary>
 	/// EWL use only.
 	/// </summary>
-	public static bool UserManagementEnabled => provider.GetProvider( returnNullIfNotFound: true ) != null;
+	public static bool UserManagementEnabled => provider!.GetProvider( returnNullIfNotFound: true ) != null;
 
 	/// <summary>
 	/// EWL use only.
 	/// </summary>
-	public static SystemUserManagementProvider SystemProvider => provider.GetProvider();
+	public static SystemUserManagementProvider SystemProvider => provider!.GetProvider()!;
 
 	internal static void InitSystemSpecificLogicDependencies() {
 		if( ConfigurationStatics.IsClientSideApp || !UserManagementEnabled )
@@ -45,11 +45,11 @@ public static class UserManagementStatics {
 		certificateMethods = SystemProvider.GetCertificateMethods();
 	}
 
-	internal static IReadOnlyCollection<IdentityProvider> IdentityProviders => identityProviders;
+	internal static IReadOnlyCollection<IdentityProvider> IdentityProviders => identityProviders!;
 
 	internal static bool LocalIdentityProviderEnabled => localIdentityProvider != null;
 
-	internal static LocalIdentityProvider LocalIdentityProvider => localIdentityProvider;
+	internal static LocalIdentityProvider LocalIdentityProvider => localIdentityProvider!;
 
 	internal static string GetCertificate() =>
 		certificateMethods.HasValue ? certificateMethods.Value.getter() : throw new ApplicationException( "Self-signed certificate methods not available." );
@@ -58,10 +58,10 @@ public static class UserManagementStatics {
 		if( !certificateMethods.HasValue )
 			throw new ApplicationException( "Self-signed certificate methods not available." );
 		certificateMethods.Value.updater( certificate );
-		certificateUpdateNotifier();
+		certificateUpdateNotifier!();
 	}
 
-	internal static SystemUser GetUser( int userId, bool ensureUserExists ) {
+	internal static SystemUser? GetUser( int userId, bool ensureUserExists ) {
 		var user = SystemProvider.GetUser( userId );
 		if( user == null && ensureUserExists )
 			throw new ApplicationException( "A user with an ID of {0} does not exist.".FormatWith( userId ) );

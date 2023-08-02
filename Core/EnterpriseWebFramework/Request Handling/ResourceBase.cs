@@ -12,11 +12,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 /// </summary>
 [ PublicAPI ]
 public abstract class ResourceBase: ResourceInfo, ResourceParent {
-	private static Func<ResourceBase, ( string name, string parameters )?> frameworkResourceSerializer;
-	private static SystemProviderReference<SystemResourceSerializationProvider> systemSerializationProviderRef;
-	private static SystemProviderReference<AppResourceSerializationProvider> appSerializationProviderRef;
-	private static Action<bool, ResourceBase> urlHandlerStateUpdater;
-	private static Func<ResourceBase?> currentResourceGetter;
+	private static Func<ResourceBase, ( string name, string parameters )?>? frameworkResourceSerializer;
+	private static SystemProviderReference<SystemResourceSerializationProvider>? systemSerializationProviderRef;
+	private static SystemProviderReference<AppResourceSerializationProvider>? appSerializationProviderRef;
+	private static Action<bool, ResourceBase>? urlHandlerStateUpdater;
+	private static Func<ResourceBase?>? currentResourceGetter;
 
 	internal static void WriteRedirectResponse( HttpContext context, string url, bool permanent ) {
 		if( context.Request.Method == "GET" || context.Request.Method == "HEAD" )
@@ -46,13 +46,13 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 		ResourceBase.currentResourceGetter = currentResourceGetter;
 	}
 
-	private static SystemResourceSerializationProvider systemSerializationProvider => systemSerializationProviderRef.GetProvider();
-	private static AppResourceSerializationProvider appSerializationProvider => appSerializationProviderRef.GetProvider();
+	private static SystemResourceSerializationProvider systemSerializationProvider => systemSerializationProviderRef!.GetProvider()!;
+	private static AppResourceSerializationProvider appSerializationProvider => appSerializationProviderRef!.GetProvider()!;
 
 	/// <summary>
 	/// Gets the currently executing resource, or null if the URL has not yet been resolved.
 	/// </summary>
-	internal static ResourceBase? Current => currentResourceGetter();
+	internal static ResourceBase? Current => currentResourceGetter!();
 
 	private string uriFragmentIdentifierField = "";
 	private readonly Lazy<ResourceParent?> parent;
@@ -241,7 +241,7 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 			       uriFragmentIdentifier.PrependDelimiter( "#" );
 		}
 		catch( Exception e ) {
-			var serializedResource = frameworkResourceSerializer( this ) ?? systemSerializationProvider.SerializeResource( this ) ??
+			var serializedResource = frameworkResourceSerializer!( this ) ?? systemSerializationProvider.SerializeResource( this ) ??
 			                         appSerializationProvider.SerializeResource( this ) ?? throw new UnexpectedValueException( "resource", this );
 			throw new Exception(
 				"Failed to get a URL for {0}.".FormatWith( serializedResource.name + serializedResource.parameters.PrependDelimiter( " with parameters " ) ),
@@ -330,7 +330,7 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 		if( disabledMode != null )
 			throw new PageDisabledException( disabledMode.Message );
 
-		urlHandlerStateUpdater( requestTransferred, this );
+		urlHandlerStateUpdater!( requestTransferred, this );
 
 		var redirect = getRedirect();
 		if( redirect != null ) {

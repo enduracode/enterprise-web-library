@@ -12,7 +12,7 @@ namespace EnterpriseWebLibrary.WebSessionState;
 /// systems to keep it enabled if necessary.
 /// </summary>
 internal static class StandardLibrarySessionState {
-	private static Func<ISession> currentSessionGetter;
+	private static Func<ISession>? currentSessionGetter;
 
 	internal static void Init( Func<HttpContext> currentContextGetter ) {
 		currentSessionGetter = () => currentContextGetter().Session;
@@ -20,20 +20,20 @@ internal static class StandardLibrarySessionState {
 
 	internal static IReadOnlyCollection<( StatusMessageType, string )> StatusMessages {
 		get {
-			var value = currentSessionGetter().GetString( "ewfStatusMessages" );
+			var value = currentSessionGetter!().GetString( "ewfStatusMessages" );
 			return value != null
 				       ? JsonConvert.DeserializeObject<ImmutableArray<( StatusMessageType, string )>>( value )
 				       : Enumerable.Empty<( StatusMessageType, string )>().Materialize();
 		}
-		set => currentSessionGetter().SetString( "ewfStatusMessages", JsonConvert.SerializeObject( value, Formatting.None ) );
+		set => currentSessionGetter!().SetString( "ewfStatusMessages", JsonConvert.SerializeObject( value, Formatting.None ) );
 	}
 
 	internal static void SetClientSideNavigation( string url, bool navigateInNewWindow ) {
-		currentSessionGetter().SetString( "ewfClientSideNavigation", JsonConvert.SerializeObject( ( url, navigateInNewWindow ), Formatting.None ) );
+		currentSessionGetter!().SetString( "ewfClientSideNavigation", JsonConvert.SerializeObject( ( url, navigateInNewWindow ), Formatting.None ) );
 	}
 
 	internal static void GetClientSideNavigationSetup( out string url, out bool navigateInNewWindow ) {
-		var value = currentSessionGetter().GetString( "ewfClientSideNavigation" );
+		var value = currentSessionGetter!().GetString( "ewfClientSideNavigation" );
 		if( value != null ) {
 			var pair = JsonConvert.DeserializeObject<( string, bool )>( value );
 			url = pair.Item1;
@@ -46,16 +46,16 @@ internal static class StandardLibrarySessionState {
 	}
 
 	internal static void ClearClientSideNavigation() {
-		currentSessionGetter().Remove( "ewfClientSideNavigation" );
+		currentSessionGetter!().Remove( "ewfClientSideNavigation" );
 	}
 
-	internal static bool HasResponseToSend => currentSessionGetter().Keys.Contains( "ewfResponseToSend" );
+	internal static bool HasResponseToSend => currentSessionGetter!().Keys.Contains( "ewfResponseToSend" );
 
-	internal static FullResponse ResponseToSend {
+	internal static FullResponse? ResponseToSend {
 		get {
-			var value = currentSessionGetter().GetString( "ewfResponseToSend" );
+			var value = currentSessionGetter!().GetString( "ewfResponseToSend" );
 			return value != null ? JsonConvert.DeserializeObject<FullResponse>( value ) : null;
 		}
-		set => currentSessionGetter().SetString( "ewfResponseToSend", JsonConvert.SerializeObject( value, Formatting.None ) );
+		set => currentSessionGetter!().SetString( "ewfResponseToSend", JsonConvert.SerializeObject( value, Formatting.None ) );
 	}
 }

@@ -5,11 +5,11 @@ namespace EnterpriseWebLibrary.ExternalFunctionality;
 
 internal static class ExternalFunctionalityStatics {
 	internal const string ProviderName = "ExternalFunctionality";
-	private static SystemProviderReference<SystemExternalFunctionalityProvider> provider;
+	private static SystemProviderReference<SystemExternalFunctionalityProvider>? provider;
 
-	private static ExternalMySqlProvider mySqlProvider;
-	private static ExternalOpenIdConnectProvider openIdConnectProvider;
-	private static ExternalSamlProvider samlProvider;
+	private static ExternalMySqlProvider? mySqlProvider;
+	private static ExternalOpenIdConnectProvider? openIdConnectProvider;
+	private static ExternalSamlProvider? samlProvider;
 
 	internal static void Init() {
 		provider = ConfigurationStatics.GetSystemLibraryProvider<SystemExternalFunctionalityProvider>( ProviderName );
@@ -48,6 +48,6 @@ internal static class ExternalFunctionalityStatics {
 	}
 
 	private static void ensureProviderExists() {
-		provider.GetProvider();
+		provider!.GetProvider();
 	}
 }
