@@ -254,7 +254,7 @@ internal static class WebFrameworkStatics {
 			false );
 		writer.WriteLine( "protected override ResourceParent? createParent() => {0};".FormatWith( isRootFolder ? "null" : parentExpression ) );
 		if( !isRootFolder || parentExpression.Any() )
-			writer.WriteLine( "protected override UrlHandler getUrlParent() => {0};".FormatWith( isRootFolder ? parentExpression : "base.getUrlParent()" ) );
+			writer.WriteLine( "protected override UrlHandler? getUrlParent() => {0};".FormatWith( isRootFolder ? parentExpression : "base.getUrlParent()" ) );
 		UrlStatics.GenerateGetEncoderMethod(
 			writer,
 			"",
