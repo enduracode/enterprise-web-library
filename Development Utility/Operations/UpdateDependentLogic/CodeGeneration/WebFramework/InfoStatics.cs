@@ -41,7 +41,17 @@ internal static class InfoStatics {
 		IReadOnlyCollection<WebItemParameter> optionalParameters, bool includeEsParameter, bool isEs ) {
 		// It's important to force the cache to be enabled in the constructor since these objects are often created in post-back-action getters.
 
-		writeConstructorDocComments( writer, requiredParameters );
+		if( includeEsParameter )
+			CodeGenerationStatics.AddParamDocComment( writer, "es", "Not yet documented." );
+		foreach( var parameter in requiredParameters )
+			CodeGenerationStatics.AddParamDocComment(
+				writer,
+				parameter.Name,
+				parameter.Comment.ConcatenateWithSpace( parameter.IsString || parameter.IsEnumerable ? "Do not pass null." : "" ) );
+		if( optionalParameters.Count > 0 )
+			CodeGenerationStatics.AddParamDocComment( writer, "optionalParameterSetter", "Not yet documented." );
+		if( !isEs )
+			CodeGenerationStatics.AddParamDocComment( writer, "uriFragmentIdentifier", "Not yet documented." );
 		var constructorParameters = "( " + StringTools.ConcatenateWithDelimiter(
 			                            ", ",
 			                            includeEsParameter ? "EntitySetup es" : "",
@@ -78,18 +88,6 @@ internal static class InfoStatics {
 		writer.WriteLine( "}" );
 
 		writeInitParametersMethod( writer, generalData, requiredParameters, optionalParameters, includeEsParameter, isEs, constructorParameters );
-	}
-
-	private static void writeConstructorDocComments( TextWriter writer, IReadOnlyCollection<WebItemParameter> requiredParameters ) {
-		foreach( var parameter in requiredParameters ) {
-			var warning = "";
-			if( parameter.IsString || parameter.IsEnumerable )
-				warning = " Do not pass null.";
-			var description = parameter.Comment + warning;
-			if( description.Length == 0 )
-				continue;
-			CodeGenerationStatics.AddParamDocComment( writer, parameter.Name, description );
-		}
 	}
 
 	private static void writeInitParametersMethod(
