@@ -1,18 +1,18 @@
 ﻿using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Configuration.Installation;
 
-namespace EnterpriseWebLibrary {
-	public static class GlobalStatics {
-		public static readonly string[] ConfigurationXsdFileNames = { "Installation Standard", "Machine", "System Development", "System General" };
+namespace EnterpriseWebLibrary;
 
-		private static InstallationSharedConfiguration installationSharedConfiguration;
+public static class GlobalStatics {
+	public static readonly string[] ConfigurationXsdFileNames = { "Installation Standard", "Machine", "System Development", "System General" };
 
-		internal static void Init() {
-			installationSharedConfiguration = ConfigurationStatics.LoadInstallationSharedConfiguration<InstallationSharedConfiguration>();
-		}
+	private static InstallationSharedConfiguration? installationSharedConfiguration;
 
-		internal static string IntermediateLogInPassword => installationSharedConfiguration.IntermediateLogInPassword;
-		internal static string EmailDefaultFromName => installationSharedConfiguration.EmailDefaultFromName;
-		internal static string EmailDefaultFromAddress => installationSharedConfiguration.EmailDefaultFromAddress;
+	internal static void Init() {
+		installationSharedConfiguration = ConfigurationStatics.LoadInstallationSharedConfiguration<InstallationSharedConfiguration>();
 	}
+
+	internal static string IntermediateLogInPassword => installationSharedConfiguration!.IntermediateLogInPassword;
+	internal static string EmailDefaultFromName => installationSharedConfiguration!.EmailDefaultFromName;
+	internal static string EmailDefaultFromAddress => installationSharedConfiguration!.EmailDefaultFromAddress;
 }
