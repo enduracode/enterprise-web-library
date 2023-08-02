@@ -14,13 +14,13 @@ using Microsoft.Extensions.Options;
 namespace EnterpriseWebLibrary.Saml;
 
 public class SamlProvider: ExternalSamlProvider {
-	private static string samlConfigurationName;
-	private static Func<string> certificateGetter;
-	private static string certificatePassword;
+	private static string? samlConfigurationName;
+	private static Func<string>? certificateGetter;
+	private static string? certificatePassword;
 
-	private static Func<IServiceProvider> currentServicesGetter;
-	private static SystemProviderReference<AppSamlProvider> provider;
-	private static Func<IReadOnlyCollection<( XmlElement metadata, string entityId )>> samlIdentityProviderGetter;
+	private static Func<IServiceProvider>? currentServicesGetter;
+	private static SystemProviderReference<AppSamlProvider>? provider;
+	private static Func<IReadOnlyCollection<( XmlElement metadata, string entityId )>>? samlIdentityProviderGetter;
 
 	void ExternalSamlProvider.InitStatics( Func<string> certificateGetter, string certificatePassword ) {
 		samlConfigurationName = EwlStatics.EwlInitialism.EnglishToCamel() + "UserManagement";
@@ -51,9 +51,9 @@ public class SamlProvider: ExternalSamlProvider {
 	private void configureSaml() {
 		var configurations = new List<SamlConfiguration>();
 
-		var samlIdentityProviders = samlIdentityProviderGetter();
+		var samlIdentityProviders = samlIdentityProviderGetter!();
 		if( samlIdentityProviders.Any() ) {
-			var metadataImporter = currentServicesGetter().GetRequiredService<IMetadataToConfiguration>();
+			var metadataImporter = currentServicesGetter!().GetRequiredService<IMetadataToConfiguration>();
 			configurations.Add(
 				new SamlConfiguration
 					{
@@ -63,7 +63,7 @@ public class SamlProvider: ExternalSamlProvider {
 								{
 									Name = EnterpriseWebFramework.UserManagement.SamlResources.Metadata.GetInfo().GetUrl( disableAuthorizationCheck: true ),
 									AssertionConsumerServiceUrl = EnterpriseWebFramework.UserManagement.SamlResources.Assertions.GetInfo().GetUrl(),
-									LocalCertificates = new List<Certificate> { new() { String = certificateGetter(), Password = certificatePassword } },
+									LocalCertificates = new List<Certificate> { new() { String = certificateGetter!(), Password = certificatePassword } },
 									ResolveToHttps = false
 								},
 						PartnerIdentityProviderConfigurations = samlIdentityProviders.Select(
@@ -76,18 +76,18 @@ public class SamlProvider: ExternalSamlProvider {
 					} );
 		}
 
-		var appProvider = provider.GetProvider( returnNullIfNotFound: true );
+		var appProvider = provider!.GetProvider( returnNullIfNotFound: true );
 		if( appProvider != null )
 			configurations.AddRange( appProvider.GetCustomConfigurations() );
 
-		currentServicesGetter().GetRequiredService<IOptionsMonitor<SamlConfigurations>>().CurrentValue.Configurations = configurations;
+		currentServicesGetter!().GetRequiredService<IOptionsMonitor<SamlConfigurations>>().CurrentValue.Configurations = configurations;
 	}
 
 	async Task<XmlElement> ExternalSamlProvider.GetMetadata() =>
-		( await currentServicesGetter().GetRequiredService<IConfigurationToMetadata>().ExportAsync( configurationName: samlConfigurationName ) ).ToXml();
+		( await currentServicesGetter!().GetRequiredService<IConfigurationToMetadata>().ExportAsync( configurationName: samlConfigurationName ) ).ToXml();
 
 	async Task ExternalSamlProvider.WriteLogInResponse( string identityProvider, bool forceReauthentication, string returnUrl ) {
-		var samlServiceProvider = currentServicesGetter().GetRequiredService<ISamlServiceProvider>();
+		var samlServiceProvider = currentServicesGetter!().GetRequiredService<ISamlServiceProvider>();
 		await samlServiceProvider.SetConfigurationNameAsync( samlConfigurationName );
 		await samlServiceProvider.InitiateSsoAsync(
 			partnerName: identityProvider,
@@ -97,7 +97,7 @@ public class SamlProvider: ExternalSamlProvider {
 
 	async Task<( string identityProvider, string userName, IReadOnlyDictionary<string, string> attributes, string returnUrl )> ExternalSamlProvider.
 		ReadAssertion() {
-		var samlServiceProvider = currentServicesGetter().GetRequiredService<ISamlServiceProvider>();
+		var samlServiceProvider = currentServicesGetter!().GetRequiredService<ISamlServiceProvider>();
 		await samlServiceProvider.SetConfigurationNameAsync( samlConfigurationName );
 		var result = await samlServiceProvider.ReceiveSsoAsync();
 		return ( result.PartnerName, result.UserID,

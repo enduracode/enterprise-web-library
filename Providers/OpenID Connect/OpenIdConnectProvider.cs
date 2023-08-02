@@ -15,11 +15,11 @@ using Microsoft.Extensions.Options;
 namespace EnterpriseWebLibrary.OpenIdConnect;
 
 public class OpenIdConnectProvider: ExternalOpenIdConnectProvider {
-	private static Func<IServiceProvider> currentServicesGetter;
-	private static string issuerIdentifier;
-	private static Func<string> certificateGetter;
-	private static string certificatePassword;
-	private static Func<IEnumerable<OpenIdClient>> clientGetter;
+	private static Func<IServiceProvider>? currentServicesGetter;
+	private static string? issuerIdentifier;
+	private static Func<string>? certificateGetter;
+	private static string? certificatePassword;
+	private static Func<IEnumerable<OpenIdClient>>? clientGetter;
 
 	void ExternalOpenIdConnectProvider.RegisterDependencyInjectionServices( IServiceCollection services ) {
 		services.AddOpenIDProvider();
@@ -45,7 +45,7 @@ public class OpenIdConnectProvider: ExternalOpenIdConnectProvider {
 
 	private void configureOpenIdProvider() {
 		var entitySetup = new EntitySetup();
-		currentServicesGetter().GetRequiredService<IOptionsMonitor<OpenIDConfigurations>>().CurrentValue.Configurations = new OpenIDConfiguration[]
+		currentServicesGetter!().GetRequiredService<IOptionsMonitor<OpenIDConfigurations>>().CurrentValue.Configurations = new OpenIDConfiguration[]
 			{
 				new()
 					{
@@ -60,9 +60,9 @@ public class OpenIdConnectProvider: ExternalOpenIdConnectProvider {
 										JwksUri = new Keys( entitySetup ).GetUrl(),
 										ScopesSupported = new[] { "openid", "profile", "email" }
 									},
-								ProviderCertificates = new Certificate[] { new() { String = certificateGetter(), Password = certificatePassword } }
+								ProviderCertificates = new Certificate[] { new() { String = certificateGetter!(), Password = certificatePassword } }
 							},
-						ClientConfigurations = clientGetter()
+						ClientConfigurations = clientGetter!()
 							.Select(
 								i => new ClientConfiguration { Description = i.ClientName, ClientID = i.ClientIdentifier, RedirectUris = i.RedirectionUrls.ToArray() } )
 							.ToArray()
@@ -71,19 +71,19 @@ public class OpenIdConnectProvider: ExternalOpenIdConnectProvider {
 	}
 
 	Task<IActionResult> ExternalOpenIdConnectProvider.WriteMetadata() {
-		var openIdProvider = currentServicesGetter().GetRequiredService<IOpenIDProvider>();
+		var openIdProvider = currentServicesGetter!().GetRequiredService<IOpenIDProvider>();
 		return openIdProvider.GetMetadataAsync();
 	}
 
 	Task<IActionResult> ExternalOpenIdConnectProvider.WriteKeys() {
-		var openIdProvider = currentServicesGetter().GetRequiredService<IOpenIDProvider>();
+		var openIdProvider = currentServicesGetter!().GetRequiredService<IOpenIDProvider>();
 		return openIdProvider.GetKeysAsync();
 	}
 
 	bool ExternalOpenIdConnectProvider.ReadAuthenticationRequest( out string clientIdentifier ) {
-		var openIdProvider = currentServicesGetter().GetRequiredService<IOpenIDProvider>();
+		var openIdProvider = currentServicesGetter!().GetRequiredService<IOpenIDProvider>();
 
-		AuthenticationRequest request = null;
+		AuthenticationRequest? request = null;
 		Task.Run(
 				async () => {
 					try {
@@ -97,13 +97,13 @@ public class OpenIdConnectProvider: ExternalOpenIdConnectProvider {
 			return false;
 		}
 
-		clientIdentifier = request.ClientID;
+		clientIdentifier = request.ClientID!;
 		return true;
 	}
 
 	async Task<IActionResult> ExternalOpenIdConnectProvider.WriteAuthenticationResponse(
 		string clientIdentifier, string subjectIdentifier, IEnumerable<( string name, string value )> additionalClaims ) {
-		var openIdProvider = currentServicesGetter().GetRequiredService<IOpenIDProvider>();
+		var openIdProvider = currentServicesGetter!().GetRequiredService<IOpenIDProvider>();
 		return await openIdProvider.SendAuthnResponseAsync(
 			       subjectIdentifier,
 			       null,
@@ -116,17 +116,17 @@ public class OpenIdConnectProvider: ExternalOpenIdConnectProvider {
 	}
 
 	Task<IActionResult> ExternalOpenIdConnectProvider.WriteAuthenticationErrorResponse() {
-		var openIdProvider = currentServicesGetter().GetRequiredService<IOpenIDProvider>();
+		var openIdProvider = currentServicesGetter!().GetRequiredService<IOpenIDProvider>();
 		return openIdProvider.SendAuthnErrorResponseAsync( OpenIDConstants.ErrorCodes.InvalidRequest );
 	}
 
 	Task<IActionResult> ExternalOpenIdConnectProvider.WriteTokenResponse() {
-		var openIdProvider = currentServicesGetter().GetRequiredService<IOpenIDProvider>();
+		var openIdProvider = currentServicesGetter!().GetRequiredService<IOpenIDProvider>();
 		return openIdProvider.GetTokensAsync();
 	}
 
 	Task<IActionResult> ExternalOpenIdConnectProvider.WriteUserInfoResponse() {
-		var openIdProvider = currentServicesGetter().GetRequiredService<IOpenIDProvider>();
+		var openIdProvider = currentServicesGetter!().GetRequiredService<IOpenIDProvider>();
 		return openIdProvider.GetUserInfoAsync();
 	}
 }
