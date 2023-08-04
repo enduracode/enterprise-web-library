@@ -1,4 +1,5 @@
 using ICSharpCode.SharpZipLib.Zip;
+using JetBrains.Annotations;
 using Tewl.IO;
 
 namespace EnterpriseWebLibrary.IO;
@@ -7,6 +8,7 @@ namespace EnterpriseWebLibrary.IO;
 /// Contains methods that zip and unzip data.
 /// </summary>
 // As of July 2014, it looks like SharpZipLib is still easier to work with than System.IO.Compression.
+[ PublicAPI ]
 public static class ZipOps {
 	internal static void Test() {
 		// NOTE: This path is probably wrong, and should not be hard-coded.
@@ -83,18 +85,17 @@ public static class ZipOps {
 	/// Zips all files and folders (recursively) in the specified folder into a ZIP byte array that represents a zip file.
 	/// </summary>
 	public static byte[] ZipFolderAsByteArray( string sourceFolderPath ) {
-		using( var memoryStream = new MemoryStream( (int)Math.Min( IoMethods.GetFolderSize( sourceFolderPath ), int.MaxValue ) ) ) {
-			ZipFolderAsStream( sourceFolderPath, memoryStream );
-			return memoryStream.ToArray();
-		}
+		using var memoryStream = new MemoryStream( (int)Math.Min( IoMethods.GetFolderSize( sourceFolderPath ), int.MaxValue ) );
+		ZipFolderAsStream( sourceFolderPath, memoryStream );
+		return memoryStream.ToArray();
 	}
 
 	/// <summary>
 	/// Unzips the specified ZIP byte array into a new folder with the specified path. If a folder already exists at the path, it is deleted.
 	/// </summary>
 	public static void UnZipByteArrayAsFolder( byte[] sourceData, string destinationFolderPath ) {
-		using( var memoryStream = new MemoryStream( sourceData ) )
-			UnZipStreamAsFolder( memoryStream, destinationFolderPath );
+		using var memoryStream = new MemoryStream( sourceData );
+		UnZipStreamAsFolder( memoryStream, destinationFolderPath );
 	}
 
 
@@ -105,13 +106,13 @@ public static class ZipOps {
 	/// </summary>
 	public static void ZipFolderAsStream( string sourceFolderPath, Stream outputStream ) {
 		var normalizedPath = Path.GetFullPath( sourceFolderPath );
-		using( var zipOutputStream = createZipOutputStream( outputStream ) )
-			foreach( var filePath in IoMethods.GetFilePathsInFolder( sourceFolderPath, searchOption: SearchOption.AllDirectories ) ) {
-				var relativePath = new string( filePath.Skip( normalizedPath.Length + 1 ).ToArray() );
-				var zipEntry = new ZipEntry( ZipEntry.CleanName( relativePath ) );
-				using( var fs = File.OpenRead( filePath ) )
-					writeZipEntry( zipEntry, fs, zipOutputStream );
-			}
+		using var zipOutputStream = createZipOutputStream( outputStream );
+		foreach( var filePath in IoMethods.GetFilePathsInFolder( sourceFolderPath, searchOption: SearchOption.AllDirectories ) ) {
+			var relativePath = new string( filePath.Skip( normalizedPath.Length + 1 ).ToArray() );
+			var zipEntry = new ZipEntry( ZipEntry.CleanName( relativePath ) );
+			using var fs = File.OpenRead( filePath );
+			writeZipEntry( zipEntry, fs, zipOutputStream );
+		}
 	}
 
 	/// <summary>
@@ -129,10 +130,11 @@ public static class ZipOps {
 	/// Zips all specified files into a stream. All files are put in the root of the zip file. The caller is responsible for disposing the stream.
 	/// </summary>
 	public static void ZipFilesAsStream( IEnumerable<string> filePaths, Stream outputStream ) {
-		using( var zipOutputStream = createZipOutputStream( outputStream ) )
-			foreach( var filePath in filePaths )
-				using( var fs = File.OpenRead( filePath ) )
-					writeZipEntry( new ZipEntry( ZipEntry.CleanName( Path.GetFileName( filePath ) ) ), fs, zipOutputStream );
+		using var zipOutputStream = createZipOutputStream( outputStream );
+		foreach( var filePath in filePaths ) {
+			using var fs = File.OpenRead( filePath );
+			writeZipEntry( new ZipEntry( ZipEntry.CleanName( Path.GetFileName( filePath ) ) ), fs, zipOutputStream );
+		}
 	}
 
 
@@ -144,15 +146,13 @@ public static class ZipOps {
 	/// </summary>
 	public static void UnZipStreamIntoFolder( Stream sourceStream, string destinationFolderPath ) {
 		Directory.CreateDirectory( destinationFolderPath );
-		using( var zipInputStream = new ZipInputStream( sourceStream ) ) {
-			ZipEntry entry;
-			while( ( entry = zipInputStream.GetNextEntry() ) != null )
-				if( entry.IsDirectory )
-					Directory.CreateDirectory( EwlStatics.CombinePaths( destinationFolderPath, entry.Name ) );
-				else
-					using( var outputStream = IoMethods.GetFileStreamForWrite( EwlStatics.CombinePaths( destinationFolderPath, entry.Name ) ) )
-						zipInputStream.CopyTo( outputStream );
-		}
+		using var zipInputStream = new ZipInputStream( sourceStream );
+		while( zipInputStream.GetNextEntry() is {} entry )
+			if( entry.IsDirectory )
+				Directory.CreateDirectory( EwlStatics.CombinePaths( destinationFolderPath, entry.Name ) );
+			else
+				using( var outputStream = IoMethods.GetFileStreamForWrite( EwlStatics.CombinePaths( destinationFolderPath, entry.Name ) ) )
+					zipInputStream.CopyTo( outputStream );
 	}
 
 
@@ -163,12 +163,12 @@ public static class ZipOps {
 	/// Tuple file names will be cleaned. File names must include extension.
 	/// </summary>
 	public static void ZipFileObjectsAsStream( IEnumerable<RsFile> files, Stream destination ) {
-		using( var zipStream = createZipOutputStream( destination ) )
-			foreach( var file in files ) {
-				var zipEntry = new ZipEntry( ZipEntry.CleanName( file.FileName ) ) { Size = file.Contents.Length };
-				using( var stream = new MemoryStream( file.Contents ) )
-					writeZipEntry( zipEntry, stream, zipStream );
-			}
+		using var zipStream = createZipOutputStream( destination );
+		foreach( var file in files ) {
+			var zipEntry = new ZipEntry( ZipEntry.CleanName( file.FileName ) ) { Size = file.Contents.Length };
+			using var stream = new MemoryStream( file.Contents );
+			writeZipEntry( zipEntry, stream, zipStream );
+		}
 	}
 
 	/// <summary>
@@ -177,16 +177,13 @@ public static class ZipOps {
 	/// </summary>
 	public static IEnumerable<RsFile> UnZipStreamAsFileObjects( Stream source ) {
 		var files = new List<RsFile>();
-		using( var zipInputStream = new ZipInputStream( source ) ) {
-			ZipEntry entry;
-			while( ( entry = zipInputStream.GetNextEntry() ) != null ) {
-				if( entry.IsDirectory )
-					continue;
-				using( var outputStream = new MemoryStream() ) {
-					zipInputStream.CopyTo( outputStream );
-					files.Add( new RsFile( outputStream.ToArray(), entry.Name ) );
-				}
-			}
+		using var zipInputStream = new ZipInputStream( source );
+		while( zipInputStream.GetNextEntry() is {} entry ) {
+			if( entry.IsDirectory )
+				continue;
+			using var outputStream = new MemoryStream();
+			zipInputStream.CopyTo( outputStream );
+			files.Add( new RsFile( outputStream.ToArray(), entry.Name ) );
 		}
 		return files;
 	}
@@ -199,23 +196,21 @@ public static class ZipOps {
 	/// Tuple file names will be cleaned. File names must include extension.
 	/// </summary>
 	public static void ZipFileStreamsAsStream( IEnumerable<Tuple<string, Stream>> fileNameAndSources, Stream destination ) {
-		using( var zipStream = createZipOutputStream( destination ) )
-			foreach( var fileNameAndSource in fileNameAndSources ) {
-				// http://wiki.sharpdevelop.net/SharpZipLib-Zip-Samples.ashx
-				// To permit the zip to be unpacked by built-in extractor in WinXP and Server2003, WinZip 8, Java, and other older code,
-				// you need to do one of the following: Specify UseZip64.Off, or set the Size.
-				// If the file may be bigger than 4GB, or you do not need WinXP built-in compatibility, you do not need either,
-				// but the zip will be in Zip64 format which not all utilities can understand.
-				var zipEntry = new ZipEntry( ZipEntry.CleanName( fileNameAndSource.Item1 ) ) { Size = fileNameAndSource.Item2.Length };
+		using var zipStream = createZipOutputStream( destination );
+		foreach( var fileNameAndSource in fileNameAndSources ) {
+			// http://wiki.sharpdevelop.net/SharpZipLib-Zip-Samples.ashx
+			// To permit the zip to be unpacked by built-in extractor in WinXP and Server2003, WinZip 8, Java, and other older code,
+			// you need to do one of the following: Specify UseZip64.Off, or set the Size.
+			// If the file may be bigger than 4GB, or you do not need WinXP built-in compatibility, you do not need either,
+			// but the zip will be in Zip64 format which not all utilities can understand.
+			var zipEntry = new ZipEntry( ZipEntry.CleanName( fileNameAndSource.Item1 ) ) { Size = fileNameAndSource.Item2.Length };
 
-				writeZipEntry( zipEntry, fileNameAndSource.Item2, zipStream );
-			}
+			writeZipEntry( zipEntry, fileNameAndSource.Item2, zipStream );
+		}
 	}
 
 
-	private static ZipOutputStream createZipOutputStream( Stream s ) {
-		return new ZipOutputStream( s ) { IsStreamOwner = false };
-	}
+	private static ZipOutputStream createZipOutputStream( Stream s ) => new( s ) { IsStreamOwner = false };
 
 	private static void writeZipEntry( ZipEntry zipEntry, Stream sourceStream, ZipOutputStream zipOutputStream ) {
 		zipOutputStream.PutNextEntry( zipEntry );
