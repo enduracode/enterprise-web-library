@@ -2,34 +2,34 @@
 	--ewf-ui-primary-color: #281e3c;
 	--ewf-ui-secondary-color: #009245;
 
-	--ewf-ui-background-color: hsla( 215, 33%, 93%, 1 );
-	--ewf-ui-text-color: hsla( 215, 11%, 22%, 1 );
+	--ewf-ui-background-color: hsla(215, 33%, 93%, 1);
+	--ewf-ui-text-color: hsla(215, 11%, 22%, 1);
 	--ewf-ui-inverted-text-color: #ffffff;
-	--ewf-ui-important-border-color: hsla( 0, 0%, 80%, 1 );
-	--ewf-ui-faint-border-color: rgba( 0, 0, 0, .1 );
+	--ewf-ui-important-border-color: hsla(0, 0%, 80%, 1);
+	--ewf-ui-faint-border-color: rgba(0, 0, 0, .1);
 	--ewf-ui-activation-color: #8cc63f;
-	--ewf-ui-form-control-placeholder-color: rgb( 175, 175, 175 );
+	--ewf-ui-form-control-placeholder-color: rgb(175, 175, 175);
 
 	/* date picker */
-	--duet-color-primary: var( --ewf-ui-secondary-color );
-	--duet-color-text: var( --ewf-ui-text-color );
-	--duet-color-text-active: var( --ewf-ui-inverted-text-color );
-	--duet-color-border: var( --ewf-ui-important-border-color );
-	--duet-color-placeholder: var( --ewf-ui-form-control-placeholder-color ) ;
+	--duet-color-primary: var(--ewf-ui-secondary-color);
+	--duet-color-text: var(--ewf-ui-text-color);
+	--duet-color-text-active: var(--ewf-ui-inverted-text-color);
+	--duet-color-border: var(--ewf-ui-important-border-color);
+	--duet-color-placeholder: var(--ewf-ui-form-control-placeholder-color);
 
-	--ewf-ui-top-error-color: hsla( 0, 100%, 70%, 1 );
+	--ewf-ui-top-error-color: hsla(0, 100%, 70%, 1);
 	--ewf-ui-nav-background-color: #ced6e0;
-	--ewf-ui-entity-action-color: hsla( 0, 0%, 33%, 1 );
-	--ewf-ui-entity-action-activation-color: var( --ewf-ui-primary-color );
-	--ewf-ui-side-tab-border-color: hsla( 0, 0%, 70%, 1 );
-	--ewf-ui-side-tab-group-head-color: hsla( 215, 11%, 40%, 1 );
-	--ewf-ui-side-tab-activation-color: hsla( 213, 22%, 93%, 1 );
-	--ewf-ui-current-side-tab-background-color: hsla( 213, 22%, 89%, 1 );
-	--ewf-ui-global-foot-background-color: hsla( 215, 33%, 96%, 1 );
+	--ewf-ui-entity-action-color: hsla(0, 0%, 33%, 1);
+	--ewf-ui-entity-action-activation-color: var(--ewf-ui-primary-color);
+	--ewf-ui-side-tab-border-color: hsla(0, 0%, 70%, 1);
+	--ewf-ui-side-tab-group-head-color: hsla(215, 11%, 40%, 1);
+	--ewf-ui-side-tab-activation-color: hsla(213, 22%, 93%, 1);
+	--ewf-ui-current-side-tab-background-color: hsla(213, 22%, 89%, 1);
+	--ewf-ui-global-foot-background-color: hsla(215, 33%, 96%, 1);
 }
 
 body {
-	background-color: var( --ewf-ui-background-color );
+	background-color: var(--ewf-ui-background-color);
 }
 @media print {
 	body {
@@ -39,7 +39,7 @@ body {
 body,
 ewfDropDownListContainer > ewfDropDownList > .chosen-single,
 ewfDropDownListContainer > ewfDropDownList > .chosen-drop > .chosen-results {
-	color: var( --ewf-ui-text-color );
+	color: var(--ewf-ui-text-color);
 }
 
 /* borders */
@@ -50,10 +50,10 @@ ewfUiEntityAndTopTabContainer,
 ewfUiTopTabListContainer ewfUiCurrentTabActionControl,
 ewfUiSideTabContainer,
 ewfUiGlobalFootContainer {
-	border-color: var( --ewf-ui-important-border-color );
+	border-color: var(--ewf-ui-important-border-color);
 }
 ewfTableStandardAndStandardExceptLayoutStyles > thead > ewfTrAllStates > ewfThAndTd {
-	border-color: var( --ewf-ui-faint-border-color );
+	border-color: var(--ewf-ui-faint-border-color);
 }
 ewfUiTopTabListContainer ewfUiCurrentTabActionControl {
 	border-bottom-color: transparent;
@@ -61,7 +61,7 @@ ewfUiTopTabListContainer ewfUiCurrentTabActionControl {
 
 /* boxes */
 ewfSectionBoxStyleBothStates, ewfTableStandardAndStandardExceptLayoutStyles, ewfUiContentBox {
-	box-shadow: 0 2px 6px rgba( 0, 0, 0, .5 );
+	box-shadow: 0 2px 6px rgba(0, 0, 0, .5);
 	background-color: white;
 }
 @media print {
@@ -75,7 +75,7 @@ ewfSectionBoxStyleBothStates, ewfTableStandardAndStandardExceptLayoutStyles, ewf
 ewfTableStandardAndStandardExceptLayoutStyles,
 ewfTableStandardAndStandardExceptLayoutStyles > tbody > ewfTrStatesWithContrast,
 ewfCheckboxList {
-	background-image: linear-gradient( rgba( 0, 0, 0, .02 ), rgba( 0, 0, 0, .02 ) );
+	background-image: linear-gradient(rgba(0, 0, 0, .02), rgba(0, 0, 0, .02));
 }
 
 /* block highlighting */
@@ -93,19 +93,19 @@ ewfActionComponentAllStylesAllNormalStates.icon,
 ewfActionComponentAllStylesAllVisitedStates.icon,
 ewfUiTopTabListContainer ewfUiCurrentTabActionControl,
 ewfUiSideTabContainer ewfUiCurrentTabActionControl {
-	color: var( --ewf-ui-secondary-color );
+	color: var(--ewf-ui-secondary-color);
 }
 ewfActionComponentAllButtonStylesAllNormalStates, ewfActionComponentAllButtonStylesAllVisitedStates {
-	background-color: var( --ewf-ui-secondary-color );
+	background-color: var(--ewf-ui-secondary-color);
 }
 ewfHyperlinkStandardStyleStatesWithHover,
 ewfHyperlinkStandardStyleStatesWithFocus,
 ewfActionComponentAllStylesStatesWithHover.icon,
 ewfActionComponentAllStylesStatesWithFocus.icon {
-	color: var( --ewf-ui-activation-color );
+	color: var(--ewf-ui-activation-color);
 }
 ewfActionComponentAllButtonStylesStatesWithHover, ewfActionComponentAllButtonStylesStatesWithFocus {
-	background-color: var( --ewf-ui-activation-color );
+	background-color: var(--ewf-ui-activation-color);
 }
 ewfActionComponentAllButtonStylesAllStates {
 	color: white;
@@ -113,7 +113,7 @@ ewfActionComponentAllButtonStylesAllStates {
 
 /* form control placeholders */
 ::placeholder {
-	color: var( --ewf-ui-form-control-placeholder-color );
+	color: var(--ewf-ui-form-control-placeholder-color);
 }
 
 /* list controls */
@@ -121,21 +121,21 @@ ewfDropDownListContainer > ewfDropDownList {
 	box-shadow: none;
 }
 ewfDropDownListContainer > ewfDropDownList > .chosen-default {
-	color: var( --ewf-ui-form-control-placeholder-color );
+	color: var(--ewf-ui-form-control-placeholder-color);
 }
 ewfDropDownListContainer > ewfDropDownList > .chosen-drop > .chosen-results > li.result-selected {
-	background-color: var( --ewf-ui-secondary-color );
-	color: var( --ewf-ui-inverted-text-color );
+	background-color: var(--ewf-ui-secondary-color);
+	color: var(--ewf-ui-inverted-text-color);
 }
 ewfDropDownListContainer > ewfDropDownList > .chosen-drop > .chosen-results > li.highlighted {
-	background-color: var( --ewf-ui-activation-color );
+	background-color: var(--ewf-ui-activation-color);
 	background-image: none;
-	color: var( --ewf-ui-inverted-text-color );
+	color: var(--ewf-ui-inverted-text-color);
 }
 
 /* error messages */
 ewfErrorMessageListContainer {
-	color: hsla( 0, 100%, 47%, 1 );
+	color: hsla(0, 100%, 47%, 1);
 }
 
 /* new content */
@@ -154,7 +154,7 @@ ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionCloseLabel
 
 /* UiPageContent */
 ewfTopWarningContainer {
-	color: var( --ewf-ui-primary-color );
+	color: var(--ewf-ui-primary-color);
 }
 ewfTopWarningContainer > ewfIcon {
 	color: #eb2113;
@@ -168,20 +168,20 @@ ewfTopWarningContainer ewfActionComponentAllButtonStylesStatesWithFocus {
 	background-color: #f00;
 }
 ewfUiOuterGlobalContainer, ewfNotificationSectionContainer > ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer {
-	background-color: var( --ewf-ui-primary-color );
-	color: var( --ewf-ui-inverted-text-color );
+	background-color: var(--ewf-ui-primary-color);
+	color: var(--ewf-ui-inverted-text-color);
 }
 ewfUiInnerGlobalContainer ewfActionComponentAllStylesAllStates, ewfUiTopErrorMessageListContainer a {
-	color: var( --ewf-ui-inverted-text-color );
+	color: var(--ewf-ui-inverted-text-color);
 }
 ewfUiInnerGlobalContainer ewfActionComponentAllStylesStatesWithHover {
-	color: var( --ewf-ui-activation-color );
+	color: var(--ewf-ui-activation-color);
 }
 ewfUiGlobalNavListContainer ewfComponentListItem {
-	border-color: rgba( 255, 255, 255, .2 );
+	border-color: rgba(255, 255, 255, .2);
 }
 ewfUiUserInfoContainer {
-	color: var( --ewf-ui-inverted-text-color );
+	color: var(--ewf-ui-inverted-text-color);
 }
 ewfUiUserInfoContainer ewfActionComponentAllStylesAllStates {
 	opacity: .65;
@@ -190,49 +190,49 @@ ewfUiUserInfoContainer ewfActionComponentAllStylesStatesWithHover {
 	opacity: 1;
 }
 ewfUiMobileMenuContainer > ewfActionComponentAllStylesAllStates {
-	background-color: var( --ewf-ui-secondary-color );
-	background-image: url( ../../versioned/ui/menu-icon-v1.svg );
+	background-color: var(--ewf-ui-secondary-color);
+	background-image: url(../../versioned/ui/menu-icon-v1.svg );
 	background-repeat: no-repeat;
 	background-size: 65%;
 	background-position: center;
 }
 ewfUiMobileMenu {
-	box-shadow: 0 10px 10px rgba( 0, 0, 0, .25 );
+	box-shadow: 0 10px 10px rgba(0, 0, 0, .25);
 }
 ewfUiMobileMenuGlobalNavListContainer, ewfUiMobileMenuEntityNavAndActionContainer {
-	background-color: var( --ewf-ui-activation-color );
+	background-color: var(--ewf-ui-activation-color);
 }
 ewfUiMobileMenuTabContainer {
-	background-color: var( --ewf-ui-secondary-color );
+	background-color: var(--ewf-ui-secondary-color);
 }
 ewfUiMobileMenuTabGroupName {
-	background-color: var( --ewf-ui-entity-action-color );
-	color: var( --ewf-ui-inverted-text-color );
+	background-color: var(--ewf-ui-entity-action-color);
+	color: var(--ewf-ui-inverted-text-color);
 }
 ewfUiMobileMenuTabGroup ewfActionComponentAllStylesAllStates {
-	border-color: rgba( 255, 255, 255, .3 );
-	color: var( --ewf-ui-inverted-text-color );
+	border-color: rgba(255, 255, 255, .3);
+	color: var(--ewf-ui-inverted-text-color);
 }
 ewfUiMobileMenuTabGroup ewfActionComponentAllStylesStatesWithHover {
-	background-color: var( --ewf-ui-activation-color );
+	background-color: var(--ewf-ui-activation-color);
 }
 ewfUiMobileMenuTabGroup ewfUiCurrentTabActionControl {
-	background-color: rgba( 255, 255, 255, .3 );
+	background-color: rgba(255, 255, 255, .3);
 }
 ewfUiTopErrorMessageListContainer {
-	color: var( --ewf-ui-top-error-color );
+	color: var(--ewf-ui-top-error-color);
 }
 ewfUiEntityAndTopTabContainer, ewfUiSideTabContainer {
-	background-color: var( --ewf-ui-nav-background-color );
+	background-color: var(--ewf-ui-nav-background-color);
 }
 ewfUiEntityContainer > ewfPagePathContainer ewfComponentListItem {
-	background: url( ../../versioned/ui/arrow-v1.svg ) no-repeat;
+	background: url(../../versioned/ui/arrow-v1.svg ) no-repeat;
 }
 ewfUiEntityContainer > ewfPagePathContainer ewfActionComponentAllStylesAllStates, ewfUiEntityNavAndActionContainer ewfActionComponentAllStylesAllStates {
-	color: var( --ewf-ui-entity-action-color );
+	color: var(--ewf-ui-entity-action-color);
 }
 ewfUiEntityContainer > ewfPagePathContainer ewfActionComponentAllStylesStatesWithHover, ewfUiEntityNavAndActionContainer ewfActionComponentAllStylesStatesWithHover {
-	color: var( --ewf-ui-entity-action-activation-color );
+	color: var(--ewf-ui-entity-action-activation-color);
 }
 ewfUiTopTabListContainer ewfActionComponentAllStylesAllNormalStates,
 ewfUiTopTabListContainer ewfActionComponentAllStylesAllVisitedStates,
@@ -244,65 +244,65 @@ ewfUiTopTabListContainer ewfUiDisabledTabActionControl, ewfUiSideTabContainer ew
 	opacity: .2;
 }
 ewfUiTopTabListContainer ewfActionComponentAllStylesAllStates {
-	color: var( --ewf-ui-primary-color );
+	color: var(--ewf-ui-primary-color);
 }
 ewfUiTopTabListContainer ewfActionComponentAllStylesAllActionStates {
-	background: linear-gradient( 0, rgba( 255, 255, 255, 1 ) 0, rgba( 255, 255, 255, 0.5 ) 100% );
+	background: linear-gradient(0, rgba(255, 255, 255, 1) 0, rgba(255, 255, 255, 0.5) 100%);
 }
 ewfUiTopTabListContainer ewfActionComponentAllStylesStatesWithHover {
 	background: none;
-	background-color: var( --ewf-ui-activation-color );
-	color: var( --ewf-ui-inverted-text-color );
+	background-color: var(--ewf-ui-activation-color);
+	color: var(--ewf-ui-inverted-text-color);
 }
 ewfUiTopTabListContainer ewfUiCurrentTabActionControl {
-	background-color: var( --ewf-ui-background-color );
+	background-color: var(--ewf-ui-background-color);
 }
 ewfUiSideTabGroupHead {
-	color: var( --ewf-ui-side-tab-group-head-color );
+	color: var(--ewf-ui-side-tab-group-head-color);
 }
 ewfUiSideTabContainer ewfActionComponentAllStylesAllStates {
-	border-top-color: var( --ewf-ui-side-tab-border-color );
+	border-top-color: var(--ewf-ui-side-tab-border-color);
 	color: inherit;
 }
 ewfUiSideTabContainer ewfActionComponentAllStylesStatesWithHover, ewfUiSideTabContainer ewfUiCurrentTabActionControl {
-	border-left-color: var( --ewf-ui-secondary-color );
+	border-left-color: var(--ewf-ui-secondary-color);
 }
 ewfUiSideTabContainer ewfActionComponentAllStylesStatesWithHover {
-	background-color: var( --ewf-ui-side-tab-activation-color );
+	background-color: var(--ewf-ui-side-tab-activation-color);
 }
 ewfUiSideTabContainer ewfUiCurrentTabActionControl {
-	background: linear-gradient( to right, var( --ewf-ui-current-side-tab-background-color ), var( --ewf-ui-background-color ) );
+	background: linear-gradient(to right, var(--ewf-ui-current-side-tab-background-color), var(--ewf-ui-background-color));
 }
 ewfUiGlobalFootContainer {
-	background-color: var( --ewf-ui-global-foot-background-color );
+	background-color: var(--ewf-ui-global-foot-background-color);
 }
 ewfNotificationSectionContainer > ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer {
 	box-shadow: revert;
 }
-@media only screen and ( max-width: 768px ) {
+@media only screen and (max-width: 768px) {
 	ewfUiUserInfoContainer {
-		background-image: url( ../../versioned/ui/account-v1.svg );
+		background-image: url(../../versioned/ui/account-v1.svg );
 		background-repeat: no-repeat;
 		background-position: center;
 		background-size: 60%;
 	}
 	ewfUiUserInfoContainer:hover {
-		background-color: var( --ewf-ui-activation-color );
+		background-color: var(--ewf-ui-activation-color);
 	}
 	ewfUiUserInfoContainer > p {
-		background-color: var( --ewf-ui-activation-color );
+		background-color: var(--ewf-ui-activation-color);
 	}
 	ewfUiUserInfoContainer > ewfUnorderedComponentList {
-		box-shadow: 0 10px 10px rgba( 0, 0, 0, .25 );
-		background-color: var( --ewf-ui-secondary-color );
+		box-shadow: 0 10px 10px rgba(0, 0, 0, .25);
+		background-color: var(--ewf-ui-secondary-color);
 	}
 	ewfUiUserInfoContainer ewfComponentListItem {
-		border-color: rgba( 255, 255, 255, .5 );
+		border-color: rgba(255, 255, 255, .5);
 	}
 	ewfUiUserInfoContainer ewfActionComponentAllStylesAllStates {
 		opacity: 1;
 	}
 	ewfUiUserInfoContainer ewfActionComponentAllStylesStatesWithHover {
-		background-color: var( --ewf-ui-activation-color );
+		background-color: var(--ewf-ui-activation-color);
 	}
 }
