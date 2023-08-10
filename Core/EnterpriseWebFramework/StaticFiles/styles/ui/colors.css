@@ -1,13 +1,13 @@
 ﻿:root {
-	--ewf-ui-primary-color: #281e3c;
-	--ewf-ui-secondary-color: #009245;
+	--ewf-ui-primary-color: hsla(215, 11%, 22%, 1);
+	--ewf-ui-secondary-color: hsla(211, 70%, 45%, 1);
 
 	--ewf-ui-background-color: hsla(215, 33%, 93%, 1);
 	--ewf-ui-text-color: hsla(215, 11%, 22%, 1);
 	--ewf-ui-inverted-text-color: #ffffff;
 	--ewf-ui-important-border-color: hsla(0, 0%, 80%, 1);
 	--ewf-ui-faint-border-color: rgba(0, 0, 0, .1);
-	--ewf-ui-activation-color: #8cc63f;
+	--ewf-ui-activation-color: hsla(4, 100%, 45%, 1);
 	--ewf-ui-form-control-placeholder-color: rgb(175, 175, 175);
 
 	/* date picker */
