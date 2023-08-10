@@ -14,6 +14,7 @@ using Tewl.IO;
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations;
 
 internal class ExportLogic: Operation {
+	private const string nuGetTargetFramework = "net7.0-windows7.0";
 	private static readonly Operation instance = new ExportLogic();
 
 	internal static PackagingConfiguration GetPackagingConfiguration( DevelopmentInstallation installation ) {
@@ -58,7 +59,7 @@ internal class ExportLogic: Operation {
 										EwlStatics.CoreProjectName,
 										ConfigurationStatics.GetProjectOutputFolderPath( useDebugAssembly ),
 										fileName ),
-									EwlStatics.CombinePaths( folderPath, @"lib\net6.0-windows7.0", fileName ) );
+									EwlStatics.CombinePaths( folderPath, @"lib\{0}".FormatWith( nuGetTargetFramework ), fileName ) );
 
 							var toolsFolderPath = EwlStatics.CombinePaths( folderPath, "tools" );
 							IoMethods.CopyFile(
@@ -221,7 +222,7 @@ internal class ExportLogic: Operation {
 										projectPath,
 										ConfigurationStatics.GetProjectOutputFolderPath( useDebugAssembly ),
 										fileName ),
-									EwlStatics.CombinePaths( folderPath, @"lib\net6.0-windows7.0", fileName ) );
+									EwlStatics.CombinePaths( folderPath, @"lib\{0}".FormatWith( nuGetTargetFramework ), fileName ) );
 
 							var manifestPath = EwlStatics.CombinePaths( folderPath, "Package.nuspec" );
 							using( var writer = IoMethods.GetTextWriterForWrite( manifestPath ) )
@@ -304,7 +305,7 @@ internal class ExportLogic: Operation {
 		writer.WriteLine( "<license type=\"expression\">MIT</license>" );
 		writer.WriteLine( "<requireLicenseAcceptance>false</requireLicenseAcceptance>" );
 		writer.WriteLine( "<dependencies>" );
-		writer.WriteLine( "<group targetFramework=\"net6.0-windows7.0\">" );
+		writer.WriteLine( "<group targetFramework=\"{0}\">".FormatWith( nuGetTargetFramework ) );
 		dependencyWriter( writer );
 		writer.WriteLine( "</group>" );
 		writer.WriteLine( "</dependencies>" );

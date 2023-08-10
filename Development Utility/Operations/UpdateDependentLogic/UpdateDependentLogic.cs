@@ -64,6 +64,7 @@ internal class UpdateDependentLogic: Operation {
 				installation,
 				"",
 				EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.CoreProjectName ),
+				"EnterpriseWebLibrary",
 				writer => {
 					writer.WriteLine( "using System;" );
 					writer.WriteLine( "using System.Collections.Generic;" );
@@ -105,22 +106,26 @@ internal class UpdateDependentLogic: Operation {
 				installation,
 				"Development Utility",
 				EwlStatics.CombinePaths( installation.GeneralLogic.Path, "Development Utility" ),
+				"EnterpriseWebLibrary.DevelopmentUtility",
 				_ => {},
 				runtimeIdentifier: "win10-x64" );
 			generateCodeForProject(
 				installation,
 				"MySQL Provider",
 				EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.MySqlProviderProjectPath ),
+				"EnterpriseWebLibrary.MySql",
 				_ => {} );
 			generateCodeForProject(
 				installation,
 				"OpenID Connect Provider",
 				EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.OpenIdConnectProviderProjectPath ),
+				"EnterpriseWebLibrary.OpenIdConnect",
 				_ => {} );
 			generateCodeForProject(
 				installation,
 				"SAML Provider",
 				EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.SamlProviderProjectPath ),
+				"EnterpriseWebLibrary.Saml",
 				_ => {} );
 		}
 		generateLibraryCode( installation );
@@ -133,8 +138,9 @@ internal class UpdateDependentLogic: Operation {
 		if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject != null )
 			generateCodeForProject(
 				installation,
-				installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name,
-				EwlStatics.CombinePaths( installation.GeneralLogic.Path, installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name ),
+				installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.Name,
+				EwlStatics.CombinePaths( installation.GeneralLogic.Path, installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.Name ),
+				installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.NamespaceAndAssemblyName,
 				_ => {},
 				runtimeIdentifier: "win10-x64",
 				selfContained: true );
@@ -183,6 +189,7 @@ internal class UpdateDependentLogic: Operation {
 			installation,
 			"Library",
 			installation.DevelopmentInstallationLogic.LibraryPath,
+			installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName,
 			writer => {
 				// Don't add "using System" here. It will create a huge number of ReSharper warnings in the generated code file.
 				writer.WriteLine( "using System.Collections.Generic;" );
@@ -417,6 +424,7 @@ internal class UpdateDependentLogic: Operation {
 			installation,
 			project.name,
 			application.Path,
+			project.NamespaceAndAssemblyName,
 			writer => {
 				writer.WriteLine( "using System;" );
 				writer.WriteLine( "using System.Collections.Generic;" );
@@ -491,6 +499,7 @@ internal class UpdateDependentLogic: Operation {
 			installation,
 			service.Name,
 			EwlStatics.CombinePaths( installation.GeneralLogic.Path, service.Name ),
+			service.NamespaceAndAssemblyName,
 			writer => {
 				writer.WriteLine( "using System;" );
 				writer.WriteLine( "using System.ComponentModel;" );
@@ -541,6 +550,7 @@ internal class UpdateDependentLogic: Operation {
 			installation,
 			project.Name,
 			EwlStatics.CombinePaths( installation.GeneralLogic.Path, project.Name ),
+			project.NamespaceAndAssemblyName,
 			writer => {
 				writer.WriteLine( "using System.Collections.Immutable;" );
 				writer.WriteLine( "using System.Threading;" );
@@ -582,11 +592,18 @@ internal class UpdateDependentLogic: Operation {
 	}
 
 	private void generateCodeForProject(
-		DevelopmentInstallation installation, string projectName, string projectPath, Action<TextWriter> codeWriter, string runtimeIdentifier = "",
-		bool selfContained = false, bool includeWebFrameworkUsingDirectives = false ) {
+		DevelopmentInstallation installation, string projectName, string projectPath, string assemblyNameAndRootNamespace, Action<TextWriter> codeWriter,
+		string runtimeIdentifier = "", bool selfContained = false, bool includeWebFrameworkUsingDirectives = false ) {
 		using( var writer = new StreamWriter( EwlStatics.CombinePaths( projectPath, "Directory.Build.props" ), false, Encoding.UTF8 ) ) {
 			writer.WriteLine( "<Project>" );
 			writer.WriteLine( "<PropertyGroup>" );
+
+			// common MSBuild properties; see https://learn.microsoft.com/en-us/visualstudio/msbuild/common-msbuild-project-properties
+			writer.WriteLine( "<AssemblyName>{0}</AssemblyName>".FormatWith( assemblyNameAndRootNamespace ) );
+			writer.WriteLine( "<RootNamespace>{0}</RootNamespace>".FormatWith( assemblyNameAndRootNamespace ) );
+
+			// framework properties; see https://learn.microsoft.com/en-us/dotnet/core/project-sdk/msbuild-props#framework-properties
+			writer.WriteLine( "<TargetFramework>{0}</TargetFramework>".FormatWith( ConfigurationStatics.TargetFramework ) );
 
 			writer.WriteLine( "<Version>{0}</Version>".FormatWith( "{0}.0.{1}.0".FormatWith( installation.CurrentMajorVersion, installation.NextBuildNumber ) ) );
 
@@ -763,10 +780,10 @@ internal class UpdateDependentLogic: Operation {
 
 		if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject != null ) {
 			writer.WriteLine();
-			writer.WriteLine( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name + "/bin/" );
-			writer.WriteLine( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name + "/obj/" );
-			writer.WriteLine( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name + "/Directory.Build.props" );
-			writer.WriteLine( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.name + "/Generated Code/" );
+			writer.WriteLine( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.Name + "/bin/" );
+			writer.WriteLine( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.Name + "/obj/" );
+			writer.WriteLine( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.Name + "/Directory.Build.props" );
+			writer.WriteLine( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.Name + "/Generated Code/" );
 		}
 
 		writer.WriteLine();

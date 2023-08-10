@@ -21,8 +21,8 @@
 			<element name="clientSideAppProject" minOccurs="0">
 				<complexType>
 					<sequence>
-						<element name="name" type="string" />
-						<element name="assemblyName" type="string" />
+						<element name="Name" type="string" />
+						<element name="NamespaceAndAssemblyName" type="string" />
 					</sequence>
 				</complexType>
 			</element>
