@@ -2,31 +2,25 @@
 
 **Please note:** While EWL has been in production use for many years, this Getting Started guide is brand new. If you run into problems please let us know in our [community forum](https://community.enterpriseweblibrary.org/) and one of the developers will help you out.
 
-Last updated for Enterprise Web Library version 72.
+Last updated for Enterprise Web Library version 78.
 
 
 ## Requirements
 
-*	Windows 10, .NET Framework 4.7.2, IIS Express 10 (.NET 6 support is on the roadmap but please [speak up](https://community.enterpriseweblibrary.org/) if you’re interested!)
-*	Visual Studio 2019 or later (recommended)
-*	SQL Server 2019 or later, MySQL 5.7, or Oracle Database 12c (if you want a relational database)
+*	Windows 10 or later
+*	Visual Studio 2022 or later (recommended), or .NET 7 SDK
+*	SQL Server 2022 or later, MySQL 8.0, or Oracle Database 12c (if you want a relational database)
 
-For servers, the only requirement is Windows Server 2016 or later with IIS enabled.
+For servers, the only requirement is Windows Server 2019 or later with IIS enabled.
 
 
 ## Creating a new system
 
 1.	Visit http://ewl.enterpriseweblibrary.org/create-system to download a ZIP file containing your new starter system. Extract the files into a location of your choice.
 
-2.	Open the solution file in Visual Studio. In the Package Manager Console, run `Get-Project -All | Install-Package Ewl`. Save all files in the solution (Ctrl-Shift-S).
+2.	Open the solution file in Visual Studio. In the Package Manager Console, run `Get-Project -All | Install-Package Ewl`.
 
-3.	Again in the Package Manager Console, run `Update-DependentLogic`. This will do the following:
-
-	*	Apply some IIS Express configuration
-
-	*	Copy some web-framework files into the solution
-
-	*	Generate a few pieces of code in both projects, and update the Web.config file
+3.	Again in the Package Manager Console, run `Update-DependentLogic`. This will copy some web-framework files into the solution, and generate a few pieces of code in both projects. It will also apply some IIS Express configuration (if installed) in case you wish to use this as a local web server instead of Kestrel.
 
 4.	Understand the elements of your new system:
 
