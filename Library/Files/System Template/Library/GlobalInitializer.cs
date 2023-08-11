@@ -1,6 +1,4 @@
-﻿using EnterpriseWebLibrary;
-
-namespace @@BaseNamespace.Library;
+﻿namespace @@BaseNamespace.Library;
 
 public class GlobalInitializer: SystemInitializer {
 	void SystemInitializer.InitStatics() {}

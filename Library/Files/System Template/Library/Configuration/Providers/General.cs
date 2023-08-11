@@ -1,6 +1,4 @@
-﻿using EnterpriseWebLibrary;
-
-namespace @@BaseNamespace.Library.Configuration.Providers;
+﻿namespace @@BaseNamespace.Library.Configuration.Providers;
 
 internal class General: SystemGeneralProvider {
 	protected override string IntermediateLogInPassword => "your-password";

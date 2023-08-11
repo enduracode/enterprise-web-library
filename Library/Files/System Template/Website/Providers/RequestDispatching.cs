@@ -1,7 +1,4 @@
-﻿using EnterpriseWebLibrary.EnterpriseWebFramework;
-using Tewl.Tools;
-
-namespace @@BaseNamespace.Website.Providers;
+﻿namespace @@BaseNamespace.Website.Providers;
 
 partial class RequestDispatching {
 	protected override IEnumerable<BaseUrlPattern> GetBaseUrlPatterns() => Home.UrlPatterns.BaseUrlPattern().ToCollection();

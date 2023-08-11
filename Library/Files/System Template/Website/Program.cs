@@ -1,4 +1,3 @@
-﻿using EnterpriseWebLibrary.EnterpriseWebFramework;
-using @@BaseNamespace.Library;
+﻿using @@BaseNamespace.Library;
 
 EwfOps.RunApplication( new GlobalInitializer() );

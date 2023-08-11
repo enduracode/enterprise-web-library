@@ -33,6 +33,7 @@ partial class CreateSystem {
 						{
 							systemName.ToTextControl(
 									false,
+									setup: TextControlSetup.Create( placeholder: "e.g. Bicycle Service Manager" ),
 									value: "",
 									maxLength: 50,
 									additionalValidationMethod: validator => {
@@ -43,6 +44,7 @@ partial class CreateSystem {
 								.ToFormItem( label: "System name".ToComponents() ),
 							baseNamespace.ToTextControl(
 									false,
+									setup: TextControlSetup.Create( placeholder: "e.g. ServiceManager" ),
 									value: "",
 									maxLength: 50,
 									additionalValidationMethod: validator => {
@@ -65,14 +67,14 @@ partial class CreateSystem {
 		foreach( var fileName in IoMethods.GetFileNamesInFolder( sourceFolderPath ) ) {
 			var filePath = EwlStatics.CombinePaths( relativeFolderPath, fileName );
 			var destinationFilePath = EwlStatics.CombinePaths( tempFolderPath, filePath == "Solution.sln" ? "{0}.sln".FormatWith( systemName.Value ) : filePath );
-			Directory.CreateDirectory( Path.GetDirectoryName( destinationFilePath ) );
+			Directory.CreateDirectory( Path.GetDirectoryName( destinationFilePath )! );
 			File.WriteAllText(
 				destinationFilePath,
 				File.ReadAllText( EwlStatics.CombinePaths( templateFolderPath, filePath ), Encoding.UTF8 )
 					.Replace( "@@SystemName", systemName.Value )
-					.Replace( "@@SystemShortNameLowercase", systemShortName.Value.ToLowerInvariant() )
 					.Replace( "@@SystemShortName", systemShortName.Value )
-					.Replace( "@@BaseNamespace", baseNamespace.Value ),
+					.Replace( "@@BaseNamespace", baseNamespace.Value )
+					.Replace( "@@TargetFramework", ConfigurationStatics.TargetFramework ),
 				Encoding.UTF8 );
 		}
 		foreach( var subFolderName in IoMethods.GetFolderNamesInFolder( sourceFolderPath ) )

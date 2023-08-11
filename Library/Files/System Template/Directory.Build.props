@@ -1,0 +1,6 @@
+﻿<!-- This file will be overwritten by code generation. -->
+<Project>
+<PropertyGroup>
+<TargetFramework>@@TargetFramework</TargetFramework>
+</PropertyGroup>
+</Project>
