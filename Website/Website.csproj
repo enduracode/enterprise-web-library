@@ -1,9 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net6.0-windows</TargetFramework>
-    <AssemblyName>EnterpriseWebLibrary.Website</AssemblyName>
-    <RootNamespace>EnterpriseWebLibrary.Website</RootNamespace>
     <SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
   </PropertyGroup>
 

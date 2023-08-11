@@ -1,9 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0-windows</TargetFramework>
     <AssemblyName>EnterpriseWebLibrary.Library</AssemblyName>
-    <RootNamespace>EnterpriseWebLibrary</RootNamespace>
     <DefaultItemExcludesInProjectFolder>$(DefaultItemExcludesInProjectFolder);Files\System Template\\**\*.*</DefaultItemExcludesInProjectFolder>
   </PropertyGroup>
 

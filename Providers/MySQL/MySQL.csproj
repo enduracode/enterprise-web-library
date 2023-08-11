@@ -1,11 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net6.0-windows</TargetFramework>
-    <AssemblyName>EnterpriseWebLibrary.MySql</AssemblyName>
-    <RootNamespace>EnterpriseWebLibrary.MySql</RootNamespace>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="MySql.Data" Version="8.0.31" />
   </ItemGroup>

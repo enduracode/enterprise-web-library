@@ -1,11 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net6.0-windows</TargetFramework>
-    <AssemblyName>EnterpriseWebLibrary.OpenIdConnect</AssemblyName>
-    <RootNamespace>EnterpriseWebLibrary.OpenIdConnect</RootNamespace>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="ComponentSpace.OpenID.Licensed" Version="3.2.0" />
   </ItemGroup>
