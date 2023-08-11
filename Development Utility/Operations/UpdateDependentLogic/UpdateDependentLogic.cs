@@ -35,10 +35,10 @@ internal class UpdateDependentLogic: Operation {
 		// This block exists because of https://enduracode.kilnhg.com/Review/K164316.
 		try {
 			IsuStatics.ConfigureIis( false );
-			Console.WriteLine( "Configured IIS." );
+			StatusStatics.SetStatus( "Configured IIS." );
 		}
 		catch {
-			Console.WriteLine( "Did not configure IIS." );
+			StatusStatics.SetStatus( "Did not configure IIS." );
 		}
 
 		var installation = genericInstallation as DevelopmentInstallation;
@@ -598,41 +598,58 @@ internal class UpdateDependentLogic: Operation {
 			writer.WriteLine( "<Project>" );
 			writer.WriteLine( "<PropertyGroup>" );
 
+			var projectFilePath = EwlStatics.CombinePaths( projectPath, "{0}.csproj".FormatWith( Path.GetFileName( projectPath ) ) );
+			var projectFile = "";
+			if( File.Exists( projectFilePath ) )
+				projectFile = File.ReadAllText( projectFilePath );
+			else
+				StatusStatics.SetStatus( "Warning: Failed to locate the project file for {0}.".FormatWith( projectName ) );
+
+			void writeMsBuildProperty( string property ) {
+				writer.WriteLine( property );
+				if( projectFile.Contains( property, StringComparison.OrdinalIgnoreCase ) )
+					StatusStatics.SetStatus(
+						"Warning: The project file for {0} contains {1}, which is generated automatically by {2}.".FormatWith(
+							projectName,
+							property,
+							EwlStatics.EwlInitialism ) );
+			}
+
 			// common MSBuild properties; see https://learn.microsoft.com/en-us/visualstudio/msbuild/common-msbuild-project-properties
-			writer.WriteLine( "<AssemblyName>{0}</AssemblyName>".FormatWith( assemblyNameAndRootNamespace ) );
-			writer.WriteLine( "<RootNamespace>{0}</RootNamespace>".FormatWith( assemblyNameAndRootNamespace ) );
+			writeMsBuildProperty( "<AssemblyName>{0}</AssemblyName>".FormatWith( assemblyNameAndRootNamespace ) );
+			writeMsBuildProperty( "<RootNamespace>{0}</RootNamespace>".FormatWith( assemblyNameAndRootNamespace ) );
 
 			// framework properties; see https://learn.microsoft.com/en-us/dotnet/core/project-sdk/msbuild-props#framework-properties
-			writer.WriteLine( "<TargetFramework>{0}</TargetFramework>".FormatWith( ConfigurationStatics.TargetFramework ) );
+			writeMsBuildProperty( "<TargetFramework>{0}</TargetFramework>".FormatWith( ConfigurationStatics.TargetFramework ) );
 
-			writer.WriteLine( "<Version>{0}</Version>".FormatWith( "{0}.0.{1}.0".FormatWith( installation.CurrentMajorVersion, installation.NextBuildNumber ) ) );
+			writeMsBuildProperty( "<Version>{0}</Version>".FormatWith( "{0}.0.{1}.0".FormatWith( installation.CurrentMajorVersion, installation.NextBuildNumber ) ) );
 
 			// assembly attributes; see https://docs.microsoft.com/en-us/dotnet/standard/assembly/set-attributes
-			writer.WriteLine( "<GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>" );
-			writer.WriteLine( "<Product>{0}</Product>".FormatWith( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName ) );
-			writer.WriteLine(
+			writeMsBuildProperty( "<GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>" );
+			writeMsBuildProperty( "<Product>{0}</Product>".FormatWith( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName ) );
+			writeMsBuildProperty(
 				"<AssemblyTitle>{0}</AssemblyTitle>".FormatWith(
 					installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + projectName.PrependDelimiter( " - " ) ) );
 
 			// package properties; see https://docs.microsoft.com/en-us/nuget/reference/msbuild-targets#pack-target
-			writer.WriteLine( "<PackageVersion>0</PackageVersion>" ); // Clear since we create both prerelease and stable packages with different version numbers.
+			writeMsBuildProperty( "<PackageVersion>0</PackageVersion>" ); // Clear since we create both prerelease and stable packages with different version numbers.
 
 			// publish-related properties; see https://learn.microsoft.com/en-us/dotnet/core/project-sdk/msbuild-props#publish-related-properties
 			if( runtimeIdentifier.Any() ) {
-				writer.WriteLine( "<RuntimeIdentifier>{0}</RuntimeIdentifier>".FormatWith( runtimeIdentifier ) );
+				writeMsBuildProperty( "<RuntimeIdentifier>{0}</RuntimeIdentifier>".FormatWith( runtimeIdentifier ) );
 				if( !selfContained )
-					writer.WriteLine( "<SelfContained>false</SelfContained>" );
+					writeMsBuildProperty( "<SelfContained>false</SelfContained>" );
 			}
 
 			// build-related properties; see https://learn.microsoft.com/en-us/dotnet/core/project-sdk/msbuild-props#build-related-properties
-			writer.WriteLine( "<Nullable>enable</Nullable>" );
-			writer.WriteLine( "<CopyDebugSymbolFilesFromPackages>true</CopyDebugSymbolFilesFromPackages>" );
+			writeMsBuildProperty( "<Nullable>enable</Nullable>" );
+			writeMsBuildProperty( "<CopyDebugSymbolFilesFromPackages>true</CopyDebugSymbolFilesFromPackages>" );
 
-			writer.WriteLine(
+			writeMsBuildProperty(
 				"<DefaultItemExcludesInProjectFolder>$(DefaultItemExcludesInProjectFolder);Directory.Build.props;**/*.ewlt.cs</DefaultItemExcludesInProjectFolder>" );
 
 			// affects only web apps; see https://learn.microsoft.com/en-us/aspnet/core/host-and-deploy/iis/web-config?view=aspnetcore-6.0
-			writer.WriteLine( "<IsTransformWebConfigDisabled>true</IsTransformWebConfigDisabled>" );
+			writeMsBuildProperty( "<IsTransformWebConfigDisabled>true</IsTransformWebConfigDisabled>" );
 
 			writer.WriteLine( "</PropertyGroup>" );
 			writer.WriteLine( "<ItemGroup>" );
