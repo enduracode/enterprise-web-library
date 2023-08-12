@@ -17,7 +17,7 @@ public static class UserManagementStatics {
 	private static LocalIdentityProvider? localIdentityProvider;
 	private static ( Func<string> getter, Action<string> updater )? certificateMethods;
 
-	internal static void Init( Action certificateUpdateNotifier, Func<SystemUser> currentUserGetter ) {
+	internal static void Init( Action certificateUpdateNotifier, Func<SystemUser?> currentUserGetter ) {
 		if( ConfigurationStatics.IsClientSideApp )
 			return;
 

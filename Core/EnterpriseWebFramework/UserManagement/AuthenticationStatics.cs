@@ -40,7 +40,13 @@ public static class AuthenticationStatics {
 
 	public delegate ( SystemUser user, string destinationUrl ) CodeLoginModificationMethod( string emailAddress, string code, string errorMessage = "" );
 
-	public delegate void SpecifiedUserLoginModificationMethod( int userId );
+	/// <summary>
+	/// Logs in the user with the specified ID.
+	/// </summary>
+	/// <param name="userId">The user ID.</param>
+	/// <param name="authenticationDuration">The duration of the authentication session. Pass null to use the default. Do not use unless the system absolutely
+	/// requires micromanagement of authentication behavior.</param>
+	public delegate void SpecifiedUserLoginModificationMethod( int userId, Duration? authenticationDuration = null );
 
 	internal static void Init(
 		SystemProviderReference<AppAuthenticationProvider> provider, IDataProtectionProvider dataProtectionProvider,
@@ -109,7 +115,7 @@ public static class AuthenticationStatics {
 		return Tuple.Create( userAndImpersonator.Item1 != null ? UserManagementStatics.GetUser( userAndImpersonator.Item1.UserId, false ) : null, impersonator );
 	}
 
-	internal static bool UserCanImpersonate( SystemUser user ) => ( user != null && user.Role.CanManageUsers ) || !ConfigurationStatics.IsLiveInstallation;
+	internal static bool UserCanImpersonate( SystemUser user ) => user is { Role.CanManageUsers: true } || !ConfigurationStatics.IsLiveInstallation;
 
 
 	// Adding a New User
@@ -235,9 +241,9 @@ public static class AuthenticationStatics {
 				                       if( errors.Any() )
 					                       throw new DataModificationException( errors.ToArray() );
 				                       return ( user, destinationUrl );
-			                       }, userId => {
+			                       }, ( userId, authenticationDuration ) => {
 				                       var user = UserManagementStatics.SystemProvider.GetUser( userId );
-				                       SetFormsAuthCookieAndUser( user );
+				                       SetFormsAuthCookieAndUser( user, authenticationDuration: authenticationDuration );
 
 				                       var errors = new List<string>();
 				                       errors.AddRange( verifyTestCookie() );
@@ -263,20 +269,20 @@ public static class AuthenticationStatics {
 	/// <summary>
 	/// MVC and private use only.
 	/// </summary>
-	public static void SetFormsAuthCookieAndUser( SystemUser user, IdentityProvider identityProvider = null ) {
+	public static void SetFormsAuthCookieAndUser( SystemUser user, IdentityProvider identityProvider = null, Duration? authenticationDuration = null ) {
 		if( AppRequestState.Instance.ImpersonatorExists )
 			UserImpersonationStatics.SetCookie( user );
 		else {
-			var authenticationDuration = identityProvider is LocalIdentityProvider { AuthenticationDuration: {} } local ? local.AuthenticationDuration.Value :
-			                             identityProvider is SamlIdentityProvider { AuthenticationDuration: {} } saml ? saml.AuthenticationDuration.Value :
-			                             user.Role.RequiresEnhancedSecurity ? Duration.FromMinutes( 12 ) : SessionDuration;
+			authenticationDuration ??= identityProvider is LocalIdentityProvider { AuthenticationDuration: not null } local ? local.AuthenticationDuration.Value :
+			                           identityProvider is SamlIdentityProvider { AuthenticationDuration: not null } saml ? saml.AuthenticationDuration.Value :
+			                           user.Role.RequiresEnhancedSecurity ? Duration.FromMinutes( 12 ) : SessionDuration;
 
 			var ticket = new AuthenticationTicket(
 				new ClaimsPrincipal( new GenericIdentity( user.UserId.ToString() ) ),
 				new AuthenticationProperties
 					{
 						IssuedUtc = AppRequestState.RequestTime.ToDateTimeOffset(),
-						ExpiresUtc = AppRequestState.RequestTime.Plus( authenticationDuration ).ToDateTimeOffset()
+						ExpiresUtc = AppRequestState.RequestTime.Plus( authenticationDuration.Value ).ToDateTimeOffset()
 					},
 				EwlStatics.EwlInitialism );
 			AppRequestState.AddNonTransactionalModificationMethod( () => setFormsAuthCookie( ticket ) );
@@ -361,7 +367,7 @@ public static class AuthenticationStatics {
 	internal static IdentityProvider GetUserLastIdentityProvider() =>
 		// Ignore the cookie if the existence of a user has changed since that could mean the user timed out.
 		CookieStatics.TryGetCookieValueFromRequestOnly( identityProviderCookieName, out var cookieValue ) &&
-		cookieValue[ 0 ] == ( AppTools.User != null ? '+' : '-' )
+		cookieValue[ 0 ] == ( SystemUser.Current is not null ? '+' : '-' )
 			? UserManagementStatics.IdentityProviders.SingleOrDefault(
 				identityProvider => string.Equals(
 					identityProvider is LocalIdentityProvider ? "Local" :
@@ -373,9 +379,9 @@ public static class AuthenticationStatics {
 	internal static void SetUserLastIdentityProvider( IdentityProvider identityProvider ) {
 		setCookie(
 			identityProviderCookieName,
-			( AppTools.User != null ? "+" : "-" ) + ( identityProvider is LocalIdentityProvider ? "Local" :
-			                                          identityProvider is SamlIdentityProvider saml ? saml.EntityId :
-			                                          throw new ApplicationException( "identity provider" ) ) );
+			( SystemUser.Current is not null ? "+" : "-" ) + ( identityProvider is LocalIdentityProvider ? "Local" :
+			                                                   identityProvider is SamlIdentityProvider saml ? saml.EntityId :
+			                                                   throw new ApplicationException( "identity provider" ) ) );
 	}
 
 

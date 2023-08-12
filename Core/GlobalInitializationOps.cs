@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System.Globalization;
+﻿using System.Globalization;
 using EnterpriseWebLibrary.Caching;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
@@ -19,7 +18,7 @@ namespace EnterpriseWebLibrary;
 
 public static class GlobalInitializationOps {
 	private static bool initialized;
-	private static SystemInitializer globalInitializer;
+	private static SystemInitializer? globalInitializer;
 	private static bool secondaryInitFailed;
 
 	/// <summary>
@@ -44,8 +43,8 @@ public static class GlobalInitializationOps {
 	/// the application.</param>
 	public static void InitStatics(
 		SystemInitializer globalInitializer, string appName, bool isClientSideApp, string assemblyFolderPath = "",
-		Action<TextWriter> telemetryAppErrorContextWriter = null, Func<IMemoryCache> memoryCacheGetter = null,
-		Func<DataAccessState> mainDataAccessStateGetter = null, bool useLongDatabaseTimeouts = false, Func<SystemUser> currentUserGetter = null ) {
+		Action<TextWriter>? telemetryAppErrorContextWriter = null, Func<IMemoryCache>? memoryCacheGetter = null,
+		Func<DataAccessState>? mainDataAccessStateGetter = null, bool useLongDatabaseTimeouts = false, Func<SystemUser?>? currentUserGetter = null ) {
 		var initializationLog = "Starting init";
 		try {
 			if( initialized )
