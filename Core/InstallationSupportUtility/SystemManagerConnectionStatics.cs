@@ -20,12 +20,14 @@ public static class SystemManagerConnectionStatics {
 	public const string InstallationsUrlSegment = "installations";
 	public const string DataPackageUrlSegment = "data-package";
 
-	public static SystemList SystemList { get; private set; }
+	private static SystemList? systemList;
 
 	public static void Init( bool? refreshProgramRunnerDataOnly = false ) {
 		if( refreshProgramRunnerDataOnly.HasValue )
 			RefreshLocalData( forProgramRunner: refreshProgramRunnerDataOnly.Value );
 	}
+
+	public static SystemList SystemList => systemList!;
 
 	/// <summary>
 	/// Gets new System Manager local data.
@@ -33,7 +35,7 @@ public static class SystemManagerConnectionStatics {
 	public static void RefreshLocalData( bool forProgramRunner = false ) {
 		// Do not perform system-list schema validation since we don’t want to be forced into redeploying Program Runner after every schema change. We also don’t
 		// have access to the schema on non-development machines.
-		byte[] emailInterface = null;
+		byte[]? emailInterface = null;
 		var systemListFilePath = EwlStatics.CombinePaths( ConfigurationStatics.EwlFolderPath, "System List" + FileExtensions.Xml );
 		var cacheUsed = false;
 		try {
@@ -41,16 +43,16 @@ public static class SystemManagerConnectionStatics {
 				client => {
 					Task.Run(
 							async () => {
-								if( !forProgramRunner )
-									using( var response = await client.GetAsync( "email-interface", HttpCompletionOption.ResponseHeadersRead ) ) {
-										response.EnsureSuccessStatusCode();
-										emailInterface = await response.Content.ReadAsByteArrayAsync();
-									}
+								if( !forProgramRunner ) {
+									using var response = await client.GetAsync( "email-interface", HttpCompletionOption.ResponseHeadersRead );
+									response.EnsureSuccessStatusCode();
+									emailInterface = await response.Content.ReadAsByteArrayAsync();
+								}
 
 								using( var response = await client.GetAsync( "system-list", HttpCompletionOption.ResponseHeadersRead ) ) {
 									response.EnsureSuccessStatusCode();
 									await using( var stream = await response.Content.ReadAsStreamAsync() )
-										SystemList = XmlOps.DeserializeFromStream<SystemList>( stream, false );
+										systemList = XmlOps.DeserializeFromStream<SystemList>( stream, false );
 								}
 							} )
 						.Wait();
@@ -61,7 +63,7 @@ public static class SystemManagerConnectionStatics {
 			if( File.Exists( systemListFilePath ) ) {
 				if( !forProgramRunner )
 					emailInterface = File.ReadAllBytes( EmailStatics.SystemManagerInterfaceFilePath );
-				SystemList = XmlOps.DeserializeFromFile<SystemList>( systemListFilePath, false );
+				systemList = XmlOps.DeserializeFromFile<SystemList>( systemListFilePath, false );
 				cacheUsed = true;
 			}
 			else
@@ -76,7 +78,7 @@ public static class SystemManagerConnectionStatics {
 		// Cache the data so something is available in the future if the System Manager is unavailable.
 		try {
 			if( !forProgramRunner )
-				File.WriteAllBytes( EmailStatics.SystemManagerInterfaceFilePath, emailInterface );
+				File.WriteAllBytes( EmailStatics.SystemManagerInterfaceFilePath, emailInterface! );
 			XmlOps.SerializeIntoFile( SystemList, systemListFilePath );
 		}
 		catch( Exception e ) {
@@ -85,7 +87,7 @@ public static class SystemManagerConnectionStatics {
 				throw new UserCorrectableException( generalMessage + " If the program is running as a non built in administrator, you may need to disable UAC.", e );
 
 			// An IOException probably means the file is locked. In this case we want to ignore the problem and move on.
-			if( !( e is IOException ) )
+			if( e is not IOException )
 				throw new UserCorrectableException( generalMessage, e );
 		}
 	}

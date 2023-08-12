@@ -7,5 +7,5 @@ public static class AppTools {
 	/// <summary>
 	/// Do not use. SystemUser.Current replaces this property.
 	/// </summary>
-	public static SystemUser User => SystemUser.Current;
+	public static SystemUser? User => SystemUser.Current;
 }

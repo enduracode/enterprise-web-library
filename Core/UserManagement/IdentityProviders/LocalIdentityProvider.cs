@@ -167,10 +167,10 @@ public class LocalIdentityProvider: IdentityProvider {
 		string emailAddress, bool isPasswordReset, AutoLogInPageUrlGetterMethod autologInPageUrlGetter,
 		ChangePasswordPageUrlGetterMethod changePasswordPageUrlGetter, string destinationUrl, int? newUserRoleId = null ) {
 		var user = UserManagementStatics.SystemProvider.GetUser( emailAddress );
-		if( user == null ) {
+		if( user is null ) {
 			if( !newUserRoleId.HasValue )
 				return;
-			user = UserManagementStatics.GetUser( UserManagementStatics.SystemProvider.InsertOrUpdateUser( null, emailAddress, newUserRoleId.Value, null ), true );
+			user = UserManagementStatics.GetUser( UserManagementStatics.SystemProvider.InsertOrUpdateUser( null, emailAddress, newUserRoleId.Value, null ), true )!;
 		}
 
 		string code;

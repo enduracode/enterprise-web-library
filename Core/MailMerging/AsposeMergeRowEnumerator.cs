@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Aspose.Words.MailMerging;
+﻿using Aspose.Words.MailMerging;
 using EnterpriseWebLibrary.MailMerging.RowTree;
 
 namespace EnterpriseWebLibrary.MailMerging;
@@ -15,13 +14,13 @@ internal class AsposeMergeRowEnumerator: IMailMergeDataSource {
 		this.ensureAllFieldsHaveValues = ensureAllFieldsHaveValues;
 	}
 
-	string IMailMergeDataSource.TableName { get { return tableName; } }
+	string IMailMergeDataSource.TableName => tableName;
 
 	bool IMailMergeDataSource.MoveNext() {
 		return enumerator.MoveNext();
 	}
 
-	bool IMailMergeDataSource.GetValue( string fieldName, [ NotNullWhen( true ) ] out object? fieldValue ) {
+	bool IMailMergeDataSource.GetValue( string fieldName, out object? fieldValue ) {
 		var mergeValue = enumerator.Current.Values.SingleOrDefault( v => v.MsWordName == fieldName );
 		if( mergeValue == null ) {
 			// This is necessary because Aspose seems to call GetValue for TableStart and/or TableEnd fields.

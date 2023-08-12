@@ -79,7 +79,7 @@ public static class AppMemoryCache {
 					periodicEvictionKeys!.Add( key );
 				return value;
 			} );
-		lazy = cache.GetOrCreate( key, _ => lazy );
+		lazy = cache.GetOrCreate( key, _ => lazy )!;
 		return (T)lazy.Value!; // There doesn’t seem to be a way to express that, if T is non-nullable, .Value will never be null.
 	}
 

@@ -17,29 +17,27 @@ public class RecognizedInstalledInstallation: ExistingInstalledInstallation, Kno
 		this.existingInstalledInstallationLogic = existingInstalledInstallationLogic;
 		this.knownSystemLogic = knownSystemLogic;
 		knownInstallationLogic = new KnownInstallationLogic(
-			SystemManagerConnectionStatics.SystemList.GetInstallationById( existingInstallationLogic.RuntimeConfiguration.RsisInstallationId!.Value ) );
+			SystemManagerConnectionStatics.SystemList.GetInstallationById( existingInstallationLogic.RuntimeConfiguration.RsisInstallationId!.Value )! );
 		this.recognizedInstallationLogic = recognizedInstallationLogic;
 	}
 
-	public override string ToString() {
-		return LatestFullName;
-	}
+	public override string ToString() => LatestFullName;
 
-	public int Id { get { return knownInstallationLogic.RsisInstallation.Id; } }
+	public int Id => knownInstallationLogic.RsisInstallation.Id;
 
-	public string LatestFullName { get { return knownInstallationLogic.RsisInstallation.FullName; } }
+	public string LatestFullName => knownInstallationLogic.RsisInstallation.FullName;
 
-	public string LatestFullShortName { get { return knownInstallationLogic.RsisInstallation.FullShortName; } }
+	public string LatestFullShortName => knownInstallationLogic.RsisInstallation.FullShortName;
 
-	public GeneralInstallationLogic GeneralLogic { get { return generalInstallationLogic; } }
+	public GeneralInstallationLogic GeneralLogic => generalInstallationLogic;
 
-	public ExistingInstallationLogic ExistingInstallationLogic { get { return existingInstallationLogic; } }
+	public ExistingInstallationLogic ExistingInstallationLogic => existingInstallationLogic;
 
-	public ExistingInstalledInstallationLogic ExistingInstalledInstallationLogic { get { return existingInstalledInstallationLogic; } }
+	public ExistingInstalledInstallationLogic ExistingInstalledInstallationLogic => existingInstalledInstallationLogic;
 
-	public KnownSystemLogic KnownSystemLogic { get { return knownSystemLogic; } }
+	public KnownSystemLogic KnownSystemLogic => knownSystemLogic;
 
-	public KnownInstallationLogic KnownInstallationLogic { get { return knownInstallationLogic; } }
+	public KnownInstallationLogic KnownInstallationLogic => knownInstallationLogic;
 
-	public RecognizedInstallationLogic RecognizedInstallationLogic { get { return recognizedInstallationLogic; } }
+	public RecognizedInstallationLogic RecognizedInstallationLogic => recognizedInstallationLogic;
 }

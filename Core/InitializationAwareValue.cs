@@ -38,7 +38,7 @@ public class InitializationAwareValue<T>: IEquatable<InitializationAwareValue<T>
 	public override int GetHashCode() {
 		// ReSharper disable NonReadonlyFieldInGetHashCode
 		hashed = true;
-		return value.GetHashCode();
+		return value!.GetHashCode();
 		// ReSharper restore NonReadonlyFieldInGetHashCode
 	}
 }

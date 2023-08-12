@@ -30,7 +30,7 @@ public interface MergeValue<out ValType>: MergeValue {
 	/// Evaluates the merge field for the row. Throws an exception if true is specified for ensureValueExists and the merge field has no value for the current
 	/// row.
 	/// </summary>
-	ValType Evaluate( bool ensureValueExists );
+	ValType? Evaluate( bool ensureValueExists );
 }
 
 internal class MergeValue<RowType, ValType>: MergeValue<ValType> where RowType: class {
@@ -49,18 +49,16 @@ internal class MergeValue<RowType, ValType>: MergeValue<ValType> where RowType: 
 		this.rowGetter = rowGetter;
 	}
 
-	public string Name { get { return name; } }
-	public string MsWordName { get { return msWordName; } }
+	public string Name => name;
+	public string MsWordName => msWordName;
 
-	public string GetDescription() {
-		return descriptionGetter();
-	}
+	public string GetDescription() => descriptionGetter();
 
-	ValType MergeValue<ValType>.Evaluate( bool ensureValueExists ) {
+	ValType? MergeValue<ValType>.Evaluate( bool ensureValueExists ) {
 		var row = rowGetter();
 
-		if( field is BasicMergeFieldImplementation<RowType, string> ) {
-			var stringValue = row != null ? ( field as BasicMergeFieldImplementation<RowType, string> ).Evaluate( row ) : "";
+		if( field is BasicMergeFieldImplementation<RowType, string> stringField ) {
+			var stringValue = row != null ? stringField.Evaluate( row ) : "";
 			if( stringValue == null )
 				throw new ApplicationException( "String merge fields must never evaluate to null. (" + Name + ")" );
 			if( ensureValueExists && stringValue.Length == 0 )
