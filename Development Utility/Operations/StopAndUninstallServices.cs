@@ -1,20 +1,17 @@
-﻿using System.Collections.Generic;
-using EnterpriseWebLibrary.InstallationSupportUtility;
+﻿using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
 
-namespace EnterpriseWebLibrary.DevelopmentUtility.Operations {
-	internal class StopAndUninstallServices: Operation {
-		private static readonly Operation instance = new StopAndUninstallServices();
-		public static Operation Instance { get { return instance; } }
-		private StopAndUninstallServices() {}
+namespace EnterpriseWebLibrary.DevelopmentUtility.Operations;
 
-		bool Operation.IsValid( Installation installation ) {
-			return installation is RecognizedDevelopmentInstallation;
-		}
+internal class StopAndUninstallServices: Operation {
+	private static readonly Operation instance = new StopAndUninstallServices();
+	public static Operation Instance => instance;
+	private StopAndUninstallServices() {}
 
-		void Operation.Execute( Installation genericInstallation, IReadOnlyList<string> arguments, OperationResult operationResult ) {
-			var installation = genericInstallation as RecognizedDevelopmentInstallation;
-			installation.ExistingInstallationLogic.UninstallServices();
-		}
+	bool Operation.IsValid( Installation installation ) => installation is RecognizedDevelopmentInstallation;
+
+	void Operation.Execute( Installation genericInstallation, IReadOnlyList<string> arguments, OperationResult operationResult ) {
+		var installation = (RecognizedDevelopmentInstallation)genericInstallation;
+		installation.ExistingInstallationLogic.UninstallServices();
 	}
 }

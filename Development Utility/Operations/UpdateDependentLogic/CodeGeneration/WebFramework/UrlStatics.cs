@@ -4,7 +4,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 
 internal static class UrlStatics {
 	internal static void GenerateUrlClasses(
-		TextWriter writer, string className, EntitySetup entitySetup, IReadOnlyCollection<WebItemParameter> requiredParameters,
+		TextWriter writer, string className, EntitySetup? entitySetup, IReadOnlyCollection<WebItemParameter> requiredParameters,
 		IReadOnlyCollection<WebItemParameter> optionalParameters, bool includeVersionString ) {
 		generateEncoder( writer, entitySetup, requiredParameters, optionalParameters, includeVersionString );
 		generateDecoder( writer, className, entitySetup, requiredParameters, optionalParameters, includeVersionString );
@@ -12,7 +12,7 @@ internal static class UrlStatics {
 	}
 
 	private static void generateEncoder(
-		TextWriter writer, EntitySetup entitySetup, IReadOnlyCollection<WebItemParameter> requiredParameters,
+		TextWriter writer, EntitySetup? entitySetup, IReadOnlyCollection<WebItemParameter> requiredParameters,
 		IReadOnlyCollection<WebItemParameter> optionalParameters, bool includeVersionString ) {
 		writer.WriteLine( "public sealed class UrlEncoder: global::EnterpriseWebLibrary.EnterpriseWebFramework.UrlEncoder {" );
 
@@ -137,7 +137,7 @@ internal static class UrlStatics {
 	}
 
 	private static void generateDecoder(
-		TextWriter writer, string className, EntitySetup entitySetup, IReadOnlyCollection<WebItemParameter> requiredParameters,
+		TextWriter writer, string className, EntitySetup? entitySetup, IReadOnlyCollection<WebItemParameter> requiredParameters,
 		IReadOnlyCollection<WebItemParameter> optionalParameters, bool includeVersionString ) {
 		writer.WriteLine( "public sealed class UrlDecoder: global::EnterpriseWebLibrary.EnterpriseWebFramework.UrlDecoder {" );
 
@@ -298,7 +298,7 @@ internal static class UrlStatics {
 	private static string getSpecifiableParameterValueSelector( WebItemParameter p ) => p.IsString || p.IsEnumerable ? "" : ".Value";
 
 	private static void generatePatterns(
-		TextWriter writer, string className, EntitySetup entitySetup, IReadOnlyCollection<WebItemParameter> requiredParameters,
+		TextWriter writer, string className, EntitySetup? entitySetup, IReadOnlyCollection<WebItemParameter> requiredParameters,
 		IReadOnlyCollection<WebItemParameter> optionalParameters, bool includeVersionString ) {
 		writer.WriteLine( "public static class UrlPatterns {" );
 

@@ -8,8 +8,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebF
 internal static class WebFrameworkStatics {
 	internal static void Generate(
 		TextWriter writer, string projectPath, string projectNamespace, bool projectContainsFramework, IEnumerable<string> ignoredFolderPaths,
-		string staticFilesFolderPath, string staticFilesFolderUrlParentExpression, out Action<string> resourceSerializationWriter ) {
-		var allResources = new List<( WebItemGeneralData entitySetup, WebItemGeneralData resource )>();
+		string? staticFilesFolderPath, string? staticFilesFolderUrlParentExpression, out Action<string> resourceSerializationWriter ) {
+		var allResources = new List<( WebItemGeneralData? entitySetup, WebItemGeneralData resource )>();
 		generateForFolder(
 			writer,
 			projectPath,
@@ -111,8 +111,8 @@ internal static class WebFrameworkStatics {
 
 	private static void generateForFolder(
 		TextWriter writer, string projectPath, string projectNamespace, bool projectContainsFramework, ImmutableHashSet<string> ignoredFolderPaths,
-		string staticFilesFolderPath, string staticFilesFolderUrlParentExpression, string folderPathRelativeToProject,
-		List<( WebItemGeneralData entitySetup, WebItemGeneralData resource )> allResources ) {
+		string? staticFilesFolderPath, string? staticFilesFolderUrlParentExpression, string folderPathRelativeToProject,
+		List<( WebItemGeneralData? entitySetup, WebItemGeneralData resource )> allResources ) {
 		if( ignoredFolderPaths.Contains( folderPathRelativeToProject ) )
 			return;
 
@@ -138,7 +138,7 @@ internal static class WebFrameworkStatics {
 				entitySetupFileName = fileName;
 				break;
 			}
-		EntitySetup entitySetup = null;
+		EntitySetup? entitySetup = null;
 		if( entitySetupFileName.Length > 0 ) {
 			var filePathRelativeToProject = Path.Combine( folderPathRelativeToProject, entitySetupFileName );
 			entitySetup = new EntitySetup( projectContainsFramework, new WebItemGeneralData( projectPath, projectNamespace, filePathRelativeToProject, false ) );
@@ -176,7 +176,7 @@ internal static class WebFrameworkStatics {
 
 	private static void generateStaticFileLogic(
 		TextWriter writer, string projectPath, string projectNamespace, bool inFramework, bool? inVersionedFolder, string folderPathRelativeToProject,
-		string folderParentExpression, List<( WebItemGeneralData entitySetup, WebItemGeneralData resource )> allResources ) {
+		string? folderParentExpression, List<( WebItemGeneralData? entitySetup, WebItemGeneralData resource )> allResources ) {
 		var isRootFolder = !inVersionedFolder.HasValue;
 		var folderPath = EwlStatics.CombinePaths( projectPath, folderPathRelativeToProject );
 
@@ -241,7 +241,7 @@ internal static class WebFrameworkStatics {
 
 	private static void generateStaticFileFolderSetup(
 		TextWriter writer, bool inFramework, bool isRootFolder, string folderPathRelativeToProject, string folderNamespace, string className,
-		string parentExpression, IReadOnlyCollection<string> childPatterns ) {
+		string? parentExpression, IReadOnlyCollection<string> childPatterns ) {
 		writer.WriteLine( "namespace {0} {{".FormatWith( folderNamespace ) );
 		writer.WriteLine( "public sealed partial class {0}: StaticFileFolderSetup {{".FormatWith( className ) );
 
@@ -253,7 +253,7 @@ internal static class WebFrameworkStatics {
 			Enumerable.Empty<WebItemParameter>().Materialize(),
 			false );
 		writer.WriteLine( "protected override ResourceParent? createParent() => {0};".FormatWith( isRootFolder ? "null" : parentExpression ) );
-		if( !isRootFolder || parentExpression.Any() )
+		if( !isRootFolder || parentExpression!.Any() )
 			writer.WriteLine( "protected override UrlHandler? getUrlParent() => {0};".FormatWith( isRootFolder ? parentExpression : "base.getUrlParent()" ) );
 		UrlStatics.GenerateGetEncoderMethod(
 			writer,

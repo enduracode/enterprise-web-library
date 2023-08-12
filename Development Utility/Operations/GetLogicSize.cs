@@ -36,7 +36,7 @@ internal class GetLogicSize: Operation {
 		              where m.SourceFileDeclAvailable && m.SourceDecls.Any( s => s.SourceFile.FilePath.ParentDirectoryPath.DirectoryName != "Generated Code" )
 		              select m;
 
-		return methods.Where( i => i.NbLinesOfCode.HasValue ).Sum( i => Convert.ToInt32( i.NbLinesOfCode.Value ) );
+		return methods.Where( i => i.NbLinesOfCode.HasValue ).Sum( i => Convert.ToInt32( i.NbLinesOfCode!.Value ) );
 	}
 
 	private static IEnumerable<string> getAssemblyPaths( DevelopmentInstallation installation, bool debug ) {
@@ -78,15 +78,13 @@ internal class GetLogicSize: Operation {
 	public static Operation Instance => instance;
 	private GetLogicSize() {}
 
-	bool Operation.IsValid( Installation genericInstallation ) {
-		var installation = genericInstallation as DevelopmentInstallation;
-		return installation != null && !installation.DevelopmentInstallationLogic.SystemIsEwl;
-	}
+	bool Operation.IsValid( Installation genericInstallation ) =>
+		genericInstallation is DevelopmentInstallation { DevelopmentInstallationLogic.SystemIsEwl: false };
 
 	void Operation.Execute( Installation genericInstallation, IReadOnlyList<string> arguments, OperationResult operationResult ) {
 		if( !AppStatics.NDependIsPresent )
 			throw new UserCorrectableException( "NDepend is not present." );
-		var installation = genericInstallation as DevelopmentInstallation;
+		var installation = (DevelopmentInstallation)genericInstallation;
 		var locCount = GetNDependLocCount( installation, true );
 
 		Console.WriteLine();

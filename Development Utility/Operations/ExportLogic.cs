@@ -317,12 +317,10 @@ internal class ExportLogic: Operation {
 	public static Operation Instance => instance;
 	private ExportLogic() {}
 
-	bool Operation.IsValid( Installation installation ) {
-		return installation is DevelopmentInstallation;
-	}
+	bool Operation.IsValid( Installation installation ) => installation is DevelopmentInstallation;
 
 	void Operation.Execute( Installation genericInstallation, IReadOnlyList<string> arguments, OperationResult operationResult ) {
-		var installation = genericInstallation as DevelopmentInstallation;
+		var installation = (DevelopmentInstallation)genericInstallation;
 		var packagingConfiguration = GetPackagingConfiguration( installation );
 
 		var logicPackagesFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, "Logic Packages" );

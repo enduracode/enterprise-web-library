@@ -27,9 +27,7 @@ internal class UpdateDependentLogic: Operation {
 	public static Operation Instance => instance;
 	private UpdateDependentLogic() {}
 
-	bool Operation.IsValid( Installation installation ) {
-		return installation is DevelopmentInstallation;
-	}
+	bool Operation.IsValid( Installation installation ) => installation is DevelopmentInstallation;
 
 	void Operation.Execute( Installation genericInstallation, IReadOnlyList<string> arguments, OperationResult operationResult ) {
 		// This block exists because of https://enduracode.kilnhg.com/Review/K164316.
@@ -41,7 +39,7 @@ internal class UpdateDependentLogic: Operation {
 			StatusStatics.SetStatus( "Did not configure IIS." );
 		}
 
-		var installation = genericInstallation as DevelopmentInstallation;
+		var installation = (DevelopmentInstallation)genericInstallation;
 
 		DatabaseOps.UpdateDatabaseLogicIfUpdateFileExists(
 			installation.ExistingInstallationLogic.Database,
@@ -413,7 +411,7 @@ internal class UpdateDependentLogic: Operation {
 			} );
 	}
 
-	private void ensureTablesExist( IReadOnlyCollection<string> databaseTables, IEnumerable<string> specifiedTables, string tableAdjective ) {
+	private void ensureTablesExist( IReadOnlyCollection<string> databaseTables, IEnumerable<string>? specifiedTables, string tableAdjective ) {
 		if( specifiedTables == null )
 			return;
 		var nonexistentTables = specifiedTables.Where( specifiedTable => databaseTables.All( i => !i.EqualsIgnoreCase( specifiedTable ) ) ).ToArray();

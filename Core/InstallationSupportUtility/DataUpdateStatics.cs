@@ -14,12 +14,12 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility;
 /// </summary>
 public class DataUpdateStatics {
 	public static Action DownloadDataPackageAndGetDataUpdateMethod(
-		ExistingInstallation installation, bool installationIsStandbyDb, RsisInstallation source, bool forceNewPackageDownload, OperationResult operationResult ) {
+		ExistingInstallation installation, bool installationIsStandbyDb, RsisInstallation? source, bool forceNewPackageDownload, OperationResult operationResult ) {
 		var recognizedInstallation = installation as RecognizedInstallation;
 
 		string packageZipFilePath;
 		if( recognizedInstallation != null )
-			packageZipFilePath = getDataPackage( source, forceNewPackageDownload, operationResult );
+			packageZipFilePath = getDataPackage( source!, forceNewPackageDownload, operationResult );
 		else {
 			var path = EwlStatics.CombinePaths(
 				getDownloadedPackagesFolderPath(),

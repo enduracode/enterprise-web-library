@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Reflection;
 using EnterpriseWebLibrary.Configuration.Machine;
 using JetBrains.Annotations;
@@ -22,23 +21,23 @@ public static class ConfigurationStatics {
 	/// <summary>
 	/// Gets the path of the EWL folder on the machine.
 	/// </summary>
-	public static string EwlFolderPath { get; private set; }
+	public static string EwlFolderPath { get; private set; } = null!;
 
 	/// <summary>
 	/// EWL and ISU use only.
 	/// </summary>
-	public static MachineConfiguration MachineConfiguration { get; private set; }
+	public static MachineConfiguration? MachineConfiguration { get; private set; }
 
-	internal static Assembly AppAssembly { get; private set; }
-	internal static InstallationConfiguration InstallationConfiguration { get; private set; }
-	private static Type globalInitializerType { get; set; }
+	internal static Assembly AppAssembly { get; private set; } = null!;
+	internal static InstallationConfiguration InstallationConfiguration { get; private set; } = null!;
+	private static Type globalInitializerType { get; set; } = null!;
 
 	/// <summary>
 	/// EWL use only.
 	/// </summary>
-	public static SystemGeneralProvider SystemGeneralProvider { get; private set; }
+	public static SystemGeneralProvider SystemGeneralProvider { get; private set; } = null!;
 
-	internal static string AppName { get; private set; }
+	internal static string AppName { get; private set; } = null!;
 	internal static bool IsClientSideApp { get; private set; }
 
 	internal static void Init( string assemblyFolderPath, Type globalInitializerType, string appName, bool isClientSideApp, ref string initializationLog ) {
@@ -68,14 +67,14 @@ public static class ConfigurationStatics {
 		var stackFrames = new StackTrace().GetFrames();
 		if( stackFrames == null )
 			throw new ApplicationException( "No stack trace available." );
-		AppAssembly = stackFrames.Select( frame => frame.GetMethod().DeclaringType.Assembly ).First( assembly => assembly != Assembly.GetExecutingAssembly() );
+		AppAssembly = stackFrames.Select( frame => frame.GetMethod()!.DeclaringType!.Assembly ).First( assembly => assembly != Assembly.GetExecutingAssembly() );
 
 		initializationLog += Environment.NewLine + "Stack trace initialized";
 
 		// Determine the installation path and load configuration information.
 		// Assume this is an installed installation. If this assumption turns out to be wrong, consider it a development installation. Installed executables are
 		// one level below the installation folder.
-		var installationPath = EwlStatics.CombinePaths( assemblyFolderPath.Any() ? assemblyFolderPath : Path.GetDirectoryName( AppAssembly.Location ), ".." );
+		var installationPath = EwlStatics.CombinePaths( assemblyFolderPath.Any() ? assemblyFolderPath : Path.GetDirectoryName( AppAssembly.Location )!, ".." );
 		var isDevelopmentInstallation = !InstallationConfiguration.InstalledInstallationExists( installationPath );
 		if( isDevelopmentInstallation )
 			// Visual Studio puts executables inside bin\Debug\target-framework-moniker\runtime-identifier.
@@ -85,9 +84,7 @@ public static class ConfigurationStatics {
 		initializationLog += Environment.NewLine + "Successfully loaded installation configuration";
 
 		ConfigurationStatics.globalInitializerType = globalInitializerType;
-		SystemGeneralProvider = GetSystemLibraryProvider<SystemGeneralProvider>( "General" ).GetProvider( returnNullIfNotFound: true );
-		if( SystemGeneralProvider == null )
-			throw new ApplicationException( "General provider not found in system" );
+		SystemGeneralProvider = GetSystemLibraryProvider<SystemGeneralProvider>( "General" ).GetProvider()!;
 
 		AppName = appName;
 		IsClientSideApp = isClientSideApp;

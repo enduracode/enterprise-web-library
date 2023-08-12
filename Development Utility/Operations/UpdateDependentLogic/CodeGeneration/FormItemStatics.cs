@@ -380,8 +380,8 @@ internal static class FormItemStatics {
 				false,
 				( field.TypeIs( typeof( string ) )
 					  ? new CSharpParameter( "string", "defaultValueItemLabel", defaultValue: "\"\"" ).ToCollection()
-					  : Enumerable.Empty<CSharpParameter>() ).Append(
-					new CSharpParameter( "bool", "placeholderIsValid", field.TypeIs( typeof( string ) ) ? "false" : "true" ) ),
+					  : Enumerable.Empty<CSharpParameter>() )
+				.Append( new CSharpParameter( "bool", "placeholderIsValid", field.TypeIs( typeof( string ) ) ? "false" : "true" ) ),
 				field.TypeIs( typeof( string ) ) ? field.NullableTypeName : "SpecifiedValue<{0}>?".FormatWith( field.NullableTypeName ),
 				Enumerable.Empty<CSharpParameter>(),
 				true,
@@ -489,7 +489,7 @@ internal static class FormItemStatics {
 		TextWriter writer, ModificationField field, string controlTypeForName, IEnumerable<CSharpParameter> requiredParams, bool controlIsLabeled,
 		IEnumerable<CSharpParameter> preValueOptionalParams, string valueParamTypeName, IEnumerable<CSharpParameter> postValueOptionalParams,
 		bool includeAdditionalValidationMethodParam, Func<string, string> formControlExpressionGetter, string preFormItemStatements = "",
-		string postFormItemStatements = "", IEnumerable<string> additionalSummarySentences = null ) {
+		string postFormItemStatements = "", IEnumerable<string>? additionalSummarySentences = null ) {
 		var parameters = new List<CSharpParameter>();
 		parameters.AddRange( requiredParams );
 		parameters.Add( new CSharpParameter( "FormItemSetup?", "formItemSetup", "null" ) );
