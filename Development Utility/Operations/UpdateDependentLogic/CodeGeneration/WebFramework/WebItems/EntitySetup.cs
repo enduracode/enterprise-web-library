@@ -23,7 +23,7 @@ internal class EntitySetup {
 			InfoStatics.WriteSpecifyParameterDefaultsMethod( writer, false );
 		InfoStatics.WriteParameterMembers( writer, generalData.RequiredParameters, generalData.OptionalParameters );
 		if( generalData.RequiredParameters.Any() || generalData.OptionalParameters.Any() )
-			writer.WriteLine( "internal ParametersModification? parametersModification;" );
+			writer.WriteLine( "internal ParametersModification parametersModification = null!;" );
 		if( generalData.OptionalParameters.Any() )
 			writer.WriteLine( "private Action<OptionalParameterSpecifier, Parameters>? optionalParameterSetter;" );
 		InfoStatics.WriteConstructorAndHelperMethods( writer, generalData, generalData.RequiredParameters, generalData.OptionalParameters, false, true );

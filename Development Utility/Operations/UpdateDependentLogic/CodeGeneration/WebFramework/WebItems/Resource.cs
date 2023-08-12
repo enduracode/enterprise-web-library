@@ -33,7 +33,7 @@ internal class Resource {
 			writer.WriteLine( "public EntitySetup Es = null!;" );
 		InfoStatics.WriteParameterMembers( writer, generalData.RequiredParameters, generalData.OptionalParameters );
 		if( generalData.IsPage() && ( generalData.RequiredParameters.Any() || generalData.OptionalParameters.Any() ) )
-			writer.WriteLine( "private ParametersModification? parametersModification;" );
+			writer.WriteLine( "private ParametersModification parametersModification = null!;" );
 		if( generalData.OptionalParameters.Any() ) {
 			writer.WriteLine( "private readonly Lazy<SegmentParameterSpecifier> segmentParameterSpecifier;" );
 			writer.WriteLine(
