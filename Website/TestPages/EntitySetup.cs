@@ -5,7 +5,7 @@
 namespace EnterpriseWebLibrary.Website.TestPages;
 
 partial class EntitySetup: UiEntitySetup {
-	protected override ResourceBase createParent() => null;
+	protected override ResourceBase? createParent() => null;
 
 	protected override string getEntitySetupName() => "Web Framework Demo";
 

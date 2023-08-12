@@ -88,8 +88,8 @@ partial class NumberControlDemo {
 
 	private Func<string, FormItem>
 		get(
-			string label, NumberControlSetup setup, PageModificationValue<decimal?> pageModificationValue = null, decimal? minValue = null, decimal? maxValue = null,
-			decimal? valueStep = null ) =>
+			string label, NumberControlSetup? setup, PageModificationValue<decimal?>? pageModificationValue = null, decimal? minValue = null,
+			decimal? maxValue = null, decimal? valueStep = null ) =>
 		id => new NumberControl(
 			null,
 			true,
@@ -97,7 +97,7 @@ partial class NumberControlDemo {
 			minValue: minValue,
 			maxValue: maxValue,
 			valueStep: valueStep,
-			validationMethod: ( postBackValue, validator ) => AddStatusMessage( StatusMessageType.Info, "{0}: {1}".FormatWith( id, postBackValue ) ) ).ToFormItem(
+			validationMethod: ( postBackValue, _ ) => AddStatusMessage( StatusMessageType.Info, "{0}: {1}".FormatWith( id, postBackValue ) ) ).ToFormItem(
 			label: "{0}. {1}".FormatWith( id, label )
 				.ToComponents()
 				.Concat(
@@ -116,7 +116,7 @@ partial class NumberControlDemo {
 
 	private Func<string, FormItem>
 		getImprecise(
-			string label, ImpreciseNumberControlSetup setup, PageModificationValue<decimal> pageModificationValue = null, decimal? minValue = null,
+			string label, ImpreciseNumberControlSetup? setup, PageModificationValue<decimal>? pageModificationValue = null, decimal? minValue = null,
 			decimal? maxValue = null, decimal? valueStep = null ) =>
 		id => new ImpreciseNumberControl(
 			.25m,
@@ -124,7 +124,7 @@ partial class NumberControlDemo {
 			maxValue ?? 1,
 			setup: setup,
 			valueStep: valueStep,
-			validationMethod: ( postBackValue, validator ) => AddStatusMessage( StatusMessageType.Info, "{0}: {1}".FormatWith( id, postBackValue ) ) ).ToFormItem(
+			validationMethod: ( postBackValue, _ ) => AddStatusMessage( StatusMessageType.Info, "{0}: {1}".FormatWith( id, postBackValue ) ) ).ToFormItem(
 			label: "{0}. {1}".FormatWith( id, label )
 				.ToComponents()
 				.Concat(

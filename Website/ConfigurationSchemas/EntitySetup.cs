@@ -1,12 +1,12 @@
 ﻿namespace EnterpriseWebLibrary.Website.ConfigurationSchemas;
 
 partial class EntitySetup {
-	protected override ResourceParent createParent() => null;
+	protected override ResourceParent? createParent() => null;
 	protected override string getEntitySetupName() => "Configuration Schemas";
 	public override ResourceBase DefaultResource => throw new NotSupportedException();
 	protected override IEnumerable<ResourceGroup> createListedResources() => Enumerable.Empty<ResourceGroup>();
 	protected override UrlHandler getUrlParent() => new TestPages.EntitySetup();
-	protected override UrlHandler getRequestHandler() => null;
+	protected override UrlHandler? getRequestHandler() => null;
 
 	protected override IEnumerable<UrlPattern> getChildUrlPatterns() =>
 		new UrlPattern(

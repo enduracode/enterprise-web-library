@@ -10,7 +10,7 @@ partial class EntitySetup: UiEntitySetup {
 	protected override IEnumerable<ResourceGroup> createListedResources() =>
 		new[] { new ResourceGroup( new General( this ), new Details( this ), new Disabled( this ), new New( this ) ) };
 
-	protected override UrlHandler getRequestHandler() => null;
+	protected override UrlHandler? getRequestHandler() => null;
 
 	EntityUiSetup UiEntitySetup.GetUiSetup() =>
 		new( entitySummaryContent: new Paragraph( "Awesome content goes here.".ToComponents() ).ToCollection(), tabMode: TabMode.Horizontal );

@@ -89,12 +89,12 @@ partial class TextControlDemo {
 				}
 			};
 
-	private Func<string, FormItem> get( string label, TextControlSetup setup, int? maxLength = null ) =>
+	private Func<string, FormItem> get( string label, TextControlSetup? setup, int? maxLength = null ) =>
 		id => new TextControl(
 			"",
 			true,
 			setup: setup,
 			maxLength: maxLength,
-			validationMethod: ( postBackValue, validator ) => AddStatusMessage( StatusMessageType.Info, "{0}: {1}".FormatWith( id, postBackValue ) ) ).ToFormItem(
+			validationMethod: ( postBackValue, _ ) => AddStatusMessage( StatusMessageType.Info, "{0}: {1}".FormatWith( id, postBackValue ) ) ).ToFormItem(
 			label: "{0}. {1}".FormatWith( id, label ).ToComponents() );
 }

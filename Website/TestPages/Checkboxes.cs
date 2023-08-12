@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using EnterpriseWebLibrary.EnterpriseWebFramework;
-using EnterpriseWebLibrary.WebSessionState;
-using Humanizer;
-using Tewl.Tools;
+﻿using EnterpriseWebLibrary.WebSessionState;
 
 // EwlPage
 
@@ -37,7 +31,8 @@ namespace EnterpriseWebLibrary.Website.TestPages {
 					getFlowCheckbox(
 						"Flow with nested content",
 						FlowCheckboxSetup.Create(
-							nestedContentGetter: () => new Paragraph(
+							nestedContentGetter:
+							() => new Paragraph(
 								"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin id vestibulum neque. Suspendisse vel sem ac nunc condimentum tempus eget quis nunc. Morbi mattis elementum cursus. Integer eros mi, porttitor vitae orci eget, facilisis pretium diam. Aenean et nisi leo. Aenean nibh ligula, suscipit sit amet nulla ac, faucibus suscipit ipsum. Nunc quis faucibus ex."
 									.ToComponents() ).ToCollection() ) ),
 					getFlowCheckbox(
@@ -63,42 +58,40 @@ namespace EnterpriseWebLibrary.Website.TestPages {
 					getRadioGroup( "Radio group with read-only button", RadioButtonSetup.CreateReadOnly() )
 				};
 
-		private Func<string, FormItem> getCheckbox( string label, CheckboxSetup setup, PageModificationValue<bool> pageModificationValue = null ) =>
+		private Func<string, FormItem> getCheckbox( string label, CheckboxSetup? setup, PageModificationValue<bool>? pageModificationValue = null ) =>
 			id => new Checkbox(
-				false,
-				"Lorem ipsum dolor sit amet".ToComponents(),
-				setup: setup,
-				validationMethod: ( postBackValue, validator ) => AddStatusMessage(
-					StatusMessageType.Info,
-					"{0}: {1}".FormatWith( id, postBackValue.Value.ToString() ) ) ).ToFormItem(
-				label: "{0}. {1}".FormatWith( id, label )
-					.ToComponents()
-					.Concat(
-						pageModificationValue != null
-							? new LineBreak().ToCollection<PhrasingComponent>()
-								.Append(
-									new SideComments(
-										"Value: ".ToComponents()
-											.Concat(
-												pageModificationValue.ToGenericPhrasingContainer(
-													v => v.ToString(),
-													valueExpression => "{0} ? 'True' : 'False'".FormatWith( valueExpression ) ) )
-											.Materialize() ) )
-							: Enumerable.Empty<PhrasingComponent>() )
-					.Materialize() );
+					false,
+					"Lorem ipsum dolor sit amet".ToComponents(),
+					setup: setup,
+					validationMethod: ( postBackValue, _ ) => AddStatusMessage( StatusMessageType.Info, "{0}: {1}".FormatWith( id, postBackValue.Value.ToString() ) ) )
+				.ToFormItem(
+					label: "{0}. {1}".FormatWith( id, label )
+						.ToComponents()
+						.Concat(
+							pageModificationValue != null
+								? new LineBreak().ToCollection<PhrasingComponent>()
+									.Append(
+										new SideComments(
+											"Value: ".ToComponents()
+												.Concat(
+													pageModificationValue.ToGenericPhrasingContainer(
+														v => v.ToString(),
+														valueExpression => "{0} ? 'True' : 'False'".FormatWith( valueExpression ) ) )
+												.Materialize() ) )
+								: Enumerable.Empty<PhrasingComponent>() )
+						.Materialize() );
 
-		private Func<string, FormItem> getFlowCheckbox( string label, FlowCheckboxSetup setup ) =>
+		private Func<string, FormItem> getFlowCheckbox( string label, FlowCheckboxSetup? setup ) =>
 			id => new FlowCheckbox(
-				false,
-				"Lorem ipsum dolor sit amet".ToComponents(),
-				setup: setup,
-				validationMethod: ( postBackValue, validator ) => AddStatusMessage(
-					StatusMessageType.Info,
-					"{0}: {1}".FormatWith( id, postBackValue.Value.ToString() ) ) ).ToFormItem( label: "{0}. {1}".FormatWith( id, label ).ToComponents() );
+					false,
+					"Lorem ipsum dolor sit amet".ToComponents(),
+					setup: setup,
+					validationMethod: ( postBackValue, _ ) => AddStatusMessage( StatusMessageType.Info, "{0}: {1}".FormatWith( id, postBackValue.Value.ToString() ) ) )
+				.ToFormItem( label: "{0}. {1}".FormatWith( id, label ).ToComponents() );
 
 		private Func<string, FormItem> getRadioGroup(
-			string label, RadioButtonSetup setup, bool noSelection = false, bool singleButton = false, FormAction selectionChangedAction = null,
-			PageModificationValue<bool> pageModificationValue = null ) =>
+			string label, RadioButtonSetup? setup, bool noSelection = false, bool singleButton = false, FormAction? selectionChangedAction = null,
+			PageModificationValue<bool>? pageModificationValue = null ) =>
 			id => {
 				var group = new RadioButtonGroup( noSelection, disableSingleButtonDetection: singleButton, selectionChangedAction: selectionChangedAction );
 				return new StackList(
@@ -107,9 +100,8 @@ namespace EnterpriseWebLibrary.Website.TestPages {
 							!noSelection,
 							"First".ToComponents(),
 							setup: setup,
-							validationMethod: ( postBackValue, validator ) => AddStatusMessage(
-								StatusMessageType.Info,
-								"{0}-1: {1}".FormatWith( id, postBackValue.Value.ToString() ) ) )
+							validationMethod:
+							( postBackValue, _ ) => AddStatusMessage( StatusMessageType.Info, "{0}-1: {1}".FormatWith( id, postBackValue.Value.ToString() ) ) )
 						.ToFormItem()
 						.ToListItem()
 						.ToCollection()
@@ -119,11 +111,11 @@ namespace EnterpriseWebLibrary.Website.TestPages {
 								: group.CreateFlowRadioButton(
 										false,
 										"Second".ToComponents(),
-										setup: FlowRadioButtonSetup.Create(
+										setup:
+										FlowRadioButtonSetup.Create(
 											nestedContentGetter: () => "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sit.".ToComponents() ),
-										validationMethod: ( postBackValue, validator ) => AddStatusMessage(
-											StatusMessageType.Info,
-											"{0}-2: {1}".FormatWith( id, postBackValue.Value.ToString() ) ) )
+										validationMethod:
+										( postBackValue, _ ) => AddStatusMessage( StatusMessageType.Info, "{0}-2: {1}".FormatWith( id, postBackValue.Value.ToString() ) ) )
 									.ToFormItem()
 									.ToListItem()
 									.ToCollection()
@@ -132,9 +124,8 @@ namespace EnterpriseWebLibrary.Website.TestPages {
 												false,
 												"Third".ToComponents(),
 												setup: RadioButtonSetup.Create(),
-												validationMethod: ( postBackValue, validator ) => AddStatusMessage(
-													StatusMessageType.Info,
-													"{0}-3: {1}".FormatWith( id, postBackValue.Value.ToString() ) ) )
+												validationMethod:
+												( postBackValue, _ ) => AddStatusMessage( StatusMessageType.Info, "{0}-3: {1}".FormatWith( id, postBackValue.Value.ToString() ) ) )
 											.ToFormItem()
 											.ToListItem() ) ) ).ToFormItem(
 					label: "{0}. {1}".FormatWith( id, label )
@@ -157,7 +148,7 @@ namespace EnterpriseWebLibrary.Website.TestPages {
 }
 
 namespace EnterpriseWebLibrary.Website.TestPages {
-partial class Checkboxes {
-protected override UrlHandler getUrlParent() => new LegacyUrlFolderSetup();
-}
+	partial class Checkboxes {
+		protected override UrlHandler getUrlParent() => new LegacyUrlFolderSetup();
+	}
 }
