@@ -71,6 +71,12 @@ ewfSectionBoxStyleBothStates, ewfTableStandardAndStandardExceptLayoutStyles, ewf
 	}
 }
 
+/* focus */
+ewfUiPageActionListContainer ewfActionComponentAllStylesStatesWithFocus {
+	outline: 2px solid hsl(209, 91%, 47%);
+	outline-offset: 1px;
+}
+
 /* contrast */
 ewfTableStandardAndStandardExceptLayoutStyles,
 ewfTableStandardAndStandardExceptLayoutStyles > tbody > ewfTrStatesWithContrast,
@@ -272,6 +278,17 @@ ewfUiSideTabContainer ewfActionComponentAllStylesStatesWithHover {
 }
 ewfUiSideTabContainer ewfUiCurrentTabActionControl {
 	background: linear-gradient(to right, var(--ewf-ui-current-side-tab-background-color), var(--ewf-ui-background-color));
+}
+ewfUiPageActionListContainer ewfActionComponentAllStylesAllStates {
+	color: white;
+}
+ewfUiPageActionListContainer ewfActionComponentAllStylesAllNormalStates,
+ewfUiPageActionListContainer ewfActionComponentAllStylesAllVisitedStates {
+	background-color: var(--ewf-ui-secondary-color);
+}
+ewfUiPageActionListContainer ewfActionComponentAllStylesStatesWithFocus,
+ewfUiPageActionListContainer ewfActionComponentAllStylesStatesWithHover {
+	background-color: var(--ewf-ui-activation-color);
 }
 ewfUiGlobalFootContainer {
 	background-color: var(--ewf-ui-global-foot-background-color);

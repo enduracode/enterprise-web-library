@@ -1,4 +1,4 @@
-﻿ewfActionComponentAllButtonStylesAllStates {
+﻿ewfActionComponentAllButtonStylesAllStates, ewfUiPageActionListContainer ewfActionComponentAllStylesAllStates {
 	transition: all 200ms;
 }
 
@@ -9,7 +9,7 @@ ewfFlowCheckboxAllStates > ewfCheckbox {
 ewfUiInnerGlobalContainer ewfActionComponentAllStylesAllStates {
 	transition: color 200ms;
 }
-@media only screen and ( max-width: 768px ) {
+@media only screen and (max-width: 768px) {
 	ewfUiUserInfoContainer > ewfUnorderedComponentList {
 		transition: transform ease-in-out 0;
 	}

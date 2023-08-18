@@ -219,14 +219,14 @@ ewfUiSideTabContainer ewfUiCurrentTabActionControl {
 @media print {}
 
 /* max width */
-ewfSectionBoxStyleBothStates, ewfUiContentBox, ewfUiContentFootActionListContainer {
+ewfSectionBoxStyleBothStates, ewfUiContentBox, ewfUiPageActionListContainer > ewfUnorderedComponentList, ewfUiContentFootActionListContainer {
 	margin-left: auto;
 	margin-right: auto;
 }
 ewfSectionBoxStyleBothStates, ewfUiContentBox {
 	max-width: var(--ewf-column-width);
 }
-ewfUiContentFootActionListContainer {
+ewfUiPageActionListContainer > ewfUnorderedComponentList, ewfUiContentFootActionListContainer {
 	max-width: calc(var(--ewf-column-width) + var(--ewf-ui-top-level-horizontal-spacing) * 2);
 }
 
@@ -361,6 +361,9 @@ ewfSectionBoxStyleBothStates, ewfSectionBoxStyleClosedState > ewfSectionHeadingC
 ewfTableStandardAndStandardExceptLayoutStyles,
 ewfTableStandardAndStandardExceptLayoutStyles > tbody:last-child > ewfTrStatesWithContrast:last-child > ewfThAndTd:last-child {
 	border-bottom-right-radius: var(--ewf-ui-large-border-radius);
+}
+ewfUiPageActionListContainer ewfActionComponentAllStylesAllStates {
+	border-radius: .25em;
 }
 @media print {
 	ewfSectionBoxStyleBothStates, ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer > ewfSectionHeading,
@@ -533,10 +536,9 @@ ewfUiEntityNavAndActionContainer {
 	align-items: center;
 	font-weight: 600;
 }
-ewfUiEntityActionListContainer, ewfUiPageActionListContainer {
-	text-align: right;
-}
-ewfUiEntityActionListContainer > ewfUnorderedLineList, ewfUiPageActionListContainer > ewfUnorderedLineList {
+ewfUiEntityActionListContainer > ewfUnorderedWrappingList,
+ewfUiPageActionListContainer > ewfUnorderedWrappingList,
+ewfUiContentFootActionListContainer > ewfUnorderedWrappingList {
 	justify-content: flex-end;
 }
 ewfUiTopTabListContainer {
@@ -571,15 +573,22 @@ ewfUiSideTabGroupHead {
 ewfUiSideTabContainer ewfActionComponentAllStylesAllStates {
 	font-weight: 600;
 }
-ewfUiPageActionListContainer {
-	margin-bottom: 1em;
-	margin-left: 1em;
+ewfUiPageActionListContainer ewfActionComponentAllStylesAllStates {
+	display: inline-block;
+	padding: .1em .3em;
+	white-space: nowrap;
+}
+ewfUiPageActionListContainer ewfHyperlinkAllStylesActionlessState,
+ewfUiPageActionListContainer ewfHyperlinkAllStylesAllNormalStates,
+ewfUiPageActionListContainer ewfHyperlinkAllStylesAllVisitedStates {
+	text-decoration: none;
+}
+ewfUiPageActionListContainer ewfHyperlinkAllStylesStatesWithFocus,
+ewfUiPageActionListContainer ewfHyperlinkAllStylesStatesWithHover {
+	text-decoration: underline;
 }
 ewfUiContentFootContainer {
 	text-align: center;
-}
-ewfUiContentFootActionListContainer > ewfUnorderedWrappingList {
-	justify-content: flex-end;
 }
 ewfUiPoweredByEwlFooterContainer {
 	font-size: .9em;
