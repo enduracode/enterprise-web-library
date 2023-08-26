@@ -13,7 +13,7 @@
     <PackageReference Include="Imageflow.AllPlatforms" Version="0.9.0" />
     <PackageReference Include="JetBrains.Annotations" Version="2022.1.0" />
     <PackageReference Include="Microsoft.Web.Administration" Version="11.1.0" />
-    <PackageReference Include="Microsoft.Windows.Compatibility" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Windows.Compatibility" Version="7.0.4" />
     <PackageReference Include="MimeTypeMapOfficial" Version="1.0.17" />
     <PackageReference Include="MiniProfiler.AspNetCore" Version="4.2.22" />
     <PackageReference Include="morelinq" Version="3.3.2" />
