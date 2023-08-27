@@ -135,7 +135,12 @@ public class MySql: Database {
 	}
 
 	private string binFolderPath =>
-		IoMethods.GetFirstExistingFolderPath( new[] { @"C:\Program Files\MySQL\MySQL Server 8.0\bin", @"C:\Program Files\MySQL\MySQL Server 5.7\bin" }, "MySQL" );
+		IoMethods.GetFirstExistingFolderPath(
+			@"C:\Program Files\MySQL\MySQL Server 8.1\bin".ToCollection()
+				.Append( @"C:\Program Files\MySQL\MySQL Server 8.0\bin" )
+				.Append( @"C:\Program Files\MySQL\MySQL Server 5.7\bin" )
+				.Materialize(),
+			"MySQL" );
 
 	private string getHostAndAuthenticationArguments() {
 		return "--host=localhost --user=root --password=password";
