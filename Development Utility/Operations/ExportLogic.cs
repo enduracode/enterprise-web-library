@@ -104,19 +104,9 @@ internal class ExportLogic: Operation {
 									writer,
 									installation,
 									mainId,
+									mainId,
 									"",
-									w => {
-										var lines = from line in File.ReadAllLines(
-											            EwlStatics.CombinePaths(
-												            installation.GeneralLogic.Path,
-												            EwlStatics.CoreProjectName,
-												            EwlStatics.CoreProjectName + ".csproj" ) )
-										            let trimmedLine = line.Trim()
-										            where trimmedLine.StartsWith( "<PackageReference " )
-										            select trimmedLine;
-										foreach( var line in lines )
-											w.WriteLine( line.Replace( "PackageReference", "dependency" ).Replace( "Include", "id" ).Replace( "Version", "version" ) );
-									},
+									EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.CoreProjectName, EwlStatics.CoreProjectName + ".csproj" ),
 									prerelease,
 									localExportDateAndTime );
 
@@ -146,11 +136,9 @@ internal class ExportLogic: Operation {
 				createProviderNuGetPackages(
 					installation,
 					mainId,
-					"MySQL Provider",
-					EwlStatics.MySqlProviderProjectPath,
+					EwlStatics.MySqlProviderProjectName,
 					"EnterpriseWebLibrary.MySql",
 					mySqlId,
-					"<dependency id=\"MySql.Data\" version=\"8.0.31\" />".ToCollection(),
 					now,
 					useDebugAssembly,
 					outputFolderPath,
@@ -162,11 +150,9 @@ internal class ExportLogic: Operation {
 				createProviderNuGetPackages(
 					installation,
 					mainId,
-					"OpenID Connect Provider",
-					EwlStatics.OpenIdConnectProviderProjectPath,
+					EwlStatics.OpenIdConnectProviderProjectName,
 					"EnterpriseWebLibrary.OpenIdConnect",
 					openIdConnectId,
-					"<dependency id=\"ComponentSpace.OpenID.Licensed\" version=\"3.2.0\" />".ToCollection(),
 					now,
 					useDebugAssembly,
 					outputFolderPath,
@@ -178,11 +164,9 @@ internal class ExportLogic: Operation {
 				createProviderNuGetPackages(
 					installation,
 					mainId,
-					"SAML Provider",
-					EwlStatics.SamlProviderProjectPath,
+					EwlStatics.SamlProviderProjectName,
 					"EnterpriseWebLibrary.Saml",
 					samlId,
-					"<dependency id=\"ComponentSpace.Saml2.Licensed\" version=\"4.5.0\" />".ToCollection(),
 					now,
 					useDebugAssembly,
 					outputFolderPath,
@@ -200,8 +184,8 @@ internal class ExportLogic: Operation {
 	}
 
 	private static IReadOnlyList<byte[]> createProviderNuGetPackages(
-		DevelopmentInstallation installation, string mainPackageId, string projectName, string projectPath, string assemblyName, string packageId,
-		IEnumerable<string> dependencies, DateTime now, bool useDebugAssembly, string outputFolderPath, IEnumerable<bool?> prereleaseValues ) =>
+		DevelopmentInstallation installation, string mainPackageId, string projectName, string assemblyName, string packageId, DateTime now, bool useDebugAssembly,
+		string outputFolderPath, IEnumerable<bool?> prereleaseValues ) =>
 		prereleaseValues.Select(
 				prerelease => {
 					var localExportDateAndTime = prerelease.HasValue ? (DateTime?)null : now;
@@ -211,7 +195,7 @@ internal class ExportLogic: Operation {
 							TewlContrib.ProcessTools.RunProgram(
 								"dotnet",
 								"build \"{0}\" --configuration {1} --no-restore".FormatWith(
-									EwlStatics.CombinePaths( installation.GeneralLogic.Path, projectPath ),
+									EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.ProviderProjectFolderName, projectName ),
 									useDebugAssembly ? "Debug" : "Release" ),
 								"",
 								true );
@@ -219,7 +203,8 @@ internal class ExportLogic: Operation {
 								IoMethods.CopyFile(
 									EwlStatics.CombinePaths(
 										installation.GeneralLogic.Path,
-										projectPath,
+										EwlStatics.ProviderProjectFolderName,
+										projectName,
 										ConfigurationStatics.GetProjectOutputFolderPath( useDebugAssembly ),
 										fileName ),
 									EwlStatics.CombinePaths( folderPath, @"lib\{0}".FormatWith( nuGetTargetFramework ), fileName ) );
@@ -229,19 +214,10 @@ internal class ExportLogic: Operation {
 								writeNuGetPackageManifest(
 									writer,
 									installation,
+									mainPackageId,
 									packageId,
-									projectName,
-									w => {
-										w.WriteLine(
-											"<dependency id=\"{0}\" version=\"[{1}]\" />".FormatWith(
-												mainPackageId,
-												EwlNuGetPackageSpecificationStatics.GetNuGetPackageVersionString(
-													installation.CurrentMajorVersion,
-													!prerelease.HasValue || prerelease.Value ? installation.NextBuildNumber : null,
-													localExportDateAndTime: localExportDateAndTime ) ) );
-										foreach( var i in dependencies )
-											w.WriteLine( i );
-									},
+									"{0} Provider".FormatWith( projectName ),
+									EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.ProviderProjectFolderName, projectName, projectName + ".csproj" ),
 									prerelease,
 									localExportDateAndTime );
 
@@ -285,7 +261,7 @@ internal class ExportLogic: Operation {
 	}
 
 	private static void writeNuGetPackageManifest(
-		TextWriter writer, DevelopmentInstallation installation, string id, string projectName, Action<TextWriter> dependencyWriter, bool? prerelease,
+		TextWriter writer, DevelopmentInstallation installation, string mainId, string id, string projectName, string projectFilePath, bool? prerelease,
 		DateTime? localExportDateAndTime ) {
 		writer.WriteLine( "<?xml version=\"1.0\" encoding=\"utf-8\"?>" );
 		writer.WriteLine( "<package xmlns=\"http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd\">" );
@@ -306,7 +282,20 @@ internal class ExportLogic: Operation {
 		writer.WriteLine( "<requireLicenseAcceptance>false</requireLicenseAcceptance>" );
 		writer.WriteLine( "<dependencies>" );
 		writer.WriteLine( "<group targetFramework=\"{0}\">".FormatWith( nuGetTargetFramework ) );
-		dependencyWriter( writer );
+		if( !string.Equals( id, mainId, StringComparison.Ordinal ) )
+			writer.WriteLine(
+				"<dependency id=\"{0}\" version=\"[{1}]\" />".FormatWith(
+					mainId,
+					EwlNuGetPackageSpecificationStatics.GetNuGetPackageVersionString(
+						installation.CurrentMajorVersion,
+						!prerelease.HasValue || prerelease.Value ? installation.NextBuildNumber : null,
+						localExportDateAndTime: localExportDateAndTime ) ) );
+		var lines = from line in File.ReadAllLines( projectFilePath )
+		            let trimmedLine = line.Trim()
+		            where trimmedLine.StartsWith( "<PackageReference " )
+		            select trimmedLine;
+		foreach( var line in lines )
+			writer.WriteLine( line.Replace( "PackageReference", "dependency" ).Replace( "Include", "id" ).Replace( "Version", "version" ) );
 		writer.WriteLine( "</group>" );
 		writer.WriteLine( "</dependencies>" );
 		writer.WriteLine( "<tags>C# ASP.NET DAL SQL-Server MySQL Oracle</tags>" );

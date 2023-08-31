@@ -34,17 +34,22 @@ public static partial class EwlStatics {
 	/// <summary>
 	/// Development Utility and internal use only.
 	/// </summary>
-	public const string MySqlProviderProjectPath = @"Providers\MySQL";
+	public const string ProviderProjectFolderName = "Providers";
 
 	/// <summary>
 	/// Development Utility and internal use only.
 	/// </summary>
-	public const string OpenIdConnectProviderProjectPath = @"Providers\OpenID Connect";
+	public const string MySqlProviderProjectName = "MySQL";
 
 	/// <summary>
 	/// Development Utility and internal use only.
 	/// </summary>
-	public const string SamlProviderProjectPath = @"Providers\SAML";
+	public const string OpenIdConnectProviderProjectName = "OpenID Connect";
+
+	/// <summary>
+	/// Development Utility and internal use only.
+	/// </summary>
+	public const string SamlProviderProjectName = "SAML";
 
 	/// <summary>
 	/// Installation Support Utility and internal use only.

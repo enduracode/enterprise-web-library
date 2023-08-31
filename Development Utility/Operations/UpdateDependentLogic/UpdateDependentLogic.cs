@@ -110,19 +110,19 @@ internal class UpdateDependentLogic: Operation {
 			generateCodeForProject(
 				installation,
 				"MySQL Provider",
-				EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.MySqlProviderProjectPath ),
+				EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.ProviderProjectFolderName, EwlStatics.MySqlProviderProjectName ),
 				"EnterpriseWebLibrary.MySql",
 				_ => {} );
 			generateCodeForProject(
 				installation,
 				"OpenID Connect Provider",
-				EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.OpenIdConnectProviderProjectPath ),
+				EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.ProviderProjectFolderName, EwlStatics.OpenIdConnectProviderProjectName ),
 				"EnterpriseWebLibrary.OpenIdConnect",
 				_ => {} );
 			generateCodeForProject(
 				installation,
 				"SAML Provider",
-				EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.SamlProviderProjectPath ),
+				EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.ProviderProjectFolderName, EwlStatics.SamlProviderProjectName ),
 				"EnterpriseWebLibrary.Saml",
 				_ => {} );
 		}
