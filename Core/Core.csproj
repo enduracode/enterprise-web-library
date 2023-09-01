@@ -29,7 +29,7 @@
     <PackageReference Include="Serilog.Sinks.Async" Version="1.5.0" />
     <PackageReference Include="ServiceStack.Stripe" Version="6.10.0" />
     <PackageReference Include="SharpZipLib" Version="1.4.2" />
-    <PackageReference Include="Tewl" Version="2022.10.18.1055" />
+    <PackageReference Include="Tewl" Version="2023.8.30.837-pre" />
   </ItemGroup>
 
 </Project>
