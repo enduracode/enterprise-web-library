@@ -81,6 +81,11 @@ public class IsuStatics {
 			() => IisConfigurationStatics.ExecuteInServerManagerTransaction(
 				serverManager => {
 					var pool = serverManager.ApplicationPools[ name ];
+					if( pool is null ) {
+						TelemetryStatics.ReportFault( "Failed to start the \"{0}\" IIS application pool because it is missing.".FormatWith( name ) );
+						return;
+					}
+
 					pool.Start();
 					while( pool.State != ObjectState.Started )
 						Thread.Sleep( 1000 );
