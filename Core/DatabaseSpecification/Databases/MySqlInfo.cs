@@ -1,5 +1,5 @@
-﻿#nullable disable
-using System.Data.Common;
+﻿using System.Data.Common;
+using EnterpriseWebLibrary.ExternalFunctionality;
 using StackExchange.Profiling;
 using StackExchange.Profiling.Data;
 
@@ -9,10 +9,10 @@ namespace EnterpriseWebLibrary.DatabaseSpecification.Databases;
 /// Contains information about a MySQL database.
 /// </summary>
 public class MySqlInfo: DatabaseInfo {
-	private static Lazy<DbProviderFactory> factory;
+	private static Lazy<DbProviderFactory>? factory;
 
-	internal static void Init( Func<DbProviderFactory> dbProviderFactoryGetter ) {
-		factory = new Lazy<DbProviderFactory>( dbProviderFactoryGetter );
+	internal static void Init( Func<ExternalMySqlProvider> providerGetter ) {
+		factory = new Lazy<DbProviderFactory>( () => providerGetter().GetDbProviderFactory() );
 	}
 
 	private readonly string secondaryDatabaseName;
@@ -47,28 +47,28 @@ public class MySqlInfo: DatabaseInfo {
 	public bool SupportsConnectionPooling => supportsConnectionPooling;
 
 	DbConnection DatabaseInfo.CreateConnection( string connectionString ) {
-		var connection = factory.Value.CreateConnection();
+		var connection = factory!.Value.CreateConnection()!;
 		connection.ConnectionString = connectionString;
 		return connection;
 	}
 
 	DbCommand DatabaseInfo.CreateCommand() {
-		return new ProfiledDbCommand( factory.Value.CreateCommand(), null, MiniProfiler.Current );
+		return new ProfiledDbCommand( factory!.Value.CreateCommand()!, null, MiniProfiler.Current );
 	}
 
 	DbParameter DatabaseInfo.CreateParameter() {
-		return factory.Value.CreateParameter();
+		return factory!.Value.CreateParameter()!;
 	}
 
 	string DatabaseInfo.GetDbTypeString( object databaseSpecificType ) {
-		return Enum.GetName( factory.Value.GetType().Assembly.GetType( "MySql.Data.MySqlClient.MySqlDbType" ), databaseSpecificType );
+		return Enum.GetName( factory!.Value.GetType().Assembly.GetType( "MySql.Data.MySqlClient.MySqlDbType" )!, databaseSpecificType )!;
 	}
 
 	void DatabaseInfo.SetParameterType( DbParameter parameter, string dbTypeString ) {
-		var mySqlDbTypeProperty = parameter.GetType().GetProperty( "MySqlDbType" );
+		var mySqlDbTypeProperty = parameter.GetType().GetProperty( "MySqlDbType" )!;
 		mySqlDbTypeProperty.SetValue(
 			parameter,
-			Enum.Parse( factory.Value.GetType().Assembly.GetType( "MySql.Data.MySqlClient.MySqlDbType" ), dbTypeString ),
+			Enum.Parse( factory!.Value.GetType().Assembly.GetType( "MySql.Data.MySqlClient.MySqlDbType" )!, dbTypeString ),
 			null );
 	}
 }

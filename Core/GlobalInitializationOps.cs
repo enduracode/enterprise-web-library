@@ -83,8 +83,11 @@ public static class GlobalInitializationOps {
 			AppMemoryCache.Init( memoryCacheGetter );
 			EncryptionOps.Init();
 
+			ExternalFunctionalityStatics.Init();
+
 			// data access
-			MySqlInfo.Init( () => ExternalFunctionalityStatics.ExternalMySqlProvider.GetDbProviderFactory() );
+			MySqlInfo.Init( () => ExternalFunctionalityStatics.ExternalMySqlProvider );
+			OracleInfo.Init( () => ExternalFunctionalityStatics.ExternalOracleDatabaseProvider );
 			DataAccessStatics.Init();
 			DataAccessState.Init( mainDataAccessStateGetter, useLongDatabaseTimeouts );
 
@@ -97,8 +100,6 @@ public static class GlobalInitializationOps {
 						ExternalFunctionalityStatics.ExternalSamlProvider.RefreshConfiguration();
 				},
 				currentUserGetter ?? ( () => null ) );
-
-			ExternalFunctionalityStatics.Init();
 
 			GlobalInitializationOps.globalInitializer = globalInitializer;
 			globalInitializer.InitStatics();

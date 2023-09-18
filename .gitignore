@@ -45,6 +45,11 @@ Providers/MySQL/obj/
 Providers/MySQL/Directory.Build.props
 Providers/MySQL/Generated Code/
 
+Providers/Oracle Database/bin/
+Providers/Oracle Database/obj/
+Providers/Oracle Database/Directory.Build.props
+Providers/Oracle Database/Generated Code/
+
 Providers/OpenID Connect/bin/
 Providers/OpenID Connect/obj/
 Providers/OpenID Connect/Directory.Build.props

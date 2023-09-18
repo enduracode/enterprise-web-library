@@ -8,6 +8,7 @@ internal static class ExternalFunctionalityStatics {
 	private static SystemProviderReference<SystemExternalFunctionalityProvider>? provider;
 
 	private static ExternalMySqlProvider? mySqlProvider;
+	private static ExternalOracleDatabaseProvider? oracleDatabaseProvider;
 	private static ExternalOpenIdConnectProvider? openIdConnectProvider;
 	private static ExternalSamlProvider? samlProvider;
 
@@ -15,6 +16,8 @@ internal static class ExternalFunctionalityStatics {
 		provider = ConfigurationStatics.GetSystemLibraryProvider<SystemExternalFunctionalityProvider>( ProviderName );
 
 		mySqlProvider = provider.GetProvider( returnNullIfNotFound: true )?.GetMySqlProvider();
+
+		oracleDatabaseProvider = provider.GetProvider( returnNullIfNotFound: true )?.GetOracleDatabaseProvider();
 
 		openIdConnectProvider = provider.GetProvider( returnNullIfNotFound: true )?.GetOpenIdConnectProvider();
 
@@ -26,6 +29,13 @@ internal static class ExternalFunctionalityStatics {
 		get {
 			ensureProviderExists();
 			return mySqlProvider ?? throw new ApplicationException( "External MySQL provider not available." );
+		}
+	}
+
+	internal static ExternalOracleDatabaseProvider ExternalOracleDatabaseProvider {
+		get {
+			ensureProviderExists();
+			return oracleDatabaseProvider ?? throw new ApplicationException( "External Oracle Database provider not available." );
 		}
 	}
 

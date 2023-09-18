@@ -10,6 +10,11 @@ public abstract class SystemExternalFunctionalityProvider {
 	protected internal virtual ExternalMySqlProvider? GetMySqlProvider() => null;
 
 	/// <summary>
+	/// Returns the external Oracle Database provider for the system. This should be a simple constructor expression with no other logic.
+	/// </summary>
+	protected internal virtual ExternalOracleDatabaseProvider? GetOracleDatabaseProvider() => null;
+
+	/// <summary>
 	/// Returns the external OpenID Connect provider for the system. This should be a simple constructor expression with no other logic.
 	/// </summary>
 	protected internal virtual ExternalOpenIdConnectProvider? GetOpenIdConnectProvider() => null;
