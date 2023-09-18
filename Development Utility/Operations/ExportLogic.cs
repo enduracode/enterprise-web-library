@@ -144,6 +144,20 @@ internal class ExportLogic: Operation {
 					outputFolderPath,
 					prereleaseValues ) ) );
 
+		var oracleDatabaseId = mainId + ".OracleDatabase";
+		packages.Add(
+			( oracleDatabaseId,
+				createProviderNuGetPackages(
+					installation,
+					mainId,
+					EwlStatics.OracleDatabaseProviderProjectName,
+					"EnterpriseWebLibrary.OracleDatabase",
+					oracleDatabaseId,
+					now,
+					useDebugAssembly,
+					outputFolderPath,
+					prereleaseValues ) ) );
+
 		var openIdConnectId = mainId + ".OpenIdConnect";
 		packages.Add(
 			( openIdConnectId,

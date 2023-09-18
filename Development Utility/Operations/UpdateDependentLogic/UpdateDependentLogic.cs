@@ -115,6 +115,12 @@ internal class UpdateDependentLogic: Operation {
 				_ => {} );
 			generateCodeForProject(
 				installation,
+				"Oracle Database Provider",
+				EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.ProviderProjectFolderName, EwlStatics.OracleDatabaseProviderProjectName ),
+				"EnterpriseWebLibrary.OracleDatabase",
+				_ => {} );
+			generateCodeForProject(
+				installation,
 				"OpenID Connect Provider",
 				EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.ProviderProjectFolderName, EwlStatics.OpenIdConnectProviderProjectName ),
 				"EnterpriseWebLibrary.OpenIdConnect",

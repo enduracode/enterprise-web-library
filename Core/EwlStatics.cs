@@ -44,6 +44,11 @@ public static partial class EwlStatics {
 	/// <summary>
 	/// Development Utility and internal use only.
 	/// </summary>
+	public const string OracleDatabaseProviderProjectName = "Oracle Database";
+
+	/// <summary>
+	/// Development Utility and internal use only.
+	/// </summary>
 	public const string OpenIdConnectProviderProjectName = "OpenID Connect";
 
 	/// <summary>
