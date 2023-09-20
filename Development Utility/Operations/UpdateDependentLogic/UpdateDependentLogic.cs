@@ -528,11 +528,11 @@ internal class UpdateDependentLogic: Operation {
 
 				writer.WriteLine( "[ MTAThread ]" );
 				writer.WriteLine( "private static void Main() {" );
-				writer.WriteLine( "SystemInitializer globalInitializer = null;" );
+				writer.WriteLine( "SystemInitializer? globalInitializer = null;" );
 				writer.WriteLine( "initGlobalInitializer( ref globalInitializer );" );
 				writer.WriteLine( "var dataAccessState = new ThreadLocal<DataAccessState>( () => new DataAccessState() );" );
 				writer.WriteLine(
-					"GlobalInitializationOps.InitStatics( globalInitializer, \"{0}\", false, mainDataAccessStateGetter: () => dataAccessState.Value, useLongDatabaseTimeouts: true );"
+					"GlobalInitializationOps.InitStatics( globalInitializer!, \"{0}\", false, mainDataAccessStateGetter: () => dataAccessState.Value!, useLongDatabaseTimeouts: true );"
 						.FormatWith( service.Name ) );
 				writer.WriteLine( "try {" );
 				writer.WriteLine(
@@ -544,7 +544,7 @@ internal class UpdateDependentLogic: Operation {
 				writer.WriteLine( "}" );
 				writer.WriteLine( "}" );
 
-				writer.WriteLine( "static partial void initGlobalInitializer( ref SystemInitializer globalInitializer );" );
+				writer.WriteLine( "static partial void initGlobalInitializer( ref SystemInitializer? globalInitializer );" );
 
 				writer.WriteLine( "}" );
 
@@ -574,11 +574,11 @@ internal class UpdateDependentLogic: Operation {
 				writer.WriteLine( "internal static partial class Program {" );
 
 				writer.WriteLine( "private static int Main( string[] args ) {" );
-				writer.WriteLine( "SystemInitializer globalInitializer = null;" );
+				writer.WriteLine( "SystemInitializer? globalInitializer = null;" );
 				writer.WriteLine( "initGlobalInitializer( ref globalInitializer );" );
 				writer.WriteLine( "var dataAccessState = new ThreadLocal<DataAccessState>( () => new DataAccessState() );" );
 				writer.WriteLine(
-					"GlobalInitializationOps.InitStatics( globalInitializer, \"{0}\", false, mainDataAccessStateGetter: () => dataAccessState.Value );".FormatWith(
+					"GlobalInitializationOps.InitStatics( globalInitializer!, \"{0}\", false, mainDataAccessStateGetter: () => dataAccessState.Value! );".FormatWith(
 						project.Name ) );
 				writer.WriteLine( "try {" );
 				writer.WriteLine( "return GlobalInitializationOps.ExecuteAppWithStandardExceptionHandling( () => {" );
@@ -587,7 +587,7 @@ internal class UpdateDependentLogic: Operation {
 				writer.WriteLine( "Console.SetIn( new StreamReader( Console.OpenStandardInput(), Console.InputEncoding, false, 4096 ) );" );
 
 				writer.WriteLine(
-					"ewlMain( args.Any() && string.Equals( args[ 0 ], \"{0}\", StringComparison.Ordinal ) ? Newtonsoft.Json.JsonConvert.DeserializeObject<ImmutableArray<string>>( Console.ReadLine() ) : args );"
+					"ewlMain( args.Any() && string.Equals( args[ 0 ], \"{0}\", StringComparison.Ordinal ) ? Newtonsoft.Json.JsonConvert.DeserializeObject<ImmutableArray<string>>( Console.ReadLine()! ) : args );"
 						.FormatWith( serverSideConsoleAppJsonArgument ) );
 				writer.WriteLine( "} );" );
 				writer.WriteLine( "}" );
@@ -596,7 +596,7 @@ internal class UpdateDependentLogic: Operation {
 				writer.WriteLine( "}" );
 				writer.WriteLine( "}" );
 
-				writer.WriteLine( "static partial void initGlobalInitializer( ref SystemInitializer globalInitializer );" );
+				writer.WriteLine( "static partial void initGlobalInitializer( ref SystemInitializer? globalInitializer );" );
 				writer.WriteLine( "static partial void ewlMain( IReadOnlyList<string> arguments );" );
 
 				writer.WriteLine( "}" );
