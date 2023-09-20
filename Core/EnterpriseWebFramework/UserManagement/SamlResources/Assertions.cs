@@ -39,13 +39,6 @@ partial class Assertions {
 		else
 			AuthenticationStatics.SetUserLastIdentityProvider( identityProvider );
 
-		try {
-			AppRequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
-		}
-		finally {
-			DataAccessState.Current.ResetCache();
-		}
-
 		var destinationUrl = new VerifyClientFunctionality( assertion.returnUrl ).GetUrl();
 		return EwfResponse.Create(
 			ContentTypes.PlainText,

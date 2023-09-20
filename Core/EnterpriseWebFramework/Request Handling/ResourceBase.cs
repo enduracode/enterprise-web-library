@@ -388,12 +388,26 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 	protected virtual EwfSafeRequestHandler? getOrHead() => null;
 
 	private EwfResponse? executeUnsafeRequestMethod( Func<EwfResponse?> method ) {
-		if( managesDataAccessCacheInUnsafeRequestMethods )
-			return method();
+		if( managesDataAccessCacheInUnsafeRequestMethods ) {
+			var response = method();
+
+			try {
+				AppRequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
+			}
+			finally {
+				DataAccessState.Current.ResetCache();
+			}
+
+			return response;
+		}
 
 		DataAccessState.Current.DisableCache();
 		try {
-			return method();
+			var response = method();
+
+			AppRequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
+
+			return response;
 		}
 		finally {
 			DataAccessState.Current.ResetCache();
