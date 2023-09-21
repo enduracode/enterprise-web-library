@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.UserManagement;
 using NUnit.Framework;
-using Selenium;
+using OpenQA.Selenium;
 
 namespace EnterpriseWebLibrary.WebTestingFramework {
 	/// <summary>
@@ -49,7 +49,7 @@ namespace EnterpriseWebLibrary.WebTestingFramework {
 			return Environment.ExitCode;
 		}
 
-		private ISelenium selenium;
+		private IWebDriver browser;
 
 		private WebTester() {
 			setupBrowser();
@@ -72,49 +72,49 @@ namespace EnterpriseWebLibrary.WebTestingFramework {
 			}
 
 
-			selenium = new DefaultSelenium(
-				"localhost" /*location of Selenium server*/,
-				4444,
-				@"*firefox3 C:\Program Files (x86)\Mozilla Firefox\firefox.exe",
-				baseUrl );
-			selenium.Start();
+			//selenium = new DefaultSelenium(
+			//	"localhost" /*location of Selenium server*/,
+			//	4444,
+			//	@"*firefox3 C:\Program Files (x86)\Mozilla Firefox\firefox.exe",
+			//	baseUrl );
+			//selenium.Start();
 
 			if( ConfigurationStatics.IsIntermediateInstallation )
 				executeSeleniumBlock(
 					"Intermediate log on",
 					delegate {
 						// NOTE: We need to go to the specific URL here instead of relying on a redirect, or Selenium will time out or otherwise fail (it sucks at following redirects).
-						selenium.Open( "/" + ConfigurationStatics.InstallationConfiguration.SystemShortName + "/Ewf/IntermediateLogIn.aspx?ReturnUrl=" );
+						browser.Url = "/" + ConfigurationStatics.InstallationConfiguration.SystemShortName + "/Ewf/IntermediateLogIn.aspx?ReturnUrl=";
 						// NOTE: Does not work for MIT Calendar, etc.
-						selenium.Type( "ctl00_ctl00_main_contentPlace_ctl12_theTextBox", ConfigurationStatics.SystemGeneralProvider.IntermediateLogInPassword );
+						//selenium.Type( "ctl00_ctl00_main_contentPlace_ctl12_theTextBox", ConfigurationStatics.SystemGeneralProvider.IntermediateLogInPassword );
 						// NOTE: Move g8Summit to machine configuration file.
-						SubmitForm( selenium );
-						selenium.WaitForPageToLoad( "30000" );
+						SubmitForm( browser );
+						//selenium.WaitForPageToLoad( "30000" );
 					} );
 			if( UserManagementStatics.UserManagementEnabled /* && FormsAuthStatics.FormsAuthEnabled */ )
 				executeSeleniumBlock(
 					"Forms log on",
 					delegate {
 						// NOTE: System-name approach suffers from same problem as above.
-						selenium.Open( "/" + ConfigurationStatics.InstallationConfiguration.SystemShortName + "/Ewf/UserManagement/LogIn.aspx?ReturnUrl=" );
+						browser.Url = "/" + ConfigurationStatics.InstallationConfiguration.SystemShortName + "/Ewf/UserManagement/LogIn.aspx?ReturnUrl=";
 
 						// NOTE: I don't think we need waits after opens.
-						selenium.WaitForPageToLoad( "30000" );
-						Assert.IsTrue( selenium.GetTitle().EndsWith( "Log In" ) );
+						//selenium.WaitForPageToLoad( "30000" );
+						Assert.IsTrue( browser.Title.EndsWith( "Log In" ) );
 						// NOTE: For RSIS, we need the ability to pass a different email address and a different password for testing.
 						//selenium.Type( "ctl00_ctl00_main_contentPlace_emailAddress_theTextBox", ConfigurationStatics.SystemGeneralProvider.FormsLogInEmail );
 						//selenium.Type( "ctl00_ctl00_main_contentPlace_password_theTextBox", ConfigurationStatics.SystemGeneralProvider.FormsLogInPassword );
-						SubmitForm( selenium );
-						selenium.WaitForPageToLoad( "30000" );
+						SubmitForm( browser );
+						//selenium.WaitForPageToLoad( "30000" );
 					} );
 		}
 
 		/// <summary>
 		/// Submits the form. Equivalent to hitting the ENTER key.
 		/// </summary>
-		public static void SubmitForm( ISelenium selenium ) {
+		public static void SubmitForm( IWebDriver browser ) {
 			// NOTE: This form ID is outdated.
-			selenium.Submit( "aspnetForm" );
+			//browser.Submit( "aspnetForm" );
 		}
 
 		/// <summary>
@@ -128,7 +128,7 @@ namespace EnterpriseWebLibrary.WebTestingFramework {
 						testClass.GetMethods()
 							.Where( m => m.GetCustomAttributes( typeof( TestAttribute ), true ).Length > 0 )
 							.Single()
-							.Invoke( null, new object[] { selenium } );
+							.Invoke( null, new object[] { browser } );
 					}
 					catch( TargetInvocationException e ) {
 						throw e.InnerException;
@@ -148,7 +148,7 @@ namespace EnterpriseWebLibrary.WebTestingFramework {
 				// NOTE: We probably don't need to set the exit code. We probably just need to return a non-zero code in the main method.
 				Environment.ExitCode = 1;
 				Console.Error.WriteLine( name + ": FAILED" );
-				if( e is AssertionException || e is SeleniumException )
+				if( e is AssertionException || e is WebDriverException )
 					handleKnownTestException( e );
 				else {
 					Console.Error.WriteLine( "Unexpected type of exception: " + e.GetType().Name );
@@ -162,11 +162,11 @@ namespace EnterpriseWebLibrary.WebTestingFramework {
 			if( e.Message.Length > 0 ) {
 				Console.Error.WriteLine( e.Message );
 				if( Regex.IsMatch( e.Message, "ERROR: Element .* not found" ) ) {
-					Console.Error.WriteLine( "Location:" + selenium.GetLocation() );
-					Console.Error.WriteLine( "Page title: " + selenium.GetTitle() );
+					Console.Error.WriteLine( "Location:" + browser.Url );
+					Console.Error.WriteLine( "Page title: " + browser.Title );
 					Console.Error.WriteLine( "Fields are:" );
-					foreach( var field in selenium.GetAllFields() )
-						Console.Error.WriteLine( field );
+					//foreach( var field in browser.GetAllFields() )
+					//	Console.Error.WriteLine( field );
 				}
 			}
 			else if( e is AssertionException )
@@ -181,8 +181,8 @@ namespace EnterpriseWebLibrary.WebTestingFramework {
 		/// </summary>
 		[ TearDown ]
 		private void teardown() {
-			if( selenium != null )
-				selenium.Stop();
+			//if( selenium != null )
+			//	selenium.Stop();
 		}
 	}
 }

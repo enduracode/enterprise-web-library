@@ -22,7 +22,7 @@
     <PackageReference Include="NodaTime.Serialization.JsonNet" Version="3.1.0" />
     <PackageReference Include="NUnit" Version="3.13.3" />
     <PackageReference Include="Polly" Version="7.2.4" />
-    <PackageReference Include="Selenium.RC" Version="3.1.0" />
+    <PackageReference Include="Selenium.WebDriver" Version="4.12.4" />
     <PackageReference Include="SendGrid" Version="9.28.1" />
     <PackageReference Include="Serilog.AspNetCore" Version="7.0.0" />
     <PackageReference Include="Serilog.Sinks.Async" Version="1.5.0" />
