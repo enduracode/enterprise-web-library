@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.InstallationSupportUtility.SystemManagerInterface.Messages.SystemListMessage;
+using EnterpriseWebLibrary.TewlContrib;
 using JetBrains.Annotations;
 using Tewl.IO;
 
@@ -141,6 +142,18 @@ public static class SystemManagerConnectionStatics {
 		throw new UserCorrectableException(
 			generalMessage + " This may have been caused by a network problem. The exception type is " + innerException.GetType().Name + ".",
 			innerException );
+	}
+
+	/// <summary>
+	/// Executes a method that makes a request to the System Manager using <see cref="HttpClient"/>, retrying several times with exponential back-off in the event
+	/// of network problems or transient failures on the server. Use only from a background process that can tolerate a long delay.
+	/// </summary>
+	public static void ExecuteSystemManagerRequestWithRetry( bool requestIsIdempotent, Func<Task> method, Action? persistentFailureHandler = null ) {
+		HttpClientTools.ExecuteRequestWithRetry(
+			requestIsIdempotent,
+			method,
+			additionalHandledMessage: "500 (Initialization Failure in EWF Application)",
+			persistentFailureHandler: persistentFailureHandler );
 	}
 
 	public static Configuration.Machine.MachineConfigurationSystemManager Configuration =>
