@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Polly;
+using Tewl.IO;
 
 namespace EnterpriseWebLibrary.TewlContrib;
 
@@ -45,6 +46,21 @@ public static class HttpClientTools {
 				response.EnsureSuccessStatusCode();
 				return await response.Content.ReadAsStringAsync();
 			} );
+
+	/// <summary>
+	/// Creates the destination path if it does not exist, and downloads the file to that destination path. Use only from a background process that can tolerate a
+	/// long delay.
+	/// </summary>
+	public static void
+		DownloadFileWithRetry( string sourceUrl, string destinationFilePath, NetworkCredential? credentials = null, string customAuthorizationHeaderValue = "" ) =>
+		Policy.Handle<WebException>( e => e.Response is HttpWebResponse response && response.StatusCode == HttpStatusCode.ServiceUnavailable )
+			.WaitAndRetry( 11, attemptNumber => TimeSpan.FromSeconds( Math.Pow( 2, attemptNumber ) ) )
+			.Execute(
+				() => IoMethods.DownloadFile(
+					sourceUrl,
+					destinationFilePath,
+					credentials: credentials,
+					customAuthorizationHeaderValue: customAuthorizationHeaderValue ) );
 
 	/// <summary>
 	/// Executes a method that makes a request using <see cref="HttpClient"/>, retrying several times with exponential back-off in the event of network problems

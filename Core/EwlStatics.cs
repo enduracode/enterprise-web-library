@@ -1,14 +1,11 @@
 ﻿#nullable disable warnings
 using System.ComponentModel;
-using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using EnterpriseWebLibrary.Configuration;
 using Imageflow.Fluent;
 using NodaTime;
-using Polly;
-using Tewl.IO;
 
 namespace EnterpriseWebLibrary;
 
@@ -331,19 +328,4 @@ public static partial class EwlStatics {
 	/// Returns whether this time is within the hours when nightly operations are typically underway.
 	/// </summary>
 	public static bool IsInNight( this LocalTime time ) => new LocalTime( 22, 0 ) <= time || time < new LocalTime( 6, 0 );
-
-	/// <summary>
-	/// Creates the destination path if it does not exist, and downloads the file to that destination path. Use only from a background process that can tolerate
-	/// a long delay.
-	/// </summary>
-	public static void
-		DownloadFileWithRetry( string sourceUrl, string destinationFilePath, NetworkCredential credentials = null, string customAuthorizationHeaderValue = "" ) =>
-		Policy.Handle<WebException>( e => e.Response is HttpWebResponse response && response.StatusCode == HttpStatusCode.ServiceUnavailable )
-			.WaitAndRetry( 11, attemptNumber => TimeSpan.FromSeconds( Math.Pow( 2, attemptNumber ) ) )
-			.Execute(
-				() => IoMethods.DownloadFile(
-					sourceUrl,
-					destinationFilePath,
-					credentials: credentials,
-					customAuthorizationHeaderValue: customAuthorizationHeaderValue ) );
 }
