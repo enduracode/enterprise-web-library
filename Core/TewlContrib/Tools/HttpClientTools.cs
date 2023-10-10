@@ -53,7 +53,7 @@ public static class HttpClientTools {
 	/// </summary>
 	public static void
 		DownloadFileWithRetry( string sourceUrl, string destinationFilePath, NetworkCredential? credentials = null, string customAuthorizationHeaderValue = "" ) =>
-		Policy.Handle<WebException>( e => e.Response is HttpWebResponse response && response.StatusCode == HttpStatusCode.ServiceUnavailable )
+		Policy.Handle<WebException>( e => e.Response is HttpWebResponse { StatusCode: HttpStatusCode.ServiceUnavailable } )
 			.WaitAndRetry( 11, attemptNumber => TimeSpan.FromSeconds( Math.Pow( 2, attemptNumber ) ) )
 			.Execute(
 				() => IoMethods.DownloadFile(
@@ -74,7 +74,7 @@ public static class HttpClientTools {
 		if( requestIsIdempotent ) {
 			policyBuilder.OrInner<TaskCanceledException>() // timeout
 				.OrInner<HttpRequestException>(
-					e => e.InnerException is WebException webException && webException.InnerException is SocketException socketException &&
+					e => e.InnerException is WebException { InnerException: SocketException socketException } &&
 					     socketException.Message.Contains( "No connection could be made because the target machine actively refused it" ) )
 				.OrInner<HttpRequestException>( e => e.Message.Contains( "500 (Internal Server Error)" ) );
 
