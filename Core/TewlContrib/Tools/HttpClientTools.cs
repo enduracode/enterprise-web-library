@@ -68,14 +68,11 @@ public static class HttpClientTools {
 	/// </summary>
 	public static void ExecuteRequestWithRetry(
 		bool requestIsIdempotent, Func<Task> method, string additionalHandledMessage = "", Action? persistentFailureHandler = null ) {
-		var policyBuilder = Policy.HandleInner<HttpRequestException>(
-			e => e.InnerException is WebException webException && webException.Message.Contains( "The remote name could not be resolved" ) );
+		var policyBuilder = Policy.HandleInner<HttpRequestException>( e => e.InnerException is SocketException { SocketErrorCode: SocketError.HostNotFound } );
 
 		if( requestIsIdempotent ) {
 			policyBuilder.OrInner<TaskCanceledException>() // timeout
-				.OrInner<HttpRequestException>(
-					e => e.InnerException is WebException { InnerException: SocketException socketException } &&
-					     socketException.Message.Contains( "No connection could be made because the target machine actively refused it" ) )
+				.OrInner<HttpRequestException>( e => e.InnerException is SocketException { SocketErrorCode: SocketError.ConnectionRefused } )
 				.OrInner<HttpRequestException>( e => e.Message.Contains( "500 (Internal Server Error)" ) );
 
 			if( additionalHandledMessage.Length > 0 )
