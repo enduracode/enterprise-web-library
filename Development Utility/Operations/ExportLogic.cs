@@ -39,6 +39,7 @@ internal class ExportLogic: Operation {
 		var packages = new List<( string, IReadOnlyList<byte[]> )>();
 
 		var mainId = packagingConfiguration.SystemShortName;
+		var mainProjectName = installation.SystemIsTewl() ? AppStatics.TewlProjectName : EwlStatics.CoreProjectName;
 		var mainPackages = prereleaseValues.Select(
 				prerelease => {
 					var localExportDateAndTime = prerelease.HasValue ? (DateTime?)null : now;
@@ -48,55 +49,57 @@ internal class ExportLogic: Operation {
 							TewlContrib.ProcessTools.RunProgram(
 								"dotnet",
 								"build \"{0}\" --configuration {1} --no-restore".FormatWith(
-									EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.CoreProjectName ),
+									EwlStatics.CombinePaths( installation.GeneralLogic.Path, mainProjectName ),
 									useDebugAssembly ? "Debug" : "Release" ),
 								"",
 								true );
-							foreach( var fileName in new[] { "dll", "pdb", "xml" }.Select( i => "EnterpriseWebLibrary." + i ) )
+							foreach( var fileName in new[] { "dll", "pdb", "xml" }.Select( i => ( installation.SystemIsTewl() ? "Tewl." : "EnterpriseWebLibrary." ) + i ) )
 								IoMethods.CopyFile(
 									EwlStatics.CombinePaths(
 										installation.GeneralLogic.Path,
-										EwlStatics.CoreProjectName,
+										mainProjectName,
 										ConfigurationStatics.GetProjectOutputFolderPath( useDebugAssembly ),
 										fileName ),
 									EwlStatics.CombinePaths( folderPath, @"lib\{0}".FormatWith( nuGetTargetFramework ), fileName ) );
 
-							var toolsFolderPath = EwlStatics.CombinePaths( folderPath, "tools" );
-							IoMethods.CopyFile(
-								EwlStatics.CombinePaths( installation.GeneralLogic.Path, @"Development Utility\Package Manager Console Commands.ps1" ),
-								EwlStatics.CombinePaths( toolsFolderPath, "init.ps1" ) );
-
-							const string duProjectAndFolderName = "Development Utility";
-							publishApp(
-								EwlStatics.CombinePaths( installation.GeneralLogic.Path, duProjectAndFolderName ),
-								EwlStatics.CombinePaths( toolsFolderPath, duProjectAndFolderName ) );
-							packageGeneralFiles( installation, toolsFolderPath, false );
-							IoMethods.CopyFolder(
-								EwlStatics.CombinePaths(
-									installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath,
-									InstallationConfiguration.InstallationConfigurationFolderName,
-									InstallationConfiguration.InstallationsFolderName,
-									!prerelease.HasValue || prerelease.Value ? "Testing" : "Live" ),
-								EwlStatics.CombinePaths(
-									toolsFolderPath,
-									InstallationConfiguration.ConfigurationFolderName,
-									InstallationConfiguration.InstallationConfigurationFolderName ),
-								false );
-							if( File.Exists( installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationSharedConfigurationFilePath ) )
+							if( !installation.SystemIsTewl() ) {
+								var toolsFolderPath = EwlStatics.CombinePaths( folderPath, "tools" );
 								IoMethods.CopyFile(
-									installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationSharedConfigurationFilePath,
+									EwlStatics.CombinePaths( installation.GeneralLogic.Path, @"Development Utility\Package Manager Console Commands.ps1" ),
+									EwlStatics.CombinePaths( toolsFolderPath, "init.ps1" ) );
+
+								const string duProjectAndFolderName = "Development Utility";
+								publishApp(
+									EwlStatics.CombinePaths( installation.GeneralLogic.Path, duProjectAndFolderName ),
+									EwlStatics.CombinePaths( toolsFolderPath, duProjectAndFolderName ) );
+								packageGeneralFiles( installation, toolsFolderPath, false );
+								IoMethods.CopyFolder(
+									EwlStatics.CombinePaths(
+										installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath,
+										InstallationConfiguration.InstallationConfigurationFolderName,
+										InstallationConfiguration.InstallationsFolderName,
+										!prerelease.HasValue || prerelease.Value ? "Testing" : "Live" ),
 									EwlStatics.CombinePaths(
 										toolsFolderPath,
 										InstallationConfiguration.ConfigurationFolderName,
-										InstallationConfiguration.InstallationConfigurationFolderName,
-										InstallationConfiguration.InstallationSharedConfigurationFileName ) );
+										InstallationConfiguration.InstallationConfigurationFolderName ),
+									false );
+								if( File.Exists( installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationSharedConfigurationFilePath ) )
+									IoMethods.CopyFile(
+										installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationSharedConfigurationFilePath,
+										EwlStatics.CombinePaths(
+											toolsFolderPath,
+											InstallationConfiguration.ConfigurationFolderName,
+											InstallationConfiguration.InstallationConfigurationFolderName,
+											InstallationConfiguration.InstallationSharedConfigurationFileName ) );
 
-							IoMethods.CopyFolder(
-								EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.CoreProjectName, StaticFile.FrameworkStaticFilesSourceFolderPath ),
-								EwlStatics.CombinePaths( toolsFolderPath, InstallationFileStatics.WebFrameworkStaticFilesFolderName ),
-								false );
-							IoMethods.DeleteFolder(
-								EwlStatics.CombinePaths( toolsFolderPath, InstallationFileStatics.WebFrameworkStaticFilesFolderName, AppStatics.StaticFileLogicFolderName ) );
+								IoMethods.CopyFolder(
+									EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.CoreProjectName, StaticFile.FrameworkStaticFilesSourceFolderPath ),
+									EwlStatics.CombinePaths( toolsFolderPath, InstallationFileStatics.WebFrameworkStaticFilesFolderName ),
+									false );
+								IoMethods.DeleteFolder(
+									EwlStatics.CombinePaths( toolsFolderPath, InstallationFileStatics.WebFrameworkStaticFilesFolderName, AppStatics.StaticFileLogicFolderName ) );
+							}
 
 							var manifestPath = EwlStatics.CombinePaths( folderPath, "Package.nuspec" );
 							using( var writer = IoMethods.GetTextWriterForWrite( manifestPath ) )
@@ -106,7 +109,7 @@ internal class ExportLogic: Operation {
 									mainId,
 									mainId,
 									"",
-									EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.CoreProjectName, EwlStatics.CoreProjectName + ".csproj" ),
+									EwlStatics.CombinePaths( installation.GeneralLogic.Path, mainProjectName, mainProjectName + ".csproj" ),
 									prerelease,
 									localExportDateAndTime );
 
@@ -130,61 +133,63 @@ internal class ExportLogic: Operation {
 			.MaterializeAsList();
 		packages.Add( ( mainId, mainPackages ) );
 
-		var mySqlId = mainId + ".MySql";
-		packages.Add(
-			( mySqlId,
-				createProviderNuGetPackages(
-					installation,
-					mainId,
-					EwlStatics.MySqlProviderProjectName,
-					"EnterpriseWebLibrary.MySql",
-					mySqlId,
-					now,
-					useDebugAssembly,
-					outputFolderPath,
-					prereleaseValues ) ) );
+		if( !installation.SystemIsTewl() ) {
+			var mySqlId = mainId + ".MySql";
+			packages.Add(
+				( mySqlId,
+					createProviderNuGetPackages(
+						installation,
+						mainId,
+						EwlStatics.MySqlProviderProjectName,
+						"EnterpriseWebLibrary.MySql",
+						mySqlId,
+						now,
+						useDebugAssembly,
+						outputFolderPath,
+						prereleaseValues ) ) );
 
-		var oracleDatabaseId = mainId + ".OracleDatabase";
-		packages.Add(
-			( oracleDatabaseId,
-				createProviderNuGetPackages(
-					installation,
-					mainId,
-					EwlStatics.OracleDatabaseProviderProjectName,
-					"EnterpriseWebLibrary.OracleDatabase",
-					oracleDatabaseId,
-					now,
-					useDebugAssembly,
-					outputFolderPath,
-					prereleaseValues ) ) );
+			var oracleDatabaseId = mainId + ".OracleDatabase";
+			packages.Add(
+				( oracleDatabaseId,
+					createProviderNuGetPackages(
+						installation,
+						mainId,
+						EwlStatics.OracleDatabaseProviderProjectName,
+						"EnterpriseWebLibrary.OracleDatabase",
+						oracleDatabaseId,
+						now,
+						useDebugAssembly,
+						outputFolderPath,
+						prereleaseValues ) ) );
 
-		var openIdConnectId = mainId + ".OpenIdConnect";
-		packages.Add(
-			( openIdConnectId,
-				createProviderNuGetPackages(
-					installation,
-					mainId,
-					EwlStatics.OpenIdConnectProviderProjectName,
-					"EnterpriseWebLibrary.OpenIdConnect",
-					openIdConnectId,
-					now,
-					useDebugAssembly,
-					outputFolderPath,
-					prereleaseValues ) ) );
+			var openIdConnectId = mainId + ".OpenIdConnect";
+			packages.Add(
+				( openIdConnectId,
+					createProviderNuGetPackages(
+						installation,
+						mainId,
+						EwlStatics.OpenIdConnectProviderProjectName,
+						"EnterpriseWebLibrary.OpenIdConnect",
+						openIdConnectId,
+						now,
+						useDebugAssembly,
+						outputFolderPath,
+						prereleaseValues ) ) );
 
-		var samlId = mainId + ".Saml";
-		packages.Add(
-			( samlId,
-				createProviderNuGetPackages(
-					installation,
-					mainId,
-					EwlStatics.SamlProviderProjectName,
-					"EnterpriseWebLibrary.Saml",
-					samlId,
-					now,
-					useDebugAssembly,
-					outputFolderPath,
-					prereleaseValues ) ) );
+			var samlId = mainId + ".Saml";
+			packages.Add(
+				( samlId,
+					createProviderNuGetPackages(
+						installation,
+						mainId,
+						EwlStatics.SamlProviderProjectName,
+						"EnterpriseWebLibrary.Saml",
+						samlId,
+						now,
+						useDebugAssembly,
+						outputFolderPath,
+						prereleaseValues ) ) );
+		}
 
 		return packages;
 	}
@@ -382,7 +387,7 @@ internal class ExportLogic: Operation {
 		}
 
 		// We cannot calculate the logic size until after the package… methods above produce build output for all projects.
-		build.LogicSize = AppStatics.NDependIsPresent && !installation.DevelopmentInstallationLogic.SystemIsEwl
+		build.LogicSize = AppStatics.NDependIsPresent && !installation.DevelopmentInstallationLogic.SystemIsEwl && !installation.SystemIsTewl()
 			                  ? GetLogicSize.GetNDependLocCount( installation, false )
 			                  : null;
 
@@ -421,7 +426,7 @@ internal class ExportLogic: Operation {
 			}
 
 		build.NuGetPackages = new InstallationSupportUtility.SystemManagerInterface.Messages.BuildMessage.Build.NuGetPackagesType();
-		if( installation.DevelopmentInstallationLogic.SystemIsEwl )
+		if( installation.DevelopmentInstallationLogic.SystemIsEwl || installation.SystemIsTewl() )
 			build.NuGetPackages.AddRange( packageEwl( installation, packagingConfiguration, logicPackagesFolderPath ) );
 
 		var recognizedInstallation = installation as RecognizedDevelopmentInstallation;
@@ -470,7 +475,7 @@ internal class ExportLogic: Operation {
 			IoMethods.DeleteFolder(
 				EwlStatics.CombinePaths( serverSideLogicFolderPath, InstallationFileStatics.WebFrameworkStaticFilesFolderName, AppStatics.StaticFileLogicFolderName ) );
 		}
-		else {
+		else if( !installation.SystemIsTewl() ) {
 			var frameworkStaticFilesFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, InstallationFileStatics.WebFrameworkStaticFilesFolderName );
 			if( Directory.Exists( frameworkStaticFilesFolderPath ) )
 				IoMethods.CopyFolder(

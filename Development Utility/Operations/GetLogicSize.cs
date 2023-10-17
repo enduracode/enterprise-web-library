@@ -79,7 +79,7 @@ internal class GetLogicSize: Operation {
 	private GetLogicSize() {}
 
 	bool Operation.IsValid( Installation genericInstallation ) =>
-		genericInstallation is DevelopmentInstallation { DevelopmentInstallationLogic.SystemIsEwl: false };
+		genericInstallation is DevelopmentInstallation { DevelopmentInstallationLogic.SystemIsEwl: false } installation && !installation.SystemIsTewl();
 
 	void Operation.Execute( Installation genericInstallation, IReadOnlyList<string> arguments, OperationResult operationResult ) {
 		if( !AppStatics.NDependIsPresent )

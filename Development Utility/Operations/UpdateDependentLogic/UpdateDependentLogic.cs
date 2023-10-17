@@ -46,15 +46,16 @@ internal class UpdateDependentLogic: Operation {
 			installation.ExistingInstallationLogic.DatabaseUpdateFilePath,
 			true );
 
-		try {
-			copyInEwlFiles( installation );
-		}
-		catch( Exception e ) {
-			var message = "Failed to copy {0} files into the installation. Please try the operation again.".FormatWith( EwlStatics.EwlName );
-			if( e is UnauthorizedAccessException || e is IOException )
-				throw new UserCorrectableException( message, e );
-			throw new ApplicationException( message, e );
-		}
+		if( !installation.SystemIsTewl() )
+			try {
+				copyInEwlFiles( installation );
+			}
+			catch( Exception e ) {
+				var message = "Failed to copy {0} files into the installation. Please try the operation again.".FormatWith( EwlStatics.EwlName );
+				if( e is UnauthorizedAccessException || e is IOException )
+					throw new UserCorrectableException( message, e );
+				throw new ApplicationException( message, e );
+			}
 
 		// Generate code.
 		if( installation.DevelopmentInstallationLogic.SystemIsEwl ) {
@@ -132,6 +133,23 @@ internal class UpdateDependentLogic: Operation {
 				"EnterpriseWebLibrary.Saml",
 				_ => {} );
 		}
+		if( installation.SystemIsTewl() )
+			generateCodeForProject(
+				installation,
+				"",
+				EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.TewlProjectName ),
+				"Tewl",
+				writer => {
+					writer.WriteLine( "using System.Globalization;" );
+					writer.WriteLine();
+					writer.WriteLine( "namespace Tewl;" );
+					writer.WriteLine();
+					writer.WriteLine( "partial class TewlStatics {" );
+					CodeGenerationStatics.AddSummaryDocComment( writer, "The date/time at which this version of Tewl was built." );
+					writer.WriteLine(
+						"public static readonly DateTimeOffset TewlBuildDateTime = {0};".FormatWith( AppStatics.GetLiteralDateTimeExpression( DateTimeOffset.UtcNow ) ) );
+					writer.WriteLine( "}" );
+				} );
 		generateLibraryCode( installation );
 		foreach( var webProject in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects ?? Enumerable.Empty<WebProject>() )
 			generateWebProjectCode( installation, webProject );
@@ -162,7 +180,7 @@ internal class UpdateDependentLogic: Operation {
 			writer.WriteLine( "</Project>" );
 		}
 
-		if( !installation.DevelopmentInstallationLogic.SystemIsEwl ) {
+		if( !installation.DevelopmentInstallationLogic.SystemIsEwl && !installation.SystemIsTewl() ) {
 			if( Directory.Exists( EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.MercurialRepositoryFolderName ) ) )
 				updateIgnoreFile( installation, false );
 			if( File.Exists( EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".gitignore" ) ) )
@@ -211,25 +229,27 @@ internal class UpdateDependentLogic: Operation {
 				writer.WriteLine( "using System.Diagnostics;" ); // Necessary for ServerSideConsoleAppStatics
 				writer.WriteLine( "using System.Diagnostics.CodeAnalysis;" );
 				writer.WriteLine( "using System.Linq;" );
-				writer.WriteLine( "using EnterpriseWebLibrary;" );
-				writer.WriteLine( "using EnterpriseWebLibrary.Caching;" );
-				writer.WriteLine( "using EnterpriseWebLibrary.Collections;" ); // Necessary for row constants
-				writer.WriteLine( "using EnterpriseWebLibrary.Configuration;" );
-				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess;" );
-				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.CommandWriting;" );
-				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.CommandWriting.Commands;" );
-				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction;" );
-				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction.Conditions;" );
-				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.RetrievalCaching;" );
-				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.RevisionHistory;" );
-				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.StandardModification;" );
-				writer.WriteLine( "using EnterpriseWebLibrary.Email;" );
-				writer.WriteLine( "using EnterpriseWebLibrary.EnterpriseWebFramework;" );
-				writer.WriteLine( "using Newtonsoft.Json;" );
-				writer.WriteLine( "using Newtonsoft.Json.Linq;" );
-				writer.WriteLine( "using NodaTime;" );
-				writer.WriteLine( "using Tewl.InputValidation;" );
-				writer.WriteLine( "using Tewl.Tools;" );
+				if( !installation.SystemIsTewl() ) {
+					writer.WriteLine( "using EnterpriseWebLibrary;" );
+					writer.WriteLine( "using EnterpriseWebLibrary.Caching;" );
+					writer.WriteLine( "using EnterpriseWebLibrary.Collections;" ); // Necessary for row constants
+					writer.WriteLine( "using EnterpriseWebLibrary.Configuration;" );
+					writer.WriteLine( "using EnterpriseWebLibrary.DataAccess;" );
+					writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.CommandWriting;" );
+					writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.CommandWriting.Commands;" );
+					writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction;" );
+					writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction.Conditions;" );
+					writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.RetrievalCaching;" );
+					writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.RevisionHistory;" );
+					writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.StandardModification;" );
+					writer.WriteLine( "using EnterpriseWebLibrary.Email;" );
+					writer.WriteLine( "using EnterpriseWebLibrary.EnterpriseWebFramework;" );
+					writer.WriteLine( "using Newtonsoft.Json;" );
+					writer.WriteLine( "using Newtonsoft.Json.Linq;" );
+					writer.WriteLine( "using NodaTime;" );
+					writer.WriteLine( "using Tewl.InputValidation;" );
+					writer.WriteLine( "using Tewl.Tools;" );
+				}
 
 				if( installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications.Any() ) {
 					writer.WriteLine();
@@ -242,7 +262,8 @@ internal class UpdateDependentLogic: Operation {
 				}
 				writer.WriteLine();
 				TypedCssClassStatics.Generate(
-					installation.GeneralLogic.Path,
+					installation.DevelopmentInstallationLogic.LibraryPath.ToCollection()
+						.Concat( installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications.Select( i => i.Path ) ),
 					installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName,
 					writer );
 				writer.WriteLine();
@@ -266,28 +287,35 @@ internal class UpdateDependentLogic: Operation {
 					writer.WriteLine( "}" );
 				}
 
-				writer.WriteLine();
-				CodeGeneration.WebFramework.WebFrameworkStatics.Generate(
-					writer,
-					installation.DevelopmentInstallationLogic.LibraryPath,
-					installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName,
-					false,
-					InstallationConfiguration.ConfigurationFolderName.ToCollection().Append( InstallationFileStatics.FilesFolderName ).Append( generatedCodeFolderName ),
-					null,
-					null,
-					out var resourceSerializationWriter );
-				writer.WriteLine();
-				writer.WriteLine(
-					"namespace {0}.Configuration.Providers {{".FormatWith(
-						installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName ) );
-				writer.WriteLine( "internal class ResourceSerialization: SystemResourceSerializationProvider {" );
-				resourceSerializationWriter( "SystemResourceSerializationProvider" );
-				writer.WriteLine( "}" );
-				writer.WriteLine( "}" );
+				if( installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications.Any() ) {
+					writer.WriteLine();
+					CodeGeneration.WebFramework.WebFrameworkStatics.Generate(
+						writer,
+						installation.DevelopmentInstallationLogic.LibraryPath,
+						installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName,
+						false,
+						InstallationConfiguration.ConfigurationFolderName.ToCollection()
+							.Append( InstallationFileStatics.FilesFolderName )
+							.Append( generatedCodeFolderName ),
+						null,
+						null,
+						out var resourceSerializationWriter );
+					writer.WriteLine();
+					writer.WriteLine(
+						"namespace {0}.Configuration.Providers {{".FormatWith(
+							installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName ) );
+					writer.WriteLine( "internal class ResourceSerialization: SystemResourceSerializationProvider {" );
+					resourceSerializationWriter( "SystemResourceSerializationProvider" );
+					writer.WriteLine( "}" );
+					writer.WriteLine( "}" );
+				}
 			} );
 	}
 
 	private void generateServerSideConsoleAppStatics( TextWriter writer, DevelopmentInstallation installation ) {
+		if( !installation.DevelopmentInstallationLogic.DevelopmentConfiguration.ServerSideConsoleProjectsNonNullable.Any() )
+			return;
+
 		writer.WriteLine( "namespace " + installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName + " {" );
 		writer.WriteLine( "public static class ServerSideConsoleAppStatics {" );
 		foreach( var project in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.ServerSideConsoleProjectsNonNullable ) {
@@ -672,9 +700,11 @@ internal class UpdateDependentLogic: Operation {
 			writer.WriteLine( "<Using Include=\"System.IO\" />" );
 			writer.WriteLine( "<Using Include=\"System.Linq\" />" );
 
-			writer.WriteLine( "<Using Include=\"EnterpriseWebLibrary\" />" );
-			if( includeWebFrameworkUsingDirectives )
-				writer.WriteLine( "<Using Include=\"EnterpriseWebLibrary.EnterpriseWebFramework\" />" );
+			if( !installation.SystemIsTewl() ) {
+				writer.WriteLine( "<Using Include=\"EnterpriseWebLibrary\" />" );
+				if( includeWebFrameworkUsingDirectives )
+					writer.WriteLine( "<Using Include=\"EnterpriseWebLibrary.EnterpriseWebFramework\" />" );
+			}
 			writer.WriteLine( "<Using Include=\"Tewl\" />" );
 			writer.WriteLine( "<Using Include=\"Tewl.Tools\" />" );
 

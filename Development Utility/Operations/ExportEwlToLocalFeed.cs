@@ -10,7 +10,8 @@ internal class ExportEwlToLocalFeed: Operation {
 	private ExportEwlToLocalFeed() {}
 
 	bool Operation.IsValid( Installation genericInstallation ) =>
-		genericInstallation is RecognizedDevelopmentInstallation { DevelopmentInstallationLogic.SystemIsEwl: true };
+		genericInstallation is RecognizedDevelopmentInstallation installation &&
+		( installation.DevelopmentInstallationLogic is { SystemIsEwl: true } || installation.SystemIsTewl() );
 
 	void Operation.Execute( Installation genericInstallation, IReadOnlyList<string> arguments, OperationResult operationResult ) {
 		var installation = (RecognizedDevelopmentInstallation)genericInstallation;

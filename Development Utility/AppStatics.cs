@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
 using Tewl.IO;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility;
@@ -7,6 +8,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility;
 internal static class AppStatics {
 	internal const string MercurialRepositoryFolderName = ".hg";
 	internal const string GitRepositoryFolderName = ".git";
+	internal const string TewlProjectName = "Tewl";
 	internal const string StaticFileLogicFolderName = "Logic";
 
 	internal static bool NDependIsPresent;
@@ -29,6 +31,9 @@ internal static class AppStatics {
 						assemblyName + ".dll" ) );
 			};
 	}
+
+	internal static bool SystemIsTewl( this DevelopmentInstallation installation ) =>
+		string.Equals( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName, "Tewl", StringComparison.Ordinal );
 
 	internal static string DotNetToolsFolderPath =>
 		IoMethods.GetFirstExistingFolderPath(
