@@ -17,9 +17,6 @@ Core/Directory.Build.props
 Core/Generated Code/
 Core/EnterpriseWebLibrary.xml
 
-Solution Files/bin/
-Solution Files/obj/
-
 Library/bin/
 Library/obj/
 Library/Configuration/Aspose Licenses/
