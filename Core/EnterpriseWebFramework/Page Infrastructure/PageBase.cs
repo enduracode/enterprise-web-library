@@ -83,7 +83,7 @@ public abstract class PageBase: ResourceBase {
 			() => Current.formState.DataModifications,
 			() => Current.formState.DataModificationsWithValidationsFromOtherElements,
 			() => Current.formState.ReportValidationCreated() );
-		BasicDataModification.Init( RequestStateStatics.SlowDataModificationNotifier );
+		BasicDataModification.Init( RequestStateStatics.NotifyOfSlowDataModification );
 		FormValueStatics.Init(
 			formValue => Current.formValues.Add( formValue ),
 			() => Current.formState.DataModifications,
@@ -219,7 +219,7 @@ public abstract class PageBase: ResourceBase {
 						i();
 					AppRequestState.AddNonTransactionalModificationMethod(
 						() => {
-							RequestStateStatics.StatusMessageAppender( statusMessages );
+							RequestStateStatics.AppendStatusMessages( statusMessages );
 							statusMessages.Clear();
 						} );
 					AppRequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
@@ -228,7 +228,7 @@ public abstract class PageBase: ResourceBase {
 					DataAccessState.Current.ResetCache();
 				}
 
-				RequestStateStatics.RequestStateRefresher();
+				RequestStateStatics.RefreshRequestState();
 
 				// Re-create page object. A big reason to do this is that some pages execute database queries or other code during initialization in order to prime
 				// the data-access cache. The code above resets the cache and we want to re-prime it right away.
@@ -485,7 +485,7 @@ public abstract class PageBase: ResourceBase {
 				}
 
 				if( dmExecuted ) {
-					AppRequestState.AddNonTransactionalModificationMethod( () => RequestStateStatics.StatusMessageAppender( statusMessages ) );
+					AppRequestState.AddNonTransactionalModificationMethod( () => RequestStateStatics.AppendStatusMessages( statusMessages ) );
 					try {
 						AppRequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
 					}
@@ -493,7 +493,7 @@ public abstract class PageBase: ResourceBase {
 						DataAccessState.Current.ResetCache();
 					}
 
-					RequestStateStatics.RequestStateRefresher();
+					RequestStateStatics.RefreshRequestState();
 				}
 
 				if( postBack.IsIntermediate ) {
@@ -631,7 +631,7 @@ public abstract class PageBase: ResourceBase {
 
 		// If the request has a secondary response, configure it now. The JavaScript solution is preferred over a meta tag since apparently it doesn’t cause reload
 		// behavior by the browser. See http://josephsmarr.com/2007/06/06/the-hidden-cost-of-meta-refresh-tags.
-		var secondaryResponseId = RequestStateStatics.SecondaryResponseIdGetter();
+		var secondaryResponseId = RequestStateStatics.GetSecondaryResponseId();
 		var secondaryResponseStatements = "";
 		if( secondaryResponseId.HasValue && StandardLibrarySessionState.HasResponseToSend ) {
 			var url = new PreBuiltResponse().GetUrl();
@@ -711,7 +711,7 @@ public abstract class PageBase: ResourceBase {
 	/// <summary>
 	/// EWL use only. Gets the status messages.
 	/// </summary>
-	public IEnumerable<( StatusMessageType, string )> StatusMessages => RequestStateStatics.StatusMessageGetter().Concat( statusMessages );
+	public IEnumerable<( StatusMessageType, string )> StatusMessages => RequestStateStatics.GetStatusMessages().Concat( statusMessages );
 
 	private void executeWithDataModificationExceptionHandling( Action method ) {
 		try {
@@ -896,7 +896,7 @@ public abstract class PageBase: ResourceBase {
 		// Put the secondary response into session state right before navigation so that it doesn't get sent if there is an error before this point.
 		if( secondaryResponse != null ) {
 			StandardLibrarySessionState.ResponseToSend = secondaryResponse;
-			RequestStateStatics.SecondaryResponseIdSetter( 1 );
+			RequestStateStatics.SetSecondaryResponseId( 1 );
 		}
 
 		// If the destination resource is a page with the same origin as the current page, do a transfer instead of a redirect. Don’t do this if the authorization
@@ -910,7 +910,7 @@ public abstract class PageBase: ResourceBase {
 			    StringComparison.Ordinal ) == 0 ) {
 			page.replaceUrlHandlers();
 			AppRequestState.Instance.SetNewUrlParameterValuesEffective( false );
-			RequestStateStatics.ClientSideNewUrlSetter( destinationUrl );
+			RequestStateStatics.SetClientSideNewUrl( destinationUrl );
 			return ( nextPageObject = page ).processViewAndGetResponse( null );
 		}
 
