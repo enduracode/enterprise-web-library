@@ -191,7 +191,7 @@ public abstract class PageBase: ResourceBase {
 	protected sealed override EwfSafeRequestHandler getOrHead() => new EwfSafeResponseWriter( processViewAndGetResponse( null ) );
 
 	private EwfResponse processViewAndGetResponse( int? statusCode ) {
-		AppRequestState.Instance.EwfPageRequestState ??= new EwfPageRequestState( AppRequestState.RequestTime, null, null );
+		AppRequestState.Instance.EwfPageRequestState ??= new PageRequestState( AppRequestState.RequestTime, null, null );
 
 		var requestState = AppRequestState.Instance.EwfPageRequestState;
 		var dmIdAndSecondaryOp = requestState.DmIdAndSecondaryOp;
@@ -414,7 +414,7 @@ public abstract class PageBase: ResourceBase {
 				formSubmission[ HiddenFieldName ],
 				new JsonSerializerSettings { MissingMemberHandling = MissingMemberHandling.Error } );
 
-			AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState(
+			AppRequestState.Instance.EwfPageRequestState = new PageRequestState(
 				hiddenFieldData.FirstRequestTime,
 				hiddenFieldData.ScrollPositionX,
 				hiddenFieldData.ScrollPositionY );
@@ -423,7 +423,7 @@ public abstract class PageBase: ResourceBase {
 		catch {
 			// Set a 400 status code if there are any problems loading hidden field state. We're assuming these problems are never the developers' fault.
 			if( AppRequestState.Instance.EwfPageRequestState == null )
-				AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( AppRequestState.RequestTime, null, null );
+				AppRequestState.Instance.EwfPageRequestState = new PageRequestState( AppRequestState.RequestTime, null, null );
 			AppRequestState.Instance.EwfPageRequestState.FocusKey = "";
 			AppRequestState.Instance.EwfPageRequestState.GeneralModificationErrors = Translation.ApplicationHasBeenUpdatedAndWeCouldNotInterpretAction.ToCollection();
 			return processViewAndGetResponse( 400 );
@@ -516,7 +516,7 @@ public abstract class PageBase: ResourceBase {
 						updateRegions.Select( i => ( i.key, i.region.ArgumentGetter() ) ).Materialize() );
 				}
 				else
-					AppRequestState.Instance.EwfPageRequestState = new EwfPageRequestState( AppRequestState.RequestTime, null, null );
+					AppRequestState.Instance.EwfPageRequestState = new PageRequestState( AppRequestState.RequestTime, null, null );
 			} );
 
 		return navigate(

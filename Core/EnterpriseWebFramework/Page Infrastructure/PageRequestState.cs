@@ -5,7 +5,7 @@ using NodaTime;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
-internal class EwfPageRequestState {
+internal class PageRequestState {
 	public Instant FirstRequestTime { get; }
 	public ImmutableDictionary<string, JToken> ComponentStateValuesById { get; set; }
 	public string ScrollPositionX { get; }
@@ -24,7 +24,7 @@ internal class EwfPageRequestState {
 	public string StaticRegionContents { get; private set; }
 	public IReadOnlyCollection<( string key, string arg )> UpdateRegionKeysAndArguments { get; private set; }
 
-	public EwfPageRequestState( Instant firstRequestTime, string scrollPositionX, string scrollPositionY ) {
+	public PageRequestState( Instant firstRequestTime, string scrollPositionX, string scrollPositionY ) {
 		FirstRequestTime = firstRequestTime;
 		ScrollPositionX = scrollPositionX;
 		ScrollPositionY = scrollPositionY;

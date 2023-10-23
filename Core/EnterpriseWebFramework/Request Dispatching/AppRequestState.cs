@@ -70,7 +70,7 @@ public class AppRequestState {
 	internal string ClientSideNewUrl { get; set; }
 	internal IReadOnlyCollection<( StatusMessageType, string )> StatusMessages { get; set; }
 	internal int? SecondaryResponseId { get; set; }
-	internal EwfPageRequestState EwfPageRequestState { get; set; }
+	internal PageRequestState EwfPageRequestState { get; set; }
 
 	private readonly List<( string prefix, Exception exception )> errors = new();
 
