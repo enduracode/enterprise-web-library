@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
@@ -16,37 +15,6 @@ internal static class StandardLibrarySessionState {
 
 	internal static void Init( Func<HttpContext> currentContextGetter ) {
 		currentSessionGetter = () => currentContextGetter().Session;
-	}
-
-	internal static IReadOnlyCollection<( StatusMessageType, string )> StatusMessages {
-		get {
-			var value = currentSessionGetter!().GetString( "ewfStatusMessages" );
-			return value != null
-				       ? JsonConvert.DeserializeObject<ImmutableArray<( StatusMessageType, string )>>( value )
-				       : Enumerable.Empty<( StatusMessageType, string )>().Materialize();
-		}
-		set => currentSessionGetter!().SetString( "ewfStatusMessages", JsonConvert.SerializeObject( value, Formatting.None ) );
-	}
-
-	internal static void SetClientSideNavigation( string url, bool navigateInNewWindow ) {
-		currentSessionGetter!().SetString( "ewfClientSideNavigation", JsonConvert.SerializeObject( ( url, navigateInNewWindow ), Formatting.None ) );
-	}
-
-	internal static void GetClientSideNavigationSetup( out string url, out bool navigateInNewWindow ) {
-		var value = currentSessionGetter!().GetString( "ewfClientSideNavigation" );
-		if( value != null ) {
-			var pair = JsonConvert.DeserializeObject<( string, bool )>( value );
-			url = pair.Item1;
-			navigateInNewWindow = pair.Item2;
-		}
-		else {
-			url = "";
-			navigateInNewWindow = false;
-		}
-	}
-
-	internal static void ClearClientSideNavigation() {
-		currentSessionGetter!().Remove( "ewfClientSideNavigation" );
 	}
 
 	internal static bool HasResponseToSend => currentSessionGetter!().Keys.Contains( "ewfResponseToSend" );

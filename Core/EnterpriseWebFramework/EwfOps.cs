@@ -283,13 +283,21 @@ public static class EwfOps {
 								() => OpenIdProviderStatics.GetWellKnownUrls().Concat( RequestDispatchingStatics.AppProvider.GetWellKnownUrls() ) );
 							StaticFile.Init( providerGetter.GetProvider<AppStaticFileHandlingProvider>( "StaticFileHandling" ) );
 							StandardLibrarySessionState.Init( () => contextAccessor.HttpContext );
+							PageInfrastructure.RequestStateStatics.Init(
+								url => RequestDispatchingStatics.RequestState.ClientSideNewUrl = url,
+								() => RequestDispatchingStatics.RequestState.StatusMessages,
+								messages => {
+									var state = RequestDispatchingStatics.RequestState;
+									state.StatusMessages = state.StatusMessages.Concat( messages ).Materialize();
+								},
+								() => RequestDispatchingStatics.RequestState.SecondaryResponseId,
+								id => RequestDispatchingStatics.RequestState.SecondaryResponseId = id,
+								() => RequestDispatchingStatics.RequestState.AllowSlowRequest(),
+								RequestDispatchingStatics.RefreshRequestState );
 							PageBase.Init(
 								( () => BasePageStatics.AppProvider.GetPageViewDataModificationMethod(),
 									() => BasePageStatics.AppProvider.JavaScriptDocumentReadyFunctionCall ),
-								BasicPageContent.GetContent,
-								url => RequestDispatchingStatics.RequestState.ClientSideNewUrl = url,
-								() => RequestDispatchingStatics.RequestState.AllowSlowRequest(),
-								RequestDispatchingStatics.RefreshRequestState );
+								BasicPageContent.GetContent );
 							HyperlinkBehaviorExtensionCreators.Init( ModalBox.GetBrowsingModalBoxOpenStatements );
 							FileUpload.Init( () => ( (BasicPageContent)PageBase.Current.BasicContent ).FormUsesMultipartEncoding = true );
 							ModalBox.Init( () => ( (BasicPageContent)PageBase.Current.BasicContent ).BrowsingModalBoxId );

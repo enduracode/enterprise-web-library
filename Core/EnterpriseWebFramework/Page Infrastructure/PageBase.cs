@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.EnterpriseWebFramework.PageInfrastructure;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.UserManagement;
 using EnterpriseWebLibrary.WebSessionState;
@@ -33,9 +34,6 @@ public abstract class PageBase: ResourceBase {
 	private static Func<Func<Func<PageContent>, PageContent>, Func<string>, Func<string>, ( PageContent basicContent, FlowComponent component, FlowComponent
 			etherealContainer, FlowComponent jsInitElement, Action dataUpdateModificationMethod, bool isAutoDataUpdater, ActionPostBack pageLoadPostBack )>
 		contentGetter;
-
-	private static Action<string> clientSideNewUrlSetter;
-	private static Action requestStateRefresher;
 
 	[ JsonObject( ItemRequired = Required.Always, MemberSerialization = MemberSerialization.Fields ) ]
 	private class HiddenFieldData {
@@ -79,13 +77,13 @@ public abstract class PageBase: ResourceBase {
 	internal static void Init(
 		( Func<Action>, Func<string> ) appProvider,
 		Func<Func<Func<PageContent>, PageContent>, Func<string>, Func<string>, ( PageContent, FlowComponent, FlowComponent, FlowComponent, Action, bool,
-			ActionPostBack )> contentGetter, Action<string> clientSideNewUrlSetter, Action slowDataModificationNotifier, Action requestStateRefresher ) {
+			ActionPostBack )> contentGetter ) {
 		EwfValidation.Init(
 			() => Current.formState.ValidationPredicate,
 			() => Current.formState.DataModifications,
 			() => Current.formState.DataModificationsWithValidationsFromOtherElements,
 			() => Current.formState.ReportValidationCreated() );
-		BasicDataModification.Init( slowDataModificationNotifier );
+		BasicDataModification.Init( RequestStateStatics.SlowDataModificationNotifier );
 		FormValueStatics.Init(
 			formValue => Current.formValues.Add( formValue ),
 			() => Current.formState.DataModifications,
@@ -124,8 +122,6 @@ public abstract class PageBase: ResourceBase {
 
 		PageBase.appProvider = appProvider;
 		PageBase.contentGetter = contentGetter;
-		PageBase.clientSideNewUrlSetter = clientSideNewUrlSetter;
-		PageBase.requestStateRefresher = requestStateRefresher;
 	}
 
 	/// <summary>
@@ -223,7 +219,7 @@ public abstract class PageBase: ResourceBase {
 						i();
 					AppRequestState.AddNonTransactionalModificationMethod(
 						() => {
-							StandardLibrarySessionState.StatusMessages = StandardLibrarySessionState.StatusMessages.Concat( statusMessages ).Materialize();
+							RequestStateStatics.StatusMessageAppender( statusMessages );
 							statusMessages.Clear();
 						} );
 					AppRequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
@@ -232,7 +228,7 @@ public abstract class PageBase: ResourceBase {
 					DataAccessState.Current.ResetCache();
 				}
 
-				requestStateRefresher();
+				RequestStateStatics.RequestStateRefresher();
 
 				// Re-create page object. A big reason to do this is that some pages execute database queries or other code during initialization in order to prime
 				// the data-access cache. The code above resets the cache and we want to re-prime it right away.
@@ -489,8 +485,7 @@ public abstract class PageBase: ResourceBase {
 				}
 
 				if( dmExecuted ) {
-					AppRequestState.AddNonTransactionalModificationMethod(
-						() => StandardLibrarySessionState.StatusMessages = StandardLibrarySessionState.StatusMessages.Concat( statusMessages ).Materialize() );
+					AppRequestState.AddNonTransactionalModificationMethod( () => RequestStateStatics.StatusMessageAppender( statusMessages ) );
 					try {
 						AppRequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
 					}
@@ -498,7 +493,7 @@ public abstract class PageBase: ResourceBase {
 						DataAccessState.Current.ResetCache();
 					}
 
-					requestStateRefresher();
+					RequestStateStatics.RequestStateRefresher();
 				}
 
 				if( postBack.IsIntermediate ) {
@@ -634,16 +629,16 @@ public abstract class PageBase: ResourceBase {
 		if( scroll && requestState.ScrollPositionX != null && requestState.ScrollPositionY != null )
 			scrollStatement = "window.scroll(" + requestState.ScrollPositionX + "," + requestState.ScrollPositionY + ");";
 
-		// If the page has requested a client-side redirect, configure it now. The JavaScript solution is preferred over a meta tag since apparently it doesn't
-		// cause reload behavior by the browser. See http://josephsmarr.com/2007/06/06/the-hidden-cost-of-meta-refresh-tags.
-		StandardLibrarySessionState.GetClientSideNavigationSetup( out var clientSideNavigationUrl, out var clientSideNavigationInNewWindow );
-		var clientSideNavigationStatements = "";
-		if( clientSideNavigationUrl.Any() ) {
-			var url = clientSideNavigationUrl;
-			if( clientSideNavigationInNewWindow )
-				clientSideNavigationStatements = "var newWindow = window.open( '{0}', '{1}' ); newWindow.focus();".FormatWith( url, "_blank" );
+		// If the request has a secondary response, configure it now. The JavaScript solution is preferred over a meta tag since apparently it doesn’t cause reload
+		// behavior by the browser. See http://josephsmarr.com/2007/06/06/the-hidden-cost-of-meta-refresh-tags.
+		var secondaryResponseId = RequestStateStatics.SecondaryResponseIdGetter();
+		var secondaryResponseStatements = "";
+		if( secondaryResponseId.HasValue && StandardLibrarySessionState.HasResponseToSend ) {
+			var url = new PreBuiltResponse().GetUrl();
+			if( !StandardLibrarySessionState.ResponseToSend.FileName.Any() )
+				secondaryResponseStatements = "var newWindow = window.open( '{0}', '{1}' ); newWindow.focus();".FormatWith( url, "_blank" );
 			else
-				clientSideNavigationStatements = "location.replace( '" + url + "' );";
+				secondaryResponseStatements = "location.replace( '" + url + "' );";
 		}
 
 		return StringTools.ConcatenateWithDelimiter(
@@ -658,7 +653,7 @@ public abstract class PageBase: ResourceBase {
 			appProvider.javaScriptDocumentReadyFunctionCallGetter().AppendDelimiter( ";" ),
 			javaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
 			"addSpeculationRules();",
-			StringTools.ConcatenateWithDelimiter( " ", scrollStatement, modificationErrorsOccurred ? "" : pageLoadActionStatements, clientSideNavigationStatements )
+			StringTools.ConcatenateWithDelimiter( " ", scrollStatement, modificationErrorsOccurred ? "" : pageLoadActionStatements, secondaryResponseStatements )
 				.PrependDelimiter( "window.onload = function() { " )
 				.AppendDelimiter( " };" ) );
 	}
@@ -716,7 +711,7 @@ public abstract class PageBase: ResourceBase {
 	/// <summary>
 	/// EWL use only. Gets the status messages.
 	/// </summary>
-	public IEnumerable<( StatusMessageType, string )> StatusMessages => StandardLibrarySessionState.StatusMessages.Concat( statusMessages );
+	public IEnumerable<( StatusMessageType, string )> StatusMessages => RequestStateStatics.StatusMessageGetter().Concat( statusMessages );
 
 	private void executeWithDataModificationExceptionHandling( Action method ) {
 		try {
@@ -900,9 +895,8 @@ public abstract class PageBase: ResourceBase {
 
 		// Put the secondary response into session state right before navigation so that it doesn't get sent if there is an error before this point.
 		if( secondaryResponse != null ) {
-			// It's important that we put the response in session state first since it's used by the init method of the pre-built-response resource.
 			StandardLibrarySessionState.ResponseToSend = secondaryResponse;
-			StandardLibrarySessionState.SetClientSideNavigation( new PreBuiltResponse().GetUrl(), !secondaryResponse.FileName.Any() );
+			RequestStateStatics.SecondaryResponseIdSetter( 1 );
 		}
 
 		// If the destination resource is a page with the same origin as the current page, do a transfer instead of a redirect. Don’t do this if the authorization
@@ -916,7 +910,7 @@ public abstract class PageBase: ResourceBase {
 			    StringComparison.Ordinal ) == 0 ) {
 			page.replaceUrlHandlers();
 			AppRequestState.Instance.SetNewUrlParameterValuesEffective( false );
-			clientSideNewUrlSetter( destinationUrl );
+			RequestStateStatics.ClientSideNewUrlSetter( destinationUrl );
 			return ( nextPageObject = page ).processViewAndGetResponse( null );
 		}
 
@@ -973,12 +967,7 @@ public abstract class PageBase: ResourceBase {
 			new EwfResponseBodyCreator(
 				writer => {
 					AuthenticationStatics.UpdateFormsAuthCookieIfNecessary();
-
 					pageTree.WriteMarkup( writer );
-
-					if( !pageLoadPostBackExists || modificationErrorsOccurred )
-						StandardLibrarySessionState.StatusMessages = Enumerable.Empty<( StatusMessageType, string )>().Materialize();
-					StandardLibrarySessionState.ClearClientSideNavigation();
 				} ),
 			statusCodeGetter: () => statusCode,
 			additionalHeaderFieldGetter: () => {
