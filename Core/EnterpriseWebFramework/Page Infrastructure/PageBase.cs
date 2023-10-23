@@ -7,6 +7,7 @@ using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.UserManagement;
 using EnterpriseWebLibrary.WebSessionState;
+using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -19,6 +20,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 /// <summary>
 /// A page in a web application.
 /// </summary>
+[ PublicAPI ]
 public abstract class PageBase: ResourceBase {
 	// These strings are duplicated in the JavaScript file.
 	internal const string FormId = "ewfForm";
