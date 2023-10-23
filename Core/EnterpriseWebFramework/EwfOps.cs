@@ -496,7 +496,7 @@ public static class EwfOps {
 	private static void assertResourceIsIntermediateInstallationPublicResourceWhenNecessary( ResourceInfo resource ) {
 		if( !PageBase.Current.IsIntermediateInstallationPublicResource )
 			return;
-		if( resource is ResourceBase appResource && !appResource.IsIntermediateInstallationPublicResource )
+		if( resource is ResourceBase { IsIntermediateInstallationPublicResource: false } )
 			throw new Exception(
 				"You must specify resource {0} as an intermediate-installation public resource because it is used on an intermediate-installation public page."
 					.FormatWith( resource.GetUrl( false, false ) ) );
