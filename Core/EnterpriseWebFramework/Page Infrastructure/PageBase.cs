@@ -87,12 +87,12 @@ public abstract class PageBase: ResourceBase {
 		FormValueStatics.Init(
 			formValue => Current.formValues.Add( formValue ),
 			() => Current.formState.DataModifications,
-			() => AppRequestState.Instance.EwfPageRequestState.PostBackValues );
+			() => RequestStateStatics.GetPageRequestState().PostBackValues );
 		ComponentStateItem.Init(
 			AssertPageTreeNotBuilt,
 			() => Current.elementOrIdentifiedComponentIdGetter(),
 			id => {
-				var valuesById = AppRequestState.Instance.EwfPageRequestState.ComponentStateValuesById;
+				var valuesById = RequestStateStatics.GetPageRequestState().ComponentStateValuesById;
 				return valuesById != null && valuesById.TryGetValue( id, out var value ) ? value : null;
 			},
 			() => Current.formState.DataModifications,
@@ -191,9 +191,7 @@ public abstract class PageBase: ResourceBase {
 	protected sealed override EwfSafeRequestHandler getOrHead() => new EwfSafeResponseWriter( processViewAndGetResponse( null ) );
 
 	private EwfResponse processViewAndGetResponse( int? statusCode ) {
-		AppRequestState.Instance.EwfPageRequestState ??= new PageRequestState( AppRequestState.RequestTime, null, null );
-
-		var requestState = AppRequestState.Instance.EwfPageRequestState;
+		var requestState = RequestStateStatics.GetPageRequestState() ?? RequestStateStatics.ResetPageRequestState();
 		var dmIdAndSecondaryOp = requestState.DmIdAndSecondaryOp;
 
 		// Page-view data modifications. All data modifications that happen simply because of a request and require no other action by the user should happen once
@@ -256,10 +254,10 @@ public abstract class PageBase: ResourceBase {
 	}
 
 	private EwfResponse processSecondaryOperationAndGetResponse( int? statusCode ) {
-		var requestState = AppRequestState.Instance.EwfPageRequestState;
+		var requestState = RequestStateStatics.GetPageRequestState();
 		var dmIdAndSecondaryOp = requestState.DmIdAndSecondaryOp;
 
-		var pageLoadPostBackExists = buildPage();
+		buildPage();
 
 		if( requestState.StaticRegionContents != null ) {
 			var nodeUpdateRegionLinkersByKey = updateRegionLinkerNodes.SelectMany( i => i.KeyedUpdateRegionLinkers, ( node, keyedLinker ) => ( node, keyedLinker ) )
@@ -334,7 +332,7 @@ public abstract class PageBase: ResourceBase {
 				return navigate( null, null, null );
 		}
 
-		return getResponse( pageLoadPostBackExists, statusCode );
+		return getResponse( statusCode );
 	}
 
 	/// <summary>
@@ -403,6 +401,7 @@ public abstract class PageBase: ResourceBase {
 	protected sealed override EwfResponse delete() => base.delete();
 
 	protected sealed override EwfResponse post() {
+		PageRequestState requestState;
 		IFormCollection formSubmission;
 		HiddenFieldData hiddenFieldData;
 		try {
@@ -414,18 +413,15 @@ public abstract class PageBase: ResourceBase {
 				formSubmission[ HiddenFieldName ],
 				new JsonSerializerSettings { MissingMemberHandling = MissingMemberHandling.Error } );
 
-			AppRequestState.Instance.EwfPageRequestState = new PageRequestState(
-				hiddenFieldData.FirstRequestTime,
-				hiddenFieldData.ScrollPositionX,
-				hiddenFieldData.ScrollPositionY );
-			AppRequestState.Instance.EwfPageRequestState.ComponentStateValuesById = hiddenFieldData.ComponentStateValuesById;
+			requestState = RequestStateStatics.SetPageRequestState(
+				new PageRequestState( hiddenFieldData.FirstRequestTime, hiddenFieldData.ScrollPositionX, hiddenFieldData.ScrollPositionY ) );
+			requestState.ComponentStateValuesById = hiddenFieldData.ComponentStateValuesById;
 		}
 		catch {
 			// Set a 400 status code if there are any problems loading hidden field state. We're assuming these problems are never the developers' fault.
-			if( AppRequestState.Instance.EwfPageRequestState == null )
-				AppRequestState.Instance.EwfPageRequestState = new PageRequestState( AppRequestState.RequestTime, null, null );
-			AppRequestState.Instance.EwfPageRequestState.FocusKey = "";
-			AppRequestState.Instance.EwfPageRequestState.GeneralModificationErrors = Translation.ApplicationHasBeenUpdatedAndWeCouldNotInterpretAction.ToCollection();
+			requestState = RequestStateStatics.GetPageRequestState() ?? RequestStateStatics.ResetPageRequestState();
+			requestState.FocusKey = "";
+			requestState.GeneralModificationErrors = Translation.ApplicationHasBeenUpdatedAndWeCouldNotInterpretAction.ToCollection();
 			return processViewAndGetResponse( 400 );
 		}
 
@@ -450,7 +446,6 @@ public abstract class PageBase: ResourceBase {
 					throw new DataModificationException( Translation.AnotherUserHasModifiedPageAndWeCouldNotInterpretAction );
 
 				// Execute the page's data update.
-				var requestState = AppRequestState.Instance.EwfPageRequestState;
 				bool changesExist( DataModification dataModification ) =>
 					componentStateItemsById.Values.Any( i => i.DataModifications.Contains( dataModification ) && i.ValueChanged() ) || formValues.Any(
 						i => i.DataModifications.Contains( dataModification ) && i.ValueChangedOnPostBack() );
@@ -516,16 +511,16 @@ public abstract class PageBase: ResourceBase {
 						updateRegions.Select( i => ( i.key, i.region.ArgumentGetter() ) ).Materialize() );
 				}
 				else
-					AppRequestState.Instance.EwfPageRequestState = new PageRequestState( AppRequestState.RequestTime, null, null );
+					requestState = RequestStateStatics.ResetPageRequestState();
 			} );
 
 		return navigate(
 			navigationBehavior?.destination,
 			navigationBehavior?.authorizationCheckDisabledPredicate,
-			AppRequestState.Instance.EwfPageRequestState.ModificationErrorsExist ? null : fullSecondaryResponse );
+			requestState.ModificationErrorsExist ? null : fullSecondaryResponse );
 	}
 
-	private bool buildPage() {
+	private void buildPage() {
 		UrlHandler urlHandler = this;
 		do {
 			if( urlHandler is ResourceBase resource ) {
@@ -550,7 +545,7 @@ public abstract class PageBase: ResourceBase {
 						return getContent() ?? defaultContentGetter();
 				} ),
 			() => {
-				var rs = AppRequestState.Instance.EwfPageRequestState;
+				var rs = RequestStateStatics.GetPageRequestState();
 				var failingDmId =
 					rs.ModificationErrorsExist && rs.DmIdAndSecondaryOp != null && rs.DmIdAndSecondaryOp.Item2 != SecondaryPostBackOperation.ValidateChangesOnly
 						? rs.DmIdAndSecondaryOp.Item1
@@ -603,8 +598,6 @@ public abstract class PageBase: ResourceBase {
 
 		// This must happen after LoadData and before modifications are executed.
 		statusMessages.Clear();
-
-		return pageLoadAction is not null;
 	}
 
 	/// <summary>
@@ -618,7 +611,7 @@ public abstract class PageBase: ResourceBase {
 	protected virtual PageContent getContent() => null;
 
 	private string getJsInitStatements( string elementJsInitStatements, string pageLoadActionStatements ) {
-		var requestState = AppRequestState.Instance.EwfPageRequestState;
+		var requestState = RequestStateStatics.GetPageRequestState();
 		var modificationErrorsOccurred = requestState.ModificationErrorsExist &&
 		                                 ( requestState.DmIdAndSecondaryOp == null ||
 		                                   !new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains(
@@ -672,7 +665,7 @@ public abstract class PageBase: ResourceBase {
 					//
 					// Avoid using exceptions here if possible. This method is sometimes called many times during a request, and we've seen exceptions take as long as
 					// 50 ms each when debugging.
-					var errors = AppRequestState.Instance.EwfPageRequestState.InLineModificationErrorsByDisplay.TryGetValue( displayKey, out var value )
+					var errors = RequestStateStatics.GetPageRequestState().InLineModificationErrorsByDisplay.TryGetValue( displayKey, out var value )
 						             ? value.Materialize()
 						             : new string[ 0 ];
 
@@ -686,7 +679,7 @@ public abstract class PageBase: ResourceBase {
 	/// <summary>
 	/// Gets the time instant at which the page was first requested. This remains constant across intermediate post-backs, but is reset after a full post-back.
 	/// </summary>
-	public Instant FirstRequestTime => AppRequestState.Instance.EwfPageRequestState.FirstRequestTime;
+	public Instant FirstRequestTime => RequestStateStatics.GetPageRequestState().FirstRequestTime;
 
 	/// <summary>
 	/// Gets the page’s data-update modification, which executes on every full post-back prior to the post-back object. WARNING: Do *not* use this for
@@ -721,16 +714,16 @@ public abstract class PageBase: ResourceBase {
 			var dmException = e.GetChain().OfType<DataModificationException>().FirstOrDefault();
 			if( dmException == null )
 				throw;
-			AppRequestState.Instance.EwfPageRequestState.FocusKey = "";
-			AppRequestState.Instance.EwfPageRequestState.GeneralModificationErrors = dmException.HtmlMessages;
-			AppRequestState.Instance.EwfPageRequestState.SetStaticAndUpdateRegionState(
-				getStaticRegionContents( null ).contents,
-				Enumerable.Empty<( string, string )>().Materialize() );
+
+			var requestState = RequestStateStatics.GetPageRequestState();
+			requestState.FocusKey = "";
+			requestState.GeneralModificationErrors = dmException.HtmlMessages;
+			requestState.SetStaticAndUpdateRegionState( getStaticRegionContents( null ).contents, Enumerable.Empty<( string, string )>().Materialize() );
 		}
 	}
 
 	private void validateFormSubmission( IFormCollection submission, string formValueHash ) {
-		var requestState = AppRequestState.Instance.EwfPageRequestState;
+		var requestState = RequestStateStatics.GetPageRequestState();
 
 		var extraComponentStateValues = requestState.ComponentStateValuesById.Keys.Where( i => !componentStateItemsById.ContainsKey( i ) ).Materialize();
 		var invalidComponentStateValues = componentStateItemsById
@@ -812,7 +805,7 @@ public abstract class PageBase: ResourceBase {
 		if( !modErrorDisplaysByValidation.ContainsKey( validation ) )
 			throw new ApplicationException( "An undisplayed validation produced errors." );
 		foreach( var displayKey in modErrorDisplaysByValidation[ validation ] ) {
-			var errorsByDisplay = AppRequestState.Instance.EwfPageRequestState.InLineModificationErrorsByDisplay;
+			var errorsByDisplay = RequestStateStatics.GetPageRequestState().InLineModificationErrorsByDisplay;
 			errorsByDisplay[ displayKey ] = errorsByDisplay.ContainsKey( displayKey ) ? errorsByDisplay[ displayKey ].Concat( errorMessages ) : errorMessages;
 		}
 	}
@@ -821,7 +814,7 @@ public abstract class PageBase: ResourceBase {
 		IEnumerable<( PageNode node, IEnumerable<PageComponent> components )> updateRegions ) {
 		var contents = new StringBuilder();
 
-		var requestState = AppRequestState.Instance.EwfPageRequestState;
+		var requestState = RequestStateStatics.GetPageRequestState();
 		if( requestState.ModificationErrorsExist ||
 		    ( requestState.DmIdAndSecondaryOp != null && requestState.DmIdAndSecondaryOp.Item2 == SecondaryPostBackOperation.NoOperation ) ) {
 			// It’s probably bad if a developer puts a post-back object in the page because of a modification error. It will be gone on the post-back and cannot be
@@ -857,7 +850,7 @@ public abstract class PageBase: ResourceBase {
 	}
 
 	private EwfResponse navigate( ResourceInfo destination, Func<ResourceInfo, bool> authorizationCheckDisabledPredicate, FullResponse secondaryResponse ) {
-		var requestState = AppRequestState.Instance.EwfPageRequestState;
+		var requestState = RequestStateStatics.GetPageRequestState();
 
 		bool authorizationCheckDisabled;
 		string destinationUrl;
@@ -945,8 +938,8 @@ public abstract class PageBase: ResourceBase {
 		AppRequestState.Instance.SetUrlHandlers( urlHandlers );
 	}
 
-	private EwfResponse getResponse( bool pageLoadPostBackExists, int? statusCode ) {
-		var requestState = AppRequestState.Instance.EwfPageRequestState;
+	private EwfResponse getResponse( int? statusCode ) {
+		var requestState = RequestStateStatics.GetPageRequestState();
 		var modificationErrorsOccurred = requestState.ModificationErrorsExist &&
 		                                 ( requestState.DmIdAndSecondaryOp == null ||
 		                                   !new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains(
@@ -955,8 +948,7 @@ public abstract class PageBase: ResourceBase {
 		Func<FocusabilityCondition, bool> isFocusablePredicate;
 		if( modificationErrorsOccurred )
 			isFocusablePredicate = condition => condition.ErrorFocusabilitySources.Validations.Any( i => validationsWithErrors.Contains( i ) ) ||
-			                                    ( condition.ErrorFocusabilitySources.IncludeGeneralErrors &&
-			                                      AppRequestState.Instance.EwfPageRequestState.GeneralModificationErrors.Any() );
+			                                    ( condition.ErrorFocusabilitySources.IncludeGeneralErrors && requestState.GeneralModificationErrors.Any() );
 		else
 			isFocusablePredicate = condition => condition.IsNormallyFocusable;
 

@@ -283,7 +283,7 @@ public static class RequestDispatchingStatics {
 		RequestState.RollbackDatabaseTransactions();
 		DataAccessState.Current.ResetCache();
 
-		RequestState.EwfPageRequestState = new PageRequestState( AppRequestState.RequestTime, null, null );
+		PageInfrastructure.RequestStateStatics.ResetPageRequestState();
 
 		if( !context.Response.HasStarted )
 			context.Response.Clear();

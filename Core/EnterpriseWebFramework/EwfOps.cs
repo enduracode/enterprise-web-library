@@ -284,6 +284,7 @@ public static class EwfOps {
 							StaticFile.Init( providerGetter.GetProvider<AppStaticFileHandlingProvider>( "StaticFileHandling" ) );
 							StandardLibrarySessionState.Init( () => contextAccessor.HttpContext );
 							PageInfrastructure.RequestStateStatics.Init(
+								() => AppRequestState.RequestTime,
 								url => RequestDispatchingStatics.RequestState.ClientSideNewUrl = url,
 								() => RequestDispatchingStatics.RequestState.StatusMessages,
 								messages => {
@@ -292,6 +293,8 @@ public static class EwfOps {
 								},
 								() => RequestDispatchingStatics.RequestState.SecondaryResponseId,
 								id => RequestDispatchingStatics.RequestState.SecondaryResponseId = id,
+								() => RequestDispatchingStatics.RequestState.PageRequestState,
+								state => RequestDispatchingStatics.RequestState.PageRequestState = state,
 								() => RequestDispatchingStatics.RequestState.AllowSlowRequest(),
 								RequestDispatchingStatics.RefreshRequestState );
 							PageBase.Init(
