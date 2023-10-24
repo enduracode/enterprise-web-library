@@ -1,11 +1,13 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
+using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.Collections;
 
 /// <summary>
 /// A cache of values.
 /// </summary>
+[ PublicAPI ]
 public class Cache<KeyType, ValType> where KeyType: notnull {
 	private readonly IDictionary<KeyType, ValType> dictionary;
 

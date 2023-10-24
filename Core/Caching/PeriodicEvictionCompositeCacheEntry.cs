@@ -1,5 +1,5 @@
-﻿namespace EnterpriseWebLibrary.Caching {
-	internal interface PeriodicEvictionCompositeCacheEntry {
-		void EvictOldEntries();
-	}
+﻿namespace EnterpriseWebLibrary.Caching;
+
+internal interface PeriodicEvictionCompositeCacheEntry {
+	void EvictOldEntries();
 }
