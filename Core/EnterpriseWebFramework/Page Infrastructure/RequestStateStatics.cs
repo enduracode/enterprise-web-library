@@ -1,4 +1,5 @@
-﻿using NodaTime;
+﻿using Microsoft.AspNetCore.Http;
+using NodaTime;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.PageInfrastructure;
 
@@ -13,12 +14,13 @@ internal static class RequestStateStatics {
 	private static Func<PageRequestState, PageRequestState>? pageRequestStateSetter;
 	private static Action? slowDataModificationNotifier;
 	private static Action? requestStateRefresher;
+	private static Func<string, string, Action<HttpContext>, string>? continuationRequestStateStorer;
 
 	internal static void Init(
 		Func<Instant> requestTimeGetter, Action<string> clientSideNewUrlSetter, Func<IReadOnlyCollection<( StatusMessageType, string )>> statusMessageGetter,
 		Action<IEnumerable<( StatusMessageType, string )>> statusMessageAppender, Func<int?> secondaryResponseIdGetter, Action<int> secondaryResponseIdSetter,
 		Func<PageRequestState>? pageRequestStateGetter, Func<PageRequestState, PageRequestState>? pageRequestStateSetter, Action slowDataModificationNotifier,
-		Action requestStateRefresher ) {
+		Action requestStateRefresher, Func<string, string, Action<HttpContext>, string> continuationRequestStateStorer ) {
 		RequestStateStatics.requestTimeGetter = requestTimeGetter;
 
 		RequestStateStatics.clientSideNewUrlSetter = clientSideNewUrlSetter;
@@ -35,6 +37,8 @@ internal static class RequestStateStatics {
 		RequestStateStatics.slowDataModificationNotifier = slowDataModificationNotifier;
 
 		RequestStateStatics.requestStateRefresher = requestStateRefresher;
+
+		RequestStateStatics.continuationRequestStateStorer = continuationRequestStateStorer;
 	}
 
 	public static Instant RequestTime => requestTimeGetter!();
@@ -54,4 +58,7 @@ internal static class RequestStateStatics {
 	public static void NotifyOfSlowDataModification() => slowDataModificationNotifier!();
 
 	public static void RefreshRequestState() => requestStateRefresher!();
+
+	public static string StoreRequestStateForContinuation( string url, string requestMethod, Action<HttpContext> requestHandler ) =>
+		continuationRequestStateStorer!( url, requestMethod, requestHandler );
 }

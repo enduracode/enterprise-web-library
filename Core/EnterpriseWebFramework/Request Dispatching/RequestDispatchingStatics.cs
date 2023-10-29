@@ -36,9 +36,9 @@ public static class RequestDispatchingStatics {
 
 		try {
 			string appRelativeUrl = null;
-			executeWithBasicExceptionHandling(
+			await executeWithBasicExceptionHandling(
 				context,
-				() => {
+				async () => {
 					// This used to be just HttpContext.Current.Request.Url, but that doesn't work with Azure due to the use of load balancing. An Azure load balancer
 					// will bind to the ip/host/port through which all web requests should come in, and then the request is redirected to one of the server instances
 					// running this web application. For example, a user will request mydomain.com. In Azure, there may be two instances running this web site, on
@@ -63,7 +63,9 @@ public static class RequestDispatchingStatics {
 						          : baseUrl + appRelativeUrl;
 
 
-					context.Items.Add( RequestStateKey, new AppRequestState( context, url, baseUrl ) );
+					context.Items.Add(
+						RequestStateKey,
+						await RequestContinuationDataStore.GetRequestState( url, baseUrl, context.Request.Method ) ?? new AppRequestState( context, url, baseUrl ) );
 				},
 				false,
 				true );
@@ -71,6 +73,14 @@ public static class RequestDispatchingStatics {
 				return;
 
 			try {
+				Action<HttpContext> requestHandler;
+				if( RequestState.RequestHandler is not null ) {
+					requestHandler = RequestState.RequestHandler;
+					RequestState.RequestHandler = null;
+					requestHandler( context );
+					return;
+				}
+
 				var ipAddresses = AppProvider.GetWhitelistedIpAddressesForMaintenance();
 				if( ipAddresses != null && !ipAddresses.Contains( context.Connection.RemoteIpAddress?.ToString() ) ) {
 					EwfResponse.Create( "", new EwfResponseBodyCreator( () => "" ), statusCodeGetter: () => 503 ).WriteToAspNetResponse( context.Response );
@@ -80,7 +90,6 @@ public static class RequestDispatchingStatics {
 				RequestState.IntermediateUserExists = NonLiveInstallationStatics.IntermediateAuthenticationCookieExists();
 				RequestState.EnableUser();
 
-				Action<HttpContext> requestHandler;
 				using( MiniProfiler.Current.Step( "EWF - Resolve URL" ) )
 					requestHandler = resolveUrl( context, appRelativeUrl );
 
@@ -97,11 +106,21 @@ public static class RequestDispatchingStatics {
 				}
 			}
 			catch( Exception exception ) {
-				handleError( context, exception );
+				await handleError( context, exception );
 			}
 			finally {
 				// Do not set a status code since we may have already set one or set a redirect page.
-				executeWithBasicExceptionHandling( context, () => RequestState.CleanUp(), false, false );
+				await executeWithBasicExceptionHandling(
+					context,
+					() => {
+						if( RequestState.RequestHandler is not null )
+							RequestState.ContinuationSemaphore.Release();
+						else
+							RequestState.CleanUp();
+						return Task.CompletedTask;
+					},
+					false,
+					false );
 			}
 		}
 		finally {
@@ -160,8 +179,8 @@ public static class RequestDispatchingStatics {
 		return null;
 	}
 
-	private static void handleError( HttpContext context, Exception exception ) {
-		executeWithBasicExceptionHandling(
+	private static async Task handleError( HttpContext context, Exception exception ) =>
+		await executeWithBasicExceptionHandling(
 			context,
 			() => {
 				try {
@@ -210,14 +229,14 @@ public static class RequestDispatchingStatics {
 						context.Response.Clear();
 					throw;
 				}
+				return Task.CompletedTask;
 			},
 			true,
 			true );
-	}
 
-	private static void executeWithBasicExceptionHandling( HttpContext context, Action handler, bool addErrorToRequestState, bool write500Response ) {
+	private static async Task executeWithBasicExceptionHandling( HttpContext context, Func<Task> handler, bool addErrorToRequestState, bool write500Response ) {
 		try {
-			handler();
+			await handler();
 		}
 		catch( Exception e ) {
 			const string prefix = "An exception occurred that could not be handled by the main exception handler:";

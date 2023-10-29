@@ -892,24 +892,38 @@ public abstract class PageBase: ResourceBase {
 			RequestStateStatics.SetSecondaryResponseId( 1 );
 		}
 
-		// If the destination resource is a page with the same origin as the current page, do a transfer instead of a redirect. Don’t do this if the authorization
-		// check was disabled since, if there is a possibility of the destination page sending a 403 status code, we need to always send a 303 code first (below) so
-		// the client knows the POST worked.
-		if( destination is PageBase page && !authorizationCheckDisabled && Uri.Compare(
-			    new Uri( destinationUrl ),
-			    new Uri( AppRequestState.Instance.Url ),
-			    UriComponents.SchemeAndServer,
-			    UriFormat.UriEscaped,
-			    StringComparison.Ordinal ) == 0 ) {
-			page.replaceUrlHandlers();
-			AppRequestState.Instance.SetNewUrlParameterValuesEffective( false );
+		if( destination is PageBase page ) {
 			RequestStateStatics.SetClientSideNewUrl( destinationUrl );
-			return ( nextPageObject = page ).processViewAndGetResponse( null );
-		}
 
-		// If modification errors exist or this is not full post-back navigation, save request state in session state until the next request.
-		if( requestState.ModificationErrorsExist || requestState.DmIdAndSecondaryOp != null )
-			throw new NotImplementedException( "Persisting request state across a redirect is not currently supported. See EnduraCode Goal 2510." );
+			// If the destination page has the same origin as the current page, do a transfer instead of a redirect. Don’t do this if the authorization check was
+			// disabled since, if there is a possibility of the destination page sending a 403 status code, we need to always send a 303 code first (below) so the
+			// client knows the POST worked.
+			if( !authorizationCheckDisabled && Uri.Compare(
+				    new Uri( destinationUrl ),
+				    new Uri( AppRequestState.Instance.Url ),
+				    UriComponents.SchemeAndServer,
+				    UriFormat.UriEscaped,
+				    StringComparison.Ordinal ) == 0 ) {
+				page.replaceUrlHandlers();
+				AppRequestState.Instance.SetNewUrlParameterValuesEffective( false );
+				return ( nextPageObject = page ).processViewAndGetResponse( null );
+			}
+
+			destinationUrl = RequestStateStatics.StoreRequestStateForContinuation(
+				destinationUrl,
+				"GET",
+				context => {
+					page.replaceUrlHandlers();
+					AppRequestState.Instance.SetNewUrlParameterValuesEffective( false );
+
+					if( authorizationCheckDisabled )
+						page.HandleRequest( context, false );
+					else {
+						AppRequestState.Instance.SetResource( page );
+						page.processViewAndGetResponse( null ).WriteToAspNetResponse( context.Response );
+					}
+				} );
+		}
 
 		return EwfResponse.Create(
 			ContentTypes.PlainText,

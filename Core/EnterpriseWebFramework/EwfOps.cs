@@ -296,7 +296,12 @@ public static class EwfOps {
 								() => RequestDispatchingStatics.RequestState.PageRequestState,
 								state => RequestDispatchingStatics.RequestState.PageRequestState = state,
 								() => RequestDispatchingStatics.RequestState.AllowSlowRequest(),
-								RequestDispatchingStatics.RefreshRequestState );
+								RequestDispatchingStatics.RefreshRequestState,
+								( url, requestMethod, requestHandler ) => RequestContinuationDataStore.AddRequestState(
+									url,
+									requestMethod,
+									RequestDispatchingStatics.RequestState,
+									requestHandler ) );
 							PageBase.Init(
 								( () => BasePageStatics.AppProvider.GetPageViewDataModificationMethod(),
 									() => BasePageStatics.AppProvider.JavaScriptDocumentReadyFunctionCall ),

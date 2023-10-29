@@ -1,4 +1,5 @@
 ﻿#nullable disable
+using System.Threading;
 using EnterpriseWebLibrary.Caching;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
@@ -45,8 +46,11 @@ public class AppRequestState {
 	}
 
 	private readonly Instant beginInstant;
-	private readonly string url;
-	private readonly string baseUrl;
+	/// <summary>
+	/// EWF use only. This is the absolute URL for the request. Absolute means the entire URL, including the scheme, host, path, and query string.
+	/// </summary>
+	public string Url { get; private set; }
+	internal string BaseUrl { get; private set; }
 
 	internal readonly List<( string, string, CookieOptions )> ResponseCookies;
 
@@ -77,14 +81,18 @@ public class AppRequestState {
 	private Duration networkWaitDuration = Duration.Zero;
 	private Duration slowRequestThreshold = Duration.FromMilliseconds( 5000 );
 
+	// request continuation
+	internal SemaphoreSlim ContinuationSemaphore { get; } = new( 0, 1 );
+	internal Action<HttpContext> RequestHandler { get; set; }
+
 	internal AppRequestState( HttpContext context, string url, string baseUrl ) {
 		beginInstant = SystemClock.Instance.GetCurrentInstant();
 
 		var profiler = MiniProfiler.StartNew( profilerName: url );
 		profiler.User = ( (MiniProfilerOptions)profiler.Options ).UserIdProvider( context.Request );
 
-		this.url = url;
-		this.baseUrl = baseUrl;
+		Url = url;
+		BaseUrl = baseUrl;
 
 		ResponseCookies = new List<( string, string, CookieOptions )>();
 
@@ -94,13 +102,6 @@ public class AppRequestState {
 		ClientSideNewUrl = "";
 		StatusMessages = Enumerable.Empty<( StatusMessageType, string )>().Materialize();
 	}
-
-	/// <summary>
-	/// EWF use only. This is the absolute URL for the request. Absolute means the entire URL, including the scheme, host, path, and query string.
-	/// </summary>
-	public string Url => url;
-
-	internal string BaseUrl => baseUrl;
 
 	/// <summary>
 	/// EwfInitializationOps.InitStatics use only.
@@ -229,30 +230,42 @@ public class AppRequestState {
 		slowRequestThreshold = Duration.Max( allowUnlimitedTime ? Duration.MaxValue : Duration.FromMinutes( 3 ), slowRequestThreshold );
 	}
 
-	internal void CleanUp() {
-		// Skip non-transactional modification methods because they could cause database connections to be reinitialized.
-		databaseConnectionManager.CleanUpConnectionsAndExecuteNonTransactionalModificationMethods( true, skipNonTransactionalModificationMethods: true );
+	internal void ResetForContinuation( string url, string baseUrl ) {
+		Url = url;
+		BaseUrl = baseUrl;
 
-		if( errors.Any() ) {
-			foreach( var i in errors )
-				TelemetryStatics.ReportError( i.prefix, i.exception );
-			MiniProfiler.Current?.Stop();
-		}
-		else {
-			var duration = SystemClock.Instance.GetCurrentInstant() - beginInstant;
-			MiniProfiler.Current?.Stop();
-			if( MiniProfiler.Current != null )
-				duration = Duration.FromMilliseconds( (double)MiniProfiler.Current.DurationMilliseconds );
-			duration -= networkWaitDuration;
-			if( duration > slowRequestThreshold && !ConfigurationStatics.IsDevelopmentInstallation )
-				TelemetryStatics.ReportError(
-					"Request took {0} to process. The threshold is {1}. If the performance problem is too difficult to fix, you can suppress this error by {2} or by {3}."
-						.FormatWith(
-							duration.ToTimeSpan().ToConciseString(),
-							slowRequestThreshold.ToTimeSpan().ToConciseString(),
-							"overriding PageBase.IsSlow (for GET request issues)",
-							"overriding PageBase.dataUpdateIsSlow or using the isSlow parameter on the PostBack constructors (for post-back issues)" ),
-					null );
-		}
+		ResponseCookies.Clear();
+	}
+
+	internal void CleanUp() {
+		EwlStatics.CallEveryMethod(
+			() => {
+				// Skip non-transactional modification methods because they could cause database connections to be reinitialized.
+				databaseConnectionManager.CleanUpConnectionsAndExecuteNonTransactionalModificationMethods( true, skipNonTransactionalModificationMethods: true );
+			},
+			() => {
+				if( errors.Any() ) {
+					foreach( var i in errors )
+						TelemetryStatics.ReportError( i.prefix, i.exception );
+					MiniProfiler.Current?.Stop();
+				}
+				else {
+					var duration = SystemClock.Instance.GetCurrentInstant() - beginInstant;
+					MiniProfiler.Current?.Stop();
+					if( MiniProfiler.Current != null )
+						duration = Duration.FromMilliseconds( (double)MiniProfiler.Current.DurationMilliseconds );
+					duration -= networkWaitDuration;
+					if( duration > slowRequestThreshold && !ConfigurationStatics.IsDevelopmentInstallation )
+						TelemetryStatics.ReportError(
+							"Request took {0} to process. The threshold is {1}. If the performance problem is too difficult to fix, you can suppress this error by {2} or by {3}."
+								.FormatWith(
+									duration.ToTimeSpan().ToConciseString(),
+									slowRequestThreshold.ToTimeSpan().ToConciseString(),
+									"overriding PageBase.IsSlow (for GET request issues)",
+									"overriding PageBase.dataUpdateIsSlow or using the isSlow parameter on the PostBack constructors (for post-back issues)" ),
+							null );
+				}
+			},
+			ContinuationSemaphore.Dispose );
 	}
 }
