@@ -1,6 +1,7 @@
 ﻿#nullable disable
 using System.Text;
 using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.EnterpriseWebFramework.PageInfrastructure;
 using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -248,7 +249,16 @@ public sealed class BasicPageContent: PageContent {
 											new DisplaySetup( pageLoadPostBack is null ),
 											() => {
 												var attributes = new List<ElementAttribute>();
-												attributes.Add( new ElementAttribute( "action", PageBase.Current.GetUrl() ) );
+												attributes.Add(
+													new ElementAttribute(
+														"action",
+														pageLoadPostBack is null
+															? PageBase.Current.GetUrl()
+															: RequestStateStatics.StoreRequestStateForContinuation(
+																PageBase.Current.GetUrl(),
+																"POST",
+																context => PageBase.Current.ProcessFormSubmissionAndGetResponse( RequestStateStatics.GetPageRequestState() )
+																	.WriteToAspNetResponse( context.Response ) ) ) );
 												attributes.Add( new ElementAttribute( "method", "post" ) );
 												if( FormUsesMultipartEncoding )
 													attributes.Add( new ElementAttribute( "enctype", "multipart/form-data" ) );

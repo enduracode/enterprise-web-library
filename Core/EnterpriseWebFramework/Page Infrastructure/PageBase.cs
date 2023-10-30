@@ -400,7 +400,9 @@ public abstract class PageBase: ResourceBase {
 	protected sealed override EwfResponse patch() => base.patch();
 	protected sealed override EwfResponse delete() => base.delete();
 
-	protected sealed override EwfResponse post() {
+	protected sealed override EwfResponse post() => ProcessFormSubmissionAndGetResponse( null );
+
+	internal EwfResponse ProcessFormSubmissionAndGetResponse( PageRequestState continuationRequestState ) {
 		PageRequestState requestState;
 		IFormCollection formSubmission;
 		HiddenFieldData hiddenFieldData;
@@ -414,8 +416,15 @@ public abstract class PageBase: ResourceBase {
 				new JsonSerializerSettings { MissingMemberHandling = MissingMemberHandling.Error } );
 
 			requestState = RequestStateStatics.SetPageRequestState(
-				new PageRequestState( hiddenFieldData.FirstRequestTime, hiddenFieldData.ScrollPositionX, hiddenFieldData.ScrollPositionY ) );
-			requestState.ComponentStateValuesById = hiddenFieldData.ComponentStateValuesById;
+				new PageRequestState(
+					continuationRequestState?.FirstRequestTime ?? hiddenFieldData.FirstRequestTime,
+					hiddenFieldData.ScrollPositionX,
+					hiddenFieldData.ScrollPositionY )
+					{
+						ComponentStateValuesById = continuationRequestState is not null
+							                           ? continuationRequestState.ComponentStateValuesById
+							                           : hiddenFieldData.ComponentStateValuesById
+					} );
 		}
 		catch {
 			// Set a 400 status code if there are any problems loading hidden field state. We're assuming these problems are never the developers' fault.
@@ -425,7 +434,8 @@ public abstract class PageBase: ResourceBase {
 			return processViewAndGetResponse( 400 );
 		}
 
-		buildPage();
+		if( continuationRequestState is null )
+			buildPage();
 
 		( ResourceInfo destination, Func<ResourceInfo, bool> authorizationCheckDisabledPredicate )? navigationBehavior = null;
 		FullResponse fullSecondaryResponse = null;
