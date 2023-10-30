@@ -34,6 +34,11 @@ internal class PageRequestState {
 
 	public bool ModificationErrorsExist => InLineModificationErrorsByDisplay.Any() || GeneralModificationErrors.Any();
 
+	public bool ModificationErrorsOccurred =>
+		ModificationErrorsExist && ( DmIdAndSecondaryOp == null ||
+		                             !new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains(
+			                             DmIdAndSecondaryOp.Item2 ) );
+
 	public void SetStaticAndUpdateRegionState( string staticRegionContents, IReadOnlyCollection<( string, string )> updateRegionKeysAndArguments ) {
 		StaticRegionContents = staticRegionContents;
 		UpdateRegionKeysAndArguments = updateRegionKeysAndArguments;

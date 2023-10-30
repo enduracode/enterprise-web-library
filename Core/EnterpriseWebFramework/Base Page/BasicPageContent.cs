@@ -252,7 +252,7 @@ public sealed class BasicPageContent: PageContent {
 												attributes.Add(
 													new ElementAttribute(
 														"action",
-														pageLoadPostBack is null
+														pageLoadPostBack is null || RequestStateStatics.GetPageRequestState().ModificationErrorsOccurred
 															? PageBase.Current.GetUrl()
 															: RequestStateStatics.StoreRequestStateForContinuation(
 																PageBase.Current.GetUrl(),
@@ -291,16 +291,12 @@ public sealed class BasicPageContent: PageContent {
 										pageLoadPostBack is null
 											? Enumerable.Empty<FlowComponent>()
 											: new GenericFlowContainer(
-												new FlowErrorContainer(
-													new ErrorSourceSet( includeGeneralErrors: true ),
-													new CustomErrorDisplayStyle(
-														( errorSources, errors, componentsFocusableOnError ) => errors.Any()
-															                                                        ? ( (ErrorDisplayStyle<FlowComponent>)new ListErrorDisplayStyle() )
-															                                                        .GetComponents( errorSources, errors, componentsFocusableOnError )
-															                                                        : new EwfImage(
-																                                                        new ImageSetup( "Loading icon" ),
-																                                                        new StaticFiles.SpinnerSvg() ).ToCollection() ),
-													disableFocusabilityOnError: true ).ToCollection(),
+												RequestStateStatics.GetPageRequestState().ModificationErrorsOccurred
+													? new FlowErrorContainer(
+														new ErrorSourceSet( includeGeneralErrors: true ),
+														new ListErrorDisplayStyle(),
+														disableFocusabilityOnError: true ).ToCollection()
+													: new EwfImage( new ImageSetup( "Loading icon" ), new StaticFiles.SpinnerSvg() ).ToCollection(),
 												classes: pageLoadPostBackContentContainerClass ).ToCollection() )
 									.Append( jsInitElement )
 									.Materialize() ) ) )

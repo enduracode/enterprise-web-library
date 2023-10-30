@@ -309,7 +309,7 @@ public abstract class PageBase: ResourceBase {
 					Environment.NewLine + Environment.NewLine + message );
 		}
 
-		if( !requestState.ModificationErrorsExist && dmIdAndSecondaryOp != null && dmIdAndSecondaryOp.Item2 == SecondaryPostBackOperation.Validate ) {
+		if( !requestState.ModificationErrorsExist && dmIdAndSecondaryOp is { Item2: SecondaryPostBackOperation.Validate } ) {
 			var secondaryDm = dmIdAndSecondaryOp.Item1.Any() ? GetPostBack( dmIdAndSecondaryOp.Item1 ) as DataModification : dataUpdate;
 			if( secondaryDm == null )
 				throw getPossibleDeveloperMistakeException( "A data modification with an ID of \"{0}\" does not exist.".FormatWith( dmIdAndSecondaryOp.Item1 ) );
@@ -622,12 +622,8 @@ public abstract class PageBase: ResourceBase {
 
 	private string getJsInitStatements( string elementJsInitStatements, string pageLoadActionStatements ) {
 		var requestState = RequestStateStatics.GetPageRequestState();
-		var modificationErrorsOccurred = requestState.ModificationErrorsExist &&
-		                                 ( requestState.DmIdAndSecondaryOp == null ||
-		                                   !new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains(
-			                                   requestState.DmIdAndSecondaryOp.Item2 ) );
 
-		var scroll = scrollPositionForThisResponse == ScrollPosition.LastPositionOrStatusBar && !modificationErrorsOccurred;
+		var scroll = scrollPositionForThisResponse == ScrollPosition.LastPositionOrStatusBar && !requestState.ModificationErrorsOccurred;
 		var scrollStatement = "";
 		if( scroll && requestState.ScrollPositionX != null && requestState.ScrollPositionY != null )
 			scrollStatement = "window.scroll(" + requestState.ScrollPositionX + "," + requestState.ScrollPositionY + ");";
@@ -656,7 +652,11 @@ public abstract class PageBase: ResourceBase {
 			appProvider.javaScriptDocumentReadyFunctionCallGetter().AppendDelimiter( ";" ),
 			javaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
 			"addSpeculationRules();",
-			StringTools.ConcatenateWithDelimiter( " ", scrollStatement, modificationErrorsOccurred ? "" : pageLoadActionStatements, secondaryResponseStatements )
+			StringTools.ConcatenateWithDelimiter(
+					" ",
+					scrollStatement,
+					requestState.ModificationErrorsOccurred ? "" : pageLoadActionStatements,
+					secondaryResponseStatements )
 				.PrependDelimiter( "window.onload = function() { " )
 				.AppendDelimiter( " };" ) );
 	}
@@ -964,19 +964,15 @@ public abstract class PageBase: ResourceBase {
 
 	private EwfResponse getResponse( int? statusCode ) {
 		var requestState = RequestStateStatics.GetPageRequestState();
-		var modificationErrorsOccurred = requestState.ModificationErrorsExist &&
-		                                 ( requestState.DmIdAndSecondaryOp == null ||
-		                                   !new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains(
-			                                   requestState.DmIdAndSecondaryOp.Item2 ) );
 
 		Func<FocusabilityCondition, bool> isFocusablePredicate;
-		if( modificationErrorsOccurred )
+		if( requestState.ModificationErrorsOccurred )
 			isFocusablePredicate = condition => condition.ErrorFocusabilitySources.Validations.Any( i => validationsWithErrors.Contains( i ) ) ||
 			                                    ( condition.ErrorFocusabilitySources.IncludeGeneralErrors && requestState.GeneralModificationErrors.Any() );
 		else
 			isFocusablePredicate = condition => condition.IsNormallyFocusable;
 
-		pageTree.PrepareForRendering( modificationErrorsOccurred, isFocusablePredicate );
+		pageTree.PrepareForRendering( requestState.ModificationErrorsOccurred, isFocusablePredicate );
 
 		return EwfResponse.Create(
 			ContentTypes.Html,
