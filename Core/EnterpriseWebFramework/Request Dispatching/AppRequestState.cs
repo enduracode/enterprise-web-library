@@ -46,6 +46,7 @@ public class AppRequestState {
 	}
 
 	private readonly Instant beginInstant;
+	internal MiniProfiler Profiler { get; set; }
 	/// <summary>
 	/// EWF use only. This is the absolute URL for the request. Absolute means the entire URL, including the scheme, host, path, and query string.
 	/// </summary>
@@ -88,8 +89,8 @@ public class AppRequestState {
 	internal AppRequestState( HttpContext context, string url, string baseUrl ) {
 		beginInstant = SystemClock.Instance.GetCurrentInstant();
 
-		var profiler = MiniProfiler.StartNew( profilerName: url );
-		profiler.User = ( (MiniProfilerOptions)profiler.Options ).UserIdProvider( context.Request );
+		Profiler = MiniProfiler.StartNew( profilerName: url );
+		Profiler.User = ( (MiniProfilerOptions)Profiler.Options ).UserIdProvider( context.Request );
 
 		Url = url;
 		BaseUrl = baseUrl;

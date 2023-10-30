@@ -40,6 +40,15 @@ public static class EwfOps {
 	public const int InitializationTimeoutSeconds = 120;
 
 	private class MiniProfilerConfigureOptions: IConfigureOptions<MiniProfilerOptions> {
+		private class ProfilerProvider: DefaultProfilerProvider {
+			public override MiniProfiler CurrentProfiler {
+				get => RequestDispatchingStatics.RequestState.Profiler;
+				protected set => RequestDispatchingStatics.RequestState.Profiler = value;
+			}
+
+			public override MiniProfiler Start( string profilerName, MiniProfilerBaseOptions options ) => new( profilerName ?? nameof(MiniProfiler), options );
+		}
+
 		private readonly IMemoryCache cache;
 
 		public MiniProfilerConfigureOptions( IMemoryCache cache ) {
@@ -50,6 +59,7 @@ public static class EwfOps {
 			options.RouteBasePath = "/profiler";
 			options.Storage = new MemoryCacheStorage( cache, TimeSpan.FromMinutes( 30 ) );
 			options.ShouldProfile = _ => false;
+			options.ProfilerProvider = new ProfilerProvider();
 		}
 	}
 
