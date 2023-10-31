@@ -5,7 +5,6 @@ using System.Security.Principal;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.UserManagement;
 using EnterpriseWebLibrary.UserManagement.IdentityProviders;
-using EnterpriseWebLibrary.WebSessionState;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.DataProtection;
@@ -21,10 +20,7 @@ public static class AuthenticationStatics {
 	private const string identityProviderCookieName = "IdentityProvider";
 	private const string testCookieName = "TestCookie";
 
-	/// <summary>
-	/// The idle time required for a session to be erased.
-	/// </summary>
-	public static readonly Duration SessionDuration = Duration.FromHours( 32 ); // persist across consecutive days of usage
+	private static readonly Duration defaultAuthenticationDuration = Duration.FromHours( 32 ); // persist across consecutive days of usage
 
 	private static AppAuthenticationProvider provider;
 	private static TicketDataFormat authenticationTicketProtector;
@@ -275,7 +271,7 @@ public static class AuthenticationStatics {
 		else {
 			authenticationDuration ??= identityProvider is LocalIdentityProvider { AuthenticationDuration: not null } local ? local.AuthenticationDuration.Value :
 			                           identityProvider is SamlIdentityProvider { AuthenticationDuration: not null } saml ? saml.AuthenticationDuration.Value :
-			                           user.Role.RequiresEnhancedSecurity ? Duration.FromMinutes( 12 ) : SessionDuration;
+			                           user.Role.RequiresEnhancedSecurity ? Duration.FromMinutes( 12 ) : defaultAuthenticationDuration;
 
 			var ticket = new AuthenticationTicket(
 				new ClaimsPrincipal( new GenericIdentity( user.UserId.ToString() ) ),

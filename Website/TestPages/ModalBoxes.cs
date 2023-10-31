@@ -1,9 +1,4 @@
-﻿using System.Linq;
-using EnterpriseWebLibrary.EnterpriseWebFramework;
-using EnterpriseWebLibrary.WebSessionState;
-using Tewl.Tools;
-
-// EwlPage
+﻿// EwlPage
 
 namespace EnterpriseWebLibrary.Website.TestPages {
 	partial class ModalBoxes {
@@ -51,7 +46,7 @@ namespace EnterpriseWebLibrary.Website.TestPages {
 }
 
 namespace EnterpriseWebLibrary.Website.TestPages {
-partial class ModalBoxes {
-protected override UrlHandler getUrlParent() => new LegacyUrlFolderSetup();
-}
+	partial class ModalBoxes {
+		protected override UrlHandler getUrlParent() => new LegacyUrlFolderSetup();
+	}
 }

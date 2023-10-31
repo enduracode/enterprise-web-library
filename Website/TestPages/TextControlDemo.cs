@@ -1,6 +1,4 @@
-﻿using EnterpriseWebLibrary.WebSessionState;
-
-// EwlPage
+﻿// EwlPage
 
 namespace EnterpriseWebLibrary.Website.TestPages;
 

@@ -1,6 +1,4 @@
-﻿using EnterpriseWebLibrary.WebSessionState;
-
-namespace EnterpriseWebLibrary.Website.Providers;
+﻿namespace EnterpriseWebLibrary.Website.Providers;
 
 internal class EwfUi: AppEwfUiProvider {
 	public override IReadOnlyCollection<ActionComponentSetup> GetGlobalNavActions( string postBackIdBase ) {

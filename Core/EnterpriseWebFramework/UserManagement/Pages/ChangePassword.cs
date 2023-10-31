@@ -1,7 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.WebSessionState;
-
-// EwlPage
+﻿// EwlPage
 // Parameter: string returnUrl
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages;
@@ -15,11 +12,11 @@ partial class ChangePassword {
 		if( customContent != null )
 			return customContent;
 
-		Action<int> passwordUpdater = null;
+		Action<int>? passwordUpdater = null;
 		return FormState.ExecuteWithDataModificationsAndDefaultAction(
 			PostBack.CreateFull(
 					modificationMethod: () => {
-						passwordUpdater( AppTools.User.UserId );
+						passwordUpdater( AppTools.User!.UserId );
 						AddStatusMessage( StatusMessageType.Info, "Your password has been successfully changed. Use it the next time you log in." );
 					},
 					actionGetter: () => new PostBackAction( new ExternalResource( ReturnUrl ) ) )

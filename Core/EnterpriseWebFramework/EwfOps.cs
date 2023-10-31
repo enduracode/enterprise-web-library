@@ -14,7 +14,6 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.EnterpriseWebFramework.WellKnownUrlHandling;
 using EnterpriseWebLibrary.ExternalFunctionality;
 using EnterpriseWebLibrary.UserManagement;
-using EnterpriseWebLibrary.WebSessionState;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
@@ -163,25 +162,12 @@ public static class EwfOps {
 
 						builder.Services.Configure<FormOptions>( options => { options.ValueCountLimit = 10000; } );
 
-						builder.Services.AddDistributedMemoryCache();
-						builder.Services.AddSession(
-							options => {
-								var defaultAttributes = EwfConfigurationStatics.AppConfiguration.DefaultCookieAttributes;
-								options.Cookie.Name = "{0}Session".FormatWith( defaultAttributes.NamePrefix ?? "" );
-								options.Cookie.Domain = defaultAttributes.Domain ?? "";
-								options.Cookie.Path = "/{0}".FormatWith( defaultAttributes.Path ?? EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.Path );
-								options.Cookie.SecurePolicy = CookieSecurePolicy.None;
-								options.Cookie.IsEssential = true;
-
-								options.IdleTimeout = AuthenticationStatics.SessionDuration.ToTimeSpan();
-							} );
+						builder.Services.AddMemoryCache();
 						builder.Services.AddDataProtection();
 						builder.Services.AddMvcCore();
 
 						builder.Host.UseSerilog();
 
-						// MiniProfiler
-						builder.Services.AddMemoryCache();
 						builder.Services.AddSingleton<IConfigureOptions<MiniProfilerOptions>, MiniProfilerConfigureOptions>();
 
 						if( ExternalFunctionalityStatics.OpenIdConnectFunctionalityEnabled )
@@ -292,7 +278,6 @@ public static class EwfOps {
 								() => RequestDispatchingStatics.AppProvider.GetFrameworkUrlParent(),
 								() => OpenIdProviderStatics.GetWellKnownUrls().Concat( RequestDispatchingStatics.AppProvider.GetWellKnownUrls() ) );
 							StaticFile.Init( providerGetter.GetProvider<AppStaticFileHandlingProvider>( "StaticFileHandling" ) );
-							StandardLibrarySessionState.Init( () => contextAccessor.HttpContext );
 							PageInfrastructure.RequestStateStatics.Init(
 								() => AppRequestState.RequestTime,
 								url => RequestDispatchingStatics.RequestState.ClientSideNewUrl = url,
@@ -485,7 +470,6 @@ public static class EwfOps {
 
 						if( ConfigurationStatics.IsDevelopmentInstallation && EwfConfigurationStatics.AppConfiguration.UsesKestrel.Value )
 							app.UsePathBase( "/{0}".FormatWith( EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.Path ) );
-						app.UseSession();
 						// This caused intermittent response-corruption issues; see https://github.com/dotnet/aspnetcore/issues/32767. We may be able to restore it after
 						// updating to .NET 7.
 						//if( ConfigurationStatics.IsDevelopmentInstallation && EwfConfigurationStatics.AppConfiguration.UsesKestrel.Value )

@@ -1,6 +1,4 @@
-﻿using EnterpriseWebLibrary.WebSessionState;
-
-// EwlPage
+﻿// EwlPage
 // OptionalParameter: int groupCount
 // OptionalParameter: int firstGroupItemCount
 
@@ -35,7 +33,8 @@ partial class EwfTableDemo {
 									parametersModification.GroupCount -= 1;
 								} ) ) ).ToCollection(),
 					selectedItemActions: SelectedItemAction
-						.CreateWithIntermediatePostBackBehavior<int>(
+						.CreateWithIntermediatePostBackBehavior<
+							int>(
 							"Echo IDs",
 							null,
 							ids => AddStatusMessage( StatusMessageType.Info, StringTools.GetEnglishListPhrase( ids.Select( i => i.ToString() ), true ) ) )
@@ -60,26 +59,34 @@ partial class EwfTableDemo {
 		return EwfTableItemGroup.Create(
 			() => new EwfTableItemGroupRemainingData(
 				"Group {0}".FormatWith( groupNumber ).ToComponents(),
-				groupActions: groupNumber == 2
-					              ? new ButtonSetup(
-							              "Action 1",
-							              behavior: new PostBackBehavior(
-								              postBack: PostBack.CreateIntermediate(
-									              null,
-									              id: PostBack.GetCompositeId( groupNumber.ToString(), "action1" ),
-									              modificationMethod: () => AddStatusMessage( StatusMessageType.Info, "Action 1" ) ) ) ).Append(
-							              new ButtonSetup(
-								              "Action 2",
-								              behavior: new PostBackBehavior(
-									              postBack: PostBack.CreateIntermediate(
-										              null,
-										              id: PostBack.GetCompositeId( groupNumber.ToString(), "action2" ),
-										              modificationMethod: () => AddStatusMessage( StatusMessageType.Info, "Action 2" ) ) ) ) )
-						              .Materialize()
-					              : null,
-				groupHeadActivationBehavior: ElementActivationBehavior.CreateButton(
+				groupActions:
+				groupNumber == 2
+					? new ButtonSetup(
+							"Action 1",
+							behavior:
+							new PostBackBehavior(
+								postBack:
+								PostBack.CreateIntermediate(
+									null,
+									id: PostBack.GetCompositeId( groupNumber.ToString(), "action1" ),
+									modificationMethod: () => AddStatusMessage( StatusMessageType.Info, "Action 1" ) ) ) )
+						.Append(
+							new ButtonSetup(
+								"Action 2",
+								behavior:
+								new PostBackBehavior(
+									postBack:
+									PostBack.CreateIntermediate(
+										null,
+										id: PostBack.GetCompositeId( groupNumber.ToString(), "action2" ),
+										modificationMethod: () => AddStatusMessage( StatusMessageType.Info, "Action 2" ) ) ) ) )
+						.Materialize()
+					: null,
+				groupHeadActivationBehavior:
+				ElementActivationBehavior.CreateButton(
 					new PostBackBehavior(
-						postBack: PostBack.CreateIntermediate(
+						postBack:
+						PostBack.CreateIntermediate(
 							null,
 							id: "group{0}".FormatWith( groupNumber ),
 							modificationMethod: () => AddStatusMessage( StatusMessageType.Info, "You clicked group {0}.".FormatWith( groupNumber ) ) ) ) ),

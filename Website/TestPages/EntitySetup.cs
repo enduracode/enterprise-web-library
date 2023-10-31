@@ -1,6 +1,4 @@
-﻿using EnterpriseWebLibrary.WebSessionState;
-
-// OptionalParameter: string someText
+﻿// OptionalParameter: string someText
 
 namespace EnterpriseWebLibrary.Website.TestPages;
 

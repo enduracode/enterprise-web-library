@@ -1,6 +1,4 @@
-﻿using EnterpriseWebLibrary.WebSessionState;
-
-// EwlPage
+﻿// EwlPage
 
 namespace EnterpriseWebLibrary.Website.TestPages {
 	partial class ColumnPrimaryTableDemo {
@@ -14,11 +12,14 @@ namespace EnterpriseWebLibrary.Website.TestPages {
 						groupActions:
 						new ButtonSetup(
 								"Action 1",
-								behavior: new PostBackBehavior(
-									postBack: PostBack.CreateIntermediate(
+								behavior:
+								new PostBackBehavior(
+									postBack:
+									PostBack.CreateIntermediate(
 										null,
 										id: PostBack.GetCompositeId( group.ToString(), "action1" ),
-										modificationMethod: () => AddStatusMessage( StatusMessageType.Info, "Action 1" ) ) ) ).Append(
+										modificationMethod: () => AddStatusMessage( StatusMessageType.Info, "Action 1" ) ) ) )
+							.Append(
 								new ButtonSetup(
 									"Action 2",
 									behavior: new PostBackBehavior(
@@ -51,13 +52,17 @@ namespace EnterpriseWebLibrary.Website.TestPages {
 						caption: "My table",
 						subCaption: "A new table implementation",
 						allowExportToExcel: true,
-						tableActions: new ButtonSetup(
-							"Action",
-							behavior: new PostBackBehavior(
-								postBack: PostBack.CreateIntermediate(
-									null,
-									id: "action",
-									modificationMethod: () => AddStatusMessage( StatusMessageType.Info, "You clicked action." ) ) ) ).ToCollection(),
+						tableActions:
+						new ButtonSetup(
+								"Action",
+								behavior:
+								new PostBackBehavior(
+									postBack:
+									PostBack.CreateIntermediate(
+										null,
+										id: "action",
+										modificationMethod: () => AddStatusMessage( StatusMessageType.Info, "You clicked action." ) ) ) )
+							.ToCollection(),
 						selectedItemActions: SelectedItemAction
 							.CreateWithIntermediatePostBackBehavior<int>(
 								"Echo IDs",
