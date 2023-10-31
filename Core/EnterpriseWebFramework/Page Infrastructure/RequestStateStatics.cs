@@ -8,8 +8,8 @@ internal static class RequestStateStatics {
 	private static Action<string>? clientSideNewUrlSetter;
 	private static Func<IReadOnlyCollection<( StatusMessageType, string )>>? statusMessageGetter;
 	private static Action<IEnumerable<( StatusMessageType, string )>>? statusMessageAppender;
-	private static Func<int?>? secondaryResponseIdGetter;
-	private static Action<int>? secondaryResponseIdSetter;
+	private static Func<uint?>? secondaryResponseIdGetter;
+	private static Action<uint>? secondaryResponseIdSetter;
 	private static Func<PageRequestState?>? pageRequestStateGetter;
 	private static Func<PageRequestState, PageRequestState>? pageRequestStateSetter;
 	private static Action? slowDataModificationNotifier;
@@ -18,7 +18,7 @@ internal static class RequestStateStatics {
 
 	internal static void Init(
 		Func<Instant> requestTimeGetter, Action<string> clientSideNewUrlSetter, Func<IReadOnlyCollection<( StatusMessageType, string )>> statusMessageGetter,
-		Action<IEnumerable<( StatusMessageType, string )>> statusMessageAppender, Func<int?> secondaryResponseIdGetter, Action<int> secondaryResponseIdSetter,
+		Action<IEnumerable<( StatusMessageType, string )>> statusMessageAppender, Func<uint?> secondaryResponseIdGetter, Action<uint> secondaryResponseIdSetter,
 		Func<PageRequestState>? pageRequestStateGetter, Func<PageRequestState, PageRequestState>? pageRequestStateSetter, Action slowDataModificationNotifier,
 		Action requestStateRefresher, Func<string, string, Action<HttpContext>, string> continuationRequestStateStorer ) {
 		RequestStateStatics.requestTimeGetter = requestTimeGetter;
@@ -48,8 +48,8 @@ internal static class RequestStateStatics {
 	public static IReadOnlyCollection<( StatusMessageType, string )> GetStatusMessages() => statusMessageGetter!();
 	public static void AppendStatusMessages( IEnumerable<( StatusMessageType, string )> messages ) => statusMessageAppender!( messages );
 
-	public static int? GetSecondaryResponseId() => secondaryResponseIdGetter!();
-	public static void SetSecondaryResponseId( int id ) => secondaryResponseIdSetter!( id );
+	public static uint? GetSecondaryResponseId() => secondaryResponseIdGetter!();
+	public static void SetSecondaryResponseId( uint id ) => secondaryResponseIdSetter!( id );
 
 	public static PageRequestState? GetPageRequestState() => pageRequestStateGetter!();
 	public static PageRequestState SetPageRequestState( PageRequestState state ) => pageRequestStateSetter!( state );

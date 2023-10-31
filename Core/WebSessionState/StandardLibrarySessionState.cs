@@ -1,6 +1,4 @@
-using EnterpriseWebLibrary.EnterpriseWebFramework;
 using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json;
 
 namespace EnterpriseWebLibrary.WebSessionState;
 
@@ -15,15 +13,5 @@ internal static class StandardLibrarySessionState {
 
 	internal static void Init( Func<HttpContext> currentContextGetter ) {
 		currentSessionGetter = () => currentContextGetter().Session;
-	}
-
-	internal static bool HasResponseToSend => currentSessionGetter!().Keys.Contains( "ewfResponseToSend" );
-
-	internal static FullResponse? ResponseToSend {
-		get {
-			var value = currentSessionGetter!().GetString( "ewfResponseToSend" );
-			return value != null ? JsonConvert.DeserializeObject<FullResponse>( value ) : null;
-		}
-		set => currentSessionGetter!().SetString( "ewfResponseToSend", JsonConvert.SerializeObject( value, Formatting.None ) );
 	}
 }

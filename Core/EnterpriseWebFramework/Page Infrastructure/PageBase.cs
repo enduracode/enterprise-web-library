@@ -7,7 +7,6 @@ using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.EnterpriseWebFramework.PageInfrastructure;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.UserManagement;
-using EnterpriseWebLibrary.WebSessionState;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
@@ -632,12 +631,15 @@ public abstract class PageBase: ResourceBase {
 		// behavior by the browser. See http://josephsmarr.com/2007/06/06/the-hidden-cost-of-meta-refresh-tags.
 		var secondaryResponseId = RequestStateStatics.GetSecondaryResponseId();
 		var secondaryResponseStatements = "";
-		if( secondaryResponseId.HasValue && StandardLibrarySessionState.HasResponseToSend ) {
-			var url = new PreBuiltResponse().GetUrl();
-			if( !StandardLibrarySessionState.ResponseToSend.FileName.Any() )
-				secondaryResponseStatements = "var newWindow = window.open( '{0}', '{1}' ); newWindow.focus();".FormatWith( url, "_blank" );
-			else
-				secondaryResponseStatements = "location.replace( '" + url + "' );";
+		if( secondaryResponseId.HasValue ) {
+			var secretAndResponse = SecondaryResponseDataStore.GetSecretAndResponse( secondaryResponseId.Value );
+			if( secretAndResponse.HasValue ) {
+				var url = new PreBuiltResponse( secondaryResponseId.Value, secretAndResponse.Value.secret ).GetUrl();
+				if( !secretAndResponse.Value.response.FileName.Any() )
+					secondaryResponseStatements = "var newWindow = window.open( '{0}', '{1}' ); newWindow.focus();".FormatWith( url, "_blank" );
+				else
+					secondaryResponseStatements = "location.replace( '" + url + "' );";
+			}
 		}
 
 		return StringTools.ConcatenateWithDelimiter(
@@ -896,11 +898,9 @@ public abstract class PageBase: ResourceBase {
 			throw getPossibleDeveloperMistakeException( "The post-modification destination page became invalid.", innerException: e );
 		}
 
-		// Put the secondary response into session state right before navigation so that it doesn't get sent if there is an error before this point.
-		if( secondaryResponse != null ) {
-			StandardLibrarySessionState.ResponseToSend = secondaryResponse;
-			RequestStateStatics.SetSecondaryResponseId( 1 );
-		}
+		// Store the secondary response right before navigation so that it doesn’t get sent if there is an error before this point.
+		if( secondaryResponse != null )
+			RequestStateStatics.SetSecondaryResponseId( SecondaryResponseDataStore.AddResponse( secondaryResponse ) );
 
 		if( destination is PageBase page ) {
 			RequestStateStatics.SetClientSideNewUrl( destinationUrl );

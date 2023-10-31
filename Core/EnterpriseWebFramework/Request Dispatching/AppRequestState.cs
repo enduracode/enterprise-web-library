@@ -74,7 +74,7 @@ public class AppRequestState {
 	// page infrastructure
 	internal string ClientSideNewUrl { get; set; }
 	internal IReadOnlyCollection<( StatusMessageType, string )> StatusMessages { get; set; }
-	internal int? SecondaryResponseId { get; set; }
+	internal uint? SecondaryResponseId { get; set; }
 	internal PageRequestState PageRequestState { get; set; }
 
 	private readonly List<( string prefix, Exception exception )> errors = new();
