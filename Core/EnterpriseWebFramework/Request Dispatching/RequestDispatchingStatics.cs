@@ -165,7 +165,7 @@ public static class RequestDispatchingStatics {
 		}
 
 		// ACME challenge response; see https://tools.ietf.org/html/rfc8555#section-8.3
-		var absoluteUrl = new Uri( RequestState.Url );
+		var absoluteUrl = new Uri( EwfRequest.Current.Url );
 		if( absoluteUrl.Scheme == "http" && absoluteUrl.Port == 80 && absoluteUrl.AbsolutePath.StartsWith( "/.well-known/acme-challenge/" ) ) {
 			var systemManager = ConfigurationStatics.MachineConfiguration?.SystemManager;
 			if( systemManager != null )
@@ -191,28 +191,28 @@ public static class RequestDispatchingStatics {
 
 					var baseUrlRequest = new Lazy<bool>(
 						() => string.Equals(
-							RequestState.Url,
+							EwfRequest.Current.Url,
 							EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString( EwfConfigurationStatics.AppSupportsSecureConnections ),
 							StringComparison.Ordinal ) );
 					if( exception is ResourceNotAvailableException || errorIsBogusPathException )
 						transferRequest( context, 404, getErrorPage( new ResourceNotAvailable( !baseUrlRequest.Value ) ) );
 					else if( exception is AccessDeniedException accessDeniedException ) {
 						if( accessDeniedException.CausedByIntermediateUser )
-							transferRequest( context, 403, new NonLiveLogIn( RequestState.Url ) );
+							transferRequest( context, 403, new NonLiveLogIn( EwfRequest.Current.Url ) );
 						else if( UserManagementStatics.UserManagementEnabled && !ConfigurationStatics.IsLiveInstallation && RequestState.UserAccessible &&
 						         !RequestState.ImpersonatorExists )
-							transferRequest( context, 403, new UserManagement.Pages.Impersonate( RequestState.Url ) );
+							transferRequest( context, 403, new UserManagement.Pages.Impersonate( EwfRequest.Current.Url ) );
 						else if( accessDeniedException.LogInPage != null )
 							transferRequest( context, 403, accessDeniedException.LogInPage );
 						else if( RequestState.UserAccessible && ( UserManagementStatics.LocalIdentityProviderEnabled ||
 						                                          AuthenticationStatics.SamlIdentityProviders.Count > 1 ||
 						                                          ( AuthenticationStatics.SamlIdentityProviders.Any() && SystemUser.Current is not null ) ) )
-							transferRequest( context, 403, new UserManagement.Pages.LogIn( RequestState.Url ) );
+							transferRequest( context, 403, new UserManagement.Pages.LogIn( EwfRequest.Current.Url ) );
 						else if( RequestState.UserAccessible && AuthenticationStatics.SamlIdentityProviders.Any() )
 							transferRequest(
 								context,
 								403,
-								new UserManagement.SamlResources.LogIn( AuthenticationStatics.SamlIdentityProviders.Single().EntityId, RequestState.Url ) );
+								new UserManagement.SamlResources.LogIn( AuthenticationStatics.SamlIdentityProviders.Single().EntityId, EwfRequest.Current.Url ) );
 						else
 							transferRequest( context, 403, getErrorPage( new AccessDenied( !baseUrlRequest.Value ) ) );
 					}

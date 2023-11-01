@@ -277,8 +277,8 @@ public static class AuthenticationStatics {
 				new ClaimsPrincipal( new GenericIdentity( user.UserId.ToString() ) ),
 				new AuthenticationProperties
 					{
-						IssuedUtc = AppRequestState.RequestTime.ToDateTimeOffset(),
-						ExpiresUtc = AppRequestState.RequestTime.Plus( authenticationDuration.Value ).ToDateTimeOffset()
+						IssuedUtc = EwfRequest.Current.RequestTime.ToDateTimeOffset(),
+						ExpiresUtc = EwfRequest.Current.RequestTime.Plus( authenticationDuration.Value ).ToDateTimeOffset()
 					},
 				EwlStatics.EwlInitialism );
 			AppRequestState.AddNonTransactionalModificationMethod( () => setFormsAuthCookie( ticket ) );
@@ -316,7 +316,7 @@ public static class AuthenticationStatics {
 
 		var ticket = GetFormsAuthTicket( cookieValue );
 		if( ticket != null ) {
-			var passedDuration = AppRequestState.RequestTime - Instant.FromDateTimeOffset( ticket.Properties.IssuedUtc.Value );
+			var passedDuration = EwfRequest.Current.RequestTime - Instant.FromDateTimeOffset( ticket.Properties.IssuedUtc.Value );
 			var totalDuration = Duration.FromTimeSpan( ticket.Properties.ExpiresUtc.Value - ticket.Properties.IssuedUtc.Value );
 			if( passedDuration / totalDuration >= .5 ) {
 				ticket.Properties.IssuedUtc = ticket.Properties.IssuedUtc.Value + passedDuration.ToTimeSpan();
@@ -334,7 +334,7 @@ public static class AuthenticationStatics {
 			ticket = authenticationTicketProtector.Unprotect( cookie );
 		}
 		catch( CryptographicException ) {}
-		return ticket != null && AppRequestState.RequestTime < Instant.FromDateTimeOffset( ticket.Properties.ExpiresUtc.Value ) ? ticket : null;
+		return ticket != null && EwfRequest.Current.RequestTime < Instant.FromDateTimeOffset( ticket.Properties.ExpiresUtc.Value ) ? ticket : null;
 	}
 
 
@@ -390,13 +390,13 @@ public static class AuthenticationStatics {
 		if( !clientParseResult.Success )
 			throw new DataModificationException( "Your browser did not submit the current time." );
 
-		var clockDifference = clientParseResult.GetValueOrThrow() - AppRequestState.RequestTime;
+		var clockDifference = clientParseResult.GetValueOrThrow() - EwfRequest.Current.RequestTime;
 		return Math.Abs( clockDifference.TotalMinutes ) > 5;
 	}
 
 	internal static string GetClockWrongMessage() {
 		var timeZone = DateTimeZoneProviders.Tzdb.GetSystemDefault();
-		return Translation.YourClockIsWrong + " " + AppRequestState.RequestTime.InZone( timeZone ).ToDateTimeUnspecified().ToHourAndMinuteString() + " " +
-		       timeZone.GetZoneInterval( AppRequestState.RequestTime ).Name + ".";
+		return Translation.YourClockIsWrong + " " + EwfRequest.Current.RequestTime.InZone( timeZone ).ToDateTimeUnspecified().ToHourAndMinuteString() + " " +
+		       timeZone.GetZoneInterval( EwfRequest.Current.RequestTime ).Name + ".";
 	}
 }

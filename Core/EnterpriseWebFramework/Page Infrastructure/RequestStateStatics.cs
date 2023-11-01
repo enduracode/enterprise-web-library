@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
-using NodaTime;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.PageInfrastructure;
 
 internal static class RequestStateStatics {
-	private static Func<Instant>? requestTimeGetter;
 	private static Action<string>? clientSideNewUrlSetter;
 	private static Func<IReadOnlyCollection<( StatusMessageType, string )>>? statusMessageGetter;
 	private static Action<IEnumerable<( StatusMessageType, string )>>? statusMessageAppender;
@@ -17,12 +15,10 @@ internal static class RequestStateStatics {
 	private static Func<string, string, Action<HttpContext>, string>? continuationRequestStateStorer;
 
 	internal static void Init(
-		Func<Instant> requestTimeGetter, Action<string> clientSideNewUrlSetter, Func<IReadOnlyCollection<( StatusMessageType, string )>> statusMessageGetter,
+		Action<string> clientSideNewUrlSetter, Func<IReadOnlyCollection<( StatusMessageType, string )>> statusMessageGetter,
 		Action<IEnumerable<( StatusMessageType, string )>> statusMessageAppender, Func<uint?> secondaryResponseIdGetter, Action<uint> secondaryResponseIdSetter,
 		Func<PageRequestState>? pageRequestStateGetter, Func<PageRequestState, PageRequestState>? pageRequestStateSetter, Action slowDataModificationNotifier,
 		Action requestStateRefresher, Func<string, string, Action<HttpContext>, string> continuationRequestStateStorer ) {
-		RequestStateStatics.requestTimeGetter = requestTimeGetter;
-
 		RequestStateStatics.clientSideNewUrlSetter = clientSideNewUrlSetter;
 
 		RequestStateStatics.statusMessageGetter = statusMessageGetter;
@@ -41,8 +37,6 @@ internal static class RequestStateStatics {
 		RequestStateStatics.continuationRequestStateStorer = continuationRequestStateStorer;
 	}
 
-	public static Instant RequestTime => requestTimeGetter!();
-
 	public static void SetClientSideNewUrl( string url ) => clientSideNewUrlSetter!( url );
 
 	public static IReadOnlyCollection<( StatusMessageType, string )> GetStatusMessages() => statusMessageGetter!();
@@ -53,7 +47,7 @@ internal static class RequestStateStatics {
 
 	public static PageRequestState? GetPageRequestState() => pageRequestStateGetter!();
 	public static PageRequestState SetPageRequestState( PageRequestState state ) => pageRequestStateSetter!( state );
-	public static PageRequestState ResetPageRequestState() => SetPageRequestState( new PageRequestState( RequestTime, null, null ) );
+	public static PageRequestState ResetPageRequestState() => SetPageRequestState( new PageRequestState( EwfRequest.Current!.RequestTime, null, null ) );
 
 	public static void NotifyOfSlowDataModification() => slowDataModificationNotifier!();
 

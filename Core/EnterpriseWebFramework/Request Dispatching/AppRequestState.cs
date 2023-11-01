@@ -21,11 +21,6 @@ public class AppRequestState {
 	public static AppRequestState Instance => RequestDispatchingStatics.RequestState;
 
 	/// <summary>
-	/// Gets the time instant for the current request.
-	/// </summary>
-	public static Instant RequestTime => Instance.beginInstant;
-
-	/// <summary>
 	/// Queues the specified non-transactional modification method to be executed after database transactions are committed.
 	/// </summary>
 	public static void AddNonTransactionalModificationMethod( Action modificationMethod ) {
@@ -45,12 +40,9 @@ public class AppRequestState {
 		}
 	}
 
-	private readonly Instant beginInstant;
+	internal readonly Instant BeginInstant;
 	internal MiniProfiler Profiler { get; set; }
-	/// <summary>
-	/// EWF use only. This is the absolute URL for the request. Absolute means the entire URL, including the scheme, host, path, and query string.
-	/// </summary>
-	public string Url { get; private set; }
+	internal string Url { get; private set; }
 	internal string BaseUrl { get; private set; }
 
 	internal readonly List<( string, string, CookieOptions )> ResponseCookies;
@@ -84,7 +76,7 @@ public class AppRequestState {
 	internal Action<HttpContext> RequestHandler { get; set; }
 
 	internal AppRequestState( HttpContext context, string url, string baseUrl ) {
-		beginInstant = SystemClock.Instance.GetCurrentInstant();
+		BeginInstant = SystemClock.Instance.GetCurrentInstant();
 
 		Profiler = MiniProfiler.StartNew( profilerName: url );
 		Profiler.User = ( (MiniProfilerOptions)Profiler.Options ).UserIdProvider( context.Request );
@@ -248,7 +240,7 @@ public class AppRequestState {
 					Profiler?.Stop();
 				}
 				else {
-					var duration = SystemClock.Instance.GetCurrentInstant() - beginInstant;
+					var duration = SystemClock.Instance.GetCurrentInstant() - BeginInstant;
 					Profiler?.Stop();
 					if( Profiler is not null )
 						duration = Duration.FromMilliseconds( (double)Profiler.DurationMilliseconds );

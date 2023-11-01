@@ -341,7 +341,7 @@ public abstract class PageBase: ResourceBase {
 	private Action getLastPageRequestTimeUpdateMethod( SystemUser user ) {
 		// Only update the request time if a significant amount of time has passed since we did it last. This can dramatically reduce concurrency issues caused by
 		// people rapidly assigning tasks to one another in the System Manager or similar situations.
-		if( AppRequestState.RequestTime - user.LastRequestTime < Duration.FromMinutes( 60 ) )
+		if( EwfRequest.Current.RequestTime - user.LastRequestTime < Duration.FromMinutes( 60 ) )
 			return null;
 
 		// Now we want to do a timestamp-based concurrency check so we don't update the last login date if we know another transaction already did.
@@ -359,7 +359,7 @@ public abstract class PageBase: ResourceBase {
 
 		return () => {
 			void updateUser() {
-				UserManagementStatics.SystemProvider.InsertOrUpdateUser( user.UserId, user.Email, user.Role.RoleId, AppRequestState.RequestTime );
+				UserManagementStatics.SystemProvider.InsertOrUpdateUser( user.UserId, user.Email, user.Role.RoleId, EwfRequest.Current.RequestTime );
 			}
 			if( ConfigurationStatics.DatabaseExists )
 				DataAccessState.Current.PrimaryDatabaseConnection.ExecuteInTransaction(
@@ -910,7 +910,7 @@ public abstract class PageBase: ResourceBase {
 			// client knows the POST worked.
 			if( !authorizationCheckDisabled && Uri.Compare(
 				    new Uri( destinationUrl ),
-				    new Uri( AppRequestState.Instance.Url ),
+				    new Uri( EwfRequest.Current.Url ),
 				    UriComponents.SchemeAndServer,
 				    UriFormat.UriEscaped,
 				    StringComparison.Ordinal ) == 0 ) {

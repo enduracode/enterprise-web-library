@@ -307,7 +307,7 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 					throw new ResourceNotAvailableException( "The resource has a connection security setting that is incompatible with the current request.", null );
 			}
 			else {
-				if( canonicalUrl != AppRequestState.Instance.Url ) {
+				if( canonicalUrl != EwfRequest.Current!.Url ) {
 					if( !ShouldBeSecureGivenCurrentRequest && EwfRequest.AppBaseUrlProvider.RequestIsSecure( context.Request ) )
 						context.Response.Headers.StrictTransportSecurity = "max-age=0";
 					WriteRedirectResponse( context, canonicalUrl, true );

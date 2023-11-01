@@ -87,7 +87,7 @@ public static class EwfOps {
 				// This check ensures that there is an actual request, which is not the case during application initialization.
 				if( EwfRequest.Current != null ) {
 					writer.WriteLine();
-					writer.WriteLine( "URL: " + AppRequestState.Instance.Url );
+					writer.WriteLine( "URL: " + EwfRequest.Current.Url );
 
 					if( EwfRequest.Current.AspNetRequest.HasFormContentType ) {
 						writer.WriteLine();
@@ -232,8 +232,10 @@ public static class EwfOps {
 								providerGetter.GetProvider<AppRequestBaseUrlProvider>( "RequestBaseUrl" ),
 								() => {
 									var context = contextAccessor.HttpContext;
-									return context != null && context.Items.ContainsKey( RequestDispatchingStatics.RequestStateKey ) ? context.Request : null;
+									return context is not null && context.Items.ContainsKey( RequestDispatchingStatics.RequestStateKey ) ? context.Request : null;
 								},
+								() => RequestDispatchingStatics.RequestState.BeginInstant,
+								() => RequestDispatchingStatics.RequestState.Url,
 								networkWaitTime => AppRequestState.Instance.AddNetworkWaitTime( networkWaitTime ) );
 							EwfResponse.Init( () => contextAccessor.HttpContext );
 							UrlHandlingStatics.Init(
@@ -279,7 +281,6 @@ public static class EwfOps {
 								() => OpenIdProviderStatics.GetWellKnownUrls().Concat( RequestDispatchingStatics.AppProvider.GetWellKnownUrls() ) );
 							StaticFile.Init( providerGetter.GetProvider<AppStaticFileHandlingProvider>( "StaticFileHandling" ) );
 							PageInfrastructure.RequestStateStatics.Init(
-								() => AppRequestState.RequestTime,
 								url => RequestDispatchingStatics.RequestState.ClientSideNewUrl = url,
 								() => RequestDispatchingStatics.RequestState.StatusMessages,
 								messages => {
@@ -402,7 +403,7 @@ public static class EwfOps {
 									return icons;
 								},
 								hideWarnings => {
-									var url = AppRequestState.Instance.Url;
+									var url = EwfRequest.Current.Url;
 									if( AppRequestState.Instance.UserAccessible && AppRequestState.Instance.ImpersonatorExists )
 										url = new UserManagement.Pages.Impersonate(
 											url,
@@ -420,8 +421,7 @@ public static class EwfOps {
 									    ( ConfigurationStatics.IsIntermediateInstallation && !AppRequestState.Instance.IntermediateUserExists ) )
 										return null;
 									return ( "User impersonation is in effect.",
-										       new HyperlinkSetup( new UserManagement.Pages.Impersonate( AppRequestState.Instance.Url ), "Change user" )
-											       .Append<ActionComponentSetup>(
+										       new HyperlinkSetup( new UserManagement.Pages.Impersonate( EwfRequest.Current.Url ), "Change user" ).Append<ActionComponentSetup>(
 												       new ButtonSetup(
 													       "End impersonation",
 													       behavior: new PostBackBehavior(

@@ -59,8 +59,7 @@ partial class LogIn {
 		return new UiPageContent( omitContentBox: true ).Add( authenticatedUserDeniedAccess ? getAuthenticatedUserDeniedAccessComponents() : getLogInComponents() );
 	}
 
-	private bool authenticatedUserDeniedAccess =>
-		SystemUser.Current is not null && !string.Equals( GetUrl(), AppRequestState.Instance.Url, StringComparison.Ordinal );
+	private bool authenticatedUserDeniedAccess => SystemUser.Current is not null && !string.Equals( GetUrl(), EwfRequest.Current.Url, StringComparison.Ordinal );
 
 	private IReadOnlyCollection<FlowComponent> getAuthenticatedUserDeniedAccessComponents() {
 		return new Section(

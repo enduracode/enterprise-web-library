@@ -82,7 +82,7 @@ public class CookieStatics {
 
 		// Ensure that the domain and path of the cookie are in scope for both the request URL and page URL. These two URLs can be different on requests that
 		// transfer to the log-in page, etc.
-		var requestUrls = new List<string> { AppRequestState.Instance.Url };
+		var requestUrls = new List<string> { EwfRequest.Current.Url };
 		if( PageBase.Current != null )
 			requestUrls.Add( PageBase.Current.GetUrl( false, false ) );
 		foreach( var url in requestUrls ) {
