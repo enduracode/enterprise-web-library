@@ -16,9 +16,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 /// </summary>
 public class AppRequestState {
 	/// <summary>
-	/// Gets the request-state object for the current request. Throws an exception if called outside of a request or from a non-web application.
+	/// Do not use. RequestDispatchingStatics.RequestState replaces this property.
 	/// </summary>
-	public static AppRequestState Instance => RequestDispatchingStatics.RequestState;
+	internal static AppRequestState Instance => RequestDispatchingStatics.RequestState;
 
 	internal static T ExecuteWithUrlHandlerStateDisabled<T>( Func<T> method ) {
 		if( EwfRequest.Current == null )
