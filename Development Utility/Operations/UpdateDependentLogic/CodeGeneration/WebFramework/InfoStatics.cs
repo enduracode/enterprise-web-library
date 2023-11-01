@@ -116,7 +116,7 @@ internal static class InfoStatics {
 			writer.WriteLine( "if( EwfRequest.Current != null ) {" );
 
 			// If the list of current URL handlers has a matching object, apply its parameter values.
-			writer.WriteLine( "foreach( var urlHandler in AppRequestState.Instance.UrlHandlers )" );
+			writer.WriteLine( "foreach( var urlHandler in RequestDispatchingStatics.RequestState.UrlHandlers )" );
 			if( isEs ) {
 				writer.WriteLine( "if( urlHandler is ResourceBase r ) {" );
 				writer.WriteLine( "if( {0} ) {{".FormatWith( getHandlerMatchExpression( generalData, requiredParameters, true ) ) );
@@ -137,7 +137,7 @@ internal static class InfoStatics {
 
 			// If new parameter values are effective, and the current resource or an ancestor matches this object, apply its new parameter values.
 			if( generalData.IsPage() || isEs ) {
-				writer.WriteLine( "if( AppRequestState.Instance.NewUrlParameterValuesEffective ) {" );
+				writer.WriteLine( "if( RequestDispatchingStatics.RequestState.NewUrlParameterValuesEffective ) {" );
 				writer.WriteLine( "UrlHandler urlHandler = {0}Current;".FormatWith( generalData.IsPage() ? "" : "PageBase." ) );
 				writer.WriteLine( "do" );
 				if( isEs ) {

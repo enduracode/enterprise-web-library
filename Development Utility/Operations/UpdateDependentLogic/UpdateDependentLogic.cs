@@ -331,8 +331,8 @@ internal class UpdateDependentLogic: Operation {
 				"EnterpriseWebLibrary.TewlContrib.ProcessTools.RunProgram( {0}, \"{1}\", Newtonsoft.Json.JsonConvert.SerializeObject( arguments, Newtonsoft.Json.Formatting.None ) + System.Environment.NewLine + input, false )"
 					.FormatWith( programPath, serverSideConsoleAppJsonArgument );
 
-			writer.WriteLine( "if( EwfRequest.Current != null )" );
-			writer.WriteLine( "AppRequestState.AddNonTransactionalModificationMethod( () => " + runProgramExpression + " );" );
+			writer.WriteLine( "if( EwfRequest.Current is not null )" );
+			writer.WriteLine( "AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod( () => " + runProgramExpression + " );" );
 			writer.WriteLine( "else" );
 			writer.WriteLine( runProgramExpression + ";" );
 

@@ -367,5 +367,9 @@ public static class RequestDispatchingStatics {
 		RequestState.RefreshUserAndImpersonator();
 	}
 
-	internal static AppRequestState RequestState => (AppRequestState)currentContextGetter().Items[ RequestStateKey ];
+	/// <summary>
+	/// Gets the request-state object for the current request. Throws an exception if called outside of a request or from a non-web application. Framework use
+	/// only.
+	/// </summary>
+	public static AppRequestState RequestState => (AppRequestState)currentContextGetter().Items[ RequestStateKey ];
 }
