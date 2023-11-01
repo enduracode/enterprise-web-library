@@ -267,7 +267,7 @@ public static class AuthenticationStatics {
 	/// MVC and private use only.
 	/// </summary>
 	public static void SetFormsAuthCookieAndUser( SystemUser user, IdentityProvider identityProvider = null, Duration? authenticationDuration = null ) {
-		if( AppRequestState.Instance.ImpersonatorExists )
+		if( RequestState.Instance.ImpersonatorExists )
 			UserImpersonationStatics.SetCookie( user );
 		else {
 			authenticationDuration ??= identityProvider is LocalIdentityProvider { AuthenticationDuration: not null } local ? local.AuthenticationDuration.Value :
@@ -284,7 +284,7 @@ public static class AuthenticationStatics {
 				EwlStatics.EwlInitialism );
 			AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod( () => setFormsAuthCookie( ticket ) );
 		}
-		AppRequestState.Instance.SetUser( user );
+		RequestState.Instance.SetUser( user );
 
 		if( identityProvider != null )
 			AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod( () => SetUserLastIdentityProvider( identityProvider ) );
@@ -345,11 +345,11 @@ public static class AuthenticationStatics {
 	/// Do not call if the system does not implement the forms authentication capable user management provider.
 	/// </summary>
 	public static void LogOutUser() {
-		if( AppRequestState.Instance.ImpersonatorExists )
+		if( RequestState.Instance.ImpersonatorExists )
 			UserImpersonationStatics.SetCookie( null );
 		else
 			AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod( clearFormsAuthCookie );
-		AppRequestState.Instance.SetUser( null );
+		RequestState.Instance.SetUser( null );
 
 		AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod( () => CookieStatics.ClearCookie( identityProviderCookieName ) );
 	}

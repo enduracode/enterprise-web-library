@@ -200,11 +200,11 @@ public abstract class PageBase: ResourceBase {
 			                                                   dmIdAndSecondaryOp.Item2 ) ) ) {
 			var modMethods = new List<Action>();
 			modMethods.Add( appProvider.pageViewDataModificationMethodGetter() );
-			if( AppRequestState.Instance.UserAccessible ) {
+			if( RequestState.Instance.UserAccessible ) {
 				if( AppTools.User != null )
 					modMethods.Add( getLastPageRequestTimeUpdateMethod( AppTools.User ) );
-				if( AppRequestState.Instance.ImpersonatorExists && AppRequestState.Instance.ImpersonatorUser != null )
-					modMethods.Add( getLastPageRequestTimeUpdateMethod( AppRequestState.Instance.ImpersonatorUser ) );
+				if( RequestState.Instance.ImpersonatorExists && RequestState.Instance.ImpersonatorUser != null )
+					modMethods.Add( getLastPageRequestTimeUpdateMethod( RequestState.Instance.ImpersonatorUser ) );
 			}
 			modMethods.Add( getPageViewDataModificationMethod() );
 			modMethods = modMethods.Where( i => i != null ).ToList();
@@ -219,7 +219,7 @@ public abstract class PageBase: ResourceBase {
 							RequestStateStatics.AppendStatusMessages( statusMessages );
 							statusMessages.Clear();
 						} );
-					AppRequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
+					RequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
 				}
 				finally {
 					DataAccessState.Current.ResetCache();
@@ -491,7 +491,7 @@ public abstract class PageBase: ResourceBase {
 				if( dmExecuted ) {
 					AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod( () => RequestStateStatics.AppendStatusMessages( statusMessages ) );
 					try {
-						AppRequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
+						RequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
 					}
 					finally {
 						DataAccessState.Current.ResetCache();
@@ -881,7 +881,7 @@ public abstract class PageBase: ResourceBase {
 			    ( requestState.DmIdAndSecondaryOp != null && requestState.DmIdAndSecondaryOp.Item2 == SecondaryPostBackOperation.NoOperation ) )
 				destination = ReCreate();
 			else {
-				AppRequestState.Instance.SetNewUrlParameterValuesEffective( true );
+				RequestState.Instance.SetNewUrlParameterValuesEffective( true );
 				if( destination == null )
 					destination = reCreateFromNewParameterValues();
 				else if( destination is ResourceBase r )
@@ -915,7 +915,7 @@ public abstract class PageBase: ResourceBase {
 				    UriFormat.UriEscaped,
 				    StringComparison.Ordinal ) == 0 ) {
 				page.replaceUrlHandlers();
-				AppRequestState.Instance.SetNewUrlParameterValuesEffective( false );
+				RequestState.Instance.SetNewUrlParameterValuesEffective( false );
 				return ( nextPageObject = page ).processViewAndGetResponse( null );
 			}
 
@@ -924,12 +924,12 @@ public abstract class PageBase: ResourceBase {
 				"GET",
 				context => {
 					page.replaceUrlHandlers();
-					AppRequestState.Instance.SetNewUrlParameterValuesEffective( false );
+					RequestState.Instance.SetNewUrlParameterValuesEffective( false );
 
 					if( authorizationCheckDisabled )
 						page.HandleRequest( context, false );
 					else {
-						AppRequestState.Instance.SetResource( page );
+						RequestState.Instance.SetResource( page );
 						page.processViewAndGetResponse( null ).WriteToAspNetResponse( context.Response );
 					}
 				} );
@@ -959,7 +959,7 @@ public abstract class PageBase: ResourceBase {
 		do
 			urlHandlers.Add( urlHandler );
 		while( ( urlHandler = urlHandler.GetParent() ) != null );
-		AppRequestState.Instance.SetUrlHandlers( urlHandlers );
+		RequestState.Instance.SetUrlHandlers( urlHandlers );
 	}
 
 	private EwfResponse getResponse( int? statusCode ) {

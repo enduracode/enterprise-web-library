@@ -316,7 +316,7 @@ public sealed class BasicPageContent: PageContent {
 			var components = new List<PhrasingComponent>();
 			components.Add( new FontAwesomeIcon( "fa-exclamation-triangle", "fa-lg" ) );
 			components.AddRange( " This is not the live system. Changes made here will be lost and are not recoverable. ".ToComponents() );
-			if( ConfigurationStatics.IsIntermediateInstallation && AppRequestState.Instance.IntermediateUserExists )
+			if( ConfigurationStatics.IsIntermediateInstallation && RequestState.Instance.IntermediateUserExists )
 				components.AddRange(
 					new EwfButton(
 							new StandardButtonStyle( "Log out", buttonSize: ButtonSize.ShrinkWrap ),
@@ -339,7 +339,7 @@ public sealed class BasicPageContent: PageContent {
 							null,
 							id: "ewfHideNonLiveWarnings",
 							modificationMethod: NonLiveInstallationStatics.SetWarningsHiddenCookie ) ) ) );
-			if( ConfigurationStatics.IsIntermediateInstallation && AppRequestState.Instance.IntermediateUserExists ) {
+			if( ConfigurationStatics.IsIntermediateInstallation && RequestState.Instance.IntermediateUserExists ) {
 				var boxId = new ModalBoxId();
 				components.AddRange(
 					" ".ToComponents()

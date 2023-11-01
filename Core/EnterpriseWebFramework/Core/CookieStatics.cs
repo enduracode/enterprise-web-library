@@ -70,7 +70,7 @@ public class CookieStatics {
 
 	private static Tuple<string, string, string> getNameAndDomainAndPath( string name, string domain, string path, bool omitNamePrefix ) {
 		var defaultAttributes = EwfConfigurationStatics.AppConfiguration.DefaultCookieAttributes;
-		var defaultBaseUrl = new Uri( AppRequestState.Instance.BaseUrl );
+		var defaultBaseUrl = new Uri( RequestState.Instance.BaseUrl );
 
 		domain ??= defaultAttributes.Domain ?? "";
 

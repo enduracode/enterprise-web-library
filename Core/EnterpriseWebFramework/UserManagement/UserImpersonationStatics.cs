@@ -13,7 +13,7 @@ public static class UserImpersonationStatics {
 	/// </summary>
 	public static void BeginImpersonation( SystemUser userBeingImpersonated ) {
 		SetCookie( userBeingImpersonated );
-		AppRequestState.Instance.SetUserAndImpersonator( new SpecifiedValue<SystemUser>( userBeingImpersonated ) );
+		RequestState.Instance.SetUserAndImpersonator( new SpecifiedValue<SystemUser>( userBeingImpersonated ) );
 	}
 
 	/// <summary>
@@ -21,7 +21,7 @@ public static class UserImpersonationStatics {
 	/// </summary>
 	public static void EndImpersonation() {
 		clearCookie();
-		AppRequestState.Instance.SetUserAndImpersonator( null );
+		RequestState.Instance.SetUserAndImpersonator( null );
 	}
 
 	internal static void SetCookie( SystemUser userBeingImpersonated ) {

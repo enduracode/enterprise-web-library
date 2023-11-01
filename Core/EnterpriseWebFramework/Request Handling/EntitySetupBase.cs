@@ -136,7 +136,7 @@ public abstract class EntitySetupBase: ResourceParent {
 	public virtual ConnectionSecurity ConnectionSecurity => Parent?.ConnectionSecurity ?? ConnectionSecurity.SecureIfPossible;
 
 	( UrlHandler parent, UrlHandler child ) UrlHandler.GetCanonicalHandlerPair( UrlHandler child ) {
-		var requestHandler = AppRequestState.ExecuteWithUrlHandlerStateDisabled( getRequestHandler );
+		var requestHandler = RequestState.ExecuteWithUrlHandlerStateDisabled( getRequestHandler );
 		return EwlStatics.AreEqual( child, requestHandler ) && canRepresentRequestHandler()
 			       ? ( (UrlHandler)this ).GetParent()?.GetCanonicalHandlerPair( this ) ?? ( null, this )
 			       : ( this, child );

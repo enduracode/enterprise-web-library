@@ -18,7 +18,7 @@ partial class RequestProfiling {
 		var content = new UiPageContent();
 
 		if( ConfigurationStatics.IsLiveInstallation ) {
-			var userIsProfiling = AppMemoryCache.UserIsProfilingRequests( AppRequestState.Instance.ProfilingUserId );
+			var userIsProfiling = AppMemoryCache.UserIsProfilingRequests( RequestState.Instance.ProfilingUserId );
 			content.Add(
 				new Paragraph( "Profiling is currently {0}.".FormatWith( userIsProfiling ? "ON" : "OFF" ).ToComponents() ).Append(
 						new Paragraph(
@@ -29,7 +29,7 @@ partial class RequestProfiling {
 										id: "userToggle",
 										modificationMethod: () => AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod(
 											() => AppMemoryCache.SetRequestProfilingForUser(
-												AppRequestState.Instance.ProfilingUserId,
+												RequestState.Instance.ProfilingUserId,
 												userIsProfiling ? TimeSpan.Zero : TimeSpan.FromHours( 1 ) ) ) ) ) ).ToCollection() ) )
 					.Materialize() );
 		}

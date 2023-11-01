@@ -33,7 +33,7 @@ partial class Impersonate {
 
 	protected override bool userCanAccess {
 		get {
-			var user = AppRequestState.Instance.ImpersonatorExists ? AppRequestState.Instance.ImpersonatorUser : AppTools.User;
+			var user = RequestState.Instance.ImpersonatorExists ? RequestState.Instance.ImpersonatorUser : AppTools.User;
 			return AuthenticationStatics.UserCanImpersonate( user );
 		}
 	}
@@ -87,9 +87,7 @@ partial class Impersonate {
 						.Append(
 							new Paragraph(
 								new EwfButton(
-										new StandardButtonStyle(
-											AppRequestState.Instance.ImpersonatorExists ? "Change User" : "Begin Impersonation",
-											buttonSize: ButtonSize.Large ) )
+										new StandardButtonStyle( RequestState.Instance.ImpersonatorExists ? "Change User" : "Begin Impersonation", buttonSize: ButtonSize.Large ) )
 									.ToCollection() ) )
 						.Materialize() );
 			} );

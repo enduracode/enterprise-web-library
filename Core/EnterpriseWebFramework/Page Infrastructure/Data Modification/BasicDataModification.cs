@@ -68,11 +68,11 @@ internal class BasicDataModification: DataModification, ValidationList {
 				modificationMethod();
 			actionMethodAndPostModificationMethod?.Item1();
 			DataAccessState.Current.ResetCache();
-			AppRequestState.Instance.PreExecuteCommitTimeValidationMethodsForAllOpenConnections();
+			RequestState.Instance.PreExecuteCommitTimeValidationMethodsForAllOpenConnections();
 			actionMethodAndPostModificationMethod?.Item2();
 		}
 		catch {
-			AppRequestState.Instance.RollbackDatabaseTransactions();
+			RequestState.Instance.RollbackDatabaseTransactions();
 			DataAccessState.Current.ResetCache();
 			throw;
 		}

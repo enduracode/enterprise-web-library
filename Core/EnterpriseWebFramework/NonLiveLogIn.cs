@@ -48,7 +48,7 @@ partial class NonLiveLogIn {
 
 	private void logIn( bool hideWarnings ) {
 		NonLiveInstallationStatics.SetIntermediateAuthenticationCookie();
-		AppRequestState.Instance.IntermediateUserExists = true;
+		RequestState.Instance.IntermediateUserExists = true;
 		if( hideWarnings )
 			NonLiveInstallationStatics.SetWarningsHiddenCookie();
 	}

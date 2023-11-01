@@ -193,7 +193,7 @@ public class UiPageContent: PageContent {
 
 	private FlowComponent getGlobalContainer() {
 		var appLogo = new GenericFlowContainer(
-			( !ConfigurationStatics.IsIntermediateInstallation || AppRequestState.Instance.IntermediateUserExists
+			( !ConfigurationStatics.IsIntermediateInstallation || RequestState.Instance.IntermediateUserExists
 				  ? EwfUiStatics.AppProvider.GetLogoComponent()
 				  : null ) ?? ( BasePageStatics.AppProvider.AppDisplayName.Length > 0
 					                ? BasePageStatics.AppProvider.AppDisplayName
@@ -201,7 +201,7 @@ public class UiPageContent: PageContent {
 			classes: appLogoClass );
 
 		var userInfo = new List<FlowComponent>();
-		if( AppRequestState.Instance.UserAccessible ) {
+		if( RequestState.Instance.UserAccessible ) {
 			var components = EwfUiStatics.AppProvider.GetUserInfoComponents() ?? getUserInfoComponents();
 			if( components.Any() )
 				userInfo.Add( new GenericFlowContainer( components, classes: userInfoClass ) );
@@ -280,7 +280,7 @@ public class UiPageContent: PageContent {
 		// This check exists to prevent the display of lookup boxes or other post back controls. With these controls we sometimes don't have a specific
 		// destination page to use for an authorization check, meaning that the system code has no way to prevent their display when there is no intermediate
 		// user.
-		if( ConfigurationStatics.IsIntermediateInstallation && !AppRequestState.Instance.IntermediateUserExists )
+		if( ConfigurationStatics.IsIntermediateInstallation && !RequestState.Instance.IntermediateUserExists )
 			return Enumerable.Empty<FlowComponent>();
 
 		var postBackIdBase = inMobileMenu ? "mobileMenuGlobal" : "global";
@@ -471,7 +471,7 @@ public class UiPageContent: PageContent {
 
 		// This check exists to prevent the display of post back controls. With these controls we sometimes don't have a specific destination page to use for an
 		// authorization check, meaning that the system code has no way to prevent their display when there is no intermediate user.
-		if( !ConfigurationStatics.IsIntermediateInstallation || AppRequestState.Instance.IntermediateUserExists )
+		if( !ConfigurationStatics.IsIntermediateInstallation || RequestState.Instance.IntermediateUserExists )
 			components.AddRange( EwfUiStatics.AppProvider.GetGlobalFootComponents() );
 
 		var ewlWebSite = new ExternalResource( "http://enterpriseweblibrary.org/" );

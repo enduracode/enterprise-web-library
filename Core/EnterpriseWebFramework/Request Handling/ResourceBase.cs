@@ -321,7 +321,7 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 			userAuthorized = UserCanAccess;
 		if( !userAuthorized )
 			throw new AccessDeniedException(
-				ConfigurationStatics.IsIntermediateInstallation && !IsIntermediateInstallationPublicResource && !AppRequestState.Instance.IntermediateUserExists,
+				ConfigurationStatics.IsIntermediateInstallation && !IsIntermediateInstallationPublicResource && !RequestState.Instance.IntermediateUserExists,
 				LogInPage );
 
 		DisabledResourceMode? disabledMode;
@@ -392,7 +392,7 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 			var response = method();
 
 			try {
-				AppRequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
+				RequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
 			}
 			finally {
 				DataAccessState.Current.ResetCache();
@@ -405,7 +405,7 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 		try {
 			var response = method();
 
-			AppRequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
+			RequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
 
 			return response;
 		}
