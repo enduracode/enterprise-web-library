@@ -14,11 +14,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 /// <summary>
 /// The state for a request in an EWF application.
 /// </summary>
-public class AppRequestState {
+public class RequestState {
 	/// <summary>
 	/// Do not use. RequestDispatchingStatics.RequestState replaces this property.
 	/// </summary>
-	internal static AppRequestState Instance => RequestDispatchingStatics.RequestState;
+	internal static RequestState Instance => RequestDispatchingStatics.RequestState;
 
 	internal static T ExecuteWithUrlHandlerStateDisabled<T>( Func<T> method ) {
 		if( EwfRequest.Current == null )
@@ -71,7 +71,7 @@ public class AppRequestState {
 	internal SemaphoreSlim ContinuationSemaphore { get; } = new( 0, 1 );
 	internal Action<HttpContext> RequestHandler { get; set; }
 
-	internal AppRequestState( HttpContext context, string url, string baseUrl ) {
+	internal RequestState( HttpContext context, string url, string baseUrl ) {
 		BeginInstant = SystemClock.Instance.GetCurrentInstant();
 
 		Profiler = MiniProfiler.StartNew( profilerName: url );

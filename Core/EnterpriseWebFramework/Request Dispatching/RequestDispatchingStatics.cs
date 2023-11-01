@@ -65,7 +65,7 @@ public static class RequestDispatchingStatics {
 
 					context.Items.Add(
 						RequestStateKey,
-						await RequestContinuationDataStore.GetRequestState( url, baseUrl, context.Request.Method ) ?? new AppRequestState( context, url, baseUrl ) );
+						await RequestContinuationDataStore.GetRequestState( url, baseUrl, context.Request.Method ) ?? new RequestState( context, url, baseUrl ) );
 				},
 				false,
 				true );
@@ -371,5 +371,5 @@ public static class RequestDispatchingStatics {
 	/// Gets the request-state object for the current request. Throws an exception if called outside of a request or from a non-web application. Framework use
 	/// only.
 	/// </summary>
-	public static AppRequestState RequestState => (AppRequestState)currentContextGetter().Items[ RequestStateKey ];
+	public static RequestState RequestState => (RequestState)currentContextGetter().Items[ RequestStateKey ];
 }

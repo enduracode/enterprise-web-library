@@ -12,10 +12,10 @@ internal class RequestContinuationDataStore: PeriodicEvictionCompositeCacheEntry
 	private class RequestData {
 		public string Url { get; }
 		public string RequestMethod { get; }
-		public AppRequestState RequestState { get; }
+		public RequestState RequestState { get; }
 		public Instant StorageTime { get; }
 
-		public RequestData( string url, string requestMethod, AppRequestState requestState, Instant storageTime ) {
+		public RequestData( string url, string requestMethod, RequestState requestState, Instant storageTime ) {
 			Url = url;
 			RequestMethod = requestMethod;
 			RequestState = requestState;
@@ -23,7 +23,7 @@ internal class RequestContinuationDataStore: PeriodicEvictionCompositeCacheEntry
 		}
 	}
 
-	public static async Task<AppRequestState?> GetRequestState( string url, string baseUrl, string requestMethod ) {
+	public static async Task<RequestState?> GetRequestState( string url, string baseUrl, string requestMethod ) {
 		// This depends on the generation logic in AddRequestState.
 		if( url.Length < 51 )
 			return null;
@@ -46,7 +46,7 @@ internal class RequestContinuationDataStore: PeriodicEvictionCompositeCacheEntry
 		return requestState;
 	}
 
-	public static string AddRequestState( string url, string requestMethod, AppRequestState requestState, Action<HttpContext> requestHandler ) {
+	public static string AddRequestState( string url, string requestMethod, RequestState requestState, Action<HttpContext> requestHandler ) {
 		requestState.RequestHandler = requestHandler;
 
 		var dataStore = getDataStoreFromCache();
