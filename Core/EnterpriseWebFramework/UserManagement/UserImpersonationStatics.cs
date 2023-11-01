@@ -1,4 +1,5 @@
 ﻿#nullable disable
+using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.UserManagement;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
@@ -24,7 +25,7 @@ public static class UserImpersonationStatics {
 	}
 
 	internal static void SetCookie( SystemUser userBeingImpersonated ) {
-		AppRequestState.AddNonTransactionalModificationMethod(
+		AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod(
 			() => CookieStatics.SetCookie(
 				CookieName,
 				userBeingImpersonated?.UserId.ToString() ?? "",
@@ -34,7 +35,7 @@ public static class UserImpersonationStatics {
 	}
 
 	private static void clearCookie() {
-		AppRequestState.AddNonTransactionalModificationMethod( () => CookieStatics.ClearCookie( CookieName ) );
+		AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod( () => CookieStatics.ClearCookie( CookieName ) );
 	}
 
 	internal static string CookieName => "UserBeingImpersonated";

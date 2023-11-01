@@ -39,12 +39,14 @@ public static class GlobalInitializationOps {
 	/// InitStatics call. Do not allow multiple threads to use the same state at the same time. If you pass null, the data-access subsystem will not be
 	/// available in the application.</param>
 	/// <param name="useLongDatabaseTimeouts">Pass true if the application is a background process that can tolerate slow database access.</param>
+	/// <param name="currentDatabaseConnectionManagerGetter">A method that returns the current automatic database-connection manager.</param>
 	/// <param name="currentUserGetter">A method that returns the current authenticated user. If you pass null, the authenticated user will not be available in
 	/// the application.</param>
 	public static void InitStatics(
 		SystemInitializer globalInitializer, string appName, bool isClientSideApp, string assemblyFolderPath = "",
 		Action<TextWriter>? telemetryAppErrorContextWriter = null, Func<IMemoryCache>? memoryCacheGetter = null,
-		Func<DataAccessState>? mainDataAccessStateGetter = null, bool useLongDatabaseTimeouts = false, Func<SystemUser?>? currentUserGetter = null ) {
+		Func<DataAccessState>? mainDataAccessStateGetter = null, bool useLongDatabaseTimeouts = false,
+		Func<AutomaticDatabaseConnectionManager>? currentDatabaseConnectionManagerGetter = null, Func<SystemUser?>? currentUserGetter = null ) {
 		var initializationLog = "Starting init";
 		try {
 			if( initialized )
@@ -90,6 +92,7 @@ public static class GlobalInitializationOps {
 			OracleInfo.Init( () => ExternalFunctionalityStatics.ExternalOracleDatabaseProvider );
 			DataAccessStatics.Init();
 			DataAccessState.Init( mainDataAccessStateGetter, useLongDatabaseTimeouts );
+			AutomaticDatabaseConnectionManager.Init( currentDatabaseConnectionManagerGetter );
 
 			BlobStorageStatics.Init();
 			HtmlBlockStatics.Init();

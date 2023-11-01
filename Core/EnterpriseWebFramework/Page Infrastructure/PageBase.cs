@@ -214,7 +214,7 @@ public abstract class PageBase: ResourceBase {
 				try {
 					foreach( var i in modMethods )
 						i();
-					AppRequestState.AddNonTransactionalModificationMethod(
+					AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod(
 						() => {
 							RequestStateStatics.AppendStatusMessages( statusMessages );
 							statusMessages.Clear();
@@ -489,7 +489,7 @@ public abstract class PageBase: ResourceBase {
 				}
 
 				if( dmExecuted ) {
-					AppRequestState.AddNonTransactionalModificationMethod( () => RequestStateStatics.AppendStatusMessages( statusMessages ) );
+					AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod( () => RequestStateStatics.AppendStatusMessages( statusMessages ) );
 					try {
 						AppRequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
 					}

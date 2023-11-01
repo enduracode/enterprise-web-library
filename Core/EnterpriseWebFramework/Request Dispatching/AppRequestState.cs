@@ -20,13 +20,6 @@ public class AppRequestState {
 	/// </summary>
 	public static AppRequestState Instance => RequestDispatchingStatics.RequestState;
 
-	/// <summary>
-	/// Queues the specified non-transactional modification method to be executed after database transactions are committed.
-	/// </summary>
-	public static void AddNonTransactionalModificationMethod( Action modificationMethod ) {
-		Instance.databaseConnectionManager.AddNonTransactionalModificationMethod( modificationMethod );
-	}
-
 	internal static T ExecuteWithUrlHandlerStateDisabled<T>( Func<T> method ) {
 		if( EwfRequest.Current == null )
 			return method();
@@ -47,7 +40,10 @@ public class AppRequestState {
 
 	internal readonly List<( string, string, CookieOptions )> ResponseCookies;
 
-	private readonly AutomaticDatabaseConnectionManager databaseConnectionManager;
+	/// <summary>
+	/// EwfOps.RunApplication and private use only.
+	/// </summary>
+	internal AutomaticDatabaseConnectionManager DatabaseConnectionManager { get; }
 
 	private bool urlHandlerStateDisabled;
 	private IReadOnlyCollection<BasicUrlHandler> urlHandlers;
@@ -86,28 +82,23 @@ public class AppRequestState {
 
 		ResponseCookies = new List<( string, string, CookieOptions )>();
 
-		databaseConnectionManager = new AutomaticDatabaseConnectionManager();
-		databaseConnectionManager.DataAccessState.ResetCache();
+		DatabaseConnectionManager = new AutomaticDatabaseConnectionManager();
+		DatabaseConnectionManager.DataAccessState.ResetCache();
 
 		ClientSideNewUrl = "";
 		StatusMessages = Enumerable.Empty<( StatusMessageType, string )>().Materialize();
 	}
 
-	/// <summary>
-	/// EwfInitializationOps.InitStatics use only.
-	/// </summary>
-	internal DataAccessState DataAccessState => databaseConnectionManager.DataAccessState;
-
 	internal void PreExecuteCommitTimeValidationMethodsForAllOpenConnections() {
-		databaseConnectionManager.PreExecuteCommitTimeValidationMethods();
+		DatabaseConnectionManager.PreExecuteCommitTimeValidationMethods();
 	}
 
 	internal void CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods() {
-		databaseConnectionManager.CommitTransactionsAndExecuteNonTransactionalModificationMethods( true );
+		DatabaseConnectionManager.CommitTransactionsAndExecuteNonTransactionalModificationMethods( true );
 	}
 
 	internal void RollbackDatabaseTransactions() {
-		databaseConnectionManager.RollbackTransactions( true );
+		DatabaseConnectionManager.RollbackTransactions( true );
 	}
 
 	internal void SetUrlHandlers( IReadOnlyCollection<BasicUrlHandler> handlers ) {
@@ -231,7 +222,7 @@ public class AppRequestState {
 		EwlStatics.CallEveryMethod(
 			() => {
 				// Skip non-transactional modification methods because they could cause database connections to be reinitialized.
-				databaseConnectionManager.CleanUpConnectionsAndExecuteNonTransactionalModificationMethods( true, skipNonTransactionalModificationMethods: true );
+				DatabaseConnectionManager.CleanUpConnectionsAndExecuteNonTransactionalModificationMethods( true, skipNonTransactionalModificationMethods: true );
 			},
 			() => {
 				if( errors.Any() ) {

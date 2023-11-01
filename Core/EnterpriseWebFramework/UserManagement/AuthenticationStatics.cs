@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Security.Principal;
 using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.UserManagement;
 using EnterpriseWebLibrary.UserManagement.IdentityProviders;
 using JetBrains.Annotations;
@@ -281,14 +282,14 @@ public static class AuthenticationStatics {
 						ExpiresUtc = EwfRequest.Current.RequestTime.Plus( authenticationDuration.Value ).ToDateTimeOffset()
 					},
 				EwlStatics.EwlInitialism );
-			AppRequestState.AddNonTransactionalModificationMethod( () => setFormsAuthCookie( ticket ) );
+			AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod( () => setFormsAuthCookie( ticket ) );
 		}
 		AppRequestState.Instance.SetUser( user );
 
 		if( identityProvider != null )
-			AppRequestState.AddNonTransactionalModificationMethod( () => SetUserLastIdentityProvider( identityProvider ) );
+			AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod( () => SetUserLastIdentityProvider( identityProvider ) );
 		else
-			AppRequestState.AddNonTransactionalModificationMethod( () => CookieStatics.ClearCookie( identityProviderCookieName ) );
+			AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod( () => CookieStatics.ClearCookie( identityProviderCookieName ) );
 	}
 
 	private static void setFormsAuthCookie( AuthenticationTicket ticket ) {
@@ -347,10 +348,10 @@ public static class AuthenticationStatics {
 		if( AppRequestState.Instance.ImpersonatorExists )
 			UserImpersonationStatics.SetCookie( null );
 		else
-			AppRequestState.AddNonTransactionalModificationMethod( clearFormsAuthCookie );
+			AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod( clearFormsAuthCookie );
 		AppRequestState.Instance.SetUser( null );
 
-		AppRequestState.AddNonTransactionalModificationMethod( () => CookieStatics.ClearCookie( identityProviderCookieName ) );
+		AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod( () => CookieStatics.ClearCookie( identityProviderCookieName ) );
 	}
 
 	private static void clearFormsAuthCookie() {
