@@ -110,7 +110,7 @@ public static class EwfOps {
 					// exception-prone code
 					try {
 						user = AppTools.User;
-						impersonator = AppRequestState.Instance.ImpersonatorExists ? AppRequestState.Instance.ImpersonatorUser : null;
+						impersonator = RequestDispatchingStatics.RequestState.ImpersonatorExists ? RequestDispatchingStatics.RequestState.ImpersonatorUser : null;
 					}
 					catch {}
 
@@ -238,7 +238,7 @@ public static class EwfOps {
 								},
 								() => RequestDispatchingStatics.RequestState.BeginInstant,
 								() => RequestDispatchingStatics.RequestState.Url,
-								networkWaitTime => AppRequestState.Instance.AddNetworkWaitTime( networkWaitTime ) );
+								networkWaitTime => RequestDispatchingStatics.RequestState.AddNetworkWaitTime( networkWaitTime ) );
 							EwfResponse.Init( () => contextAccessor.HttpContext );
 							UrlHandlingStatics.Init(
 								() => RequestDispatchingStatics.AppProvider.GetBaseUrlPatterns(),
@@ -269,15 +269,15 @@ public static class EwfOps {
 										do
 											urlHandlers.Add( urlHandler );
 										while( ( urlHandler = urlHandler.GetParent() ) != null );
-										AppRequestState.Instance.SetUrlHandlers( urlHandlers );
+										RequestDispatchingStatics.RequestState.SetUrlHandlers( urlHandlers );
 
-										AppRequestState.Instance.SetNewUrlParameterValuesEffective( false );
-										AppRequestState.Instance.SetResource( resource );
+										RequestDispatchingStatics.RequestState.SetNewUrlParameterValuesEffective( false );
+										RequestDispatchingStatics.RequestState.SetResource( resource );
 									}
 									else
-										AppRequestState.Instance.SetResource( resource );
+										RequestDispatchingStatics.RequestState.SetResource( resource );
 								},
-								() => AppRequestState.Instance.Resource );
+								() => RequestDispatchingStatics.RequestState.Resource );
 							WellKnownResource.Init(
 								() => RequestDispatchingStatics.AppProvider.GetFrameworkUrlParent(),
 								() => OpenIdProviderStatics.GetWellKnownUrls().Concat( RequestDispatchingStatics.AppProvider.GetWellKnownUrls() ) );
@@ -406,7 +406,7 @@ public static class EwfOps {
 								},
 								hideWarnings => {
 									var url = EwfRequest.Current.Url;
-									if( AppRequestState.Instance.UserAccessible && AppRequestState.Instance.ImpersonatorExists )
+									if( RequestDispatchingStatics.RequestState.UserAccessible && RequestDispatchingStatics.RequestState.ImpersonatorExists )
 										url = new UserManagement.Pages.Impersonate(
 											url,
 											optionalParameterSetter: ( specifier, _ ) =>
@@ -419,8 +419,8 @@ public static class EwfOps {
 										} ).GetUrl();
 								},
 								() => {
-									if( !AppRequestState.Instance.UserAccessible || !AppRequestState.Instance.ImpersonatorExists ||
-									    ( ConfigurationStatics.IsIntermediateInstallation && !AppRequestState.Instance.IntermediateUserExists ) )
+									if( !RequestDispatchingStatics.RequestState.UserAccessible || !RequestDispatchingStatics.RequestState.ImpersonatorExists ||
+									    ( ConfigurationStatics.IsIntermediateInstallation && !RequestDispatchingStatics.RequestState.IntermediateUserExists ) )
 										return null;
 									return ( "User impersonation is in effect.",
 										       new HyperlinkSetup( new UserManagement.Pages.Impersonate( EwfRequest.Current.Url ), "Change user" ).Append<ActionComponentSetup>(
