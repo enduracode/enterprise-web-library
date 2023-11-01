@@ -156,7 +156,7 @@ public class AppRequestState {
 		// the installation is not live; doing so would prevent adequate testing of the user check.
 		var userIsProfiling = UserAccessible && ( ProfilingUserId.HasValue || ImpersonatorExists ) && AppMemoryCache.UserIsProfilingRequests( ProfilingUserId );
 		if( !userIsProfiling && ( ConfigurationStatics.IsLiveInstallation || AppMemoryCache.UnconditionalRequestProfilingDisabled() ) )
-			MiniProfiler.Current.Stop( discardResults: true );
+			Profiler.Stop( discardResults: true );
 	}
 
 	internal T ExecuteWithUserDisabled<T>( Func<T> method ) {
@@ -248,13 +248,13 @@ public class AppRequestState {
 				if( errors.Any() ) {
 					foreach( var i in errors )
 						TelemetryStatics.ReportError( i.prefix, i.exception );
-					MiniProfiler.Current?.Stop();
+					Profiler?.Stop();
 				}
 				else {
 					var duration = SystemClock.Instance.GetCurrentInstant() - beginInstant;
-					MiniProfiler.Current?.Stop();
-					if( MiniProfiler.Current != null )
-						duration = Duration.FromMilliseconds( (double)MiniProfiler.Current.DurationMilliseconds );
+					Profiler?.Stop();
+					if( Profiler is not null )
+						duration = Duration.FromMilliseconds( (double)Profiler.DurationMilliseconds );
 					duration -= networkWaitDuration;
 					if( duration > slowRequestThreshold && !ConfigurationStatics.IsDevelopmentInstallation )
 						TelemetryStatics.ReportError(
