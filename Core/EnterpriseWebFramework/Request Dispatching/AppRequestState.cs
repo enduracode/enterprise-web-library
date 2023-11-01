@@ -62,10 +62,7 @@ public class AppRequestState {
 	private ResourceBase resource;
 	private bool newUrlParameterValuesEffective;
 
-	/// <summary>
-	/// EWL use only.
-	/// </summary>
-	public bool IntermediateUserExists { get; set; }
+	internal bool IntermediateUserExists { get; set; }
 
 	private bool userEnabled;
 	private bool userDisabled;
