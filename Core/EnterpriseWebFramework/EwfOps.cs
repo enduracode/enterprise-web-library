@@ -41,7 +41,7 @@ public static class EwfOps {
 	private class MiniProfilerConfigureOptions: IConfigureOptions<MiniProfilerOptions> {
 		private class ProfilerProvider: DefaultProfilerProvider {
 			public override MiniProfiler CurrentProfiler {
-				get => RequestDispatchingStatics.RequestState.Profiler;
+				get => EwfRequest.Current is not null ? RequestDispatchingStatics.RequestState.Profiler : null;
 				protected set => RequestDispatchingStatics.RequestState.Profiler = value;
 			}
 
