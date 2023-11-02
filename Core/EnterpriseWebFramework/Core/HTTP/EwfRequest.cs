@@ -52,9 +52,10 @@ public class EwfRequest {
 	public Instant RequestTime => requestTimeGetter!();
 
 	/// <summary>
-	/// This is the absolute URL for the request. Absolute means the entire URL, including the scheme, host, path, and query string.
+	/// This is the absolute URL for the request. Absolute means the entire URL, including the scheme, host, path, and query string. Use with caution, as this may
+	/// not be a normalized URL. You likely should call PageBase.Current.GetUrl instead.
 	/// </summary>
-	internal string Url => urlGetter!();
+	public string Url => urlGetter!();
 
 	/// <summary>
 	/// Returns true if this request is secure.
