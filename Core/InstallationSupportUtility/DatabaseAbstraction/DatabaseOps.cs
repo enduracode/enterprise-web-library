@@ -24,7 +24,7 @@ public static class DatabaseOps {
 		"{0} database".FormatWith( database.SecondaryDatabaseName.Any() ? "{0} secondary".FormatWith( database.SecondaryDatabaseName ) : "primary" );
 
 	public static void UpdateDatabaseLogicIfUpdateFileExists( Database database, string databaseUpdateFilePath, bool allFailuresUserCorrectable ) {
-		var linesInScriptOnHd = GetNumberOfLinesInDatabaseScript( databaseUpdateFilePath );
+		var linesInScriptOnHd = getNumberOfLinesInDatabaseScript( databaseUpdateFilePath );
 
 		// We don't want to ask the database for the line number if there is no script.
 		if( linesInScriptOnHd == null )
@@ -68,6 +68,20 @@ public static class DatabaseOps {
 			}
 		}
 		database.UpdateLineMarker( lineMarker );
+	}
+
+	/// <summary>
+	/// Returns null if no database script exists on the hard drive.
+	/// </summary>
+	private static int? getNumberOfLinesInDatabaseScript( string databaseUpdateFilePath ) {
+		if( !File.Exists( databaseUpdateFilePath ) )
+			return null;
+
+		var lines = 0;
+		using var reader = new StreamReader( File.OpenRead( databaseUpdateFilePath ) );
+		while( reader.ReadLine() != null )
+			lines++;
+		return lines;
 	}
 
 	public static void ExportDatabaseToFile( Database database, string dataPackageFolderPath ) {
@@ -114,19 +128,5 @@ public static class DatabaseOps {
 	/// </summary>
 	public static IEnumerable<string> GetDatabaseTables( Database database ) {
 		return database.GetTables().OrderBy( i => i );
-	}
-
-	/// <summary>
-	/// Returns null if no database script exists on the hard drive.
-	/// </summary>
-	public static int? GetNumberOfLinesInDatabaseScript( string databaseUpdateFilePath ) {
-		if( !File.Exists( databaseUpdateFilePath ) )
-			return null;
-
-		var lines = 0;
-		using var reader = new StreamReader( File.OpenRead( databaseUpdateFilePath ) );
-		while( reader.ReadLine() != null )
-			lines++;
-		return lines;
 	}
 }
