@@ -146,7 +146,7 @@ public class MySql: Database {
 		return "--host=localhost --user=root --password=password";
 	}
 
-	List<string> Database.GetTables() {
+	IEnumerable<string> Database.GetTables() {
 		var tables = new List<string>();
 		ExecuteDbMethod(
 			delegate( DBConnection cn ) {
@@ -163,11 +163,11 @@ public class MySql: Database {
 		return tables;
 	}
 
-	List<string> Database.GetProcedures() {
+	IEnumerable<string> Database.GetProcedures() {
 		throw new NotSupportedException();
 	}
 
-	List<ProcedureParameter> Database.GetProcedureParameters( string procedure ) {
+	IEnumerable<ProcedureParameter> Database.GetProcedureParameters( string procedure ) {
 		throw new NotSupportedException();
 	}
 
