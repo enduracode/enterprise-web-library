@@ -1,4 +1,4 @@
-﻿using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework.WebItems;
+﻿using EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.WebFramework.WebItems;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.WebFramework;
 

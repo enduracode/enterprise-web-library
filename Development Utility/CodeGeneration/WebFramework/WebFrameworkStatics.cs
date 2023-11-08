@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 using System.Text;
-using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework.WebItems;
+using EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.WebFramework.WebItems;
 using Tewl.IO;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.WebFramework;
