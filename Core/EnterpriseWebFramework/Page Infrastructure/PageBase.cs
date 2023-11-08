@@ -563,7 +563,8 @@ public abstract class PageBase: ResourceBase {
 				return JsonConvert.SerializeObject(
 					new HiddenFieldData(
 						rs.FirstRequestTime,
-						componentStateItemsById.ToImmutableDictionary( i => i.Key, i => i.Value.ValueAsJson ),
+						/* Put the values in request state so they’re available if the request is continued for a page-load post-back. */
+						rs.ComponentStateValuesById = componentStateItemsById.ToImmutableDictionary( i => i.Key, i => i.Value.ValueAsJson ),
 						generateFormValueHash(),
 						failingDmId,
 						"",
