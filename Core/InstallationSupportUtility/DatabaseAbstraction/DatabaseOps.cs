@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Databases;
@@ -85,11 +86,11 @@ public static class DatabaseOps {
 	}
 
 	public static void ExportDatabaseToFile( Database database, string dataPackageFolderPath ) {
-		if( !( database is NoDatabase ) )
+		if( database is not NoDatabase )
 			database.ExportToFile( getDatabaseFilePath( dataPackageFolderPath, database ) );
 	}
 
-	public static void DeleteAndReCreateDatabaseFromFile( Database database, bool databaseHasMinimumDataRevision, string dataPackageFolderPath ) {
+	internal static void DeleteAndReCreateDatabaseFromFile( Database database, bool databaseHasMinimumDataRevision, string dataPackageFolderPath ) {
 		if( database is NoDatabase )
 			return;
 
@@ -106,16 +107,13 @@ public static class DatabaseOps {
 				"Created a new {0} because the data package did not exist, or did not contain a file.".FormatWith( GetDatabaseNounPhrase( database ) ) );
 	}
 
-	private static string getDatabaseFilePath( string dataPackageFolderPath, Database database ) {
-		return EwlStatics.CombinePaths(
-			dataPackageFolderPath,
-			( database.SecondaryDatabaseName.Length > 0 ? database.SecondaryDatabaseName : "Primary" ) + ".bak" );
-	}
+	private static string getDatabaseFilePath( string dataPackageFolderPath, Database database ) =>
+		EwlStatics.CombinePaths( dataPackageFolderPath, ( database.SecondaryDatabaseName.Length > 0 ? database.SecondaryDatabaseName : "Primary" ) + ".bak" );
 
 	/// <summary>
 	/// SQL Server takes awhile to recover to a usable state after restoring.  Wait until it is.
 	/// </summary>
-	public static void WaitForDatabaseRecovery( Database database ) {
+	internal static void WaitForDatabaseRecovery( Database database ) {
 		if( database is NoDatabase )
 			return;
 		StatusStatics.SetStatus( "Waiting for database to be ready..." );
@@ -126,7 +124,15 @@ public static class DatabaseOps {
 	/// <summary>
 	/// Gets the tables in the specified database, ordered by name.
 	/// </summary>
-	public static IEnumerable<string> GetDatabaseTables( Database database ) {
-		return database.GetTables().OrderBy( i => i );
+	public static IEnumerable<( string name, bool hasModTable )> GetDatabaseTables( Database database ) {
+		var tableNames = database.GetTables().Materialize();
+
+		var modTableSuffix = GetModificationTableSuffix( database );
+		bool isModTable( string table ) => table.EndsWithIgnoreCase( modTableSuffix );
+		var modTables = tableNames.Where( isModTable ).ToImmutableHashSet( StringComparer.Ordinal );
+
+		return database.GetTables().Where( i => !isModTable( i ) ).OrderBy( i => i ).Select( i => ( i, modTables.Contains( i + modTableSuffix ) ) );
 	}
+
+	internal static string GetModificationTableSuffix( Database database ) => database is MySql or Oracle ? "_table_modifications" : "TableModifications";
 }

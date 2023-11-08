@@ -374,7 +374,8 @@ internal class UpdateDependentLogic: Operation {
 	private void generateDataAccessCodeForDatabase(
 		InstallationSupportUtility.DatabaseAbstraction.Database database, string libraryBasePath, TextWriter writer, string baseNamespace,
 		EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
-		var tableNames = DatabaseOps.GetDatabaseTables( database ).ToImmutableArray();
+		var tables = DatabaseOps.GetDatabaseTables( database ).Materialize();
+		var tableNames = tables.Select( i => i.name ).Materialize();
 
 		ensureTablesExist( tableNames, configuration.SmallTables, "small" );
 		ensureTablesExist( tableNames, configuration.TablesUsingRowVersionedDataCaching, "row-versioned data caching" );

@@ -190,9 +190,9 @@ LOG ON (
 	void Database.PerformMaintenance() {
 		ExecuteDbMethod(
 			delegate( DBConnection cn ) {
-				foreach( var tableName in DatabaseOps.GetDatabaseTables( this ) ) {
-					executeLongRunningCommand( cn, "ALTER INDEX ALL ON " + tableName + " REBUILD" );
-					executeLongRunningCommand( cn, "UPDATE STATISTICS " + tableName );
+				foreach( var table in DatabaseOps.GetDatabaseTables( this ) ) {
+					executeLongRunningCommand( cn, "ALTER INDEX ALL ON " + table.name + " REBUILD" );
+					executeLongRunningCommand( cn, "UPDATE STATISTICS " + table.name );
 				}
 			} );
 	}
