@@ -9,48 +9,42 @@ internal static class StandardModificationStatics {
 	private static Database database = null!;
 	private static TableColumns columns = null!;
 
-	public static string GetNamespaceDeclaration( string baseNamespace, Database database ) {
-		return "namespace " + baseNamespace + "." + database.SecondaryDatabaseName + "Modification {";
-	}
-
 	internal static void Generate(
-		DBConnection cn, TextWriter writer, string namespaceDeclaration, Database database, IEnumerable<( string name, bool hasModTable )> tables,
+		DBConnection cn, TextWriter writer, string baseNamespace, string templateBasePath, Database database, IEnumerable<( string name, bool hasModTable )> tables,
 		EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
 		StandardModificationStatics.writer = writer;
 		StandardModificationStatics.database = database;
 
-		writer.WriteLine( namespaceDeclaration );
+		var subsystemName = "{0}Modification".FormatWith( database.SecondaryDatabaseName );
+		var subsystemNamespace = "namespace {0}.{1}".FormatWith( baseNamespace, subsystemName );
+
+		writer.WriteLine( "{0} {{".FormatWith( subsystemNamespace ) );
 		foreach( var tableName in tables.Select( i => i.name ) ) {
 			var isRevisionHistoryTable = DataAccessStatics.IsRevisionHistoryTable( tableName, configuration );
 
 			writeClass( cn, tableName, isRevisionHistoryTable, false );
 			if( isRevisionHistoryTable )
 				writeClass( cn, tableName, true, true );
+
+			// We do not create templates for direct modification classes.
+			var templateClassName = GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryTable );
+
+			var templateFilePath = EwlStatics.CombinePaths( templateBasePath, subsystemName, templateClassName );
+			IoMethods.DeleteFile( templateFilePath + DataAccessStatics.CSharpTemplateFileExtension );
+
+			// If a real file exists, don’t create a template.
+			if( File.Exists( templateFilePath + ".cs" ) )
+				continue;
+
+			using var templateWriter = IoMethods.GetTextWriterForWrite( templateFilePath + DataAccessStatics.CSharpTemplateFileExtension );
+			templateWriter.WriteLine( "{0};".FormatWith( subsystemNamespace ) );
+			templateWriter.WriteLine();
+			templateWriter.WriteLine( "partial class {0} {{".FormatWith( templateClassName ) );
+			templateWriter.WriteLine(
+				"	// IMPORTANT: Change extension from \"{0}\" to \".cs\" before editing.".FormatWith( DataAccessStatics.CSharpTemplateFileExtension ) );
+			templateWriter.WriteLine( "}" );
 		}
 		writer.WriteLine( "}" );
-	}
-
-	internal static void WritePartialClass(
-		DBConnection cn, string libraryBasePath, string namespaceDeclaration, Database database, string tableName, bool isRevisionHistoryTable ) {
-		// We do not create templates for direct modification classes.
-		var folderPath = EwlStatics.CombinePaths( libraryBasePath, "DataAccess", database.SecondaryDatabaseName + "Modification" );
-		var templateFilePath = EwlStatics.CombinePaths(
-			folderPath,
-			GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryTable ) + DataAccessStatics.CSharpTemplateFileExtension );
-		IoMethods.DeleteFile( templateFilePath );
-
-		// If a real file exists, don't create a template.
-		if( File.Exists( EwlStatics.CombinePaths( folderPath, GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryTable ) + ".cs" ) ) )
-			return;
-
-		using var templateWriter = IoMethods.GetTextWriterForWrite( templateFilePath );
-		templateWriter.WriteLine( namespaceDeclaration );
-		templateWriter.WriteLine( "	partial class " + GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryTable ) + " {" );
-		templateWriter.WriteLine(
-			"		// IMPORTANT: Change extension from \"{0}\" to \".cs\" before including in project and editing.".FormatWith(
-				DataAccessStatics.CSharpTemplateFileExtension ) );
-		templateWriter.WriteLine( "	}" ); // class
-		templateWriter.WriteLine( "}" ); // namespace
 	}
 
 	private static void writeClass( DBConnection cn, string tableName, bool isRevisionHistoryTable, bool isRevisionHistoryClass ) {

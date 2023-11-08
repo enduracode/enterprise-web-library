@@ -18,13 +18,14 @@ internal static class DataAccessStatics {
 
 	public static void GenerateDataAccessCode( TextWriter writer, DevelopmentInstallation installation ) {
 		var baseNamespace = installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName + ".DataAccess";
+		var templateBasePath = EwlStatics.CombinePaths( installation.DevelopmentInstallationLogic.LibraryPath, "DataAccess" );
 		foreach( var database in installation.DevelopmentInstallationLogic.DatabasesForCodeGeneration )
 			try {
 				generateDataAccessCodeForDatabase(
-					database,
-					installation.DevelopmentInstallationLogic.LibraryPath,
 					writer,
 					baseNamespace,
+					templateBasePath,
+					database,
 					database.SecondaryDatabaseName.Length == 0
 						? installation.DevelopmentInstallationLogic.DevelopmentConfiguration.database
 						: installation.DevelopmentInstallationLogic.DevelopmentConfiguration.secondaryDatabases.Single( sd => sd.name == database.SecondaryDatabaseName ) );
@@ -46,7 +47,7 @@ internal static class DataAccessStatics {
 	}
 
 	private static void generateDataAccessCodeForDatabase(
-		Database database, string libraryBasePath, TextWriter writer, string baseNamespace,
+		TextWriter writer, string baseNamespace, string templateBasePath, Database database,
 		EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
 		var tables = DatabaseOps.GetDatabaseTables( database ).Materialize();
 		var tableNames = tables.Select( i => i.name ).Materialize();
@@ -92,23 +93,10 @@ internal static class DataAccessStatics {
 				CommandConditionStatics.Generate( cn, writer, baseNamespace, database, tableNames );
 
 				writer.WriteLine();
-				var tableRetrievalNamespaceDeclaration = TableRetrievalStatics.GetNamespaceDeclaration( baseNamespace, database );
-				TableRetrievalStatics.Generate( cn, writer, tableRetrievalNamespaceDeclaration, database, tables, configuration );
+				TableRetrievalStatics.Generate( cn, writer, baseNamespace, templateBasePath, database, tables, configuration );
 
 				writer.WriteLine();
-				var modNamespaceDeclaration = StandardModificationStatics.GetNamespaceDeclaration( baseNamespace, database );
-				StandardModificationStatics.Generate( cn, writer, modNamespaceDeclaration, database, tables, configuration );
-
-				foreach( var tableName in tableNames ) {
-					TableRetrievalStatics.WritePartialClass( cn, libraryBasePath, tableRetrievalNamespaceDeclaration, database, tableName );
-					StandardModificationStatics.WritePartialClass(
-						cn,
-						libraryBasePath,
-						modNamespaceDeclaration,
-						database,
-						tableName,
-						DataAccessStatics.IsRevisionHistoryTable( tableName, configuration ) );
-				}
+				StandardModificationStatics.Generate( cn, writer, baseNamespace, templateBasePath, database, tables, configuration );
 
 				// retrieval and modification commands - custom
 				writer.WriteLine();

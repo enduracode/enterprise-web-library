@@ -10,14 +10,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess.Subs
 internal static class TableRetrievalStatics {
 	private const string oracleRowVersionDataType = "decimal";
 
-	public static string GetNamespaceDeclaration( string baseNamespace, Database database ) {
-		return "namespace " + baseNamespace + "." + database.SecondaryDatabaseName + "TableRetrieval {";
-	}
-
 	internal static void Generate(
-		DBConnection cn, TextWriter writer, string namespaceDeclaration, Database database, IEnumerable<( string name, bool hasModTable )> tables,
+		DBConnection cn, TextWriter writer, string baseNamespace, string templateBasePath, Database database, IEnumerable<( string name, bool hasModTable )> tables,
 		EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
-		writer.WriteLine( namespaceDeclaration );
+		var subsystemName = "{0}TableRetrieval".FormatWith( database.SecondaryDatabaseName );
+		var subsystemNamespace = "namespace {0}.{1}".FormatWith( baseNamespace, subsystemName );
+
+		writer.WriteLine( "{0} {{".FormatWith( subsystemNamespace ) );
 		foreach( var table in tables.Select( i => i.name ) ) {
 			CodeGenerationStatics.AddSummaryDocComment( writer, "Contains logic that retrieves rows from the " + table + " table." );
 			writer.WriteLine( "public static partial class " + GetClassName( cn, table ) + " {" );
@@ -99,26 +98,23 @@ internal static class TableRetrievalStatics {
 				DataAccessStatics.WriteRevisionDeltaExtensionMethods( writer, GetClassName( cn, table ), columns.DataColumns );
 
 			writer.WriteLine( "}" ); // class
+
+			var templateClassName = GetClassName( cn, table );
+			var templateFilePath = EwlStatics.CombinePaths( templateBasePath, subsystemName, templateClassName );
+			IoMethods.DeleteFile( templateFilePath + DataAccessStatics.CSharpTemplateFileExtension );
+
+			// If a real file exists, don’t create a template.
+			if( File.Exists( templateFilePath + ".cs" ) )
+				continue;
+
+			using var templateWriter = IoMethods.GetTextWriterForWrite( templateFilePath + DataAccessStatics.CSharpTemplateFileExtension );
+			templateWriter.WriteLine( "{0};".FormatWith( subsystemNamespace ) );
+			templateWriter.WriteLine();
+			templateWriter.WriteLine( "partial class {0} {{".FormatWith( templateClassName ) );
+			templateWriter.WriteLine(
+				"	// IMPORTANT: Change extension from \"{0}\" to \".cs\" before editing.".FormatWith( DataAccessStatics.CSharpTemplateFileExtension ) );
+			templateWriter.WriteLine( "}" );
 		}
-		writer.WriteLine( "}" ); // namespace
-	}
-
-	internal static void WritePartialClass( DBConnection cn, string libraryBasePath, string namespaceDeclaration, Database database, string tableName ) {
-		var folderPath = EwlStatics.CombinePaths( libraryBasePath, "DataAccess", database.SecondaryDatabaseName + "TableRetrieval" );
-		var templateFilePath = EwlStatics.CombinePaths( folderPath, GetClassName( cn, tableName ) + DataAccessStatics.CSharpTemplateFileExtension );
-		IoMethods.DeleteFile( templateFilePath );
-
-		// If a real file exists, don't create a template.
-		if( File.Exists( EwlStatics.CombinePaths( folderPath, GetClassName( cn, tableName ) + ".cs" ) ) )
-			return;
-
-		using var writer = IoMethods.GetTextWriterForWrite( templateFilePath );
-		writer.WriteLine( namespaceDeclaration );
-		writer.WriteLine( "	partial class " + GetClassName( cn, tableName ) + " {" );
-		writer.WriteLine(
-			"		// IMPORTANT: Change extension from \"{0}\" to \".cs\" before including in project and editing.".FormatWith(
-				DataAccessStatics.CSharpTemplateFileExtension ) );
-		writer.WriteLine( "	}" ); // class
 		writer.WriteLine( "}" ); // namespace
 	}
 
