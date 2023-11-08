@@ -6,12 +6,148 @@ using EnterpriseWebLibrary.DataAccess.CommandWriting;
 using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess.Subsystems;
+using EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess.Subsystems.StandardModification;
+using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
+using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess;
 
 internal static class DataAccessStatics {
 	internal const string CSharpTemplateFileExtension = ".ewlt.cs";
+
+	public static void GenerateDataAccessCode( TextWriter writer, DevelopmentInstallation installation ) {
+		var baseNamespace = installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName + ".DataAccess";
+		foreach( var database in installation.DevelopmentInstallationLogic.DatabasesForCodeGeneration )
+			try {
+				generateDataAccessCodeForDatabase(
+					database,
+					installation.DevelopmentInstallationLogic.LibraryPath,
+					writer,
+					baseNamespace,
+					database.SecondaryDatabaseName.Length == 0
+						? installation.DevelopmentInstallationLogic.DevelopmentConfiguration.database
+						: installation.DevelopmentInstallationLogic.DevelopmentConfiguration.secondaryDatabases.Single( sd => sd.name == database.SecondaryDatabaseName ) );
+			}
+			catch( Exception e ) {
+				throw UserCorrectableException.CreateSecondaryException(
+					"An exception occurred while generating data access logic for the {0}.".FormatWith( DatabaseOps.GetDatabaseNounPhrase( database ) ),
+					e );
+			}
+		if( installation.DevelopmentInstallationLogic.DatabasesForCodeGeneration.Any( d => d.SecondaryDatabaseName.Length > 0 ) ) {
+			writer.WriteLine();
+			writer.WriteLine( "namespace " + baseNamespace + " {" );
+			writer.WriteLine( "public class SecondaryDatabaseNames {" );
+			foreach( var secondaryDatabase in installation.DevelopmentInstallationLogic.DatabasesForCodeGeneration.Where( d => d.SecondaryDatabaseName.Length > 0 ) )
+				writer.WriteLine( "public const string " + secondaryDatabase.SecondaryDatabaseName + " = \"" + secondaryDatabase.SecondaryDatabaseName + "\";" );
+			writer.WriteLine( "}" );
+			writer.WriteLine( "}" );
+		}
+	}
+
+	private static void generateDataAccessCodeForDatabase(
+		Database database, string libraryBasePath, TextWriter writer, string baseNamespace,
+		EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
+		var tables = DatabaseOps.GetDatabaseTables( database ).Materialize();
+		var tableNames = tables.Select( i => i.name ).Materialize();
+
+		ensureTablesExist( tableNames, configuration.SmallTables, "small" );
+		ensureTablesExist( tableNames, configuration.TablesUsingRowVersionedDataCaching, "row-versioned data caching" );
+		ensureTablesExist( tableNames, configuration.revisionHistoryTables, "revision history" );
+
+		ensureTablesExist( tableNames, configuration.WhitelistedTables, "whitelisted" );
+		tableNames = tableNames.Where( table => configuration.WhitelistedTables == null || configuration.WhitelistedTables.Any( i => i.EqualsIgnoreCase( table ) ) )
+			.Materialize();
+
+		database.ExecuteDbMethod(
+			delegate( DBConnection cn ) {
+				foreach( var table in tables.Where( i => i.hasModTable ).Select( i => i.name ) ) {
+					var columns = new TableColumns( cn, table, false );
+					var modTableColumns = Column.GetColumnsInQueryResults(
+						cn,
+						"SELECT * FROM {0}".FormatWith( table + DatabaseOps.GetModificationTableSuffix( database ) ),
+						false,
+						false );
+
+					if( modTableColumns.Count != columns.KeyColumns.Count )
+						throw new UserCorrectableException( "The modification table for {0} must have columns that match the primary key.".FormatWith( table ) );
+
+					foreach( var column in columns.KeyColumns ) {
+						var modTableColumn = modTableColumns.SingleOrDefault( i => string.Equals( i.Name, column.Name, StringComparison.OrdinalIgnoreCase ) );
+						if( modTableColumn is null )
+							throw new UserCorrectableException( "The modification table for {0} must have a {1} column.".FormatWith( table, column.Name ) );
+					}
+				}
+
+				// database logic access - standard
+				writer.WriteLine();
+				TableConstantStatics.Generate( cn, writer, baseNamespace, database, tableNames );
+
+				// database logic access - custom
+				writer.WriteLine();
+				RowConstantStatics.Generate( cn, writer, baseNamespace, database, configuration );
+
+				// retrieval and modification commands - standard
+				writer.WriteLine();
+				CommandConditionStatics.Generate( cn, writer, baseNamespace, database, tableNames );
+
+				writer.WriteLine();
+				var tableRetrievalNamespaceDeclaration = TableRetrievalStatics.GetNamespaceDeclaration( baseNamespace, database );
+				TableRetrievalStatics.Generate( cn, writer, tableRetrievalNamespaceDeclaration, database, tables, configuration );
+
+				writer.WriteLine();
+				var modNamespaceDeclaration = StandardModificationStatics.GetNamespaceDeclaration( baseNamespace, database );
+				StandardModificationStatics.Generate( cn, writer, modNamespaceDeclaration, database, tables, configuration );
+
+				foreach( var tableName in tableNames ) {
+					TableRetrievalStatics.WritePartialClass( cn, libraryBasePath, tableRetrievalNamespaceDeclaration, database, tableName );
+					StandardModificationStatics.WritePartialClass(
+						cn,
+						libraryBasePath,
+						modNamespaceDeclaration,
+						database,
+						tableName,
+						DataAccessStatics.IsRevisionHistoryTable( tableName, configuration ) );
+				}
+
+				// retrieval and modification commands - custom
+				writer.WriteLine();
+				QueryRetrievalStatics.Generate( cn, writer, baseNamespace, database, configuration );
+				writer.WriteLine();
+				CustomModificationStatics.Generate( cn, writer, baseNamespace, database, configuration );
+
+				// other commands
+				if( cn.DatabaseInfo is SqlServerInfo ) {
+					writer.WriteLine();
+					writer.WriteLine( "namespace {0} {{".FormatWith( baseNamespace ) );
+					writer.WriteLine( "public static class {0}MainSequence {{".FormatWith( database.SecondaryDatabaseName ) );
+					writer.WriteLine( "public static int GetNextValue() {" );
+					writer.WriteLine( "var command = " + DataAccessStatics.GetConnectionExpression( database ) + ".DatabaseInfo.CreateCommand();" );
+					writer.WriteLine( "command.CommandText = \"SELECT NEXT VALUE FOR MainSequence\";" );
+					writer.WriteLine( "return (int)" + DataAccessStatics.GetConnectionExpression( database ) + ".ExecuteScalarCommand( command );" );
+					writer.WriteLine( "}" );
+					writer.WriteLine( "}" );
+					writer.WriteLine( "}" );
+				}
+				else if( cn.DatabaseInfo is OracleInfo ) {
+					writer.WriteLine();
+					SequenceStatics.Generate( cn, writer, baseNamespace, database );
+					writer.WriteLine();
+					ProcedureStatics.Generate( cn, writer, baseNamespace, database );
+				}
+			} );
+	}
+
+	private static void ensureTablesExist( IReadOnlyCollection<string> databaseTables, IEnumerable<string>? specifiedTables, string tableAdjective ) {
+		if( specifiedTables == null )
+			return;
+		var nonexistentTables = specifiedTables.Where( specifiedTable => databaseTables.All( i => !i.EqualsIgnoreCase( specifiedTable ) ) ).ToArray();
+		if( nonexistentTables.Any() )
+			throw new UserCorrectableException(
+				tableAdjective.CapitalizeString() + " " + ( nonexistentTables.Length > 1 ? "tables" : "table" ) + " " +
+				StringTools.GetEnglishListPhrase( nonexistentTables.Select( i => "'" + i + "'" ), true ) + " " + ( nonexistentTables.Length > 1 ? "do" : "does" ) +
+				" not exist." );
+	}
 
 	/// <summary>
 	/// Given a string, returns all instances of @abc in an ordered set containing abc (the token without the @ sign). If a token is used more than once, it
