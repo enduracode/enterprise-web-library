@@ -2,7 +2,7 @@ using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 using Tewl.IO;
 
-namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems.StandardModification;
+namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess.Subsystems.StandardModification;
 
 internal static class StandardModificationStatics {
 	private static TextWriter writer = null!;

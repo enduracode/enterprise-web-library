@@ -8,7 +8,7 @@ using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 
-namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess;
+namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess;
 
 internal static class DataAccessStatics {
 	internal const string CSharpTemplateFileExtension = ".ewlt.cs";

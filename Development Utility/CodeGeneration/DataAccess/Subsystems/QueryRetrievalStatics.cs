@@ -3,7 +3,7 @@ using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 
-namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems;
+namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess.Subsystems;
 
 internal static class QueryRetrievalStatics {
 	private static DatabaseInfo info = null!;

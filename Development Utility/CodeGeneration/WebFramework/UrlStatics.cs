@@ -1,6 +1,6 @@
 ﻿using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework.WebItems;
 
-namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework;
+namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.WebFramework;
 
 internal static class UrlStatics {
 	internal static void GenerateUrlClasses(

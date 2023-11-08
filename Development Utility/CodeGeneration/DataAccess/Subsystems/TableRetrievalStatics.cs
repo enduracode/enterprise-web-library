@@ -5,7 +5,7 @@ using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 using Tewl.IO;
 
-namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems;
+namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess.Subsystems;
 
 internal static class TableRetrievalStatics {
 	private const string oracleRowVersionDataType = "decimal";

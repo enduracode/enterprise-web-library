@@ -4,7 +4,7 @@ using System.Linq;
 using Humanizer;
 using Tewl.Tools;
 
-namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework.WebItems {
+namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.WebFramework.WebItems {
 	internal class StaticFile {
 		private readonly WebItemGeneralData generalData;
 		private readonly bool inFramework;

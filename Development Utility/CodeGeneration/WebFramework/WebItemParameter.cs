@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CSharp;
 
-namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework;
+namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.WebFramework;
 
 /// <summary>
 /// The specification for a parameter or a page state variable.

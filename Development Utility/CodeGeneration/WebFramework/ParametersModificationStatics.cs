@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using Humanizer;
 
-namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework {
+namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.WebFramework {
 	internal static class ParametersModificationStatics {
 		internal static void WriteClassIfNecessary( TextWriter writer, IEnumerable<WebItemParameter> parameters ) {
 			if( !parameters.Any() )

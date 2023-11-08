@@ -1,7 +1,7 @@
 ﻿using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 
-namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess;
+namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess;
 
 internal class TableColumns {
 	internal readonly IReadOnlyCollection<Column> AllColumns;

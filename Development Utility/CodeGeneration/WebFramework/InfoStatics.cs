@@ -1,4 +1,4 @@
-﻿namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework;
+﻿namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.WebFramework;
 
 internal static class InfoStatics {
 	internal static void WriteSpecifyParameterDefaultsMethod( TextWriter writer, bool includeEsParameter ) {

@@ -2,7 +2,7 @@ using System.IO;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 
-namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems {
+namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess.Subsystems {
 	internal static class SequenceStatics {
 		internal static void Generate( DBConnection cn, TextWriter writer, string baseNamespace, Database database ) {
 			writer.WriteLine( "namespace " + baseNamespace + "." + database.SecondaryDatabaseName + "Sequences {" );

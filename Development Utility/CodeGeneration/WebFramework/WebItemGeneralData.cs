@@ -1,7 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 
-namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework;
+namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.WebFramework;
 
 internal class WebItemGeneralData {
 	internal const string ParameterDefaultsFieldName = "__parameterDefaults";

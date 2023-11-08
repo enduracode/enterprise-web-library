@@ -1,4 +1,4 @@
-﻿namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework;
+﻿namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.WebFramework;
 
 internal static class OptionalParameterPackageStatics {
 	internal static void WriteClassIfNecessary(

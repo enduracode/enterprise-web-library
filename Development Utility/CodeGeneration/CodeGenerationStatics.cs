@@ -1,6 +1,6 @@
 using System.IO;
 
-namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
+namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration {
 	internal static class CodeGenerationStatics {
 		internal static void AddSummaryDocComment( TextWriter writer, string text ) {
 			if( text.Length == 0 )

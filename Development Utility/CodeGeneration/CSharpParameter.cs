@@ -1,6 +1,6 @@
 ﻿using Tewl.Tools;
 
-namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
+namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration {
 	internal class CSharpParameter {
 		private readonly string type;
 		internal readonly string Name;

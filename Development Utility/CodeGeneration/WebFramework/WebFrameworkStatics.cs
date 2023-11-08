@@ -3,7 +3,7 @@ using System.Text;
 using EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework.WebItems;
 using Tewl.IO;
 
-namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.WebFramework;
+namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.WebFramework;
 
 internal static class WebFrameworkStatics {
 	internal static void Generate(

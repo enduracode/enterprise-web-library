@@ -6,7 +6,7 @@ using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 
-namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess;
+namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess;
 
 internal class Column {
 	/// <summary>

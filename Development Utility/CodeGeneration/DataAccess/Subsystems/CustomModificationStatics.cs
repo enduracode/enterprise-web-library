@@ -4,7 +4,7 @@ using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 
-namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess.Subsystems;
+namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess.Subsystems;
 
 internal static class CustomModificationStatics {
 	private static DatabaseInfo info = null!;

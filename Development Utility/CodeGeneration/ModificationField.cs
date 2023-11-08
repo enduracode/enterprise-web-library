@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 
-namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration {
+namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration {
 	internal class ModificationField {
 		private readonly string name;
 		private readonly string pascalCasedName;

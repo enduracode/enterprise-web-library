@@ -1,4 +1,4 @@
-﻿namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration;
+﻿namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration;
 
 internal static class FormItemStatics {
 	internal static void WriteFormItemGetters( TextWriter writer, ModificationField field ) {

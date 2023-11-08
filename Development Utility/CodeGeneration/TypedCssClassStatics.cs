@@ -1,7 +1,7 @@
 using System.Text.RegularExpressions;
 using Tewl.IO;
 
-namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration;
+namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration;
 
 internal static class TypedCssClassStatics {
 	internal static void Generate( IEnumerable<string> projectPaths, string nameSpace, TextWriter writer ) {
