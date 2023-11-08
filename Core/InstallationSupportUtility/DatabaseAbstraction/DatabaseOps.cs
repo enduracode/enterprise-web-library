@@ -134,5 +134,5 @@ public static class DatabaseOps {
 		return database.GetTables().Where( i => !isModTable( i ) ).OrderBy( i => i ).Select( i => ( i, modTables.Contains( i + modTableSuffix ) ) );
 	}
 
-	internal static string GetModificationTableSuffix( Database database ) => database is MySql or Oracle ? "_table_modifications" : "TableModifications";
+	public static string GetModificationTableSuffix( Database database ) => database is MySql or Oracle ? "_table_modifications" : "TableModifications";
 }

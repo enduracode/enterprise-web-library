@@ -14,13 +14,13 @@ internal static class StandardModificationStatics {
 	}
 
 	internal static void Generate(
-		DBConnection cn, TextWriter writer, string namespaceDeclaration, Database database, IEnumerable<string> tableNames,
+		DBConnection cn, TextWriter writer, string namespaceDeclaration, Database database, IEnumerable<( string name, bool hasModTable )> tables,
 		EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
 		StandardModificationStatics.writer = writer;
 		StandardModificationStatics.database = database;
 
 		writer.WriteLine( namespaceDeclaration );
-		foreach( var tableName in tableNames ) {
+		foreach( var tableName in tables.Select( i => i.name ) ) {
 			var isRevisionHistoryTable = DataAccessStatics.IsRevisionHistoryTable( tableName, configuration );
 
 			writeClass( cn, tableName, isRevisionHistoryTable, false );

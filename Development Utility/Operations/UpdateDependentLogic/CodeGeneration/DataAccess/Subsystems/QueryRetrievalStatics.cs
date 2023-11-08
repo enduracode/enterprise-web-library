@@ -17,7 +17,7 @@ internal static class QueryRetrievalStatics {
 		writer.WriteLine( "namespace " + baseNamespace + "." + database.SecondaryDatabaseName + "Retrieval {" );
 
 		foreach( var query in configuration.queries ) {
-			List<Column> columns;
+			IReadOnlyCollection<Column> columns;
 			try {
 				columns = validateQueryAndGetColumns( cn, query );
 			}
@@ -45,7 +45,7 @@ internal static class QueryRetrievalStatics {
 		writer.WriteLine( "}" ); // namespace
 	}
 
-	private static List<Column> validateQueryAndGetColumns( DBConnection cn, EnterpriseWebLibrary.Configuration.SystemDevelopment.Query query ) {
+	private static IReadOnlyCollection<Column> validateQueryAndGetColumns( DBConnection cn, EnterpriseWebLibrary.Configuration.SystemDevelopment.Query query ) {
 		// Attempt to query with every postSelectFromClause to ensure validity.
 		foreach( var postSelectFromClause in query.postSelectFromClauses )
 			cn.ExecuteReaderCommandWithSchemaOnlyBehavior(

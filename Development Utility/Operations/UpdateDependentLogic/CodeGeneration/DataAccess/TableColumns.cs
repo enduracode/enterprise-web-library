@@ -4,14 +4,14 @@ using EnterpriseWebLibrary.InstallationSupportUtility;
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations.CodeGeneration.DataAccess;
 
 internal class TableColumns {
-	internal readonly IEnumerable<Column> AllColumns;
+	internal readonly IReadOnlyCollection<Column> AllColumns;
 
 	private readonly List<Column> keyColumns = new();
 
 	/// <summary>
 	/// Returns either all components of the primary key, or the identity (alone).
 	/// </summary>
-	internal IEnumerable<Column> KeyColumns => keyColumns;
+	internal IReadOnlyCollection<Column> KeyColumns => keyColumns;
 
 	private readonly Column? identityColumn;
 	internal Column? IdentityColumn => identityColumn;

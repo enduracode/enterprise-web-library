@@ -387,6 +387,24 @@ internal class UpdateDependentLogic: Operation {
 
 		database.ExecuteDbMethod(
 			delegate( DBConnection cn ) {
+				foreach( var table in tables.Where( i => i.hasModTable ).Select( i => i.name ) ) {
+					var columns = new TableColumns( cn, table, false );
+					var modTableColumns = Column.GetColumnsInQueryResults(
+						cn,
+						"SELECT * FROM {0}".FormatWith( table + DatabaseOps.GetModificationTableSuffix( database ) ),
+						false,
+						false );
+
+					if( modTableColumns.Count != columns.KeyColumns.Count )
+						throw new UserCorrectableException( "The modification table for {0} must have columns that match the primary key.".FormatWith( table ) );
+
+					foreach( var column in columns.KeyColumns ) {
+						var modTableColumn = modTableColumns.SingleOrDefault( i => string.Equals( i.Name, column.Name, StringComparison.OrdinalIgnoreCase ) );
+						if( modTableColumn is null )
+							throw new UserCorrectableException( "The modification table for {0} must have a {1} column.".FormatWith( table, column.Name ) );
+					}
+				}
+
 				// database logic access - standard
 				writer.WriteLine();
 				TableConstantStatics.Generate( cn, writer, baseNamespace, database, tableNames );
@@ -401,11 +419,11 @@ internal class UpdateDependentLogic: Operation {
 
 				writer.WriteLine();
 				var tableRetrievalNamespaceDeclaration = TableRetrievalStatics.GetNamespaceDeclaration( baseNamespace, database );
-				TableRetrievalStatics.Generate( cn, writer, tableRetrievalNamespaceDeclaration, database, tableNames, configuration );
+				TableRetrievalStatics.Generate( cn, writer, tableRetrievalNamespaceDeclaration, database, tables, configuration );
 
 				writer.WriteLine();
 				var modNamespaceDeclaration = StandardModificationStatics.GetNamespaceDeclaration( baseNamespace, database );
-				StandardModificationStatics.Generate( cn, writer, modNamespaceDeclaration, database, tableNames, configuration );
+				StandardModificationStatics.Generate( cn, writer, modNamespaceDeclaration, database, tables, configuration );
 
 				foreach( var tableName in tableNames ) {
 					TableRetrievalStatics.WritePartialClass( cn, libraryBasePath, tableRetrievalNamespaceDeclaration, database, tableName );

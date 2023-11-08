@@ -15,10 +15,10 @@ internal static class TableRetrievalStatics {
 	}
 
 	internal static void Generate(
-		DBConnection cn, TextWriter writer, string namespaceDeclaration, Database database, IEnumerable<string> tableNames,
+		DBConnection cn, TextWriter writer, string namespaceDeclaration, Database database, IEnumerable<( string name, bool hasModTable )> tables,
 		EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
 		writer.WriteLine( namespaceDeclaration );
-		foreach( var table in tableNames ) {
+		foreach( var table in tables.Select( i => i.name ) ) {
 			CodeGenerationStatics.AddSummaryDocComment( writer, "Contains logic that retrieves rows from the " + table + " table." );
 			writer.WriteLine( "public static partial class " + GetClassName( cn, table ) + " {" );
 
