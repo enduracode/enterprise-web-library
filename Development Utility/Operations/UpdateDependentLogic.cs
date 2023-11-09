@@ -681,7 +681,7 @@ internal class UpdateDependentLogic: Operation {
 		writer.WriteLine( "{0}/".FormatWith( InstallationFileStatics.WebFrameworkStaticFilesFolderName ) );
 		writer.WriteLine( "Error Log.txt" );
 		writer.WriteLine( "*.csproj.user" );
-		writer.WriteLine( "*" + DataAccessStatics.CSharpTemplateFileExtension );
+		writer.WriteLine( "*" + CodeGeneration.DataAccess.DataAccessStatics.CSharpTemplateFileExtension );
 		writer.WriteLine();
 		writer.WriteLine( "Solution Files/bin/" );
 		writer.WriteLine( "Solution Files/obj/" );
