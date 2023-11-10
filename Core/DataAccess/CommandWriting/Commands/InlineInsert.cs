@@ -33,7 +33,7 @@ public class InlineInsert: InlineDbModificationCommand {
 		if( columnModifications.Count == 0 )
 			cmd.CommandText += " DEFAULT VALUES";
 		else {
-			cmd.CommandText += "( ";
+			cmd.CommandText += " ( ";
 			foreach( var columnMod in columnModifications )
 				cmd.CommandText += columnMod.ColumnName + ", ";
 			cmd.CommandText = cmd.CommandText.Substring( 0, cmd.CommandText.Length - 2 );
