@@ -18,7 +18,7 @@ internal static class Program {
 						Console.WriteLine(
 							"{0} Development Utility, installation path {1}".FormatWith(
 								EwlStatics.EwlInitialism,
-								Path.GetFullPath( ConfigurationStatics.InstallationPath ) ) );
+								Path.GetFullPath( ConfigurationStatics.InstallationConfiguration.InstallationPath ) ) );
 
 						AppStatics.Init();
 

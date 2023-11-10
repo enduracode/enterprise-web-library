@@ -302,7 +302,10 @@ public class InstallationConfiguration {
 	internal IntermediateInstallationConfiguration IntermediateInstallationConfiguration =>
 		(IntermediateInstallationConfiguration)installationStandardConfiguration.installedInstallation.InstallationTypeConfiguration;
 
-	internal string InstallationPath => installationPath;
+	/// <summary>
+	/// Development Utility and internal use only.
+	/// </summary>
+	public string InstallationPath => installationPath;
 
 	/// <summary>
 	/// Gets the path of the configuration folder.

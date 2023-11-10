@@ -194,18 +194,19 @@ internal class UpdateDependentLogic: Operation {
 						InstallationFileStatics.GetGeneralFilesFolderPath( installation.GeneralLogic.Path, true ),
 						InstallationFileStatics.FilesFolderName,
 						fileName + FileExtensions.Xsd ) );
-		else {
-			// If web projects exist for this installation, copy in web-framework static files.
-			if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects != null ) {
-				var webFrameworkStaticFilesFolderPath = EwlStatics.CombinePaths(
-					installation.GeneralLogic.Path,
-					InstallationFileStatics.WebFrameworkStaticFilesFolderName );
-				IoMethods.DeleteFolder( webFrameworkStaticFilesFolderPath );
-				IoMethods.CopyFolder(
-					EwlStatics.CombinePaths( ConfigurationStatics.InstallationPath, InstallationFileStatics.WebFrameworkStaticFilesFolderName ),
-					webFrameworkStaticFilesFolderPath,
-					false );
-			}
+
+		// If web projects exist for this installation, copy in web-framework static files.
+		else if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects is not null ) {
+			var webFrameworkStaticFilesFolderPath = EwlStatics.CombinePaths(
+				installation.GeneralLogic.Path,
+				InstallationFileStatics.WebFrameworkStaticFilesFolderName );
+			IoMethods.DeleteFolder( webFrameworkStaticFilesFolderPath );
+			IoMethods.CopyFolder(
+				StaticFile.GetFrameworkStaticFilesFolderPath( ConfigurationStatics.InstallationConfiguration ),
+				webFrameworkStaticFilesFolderPath,
+				false );
+			if( ConfigurationStatics.InstallationConfiguration.InstallationType == InstallationType.Development )
+				IoMethods.DeleteFolder( EwlStatics.CombinePaths( webFrameworkStaticFilesFolderPath, AppStatics.StaticFileLogicFolderName ) );
 		}
 	}
 

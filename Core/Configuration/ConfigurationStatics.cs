@@ -29,7 +29,12 @@ public static class ConfigurationStatics {
 	public static MachineConfiguration? MachineConfiguration { get; private set; }
 
 	internal static Assembly AppAssembly { get; private set; } = null!;
-	internal static InstallationConfiguration InstallationConfiguration { get; private set; } = null!;
+
+	/// <summary>
+	/// Development Utility and internal use only.
+	/// </summary>
+	public static InstallationConfiguration InstallationConfiguration { get; private set; } = null!;
+
 	private static Type globalInitializerType { get; set; } = null!;
 
 	/// <summary>
@@ -114,11 +119,6 @@ public static class ConfigurationStatics {
 	public static bool IsLiveInstallation => InstallationConfiguration.InstallationType == InstallationType.Live;
 
 	internal static bool IsIntermediateInstallation => InstallationConfiguration.InstallationType == InstallationType.Intermediate;
-
-	/// <summary>
-	/// Development Utility use only.
-	/// </summary>
-	public static string InstallationPath => InstallationConfiguration.InstallationPath;
 
 	/// <summary>
 	/// Gets the path of the Files folder for the system.

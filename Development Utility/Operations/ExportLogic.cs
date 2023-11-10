@@ -94,7 +94,7 @@ internal class ExportLogic: Operation {
 											InstallationConfiguration.InstallationSharedConfigurationFileName ) );
 
 								IoMethods.CopyFolder(
-									EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.CoreProjectName, StaticFile.FrameworkStaticFilesSourceFolderPath ),
+									StaticFile.GetFrameworkStaticFilesFolderPath( installation.ExistingInstallationLogic.RuntimeConfiguration ),
 									EwlStatics.CombinePaths( toolsFolderPath, InstallationFileStatics.WebFrameworkStaticFilesFolderName ),
 									false );
 								IoMethods.DeleteFolder(
@@ -467,21 +467,18 @@ internal class ExportLogic: Operation {
 				Encoding.UTF8 );
 		}
 
-		if( installation.DevelopmentInstallationLogic.SystemIsEwl ) {
+		var frameworkStaticFilesFolderPath = StaticFile.GetFrameworkStaticFilesFolderPath( installation.ExistingInstallationLogic.RuntimeConfiguration );
+		if( installation.DevelopmentInstallationLogic.SystemIsEwl || Directory.Exists( frameworkStaticFilesFolderPath ) ) {
 			IoMethods.CopyFolder(
-				EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.CoreProjectName, StaticFile.FrameworkStaticFilesSourceFolderPath ),
+				frameworkStaticFilesFolderPath,
 				EwlStatics.CombinePaths( serverSideLogicFolderPath, InstallationFileStatics.WebFrameworkStaticFilesFolderName ),
 				false );
-			IoMethods.DeleteFolder(
-				EwlStatics.CombinePaths( serverSideLogicFolderPath, InstallationFileStatics.WebFrameworkStaticFilesFolderName, AppStatics.StaticFileLogicFolderName ) );
-		}
-		else if( !installation.SystemIsTewl() ) {
-			var frameworkStaticFilesFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, InstallationFileStatics.WebFrameworkStaticFilesFolderName );
-			if( Directory.Exists( frameworkStaticFilesFolderPath ) )
-				IoMethods.CopyFolder(
-					frameworkStaticFilesFolderPath,
-					EwlStatics.CombinePaths( serverSideLogicFolderPath, InstallationFileStatics.WebFrameworkStaticFilesFolderName ),
-					false );
+			if( installation.DevelopmentInstallationLogic.SystemIsEwl )
+				IoMethods.DeleteFolder(
+					EwlStatics.CombinePaths(
+						serverSideLogicFolderPath,
+						InstallationFileStatics.WebFrameworkStaticFilesFolderName,
+						AppStatics.StaticFileLogicFolderName ) );
 		}
 	}
 

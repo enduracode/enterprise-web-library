@@ -20,6 +20,14 @@ public abstract class StaticFile: ResourceBase {
 
 	private static AppStaticFileHandlingProvider provider;
 
+	/// <summary>
+	/// Development Utility and private use only.
+	/// </summary>
+	public static string GetFrameworkStaticFilesFolderPath( InstallationConfiguration installationConfiguration ) =>
+		installationConfiguration.SystemIsEwl && installationConfiguration.InstallationType == InstallationType.Development
+			? EwlStatics.CombinePaths( installationConfiguration.InstallationPath, EwlStatics.CoreProjectName, FrameworkStaticFilesSourceFolderPath )
+			: EwlStatics.CombinePaths( installationConfiguration.InstallationPath, InstallationFileStatics.WebFrameworkStaticFilesFolderName );
+
 	internal static void Init( SystemProviderReference<AppStaticFileHandlingProvider> provider ) {
 		StaticFile.provider = provider.GetProvider( returnNullIfNotFound: true ) ?? new AppStaticFileHandlingProvider();
 	}
@@ -61,14 +69,7 @@ public abstract class StaticFile: ResourceBase {
 	private string filePath =>
 		EwlStatics.CombinePaths(
 			isFrameworkFile
-				? ConfigurationStatics.InstallationConfiguration.SystemIsEwl && ConfigurationStatics.IsDevelopmentInstallation
-					  ? EwlStatics.CombinePaths(
-						  ConfigurationStatics.InstallationConfiguration.InstallationPath,
-						  EwlStatics.CoreProjectName,
-						  FrameworkStaticFilesSourceFolderPath )
-					  : EwlStatics.CombinePaths(
-						  ConfigurationStatics.InstallationConfiguration.InstallationPath,
-						  InstallationFileStatics.WebFrameworkStaticFilesFolderName )
+				? GetFrameworkStaticFilesFolderPath( ConfigurationStatics.InstallationConfiguration )
 				: EwlStatics.CombinePaths( EwfConfigurationStatics.AppConfiguration.Path, AppStaticFilesFolderName ),
 			relativeFilePath );
 
