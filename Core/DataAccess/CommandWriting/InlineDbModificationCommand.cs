@@ -1,13 +1,11 @@
-using System.Collections.Generic;
+namespace EnterpriseWebLibrary.DataAccess.CommandWriting;
 
-namespace EnterpriseWebLibrary.DataAccess.CommandWriting {
+/// <summary>
+/// Not yet documented.
+/// </summary>
+public interface InlineDbModificationCommand {
 	/// <summary>
 	/// Not yet documented.
 	/// </summary>
-	public interface InlineDbModificationCommand {
-		/// <summary>
-		/// Not yet documented.
-		/// </summary>
-		void AddColumnModifications( IEnumerable<InlineDbCommandColumnValue> columnModifications );
-	}
+	void AddColumnModifications( IEnumerable<InlineDbCommandColumnValue> columnModifications );
 }

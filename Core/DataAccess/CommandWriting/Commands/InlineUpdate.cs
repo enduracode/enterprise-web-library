@@ -9,9 +9,7 @@ public class InlineUpdate: InlineDbModificationCommand, InlineDbCommandWithCondi
 	/// <summary>
 	/// Use this to get a parameter name from a number that should be unique to the query.
 	/// </summary>
-	internal static string GetParamNameFromNumber( int number ) {
-		return "p" + number;
-	}
+	internal static string GetParamNameFromNumber( int number ) => "p" + number;
 
 	private readonly string tableName;
 	private readonly List<InlineDbCommandColumnValue> columnModifications = new();
@@ -34,8 +32,8 @@ public class InlineUpdate: InlineDbModificationCommand, InlineDbCommandWithCondi
 	/// <summary>
 	/// EWL use only.
 	/// </summary>
-	public void AddCondition( InlineDbCommandCondition condition ) {
-		conditions.Add( condition );
+	public void AddConditions( IEnumerable<InlineDbCommandCondition> conditions ) {
+		this.conditions.AddRange( conditions );
 	}
 
 	/// <summary>

@@ -56,7 +56,8 @@ public class SqlServer: Database {
 			delegate( DBConnection cn ) {
 				var command = new InlineUpdate( "GlobalInts" );
 				command.AddColumnModifications( new InlineDbCommandColumnValue( "ParameterValue", new DbParameterValue( value ) ).ToCollection() );
-				command.AddCondition( new EqualityCondition( new InlineDbCommandColumnValue( "ParameterName", new DbParameterValue( "LineMarker" ) ) ) );
+				command.AddConditions(
+					new EqualityCondition( new InlineDbCommandColumnValue( "ParameterName", new DbParameterValue( "LineMarker" ) ) ).ToCollection() );
 				command.Execute( cn );
 			} );
 	}

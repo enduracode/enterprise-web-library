@@ -272,12 +272,15 @@ internal static class TableRetrievalStatics {
 			writer.WriteLine( "foreach( var key in keys ) {" );
 			writer.WriteLine( "results.Add( new Row( rowsByPkAndVersion.GetOrAdd( key, () => {" );
 			writer.WriteLine( "var singleRowCommand = {0};".FormatWith( getInlineSelectExpression( table, tableColumns, "\"*\"", "false" ) ) );
-			foreach( var i in tableColumns.KeyColumns.Select( ( c, i ) => new { column = c, index = i } ) )
-				writer.WriteLine(
-					"singleRowCommand.AddCondition( ( ({0})new {1}( key.Item{2} ) ).CommandCondition );".FormatWith(
-						DataAccessStatics.GetTableConditionInterfaceName( cn, database, table ),
-						DataAccessStatics.GetEqualityConditionClassName( cn, database, table, i.column ),
-						i.index + 1 ) );
+			writer.WriteLine(
+				"singleRowCommand.AddConditions( new[] {{ {0} }} );".FormatWith(
+					StringTools.ConcatenateWithDelimiter(
+						", ",
+						tableColumns.KeyColumns.Select(
+							( column, index ) => "( ({0})new {1}( key.Item{2} ) ).CommandCondition".FormatWith(
+								DataAccessStatics.GetTableConditionInterfaceName( cn, database, table ),
+								DataAccessStatics.GetEqualityConditionClassName( cn, database, table, column ),
+								index + 1 ) ) ) ) );
 			writer.WriteLine( "var singleRowResults = new List<BasicRow>();" );
 			writer.WriteLine(
 				"singleRowCommand.Execute( " + DataAccessStatics.GetConnectionExpression( database ) +
@@ -338,9 +341,7 @@ internal static class TableRetrievalStatics {
 			StringTools.ConcatenateWithDelimiter( ", ", tableColumns.KeyColumns.Select( i => i.Name ).ToArray() ) );
 	}
 
-	private static string getCommandConditionAddingStatement( string commandName ) {
-		return "foreach( var i in commandConditions ) {0}.AddCondition( i );".FormatWith( commandName );
-	}
+	private static string getCommandConditionAddingStatement( string commandName ) => "{0}.AddConditions( commandConditions );".FormatWith( commandName );
 
 	private static string getPkAndVersionTupleTypeArguments( DBConnection cn, TableColumns tableColumns ) {
 		return "{0}, {1}".FormatWith(

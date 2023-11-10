@@ -61,7 +61,7 @@ public class Oracle: Database {
 			delegate( DBConnection cn ) {
 				var command = new InlineUpdate( "global_numbers" );
 				command.AddColumnModifications( new InlineDbCommandColumnValue( "v", new DbParameterValue( value ) ).ToCollection() );
-				command.AddCondition( new EqualityCondition( new InlineDbCommandColumnValue( "k", new DbParameterValue( "LineMarker" ) ) ) );
+				command.AddConditions( new EqualityCondition( new InlineDbCommandColumnValue( "k", new DbParameterValue( "LineMarker" ) ) ).ToCollection() );
 				command.Execute( cn );
 			} );
 	}
