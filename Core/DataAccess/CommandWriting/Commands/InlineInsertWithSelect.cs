@@ -1,26 +1,44 @@
-﻿using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction;
+﻿using System.Data.Common;
+using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction;
+using EnterpriseWebLibrary.DatabaseSpecification;
+using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.DataAccess.CommandWriting.Commands;
 
 /// <summary>
 /// Generated code use only.
 /// </summary>
+[ PublicAPI ]
 public class InlineInsertWithSelect {
 	private readonly string insertTable;
-	private readonly IReadOnlyCollection<string> insertColumns;
+	private readonly IReadOnlyList<string> insertColumns;
 	private readonly string selectTable;
-	private readonly IReadOnlyCollection<string> selectExpressions;
+	private readonly List<( Func<DatabaseInfo, string> expressionGetter, Action<DatabaseInfo, DbCommand> parameterAdder )> selectExpressions = new();
 	private readonly List<InlineDbCommandCondition> conditions = new();
 
 	/// <summary>
 	/// Create a command that inserts rows in a table using data from another table.
 	/// </summary>
-	public InlineInsertWithSelect(
-		string insertTable, IReadOnlyCollection<string> insertColumns, string selectTable, IReadOnlyCollection<string> selectExpressions ) {
+	public InlineInsertWithSelect( string insertTable, IReadOnlyList<string> insertColumns, string selectTable ) {
 		this.insertTable = insertTable;
 		this.insertColumns = insertColumns;
 		this.selectTable = selectTable;
-		this.selectExpressions = selectExpressions;
+	}
+
+	/// <summary>
+	/// EWL use only.
+	/// </summary>
+	public void AddSelectExpression( string expression ) {
+		selectExpressions.Add( ( _ => expression, ( _, _ ) => {} ) );
+	}
+
+	/// <summary>
+	/// EWL use only.
+	/// </summary>
+	public void AddSelectValue( DbParameterValue value ) {
+		var parameter = new DbCommandParameter( insertColumns[ selectExpressions.Count ], value );
+		selectExpressions.Add(
+			( parameter.GetNameForCommandText, ( databaseInfo, command ) => command.Parameters.Add( parameter.GetAdoDotNetParameter( databaseInfo ) ) ) );
 	}
 
 	/// <summary>
@@ -43,8 +61,10 @@ public class InlineInsertWithSelect {
 		command.CommandText = "INSERT INTO {0} ( {1} ) SELECT {2} FROM {3} WHERE ".FormatWith(
 			insertTable,
 			StringTools.ConcatenateWithDelimiter( ", ", insertColumns ),
-			StringTools.ConcatenateWithDelimiter( ", ", selectExpressions ),
+			StringTools.ConcatenateWithDelimiter( ", ", selectExpressions.Select( i => i.expressionGetter( cn.DatabaseInfo ) ) ),
 			selectTable );
+		foreach( var expression in selectExpressions )
+			expression.parameterAdder( cn.DatabaseInfo, command );
 
 		var first = true;
 		var paramNumber = 0;

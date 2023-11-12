@@ -72,49 +72,46 @@ internal class Column {
 			} );
 	}
 
-	internal string Name { get { return valueContainer.Name; } }
-	internal string PascalCasedName { get { return valueContainer.PascalCasedName; } }
-	internal string PascalCasedNameExceptForOracle { get { return valueContainer.PascalCasedNameExceptForOracle; } }
-	internal string CamelCasedName { get { return valueContainer.CamelCasedName; } }
+	internal string Name => valueContainer.Name;
+	internal string PascalCasedName => valueContainer.PascalCasedName;
+	internal string PascalCasedNameExceptForOracle => valueContainer.PascalCasedNameExceptForOracle;
+	internal string CamelCasedName => valueContainer.CamelCasedName;
 
 	/// <summary>
 	/// Gets the name of the data type for this column, or the nullable data type if the column allows null.
 	/// </summary>
-	internal string DataTypeName { get { return valueContainer.DataTypeName; } }
+	internal string DataTypeName => valueContainer.DataTypeName;
 
 	/// <summary>
 	/// Gets the name of the nullable data type for this column, regardless of whether the column allows null. The nullable data type is equivalent to the data
 	/// type if the latter is a reference type or if the null value is represented with an expression other than "null".
 	/// </summary>
-	internal string NullableDataTypeName { get { return valueContainer.NullableDataTypeName; } }
+	internal string NullableDataTypeName => valueContainer.NullableDataTypeName;
 
-	internal string NullValueExpression { get { return valueContainer.NullValueExpression; } }
-	internal string UnconvertedDataTypeName { get { return valueContainer.UnconvertedDataTypeName; } }
+	internal string NullValueExpression => valueContainer.NullValueExpression;
+	internal string UnconvertedDataTypeName => valueContainer.UnconvertedDataTypeName;
 
-	internal string GetIncomingValueConversionExpression( string valueExpression ) {
-		return valueContainer.GetIncomingValueConversionExpression( valueExpression );
-	}
+	internal string GetIncomingValueConversionExpression( string valueExpression ) => valueContainer.GetIncomingValueConversionExpression( valueExpression );
 
-	internal object ConvertIncomingValue( object value ) {
-		return valueContainer.ConvertIncomingValue( value );
-	}
+	internal object ConvertIncomingValue( object value ) => valueContainer.ConvertIncomingValue( value );
 
-	internal int Size { get { return valueContainer.Size; } }
-	internal bool AllowsNull { get { return valueContainer.AllowsNull; } }
-	internal bool IsIdentity { get { return isIdentity; } }
-	internal bool IsRowVersion { get { return isRowVersion; } }
-	internal bool IsKey { get { return isKey!.Value; } }
+	internal int Size => valueContainer.Size;
+	internal bool AllowsNull => valueContainer.AllowsNull;
+	internal bool IsIdentity => isIdentity;
+	internal bool IsRowVersion => isRowVersion;
+	internal bool IsKey => isKey!.Value;
 
 	// NOTE: It would be best to use primary keys here, but unfortunately we don't always have that information.
 	//internal bool UseToUniquelyIdentifyRow { get { return !allowsNull && dataType.IsValueType /*We could use IsPrimitive if not for Oracle resolving to System.Decimal.*/; } }
 	// Right now we assume that at least one column in table (or query) returns true for UseToUniquelyIdentifyRow. This might not always be the case, for example if you have a query
 	// that selects file contents only. If we re-implement this in a way that makes our assumption false, we'll need to modify DataAccessStatics to detect the case where no
 	// columns return true for this and provide a useful exception.
-	internal bool UseToUniquelyIdentifyRow { get { return !valueContainer.DataType.IsArray && !isRowVersion; } }
+	internal bool UseToUniquelyIdentifyRow => !valueContainer.DataType.IsArray && !isRowVersion;
 
-	internal string GetCommandColumnValueExpression( string valueExpression ) {
-		return "new InlineDbCommandColumnValue( \"{0}\", {1} )".FormatWith( valueContainer.Name, valueContainer.GetParameterValueExpression( valueExpression ) );
-	}
+	internal string GetCommandColumnValueExpression( string valueExpression ) =>
+		"new InlineDbCommandColumnValue( \"{0}\", {1} )".FormatWith( valueContainer.Name, GetCommandParameterValueExpression( valueExpression ) );
+
+	internal string GetCommandParameterValueExpression( string valueExpression ) => valueContainer.GetParameterValueExpression( valueExpression );
 
 	internal string GetDataReaderValueExpression( string readerName, int? ordinalOverride = null ) {
 		var getValueExpression = valueContainer.GetIncomingValueConversionExpression( "{0}.GetValue( {1} )".FormatWith( readerName, ordinalOverride ?? ordinal ) );

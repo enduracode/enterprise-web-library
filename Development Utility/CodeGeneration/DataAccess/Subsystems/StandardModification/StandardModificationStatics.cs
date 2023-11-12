@@ -228,10 +228,12 @@ internal static class StandardModificationStatics {
 
 		if( hasModTable ) {
 			writer.WriteLine(
-				"var modTableInsert = new InlineInsertWithSelect( \"{0}\", {1}, {2}, {1} );".FormatWith(
+				"var modTableInsert = new InlineInsertWithSelect( \"{0}\", new[] {{ {1} }}, {2} );".FormatWith(
 					tableName + DatabaseOps.GetModificationTableSuffix( database ),
-					StringTools.ConcatenateWithDelimiter( ", ", keyColumns.Select( i => i.Name ) ),
+					StringTools.ConcatenateWithDelimiter( ", ", keyColumns.Select( i => "\"{0}\"".FormatWith( i.Name ) ) ),
 					tableName ) );
+			foreach( var i in keyColumns )
+				writer.WriteLine( "modTableInsert.AddSelectExpression( \"{0}\" );".FormatWith( i.Name ) );
 			writer.WriteLine( "modTableInsert.AddConditions( conditions.Select( i => i.CommandCondition ) );" );
 			if( isRevisionHistoryClass )
 				writer.WriteLine( "modTableInsert.AddConditions( getLatestRevisionsCondition().ToCollection() );" );
@@ -526,14 +528,45 @@ internal static class StandardModificationStatics {
 
 		if( hasModTable ) {
 			writer.WriteLine(
-				"var modTableInsert = new InlineInsertWithSelect( \"{0}\", {1}, {2}, {1} );".FormatWith(
+				"var modTableInsert = new InlineInsertWithSelect( \"{0}\", new[] {{ {1} }}, {2} );".FormatWith(
 					tableName + DatabaseOps.GetModificationTableSuffix( database ),
-					StringTools.ConcatenateWithDelimiter( ", ", keyColumns.Select( i => i.Name ) ),
+					StringTools.ConcatenateWithDelimiter( ", ", keyColumns.Select( i => "\"{0}\"".FormatWith( i.Name ) ) ),
 					tableName ) );
+			foreach( var i in keyColumns )
+				writer.WriteLine( "modTableInsert.AddSelectExpression( \"{0}\" );".FormatWith( i.Name ) );
 			writer.WriteLine( "modTableInsert.AddConditions( conditions.Select( i => i.CommandCondition ) );" );
 			if( isRevisionHistoryClass )
 				writer.WriteLine( "modTableInsert.AddConditions( getLatestRevisionsCondition().ToCollection() );" );
 			writer.WriteLine( "modTableInsert.Execute( {0}, isLongRunning: isLongRunning );".FormatWith( DataAccessStatics.GetConnectionExpression( database ) ) );
+
+			// If any primary-key columns are changing, insert the new key(s) into the modification table.
+			var nonIdentityKeyColumns = keyColumns.Where( i => !i.IsIdentity ).Materialize();
+			if( nonIdentityKeyColumns.Any() ) {
+				writer.WriteLine(
+					"if( {0} ) {{".FormatWith(
+						StringTools.ConcatenateWithDelimiter( " || ", nonIdentityKeyColumns.Select( i => "{0}.Changed".FormatWith( getColumnFieldName( i ) ) ) ) ) );
+				writer.WriteLine(
+					"var modTableNewKeyInsert = new InlineInsertWithSelect( \"{0}\", new[] {{ {1} }}, {2} );".FormatWith(
+						tableName + DatabaseOps.GetModificationTableSuffix( database ),
+						StringTools.ConcatenateWithDelimiter( ", ", keyColumns.Select( i => "\"{0}\"".FormatWith( i.Name ) ) ),
+						tableName ) );
+				foreach( var column in keyColumns )
+					if( column.IsIdentity )
+						writer.WriteLine( "modTableInsert.AddSelectExpression( \"{0}\" );".FormatWith( column.Name ) );
+					else {
+						writer.WriteLine(
+							"if( {0}.Changed ) modTableNewKeyInsert.AddSelectValue( {1} );".FormatWith(
+								getColumnFieldName( column ),
+								column.GetCommandParameterValueExpression( EwlStatics.GetCSharpIdentifier( column.PascalCasedNameExceptForOracle ) ) ) );
+						writer.WriteLine( "else modTableNewKeyInsert.AddSelectExpression( \"{0}\" );".FormatWith( column.Name ) );
+					}
+				writer.WriteLine( "modTableNewKeyInsert.AddConditions( conditions.Select( i => i.CommandCondition ) );" );
+				if( isRevisionHistoryClass )
+					writer.WriteLine( "modTableNewKeyInsert.AddConditions( getLatestRevisionsCondition().ToCollection() );" );
+				writer.WriteLine(
+					"modTableNewKeyInsert.Execute( {0}, isLongRunning: isLongRunning );".FormatWith( DataAccessStatics.GetConnectionExpression( database ) ) );
+				writer.WriteLine( "}" );
+			}
 		}
 
 		writer.WriteLine( "var update = new InlineUpdate( \"" + tableName + "\" );" );
