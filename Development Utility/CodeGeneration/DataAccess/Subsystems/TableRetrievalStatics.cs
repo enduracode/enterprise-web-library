@@ -63,11 +63,11 @@ internal static class TableRetrievalStatics {
 
 			if( isSmallTable )
 				writeGetAllRowsMethod( writer, isRevisionHistoryTable, false );
-			writeGetRowsMethod( cn, writer, database, table, columns, isSmallTable, tableUsesRowVersionedCaching, isRevisionHistoryTable, false );
+			writeGetRowsMatchingConditionsMethod( cn, writer, database, table, columns, isSmallTable, tableUsesRowVersionedCaching, isRevisionHistoryTable, false );
 			if( isRevisionHistoryTable ) {
 				if( isSmallTable )
 					writeGetAllRowsMethod( writer, true, true );
-				writeGetRowsMethod( cn, writer, database, table, columns, isSmallTable, tableUsesRowVersionedCaching, true, true );
+				writeGetRowsMatchingConditionsMethod( cn, writer, database, table, columns, isSmallTable, tableUsesRowVersionedCaching, true, true );
 			}
 
 			writeGetRowMatchingPkMethod( cn, writer, database, table, columns, isSmallTable, tableUsesRowVersionedCaching, isRevisionHistoryTable );
@@ -85,13 +85,13 @@ internal static class TableRetrievalStatics {
 						database.SecondaryDatabaseName + table.TableNameToPascal( cn ) + "TableRetrievalRowsByPkAndVersion",
 						StringTools.ConcatenateWithDelimiter(
 							", ",
-							Enumerable.Range( 1, columns.KeyColumns.Count() ).Select( i => "i.Item{0}".FormatWith( i ) ).ToArray() ) ) );
+							Enumerable.Range( 1, columns.KeyColumns.Count ).Select( i => "i.Item{0}".FormatWith( i ) ).ToArray() ) ) );
 				writer.WriteLine( "}" );
 			}
 
 			// Initially we did not generate this method for small tables, but we found a need for it when the cache is disabled since that will cause
 			// GetRowMatchingId to repeatedly query.
-			if( columns.KeyColumns.Count() == 1 && columns.KeyColumns.Single().Name.ToLower().EndsWith( "id" ) )
+			if( columns.KeyColumns.Count == 1 && columns.KeyColumns.Single().Name.ToLower().EndsWith( "id" ) )
 				writeToIdDictionaryMethod( writer, columns );
 
 			if( isRevisionHistoryTable )
@@ -116,10 +116,6 @@ internal static class TableRetrievalStatics {
 			templateWriter.WriteLine( "}" );
 		}
 		writer.WriteLine( "}" ); // namespace
-	}
-
-	internal static string GetClassName( DBConnection cn, string table ) {
-		return EwlStatics.GetCSharpIdentifier( table.TableNameToPascal( cn ) + "TableRetrieval" );
 	}
 
 	private static void writeCacheClass(
@@ -148,7 +144,7 @@ internal static class TableRetrievalStatics {
 		writer.WriteLine( "}" );
 	}
 
-	private static void writeGetRowsMethod(
+	private static void writeGetRowsMatchingConditionsMethod(
 		DBConnection cn, TextWriter writer, Database database, string table, TableColumns tableColumns, bool isSmallTable, bool tableUsesRowVersionedCaching,
 		bool isRevisionHistoryTable, bool excludePreviousRevisions ) {
 		// header
@@ -174,7 +170,7 @@ internal static class TableRetrievalStatics {
 		var pkConditionVariableNames = tableColumns.KeyColumns.Select( i => i.CamelCasedName + "Condition" );
 		writer.WriteLine(
 			"var isPkQuery = " + StringTools.ConcatenateWithDelimiter( " && ", pkConditionVariableNames.Select( i => i + " != null" ).ToArray() ) +
-			" && conditions.Count() == " + tableColumns.KeyColumns.Count() + ";" );
+			" && conditions.Count() == " + tableColumns.KeyColumns.Count + ";" );
 		writer.WriteLine( "if( isPkQuery ) {" );
 		writer.WriteLine( "Row row;" );
 		writer.WriteLine(
@@ -196,7 +192,7 @@ internal static class TableRetrievalStatics {
 	private static void writeGetRowMatchingPkMethod(
 		DBConnection cn, TextWriter writer, Database database, string table, TableColumns tableColumns, bool isSmallTable, bool tableUsesRowVersionedCaching,
 		bool isRevisionHistoryTable ) {
-		var pkIsId = tableColumns.KeyColumns.Count() == 1 && tableColumns.KeyColumns.Single().Name.ToLower().EndsWith( "id" );
+		var pkIsId = tableColumns.KeyColumns.Count == 1 && tableColumns.KeyColumns.Single().Name.ToLower().EndsWith( "id" );
 		var methodName = pkIsId ? "GetRowMatchingId" : "GetRowMatchingPk";
 		var pkParameters = pkIsId
 			                   ? "{0} id".FormatWith( tableColumns.KeyColumns.Single().DataTypeName )
@@ -261,8 +257,8 @@ internal static class TableRetrievalStatics {
 						", ",
 						tableColumns.KeyColumns.Select( ( c, i ) => c.GetDataReaderValueExpression( "r", ordinalOverride: i ) ).ToArray() ),
 					cn.DatabaseInfo is OracleInfo
-						? "({0})r.GetValue( {1} )".FormatWith( oracleRowVersionDataType, tableColumns.KeyColumns.Count() )
-						: tableColumns.RowVersionColumn!.GetDataReaderValueExpression( "r", ordinalOverride: tableColumns.KeyColumns.Count() ) ) + " ); } );" );
+						? "({0})r.GetValue( {1} )".FormatWith( oracleRowVersionDataType, tableColumns.KeyColumns.Count )
+						: tableColumns.RowVersionColumn!.GetDataReaderValueExpression( "r", ordinalOverride: tableColumns.KeyColumns.Count ) ) + " ); } );" );
 
 			writer.WriteLine( "var rowsByPkAndVersion = getRowsByPkAndVersion();" );
 			writer.WriteLine( "var cachedKeyCount = keys.Where( i => rowsByPkAndVersion.ContainsKey( i ) ).Count();" );
@@ -305,7 +301,7 @@ internal static class TableRetrievalStatics {
 				"while( r.Read() ) results.Add( new Row( rowsByPkAndVersion.GetOrAdd( System.Tuple.Create( {0}, {1} ), () => new BasicRow( r ) ) ) );".FormatWith(
 					StringTools.ConcatenateWithDelimiter( ", ", tableColumns.KeyColumns.Select( i => i.GetDataReaderValueExpression( "r" ) ).ToArray() ),
 					cn.DatabaseInfo is OracleInfo
-						? "({0})r.GetValue( {1} )".FormatWith( oracleRowVersionDataType, tableColumns.AllColumns.Count() )
+						? "({0})r.GetValue( {1} )".FormatWith( oracleRowVersionDataType, tableColumns.AllColumns.Count )
 						: tableColumns.RowVersionColumn!.GetDataReaderValueExpression( "r" ) ) );
 			writer.WriteLine( "} );" );
 			writer.WriteLine( "}" );
@@ -343,15 +339,13 @@ internal static class TableRetrievalStatics {
 
 	private static string getCommandConditionAddingStatement( string commandName ) => "{0}.AddConditions( commandConditions );".FormatWith( commandName );
 
-	private static string getPkAndVersionTupleTypeArguments( DBConnection cn, TableColumns tableColumns ) {
-		return "{0}, {1}".FormatWith(
+	private static string getPkAndVersionTupleTypeArguments( DBConnection cn, TableColumns tableColumns ) =>
+		"{0}, {1}".FormatWith(
 			getPkTupleTypeArguments( tableColumns ),
 			cn.DatabaseInfo is OracleInfo ? oracleRowVersionDataType : tableColumns.RowVersionColumn!.DataTypeName );
-	}
 
-	private static string getPkTupleTypeArguments( TableColumns tableColumns ) {
-		return StringTools.ConcatenateWithDelimiter( ", ", tableColumns.KeyColumns.Select( i => i.DataTypeName ).ToArray() );
-	}
+	private static string getPkTupleTypeArguments( TableColumns tableColumns ) =>
+		StringTools.ConcatenateWithDelimiter( ", ", tableColumns.KeyColumns.Select( i => i.DataTypeName ).ToArray() );
 
 	private static void writeToIdDictionaryMethod( TextWriter writer, TableColumns tableColumns ) {
 		writer.WriteLine( "public static Dictionary<" + tableColumns.KeyColumns.Single().DataTypeName + ", Row> ToIdDictionary( this IEnumerable<Row> rows ) {" );
@@ -359,4 +353,7 @@ internal static class TableRetrievalStatics {
 			"return rows.ToDictionary( i => i." + EwlStatics.GetCSharpIdentifier( tableColumns.KeyColumns.Single().PascalCasedNameExceptForOracle ) + " );" );
 		writer.WriteLine( "}" );
 	}
+
+	internal static string GetClassName( DBConnection cn, string table ) =>
+		EwlStatics.GetCSharpIdentifier( "{0}TableRetrieval".FormatWith( table.TableNameToPascal( cn ) ) );
 }
