@@ -13,21 +13,19 @@ public static class AppMemoryCache {
 	private static readonly string keyPrefix = "{0}-".FormatWith( EwlStatics.EwlInitialism.ToLowerInvariant() );
 	private const int tickInterval = 10000;
 
-	private static IMemoryCache? staticCache;
-	private static Func<IMemoryCache>? cacheGetter;
+	private static IMemoryCache? cacheField;
 	private static Timer? timer;
 	private static ConcurrentBag<string>? periodicEvictionKeys;
 
-	internal static void Init( Func<IMemoryCache>? cacheGetter ) {
-		staticCache = cacheGetter is null ? new MemoryCache( new MemoryCacheOptions() ) : null;
-		AppMemoryCache.cacheGetter = cacheGetter ?? ( () => staticCache! );
+	internal static void Init() {
+		cacheField = new MemoryCache( new MemoryCacheOptions() );
 
 		timer = new Timer( tick, null, tickInterval, Timeout.Infinite );
 		periodicEvictionKeys = new ConcurrentBag<string>();
 	}
 
 	internal static void CleanUp() {
-		staticCache?.Dispose();
+		cacheField?.Dispose();
 
 		if( timer is null )
 			return;
@@ -114,7 +112,7 @@ public static class AppMemoryCache {
 		keyPrefix + "requestProfiling-{0}".FormatWith( userId.HasValue ? userId.Value.ToString() : "unrecognized" );
 
 
-	private static IMemoryCache cache => cacheGetter!();
+	private static IMemoryCache cache => cacheField!;
 
 	/// <summary>
 	/// Gets the underlying .NET cache object, which you can use if you need maximum control over caching behavior.

@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using Destructurama;
+using EnterpriseWebLibrary.Caching;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core;
@@ -77,7 +78,6 @@ public static class EwfOps {
 		if( TimeSpan.FromMilliseconds( GetTickCount64() ) < new TimeSpan( 0, 3, 0 ) )
 			Thread.Sleep( new TimeSpan( 0, 1, 0 ) );
 
-		IMemoryCache memoryCache = null;
 		var initTimeDataAccessState = new ThreadLocal<DataAccessState>( () => new DataAccessState() );
 		GlobalInitializationOps.InitStatics(
 			globalInitializer,
@@ -118,7 +118,6 @@ public static class EwfOps {
 						writer.WriteLine( "User: {0}{1}".FormatWith( user.Email, impersonator != null ? " (impersonated by {0})".FormatWith( impersonator.Email ) : "" ) );
 				}
 			},
-			memoryCacheGetter: () => memoryCache,
 			mainDataAccessStateGetter: () =>
 				EwfRequest.Current is not null ? RequestDispatchingStatics.RequestState.DatabaseConnectionManager.DataAccessState : initTimeDataAccessState.Value,
 			currentDatabaseConnectionManagerGetter: () => RequestDispatchingStatics.RequestState.DatabaseConnectionManager,
@@ -164,7 +163,6 @@ public static class EwfOps {
 
 						builder.Services.Configure<FormOptions>( options => { options.ValueCountLimit = 10000; } );
 
-						builder.Services.AddMemoryCache();
 						builder.Services.AddDataProtection();
 						builder.Services.AddMvcCore();
 
@@ -179,12 +177,11 @@ public static class EwfOps {
 
 						dependencyInjectionServicesRegistrationMethod?.Invoke( builder.Services );
 
-						// Register this last so it cannot be overridden.
+						// Register these last so they cannot be overridden.
+						builder.Services.AddSingleton( AppMemoryCache.UnderlyingCache );
 						builder.Services.AddSingleton<IHttpContextAccessor, EwfHttpContextAccessor>();
 
 						var app = builder.Build();
-
-						memoryCache = app.Services.GetRequiredService<IMemoryCache>();
 
 						using( var serviceScope = app.Services.CreateScope() ) {
 							MiniProfiler.Configure( app.Services.GetRequiredService<IOptions<MiniProfilerOptions>>().Value );

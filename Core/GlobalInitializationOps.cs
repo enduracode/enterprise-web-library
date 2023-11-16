@@ -9,7 +9,6 @@ using EnterpriseWebLibrary.Encryption;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.ExternalFunctionality;
 using EnterpriseWebLibrary.UserManagement;
-using Microsoft.Extensions.Caching.Memory;
 using Newtonsoft.Json;
 using NodaTime;
 using NodaTime.Serialization.JsonNet;
@@ -34,7 +33,6 @@ public static class GlobalInitializationOps {
 	/// <param name="assemblyFolderPath">Pass a nonempty string to override the assembly folder path, which is used to locate the installation folder. Use with
 	/// caution.</param>
 	/// <param name="telemetryAppErrorContextWriter"></param>
-	/// <param name="memoryCacheGetter"></param>
 	/// <param name="mainDataAccessStateGetter">A method that returns the current main data-access state whenever it is requested, including during this
 	/// InitStatics call. Do not allow multiple threads to use the same state at the same time. If you pass null, the data-access subsystem will not be
 	/// available in the application.</param>
@@ -44,8 +42,7 @@ public static class GlobalInitializationOps {
 	/// the application.</param>
 	public static void InitStatics(
 		SystemInitializer globalInitializer, string appName, bool isClientSideApp, string assemblyFolderPath = "",
-		Action<TextWriter>? telemetryAppErrorContextWriter = null, Func<IMemoryCache>? memoryCacheGetter = null,
-		Func<DataAccessState>? mainDataAccessStateGetter = null, bool useLongDatabaseTimeouts = false,
+		Action<TextWriter>? telemetryAppErrorContextWriter = null, Func<DataAccessState>? mainDataAccessStateGetter = null, bool useLongDatabaseTimeouts = false,
 		Func<AutomaticDatabaseConnectionManager>? currentDatabaseConnectionManagerGetter = null, Func<SystemUser?>? currentUserGetter = null ) {
 		var initializationLog = "Starting init";
 		try {
@@ -82,7 +79,7 @@ public static class GlobalInitializationOps {
 			if( File.Exists( asposeWordsLicensePath ) )
 				new Aspose.Words.License().SetLicense( asposeWordsLicensePath );
 
-			AppMemoryCache.Init( memoryCacheGetter );
+			AppMemoryCache.Init();
 			EncryptionOps.Init();
 
 			ExternalFunctionalityStatics.Init();
