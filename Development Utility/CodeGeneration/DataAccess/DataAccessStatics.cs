@@ -72,7 +72,13 @@ internal static class DataAccessStatics {
 		var tableNames = tables.Select( i => i.name ).Materialize();
 
 		ensureTablesExist( tableNames, configuration.SmallTables, "small" );
+
 		ensureTablesExist( tableNames, configuration.TablesUsingRowVersionedDataCaching, "row-versioned data caching" );
+		foreach( var table in tables.Where( i => i.hasModTable ).Select( i => i.name ) )
+			if( configuration.TablesUsingRowVersionedDataCaching is {} specifiedTables && specifiedTables.Any( i => i.EqualsIgnoreCase( table ) ) )
+				throw new UserCorrectableException(
+					"Table {0} is cached using a modification table and therefore cannot also use row-versioned data caching.".FormatWith( table ) );
+
 		ensureTablesExist( tableNames, configuration.revisionHistoryTables, "revision history" );
 
 		ensureTablesExist( tableNames, configuration.WhitelistedTables, "whitelisted" );
