@@ -7,7 +7,7 @@ public interface SystemDataAccessProvider {
 	/// <summary>
 	/// EWL use only.
 	/// </summary>
-	void InitRetrievalCaches();
+	void InitRetrievalCaches() {}
 
 	/// <summary>
 	/// Retrieves the next value from the system’s main sequence.
