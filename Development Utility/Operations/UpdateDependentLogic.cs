@@ -320,7 +320,7 @@ internal class UpdateDependentLogic: Operation {
 			writer.WriteLine( "if( errorMessageIfAlreadyRunning.Any() && Process.GetProcessesByName( \"" + project.NamespaceAndAssemblyName + "\" ).Any() )" );
 			writer.WriteLine( "throw new DataModificationException( errorMessageIfAlreadyRunning );" );
 
-			var programPath = "EwlStatics.CombinePaths( ConfigurationStatics.InstallationPath, \"" + project.Name +
+			var programPath = "EwlStatics.CombinePaths( ConfigurationStatics.InstallationConfiguration.InstallationPath, \"" + project.Name +
 			                  "\", ConfigurationStatics.ServerSideConsoleAppRelativeFolderPath, \"" + project.NamespaceAndAssemblyName + "\" )";
 			var runProgramExpression =
 				"EnterpriseWebLibrary.TewlContrib.ProcessTools.RunProgram( {0}, \"{1}\", Newtonsoft.Json.JsonConvert.SerializeObject( arguments, Newtonsoft.Json.Formatting.None ) + System.Environment.NewLine + input, false )"
