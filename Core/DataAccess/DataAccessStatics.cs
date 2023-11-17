@@ -3,24 +3,35 @@ using EnterpriseWebLibrary.DatabaseSpecification;
 
 namespace EnterpriseWebLibrary.DataAccess;
 
-internal static class DataAccessStatics {
-	private const string providerName = "DataAccess";
-	private static SystemProviderReference<SystemDataAccessProvider>? provider;
-	private static IEnumerable<DatabaseInfo>? disabledAutomaticTransactionSecondaryDatabases;
+/// <summary>
+/// Development Utility and internal use only.
+/// </summary>
+public static class DataAccessStatics {
+	/// <summary>
+	/// Development Utility and internal use only.
+	/// </summary>
+	public const string ProviderName = "DataAccess";
+
+	private static SystemProviderReference<SystemDataAccessProvider> provider = null!;
+	private static IReadOnlyCollection<DatabaseInfo> disabledAutomaticTransactionSecondaryDatabases = null!;
 
 	internal static void Init() {
-		provider = ConfigurationStatics.GetSystemLibraryProvider<SystemDataAccessProvider>( providerName );
+		provider = ConfigurationStatics.GetSystemLibraryProvider<SystemDataAccessProvider>( ProviderName );
 
 		disabledAutomaticTransactionSecondaryDatabases =
 			provider.GetProvider( returnNullIfNotFound: true ) is AutomaticTransactionDisablingProvider automaticTransactionDisablingProvider
 				? automaticTransactionDisablingProvider.GetDisabledAutomaticTransactionSecondaryDatabaseNames()
 					.Select( i => ConfigurationStatics.InstallationConfiguration.GetSecondaryDatabaseInfo( i ) )
-					.ToArray()
-				: Enumerable.Empty<DatabaseInfo>();
+					.Materialize()
+				: Enumerable.Empty<DatabaseInfo>().Materialize();
 	}
 
-	internal static SystemDataAccessProvider SystemProvider => provider!.GetProvider()!;
+	internal static SystemDataAccessProvider SystemProvider => provider.GetProvider()!;
+
+	internal static void InitRetrievalCaches() {
+		provider.GetProvider( returnNullIfNotFound: true )?.InitRetrievalCaches();
+	}
 
 	internal static bool DatabaseShouldHaveAutomaticTransactions( DatabaseInfo databaseInfo ) =>
-		disabledAutomaticTransactionSecondaryDatabases!.All( i => i.SecondaryDatabaseName != databaseInfo.SecondaryDatabaseName );
+		disabledAutomaticTransactionSecondaryDatabases.All( i => i.SecondaryDatabaseName != databaseInfo.SecondaryDatabaseName );
 }

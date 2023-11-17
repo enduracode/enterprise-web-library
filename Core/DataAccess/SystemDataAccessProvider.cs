@@ -1,11 +1,16 @@
-﻿namespace EnterpriseWebLibrary.DataAccess {
+﻿namespace EnterpriseWebLibrary.DataAccess;
+
+/// <summary>
+/// System-specific data-access logic.
+/// </summary>
+public interface SystemDataAccessProvider {
 	/// <summary>
-	/// System-specific data-access logic.
+	/// EWL use only.
 	/// </summary>
-	public interface SystemDataAccessProvider {
-		/// <summary>
-		/// Retrieves the next value from the system's main sequence.
-		/// </summary>
-		int GetNextMainSequenceValue();
-	}
+	void InitRetrievalCaches();
+
+	/// <summary>
+	/// Retrieves the next value from the system’s main sequence.
+	/// </summary>
+	int GetNextMainSequenceValue();
 }

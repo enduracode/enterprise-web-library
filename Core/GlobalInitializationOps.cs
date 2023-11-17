@@ -90,6 +90,7 @@ public static class GlobalInitializationOps {
 			DataAccessStatics.Init();
 			DataAccessState.Init( mainDataAccessStateGetter, useLongDatabaseTimeouts );
 			AutomaticDatabaseConnectionManager.Init( currentDatabaseConnectionManagerGetter );
+			DataAccessStatics.InitRetrievalCaches();
 
 			BlobStorageStatics.Init();
 			HtmlBlockStatics.Init();

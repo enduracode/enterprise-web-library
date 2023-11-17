@@ -18,6 +18,18 @@ internal static class DataAccessStatics {
 
 	public static void GenerateDataAccessCode( TextWriter writer, DevelopmentInstallation installation ) {
 		var baseNamespace = installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName + ".DataAccess";
+
+		if( installation.DevelopmentInstallationLogic.DatabasesForCodeGeneration.Any( d => d.SecondaryDatabaseName.Length > 0 ) ) {
+			writer.WriteLine();
+			writer.WriteLine( "namespace " + baseNamespace + " {" );
+			writer.WriteLine( "public class SecondaryDatabaseNames {" );
+			foreach( var secondaryDatabase in installation.DevelopmentInstallationLogic.DatabasesForCodeGeneration.Where( d => d.SecondaryDatabaseName.Length > 0 ) )
+				writer.WriteLine( "public const string " + secondaryDatabase.SecondaryDatabaseName + " = \"" + secondaryDatabase.SecondaryDatabaseName + "\";" );
+			writer.WriteLine( "}" );
+			writer.WriteLine( "}" );
+		}
+
+		var initStatements = new List<string>();
 		var templateBasePath = EwlStatics.CombinePaths( installation.DevelopmentInstallationLogic.LibraryPath, "DataAccess" );
 		foreach( var database in installation.DevelopmentInstallationLogic.DatabasesForCodeGeneration )
 			try {
@@ -28,19 +40,26 @@ internal static class DataAccessStatics {
 					database,
 					database.SecondaryDatabaseName.Length == 0
 						? installation.DevelopmentInstallationLogic.DevelopmentConfiguration.database
-						: installation.DevelopmentInstallationLogic.DevelopmentConfiguration.secondaryDatabases.Single( sd => sd.name == database.SecondaryDatabaseName ) );
+						: installation.DevelopmentInstallationLogic.DevelopmentConfiguration.secondaryDatabases.Single( sd => sd.name == database.SecondaryDatabaseName ),
+					initStatements );
 			}
 			catch( Exception e ) {
 				throw UserCorrectableException.CreateSecondaryException(
 					"An exception occurred while generating data access logic for the {0}.".FormatWith( DatabaseOps.GetDatabaseNounPhrase( database ) ),
 					e );
 			}
-		if( installation.DevelopmentInstallationLogic.DatabasesForCodeGeneration.Any( d => d.SecondaryDatabaseName.Length > 0 ) ) {
+
+		if( initStatements.Any() ) {
 			writer.WriteLine();
-			writer.WriteLine( "namespace " + baseNamespace + " {" );
-			writer.WriteLine( "public class SecondaryDatabaseNames {" );
-			foreach( var secondaryDatabase in installation.DevelopmentInstallationLogic.DatabasesForCodeGeneration.Where( d => d.SecondaryDatabaseName.Length > 0 ) )
-				writer.WriteLine( "public const string " + secondaryDatabase.SecondaryDatabaseName + " = \"" + secondaryDatabase.SecondaryDatabaseName + "\";" );
+			writer.WriteLine(
+				"namespace {0}.Configuration.Providers {{".FormatWith(
+					installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName ) );
+			writer.WriteLine(
+				"internal partial class {0}: SystemDataAccessProvider {{".FormatWith( EnterpriseWebLibrary.DataAccess.DataAccessStatics.ProviderName ) );
+			writer.WriteLine( "void SystemDataAccessProvider.InitRetrievalCaches() {" );
+			foreach( var statement in initStatements )
+				writer.WriteLine( statement );
+			writer.WriteLine( "}" );
 			writer.WriteLine( "}" );
 			writer.WriteLine( "}" );
 		}
@@ -48,7 +67,7 @@ internal static class DataAccessStatics {
 
 	private static void generateDataAccessCodeForDatabase(
 		TextWriter writer, string baseNamespace, string templateBasePath, Database database,
-		EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
+		EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration, List<string> initStatements ) {
 		var tables = DatabaseOps.GetDatabaseTables( database ).Materialize();
 		var tableNames = tables.Select( i => i.name ).Materialize();
 
@@ -93,7 +112,7 @@ internal static class DataAccessStatics {
 				CommandConditionStatics.Generate( cn, writer, baseNamespace, database, tableNames );
 
 				writer.WriteLine();
-				TableRetrievalStatics.Generate( cn, writer, baseNamespace, templateBasePath, database, tables, configuration );
+				TableRetrievalStatics.Generate( cn, writer, baseNamespace, templateBasePath, database, tables, configuration, initStatements );
 
 				writer.WriteLine();
 				StandardModificationStatics.Generate( cn, writer, baseNamespace, templateBasePath, database, tables, configuration );

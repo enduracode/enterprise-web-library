@@ -12,17 +12,17 @@ internal static class TableRetrievalStatics {
 
 	internal static void Generate(
 		DBConnection cn, TextWriter writer, string baseNamespace, string templateBasePath, Database database, IEnumerable<( string name, bool hasModTable )> tables,
-		EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
+		EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration, List<string> initStatements ) {
 		var subsystemName = "{0}TableRetrieval".FormatWith( database.SecondaryDatabaseName );
 		var subsystemNamespace = "namespace {0}.{1}".FormatWith( baseNamespace, subsystemName );
 
 		writer.WriteLine( "{0} {{".FormatWith( subsystemNamespace ) );
-		foreach( var table in tables.Select( i => i.name ) ) {
-			CodeGenerationStatics.AddSummaryDocComment( writer, "Contains logic that retrieves rows from the " + table + " table." );
-			writer.WriteLine( "public static partial class " + GetClassName( cn, table ) + " {" );
+		foreach( var table in tables ) {
+			CodeGenerationStatics.AddSummaryDocComment( writer, "Contains logic that retrieves rows from the " + table.name + " table." );
+			writer.WriteLine( "public static partial class " + GetClassName( cn, table.name ) + " {" );
 
-			var isRevisionHistoryTable = DataAccessStatics.IsRevisionHistoryTable( table, configuration );
-			var columns = new TableColumns( cn, table, isRevisionHistoryTable );
+			var isRevisionHistoryTable = DataAccessStatics.IsRevisionHistoryTable( table.name, configuration );
+			var columns = new TableColumns( cn, table.name, isRevisionHistoryTable );
 
 			// Write nested classes.
 			DataAccessStatics.WriteRowClasses(
@@ -40,7 +40,7 @@ internal static class TableRetrievalStatics {
 						return;
 
 					var modClass = database.SecondaryDatabaseName + "Modification." +
-					               StandardModificationStatics.GetClassName( cn, table, isRevisionHistoryTable, isRevisionHistoryTable );
+					               StandardModificationStatics.GetClassName( cn, table.name, isRevisionHistoryTable, isRevisionHistoryTable );
 					var revisionHistorySuffix = StandardModificationStatics.GetRevisionHistorySuffix( isRevisionHistoryTable );
 					writer.WriteLine( "public " + modClass + " ToModification" + revisionHistorySuffix + "() {" );
 					writer.WriteLine(
@@ -49,28 +49,43 @@ internal static class TableRetrievalStatics {
 							columns.AllColumnsExceptRowVersion.Select( i => EwlStatics.GetCSharpIdentifier( i.PascalCasedNameExceptForOracle ) ).ToArray() ) + " );" );
 					writer.WriteLine( "}" );
 				} );
-			writeCacheClass( cn, writer, database, table, columns, isRevisionHistoryTable );
+			writeCacheClass( cn, writer, database, table.name, columns, isRevisionHistoryTable );
 
-			var isSmallTable = configuration.SmallTables != null && configuration.SmallTables.Any( i => i.EqualsIgnoreCase( table ) );
+			if( table.hasModTable ) {
+				CodeGenerationStatics.AddGeneratedCodeUseOnlyComment( writer );
+				writer.WriteLine( "internal static void Init() {" );
+				writer.WriteLine( "}" );
+			}
+
+			var isSmallTable = configuration.SmallTables != null && configuration.SmallTables.Any( i => i.EqualsIgnoreCase( table.name ) );
 
 			var tableUsesRowVersionedCaching = configuration.TablesUsingRowVersionedDataCaching != null &&
-			                                   configuration.TablesUsingRowVersionedDataCaching.Any( i => i.EqualsIgnoreCase( table ) );
+			                                   configuration.TablesUsingRowVersionedDataCaching.Any( i => i.EqualsIgnoreCase( table.name ) );
 			if( tableUsesRowVersionedCaching && columns.RowVersionColumn == null && !( cn.DatabaseInfo is OracleInfo ) )
 				throw new UserCorrectableException(
 					cn.DatabaseInfo is MySqlInfo
 						? "Row-versioned data caching cannot currently be used with MySQL databases."
-						: "Row-versioned data caching can only be used with the {0} table if you add a rowversion column.".FormatWith( table ) );
+						: "Row-versioned data caching can only be used with the {0} table if you add a rowversion column.".FormatWith( table.name ) );
 
 			if( isSmallTable )
 				writeGetAllRowsMethod( writer, isRevisionHistoryTable, false );
-			writeGetRowsMatchingConditionsMethod( cn, writer, database, table, columns, isSmallTable, tableUsesRowVersionedCaching, isRevisionHistoryTable, false );
+			writeGetRowsMatchingConditionsMethod(
+				cn,
+				writer,
+				database,
+				table.name,
+				columns,
+				isSmallTable,
+				tableUsesRowVersionedCaching,
+				isRevisionHistoryTable,
+				false );
 			if( isRevisionHistoryTable ) {
 				if( isSmallTable )
 					writeGetAllRowsMethod( writer, true, true );
-				writeGetRowsMatchingConditionsMethod( cn, writer, database, table, columns, isSmallTable, tableUsesRowVersionedCaching, true, true );
+				writeGetRowsMatchingConditionsMethod( cn, writer, database, table.name, columns, isSmallTable, tableUsesRowVersionedCaching, true, true );
 			}
 
-			writeGetRowMatchingPkMethod( cn, writer, database, table, columns, isSmallTable, tableUsesRowVersionedCaching, isRevisionHistoryTable );
+			writeGetRowMatchingPkMethod( cn, writer, database, table.name, columns, isSmallTable, tableUsesRowVersionedCaching, isRevisionHistoryTable );
 
 			if( isRevisionHistoryTable )
 				DataAccessStatics.WriteGetLatestRevisionsConditionMethod( writer, columns.PrimaryKeyAndRevisionIdColumn!.Name );
@@ -82,7 +97,7 @@ internal static class TableRetrievalStatics {
 				writer.WriteLine(
 					"return AppMemoryCache.GetCacheValue<{0}>( \"{1}\", () => new {0}( i => System.Tuple.Create( {2} ) ) ).RowsByPkAndVersion;".FormatWith(
 						"VersionedRowDataCache<System.Tuple<{0}>, System.Tuple<{1}>, BasicRow>".FormatWith( getPkTupleTypeArguments( columns ), keyTupleTypeArguments ),
-						database.SecondaryDatabaseName + table.TableNameToPascal( cn ) + "TableRetrievalRowsByPkAndVersion",
+						database.SecondaryDatabaseName + table.name.TableNameToPascal( cn ) + "TableRetrievalRowsByPkAndVersion",
 						StringTools.ConcatenateWithDelimiter(
 							", ",
 							Enumerable.Range( 1, columns.KeyColumns.Count ).Select( i => "i.Item{0}".FormatWith( i ) ).ToArray() ) ) );
@@ -95,11 +110,14 @@ internal static class TableRetrievalStatics {
 				writeToIdDictionaryMethod( writer, columns );
 
 			if( isRevisionHistoryTable )
-				DataAccessStatics.WriteRevisionDeltaExtensionMethods( writer, GetClassName( cn, table ), columns.DataColumns );
+				DataAccessStatics.WriteRevisionDeltaExtensionMethods( writer, GetClassName( cn, table.name ), columns.DataColumns );
 
 			writer.WriteLine( "}" ); // class
 
-			var templateClassName = GetClassName( cn, table );
+			if( table.hasModTable )
+				initStatements.Add( "{0}.{1}.{2}.Init();".FormatWith( baseNamespace, subsystemName, GetClassName( cn, table.name ) ) );
+
+			var templateClassName = GetClassName( cn, table.name );
 			var templateFilePath = EwlStatics.CombinePaths( templateBasePath, subsystemName, templateClassName );
 			IoMethods.DeleteFile( templateFilePath + DataAccessStatics.CSharpTemplateFileExtension );
 
