@@ -25,7 +25,7 @@ internal static class TableRetrievalStatics {
 			var columns = new TableColumns( cn, table.name, isRevisionHistoryTable );
 
 			// Write nested classes.
-			DataAccessStatics.WriteRowClasses(
+			RetrievalStatics.WriteRowClasses(
 				writer,
 				columns.AllColumns,
 				columns.KeyColumns,
