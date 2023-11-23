@@ -28,6 +28,7 @@ internal static class TableRetrievalStatics {
 			DataAccessStatics.WriteRowClasses(
 				writer,
 				columns.AllColumns,
+				columns.KeyColumns,
 				_ => {
 					if( !isRevisionHistoryTable )
 						return;

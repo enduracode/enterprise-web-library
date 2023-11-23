@@ -199,10 +199,13 @@ internal static class DataAccessStatics {
 	}
 
 	internal static void WriteRowClasses(
-		TextWriter writer, IEnumerable<Column> columns, Action<TextWriter> transactionPropertyWriter, Action<TextWriter> toModificationMethodWriter ) {
+		TextWriter writer, IReadOnlyCollection<Column> columns, IReadOnlyCollection<Column>? keyColumns, Action<TextWriter> transactionPropertyWriter,
+		Action<TextWriter> toModificationMethodWriter ) {
 		// BasicRow
 
-		writer.WriteLine( "internal class BasicRow {" );
+		writer.WriteLine(
+			"internal class BasicRow{0} {{".FormatWith(
+				keyColumns is null ? "" : ": TableRetrievalRow<{0}>".FormatWith( RetrievalStatics.GetColumnTupleTypeName( keyColumns ) ) ) );
 		foreach( var column in columns.Where( i => !i.IsRowVersion ) )
 			writer.WriteLine( "private readonly " + column.DataTypeName + " " + getMemberVariableName( column ) + ";" );
 
@@ -213,8 +216,15 @@ internal static class DataAccessStatics {
 
 		foreach( var column in columns.Where( i => !i.IsRowVersion ) )
 			writer.WriteLine(
-				"internal " + column.DataTypeName + " " + EwlStatics.GetCSharpIdentifier( column.PascalCasedName ) + " { get { return " +
-				getMemberVariableName( column ) + "; } }" );
+				"public {0} {1} => {2};".FormatWith( column.DataTypeName, EwlStatics.GetCSharpIdentifier( column.PascalCasedName ), getMemberVariableName( column ) ) );
+
+		if( keyColumns is not null )
+			writer.WriteLine(
+				"{0} TableRetrievalRow<{0}>.PrimaryKey => {1};".FormatWith(
+					RetrievalStatics.GetColumnTupleTypeName( keyColumns ),
+					keyColumns.Count < 2
+						? getMemberVariableName( keyColumns.Single() )
+						: "( {0} )".FormatWith( StringTools.ConcatenateWithDelimiter( ", ", keyColumns.Select( getMemberVariableName ) ) ) ) );
 
 		writer.WriteLine( "}" );
 

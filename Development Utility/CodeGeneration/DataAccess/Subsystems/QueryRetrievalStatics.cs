@@ -30,7 +30,7 @@ internal static class QueryRetrievalStatics {
 			writer.WriteLine( "public static partial class " + className + " {" );
 
 			// Write nested classes.
-			DataAccessStatics.WriteRowClasses( writer, columns, _ => {}, _ => {} );
+			DataAccessStatics.WriteRowClasses( writer, columns, null, _ => {}, _ => {} );
 			writeCacheClass( writer, database, query );
 
 			writer.WriteLine( "private const string selectFromClause = @\"" + AppStatics.NormalizeLineEndingsFromXml( query.selectFromClause ) + " \";" );
