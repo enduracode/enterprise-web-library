@@ -44,7 +44,9 @@ public class RowModificationCountTableCache<RowType, RowPkType>: PeriodicEvictio
 			this.rowsByPk = rowsByPk;
 
 			this.modifiedRowPks = modifiedRowPks;
-			modifiedRows = new Lazy<IReadOnlyCollection<RowType>>( () => modifiedRowGetter( modifiedRowPks ), LazyThreadSafetyMode.None );
+			modifiedRows = new Lazy<IReadOnlyCollection<RowType>>(
+				() => modifiedRowPks.Count == 0 ? Enumerable.Empty<RowType>().Materialize() : modifiedRowGetter( modifiedRowPks ),
+				LazyThreadSafetyMode.None );
 			modifiedRowsByPk = new Lazy<IReadOnlyDictionary<RowPkType, RowType>>(
 				() => modifiedRows.Value.ToDictionary( i => i.PrimaryKey ),
 				LazyThreadSafetyMode.None );
