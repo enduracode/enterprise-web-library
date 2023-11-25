@@ -57,7 +57,10 @@ public class RowModificationCountTableCache<RowType, RowPkType>: PeriodicEvictio
 		/// modified rows).
 		/// </summary>
 		[ EditorBrowsable( EditorBrowsableState.Never ) ]
-		public IEnumerable<RowType> GetRows() => rows.Where( i => !modifiedRowPks.Contains( i.PrimaryKey ) ).Concat( modifiedRows.Value );
+		public IEnumerable<RowType> GetRows() {
+			var modifiedRowsRetrieved = modifiedRows.Value; // ensure modified rows are retrieved within the transaction
+			return rows.Where( i => !modifiedRowPks.Contains( i.PrimaryKey ) ).Concat( modifiedRowsRetrieved );
+		}
 
 		/// <summary>
 		/// EWL use only. To ensure validity of results, you must call this within the same transaction in which the object was created (due to lazy loading of
