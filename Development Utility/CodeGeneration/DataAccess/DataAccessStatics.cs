@@ -89,6 +89,14 @@ internal static class DataAccessStatics {
 			delegate( DBConnection cn ) {
 				foreach( var table in tables.Where( i => i.hasModTable ).Select( i => i.name ) ) {
 					var columns = new TableColumns( cn, table, false );
+
+					// This check ensures safety in the table-retrieval method that gets modified rows given a list of primary keys. This method uses inline SQL in order
+					// to support a potentially large number of keys in a single query.
+					foreach( var column in columns.KeyColumns )
+						if( !string.Equals( column.DataTypeName, "System.Int32" ) )
+							throw new UserCorrectableException(
+								"Table {0} is cached using a modification table but the {1} primary-key column is not numeric.".FormatWith( table, column.Name ) );
+
 					var modTableColumns = Column.GetColumnsInQueryResults(
 						cn,
 						"SELECT * FROM {0}".FormatWith( table + DatabaseOps.GetModificationTableSuffix( database ) ),

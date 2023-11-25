@@ -224,6 +224,7 @@ internal class UpdateDependentLogic: Operation {
 				writer.WriteLine( "using System.Diagnostics;" ); // Necessary for ServerSideConsoleAppStatics
 				writer.WriteLine( "using System.Diagnostics.CodeAnalysis;" );
 				writer.WriteLine( "using System.Linq;" );
+				writer.WriteLine( "using System.Threading;" ); // used by LazyThreadSafetyMode in TableRetrievalStatics
 				if( !installation.SystemIsTewl() ) {
 					writer.WriteLine( "using EnterpriseWebLibrary;" );
 					writer.WriteLine( "using EnterpriseWebLibrary.Caching;" );
