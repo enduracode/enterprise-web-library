@@ -1,27 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
+﻿using System.ComponentModel;
 using EnterpriseWebLibrary.Collections;
 using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction;
+using JetBrains.Annotations;
 
-namespace EnterpriseWebLibrary.DataAccess.RetrievalCaching {
+namespace EnterpriseWebLibrary.DataAccess.RetrievalCaching;
+
+/// <summary>
+/// EWL use only.
+/// </summary>
+[ PublicAPI ]
+[ EditorBrowsable( EditorBrowsableState.Never ) ]
+public class TableRetrievalQueryCache<RowType> {
+	private readonly Cache<InlineDbCommandCondition[], IReadOnlyCollection<RowType>> cache = new(
+		false,
+		comparer: new StructuralEqualityComparer<InlineDbCommandCondition[]>() );
+
 	/// <summary>
 	/// EWL use only.
 	/// </summary>
-	public class TableRetrievalQueryCache<RowType> {
-		private readonly Cache<InlineDbCommandCondition[], IEnumerable<RowType>> cache;
+	[ EditorBrowsable( EditorBrowsableState.Never ) ]
+	public TableRetrievalQueryCache() {}
 
-		[ EditorBrowsable( EditorBrowsableState.Never ) ]
-		public TableRetrievalQueryCache() {
-			cache = new Cache<InlineDbCommandCondition[], IEnumerable<RowType>>( false, comparer: new StructuralEqualityComparer<InlineDbCommandCondition[]>() );
-		}
-
-		[ EditorBrowsable( EditorBrowsableState.Never ) ]
-		public IEnumerable<RowType> GetResultSet(
-			IEnumerable<InlineDbCommandCondition> conditions, Func<IEnumerable<InlineDbCommandCondition>, IEnumerable<RowType>> resultSetCreator ) {
-			var conditionArray = conditions.OrderBy( i => i ).ToArray();
-			return cache.GetOrAdd( conditionArray, () => resultSetCreator( conditionArray ) );
-		}
+	/// <summary>
+	/// EWL use only.
+	/// </summary>
+	[ EditorBrowsable( EditorBrowsableState.Never ) ]
+	public IEnumerable<RowType> GetResultSet(
+		IEnumerable<InlineDbCommandCondition> conditions, Func<IReadOnlyCollection<InlineDbCommandCondition>, IReadOnlyCollection<RowType>> resultSetCreator ) {
+		var conditionArray = conditions.OrderBy( i => i ).ToArray();
+		return cache.GetOrAdd( conditionArray, () => resultSetCreator( conditionArray ) );
 	}
 }
