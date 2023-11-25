@@ -50,7 +50,7 @@ internal static class TableRetrievalStatics {
 							columns.AllColumnsExceptRowVersion.Select( i => EwlStatics.GetCSharpIdentifier( i.PascalCasedNameExceptForOracle ) ).ToArray() ) + " );" );
 					writer.WriteLine( "}" );
 				} );
-			writeCacheClass( cn, writer, database, table.name, columns, isRevisionHistoryTable );
+			writeCacheClass( cn, writer, database, table.name, columns, table.hasModTable, isRevisionHistoryTable );
 
 			if( table.hasModTable ) {
 				CodeGenerationStatics.AddGeneratedCodeUseOnlyComment( writer );
@@ -165,18 +165,20 @@ internal static class TableRetrievalStatics {
 	}
 
 	private static void writeCacheClass(
-		DBConnection cn, TextWriter writer, Database database, string table, TableColumns tableColumns, bool isRevisionHistoryTable ) {
+		DBConnection cn, TextWriter writer, Database database, string table, TableColumns tableColumns, bool hasModTable, bool isRevisionHistoryTable ) {
 		writer.WriteLine( "private partial class Cache {" );
 		writer.WriteLine(
-			"internal static Cache Current => return DataAccessState.Current.GetCacheValue( \"{0}\", () => new Cache() );".FormatWith(
+			"internal static Cache Current => DataAccessState.Current.GetCacheValue( \"{0}\", () => new Cache() );".FormatWith(
 				database.SecondaryDatabaseName + table.TableNameToPascal( cn ) + "TableRetrieval" ) );
-		writer.WriteLine(
-			"public readonly Lazy<{0}.DataRetriever> {1}DataRetriever = new( () => __get{1}().GetDataRetriever( __get{1}RowModificationCounts(), __get{1}Rows ), LazyThreadSafetyMode.None );"
-				.FormatWith( tableCacheType, getTableCacheName( false ) ) );
-		if( isRevisionHistoryTable )
+		if( hasModTable ) {
 			writer.WriteLine(
 				"public readonly Lazy<{0}.DataRetriever> {1}DataRetriever = new( () => __get{1}().GetDataRetriever( __get{1}RowModificationCounts(), __get{1}Rows ), LazyThreadSafetyMode.None );"
-					.FormatWith( tableCacheType, getTableCacheName( true ) ) );
+					.FormatWith( getTableCacheType( tableColumns ), getTableCacheName( false ) ) );
+			if( isRevisionHistoryTable )
+				writer.WriteLine(
+					"public readonly Lazy<{0}.DataRetriever> {1}DataRetriever = new( () => __get{1}().GetDataRetriever( __get{1}RowModificationCounts(), __get{1}Rows ), LazyThreadSafetyMode.None );"
+						.FormatWith( getTableCacheType( tableColumns ), getTableCacheName( true ) ) );
+		}
 		writer.WriteLine( "internal readonly TableRetrievalQueryCache<Row> Queries = new TableRetrievalQueryCache<Row>();" );
 		writer.WriteLine(
 			"internal readonly Cache<{0}, Row> RowsByPk = new( false );".FormatWith( RetrievalStatics.GetColumnTupleTypeName( tableColumns.KeyColumns ) ) );
@@ -191,12 +193,15 @@ internal static class TableRetrievalStatics {
 	private static void writeTableCacheMethods(
 		DBConnection cn, TextWriter writer, Database database, string table, TableColumns tableColumns, bool excludePreviousRevisions ) {
 		CodeGenerationStatics.AddGeneratedCodeUseOnlyComment( writer );
-		writer.WriteLine( "private static {0} __get{1}() =>".FormatWith( tableCacheType, getTableCacheName( excludePreviousRevisions ) ) );
+		writer.WriteLine( "private static {0} __get{1}() =>".FormatWith( getTableCacheType( tableColumns ), getTableCacheName( excludePreviousRevisions ) ) );
 		writer.WriteLine(
 			"AppMemoryCache.GetCacheValue( \"dataAccess-{0}\", () => {1} );".FormatWith(
 				database.SecondaryDatabaseName + table.TableNameToPascal( cn ) + getTableCacheName( excludePreviousRevisions ),
 				"{0}.ExecuteInTransaction( () => new {1}( __get{2}Rows( null ), __get{2}RowModificationCounts(), cacheRecreator => {0}.ExecuteInTransaction( () => cacheRecreator( __get{2}RowModificationCounts(), __get{2}Rows ) ) ) )"
-					.FormatWith( DataAccessStatics.GetConnectionExpression( database ), tableCacheType, getTableCacheName( excludePreviousRevisions ) ) ) );
+					.FormatWith(
+						DataAccessStatics.GetConnectionExpression( database ),
+						getTableCacheType( tableColumns ),
+						getTableCacheName( excludePreviousRevisions ) ) ) );
 
 		CodeGenerationStatics.AddGeneratedCodeUseOnlyComment( writer );
 		writer.WriteLine(
@@ -260,7 +265,8 @@ internal static class TableRetrievalStatics {
 		writer.WriteLine( "}" );
 	}
 
-	private static string tableCacheType => "RowModificationCountTableCache<BasicRow, int>";
+	private static string getTableCacheType( TableColumns tableColumns ) =>
+		"RowModificationCountTableCache<BasicRow, {0}>".FormatWith( RetrievalStatics.GetColumnTupleTypeName( tableColumns.KeyColumns ) );
 
 	private static void writeGetAllRowsMethod(
 		TextWriter writer, Database database, bool isSmallTable, bool hasModTable, bool isRevisionHistoryTable, bool excludePreviousRevisions ) {
@@ -274,7 +280,7 @@ internal static class TableRetrievalStatics {
 				  : " If you specify a predicate, we recommend storing the results of this call in the Cache object using a key that corresponds to the predicate." ) );
 		var allRowsStatement = "return GetRowsMatchingConditions{0}();".FormatWith( revisionHistorySuffix );
 		writer.WriteLine(
-			"public static IEnumerable<Row> {0} => {{".FormatWith(
+			"public static IEnumerable<Row> {0} {{".FormatWith(
 				isSmallTable
 					? "GetAllRows{0}()".FormatWith( revisionHistorySuffix )
 					: "GetRows{0}( Func<BasicRow, bool> predicate = null )".FormatWith( revisionHistorySuffix ) ) );
