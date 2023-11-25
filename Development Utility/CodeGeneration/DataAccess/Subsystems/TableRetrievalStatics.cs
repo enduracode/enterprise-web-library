@@ -197,7 +197,7 @@ internal static class TableRetrievalStatics {
 		writer.WriteLine(
 			"AppMemoryCache.GetCacheValue( \"dataAccess-{0}\", () => {1} );".FormatWith(
 				database.SecondaryDatabaseName + table.TableNameToPascal( cn ) + getTableCacheName( excludePreviousRevisions ),
-				"{0}.ExecuteInTransaction( () => new {1}( __get{2}Rows( null ), __get{2}RowModificationCounts(), cacheRecreator => {0}.ExecuteInTransaction( () => cacheRecreator( __get{2}RowModificationCounts(), __get{2}Rows ) ) ) )"
+				"new DataAccessState().ExecuteWithThis( () => {0}.ExecuteWithConnectionOpen( () => {0}.ExecuteInTransaction( () => new {1}( __get{2}Rows( null ), __get{2}RowModificationCounts(), cacheRecreator => new DataAccessState().ExecuteWithThis( () => {0}.ExecuteWithConnectionOpen( () => {0}.ExecuteInTransaction( () => cacheRecreator( __get{2}RowModificationCounts(), __get{2}Rows ) ) ) ) ) ) ) )"
 					.FormatWith(
 						DataAccessStatics.GetConnectionExpression( database ),
 						getTableCacheType( tableColumns ),
@@ -246,7 +246,7 @@ internal static class TableRetrievalStatics {
 				StringTools.ConcatenateWithDelimiter( ", ", tableColumns.KeyColumns.Select( i => i.Name ) ),
 				table + DatabaseOps.GetModificationTableSuffix( database ) ) );
 		if( excludePreviousRevisions ) {
-			writer.WriteLine( "command.CommandText += \" \";" );
+			writer.WriteLine( "command.CommandText += \" WHERE \";" );
 			writer.WriteLine(
 				"getLatestRevisionsCondition().AddToCommand( command, {0}.DatabaseInfo, \"latestRevisions\" );".FormatWith(
 					DataAccessStatics.GetConnectionExpression( database ) ) );
