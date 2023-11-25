@@ -309,7 +309,7 @@ internal static class TableRetrievalStatics {
 		DBConnection cn, TextWriter writer, Database database, string table, TableColumns tableColumns, bool isSmallTable, bool hasModTable,
 		bool tableUsesRowVersionedCaching, bool isRevisionHistoryTable, bool excludePreviousRevisions ) {
 		// header
-		var methodName = "GetRows" + ( isSmallTable ? "MatchingConditions" : "" ) +
+		var methodName = "GetRows" + ( isSmallTable || hasModTable ? "MatchingConditions" : "" ) +
 		                 ( isRevisionHistoryTable && !excludePreviousRevisions ? "IncludingPreviousRevisions" : "" );
 		CodeGenerationStatics.AddSummaryDocComment(
 			writer,
@@ -345,7 +345,7 @@ internal static class TableRetrievalStatics {
 		writer.WriteLine(
 			"if( cache." + ( excludePreviousRevisions ? "LatestRevision" : "" ) + "RowsByPk.TryGetValue( pk, out row ) ) return row.ToCollection();" );
 		if( hasModTable ) {
-			writer.WriteLine( "BasicRow basicRow;" );
+			writer.WriteLine( "BasicRow basicRow = null;" );
 			writer.WriteLine(
 				"if( {0}.ExecuteInTransaction( () => cache.{1}DataRetriever.Value.TryGetRowMatchingPk( pk, out basicRow ) ) ) {{".FormatWith(
 					DataAccessStatics.GetConnectionExpression( database ),
@@ -394,7 +394,8 @@ internal static class TableRetrievalStatics {
 		}
 		else {
 			writer.WriteLine(
-				"var rows = GetRows( {0} );".FormatWith(
+				"var rows = Get{0}( {1} );".FormatWith(
+					hasModTable ? "RowsMatchingConditions" : "Rows",
 					pkIsId
 						? "new {0}( id )".FormatWith( DataAccessStatics.GetEqualityConditionClassName( cn, database, table, tableColumns.KeyColumns.Single() ) )
 						: StringTools.ConcatenateWithDelimiter(

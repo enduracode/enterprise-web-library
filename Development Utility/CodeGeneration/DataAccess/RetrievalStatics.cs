@@ -7,18 +7,21 @@ internal static class RetrievalStatics {
 		// BasicRow
 
 		writer.WriteLine(
-			"internal class BasicRow{0} {{".FormatWith( keyColumns is null ? "" : ": TableRetrievalRow<{0}>".FormatWith( GetColumnTupleTypeName( keyColumns ) ) ) );
+			"public class BasicRow{0} {{".FormatWith( keyColumns is null ? "" : ": TableRetrievalRow<{0}>".FormatWith( GetColumnTupleTypeName( keyColumns ) ) ) );
 		foreach( var column in columns.Where( i => !i.IsRowVersion ) )
 			writer.WriteLine( "private readonly " + column.DataTypeName + " " + getMemberVariableName( column ) + ";" );
 
+		CodeGenerationStatics.AddGeneratedCodeUseOnlyComment( writer );
 		writer.WriteLine( "internal BasicRow( DbDataReader reader ) {" );
 		foreach( var column in columns.Where( i => !i.IsRowVersion ) )
 			writer.WriteLine( "{0} = {1};".FormatWith( getMemberVariableName( column ), column.GetDataReaderValueExpression( "reader" ) ) );
 		writer.WriteLine( "}" );
 
-		foreach( var column in columns.Where( i => !i.IsRowVersion ) )
+		foreach( var column in columns.Where( i => !i.IsRowVersion ) ) {
+			writeColumnComment( writer, column );
 			writer.WriteLine(
 				"public {0} {1} => {2};".FormatWith( column.DataTypeName, EwlStatics.GetCSharpIdentifier( column.PascalCasedName ), getMemberVariableName( column ) ) );
+		}
 
 		if( keyColumns is not null )
 			writer.WriteLine(
@@ -86,12 +89,18 @@ internal static class RetrievalStatics {
 		EwlStatics.GetCSharpIdentifier( "__" + column.CamelCasedName );
 
 	private static void writeColumnProperty( TextWriter writer, Column column ) {
+		writeColumnComment( writer, column );
+		writer.WriteLine(
+			"public " + column.DataTypeName + " " + EwlStatics.GetCSharpIdentifier( column.PascalCasedNameExceptForOracle ) + " => __basicRow." +
+			EwlStatics.GetCSharpIdentifier( column.PascalCasedName ) + ";" );
+	}
+
+	private static void writeColumnComment( TextWriter writer, Column column ) {
 		CodeGenerationStatics.AddSummaryDocComment(
 			writer,
-			"This object will " + ( column.AllowsNull && !column.NullValueExpression.Any() ? "sometimes" : "never" ) + " be null." );
-		writer.WriteLine(
-			"public " + column.DataTypeName + " " + EwlStatics.GetCSharpIdentifier( column.PascalCasedNameExceptForOracle ) + " { get { return __basicRow." +
-			EwlStatics.GetCSharpIdentifier( column.PascalCasedName ) + "; } }" );
+			"Gets the value in the {0} column, which will {1} be null.".FormatWith(
+				column.Name,
+				column.AllowsNull && !column.NullValueExpression.Any() ? "sometimes" : "never" ) );
 	}
 
 	public static string GetColumnTupleTypeName( IReadOnlyCollection<Column> columns ) =>

@@ -228,7 +228,7 @@ internal static class StandardModificationStatics {
 
 		if( hasModTable ) {
 			writer.WriteLine(
-				"var modTableInsert = new InlineInsertWithSelect( \"{0}\", new[] {{ {1} }}, {2} );".FormatWith(
+				"var modTableInsert = new InlineInsertWithSelect( \"{0}\", new[] {{ {1} }}, \"{2}\" );".FormatWith(
 					tableName + DatabaseOps.GetModificationTableSuffix( database ),
 					StringTools.ConcatenateWithDelimiter( ", ", keyColumns.Select( i => "\"{0}\"".FormatWith( i.Name ) ) ),
 					tableName ) );
@@ -528,7 +528,7 @@ internal static class StandardModificationStatics {
 
 		if( hasModTable ) {
 			writer.WriteLine(
-				"var modTableInsert = new InlineInsertWithSelect( \"{0}\", new[] {{ {1} }}, {2} );".FormatWith(
+				"var modTableInsert = new InlineInsertWithSelect( \"{0}\", new[] {{ {1} }}, \"{2}\" );".FormatWith(
 					tableName + DatabaseOps.GetModificationTableSuffix( database ),
 					StringTools.ConcatenateWithDelimiter( ", ", keyColumns.Select( i => "\"{0}\"".FormatWith( i.Name ) ) ),
 					tableName ) );
@@ -546,7 +546,7 @@ internal static class StandardModificationStatics {
 					"if( {0} ) {{".FormatWith(
 						StringTools.ConcatenateWithDelimiter( " || ", nonIdentityKeyColumns.Select( i => "{0}.Changed".FormatWith( getColumnFieldName( i ) ) ) ) ) );
 				writer.WriteLine(
-					"var modTableNewKeyInsert = new InlineInsertWithSelect( \"{0}\", new[] {{ {1} }}, {2} );".FormatWith(
+					"var modTableNewKeyInsert = new InlineInsertWithSelect( \"{0}\", new[] {{ {1} }}, \"{2}\" );".FormatWith(
 						tableName + DatabaseOps.GetModificationTableSuffix( database ),
 						StringTools.ConcatenateWithDelimiter( ", ", keyColumns.Select( i => "\"{0}\"".FormatWith( i.Name ) ) ),
 						tableName ) );
