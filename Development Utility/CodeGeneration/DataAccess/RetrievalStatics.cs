@@ -22,11 +22,9 @@ internal static class RetrievalStatics {
 
 		if( keyColumns is not null )
 			writer.WriteLine(
-				"{0} TableRetrievalRow<{0}>.PrimaryKey => {1};".FormatWith(
+				"public {0} PrimaryKey => {1};".FormatWith(
 					GetColumnTupleTypeName( keyColumns ),
-					keyColumns.Count < 2
-						? getMemberVariableName( keyColumns.Single() )
-						: "( {0} )".FormatWith( StringTools.ConcatenateWithDelimiter( ", ", keyColumns.Select( getMemberVariableName ) ) ) ) );
+					GetColumnTupleExpression( keyColumns.Select( getMemberVariableName ).Materialize() ) ) );
 
 		writer.WriteLine( "}" );
 
@@ -103,4 +101,7 @@ internal static class RetrievalStatics {
 				StringTools.ConcatenateWithDelimiter(
 					", ",
 					columns.Select( i => "{0} {1}".FormatWith( i.DataTypeName, EwlStatics.GetCSharpIdentifier( i.CamelCasedName ) ) ) ) );
+
+	public static string GetColumnTupleExpression( IReadOnlyCollection<string> columnExpressions ) =>
+		columnExpressions.Count < 2 ? columnExpressions.Single() : "( {0} )".FormatWith( StringTools.ConcatenateWithDelimiter( ", ", columnExpressions ) );
 }
