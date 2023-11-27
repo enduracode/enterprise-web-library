@@ -1,18 +1,21 @@
 ﻿#nullable disable
+using System.Collections.Immutable;
 using System.Threading;
 using EnterpriseWebLibrary.Collections;
 using EnterpriseWebLibrary.Configuration;
+using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.DataAccess;
 
+[ PublicAPI ]
 public class DataAccessState {
 	private static Func<DataAccessState> mainStateGetter;
-	private static ThreadLocal<Stack<DataAccessState>> mainStateOverrideStack;
+	private static AsyncLocal<ImmutableStack<DataAccessState>> mainStateOverrideStack;
 	private static bool useLongTimeouts;
 
 	internal static void Init( Func<DataAccessState> mainDataAccessStateGetter, bool useLongTimeouts ) {
 		mainStateGetter = mainDataAccessStateGetter;
-		mainStateOverrideStack = new ThreadLocal<Stack<DataAccessState>>( () => new Stack<DataAccessState>() );
+		mainStateOverrideStack = new AsyncLocal<ImmutableStack<DataAccessState>>();
 		DataAccessState.useLongTimeouts = useLongTimeouts;
 	}
 
@@ -21,8 +24,8 @@ public class DataAccessState {
 	/// </summary>
 	public static DataAccessState Current {
 		get {
-			if( mainStateOverrideStack.Value.Any() )
-				return mainStateOverrideStack.Value.Peek();
+			if( mainStateOverrideStack.Value is {} overrideStack && overrideStack.Any() )
+				return overrideStack.Peek();
 			if( mainStateGetter == null )
 				throw new ApplicationException( "No main data-access state getter was specified during application initialization." );
 			var mainDataAccessState = mainStateGetter();
@@ -134,12 +137,12 @@ public class DataAccessState {
 	/// Executes the specified method with this as the current data-access state. Only necessary when using supplemental data-access state objects.
 	/// </summary>
 	public void ExecuteWithThis( Action method ) {
-		mainStateOverrideStack.Value.Push( this );
+		mainStateOverrideStack.Value = mainStateOverrideStack.Value is {} stack ? stack.Push( this ) : ImmutableStack.Create( this );
 		try {
 			method();
 		}
 		finally {
-			mainStateOverrideStack.Value.Pop();
+			mainStateOverrideStack.Value = mainStateOverrideStack.Value.Pop();
 		}
 	}
 
@@ -147,12 +150,12 @@ public class DataAccessState {
 	/// Executes the specified method with this as the current data-access state. Only necessary when using supplemental data-access state objects.
 	/// </summary>
 	public T ExecuteWithThis<T>( Func<T> method ) {
-		mainStateOverrideStack.Value.Push( this );
+		mainStateOverrideStack.Value = mainStateOverrideStack.Value is {} stack ? stack.Push( this ) : ImmutableStack.Create( this );
 		try {
 			return method();
 		}
 		finally {
-			mainStateOverrideStack.Value.Pop();
+			mainStateOverrideStack.Value = mainStateOverrideStack.Value.Pop();
 		}
 	}
 }
