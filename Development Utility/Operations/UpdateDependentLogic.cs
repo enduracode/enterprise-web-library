@@ -440,7 +440,7 @@ internal class UpdateDependentLogic: Operation {
 				writer.WriteLine( "private static void Main() {" );
 				writer.WriteLine( "SystemInitializer? globalInitializer = null;" );
 				writer.WriteLine( "initGlobalInitializer( ref globalInitializer );" );
-				writer.WriteLine( "var dataAccessState = new ThreadLocal<DataAccessState>( () => new DataAccessState() );" );
+				writer.WriteLine( "var dataAccessState = new System.Lazy<DataAccessState>( () => new DataAccessState() );" );
 				writer.WriteLine(
 					"GlobalInitializationOps.InitStatics( globalInitializer!, \"{0}\", false, mainDataAccessStateGetter: () => dataAccessState.Value!, useLongDatabaseTimeouts: true );"
 						.FormatWith( service.Name ) );
@@ -486,7 +486,7 @@ internal class UpdateDependentLogic: Operation {
 				writer.WriteLine( "private static int Main( string[] args ) {" );
 				writer.WriteLine( "SystemInitializer? globalInitializer = null;" );
 				writer.WriteLine( "initGlobalInitializer( ref globalInitializer );" );
-				writer.WriteLine( "var dataAccessState = new ThreadLocal<DataAccessState>( () => new DataAccessState() );" );
+				writer.WriteLine( "var dataAccessState = new System.Lazy<DataAccessState>( () => new DataAccessState() );" );
 				writer.WriteLine(
 					"GlobalInitializationOps.InitStatics( globalInitializer!, \"{0}\", false, mainDataAccessStateGetter: () => dataAccessState.Value! );".FormatWith(
 						project.Name ) );

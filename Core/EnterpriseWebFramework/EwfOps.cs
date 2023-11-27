@@ -78,7 +78,7 @@ public static class EwfOps {
 		if( TimeSpan.FromMilliseconds( GetTickCount64() ) < new TimeSpan( 0, 3, 0 ) )
 			Thread.Sleep( new TimeSpan( 0, 1, 0 ) );
 
-		var initTimeDataAccessState = new ThreadLocal<DataAccessState>( () => new DataAccessState() );
+		var initTimeDataAccessState = new Lazy<DataAccessState>( () => new DataAccessState() );
 		GlobalInitializationOps.InitStatics(
 			globalInitializer,
 			Path.GetFileName( Directory.GetCurrentDirectory() ),
