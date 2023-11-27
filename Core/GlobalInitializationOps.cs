@@ -34,8 +34,7 @@ public static class GlobalInitializationOps {
 	/// caution.</param>
 	/// <param name="telemetryAppErrorContextWriter"></param>
 	/// <param name="mainDataAccessStateGetter">A method that returns the current main data-access state whenever it is requested, including during this
-	/// InitStatics call. Do not allow multiple threads to use the same state at the same time. If you pass null, the data-access subsystem will not be
-	/// available in the application.</param>
+	/// InitStatics call. If you pass null, the data-access subsystem will not be available in the application.</param>
 	/// <param name="useLongDatabaseTimeouts">Pass true if the application is a background process that can tolerate slow database access.</param>
 	/// <param name="currentDatabaseConnectionManagerGetter">A method that returns the current automatic database-connection manager.</param>
 	/// <param name="currentUserGetter">A method that returns the current authenticated user. If you pass null, the authenticated user will not be available in
