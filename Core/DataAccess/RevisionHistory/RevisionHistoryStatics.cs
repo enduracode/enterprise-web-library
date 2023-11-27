@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using JetBrains.Annotations;
 using MoreLinq;
+using StackExchange.Profiling;
 
 namespace EnterpriseWebLibrary.DataAccess.RevisionHistory;
 
@@ -67,87 +68,89 @@ public static class RevisionHistoryStatics {
 			Func<Func<IEnumerable<RevisionId>, IEnumerable<int>>, ConceptualEntityStateType> conceptualEntityStateSelector,
 			Func<Func<IEnumerable<RevisionId>, IEnumerable<RevisionIdDelta<UserType>>>, Func<IEnumerable<EventId>, IEnumerable<int>>, ConceptualEntityActivityType>
 				conceptualEntityActivitySelector, Func<int, UserType> userSelector ) {
-		var revisionsById = RevisionsById;
-		var entityIdsAndRevisionIdListsByLatestRevisionId = entityTypeRevisionIdLists.SelectMany(
-				i => i,
-				( list, revisionId ) => {
-					var revision = revisionsById[ revisionId.Id ];
-					return new { revision.LatestRevisionId, ConceptualEntityId = revisionId.ConceptualEntityId ?? revision.LatestRevisionId, RevisionIdList = list };
-				} )
-			.GroupBy( i => i.LatestRevisionId )
-			.ToImmutableDictionary(
-				i => i.Key,
-				grouping => {
-					var cachedGrouping = grouping.ToImmutableArray();
-					return Tuple.Create(
-						new HashSet<int>( cachedGrouping.Select( i => i.ConceptualEntityId ) ),
-						new HashSet<IEnumerable<RevisionId>>( cachedGrouping.Select( i => i.RevisionIdList ) ) );
-				} );
+		using( MiniProfiler.Current.Step( "{0} Data Access - Build transaction list".FormatWith( EwlStatics.EwlInitialism ) ) ) {
+			var revisionsById = RevisionsById;
+			var entityIdsAndRevisionIdListsByLatestRevisionId = entityTypeRevisionIdLists.SelectMany(
+					i => i,
+					( list, revisionId ) => {
+						var revision = revisionsById[ revisionId.Id ];
+						return new { revision.LatestRevisionId, ConceptualEntityId = revisionId.ConceptualEntityId ?? revision.LatestRevisionId, RevisionIdList = list };
+					} )
+				.GroupBy( i => i.LatestRevisionId )
+				.ToImmutableDictionary(
+					i => i.Key,
+					grouping => {
+						var cachedGrouping = grouping.ToImmutableArray();
+						return Tuple.Create(
+							new HashSet<int>( cachedGrouping.Select( i => i.ConceptualEntityId ) ),
+							new HashSet<IEnumerable<RevisionId>>( cachedGrouping.Select( i => i.RevisionIdList ) ) );
+					} );
 
-		var eventIdAndListPairsByUserTransactionId = entityTypeEventIdLists.SelectMany( i => i, ( list, eventId ) => new { eventId, list } )
-			.ToLookup( i => i.eventId.UserTransactionId );
+			var eventIdAndListPairsByUserTransactionId = entityTypeEventIdLists.SelectMany( i => i, ( list, eventId ) => new { eventId, list } )
+				.ToLookup( i => i.eventId.UserTransactionId );
 
-		// Pre-filter user transactions to avoid having to sort the full list below.
-		var revisionsByLatestRevisionId = RevisionsByLatestRevisionId;
-		var userTransactionsById = UserTransactionsById;
-		var userTransactions = entityIdsAndRevisionIdListsByLatestRevisionId.Keys.SelectMany( i => revisionsByLatestRevisionId[ i ] )
-			.Select( i => i.UserTransactionId )
-			.Concat( eventIdAndListPairsByUserTransactionId.Select( i => i.Key ) )
-			.Select( i => userTransactionsById[ i ] )
-			.Distinct();
+			// Pre-filter user transactions to avoid having to sort the full list below.
+			var revisionsByLatestRevisionId = RevisionsByLatestRevisionId;
+			var userTransactionsById = UserTransactionsById;
+			var userTransactions = entityIdsAndRevisionIdListsByLatestRevisionId.Keys.SelectMany( i => revisionsByLatestRevisionId[ i ] )
+				.Select( i => i.UserTransactionId )
+				.Concat( eventIdAndListPairsByUserTransactionId.Select( i => i.Key ) )
+				.Select( i => userTransactionsById[ i ] )
+				.Distinct();
 
-		var revisionsByUserTransactionId = RevisionsByUserTransactionId;
-		var entityTransactions = from transaction in from i in userTransactions orderby i.TransactionDateTime, i.UserTransactionId select i
-		                         let user = transaction.UserId.HasValue ? userSelector( transaction.UserId.Value ) : default( UserType )
-		                         let revisionEntities =
-			                         from revision in revisionsByUserTransactionId[ transaction.UserTransactionId ]
-			                         let entityIdsAndRevisionIdLists = entityIdsAndRevisionIdListsByLatestRevisionId.GetValueOrDefault( revision.LatestRevisionId )
-			                         where entityIdsAndRevisionIdLists != null
-			                         from entityId in entityIdsAndRevisionIdLists.Item1
-			                         from revisionIdList in entityIdsAndRevisionIdLists.Item2
-			                         group ( revisionIdList, revision ) by entityId
-			                         into grouping
-			                         select new TransactionListEntityData( grouping.Key, grouping )
-		                         let eventEntities =
-			                         from eventIdAndList in eventIdAndListPairsByUserTransactionId[ transaction.UserTransactionId ]
-			                         group ( eventIdAndList.list, eventIdAndList.eventId.Id ) by eventIdAndList.eventId.ConceptualEntityId
-			                         into grouping
-			                         select new TransactionListEntityData( grouping.Key, grouping )
-		                         from entityData in revisionEntities.FullJoin(
-				                         eventEntities,
-				                         i => i.EntityId,
-				                         i => i,
-				                         i => i,
-				                         ( r, e ) => new TransactionListEntityData( r, e ) )
-			                         .OrderBy( i => i.EntityId )
-		                         select new
-			                         {
-				                         entityData.EntityId,
-				                         entityData.RevisionIdListAndRevisionSetPairs,
-				                         entityData.EventIdListAndEventIdSetPairs,
-				                         transaction,
-				                         user
-			                         };
+			var revisionsByUserTransactionId = RevisionsByUserTransactionId;
+			var entityTransactions = from transaction in from i in userTransactions orderby i.TransactionDateTime, i.UserTransactionId select i
+			                         let user = transaction.UserId.HasValue ? userSelector( transaction.UserId.Value ) : default( UserType )
+			                         let revisionEntities =
+				                         from revision in revisionsByUserTransactionId[ transaction.UserTransactionId ]
+				                         let entityIdsAndRevisionIdLists = entityIdsAndRevisionIdListsByLatestRevisionId.GetValueOrDefault( revision.LatestRevisionId )
+				                         where entityIdsAndRevisionIdLists != null
+				                         from entityId in entityIdsAndRevisionIdLists.Item1
+				                         from revisionIdList in entityIdsAndRevisionIdLists.Item2
+				                         group ( revisionIdList, revision ) by entityId
+				                         into grouping
+				                         select new TransactionListEntityData( grouping.Key, grouping )
+			                         let eventEntities =
+				                         from eventIdAndList in eventIdAndListPairsByUserTransactionId[ transaction.UserTransactionId ]
+				                         group ( eventIdAndList.list, eventIdAndList.eventId.Id ) by eventIdAndList.eventId.ConceptualEntityId
+				                         into grouping
+				                         select new TransactionListEntityData( grouping.Key, grouping )
+			                         from entityData in revisionEntities.FullJoin(
+					                         eventEntities,
+					                         i => i.EntityId,
+					                         i => i,
+					                         i => i,
+					                         ( r, e ) => new TransactionListEntityData( r, e ) )
+				                         .OrderBy( i => i.EntityId )
+			                         select new
+				                         {
+					                         entityData.EntityId,
+					                         entityData.RevisionIdListAndRevisionSetPairs,
+					                         entityData.EventIdListAndEventIdSetPairs,
+					                         transaction,
+					                         user
+				                         };
 
-		var listItems = new List<TransactionListItem<ConceptualEntityStateType, ConceptualEntityActivityType, UserType>>();
-		var lastListItemsByEntityId = new Dictionary<int, TransactionListItem<ConceptualEntityStateType, ConceptualEntityActivityType, UserType>>();
-		foreach( var entityTransaction in entityTransactions ) {
-			lastListItemsByEntityId.TryGetValue( entityTransaction.EntityId, out var lastListItem );
+			var listItems = new List<TransactionListItem<ConceptualEntityStateType, ConceptualEntityActivityType, UserType>>();
+			var lastListItemsByEntityId = new Dictionary<int, TransactionListItem<ConceptualEntityStateType, ConceptualEntityActivityType, UserType>>();
+			foreach( var entityTransaction in entityTransactions ) {
+				lastListItemsByEntityId.TryGetValue( entityTransaction.EntityId, out var lastListItem );
 
-			var newListItem = new TransactionListItem<ConceptualEntityStateType, ConceptualEntityActivityType, UserType>(
-				entityTransaction.EntityId,
-				entityTransaction.RevisionIdListAndRevisionSetPairs,
-				entityTransaction.EventIdListAndEventIdSetPairs,
-				conceptualEntityStateSelector,
-				conceptualEntityActivitySelector,
-				entityTransaction.transaction,
-				entityTransaction.user,
-				lastListItem );
-			listItems.Add( newListItem );
-			lastListItemsByEntityId[ entityTransaction.EntityId ] = newListItem;
+				var newListItem = new TransactionListItem<ConceptualEntityStateType, ConceptualEntityActivityType, UserType>(
+					entityTransaction.EntityId,
+					entityTransaction.RevisionIdListAndRevisionSetPairs,
+					entityTransaction.EventIdListAndEventIdSetPairs,
+					conceptualEntityStateSelector,
+					conceptualEntityActivitySelector,
+					entityTransaction.transaction,
+					entityTransaction.user,
+					lastListItem );
+				listItems.Add( newListItem );
+				lastListItemsByEntityId[ entityTransaction.EntityId ] = newListItem;
+			}
+
+			return listItems.AsEnumerable().Reverse();
 		}
-
-		return listItems.AsEnumerable().Reverse();
 	}
 
 	/// <summary>
