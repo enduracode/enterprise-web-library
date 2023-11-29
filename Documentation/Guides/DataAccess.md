@@ -1,4 +1,12 @@
-# Data access
+﻿# Data access
+
+
+## Application-level table caching
+
+You can enable caching for a table called YourData by creating a YourDataTableEwlModifications table containing only column(s) for the main table’s primary key. The caching will turn potentially large queries for the table’s data into tiny queries to the …TableEwlModifications table while never returning stale data, provided that the following assumptions are true:
+
+*	All modifications to the table happen through EWL generated Modification classes (i.e. no external systems, no hand editing of data, and no triggers that modify data in the table)
+*	Database transactions use snapshot isolation, which is also an assumption for using the ubiquitous intra-transaction cache
 
 
 ## Revision history (section needs work)
