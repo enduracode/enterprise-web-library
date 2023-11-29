@@ -16,9 +16,9 @@ public class RowModificationCountTableCache<RowType, RowPkType>: PeriodicEvictio
 	private class Cache {
 		public readonly IReadOnlyCollection<RowType> Rows;
 		public readonly IReadOnlyDictionary<RowPkType, RowType> RowsByPk;
-		public readonly IReadOnlyDictionary<RowPkType, int> RowModificationCountsByPk;
+		public readonly IReadOnlyDictionary<RowPkType, long> RowModificationCountsByPk;
 
-		public Cache( IEnumerable<RowType> rows, IEnumerable<( RowPkType pk, int count )> rowModificationCounts ) {
+		public Cache( IEnumerable<RowType> rows, IEnumerable<( RowPkType pk, long count )> rowModificationCounts ) {
 			Rows = rows.ToArray();
 			RowsByPk = Rows.ToDictionary( i => i.PrimaryKey );
 			RowModificationCountsByPk = rowModificationCounts.ToDictionary( i => i.pk, i => i.count );
@@ -79,8 +79,8 @@ public class RowModificationCountTableCache<RowType, RowPkType>: PeriodicEvictio
 	/// </summary>
 	[ EditorBrowsable( EditorBrowsableState.Never ) ]
 	public RowModificationCountTableCache(
-		IEnumerable<RowType> rows, IEnumerable<( RowPkType, int )> rowModificationCounts,
-		Action<Action<IReadOnlyCollection<( RowPkType, int )>, Func<IEnumerable<RowPkType>, IReadOnlyCollection<RowType>>>> cacheRecreator ) {
+		IEnumerable<RowType> rows, IEnumerable<( RowPkType, long )> rowModificationCounts,
+		Action<Action<IReadOnlyCollection<( RowPkType, long )>, Func<IEnumerable<RowPkType>, IReadOnlyCollection<RowType>>>> cacheRecreator ) {
 		cache = new Cache( rows, rowModificationCounts );
 		this.cacheRecreator = () => {
 			Cache? newCache = null;
@@ -94,7 +94,7 @@ public class RowModificationCountTableCache<RowType, RowPkType>: PeriodicEvictio
 	/// </summary>
 	[ EditorBrowsable( EditorBrowsableState.Never ) ]
 	public DataRetriever GetDataRetriever(
-		IEnumerable<( RowPkType pk, int count )> rowModificationCounts, Func<IEnumerable<RowPkType>, IReadOnlyCollection<RowType>> modifiedRowGetter ) {
+		IEnumerable<( RowPkType pk, long count )> rowModificationCounts, Func<IEnumerable<RowPkType>, IReadOnlyCollection<RowType>> modifiedRowGetter ) {
 		var cacheStable = cache;
 		var modifiedRowPks = rowModificationCounts.Where( i => !cacheStable.RowModificationCountsByPk.TryGetValue( i.pk, out var count ) || count != i.count )
 			.Select( i => i.pk )

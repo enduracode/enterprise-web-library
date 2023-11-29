@@ -237,13 +237,14 @@ internal static class TableRetrievalStatics {
 
 		CodeGenerationStatics.AddGeneratedCodeUseOnlyComment( writer );
 		writer.WriteLine(
-			"private static IReadOnlyCollection<( {0}, int )> __get{1}RowModificationCounts() {{".FormatWith(
+			"private static IReadOnlyCollection<( {0}, long )> __get{1}RowModificationCounts() {{".FormatWith(
 				RetrievalStatics.GetColumnTupleTypeName( tableColumns.KeyColumns ),
 				getTableCacheName( excludePreviousRevisions ) ) );
 		writer.WriteLine( "var command = {0}.DatabaseInfo.CreateCommand();".FormatWith( DataAccessStatics.GetConnectionExpression( database ) ) );
 		writer.WriteLine(
-			"command.CommandText = \"SELECT {0}, COUNT(*) FROM {1}\";".FormatWith(
+			"command.CommandText = \"SELECT {0}, {1} FROM {2}\";".FormatWith(
 				StringTools.ConcatenateWithDelimiter( ", ", tableColumns.KeyColumns.Select( i => i.Name ) ),
+				cn.DatabaseInfo is SqlServerInfo ? "COUNT_BIG(*)" : "COUNT(*)",
 				table + DatabaseOps.GetModificationTableSuffix( database ) ) );
 		if( excludePreviousRevisions ) {
 			writer.WriteLine( "command.CommandText += \" WHERE \";" );
@@ -253,10 +254,9 @@ internal static class TableRetrievalStatics {
 		}
 		writer.WriteLine(
 			"command.CommandText += \" GROUP BY {0}\";".FormatWith( StringTools.ConcatenateWithDelimiter( ", ", tableColumns.KeyColumns.Select( i => i.Name ) ) ) );
-		writer.WriteLine( "var results = new List<( {0}, int )>();".FormatWith( RetrievalStatics.GetColumnTupleTypeName( tableColumns.KeyColumns ) ) );
-		// NOTE: Use debugger to check underlying data type of count. Might be uint or something else.
+		writer.WriteLine( "var results = new List<( {0}, long )>();".FormatWith( RetrievalStatics.GetColumnTupleTypeName( tableColumns.KeyColumns ) ) );
 		writer.WriteLine(
-			"{0}.ExecuteReaderCommand( command, r => {{ while( r.Read() ) results.Add( ( {1}, r.GetInt32( {2} ) ) ); }} );".FormatWith(
+			"{0}.ExecuteReaderCommand( command, r => {{ while( r.Read() ) results.Add( ( {1}, r.GetInt64( {2} ) ) ); }} );".FormatWith(
 				DataAccessStatics.GetConnectionExpression( database ),
 				RetrievalStatics.GetColumnTupleExpression(
 					tableColumns.KeyColumns.Select( ( c, i ) => c.GetDataReaderValueExpression( "r", ordinalOverride: i ) ).Materialize() ),
