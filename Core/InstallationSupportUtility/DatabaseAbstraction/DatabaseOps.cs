@@ -138,4 +138,14 @@ public static class DatabaseOps {
 		database is MySql or Oracle
 			? "_table_{0}_modifications".FormatWith( EwlStatics.EwlInitialism.ToLowerInvariant() )
 			: "Table{0}Modifications".FormatWith( EwlStatics.EwlInitialism.EnglishToPascal() );
+
+	public static void ClearModificationTables( Database database ) {
+		foreach( var table in GetDatabaseTables( database ).Where( i => i.hasModTable ).Select( i => i.name ) )
+			database.ExecuteDbMethod(
+				connection => {
+					var command = connection.DatabaseInfo.CreateCommand();
+					command.CommandText = "DELETE FROM {0}".FormatWith( table + GetModificationTableSuffix( database ) );
+					connection.ExecuteNonQueryCommand( command );
+				} );
+	}
 }

@@ -1,4 +1,5 @@
 ﻿using EnterpriseWebLibrary.InstallationSupportUtility;
+using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
 using EnterpriseWebLibrary.InstallationSupportUtility.SystemManagerInterface.Messages.SystemListMessage;
 
@@ -20,7 +21,8 @@ internal class UpdateData: Operation {
 		var forceNewPackageDownload = bool.Parse( arguments[ 1 ] );
 
 		RsisInstallation? sourceInstallation;
-		if( installation is RecognizedDevelopmentInstallation recognizedInstallation ) {
+		var recognizedInstallation = installation as RecognizedDevelopmentInstallation;
+		if( recognizedInstallation is not null ) {
 			var sources = SystemManagerConnectionStatics.SystemList.GetDataUpdateSources( recognizedInstallation );
 			if( source.Any() ) {
 				sourceInstallation = sources.SingleOrDefault( i => i.ShortName == source );
@@ -39,6 +41,15 @@ internal class UpdateData: Operation {
 			sourceInstallation = null;
 		}
 
+		var databases = installation.ExistingInstallationLogic.Database.ToCollection()
+			.Concat( recognizedInstallation?.RecognizedInstallationLogic.SecondaryDatabasesIncludedInDataPackages ?? Enumerable.Empty<Database>() )
+			.Materialize();
+		if( databases.SelectMany( DatabaseOps.GetDatabaseTables ).Any( i => i.hasModTable ) )
+			StatusStatics.SetStatus( "Cached tables exist. Please restart any running applications to prevent them from using stale data." );
+
 		DataUpdateStatics.DownloadDataPackageAndGetDataUpdateMethod( installation, false, sourceInstallation, forceNewPackageDownload, operationResult )();
+
+		foreach( var database in databases )
+			DatabaseOps.ClearModificationTables( database );
 	}
 }

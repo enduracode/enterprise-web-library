@@ -20,9 +20,7 @@ internal class NoDatabase: Database {
 	void Database.ExportToFile( string filePath ) {}
 	void Database.DeleteAndReCreateFromFile( string filePath ) {}
 
-	IEnumerable<string> Database.GetTables() {
-		throw new NotSupportedException();
-	}
+	IEnumerable<string> Database.GetTables() => Enumerable.Empty<string>();
 
 	IEnumerable<string> Database.GetProcedures() {
 		throw new NotSupportedException();

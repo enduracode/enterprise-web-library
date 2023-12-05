@@ -62,11 +62,11 @@ public class DataUpdateStatics {
 					installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationType == InstallationType.Development );
 			}
 
-			// If we're an intermediate installation and we are getting data from a live installation, sanitize the data and do other conversion commands.
+			// If we’re an intermediate installation and we are getting data from a live installation, sanitize the data and do other conversion commands.
 			if( installation is RecognizedInstalledInstallation
 				   {
 					   KnownInstallationLogic.RsisInstallation.InstallationTypeElements: IntermediateInstallationElements
-				   } && source.InstallationTypeElements is LiveInstallationElements ) {
+				   } && source!.InstallationTypeElements is LiveInstallationElements ) {
 				StatusStatics.SetStatus( "Executing live -> intermediate conversion commands..." );
 				doDatabaseLiveToIntermediateConversionIfCommandsExist(
 					installation.ExistingInstallationLogic.Database,
