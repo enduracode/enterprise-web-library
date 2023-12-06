@@ -83,18 +83,16 @@ public static class GlobalInitializationOps {
 
 			ExternalFunctionalityStatics.Init();
 
-			if( !ConfigurationStatics.IsClientSideApp ) {
-				// data access
-				MySqlInfo.Init( () => ExternalFunctionalityStatics.ExternalMySqlProvider );
-				OracleInfo.Init( () => ExternalFunctionalityStatics.ExternalOracleDatabaseProvider );
-				DataAccessStatics.Init();
-				DataAccessState.Init( mainDataAccessStateGetter, useLongDatabaseTimeouts );
-				AutomaticDatabaseConnectionManager.Init( currentDatabaseConnectionManagerGetter );
-				DataAccessStatics.InitRetrievalCaches();
+			// data access
+			MySqlInfo.Init( () => ExternalFunctionalityStatics.ExternalMySqlProvider );
+			OracleInfo.Init( () => ExternalFunctionalityStatics.ExternalOracleDatabaseProvider );
+			DataAccessStatics.Init();
+			DataAccessState.Init( mainDataAccessStateGetter, useLongDatabaseTimeouts );
+			AutomaticDatabaseConnectionManager.Init( currentDatabaseConnectionManagerGetter );
+			DataAccessStatics.InitRetrievalCaches();
 
-				BlobStorageStatics.Init();
-				HtmlBlockStatics.Init();
-			}
+			BlobStorageStatics.Init();
+			HtmlBlockStatics.Init();
 
 			UserManagementStatics.Init(
 				() => {
