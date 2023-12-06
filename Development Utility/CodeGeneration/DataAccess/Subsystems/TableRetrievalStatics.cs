@@ -210,7 +210,12 @@ internal static class TableRetrievalStatics {
 				RetrievalStatics.GetColumnTupleTypeName( tableColumns.KeyColumns ) ) );
 		writer.WriteLine( "List<BasicRow> results;" );
 		writer.WriteLine( "if( primaryKeys is null ) {" );
-		writer.WriteLine( "results = new List<BasicRow>();" );
+		writer.WriteLine( "var countCommand = {0}.DatabaseInfo.CreateCommand();".FormatWith( DataAccessStatics.GetConnectionExpression( database ) ) );
+		writer.WriteLine(
+			"countCommand.CommandText = \"SELECT {0} FROM {1}\";".FormatWith( cn.DatabaseInfo is SqlServerInfo ? "COUNT_BIG(*)" : "COUNT(*)", table ) );
+		writer.WriteLine(
+			"results = new List<BasicRow>( (int)(long){0}.ExecuteScalarCommand( countCommand ) );".FormatWith(
+				DataAccessStatics.GetConnectionExpression( database ) ) );
 		writer.WriteLine( "var command = {0};".FormatWith( getInlineSelectExpression( table, tableColumns, "\"*\"", "true" ) ) );
 		if( excludePreviousRevisions )
 			writer.WriteLine( "{0}.AddConditions( getLatestRevisionsCondition().ToCollection() );".FormatWith( "command" ) );
