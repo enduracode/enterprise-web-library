@@ -29,6 +29,8 @@ public static class DataAccessStatics {
 	internal static SystemDataAccessProvider SystemProvider => provider.GetProvider()!;
 
 	internal static void InitRetrievalCaches() {
+		if( ConfigurationStatics.IsClientSideApp )
+			return;
 		provider.GetProvider( returnNullIfNotFound: true )?.InitRetrievalCaches();
 	}
 
