@@ -205,11 +205,12 @@ internal static class TableRetrievalStatics {
 
 		CodeGenerationStatics.AddGeneratedCodeUseOnlyComment( writer );
 		writer.WriteLine(
-			"private static IReadOnlyCollection<BasicRow> __get{0}Rows( IEnumerable<{1}>? primaryKeys ) {{".FormatWith(
+			"private static IReadOnlyCollection<BasicRow> __get{0}Rows( IReadOnlyCollection<{1}>? primaryKeys ) {{".FormatWith(
 				getTableCacheName( excludePreviousRevisions ),
 				RetrievalStatics.GetColumnTupleTypeName( tableColumns.KeyColumns ) ) );
-		writer.WriteLine( "var results = new List<BasicRow>();" );
+		writer.WriteLine( "List<BasicRow> results;" );
 		writer.WriteLine( "if( primaryKeys is null ) {" );
+		writer.WriteLine( "results = new List<BasicRow>();" );
 		writer.WriteLine( "var command = {0};".FormatWith( getInlineSelectExpression( table, tableColumns, "\"*\"", "true" ) ) );
 		if( excludePreviousRevisions )
 			writer.WriteLine( "{0}.AddConditions( getLatestRevisionsCondition().ToCollection() );".FormatWith( "command" ) );
@@ -218,6 +219,7 @@ internal static class TableRetrievalStatics {
 				DataAccessStatics.GetConnectionExpression( database ) ) );
 		writer.WriteLine( "}" );
 		writer.WriteLine( "else {" );
+		writer.WriteLine( "results = new List<BasicRow>( primaryKeys.Count );" );
 		writer.WriteLine( "var command = {0}.DatabaseInfo.CreateCommand();".FormatWith( DataAccessStatics.GetConnectionExpression( database ) ) );
 		writer.WriteLine(
 			"command.CommandText = \"SELECT * FROM {0} WHERE \" + StringTools.ConcatenateWithDelimiter( \" OR \", primaryKeys.Select( i => $\"( {1} )\" ) );"

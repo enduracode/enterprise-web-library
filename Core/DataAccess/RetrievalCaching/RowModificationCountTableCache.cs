@@ -39,7 +39,7 @@ public class RowModificationCountTableCache<RowType, RowPkType>: PeriodicEvictio
 
 		internal DataRetriever(
 			IReadOnlyCollection<RowType> rows, IReadOnlyDictionary<RowPkType, RowType> rowsByPk, HashSet<RowPkType> modifiedRowPks,
-			Func<IEnumerable<RowPkType>, IReadOnlyCollection<RowType>> modifiedRowGetter ) {
+			Func<IReadOnlyCollection<RowPkType>, IReadOnlyCollection<RowType>> modifiedRowGetter ) {
 			this.rows = rows;
 			this.rowsByPk = rowsByPk;
 
@@ -80,7 +80,7 @@ public class RowModificationCountTableCache<RowType, RowPkType>: PeriodicEvictio
 	[ EditorBrowsable( EditorBrowsableState.Never ) ]
 	public RowModificationCountTableCache(
 		IReadOnlyCollection<RowType> rows, IReadOnlyCollection<( RowPkType, long )> rowModificationCounts,
-		Action<Action<IReadOnlyCollection<( RowPkType, long )>, Func<IEnumerable<RowPkType>, IReadOnlyCollection<RowType>>>> cacheRecreator ) {
+		Action<Action<IReadOnlyCollection<( RowPkType, long )>, Func<IReadOnlyCollection<RowPkType>, IReadOnlyCollection<RowType>>>> cacheRecreator ) {
 		cache = new Cache( rows, rowModificationCounts );
 		this.cacheRecreator = () => {
 			Cache? newCache = null;
@@ -94,7 +94,8 @@ public class RowModificationCountTableCache<RowType, RowPkType>: PeriodicEvictio
 	/// </summary>
 	[ EditorBrowsable( EditorBrowsableState.Never ) ]
 	public DataRetriever GetDataRetriever(
-		IEnumerable<( RowPkType pk, long count )> rowModificationCounts, Func<IEnumerable<RowPkType>, IReadOnlyCollection<RowType>> modifiedRowGetter ) {
+		IReadOnlyCollection<( RowPkType pk, long count )> rowModificationCounts,
+		Func<IReadOnlyCollection<RowPkType>, IReadOnlyCollection<RowType>> modifiedRowGetter ) {
 		var cacheStable = cache;
 		var modifiedRowPks = rowModificationCounts.Where( i => !cacheStable.RowModificationCountsByPk.TryGetValue( i.pk, out var count ) || count != i.count )
 			.Select( i => i.pk )
