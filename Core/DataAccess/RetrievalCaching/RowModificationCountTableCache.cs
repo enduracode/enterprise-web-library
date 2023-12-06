@@ -18,9 +18,9 @@ public class RowModificationCountTableCache<RowType, RowPkType>: PeriodicEvictio
 		public readonly IReadOnlyDictionary<RowPkType, RowType> RowsByPk;
 		public readonly IReadOnlyDictionary<RowPkType, long> RowModificationCountsByPk;
 
-		public Cache( IEnumerable<RowType> rows, IEnumerable<( RowPkType pk, long count )> rowModificationCounts ) {
-			Rows = rows.ToArray();
-			RowsByPk = Rows.ToDictionary( i => i.PrimaryKey );
+		public Cache( IReadOnlyCollection<RowType> rows, IReadOnlyCollection<( RowPkType pk, long count )> rowModificationCounts ) {
+			Rows = rows;
+			RowsByPk = rows.ToDictionary( i => i.PrimaryKey );
 			RowModificationCountsByPk = rowModificationCounts.ToDictionary( i => i.pk, i => i.count );
 		}
 	}
@@ -79,12 +79,12 @@ public class RowModificationCountTableCache<RowType, RowPkType>: PeriodicEvictio
 	/// </summary>
 	[ EditorBrowsable( EditorBrowsableState.Never ) ]
 	public RowModificationCountTableCache(
-		IEnumerable<RowType> rows, IEnumerable<( RowPkType, long )> rowModificationCounts,
+		IReadOnlyCollection<RowType> rows, IReadOnlyCollection<( RowPkType, long )> rowModificationCounts,
 		Action<Action<IReadOnlyCollection<( RowPkType, long )>, Func<IEnumerable<RowPkType>, IReadOnlyCollection<RowType>>>> cacheRecreator ) {
 		cache = new Cache( rows, rowModificationCounts );
 		this.cacheRecreator = () => {
 			Cache? newCache = null;
-			cacheRecreator( ( counts, rowGetter ) => newCache = new Cache( GetDataRetriever( counts, rowGetter ).GetRows(), counts ) );
+			cacheRecreator( ( counts, rowGetter ) => newCache = new Cache( GetDataRetriever( counts, rowGetter ).GetRows().Materialize(), counts ) );
 			return newCache!;
 		};
 	}
