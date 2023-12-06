@@ -57,7 +57,7 @@ internal static class TableRetrievalStatics {
 				writer.WriteLine( "internal static void __Init() {" );
 				writer.WriteLine( "__get{0}();".FormatWith( getTableCacheName( false ) ) );
 				if( isRevisionHistoryTable )
-					writer.WriteLine( "__get{0}();".FormatWith( getTableCacheName( false ) ) );
+					writer.WriteLine( "__get{0}();".FormatWith( getTableCacheName( true ) ) );
 				writer.WriteLine( "}" );
 				writer.WriteLine();
 				writeTableCacheMethods( cn, writer, database, table.name, columns, false );
