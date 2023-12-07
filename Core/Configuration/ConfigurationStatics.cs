@@ -16,7 +16,7 @@ public static class ConfigurationStatics {
 	/// <summary>
 	/// Development Utility and private use only.
 	/// </summary>
-	public const string TargetFramework = "net7.0-windows";
+	public const string TargetFramework = "net8.0-windows";
 
 	/// <summary>
 	/// Gets the path of the EWL folder on the machine.
@@ -134,7 +134,7 @@ public static class ConfigurationStatics {
 	/// Generated code use only.
 	/// </summary>
 	public static string ServerSideConsoleAppRelativeFolderPath =>
-		InstallationConfiguration.InstallationType == InstallationType.Development ? GetProjectOutputFolderPath( true, runtimeIdentifier: "win10-x64" ) : "";
+		InstallationConfiguration.InstallationType == InstallationType.Development ? GetProjectOutputFolderPath( true, runtimeIdentifier: "win-x64" ) : "";
 
 
 	// Do not perform schema validation for non-development installations because the schema file won't be available on non-development machines. Do not perform

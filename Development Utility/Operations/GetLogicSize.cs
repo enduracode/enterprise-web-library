@@ -52,7 +52,7 @@ internal class GetLogicSize: Operation {
 					EwlStatics.CombinePaths(
 						installation.GeneralLogic.Path,
 						i.name,
-						ConfigurationStatics.GetProjectOutputFolderPath( debug, runtimeIdentifier: "win10-x64" ),
+						ConfigurationStatics.GetProjectOutputFolderPath( debug, runtimeIdentifier: "win-x64" ),
 						i.NamespaceAndAssemblyName + ".dll" ) )
 			.Concat(
 				from i in installation.ExistingInstallationLogic.RuntimeConfiguration.WindowsServices
@@ -62,14 +62,14 @@ internal class GetLogicSize: Operation {
 				select EwlStatics.CombinePaths(
 					installation.GeneralLogic.Path,
 					i.Name,
-					ConfigurationStatics.GetProjectOutputFolderPath( debug, runtimeIdentifier: "win10-x64" ),
+					ConfigurationStatics.GetProjectOutputFolderPath( debug, runtimeIdentifier: "win-x64" ),
 					i.NamespaceAndAssemblyName + ".exe" ) )
 			.Concat(
 				installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject != null
 					? EwlStatics.CombinePaths(
 							installation.GeneralLogic.Path,
 							installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.Name,
-							ConfigurationStatics.GetProjectOutputFolderPath( debug, runtimeIdentifier: "win10-x64" ),
+							ConfigurationStatics.GetProjectOutputFolderPath( debug, runtimeIdentifier: "win-x64" ),
 							installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.NamespaceAndAssemblyName + ".exe" )
 						.ToCollection()
 					: Enumerable.Empty<string>() );

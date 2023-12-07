@@ -101,7 +101,7 @@ internal class UpdateDependentLogic: Operation {
 				EwlStatics.CombinePaths( installation.GeneralLogic.Path, "Development Utility" ),
 				"EnterpriseWebLibrary.DevelopmentUtility",
 				_ => {},
-				runtimeIdentifier: "win10-x64" );
+				runtimeIdentifier: "win-x64" );
 			generateCodeForProject(
 				installation,
 				"MySQL Provider",
@@ -158,7 +158,7 @@ internal class UpdateDependentLogic: Operation {
 				EwlStatics.CombinePaths( installation.GeneralLogic.Path, installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.Name ),
 				installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.NamespaceAndAssemblyName,
 				_ => {},
-				runtimeIdentifier: "win10-x64",
+				runtimeIdentifier: "win-x64",
 				selfContained: true );
 
 		generateXmlSchemaLogicForInstallationConfigurationFile( installation, "Custom" );
@@ -388,7 +388,7 @@ internal class UpdateDependentLogic: Operation {
 				writer.WriteLine( "}" );
 				writer.WriteLine( "}" );
 			},
-			runtimeIdentifier: "win10-x64",
+			runtimeIdentifier: "win-x64",
 			includeWebFrameworkUsingDirectives: true );
 
 		var configurationFilesFolderPath = EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "Web Project Configuration" );
@@ -465,7 +465,7 @@ internal class UpdateDependentLogic: Operation {
 
 				writer.WriteLine( "}" );
 			},
-			runtimeIdentifier: "win10-x64" );
+			runtimeIdentifier: "win-x64" );
 	}
 
 	private void generateServerSideConsoleProjectCode( DevelopmentInstallation installation, ServerSideConsoleProject project ) {
@@ -511,7 +511,7 @@ internal class UpdateDependentLogic: Operation {
 
 				writer.WriteLine( "}" );
 			},
-			runtimeIdentifier: "win10-x64" );
+			runtimeIdentifier: "win-x64" );
 	}
 
 	private void generateCodeForProject(
@@ -559,9 +559,9 @@ internal class UpdateDependentLogic: Operation {
 
 			// publish-related properties; see https://learn.microsoft.com/en-us/dotnet/core/project-sdk/msbuild-props#publish-related-properties
 			if( runtimeIdentifier.Any() ) {
+				if( selfContained )
+					writeMsBuildProperty( "<PublishSelfContained>true</PublishSelfContained>" );
 				writeMsBuildProperty( "<RuntimeIdentifier>{0}</RuntimeIdentifier>".FormatWith( runtimeIdentifier ) );
-				if( !selfContained )
-					writeMsBuildProperty( "<SelfContained>false</SelfContained>" );
 			}
 
 			// build-related properties; see https://learn.microsoft.com/en-us/dotnet/core/project-sdk/msbuild-props#build-related-properties

@@ -14,7 +14,7 @@ using Tewl.IO;
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations;
 
 internal class ExportLogic: Operation {
-	private const string nuGetTargetFramework = "net7.0-windows7.0";
+	private const string nuGetTargetFramework = "net8.0-windows7.0";
 	private static readonly Operation instance = new ExportLogic();
 
 	internal static PackagingConfiguration GetPackagingConfiguration( DevelopmentInstallation installation ) {
