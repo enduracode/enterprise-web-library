@@ -9,7 +9,7 @@
     <PackageReference Include="Aspose.PDF" Version="23.8.0" />
     <PackageReference Include="Aspose.Words" Version="23.8.0" />
     <PackageReference Include="Destructurama.JsonNet" Version="2.0.1" />
-    <PackageReference Include="Ewl.Tools" Version="1.0.0" />
+    <PackageReference Include="Ewl.Tools" Version="2.0.0" />
     <PackageReference Include="Humanizer.Core" Version="2.14.1" />
     <PackageReference Include="Imageflow.AllPlatforms" Version="0.10.2" />
     <PackageReference Include="JetBrains.Annotations" Version="2023.3.0" />
