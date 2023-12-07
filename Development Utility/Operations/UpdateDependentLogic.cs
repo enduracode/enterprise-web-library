@@ -559,9 +559,9 @@ internal class UpdateDependentLogic: Operation {
 
 			// publish-related properties; see https://learn.microsoft.com/en-us/dotnet/core/project-sdk/msbuild-props#publish-related-properties
 			if( runtimeIdentifier.Any() ) {
-				if( selfContained )
-					writeMsBuildProperty( "<PublishSelfContained>true</PublishSelfContained>" );
 				writeMsBuildProperty( "<RuntimeIdentifier>{0}</RuntimeIdentifier>".FormatWith( runtimeIdentifier ) );
+				if( selfContained )
+					writeMsBuildProperty( "<SelfContained>true</SelfContained>" );
 			}
 
 			// build-related properties; see https://learn.microsoft.com/en-us/dotnet/core/project-sdk/msbuild-props#build-related-properties
