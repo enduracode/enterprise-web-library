@@ -39,9 +39,9 @@ public static class RequestDispatchingStatics {
 			await executeWithBasicExceptionHandling(
 				context,
 				async () => {
-					// This used to be just HttpContext.Current.Request.Url, but that doesn't work with Azure due to the use of load balancing. An Azure load balancer
+					// This used to be just HttpContext.Current.Request.Url, but that doesn’t work with Azure due to the use of load balancing. An Azure load balancer
 					// will bind to the ip/host/port through which all web requests should come in, and then the request is redirected to one of the server instances
-					// running this web application. For example, a user will request mydomain.com. In Azure, there may be two instances running this web site, on
+					// running this web application. For example, a user will request mydomain.com. In Azure, there may be two instances running this website, on
 					// someIp:81 and someIp:82. For some reason, HttpContext.Current.Request.Url ends up using the host and port from one of these addresses instead of
 					// using the host and port from the HTTP Host header, which is what the client is actually "viewing". Basically, HttpContext.Current.Request.Url
 					// returns http://someIp:81?something=1 instead of http://mydomain.com?something=1. See
@@ -56,7 +56,7 @@ public static class RequestDispatchingStatics {
 					appRelativeUrl = UrlHandlingStatics.EncodePathForPredictableNormalization( context.Request.Path.ToUriComponent() ) +
 					                 context.Request.QueryString.ToUriComponent();
 
-					// If the base URL doesn't include a path and the app-relative URL is just a slash, don't include this trailing slash in the URL since it will not be
+					// If the base URL doesn’t include a path and the app-relative URL is just a slash, don’t include this trailing slash in the URL since it will not be
 					// present in the canonical URLs that we construct and therefore it would cause problems with URL normalization.
 					var url = !EwfRequest.AppBaseUrlProvider.GetRequestBasePath( context.Request ).Any() && appRelativeUrl.Length == "/".Length
 						          ? baseUrl
@@ -65,7 +65,8 @@ public static class RequestDispatchingStatics {
 
 					context.Items.Add(
 						RequestStateKey,
-						await RequestContinuationDataStore.GetRequestState( url, baseUrl, context.Request.Method ) ?? new RequestState( context, url, baseUrl ) );
+						await RequestContinuationDataStore.GetRequestState( url, baseUrl, context.Request.Method ) ??
+						new RequestState( context, url, baseUrl, AppProvider.GetSlowRequestThreshold() ) );
 				},
 				false,
 				true );
@@ -368,8 +369,7 @@ public static class RequestDispatchingStatics {
 	}
 
 	/// <summary>
-	/// Gets the request-state object for the current request. Throws an exception if called outside of a request or from a non-web application. Framework use
-	/// only.
+	/// Gets the request-state object for the current request. Throws an exception if called outside a request or from a non-web application. Framework use only.
 	/// </summary>
 	public static RequestState RequestState => (RequestState)currentContextGetter().Items[ RequestStateKey ];
 }

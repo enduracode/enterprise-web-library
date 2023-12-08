@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using EnterpriseWebLibrary.EnterpriseWebFramework.WellKnownUrlHandling;
 using Microsoft.AspNetCore.Builder;
 
@@ -20,9 +19,14 @@ public abstract class AppRequestDispatchingProvider {
 	protected internal virtual void ConfigurePostFrameworkPipeline( WebApplication app ) {}
 
 	/// <summary>
+	/// Returns the current slow-request threshold for the application.
+	/// </summary>
+	protected internal virtual SlowRequestThreshold GetSlowRequestThreshold() => SlowRequestThreshold._1000ms;
+
+	/// <summary>
 	/// Returns the IP addresses that are allowed to access the application, or null when the application is not down for maintenance.
 	/// </summary>
-	protected internal virtual ImmutableHashSet<string> GetWhitelistedIpAddressesForMaintenance() => null;
+	protected internal virtual ImmutableHashSet<string>? GetWhitelistedIpAddressesForMaintenance() => null;
 
 	/// <summary>
 	/// Returns the base URL patterns for the application.
@@ -47,5 +51,5 @@ public abstract class AppRequestDispatchingProvider {
 	/// <summary>
 	/// Gets the page that users will be transferred to when errors occur in the application.
 	/// </summary>
-	protected internal virtual PageBase GetErrorPage() => null;
+	protected internal virtual PageBase? GetErrorPage() => null;
 }

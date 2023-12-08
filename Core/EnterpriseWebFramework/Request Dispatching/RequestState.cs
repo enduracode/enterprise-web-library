@@ -65,13 +65,13 @@ public class RequestState {
 	private readonly List<( string prefix, Exception exception )> errors = new();
 
 	private Duration networkWaitDuration = Duration.Zero;
-	private Duration slowRequestThreshold = Duration.FromMilliseconds( 5000 );
+	private Duration slowRequestThreshold;
 
 	// request continuation
 	internal SemaphoreSlim ContinuationSemaphore { get; } = new( 0, 1 );
 	internal Action<HttpContext> RequestHandler { get; set; }
 
-	internal RequestState( HttpContext context, string url, string baseUrl ) {
+	internal RequestState( HttpContext context, string url, string baseUrl, SlowRequestThreshold slowRequestThreshold ) {
 		BeginInstant = SystemClock.Instance.GetCurrentInstant();
 
 		Profiler = MiniProfiler.StartNew( profilerName: url );
@@ -87,6 +87,8 @@ public class RequestState {
 
 		ClientSideNewUrl = "";
 		StatusMessages = Enumerable.Empty<( StatusMessageType, string )>().Materialize();
+
+		this.slowRequestThreshold = Duration.FromMilliseconds( (long)slowRequestThreshold );
 	}
 
 	internal void PreExecuteCommitTimeValidationMethodsForAllOpenConnections() {
