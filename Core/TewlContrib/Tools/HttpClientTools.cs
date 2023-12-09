@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Polly;
+using StackExchange.Profiling;
 using Tewl.IO;
 
 namespace EnterpriseWebLibrary.TewlContrib;
@@ -79,11 +80,13 @@ public static class HttpClientTools {
 				policyBuilder = policyBuilder.OrInner<HttpRequestException>( e => e.Message.Contains( additionalHandledMessage ) );
 		}
 
-		var result = policyBuilder.WaitAndRetry( 7, attemptNumber => TimeSpan.FromSeconds( Math.Pow( 2, attemptNumber ) ) )
-			.ExecuteAndCapture(
-				() => Policy.HandleInner<HttpRequestException>( e => e.Message.Contains( "503 (Service Unavailable)" ) )
-					.WaitAndRetry( 11, attemptNumber => TimeSpan.FromSeconds( Math.Pow( 2, attemptNumber ) ) )
-					.Execute( () => Task.Run( method ).Wait() ) );
+		var result = MiniProfiler.Current.Inline(
+			() => policyBuilder.WaitAndRetry( 7, attemptNumber => TimeSpan.FromSeconds( Math.Pow( 2, attemptNumber ) ) )
+				.ExecuteAndCapture(
+					() => Policy.HandleInner<HttpRequestException>( e => e.Message.Contains( "503 (Service Unavailable)" ) )
+						.WaitAndRetry( 11, attemptNumber => TimeSpan.FromSeconds( Math.Pow( 2, attemptNumber ) ) )
+						.Execute( () => Task.Run( method ).Wait() ) ),
+			"{0} - Execute HTTP request with retry".FormatWith( EwlStatics.EwlInitialism ) );
 
 		if( result.Outcome == OutcomeType.Successful )
 			return;
