@@ -7,6 +7,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 [ PublicAPI ]
 public class CookieStatics {
+	// Remove after https://github.com/dotnet/aspnetcore/issues/52580 is resolved.
+	internal const string EmptyValue = "EwlEmpty";
+
 	private static Func<IReadOnlyCollection<( string, string, CookieOptions )>> responseCookieGetter;
 	private static Action<string, string, CookieOptions> responseCookieAdder;
 
@@ -21,7 +24,11 @@ public class CookieStatics {
 	/// </summary>
 	public static bool TryGetCookieValueFromRequestOnly( string name, out string value, bool omitNamePrefix = false ) {
 		var defaultAttributes = EwfConfigurationStatics.AppConfiguration.DefaultCookieAttributes;
-		return EwfRequest.Current.AspNetRequest.Cookies.TryGetValue( ( omitNamePrefix ? "" : defaultAttributes.NamePrefix ?? "" ) + name, out value );
+		if( !EwfRequest.Current.AspNetRequest.Cookies.TryGetValue( ( omitNamePrefix ? "" : defaultAttributes.NamePrefix ?? "" ) + name, out value ) )
+			return false;
+		if( string.Equals( value, EmptyValue ) )
+			value = "";
+		return true;
 	}
 
 	/// <summary>

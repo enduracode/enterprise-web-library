@@ -247,7 +247,7 @@ public static class EwfOps {
 								( name, value, options ) => {
 									var cookies = contextAccessor.HttpContext.Response.Cookies;
 									if( value != null )
-										cookies.Append( name, value, options );
+										cookies.Append( name, value.Length == 0 ? CookieStatics.EmptyValue : value, options );
 									else
 										cookies.Delete( name, options );
 
