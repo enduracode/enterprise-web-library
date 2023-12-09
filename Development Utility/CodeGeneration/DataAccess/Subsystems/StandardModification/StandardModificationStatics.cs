@@ -106,7 +106,7 @@ internal static class StandardModificationStatics {
 		writeExecuteInsertOrUpdateMethod( cn, tableName, columns.KeyColumns, columns.IdentityColumn, hasModTable, isRevisionHistoryClass );
 		writeGetColumnModificationValuesMethod( columns.AllNonIdentityColumnsExceptRowVersion );
 		if( isRevisionHistoryClass ) {
-			writeCopyLatestRevisionsMethod( cn, tableName, columns.AllNonIdentityColumnsExceptRowVersion );
+			writeCopyLatestRevisionsMethod( cn, tableName, columns.AllNonIdentityColumnsExceptRowVersion, hasModTable );
 			DataAccessStatics.WriteGetLatestRevisionsConditionMethod( writer, columns.PrimaryKeyAndRevisionIdColumn!.Name );
 		}
 		writeRethrowAsEwfExceptionIfNecessary();
@@ -604,7 +604,7 @@ internal static class StandardModificationStatics {
 		writer.WriteLine( "}" );
 	}
 
-	private static void writeCopyLatestRevisionsMethod( DBConnection cn, string tableName, IEnumerable<Column> nonIdentityColumns ) {
+	private static void writeCopyLatestRevisionsMethod( DBConnection cn, string tableName, IEnumerable<Column> nonIdentityColumns, bool hasModTable ) {
 		writer.WriteLine(
 			"private static void copyLatestRevisions( List<" + DataAccessStatics.GetTableConditionInterfaceName( cn, database, tableName ) +
 			"> conditions, bool isLongRunning ) {" );
@@ -639,27 +639,27 @@ internal static class StandardModificationStatics {
 		writer.WriteLine( "revisionHistorySetup.InsertRevision( copiedRevisionId, latestRevisionId, latestRevision.UserTransactionId );" );
 
 		// Insert a copy of the data row and make it correspond to the copy of the latest revision.
-		writer.WriteLine( "var copyCommand = " + DataAccessStatics.GetConnectionExpression( database ) + ".DatabaseInfo.CreateCommand();" );
-		writer.WriteLine( "copyCommand.CommandText = \"INSERT INTO " + tableName + " SELECT \";" );
-		foreach( var column in nonIdentityColumns )
-			if( column == columns.PrimaryKeyAndRevisionIdColumn ) {
-				writer.WriteLine( "var revisionIdParameter = new DbCommandParameter( \"copiedRevisionId\", new DbParameterValue( copiedRevisionId ) );" );
-				writer.WriteLine(
-					"copyCommand.CommandText += revisionIdParameter.GetNameForCommandText( " + DataAccessStatics.GetConnectionExpression( database ) +
-					".DatabaseInfo ) + \", \";" );
-				writer.WriteLine(
-					"copyCommand.Parameters.Add( revisionIdParameter.GetAdoDotNetParameter( " + DataAccessStatics.GetConnectionExpression( database ) +
-					".DatabaseInfo ) );" );
-			}
-			else
-				writer.WriteLine( "copyCommand.CommandText += \"" + column.Name + ", \";" );
-		writer.WriteLine( "copyCommand.CommandText = copyCommand.CommandText.Remove( copyCommand.CommandText.Length - 2 );" );
-		writer.WriteLine( "copyCommand.CommandText += \" FROM " + tableName + " WHERE \";" );
 		writer.WriteLine(
-			"( new EqualityCondition( new InlineDbCommandColumnValue( \"" + columns.PrimaryKeyAndRevisionIdColumn.Name +
-			"\", new DbParameterValue( latestRevisionId ) ) ) as InlineDbCommandCondition ).AddToCommand( copyCommand, " +
-			DataAccessStatics.GetConnectionExpression( database ) + ".DatabaseInfo, \"latestRevisionId\" );" );
-		writer.WriteLine( DataAccessStatics.GetConnectionExpression( database ) + ".ExecuteNonQueryCommand( copyCommand );" );
+			"var copyCommand = new InlineInsertWithSelect( \"{0}\", new[] {{ {1} }}, \"{0}\" );".FormatWith(
+				tableName,
+				StringTools.ConcatenateWithDelimiter( ", ", nonIdentityColumns.Select( i => "\"{0}\"".FormatWith( i.Name ) ) ) ) );
+		foreach( var column in nonIdentityColumns )
+			writer.WriteLine(
+				column == columns.PrimaryKeyAndRevisionIdColumn
+					? "copyCommand.AddSelectValue( {0} );".FormatWith( column.GetCommandParameterValueExpression( "copiedRevisionId" ) )
+					: "copyCommand.AddSelectExpression( \"{0}\" );".FormatWith( column.Name ) );
+		writer.WriteLine(
+			"copyCommand.AddConditions( new EqualityCondition( new InlineDbCommandColumnValue( \"{0}\", new DbParameterValue( latestRevisionId ) ) ).ToCollection() );"
+				.FormatWith( columns.PrimaryKeyAndRevisionIdColumn.Name ) );
+		writer.WriteLine( "copyCommand.Execute( {0} );".FormatWith( DataAccessStatics.GetConnectionExpression( database ) ) );
+
+		if( hasModTable ) {
+			writer.WriteLine( "var modTableInsert = new InlineInsert( \"{0}\" );".FormatWith( tableName + DatabaseOps.GetModificationTableSuffix( database ) ) );
+			writer.WriteLine(
+				"modTableInsert.AddColumnModifications( {0}.ToCollection() );".FormatWith(
+					columns.PrimaryKeyAndRevisionIdColumn.GetCommandColumnValueExpression( "copiedRevisionId" ) ) );
+			writer.WriteLine( "modTableInsert.Execute( {0} );".FormatWith( DataAccessStatics.GetConnectionExpression( database ) ) );
+		}
 
 		writer.WriteLine( "}" ); // foreach
 		writer.WriteLine( "}" ); // method
