@@ -552,7 +552,7 @@ internal static class StandardModificationStatics {
 						tableName ) );
 				foreach( var column in keyColumns )
 					if( column.IsIdentity )
-						writer.WriteLine( "modTableInsert.AddSelectExpression( \"{0}\" );".FormatWith( column.Name ) );
+						writer.WriteLine( "modTableNewKeyInsert.AddSelectExpression( \"{0}\" );".FormatWith( column.Name ) );
 					else {
 						writer.WriteLine(
 							"if( {0}.Changed ) modTableNewKeyInsert.AddSelectValue( {1} );".FormatWith(
