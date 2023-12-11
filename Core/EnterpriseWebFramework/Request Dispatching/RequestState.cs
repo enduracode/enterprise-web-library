@@ -88,7 +88,10 @@ public class RequestState {
 		ClientSideNewUrl = "";
 		StatusMessages = Enumerable.Empty<( StatusMessageType, string )>().Materialize();
 
-		this.slowRequestThreshold = Duration.FromMilliseconds( (long)slowRequestThreshold );
+		this.slowRequestThreshold = Duration.FromMilliseconds( (long)slowRequestThreshold )
+			.Plus(
+				// Sometimes requests are slow when nightly operations are underway.
+				BeginInstant.InZone( DateTimeZoneProviders.Tzdb.GetSystemDefault() ).TimeOfDay.IsInNight() ? Duration.FromSeconds( 3 ) : Duration.Zero );
 	}
 
 	internal void PreExecuteCommitTimeValidationMethodsForAllOpenConnections() {
