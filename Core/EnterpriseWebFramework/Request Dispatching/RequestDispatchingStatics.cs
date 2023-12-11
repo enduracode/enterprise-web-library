@@ -115,7 +115,7 @@ public static class RequestDispatchingStatics {
 					context,
 					() => {
 						if( RequestState.RequestHandler is not null )
-							RequestState.ContinuationSemaphore.Release();
+							RequestState.ReleaseContinuationSemaphore();
 						else
 							RequestState.CleanUp();
 						return Task.CompletedTask;

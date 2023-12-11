@@ -69,6 +69,7 @@ public class RequestState {
 
 	// request continuation
 	internal SemaphoreSlim ContinuationSemaphore { get; } = new( 0, 1 );
+	private Instant? continuationSemaphoreReleaseTime { get; set; }
 	internal Action<HttpContext> RequestHandler { get; set; }
 
 	internal RequestState( HttpContext context, string url, string baseUrl, SlowRequestThreshold slowRequestThreshold ) {
@@ -216,11 +217,18 @@ public class RequestState {
 		slowRequestThreshold = Duration.Max( allowUnlimitedTime ? Duration.MaxValue : Duration.FromMinutes( 3 ), slowRequestThreshold );
 	}
 
+	internal void ReleaseContinuationSemaphore() {
+		continuationSemaphoreReleaseTime = SystemClock.Instance.GetCurrentInstant();
+		ContinuationSemaphore.Release();
+	}
+
 	internal void ResetForContinuation( string url, string baseUrl ) {
 		Url = url;
 		BaseUrl = baseUrl;
 
 		ResponseCookies.Clear();
+
+		AddNetworkWaitTime( SystemClock.Instance.GetCurrentInstant() - continuationSemaphoreReleaseTime.Value );
 	}
 
 	internal void CleanUp() {
