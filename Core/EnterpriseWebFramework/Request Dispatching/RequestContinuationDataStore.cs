@@ -33,15 +33,16 @@ internal class RequestContinuationDataStore: PeriodicEvictionCompositeCacheEntry
 		if( !getDataStoreFromCache().requestDataById.TryRemove( requestId, out var requestData ) )
 			return null;
 
-		await requestData.RequestState.ContinuationSemaphore.WaitAsync();
-
-		if( !string.Equals( url, requestData.Url, StringComparison.Ordinal ) )
-			return null;
-
-		if( !string.Equals( requestMethod, requestData.RequestMethod, StringComparison.Ordinal ) )
-			return null;
-
 		var requestState = requestData.RequestState;
+		await requestState.ContinuationSemaphore.WaitAsync();
+
+		if( !string.Equals( url, requestData.Url, StringComparison.Ordinal ) ||
+		    !string.Equals( requestMethod, requestData.RequestMethod, StringComparison.Ordinal ) ) {
+			requestState.RollbackDatabaseTransactions();
+			requestState.CleanUp();
+			return null;
+		}
+
 		requestState.ResetForContinuation( url, baseUrl );
 		return requestState;
 	}
@@ -79,8 +80,13 @@ internal class RequestContinuationDataStore: PeriodicEvictionCompositeCacheEntry
 				continue;
 
 			var requestState = requestData.RequestState;
-			requestState.RollbackDatabaseTransactions();
-			requestState.CleanUp();
+			if( !requestState.ContinuationSemaphore.Wait( 0 ) )
+				// The initial request is not finished. Put its data back in the dictionary for cleanup in the next tick.
+				( (IDictionary<string, RequestData>)requestDataById ).Add( requestId, requestData );
+			else {
+				requestState.RollbackDatabaseTransactions();
+				requestState.CleanUp();
+			}
 		}
 	}
 }
