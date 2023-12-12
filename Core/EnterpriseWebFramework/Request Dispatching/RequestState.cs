@@ -229,6 +229,7 @@ public class RequestState {
 		ResponseCookies.Clear();
 
 		AddNetworkWaitTime( SystemClock.Instance.GetCurrentInstant() - continuationSemaphoreReleaseTime.Value );
+		continuationSemaphoreReleaseTime = null;
 	}
 
 	internal void CleanUp() {
@@ -244,11 +245,19 @@ public class RequestState {
 					Profiler?.Stop();
 				}
 				else {
-					var duration = SystemClock.Instance.GetCurrentInstant() - BeginInstant;
+					var currentTime = SystemClock.Instance.GetCurrentInstant();
+
+					var duration = currentTime - BeginInstant;
 					Profiler?.Stop();
 					if( Profiler is not null )
 						duration = Duration.FromMilliseconds( (double)Profiler.DurationMilliseconds );
+
 					duration -= networkWaitDuration;
+					if( continuationSemaphoreReleaseTime.HasValue ) {
+						var releasedDuration = currentTime - continuationSemaphoreReleaseTime.Value;
+						duration -= releasedDuration;
+					}
+
 					if( duration > slowRequestThreshold && !ConfigurationStatics.IsDevelopmentInstallation )
 						TelemetryStatics.ReportError(
 							"Request took {0} to process. The threshold is {1}. If the performance problem is too difficult to fix, you can suppress this error by {2} or by {3}."
