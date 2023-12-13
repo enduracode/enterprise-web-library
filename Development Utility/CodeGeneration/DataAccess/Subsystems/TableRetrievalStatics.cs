@@ -290,7 +290,7 @@ internal static class TableRetrievalStatics {
 			"public static IEnumerable<Row> {0} {{".FormatWith(
 				isSmallTable
 					? "GetAllRows{0}()".FormatWith( revisionHistorySuffix )
-					: "GetRows{0}( Func<BasicRow, bool> predicate = null )".FormatWith( revisionHistorySuffix ) ) );
+					: "GetRows{0}( Func<BasicRow, bool>? predicate = null )".FormatWith( revisionHistorySuffix ) ) );
 
 		if( isSmallTable )
 			writer.WriteLine( allRowsStatement );
@@ -343,24 +343,23 @@ internal static class TableRetrievalStatics {
 		writer.WriteLine( "var cache = Cache.Current;" );
 		var pkConditionVariableNames = tableColumns.KeyColumns.Select( i => i.CamelCasedName + "Condition" );
 		writer.WriteLine(
-			"var isPkQuery = " + StringTools.ConcatenateWithDelimiter( " && ", pkConditionVariableNames.Select( i => i + " != null" ).ToArray() ) +
+			"var isPkQuery = " + StringTools.ConcatenateWithDelimiter( " && ", pkConditionVariableNames.Select( i => i + " is not null" ).ToArray() ) +
 			" && conditions.Count() == " + tableColumns.KeyColumns.Count + ";" );
 		writer.WriteLine( "if( isPkQuery ) {" );
-		writer.WriteLine( "Row row;" );
 		writer.WriteLine(
-			"var pk = {0};".FormatWith( RetrievalStatics.GetColumnTupleExpression( pkConditionVariableNames.Select( i => i + ".Value" ).Materialize() ) ) );
+			"var pk = {0};".FormatWith( RetrievalStatics.GetColumnTupleExpression( pkConditionVariableNames.Select( i => i + "!.Value" ).Materialize() ) ) );
 		writer.WriteLine(
-			"if( cache." + ( excludePreviousRevisions ? "LatestRevision" : "" ) + "RowsByPk.TryGetValue( pk, out row ) ) return row.ToCollection();" );
+			"if( cache." + ( excludePreviousRevisions ? "LatestRevision" : "" ) + "RowsByPk.TryGetValue( pk, out var row ) ) return row.ToCollection();" );
 		if( hasModTable ) {
-			writer.WriteLine( "BasicRow basicRow = null;" );
+			writer.WriteLine( "BasicRow? basicRow = null;" );
 			writer.WriteLine(
 				"if( {0}.ExecuteInTransaction( () => cache.{1}DataRetriever.Value.TryGetRowMatchingPk( pk, out basicRow ) ) ) {{".FormatWith(
 					DataAccessStatics.GetConnectionExpression( database ),
 					getTableCacheName( excludePreviousRevisions ) ) );
-			writer.WriteLine( "row = new Row( basicRow );" );
-			writer.WriteLine( "cache.RowsByPk.TryAdd( basicRow.PrimaryKey, row );" );
+			writer.WriteLine( "row = new Row( basicRow! );" );
+			writer.WriteLine( "cache.RowsByPk.TryAdd( basicRow!.PrimaryKey, row );" );
 			if( excludePreviousRevisions )
-				writer.WriteLine( "cache.LatestRevisionRowsByPk.TryAdd( basicRow.PrimaryKey, row );" );
+				writer.WriteLine( "cache.LatestRevisionRowsByPk.TryAdd( basicRow!.PrimaryKey, row );" );
 			writer.WriteLine( "return row.ToCollection();" );
 			writer.WriteLine( "}" );
 		}

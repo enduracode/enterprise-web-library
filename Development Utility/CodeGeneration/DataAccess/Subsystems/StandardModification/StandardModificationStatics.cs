@@ -67,7 +67,7 @@ internal static class StandardModificationStatics {
 		writePrivateDeleteRowsMethod( cn, tableName, columns.KeyColumns, hasModTable, isRevisionHistoryClass );
 		writer.WriteLine(
 			"static partial void preDelete( List<" + DataAccessStatics.GetTableConditionInterfaceName( cn, database, tableName ) + "> conditions, ref " +
-			getPostDeleteCallClassName( cn, tableName ) + " postDeleteCall );" );
+			getPostDeleteCallClassName( cn, tableName ) + "? postDeleteCall );" );
 
 		writeCreateForInsertMethod( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass, revisionHistorySuffix );
 		writeCreateForUpdateMethod( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass, revisionHistorySuffix );
@@ -76,7 +76,7 @@ internal static class StandardModificationStatics {
 			writeCreateForSingleRowUpdateMethod( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass, revisionHistorySuffix );
 
 		writer.WriteLine( "private ModificationType modType;" );
-		writer.WriteLine( "private List<" + DataAccessStatics.GetTableConditionInterfaceName( cn, database, tableName ) + "> conditions;" );
+		writer.WriteLine( "private List<" + DataAccessStatics.GetTableConditionInterfaceName( cn, database, tableName ) + ">? conditions;" );
 
 		foreach( var column in columns.AllColumnsExceptRowVersion )
 			writeFieldsAndPropertiesForColumn( column );
@@ -195,14 +195,14 @@ internal static class StandardModificationStatics {
 		writer.WriteLine( "var conditions = getConditionList( requiredCondition, additionalConditions );" );
 
 		if( executeAdditionalLogic ) {
-			writer.WriteLine( getPostDeleteCallClassName( cn, tableName ) + " postDeleteCall = null;" );
+			writer.WriteLine( getPostDeleteCallClassName( cn, tableName ) + "? postDeleteCall = null;" );
 			writer.WriteLine( "preDelete( conditions, ref postDeleteCall );" );
 		}
 
 		writer.WriteLine( "var rowsDeleted = deleteRows( conditions, {0} );".FormatWith( includeIsLongRunningParameter ? "isLongRunning" : "false" ) );
 
 		if( executeAdditionalLogic ) {
-			writer.WriteLine( "if( postDeleteCall != null )" );
+			writer.WriteLine( "if( postDeleteCall is not null )" );
 			writer.WriteLine( "postDeleteCall.Execute();" );
 		}
 
@@ -296,10 +296,12 @@ internal static class StandardModificationStatics {
 		writer.WriteLine( "foreach( var condition in mod.conditions ) {" );
 		var prefix = "if";
 		foreach( var column in columns.AllColumnsExceptRowVersion ) {
-			writer.WriteLine( prefix + "( condition is " + DataAccessStatics.GetEqualityConditionClassName( cn, database, tableName, column ) + " )" );
 			writer.WriteLine(
-				"mod." + getColumnFieldName( column ) + ".Value = ( condition as " +
-				DataAccessStatics.GetEqualityConditionClassName( cn, database, tableName, column ) + " ).Value;" );
+				"{0}( condition is {1} {2} )".FormatWith(
+					prefix,
+					DataAccessStatics.GetEqualityConditionClassName( cn, database, tableName, column ),
+					EwlStatics.GetCSharpIdentifier( column.CamelCasedName ) ) );
+			writer.WriteLine( "mod.{0}.Value = {1}.Value;".FormatWith( getColumnFieldName( column ), EwlStatics.GetCSharpIdentifier( column.CamelCasedName ) ) );
 			prefix = "else if";
 		}
 		writer.WriteLine( "}" );
@@ -524,7 +526,7 @@ internal static class StandardModificationStatics {
 		writer.WriteLine( "if( modificationValues.Any() ) {" );
 
 		if( isRevisionHistoryClass )
-			writer.WriteLine( "copyLatestRevisions( conditions, isLongRunning );" );
+			writer.WriteLine( "copyLatestRevisions( conditions!, isLongRunning );" );
 
 		if( hasModTable ) {
 			writer.WriteLine(
@@ -534,7 +536,7 @@ internal static class StandardModificationStatics {
 					tableName ) );
 			foreach( var i in keyColumns )
 				writer.WriteLine( "modTableInsert.AddSelectExpression( \"{0}\" );".FormatWith( i.Name ) );
-			writer.WriteLine( "modTableInsert.AddConditions( conditions.Select( i => i.CommandCondition ) );" );
+			writer.WriteLine( "modTableInsert.AddConditions( conditions!.Select( i => i.CommandCondition ) );" );
 			if( isRevisionHistoryClass )
 				writer.WriteLine( "modTableInsert.AddConditions( getLatestRevisionsCondition().ToCollection() );" );
 			writer.WriteLine( "modTableInsert.Execute( {0}, isLongRunning: isLongRunning );".FormatWith( DataAccessStatics.GetConnectionExpression( database ) ) );
@@ -560,7 +562,7 @@ internal static class StandardModificationStatics {
 								column.GetCommandParameterValueExpression( EwlStatics.GetCSharpIdentifier( column.PascalCasedNameExceptForOracle ) ) ) );
 						writer.WriteLine( "else modTableNewKeyInsert.AddSelectExpression( \"{0}\" );".FormatWith( column.Name ) );
 					}
-				writer.WriteLine( "modTableNewKeyInsert.AddConditions( conditions.Select( i => i.CommandCondition ) );" );
+				writer.WriteLine( "modTableNewKeyInsert.AddConditions( conditions!.Select( i => i.CommandCondition ) );" );
 				if( isRevisionHistoryClass )
 					writer.WriteLine( "modTableNewKeyInsert.AddConditions( getLatestRevisionsCondition().ToCollection() );" );
 				writer.WriteLine(
@@ -571,7 +573,7 @@ internal static class StandardModificationStatics {
 
 		writer.WriteLine( "var update = new InlineUpdate( \"" + tableName + "\" );" );
 		writer.WriteLine( "update.AddColumnModifications( modificationValues );" );
-		writer.WriteLine( "update.AddConditions( conditions.Select( i => i.CommandCondition ) );" );
+		writer.WriteLine( "update.AddConditions( conditions!.Select( i => i.CommandCondition ) );" );
 		if( isRevisionHistoryClass )
 			writer.WriteLine( "update.AddConditions( getLatestRevisionsCondition().ToCollection() );" );
 		writer.WriteLine( "update.Execute( {0}, isLongRunning: isLongRunning );".FormatWith( DataAccessStatics.GetConnectionExpression( database ) ) );

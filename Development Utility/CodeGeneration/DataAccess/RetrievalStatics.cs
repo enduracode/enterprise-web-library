@@ -61,12 +61,12 @@ internal static class RetrievalStatics {
 				return !Equals( row1, row2 );
 			}" );
 
-		writer.WriteLine( "public override bool Equals( object obj ) {" );
+		writer.WriteLine( "public override bool Equals( object? obj ) {" );
 		writer.WriteLine( "return Equals( obj as Row );" );
 		writer.WriteLine( "}" ); // Object override of Equals
 
-		writer.WriteLine( "public bool Equals( Row other ) {" );
-		writer.WriteLine( "if( other == null ) return false;" );
+		writer.WriteLine( "public bool Equals( Row? other ) {" );
+		writer.WriteLine( "if( other is null ) return false;" );
 
 		var condition = "";
 		foreach( var column in columns.Where( c => c.UseToUniquelyIdentifyRow ) )
