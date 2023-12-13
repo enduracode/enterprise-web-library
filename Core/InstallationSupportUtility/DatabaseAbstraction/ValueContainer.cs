@@ -72,9 +72,9 @@ public class ValueContainer {
 
 	/// <summary>
 	/// Gets the name of the nullable data type for this container, regardless of whether the container allows null. The nullable data type is equivalent to the
-	/// data type if the latter is a reference type or if the null value is represented with an expression other than "null".
+	/// data type if the null value is represented with an expression other than “null”.
 	/// </summary>
-	public string NullableDataTypeName => dataType.IsValueType && !nullValueExpression.Any() ? dataType + "?" : dataType.ToString();
+	public string NullableDataTypeName => nullValueExpression.Length > 0 ? dataType.ToString() : dataType + "?";
 
 	public string NullValueExpression => nullValueExpression;
 

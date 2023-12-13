@@ -84,7 +84,7 @@ internal class Column {
 
 	/// <summary>
 	/// Gets the name of the nullable data type for this column, regardless of whether the column allows null. The nullable data type is equivalent to the data
-	/// type if the latter is a reference type or if the null value is represented with an expression other than "null".
+	/// type if the null value is represented with an expression other than “null”.
 	/// </summary>
 	internal string NullableDataTypeName => valueContainer.NullableDataTypeName;
 
@@ -125,7 +125,7 @@ internal class Column {
 	}
 
 	internal ModificationField GetModificationField( string privateFieldName ) {
-		var type = valueContainer.DataTypeName != valueContainer.DataType.ToString()
+		var type = valueContainer.DataType.IsValueType && valueContainer.NullValueExpression.Length == 0 && valueContainer.AllowsNull
 			           ? typeof( Nullable<> ).MakeGenericType( valueContainer.DataType )
 			           : valueContainer.DataType;
 		return new ModificationField(
