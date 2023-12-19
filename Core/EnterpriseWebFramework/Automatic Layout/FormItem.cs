@@ -5,6 +5,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 /// <summary>
 /// Contains metadata about a control, such as what it is called, ways in which it can be displayed, how it should be validated, etc.
 /// </summary>
+[ PublicAPI ]
 public class FormItem {
 	private static readonly ElementClass itemClass = new( "ewfFi" );
 	private static readonly ElementClass labelClass = new( "ewfFiL" );
@@ -49,7 +50,7 @@ public class FormItem {
 	/// Creates a collection of components representing this form item.
 	/// This can be used to display a form item without a <see cref="FormItemList"/>.
 	/// </summary>
-	public IReadOnlyCollection<FlowComponent> ToComponentCollection( bool omitLabel = false ) =>
+	public IReadOnlyCollection<FlowComponent> ToComponentCollection( bool omitLabel = false, IReadOnlyCollection<EtherealComponent>? etherealContent = null ) =>
 		new FlowIdContainer(
 			new DisplayableElement(
 				context => new DisplayableElementData(
@@ -61,7 +62,8 @@ public class FormItem {
 						            : new GenericPhrasingContainer( label, classes: labelClass ).ToCollection<PhrasingComponent>() )
 					.Append<FlowComponent>( new GenericFlowContainer( content, classes: contentClass ) )
 					.Concat( getErrorContainer() )
-					.Materialize() ) ).ToCollection(),
+					.Materialize(),
+					etherealChildren: etherealContent ) ).ToCollection(),
 			updateRegionSets: Setup.UpdateRegionSets ).ToCollection();
 
 	/// <summary>
@@ -118,6 +120,7 @@ public class FormItem {
 	}
 }
 
+[ PublicAPI ]
 public static class FormItemExtensionCreators {
 	/// <summary>
 	/// Creates a form item with this form control.
@@ -127,7 +130,7 @@ public static class FormItemExtensionCreators {
 	/// <param name="label">The form-item label.</param>
 	public static FormItem ToFormItem(
 		this FormControl<FlowComponent> formControl, FormItemSetup? setup = null, IReadOnlyCollection<PhrasingComponent>? label = null ) {
-		label = label ?? Enumerable.Empty<PhrasingComponent>().Materialize();
+		label ??= Enumerable.Empty<PhrasingComponent>().Materialize();
 		return formControl.PageComponent.ToFormItem(
 			setup: setup,
 			label: label.Any() && formControl.Labeler != null ? formControl.Labeler.CreateLabel( label ) : label,
@@ -144,7 +147,7 @@ public static class FormItemExtensionCreators {
 	public static FormItem ToFormItem(
 		this IReadOnlyCollection<FlowComponent> content, FormItemSetup? setup = null, IReadOnlyCollection<PhrasingComponent>? label = null,
 		EwfValidation? validation = null ) {
-		label = label ?? Enumerable.Empty<PhrasingComponent>().Materialize();
+		label ??= Enumerable.Empty<PhrasingComponent>().Materialize();
 		return new FormItem( setup, label, content, validation != null ? validation.ToCollection() : Enumerable.Empty<EwfValidation>().Materialize() );
 	}
 
