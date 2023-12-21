@@ -81,7 +81,7 @@ internal static class StandardModificationStatics {
 		foreach( var column in columns.AllColumnsExceptRowVersion )
 			writeFieldsAndPropertiesForColumn( column );
 
-		foreach( var column in columns.DataColumns.Where( i => !columns.KeyColumns.Contains( i ) ) )
+		foreach( var column in columns.DataColumns )
 			FormItemStatics.WriteFormItemGetters( writer, column.GetModificationField( getColumnFieldName( column ) ) );
 
 		writer.WriteLine( "private " + GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass ) + "() {}" );
