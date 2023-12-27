@@ -52,7 +52,7 @@ public class InlineUpdate: InlineDbModificationCommand, InlineDbCommandWithCondi
 		var paramNumber = 0;
 		foreach( var columnMod in columnModifications ) {
 			var parameter = columnMod.GetParameter( name: GetParamNameFromNumber( paramNumber++ ) );
-			command.CommandText += columnMod.ColumnName + " = " + parameter.GetNameForCommandText( cn.DatabaseInfo ) + ", ";
+			command.CommandText += columnMod.GetColumnIdentifier( cn.DatabaseInfo ) + " = " + parameter.GetNameForCommandText( cn.DatabaseInfo ) + ", ";
 			command.Parameters.Add( parameter.GetAdoDotNetParameter( cn.DatabaseInfo ) );
 		}
 		command.CommandText = command.CommandText.Remove( command.CommandText.Length - 2 );

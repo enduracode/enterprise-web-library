@@ -1,4 +1,6 @@
-﻿namespace EnterpriseWebLibrary.DataAccess.CommandWriting;
+﻿using EnterpriseWebLibrary.DatabaseSpecification;
+
+namespace EnterpriseWebLibrary.DataAccess.CommandWriting;
 
 /// <summary>
 /// A column name and a value for use by an inline database command.
@@ -15,11 +17,9 @@ public class InlineDbCommandColumnValue: IEquatable<InlineDbCommandColumnValue>,
 		this.value = value;
 	}
 
-	internal string ColumnName => columnName;
+	internal string GetColumnIdentifier( DatabaseInfo databaseInfo ) => databaseInfo.GetDelimitedIdentifier( columnName );
 
-	internal DbCommandParameter GetParameter( string name = "" ) {
-		return new DbCommandParameter( name.Any() ? name : columnName, value );
-	}
+	internal DbCommandParameter GetParameter( string name = "" ) => new( name.Any() ? name : columnName, value );
 
 	public override bool Equals( object? obj ) => Equals( obj as InlineDbCommandColumnValue );
 

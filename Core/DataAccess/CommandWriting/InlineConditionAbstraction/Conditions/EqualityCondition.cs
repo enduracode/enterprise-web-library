@@ -20,9 +20,9 @@ public class EqualityCondition: InlineDbCommandCondition {
 		var parameter = columnValue.GetParameter( name: parameterName );
 
 		if( parameter.ValueIsNull )
-			command.CommandText += columnValue.ColumnName + " IS NULL";
+			command.CommandText += columnValue.GetColumnIdentifier( databaseInfo ) + " IS NULL";
 		else {
-			command.CommandText += columnValue.ColumnName + " = " + parameter.GetNameForCommandText( databaseInfo );
+			command.CommandText += columnValue.GetColumnIdentifier( databaseInfo ) + " = " + parameter.GetNameForCommandText( databaseInfo );
 			command.Parameters.Add( parameter.GetAdoDotNetParameter( databaseInfo ) );
 		}
 	}

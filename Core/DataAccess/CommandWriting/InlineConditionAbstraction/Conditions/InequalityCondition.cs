@@ -73,7 +73,7 @@ public class InequalityCondition: InlineDbCommandCondition {
 				throw new ApplicationException( "unknown operator" );
 		}
 
-		command.CommandText += columnValue.ColumnName + " " + operatorString + " " + parameter.GetNameForCommandText( databaseInfo );
+		command.CommandText += columnValue.GetColumnIdentifier( databaseInfo ) + " " + operatorString + " " + parameter.GetNameForCommandText( databaseInfo );
 		command.Parameters.Add( parameter.GetAdoDotNetParameter( databaseInfo ) );
 	}
 

@@ -35,7 +35,7 @@ public class InlineInsert: InlineDbModificationCommand {
 		else {
 			cmd.CommandText += " ( ";
 			foreach( var columnMod in columnModifications )
-				cmd.CommandText += columnMod.ColumnName + ", ";
+				cmd.CommandText += columnMod.GetColumnIdentifier( cn.DatabaseInfo ) + ", ";
 			cmd.CommandText = cmd.CommandText.Substring( 0, cmd.CommandText.Length - 2 );
 			cmd.CommandText += " ) VALUES( ";
 			foreach( var columnMod in columnModifications ) {
