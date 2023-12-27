@@ -37,6 +37,7 @@ public class OracleInfo: DatabaseInfo {
 
 	string DatabaseInfo.SecondaryDatabaseName => secondaryDatabaseName;
 
+	string DatabaseInfo.GetDelimitedIdentifier( string databaseObject ) => "\"" + databaseObject.ToUpperInvariant() + "\"";
 	string DatabaseInfo.ParameterPrefix => ":";
 
 	// Oracle doesn't have identities.

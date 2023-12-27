@@ -12,6 +12,11 @@ public interface DatabaseInfo {
 	string SecondaryDatabaseName { get; }
 
 	/// <summary>
+	/// Returns a delimited identifier representing the specified database object.
+	/// </summary>
+	string GetDelimitedIdentifier( string databaseObject );
+
+	/// <summary>
 	/// Returns the prefix used for parameters in SQL queries (@, :, etc.).
 	/// </summary>
 	string ParameterPrefix { get; }

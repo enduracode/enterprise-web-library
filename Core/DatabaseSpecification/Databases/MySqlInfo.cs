@@ -30,6 +30,7 @@ public class MySqlInfo: DatabaseInfo {
 
 	string DatabaseInfo.SecondaryDatabaseName => secondaryDatabaseName;
 
+	string DatabaseInfo.GetDelimitedIdentifier( string databaseObject ) => "`" + databaseObject + "`";
 	string DatabaseInfo.ParameterPrefix => "@";
 	string DatabaseInfo.LastAutoIncrementValueExpression => "LAST_INSERT_ID()";
 
