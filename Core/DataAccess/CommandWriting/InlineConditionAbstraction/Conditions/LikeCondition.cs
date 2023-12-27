@@ -58,7 +58,8 @@ public class LikeCondition: InlineDbCommandCondition {
 			newCommandText = StringTools.ConcatenateWithDelimiter(
 				" AND ",
 				newCommandText,
-				( columnName + " LIKE '%' {0} " + parameter.GetNameForCommandText( databaseInfo ) + " {0} '%'" ).FormatWith( concatCharacter ) );
+				( databaseInfo.GetDelimitedIdentifier( columnName ) + " LIKE '%' {0} " + parameter.GetNameForCommandText( databaseInfo ) + " {0} '%'" ).FormatWith(
+					concatCharacter ) );
 			command.Parameters.Add( parameter.GetAdoDotNetParameter( databaseInfo ) );
 		}
 		command.CommandText += newCommandText;

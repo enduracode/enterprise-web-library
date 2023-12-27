@@ -19,7 +19,7 @@ public class InCondition: InlineDbCommandCondition {
 	}
 
 	void InlineDbCommandCondition.AddToCommand( IDbCommand command, DatabaseInfo databaseInfo, string parameterName ) {
-		command.CommandText += columnName + " IN ( " + subQuery + " )";
+		command.CommandText += databaseInfo.GetDelimitedIdentifier( columnName ) + " IN ( " + subQuery + " )";
 	}
 
 	public override bool Equals( object? obj ) => Equals( obj as InlineDbCommandCondition );
