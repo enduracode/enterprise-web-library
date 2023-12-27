@@ -60,7 +60,7 @@ public class InlineInsertWithSelect {
 		var command = cn.DatabaseInfo.CreateCommand();
 		command.CommandText = "INSERT INTO {0} ( {1} ) SELECT {2} FROM {3} WHERE ".FormatWith(
 			insertTable,
-			StringTools.ConcatenateWithDelimiter( ", ", insertColumns ),
+			StringTools.ConcatenateWithDelimiter( ", ", insertColumns.Select( cn.DatabaseInfo.GetDelimitedIdentifier ) ),
 			StringTools.ConcatenateWithDelimiter( ", ", selectExpressions.Select( i => i.expressionGetter( cn.DatabaseInfo ) ) ),
 			selectTable );
 		foreach( var expression in selectExpressions )
