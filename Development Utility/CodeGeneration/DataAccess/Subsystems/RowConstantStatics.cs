@@ -25,7 +25,7 @@ internal static class RowConstantStatics {
 				var nameColumn = columns.AllColumnsExceptRowVersion.Single( column => column.Name.ToLower() == table.nameColumn.ToLower() );
 
 				var cmd = new InlineSelect(
-					new[] { valueColumn.Name, nameColumn.Name },
+					new[] { valueColumn.DelimitedIdentifier, nameColumn.DelimitedIdentifier },
 					"FROM " + table.tableName,
 					false,
 					orderByClause: orderIsSpecified ? "ORDER BY " + table.orderByColumn : "" );

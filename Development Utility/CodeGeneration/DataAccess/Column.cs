@@ -35,6 +35,7 @@ internal class Column {
 
 	private readonly int ordinal;
 	private readonly ValueContainer valueContainer;
+	private readonly string delimitedIdentifier;
 	private readonly bool isIdentity;
 	private readonly bool isRowVersion;
 	private readonly bool? isKey;
@@ -58,6 +59,7 @@ internal class Column {
 			(bool)schemaTableRow[ "AllowDBNull" ],
 			databaseInfo );
 
+		delimitedIdentifier = databaseInfo.GetDelimitedIdentifier( valueContainer.Name );
 		isIdentity = ( databaseInfo is SqlServerInfo && (bool)schemaTableRow[ "IsIdentity" ] ) ||
 		             ( databaseInfo is MySqlInfo && (bool)schemaTableRow[ "IsAutoIncrement" ] );
 		isRowVersion = databaseInfo is SqlServerInfo && (bool)schemaTableRow[ "IsRowVersion" ];
@@ -73,6 +75,7 @@ internal class Column {
 	}
 
 	internal string Name => valueContainer.Name;
+	internal string DelimitedIdentifier => delimitedIdentifier;
 	internal string PascalCasedName => valueContainer.PascalCasedName;
 	internal string PascalCasedNameExceptForOracle => valueContainer.PascalCasedNameExceptForOracle;
 	internal string CamelCasedName => valueContainer.CamelCasedName;
