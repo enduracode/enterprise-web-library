@@ -303,8 +303,6 @@ public static class RequestDispatchingStatics {
 		RequestState.RollbackDatabaseTransactions();
 		DataAccessState.Current.ResetCache();
 
-		PageInfrastructure.RequestStateStatics.ResetPageRequestState();
-
 		if( !context.Response.HasStarted )
 			context.Response.Clear();
 	}

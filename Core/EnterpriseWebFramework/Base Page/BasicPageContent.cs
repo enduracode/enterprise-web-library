@@ -252,13 +252,12 @@ public sealed class BasicPageContent: PageContent {
 												attributes.Add(
 													new ElementAttribute(
 														"action",
-														pageLoadPostBack is null || RequestStateStatics.GetPageRequestState().ModificationErrorsOccurred
+														pageLoadPostBack is null || PageBase.Current.ModificationErrorsOccurred
 															? PageBase.Current.GetUrl()
 															: RequestStateStatics.StoreRequestStateForContinuation(
 																PageBase.Current.GetUrl(),
 																"POST",
-																context => PageBase.Current.ProcessFormSubmissionAndGetResponse( RequestStateStatics.GetPageRequestState() )
-																	.WriteToAspNetResponse( context.Response ) ) ) );
+																context => PageBase.Current.ProcessFormSubmissionAndGetResponse( true ).WriteToAspNetResponse( context.Response ) ) ) );
 												attributes.Add( new ElementAttribute( "method", "post" ) );
 												if( FormUsesMultipartEncoding )
 													attributes.Add( new ElementAttribute( "enctype", "multipart/form-data" ) );
@@ -291,7 +290,7 @@ public sealed class BasicPageContent: PageContent {
 										pageLoadPostBack is null
 											? Enumerable.Empty<FlowComponent>()
 											: new GenericFlowContainer(
-												RequestStateStatics.GetPageRequestState().ModificationErrorsOccurred
+												PageBase.Current.ModificationErrorsOccurred
 													? new FlowErrorContainer(
 														new ErrorSourceSet( includeGeneralErrors: true ),
 														new ListErrorDisplayStyle(),

@@ -86,12 +86,12 @@ public abstract class PageBase: ResourceBase {
 		FormValueStatics.Init(
 			formValue => Current.formValues.Add( formValue ),
 			() => Current.formState.DataModifications,
-			() => RequestStateStatics.GetPageRequestState().PostBackValues );
+			() => Current.requestState.PostBackValues );
 		ComponentStateItem.Init(
 			AssertPageTreeNotBuilt,
 			() => Current.elementOrIdentifiedComponentIdGetter(),
 			id => {
-				var valuesById = RequestStateStatics.GetPageRequestState().ComponentStateValuesById;
+				var valuesById = Current.requestState.ComponentStateValuesById;
 				return valuesById != null && valuesById.TryGetValue( id, out var value ) ? value : null;
 			},
 			() => Current.formState.DataModifications,
@@ -156,6 +156,7 @@ public abstract class PageBase: ResourceBase {
 
 	private PageBase nextPageObject;
 
+	private PageRequestState requestState;
 	private FormState formState;
 	internal PageContent BasicContent;
 	private PageTree pageTree;
@@ -187,15 +188,16 @@ public abstract class PageBase: ResourceBase {
 
 	protected sealed override ExternalRedirect getRedirect() => base.getRedirect();
 
-	protected sealed override EwfSafeRequestHandler getOrHead() => new EwfSafeResponseWriter( processViewAndGetResponse( null ) );
+	protected sealed override EwfSafeRequestHandler getOrHead() => new EwfSafeResponseWriter( processViewAndGetResponse( new PageRequestState(), null ) );
 
-	private EwfResponse processViewAndGetResponse( int? statusCode ) {
-		var requestState = RequestStateStatics.GetPageRequestState() ?? RequestStateStatics.ResetPageRequestState();
+	private EwfResponse processViewAndGetResponse( PageRequestState requestState, int? statusCode ) {
+		this.requestState = requestState;
+
 		var dmIdAndSecondaryOp = requestState.DmIdAndSecondaryOp;
 
 		// Page-view data modifications. All data modifications that happen simply because of a request and require no other action by the user should happen once
 		// per page view, and prior to LoadData so that the modified data can be used in the page if necessary.
-		if( requestState.StaticRegionContents == null || ( !requestState.ModificationErrorsExist && dmIdAndSecondaryOp != null &&
+		if( requestState.StaticRegionContents == null || ( !modificationErrorsExist && dmIdAndSecondaryOp != null &&
 		                                                   new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains(
 			                                                   dmIdAndSecondaryOp.Item2 ) ) ) {
 			var modMethods = new List<Action>();
@@ -245,6 +247,7 @@ public abstract class PageBase: ResourceBase {
 					disabledMode = newPageObject.AlternativeMode as DisabledResourceMode;
 				if( !userAuthorized || disabledMode != null )
 					throw getPossibleDeveloperMistakeException( "The user lost access to the page or the page became disabled after page-view data modifications." );
+				newPageObject.requestState = requestState;
 				return ( nextPageObject = newPageObject ).processSecondaryOperationAndGetResponse( statusCode );
 			}
 		}
@@ -253,7 +256,6 @@ public abstract class PageBase: ResourceBase {
 	}
 
 	private EwfResponse processSecondaryOperationAndGetResponse( int? statusCode ) {
-		var requestState = RequestStateStatics.GetPageRequestState();
 		var dmIdAndSecondaryOp = requestState.DmIdAndSecondaryOp;
 
 		buildPage();
@@ -298,7 +300,7 @@ public abstract class PageBase: ResourceBase {
 						Environment.NewLine + Environment.NewLine ) );
 			if( message.Length > 0 )
 				throw getPossibleDeveloperMistakeException(
-					" " + ( requestState.ModificationErrorsExist
+					" " + ( modificationErrorsExist
 						        ?
 						        "Post-backs, form controls, component-state items, and modification-error-display keys may not change if modification errors exist." +
 						        " (IMPORTANT: This exception may have been thrown because EWL Goal 588 hasn't been completed. See the note in the goal about the EwfPage bug and disregard the rest of this error message.)"
@@ -308,7 +310,7 @@ public abstract class PageBase: ResourceBase {
 					Environment.NewLine + Environment.NewLine + message );
 		}
 
-		if( !requestState.ModificationErrorsExist && dmIdAndSecondaryOp is { Item2: SecondaryPostBackOperation.Validate } ) {
+		if( !modificationErrorsExist && dmIdAndSecondaryOp is { Item2: SecondaryPostBackOperation.Validate } ) {
 			var secondaryDm = dmIdAndSecondaryOp.Item1.Any() ? GetPostBack( dmIdAndSecondaryOp.Item1 ) as DataModification : dataUpdate;
 			if( secondaryDm == null )
 				throw getPossibleDeveloperMistakeException( "A data modification with an ID of \"{0}\" does not exist.".FormatWith( dmIdAndSecondaryOp.Item1 ) );
@@ -399,10 +401,9 @@ public abstract class PageBase: ResourceBase {
 	protected sealed override EwfResponse patch() => base.patch();
 	protected sealed override EwfResponse delete() => base.delete();
 
-	protected sealed override EwfResponse post() => ProcessFormSubmissionAndGetResponse( null );
+	protected sealed override EwfResponse post() => ProcessFormSubmissionAndGetResponse( false );
 
-	internal EwfResponse ProcessFormSubmissionAndGetResponse( PageRequestState continuationRequestState ) {
-		PageRequestState requestState;
+	internal EwfResponse ProcessFormSubmissionAndGetResponse( bool pageBuilt ) {
 		IFormCollection formSubmission;
 		HiddenFieldData hiddenFieldData;
 		try {
@@ -414,26 +415,23 @@ public abstract class PageBase: ResourceBase {
 				formSubmission[ HiddenFieldName ],
 				new JsonSerializerSettings { MissingMemberHandling = MissingMemberHandling.Error } );
 
-			requestState = RequestStateStatics.SetPageRequestState(
-				new PageRequestState(
-					continuationRequestState?.FirstRequestTime ?? hiddenFieldData.FirstRequestTime,
-					hiddenFieldData.ScrollPositionX,
-					hiddenFieldData.ScrollPositionY )
-					{
-						ComponentStateValuesById = continuationRequestState is not null
-							                           ? continuationRequestState.ComponentStateValuesById
-							                           : hiddenFieldData.ComponentStateValuesById
-					} );
+			requestState = new PageRequestState(
+				pageBuilt ? requestState.FirstRequestTime : hiddenFieldData.FirstRequestTime,
+				hiddenFieldData.ScrollPositionX,
+				hiddenFieldData.ScrollPositionY )
+				{
+					ComponentStateValuesById = pageBuilt ? requestState.ComponentStateValuesById : hiddenFieldData.ComponentStateValuesById
+				};
 		}
 		catch {
-			// Set a 400 status code if there are any problems loading hidden field state. We're assuming these problems are never the developers' fault.
-			requestState = RequestStateStatics.GetPageRequestState() ?? RequestStateStatics.ResetPageRequestState();
+			// Set a 400 status code if there are any problems loading hidden field state. We’re assuming these problems are never the developers’ fault.
+			requestState ??= new PageRequestState();
 			requestState.FocusKey = "";
 			requestState.GeneralModificationErrors = Translation.ApplicationHasBeenUpdatedAndWeCouldNotInterpretAction.ToCollection();
-			return processViewAndGetResponse( 400 );
+			return processViewAndGetResponse( requestState, 400 );
 		}
 
-		if( continuationRequestState is null )
+		if( !pageBuilt )
 			buildPage();
 
 		( ResourceInfo destination, Func<ResourceInfo, bool> authorizationCheckDisabledPredicate )? navigationBehavior = null;
@@ -520,13 +518,13 @@ public abstract class PageBase: ResourceBase {
 						updateRegions.Select( i => ( i.key, i.region.ArgumentGetter() ) ).Materialize() );
 				}
 				else
-					requestState = RequestStateStatics.ResetPageRequestState();
+					requestState = new PageRequestState();
 			} );
 
 		return navigate(
 			navigationBehavior?.destination,
 			navigationBehavior?.authorizationCheckDisabledPredicate,
-			requestState.ModificationErrorsExist ? null : fullSecondaryResponse );
+			modificationErrorsExist ? null : fullSecondaryResponse );
 	}
 
 	private void buildPage() {
@@ -554,17 +552,17 @@ public abstract class PageBase: ResourceBase {
 						return getContent() ?? defaultContentGetter();
 				} ),
 			() => {
-				var rs = RequestStateStatics.GetPageRequestState();
 				var failingDmId =
-					rs.ModificationErrorsExist && rs.DmIdAndSecondaryOp != null && rs.DmIdAndSecondaryOp.Item2 != SecondaryPostBackOperation.ValidateChangesOnly
-						? rs.DmIdAndSecondaryOp.Item1
+					modificationErrorsExist && requestState.DmIdAndSecondaryOp != null &&
+					requestState.DmIdAndSecondaryOp.Item2 != SecondaryPostBackOperation.ValidateChangesOnly
+						? requestState.DmIdAndSecondaryOp.Item1
 						: null;
 
 				return JsonConvert.SerializeObject(
 					new HiddenFieldData(
-						rs.FirstRequestTime,
+						requestState.FirstRequestTime,
 						/* Put the values in request state so they’re available if the request is continued for a page-load post-back. */
-						rs.ComponentStateValuesById = componentStateItemsById.ToImmutableDictionary( i => i.Key, i => i.Value.ValueAsJson ),
+						requestState.ComponentStateValuesById = componentStateItemsById.ToImmutableDictionary( i => i.Key, i => i.Value.ValueAsJson ),
 						generateFormValueHash(),
 						failingDmId,
 						"",
@@ -584,6 +582,7 @@ public abstract class PageBase: ResourceBase {
 				content.component,
 				id => elementOrIdentifiedComponentIdGetter = () => id,
 				addModificationErrorDisplaysAndGetErrors,
+				requestState.GeneralModificationErrors,
 				content.etherealContainer,
 				content.jsInitElement,
 				elementJsInitStatements );
@@ -621,9 +620,7 @@ public abstract class PageBase: ResourceBase {
 	protected virtual PageContent getContent() => null;
 
 	private string getJsInitStatements( string elementJsInitStatements, string pageLoadActionStatements ) {
-		var requestState = RequestStateStatics.GetPageRequestState();
-
-		var scroll = scrollPositionForThisResponse == ScrollPosition.LastPositionOrStatusBar && !requestState.ModificationErrorsOccurred;
+		var scroll = scrollPositionForThisResponse == ScrollPosition.LastPositionOrStatusBar && !ModificationErrorsOccurred;
 		var scrollStatement = "";
 		if( scroll && requestState.ScrollPositionX != null && requestState.ScrollPositionY != null )
 			scrollStatement = "window.scroll(" + requestState.ScrollPositionX + "," + requestState.ScrollPositionY + ");";
@@ -655,11 +652,7 @@ public abstract class PageBase: ResourceBase {
 			appProvider.javaScriptDocumentReadyFunctionCallGetter().AppendDelimiter( ";" ),
 			javaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
 			"addSpeculationRules();",
-			StringTools.ConcatenateWithDelimiter(
-					" ",
-					scrollStatement,
-					requestState.ModificationErrorsOccurred ? "" : pageLoadActionStatements,
-					secondaryResponseStatements )
+			StringTools.ConcatenateWithDelimiter( " ", scrollStatement, ModificationErrorsOccurred ? "" : pageLoadActionStatements, secondaryResponseStatements )
 				.PrependDelimiter( "window.onload = function() { " )
 				.AppendDelimiter( " };" ) );
 	}
@@ -678,9 +671,7 @@ public abstract class PageBase: ResourceBase {
 					//
 					// Avoid using exceptions here if possible. This method is sometimes called many times during a request, and we've seen exceptions take as long as
 					// 50 ms each when debugging.
-					var errors = RequestStateStatics.GetPageRequestState().InLineModificationErrorsByDisplay.TryGetValue( displayKey, out var value )
-						             ? value.Materialize()
-						             : new string[ 0 ];
+					var errors = requestState.InLineModificationErrorsByDisplay.TryGetValue( displayKey, out var value ) ? value.Materialize() : new string[ 0 ];
 
 					if( errors.Any() )
 						validationsWithErrors.Add( validation );
@@ -692,7 +683,7 @@ public abstract class PageBase: ResourceBase {
 	/// <summary>
 	/// Gets the time instant at which the page was first requested. This remains constant across intermediate post-backs, but is reset after a full post-back.
 	/// </summary>
-	public Instant FirstRequestTime => RequestStateStatics.GetPageRequestState().FirstRequestTime;
+	public Instant FirstRequestTime => requestState.FirstRequestTime;
 
 	/// <summary>
 	/// Gets the page’s data-update modification, which executes on every full post-back prior to the post-back object. WARNING: Do *not* use this for
@@ -715,9 +706,9 @@ public abstract class PageBase: ResourceBase {
 	}
 
 	/// <summary>
-	/// EWL use only. Gets the status messages.
+	/// Gets the status messages.
 	/// </summary>
-	public IEnumerable<( StatusMessageType, string )> StatusMessages => RequestStateStatics.GetStatusMessages().Concat( statusMessages );
+	internal IEnumerable<( StatusMessageType, string )> StatusMessages => RequestStateStatics.GetStatusMessages().Concat( statusMessages );
 
 	private void executeWithDataModificationExceptionHandling( Action method ) {
 		try {
@@ -728,7 +719,6 @@ public abstract class PageBase: ResourceBase {
 			if( dmException == null )
 				throw;
 
-			var requestState = RequestStateStatics.GetPageRequestState();
 			requestState.FocusKey = "";
 			requestState.GeneralModificationErrors = dmException.HtmlMessages;
 			requestState.SetStaticAndUpdateRegionState( getStaticRegionContents( null ).contents, Enumerable.Empty<( string, string )>().Materialize() );
@@ -736,8 +726,6 @@ public abstract class PageBase: ResourceBase {
 	}
 
 	private void validateFormSubmission( IFormCollection submission, string formValueHash ) {
-		var requestState = RequestStateStatics.GetPageRequestState();
-
 		var extraComponentStateValues = requestState.ComponentStateValuesById.Keys.Where( i => !componentStateItemsById.ContainsKey( i ) ).Materialize();
 		var invalidComponentStateValues = componentStateItemsById
 			.Where( i => !requestState.ComponentStateValuesById.ContainsKey( i.Key ) || i.Value.ValueIsInvalid() )
@@ -818,7 +806,7 @@ public abstract class PageBase: ResourceBase {
 		if( !modErrorDisplaysByValidation.ContainsKey( validation ) )
 			throw new ApplicationException( "An undisplayed validation produced errors." );
 		foreach( var displayKey in modErrorDisplaysByValidation[ validation ] ) {
-			var errorsByDisplay = RequestStateStatics.GetPageRequestState().InLineModificationErrorsByDisplay;
+			var errorsByDisplay = requestState.InLineModificationErrorsByDisplay;
 			errorsByDisplay[ displayKey ] = errorsByDisplay.ContainsKey( displayKey ) ? errorsByDisplay[ displayKey ].Concat( errorMessages ) : errorMessages;
 		}
 	}
@@ -827,9 +815,7 @@ public abstract class PageBase: ResourceBase {
 		IEnumerable<( PageNode node, IEnumerable<PageComponent> components )> updateRegions ) {
 		var contents = new StringBuilder();
 
-		var requestState = RequestStateStatics.GetPageRequestState();
-		if( requestState.ModificationErrorsExist ||
-		    ( requestState.DmIdAndSecondaryOp != null && requestState.DmIdAndSecondaryOp.Item2 == SecondaryPostBackOperation.NoOperation ) ) {
+		if( modificationErrorsExist || requestState.DmIdAndSecondaryOp is { Item2: SecondaryPostBackOperation.NoOperation } ) {
 			// It’s probably bad if a developer puts a post-back object in the page because of a modification error. It will be gone on the post-back and cannot be
 			// processed.
 			contents.AppendLine( "Post-backs:" );
@@ -851,7 +837,7 @@ public abstract class PageBase: ResourceBase {
 		foreach( var formValue in staticFormValues )
 			contents.AppendLine( "\t" + formValue.GetPostBackValueKey() );
 
-		if( requestState.ModificationErrorsExist ) {
+		if( modificationErrorsExist ) {
 			// Include mod error display keys. They shouldn't change across a transfer when there are modification errors because that could prevent some of the
 			// errors from being displayed.
 			contents.AppendLine( "Modification-error-display keys:" );
@@ -863,8 +849,6 @@ public abstract class PageBase: ResourceBase {
 	}
 
 	private EwfResponse navigate( ResourceInfo destination, Func<ResourceInfo, bool> authorizationCheckDisabledPredicate, FullResponse secondaryResponse ) {
-		var requestState = RequestStateStatics.GetPageRequestState();
-
 		bool authorizationCheckDisabled;
 		string destinationUrl;
 		try {
@@ -878,8 +862,7 @@ public abstract class PageBase: ResourceBase {
 			// 2. The page redirects, or transfers, to this destination, leading the user to an error page without developers being notified. This is bad behavior.
 			// It would also be a problem if the destination were the current page object since it could then contain dirty state from this post-back after
 			// navigation.
-			if( requestState.ModificationErrorsExist ||
-			    ( requestState.DmIdAndSecondaryOp != null && requestState.DmIdAndSecondaryOp.Item2 == SecondaryPostBackOperation.NoOperation ) )
+			if( modificationErrorsExist || requestState.DmIdAndSecondaryOp is { Item2: SecondaryPostBackOperation.NoOperation } )
 				destination = ReCreate();
 			else {
 				RequestState.Instance.SetNewUrlParameterValuesEffective( true );
@@ -892,7 +875,7 @@ public abstract class PageBase: ResourceBase {
 			// This GetUrl call is important even for the transfer case below for the same reason that we *actually create* a new page object in every case above.
 			// We want to force developers to get an error email if a page modifies data to make itself unauthorized/disabled without specifying a different page as
 			// the redirect destination. The resulting transfer would lead the user to an error page.
-			authorizationCheckDisabled = !requestState.ModificationErrorsExist && authorizationCheckDisabledPredicate?.Invoke( destination ) == true;
+			authorizationCheckDisabled = !modificationErrorsExist && authorizationCheckDisabledPredicate?.Invoke( destination ) == true;
 			destinationUrl = destination.GetUrl( !authorizationCheckDisabled, !authorizationCheckDisabled );
 		}
 		catch( Exception e ) {
@@ -917,7 +900,7 @@ public abstract class PageBase: ResourceBase {
 				    StringComparison.Ordinal ) == 0 ) {
 				page.replaceUrlHandlers();
 				RequestState.Instance.SetNewUrlParameterValuesEffective( false );
-				return ( nextPageObject = page ).processViewAndGetResponse( null );
+				return ( nextPageObject = page ).processViewAndGetResponse( requestState, null );
 			}
 
 			destinationUrl = RequestStateStatics.StoreRequestStateForContinuation(
@@ -931,7 +914,7 @@ public abstract class PageBase: ResourceBase {
 						page.HandleRequest( context, false );
 					else {
 						RequestState.Instance.SetResource( page );
-						page.processViewAndGetResponse( null ).WriteToAspNetResponse( context.Response );
+						page.processViewAndGetResponse( requestState, null ).WriteToAspNetResponse( context.Response );
 					}
 				} );
 		}
@@ -964,16 +947,14 @@ public abstract class PageBase: ResourceBase {
 	}
 
 	private EwfResponse getResponse( int? statusCode ) {
-		var requestState = RequestStateStatics.GetPageRequestState();
-
 		Func<FocusabilityCondition, bool> isFocusablePredicate;
-		if( requestState.ModificationErrorsOccurred )
+		if( ModificationErrorsOccurred )
 			isFocusablePredicate = condition => condition.ErrorFocusabilitySources.Validations.Any( i => validationsWithErrors.Contains( i ) ) ||
 			                                    ( condition.ErrorFocusabilitySources.IncludeGeneralErrors && requestState.GeneralModificationErrors.Any() );
 		else
 			isFocusablePredicate = condition => condition.IsNormallyFocusable;
 
-		pageTree.PrepareForRendering( requestState.ModificationErrorsOccurred, isFocusablePredicate );
+		pageTree.PrepareForRendering( requestState.FocusKey, ModificationErrorsOccurred, isFocusablePredicate );
 
 		return EwfResponse.Create(
 			ContentTypes.Html,
@@ -997,6 +978,13 @@ public abstract class PageBase: ResourceBase {
 				return headerFields;
 			} );
 	}
+
+	internal bool ModificationErrorsOccurred =>
+		modificationErrorsExist && ( requestState.DmIdAndSecondaryOp == null ||
+		                             !new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains(
+			                             requestState.DmIdAndSecondaryOp.Item2 ) );
+
+	private bool modificationErrorsExist => requestState.InLineModificationErrorsByDisplay.Any() || requestState.GeneralModificationErrors.Any();
 
 	/// <summary>
 	/// The desired scroll position of the browser when this response is received.

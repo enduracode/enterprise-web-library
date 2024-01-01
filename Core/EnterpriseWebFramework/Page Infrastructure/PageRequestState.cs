@@ -17,27 +17,22 @@ internal class PageRequestState {
 	// set during modifications
 	public string FocusKey { get; set; }
 	public Tuple<string, SecondaryPostBackOperation> DmIdAndSecondaryOp { get; set; }
-	public Dictionary<string, IEnumerable<string>> InLineModificationErrorsByDisplay { get; }
-	public IReadOnlyCollection<TrustedHtmlString> GeneralModificationErrors { get; set; }
+	public Dictionary<string, IEnumerable<string>> InLineModificationErrorsByDisplay { get; } = new();
+	public IReadOnlyCollection<TrustedHtmlString> GeneralModificationErrors { get; set; } = Array.Empty<TrustedHtmlString>();
 
 	// set before navigation and used to detect possible developer mistakes
 	public string StaticRegionContents { get; private set; }
 	public IReadOnlyCollection<( string key, string arg )> UpdateRegionKeysAndArguments { get; private set; }
 
+	public PageRequestState() {
+		FirstRequestTime = EwfRequest.Current!.RequestTime;
+	}
+
 	public PageRequestState( Instant firstRequestTime, string scrollPositionX, string scrollPositionY ) {
 		FirstRequestTime = firstRequestTime;
 		ScrollPositionX = scrollPositionX;
 		ScrollPositionY = scrollPositionY;
-		InLineModificationErrorsByDisplay = new Dictionary<string, IEnumerable<string>>();
-		GeneralModificationErrors = ImmutableArray<TrustedHtmlString>.Empty;
 	}
-
-	public bool ModificationErrorsExist => InLineModificationErrorsByDisplay.Any() || GeneralModificationErrors.Any();
-
-	public bool ModificationErrorsOccurred =>
-		ModificationErrorsExist && ( DmIdAndSecondaryOp == null ||
-		                             !new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains(
-			                             DmIdAndSecondaryOp.Item2 ) );
 
 	public void SetStaticAndUpdateRegionState( string staticRegionContents, IReadOnlyCollection<( string, string )> updateRegionKeysAndArguments ) {
 		StaticRegionContents = staticRegionContents;

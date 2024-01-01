@@ -1,7 +1,6 @@
 ﻿#nullable disable
 using System.Collections.Immutable;
 using System.Text;
-using EnterpriseWebLibrary.EnterpriseWebFramework.PageInfrastructure;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
@@ -32,6 +31,7 @@ internal class PageTree {
 
 	private readonly Action<string> idSetter;
 	private readonly Func<string, ErrorSourceSet, ImmutableDictionary<EwfValidation, IReadOnlyCollection<string>>> modificationErrorGetter;
+	private readonly IReadOnlyCollection<TrustedHtmlString> generalModificationErrors;
 	private readonly FlowComponent etherealContainer;
 	private readonly FlowComponent jsInitElement;
 	private readonly StringBuilder elementJsInitStatements;
@@ -41,10 +41,12 @@ internal class PageTree {
 
 	public PageTree(
 		PageComponent rootComponent, Action<string> idSetter,
-		Func<string, ErrorSourceSet, ImmutableDictionary<EwfValidation, IReadOnlyCollection<string>>> modificationErrorGetter, FlowComponent etherealContainer,
-		FlowComponent jsInitElement, StringBuilder elementJsInitStatements ) {
+		Func<string, ErrorSourceSet, ImmutableDictionary<EwfValidation, IReadOnlyCollection<string>>> modificationErrorGetter,
+		IReadOnlyCollection<TrustedHtmlString> generalModificationErrors, FlowComponent etherealContainer, FlowComponent jsInitElement,
+		StringBuilder elementJsInitStatements ) {
 		this.idSetter = idSetter;
 		this.modificationErrorGetter = modificationErrorGetter;
+		this.generalModificationErrors = generalModificationErrors;
 		this.etherealContainer = etherealContainer;
 		this.jsInitElement = jsInitElement;
 		this.elementJsInitStatements = elementJsInitStatements;
@@ -137,9 +139,7 @@ internal class PageTree {
 					childGetter(
 						new ModificationErrorDictionary(
 							modificationErrorGetter( id, data.ErrorSources ),
-							data.ErrorSources.IncludeGeneralErrors
-								? RequestStateStatics.GetPageRequestState().GeneralModificationErrors
-								: ImmutableArray<TrustedHtmlString>.Empty ) ),
+							data.ErrorSources.IncludeGeneralErrors ? generalModificationErrors : Array.Empty<TrustedHtmlString>() ) ),
 					data.Id == null ? idGenerator : new IdGenerator( id ) ) );
 		}
 		if( component is IdentifiedFlowComponent identifiedFlowComponent ) {
@@ -185,7 +185,7 @@ internal class PageTree {
 		return nodes;
 	}
 
-	public void PrepareForRendering( bool modificationErrorsOccurred, Func<FocusabilityCondition, bool> isFocusablePredicate ) {
+	public void PrepareForRendering( string focusKey, bool modificationErrorsOccurred, Func<FocusabilityCondition, bool> isFocusablePredicate ) {
 		var etherealChildren = new List<PageNode>( etherealComponentCount );
 
 		var activeAutofocusRegionsExist = false;
@@ -194,7 +194,7 @@ internal class PageTree {
 		void prepareForRendering( PageNode node, bool inActiveAutofocusRegion, TextWriter jsInitStatementWriter ) {
 			etherealChildren.AddRange( node.EtherealChildren );
 
-			if( !inActiveAutofocusRegion && node.AutofocusCondition?.IsTrue( RequestStateStatics.GetPageRequestState().FocusKey ) == true ) {
+			if( !inActiveAutofocusRegion && node.AutofocusCondition?.IsTrue( focusKey ) == true ) {
 				inActiveAutofocusRegion = true;
 				activeAutofocusRegionsExist = true;
 			}

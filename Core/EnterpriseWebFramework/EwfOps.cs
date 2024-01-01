@@ -289,8 +289,6 @@ public static class EwfOps {
 								},
 								() => RequestDispatchingStatics.RequestState.SecondaryResponseId,
 								id => RequestDispatchingStatics.RequestState.SecondaryResponseId = id,
-								() => RequestDispatchingStatics.RequestState.PageRequestState,
-								state => RequestDispatchingStatics.RequestState.PageRequestState = state,
 								() => RequestDispatchingStatics.RequestState.AllowSlowRequest(),
 								RequestDispatchingStatics.RefreshRequestState,
 								( url, requestMethod, requestHandler ) => RequestContinuationDataStore.AddRequestState(
