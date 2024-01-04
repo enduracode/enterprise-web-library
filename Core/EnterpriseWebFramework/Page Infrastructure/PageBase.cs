@@ -188,71 +188,65 @@ public abstract class PageBase: ResourceBase {
 
 	protected sealed override ExternalRedirect getRedirect() => base.getRedirect();
 
-	protected sealed override EwfSafeRequestHandler getOrHead() => new EwfSafeResponseWriter( processViewAndGetResponse( new PageRequestState(), null ) );
+	protected sealed override EwfSafeRequestHandler getOrHead() {
+		requestState = new PageRequestState();
+		return new EwfSafeResponseWriter( executePageViewDataModifications().processSecondaryOperationAndGetResponse( null ) );
+	}
 
-	private EwfResponse processViewAndGetResponse( PageRequestState requestState, int? statusCode ) {
-		this.requestState = requestState;
+	// Page-view data modifications. All data modifications that happen simply because of a request and require no other action by the user should happen once per
+	// page view, and prior to LoadData so that the modified data can be used in the page if necessary.
+	private PageBase executePageViewDataModifications() {
+		var modMethods = new List<Action>();
+		modMethods.Add( appProvider.pageViewDataModificationMethodGetter() );
+		if( RequestState.Instance.UserAccessible ) {
+			if( AppTools.User != null )
+				modMethods.Add( getLastPageRequestTimeUpdateMethod( AppTools.User ) );
+			if( RequestState.Instance.ImpersonatorExists && RequestState.Instance.ImpersonatorUser != null )
+				modMethods.Add( getLastPageRequestTimeUpdateMethod( RequestState.Instance.ImpersonatorUser ) );
+		}
+		modMethods.Add( getPageViewDataModificationMethod() );
+		modMethods = modMethods.Where( i => i != null ).ToList();
 
-		var dmIdAndSecondaryOp = requestState.DmIdAndSecondaryOp;
+		if( !modMethods.Any() )
+			return this;
 
-		// Page-view data modifications. All data modifications that happen simply because of a request and require no other action by the user should happen once
-		// per page view, and prior to LoadData so that the modified data can be used in the page if necessary.
-		if( requestState.StaticRegionContents == null || ( !modificationErrorsExist && dmIdAndSecondaryOp != null &&
-		                                                   new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains(
-			                                                   dmIdAndSecondaryOp.Item2 ) ) ) {
-			var modMethods = new List<Action>();
-			modMethods.Add( appProvider.pageViewDataModificationMethodGetter() );
-			if( RequestState.Instance.UserAccessible ) {
-				if( AppTools.User != null )
-					modMethods.Add( getLastPageRequestTimeUpdateMethod( AppTools.User ) );
-				if( RequestState.Instance.ImpersonatorExists && RequestState.Instance.ImpersonatorUser != null )
-					modMethods.Add( getLastPageRequestTimeUpdateMethod( RequestState.Instance.ImpersonatorUser ) );
-			}
-			modMethods.Add( getPageViewDataModificationMethod() );
-			modMethods = modMethods.Where( i => i != null ).ToList();
-
-			if( modMethods.Any() ) {
-				DataAccessState.Current.DisableCache();
-				try {
-					foreach( var i in modMethods )
-						i();
-					AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod(
-						() => {
-							RequestStateStatics.AppendStatusMessages( statusMessages );
-							statusMessages.Clear();
-						} );
-					RequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
-				}
-				finally {
-					DataAccessState.Current.ResetCache();
-				}
-
-				RequestStateStatics.RefreshRequestState();
-
-				// Re-create page object. A big reason to do this is that some pages execute database queries or other code during initialization in order to prime
-				// the data-access cache. The code above resets the cache and we want to re-prime it right away.
-				PageBase newPageObject;
-				using( MiniProfiler.Current.Step( "EWF - Re-create page object after page-view data modifications" ) )
-					newPageObject = (PageBase)ReCreate();
-				bool urlChanged;
-				using( MiniProfiler.Current.Step( "EWF - Check URL after page-view data modifications" ) )
-					urlChanged = newPageObject.GetUrl( false, false ) != GetUrl( false, false );
-				if( urlChanged )
-					throw getPossibleDeveloperMistakeException( "The URL of the page changed after page-view data modifications." );
-				bool userAuthorized;
-				using( MiniProfiler.Current.Step( "EWF - Check page authorization after page-view data modifications" ) )
-					userAuthorized = newPageObject.UserCanAccess;
-				DisabledResourceMode disabledMode;
-				using( MiniProfiler.Current.Step( "EWF - Check alternative page mode after page-view data modifications" ) )
-					disabledMode = newPageObject.AlternativeMode as DisabledResourceMode;
-				if( !userAuthorized || disabledMode != null )
-					throw getPossibleDeveloperMistakeException( "The user lost access to the page or the page became disabled after page-view data modifications." );
-				newPageObject.requestState = requestState;
-				return ( nextPageObject = newPageObject ).processSecondaryOperationAndGetResponse( statusCode );
-			}
+		DataAccessState.Current.DisableCache();
+		try {
+			foreach( var i in modMethods )
+				i();
+			AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod(
+				() => {
+					RequestStateStatics.AppendStatusMessages( statusMessages );
+					statusMessages.Clear();
+				} );
+			RequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
+		}
+		finally {
+			DataAccessState.Current.ResetCache();
 		}
 
-		return processSecondaryOperationAndGetResponse( statusCode );
+		RequestStateStatics.RefreshRequestState();
+
+		// Re-create page object. A big reason to do this is that some pages execute database queries or other code during initialization in order to prime
+		// the data-access cache. The code above resets the cache and we want to re-prime it right away.
+		PageBase newPageObject;
+		using( MiniProfiler.Current.Step( "EWF - Re-create page object after page-view data modifications" ) )
+			newPageObject = (PageBase)ReCreate();
+		bool urlChanged;
+		using( MiniProfiler.Current.Step( "EWF - Check URL after page-view data modifications" ) )
+			urlChanged = newPageObject.GetUrl( false, false ) != GetUrl( false, false );
+		if( urlChanged )
+			throw getPossibleDeveloperMistakeException( "The URL of the page changed after page-view data modifications." );
+		bool userAuthorized;
+		using( MiniProfiler.Current.Step( "EWF - Check page authorization after page-view data modifications" ) )
+			userAuthorized = newPageObject.UserCanAccess;
+		DisabledResourceMode disabledMode;
+		using( MiniProfiler.Current.Step( "EWF - Check alternative page mode after page-view data modifications" ) )
+			disabledMode = newPageObject.AlternativeMode as DisabledResourceMode;
+		if( !userAuthorized || disabledMode != null )
+			throw getPossibleDeveloperMistakeException( "The user lost access to the page or the page became disabled after page-view data modifications." );
+		newPageObject.requestState = requestState;
+		return nextPageObject = newPageObject;
 	}
 
 	private EwfResponse processSecondaryOperationAndGetResponse( int? statusCode ) {
@@ -330,7 +324,7 @@ public abstract class PageBase: ResourceBase {
 					}
 				} );
 			if( navigationNeeded )
-				return navigate( null, null, null );
+				return navigate( null, null, page => page.processSecondaryOperationAndGetResponse( null ) );
 		}
 
 		return getResponse( statusCode );
@@ -428,7 +422,7 @@ public abstract class PageBase: ResourceBase {
 			requestState ??= new PageRequestState();
 			requestState.FocusKey = "";
 			requestState.GeneralModificationErrors = Translation.ApplicationHasBeenUpdatedAndWeCouldNotInterpretAction.ToCollection();
-			return processViewAndGetResponse( requestState, 400 );
+			return executePageViewDataModifications().processSecondaryOperationAndGetResponse( 400 );
 		}
 
 		if( !pageBuilt )
@@ -436,6 +430,7 @@ public abstract class PageBase: ResourceBase {
 
 		( ResourceInfo destination, Func<ResourceInfo, bool> authorizationCheckDisabledPredicate )? navigationBehavior = null;
 		FullResponse fullSecondaryResponse = null;
+		Func<PageBase, EwfResponse> actionProcessor = null;
 		executeWithDataModificationExceptionHandling(
 			() => {
 				validateFormSubmission( formSubmission, hiddenFieldData.FormValueHash );
@@ -516,15 +511,28 @@ public abstract class PageBase: ResourceBase {
 					requestState.SetStaticAndUpdateRegionState(
 						staticRegionContents.contents,
 						updateRegions.Select( i => ( i.key, i.region.ArgumentGetter() ) ).Materialize() );
+
+					actionProcessor = page => page.executePageViewDataModifications().processSecondaryOperationAndGetResponse( null );
 				}
-				else
+				else {
 					requestState = new PageRequestState();
+					actionProcessor = page => page.executePageViewDataModifications().processSecondaryOperationAndGetResponse( null );
+				}
 			} );
 
 		return navigate(
 			navigationBehavior?.destination,
 			navigationBehavior?.authorizationCheckDisabledPredicate,
-			modificationErrorsExist ? null : fullSecondaryResponse );
+			page => {
+				if( modificationErrorsExist )
+					return page.processSecondaryOperationAndGetResponse( null );
+
+				// Store the secondary response right before navigation so that it doesn’t get sent if there is an error before this point.
+				if( fullSecondaryResponse is not null )
+					RequestStateStatics.SetSecondaryResponseId( SecondaryResponseDataStore.AddResponse( fullSecondaryResponse ) );
+
+				return actionProcessor( page );
+			} );
 	}
 
 	private void buildPage() {
@@ -848,7 +856,8 @@ public abstract class PageBase: ResourceBase {
 		return ( contents.ToString(), staticStateItems, staticFormValues );
 	}
 
-	private EwfResponse navigate( ResourceInfo destination, Func<ResourceInfo, bool> authorizationCheckDisabledPredicate, FullResponse secondaryResponse ) {
+	private EwfResponse navigate(
+		ResourceInfo destination, Func<ResourceInfo, bool> authorizationCheckDisabledPredicate, Func<PageBase, EwfResponse> actionProcessor ) {
 		bool authorizationCheckDisabled;
 		string destinationUrl;
 		try {
@@ -882,10 +891,6 @@ public abstract class PageBase: ResourceBase {
 			throw getPossibleDeveloperMistakeException( "The post-modification destination page became invalid.", innerException: e );
 		}
 
-		// Store the secondary response right before navigation so that it doesn’t get sent if there is an error before this point.
-		if( secondaryResponse != null )
-			RequestStateStatics.SetSecondaryResponseId( SecondaryResponseDataStore.AddResponse( secondaryResponse ) );
-
 		if( destination is PageBase page ) {
 			RequestStateStatics.SetClientSideNewUrl( destinationUrl );
 
@@ -900,7 +905,10 @@ public abstract class PageBase: ResourceBase {
 				    StringComparison.Ordinal ) == 0 ) {
 				page.replaceUrlHandlers();
 				RequestState.Instance.SetNewUrlParameterValuesEffective( false );
-				return ( nextPageObject = page ).processViewAndGetResponse( requestState, null );
+
+				page.requestState = requestState;
+				nextPageObject = page;
+				return actionProcessor( page );
 			}
 
 			destinationUrl = RequestStateStatics.StoreRequestStateForContinuation(
@@ -914,7 +922,9 @@ public abstract class PageBase: ResourceBase {
 						page.HandleRequest( context, false );
 					else {
 						RequestState.Instance.SetResource( page );
-						page.processViewAndGetResponse( requestState, null ).WriteToAspNetResponse( context.Response );
+
+						page.requestState = requestState;
+						actionProcessor( page ).WriteToAspNetResponse( context.Response );
 					}
 				} );
 		}
