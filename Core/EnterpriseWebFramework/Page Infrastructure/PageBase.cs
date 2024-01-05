@@ -193,203 +193,6 @@ public abstract class PageBase: ResourceBase {
 		return new EwfSafeResponseWriter( executePageViewDataModifications().buildPageAndGetResponse( null ) );
 	}
 
-	// Page-view data modifications. All data modifications that happen simply because of a request and require no other action by the user should happen once per
-	// page view, and prior to LoadData so that the modified data can be used in the page if necessary.
-	private PageBase executePageViewDataModifications() {
-		var modMethods = new List<Action>();
-		modMethods.Add( appProvider.pageViewDataModificationMethodGetter() );
-		if( RequestState.Instance.UserAccessible ) {
-			if( AppTools.User != null )
-				modMethods.Add( getLastPageRequestTimeUpdateMethod( AppTools.User ) );
-			if( RequestState.Instance.ImpersonatorExists && RequestState.Instance.ImpersonatorUser != null )
-				modMethods.Add( getLastPageRequestTimeUpdateMethod( RequestState.Instance.ImpersonatorUser ) );
-		}
-		modMethods.Add( getPageViewDataModificationMethod() );
-		modMethods = modMethods.Where( i => i != null ).ToList();
-
-		if( !modMethods.Any() )
-			return this;
-
-		DataAccessState.Current.DisableCache();
-		try {
-			foreach( var i in modMethods )
-				i();
-			AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod(
-				() => {
-					RequestStateStatics.AppendStatusMessages( statusMessages );
-					statusMessages.Clear();
-				} );
-			RequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
-		}
-		finally {
-			DataAccessState.Current.ResetCache();
-		}
-
-		RequestStateStatics.RefreshRequestState();
-
-		// Re-create page object. A big reason to do this is that some pages execute database queries or other code during initialization in order to prime
-		// the data-access cache. The code above resets the cache and we want to re-prime it right away.
-		PageBase newPageObject;
-		using( MiniProfiler.Current.Step( "EWF - Re-create page object after page-view data modifications" ) )
-			newPageObject = (PageBase)ReCreate();
-		bool urlChanged;
-		using( MiniProfiler.Current.Step( "EWF - Check URL after page-view data modifications" ) )
-			urlChanged = newPageObject.GetUrl( false, false ) != GetUrl( false, false );
-		if( urlChanged )
-			throw getPossibleDeveloperMistakeException( "The URL of the page changed after page-view data modifications." );
-		bool userAuthorized;
-		using( MiniProfiler.Current.Step( "EWF - Check page authorization after page-view data modifications" ) )
-			userAuthorized = newPageObject.UserCanAccess;
-		DisabledResourceMode disabledMode;
-		using( MiniProfiler.Current.Step( "EWF - Check alternative page mode after page-view data modifications" ) )
-			disabledMode = newPageObject.AlternativeMode as DisabledResourceMode;
-		if( !userAuthorized || disabledMode != null )
-			throw getPossibleDeveloperMistakeException( "The user lost access to the page or the page became disabled after page-view data modifications." );
-		newPageObject.requestState = requestState;
-		return nextPageObject = newPageObject;
-	}
-
-	private void assertStaticRegionsUnchanged() {
-		var nodeUpdateRegionLinkersByKey = updateRegionLinkerNodes.SelectMany( i => i.KeyedUpdateRegionLinkers, ( node, keyedLinker ) => ( node, keyedLinker ) )
-			.ToImmutableDictionary( i => i.keyedLinker.key );
-		var updateRegions = requestState.UpdateRegionKeysAndArguments.Select(
-			keyAndArg => {
-				if( !nodeUpdateRegionLinkersByKey.TryGetValue( keyAndArg.key, out var nodeLinker ) )
-					throw getPossibleDeveloperMistakeException(
-						"An update region linker with the key \"{0}\" does not exist. The post-back included {1}; the page contains {2}.".FormatWith(
-							keyAndArg.key,
-							StringTools.GetEnglishListPhrase( requestState.UpdateRegionKeysAndArguments.Select( i => $"\"{i.key}\"" ), true ),
-							nodeUpdateRegionLinkersByKey.Any()
-								? StringTools.GetEnglishListPhrase( nodeUpdateRegionLinkersByKey.Select( i => $"\"{i.Key}\"" ), true )
-								: "no linkers" ) );
-				return ( nodeLinker.node, nodeLinker.keyedLinker.linker.PostModificationRegionGetter( keyAndArg.arg ) );
-			} );
-
-		var message = new StringBuilder();
-		var staticRegionContents = getStaticRegionContents( updateRegions );
-		message.Append(
-			!string.Equals( staticRegionContents.contents, requestState.StaticRegionContents, StringComparison.Ordinal )
-				? "Previous static-region contents: " + Environment.NewLine + Environment.NewLine + requestState.StaticRegionContents + Environment.NewLine +
-				  "Current static-region contents: " + Environment.NewLine + Environment.NewLine + staticRegionContents.contents + Environment.NewLine
-				: "" );
-		message.Append(
-			StringTools
-				.ConcatenateWithDelimiter( Environment.NewLine, componentStateItemsById.Where( i => i.Value.ValueIsInvalid() ).Select( i => i.Key ).OrderBy( i => i ) )
-				.Surround(
-					"Component-state items whose values became invalid:" + Environment.NewLine + Environment.NewLine,
-					Environment.NewLine + Environment.NewLine ) );
-		message.Append(
-			StringTools.ConcatenateWithDelimiter(
-					Environment.NewLine,
-					formValues.Where( i => i.GetPostBackValueKey().Any() && i.PostBackValueIsInvalid() ).Select( i => i.GetPostBackValueKey() ).OrderBy( i => i ) )
-				.Surround(
-					"Form values whose post-back values became invalid:" + Environment.NewLine + Environment.NewLine,
-					Environment.NewLine + Environment.NewLine ) );
-		if( message.Length > 0 )
-			throw getPossibleDeveloperMistakeException(
-				" " + ( modificationErrorsExist
-					        ?
-					        "Post-backs, form controls, component-state items, and modification-error-display keys may not change if modification errors exist." +
-					        " (IMPORTANT: This exception may have been thrown because EWL Goal 588 hasn't been completed. See the note in the goal about the EwfPage bug and disregard the rest of this error message.)"
-					        : new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains(
-						        requestState.DmIdAndSecondaryOp.Item2 )
-						        ? "Form controls and component-state items outside of update regions may not change on an intermediate post-back."
-						        : "Post-backs, form controls, and component-state items may not change during the validation stage of an intermediate post-back." ) +
-				Environment.NewLine + Environment.NewLine + message );
-	}
-
-	private EwfResponse processSecondaryOperationAndGetResponse() {
-		var dmIdAndSecondaryOp = requestState.DmIdAndSecondaryOp;
-		var secondaryDm = dmIdAndSecondaryOp.Item1.Any() ? GetPostBack( dmIdAndSecondaryOp.Item1 ) as DataModification : dataUpdate;
-		if( secondaryDm == null )
-			throw getPossibleDeveloperMistakeException( "A data modification with an ID of \"{0}\" does not exist.".FormatWith( dmIdAndSecondaryOp.Item1 ) );
-
-		var navigationNeeded = true;
-		executeWithDataModificationExceptionHandling(
-			() => {
-				var changesExist = componentStateItemsById.Values.Any( i => i.DataModifications.Contains( secondaryDm ) && i.ValueChanged() ) || formValues.Any(
-					                   i => i.DataModifications.Contains( secondaryDm ) && i.ValueChangedOnPostBack() );
-				navigationNeeded = secondaryDm == dataUpdate
-					                   ? dataUpdate.Execute( true, changesExist, handleValidationErrors, performValidationOnly: true )
-					                   : ( (ActionPostBack)secondaryDm ).Execute( changesExist, handleValidationErrors, null );
-
-				if( navigationNeeded ) {
-					requestState.DmIdAndSecondaryOp = Tuple.Create( dmIdAndSecondaryOp.Item1, SecondaryPostBackOperation.NoOperation );
-					requestState.SetStaticAndUpdateRegionState( getStaticRegionContents( null ).contents, Enumerable.Empty<( string, string )>().Materialize() );
-				}
-			} );
-		if( navigationNeeded )
-			return navigate(
-				null,
-				null,
-				page => {
-					page.buildPage();
-					page.assertStaticRegionsUnchanged();
-					return page.getResponse( null );
-				} );
-
-		return getResponse( null );
-	}
-
-	/// <summary>
-	/// It's important to call this from EwfPage instead of EwfApp because requests for some pages, with their associated images, CSS files, etc., can easily
-	/// cause 20-30 server requests, and we only want to update the time stamp once for all of these.
-	/// </summary>
-	private Action getLastPageRequestTimeUpdateMethod( SystemUser user ) {
-		// Only update the request time if a significant amount of time has passed since we did it last. This can dramatically reduce concurrency issues caused by
-		// people rapidly assigning tasks to one another in the System Manager or similar situations.
-		if( EwfRequest.Current.RequestTime - user.LastRequestTime < Duration.FromMinutes( 60 ) )
-			return null;
-
-		// Now we want to do a timestamp-based concurrency check so we don't update the last login date if we know another transaction already did.
-		// It is not perfect, but it reduces errors caused by one user doing a long-running request and then doing smaller requests
-		// in another browser window while the first one is still running.
-		// We have to query in a separate transaction because otherwise snapshot isolation will result in us always getting the original LastRequestTime, even if
-		// another transaction has modified its value during this transaction.
-		var newlyQueriedUser = new DataAccessState().ExecuteWithThis(
-			() => {
-				SystemUser getUser() => UserManagementStatics.GetUser( user.UserId, false );
-				return ConfigurationStatics.DatabaseExists ? DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( getUser ) : getUser();
-			} );
-		if( newlyQueriedUser == null || newlyQueriedUser.LastRequestTime > user.LastRequestTime )
-			return null;
-
-		return () => {
-			void updateUser() {
-				UserManagementStatics.SystemProvider.InsertOrUpdateUser( user.UserId, user.Email, user.Role.RoleId, EwfRequest.Current.RequestTime );
-			}
-			if( ConfigurationStatics.DatabaseExists )
-				DataAccessState.Current.PrimaryDatabaseConnection.ExecuteInTransaction(
-					() => {
-						try {
-							updateUser();
-						}
-						catch( DbConcurrencyException ) {
-							// Since this method is called on every page request, concurrency errors are common. They are caused when an authenticated user makes one request
-							// and then makes another before ASP.NET has finished processing the first. Since we are only updating the last request date and time, we don't
-							// need to get an error email if the update fails.
-							throw new DoNotCommitException();
-						}
-					} );
-			else
-				updateUser();
-		};
-	}
-
-	// The warning below also appears on AppStandardPageLogicProvider.GetPageViewDataModificationMethod.
-	/// <summary>
-	/// Returns a method that executes data modifications that happen simply because of a request and require no other action by the user. Returns null if there
-	/// are no modifications, which can improve page performance since the data-access cache does not need to be reset.
-	/// 
-	/// WARNING: Don't ever use this to correct for missing loadData preconditions. For example, do not create a page that requires a user preferences row to
-	/// exist and then use a page-view data modification to create the row if it is missing. Page-view data modifications will not execute before the first
-	/// loadData call on post-back requests, and we provide no mechanism to do this because it would allow developers to accidentally cause false user
-	/// concurrency errors by modifying data that affects the rendering of the page.
-	/// </summary>
-	protected virtual Action getPageViewDataModificationMethod() {
-		return null;
-	}
-
 	protected sealed override bool managesDataAccessCacheInUnsafeRequestMethods => true;
 
 	protected sealed override EwfResponse put() => base.put();
@@ -555,6 +358,324 @@ public abstract class PageBase: ResourceBase {
 		return getResponse( statusCode );
 	}
 
+	private void validateFormSubmission( IFormCollection submission, string formValueHash ) {
+		var extraComponentStateValues = requestState.ComponentStateValuesById.Keys.Where( i => !componentStateItemsById.ContainsKey( i ) ).Materialize();
+		var invalidComponentStateValues = componentStateItemsById
+			.Where( i => !requestState.ComponentStateValuesById.ContainsKey( i.Key ) || i.Value.ValueIsInvalid() )
+			.Select( i => i.Key )
+			.Materialize();
+
+		var activeFormValues = formValues.Where( i => i.GetPostBackValueKey().Any() ).ToArray();
+		var postBackValueKeys = new HashSet<string>( activeFormValues.Select( i => i.GetPostBackValueKey() ) );
+		requestState.PostBackValues = new PostBackValueDictionary();
+		var extraPostBackValues = requestState.PostBackValues.AddFromRequest(
+				submission.Where(
+						i => !string.Equals( i.Key, HiddenFieldName, StringComparison.Ordinal ) && !string.Equals( i.Key, ButtonElementName, StringComparison.Ordinal ) )
+					.SelectMany( pair => pair.Value.Select( value => KeyValuePair.Create( pair.Key, (object)value ) ) ),
+				postBackValueKeys.Contains )
+			.Concat(
+				requestState.PostBackValues.AddFromRequest( submission.Files.Select( i => KeyValuePair.Create( i.Name, (object)i ) ), postBackValueKeys.Contains ) )
+			.Materialize();
+
+		var invalidPostBackValues = activeFormValues.Where( i => i.PostBackValueIsInvalid() ).Select( i => i.GetPostBackValueKey() ).Materialize();
+		var formValueHashesDisagree = generateFormValueHash() != formValueHash;
+
+		// Make sure data didn’t change under this page’s feet since the last request.
+		if( extraComponentStateValues.Any() || invalidComponentStateValues.Any() || extraPostBackValues.Any() || invalidPostBackValues.Any() ||
+		    formValueHashesDisagree ) {
+			if( extraComponentStateValues.Any() )
+				Log.Debug( "Form-submission validation failed due to extra component-state values: {Values}", extraComponentStateValues );
+			else if( invalidComponentStateValues.Any() )
+				Log.Debug(
+					"Form-submission validation failed due to invalid component-state values: {@Values}",
+					invalidComponentStateValues.Select(
+						i => new { Id = i, Value = requestState.ComponentStateValuesById.TryGetValue( i, out var value ) ? value : "missing" } ) );
+			else if( extraPostBackValues.Any() )
+				Log.Debug( "Form-submission validation failed due to extra post-back values: {Values}", extraPostBackValues );
+			else if( invalidPostBackValues.Any() )
+				Log.Debug(
+					"Form-submission validation failed due to invalid post-back values: {@Values}",
+					invalidPostBackValues.Select(
+						i => {
+							var value = requestState.PostBackValues.GetValue( i );
+							return new { Key = i, Value = value is not null ? "{0}".FormatWith( value ) : "missing" };
+						} ) );
+			else if( formValueHashesDisagree )
+				Log.Debug( "Form-submission validation failed due to disagreeing form-value hashes" );
+
+			// Remove invalid post-back values so they don't cause a false developer-mistake exception after the transfer.
+			requestState.ComponentStateValuesById = requestState.ComponentStateValuesById.RemoveRange(
+				from i in componentStateItemsById where i.Value.ValueIsInvalid() select i.Key );
+			var validPostBackValueKeys = from i in activeFormValues where !i.PostBackValueIsInvalid() select i.GetPostBackValueKey();
+			requestState.PostBackValues.RemoveExcept( validPostBackValueKeys );
+
+			throw new DataModificationException( Translation.AnotherUserHasModifiedPageHtml.ToCollection() );
+		}
+	}
+
+	private EwfResponse processSecondaryOperationAndGetResponse() {
+		var dmIdAndSecondaryOp = requestState.DmIdAndSecondaryOp;
+		var secondaryDm = dmIdAndSecondaryOp.Item1.Any() ? GetPostBack( dmIdAndSecondaryOp.Item1 ) as DataModification : dataUpdate;
+		if( secondaryDm == null )
+			throw getPossibleDeveloperMistakeException( "A data modification with an ID of \"{0}\" does not exist.".FormatWith( dmIdAndSecondaryOp.Item1 ) );
+
+		var navigationNeeded = true;
+		executeWithDataModificationExceptionHandling(
+			() => {
+				var changesExist = componentStateItemsById.Values.Any( i => i.DataModifications.Contains( secondaryDm ) && i.ValueChanged() ) || formValues.Any(
+					                   i => i.DataModifications.Contains( secondaryDm ) && i.ValueChangedOnPostBack() );
+				navigationNeeded = secondaryDm == dataUpdate
+					                   ? dataUpdate.Execute( true, changesExist, handleValidationErrors, performValidationOnly: true )
+					                   : ( (ActionPostBack)secondaryDm ).Execute( changesExist, handleValidationErrors, null );
+
+				if( navigationNeeded ) {
+					requestState.DmIdAndSecondaryOp = Tuple.Create( dmIdAndSecondaryOp.Item1, SecondaryPostBackOperation.NoOperation );
+					requestState.SetStaticAndUpdateRegionState( getStaticRegionContents( null ).contents, Enumerable.Empty<( string, string )>().Materialize() );
+				}
+			} );
+		if( navigationNeeded )
+			return navigate(
+				null,
+				null,
+				page => {
+					page.buildPage();
+					page.assertStaticRegionsUnchanged();
+					return page.getResponse( null );
+				} );
+
+		return getResponse( null );
+	}
+
+	private void executeWithDataModificationExceptionHandling( Action method ) {
+		try {
+			method();
+		}
+		catch( Exception e ) {
+			var dmException = e.GetChain().OfType<DataModificationException>().FirstOrDefault();
+			if( dmException == null )
+				throw;
+
+			requestState.FocusKey = "";
+			requestState.GeneralModificationErrors = dmException.HtmlMessages;
+			requestState.SetStaticAndUpdateRegionState( getStaticRegionContents( null ).contents, Enumerable.Empty<( string, string )>().Materialize() );
+		}
+	}
+
+	private void handleValidationErrors( EwfValidation validation, IEnumerable<string> errorMessages ) {
+		if( !errorMessages.Any() )
+			return;
+		if( !modErrorDisplaysByValidation.ContainsKey( validation ) )
+			throw new ApplicationException( "An undisplayed validation produced errors." );
+		foreach( var displayKey in modErrorDisplaysByValidation[ validation ] ) {
+			var errorsByDisplay = requestState.InLineModificationErrorsByDisplay;
+			errorsByDisplay[ displayKey ] = errorsByDisplay.ContainsKey( displayKey ) ? errorsByDisplay[ displayKey ].Concat( errorMessages ) : errorMessages;
+		}
+	}
+
+	// Page-view data modifications. All data modifications that happen simply because of a request and require no other action by the user should happen once per
+	// page view, and prior to LoadData so that the modified data can be used in the page if necessary.
+	private PageBase executePageViewDataModifications() {
+		var modMethods = new List<Action>();
+		modMethods.Add( appProvider.pageViewDataModificationMethodGetter() );
+		if( RequestState.Instance.UserAccessible ) {
+			if( AppTools.User != null )
+				modMethods.Add( getLastPageRequestTimeUpdateMethod( AppTools.User ) );
+			if( RequestState.Instance.ImpersonatorExists && RequestState.Instance.ImpersonatorUser != null )
+				modMethods.Add( getLastPageRequestTimeUpdateMethod( RequestState.Instance.ImpersonatorUser ) );
+		}
+		modMethods.Add( getPageViewDataModificationMethod() );
+		modMethods = modMethods.Where( i => i != null ).ToList();
+
+		if( !modMethods.Any() )
+			return this;
+
+		DataAccessState.Current.DisableCache();
+		try {
+			foreach( var i in modMethods )
+				i();
+			AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod(
+				() => {
+					RequestStateStatics.AppendStatusMessages( statusMessages );
+					statusMessages.Clear();
+				} );
+			RequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
+		}
+		finally {
+			DataAccessState.Current.ResetCache();
+		}
+
+		RequestStateStatics.RefreshRequestState();
+
+		// Re-create page object. A big reason to do this is that some pages execute database queries or other code during initialization in order to prime
+		// the data-access cache. The code above resets the cache and we want to re-prime it right away.
+		PageBase newPageObject;
+		using( MiniProfiler.Current.Step( "EWF - Re-create page object after page-view data modifications" ) )
+			newPageObject = (PageBase)ReCreate();
+		bool urlChanged;
+		using( MiniProfiler.Current.Step( "EWF - Check URL after page-view data modifications" ) )
+			urlChanged = newPageObject.GetUrl( false, false ) != GetUrl( false, false );
+		if( urlChanged )
+			throw getPossibleDeveloperMistakeException( "The URL of the page changed after page-view data modifications." );
+		bool userAuthorized;
+		using( MiniProfiler.Current.Step( "EWF - Check page authorization after page-view data modifications" ) )
+			userAuthorized = newPageObject.UserCanAccess;
+		DisabledResourceMode disabledMode;
+		using( MiniProfiler.Current.Step( "EWF - Check alternative page mode after page-view data modifications" ) )
+			disabledMode = newPageObject.AlternativeMode as DisabledResourceMode;
+		if( !userAuthorized || disabledMode != null )
+			throw getPossibleDeveloperMistakeException( "The user lost access to the page or the page became disabled after page-view data modifications." );
+		newPageObject.requestState = requestState;
+		return nextPageObject = newPageObject;
+	}
+
+	/// <summary>
+	/// It's important to call this from EwfPage instead of EwfApp because requests for some pages, with their associated images, CSS files, etc., can easily
+	/// cause 20-30 server requests, and we only want to update the time stamp once for all of these.
+	/// </summary>
+	private Action getLastPageRequestTimeUpdateMethod( SystemUser user ) {
+		// Only update the request time if a significant amount of time has passed since we did it last. This can dramatically reduce concurrency issues caused by
+		// people rapidly assigning tasks to one another in the System Manager or similar situations.
+		if( EwfRequest.Current.RequestTime - user.LastRequestTime < Duration.FromMinutes( 60 ) )
+			return null;
+
+		// Now we want to do a timestamp-based concurrency check so we don't update the last login date if we know another transaction already did.
+		// It is not perfect, but it reduces errors caused by one user doing a long-running request and then doing smaller requests
+		// in another browser window while the first one is still running.
+		// We have to query in a separate transaction because otherwise snapshot isolation will result in us always getting the original LastRequestTime, even if
+		// another transaction has modified its value during this transaction.
+		var newlyQueriedUser = new DataAccessState().ExecuteWithThis(
+			() => {
+				SystemUser getUser() => UserManagementStatics.GetUser( user.UserId, false );
+				return ConfigurationStatics.DatabaseExists ? DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( getUser ) : getUser();
+			} );
+		if( newlyQueriedUser == null || newlyQueriedUser.LastRequestTime > user.LastRequestTime )
+			return null;
+
+		return () => {
+			void updateUser() {
+				UserManagementStatics.SystemProvider.InsertOrUpdateUser( user.UserId, user.Email, user.Role.RoleId, EwfRequest.Current.RequestTime );
+			}
+			if( ConfigurationStatics.DatabaseExists )
+				DataAccessState.Current.PrimaryDatabaseConnection.ExecuteInTransaction(
+					() => {
+						try {
+							updateUser();
+						}
+						catch( DbConcurrencyException ) {
+							// Since this method is called on every page request, concurrency errors are common. They are caused when an authenticated user makes one request
+							// and then makes another before ASP.NET has finished processing the first. Since we are only updating the last request date and time, we don't
+							// need to get an error email if the update fails.
+							throw new DoNotCommitException();
+						}
+					} );
+			else
+				updateUser();
+		};
+	}
+
+	// The warning below also appears on AppStandardPageLogicProvider.GetPageViewDataModificationMethod.
+	/// <summary>
+	/// Returns a method that executes data modifications that happen simply because of a request and require no other action by the user. Returns null if there
+	/// are no modifications, which can improve page performance since the data-access cache does not need to be reset.
+	/// 
+	/// WARNING: Don't ever use this to correct for missing loadData preconditions. For example, do not create a page that requires a user preferences row to
+	/// exist and then use a page-view data modification to create the row if it is missing. Page-view data modifications will not execute before the first
+	/// loadData call on post-back requests, and we provide no mechanism to do this because it would allow developers to accidentally cause false user
+	/// concurrency errors by modifying data that affects the rendering of the page.
+	/// </summary>
+	protected virtual Action getPageViewDataModificationMethod() {
+		return null;
+	}
+
+	private EwfResponse navigate(
+		ResourceInfo destination, Func<ResourceInfo, bool> authorizationCheckDisabledPredicate, Func<PageBase, EwfResponse> actionProcessor ) {
+		bool authorizationCheckDisabled;
+		string destinationUrl;
+		try {
+			// Determine the final navigation destination. If a destination is already specified and it is the current page or a page with the same entity setup,
+			// replace any default optional parameter values it may have with new values from this post-back. If a destination isn't specified, make it the current
+			// page with new parameter values from this post back. At the end of this block, destination is always newly created with fresh data that reflects any
+			// data modifications that may have occurred (except when the destination is an external resource). It's important that every case below *actually
+			// creates* a new resource object to guard against this scenario:
+			// 1. A page modifies data such that a previously-created destination resource object that is then used here is no longer valid because it would throw
+			//    an exception from init if it were re-created.
+			// 2. The page redirects, or transfers, to this destination, leading the user to an error page without developers being notified. This is bad behavior.
+			// It would also be a problem if the destination were the current page object since it could then contain dirty state from this post-back after
+			// navigation.
+			if( modificationErrorsExist || requestState.DmIdAndSecondaryOp is { Item2: SecondaryPostBackOperation.NoOperation } )
+				destination = ReCreate();
+			else {
+				RequestState.Instance.SetNewUrlParameterValuesEffective( true );
+				if( destination == null )
+					destination = reCreateFromNewParameterValues();
+				else if( destination is ResourceBase r )
+					destination = r.ReCreate();
+			}
+
+			// This GetUrl call is important even for the transfer case below for the same reason that we *actually create* a new page object in every case above.
+			// We want to force developers to get an error email if a page modifies data to make itself unauthorized/disabled without specifying a different page as
+			// the redirect destination. The resulting transfer would lead the user to an error page.
+			authorizationCheckDisabled = !modificationErrorsExist && authorizationCheckDisabledPredicate?.Invoke( destination ) == true;
+			destinationUrl = destination.GetUrl( !authorizationCheckDisabled, !authorizationCheckDisabled );
+		}
+		catch( Exception e ) {
+			throw getPossibleDeveloperMistakeException( "The post-modification destination page became invalid.", innerException: e );
+		}
+
+		if( destination is PageBase page ) {
+			RequestStateStatics.SetClientSideNewUrl( destinationUrl );
+
+			// If the destination page has the same origin as the current page, do a transfer instead of a redirect. Don’t do this if the authorization check was
+			// disabled since, if there is a possibility of the destination page sending a 403 status code, we need to always send a 303 code first (below) so the
+			// client knows the POST worked.
+			if( !authorizationCheckDisabled && Uri.Compare(
+				    new Uri( destinationUrl ),
+				    new Uri( EwfRequest.Current.Url ),
+				    UriComponents.SchemeAndServer,
+				    UriFormat.UriEscaped,
+				    StringComparison.Ordinal ) == 0 ) {
+				page.replaceUrlHandlers();
+				RequestState.Instance.SetNewUrlParameterValuesEffective( false );
+
+				page.requestState = requestState;
+				nextPageObject = page;
+				return actionProcessor( page );
+			}
+
+			destinationUrl = RequestStateStatics.StoreRequestStateForContinuation(
+				destinationUrl,
+				"GET",
+				context => {
+					page.replaceUrlHandlers();
+					RequestState.Instance.SetNewUrlParameterValuesEffective( false );
+
+					if( authorizationCheckDisabled )
+						page.HandleRequest( context, false );
+					else {
+						RequestState.Instance.SetResource( page );
+
+						page.requestState = requestState;
+						actionProcessor( page ).WriteToAspNetResponse( context.Response );
+					}
+				} );
+		}
+
+		return EwfResponse.Create(
+			ContentTypes.PlainText,
+			new EwfResponseBodyCreator( writer => writer.Write( "See Other: {0}".FormatWith( destinationUrl ) ) ),
+			statusCodeGetter: () => 303,
+			additionalHeaderFieldGetter: () => ( "Location", destinationUrl ).ToCollection() );
+	}
+
+	private void replaceUrlHandlers() {
+		var urlHandlers = new List<BasicUrlHandler>();
+		UrlHandler urlHandler = this;
+		do
+			urlHandlers.Add( urlHandler );
+		while( ( urlHandler = urlHandler.GetParent() ) != null );
+		RequestState.Instance.SetUrlHandlers( urlHandlers );
+	}
+
 	private void buildPage() {
 		UrlHandler urlHandler = this;
 		do {
@@ -647,6 +768,26 @@ public abstract class PageBase: ResourceBase {
 	/// </summary>
 	protected virtual PageContent getContent() => null;
 
+	private string generateFormValueHash() {
+		var formValueString = new StringBuilder();
+
+		formValueString.AppendLine( "Component-state items:" );
+		foreach( var pair in componentStateItemsById.Where( i => i.Value.DataModifications.Any() ).OrderBy( i => i.Key ) )
+			formValueString.AppendLine( "\t{0}: {1}".FormatWith( pair.Key, pair.Value.DurableValueAsString ) );
+		formValueString.AppendLine( "Form values:" );
+		foreach( var formValue in formValues.Where( i => i.GetPostBackValueKey().Any() && i.DataModifications.Any() ) )
+			formValueString.AppendLine( "\t{0}: {1}".FormatWith( formValue.GetPostBackValueKey(), formValue.GetDurableValueAsString() ) );
+
+		var hash = MD5.Create().ComputeHash( Encoding.ASCII.GetBytes( formValueString.ToString() ) );
+		var hashString = "";
+		foreach( var b in hash )
+			hashString += b.ToString( "x2" );
+
+		Log.Debug( "Form-value hash generated from {Values}", Environment.NewLine + formValueString );
+
+		return hashString;
+	}
+
 	private string getJsInitStatements( string elementJsInitStatements, string pageLoadActionStatements ) {
 		var scroll = scrollPositionForThisResponse == ScrollPosition.LastPositionOrStatusBar && !ModificationErrorsOccurred;
 		var scrollStatement = "";
@@ -738,105 +879,53 @@ public abstract class PageBase: ResourceBase {
 	/// </summary>
 	internal IEnumerable<( StatusMessageType, string )> StatusMessages => RequestStateStatics.GetStatusMessages().Concat( statusMessages );
 
-	private void executeWithDataModificationExceptionHandling( Action method ) {
-		try {
-			method();
-		}
-		catch( Exception e ) {
-			var dmException = e.GetChain().OfType<DataModificationException>().FirstOrDefault();
-			if( dmException == null )
-				throw;
+	private void assertStaticRegionsUnchanged() {
+		var nodeUpdateRegionLinkersByKey = updateRegionLinkerNodes.SelectMany( i => i.KeyedUpdateRegionLinkers, ( node, keyedLinker ) => ( node, keyedLinker ) )
+			.ToImmutableDictionary( i => i.keyedLinker.key );
+		var updateRegions = requestState.UpdateRegionKeysAndArguments.Select(
+			keyAndArg => {
+				if( !nodeUpdateRegionLinkersByKey.TryGetValue( keyAndArg.key, out var nodeLinker ) )
+					throw getPossibleDeveloperMistakeException(
+						"An update region linker with the key \"{0}\" does not exist. The post-back included {1}; the page contains {2}.".FormatWith(
+							keyAndArg.key,
+							StringTools.GetEnglishListPhrase( requestState.UpdateRegionKeysAndArguments.Select( i => $"\"{i.key}\"" ), true ),
+							nodeUpdateRegionLinkersByKey.Any()
+								? StringTools.GetEnglishListPhrase( nodeUpdateRegionLinkersByKey.Select( i => $"\"{i.Key}\"" ), true )
+								: "no linkers" ) );
+				return ( nodeLinker.node, nodeLinker.keyedLinker.linker.PostModificationRegionGetter( keyAndArg.arg ) );
+			} );
 
-			requestState.FocusKey = "";
-			requestState.GeneralModificationErrors = dmException.HtmlMessages;
-			requestState.SetStaticAndUpdateRegionState( getStaticRegionContents( null ).contents, Enumerable.Empty<( string, string )>().Materialize() );
-		}
-	}
-
-	private void validateFormSubmission( IFormCollection submission, string formValueHash ) {
-		var extraComponentStateValues = requestState.ComponentStateValuesById.Keys.Where( i => !componentStateItemsById.ContainsKey( i ) ).Materialize();
-		var invalidComponentStateValues = componentStateItemsById
-			.Where( i => !requestState.ComponentStateValuesById.ContainsKey( i.Key ) || i.Value.ValueIsInvalid() )
-			.Select( i => i.Key )
-			.Materialize();
-
-		var activeFormValues = formValues.Where( i => i.GetPostBackValueKey().Any() ).ToArray();
-		var postBackValueKeys = new HashSet<string>( activeFormValues.Select( i => i.GetPostBackValueKey() ) );
-		requestState.PostBackValues = new PostBackValueDictionary();
-		var extraPostBackValues = requestState.PostBackValues.AddFromRequest(
-				submission.Where(
-						i => !string.Equals( i.Key, HiddenFieldName, StringComparison.Ordinal ) && !string.Equals( i.Key, ButtonElementName, StringComparison.Ordinal ) )
-					.SelectMany( pair => pair.Value.Select( value => KeyValuePair.Create( pair.Key, (object)value ) ) ),
-				postBackValueKeys.Contains )
-			.Concat(
-				requestState.PostBackValues.AddFromRequest( submission.Files.Select( i => KeyValuePair.Create( i.Name, (object)i ) ), postBackValueKeys.Contains ) )
-			.Materialize();
-
-		var invalidPostBackValues = activeFormValues.Where( i => i.PostBackValueIsInvalid() ).Select( i => i.GetPostBackValueKey() ).Materialize();
-		var formValueHashesDisagree = generateFormValueHash() != formValueHash;
-
-		// Make sure data didn’t change under this page’s feet since the last request.
-		if( extraComponentStateValues.Any() || invalidComponentStateValues.Any() || extraPostBackValues.Any() || invalidPostBackValues.Any() ||
-		    formValueHashesDisagree ) {
-			if( extraComponentStateValues.Any() )
-				Log.Debug( "Form-submission validation failed due to extra component-state values: {Values}", extraComponentStateValues );
-			else if( invalidComponentStateValues.Any() )
-				Log.Debug(
-					"Form-submission validation failed due to invalid component-state values: {@Values}",
-					invalidComponentStateValues.Select(
-						i => new { Id = i, Value = requestState.ComponentStateValuesById.TryGetValue( i, out var value ) ? value : "missing" } ) );
-			else if( extraPostBackValues.Any() )
-				Log.Debug( "Form-submission validation failed due to extra post-back values: {Values}", extraPostBackValues );
-			else if( invalidPostBackValues.Any() )
-				Log.Debug(
-					"Form-submission validation failed due to invalid post-back values: {@Values}",
-					invalidPostBackValues.Select(
-						i => {
-							var value = requestState.PostBackValues.GetValue( i );
-							return new { Key = i, Value = value is not null ? "{0}".FormatWith( value ) : "missing" };
-						} ) );
-			else if( formValueHashesDisagree )
-				Log.Debug( "Form-submission validation failed due to disagreeing form-value hashes" );
-
-			// Remove invalid post-back values so they don't cause a false developer-mistake exception after the transfer.
-			requestState.ComponentStateValuesById = requestState.ComponentStateValuesById.RemoveRange(
-				from i in componentStateItemsById where i.Value.ValueIsInvalid() select i.Key );
-			var validPostBackValueKeys = from i in activeFormValues where !i.PostBackValueIsInvalid() select i.GetPostBackValueKey();
-			requestState.PostBackValues.RemoveExcept( validPostBackValueKeys );
-
-			throw new DataModificationException( Translation.AnotherUserHasModifiedPageHtml.ToCollection() );
-		}
-	}
-
-	private string generateFormValueHash() {
-		var formValueString = new StringBuilder();
-
-		formValueString.AppendLine( "Component-state items:" );
-		foreach( var pair in componentStateItemsById.Where( i => i.Value.DataModifications.Any() ).OrderBy( i => i.Key ) )
-			formValueString.AppendLine( "\t{0}: {1}".FormatWith( pair.Key, pair.Value.DurableValueAsString ) );
-		formValueString.AppendLine( "Form values:" );
-		foreach( var formValue in formValues.Where( i => i.GetPostBackValueKey().Any() && i.DataModifications.Any() ) )
-			formValueString.AppendLine( "\t{0}: {1}".FormatWith( formValue.GetPostBackValueKey(), formValue.GetDurableValueAsString() ) );
-
-		var hash = MD5.Create().ComputeHash( Encoding.ASCII.GetBytes( formValueString.ToString() ) );
-		var hashString = "";
-		foreach( var b in hash )
-			hashString += b.ToString( "x2" );
-
-		Log.Debug( "Form-value hash generated from {Values}", Environment.NewLine + formValueString );
-
-		return hashString;
-	}
-
-	private void handleValidationErrors( EwfValidation validation, IEnumerable<string> errorMessages ) {
-		if( !errorMessages.Any() )
-			return;
-		if( !modErrorDisplaysByValidation.ContainsKey( validation ) )
-			throw new ApplicationException( "An undisplayed validation produced errors." );
-		foreach( var displayKey in modErrorDisplaysByValidation[ validation ] ) {
-			var errorsByDisplay = requestState.InLineModificationErrorsByDisplay;
-			errorsByDisplay[ displayKey ] = errorsByDisplay.ContainsKey( displayKey ) ? errorsByDisplay[ displayKey ].Concat( errorMessages ) : errorMessages;
-		}
+		var message = new StringBuilder();
+		var staticRegionContents = getStaticRegionContents( updateRegions );
+		message.Append(
+			!string.Equals( staticRegionContents.contents, requestState.StaticRegionContents, StringComparison.Ordinal )
+				? "Previous static-region contents: " + Environment.NewLine + Environment.NewLine + requestState.StaticRegionContents + Environment.NewLine +
+				  "Current static-region contents: " + Environment.NewLine + Environment.NewLine + staticRegionContents.contents + Environment.NewLine
+				: "" );
+		message.Append(
+			StringTools
+				.ConcatenateWithDelimiter( Environment.NewLine, componentStateItemsById.Where( i => i.Value.ValueIsInvalid() ).Select( i => i.Key ).OrderBy( i => i ) )
+				.Surround(
+					"Component-state items whose values became invalid:" + Environment.NewLine + Environment.NewLine,
+					Environment.NewLine + Environment.NewLine ) );
+		message.Append(
+			StringTools.ConcatenateWithDelimiter(
+					Environment.NewLine,
+					formValues.Where( i => i.GetPostBackValueKey().Any() && i.PostBackValueIsInvalid() ).Select( i => i.GetPostBackValueKey() ).OrderBy( i => i ) )
+				.Surround(
+					"Form values whose post-back values became invalid:" + Environment.NewLine + Environment.NewLine,
+					Environment.NewLine + Environment.NewLine ) );
+		if( message.Length > 0 )
+			throw getPossibleDeveloperMistakeException(
+				" " + ( modificationErrorsExist
+					        ?
+					        "Post-backs, form controls, component-state items, and modification-error-display keys may not change if modification errors exist." +
+					        " (IMPORTANT: This exception may have been thrown because EWL Goal 588 hasn't been completed. See the note in the goal about the EwfPage bug and disregard the rest of this error message.)"
+					        : new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains(
+						        requestState.DmIdAndSecondaryOp.Item2 )
+						        ? "Form controls and component-state items outside of update regions may not change on an intermediate post-back."
+						        : "Post-backs, form controls, and component-state items may not change during the validation stage of an intermediate post-back." ) +
+				Environment.NewLine + Environment.NewLine + message );
 	}
 
 	private ( string contents, ImmutableHashSet<ComponentStateItem> stateItems, IReadOnlyCollection<FormValue> formValues ) getStaticRegionContents(
@@ -876,86 +965,6 @@ public abstract class PageBase: ResourceBase {
 		return ( contents.ToString(), staticStateItems, staticFormValues );
 	}
 
-	private EwfResponse navigate(
-		ResourceInfo destination, Func<ResourceInfo, bool> authorizationCheckDisabledPredicate, Func<PageBase, EwfResponse> actionProcessor ) {
-		bool authorizationCheckDisabled;
-		string destinationUrl;
-		try {
-			// Determine the final navigation destination. If a destination is already specified and it is the current page or a page with the same entity setup,
-			// replace any default optional parameter values it may have with new values from this post-back. If a destination isn't specified, make it the current
-			// page with new parameter values from this post back. At the end of this block, destination is always newly created with fresh data that reflects any
-			// data modifications that may have occurred (except when the destination is an external resource). It's important that every case below *actually
-			// creates* a new resource object to guard against this scenario:
-			// 1. A page modifies data such that a previously-created destination resource object that is then used here is no longer valid because it would throw
-			//    an exception from init if it were re-created.
-			// 2. The page redirects, or transfers, to this destination, leading the user to an error page without developers being notified. This is bad behavior.
-			// It would also be a problem if the destination were the current page object since it could then contain dirty state from this post-back after
-			// navigation.
-			if( modificationErrorsExist || requestState.DmIdAndSecondaryOp is { Item2: SecondaryPostBackOperation.NoOperation } )
-				destination = ReCreate();
-			else {
-				RequestState.Instance.SetNewUrlParameterValuesEffective( true );
-				if( destination == null )
-					destination = reCreateFromNewParameterValues();
-				else if( destination is ResourceBase r )
-					destination = r.ReCreate();
-			}
-
-			// This GetUrl call is important even for the transfer case below for the same reason that we *actually create* a new page object in every case above.
-			// We want to force developers to get an error email if a page modifies data to make itself unauthorized/disabled without specifying a different page as
-			// the redirect destination. The resulting transfer would lead the user to an error page.
-			authorizationCheckDisabled = !modificationErrorsExist && authorizationCheckDisabledPredicate?.Invoke( destination ) == true;
-			destinationUrl = destination.GetUrl( !authorizationCheckDisabled, !authorizationCheckDisabled );
-		}
-		catch( Exception e ) {
-			throw getPossibleDeveloperMistakeException( "The post-modification destination page became invalid.", innerException: e );
-		}
-
-		if( destination is PageBase page ) {
-			RequestStateStatics.SetClientSideNewUrl( destinationUrl );
-
-			// If the destination page has the same origin as the current page, do a transfer instead of a redirect. Don’t do this if the authorization check was
-			// disabled since, if there is a possibility of the destination page sending a 403 status code, we need to always send a 303 code first (below) so the
-			// client knows the POST worked.
-			if( !authorizationCheckDisabled && Uri.Compare(
-				    new Uri( destinationUrl ),
-				    new Uri( EwfRequest.Current.Url ),
-				    UriComponents.SchemeAndServer,
-				    UriFormat.UriEscaped,
-				    StringComparison.Ordinal ) == 0 ) {
-				page.replaceUrlHandlers();
-				RequestState.Instance.SetNewUrlParameterValuesEffective( false );
-
-				page.requestState = requestState;
-				nextPageObject = page;
-				return actionProcessor( page );
-			}
-
-			destinationUrl = RequestStateStatics.StoreRequestStateForContinuation(
-				destinationUrl,
-				"GET",
-				context => {
-					page.replaceUrlHandlers();
-					RequestState.Instance.SetNewUrlParameterValuesEffective( false );
-
-					if( authorizationCheckDisabled )
-						page.HandleRequest( context, false );
-					else {
-						RequestState.Instance.SetResource( page );
-
-						page.requestState = requestState;
-						actionProcessor( page ).WriteToAspNetResponse( context.Response );
-					}
-				} );
-		}
-
-		return EwfResponse.Create(
-			ContentTypes.PlainText,
-			new EwfResponseBodyCreator( writer => writer.Write( "See Other: {0}".FormatWith( destinationUrl ) ) ),
-			statusCodeGetter: () => 303,
-			additionalHeaderFieldGetter: () => ( "Location", destinationUrl ).ToCollection() );
-	}
-
 	private ApplicationException getPossibleDeveloperMistakeException( string messageSentence, Exception innerException = null ) {
 		const string firstSentence = "Possible developer mistake.";
 		const string lastSentence =
@@ -965,15 +974,6 @@ public abstract class PageBase: ResourceBase {
 				? firstSentence + messageSentence + lastSentence
 				: StringTools.ConcatenateWithDelimiter( " ", firstSentence, messageSentence, lastSentence ),
 			innerException );
-	}
-
-	private void replaceUrlHandlers() {
-		var urlHandlers = new List<BasicUrlHandler>();
-		UrlHandler urlHandler = this;
-		do
-			urlHandlers.Add( urlHandler );
-		while( ( urlHandler = urlHandler.GetParent() ) != null );
-		RequestState.Instance.SetUrlHandlers( urlHandlers );
 	}
 
 	private EwfResponse getResponse( int? statusCode ) {
