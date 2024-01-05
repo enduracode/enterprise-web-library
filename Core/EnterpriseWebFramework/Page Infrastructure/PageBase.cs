@@ -190,7 +190,7 @@ public abstract class PageBase: ResourceBase {
 
 	protected sealed override EwfSafeRequestHandler getOrHead() {
 		requestState = new PageRequestState();
-		return new EwfSafeResponseWriter( executePageViewDataModifications().processSecondaryOperationAndGetResponse( null ) );
+		return new EwfSafeResponseWriter( executePageViewDataModifications().buildPageAndGetResponse( null ) );
 	}
 
 	// Page-view data modifications. All data modifications that happen simply because of a request and require no other action by the user should happen once per
@@ -249,85 +249,86 @@ public abstract class PageBase: ResourceBase {
 		return nextPageObject = newPageObject;
 	}
 
-	private EwfResponse processSecondaryOperationAndGetResponse( int? statusCode ) {
+	private void assertStaticRegionsUnchanged() {
+		var nodeUpdateRegionLinkersByKey = updateRegionLinkerNodes.SelectMany( i => i.KeyedUpdateRegionLinkers, ( node, keyedLinker ) => ( node, keyedLinker ) )
+			.ToImmutableDictionary( i => i.keyedLinker.key );
+		var updateRegions = requestState.UpdateRegionKeysAndArguments.Select(
+			keyAndArg => {
+				if( !nodeUpdateRegionLinkersByKey.TryGetValue( keyAndArg.key, out var nodeLinker ) )
+					throw getPossibleDeveloperMistakeException(
+						"An update region linker with the key \"{0}\" does not exist. The post-back included {1}; the page contains {2}.".FormatWith(
+							keyAndArg.key,
+							StringTools.GetEnglishListPhrase( requestState.UpdateRegionKeysAndArguments.Select( i => $"\"{i.key}\"" ), true ),
+							nodeUpdateRegionLinkersByKey.Any()
+								? StringTools.GetEnglishListPhrase( nodeUpdateRegionLinkersByKey.Select( i => $"\"{i.Key}\"" ), true )
+								: "no linkers" ) );
+				return ( nodeLinker.node, nodeLinker.keyedLinker.linker.PostModificationRegionGetter( keyAndArg.arg ) );
+			} );
+
+		var message = new StringBuilder();
+		var staticRegionContents = getStaticRegionContents( updateRegions );
+		message.Append(
+			!string.Equals( staticRegionContents.contents, requestState.StaticRegionContents, StringComparison.Ordinal )
+				? "Previous static-region contents: " + Environment.NewLine + Environment.NewLine + requestState.StaticRegionContents + Environment.NewLine +
+				  "Current static-region contents: " + Environment.NewLine + Environment.NewLine + staticRegionContents.contents + Environment.NewLine
+				: "" );
+		message.Append(
+			StringTools
+				.ConcatenateWithDelimiter( Environment.NewLine, componentStateItemsById.Where( i => i.Value.ValueIsInvalid() ).Select( i => i.Key ).OrderBy( i => i ) )
+				.Surround(
+					"Component-state items whose values became invalid:" + Environment.NewLine + Environment.NewLine,
+					Environment.NewLine + Environment.NewLine ) );
+		message.Append(
+			StringTools.ConcatenateWithDelimiter(
+					Environment.NewLine,
+					formValues.Where( i => i.GetPostBackValueKey().Any() && i.PostBackValueIsInvalid() ).Select( i => i.GetPostBackValueKey() ).OrderBy( i => i ) )
+				.Surround(
+					"Form values whose post-back values became invalid:" + Environment.NewLine + Environment.NewLine,
+					Environment.NewLine + Environment.NewLine ) );
+		if( message.Length > 0 )
+			throw getPossibleDeveloperMistakeException(
+				" " + ( modificationErrorsExist
+					        ?
+					        "Post-backs, form controls, component-state items, and modification-error-display keys may not change if modification errors exist." +
+					        " (IMPORTANT: This exception may have been thrown because EWL Goal 588 hasn't been completed. See the note in the goal about the EwfPage bug and disregard the rest of this error message.)"
+					        : new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains(
+						        requestState.DmIdAndSecondaryOp.Item2 )
+						        ? "Form controls and component-state items outside of update regions may not change on an intermediate post-back."
+						        : "Post-backs, form controls, and component-state items may not change during the validation stage of an intermediate post-back." ) +
+				Environment.NewLine + Environment.NewLine + message );
+	}
+
+	private EwfResponse processSecondaryOperationAndGetResponse() {
 		var dmIdAndSecondaryOp = requestState.DmIdAndSecondaryOp;
+		var secondaryDm = dmIdAndSecondaryOp.Item1.Any() ? GetPostBack( dmIdAndSecondaryOp.Item1 ) as DataModification : dataUpdate;
+		if( secondaryDm == null )
+			throw getPossibleDeveloperMistakeException( "A data modification with an ID of \"{0}\" does not exist.".FormatWith( dmIdAndSecondaryOp.Item1 ) );
 
-		buildPage();
+		var navigationNeeded = true;
+		executeWithDataModificationExceptionHandling(
+			() => {
+				var changesExist = componentStateItemsById.Values.Any( i => i.DataModifications.Contains( secondaryDm ) && i.ValueChanged() ) || formValues.Any(
+					                   i => i.DataModifications.Contains( secondaryDm ) && i.ValueChangedOnPostBack() );
+				navigationNeeded = secondaryDm == dataUpdate
+					                   ? dataUpdate.Execute( true, changesExist, handleValidationErrors, performValidationOnly: true )
+					                   : ( (ActionPostBack)secondaryDm ).Execute( changesExist, handleValidationErrors, null );
 
-		if( requestState.StaticRegionContents != null ) {
-			var nodeUpdateRegionLinkersByKey = updateRegionLinkerNodes.SelectMany( i => i.KeyedUpdateRegionLinkers, ( node, keyedLinker ) => ( node, keyedLinker ) )
-				.ToImmutableDictionary( i => i.keyedLinker.key );
-			var updateRegions = requestState.UpdateRegionKeysAndArguments.Select(
-				keyAndArg => {
-					if( !nodeUpdateRegionLinkersByKey.TryGetValue( keyAndArg.key, out var nodeLinker ) )
-						throw getPossibleDeveloperMistakeException(
-							"An update region linker with the key \"{0}\" does not exist. The post-back included {1}; the page contains {2}.".FormatWith(
-								keyAndArg.key,
-								StringTools.GetEnglishListPhrase( requestState.UpdateRegionKeysAndArguments.Select( i => $"\"{i.key}\"" ), true ),
-								nodeUpdateRegionLinkersByKey.Any()
-									? StringTools.GetEnglishListPhrase( nodeUpdateRegionLinkersByKey.Select( i => $"\"{i.Key}\"" ), true )
-									: "no linkers" ) );
-					return ( nodeLinker.node, nodeLinker.keyedLinker.linker.PostModificationRegionGetter( keyAndArg.arg ) );
+				if( navigationNeeded ) {
+					requestState.DmIdAndSecondaryOp = Tuple.Create( dmIdAndSecondaryOp.Item1, SecondaryPostBackOperation.NoOperation );
+					requestState.SetStaticAndUpdateRegionState( getStaticRegionContents( null ).contents, Enumerable.Empty<( string, string )>().Materialize() );
+				}
+			} );
+		if( navigationNeeded )
+			return navigate(
+				null,
+				null,
+				page => {
+					page.buildPage();
+					page.assertStaticRegionsUnchanged();
+					return page.getResponse( null );
 				} );
 
-			var message = new StringBuilder();
-			var staticRegionContents = getStaticRegionContents( updateRegions );
-			message.Append(
-				!string.Equals( staticRegionContents.contents, requestState.StaticRegionContents, StringComparison.Ordinal )
-					? "Previous static-region contents: " + Environment.NewLine + Environment.NewLine + requestState.StaticRegionContents + Environment.NewLine +
-					  "Current static-region contents: " + Environment.NewLine + Environment.NewLine + staticRegionContents.contents + Environment.NewLine
-					: "" );
-			message.Append(
-				StringTools
-					.ConcatenateWithDelimiter(
-						Environment.NewLine,
-						componentStateItemsById.Where( i => i.Value.ValueIsInvalid() ).Select( i => i.Key ).OrderBy( i => i ) )
-					.Surround(
-						"Component-state items whose values became invalid:" + Environment.NewLine + Environment.NewLine,
-						Environment.NewLine + Environment.NewLine ) );
-			message.Append(
-				StringTools.ConcatenateWithDelimiter(
-						Environment.NewLine,
-						formValues.Where( i => i.GetPostBackValueKey().Any() && i.PostBackValueIsInvalid() ).Select( i => i.GetPostBackValueKey() ).OrderBy( i => i ) )
-					.Surround(
-						"Form values whose post-back values became invalid:" + Environment.NewLine + Environment.NewLine,
-						Environment.NewLine + Environment.NewLine ) );
-			if( message.Length > 0 )
-				throw getPossibleDeveloperMistakeException(
-					" " + ( modificationErrorsExist
-						        ?
-						        "Post-backs, form controls, component-state items, and modification-error-display keys may not change if modification errors exist." +
-						        " (IMPORTANT: This exception may have been thrown because EWL Goal 588 hasn't been completed. See the note in the goal about the EwfPage bug and disregard the rest of this error message.)"
-						        : new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains( dmIdAndSecondaryOp.Item2 )
-							        ? "Form controls and component-state items outside of update regions may not change on an intermediate post-back."
-							        : "Post-backs, form controls, and component-state items may not change during the validation stage of an intermediate post-back." ) +
-					Environment.NewLine + Environment.NewLine + message );
-		}
-
-		if( !modificationErrorsExist && dmIdAndSecondaryOp is { Item2: SecondaryPostBackOperation.Validate } ) {
-			var secondaryDm = dmIdAndSecondaryOp.Item1.Any() ? GetPostBack( dmIdAndSecondaryOp.Item1 ) as DataModification : dataUpdate;
-			if( secondaryDm == null )
-				throw getPossibleDeveloperMistakeException( "A data modification with an ID of \"{0}\" does not exist.".FormatWith( dmIdAndSecondaryOp.Item1 ) );
-
-			var navigationNeeded = true;
-			executeWithDataModificationExceptionHandling(
-				() => {
-					var changesExist = componentStateItemsById.Values.Any( i => i.DataModifications.Contains( secondaryDm ) && i.ValueChanged() ) || formValues.Any(
-						                   i => i.DataModifications.Contains( secondaryDm ) && i.ValueChangedOnPostBack() );
-					navigationNeeded = secondaryDm == dataUpdate
-						                   ? dataUpdate.Execute( true, changesExist, handleValidationErrors, performValidationOnly: true )
-						                   : ( (ActionPostBack)secondaryDm ).Execute( changesExist, handleValidationErrors, null );
-
-					if( navigationNeeded ) {
-						requestState.DmIdAndSecondaryOp = Tuple.Create( dmIdAndSecondaryOp.Item1, SecondaryPostBackOperation.NoOperation );
-						requestState.SetStaticAndUpdateRegionState( getStaticRegionContents( null ).contents, Enumerable.Empty<( string, string )>().Materialize() );
-					}
-				} );
-			if( navigationNeeded )
-				return navigate( null, null, page => page.processSecondaryOperationAndGetResponse( null ) );
-		}
-
-		return getResponse( statusCode );
+		return getResponse( null );
 	}
 
 	/// <summary>
@@ -422,7 +423,7 @@ public abstract class PageBase: ResourceBase {
 			requestState ??= new PageRequestState();
 			requestState.FocusKey = "";
 			requestState.GeneralModificationErrors = Translation.ApplicationHasBeenUpdatedAndWeCouldNotInterpretAction.ToCollection();
-			return executePageViewDataModifications().processSecondaryOperationAndGetResponse( 400 );
+			return executePageViewDataModifications().buildPageAndGetResponse( 400 );
 		}
 
 		if( !pageBuilt )
@@ -512,11 +513,22 @@ public abstract class PageBase: ResourceBase {
 						staticRegionContents.contents,
 						updateRegions.Select( i => ( i.key, i.region.ArgumentGetter() ) ).Materialize() );
 
-					actionProcessor = page => page.executePageViewDataModifications().processSecondaryOperationAndGetResponse( null );
+					actionProcessor = page => {
+						page = page.executePageViewDataModifications();
+						page.buildPage();
+						page.assertStaticRegionsUnchanged();
+						return requestState.DmIdAndSecondaryOp is { Item2: SecondaryPostBackOperation.Validate }
+							       ? page.processSecondaryOperationAndGetResponse()
+							       : page.getResponse( null );
+					};
 				}
 				else {
 					requestState = new PageRequestState();
-					actionProcessor = page => page.executePageViewDataModifications().processSecondaryOperationAndGetResponse( null );
+					actionProcessor = page => {
+						page = page.executePageViewDataModifications();
+						page.buildPage();
+						return page.getResponse( null );
+					};
 				}
 			} );
 
@@ -524,8 +536,11 @@ public abstract class PageBase: ResourceBase {
 			navigationBehavior?.destination,
 			navigationBehavior?.authorizationCheckDisabledPredicate,
 			page => {
-				if( modificationErrorsExist )
-					return page.processSecondaryOperationAndGetResponse( null );
+				if( modificationErrorsExist ) {
+					page.buildPage();
+					page.assertStaticRegionsUnchanged();
+					return page.getResponse( null );
+				}
 
 				// Store the secondary response right before navigation so that it doesn’t get sent if there is an error before this point.
 				if( fullSecondaryResponse is not null )
@@ -533,6 +548,11 @@ public abstract class PageBase: ResourceBase {
 
 				return actionProcessor( page );
 			} );
+	}
+
+	private EwfResponse buildPageAndGetResponse( int? statusCode ) {
+		buildPage();
+		return getResponse( statusCode );
 	}
 
 	private void buildPage() {
