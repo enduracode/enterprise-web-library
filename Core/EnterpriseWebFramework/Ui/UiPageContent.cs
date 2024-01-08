@@ -43,6 +43,7 @@ public class UiPageContent: PageContent {
 	private static readonly ElementClass pageActionListContainerClass = new( "ewfUiPageAction" );
 	private static readonly ElementClass contentContainerClass = new( "ewfUiContent" );
 	private static readonly ElementClass contentBoxClass = new( "ewfUiContentBox" );
+	private static readonly ElementClass contentGridClass = new( "ewfUiContentGrid" );
 	private static readonly ElementClass contentFootContainerClass = new( "ewfUiCf" );
 	private static readonly ElementClass contentFootActionListContainerClass = new( "ewfUiCfActions" );
 
@@ -111,7 +112,8 @@ public class UiPageContent: PageContent {
 					new CssElement( "UiSideTabGroupHead", formSelector + " div." + sideTabGroupHeadClass.ClassName ),
 					new CssElement( "UiPageActionListContainer", formSelector + " " + "div." + pageActionListContainerClass.ClassName ),
 					new CssElement( "UiContentContainer", formSelector + " " + "div." + contentContainerClass.ClassName ),
-					new CssElement( "UiContentBox", formSelector + " " + "div." + contentBoxClass.ClassName ),
+					new CssElement( "UiContentBox", formSelector + " div." + contentBoxClass.ClassName ),
+					new CssElement( "UiContentGrid", formSelector + " div." + contentGridClass.ClassName ),
 					new CssElement( "UiContentFootContainer", formSelector + " " + "div." + contentFootContainerClass.ClassName ),
 					new CssElement( "UiContentFootActionListContainer", formSelector + " " + "div." + contentFootActionListContainerClass.ClassName )
 				};
@@ -148,8 +150,8 @@ public class UiPageContent: PageContent {
 	/// <param name="bodyClasses"></param>
 	/// <param name="pageActions">The page actions. Any hyperlink with a destination to which the user cannot navigate (due to authorization logic) will be
 	/// automatically hidden by the framework.</param>
-	/// <param name="omitContentBox">Pass true to omit the box-style effect around the page content. Useful when all content is contained within multiple
-	/// box-style sections.</param>
+	/// <param name="omitContentBox">Pass true to omit the box-style effect around the page content, instead placing it within a grid that has a single column by
+	/// default. Useful when all content is contained within multiple box-style sections.</param>
 	/// <param name="contentFootActions">The content-foot actions. The first action, if it is a post-back, will produce a submit button.</param>
 	/// <param name="contentFootComponents">The content-foot components.</param>
 	/// <param name="dataUpdateModificationMethod">The modification method for the page’s data-update modification.</param>
@@ -183,7 +185,7 @@ public class UiPageContent: PageContent {
 								_ => new DisplayableElementData(
 									null,
 									() => new DisplayableElementLocalData( "div" ),
-									classes: omitContentBox ? null : contentBoxClass,
+									classes: omitContentBox ? contentGridClass : contentBoxClass,
 									children: content ) ).ToCollection(),
 							classes: contentContainerClass ) )
 					.Concat( getContentFootBlock( isAutoDataUpdater, contentFootActions, contentFootComponents ) )

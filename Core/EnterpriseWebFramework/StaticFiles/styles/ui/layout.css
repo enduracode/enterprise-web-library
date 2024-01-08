@@ -140,7 +140,7 @@ ewfSectionBoxStyleClosedState > ewfSectionHeadingContainer {
 ewfUiTopErrorMessageListContainer, ewfUiEntitySummaryContainer:nth-child(n + 2) {
 	margin-top: var(--ewf-ui-top-level-vertical-spacing);
 }
-ewfUiEntityAndTopTabContainer {
+ewfUiEntityAndTopTabContainer, ewfUiContentGrid {
 	row-gap: var(--ewf-ui-top-level-vertical-spacing);
 }
 ewfUiSideTabGroupHead {
@@ -150,6 +150,9 @@ ewfUiSideTabContainer ewfActionComponentAllStylesStatesWithHover, ewfUiSideTabCo
 	border-left-width: var(--ewf-ui-side-tab-border-width);
 	border-left-style: solid;
 	padding-left: calc(var(--ewf-ui-top-level-horizontal-spacing) - var(--ewf-ui-side-tab-border-width));
+}
+ewfUiContentGrid {
+	column-gap: var(--ewf-ui-top-level-horizontal-spacing);
 }
 
 /* navigation spacing */
@@ -219,14 +222,14 @@ ewfUiSideTabContainer ewfUiCurrentTabActionControl {
 @media print {}
 
 /* max width */
-ewfSectionBoxStyleBothStates, ewfUiContentBox, ewfUiPageActionListContainer > ewfUnorderedComponentList, ewfUiContentFootActionListContainer {
+ewfSectionBoxStyleBothStates, ewfUiContentBox, ewfUiPageActionListContainer > ewfUnorderedComponentList, ewfUiContentGrid, ewfUiContentFootActionListContainer {
 	margin-left: auto;
 	margin-right: auto;
 }
 ewfSectionBoxStyleBothStates, ewfUiContentBox {
 	max-width: var(--ewf-column-width);
 }
-ewfUiPageActionListContainer > ewfUnorderedComponentList, ewfUiContentFootActionListContainer {
+ewfUiPageActionListContainer > ewfUnorderedComponentList, ewfUiContentGrid, ewfUiContentFootActionListContainer {
 	max-width: calc(var(--ewf-column-width) + var(--ewf-ui-top-level-horizontal-spacing) * 2);
 }
 
@@ -586,6 +589,13 @@ ewfUiPageActionListContainer ewfHyperlinkAllStylesAllVisitedStates {
 ewfUiPageActionListContainer ewfHyperlinkAllStylesStatesWithFocus,
 ewfUiPageActionListContainer ewfHyperlinkAllStylesStatesWithHover {
 	text-decoration: underline;
+}
+ewfUiContentGrid {
+	display: grid;
+	grid-template-columns: 1fr;
+}
+ewfUiContentGrid > ewfSectionBoxStyleBothStates {
+	margin: 0;
 }
 ewfUiContentFootContainer {
 	text-align: center;
