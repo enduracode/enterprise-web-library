@@ -232,7 +232,10 @@ internal static class TableStatics {
 				if( index != 0 )
 					components.Add(
 						new EwfButton(
-							new StandardButtonStyle( tableIsColumnPrimary ? "<" : @"/\", ButtonSize.ShrinkWrap ),
+							new CustomButtonStyle(
+								classes: new ElementClass( "icon" ),
+								attributes: new ElementAttribute( "aria-label", "Move up" ).ToCollection(),
+								children: new FontAwesomeIcon( tableIsColumnPrimary ? "fa-chevron-circle-left" : "fa-chevron-circle-up", "fa-lg" ).ToCollection() ),
 							behavior: new PostBackBehavior(
 								postBack: PostBack.CreateFull(
 									id: PostBack.GetCompositeId( postBackIdBase, item.Setup.RankId.Value.ToString(), "up" ),
@@ -242,7 +245,10 @@ internal static class TableStatics {
 				if( index != items.Count - 1 )
 					components.Add(
 						new EwfButton(
-							new StandardButtonStyle( tableIsColumnPrimary ? ">" : @"\/", ButtonSize.ShrinkWrap ),
+							new CustomButtonStyle(
+								classes: new ElementClass( "icon" ),
+								attributes: new ElementAttribute( "aria-label", "Move down" ).ToCollection(),
+								children: new FontAwesomeIcon( tableIsColumnPrimary ? "fa-chevron-circle-right" : "fa-chevron-circle-down", "fa-lg" ).ToCollection() ),
 							behavior: new PostBackBehavior(
 								postBack: PostBack.CreateFull(
 									id: PostBack.GetCompositeId( postBackIdBase, item.Setup.RankId.Value.ToString(), "down" ),

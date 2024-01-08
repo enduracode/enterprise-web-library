@@ -87,16 +87,17 @@ public class TimeControl: FormControl<FlowComponent> {
 				setup.IsReadOnly
 					? Enumerable.Empty<PhrasingComponent>()
 					: new EwfButton(
-						new CustomButtonStyle(
-							attributes: new ElementAttribute( "aria-label", "Help" ).ToCollection(),
-							children: new FontAwesomeIcon( "fa-question-circle-o" ).ToCollection() ),
-						behavior: new OpenModalBehavior(
-							helpBoxId,
-							etherealChildren: new ModalBox(
+							new CustomButtonStyle(
+								classes: new ElementClass( "icon" ),
+								attributes: new ElementAttribute( "aria-label", "Help" ).ToCollection(),
+								children: new FontAwesomeIcon( "fa-question-circle-o" ).ToCollection() ),
+							behavior: new OpenModalBehavior(
 								helpBoxId,
-								true,
-								"Examples:".ToComponents().Append( new LineBreak() ).Concat( "9 am, 2:30p, 1600".ToComponents() ).Materialize() ).ToCollection() ),
-						classes: new ElementClass( "icon" ) ).ToCollection() );
+								etherealChildren: new ModalBox(
+									helpBoxId,
+									true,
+									"Examples:".ToComponents().Append( new LineBreak() ).Concat( "9 am, 2:30p, 1600".ToComponents() ).Materialize() ).ToCollection() ) )
+						.ToCollection() );
 			Validation = textControl.Validation;
 		}
 		else {
