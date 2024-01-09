@@ -293,8 +293,15 @@ ewfWrappingFormItemList > ewfFormItemListItem, ewfWrappingFormItemList > ewfForm
 ewfGridFormItemList > ewfFormItemListItem, ewfGridFormItemList > ewfFormItemListButtonItem {
 	min-width: 0;
 }
+ewfWrappingFormItemList > ewfFormItemListButtonItem,
+ewfGridFormItemList:not(.ewfGvaT):not(.ewfGvaB):not(.ewfGvaC):not(.ewfGvaS) > ewfFormItemListButtonItem {
+	align-self: end;
+}
 ewfGridFormItemList > ewfFormItemListButtonItem {
 	grid-column-end: -1;
+}
+ewfGridFormItemList > ewfFormItemListButtonItem:not(.ewfTaL):not(.ewfTaR):not(.ewfTaC):not(.ewfTaJ) {
+	justify-self: end;
 }
 .ewfFaL {
 	justify-content: flex-start;
