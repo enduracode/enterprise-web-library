@@ -17,7 +17,7 @@ partial class FormItemListDemo {
 
 	private IReadOnlyCollection<FormItem> getFormItems() {
 		var boxId = new ModalBoxId();
-		return new TextControl( "", true ).ToFormItem(
+		return new TextControl( "", true, setup: TextControlSetup.Create( widthOverride: 45.ToEm() ) ).ToFormItem(
 				setup: new FormItemSetup( columnSpan: 2 ),
 				label: "Model number ".ToComponents()
 					.Append(
@@ -25,11 +25,12 @@ partial class FormItemListDemo {
 							new StandardButtonStyle( "(popup)", buttonSize: ButtonSize.ShrinkWrap ),
 							behavior: new OpenModalBehavior( boxId, etherealChildren: new ModalBox( boxId, true, "More information...".ToComponents() ).ToCollection() ) ) )
 					.Materialize() )
-			.Append( "".ToComponents().ToFormItem( label: "Normal price".ToComponents() ) )
-			.Append( new TextControl( "", true ).ToFormItem( label: "Actual price".ToComponents() ) )
-			.Append( new TextControl( "", true ).ToFormItem( label: "Quantity".ToComponents() ) )
-			.Append( "".ToComponents().ToFormItem( label: "Inventory".ToComponents() ) )
-			.Append( "".ToComponents().ToFormItem( label: "Bill Number".ToComponents() ) )
+			.Append( "$150".ToComponents().ToFormItem( label: "Normal price".ToComponents() ) )
+			.Append( new TextControl( "", true, maxLength: 10 ).ToFormItem( label: "Actual price".ToComponents() ) )
+			.Append( new NumberControl( null, true ).ToFormItem( label: "Quantity".ToComponents() ) )
+			.Append( new TextControl( "", true, setup: TextControlSetup.Create( numberOfRows: 3 ) ).ToFormItem( label: "Inventory".ToComponents() ) )
+			.Append( new Checkbox( false, label: "Tax exempt".ToComponents() ).ToFormItem() )
+			.Append( new NumberControl( null, true ).ToFormItem( label: "Quantity shipped".ToComponents() ) )
 			.Materialize();
 	}
 }
