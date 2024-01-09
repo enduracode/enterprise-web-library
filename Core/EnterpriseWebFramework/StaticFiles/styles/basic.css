@@ -289,6 +289,7 @@ ewfStackFormItemList > ewfFormItemListItem > ewfFormItemListItemContent,
 ewfStackFormItemList > ewfFormItemListButtonItem > ewfFormItemListItemContent {
 	align-self: stretch;
 }
+ewfWrappingFormItemList > ewfFormItemListItem, ewfWrappingFormItemList > ewfFormItemListButtonItem,
 ewfGridFormItemList > ewfFormItemListItem, ewfGridFormItemList > ewfFormItemListButtonItem {
 	min-width: 0;
 }
