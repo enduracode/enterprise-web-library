@@ -12,7 +12,7 @@ partial class EntitySetup: UiEntitySetup {
 	protected override IEnumerable<ResourceGroup> createListedResources() =>
 		new[]
 			{
-				new ResourceGroup( "Layout", new BoxDemo( this ), new ComponentLists( this ) ),
+				new ResourceGroup( "Layout", new BoxDemo( this ), new ComponentLists( this ), new FormItemListDemo( this ) ),
 				new ResourceGroup( "Tables", new EwfTableDemo( this ), new ColumnPrimaryTableDemo( this ), new ResponsiveTableDemo( this ) ),
 				new ResourceGroup(
 					"Form Controls",
@@ -23,7 +23,7 @@ partial class EntitySetup: UiEntitySetup {
 					new CheckboxListDemo( this ),
 					new DateAndTimePickers( this ),
 					new FileUploadDemo( this ) ),
-				new ResourceGroup( "Working Stuff", new ActionControls( this ), new OptionalParametersDemo( this ), new OmniDemo( this ) ),
+				new ResourceGroup( "Working Stuff", new ActionControls( this ), new OptionalParametersDemo( this ) ),
 				new ResourceGroup( "First category", new HtmlEditing( this ), new RegexHelper( this ), new StatusMessages( this ) ),
 				new ResourceGroup( "Other", new IntermediatePostBacks( this ), new ModalBoxes( this ), new MailMerging( this ), new Charts( this ) )
 			};
@@ -34,6 +34,7 @@ partial class EntitySetup: UiEntitySetup {
 	protected override IEnumerable<UrlPattern> getChildUrlPatterns() =>
 		RequestDispatchingStatics.GetFrameworkUrlPatterns()
 			.Append( BoxDemo.UrlPatterns.Literal( this, "box" ) )
+			.Append( FormItemListDemo.UrlPatterns.Literal( this, "form-item-list" ) )
 			.Append( EwfTableDemo.UrlPatterns.Literal( this, "standard-table" ) )
 			.Append( ResponsiveTableDemo.UrlPatterns.Literal( this, "responsive-table" ) )
 			.Append( TextControlDemo.UrlPatterns.Literal( this, "text-control" ) )
