@@ -13,12 +13,12 @@
 	--duet-color-placeholder: #666;
 	--duet-color-button: #f5f5f5;
 	--duet-color-surface: #fff;
-	--duet-color-overlay: rgba( 0, 0, 0, 0.8 );
+	--duet-color-overlay: rgba(0, 0, 0, 0.8);
 	--duet-color-border: #333;
 	--duet-font: inherit;
 	--duet-font-normal: 400;
 	--duet-font-bold: 600;
-	--duet-radius: var( --ewf-form-control-border-radius );
+	--duet-radius: var(--ewf-form-control-border-radius);
 	--duet-z-index: 600;
 }
 
@@ -116,10 +116,10 @@ ewfHtmlBlock:first-child {
 	margin-top: 0;
 }
 ewfWrappingFormItemList {
-	margin-top: calc( 1em - .5em );
+	margin-top: calc(1em - .5em);
 }
 ewfWrappingFormItemList:first-child {
-	margin-top: calc( 0em - .5em );
+	margin-top: calc(0em - .5em);
 }
 
 /* bottom */
@@ -132,7 +132,7 @@ ewfFlowCheckboxAllStates > ewfFlowCheckboxNestedContentContainer {
 
 /* lists */
 ewfUnorderedLineList, ewfUnorderedStackList, ewfUnorderedWrappingList {
-	gap: var( --ewf-list-item-spacing );
+	gap: var(--ewf-list-item-spacing);
 }
 ewfOrderedStackList > ewfComponentListItem, ewfHtmlBlock li {
 	margin-top: .5em;
@@ -207,24 +207,24 @@ ewfModalBox > ewfModalBoxCloseButtonContainer {
 ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer,
 ewfStackFormItemList > ewfFormItemListItem, ewfStackFormItemList > ewfFormItemListButtonItem,
 ewfMergeRowTreeContainer ewfUnorderedStackList > ewfComponentListItem {
-	border-color: rgba( 0, 0, 0, 0.1 );
+	border-color: rgba(0, 0, 0, 0.1);
 }
 ewfSingleLineTextControlAllStates, ewfMultilineTextControlAllStates,
 ewfModalBox > ewfModalBoxCloseButtonContainer {
-	border-color: hsla( 0, 0%, 58%, 1 );
+	border-color: hsla(0, 0%, 58%, 1);
 }
 
 /* focus */
 ewfHyperlinkStandardStyleStatesWithFocus, ewfActionComponentAllStylesStatesWithFocus.icon {
-	outline: 2px solid hsl( 209, 91%, 47% );
+	outline: 2px solid hsl(209, 91%, 47%);
 }
 ewfActionComponentAllButtonStylesStatesWithFocus {
-	outline: 2px solid hsl( 209, 91%, 47% );
+	outline: 2px solid hsl(209, 91%, 47%);
 	outline-offset: 1px;
 }
 ewfSingleLineTextControlFocusState, ewfMultilineTextControlFocusState {
-	box-shadow: 0 0 8px hsla( 209, 91%, 47%, 0.3 );
-	border-color: hsla( 209, 91%, 47%, 1 );
+	box-shadow: 0 0 8px hsla(209, 91%, 47%, 0.3);
+	border-color: hsla(209, 91%, 47%, 1);
 	outline: none;
 }
 
@@ -252,8 +252,8 @@ ewfStackFormItemList > ewfFormItemListItem, ewfStackFormItemList > ewfFormItemLi
 ewfWrappingFormItemList {
 	display: flex;
 }
-ewfUnorderedLineList:not( .ewfFvaT ):not( .ewfFvaB ):not( .ewfFvaC ):not( .ewfFvaBl ),
-ewfUnorderedWrappingList:not( .ewfFvaT ):not( .ewfFvaB ):not( .ewfFvaC ):not( .ewfFvaBl ),
+ewfUnorderedLineList:not(.ewfFvaT):not(.ewfFvaB):not(.ewfFvaC):not(.ewfFvaBl),
+ewfUnorderedWrappingList:not(.ewfFvaT):not(.ewfFvaB):not(.ewfFvaC):not(.ewfFvaBl),
 ewfStackFormItemList > ewfFormItemListItem, ewfStackFormItemList > ewfFormItemListButtonItem {
 	align-items: center;
 }
@@ -393,7 +393,7 @@ ewfActionComponentShrinkWrapButtonStyleAllStates, ewfTopWarningContainer ewfActi
 }
 ewfActionComponentNormalButtonStyleAllStates {
 	border-radius: .4em;
-	padding: var( --ewf-normal-button-padding );
+	padding: var(--ewf-normal-button-padding);
 }
 ewfActionComponentLargeButtonStyleAllStates {
 	font-size: 1.4em;
@@ -407,7 +407,8 @@ button {
 
 /* images */
 img {
-	border-width: 0; /* Remove default borders around images when they are inside anchor tags. */
+	/* Remove default borders around images when they are inside anchor tags. */
+	border-width: 0;
 }
 img.ewfAutoSizer {
 	display: block;
@@ -475,9 +476,9 @@ ewfSingleLineTextControlAllStates, ewfMultilineTextControlAllStates {
 	max-width: 100%;
 	border-width: 1px;
 	border-style: solid;
-	border-radius: var( --ewf-form-control-border-radius );
-	padding: var( --ewf-text-control-vertical-padding ) var( --ewf-text-control-horizontal-padding );
-	color: hsla( 215, 11%, 22%, 1 );
+	border-radius: var(--ewf-form-control-border-radius);
+	padding: var(--ewf-text-control-vertical-padding) var(--ewf-text-control-horizontal-padding);
+	color: hsla(215, 11%, 22%, 1);
 }
 ewfMultilineTextControlAllStates {
 	width: 35em;
@@ -529,8 +530,8 @@ ewfDateControl {
 	max-width: 10.5em;
 }
 ewfDateControl input.duet-date__input {
-	padding: var( --ewf-text-control-vertical-padding ) var( --ewf-text-control-horizontal-padding );
-	padding-right: calc( var( --ewf-text-control-horizontal-padding ) + 48px );
+	padding: var(--ewf-text-control-vertical-padding) var(--ewf-text-control-horizontal-padding);
+	padding-right: calc(var(--ewf-text-control-horizontal-padding) + 48px);
 }
 ewfDateControl table.duet-date__table th {
 	text-align: center;
@@ -622,7 +623,7 @@ ewfModalBox > iframe {
 	min-height: 0;
 }
 ewfModalBoxBackdrop {
-	background-color: hsla( 0, 0%, 0%, .65 );
+	background-color: hsla(0, 0%, 0%, .65);
 }
 
 /* user management */
@@ -658,7 +659,7 @@ ewfTopWarningContainer {
 	margin-bottom: .5em;
 	border: 1px solid #464646;
 	border-radius: .5em;
-	background-color: hsla( 43, 100%, 54%, 0.75 );
+	background-color: hsla(43, 100%, 54%, 0.75);
 	padding: .5em;
 	text-align: center;
 	font-weight: bold;
@@ -674,11 +675,11 @@ ewfTopWarningContainer ewfActionComponentAllButtonStylesAllStates {
 }
 ewfTopWarningContainer ewfActionComponentAllButtonStylesAllNormalStates,
 ewfTopWarningContainer ewfActionComponentAllButtonStylesAllVisitedStates {
-	background-color: hsla( 4, 100%, 32%, 1 );
+	background-color: hsla(4, 100%, 32%, 1);
 }
 ewfTopWarningContainer ewfActionComponentAllButtonStylesStatesWithHover,
 ewfTopWarningContainer ewfActionComponentAllButtonStylesStatesWithFocus {
-	background-color: hsla( 4, 100%, 45%, 1 );
+	background-color: hsla(4, 100%, 45%, 1);
 }
 span.ewfIntermediateUrl {
 	word-break: break-all;
@@ -781,10 +782,10 @@ ewfProcessingDialogTimeOutParagraphBothStates > ewfActionComponentAllButtonStyle
 }
 @keyframes processingDialogBackdropFade_EWF {
 	from {
-		background-color: hsla( 0, 0%, 50%, 0 );
+		background-color: hsla(0, 0%, 50%, 0);
 	}
 	to {
-		background-color: hsla( 0, 0%, 50%, .3 );
+		background-color: hsla(0, 0%, 50%, .3);
 	}
 }
 ewfNotificationSectionContainer {
@@ -793,7 +794,7 @@ ewfNotificationSectionContainer {
 	bottom: 0;
 }
 ewfNotificationSectionContainer > ewfSectionBoxStyleBothStates {
-	box-shadow: 0 2px 6px rgba( 0, 0, 0, .5 );
+	box-shadow: 0 2px 6px rgba(0, 0, 0, .5);
 	border-radius: revert;
 	background-color: white;
 	padding: .2rem 1em;
@@ -805,7 +806,7 @@ ewfNotificationSectionContainer > ewfSectionBoxStyleBothStates > ewfSectionHeadi
 	margin-left: -1em;
 	margin-right: -1em;
 	border-style: none;
-	background-color: rgba( 0, 0, 0, .05 );
+	background-color: rgba(0, 0, 0, .05);
 	padding: .2rem 1em;
 	overflow: hidden;
 
@@ -837,7 +838,7 @@ ewfNotificationSectionContainer > ewfSectionBoxStyleClosedState > ewfSectionCont
 	height: 0;
 }
 ewfInfoMessageContainer > ewfIcon {
-	color: rgb( 120, 160, 195 );
+	color: rgb(120, 160, 195);
 }
 ewfWarningMessageContainer > ewfIcon {
 	color: #E69017;
@@ -859,9 +860,9 @@ ewfWarningMessageContainer > ewfStatusMessageText {
 ewfPageLoadPostBackContentContainer > ewfImage {
 	--ewf-size: 15vw;
 	position: fixed;
-	top: calc( 50vh - var( --ewf-size ) / 2 );
-	left: calc( 50vw - var( --ewf-size ) / 2 );
-	width: var( --ewf-size );
+	top: calc(50vh - var(--ewf-size) / 2);
+	left: calc(50vw - var(--ewf-size) / 2);
+	width: var(--ewf-size);
 }
 ewfPageLoadPostBackContentContainer > ewfErrorMessageListContainer {
 	font-size: 1.5em;
@@ -871,7 +872,7 @@ ewfPageLoadPostBackContentContainer > ewfErrorMessageListContainer {
 	padding-left: 1rem;
 	padding-right: 1rem;
 	min-height: 100vh;
-	max-width: var( --ewf-column-width );
+	max-width: var(--ewf-column-width);
 	justify-content: center;
 	align-items: center;
 }
@@ -882,32 +883,32 @@ ewfSelectUserPageBody, ewfErrorPageBody {
 	margin-left: auto;
 	margin-right: auto;
 	background-color: white;
-	max-width: var( --ewf-column-width );
+	max-width: var(--ewf-column-width);
 	color: black;
 }
 ewfSelectUserPageBody ewfHyperlinkStandardStyleAllNormalStates,
 ewfSelectUserPageBody ewfHyperlinkStandardStyleAllVisitedStates,
 ewfErrorPageBody ewfHyperlinkStandardStyleAllNormalStates,
 ewfErrorPageBody ewfHyperlinkStandardStyleAllVisitedStates {
-	color: hsla( 4, 100%, 32%, 1 );
+	color: hsla(4, 100%, 32%, 1);
 }
 ewfSelectUserPageBody ewfActionComponentAllButtonStylesAllNormalStates,
 ewfSelectUserPageBody ewfActionComponentAllButtonStylesAllVisitedStates,
 ewfErrorPageBody ewfActionComponentAllButtonStylesAllNormalStates,
 ewfErrorPageBody ewfActionComponentAllButtonStylesAllVisitedStates {
-	background-color: hsla( 4, 100%, 32%, 1 );
+	background-color: hsla(4, 100%, 32%, 1);
 }
 ewfSelectUserPageBody ewfHyperlinkStandardStyleStatesWithHover,
 ewfSelectUserPageBody ewfHyperlinkStandardStyleStatesWithFocus,
 ewfErrorPageBody ewfHyperlinkStandardStyleStatesWithHover,
 ewfErrorPageBody ewfHyperlinkStandardStyleStatesWithFocus {
-	color: hsla( 4, 100%, 45%, 1 );
+	color: hsla(4, 100%, 45%, 1);
 }
 ewfSelectUserPageBody ewfActionComponentAllButtonStylesStatesWithHover,
 ewfSelectUserPageBody ewfActionComponentAllButtonStylesStatesWithFocus,
 ewfErrorPageBody ewfActionComponentAllButtonStylesStatesWithHover,
 ewfErrorPageBody ewfActionComponentAllButtonStylesStatesWithFocus {
-	background-color: hsla( 4, 100%, 45%, 1 );
+	background-color: hsla(4, 100%, 45%, 1);
 }
 ewfSelectUserPageBody ewfHyperlinkStandardStyleAllStates,
 ewfErrorPageBody ewfHyperlinkStandardStyleAllStates {
@@ -931,7 +932,7 @@ ewfErrorPageBody.ewfUnhandledExceptionDisplay {
 	max-width: revert;
 }
 ewfErrorPageBody.ewfUnhandledExceptionDisplay pre {
-	font-size: min( 2.5vw, 1rem );
+	font-size: min(2.5vw, 1rem);
 	white-space: pre-wrap;
 	tab-size: 4;
 }
