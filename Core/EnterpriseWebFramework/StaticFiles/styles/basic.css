@@ -291,6 +291,7 @@ ewfStackFormItemList > ewfFormItemListButtonItem > ewfFormItemListItemContent {
 }
 ewfWrappingFormItemList > ewfFormItemListItem, ewfWrappingFormItemList > ewfFormItemListButtonItem,
 ewfGridFormItemList > ewfFormItemListItem, ewfGridFormItemList > ewfFormItemListButtonItem {
+	/* see https://stackoverflow.com/a/66689926/35349 */
 	min-width: 0;
 }
 ewfWrappingFormItemList > ewfFormItemListButtonItem,
