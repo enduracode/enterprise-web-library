@@ -6,6 +6,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 /// <summary>
 /// Helps lay out form items in useful ways.
 /// </summary>
+[ PublicAPI ]
 // After https://bugs.chromium.org/p/chromium/issues/detail?id=375693 is fixed, change the top-level element to fieldset. Don't support legend.
 public class FormItemList: FlowComponent {
 	// This class allows us to use just one selector in the FormItemList element.
@@ -58,8 +59,7 @@ public class FormItemList: FlowComponent {
 							new DisplayableElementFocusDependentData(
 								attributes: new ElementAttribute( "style", "flex-basis: {0}".FormatWith( ( (CssLength)minWidths.Value.label ).Value ) ).ToCollection() ) ),
 						classes: labelClass,
-						children: i.Label ) ).ToCollection()
-				.Append(
+						children: i.Label ) ).Append(
 					new DisplayableElement(
 						_ => new DisplayableElementData(
 							null,
