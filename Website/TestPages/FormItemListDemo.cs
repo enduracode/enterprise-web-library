@@ -26,7 +26,15 @@ partial class FormItemListDemo {
 							behavior: new OpenModalBehavior( boxId, etherealChildren: new ModalBox( boxId, true, "More information...".ToComponents() ).ToCollection() ) ) )
 					.Materialize() )
 			.Append( "$150".ToComponents().ToFormItem( label: "Normal price".ToComponents() ) )
-			.Append( new TextControl( "", true, maxLength: 10 ).ToFormItem( label: "Actual price".ToComponents() ) )
+			.Append(
+				new TextControl(
+					"",
+					true,
+					maxLength: 10,
+					validationMethod: ( value, validator ) => {
+						if( value.Length > 0 )
+							validator.NoteErrorAndAddMessage( "The price is wrong. Also, this error message is far too long." );
+					} ).ToFormItem( label: "Actual price".ToComponents() ) )
 			.Append( new NumberControl( null, true ).ToFormItem( label: "Quantity".ToComponents() ) )
 			.Append( new TextControl( "", true, setup: TextControlSetup.Create( numberOfRows: 3 ) ).ToFormItem( label: "Inventory".ToComponents() ) )
 			.Append( new Checkbox( false, label: "Tax exempt".ToComponents() ).ToFormItem() )
