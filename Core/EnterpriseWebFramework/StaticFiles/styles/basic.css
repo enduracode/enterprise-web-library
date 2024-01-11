@@ -295,6 +295,13 @@ ewfGridFormItemList > ewfFormItemListItem, ewfGridFormItemList > ewfFormItemList
 	/* see https://stackoverflow.com/a/66689926/35349 */
 	min-width: 0;
 }
+ewfWrappingFormItemList > ewfFormItemListItem, ewfWrappingFormItemList > ewfFormItemListButtonItem {
+	width: min-content;
+}
+ewfWrappingFormItemList > ewfFormItemListItem > ewfFormItemListItemLabel, ewfWrappingFormItemList > ewfFormItemListItem > ewfFormItemListItemContent,
+ewfWrappingFormItemList > ewfFormItemListButtonItem > ewfFormItemListItemLabel, ewfWrappingFormItemList > ewfFormItemListButtonItem > ewfFormItemListItemContent {
+	width: max-content;
+}
 ewfWrappingFormItemList > ewfFormItemListButtonItem,
 ewfGridFormItemList:not(.ewfGvaT):not(.ewfGvaB):not(.ewfGvaC):not(.ewfGvaS) > ewfFormItemListButtonItem {
 	align-self: end;
