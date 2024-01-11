@@ -249,8 +249,8 @@ ewfUnorderedLineList, ewfUnorderedStackList, ewfUnorderedWrappingList, ewfUnorde
 	list-style-type: none;
 }
 ewfUnorderedLineList, ewfUnorderedStackList, ewfUnorderedWrappingList,
-ewfStackFormItemList > ewfFormItemListItem, ewfStackFormItemList > ewfFormItemListButtonItem,
-ewfWrappingFormItemList {
+ewfWrappingFormItemList,
+ewfStackFormItemList > ewfFormItemListItem, ewfStackFormItemList > ewfFormItemListButtonItem {
 	display: flex;
 }
 ewfUnorderedLineList:not(.ewfFvaT):not(.ewfFvaB):not(.ewfFvaC):not(.ewfFvaBl),
@@ -265,8 +265,8 @@ ewfUnorderedStackList {
 	flex-flow: column nowrap;
 }
 ewfUnorderedWrappingList,
-ewfStackFormItemList > ewfFormItemListItem, ewfStackFormItemList > ewfFormItemListButtonItem,
-ewfWrappingFormItemList {
+ewfWrappingFormItemList,
+ewfStackFormItemList > ewfFormItemListItem, ewfStackFormItemList > ewfFormItemListButtonItem {
 	flex-flow: row wrap;
 }
 ewfStackFormItemList, ewfGridFormItemList {
@@ -281,15 +281,6 @@ ewfUnorderedInlineList, ewfUnorderedInlineList > ewfComponentListItem, ewfInline
 ewfUnorderedInlineList > ewfComponentListItem + ewfComponentListItem::before {
 	content: " | ";
 }
-ewfStackFormItemList > ewfFormItemListItem > ewfFormItemListItemLabel, ewfStackFormItemList > ewfFormItemListItem > ewfFormItemListItemContent,
-ewfStackFormItemList > ewfFormItemListButtonItem > ewfFormItemListItemLabel, ewfStackFormItemList > ewfFormItemListButtonItem > ewfFormItemListItemContent {
-	min-width: 0;
-	flex-grow: 1;
-}
-ewfStackFormItemList > ewfFormItemListItem > ewfFormItemListItemContent,
-ewfStackFormItemList > ewfFormItemListButtonItem > ewfFormItemListItemContent {
-	align-self: stretch;
-}
 ewfWrappingFormItemList > ewfFormItemListItem, ewfWrappingFormItemList > ewfFormItemListButtonItem,
 ewfGridFormItemList > ewfFormItemListItem, ewfGridFormItemList > ewfFormItemListButtonItem {
 	/* see https://stackoverflow.com/a/66689926/35349 */
@@ -297,10 +288,6 @@ ewfGridFormItemList > ewfFormItemListItem, ewfGridFormItemList > ewfFormItemList
 }
 ewfWrappingFormItemList > ewfFormItemListItem, ewfWrappingFormItemList > ewfFormItemListButtonItem {
 	width: min-content;
-}
-ewfWrappingFormItemList > ewfFormItemListItem > ewfFormItemListItemLabel, ewfWrappingFormItemList > ewfFormItemListItem > ewfFormItemListItemContent,
-ewfWrappingFormItemList > ewfFormItemListButtonItem > ewfFormItemListItemLabel, ewfWrappingFormItemList > ewfFormItemListButtonItem > ewfFormItemListItemContent {
-	width: max-content;
 }
 ewfWrappingFormItemList > ewfFormItemListButtonItem,
 ewfGridFormItemList:not(.ewfGvaT):not(.ewfGvaB):not(.ewfGvaC):not(.ewfGvaS) > ewfFormItemListButtonItem {
@@ -311,6 +298,19 @@ ewfGridFormItemList > ewfFormItemListButtonItem {
 }
 ewfGridFormItemList > ewfFormItemListButtonItem:not(.ewfTaL):not(.ewfTaR):not(.ewfTaC):not(.ewfTaJ) {
 	justify-self: end;
+}
+ewfStackFormItemList > ewfFormItemListItem > ewfFormItemListItemLabel, ewfStackFormItemList > ewfFormItemListItem > ewfFormItemListItemContent,
+ewfStackFormItemList > ewfFormItemListButtonItem > ewfFormItemListItemLabel, ewfStackFormItemList > ewfFormItemListButtonItem > ewfFormItemListItemContent {
+	min-width: 0;
+	flex-grow: 1;
+}
+ewfStackFormItemList > ewfFormItemListItem > ewfFormItemListItemContent,
+ewfStackFormItemList > ewfFormItemListButtonItem > ewfFormItemListItemContent {
+	align-self: stretch;
+}
+ewfWrappingFormItemList > ewfFormItemListItem > ewfFormItemListItemLabel, ewfWrappingFormItemList > ewfFormItemListItem > ewfFormItemListItemContent,
+ewfWrappingFormItemList > ewfFormItemListButtonItem > ewfFormItemListItemLabel, ewfWrappingFormItemList > ewfFormItemListButtonItem > ewfFormItemListItemContent {
+	width: max-content;
 }
 .ewfFaL {
 	justify-content: flex-start;
