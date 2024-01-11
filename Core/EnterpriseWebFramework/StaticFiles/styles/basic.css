@@ -185,7 +185,8 @@ ewfGridFormItemList > ewfFormItemListItem > ewfFormItemListItemLabel,
 ewfFormItem > ewfFormItemLabel {
 	margin-bottom: .1em;
 }
-ewfFormItemList > ewfFormItemListItem > ewfFormItemListItemContent > ewfErrorMessageListContainer > ewfUnorderedStackList > ewfComponentListItem,
+ewfFormItemList > ewfFormItemListItem > ewfErrorMessageListContainer > ewfUnorderedStackList > ewfComponentListItem,
+ewfStackFormItemList > ewfFormItemListItem > ewfFormItemListItemContent > ewfErrorMessageListContainer > ewfUnorderedStackList > ewfComponentListItem,
 ewfFormItem > ewfErrorMessageListContainer > ewfUnorderedStackList > ewfComponentListItem {
 	margin-top: .1em;
 }

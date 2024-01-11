@@ -148,14 +148,12 @@ public class FormItemList: FlowComponent {
 		new( setup, ElementClassSet.Empty, "", _ => ElementClassSet.Empty, _ => "", null, getItemComponents, items );
 
 	private static IReadOnlyCollection<FlowComponent> getItemComponents( FormItem item ) =>
-		( item.Label.Any() ? new GenericFlowContainer( item.Label, classes: labelClass ).ToCollection() : Enumerable.Empty<FlowComponent>() ).Append(
-			new GenericFlowContainer(
-				item.Content.Concat(
-						item.ErrorSourceSet == null
-							? Enumerable.Empty<FlowComponent>()
-							: new FlowErrorContainer( item.ErrorSourceSet, new ListErrorDisplayStyle(), disableFocusabilityOnError: true ).ToCollection() )
-					.Materialize(),
-				classes: contentClass ) )
+		( item.Label.Any() ? new GenericFlowContainer( item.Label, classes: labelClass ).ToCollection() : Enumerable.Empty<FlowComponent>() )
+		.Append( new GenericFlowContainer( item.Content, classes: contentClass ) )
+		.Concat(
+			item.ErrorSourceSet == null
+				? Enumerable.Empty<FlowComponent>()
+				: new FlowErrorContainer( item.ErrorSourceSet, new ListErrorDisplayStyle(), disableFocusabilityOnError: true ).ToCollection() )
 		.Materialize();
 
 	private readonly IReadOnlyCollection<DisplayableElement> children;
