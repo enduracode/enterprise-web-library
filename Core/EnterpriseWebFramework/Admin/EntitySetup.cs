@@ -64,8 +64,11 @@ partial class EntitySetup: UiEntitySetup {
 
 	EntityUiSetup UiEntitySetup.GetUiSetup() =>
 		new(
-			actionGetter: _ => new HyperlinkSetup(
-				new EnterpriseWebFramework.UserManagement.Pages.Impersonate( PageBase.Current.GetUrl() ),
-				"Impersonate user",
-				icon: new ActionComponentIcon( new FontAwesomeIcon( "fa-key" ) ) ).ToCollection() );
+			actionGetter: _ =>
+				UserManagementStatics.UserManagementEnabled
+					? new HyperlinkSetup(
+						new EnterpriseWebFramework.UserManagement.Pages.Impersonate( PageBase.Current.GetUrl() ),
+						"Impersonate user",
+						icon: new ActionComponentIcon( new FontAwesomeIcon( "fa-key" ) ) ).ToCollection()
+					: Array.Empty<ActionComponentSetup>() );
 }
