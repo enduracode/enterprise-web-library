@@ -155,13 +155,11 @@ public class NumberControlSetup {
 									       attributes.Add( new ElementAttribute( "value", getHtmlFloatingPointNumber( pmvValue ) ) );
 									       if( isReadOnly )
 										       attributes.Add( new ElementAttribute( "disabled" ) );
-									       if( !isReadOnly ) {
-										       if( minValue.HasValue )
-											       attributes.Add( new ElementAttribute( "min", getHtmlFloatingPointNumber( minValue.Value ) ) );
-										       if( maxValue.HasValue )
-											       attributes.Add( new ElementAttribute( "max", getHtmlFloatingPointNumber( maxValue.Value ) ) );
-										       attributes.Add( new ElementAttribute( "step", valueStep.HasValue ? getHtmlFloatingPointNumber( valueStep.Value ) : "any" ) );
-									       }
+									       if( minValue.HasValue )
+										       attributes.Add( new ElementAttribute( "min", getHtmlFloatingPointNumber( minValue.Value ) ) );
+									       if( maxValue.HasValue )
+										       attributes.Add( new ElementAttribute( "max", getHtmlFloatingPointNumber( maxValue.Value ) ) );
+									       attributes.Add( new ElementAttribute( "step", valueStep.HasValue ? getHtmlFloatingPointNumber( valueStep.Value ) : "any" ) );
 									       if( placeholder.Any() )
 										       attributes.Add( new ElementAttribute( "placeholder", placeholder ) );
 									       if( autoFillTokens.Any() )

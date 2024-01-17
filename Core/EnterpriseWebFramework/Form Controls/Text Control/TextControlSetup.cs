@@ -284,26 +284,23 @@ public class TextControlSetup {
 										       attributes.Add( new ElementAttribute( "value", inputElementType != "password" ? pageModificationValue.Value : "" ) );
 									       if( isReadOnly )
 										       attributes.Add( new ElementAttribute( "disabled" ) );
-									       if( !isReadOnly ) {
-										       if( minLength.HasValue )
-											       attributes.Add( new ElementAttribute( "minlength", minLength.Value.ToString() ) );
-										       if( maxLength.HasValue )
-											       attributes.Add( new ElementAttribute( "maxlength", maxLength.Value.ToString() ) );
-									       }
+									       if( minLength.HasValue )
+										       attributes.Add( new ElementAttribute( "minlength", minLength.Value.ToString() ) );
+									       if( maxLength.HasValue )
+										       attributes.Add( new ElementAttribute( "maxlength", maxLength.Value.ToString() ) );
 									       if( requiresNumericValue )
 										       attributes.Add( new ElementAttribute( "pattern", "[0-9]*" ) );
 									       if( placeholder.Any() )
 										       attributes.Add( new ElementAttribute( "placeholder", placeholder ) );
 									       if( autoFillTokens.Any() )
 										       attributes.Add( new ElementAttribute( "autocomplete", autoFillTokens ) );
-									       if( !isReadOnly )
-										       attributes.Add(
-											       new ElementAttribute(
-												       "inputmode",
-												       inputElementType == "email" ? "email" :
-												       inputElementType == "tel" ? "tel" :
-												       inputElementType == "url" ? "url" :
-												       requiresNumericValue ? "numeric" : "text" ) );
+									       attributes.Add(
+										       new ElementAttribute(
+											       "inputmode",
+											       inputElementType == "email" ? "email" :
+											       inputElementType == "tel" ? "tel" :
+											       inputElementType == "url" ? "url" :
+											       requiresNumericValue ? "numeric" : "text" ) );
 									       if( checksSpellingAndGrammar.HasValue )
 										       attributes.Add( new ElementAttribute( "spellcheck", checksSpellingAndGrammar.Value ? "true" : "false" ) );
 									       if( widthOverride != null )
