@@ -131,7 +131,7 @@ internal class UpdateDependentLogic: Operation {
 			generateCodeForProject(
 				installation,
 				"",
-				EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.TewlProjectName ),
+				EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.TewlProjectPath ),
 				"Tewl",
 				writer => {
 					writer.WriteLine( "using System.Globalization;" );
@@ -139,7 +139,7 @@ internal class UpdateDependentLogic: Operation {
 					writer.WriteLine( "namespace Tewl;" );
 					writer.WriteLine();
 					writer.WriteLine( "partial class TewlStatics {" );
-					CodeGenerationStatics.AddSummaryDocComment( writer, "The date/time at which this version of Tewl was built." );
+					CodeGenerationStatics.AddSummaryDocComment( writer, "The date/time at which this version of TEWL was built." );
 					writer.WriteLine(
 						"public static readonly DateTimeOffset TewlBuildDateTime = {0};".FormatWith( AppStatics.GetLiteralDateTimeExpression( DateTimeOffset.UtcNow ) ) );
 					writer.WriteLine( "}" );

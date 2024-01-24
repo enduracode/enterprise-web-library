@@ -39,7 +39,7 @@ internal class ExportLogic: Operation {
 		var packages = new List<( string, IReadOnlyList<byte[]> )>();
 
 		var mainId = packagingConfiguration.SystemShortName;
-		var mainProjectName = installation.SystemIsTewl() ? AppStatics.TewlProjectName : EwlStatics.CoreProjectName;
+		var mainProjectPath = installation.SystemIsTewl() ? AppStatics.TewlProjectPath : EwlStatics.CoreProjectName;
 		var mainPackages = prereleaseValues.Select(
 				prerelease => {
 					var localExportDateAndTime = prerelease.HasValue ? (DateTime?)null : now;
@@ -49,7 +49,7 @@ internal class ExportLogic: Operation {
 							TewlContrib.ProcessTools.RunProgram(
 								"dotnet",
 								"build \"{0}\" --configuration {1} --no-restore".FormatWith(
-									EwlStatics.CombinePaths( installation.GeneralLogic.Path, mainProjectName ),
+									EwlStatics.CombinePaths( installation.GeneralLogic.Path, mainProjectPath ),
 									useDebugAssembly ? "Debug" : "Release" ),
 								"",
 								true );
@@ -57,7 +57,7 @@ internal class ExportLogic: Operation {
 								IoMethods.CopyFile(
 									EwlStatics.CombinePaths(
 										installation.GeneralLogic.Path,
-										mainProjectName,
+										mainProjectPath,
 										ConfigurationStatics.GetProjectOutputFolderPath( useDebugAssembly ),
 										fileName ),
 									EwlStatics.CombinePaths( folderPath, @"lib\{0}".FormatWith( nuGetTargetFramework ), fileName ) );
@@ -109,7 +109,7 @@ internal class ExportLogic: Operation {
 									mainId,
 									mainId,
 									"",
-									EwlStatics.CombinePaths( installation.GeneralLogic.Path, mainProjectName, mainProjectName + ".csproj" ),
+									EwlStatics.CombinePaths( installation.GeneralLogic.Path, mainProjectPath, Path.GetFileName( mainProjectPath ) + ".csproj" ),
 									prerelease,
 									localExportDateAndTime );
 
