@@ -45,8 +45,7 @@ create table Users(
 )
 go
 
-insert into MainSequence default values
-insert into Users values( @@IDENTITY, 'john.doe@example.com', 1, NULL, 0, NULL, NULL, NULL, NULL, NULL, '' );
+insert into Users values( next value for MainSequence, 'john.doe@example.com', 1, NULL, 0, NULL, NULL, NULL, NULL, NULL, '' );
 go
 ```
 

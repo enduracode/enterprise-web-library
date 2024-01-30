@@ -1,6 +1,6 @@
 # Adding user management
 
-Last updated for Enterprise Web Library version 72.
+Last updated for Enterprise Web Library version 81.
 
 
 ## Creating database schema
@@ -34,9 +34,6 @@ Run `Update-DependentLogic`.
 Add a class called `UserManagement` to your `Library/Configuration/Providers` folder. Paste the following into it, making adjustments as necessary to match the schema you created above:
 
 ```C#
-using System.Collections.Generic;
-using System.Linq;
-using EnterpriseWebLibrary;
 using EnterpriseWebLibrary.UserManagement;
 using EnterpriseWebLibrary.UserManagement.IdentityProviders;
 using NodaTime;
@@ -45,89 +42,77 @@ using ServiceManager.Library.DataAccess.CommandConditions;
 using ServiceManager.Library.DataAccess.Modification;
 using ServiceManager.Library.DataAccess.RowConstants;
 using ServiceManager.Library.DataAccess.TableRetrieval;
-using Tewl.Tools;
 
-namespace ServiceManager.Library.Configuration.Providers {
-	internal class UserManagement: SystemUserManagementProvider {
-		protected override IEnumerable<IdentityProvider> GetIdentityProviders() =>
-			new LocalIdentityProvider(
-				"Organization Name",
-				"contact Organization Name.",
-				emailAddress => {
-					var user = UsersTableRetrieval.GetRows( new UsersTableEqualityConditions.EmailAddress( emailAddress ) ).SingleOrDefault();
-					if( user == null )
-						return null;
-					return ( getUserObject( user ), user.Salt, user.SaltedPassword );
-				},
-				userId => {
-					var user = UsersTableRetrieval.GetRowMatchingId( userId );
-					return ( user.LoginCodeSalt, user.HashedLoginCode,
-						       user.LoginCodeExpirationDateAndTime.ToNewUnderlyingValue( v => LocalDateTime.FromDateTime( v ).InUtc().ToInstant() ),
-						       user.LoginCodeRemainingAttemptCount, user.LoginCodeDestinationUrl );
-				},
-				( userId, salt, saltedPassword ) => {
-					var mod = UsersModification.CreateForUpdate( new UsersTableEqualityConditions.UserId( userId ) );
-					mod.Salt = salt;
-					mod.SaltedPassword = saltedPassword;
-					mod.Execute();
-				},
-				( userId, salt, hashedCode, expirationTime, remainingAttemptCount, destinationUrl ) => {
-					var mod = UsersModification.CreateForUpdate( new UsersTableEqualityConditions.UserId( userId ) );
-					mod.LoginCodeSalt = salt;
-					mod.HashedLoginCode = hashedCode;
-					mod.LoginCodeExpirationDateAndTime = expirationTime?.InUtc().ToDateTimeUnspecified();
-					mod.LoginCodeRemainingAttemptCount = remainingAttemptCount;
-					mod.LoginCodeDestinationUrl = destinationUrl;
-					mod.Execute();
-				} ).ToCollection();
+namespace ServiceManager.Library.Configuration.Providers;
 
-		protected override IEnumerable<User> GetUsers() => UsersTableRetrieval.GetRows().OrderBy( i => i.EmailAddress ).Select( getUserObject );
-
-		protected override User GetUser( int userId ) => getUserObject( UsersTableRetrieval.GetRowMatchingId( userId, returnNullIfNoMatch: true ) );
-
-		protected override User GetUser( string emailAddress ) =>
-			getUserObject( UsersTableRetrieval.GetRows( new UsersTableEqualityConditions.EmailAddress( emailAddress ) ).SingleOrDefault() );
-
-		private User getUserObject( UsersTableRetrieval.Row user ) =>
-			user == null
-				? null
-				: new User(
-					user.UserId,
-					user.EmailAddress,
-					getRoleObject( user.RoleId ),
-					user.LastRequestDateAndTime.ToNewUnderlyingValue( v => LocalDateTime.FromDateTime( v ).InUtc().ToInstant() ) );
-
-		private Role getRoleObject( int roleId ) => new Role( roleId, UserRolesRows.GetNameFromValue( roleId ), roleId == UserRolesRows.Administrator, false );
-
-		protected override int InsertOrUpdateUser( int? userId, string emailAddress, int roleId, Instant? lastRequestTime ) {
-			if( userId.HasValue ) {
-				var mod = UsersModification.CreateForUpdate( new UsersTableEqualityConditions.UserId( userId.Value ) );
-				mod.EmailAddress = emailAddress;
-				mod.RoleId = roleId;
-				mod.LastRequestDateAndTime = lastRequestTime?.InUtc().ToDateTimeUnspecified();
+internal class UserManagement: SystemUserManagementProvider {
+	protected override IEnumerable<IdentityProvider> GetIdentityProviders() =>
+		new LocalIdentityProvider(
+			"Organization Name",
+			"contact Organization Name.",
+			emailAddress => {
+				var user = UsersTableRetrieval.GetRows( new UsersTableEqualityConditions.EmailAddress( emailAddress ) ).SingleOrDefault();
+				if( user is null )
+					return null;
+				return ( getUserObject( user )!, user.Salt, user.SaltedPassword );
+			},
+			userId => {
+				var user = UsersTableRetrieval.GetRowMatchingId( userId );
+				return ( user.LoginCodeSalt, user.HashedLoginCode,
+					       user.LoginCodeExpirationDateAndTime.ToNewUnderlyingValue( v => LocalDateTime.FromDateTime( v ).InUtc().ToInstant() ),
+					       user.LoginCodeRemainingAttemptCount, user.LoginCodeDestinationUrl );
+			},
+			( userId, salt, saltedPassword ) => {
+				var mod = UsersModification.CreateForUpdate( new UsersTableEqualityConditions.UserId( userId ) );
+				mod.Salt = salt;
+				mod.SaltedPassword = saltedPassword;
 				mod.Execute();
-			}
-			else {
-				userId = MainSequence.GetNextValue();
-				UsersModification.InsertRow(
-					userId.Value,
-					emailAddress,
-					roleId,
-					lastRequestTime?.InUtc().ToDateTimeUnspecified(),
-					0,
-					null,
-					null,
-					null,
-					null,
-					null,
-					"" );
-			}
-			return userId.Value;
+			},
+			( userId, salt, hashedCode, expirationTime, remainingAttemptCount, destinationUrl ) => {
+				var mod = UsersModification.CreateForUpdate( new UsersTableEqualityConditions.UserId( userId ) );
+				mod.LoginCodeSalt = salt;
+				mod.HashedLoginCode = hashedCode;
+				mod.LoginCodeExpirationDateAndTime = expirationTime?.InUtc().ToDateTimeUnspecified();
+				mod.LoginCodeRemainingAttemptCount = remainingAttemptCount;
+				mod.LoginCodeDestinationUrl = destinationUrl;
+				mod.Execute();
+			} ).ToCollection();
+
+	protected override IEnumerable<SystemUser> GetUsers() => UsersTableRetrieval.GetRows().OrderBy( i => i.EmailAddress ).Select( getUserObject )!;
+
+	protected override SystemUser? GetUser( int userId ) => getUserObject( UsersTableRetrieval.GetRowMatchingId( userId, returnNullIfNoMatch: true ) );
+
+	protected override SystemUser? GetUser( string emailAddress ) =>
+		getUserObject( UsersTableRetrieval.GetRows( new UsersTableEqualityConditions.EmailAddress( emailAddress ) ).SingleOrDefault() );
+
+	private SystemUser? getUserObject( UsersTableRetrieval.Row? user ) =>
+		user is null
+			? null
+			: new SystemUser(
+				user.UserId,
+				user.EmailAddress,
+				getRoleObject( user.RoleId ),
+				user.LastRequestDateAndTime.ToNewUnderlyingValue( v => LocalDateTime.FromDateTime( v ).InUtc().ToInstant() ) );
+
+	private Role getRoleObject( int roleId ) => new( roleId, UserRolesRows.GetNameFromValue( roleId ), roleId == UserRolesRows.Administrator, false );
+
+	protected override int InsertOrUpdateUser( int? userId, string emailAddress, int roleId, Instant? lastRequestTime ) {
+		if( userId.HasValue ) {
+			var mod = UsersModification.CreateForUpdate( new UsersTableEqualityConditions.UserId( userId.Value ) );
+			mod.EmailAddress = emailAddress;
+			mod.RoleId = roleId;
+			mod.LastRequestDateAndTime = lastRequestTime?.InUtc().ToDateTimeUnspecified();
+			mod.Execute();
 		}
-
-		protected override void DeleteUser( int userId ) => UsersModification.DeleteRows( new UsersTableEqualityConditions.UserId( userId ) );
-
-		protected override IEnumerable<Role> GetRoles() => UserRolesTableRetrieval.GetAllRows().Select( i => getRoleObject( i.UserRoleId ) );
+		else {
+			userId = MainSequence.GetNextValue();
+			UsersModification.InsertRow( userId.Value, emailAddress, roleId, lastRequestTime?.InUtc().ToDateTimeUnspecified(), 0, null, null, null, null, null, "" );
+		}
+		return userId.Value;
 	}
+
+	protected override void DeleteUser( int userId ) => UsersModification.DeleteRows( new UsersTableEqualityConditions.UserId( userId ) );
+
+	protected override IEnumerable<Role> GetRoles() => UserRolesTableRetrieval.GetAllRows().Select( i => getRoleObject( i.UserRoleId ) );
 }
 ```
