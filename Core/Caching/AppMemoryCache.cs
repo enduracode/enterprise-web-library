@@ -67,16 +67,16 @@ public static class AppMemoryCache {
 	public static T GetCacheValue<T>( string key, Func<T> valueCreator ) {
 		key = keyPrefix + key;
 
-		// From http://stackoverflow.com/a/15894928/35349. Use object as the type parameter since we need covariance on the way out.
-		var lazy = new Lazy<object?>(
-			() => {
+		// This is currently subject to cache-stampede issues since the factory method can be called concurrently. We’re waiting for a new memory cache
+		// implementation to solve this; see https://github.com/dotnet/runtime/issues/48567.
+		return cache.GetOrCreate(
+			key,
+			_ => {
 				var value = valueCreator();
 				if( value is PeriodicEvictionCompositeCacheEntry )
 					periodicEvictionKeys!.Add( key );
 				return value;
-			} );
-		lazy = cache.GetOrCreate( key, _ => lazy )!;
-		return (T)lazy.Value!; // There doesn’t seem to be a way to express that, if T is non-nullable, .Value will never be null.
+			} )!;
 	}
 
 
