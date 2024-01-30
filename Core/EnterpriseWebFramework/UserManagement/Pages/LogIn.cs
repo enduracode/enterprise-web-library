@@ -36,9 +36,9 @@ partial class LogIn {
 		if( customContent != null )
 			return customContent;
 
-		AuthenticationStatics.CodeLoginModificationMethod codeLoginMethod = null;
-		string destinationUrl = null;
-		if( User.Any() ) {
+		if( User.Length > 0 ) {
+			AuthenticationStatics.CodeLoginModificationMethod codeLoginMethod = null;
+			string destinationUrl = null;
 			var postBack = PostBack.CreateFull(
 				modificationMethod: () => destinationUrl = codeLoginMethod(
 						                          User,
@@ -61,8 +61,8 @@ partial class LogIn {
 
 	private bool authenticatedUserDeniedAccess => SystemUser.Current is not null && !string.Equals( GetUrl(), EwfRequest.Current.Url, StringComparison.Ordinal );
 
-	private IReadOnlyCollection<FlowComponent> getAuthenticatedUserDeniedAccessComponents() {
-		return new Section(
+	private IReadOnlyCollection<FlowComponent> getAuthenticatedUserDeniedAccessComponents() =>
+		new Section(
 			new Paragraph(
 					"You’re already logged in, but do not have access to this page. It’s possible that you had access in the past and that it was revoked."
 						.ToComponents() )
@@ -71,7 +71,6 @@ partial class LogIn {
 						new EwfHyperlink( AuthenticationStatics.GetDefaultLogInPage( ReturnUrl ), new ButtonHyperlinkStyle( "Log In as Another User" ) ).ToCollection() ) )
 				.Materialize(),
 			style: SectionStyle.Box ).ToCollection();
-	}
 
 	private IReadOnlyCollection<FlowComponent> getLogInComponents() {
 		var components = new List<FlowComponent>();
