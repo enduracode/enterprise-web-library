@@ -2,6 +2,7 @@
 using System.Threading;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Caching.Memory;
+using NodaTime;
 
 namespace EnterpriseWebLibrary.Caching;
 
@@ -64,17 +65,23 @@ public static class AppMemoryCache {
 	/// <summary>
 	/// Gets the cache value associated with the specified key. If no value exists, adds one by executing the specified creator function.
 	/// </summary>
-	public static T GetCacheValue<T>( string key, Func<T> valueCreator ) {
+	public static T GetCacheValue<T>( string key, Func<T> valueCreator, Func<Duration?>? lifetimeGetter = null ) {
 		key = keyPrefix + key;
 
 		// This is currently subject to cache-stampede issues since the factory method can be called concurrently. We’re waiting for a new memory cache
 		// implementation to solve this; see https://github.com/dotnet/runtime/issues/48567.
 		return cache.GetOrCreate(
 			key,
-			_ => {
+			entry => {
 				var value = valueCreator();
+
 				if( value is PeriodicEvictionCompositeCacheEntry )
 					periodicEvictionKeys!.Add( key );
+
+				var lifetime = lifetimeGetter?.Invoke();
+				if( lifetime.HasValue )
+					entry.AbsoluteExpirationRelativeToNow = lifetime.Value.ToTimeSpan();
+
 				return value;
 			} )!;
 	}
