@@ -436,6 +436,26 @@ internal static class FormItemStatics {
 					"{0}.ToDateControl( setup: controlSetup, value: value, allowEmpty: allowEmpty, minValue: minValue, maxValue: maxValue, additionalValidationMethod: additionalValidationMethod )"
 						.FormatWith( dv ) );
 
+		if( field.TypeIs( typeof( TimeSpan ) ) || field.TypeIs( typeof( TimeSpan? ) ) )
+			writeFormItemGetter(
+				writer,
+				field,
+				"TimeControl",
+				Enumerable.Empty<CSharpParameter>(),
+				false,
+				new CSharpParameter( "TimeControlSetup?", "controlSetup", defaultValue: "null" ).ToCollection(),
+				"SpecifiedValue<{0}>?".FormatWith( field.NullableTypeName ),
+				( field.TypeName == field.NullableTypeName ? getAllowEmptyParameter( true ).ToCollection() : Enumerable.Empty<CSharpParameter>() )
+				.Append( new CSharpParameter( "LocalTime?", "minValue", "null" ) )
+				.Append( new CSharpParameter( "LocalTime?", "maxValue", "null" ) )
+				.Append( new CSharpParameter( "int", "minuteInterval", "15" ) ),
+				true,
+				dv => field.TypeName == field.NullableTypeName
+					      ? "{0}.ToTimeControl( setup: controlSetup, value: value, allowEmpty: allowEmpty, minValue: minValue, maxValue: maxValue, minuteInterval: minuteInterval, additionalValidationMethod: additionalValidationMethod )"
+						      .FormatWith( dv )
+					      : "{0}.ToTimeControl( setup: controlSetup, value: value, minValue: minValue, maxValue: maxValue, minuteInterval: minuteInterval, additionalValidationMethod: additionalValidationMethod )"
+						      .FormatWith( dv ) );
+
 		if( field.TypeIs( typeof( DateTime ) ) )
 			writeFormItemGetter(
 				writer,

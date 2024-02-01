@@ -958,8 +958,8 @@ public static class FormControlExtensionCreators {
 
 	public static DateControl ToDateControl(
 		this DataValue<LocalDate> dataValue, DateControlSetup? setup = null, SpecifiedValue<LocalDate?>? value = null, LocalDate? minValue = null,
-		LocalDate? maxValue = null, Action<Validator>? additionalValidationMethod = null ) {
-		return new DateControl(
+		LocalDate? maxValue = null, Action<Validator>? additionalValidationMethod = null ) =>
+		new(
 			value != null ? value.Value : dataValue.Value,
 			false,
 			setup: setup,
@@ -969,12 +969,11 @@ public static class FormControlExtensionCreators {
 				dataValue.Value = postBackValue.Value;
 				additionalValidationMethod?.Invoke( validator );
 			} );
-	}
 
 	public static DateControl ToDateControl(
 		this DataValue<LocalDate?> dataValue, DateControlSetup? setup = null, SpecifiedValue<LocalDate?>? value = null, bool allowEmpty = true,
-		LocalDate? minValue = null, LocalDate? maxValue = null, Action<Validator>? additionalValidationMethod = null ) {
-		return new DateControl(
+		LocalDate? minValue = null, LocalDate? maxValue = null, Action<Validator>? additionalValidationMethod = null ) =>
+		new(
 			value != null ? value.Value : dataValue.Value,
 			allowEmpty,
 			setup: setup,
@@ -984,7 +983,6 @@ public static class FormControlExtensionCreators {
 				dataValue.Value = postBackValue;
 				additionalValidationMethod?.Invoke( validator );
 			} );
-	}
 
 	public static DateControl ToDateControl(
 		this DataValue<DateTime> dataValue, DateControlSetup? setup = null, SpecifiedValue<DateTime?>? value = null, LocalDate? minValue = null,
@@ -1018,13 +1016,14 @@ public static class FormControlExtensionCreators {
 
 	public static TimeControl ToTimeControl(
 		this DataValue<LocalTime> dataValue, TimeControlSetup? setup = null, SpecifiedValue<LocalTime?>? value = null, LocalTime? minValue = null,
-		LocalTime? maxValue = null, Action<Validator>? additionalValidationMethod = null ) =>
+		LocalTime? maxValue = null, int minuteInterval = 15, Action<Validator>? additionalValidationMethod = null ) =>
 		new(
 			value != null ? value.Value : dataValue.Value,
 			false,
 			setup: setup,
 			minValue: minValue,
 			maxValue: maxValue,
+			minuteInterval: minuteInterval,
 			validationMethod: ( postBackValue, validator ) => {
 				dataValue.Value = postBackValue.Value;
 				additionalValidationMethod?.Invoke( validator );
@@ -1032,17 +1031,53 @@ public static class FormControlExtensionCreators {
 
 	public static TimeControl ToTimeControl(
 		this DataValue<LocalTime?> dataValue, TimeControlSetup? setup = null, SpecifiedValue<LocalTime?>? value = null, bool allowEmpty = true,
-		LocalTime? minValue = null, LocalTime? maxValue = null, Action<Validator>? additionalValidationMethod = null ) =>
+		LocalTime? minValue = null, LocalTime? maxValue = null, int minuteInterval = 15, Action<Validator>? additionalValidationMethod = null ) =>
 		new(
 			value != null ? value.Value : dataValue.Value,
 			allowEmpty,
 			setup: setup,
 			minValue: minValue,
 			maxValue: maxValue,
+			minuteInterval: minuteInterval,
 			validationMethod: ( postBackValue, validator ) => {
 				dataValue.Value = postBackValue;
 				additionalValidationMethod?.Invoke( validator );
 			} );
+
+	public static TimeControl ToTimeControl(
+		this DataValue<TimeSpan> dataValue, TimeControlSetup? setup = null, SpecifiedValue<TimeSpan?>? value = null, LocalTime? minValue = null,
+		LocalTime? maxValue = null, int minuteInterval = 15, Action<Validator>? additionalValidationMethod = null ) {
+		var nullableValue = new DataValue<TimeSpan?> { Value = value is not null ? value.Value : dataValue.Value };
+		return nullableValue.ToTimeControl(
+			setup: setup,
+			allowEmpty: false,
+			minValue: minValue,
+			maxValue: maxValue,
+			minuteInterval: minuteInterval,
+			additionalValidationMethod: validator => {
+				dataValue.Value = nullableValue.Value.Value;
+				additionalValidationMethod?.Invoke( validator );
+			} );
+	}
+
+	public static TimeControl ToTimeControl(
+		this DataValue<TimeSpan?> dataValue, TimeControlSetup? setup = null, SpecifiedValue<TimeSpan?>? value = null, bool allowEmpty = true,
+		LocalTime? minValue = null, LocalTime? maxValue = null, int minuteInterval = 15, Action<Validator>? additionalValidationMethod = null ) {
+		var localTimeValue = new DataValue<LocalTime?>
+			{
+				Value = ( value is not null ? value.Value : dataValue.Value ).ToNewUnderlyingValue( v => LocalTime.FromTicksSinceMidnight( v.Ticks ) )
+			};
+		return localTimeValue.ToTimeControl(
+			setup: setup,
+			allowEmpty: allowEmpty,
+			minValue: minValue,
+			maxValue: maxValue,
+			minuteInterval: minuteInterval,
+			additionalValidationMethod: validator => {
+				dataValue.Value = localTimeValue.Value.ToNewUnderlyingValue( v => new TimeSpan( v.TickOfDay ) );
+				additionalValidationMethod?.Invoke( validator );
+			} );
+	}
 
 	public static DateAndTimeControl ToDateAndTimeControl(
 		this DataValue<LocalDateTime> dataValue, DateAndTimeControlSetup? setup = null, SpecifiedValue<LocalDateTime?>? value = null, LocalDate? minValue = null,
