@@ -137,7 +137,10 @@ internal static class UrlHandlingStatics {
 
 	private static ( string path, string query ) parseAppRelativeUrl( string appRelativeUrl ) {
 		var queryIndex = appRelativeUrl.IndexOf( '?' );
-		return queryIndex >= 0 ? ( appRelativeUrl.Remove( queryIndex ), appRelativeUrl.Substring( queryIndex + 1 ) ) : ( appRelativeUrl, "" );
+		return queryIndex >= 0
+			       ? ( appRelativeUrl.Remove( queryIndex ), appRelativeUrl.Substring( queryIndex + 1 ) )
+			       // If the URL ends with a single slash, remove it. These are commonly added by users but have no meaning in this framework.
+			       : ( appRelativeUrl.Length > 1 && appRelativeUrl[ ^1 ] == '/' && appRelativeUrl[ ^2 ] != '/' ? appRelativeUrl[ ..^1 ] : appRelativeUrl, "" );
 	}
 
 	private static string generatePath( string baseUrlParameters, IEnumerable<string> segments ) =>
