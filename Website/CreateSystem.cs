@@ -48,7 +48,12 @@ partial class CreateSystem {
 									value: "",
 									maxLength: 50,
 									additionalValidationMethod: validator => {
-										if( baseNamespace.Value != EwlStatics.GetCSharpIdentifier( baseNamespace.Value, omitAtSignPrefixIfNotRequired: true ) )
+										if( baseNamespace.Value.Separate( ".", false )
+										   .Any(
+											   i => i.Length == 0 || !string.Equals(
+												        i,
+												        EwlStatics.GetCSharpIdentifier( i, omitAtSignPrefixIfNotRequired: true ),
+												        StringComparison.Ordinal ) ) )
 											validator.NoteErrorAndAddMessage( "The base namespace must be a valid C# identifier." );
 									} )
 								.ToFormItem( label: "Base namespace".ToComponents() )
