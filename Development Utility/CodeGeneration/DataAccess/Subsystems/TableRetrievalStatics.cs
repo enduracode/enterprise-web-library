@@ -231,11 +231,11 @@ internal static class TableRetrievalStatics {
 				.FormatWith(
 					table,
 					tableColumns.KeyColumns.Count < 2
-						? "{0} = {{i}}".FormatWith( tableColumns.KeyColumns.Single().DelimitedIdentifier )
+						? "{0} = {{i}}".FormatWith( tableColumns.KeyColumns.Single().DelimitedIdentifier.EscapeForLiteral() )
 						: StringTools.ConcatenateWithDelimiter(
 							" AND ",
 							tableColumns.KeyColumns.Select(
-								i => "{0} = {{i.{1}}}".FormatWith( i.DelimitedIdentifier, EwlStatics.GetCSharpIdentifier( i.CamelCasedName ) ) ) ) ) );
+								i => "{0} = {{i.{1}}}".FormatWith( i.DelimitedIdentifier.EscapeForLiteral(), EwlStatics.GetCSharpIdentifier( i.CamelCasedName ) ) ) ) ) );
 		writer.WriteLine(
 			"{0}.ExecuteReaderCommand( command, r => {{ while( r.Read() ) results.Add( new BasicRow( r ) ); }} );".FormatWith(
 				DataAccessStatics.GetConnectionExpression( database ) ) );
@@ -251,7 +251,7 @@ internal static class TableRetrievalStatics {
 		writer.WriteLine( "var command = {0}.DatabaseInfo.CreateCommand();".FormatWith( DataAccessStatics.GetConnectionExpression( database ) ) );
 		writer.WriteLine(
 			"command.CommandText = \"SELECT {0}, {1} FROM {2}\";".FormatWith(
-				StringTools.ConcatenateWithDelimiter( ", ", tableColumns.KeyColumns.Select( i => i.DelimitedIdentifier ) ),
+				StringTools.ConcatenateWithDelimiter( ", ", tableColumns.KeyColumns.Select( i => i.DelimitedIdentifier.EscapeForLiteral() ) ),
 				cn.DatabaseInfo is SqlServerInfo ? "COUNT_BIG(*)" : "COUNT(*)",
 				table + DatabaseOps.GetModificationTableSuffix( database ) ) );
 		if( excludePreviousRevisions ) {
@@ -262,7 +262,7 @@ internal static class TableRetrievalStatics {
 		}
 		writer.WriteLine(
 			"command.CommandText += \" GROUP BY {0}\";".FormatWith(
-				StringTools.ConcatenateWithDelimiter( ", ", tableColumns.KeyColumns.Select( i => i.DelimitedIdentifier ) ) ) );
+				StringTools.ConcatenateWithDelimiter( ", ", tableColumns.KeyColumns.Select( i => i.DelimitedIdentifier.EscapeForLiteral() ) ) ) );
 		writer.WriteLine( "var results = new List<( {0}, long )>();".FormatWith( RetrievalStatics.GetColumnTupleTypeName( tableColumns.KeyColumns ) ) );
 		writer.WriteLine(
 			"{0}.ExecuteReaderCommand( command, r => {{ while( r.Read() ) results.Add( ( {1}, r.GetInt64( {2} ) ) ); }} );".FormatWith(
@@ -430,8 +430,10 @@ internal static class TableRetrievalStatics {
 						table,
 						tableColumns,
 						"{0}, \"{1}\"".FormatWith(
-							StringTools.ConcatenateWithDelimiter( ", ", tableColumns.KeyColumns.Select( i => "\"{0}\"".FormatWith( i.DelimitedIdentifier ) ).ToArray() ),
-							cn.DatabaseInfo is OracleInfo ? "ORA_ROWSCN" : tableColumns.RowVersionColumn!.DelimitedIdentifier ),
+							StringTools.ConcatenateWithDelimiter(
+								", ",
+								tableColumns.KeyColumns.Select( i => "\"{0}\"".FormatWith( i.DelimitedIdentifier.EscapeForLiteral() ) ).ToArray() ),
+							cn.DatabaseInfo is OracleInfo ? "ORA_ROWSCN" : tableColumns.RowVersionColumn!.DelimitedIdentifier.EscapeForLiteral() ),
 						cacheQueryInDbExpression ) ) );
 			writer.WriteLine( getCommandConditionAddingStatement( "keyCommand" ) );
 			writer.WriteLine( "var keys = new List<System.Tuple<{0}>>();".FormatWith( getPkAndVersionTupleTypeArguments( cn, tableColumns ) ) );
@@ -533,7 +535,7 @@ internal static class TableRetrievalStatics {
 			"new[] { " + selectExpressions + " }",
 			table,
 			cacheQueryInDbExpression,
-			StringTools.ConcatenateWithDelimiter( ", ", tableColumns.KeyColumns.Select( i => i.DelimitedIdentifier ).ToArray() ) );
+			StringTools.ConcatenateWithDelimiter( ", ", tableColumns.KeyColumns.Select( i => i.DelimitedIdentifier.EscapeForLiteral() ).ToArray() ) );
 
 	private static string getCommandConditionAddingStatement( string commandName ) => "{0}.AddConditions( commandConditions );".FormatWith( commandName );
 

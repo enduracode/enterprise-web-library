@@ -233,7 +233,7 @@ internal static class StandardModificationStatics {
 					StringTools.ConcatenateWithDelimiter( ", ", keyColumns.Select( i => "\"{0}\"".FormatWith( i.Name ) ) ),
 					tableName ) );
 			foreach( var i in keyColumns )
-				writer.WriteLine( "modTableInsert.AddSelectExpression( \"{0}\" );".FormatWith( i.DelimitedIdentifier ) );
+				writer.WriteLine( "modTableInsert.AddSelectExpression( \"{0}\" );".FormatWith( i.DelimitedIdentifier.EscapeForLiteral() ) );
 			writer.WriteLine( "modTableInsert.AddConditions( conditions.Select( i => i.CommandCondition ) );" );
 			if( isRevisionHistoryClass )
 				writer.WriteLine( "modTableInsert.AddConditions( getLatestRevisionsCondition().ToCollection() );" );
@@ -535,7 +535,7 @@ internal static class StandardModificationStatics {
 					StringTools.ConcatenateWithDelimiter( ", ", keyColumns.Select( i => "\"{0}\"".FormatWith( i.Name ) ) ),
 					tableName ) );
 			foreach( var i in keyColumns )
-				writer.WriteLine( "modTableInsert.AddSelectExpression( \"{0}\" );".FormatWith( i.DelimitedIdentifier ) );
+				writer.WriteLine( "modTableInsert.AddSelectExpression( \"{0}\" );".FormatWith( i.DelimitedIdentifier.EscapeForLiteral() ) );
 			writer.WriteLine( "modTableInsert.AddConditions( conditions!.Select( i => i.CommandCondition ) );" );
 			if( isRevisionHistoryClass )
 				writer.WriteLine( "modTableInsert.AddConditions( getLatestRevisionsCondition().ToCollection() );" );
@@ -554,13 +554,13 @@ internal static class StandardModificationStatics {
 						tableName ) );
 				foreach( var column in keyColumns )
 					if( column.IsIdentity )
-						writer.WriteLine( "modTableNewKeyInsert.AddSelectExpression( \"{0}\" );".FormatWith( column.DelimitedIdentifier ) );
+						writer.WriteLine( "modTableNewKeyInsert.AddSelectExpression( \"{0}\" );".FormatWith( column.DelimitedIdentifier.EscapeForLiteral() ) );
 					else {
 						writer.WriteLine(
 							"if( {0}.Changed ) modTableNewKeyInsert.AddSelectValue( {1} );".FormatWith(
 								getColumnFieldName( column ),
 								column.GetCommandParameterValueExpression( EwlStatics.GetCSharpIdentifier( column.PascalCasedNameExceptForOracle ) ) ) );
-						writer.WriteLine( "else modTableNewKeyInsert.AddSelectExpression( \"{0}\" );".FormatWith( column.DelimitedIdentifier ) );
+						writer.WriteLine( "else modTableNewKeyInsert.AddSelectExpression( \"{0}\" );".FormatWith( column.DelimitedIdentifier.EscapeForLiteral() ) );
 					}
 				writer.WriteLine( "modTableNewKeyInsert.AddConditions( conditions!.Select( i => i.CommandCondition ) );" );
 				if( isRevisionHistoryClass )
@@ -614,8 +614,8 @@ internal static class StandardModificationStatics {
 		writer.WriteLine( "var revisionHistorySetup = RevisionHistoryStatics.SystemProvider;" );
 
 		writer.WriteLine(
-			"var command = new InlineSelect( \"" + columns.PrimaryKeyAndRevisionIdColumn!.DelimitedIdentifier + "\".ToCollection(), \"FROM " + tableName +
-			"\", false );" );
+			"var command = new InlineSelect( \"" + columns.PrimaryKeyAndRevisionIdColumn!.DelimitedIdentifier.EscapeForLiteral() + "\".ToCollection(), \"FROM " +
+			tableName + "\", false );" );
 		writer.WriteLine( "command.AddConditions( conditions.Select( i => i.CommandCondition ) );" );
 		writer.WriteLine( "command.AddConditions( getLatestRevisionsCondition().ToCollection() );" );
 		writer.WriteLine( "var latestRevisionIds = new List<int>();" );
@@ -650,7 +650,7 @@ internal static class StandardModificationStatics {
 			writer.WriteLine(
 				column == columns.PrimaryKeyAndRevisionIdColumn
 					? "copyCommand.AddSelectValue( {0} );".FormatWith( column.GetCommandParameterValueExpression( "copiedRevisionId" ) )
-					: "copyCommand.AddSelectExpression( \"{0}\" );".FormatWith( column.DelimitedIdentifier ) );
+					: "copyCommand.AddSelectExpression( \"{0}\" );".FormatWith( column.DelimitedIdentifier.EscapeForLiteral() ) );
 		writer.WriteLine(
 			"copyCommand.AddConditions( new EqualityCondition( new InlineDbCommandColumnValue( \"{0}\", new DbParameterValue( latestRevisionId ) ) ).ToCollection() );"
 				.FormatWith( columns.PrimaryKeyAndRevisionIdColumn.Name ) );
