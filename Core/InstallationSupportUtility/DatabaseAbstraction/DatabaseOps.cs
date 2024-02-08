@@ -135,9 +135,12 @@ public static class DatabaseOps {
 	}
 
 	public static string GetModificationTableSuffix( Database database ) =>
-		database is MySql or Oracle
-			? "_table_{0}_modifications".FormatWith( EwlStatics.EwlInitialism.ToLowerInvariant() )
-			: "Table{0}Modifications".FormatWith( EwlStatics.EwlInitialism.EnglishToPascal() );
+		database switch
+			{
+				MySql => "_table_{0}_modifications".FormatWith( EwlStatics.EwlInitialism.ToLowerInvariant() ),
+				Oracle => "_TABLE_{0}_MODIFICATIONS".FormatWith( EwlStatics.EwlInitialism.ToUpperInvariant() ),
+				_ => "Table{0}Modifications".FormatWith( EwlStatics.EwlInitialism.EnglishToPascal() )
+			};
 
 	public static void ClearModificationTables( Database database ) {
 		foreach( var table in GetDatabaseTables( database ).Where( i => i.hasModTable ).Select( i => i.name ) )

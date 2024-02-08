@@ -1,4 +1,5 @@
-﻿using System.Data.Common;
+﻿using System.Collections.Immutable;
+using System.Data.Common;
 using System.Text.RegularExpressions;
 using EnterpriseWebLibrary.Collections;
 using EnterpriseWebLibrary.DataAccess;
@@ -92,8 +93,11 @@ internal static class DataAccessStatics {
 
 					// This check ensures safety in the table-retrieval method that gets modified rows given a list of primary keys. This method uses inline SQL in order
 					// to support a potentially large number of keys in a single query.
+					var types = new[] { "System.Int32" }.Concat(
+							database is InstallationSupportUtility.DatabaseAbstraction.Databases.Oracle ? "System.Decimal".ToCollection() : Enumerable.Empty<string>() )
+						.ToImmutableHashSet( StringComparer.Ordinal );
 					foreach( var column in columns.KeyColumns )
-						if( !string.Equals( column.DataTypeName, "System.Int32" ) )
+						if( !types.Contains( column.DataTypeName ) )
 							throw new UserCorrectableException(
 								"Table {0} is cached using a modification table but the {1} primary-key column is not numeric.".FormatWith( table, column.Name ) );
 
