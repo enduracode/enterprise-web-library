@@ -93,8 +93,7 @@ internal static class DataAccessStatics {
 
 					// This check ensures safety in the table-retrieval method that gets modified rows given a list of primary keys. This method uses inline SQL in order
 					// to support a potentially large number of keys in a single query.
-					var types = new[] { "System.Int32" }.Concat(
-							database is InstallationSupportUtility.DatabaseAbstraction.Databases.Oracle ? "System.Decimal".ToCollection() : Enumerable.Empty<string>() )
+					var types = new[] { "System.Int32" }.Concat( cn.DatabaseInfo is OracleInfo ? "System.Decimal".ToCollection() : Enumerable.Empty<string>() )
 						.ToImmutableHashSet( StringComparer.Ordinal );
 					foreach( var column in columns.KeyColumns )
 						if( !types.Contains( column.DataTypeName ) )
