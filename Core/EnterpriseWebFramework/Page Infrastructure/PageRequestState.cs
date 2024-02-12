@@ -16,7 +16,6 @@ internal class PageRequestState {
 
 	// set during modifications
 	public string FocusKey { get; set; }
-	public Tuple<string, SecondaryPostBackOperation> DmIdAndSecondaryOp { get; set; }
 	public Dictionary<string, IEnumerable<string>> InLineModificationErrorsByDisplay { get; } = new();
 	public IReadOnlyCollection<TrustedHtmlString> GeneralModificationErrors { get; set; } = Array.Empty<TrustedHtmlString>();
 
@@ -34,6 +33,7 @@ internal class PageRequestState {
 		ScrollPositionY = scrollPositionY;
 	}
 
+	// Pass null for updateRegionKeysAndArguments when modification errors exist or during the validation stage of an intermediate post-back.
 	public void SetStaticAndUpdateRegionState( string staticRegionContents, IReadOnlyCollection<( string, string )> updateRegionKeysAndArguments ) {
 		StaticRegionContents = staticRegionContents;
 		UpdateRegionKeysAndArguments = updateRegionKeysAndArguments;

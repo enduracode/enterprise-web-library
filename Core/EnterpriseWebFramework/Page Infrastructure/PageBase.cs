@@ -157,6 +157,8 @@ public abstract class PageBase: ResourceBase {
 	private PageBase nextPageObject;
 
 	private PageRequestState requestState;
+	private bool postBackValidationDmExecuted;
+
 	private FormState formState;
 	internal PageContent BasicContent;
 	private PageTree pageTree;
@@ -230,11 +232,12 @@ public abstract class PageBase: ResourceBase {
 		}
 
 		if( !pageBuilt )
-			buildPage();
+			buildPage( hiddenFieldData.LastPostBackFailingDmId );
 
 		( ResourceInfo destination, Func<ResourceInfo, bool> authorizationCheckDisabledPredicate )? navigationBehavior = null;
 		FullResponse fullSecondaryResponse = null;
 		Func<PageBase, EwfResponse> actionProcessor = null;
+		string failingDataModificationId = null;
 		executeWithDataModificationExceptionHandling(
 			() => {
 				validateFormSubmission( formSubmission, hiddenFieldData.FormValueHash );
@@ -261,7 +264,7 @@ public abstract class PageBase: ResourceBase {
 						dmExecuted |= dataUpdate.Execute( !postBack.ForcePageDataUpdate, changesExist( dataUpdate ), handleValidationErrors );
 					}
 					catch {
-						requestState.DmIdAndSecondaryOp = Tuple.Create( "", SecondaryPostBackOperation.NoOperation );
+						failingDataModificationId = "";
 						throw;
 					}
 
@@ -280,7 +283,7 @@ public abstract class PageBase: ResourceBase {
 							} );
 					}
 					catch {
-						requestState.DmIdAndSecondaryOp = Tuple.Create( actionPostBack.Id, SecondaryPostBackOperation.NoOperation );
+						failingDataModificationId = actionPostBack.Id;
 						throw;
 					}
 				}
@@ -309,19 +312,20 @@ public abstract class PageBase: ResourceBase {
 					requestState.ComponentStateValuesById = componentStateItemsById.Where( i => staticRegionContents.stateItems.Contains( i.Value ) )
 						.ToImmutableDictionary( i => i.Key, i => i.Value.ValueAsJson );
 					requestState.PostBackValues.RemoveExcept( staticRegionContents.formValues.Select( i => i.GetPostBackValueKey() ) );
-					requestState.DmIdAndSecondaryOp = Tuple.Create(
-						actionPostBack.ValidationDm == dataUpdate ? "" : ( (ActionPostBack)actionPostBack.ValidationDm ).Id,
-						actionPostBack.ValidationDm == lastPostBackFailingDm ? SecondaryPostBackOperation.Validate : SecondaryPostBackOperation.ValidateChangesOnly );
 					requestState.SetStaticAndUpdateRegionState(
 						staticRegionContents.contents,
 						updateRegions.Select( i => ( i.key, i.region.ArgumentGetter() ) ).Materialize() );
 
 					actionProcessor = page => {
 						page = page.executePageViewDataModifications();
-						page.buildPage();
+						page.buildPage( null );
 						page.assertStaticRegionsUnchanged();
-						return requestState.DmIdAndSecondaryOp is { Item2: SecondaryPostBackOperation.Validate }
-							       ? page.processSecondaryOperationAndGetResponse()
+						return ( actionPostBack.ValidationDm == lastPostBackFailingDm
+							         ? SecondaryPostBackOperation.Validate
+							         : SecondaryPostBackOperation.ValidateChangesOnly ) == SecondaryPostBackOperation.Validate
+							       ? page.processSecondaryOperationAndGetResponse(
+								       actionPostBack.ValidationDm == dataUpdate ? "" : ( (ActionPostBack)actionPostBack.ValidationDm ).Id,
+								       SecondaryPostBackOperation.Validate )
 							       : page.getResponse( null );
 					};
 				}
@@ -329,18 +333,17 @@ public abstract class PageBase: ResourceBase {
 					requestState = new PageRequestState();
 					actionProcessor = page => {
 						page = page.executePageViewDataModifications();
-						page.buildPage();
+						page.buildPage( null );
 						return page.getResponse( null );
 					};
 				}
 			} );
 
 		return navigate(
-			navigationBehavior?.destination,
-			navigationBehavior?.authorizationCheckDisabledPredicate,
+			modificationErrorsExist ? null : navigationBehavior ?? ( null, null ),
 			page => {
 				if( modificationErrorsExist ) {
-					page.buildPage();
+					page.buildPage( failingDataModificationId );
 					page.assertStaticRegionsUnchanged();
 					return page.getResponse( null );
 				}
@@ -354,7 +357,7 @@ public abstract class PageBase: ResourceBase {
 	}
 
 	private EwfResponse buildPageAndGetResponse( int? statusCode ) {
-		buildPage();
+		buildPage( null );
 		return getResponse( statusCode );
 	}
 
@@ -413,32 +416,29 @@ public abstract class PageBase: ResourceBase {
 		}
 	}
 
-	private EwfResponse processSecondaryOperationAndGetResponse() {
-		var dmIdAndSecondaryOp = requestState.DmIdAndSecondaryOp;
-		var secondaryDm = dmIdAndSecondaryOp.Item1.Any() ? GetPostBack( dmIdAndSecondaryOp.Item1 ) as DataModification : dataUpdate;
-		if( secondaryDm == null )
-			throw getPossibleDeveloperMistakeException( "A data modification with an ID of \"{0}\" does not exist.".FormatWith( dmIdAndSecondaryOp.Item1 ) );
+	private EwfResponse processSecondaryOperationAndGetResponse( string dataModificationId, SecondaryPostBackOperation operation ) {
+		var dataModification = dataModificationId.Length > 0 ? GetPostBack( dataModificationId ) as DataModification : dataUpdate;
+		if( dataModification is null )
+			throw getPossibleDeveloperMistakeException( "A data modification with an ID of \"{0}\" does not exist.".FormatWith( dataModificationId ) );
 
 		var navigationNeeded = true;
 		executeWithDataModificationExceptionHandling(
 			() => {
-				var changesExist = componentStateItemsById.Values.Any( i => i.DataModifications.Contains( secondaryDm ) && i.ValueChanged() ) || formValues.Any(
-					                   i => i.DataModifications.Contains( secondaryDm ) && i.ValueChangedOnPostBack() );
-				navigationNeeded = secondaryDm == dataUpdate
+				var changesExist = componentStateItemsById.Values.Any( i => i.DataModifications.Contains( dataModification ) && i.ValueChanged() ) || formValues.Any(
+					                   i => i.DataModifications.Contains( dataModification ) && i.ValueChangedOnPostBack() );
+				navigationNeeded = dataModification == dataUpdate
 					                   ? dataUpdate.Execute( true, changesExist, handleValidationErrors, performValidationOnly: true )
-					                   : ( (ActionPostBack)secondaryDm ).Execute( changesExist, handleValidationErrors, null );
+					                   : ( (ActionPostBack)dataModification ).Execute( changesExist, handleValidationErrors, null );
 
-				if( navigationNeeded ) {
-					requestState.DmIdAndSecondaryOp = Tuple.Create( dmIdAndSecondaryOp.Item1, SecondaryPostBackOperation.NoOperation );
-					requestState.SetStaticAndUpdateRegionState( getStaticRegionContents( null ).contents, Enumerable.Empty<( string, string )>().Materialize() );
-				}
+				if( navigationNeeded )
+					requestState.SetStaticAndUpdateRegionState( getStaticRegionContents( null ).contents, null );
 			} );
 		if( navigationNeeded )
 			return navigate(
 				null,
-				null,
 				page => {
-					page.buildPage();
+					page.postBackValidationDmExecuted = true;
+					page.buildPage( modificationErrorsExist && operation != SecondaryPostBackOperation.ValidateChangesOnly ? dataModificationId : null );
 					page.assertStaticRegionsUnchanged();
 					return page.getResponse( null );
 				} );
@@ -457,7 +457,7 @@ public abstract class PageBase: ResourceBase {
 
 			requestState.FocusKey = "";
 			requestState.GeneralModificationErrors = dmException.HtmlMessages;
-			requestState.SetStaticAndUpdateRegionState( getStaticRegionContents( null ).contents, Enumerable.Empty<( string, string )>().Materialize() );
+			requestState.SetStaticAndUpdateRegionState( getStaticRegionContents( null ).contents, null );
 		}
 	}
 
@@ -588,7 +588,9 @@ public abstract class PageBase: ResourceBase {
 	}
 
 	private EwfResponse navigate(
-		ResourceInfo destination, Func<ResourceInfo, bool> authorizationCheckDisabledPredicate, Func<PageBase, EwfResponse> actionProcessor ) {
+		( ResourceInfo destination, Func<ResourceInfo, bool> authorizationCheckDisabledPredicate )? navigationBehavior,
+		Func<PageBase, EwfResponse> actionProcessor ) {
+		ResourceInfo destination;
 		bool authorizationCheckDisabled;
 		string destinationUrl;
 		try {
@@ -602,20 +604,22 @@ public abstract class PageBase: ResourceBase {
 			// 2. The page redirects, or transfers, to this destination, leading the user to an error page without developers being notified. This is bad behavior.
 			// It would also be a problem if the destination were the current page object since it could then contain dirty state from this post-back after
 			// navigation.
-			if( modificationErrorsExist || requestState.DmIdAndSecondaryOp is { Item2: SecondaryPostBackOperation.NoOperation } )
+			if( !navigationBehavior.HasValue )
 				destination = ReCreate();
 			else {
 				RequestState.Instance.SetNewUrlParameterValuesEffective( true );
-				if( destination == null )
+				if( navigationBehavior.Value.destination is null )
 					destination = reCreateFromNewParameterValues();
-				else if( destination is ResourceBase r )
+				else if( navigationBehavior.Value.destination is ResourceBase r )
 					destination = r.ReCreate();
+				else
+					destination = navigationBehavior.Value.destination;
 			}
 
 			// This GetUrl call is important even for the transfer case below for the same reason that we *actually create* a new page object in every case above.
 			// We want to force developers to get an error email if a page modifies data to make itself unauthorized/disabled without specifying a different page as
 			// the redirect destination. The resulting transfer would lead the user to an error page.
-			authorizationCheckDisabled = !modificationErrorsExist && authorizationCheckDisabledPredicate?.Invoke( destination ) == true;
+			authorizationCheckDisabled = navigationBehavior?.authorizationCheckDisabledPredicate?.Invoke( destination ) == true;
 			destinationUrl = destination.GetUrl( !authorizationCheckDisabled, !authorizationCheckDisabled );
 		}
 		catch( Exception e ) {
@@ -676,7 +680,7 @@ public abstract class PageBase: ResourceBase {
 		RequestState.Instance.SetUrlHandlers( urlHandlers );
 	}
 
-	private void buildPage() {
+	private void buildPage( string failingDataModificationId ) {
 		UrlHandler urlHandler = this;
 		do {
 			if( urlHandler is ResourceBase resource ) {
@@ -700,25 +704,17 @@ public abstract class PageBase: ResourceBase {
 					using( MiniProfiler.Current.Step( "EWF - Get page content" ) )
 						return getContent() ?? defaultContentGetter();
 				} ),
-			() => {
-				var failingDmId =
-					modificationErrorsExist && requestState.DmIdAndSecondaryOp != null &&
-					requestState.DmIdAndSecondaryOp.Item2 != SecondaryPostBackOperation.ValidateChangesOnly
-						? requestState.DmIdAndSecondaryOp.Item1
-						: null;
-
-				return JsonConvert.SerializeObject(
-					new HiddenFieldData(
-						requestState.FirstRequestTime,
-						/* Put the values in request state so they’re available if the request is continued for a page-load post-back. */
-						requestState.ComponentStateValuesById = componentStateItemsById.ToImmutableDictionary( i => i.Key, i => i.Value.ValueAsJson ),
-						generateFormValueHash(),
-						failingDmId,
-						"",
-						"",
-						"" ),
-					Formatting.None );
-			},
+			() => JsonConvert.SerializeObject(
+				new HiddenFieldData(
+					requestState.FirstRequestTime,
+					/* Put the values in request state so they’re available if the request is continued for a page-load post-back. */
+					requestState.ComponentStateValuesById = componentStateItemsById.ToImmutableDictionary( i => i.Key, i => i.Value.ValueAsJson ),
+					generateFormValueHash(),
+					failingDataModificationId,
+					"",
+					"",
+					"" ),
+				Formatting.None ),
 			() => getJsInitStatements( elementJsInitStatements.ToString(), pageLoadAction != null ? pageLoadAction.GetJsStatements() : "" ) );
 		BasicContent = content.basicContent;
 		if( content.dataUpdateModificationMethod != null )
@@ -882,7 +878,7 @@ public abstract class PageBase: ResourceBase {
 	private void assertStaticRegionsUnchanged() {
 		var nodeUpdateRegionLinkersByKey = updateRegionLinkerNodes.SelectMany( i => i.KeyedUpdateRegionLinkers, ( node, keyedLinker ) => ( node, keyedLinker ) )
 			.ToImmutableDictionary( i => i.keyedLinker.key );
-		var updateRegions = requestState.UpdateRegionKeysAndArguments.Select(
+		var updateRegions = requestState.UpdateRegionKeysAndArguments?.Select(
 			keyAndArg => {
 				if( !nodeUpdateRegionLinkersByKey.TryGetValue( keyAndArg.key, out var nodeLinker ) )
 					throw getPossibleDeveloperMistakeException(
@@ -921,18 +917,18 @@ public abstract class PageBase: ResourceBase {
 					        ?
 					        "Post-backs, form controls, component-state items, and modification-error-display keys may not change if modification errors exist." +
 					        " (IMPORTANT: This exception may have been thrown because EWL Goal 588 hasn't been completed. See the note in the goal about the EwfPage bug and disregard the rest of this error message.)"
-					        : new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains(
-						        requestState.DmIdAndSecondaryOp.Item2 )
-						        ? "Form controls and component-state items outside of update regions may not change on an intermediate post-back."
-						        : "Post-backs, form controls, and component-state items may not change during the validation stage of an intermediate post-back." ) +
-				Environment.NewLine + Environment.NewLine + message );
+					        : updateRegions is null
+						        ? "Post-backs, form controls, and component-state items may not change during the validation stage of an intermediate post-back."
+						        : "Form controls and component-state items outside of update regions may not change on an intermediate post-back." ) + Environment.NewLine +
+				Environment.NewLine + message );
 	}
 
+	// Pass null for updateRegions when modification errors exist or during the validation stage of an intermediate post-back.
 	private ( string contents, ImmutableHashSet<ComponentStateItem> stateItems, IReadOnlyCollection<FormValue> formValues ) getStaticRegionContents(
 		IEnumerable<( PageNode node, IEnumerable<PageComponent> components )> updateRegions ) {
 		var contents = new StringBuilder();
 
-		if( modificationErrorsExist || requestState.DmIdAndSecondaryOp is { Item2: SecondaryPostBackOperation.NoOperation } ) {
+		if( updateRegions is null ) {
 			// It’s probably bad if a developer puts a post-back object in the page because of a modification error. It will be gone on the post-back and cannot be
 			// processed.
 			contents.AppendLine( "Post-backs:" );
@@ -1009,10 +1005,7 @@ public abstract class PageBase: ResourceBase {
 			} );
 	}
 
-	internal bool ModificationErrorsOccurred =>
-		modificationErrorsExist && ( requestState.DmIdAndSecondaryOp == null ||
-		                             !new[] { SecondaryPostBackOperation.Validate, SecondaryPostBackOperation.ValidateChangesOnly }.Contains(
-			                             requestState.DmIdAndSecondaryOp.Item2 ) );
+	internal bool ModificationErrorsOccurred => modificationErrorsExist && !postBackValidationDmExecuted;
 
 	private bool modificationErrorsExist => requestState.InLineModificationErrorsByDisplay.Any() || requestState.GeneralModificationErrors.Any();
 
