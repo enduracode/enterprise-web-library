@@ -72,23 +72,28 @@ partial class IntermediatePostBacks {
 		return content;
 	}
 
-	private IEnumerable<FlowComponent> getBasicRegionComponents() {
+	private IReadOnlyCollection<FlowComponent> getBasicRegionComponents() {
+		var components = new List<FlowComponent>();
+
 		var rs = new UpdateRegionSet();
 		var dynamicFieldValue = new DataValue<string>();
-		var pb = PostBack.CreateIntermediate(
-			rs.ToCollection(),
-			id: "basic",
-			modificationMethod: () => {
-				parametersModification.Toggled = !parametersModification.Toggled;
-				AddStatusMessage( StatusMessageType.Info, Toggled ? "Dynamic field value was '{0}'.".FormatWith( dynamicFieldValue.Value ) : "Dynamic field added." );
-			} );
-		yield return new Paragraph(
-			new EwfButton( new StandardButtonStyle( "Toggle Basic Region Below" ), behavior: new PostBackBehavior( postBack: pb ) ).ToCollection() );
-
-		var regionComponents = new List<FlowComponent>();
+		const string focusKey = "basicRegion";
 		FormState.ExecuteWithDataModificationsAndDefaultAction(
-			pb.ToCollection(),
+			PostBack.CreateIntermediate(
+					rs.ToCollection(),
+					id: "basic",
+					modificationMethod: () => {
+						parametersModification.Toggled = !parametersModification.Toggled;
+						AddStatusMessage(
+							StatusMessageType.Info,
+							Toggled ? "Dynamic field value was '{0}'.".FormatWith( dynamicFieldValue.Value ) : "Dynamic field added." );
+					},
+					reloadBehaviorGetter: Toggled ? null : () => new PageReloadBehavior( focusKey: focusKey ) )
+				.ToCollection(),
 			() => {
+				components.Add( new Paragraph( new EwfButton( new StandardButtonStyle( "Toggle Basic Region Below" ) ).ToCollection() ) );
+
+				var regionComponents = new List<FlowComponent>();
 				if( Toggled )
 					regionComponents.AddRange(
 						dynamicFieldValue.ToTextControl( true, value: "This was just added!" )
@@ -96,10 +101,15 @@ partial class IntermediatePostBacks {
 							.ToComponentCollection() );
 				else
 					regionComponents.Add( new Paragraph( "Nothing here yet.".ToComponents() ) );
+				components.Add(
+					new FlowIdContainer(
+						new FlowAutofocusRegion(
+							AutofocusCondition.PostBack( focusKey ),
+							new Section( "Basic Update Region", regionComponents, style: SectionStyle.Box ).ToCollection() ).ToCollection(),
+						updateRegionSets: rs.ToCollection() ) );
 			} );
-		yield return new FlowIdContainer(
-			new Section( "Basic Update Region", regionComponents, style: SectionStyle.Box ).ToCollection(),
-			updateRegionSets: rs.ToCollection() );
+
+		return components;
 	}
 
 	private IReadOnlyCollection<FlowComponent> getNonIdListRegionComponents() {
