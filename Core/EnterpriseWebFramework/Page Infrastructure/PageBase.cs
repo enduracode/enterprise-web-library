@@ -192,7 +192,7 @@ public abstract class PageBase: ResourceBase {
 
 	protected sealed override EwfSafeRequestHandler getOrHead() {
 		requestState = new PageRequestState();
-		return new EwfSafeResponseWriter( executePageViewDataModifications().buildPageAndGetResponse( null ) );
+		return new EwfSafeResponseWriter( executePageViewDataModifications().buildPageAndGetResponse( new SpecifiedValue<string>( null ) ) );
 	}
 
 	protected sealed override bool managesDataAccessCacheInUnsafeRequestMethods => true;
@@ -226,9 +226,8 @@ public abstract class PageBase: ResourceBase {
 		catch {
 			// Set a 400 status code if there are any problems loading hidden field state. We’re assuming these problems are never the developers’ fault.
 			requestState ??= new PageRequestState();
-			requestState.FocusKey = "";
 			requestState.GeneralModificationErrors = Translation.ApplicationHasBeenUpdatedAndWeCouldNotInterpretAction.ToCollection();
-			return executePageViewDataModifications().buildPageAndGetResponse( 400 );
+			return executePageViewDataModifications().buildPageAndGetResponse( null, statusCode: 400 );
 		}
 
 		if( !pageBuilt )
@@ -270,15 +269,16 @@ public abstract class PageBase: ResourceBase {
 
 				// Execute the post-back.
 				var actionPostBack = postBack as ActionPostBack;
+				string focusKey = null;
 				if( actionPostBack != null ) {
-					requestState.FocusKey = "";
+					focusKey = "";
 					try {
 						dmExecuted |= actionPostBack.Execute(
 							changesExist( actionPostBack ),
 							handleValidationErrors,
 							postBackAction => {
 								navigationBehavior = postBackAction?.NavigationBehavior;
-								requestState.FocusKey = postBackAction?.ReloadBehavior?.FocusKey ?? "";
+								focusKey = postBackAction?.ReloadBehavior?.FocusKey ?? "";
 								fullSecondaryResponse = postBackAction?.ReloadBehavior?.SecondaryResponse?.GetFullResponse();
 							} );
 					}
@@ -325,8 +325,9 @@ public abstract class PageBase: ResourceBase {
 							         : SecondaryPostBackOperation.ValidateChangesOnly ) == SecondaryPostBackOperation.Validate
 							       ? page.processSecondaryOperationAndGetResponse(
 								       actionPostBack.ValidationDm == dataUpdate ? "" : ( (ActionPostBack)actionPostBack.ValidationDm ).Id,
-								       SecondaryPostBackOperation.Validate )
-							       : page.getResponse( null );
+								       SecondaryPostBackOperation.Validate,
+								       focusKey )
+							       : page.getResponse( new SpecifiedValue<string>( focusKey ) );
 					};
 				}
 				else {
@@ -334,7 +335,7 @@ public abstract class PageBase: ResourceBase {
 					actionProcessor = page => {
 						page = page.executePageViewDataModifications();
 						page.buildPage( null );
-						return page.getResponse( null );
+						return page.getResponse( new SpecifiedValue<string>( focusKey ) );
 					};
 				}
 			} );
@@ -356,9 +357,9 @@ public abstract class PageBase: ResourceBase {
 			} );
 	}
 
-	private EwfResponse buildPageAndGetResponse( int? statusCode ) {
+	private EwfResponse buildPageAndGetResponse( SpecifiedValue<string> focusKey, int? statusCode = null ) {
 		buildPage( null );
-		return getResponse( statusCode );
+		return getResponse( focusKey, statusCode: statusCode );
 	}
 
 	private void validateFormSubmission( IFormCollection submission, string formValueHash ) {
@@ -416,7 +417,7 @@ public abstract class PageBase: ResourceBase {
 		}
 	}
 
-	private EwfResponse processSecondaryOperationAndGetResponse( string dataModificationId, SecondaryPostBackOperation operation ) {
+	private EwfResponse processSecondaryOperationAndGetResponse( string dataModificationId, SecondaryPostBackOperation operation, string focusKey ) {
 		var dataModification = dataModificationId.Length > 0 ? GetPostBack( dataModificationId ) as DataModification : dataUpdate;
 		if( dataModification is null )
 			throw getPossibleDeveloperMistakeException( "A data modification with an ID of \"{0}\" does not exist.".FormatWith( dataModificationId ) );
@@ -440,10 +441,10 @@ public abstract class PageBase: ResourceBase {
 					page.postBackValidationDmExecuted = true;
 					page.buildPage( modificationErrorsExist && operation != SecondaryPostBackOperation.ValidateChangesOnly ? dataModificationId : null );
 					page.assertStaticRegionsUnchanged();
-					return page.getResponse( null );
+					return page.getResponse( new SpecifiedValue<string>( focusKey ) );
 				} );
 
-		return getResponse( null );
+		return getResponse( new SpecifiedValue<string>( focusKey ) );
 	}
 
 	private void executeWithDataModificationExceptionHandling( Action method ) {
@@ -455,7 +456,6 @@ public abstract class PageBase: ResourceBase {
 			if( dmException == null )
 				throw;
 
-			requestState.FocusKey = "";
 			requestState.GeneralModificationErrors = dmException.HtmlMessages;
 			requestState.SetStaticAndUpdateRegionState( getStaticRegionContents( null ).contents, null );
 		}
@@ -972,15 +972,14 @@ public abstract class PageBase: ResourceBase {
 			innerException );
 	}
 
-	private EwfResponse getResponse( int? statusCode ) {
-		Func<FocusabilityCondition, bool> isFocusablePredicate;
-		if( ModificationErrorsOccurred )
-			isFocusablePredicate = condition => condition.ErrorFocusabilitySources.Validations.Any( i => validationsWithErrors.Contains( i ) ) ||
-			                                    ( condition.ErrorFocusabilitySources.IncludeGeneralErrors && requestState.GeneralModificationErrors.Any() );
-		else
-			isFocusablePredicate = condition => condition.IsNormallyFocusable;
-
-		pageTree.PrepareForRendering( requestState.FocusKey, ModificationErrorsOccurred, isFocusablePredicate );
+	// Null for focusKey means modification errors occurred.
+	private EwfResponse getResponse( SpecifiedValue<string> focusKey, int? statusCode = null ) {
+		pageTree.PrepareForRendering(
+			focusKey,
+			focusKey is null
+				? condition => condition.ErrorFocusabilitySources.Validations.Any( i => validationsWithErrors.Contains( i ) ) ||
+				               ( condition.ErrorFocusabilitySources.IncludeGeneralErrors && requestState.GeneralModificationErrors.Any() )
+				: condition => condition.IsNormallyFocusable );
 
 		return EwfResponse.Create(
 			ContentTypes.Html,

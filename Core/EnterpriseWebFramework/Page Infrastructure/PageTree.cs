@@ -185,7 +185,7 @@ internal class PageTree {
 		return nodes;
 	}
 
-	public void PrepareForRendering( string focusKey, bool modificationErrorsOccurred, Func<FocusabilityCondition, bool> isFocusablePredicate ) {
+	public void PrepareForRendering( SpecifiedValue<string> focusKey, Func<FocusabilityCondition, bool> isFocusablePredicate ) {
 		var etherealChildren = new List<PageNode>( etherealComponentCount );
 
 		var activeAutofocusRegionsExist = false;
@@ -194,7 +194,7 @@ internal class PageTree {
 		void prepareForRendering( PageNode node, bool inActiveAutofocusRegion, TextWriter jsInitStatementWriter ) {
 			etherealChildren.AddRange( node.EtherealChildren );
 
-			if( !inActiveAutofocusRegion && node.AutofocusCondition?.IsTrue( focusKey ) == true ) {
+			if( !inActiveAutofocusRegion && node.AutofocusCondition?.IsTrue( focusKey.Value ) == true ) {
 				inActiveAutofocusRegion = true;
 				activeAutofocusRegionsExist = true;
 			}
@@ -212,9 +212,9 @@ internal class PageTree {
 		}
 
 		using( var jsInitStatementWriter = new StringWriter( elementJsInitStatements ) )
-			prepareForRendering( rootNode, modificationErrorsOccurred, jsInitStatementWriter );
+			prepareForRendering( rootNode, focusKey is null, jsInitStatementWriter );
 
-		if( !modificationErrorsOccurred && activeAutofocusRegionsExist && !elementFocused )
+		if( focusKey is not null && activeAutofocusRegionsExist && !elementFocused )
 			throw new ApplicationException( "The active autofocus regions do not contain any focusable elements." );
 
 		etherealContainerNode.Children = etherealChildren;

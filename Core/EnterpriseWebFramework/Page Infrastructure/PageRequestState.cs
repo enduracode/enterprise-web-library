@@ -15,7 +15,6 @@ internal class PageRequestState {
 	public PostBackValueDictionary PostBackValues { get; set; }
 
 	// set during modifications
-	public string FocusKey { get; set; }
 	public Dictionary<string, IEnumerable<string>> InLineModificationErrorsByDisplay { get; } = new();
 	public IReadOnlyCollection<TrustedHtmlString> GeneralModificationErrors { get; set; } = Array.Empty<TrustedHtmlString>();
 
