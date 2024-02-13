@@ -23,9 +23,15 @@ partial class EntitySetup: UiEntitySetup {
 					new CheckboxListDemo( this ),
 					new DateAndTimePickers( this ),
 					new FileUploadDemo( this ) ),
-				new ResourceGroup( "Working Stuff", new ActionControls( this ), new OptionalParametersDemo( this ) ),
-				new ResourceGroup( "First category", new HtmlEditing( this ), new RegexHelper( this ), new StatusMessages( this ) ),
-				new ResourceGroup( "Other", new IntermediatePostBacks( this ), new ModalBoxes( this ), new MailMerging( this ), new Charts( this ) )
+				new ResourceGroup(
+					"Page Functionality",
+					new OptionalParametersDemo( this ),
+					new StatusMessages( this ),
+					new IntermediatePostBacks( this ),
+					new KeyboardFocus( this ) ),
+				new ResourceGroup( "Working Stuff", new ActionControls( this ) ),
+				new ResourceGroup( "First category", new HtmlEditing( this ), new RegexHelper( this ) ),
+				new ResourceGroup( "Other", new ModalBoxes( this ), new MailMerging( this ), new Charts( this ) )
 			};
 
 	protected override UrlHandler getRequestHandler() => new BoxDemo( this );
@@ -42,6 +48,7 @@ partial class EntitySetup: UiEntitySetup {
 			.Append( DateAndTimePickers.UrlPatterns.Literal( this, "date-time-controls" ) )
 			.Append( FileUploadDemo.UrlPatterns.Literal( this, "file-upload" ) )
 			.Append( IntermediatePostBacks.UrlPatterns.Literal( this, "intermediate-post-backs" ) )
+			.Append( KeyboardFocus.UrlPatterns.Literal( this, "keyboard-focus" ) )
 			.Append( UnauthorizedPage.UrlPatterns.Literal( this, "unauthorized-page" ) )
 			.Append( CreateSystem.UrlPatterns.Literal( "create-system" ) )
 			.Append( ConfigurationSchemas.EntitySetup.UrlPatterns.Literal( "ConfigurationSchemas" ) )

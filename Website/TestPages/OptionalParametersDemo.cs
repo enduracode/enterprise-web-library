@@ -1,6 +1,4 @@
-﻿using EnterpriseWebLibrary.EnterpriseWebFramework;
-using Tewl.InputValidation;
-using Tewl.Tools;
+﻿using Tewl.InputValidation;
 
 // EwlPage
 // OptionalParameter: string field1
@@ -12,6 +10,8 @@ namespace EnterpriseWebLibrary.Website.TestPages {
 		static partial void specifyParameterDefaults( OptionalParameterSpecifier specifier, EntitySetup entitySetup, Parameters parameters ) {
 			specifier.Field1 = "Default value";
 		}
+
+		protected override string getResourceName() => "Optional Parameters";
 
 		protected override PageContent getContent() {
 			var content = new UiPageContent( isAutoDataUpdater: true );
@@ -44,10 +44,10 @@ namespace EnterpriseWebLibrary.Website.TestPages {
 					testUrl( table, scheme + userinfo + subdomain + domain + tld + port + folder + file + query + frag );
 
 				foreach( var additionalUrl in new[]
-					{
-						"//example.org/scheme-relative/URI/with/absolute/path/to/resource.txt", "/relative/URI/with/absolute/path/to/resource.txt",
-						"relative/path/to/resource.txt", "../../../resource.txt", "./resource.txt#frag01", "resource.txt", "#frag01", "www.world.com"
-					} )
+					        {
+						        "//example.org/scheme-relative/URI/with/absolute/path/to/resource.txt", "/relative/URI/with/absolute/path/to/resource.txt",
+						        "relative/path/to/resource.txt", "../../../resource.txt", "./resource.txt#frag01", "resource.txt", "#frag01", "www.world.com"
+					        } )
 					testUrl( table, additionalUrl );
 			}
 
