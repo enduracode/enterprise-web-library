@@ -425,11 +425,9 @@ public abstract class PageBase: ResourceBase {
 		var navigationNeeded = true;
 		executeWithDataModificationExceptionHandling(
 			() => {
-				var changesExist = componentStateItemsById.Values.Any( i => i.DataModifications.Contains( dataModification ) && i.ValueChanged() ) || formValues.Any(
-					                   i => i.DataModifications.Contains( dataModification ) && i.ValueChangedOnPostBack() );
 				navigationNeeded = dataModification == dataUpdate
-					                   ? dataUpdate.Execute( true, changesExist, handleValidationErrors, performValidationOnly: true )
-					                   : ( (ActionPostBack)dataModification ).Execute( changesExist, handleValidationErrors, null );
+					                   ? dataUpdate.Execute( true, changesExist( dataModification ), handleValidationErrors, performValidationOnly: true )
+					                   : ( (ActionPostBack)dataModification ).Execute( changesExist( dataModification ), handleValidationErrors, null );
 
 				if( navigationNeeded )
 					requestState.SetStaticAndUpdateRegionState( getStaticRegionContents( null ).contents, null );
@@ -460,6 +458,10 @@ public abstract class PageBase: ResourceBase {
 			requestState.SetStaticAndUpdateRegionState( getStaticRegionContents( null ).contents, null );
 		}
 	}
+
+	private bool changesExist( DataModification dataModification ) =>
+		componentStateItemsById.Values.Any( i => i.IncludedInChangeDetection && i.DataModifications.Contains( dataModification ) && i.ValueChanged() ) ||
+		formValues.Any( i => i.DataModifications.Contains( dataModification ) && i.ValueChangedOnPostBack() );
 
 	private void handleValidationErrors( EwfValidation validation, IEnumerable<string> errorMessages ) {
 		if( !errorMessages.Any() )
@@ -768,7 +770,7 @@ public abstract class PageBase: ResourceBase {
 		var formValueString = new StringBuilder();
 
 		formValueString.AppendLine( "Component-state items:" );
-		foreach( var pair in componentStateItemsById.Where( i => i.Value.DataModifications.Any() ).OrderBy( i => i.Key ) )
+		foreach( var pair in componentStateItemsById.Where( i => i.Value.IncludedInChangeDetection ).OrderBy( i => i.Key ) )
 			formValueString.AppendLine( "\t{0}: {1}".FormatWith( pair.Key, pair.Value.DurableValueAsString ) );
 		formValueString.AppendLine( "Form values:" );
 		foreach( var formValue in formValues.Where( i => i.GetPostBackValueKey().Any() && i.DataModifications.Any() ) )

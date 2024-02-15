@@ -36,17 +36,14 @@ public abstract class ComponentStateItem {
 		creationTimeAsserter();
 
 		id = elementOrIdentifiedComponentIdGetter().AppendDelimiter( "_" ) + id;
-		var item = new ComponentStateItem<T>(
-			durableValue,
-			valueGetter( id ),
-			valueValidator,
-			includeInChangeDetection ? dataModificationGetter() : Enumerable.Empty<DataModification>().Materialize() );
+		var item = new ComponentStateItem<T>( durableValue, valueGetter( id ), valueValidator, includeInChangeDetection, dataModificationGetter() );
 		itemAdder( id, item );
 		return item;
 	}
 
 	internal abstract string DurableValueAsString { get; }
 	internal abstract bool ValueIsInvalid();
+	internal abstract bool IncludedInChangeDetection { get; }
 	internal abstract IReadOnlyCollection<DataModification> DataModifications { get; }
 	internal abstract bool ValueChanged();
 	internal abstract JToken ValueAsJson { get; }
@@ -56,12 +53,14 @@ public sealed class ComponentStateItem<T>: ComponentStateItem, EtherealComponent
 	private readonly SpecifiedValue<T> durableValue;
 	private readonly DataValue<T> value;
 	private readonly bool valueIsInvalid;
+	private readonly bool includedInChangeDetection;
 	private readonly IReadOnlyCollection<DataModification> dataModifications;
 
-	internal ComponentStateItem( T durableValue, JToken value, Func<T, bool> valueValidator, IReadOnlyCollection<DataModification> dataModifications ) {
+	internal ComponentStateItem(
+		T durableValue, JToken value, Func<T, bool> valueValidator, bool includeInChangeDetection, IReadOnlyCollection<DataModification> dataModifications ) {
 		if( !valueValidator( durableValue ) )
 			throw new ApplicationException( "The specified durable value is invalid according to the specified value validator." );
-		if( dataModifications.Any() )
+		if( includeInChangeDetection )
 			this.durableValue = new SpecifiedValue<T>( durableValue );
 
 		if( value != null && tryConvertValue( value, out var convertedValue ) && valueValidator( convertedValue ) )
@@ -71,6 +70,7 @@ public sealed class ComponentStateItem<T>: ComponentStateItem, EtherealComponent
 			valueIsInvalid = value != null;
 		}
 
+		includedInChangeDetection = includeInChangeDetection;
 		this.dataModifications = dataModifications;
 	}
 
@@ -93,6 +93,7 @@ public sealed class ComponentStateItem<T>: ComponentStateItem, EtherealComponent
 	IReadOnlyCollection<EtherealComponentOrElement> EtherealComponent.GetChildren() => Enumerable.Empty<EtherealComponentOrElement>().Materialize();
 	internal override string DurableValueAsString => JsonConvert.SerializeObject( durableValue.Value, Formatting.None );
 	internal override bool ValueIsInvalid() => valueIsInvalid;
+	internal override bool IncludedInChangeDetection => includedInChangeDetection;
 	internal override IReadOnlyCollection<DataModification> DataModifications => dataModifications;
 	internal override bool ValueChanged() => !EwlStatics.AreEqual( value.Value, durableValue.Value );
 	internal override JToken ValueAsJson => value.Value == null ? JValue.CreateNull() : JToken.FromObject( value.Value );
