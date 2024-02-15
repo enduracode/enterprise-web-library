@@ -233,122 +233,138 @@ public abstract class PageBase: ResourceBase {
 		if( !pageBuilt )
 			buildPage( hiddenFieldData.LastPostBackFailingDmId );
 
-		( ResourceInfo destination, Func<ResourceInfo, bool> authorizationCheckDisabledPredicate )? navigationBehavior = null;
-		FullResponse fullSecondaryResponse = null;
-		Func<PageBase, EwfResponse> actionProcessor = null;
-		string failingDataModificationId = null;
+		PostBack postBack = null;
+		DataModification lastPostBackFailingDm = null;
 		executeWithDataModificationExceptionHandling(
 			() => {
 				validateFormSubmission( formSubmission, hiddenFieldData.FormValueHash );
 
-				// Get the post-back object and, if necessary, the last post-back's failing data modification.
-				var postBack = GetPostBack( hiddenFieldData.PostBackId );
-				if( postBack == null )
+				// Get the post-back object and, if necessary, the last post-back’s failing data modification.
+				postBack = GetPostBack( hiddenFieldData.PostBackId );
+				if( postBack is null )
 					throw new DataModificationException( Translation.AnotherUserHasModifiedPageAndWeCouldNotInterpretAction );
-				var lastPostBackFailingDm = postBack.IsIntermediate && hiddenFieldData.LastPostBackFailingDmId != null
-					                            ? hiddenFieldData.LastPostBackFailingDmId.Any()
-						                              ? GetPostBack( hiddenFieldData.LastPostBackFailingDmId ) as DataModification
-						                              : dataUpdate
-					                            : null;
-				if( postBack.IsIntermediate && hiddenFieldData.LastPostBackFailingDmId != null && lastPostBackFailingDm == null )
+				lastPostBackFailingDm = postBack.IsIntermediate && hiddenFieldData.LastPostBackFailingDmId != null
+					                        ? hiddenFieldData.LastPostBackFailingDmId.Any()
+						                          ? GetPostBack( hiddenFieldData.LastPostBackFailingDmId ) as DataModification
+						                          : dataUpdate
+					                        : null;
+				if( postBack.IsIntermediate && hiddenFieldData.LastPostBackFailingDmId is not null && lastPostBackFailingDm is null )
 					throw new DataModificationException( Translation.AnotherUserHasModifiedPageAndWeCouldNotInterpretAction );
-
-				// Execute the page's data update.
-				bool changesExist( DataModification dataModification ) =>
-					componentStateItemsById.Values.Any( i => i.DataModifications.Contains( dataModification ) && i.ValueChanged() ) || formValues.Any(
-						i => i.DataModifications.Contains( dataModification ) && i.ValueChangedOnPostBack() );
-				var dmExecuted = false;
-				if( !postBack.IsIntermediate )
-					try {
-						dmExecuted |= dataUpdate.Execute( !postBack.ForcePageDataUpdate, changesExist( dataUpdate ), handleValidationErrors );
-					}
-					catch {
-						failingDataModificationId = "";
-						throw;
-					}
-
-				// Execute the post-back.
-				var actionPostBack = postBack as ActionPostBack;
-				string focusKey = null;
-				if( actionPostBack != null ) {
-					focusKey = "";
-					try {
-						dmExecuted |= actionPostBack.Execute(
-							changesExist( actionPostBack ),
-							handleValidationErrors,
-							postBackAction => {
-								navigationBehavior = postBackAction?.NavigationBehavior;
-								focusKey = postBackAction?.ReloadBehavior?.FocusKey ?? "";
-								fullSecondaryResponse = postBackAction?.ReloadBehavior?.SecondaryResponse?.GetFullResponse();
-							} );
-					}
-					catch {
-						failingDataModificationId = actionPostBack.Id;
-						throw;
-					}
-				}
-
-				if( dmExecuted ) {
-					AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod( () => RequestStateStatics.AppendStatusMessages( statusMessages ) );
-					try {
-						RequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
-					}
-					finally {
-						DataAccessState.Current.ResetCache();
-					}
-
-					RequestStateStatics.RefreshRequestState();
-				}
-
-				if( postBack.IsIntermediate ) {
-					var regionSets = actionPostBack.UpdateRegions.ToImmutableHashSet();
-					var updateRegions = updateRegionLinkerNodes.SelectMany( i => i.KeyedUpdateRegionLinkers, ( node, keyedLinker ) => ( node, keyedLinker ) )
-						.SelectMany(
-							nodeLinker => nodeLinker.keyedLinker.linker.PreModificationRegions.Where( i => regionSets.Overlaps( i.Sets ) ),
-							( nodeLinker, region ) => ( nodeLinker.node, nodeLinker.keyedLinker.key, region ) )
-						.Materialize();
-					var staticRegionContents = getStaticRegionContents( updateRegions.Select( i => ( i.node, i.region.ComponentGetter() ) ) );
-
-					requestState.ComponentStateValuesById = componentStateItemsById.Where( i => staticRegionContents.stateItems.Contains( i.Value ) )
-						.ToImmutableDictionary( i => i.Key, i => i.Value.ValueAsJson );
-					requestState.PostBackValues.RemoveExcept( staticRegionContents.formValues.Select( i => i.GetPostBackValueKey() ) );
-					requestState.SetStaticAndUpdateRegionState(
-						staticRegionContents.contents,
-						updateRegions.Select( i => ( i.key, i.region.ArgumentGetter() ) ).Materialize() );
-
-					actionProcessor = page => {
-						page = page.executePageViewDataModifications();
-						page.buildPage( null );
-						page.assertStaticRegionsUnchanged();
-						return ( actionPostBack.ValidationDm == lastPostBackFailingDm
-							         ? SecondaryPostBackOperation.Validate
-							         : SecondaryPostBackOperation.ValidateChangesOnly ) == SecondaryPostBackOperation.Validate
-							       ? page.processSecondaryOperationAndGetResponse(
-								       actionPostBack.ValidationDm == dataUpdate ? "" : ( (ActionPostBack)actionPostBack.ValidationDm ).Id,
-								       SecondaryPostBackOperation.Validate,
-								       focusKey )
-							       : page.getResponse( new SpecifiedValue<string>( focusKey ) );
-					};
-				}
-				else {
-					requestState = new PageRequestState();
-					actionProcessor = page => {
-						page = page.executePageViewDataModifications();
-						page.buildPage( null );
-						return page.getResponse( new SpecifiedValue<string>( focusKey ) );
-					};
-				}
 			} );
-
-		return navigate(
-			modificationErrorsExist ? null : navigationBehavior ?? ( null, null ),
-			page => {
-				if( modificationErrorsExist ) {
-					page.buildPage( failingDataModificationId );
+		if( modificationErrorsExist )
+			return navigate(
+				null,
+				page => {
+					page.buildPage( null );
 					page.assertStaticRegionsUnchanged();
 					return page.getResponse( null );
-				}
+				} );
 
+		if( postBack.IsIntermediate )
+			return executePostBackAndGetResponse( (ActionPostBack)postBack, lastPostBackFailingDm );
+
+		// Execute the page’s data update.
+		var dataUpdateExecuted = false;
+		executeWithDataModificationExceptionHandling(
+			() => {
+				dataUpdateExecuted = dataUpdate.Execute( !postBack.ForcePageDataUpdate, changesExist( dataUpdate ), handleValidationErrors );
+				if( dataUpdateExecuted )
+					commitDataModification();
+			} );
+		if( modificationErrorsExist )
+			return navigate(
+				null,
+				page => {
+					page.buildPage( "" );
+					page.assertStaticRegionsUnchanged();
+					return page.getResponse( null );
+				} );
+
+		if( postBack is not ActionPostBack actionPostBack ) {
+			requestState = new PageRequestState();
+			return navigate( ( null, null ), page => page.executePageViewDataModifications().buildPageAndGetResponse( new SpecifiedValue<string>( null ) ) );
+		}
+
+		if( !dataUpdateExecuted )
+			return executePostBackAndGetResponse( actionPostBack, null );
+
+		// NOTE: Store integrity-checking data.
+
+		return navigate(
+			( null, null ),
+			page => {
+				page.buildPage( null );
+
+				// NOTE: Check page integrity, running with data-mod exception handling and throwing a data-mod exception if there is a problem.
+				var newPostBackObject = (ActionPostBack)GetPostBack( actionPostBack.Id );
+
+				return page.executePostBackAndGetResponse( newPostBackObject, null );
+			} );
+	}
+
+	private EwfResponse executePostBackAndGetResponse( ActionPostBack postBack, DataModification lastPostBackFailingDm ) {
+		( ResourceInfo destination, Func<ResourceInfo, bool> authorizationCheckDisabledPredicate )? navigationBehavior = null;
+		var focusKey = "";
+		FullResponse fullSecondaryResponse = null;
+		executeWithDataModificationExceptionHandling(
+			() => {
+				if( postBack.Execute(
+					   changesExist( postBack ),
+					   handleValidationErrors,
+					   postBackAction => {
+						   navigationBehavior = postBackAction?.NavigationBehavior;
+						   focusKey = postBackAction?.ReloadBehavior?.FocusKey ?? "";
+						   fullSecondaryResponse = postBackAction?.ReloadBehavior?.SecondaryResponse?.GetFullResponse();
+					   } ) )
+					commitDataModification();
+			} );
+		if( modificationErrorsExist )
+			return navigate(
+				null,
+				page => {
+					page.buildPage( postBack.Id );
+					page.assertStaticRegionsUnchanged();
+					return page.getResponse( null );
+				} );
+
+		Func<PageBase, EwfResponse> actionProcessor;
+		if( postBack.IsIntermediate ) {
+			var regionSets = postBack.UpdateRegions.ToImmutableHashSet();
+			var updateRegions = updateRegionLinkerNodes.SelectMany( i => i.KeyedUpdateRegionLinkers, ( node, keyedLinker ) => ( node, keyedLinker ) )
+				.SelectMany(
+					nodeLinker => nodeLinker.keyedLinker.linker.PreModificationRegions.Where( i => regionSets.Overlaps( i.Sets ) ),
+					( nodeLinker, region ) => ( nodeLinker.node, nodeLinker.keyedLinker.key, region ) )
+				.Materialize();
+			var staticRegionContents = getStaticRegionContents( updateRegions.Select( i => ( i.node, i.region.ComponentGetter() ) ) );
+
+			requestState.ComponentStateValuesById = componentStateItemsById.Where( i => staticRegionContents.stateItems.Contains( i.Value ) )
+				.ToImmutableDictionary( i => i.Key, i => i.Value.ValueAsJson );
+			requestState.PostBackValues.RemoveExcept( staticRegionContents.formValues.Select( i => i.GetPostBackValueKey() ) );
+			requestState.SetStaticAndUpdateRegionState(
+				staticRegionContents.contents,
+				updateRegions.Select( i => ( i.key, i.region.ArgumentGetter() ) ).Materialize() );
+
+			actionProcessor = page => {
+				page = page.executePageViewDataModifications();
+				page.buildPage( null );
+				page.assertStaticRegionsUnchanged();
+				return ( postBack.ValidationDm == lastPostBackFailingDm ? SecondaryPostBackOperation.Validate : SecondaryPostBackOperation.ValidateChangesOnly ) ==
+				       SecondaryPostBackOperation.Validate
+					       ? page.processSecondaryOperationAndGetResponse(
+						       postBack.ValidationDm == dataUpdate ? "" : ( (ActionPostBack)postBack.ValidationDm ).Id,
+						       SecondaryPostBackOperation.Validate,
+						       focusKey )
+					       : page.getResponse( new SpecifiedValue<string>( focusKey ) );
+			};
+		}
+		else {
+			requestState = new PageRequestState();
+			actionProcessor = page => page.executePageViewDataModifications().buildPageAndGetResponse( new SpecifiedValue<string>( focusKey ) );
+		}
+
+		return navigate(
+			navigationBehavior ?? ( null, null ),
+			page => {
 				// Store the secondary response right before navigation so that it doesn’t get sent if there is an error before this point.
 				if( fullSecondaryResponse is not null )
 					RequestStateStatics.SetSecondaryResponseId( SecondaryResponseDataStore.AddResponse( fullSecondaryResponse ) );
@@ -417,6 +433,18 @@ public abstract class PageBase: ResourceBase {
 		}
 	}
 
+	private void commitDataModification() {
+		AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod( () => RequestStateStatics.AppendStatusMessages( statusMessages ) );
+		try {
+			RequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
+		}
+		finally {
+			DataAccessState.Current.ResetCache();
+		}
+
+		RequestStateStatics.RefreshRequestState();
+	}
+
 	private EwfResponse processSecondaryOperationAndGetResponse( string dataModificationId, SecondaryPostBackOperation operation, string focusKey ) {
 		var dataModification = dataModificationId.Length > 0 ? GetPostBack( dataModificationId ) as DataModification : dataUpdate;
 		if( dataModification is null )
@@ -451,7 +479,7 @@ public abstract class PageBase: ResourceBase {
 		}
 		catch( Exception e ) {
 			var dmException = e.GetChain().OfType<DataModificationException>().FirstOrDefault();
-			if( dmException == null )
+			if( dmException is null )
 				throw;
 
 			requestState.GeneralModificationErrors = dmException.HtmlMessages;
@@ -917,8 +945,7 @@ public abstract class PageBase: ResourceBase {
 			throw getPossibleDeveloperMistakeException(
 				" " + ( modificationErrorsExist
 					        ?
-					        "Post-backs, form controls, component-state items, and modification-error-display keys may not change if modification errors exist." +
-					        " (IMPORTANT: This exception may have been thrown because EWL Goal 588 hasn't been completed. See the note in the goal about the EwfPage bug and disregard the rest of this error message.)"
+					        "Post-backs, form controls, component-state items, and modification-error-display keys may not change if modification errors exist."
 					        : updateRegions is null
 						        ? "Post-backs, form controls, and component-state items may not change during the validation stage of an intermediate post-back."
 						        : "Form controls and component-state items outside of update regions may not change on an intermediate post-back." ) + Environment.NewLine +
