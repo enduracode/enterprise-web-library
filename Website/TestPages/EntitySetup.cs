@@ -27,6 +27,7 @@ partial class EntitySetup: UiEntitySetup {
 					"Page Functionality",
 					new OptionalParametersDemo( this ),
 					new StatusMessages( this ),
+					new DataUpdateModification( this ),
 					new IntermediatePostBacks( this ),
 					new KeyboardFocus( this ) ),
 				new ResourceGroup( "Working Stuff", new ActionControls( this ) ),
@@ -47,6 +48,7 @@ partial class EntitySetup: UiEntitySetup {
 			.Append( NumberControlDemo.UrlPatterns.Literal( this, "number-control" ) )
 			.Append( DateAndTimePickers.UrlPatterns.Literal( this, "date-time-controls" ) )
 			.Append( FileUploadDemo.UrlPatterns.Literal( this, "file-upload" ) )
+			.Append( DataUpdateModification.UrlPatterns.Literal( this, "data-update-modification" ) )
 			.Append( IntermediatePostBacks.UrlPatterns.Literal( this, "intermediate-post-backs" ) )
 			.Append( KeyboardFocus.UrlPatterns.Literal( this, "keyboard-focus" ) )
 			.Append( UnauthorizedPage.UrlPatterns.Literal( this, "unauthorized-page" ) )

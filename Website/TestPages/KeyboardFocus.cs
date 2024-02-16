@@ -45,6 +45,7 @@ partial class KeyboardFocus {
 
 	private IReadOnlyCollection<FormItem> getFormItems() =>
 		Enumerable.Range( 1, 3 )
-			.Select( i => new TextControl( "", true ).ToFormItem( label: $"{i.ToOrdinalWords().CapitalizeString()} control".ToComponents() ) )
+			.Select(
+				i => new DataValue<string>().ToTextControl( true, value: "" ).ToFormItem( label: $"{i.ToOrdinalWords().CapitalizeString()} control".ToComponents() ) )
 			.Materialize();
 }
