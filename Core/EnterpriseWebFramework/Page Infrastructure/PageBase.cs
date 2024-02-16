@@ -288,18 +288,8 @@ public abstract class PageBase: ResourceBase {
 		if( !dataUpdateExecuted )
 			return executePostBackAndGetResponse( actionPostBack, null );
 
-		// NOTE: Store integrity-checking data.
-
-		return navigate(
-			( null, null ),
-			page => {
-				page.buildPage( null );
-
-				// NOTE: Check page integrity, running with data-mod exception handling and throwing a data-mod exception if there is a problem.
-				var newPostBackObject = (ActionPostBack)GetPostBack( actionPostBack.Id );
-
-				return page.executePostBackAndGetResponse( newPostBackObject, null );
-			} );
+		var stateItemsAndFormValues = getPostBackStateItemsAndFormValues( actionPostBack );
+		return navigate( ( null, null ), page => page.processPostBackAfterDataUpdate( actionPostBack.Id, stateItemsAndFormValues ) );
 	}
 
 	private EwfResponse executePostBackAndGetResponse( ActionPostBack postBack, DataModification lastPostBackFailingDm ) {
@@ -423,14 +413,92 @@ public abstract class PageBase: ResourceBase {
 			else if( formValueHashesDisagree )
 				Log.Debug( "Form-submission validation failed due to disagreeing form-value hashes" );
 
-			// Remove invalid post-back values so they don't cause a false developer-mistake exception after the transfer.
-			requestState.ComponentStateValuesById = requestState.ComponentStateValuesById.RemoveRange(
-				from i in componentStateItemsById where i.Value.ValueIsInvalid() select i.Key );
-			var validPostBackValueKeys = from i in activeFormValues where !i.PostBackValueIsInvalid() select i.GetPostBackValueKey();
-			requestState.PostBackValues.RemoveExcept( validPostBackValueKeys );
+			removeInvalidComponentStateAndPostBackValues();
 
 			throw new DataModificationException( Translation.AnotherUserHasModifiedPageHtml.ToCollection() );
 		}
+	}
+
+	private EwfResponse processPostBackAfterDataUpdate( string postBackId, string stateItemsAndFormValues ) {
+		buildPage( null );
+
+		ActionPostBack postBack = null;
+		executeWithDataModificationExceptionHandling(
+			() => {
+				postBack = (ActionPostBack)GetPostBack( postBackId );
+				if( postBack is null ) {
+					Log.Debug( "Post-back execution failed after the data update because the post-back was missing" );
+					throw new DataModificationException( Translation.YouHaveModifiedPageAndWeCouldNotInterpretAction );
+				}
+
+				if( !string.Equals( getPostBackStateItemsAndFormValues( postBack ), stateItemsAndFormValues, StringComparison.Ordinal ) ) {
+					Log.Debug( "Post-back execution failed after the data update because component-state items and/or form values changed" );
+					throw new DataModificationException( Translation.YouHaveModifiedPageAndWeCouldNotInterpretAction );
+				}
+				var invalidComponentStateValues = componentStateItemsById.Where( i => i.Value.ValueIsInvalid() && i.Value.DataModifications.Contains( postBack ) )
+					.Select( i => i.Key )
+					.OrderBy( i => i )
+					.Materialize();
+				if( invalidComponentStateValues.Any() ) {
+					Log.Debug(
+						"Post-back execution failed after the data update due to component-state values that became invalid: {@Values}",
+						invalidComponentStateValues.Select( i => new { Id = i, Value = requestState.ComponentStateValuesById[ i ] } ) );
+					throw new DataModificationException( Translation.YouHaveModifiedPageAndWeCouldNotInterpretAction );
+				}
+				var invalidPostBackValues = formValues
+					.Where( i => i.GetPostBackValueKey().Length > 0 && i.PostBackValueIsInvalid() && i.DataModifications.Contains( postBack ) )
+					.Select( i => i.GetPostBackValueKey() )
+					.OrderBy( i => i )
+					.Materialize();
+				if( invalidPostBackValues.Any() ) {
+					Log.Debug(
+						"Post-back execution failed after the data update due to post-back values that became invalid: {@Values}",
+						invalidPostBackValues.Select(
+							i => {
+								var value = requestState.PostBackValues.GetValue( i );
+								return new { Key = i, Value = value is not null ? "{0}".FormatWith( value ) : "missing" };
+							} ) );
+					throw new DataModificationException( Translation.YouHaveModifiedPageAndWeCouldNotInterpretAction );
+				}
+			} );
+		if( modificationErrorsExist ) {
+			removeInvalidComponentStateAndPostBackValues();
+			return navigate(
+				null,
+				page => {
+					page.buildPage( null );
+					page.assertStaticRegionsUnchanged();
+					return page.getResponse( null );
+				} );
+		}
+
+		return executePostBackAndGetResponse( postBack, null );
+	}
+
+	private string getPostBackStateItemsAndFormValues( ActionPostBack postBack ) {
+		var builder = new StringBuilder();
+		builder.AppendLine( "Component-state items:" );
+		foreach( var pair in componentStateItemsById.Where( i => i.Value.DataModifications.Contains( postBack ) ).OrderBy( i => i.Key ) )
+			builder.AppendLine( "\t" + pair.Key );
+		builder.AppendLine( "Form values:" );
+		foreach( var key in formValues.Where( i => i.GetPostBackValueKey().Length > 0 && i.DataModifications.Contains( postBack ) )
+			        .Select( i => i.GetPostBackValueKey() )
+			        .OrderBy( i => i ) )
+			builder.AppendLine( "\t" + key );
+
+		var s = builder.ToString();
+		Log.Debug( "Post-back component-state items and form values represented as {Values}", Environment.NewLine + s );
+		return s;
+	}
+
+	/// <summary>
+	/// Removes invalid component-state and post-back values so they don't cause a false developer-mistake exception after the page is rebuilt.
+	/// </summary>
+	private void removeInvalidComponentStateAndPostBackValues() {
+		requestState.ComponentStateValuesById = requestState.ComponentStateValuesById.RemoveRange(
+			from i in componentStateItemsById where i.Value.ValueIsInvalid() select i.Key );
+		var validPostBackValueKeys = from i in formValues where i.GetPostBackValueKey().Length > 0 && !i.PostBackValueIsInvalid() select i.GetPostBackValueKey();
+		requestState.PostBackValues.RemoveExcept( validPostBackValueKeys );
 	}
 
 	private void commitDataModification() {

@@ -39,13 +39,15 @@ internal static class Translation {
 				"You can also " + Tewl.Tools.NetTools.BuildBasicLink( "load the latest version in another window", PageBase.Current.GetUrl(), true ) + ".",
 				"También puede " + Tewl.Tools.NetTools.BuildBasicLink( "cargar la versión más reciente en otra ventana", PageBase.Current.GetUrl(), true ) + "." ) );
 
-	internal static string AnotherUserHasModifiedPageAndWeCouldNotInterpretAction {
-		get {
-			return getCorrectTranslation(
-				"Another user has modified this page since the last time you saw it and we couldn't interpret your last action. Please repeat it.",
-				"Otro usuario ha modificado esta página desde la última vez que lo vio y no pudo interpretar su última acción. Por favor, repita la misma." );
-		}
-	}
+	internal static string AnotherUserHasModifiedPageAndWeCouldNotInterpretAction =>
+		getCorrectTranslation(
+			"Another user has modified this page since the last time you saw it and we couldn't interpret your last action. Please repeat it.",
+			"Otro usuario ha modificado esta página desde la última vez que lo vio y no pudo interpretar su última acción. Por favor, repita la misma." );
+
+	internal static string YouHaveModifiedPageAndWeCouldNotInterpretAction =>
+		getCorrectTranslation(
+			"You have modified this page and we couldn’t interpret your last action. Please repeat it.",
+			"Has modificado esta página y no hemos podido interpretar tu última acción. Por favor, repítelo." );
 
 	internal static string YourBrowserHasCookiesDisabled {
 		get {
