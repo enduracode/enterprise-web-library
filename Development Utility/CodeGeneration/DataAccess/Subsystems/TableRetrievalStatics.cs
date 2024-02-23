@@ -11,7 +11,7 @@ internal static class TableRetrievalStatics {
 	private const string oracleRowVersionDataType = "decimal";
 
 	internal static void Generate(
-		DBConnection cn, TextWriter writer, string baseNamespace, string templateBasePath, Database database, IEnumerable<( string name, bool hasModTable )> tables,
+		DatabaseConnection cn, TextWriter writer, string baseNamespace, string templateBasePath, Database database, IEnumerable<( string name, bool hasModTable )> tables,
 		EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration, List<string> initStatements ) {
 		var subsystemName = "{0}TableRetrieval".FormatWith( database.SecondaryDatabaseName );
 		var subsystemNamespace = "namespace {0}.{1}".FormatWith( baseNamespace, subsystemName );
@@ -165,7 +165,7 @@ internal static class TableRetrievalStatics {
 	}
 
 	private static void writeCacheClass(
-		DBConnection cn, TextWriter writer, Database database, string table, TableColumns tableColumns, bool hasModTable, bool isRevisionHistoryTable ) {
+		DatabaseConnection cn, TextWriter writer, Database database, string table, TableColumns tableColumns, bool hasModTable, bool isRevisionHistoryTable ) {
 		writer.WriteLine( "private partial class Cache {" );
 		writer.WriteLine(
 			"internal static Cache Current => DataAccessState.Current.GetCacheValue( \"{0}\", () => new Cache() );".FormatWith(
@@ -191,7 +191,7 @@ internal static class TableRetrievalStatics {
 	}
 
 	private static void writeTableCacheMethods(
-		DBConnection cn, TextWriter writer, Database database, string table, TableColumns tableColumns, bool excludePreviousRevisions ) {
+		DatabaseConnection cn, TextWriter writer, Database database, string table, TableColumns tableColumns, bool excludePreviousRevisions ) {
 		CodeGenerationStatics.AddGeneratedCodeUseOnlyComment( writer );
 		writer.WriteLine( "private static {0} __get{1}() =>".FormatWith( getTableCacheType( tableColumns ), getTableCacheName( excludePreviousRevisions ) ) );
 		writer.WriteLine(
@@ -316,7 +316,7 @@ internal static class TableRetrievalStatics {
 	}
 
 	private static void writeGetRowsMatchingConditionsMethod(
-		DBConnection cn, TextWriter writer, Database database, string table, TableColumns tableColumns, bool isSmallTable, bool hasModTable,
+		DatabaseConnection cn, TextWriter writer, Database database, string table, TableColumns tableColumns, bool isSmallTable, bool hasModTable,
 		bool tableUsesRowVersionedCaching, bool isRevisionHistoryTable, bool excludePreviousRevisions ) {
 		// header
 		var methodName = "GetRows" + ( isSmallTable || hasModTable ? "MatchingConditions" : "" ) +
@@ -379,7 +379,7 @@ internal static class TableRetrievalStatics {
 	}
 
 	private static void writeGetRowMatchingPkMethod(
-		DBConnection cn, TextWriter writer, Database database, string table, TableColumns tableColumns, bool isSmallTable, bool hasModTable,
+		DatabaseConnection cn, TextWriter writer, Database database, string table, TableColumns tableColumns, bool isSmallTable, bool hasModTable,
 		bool tableUsesRowVersionedCaching, bool isRevisionHistoryTable ) {
 		var pkIsId = tableColumns.KeyColumns.Count == 1 && tableColumns.KeyColumns.Single().Name.ToLower().EndsWith( "id" );
 		var methodName = pkIsId ? "GetRowMatchingId" : "GetRowMatchingPk";
@@ -418,7 +418,7 @@ internal static class TableRetrievalStatics {
 	}
 
 	private static void writeResultSetCreatorBody(
-		DBConnection cn, TextWriter writer, Database database, string table, TableColumns tableColumns, bool hasModTable, bool tableUsesRowVersionedCaching,
+		DatabaseConnection cn, TextWriter writer, Database database, string table, TableColumns tableColumns, bool hasModTable, bool tableUsesRowVersionedCaching,
 		bool excludesPreviousRevisions, string cacheQueryInDbExpression ) {
 		writer.WriteLine( "var results = new List<Row>();" );
 		if( tableUsesRowVersionedCaching ) {
@@ -540,7 +540,7 @@ internal static class TableRetrievalStatics {
 
 	private static string getCommandConditionAddingStatement( string commandName ) => "{0}.AddConditions( commandConditions );".FormatWith( commandName );
 
-	private static string getPkAndVersionTupleTypeArguments( DBConnection cn, TableColumns tableColumns ) =>
+	private static string getPkAndVersionTupleTypeArguments( DatabaseConnection cn, TableColumns tableColumns ) =>
 		"{0}, {1}".FormatWith(
 			getPkTupleTypeArguments( tableColumns ),
 			cn.DatabaseInfo is OracleInfo ? oracleRowVersionDataType : tableColumns.RowVersionColumn!.DataTypeName );
@@ -555,6 +555,6 @@ internal static class TableRetrievalStatics {
 		writer.WriteLine( "}" );
 	}
 
-	internal static string GetClassName( DBConnection cn, string table ) =>
+	internal static string GetClassName( DatabaseConnection cn, string table ) =>
 		EwlStatics.GetCSharpIdentifier( "{0}TableRetrieval".FormatWith( table.TableNameToPascal( cn ) ) );
 }

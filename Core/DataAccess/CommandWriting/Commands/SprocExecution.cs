@@ -29,7 +29,7 @@ namespace EnterpriseWebLibrary.DataAccess.CommandWriting.Commands {
 		/// <summary>
 		/// Executes this procedure against the specified database connection to get a data reader and then executes the specified method with the reader.
 		/// </summary>
-		public void ExecuteReader( DBConnection cn, Action<DbDataReader> readerMethod ) {
+		public void ExecuteReader( DatabaseConnection cn, Action<DbDataReader> readerMethod ) {
 			var cmd = cn.DatabaseInfo.CreateCommand();
 			setupDbCommand( cmd, cn.DatabaseInfo );
 			cn.ExecuteReaderCommand( cmd, readerMethod );
@@ -38,7 +38,7 @@ namespace EnterpriseWebLibrary.DataAccess.CommandWriting.Commands {
 		/// <summary>
 		/// Executes this sproc against the specified database connection and returns the number of rows affected.
 		/// </summary>
-		public int ExecuteNonQuery( DBConnection cn ) {
+		public int ExecuteNonQuery( DatabaseConnection cn ) {
 			var cmd = cn.DatabaseInfo.CreateCommand();
 			setupDbCommand( cmd, cn.DatabaseInfo );
 			return cn.ExecuteNonQueryCommand( cmd );
@@ -47,7 +47,7 @@ namespace EnterpriseWebLibrary.DataAccess.CommandWriting.Commands {
 		/// <summary>
 		/// Executes this sproc against the specified database connection and returns a single value.
 		/// </summary>
-		public object ExecuteScalar( DBConnection cn ) {
+		public object ExecuteScalar( DatabaseConnection cn ) {
 			var cmd = cn.DatabaseInfo.CreateCommand();
 			setupDbCommand( cmd, cn.DatabaseInfo );
 			return cn.ExecuteScalarCommand( cmd );

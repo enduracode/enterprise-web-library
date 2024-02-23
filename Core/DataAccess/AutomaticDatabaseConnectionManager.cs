@@ -106,7 +106,7 @@ public class AutomaticDatabaseConnectionManager {
 		transactionsMarkedForRollback = false;
 	}
 
-	private void cleanUpConnection( DBConnection connection ) {
+	private void cleanUpConnection( DatabaseConnection connection ) {
 		// Keep the connection initialized during cleanup to accommodate commit-time validation methods.
 		try {
 			try {

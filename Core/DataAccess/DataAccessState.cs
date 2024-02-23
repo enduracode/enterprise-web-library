@@ -35,9 +35,9 @@ public class DataAccessState {
 		}
 	}
 
-	private DBConnection primaryConnection;
-	private readonly Dictionary<string, DBConnection> secondaryConnectionsByName = new();
-	private readonly Action<DBConnection> connectionInitializer;
+	private DatabaseConnection primaryConnection;
+	private readonly Dictionary<string, DatabaseConnection> secondaryConnectionsByName = new();
+	private readonly Action<DatabaseConnection> connectionInitializer;
 
 	private bool cacheEnabled;
 	private Cache<string, object> cache;
@@ -49,34 +49,34 @@ public class DataAccessState {
 	/// </summary>
 	/// <param name="databaseConnectionInitializer">A method that is called whenever a database connection is requested. Can be used to initialize the
 	/// connection.</param>
-	public DataAccessState( Action<DBConnection> databaseConnectionInitializer = null ) {
+	public DataAccessState( Action<DatabaseConnection> databaseConnectionInitializer = null ) {
 		connectionInitializer = databaseConnectionInitializer ?? ( connection => {} );
 	}
 
 	/// <summary>
 	/// Gets the connection to the primary database.
 	/// </summary>
-	public DBConnection PrimaryDatabaseConnection =>
+	public DatabaseConnection PrimaryDatabaseConnection =>
 		initConnection(
-			primaryConnection ?? ( primaryConnection = new DBConnection(
+			primaryConnection ?? ( primaryConnection = new DatabaseConnection(
 				                       ConfigurationStatics.InstallationConfiguration.PrimaryDatabaseInfo,
 				                       useLongTimeouts: useLongTimeouts ) ) );
 
 	/// <summary>
 	/// Gets the connection to the specified secondary database.
 	/// </summary>
-	public DBConnection GetSecondaryDatabaseConnection( string databaseName ) {
+	public DatabaseConnection GetSecondaryDatabaseConnection( string databaseName ) {
 		secondaryConnectionsByName.TryGetValue( databaseName, out var connection );
 		if( connection == null )
 			secondaryConnectionsByName.Add(
 				databaseName,
-				connection = new DBConnection(
+				connection = new DatabaseConnection(
 					ConfigurationStatics.InstallationConfiguration.GetSecondaryDatabaseInfo( databaseName ),
 					useLongTimeouts: useLongTimeouts ) );
 		return initConnection( connection );
 	}
 
-	private DBConnection initConnection( DBConnection connection ) {
+	private DatabaseConnection initConnection( DatabaseConnection connection ) {
 		connectionInitializer( connection );
 		return connection;
 	}

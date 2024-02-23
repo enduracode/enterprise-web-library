@@ -27,7 +27,7 @@ public class InlineInsert: InlineDbModificationCommand {
 	/// </summary>
 	/// <param name="cn"></param>
 	/// <param name="isLongRunning">Pass true to give the command as much time as it needs.</param>
-	public object? Execute( DBConnection cn, bool isLongRunning = false ) {
+	public object? Execute( DatabaseConnection cn, bool isLongRunning = false ) {
 		var cmd = cn.DatabaseInfo.CreateCommand();
 		cmd.CommandText = "INSERT INTO " + table;
 		if( columnModifications.Count == 0 )

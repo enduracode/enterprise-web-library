@@ -53,7 +53,7 @@ public class InlineInsertWithSelect {
 	/// </summary>
 	/// <param name="cn"></param>
 	/// <param name="isLongRunning">Pass true to give the command as much time as it needs.</param>
-	public int Execute( DBConnection cn, bool isLongRunning = false ) {
+	public int Execute( DatabaseConnection cn, bool isLongRunning = false ) {
 		if( conditions.Count == 0 )
 			throw new ApplicationException( "Executing an inline-insert-with-select command with no parameters in the where clause is not allowed." );
 

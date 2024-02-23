@@ -1,4 +1,4 @@
-#nullable disable
+﻿#nullable disable
 using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
@@ -15,7 +15,7 @@ namespace EnterpriseWebLibrary.DataAccess;
 /// <summary>
 /// Provides a connection to a database.  Capable of nested transactions.
 /// </summary>
-public class DBConnection {
+public class DatabaseConnection {
 	private const string saveName = "child";
 
 	private readonly DatabaseInfo databaseInfo;
@@ -35,7 +35,7 @@ public class DBConnection {
 	/// <summary>
 	/// Creates a database connection based on the specified database information object.
 	/// </summary>
-	internal DBConnection( DatabaseInfo databaseInfo, bool useLongTimeouts = false ) {
+	internal DatabaseConnection( DatabaseInfo databaseInfo, bool useLongTimeouts = false ) {
 		this.databaseInfo = databaseInfo;
 
 		// Sometimes databases are slow when nightly operations are underway.

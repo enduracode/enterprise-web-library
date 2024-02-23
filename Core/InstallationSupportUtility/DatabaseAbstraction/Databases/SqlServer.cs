@@ -43,7 +43,7 @@ public class SqlServer: Database {
 	int Database.GetLineMarker() {
 		var value = 0;
 		ExecuteDbMethod(
-			delegate( DBConnection cn ) {
+			delegate( DatabaseConnection cn ) {
 				var cmd = cn.DatabaseInfo.CreateCommand();
 				cmd.CommandText = "SELECT ParameterValue FROM GlobalInts WHERE ParameterName = 'LineMarker'";
 				value = (int)cn.ExecuteScalarCommand( cmd );
@@ -53,7 +53,7 @@ public class SqlServer: Database {
 
 	void Database.UpdateLineMarker( int value ) {
 		ExecuteDbMethod(
-			delegate( DBConnection cn ) {
+			delegate( DatabaseConnection cn ) {
 				var command = new InlineUpdate( "GlobalInts" );
 				command.AddColumnModifications( new InlineDbCommandColumnValue( "ParameterValue", new DbParameterValue( value ) ).ToCollection() );
 				command.AddConditions(
@@ -105,7 +105,7 @@ public class SqlServer: Database {
 				} );
 	}
 
-	private void deleteAndReCreateFromFile( DBConnection cn, string filePath ) {
+	private void deleteAndReCreateFromFile( DatabaseConnection cn, string filePath ) {
 		// NOTE: Instead of catching exceptions, figure out if the database exists by querying.
 		try {
 			// Gets rid of existing connections. These don't need to be executed against the master database, but it's convenient because it saves us from needing
@@ -167,7 +167,7 @@ LOG ON (
 	IEnumerable<string> Database.GetTables() {
 		var tables = new List<string>();
 		ExecuteDbMethod(
-			delegate( DBConnection cn ) {
+			delegate( DatabaseConnection cn ) {
 				var command = cn.DatabaseInfo.CreateCommand();
 				command.CommandText = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE Table_Type = 'Base Table'";
 				cn.ExecuteReaderCommand(
@@ -190,7 +190,7 @@ LOG ON (
 
 	void Database.PerformMaintenance() {
 		ExecuteDbMethod(
-			delegate( DBConnection cn ) {
+			delegate( DatabaseConnection cn ) {
 				foreach( var table in DatabaseOps.GetDatabaseTables( this ) ) {
 					executeLongRunningCommand( cn, "ALTER INDEX ALL ON " + table.name + " REBUILD" );
 					executeLongRunningCommand( cn, "UPDATE STATISTICS " + table.name );
@@ -222,17 +222,17 @@ LOG ON (
 			} );
 	}
 
-	private void executeLongRunningCommand( DBConnection cn, string commandText ) {
+	private void executeLongRunningCommand( DatabaseConnection cn, string commandText ) {
 		var command = cn.DatabaseInfo.CreateCommand();
 		command.CommandText = commandText;
 		cn.ExecuteNonQueryCommand( command, isLongRunning: true );
 	}
 
-	public void ExecuteDbMethod( Action<DBConnection> method ) {
+	public void ExecuteDbMethod( Action<DatabaseConnection> method ) {
 		executeDbMethodWithSpecifiedDatabaseInfo( info, method );
 	}
 
-	private void executeDbMethodAgainstMaster( Action<DBConnection> method ) {
+	private void executeDbMethodAgainstMaster( Action<DatabaseConnection> method ) {
 		executeDbMethodWithSpecifiedDatabaseInfo(
 			new SqlServerInfo(
 				( info as DatabaseInfo ).SecondaryDatabaseName,
@@ -245,10 +245,10 @@ LOG ON (
 			method );
 	}
 
-	private void executeDbMethodWithSpecifiedDatabaseInfo( SqlServerInfo info, Action<DBConnection> method ) {
+	private void executeDbMethodWithSpecifiedDatabaseInfo( SqlServerInfo info, Action<DatabaseConnection> method ) {
 		executeMethodWithDbExceptionHandling(
 			() => {
-				var connection = new DBConnection(
+				var connection = new DatabaseConnection(
 					new SqlServerInfo(
 						( info as DatabaseInfo ).SecondaryDatabaseName,
 						info.Server,

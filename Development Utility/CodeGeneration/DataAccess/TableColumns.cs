@@ -30,7 +30,7 @@ internal class TableColumns {
 	/// </summary>
 	internal IEnumerable<Column> DataColumns => dataColumns;
 
-	internal TableColumns( DBConnection cn, string table, bool forRevisionHistoryLogic ) {
+	internal TableColumns( DatabaseConnection cn, string table, bool forRevisionHistoryLogic ) {
 		try {
 			// This hack allows code to be generated against a database that is configured for ASP.NET Application Services.
 			var isAspNetApplicationServicesTable = table.StartsWith( "aspnet_" );

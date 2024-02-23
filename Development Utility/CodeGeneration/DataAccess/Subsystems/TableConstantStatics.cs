@@ -5,7 +5,7 @@ using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess.Subsystems {
 	internal static class TableConstantStatics {
-		internal static void Generate( DBConnection cn, TextWriter writer, string baseNamespace, Database database, IEnumerable<string> tableNames ) {
+		internal static void Generate( DatabaseConnection cn, TextWriter writer, string baseNamespace, Database database, IEnumerable<string> tableNames ) {
 			writer.WriteLine( "namespace " + baseNamespace + "." + database.SecondaryDatabaseName + "TableConstants {" );
 			foreach( var table in tableNames ) {
 				CodeGenerationStatics.AddSummaryDocComment( writer, "This object represents the constants of the " + table + " table." );

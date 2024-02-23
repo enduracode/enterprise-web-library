@@ -10,7 +10,7 @@ internal static class CustomModificationStatics {
 	private static DatabaseInfo info = null!;
 
 	internal static void Generate(
-		DBConnection cn, TextWriter writer, string baseNamespace, Database database, EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
+		DatabaseConnection cn, TextWriter writer, string baseNamespace, Database database, EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
 		info = cn.DatabaseInfo;
 		if( configuration.customModifications != null ) {
 			writer.WriteLine( "namespace " + baseNamespace + " {" );
@@ -28,7 +28,7 @@ internal static class CustomModificationStatics {
 		}
 	}
 
-	private static void testQueries( DBConnection cn, EnterpriseWebLibrary.Configuration.SystemDevelopment.CustomModification[] mods ) {
+	private static void testQueries( DatabaseConnection cn, EnterpriseWebLibrary.Configuration.SystemDevelopment.CustomModification[] mods ) {
 		// We don't test commands in Oracle because:
 		// 1. There's no good junk value to pass in.
 		// 2. The only way to keep the commands from actually modifying the database is with a transaction rollback, and we don't want to do that unless absolutely necessary.

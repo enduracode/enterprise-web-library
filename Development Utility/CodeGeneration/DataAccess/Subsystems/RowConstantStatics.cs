@@ -9,7 +9,7 @@ internal static class RowConstantStatics {
 	private const string dictionaryName = "valuesAndNames";
 
 	internal static void Generate(
-		DBConnection cn, TextWriter writer, string baseNamespace, Database database, EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
+		DatabaseConnection cn, TextWriter writer, string baseNamespace, Database database, EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
 		if( configuration.rowConstantTables == null )
 			return;
 

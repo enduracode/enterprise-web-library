@@ -43,7 +43,7 @@ public class MySql: Database {
 	int Database.GetLineMarker() {
 		var value = 0;
 		ExecuteDbMethod(
-			delegate( DBConnection cn ) {
+			delegate( DatabaseConnection cn ) {
 				var command = cn.DatabaseInfo.CreateCommand();
 				command.CommandText = "SELECT ParameterValue FROM global_ints WHERE ParameterName = 'LineMarker'";
 				value = (int)cn.ExecuteScalarCommand( command );
@@ -53,7 +53,7 @@ public class MySql: Database {
 
 	void Database.UpdateLineMarker( int value ) {
 		ExecuteDbMethod(
-			delegate( DBConnection cn ) {
+			delegate( DatabaseConnection cn ) {
 				var command = new InlineUpdate( "global_ints" );
 				command.AddColumnModifications( new InlineDbCommandColumnValue( "ParameterValue", new DbParameterValue( value ) ).ToCollection() );
 				command.AddConditions(
@@ -150,7 +150,7 @@ public class MySql: Database {
 	IEnumerable<string> Database.GetTables() {
 		var tables = new List<string>();
 		ExecuteDbMethod(
-			delegate( DBConnection cn ) {
+			delegate( DatabaseConnection cn ) {
 				var command = cn.DatabaseInfo.CreateCommand();
 				command.CommandText =
 					"SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = '{0}' AND TABLE_TYPE = 'BASE TABLE'".FormatWith( info.Database );
@@ -176,10 +176,10 @@ public class MySql: Database {
 
 	void Database.ShrinkAfterPostUpdateDataCommands() {}
 
-	public void ExecuteDbMethod( Action<DBConnection> method ) {
+	public void ExecuteDbMethod( Action<DatabaseConnection> method ) {
 		executeMethodWithDbExceptionHandling(
 			() => {
-				var connection = new DBConnection( new MySqlInfo( ( info as DatabaseInfo ).SecondaryDatabaseName, info.Database, false ) );
+				var connection = new DatabaseConnection( new MySqlInfo( ( info as DatabaseInfo ).SecondaryDatabaseName, info.Database, false ) );
 				connection.ExecuteWithConnectionOpen( () => method( connection ) );
 			} );
 	}

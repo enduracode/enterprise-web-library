@@ -30,7 +30,7 @@ public class InlineDelete: InlineDbCommandWithConditions {
 	/// </summary>
 	/// <param name="cn"></param>
 	/// <param name="isLongRunning">Pass true to give the command as much time as it needs.</param>
-	public int Execute( DBConnection cn, bool isLongRunning = false ) {
+	public int Execute( DatabaseConnection cn, bool isLongRunning = false ) {
 		if( conditions.Count == 0 )
 			throw new ApplicationException( "Executing an inline delete command with no parameters in the where clause is not allowed." );
 		var command = cn.DatabaseInfo.CreateCommand();

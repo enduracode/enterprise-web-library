@@ -12,7 +12,7 @@ internal class Column {
 	/// <summary>
 	/// If includeKeyInfo is true, all key columns for involved tables will be returned even if they were not selected.
 	/// </summary>
-	internal static IReadOnlyCollection<Column> GetColumnsInQueryResults( DBConnection cn, string commandText, bool includeKeyInfo, bool validateStringColumns ) {
+	internal static IReadOnlyCollection<Column> GetColumnsInQueryResults( DatabaseConnection cn, string commandText, bool includeKeyInfo, bool validateStringColumns ) {
 		var columns = new List<Column>();
 
 		var cmd = DataAccessStatics.GetCommandFromRawQueryText( cn, commandText );

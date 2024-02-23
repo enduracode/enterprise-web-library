@@ -10,7 +10,7 @@ internal static class StandardModificationStatics {
 	private static TableColumns columns = null!;
 
 	internal static void Generate(
-		DBConnection cn, TextWriter writer, string baseNamespace, string templateBasePath, Database database, IEnumerable<( string name, bool hasModTable )> tables,
+		DatabaseConnection cn, TextWriter writer, string baseNamespace, string templateBasePath, Database database, IEnumerable<( string name, bool hasModTable )> tables,
 		EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
 		StandardModificationStatics.writer = writer;
 		StandardModificationStatics.database = database;
@@ -47,7 +47,7 @@ internal static class StandardModificationStatics {
 		writer.WriteLine( "}" );
 	}
 
-	private static void writeClass( DBConnection cn, string tableName, bool isRevisionHistoryTable, bool hasModTable, bool isRevisionHistoryClass ) {
+	private static void writeClass( DatabaseConnection cn, string tableName, bool isRevisionHistoryTable, bool hasModTable, bool isRevisionHistoryClass ) {
 		columns = new TableColumns( cn, tableName, isRevisionHistoryClass );
 
 		writer.WriteLine( "public partial class " + GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass ) + " {" );
@@ -150,7 +150,7 @@ internal static class StandardModificationStatics {
 	}
 
 	private static void writeUpdateRowsMethod(
-		DBConnection cn, string tableName, string revisionHistorySuffix, string additionalLogicSuffix, bool includeIsLongRunningParameter ) {
+		DatabaseConnection cn, string tableName, string revisionHistorySuffix, string additionalLogicSuffix, bool includeIsLongRunningParameter ) {
 		// header
 		CodeGenerationStatics.AddSummaryDocComment(
 			writer,
@@ -177,7 +177,7 @@ internal static class StandardModificationStatics {
 	}
 
 	private static void writeDeleteRowsMethod(
-		DBConnection cn, string tableName, string methodNameSuffix, bool includeIsLongRunningParameter, bool executeAdditionalLogic ) {
+		DatabaseConnection cn, string tableName, string methodNameSuffix, bool includeIsLongRunningParameter, bool executeAdditionalLogic ) {
 		CodeGenerationStatics.AddSummaryDocComment(
 			writer,
 			"<para>Deletes the rows that match the specified conditions and returns the number of rows deleted.</para>" +
@@ -214,7 +214,7 @@ internal static class StandardModificationStatics {
 	}
 
 	private static void writePrivateDeleteRowsMethod(
-		DBConnection cn, string tableName, IReadOnlyCollection<Column> keyColumns, bool hasModTable, bool isRevisionHistoryClass ) {
+		DatabaseConnection cn, string tableName, IReadOnlyCollection<Column> keyColumns, bool hasModTable, bool isRevisionHistoryClass ) {
 		// NOTE: For revision history tables, we should have the delete method automatically clean up the revisions table (but not user transactions) for us when doing direct-with-revision-bypass deletions.
 
 		writer.WriteLine(
@@ -258,11 +258,11 @@ internal static class StandardModificationStatics {
 		writer.WriteLine( "}" );
 	}
 
-	private static string getPostDeleteCallClassName( DBConnection cn, string tableName ) =>
+	private static string getPostDeleteCallClassName( DatabaseConnection cn, string tableName ) =>
 		"PostDeleteCall<IEnumerable<" + database.SecondaryDatabaseName + "TableRetrieval." + TableRetrievalStatics.GetClassName( cn, tableName ) + ".Row>>";
 
 	private static void writeCreateForInsertMethod(
-		DBConnection cn, string tableName, bool isRevisionHistoryTable, bool isRevisionHistoryClass, string methodNameSuffix ) {
+		DatabaseConnection cn, string tableName, bool isRevisionHistoryTable, bool isRevisionHistoryClass, string methodNameSuffix ) {
 		CodeGenerationStatics.AddSummaryDocComment(
 			writer,
 			"Creates a modification object in insert mode, which can be used to do a piecemeal insert of a new row in the " + tableName + " table." );
@@ -274,7 +274,7 @@ internal static class StandardModificationStatics {
 	}
 
 	private static void writeCreateForUpdateMethod(
-		DBConnection cn, string tableName, bool isRevisionHistoryTable, bool isRevisionHistoryClass, string methodNameSuffix ) {
+		DatabaseConnection cn, string tableName, bool isRevisionHistoryTable, bool isRevisionHistoryClass, string methodNameSuffix ) {
 		// header
 		CodeGenerationStatics.AddSummaryDocComment(
 			writer,
@@ -311,7 +311,7 @@ internal static class StandardModificationStatics {
 		writer.WriteLine( "}" );
 	}
 
-	private static void writeGetConditionListMethod( DBConnection cn, string tableName ) {
+	private static void writeGetConditionListMethod( DatabaseConnection cn, string tableName ) {
 		writer.WriteLine(
 			"private static List<" + DataAccessStatics.GetTableConditionInterfaceName( cn, database, tableName ) + "> getConditionList( " +
 			getConditionParameterDeclarations( cn, tableName ) + " ) {" );
@@ -323,12 +323,12 @@ internal static class StandardModificationStatics {
 		writer.WriteLine( "}" );
 	}
 
-	private static string getConditionParameterDeclarations( DBConnection cn, string tableName ) =>
+	private static string getConditionParameterDeclarations( DatabaseConnection cn, string tableName ) =>
 		"" + DataAccessStatics.GetTableConditionInterfaceName( cn, database, tableName ) + " requiredCondition, params " +
 		DataAccessStatics.GetTableConditionInterfaceName( cn, database, tableName ) + "[] additionalConditions";
 
 	private static void writeCreateForSingleRowUpdateMethod(
-		DBConnection cn, string tableName, bool isRevisionHistoryTable, bool isRevisionHistoryClass, string methodNameSuffix ) {
+		DatabaseConnection cn, string tableName, bool isRevisionHistoryTable, bool isRevisionHistoryClass, string methodNameSuffix ) {
 		// header
 		CodeGenerationStatics.AddSummaryDocComment(
 			writer,
@@ -463,7 +463,7 @@ internal static class StandardModificationStatics {
 	}
 
 	private static void writeExecuteInsertOrUpdateMethod(
-		DBConnection cn, string tableName, IReadOnlyCollection<Column> keyColumns, Column? identityColumn, bool hasModTable, bool isRevisionHistoryClass ) {
+		DatabaseConnection cn, string tableName, IReadOnlyCollection<Column> keyColumns, Column? identityColumn, bool hasModTable, bool isRevisionHistoryClass ) {
 		writer.WriteLine( "private void executeInsertOrUpdate( bool isLongRunning ) {" );
 		if( hasModTable || isRevisionHistoryClass )
 			writer.WriteLine( DataAccessStatics.GetConnectionExpression( database ) + ".ExecuteInTransaction( () => {" );
@@ -606,7 +606,7 @@ internal static class StandardModificationStatics {
 		writer.WriteLine( "}" );
 	}
 
-	private static void writeCopyLatestRevisionsMethod( DBConnection cn, string tableName, IEnumerable<Column> nonIdentityColumns, bool hasModTable ) {
+	private static void writeCopyLatestRevisionsMethod( DatabaseConnection cn, string tableName, IEnumerable<Column> nonIdentityColumns, bool hasModTable ) {
 		writer.WriteLine(
 			"private static void copyLatestRevisions( List<" + DataAccessStatics.GetTableConditionInterfaceName( cn, database, tableName ) +
 			"> conditions, bool isLongRunning ) {" );
@@ -686,7 +686,7 @@ internal static class StandardModificationStatics {
 
 	private static string getColumnFieldName( Column column ) => EwlStatics.GetCSharpIdentifier( column.CamelCasedName + "ColumnValue" );
 
-	internal static string GetClassName( DBConnection cn, string table, bool isRevisionHistoryTable, bool isRevisionHistoryClass ) =>
+	internal static string GetClassName( DatabaseConnection cn, string table, bool isRevisionHistoryTable, bool isRevisionHistoryClass ) =>
 		EwlStatics.GetCSharpIdentifier(
 			isRevisionHistoryTable && !isRevisionHistoryClass
 				? "Direct" + table.TableNameToPascal( cn ) + "ModificationWithRevisionBypass"

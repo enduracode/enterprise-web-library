@@ -48,7 +48,7 @@ public class Oracle: Database {
 	int Database.GetLineMarker() {
 		var value = 0;
 		ExecuteDbMethod(
-			delegate( DBConnection cn ) {
+			delegate( DatabaseConnection cn ) {
 				var cmd = cn.DatabaseInfo.CreateCommand();
 				cmd.CommandText = "SELECT v FROM global_numbers WHERE k = 'LineMarker'";
 				value = Convert.ToInt32( cn.ExecuteScalarCommand( cmd ) );
@@ -58,7 +58,7 @@ public class Oracle: Database {
 
 	void Database.UpdateLineMarker( int value ) {
 		ExecuteDbMethod(
-			delegate( DBConnection cn ) {
+			delegate( DatabaseConnection cn ) {
 				var command = new InlineUpdate( "global_numbers" );
 				command.AddColumnModifications( new InlineDbCommandColumnValue( "v", new DbParameterValue( value ) ).ToCollection() );
 				command.AddConditions( new EqualityCondition( new InlineDbCommandColumnValue( "k", new DbParameterValue( "LineMarker" ) ) ).ToCollection() );
@@ -183,7 +183,7 @@ public class Oracle: Database {
 				} );
 	}
 
-	private void deleteAndReCreateUser( DBConnection cn ) {
+	private void deleteAndReCreateUser( DatabaseConnection cn ) {
 		// Delete the existing user and schema.
 		deleteUser( cn );
 
@@ -227,7 +227,7 @@ public class Oracle: Database {
 			? throw new UserCorrectableException( "Missing Oracle sys password in machine configuration file." )
 			: ConfigurationStatics.MachineConfiguration.OracleSysPassword;
 
-	private void deleteUser( DBConnection cn ) {
+	private void deleteUser( DatabaseConnection cn ) {
 		try {
 			executeLongRunningCommand( cn, "DROP USER " + info.UserAndSchema + " CASCADE" );
 		}
@@ -246,7 +246,7 @@ public class Oracle: Database {
 	IEnumerable<string> Database.GetTables() {
 		var tables = new List<string>();
 		ExecuteDbMethod(
-			delegate( DBConnection cn ) {
+			delegate( DatabaseConnection cn ) {
 				var command = cn.DatabaseInfo.CreateCommand();
 				command.CommandText = "SELECT table_name FROM user_tables";
 				cn.ExecuteReaderCommand(
@@ -262,7 +262,7 @@ public class Oracle: Database {
 	IEnumerable<string> Database.GetProcedures() {
 		var procedures = new List<string>();
 		ExecuteDbMethod(
-			delegate( DBConnection cn ) {
+			delegate( DatabaseConnection cn ) {
 				foreach( DataRow row in cn.GetSchema( "Procedures", info.UserAndSchema ).Rows )
 					procedures.Add( (string)row[ "OBJECT_NAME" ] );
 			} );
@@ -272,7 +272,7 @@ public class Oracle: Database {
 	IEnumerable<ProcedureParameter> Database.GetProcedureParameters( string procedure ) {
 		var parameters = new List<ProcedureParameter>();
 		ExecuteDbMethod(
-			delegate( DBConnection cn ) {
+			delegate( DatabaseConnection cn ) {
 				var rows = new List<DataRow>();
 				foreach( DataRow row in cn.GetSchema( "ProcedureParameters", null, procedure ).Rows )
 					rows.Add( row );
@@ -319,7 +319,7 @@ public class Oracle: Database {
 			} );
 	}
 
-	private void executeLongRunningCommand( DBConnection cn, string commandText ) {
+	private void executeLongRunningCommand( DatabaseConnection cn, string commandText ) {
 		var command = cn.DatabaseInfo.CreateCommand();
 		command.CommandText = commandText;
 		cn.ExecuteNonQueryCommand( command, isLongRunning: true );
@@ -327,15 +327,15 @@ public class Oracle: Database {
 
 	void Database.ShrinkAfterPostUpdateDataCommands() {}
 
-	public void ExecuteDbMethod( Action<DBConnection> method ) {
+	public void ExecuteDbMethod( Action<DatabaseConnection> method ) {
 		executeDbMethodWithSpecifiedDatabaseInfo( info, method );
 	}
 
-	private void executeDbMethodWithSpecifiedDatabaseInfo( OracleInfo info, Action<DBConnection> method ) {
+	private void executeDbMethodWithSpecifiedDatabaseInfo( OracleInfo info, Action<DatabaseConnection> method ) {
 		executeMethodWithDbExceptionHandling(
 			delegate {
 				// Before we disabled pooling, we couldn't repeatedly perform Update Data operations since users with open connections can't be dropped.
-				var connection = new DBConnection(
+				var connection = new DatabaseConnection(
 					new OracleInfo(
 						( info as DatabaseInfo ).SecondaryDatabaseName,
 						info.DataSource,

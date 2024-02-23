@@ -87,7 +87,7 @@ internal static class DataAccessStatics {
 			.Materialize();
 
 		database.ExecuteDbMethod(
-			delegate( DBConnection cn ) {
+			delegate( DatabaseConnection cn ) {
 				foreach( var table in tables.Where( i => i.hasModTable ).Select( i => i.name ) ) {
 					var columns = new TableColumns( cn, table, false );
 
@@ -197,7 +197,7 @@ internal static class DataAccessStatics {
 	/// Given raw query text such as that from Development.xml, returns a command that has had all of its parameters filled in with
 	/// good dummy values and is ready to safely execute using schema only or key info behavior.
 	/// </summary>
-	internal static DbCommand GetCommandFromRawQueryText( DBConnection cn, string commandText ) {
+	internal static DbCommand GetCommandFromRawQueryText( DatabaseConnection cn, string commandText ) {
 		// This replacement is necessary because SQL Server chooses to care about the type of the parameter passed to TOP.
 		commandText = Regex.Replace( commandText, @"TOP\( *@\w+ *\)", "TOP 0", RegexOptions.IgnoreCase );
 
@@ -226,11 +226,11 @@ internal static class DataAccessStatics {
 		       configuration.revisionHistoryTables.Any( revisionHistoryTable => revisionHistoryTable.EqualsIgnoreCase( table ) );
 	}
 
-	internal static string GetTableConditionInterfaceName( DBConnection cn, Database database, string table ) {
+	internal static string GetTableConditionInterfaceName( DatabaseConnection cn, Database database, string table ) {
 		return database.SecondaryDatabaseName + "CommandConditions." + CommandConditionStatics.GetTableConditionInterfaceName( cn, table );
 	}
 
-	internal static string GetEqualityConditionClassName( DBConnection cn, Database database, string tableName, Column column ) {
+	internal static string GetEqualityConditionClassName( DatabaseConnection cn, Database database, string tableName, Column column ) {
 		return database.SecondaryDatabaseName + "CommandConditions." + CommandConditionStatics.GetTableEqualityConditionsClassName( cn, tableName ) + "." +
 		       CommandConditionStatics.GetConditionClassName( column );
 	}
@@ -242,7 +242,7 @@ internal static class DataAccessStatics {
 		writer.WriteLine( "}" );
 	}
 
-	internal static string TableNameToPascal( this string tableName, DBConnection cn ) {
+	internal static string TableNameToPascal( this string tableName, DatabaseConnection cn ) {
 		return cn.DatabaseInfo is MySqlInfo ? tableName.OracleToEnglish().EnglishToPascal() : tableName;
 	}
 

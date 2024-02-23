@@ -36,7 +36,7 @@ public class InlineSelect: InlineDbCommandWithConditions {
 	/// <param name="cn"></param>
 	/// <param name="readerMethod"></param>
 	/// <param name="isLongRunning">Pass true to give the command as much time as it needs.</param>
-	public void Execute( DBConnection cn, Action<DbDataReader> readerMethod, bool isLongRunning = false ) {
+	public void Execute( DatabaseConnection cn, Action<DbDataReader> readerMethod, bool isLongRunning = false ) {
 		var command = cn.DatabaseInfo.CreateCommand();
 		command.CommandText = "SELECT{0} {1} ".FormatWith(
 			                      cacheQueryInDatabase && cn.DatabaseInfo.QueryCacheHint.Any() ? " {0}".FormatWith( cn.DatabaseInfo.QueryCacheHint ) : "",

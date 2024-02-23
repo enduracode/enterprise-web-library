@@ -5,7 +5,7 @@ using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess.Subsystems {
 	internal static class CommandConditionStatics {
-		internal static void Generate( DBConnection cn, TextWriter writer, string baseNamespace, Database database, IEnumerable<string> tableNames ) {
+		internal static void Generate( DatabaseConnection cn, TextWriter writer, string baseNamespace, Database database, IEnumerable<string> tableNames ) {
 			writer.WriteLine( "namespace " + baseNamespace + "." + database.SecondaryDatabaseName + "CommandConditions {" );
 			foreach( var table in tableNames ) {
 				// Write the interface for all of the table's conditions.
@@ -19,7 +19,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess.Subs
 			writer.WriteLine( "}" ); // namespace
 		}
 
-		private static void writeEqualityConditionClasses( DBConnection cn, TextWriter writer, string table ) {
+		private static void writeEqualityConditionClasses( DatabaseConnection cn, TextWriter writer, string table ) {
 			writer.WriteLine( "public static class " + GetTableEqualityConditionsClassName( cn, table ) + " {" );
 			foreach( var column in new TableColumns( cn, table, false ).AllColumnsExceptRowVersion ) {
 				CodeGenerationStatics.AddSummaryDocComment( writer, "A condition that narrows the scope of a command." );
@@ -39,11 +39,11 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess.Subs
 			writer.WriteLine( "}" ); // class
 		}
 
-		internal static string GetTableEqualityConditionsClassName( DBConnection cn, string table ) {
+		internal static string GetTableEqualityConditionsClassName( DatabaseConnection cn, string table ) {
 			return EwlStatics.GetCSharpIdentifier( table.TableNameToPascal( cn ) + "TableEqualityConditions" );
 		}
 
-		private static void writeInequalityConditionClasses( DBConnection cn, TextWriter writer, string table ) {
+		private static void writeInequalityConditionClasses( DatabaseConnection cn, TextWriter writer, string table ) {
 			// NOTE: This kind of sucks. It seems like we could use generics to not have to write N of these methods into ISU.cs.
 			writer.WriteLine( "public static class " + EwlStatics.GetCSharpIdentifier( table.TableNameToPascal( cn ) + "TableInequalityConditions" ) + " {" );
 			foreach( var column in new TableColumns( cn, table, false ).AllColumnsExceptRowVersion ) {
@@ -67,7 +67,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess.Subs
 			writer.WriteLine( "}" ); // class
 		}
 
-		private static void writeInConditionClasses( DBConnection cn, TextWriter writer, string table ) {
+		private static void writeInConditionClasses( DatabaseConnection cn, TextWriter writer, string table ) {
 			writer.WriteLine( "public static class " + EwlStatics.GetCSharpIdentifier( table.TableNameToPascal( cn ) + "TableInConditions" ) + " {" );
 			foreach( var column in new TableColumns( cn, table, false ).AllColumnsExceptRowVersion ) {
 				CodeGenerationStatics.AddSummaryDocComment( writer, "A condition that narrows the scope of a command." );
@@ -86,7 +86,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess.Subs
 			writer.WriteLine( "}" );
 		}
 
-		private static void writeLikeConditionClasses( DBConnection cn, TextWriter writer, string table ) {
+		private static void writeLikeConditionClasses( DatabaseConnection cn, TextWriter writer, string table ) {
 			writer.WriteLine( "public static class " + EwlStatics.GetCSharpIdentifier( table.TableNameToPascal( cn ) + "TableLikeConditions" ) + " {" );
 			foreach( var column in new TableColumns( cn, table, false ).AllColumnsExceptRowVersion ) {
 				CodeGenerationStatics.AddSummaryDocComment( writer, "A condition that narrows the scope of a command." );
@@ -108,7 +108,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess.Subs
 			writer.WriteLine( "}" ); // class
 		}
 
-		internal static string GetTableConditionInterfaceName( DBConnection cn, string tableName ) {
+		internal static string GetTableConditionInterfaceName( DatabaseConnection cn, string tableName ) {
 			return tableName.TableNameToPascal( cn ) + "TableCondition";
 		}
 

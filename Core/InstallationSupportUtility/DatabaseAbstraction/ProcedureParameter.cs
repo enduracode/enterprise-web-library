@@ -10,7 +10,7 @@ public class ProcedureParameter {
 	private readonly ValueContainer valueContainer;
 	private readonly ParameterDirection direction;
 
-	internal ProcedureParameter( DBConnection cn, string name, string dataTypeFromGetSchema, int size, ParameterDirection direction ) {
+	internal ProcedureParameter( DatabaseConnection cn, string name, string dataTypeFromGetSchema, int size, ParameterDirection direction ) {
 		var table = cn.GetSchema( "DataTypes" );
 		var rows = new List<DataRow>();
 		foreach( DataRow r in table.Rows )

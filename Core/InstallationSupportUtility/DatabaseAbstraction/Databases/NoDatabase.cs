@@ -33,7 +33,7 @@ internal class NoDatabase: Database {
 	void Database.PerformMaintenance() {}
 	void Database.ShrinkAfterPostUpdateDataCommands() {}
 
-	void Database.ExecuteDbMethod( Action<DBConnection> method ) {
+	void Database.ExecuteDbMethod( Action<DatabaseConnection> method ) {
 		throw new NotSupportedException();
 	}
 }

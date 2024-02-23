@@ -35,7 +35,7 @@ public interface Database {
 	void ShrinkAfterPostUpdateDataCommands();
 
 	/// <summary>
-	/// Executes the given method inside a DBConnection for this Database.
+	/// Executes the given method inside a connection for this database.
 	/// </summary>
-	void ExecuteDbMethod( Action<DBConnection> method );
+	void ExecuteDbMethod( Action<DatabaseConnection> method );
 }

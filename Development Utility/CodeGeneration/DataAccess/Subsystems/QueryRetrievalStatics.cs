@@ -9,7 +9,7 @@ internal static class QueryRetrievalStatics {
 	private static DatabaseInfo info = null!;
 
 	internal static void Generate(
-		DBConnection cn, TextWriter writer, string baseNamespace, Database database, EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
+		DatabaseConnection cn, TextWriter writer, string baseNamespace, Database database, EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
 		if( configuration.queries == null )
 			return;
 
@@ -45,7 +45,7 @@ internal static class QueryRetrievalStatics {
 		writer.WriteLine( "}" ); // namespace
 	}
 
-	private static IReadOnlyCollection<Column> validateQueryAndGetColumns( DBConnection cn, EnterpriseWebLibrary.Configuration.SystemDevelopment.Query query ) {
+	private static IReadOnlyCollection<Column> validateQueryAndGetColumns( DatabaseConnection cn, EnterpriseWebLibrary.Configuration.SystemDevelopment.Query query ) {
 		// Attempt to query with every postSelectFromClause to ensure validity.
 		foreach( var postSelectFromClause in query.postSelectFromClauses )
 			cn.ExecuteReaderCommandWithSchemaOnlyBehavior(

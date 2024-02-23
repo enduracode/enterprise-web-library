@@ -4,7 +4,7 @@ using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess.Subsystems {
 	internal static class SequenceStatics {
-		internal static void Generate( DBConnection cn, TextWriter writer, string baseNamespace, Database database ) {
+		internal static void Generate( DatabaseConnection cn, TextWriter writer, string baseNamespace, Database database ) {
 			writer.WriteLine( "namespace " + baseNamespace + "." + database.SecondaryDatabaseName + "Sequences {" );
 
 			var cmd = cn.DatabaseInfo.CreateCommand();

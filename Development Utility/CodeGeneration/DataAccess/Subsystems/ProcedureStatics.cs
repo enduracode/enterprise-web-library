@@ -8,7 +8,7 @@ using Tewl.Tools;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess.Subsystems {
 	internal static class ProcedureStatics {
-		internal static void Generate( DBConnection cn, TextWriter writer, string baseNamespace, Database database ) {
+		internal static void Generate( DatabaseConnection cn, TextWriter writer, string baseNamespace, Database database ) {
 			writer.WriteLine( "namespace " + baseNamespace + " {" );
 			writer.WriteLine( "public static class " + database.SecondaryDatabaseName + "Procedures {" );
 			foreach( var procedure in database.GetProcedures() ) {
