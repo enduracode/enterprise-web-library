@@ -1,11 +1,11 @@
-﻿#nullable disable
-using System.Data;
+﻿using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
 using EnterpriseWebLibrary.DataAccess.RevisionHistory;
 using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
+using JetBrains.Annotations;
 using NodaTime;
 using StackExchange.Profiling;
 using StackExchange.Profiling.Data;
@@ -15,6 +15,7 @@ namespace EnterpriseWebLibrary.DataAccess;
 /// <summary>
 /// Provides a connection to a database.  Capable of nested transactions.
 /// </summary>
+[ PublicAPI ]
 public class DatabaseConnection {
 	private const string saveName = "child";
 
@@ -24,9 +25,9 @@ public class DatabaseConnection {
 
 	// transaction-related fields
 	private int nestLevel;
-	private ProfiledDbTransaction tx;
-	private DbTransaction innerTx;
-	private List<Func<string>> commitTimeValidationMethods;
+	private ProfiledDbTransaction? tx;
+	private DbTransaction? innerTx;
+	private List<Func<string>>? commitTimeValidationMethods;
 	private int? userTransactionId;
 
 	// This is true only if SQL returned an error indicating rollback outside a transaction at the database level (error 3903).
@@ -220,12 +221,12 @@ public class DatabaseConnection {
 
 	private void saveTransaction() {
 		if( databaseInfo is SqlServerInfo )
-			( (SqlTransaction)innerTx ).Save( saveName + nestLevel );
+			( (SqlTransaction)innerTx! ).Save( saveName + nestLevel );
 		else if( databaseInfo is MySqlInfo )
 			executeText( "SAVEPOINT {0}".FormatWith( saveName + nestLevel ) );
 		else {
-			var saveMethod = innerTx.GetType().GetMethod( "Save" );
-			saveMethod.Invoke( innerTx, new object[] { saveName + nestLevel } );
+			var saveMethod = innerTx!.GetType().GetMethod( "Save" )!;
+			saveMethod.Invoke( innerTx, [ saveName + nestLevel ] );
 		}
 	}
 
@@ -241,18 +242,18 @@ public class DatabaseConnection {
 			try {
 				if( nestLevel == 0 ) {
 					if( !transactionDead )
-						tx.Rollback();
+						tx!.Rollback();
 					resetTransactionFields();
 				}
 				else {
 					if( !transactionDead )
 						if( databaseInfo is SqlServerInfo )
-							( (SqlTransaction)innerTx ).Rollback( saveName + nestLevel );
+							( (SqlTransaction)innerTx! ).Rollback( saveName + nestLevel );
 						else if( databaseInfo is MySqlInfo )
 							executeText( "ROLLBACK TO SAVEPOINT {0}".FormatWith( saveName + nestLevel ) );
 						else {
-							var rollbackMethod = innerTx.GetType().GetMethod( "Rollback", new[] { typeof( string ) } );
-							rollbackMethod.Invoke( innerTx, new object[] { saveName + nestLevel } );
+							var rollbackMethod = innerTx!.GetType().GetMethod( "Rollback", [ typeof( string ) ] )!;
+							rollbackMethod.Invoke( innerTx, [ saveName + nestLevel ] );
 						}
 				}
 			}
@@ -296,7 +297,7 @@ public class DatabaseConnection {
 	/// </summary>
 	public void PreExecuteCommitTimeValidationMethods() {
 		executeCommitTimeValidationMethods();
-		commitTimeValidationMethods.Clear();
+		commitTimeValidationMethods!.Clear();
 	}
 
 	/// <summary>
@@ -308,7 +309,7 @@ public class DatabaseConnection {
 				throw new ApplicationException( "Cannot commit without a matching begin." );
 			if( nestLevel == 1 ) {
 				executeCommitTimeValidationMethods();
-				tx.Commit();
+				tx!.Commit();
 				resetTransactionFields();
 			}
 			nestLevel--;
@@ -323,7 +324,7 @@ public class DatabaseConnection {
 	/// </summary>
 	private void executeCommitTimeValidationMethods() {
 		var errors = new List<string>();
-		foreach( var method in commitTimeValidationMethods ) {
+		foreach( var method in commitTimeValidationMethods! ) {
 			var result = method();
 			if( result.Length > 0 )
 				errors.Add( result );
@@ -369,7 +370,7 @@ public class DatabaseConnection {
 	/// <param name="cmd">Command to execute</param>
 	/// <param name="isLongRunning">Pass true to give the command as much time as it needs.</param>
 	/// <returns>First column of the first row returned by the query. Null if there were no results.</returns>
-	public object ExecuteScalarCommand( DbCommand cmd, bool isLongRunning = false ) {
+	public object? ExecuteScalarCommand( DbCommand cmd, bool isLongRunning = false ) {
 		try {
 			cmd.Connection = cn;
 			if( tx != null )
@@ -412,8 +413,9 @@ public class DatabaseConnection {
 			if( tx != null )
 				command.Transaction = tx;
 			command.CommandTimeout = isLongRunning ? 0 : defaultCommandTimeout;
-			using( var reader = command.ExecuteReader( behavior ) )
-				readerMethod( reader );
+
+			using var reader = command.ExecuteReader( behavior );
+			readerMethod( reader );
 		}
 		catch( Exception e ) {
 			throw createCommandException( command, e );
@@ -421,8 +423,8 @@ public class DatabaseConnection {
 	}
 
 	private Exception createCommandException( DbCommand command, Exception innerException ) {
-		if( databaseInfo is SqlServerInfo && innerException is SqlException ) {
-			var errorNumber = ( (SqlException)innerException ).Number;
+		if( databaseInfo is SqlServerInfo && innerException is SqlException sqlException ) {
+			var errorNumber = sqlException.Number;
 
 			// 1205 is the code for deadlock; 3960 is the code for a snapshot optimistic concurrency error; 3961 is the code for a snapshot concurrency error due to
 			// a DDL statement in another transaction.
@@ -457,18 +459,17 @@ public class DatabaseConnection {
 	}
 
 	private string getCommandExceptionMessage( DbCommand command, string customMessage ) {
-		using( var sw = new StringWriter() ) {
-			sw.WriteLine(
-				"Failed to execute a command against the " + DataAccessMethods.GetDbName( databaseInfo ) + " database. " + customMessage + " Command details:" );
-			sw.WriteLine();
-			sw.WriteLine( "Type: " + command.CommandType );
-			sw.WriteLine( "Text: " + command.CommandText );
-			sw.WriteLine();
-			sw.WriteLine( "Parameters:" );
-			foreach( DbParameter p in command.Parameters )
-				sw.WriteLine( p.ParameterName + ": " + p.Value );
-			return sw.ToString();
-		}
+		using var sw = new StringWriter();
+		sw.WriteLine(
+			"Failed to execute a command against the " + DataAccessMethods.GetDbName( databaseInfo ) + " database. " + customMessage + " Command details:" );
+		sw.WriteLine();
+		sw.WriteLine( "Type: " + command.CommandType );
+		sw.WriteLine( "Text: " + command.CommandText );
+		sw.WriteLine();
+		sw.WriteLine( "Parameters:" );
+		foreach( DbParameter p in command.Parameters )
+			sw.WriteLine( p.ParameterName + ": " + p.Value );
+		return sw.ToString();
 	}
 
 	/// <summary>
@@ -478,7 +479,7 @@ public class DatabaseConnection {
 	public void AddCommitTimeValidationMethod( Func<string> method ) {
 		if( nestLevel == 0 )
 			throw new ApplicationException( "A commit-time validation method can only be added during a database transaction." );
-		commitTimeValidationMethods.Add( method );
+		commitTimeValidationMethods!.Add( method );
 	}
 
 	/// <summary>
