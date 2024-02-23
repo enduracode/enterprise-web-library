@@ -1,35 +1,33 @@
-﻿#nullable disable
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using System.Web;
-using Tewl.Tools;
+﻿using System.Web;
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework;
+
+/// <summary>
+/// An exception that is thrown during data modification.
+/// </summary>
+public class DataModificationException: Exception {
+	internal Action? ModificationMethod { get; }
+	internal IReadOnlyCollection<TrustedHtmlString> HtmlMessages { get; }
+
 	/// <summary>
-	/// An exception that is thrown during data modification.
+	/// Creates a new exception with the specified message.
 	/// </summary>
-	public class DataModificationException: ApplicationException {
-		/// <summary>
-		/// Gets the messages that describe the exception.
-		/// </summary>
-		public IReadOnlyCollection<TrustedHtmlString> HtmlMessages { get; }
+	/// <param name="message">The message that describes the exception.</param>
+	/// <param name="modificationMethod">The modification method, which can perform logging but must not change the page in any way. Use with caution.</param>
+	public DataModificationException( string message, Action? modificationMethod = null ): this( [ message ], modificationMethod: modificationMethod ) {}
 
-		/// <summary>
-		/// Creates a new exception with the specified message.
-		/// </summary>
-		public DataModificationException( string message ): this( new[] { message } ) {}
+	/// <summary>
+	/// Creates a new exception with the specified messages.
+	/// </summary>
+	/// <param name="messages">The messages that describe the exception.</param>
+	/// <param name="modificationMethod">The modification method, which can perform logging but must not change the page in any way. Use with caution.</param>
+	public DataModificationException( IEnumerable<string> messages, Action? modificationMethod = null ): this(
+		messages.Select( i => new TrustedHtmlString( HttpUtility.HtmlEncode( i ) ) ).Materialize(),
+		modificationMethod: modificationMethod ) {}
 
-		/// <summary>
-		/// Creates a new exception with the specified messages.
-		/// </summary>
-		public DataModificationException( params string[] messages ): this(
-			messages.Select( i => new TrustedHtmlString( HttpUtility.HtmlEncode( i ) ) ).ToImmutableArray() ) {}
-
-		internal DataModificationException( IReadOnlyCollection<TrustedHtmlString> messages ): base(
-			StringTools.ConcatenateWithDelimiter( Environment.NewLine, messages.Select( i => i.Html ).ToArray() ) ) {
-			HtmlMessages = messages;
-		}
+	internal DataModificationException( IReadOnlyCollection<TrustedHtmlString> messages, Action? modificationMethod = null ): base(
+		StringTools.ConcatenateWithDelimiter( Environment.NewLine, messages.Select( i => i.Html ) ) ) {
+		ModificationMethod = modificationMethod;
+		HtmlMessages = messages;
 	}
 }
