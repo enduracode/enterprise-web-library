@@ -117,7 +117,7 @@ public static class RequestDispatchingStatics {
 						if( RequestState.RequestHandler is not null )
 							RequestState.ReleaseContinuationSemaphore();
 						else
-							RequestState.CleanUp();
+							RequestState.CleanUp( false );
 						return Task.CompletedTask;
 					},
 					false,
@@ -300,7 +300,7 @@ public static class RequestDispatchingStatics {
 	private static PageBase getErrorPage( PageBase ewfErrorPage ) => AppProvider.GetErrorPage() ?? ewfErrorPage;
 
 	private static void rollbackDatabaseTransactionsAndClearResponseIfPossible( HttpContext context ) {
-		RequestState.RollbackDatabaseTransactions();
+		AutomaticDatabaseConnectionManager.Current.RollbackTransactions( true );
 		DataAccessState.Current.ResetCache();
 
 		if( !context.Response.HasStarted )

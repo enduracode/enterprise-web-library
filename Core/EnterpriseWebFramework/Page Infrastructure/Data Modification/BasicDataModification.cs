@@ -52,7 +52,7 @@ internal class BasicDataModification: DataModification, ValidationList {
 				validationErrorHandler( validation, validator.ErrorMessages );
 			}
 			if( errorsOccurred )
-				throw new DataModificationException();
+				throw new DataModificationException( Enumerable.Empty<string>() );
 		}
 
 		var skipModification = modificationMethod == null || ( skipIfNoChanges && !changesExist );
@@ -68,11 +68,11 @@ internal class BasicDataModification: DataModification, ValidationList {
 				modificationMethod();
 			actionMethodAndPostModificationMethod?.Item1();
 			DataAccessState.Current.ResetCache();
-			RequestState.Instance.PreExecuteCommitTimeValidationMethodsForAllOpenConnections();
+			AutomaticDatabaseConnectionManager.Current.PreExecuteCommitTimeValidationMethods();
 			actionMethodAndPostModificationMethod?.Item2();
 		}
 		catch {
-			RequestState.Instance.RollbackDatabaseTransactions();
+			AutomaticDatabaseConnectionManager.Current.RollbackTransactions( true );
 			DataAccessState.Current.ResetCache();
 			throw;
 		}

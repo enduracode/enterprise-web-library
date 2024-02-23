@@ -94,18 +94,6 @@ public class RequestState {
 				BeginInstant.InZone( DateTimeZoneProviders.Tzdb.GetSystemDefault() ).TimeOfDay.IsInNight() ? Duration.FromSeconds( 3 ) : Duration.Zero );
 	}
 
-	internal void PreExecuteCommitTimeValidationMethodsForAllOpenConnections() {
-		DatabaseConnectionManager.PreExecuteCommitTimeValidationMethods();
-	}
-
-	internal void CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods() {
-		DatabaseConnectionManager.CommitTransactionsAndExecuteNonTransactionalModificationMethods( true );
-	}
-
-	internal void RollbackDatabaseTransactions() {
-		DatabaseConnectionManager.RollbackTransactions( true );
-	}
-
 	internal void SetUrlHandlers( IReadOnlyCollection<BasicUrlHandler> handlers ) {
 		urlHandlers = handlers;
 	}
@@ -231,11 +219,14 @@ public class RequestState {
 		continuationSemaphoreReleaseTime = null;
 	}
 
-	internal void CleanUp() {
+	internal void CleanUp( bool rollbackDatabaseTransactions ) {
 		EwlStatics.CallEveryMethod(
 			() => {
-				// Skip non-transactional modification methods because they could cause database connections to be reinitialized.
-				DatabaseConnectionManager.CleanUpConnectionsAndExecuteNonTransactionalModificationMethods( true, skipNonTransactionalModificationMethods: true );
+				if( rollbackDatabaseTransactions )
+					DatabaseConnectionManager.RollbackTransactions( true );
+				else
+					// Skip non-transactional modification methods because they could cause database connections to be reinitialized.
+					DatabaseConnectionManager.CleanUpConnectionsAndExecuteNonTransactionalModificationMethods( true, skipNonTransactionalModificationMethods: true );
 			},
 			() => {
 				if( errors.Any() ) {

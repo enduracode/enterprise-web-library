@@ -392,7 +392,7 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 			var response = method();
 
 			try {
-				RequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
+				AutomaticDatabaseConnectionManager.Current.CommitTransactionsAndExecuteNonTransactionalModificationMethods( true );
 			}
 			finally {
 				DataAccessState.Current.ResetCache();
@@ -405,7 +405,7 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 		try {
 			var response = method();
 
-			RequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
+			AutomaticDatabaseConnectionManager.Current.CommitTransactionsAndExecuteNonTransactionalModificationMethods( true );
 
 			return response;
 		}

@@ -38,8 +38,7 @@ internal class RequestContinuationDataStore: PeriodicEvictionCompositeCacheEntry
 
 		if( !string.Equals( url, requestData.Url, StringComparison.Ordinal ) ||
 		    !string.Equals( requestMethod, requestData.RequestMethod, StringComparison.Ordinal ) ) {
-			requestState.RollbackDatabaseTransactions();
-			requestState.CleanUp();
+			requestState.CleanUp( true );
 			return null;
 		}
 
@@ -83,10 +82,8 @@ internal class RequestContinuationDataStore: PeriodicEvictionCompositeCacheEntry
 			if( !requestState.ContinuationSemaphore.Wait( 0 ) )
 				// The initial request is not finished. Put its data back in the dictionary for cleanup in the next tick.
 				( (IDictionary<string, RequestData>)requestDataById ).Add( requestId, requestData );
-			else {
-				requestState.RollbackDatabaseTransactions();
-				requestState.CleanUp();
-			}
+			else
+				requestState.CleanUp( true );
 		}
 	}
 }

@@ -11,10 +11,15 @@ public class AutomaticDatabaseConnectionManager {
 	}
 
 	/// <summary>
+	/// Gets the current connection manager.
+	/// </summary>
+	internal static AutomaticDatabaseConnectionManager Current => currentManagerGetter!();
+
+	/// <summary>
 	/// Queues the specified non-transactional modification method to be executed after database transactions are committed.
 	/// </summary>
 	public static void AddNonTransactionalModificationMethod( Action modificationMethod ) {
-		currentManagerGetter!().nonTransactionalModificationMethods.Add( modificationMethod );
+		Current.nonTransactionalModificationMethods.Add( modificationMethod );
 	}
 
 	private readonly DataAccessState dataAccessState;

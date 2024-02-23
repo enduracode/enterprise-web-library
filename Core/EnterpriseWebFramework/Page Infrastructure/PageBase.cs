@@ -504,7 +504,7 @@ public abstract class PageBase: ResourceBase {
 	private void commitDataModification() {
 		AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod( () => RequestStateStatics.AppendStatusMessages( statusMessages ) );
 		try {
-			RequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
+			AutomaticDatabaseConnectionManager.Current.CommitTransactionsAndExecuteNonTransactionalModificationMethods( true );
 		}
 		finally {
 			DataAccessState.Current.ResetCache();
@@ -596,7 +596,7 @@ public abstract class PageBase: ResourceBase {
 					RequestStateStatics.AppendStatusMessages( statusMessages );
 					statusMessages.Clear();
 				} );
-			RequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
+			AutomaticDatabaseConnectionManager.Current.CommitTransactionsAndExecuteNonTransactionalModificationMethods( true );
 		}
 		finally {
 			DataAccessState.Current.ResetCache();

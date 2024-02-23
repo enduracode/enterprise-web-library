@@ -1,9 +1,10 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.DataAccess;
+﻿using EnterpriseWebLibrary.DataAccess;
+using JetBrains.Annotations;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
+[ PublicAPI ]
 public static class MvcStatics {
 	private class EwfActionFilterAttribute: IActionFilter {
 		void IActionFilter.OnActionExecuting( ActionExecutingContext filterContext ) {
@@ -13,7 +14,7 @@ public static class MvcStatics {
 		void IActionFilter.OnActionExecuted( ActionExecutedContext filterContext ) {
 			try {
 				if( filterContext.Exception == null )
-					RequestState.Instance.CommitDatabaseTransactionsAndExecuteNonTransactionalModificationMethods();
+					AutomaticDatabaseConnectionManager.Current.CommitTransactionsAndExecuteNonTransactionalModificationMethods( true );
 			}
 			finally {
 				DataAccessState.Current.ResetCache();
