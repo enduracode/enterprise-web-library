@@ -17,21 +17,20 @@ namespace EnterpriseWebLibrary.DataAccess;
 /// </summary>
 [ PublicAPI ]
 public class DatabaseConnection {
-	private const string saveName = "child";
+	private const string savepointBaseName = "child";
 
 	private readonly DatabaseInfo databaseInfo;
 	private readonly ProfiledDbConnection cn;
 	private readonly int defaultCommandTimeout;
 
 	// transaction-related fields
-	private int nestLevel;
+	private Stack<string>? savepoints;
+	private bool? rollbackWasToLastSavepoint; // false only if SQL returned an error indicating rollback outside a transaction at the database level (error 3903)
+	private bool commitFailed;
 	private ProfiledDbTransaction? tx;
 	private DbTransaction? innerTx;
 	private List<Func<string>>? commitTimeValidationMethods;
 	private int? userTransactionId;
-
-	// This is true only if SQL returned an error indicating rollback outside a transaction at the database level (error 3903).
-	private bool transactionDead;
 
 	/// <summary>
 	/// Creates a database connection based on the specified database information object.
@@ -72,7 +71,7 @@ public class DatabaseConnection {
 			connectionString += "; Connection Timeout={0}".FormatWith( timeout );
 		}
 		else
-			throw new ApplicationException( "Invalid database information object type." );
+			throw new Exception( "Invalid database information object type." );
 
 		cn = new ProfiledDbConnection( databaseInfo.CreateConnection( connectionString ), MiniProfiler.Current );
 
@@ -155,18 +154,19 @@ public class DatabaseConnection {
 	}
 
 	/// <summary>
-	/// Executes the given block of code inside a transaction using the given database connection.  Does not
-	/// create, open, or close a database connection.
-	/// This overload allows you to throw a DoNotCommitException, which will gracefully not commit the transaction.
+	/// Executes the given block of code inside a transaction. Does not open or close a database connection. This overload allows you to throw a
+	/// DoNotCommitException (which will gracefully rollback the transaction) unless this is a nested transaction without a savepoint.
 	/// </summary>
-	public void ExecuteInTransaction( Action method ) {
-		BeginTransaction();
+	public void ExecuteInTransaction( Action method, bool createSavepointIfAlreadyInTransaction = false ) {
+		BeginTransaction( createSavepointIfAlreadyInTransaction: createSavepointIfAlreadyInTransaction );
 		try {
 			method();
 			CommitTransaction();
 		}
 		catch( DoNotCommitException ) {
 			RollbackTransaction();
+			if( savepoints is not null && !createSavepointIfAlreadyInTransaction )
+				throw new Exception( "You must not throw DoNotCommitException from a nested transaction without a savepoint." );
 		}
 		catch {
 			RollbackTransaction();
@@ -179,8 +179,8 @@ public class DatabaseConnection {
 	/// create, open, or close a database connection.
 	/// This overload does not handle DoNotCommitExceptions for you.
 	/// </summary>
-	public T ExecuteInTransaction<T>( Func<T> method ) {
-		BeginTransaction();
+	public T ExecuteInTransaction<T>( Func<T> method, bool createSavepointIfAlreadyInTransaction = false ) {
+		BeginTransaction( createSavepointIfAlreadyInTransaction: createSavepointIfAlreadyInTransaction );
 		try {
 			var result = method();
 			CommitTransaction();
@@ -195,38 +195,51 @@ public class DatabaseConnection {
 	/// <summary>
 	/// Begins a new transaction.
 	/// </summary>
-	public void BeginTransaction() {
-		try {
-			if( nestLevel == 0 ) {
-				transactionDead = false;
+	public void BeginTransaction( bool createSavepointIfAlreadyInTransaction = false ) {
+		assertCurrentTransactionUsable();
 
+		string? savepoint;
+		if( savepoints is null ) {
+			savepoints = new Stack<string>( 10 );
+			savepoint = null;
+		}
+		else if( createSavepointIfAlreadyInTransaction ) {
+			savepoint = savepointBaseName + savepoints.Count;
+			savepoints.Push( savepoint );
+		}
+		else
+			savepoint = "";
+
+		try {
+			if( savepoint is null ) {
 				if( databaseInfo is SqlServerInfo )
 					innerTx = cn.WrappedConnection.BeginTransaction( IsolationLevel.Snapshot );
 				else if( databaseInfo is OracleInfo )
 					innerTx = cn.WrappedConnection.BeginTransaction( IsolationLevel.Serializable );
 				else
 					innerTx = cn.WrappedConnection.BeginTransaction();
-				tx = new ProfiledDbTransaction( innerTx, cn );
-
-				commitTimeValidationMethods = new List<Func<string>>();
 			}
-			else
-				saveTransaction();
-			nestLevel++;
+			else if( savepoint.Length > 0 )
+				createSavepoint( savepoint );
 		}
 		catch( Exception e ) {
 			throw createConnectionException( "beginning a transaction for", e );
 		}
+
+		if( savepoint is null ) {
+			tx = new ProfiledDbTransaction( innerTx!, cn );
+			commitTimeValidationMethods = new List<Func<string>>();
+		}
 	}
 
-	private void saveTransaction() {
+	private void createSavepoint( string name ) {
 		if( databaseInfo is SqlServerInfo )
-			( (SqlTransaction)innerTx! ).Save( saveName + nestLevel );
+			( (SqlTransaction)innerTx! ).Save( name );
 		else if( databaseInfo is MySqlInfo )
-			executeText( "SAVEPOINT {0}".FormatWith( saveName + nestLevel ) );
+			executeText( "SAVEPOINT {0}".FormatWith( name ) );
 		else {
 			var saveMethod = innerTx!.GetType().GetMethod( "Save" )!;
-			saveMethod.Invoke( innerTx, [ saveName + nestLevel ] );
+			saveMethod.Invoke( innerTx, [ name ] );
 		}
 	}
 
@@ -234,60 +247,69 @@ public class DatabaseConnection {
 	/// Rolls back all commands since the last call to BeginTransaction.
 	/// </summary>
 	public void RollbackTransaction() {
-		try {
-			if( nestLevel == 0 )
-				throw new ApplicationException( "Cannot rollback without a matching begin." );
+		// Prevent an exception in this method from covering up the primary exception from CommitTransaction.
+		if( commitFailed ) {
+			commitFailed = false;
+			return;
+		}
 
-			nestLevel--;
+		if( savepoints is null )
+			throw new Exception( "Cannot rollback without a matching begin." );
+
+		if( !savepoints.TryPop( out var savepoint ) )
+			savepoints = null;
+
+		if( rollbackWasToLastSavepoint is null ) {
+			if( savepoint is { Length: 0 } ) {
+				rollbackWasToLastSavepoint = true;
+				savepoint = savepoints!.FirstOrDefault( i => i.Length > 0 );
+			}
+
 			try {
-				if( nestLevel == 0 ) {
-					if( !transactionDead )
+				try {
+					if( savepoint is null )
 						tx!.Rollback();
-					resetTransactionFields();
-				}
-				else {
-					if( !transactionDead )
+					else if( savepoint.Length > 0 )
 						if( databaseInfo is SqlServerInfo )
-							( (SqlTransaction)innerTx! ).Rollback( saveName + nestLevel );
+							( (SqlTransaction)innerTx! ).Rollback( savepoint );
 						else if( databaseInfo is MySqlInfo )
-							executeText( "ROLLBACK TO SAVEPOINT {0}".FormatWith( saveName + nestLevel ) );
+							executeText( "ROLLBACK TO SAVEPOINT {0}".FormatWith( savepoint ) );
 						else {
 							var rollbackMethod = innerTx!.GetType().GetMethod( "Rollback", [ typeof( string ) ] )!;
-							rollbackMethod.Invoke( innerTx, [ saveName + nestLevel ] );
+							rollbackMethod.Invoke( innerTx, [ savepoint ] );
 						}
 				}
-			}
-			catch( SqlException e ) {
-				//Explanation of why we need this hack:
-				//SQL Server will sometimes rollback a transaction on its own when it
-				//encounters a "serious" error. These seem to include any kind of command param
-				//error or any of our trigger errors with severity of 11 or higher. When
-				//we detect the error, we attempt to rollback the transaction. But if SQL Server
-				//has already done that, we will get an error 3903. Therefore, we catch it below
-				//to make sure the RollbackTransaction call (this method) does not throw
-				//an exception that blocks out the real exception that occurred.
+				catch( SqlException e ) {
+					//Explanation of why we need this hack:
+					//SQL Server will sometimes rollback a transaction on its own when it
+					//encounters a "serious" error. These seem to include any kind of command param
+					//error or any of our trigger errors with severity of 11 or higher. When
+					//we detect the error, we attempt to rollback the transaction. But if SQL Server
+					//has already done that, we will get an error 3903. Therefore, we catch it below
+					//to make sure the RollbackTransaction call (this method) does not throw
+					//an exception that blocks out the real exception that occurred.
 
-				// We set transactionDead to true so that we do not accumulate additional
-				// exceptions while the client attempts to rollback all nest levels
-				if( e.Number == 3903 )
-					transactionDead = true;
-				else
-					throw;
+					// We set transactionDead to true so that we do not accumulate additional
+					// exceptions while the client attempts to rollback all nest levels
+					if( e.Number == 3903 )
+						rollbackWasToLastSavepoint = false;
+					else
+						throw;
+				}
+				catch( InvalidOperationException ) {
+					// This means that the transaction had already been rolled back (by SQL, due to high error severity, as above).
+					rollbackWasToLastSavepoint = false;
+				}
 			}
-			catch( InvalidOperationException ) {
-				// This means that the transaction had already been rolled back (by SQL, due to high error severity, as above).
-				transactionDead = true;
+			catch( Exception e ) {
+				throw createConnectionException( "rolling back a transaction for", e );
 			}
-		}
-		catch( Exception e ) {
-			throw createConnectionException( "rolling back a transaction for", e );
-		}
-	}
 
-	private void executeText( string commandText ) {
-		var command = databaseInfo.CreateCommand();
-		command.CommandText = commandText;
-		ExecuteNonQueryCommand( command );
+			if( savepoint is null )
+				resetTransactionFields();
+		}
+		else if( rollbackWasToLastSavepoint == true && savepoint is { Length: > 0 } )
+			rollbackWasToLastSavepoint = null;
 	}
 
 	/// <summary>
@@ -296,6 +318,8 @@ public class DatabaseConnection {
 	/// successful.
 	/// </summary>
 	public void PreExecuteCommitTimeValidationMethods() {
+		assertCurrentTransactionUsable();
+
 		executeCommitTimeValidationMethods();
 		commitTimeValidationMethods!.Clear();
 	}
@@ -304,18 +328,34 @@ public class DatabaseConnection {
 	/// Commits all commands since the last call to BeginTransaction.
 	/// </summary>
 	public void CommitTransaction() {
-		try {
-			if( nestLevel == 0 )
-				throw new ApplicationException( "Cannot commit without a matching begin." );
-			if( nestLevel == 1 ) {
-				executeCommitTimeValidationMethods();
-				tx!.Commit();
-				resetTransactionFields();
-			}
-			nestLevel--;
+		if( savepoints is null )
+			throw new Exception( "Cannot commit without a matching begin." );
+		assertCurrentTransactionUsable();
+
+		if( !savepoints.TryPop( out var savepoint ) ) {
+			// Run this before modifying transaction state since it throws recoverable exceptions.
+			executeCommitTimeValidationMethods();
+
+			savepoints = null;
 		}
-		catch( Exception e ) {
-			throw createConnectionException( "committing a transaction for", e );
+
+		try {
+			try {
+				if( savepoint is null )
+					tx!.Commit();
+				else if( savepoint.Length > 0 )
+					releaseSavepoint( savepoint );
+			}
+			catch( Exception e ) {
+				throw createConnectionException( "committing a transaction for", e );
+			}
+
+			if( savepoint is null )
+				resetTransactionFields();
+		}
+		catch {
+			commitFailed = true;
+			throw;
 		}
 	}
 
@@ -333,15 +373,26 @@ public class DatabaseConnection {
 			throw new DataModificationException( errors.ToArray() );
 	}
 
-	private void resetTransactionFields() {
-		userTransactionId = null;
-		commitTimeValidationMethods = null;
-		tx = null;
-		innerTx = null;
+	private void releaseSavepoint( string name ) {
+		if( databaseInfo is MySqlInfo )
+			executeText( "RELEASE SAVEPOINT {0}".FormatWith( name ) );
 	}
 
-	private Exception createConnectionException( string action, Exception innerException ) {
-		return DataAccessMethods.CreateDbConnectionException( databaseInfo, action, innerException );
+	private void executeText( string commandText ) {
+		var command = databaseInfo.CreateCommand();
+		command.CommandText = commandText;
+		ExecuteNonQueryCommand( command );
+	}
+
+	private Exception createConnectionException( string action, Exception innerException ) =>
+		DataAccessMethods.CreateDbConnectionException( databaseInfo, action, innerException );
+
+	private void resetTransactionFields() {
+		rollbackWasToLastSavepoint = null;
+		tx = null;
+		innerTx = null;
+		commitTimeValidationMethods = null;
+		userTransactionId = null;
 	}
 
 	/// <summary>
@@ -351,6 +402,8 @@ public class DatabaseConnection {
 	/// <param name="isLongRunning">Pass true to give the command as much time as it needs.</param>
 	/// <returns>Number of rows affected.</returns>
 	public int ExecuteNonQueryCommand( DbCommand cmd, bool isLongRunning = false ) {
+		assertCurrentTransactionUsable();
+
 		try {
 			cmd.Connection = cn;
 			if( tx != null )
@@ -371,6 +424,8 @@ public class DatabaseConnection {
 	/// <param name="isLongRunning">Pass true to give the command as much time as it needs.</param>
 	/// <returns>First column of the first row returned by the query. Null if there were no results.</returns>
 	public object? ExecuteScalarCommand( DbCommand cmd, bool isLongRunning = false ) {
+		assertCurrentTransactionUsable();
+
 		try {
 			cmd.Connection = cn;
 			if( tx != null )
@@ -408,6 +463,8 @@ public class DatabaseConnection {
 	}
 
 	private void executeReaderCommand( DbCommand command, CommandBehavior behavior, bool isLongRunning, Action<DbDataReader> readerMethod ) {
+		assertCurrentTransactionUsable();
+
 		try {
 			command.Connection = cn;
 			if( tx != null )
@@ -439,10 +496,10 @@ public class DatabaseConnection {
 			if( errorNumber == 233 ) {
 				const string m =
 					"The connection with the server has probably been severed. This likely happened because we did not disable connection pooling and a connection was taken from the pool that was no longer valid.";
-				return new ApplicationException( getCommandExceptionMessage( command, m ), innerException );
+				return new Exception( getCommandExceptionMessage( command, m ), innerException );
 			}
 
-			return new ApplicationException( getCommandExceptionMessage( command, "Error number: " + errorNumber + "." ), innerException );
+			return new Exception( getCommandExceptionMessage( command, "Error number: " + errorNumber + "." ), innerException );
 		}
 
 		if( databaseInfo is OracleInfo ) {
@@ -455,7 +512,7 @@ public class DatabaseConnection {
 				return new DbConnectionFailureException( getCommandExceptionMessage( command, "Failed to connect to Oracle." ), innerException );
 		}
 
-		return new ApplicationException( getCommandExceptionMessage( command, "" ), innerException );
+		return new Exception( getCommandExceptionMessage( command, "" ), innerException );
 	}
 
 	private string getCommandExceptionMessage( DbCommand command, string customMessage ) {
@@ -477,8 +534,10 @@ public class DatabaseConnection {
 	/// added.
 	/// </summary>
 	public void AddCommitTimeValidationMethod( Func<string> method ) {
-		if( nestLevel == 0 )
-			throw new ApplicationException( "A commit-time validation method can only be added during a database transaction." );
+		if( savepoints is null )
+			throw new Exception( "A commit-time validation method can only be added during a database transaction." );
+		assertCurrentTransactionUsable();
+
 		commitTimeValidationMethods!.Add( method );
 	}
 
@@ -487,8 +546,10 @@ public class DatabaseConnection {
 	/// Do not cache this value for any reason.
 	/// </summary>
 	public int GetUserTransactionId() {
-		if( nestLevel == 0 )
-			throw new ApplicationException( "A user transaction can only be created or retrieved during a database transaction." );
+		if( savepoints is null )
+			throw new Exception( "A user transaction can only be created or retrieved during a database transaction." );
+		assertCurrentTransactionUsable();
+
 		if( !userTransactionId.HasValue ) {
 			int? userId = null;
 			if( AppTools.User != null )
@@ -501,17 +562,18 @@ public class DatabaseConnection {
 		return userTransactionId.Value;
 	}
 
-	/// <summary>
-	/// Returns true if the specified user transaction ID matches the current user transaction ID.
-	/// </summary>
-	public bool UserTransactionIsCurrent( int userTransactionId ) {
-		return userTransactionId == this.userTransactionId;
+	private void assertCurrentTransactionUsable() {
+		if( rollbackWasToLastSavepoint is null )
+			return;
+
+		var description = rollbackWasToLastSavepoint.Value
+			                  ? "at this nesting level due to a rollback from an inner transaction that had no inner savepoints available"
+			                  : "due to a forced rollback at the database level";
+		throw new Exception( $"The transaction is no longer usable {description}." );
 	}
 
 	/// <summary>
-	/// Returns schema information about the database. For Red Stapler Information System use only.
+	/// Returns schema information about the database.
 	/// </summary>
-	public DataTable GetSchema( string collectionName, params string[] restrictionValues ) {
-		return cn.GetSchema( collectionName, restrictionValues );
-	}
+	internal DataTable GetSchema( string collectionName, params string[] restrictionValues ) => cn.GetSchema( collectionName, restrictionValues );
 }
