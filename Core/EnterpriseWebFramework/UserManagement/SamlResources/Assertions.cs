@@ -1,8 +1,6 @@
-﻿#nullable disable
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.ExternalFunctionality;
-using EnterpriseWebLibrary.UserManagement;
 
 // EwlResource
 
@@ -18,26 +16,21 @@ partial class Assertions {
 
 	protected override UrlHandler getUrlParent() => new Metadata();
 
-	protected override bool managesDataAccessCacheInUnsafeRequestMethods => true;
+	protected override bool managesDataModificationsInUnsafeRequestMethods => true;
 
 	protected override EwfResponse post() {
 		var assertion = Task.Run( async () => await ExternalFunctionalityStatics.ExternalSamlProvider.ReadAssertion() ).Result;
 
 		var identityProvider =
 			AuthenticationStatics.SamlIdentityProviders.Single( i => string.Equals( i.EntityId, assertion.identityProvider, StringComparison.Ordinal ) );
-		SystemUser user;
-		DataAccessState.Current.DisableCache();
-		try {
-			user = identityProvider.LogInUser( assertion.userName, assertion.attributes );
-		}
-		finally {
-			DataAccessState.Current.ResetCache();
-		}
-
-		if( user != null )
-			AuthenticationStatics.SetFormsAuthCookieAndUser( user, identityProvider: identityProvider );
-		else
-			AuthenticationStatics.SetUserLastIdentityProvider( identityProvider );
+		AutomaticDatabaseConnectionManager.Current.ExecuteWithModificationsEnabled(
+			() => {
+				var user = identityProvider.LogInUser( assertion.userName, assertion.attributes );
+				if( user is not null )
+					AuthenticationStatics.SetFormsAuthCookieAndUser( user, identityProvider: identityProvider );
+				else
+					AuthenticationStatics.SetUserLastIdentityProvider( identityProvider );
+			} );
 
 		var destinationUrl = new VerifyClientFunctionality( assertion.returnUrl ).GetUrl();
 		return EwfResponse.Create(

@@ -74,6 +74,16 @@ public static class RequestDispatchingStatics {
 				return;
 
 			try {
+				// Commit transactions and execute non-transactional modifications while the error handler still has the ability to send a 500-level response if needed.
+				context.Response.OnStarting(
+					() => {
+						if( RequestState.RequestHandler is null ) {
+							AutomaticDatabaseConnectionManager.Current.CommitTransactionsAndExecuteNonTransactionalModificationMethods( true );
+							DataAccessState.Current.ResetCache();
+						}
+						return Task.CompletedTask;
+					} );
+
 				Action<HttpContext> requestHandler;
 				if( RequestState.RequestHandler is not null ) {
 					requestHandler = RequestState.RequestHandler;

@@ -1,19 +1,24 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.DataAccess;
+﻿using EnterpriseWebLibrary.DataAccess;
 using Tewl.InputValidation;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 internal class BasicDataModification: DataModification, ValidationList {
-	private static Action slowExecutionNotifier;
+	private static Action slowExecutionNotifier = null!;
+	private static Action<EwfValidation, IEnumerable<string>> validationErrorHandler = null!;
+	private static Action<IReadOnlyCollection<TrustedHtmlString>> modificationErrorHandler = null!;
 
-	internal static void Init( Action slowExecutionNotifier ) {
+	internal static void Init(
+		Action slowExecutionNotifier, Action<EwfValidation, IEnumerable<string>> validationErrorHandler,
+		Action<IReadOnlyCollection<TrustedHtmlString>> modificationErrorHandler ) {
 		BasicDataModification.slowExecutionNotifier = slowExecutionNotifier;
+		BasicDataModification.validationErrorHandler = validationErrorHandler;
+		BasicDataModification.modificationErrorHandler = modificationErrorHandler;
 	}
 
 	private readonly bool isSlow;
 	private readonly List<EwfValidation> validations = new();
-	private Action modificationMethod;
+	private Action? modificationMethod;
 
 	internal BasicDataModification( bool isSlow ) {
 		this.isSlow = isSlow;
@@ -27,14 +32,16 @@ internal class BasicDataModification: DataModification, ValidationList {
 	/// Adds the modification method, which only executes if all validations succeed. This can only be called once.
 	/// </summary>
 	public void AddModificationMethod( Action modificationMethod ) {
-		if( this.modificationMethod != null )
+		if( this.modificationMethod is not null )
 			throw new ApplicationException( "The modification method was already added." );
 		this.modificationMethod = modificationMethod;
 	}
 
+	/// <summary>
+	/// Returns whether anything executed.
+	/// </summary>
 	internal bool Execute(
-		bool skipIfNoChanges, bool changesExist, Action<EwfValidation, IEnumerable<string>> validationErrorHandler, bool performValidationOnly = false,
-		Tuple<Action, Action> actionMethodAndPostModificationMethod = null ) {
+		bool skipIfNoChanges, bool changesExist, bool performValidationOnly = false, Tuple<Action, Action>? actionMethodAndPostModificationMethod = null ) {
 		var validationNeeded = validations.Any() && ( !skipIfNoChanges || changesExist );
 		if( validationNeeded ) {
 			if( isSlow )
@@ -47,35 +54,45 @@ internal class BasicDataModification: DataModification, ValidationList {
 				if( validator.ErrorsOccurred ) {
 					errorsOccurred = true;
 					if( !validator.ErrorMessages.Any() )
-						throw new ApplicationException( "Validation errors occurred but there are no messages." );
+						throw new Exception( "Validation errors occurred but there are no messages." );
 				}
 				validationErrorHandler( validation, validator.ErrorMessages );
 			}
 			if( errorsOccurred )
-				throw new DataModificationException( Enumerable.Empty<string>() );
+				return true;
 		}
 
-		var skipModification = modificationMethod == null || ( skipIfNoChanges && !changesExist );
+		var skipModification = modificationMethod is null || ( skipIfNoChanges && !changesExist );
 		if( performValidationOnly || ( skipModification && actionMethodAndPostModificationMethod == null ) )
 			return validationNeeded;
 
 		if( isSlow )
 			slowExecutionNotifier();
 
+		AutomaticDatabaseConnectionManager.Current.EnableModifications();
 		DataAccessState.Current.DisableCache();
 		try {
 			if( !skipModification )
-				modificationMethod();
+				modificationMethod!();
 			actionMethodAndPostModificationMethod?.Item1();
 			DataAccessState.Current.ResetCache();
 			AutomaticDatabaseConnectionManager.Current.PreExecuteCommitTimeValidationMethods();
 			actionMethodAndPostModificationMethod?.Item2();
 		}
-		catch {
-			AutomaticDatabaseConnectionManager.Current.RollbackTransactions( true );
+		catch( Exception e ) {
+			AutomaticDatabaseConnectionManager.Current.RollbackModifications();
 			DataAccessState.Current.ResetCache();
-			throw;
+
+			var dmException = e.GetChain().OfType<DataModificationException>().FirstOrDefault();
+			if( dmException is null )
+				throw;
+
+			if( dmException.ModificationMethod is not null )
+				AutomaticDatabaseConnectionManager.Current.ExecuteWithModificationsEnabled( dmException.ModificationMethod );
+			modificationErrorHandler( dmException.HtmlMessages );
+			return true;
 		}
+		AutomaticDatabaseConnectionManager.Current.CommitModifications();
 
 		return true;
 	}

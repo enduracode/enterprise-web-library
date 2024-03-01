@@ -12,13 +12,7 @@ public static class MvcStatics {
 		}
 
 		void IActionFilter.OnActionExecuted( ActionExecutedContext filterContext ) {
-			try {
-				if( filterContext.Exception == null )
-					AutomaticDatabaseConnectionManager.Current.CommitTransactionsAndExecuteNonTransactionalModificationMethods( true );
-			}
-			finally {
-				DataAccessState.Current.ResetCache();
-			}
+			DataAccessState.Current.ResetCache();
 		}
 	}
 

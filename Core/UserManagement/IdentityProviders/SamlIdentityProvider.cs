@@ -3,7 +3,7 @@
 namespace EnterpriseWebLibrary.UserManagement.IdentityProviders;
 
 public class SamlIdentityProvider: IdentityProvider {
-	public delegate SystemUser LogInUserGetterMethod( string userName, IReadOnlyDictionary<string, string> attributes );
+	public delegate SystemUser? LogInUserGetterMethod( string userName, IReadOnlyDictionary<string, string> attributes );
 
 	internal readonly string MetadataUrl;
 	internal readonly string EntityId;
@@ -27,5 +27,5 @@ public class SamlIdentityProvider: IdentityProvider {
 		AuthenticationDuration = authenticationDuration;
 	}
 
-	internal SystemUser LogInUser( string userName, IReadOnlyDictionary<string, string> attributes ) => logInUserGetter( userName, attributes );
+	internal SystemUser? LogInUser( string userName, IReadOnlyDictionary<string, string> attributes ) => logInUserGetter( userName, attributes );
 }

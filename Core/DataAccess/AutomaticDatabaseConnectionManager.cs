@@ -19,13 +19,19 @@ public class AutomaticDatabaseConnectionManager {
 	/// Queues the specified non-transactional modification method to be executed after database transactions are committed.
 	/// </summary>
 	public static void AddNonTransactionalModificationMethod( Action modificationMethod ) {
-		Current.nonTransactionalModificationMethods.Add( modificationMethod );
+		var current = Current;
+		if( !current.inModificationTransaction )
+			throw new Exception( "You can only queue a non-transactional modification method at a time when normal modifications are enabled." );
+		current.nonTransactionalModificationMethods.Add( modificationMethod );
 	}
 
 	private readonly DataAccessState dataAccessState;
 	private bool primaryDatabaseConnectionInitialized;
 	private readonly List<string> secondaryDatabasesWithInitializedConnections = new();
 	private readonly List<Action> nonTransactionalModificationMethods = new();
+	private bool modTransactionIncludesPrimaryDatabase;
+	private int? modTransactionSecondaryDatabaseCount;
+	private int modTransactionNonTransactionalMethodIndex;
 	private bool transactionsMarkedForRollback;
 
 	internal AutomaticDatabaseConnectionManager() {
@@ -49,16 +55,95 @@ public class AutomaticDatabaseConnectionManager {
 
 	internal DataAccessState DataAccessState => dataAccessState;
 
+	internal void ExecuteWithModificationsEnabled( Action modificationMethod ) {
+		EnableModifications();
+		dataAccessState.DisableCache();
+		try {
+			modificationMethod();
+		}
+		catch {
+			RollbackModifications();
+			throw;
+		}
+		finally {
+			dataAccessState.ResetCache();
+		}
+		CommitModifications();
+	}
+
+	internal void EnableModifications() {
+		if( inModificationTransaction )
+			throw new InvalidOperationException();
+
+		foreach( var connection in getConnectionsWithTransaction( false ) ) {
+			connection.BeginTransaction( createSavepointIfAlreadyInTransaction: true );
+			modTransactionIncludesPrimaryDatabase = true;
+		}
+
+		var secondaryConnections = getConnectionsWithTransaction( true ).Materialize();
+		foreach( var connection in secondaryConnections )
+			connection.BeginTransaction( createSavepointIfAlreadyInTransaction: true );
+		modTransactionSecondaryDatabaseCount = secondaryConnections.Count;
+
+		modTransactionNonTransactionalMethodIndex = nonTransactionalModificationMethods.Count;
+	}
+
 	internal void PreExecuteCommitTimeValidationMethods() {
-		if( primaryDatabaseConnectionInitialized ) {
+		foreach( var connection in getConnectionsWithTransaction( false ).Concat( getConnectionsWithTransaction( true ) ) )
+			connection.PreExecuteCommitTimeValidationMethods();
+	}
+
+	internal void CommitModifications() {
+		if( !inModificationTransaction )
+			throw new InvalidOperationException();
+
+		foreach( var connection in getConnectionsWithTransaction( false )
+			        .Where( _ => modTransactionIncludesPrimaryDatabase )
+			        .Concat( getConnectionsWithTransaction( true ).Take( modTransactionSecondaryDatabaseCount!.Value ) ) )
+			connection.CommitTransaction();
+
+		modTransactionIncludesPrimaryDatabase = false;
+		modTransactionSecondaryDatabaseCount = null;
+	}
+
+	internal void RollbackModifications() {
+		if( !inModificationTransaction )
+			throw new InvalidOperationException();
+
+		transactionsMarkedForRollback = true;
+
+		foreach( var connection in getConnectionsWithTransaction( false ) )
+			if( modTransactionIncludesPrimaryDatabase )
+				connection.RollbackTransaction();
+			else
+				cleanUpConnection( connection );
+
+		var secondaryConnections = getConnectionsWithTransaction( true ).Materialize();
+		foreach( var connection in secondaryConnections.Take( modTransactionSecondaryDatabaseCount!.Value ) )
+			connection.RollbackTransaction();
+		foreach( var connection in secondaryConnections.Skip( modTransactionSecondaryDatabaseCount.Value ) )
+			cleanUpConnection( connection );
+
+		transactionsMarkedForRollback = false;
+
+		nonTransactionalModificationMethods.RemoveRange(
+			modTransactionNonTransactionalMethodIndex,
+			nonTransactionalModificationMethods.Count - modTransactionNonTransactionalMethodIndex );
+
+		modTransactionIncludesPrimaryDatabase = false;
+		modTransactionSecondaryDatabaseCount = null;
+	}
+
+	private IEnumerable<DatabaseConnection> getConnectionsWithTransaction( bool forSecondaryDatabases ) {
+		if( forSecondaryDatabases ) {
+			foreach( var connection in secondaryDatabasesWithInitializedConnections.Select( dataAccessState.GetSecondaryDatabaseConnection ) )
+				if( DataAccessStatics.DatabaseShouldHaveAutomaticTransactions( connection.DatabaseInfo ) )
+					yield return connection;
+		}
+		else if( primaryDatabaseConnectionInitialized ) {
 			var connection = dataAccessState.PrimaryDatabaseConnection;
 			if( DataAccessStatics.DatabaseShouldHaveAutomaticTransactions( connection.DatabaseInfo ) )
-				connection.PreExecuteCommitTimeValidationMethods();
-		}
-		foreach( var databaseName in secondaryDatabasesWithInitializedConnections ) {
-			var connection = dataAccessState.GetSecondaryDatabaseConnection( databaseName );
-			if( DataAccessStatics.DatabaseShouldHaveAutomaticTransactions( connection.DatabaseInfo ) )
-				connection.PreExecuteCommitTimeValidationMethods();
+				yield return connection;
 		}
 	}
 
@@ -72,13 +157,14 @@ public class AutomaticDatabaseConnectionManager {
 	}
 
 	internal void CleanUpConnectionsAndExecuteNonTransactionalModificationMethods( bool cacheEnabled, bool skipNonTransactionalModificationMethods = false ) {
+		if( inModificationTransaction )
+			throw new InvalidOperationException();
+
 		var methods = new List<Action>();
 		if( primaryDatabaseConnectionInitialized )
 			methods.Add( () => cleanUpConnection( dataAccessState.PrimaryDatabaseConnection ) );
-		foreach( var databaseName in secondaryDatabasesWithInitializedConnections ) {
-			var databaseNameCopy = databaseName;
-			methods.Add( () => cleanUpConnection( dataAccessState.GetSecondaryDatabaseConnection( databaseNameCopy ) ) );
-		}
+		foreach( var databaseName in secondaryDatabasesWithInitializedConnections )
+			methods.Add( () => cleanUpConnection( dataAccessState.GetSecondaryDatabaseConnection( databaseName ) ) );
 		methods.Add(
 			() => {
 				try {
@@ -142,4 +228,6 @@ public class AutomaticDatabaseConnectionManager {
 				primaryDatabaseConnectionInitialized = false;
 		}
 	}
+
+	private bool inModificationTransaction => modTransactionSecondaryDatabaseCount.HasValue;
 }

@@ -110,12 +110,11 @@ public class ActionPostBack: PostBack, DataModification, ValidationList {
 		( (ValidationList)dataModification ).AddValidation( validation );
 	}
 
-	internal bool Execute( bool changesExist, Action<EwfValidation, IEnumerable<string>> validationErrorHandler, Action<PostBackAction> actionSetter ) {
+	internal bool Execute( bool changesExist, Action<PostBackAction> actionSetter ) {
 		PostBackAction action = null;
 		return dataModification.Execute(
 			skipModificationIfNoChanges,
 			changesExist,
-			validationErrorHandler,
 			performValidationOnly: actionSetter == null,
 			actionMethodAndPostModificationMethod: actionGetter != null
 				                                       ? new Tuple<Action, Action>( () => action = actionGetter(), () => actionSetter( action ) )
