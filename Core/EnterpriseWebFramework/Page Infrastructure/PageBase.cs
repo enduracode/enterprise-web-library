@@ -328,13 +328,10 @@ public abstract class PageBase: ResourceBase {
 				page = page.executePageViewDataModifications();
 				page.buildPage( null );
 				page.assertStaticRegionsUnchanged( updateRegionKeysAndArguments, staticRegionContents.contents );
-				return ( postBack.ValidationDm == lastPostBackFailingDm ? SecondaryPostBackOperation.Validate : SecondaryPostBackOperation.ValidateChangesOnly ) ==
-				       SecondaryPostBackOperation.Validate
-					       ? page.processSecondaryOperationAndGetResponse(
-						       postBack.ValidationDm == dataUpdate ? "" : ( (ActionPostBack)postBack.ValidationDm ).Id,
-						       SecondaryPostBackOperation.Validate,
-						       focusKey )
-					       : page.getResponse( new SpecifiedValue<string>( focusKey ) );
+				return page.processValidationDmAfterIntermediatePostBack(
+					postBack.ValidationDm == dataUpdate ? "" : ( (ActionPostBack)postBack.ValidationDm ).Id,
+					postBack.ValidationDm != lastPostBackFailingDm,
+					focusKey );
 			};
 		}
 		else {
@@ -501,7 +498,11 @@ public abstract class PageBase: ResourceBase {
 		RequestStateStatics.RefreshRequestState();
 	}
 
-	private EwfResponse processSecondaryOperationAndGetResponse( string dataModificationId, SecondaryPostBackOperation operation, string focusKey ) {
+	private EwfResponse processValidationDmAfterIntermediatePostBack( string dataModificationId, bool validateChangesOnly, string focusKey ) {
+		// Remove this trivial exit when we implement EnduraCode goal 1138.
+		if( validateChangesOnly )
+			return getResponse( new SpecifiedValue<string>( focusKey ) );
+
 		var dataModification = dataModificationId.Length > 0 ? GetPostBack( dataModificationId ) as DataModification : dataUpdate;
 		if( dataModification is null )
 			throw getDeveloperMistakeException( "A data modification with an ID of \"{0}\" does not exist.".FormatWith( dataModificationId ) );
@@ -510,17 +511,16 @@ public abstract class PageBase: ResourceBase {
 			                       ? dataUpdate.Execute( true, changesExist( dataModification ), performValidationOnly: true )
 			                       : ( (ActionPostBack)dataModification ).Execute( changesExist( dataModification ), null );
 
-		if( !navigationNeeded )
-			return getResponse( new SpecifiedValue<string>( focusKey ) );
-
-		return navigate(
-			null,
-			page => {
-				page.postBackValidationDmExecuted = true;
-				page.buildPage( modificationErrorsExist && operation != SecondaryPostBackOperation.ValidateChangesOnly ? dataModificationId : null );
-				page.assertStaticRegionsUnchanged( null, getStaticRegionContents( null ).contents );
-				return page.getResponse( new SpecifiedValue<string>( focusKey ) );
-			} );
+		return navigationNeeded
+			       ? navigate(
+				       null,
+				       page => {
+					       page.postBackValidationDmExecuted = true;
+					       page.buildPage( modificationErrorsExist && !validateChangesOnly ? dataModificationId : null );
+					       page.assertStaticRegionsUnchanged( null, getStaticRegionContents( null ).contents );
+					       return page.getResponse( new SpecifiedValue<string>( focusKey ) );
+				       } )
+			       : getResponse( new SpecifiedValue<string>( focusKey ) );
 	}
 
 	private bool changesExist( DataModification dataModification ) =>
