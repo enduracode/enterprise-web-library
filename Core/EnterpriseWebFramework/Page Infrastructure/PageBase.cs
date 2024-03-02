@@ -292,69 +292,6 @@ public abstract class PageBase: ResourceBase {
 		return navigate( ( null, null ), page => page.processPostBackAfterDataUpdate( actionPostBack.Id, stateItemsAndFormValues ) );
 	}
 
-	private EwfResponse executePostBackAndGetResponse( ActionPostBack postBack, DataModification lastPostBackFailingDm ) {
-		( ResourceInfo destination, Func<ResourceInfo, bool> authorizationCheckDisabledPredicate )? navigationBehavior = null;
-		var focusKey = "";
-		FullResponse fullSecondaryResponse = null;
-		var postBackExecuted = postBack.Execute(
-			changesExist( postBack ),
-			postBackAction => {
-				navigationBehavior = postBackAction?.NavigationBehavior;
-				focusKey = postBackAction?.ReloadBehavior?.FocusKey ?? "";
-				fullSecondaryResponse = postBackAction?.ReloadBehavior?.SecondaryResponse?.GetFullResponse();
-			} );
-		if( modificationErrorsExist )
-			return navigateToCurrent( postBack.Id );
-
-		if( postBackExecuted )
-			commitDataModificationsToRequestState();
-
-		Func<PageBase, EwfResponse> actionProcessor;
-		if( postBack.IsIntermediate ) {
-			var regionSets = postBack.UpdateRegions.ToImmutableHashSet();
-			var updateRegions = updateRegionLinkerNodes.SelectMany( i => i.KeyedUpdateRegionLinkers, ( node, keyedLinker ) => ( node, keyedLinker ) )
-				.SelectMany(
-					nodeLinker => nodeLinker.keyedLinker.linker.PreModificationRegions.Where( i => regionSets.Overlaps( i.Sets ) ),
-					( nodeLinker, region ) => ( nodeLinker.node, nodeLinker.keyedLinker.key, region ) )
-				.Materialize();
-			var staticRegionContents = getStaticRegionContents( updateRegions.Select( i => ( i.node, i.region.ComponentGetter() ) ) );
-
-			requestState.ComponentStateValuesById = componentStateItemsById.Where( i => staticRegionContents.stateItems.Contains( i.Value ) )
-				.ToImmutableDictionary( i => i.Key, i => i.Value.ValueAsJson );
-			requestState.PostBackValues.RemoveExcept( staticRegionContents.formValues.Select( i => i.GetPostBackValueKey() ) );
-
-			var updateRegionKeysAndArguments = updateRegions.Select( i => ( i.key, i.region.ArgumentGetter() ) ).Materialize();
-			actionProcessor = page => {
-				page = page.executePageViewDataModifications();
-				page.buildPage( null );
-				page.assertStaticRegionsUnchanged( updateRegionKeysAndArguments, staticRegionContents.contents );
-				return page.processValidationDmAfterIntermediatePostBack(
-					postBack.ValidationDm == dataUpdate ? "" : ( (ActionPostBack)postBack.ValidationDm ).Id,
-					postBack.ValidationDm != lastPostBackFailingDm,
-					focusKey );
-			};
-		}
-		else {
-			requestState = new PageRequestState();
-			actionProcessor = page => page.executePageViewDataModifications().buildPageAndGetResponse( new SpecifiedValue<string>( focusKey ) );
-		}
-
-		return navigate(
-			navigationBehavior ?? ( null, null ),
-			page => {
-				// Store the secondary response right before navigation so that it doesn’t get sent if there is an error before this point.
-				if( fullSecondaryResponse is not null )
-					RequestStateStatics.SetSecondaryResponseId( SecondaryResponseDataStore.AddResponse( fullSecondaryResponse ) );
-
-				return actionProcessor( page );
-			} );
-	}
-
-	private EwfResponse buildPageAndGetResponse( SpecifiedValue<string> focusKey, int? statusCode = null ) {
-		buildPage( null );
-		return getResponse( focusKey, statusCode: statusCode );
-	}
-
 	private IReadOnlyCollection<TrustedHtmlString> validateFormSubmission( IFormCollection submission, string formValueHash ) {
 		var extraComponentStateValues = requestState.ComponentStateValuesById.Keys.Where( i => !componentStateItemsById.ContainsKey( i ) ).Materialize();
 		var invalidComponentStateValues = componentStateItemsById
@@ -484,6 +421,64 @@ public abstract class PageBase: ResourceBase {
 		requestState.PostBackValues.RemoveExcept( validPostBackValueKeys );
 	}
 
+	private EwfResponse executePostBackAndGetResponse( ActionPostBack postBack, DataModification lastPostBackFailingDm ) {
+		( ResourceInfo destination, Func<ResourceInfo, bool> authorizationCheckDisabledPredicate )? navigationBehavior = null;
+		var focusKey = "";
+		FullResponse fullSecondaryResponse = null;
+		var postBackExecuted = postBack.Execute(
+			changesExist( postBack ),
+			postBackAction => {
+				navigationBehavior = postBackAction?.NavigationBehavior;
+				focusKey = postBackAction?.ReloadBehavior?.FocusKey ?? "";
+				fullSecondaryResponse = postBackAction?.ReloadBehavior?.SecondaryResponse?.GetFullResponse();
+			} );
+		if( modificationErrorsExist )
+			return navigateToCurrent( postBack.Id );
+
+		if( postBackExecuted )
+			commitDataModificationsToRequestState();
+
+		Func<PageBase, EwfResponse> actionProcessor;
+		if( postBack.IsIntermediate ) {
+			var regionSets = postBack.UpdateRegions.ToImmutableHashSet();
+			var updateRegions = updateRegionLinkerNodes.SelectMany( i => i.KeyedUpdateRegionLinkers, ( node, keyedLinker ) => ( node, keyedLinker ) )
+				.SelectMany(
+					nodeLinker => nodeLinker.keyedLinker.linker.PreModificationRegions.Where( i => regionSets.Overlaps( i.Sets ) ),
+					( nodeLinker, region ) => ( nodeLinker.node, nodeLinker.keyedLinker.key, region ) )
+				.Materialize();
+			var staticRegionContents = getStaticRegionContents( updateRegions.Select( i => ( i.node, i.region.ComponentGetter() ) ) );
+
+			requestState.ComponentStateValuesById = componentStateItemsById.Where( i => staticRegionContents.stateItems.Contains( i.Value ) )
+				.ToImmutableDictionary( i => i.Key, i => i.Value.ValueAsJson );
+			requestState.PostBackValues.RemoveExcept( staticRegionContents.formValues.Select( i => i.GetPostBackValueKey() ) );
+
+			var updateRegionKeysAndArguments = updateRegions.Select( i => ( i.key, i.region.ArgumentGetter() ) ).Materialize();
+			actionProcessor = page => {
+				page = page.executePageViewDataModifications();
+				page.buildPage( null );
+				page.assertStaticRegionsUnchanged( updateRegionKeysAndArguments, staticRegionContents.contents );
+				return page.processValidationDmAfterIntermediatePostBack(
+					postBack.ValidationDm == dataUpdate ? "" : ( (ActionPostBack)postBack.ValidationDm ).Id,
+					postBack.ValidationDm != lastPostBackFailingDm,
+					focusKey );
+			};
+		}
+		else {
+			requestState = new PageRequestState();
+			actionProcessor = page => page.executePageViewDataModifications().buildPageAndGetResponse( new SpecifiedValue<string>( focusKey ) );
+		}
+
+		return navigate(
+			navigationBehavior ?? ( null, null ),
+			page => {
+				// Store the secondary response right before navigation so that it doesn’t get sent if there is an error before this point.
+				if( fullSecondaryResponse is not null )
+					RequestStateStatics.SetSecondaryResponseId( SecondaryResponseDataStore.AddResponse( fullSecondaryResponse ) );
+
+				return actionProcessor( page );
+			} );
+	}
+
 	private EwfResponse navigateToCurrent( string failingDataModificationId ) =>
 		navigate(
 			null,
@@ -492,11 +487,6 @@ public abstract class PageBase: ResourceBase {
 				page.assertStaticRegionsUnchanged( null, getStaticRegionContents( null ).contents );
 				return page.getResponse( null );
 			} );
-
-	private void commitDataModificationsToRequestState() {
-		RequestStateStatics.AppendStatusMessages( statusMessages );
-		RequestStateStatics.RefreshRequestState();
-	}
 
 	private EwfResponse processValidationDmAfterIntermediatePostBack( string dataModificationId, bool validateChangesOnly, string focusKey ) {
 		// Remove this trivial exit when we implement EnduraCode goal 1138.
@@ -526,6 +516,93 @@ public abstract class PageBase: ResourceBase {
 	private bool changesExist( DataModification dataModification ) =>
 		componentStateItemsById.Values.Any( i => i.IncludedInChangeDetection && i.DataModifications.Contains( dataModification ) && i.ValueChanged() ) ||
 		formValues.Any( i => i.DataModifications.Contains( dataModification ) && i.ValueChangedOnPostBack() );
+
+	// Pass null for updateRegionKeysAndArguments when modification errors exist or during the validation stage of an intermediate post-back.
+	private void assertStaticRegionsUnchanged(
+		IReadOnlyCollection<( string key, string arg )> updateRegionKeysAndArguments, string previousStaticRegionContents ) {
+		var nodeUpdateRegionLinkersByKey = updateRegionLinkerNodes.SelectMany( i => i.KeyedUpdateRegionLinkers, ( node, keyedLinker ) => ( node, keyedLinker ) )
+			.ToImmutableDictionary( i => i.keyedLinker.key );
+		var updateRegions = updateRegionKeysAndArguments?.Select(
+			keyAndArg => {
+				if( !nodeUpdateRegionLinkersByKey.TryGetValue( keyAndArg.key, out var nodeLinker ) )
+					throw getDeveloperMistakeException(
+						"An update region linker with the key \"{0}\" does not exist. The post-back included {1}; the page contains {2}.".FormatWith(
+							keyAndArg.key,
+							StringTools.GetEnglishListPhrase( updateRegionKeysAndArguments.Select( i => $"\"{i.key}\"" ), true ),
+							nodeUpdateRegionLinkersByKey.Any()
+								? StringTools.GetEnglishListPhrase( nodeUpdateRegionLinkersByKey.Select( i => $"\"{i.Key}\"" ), true )
+								: "no linkers" ) );
+				return ( nodeLinker.node, nodeLinker.keyedLinker.linker.PostModificationRegionGetter( keyAndArg.arg ) );
+			} );
+
+		var message = new StringBuilder();
+		var staticRegionContents = getStaticRegionContents( updateRegions );
+		message.Append(
+			!string.Equals( staticRegionContents.contents, previousStaticRegionContents, StringComparison.Ordinal )
+				? "Previous static-region contents: " + Environment.NewLine + Environment.NewLine + previousStaticRegionContents + Environment.NewLine +
+				  "Current static-region contents: " + Environment.NewLine + Environment.NewLine + staticRegionContents.contents + Environment.NewLine
+				: "" );
+		message.Append(
+			StringTools
+				.ConcatenateWithDelimiter( Environment.NewLine, componentStateItemsById.Where( i => i.Value.ValueIsInvalid() ).Select( i => i.Key ).OrderBy( i => i ) )
+				.Surround(
+					"Component-state items whose values became invalid:" + Environment.NewLine + Environment.NewLine,
+					Environment.NewLine + Environment.NewLine ) );
+		message.Append(
+			StringTools.ConcatenateWithDelimiter(
+					Environment.NewLine,
+					formValues.Where( i => i.GetPostBackValueKey().Any() && i.PostBackValueIsInvalid() ).Select( i => i.GetPostBackValueKey() ).OrderBy( i => i ) )
+				.Surround(
+					"Form values whose post-back values became invalid:" + Environment.NewLine + Environment.NewLine,
+					Environment.NewLine + Environment.NewLine ) );
+		if( message.Length > 0 )
+			throw getDeveloperMistakeException(
+				" " + ( modificationErrorsExist
+					        ?
+					        "Post-backs, form controls, component-state items, and modification-error-display keys may not change if modification errors exist."
+					        : updateRegions is null
+						        ? "Post-backs, form controls, and component-state items may not change during the validation stage of an intermediate post-back."
+						        : "Form controls and component-state items outside of update regions may not change on an intermediate post-back." ) + Environment.NewLine +
+				Environment.NewLine + message );
+	}
+
+	// Pass null for updateRegions when modification errors exist or during the validation stage of an intermediate post-back.
+	private ( string contents, ImmutableHashSet<ComponentStateItem> stateItems, IReadOnlyCollection<FormValue> formValues ) getStaticRegionContents(
+		IEnumerable<( PageNode node, IEnumerable<PageComponent> components )> updateRegions ) {
+		var contents = new StringBuilder();
+
+		if( updateRegions is null ) {
+			// It’s probably bad if a developer puts a post-back object in the page because of a modification error. It will be gone on the post-back and cannot be
+			// processed.
+			contents.AppendLine( "Post-backs:" );
+			foreach( var postBack in postBacksById.Values.OrderBy( i => i.Id ) )
+				contents.AppendLine( "\t" + postBack.Id );
+		}
+
+		var staticNodes = pageTree.GetStaticRegionNodes( updateRegions );
+		var staticStateItems = staticNodes.Select( i => i.StateItem ).Where( i => i != null ).ToImmutableHashSet();
+		var staticFormValues = staticNodes.Select( i => i.FormValue ).Where( i => i != null ).Distinct().OrderBy( i => i.GetPostBackValueKey() ).Materialize();
+
+		// Intermediate post-backs sometimes have good reason to change durable values outside of update regions, e.g. when updating filters on a search page. We
+		// allow this (by omitting durable values here) under the assumption that all durable values are retrieved using a technique such as snapshot isolation to
+		// protect against concurrent modifications during the request. If concurrent modifications did occur they would be unintentionally ignored.
+		contents.AppendLine( "Component-state items:" );
+		foreach( var pair in componentStateItemsById.Where( i => staticStateItems.Contains( i.Value ) ).OrderBy( i => i.Key ) )
+			contents.AppendLine( "\t" + pair.Key );
+		contents.AppendLine( "Form values:" );
+		foreach( var formValue in staticFormValues )
+			contents.AppendLine( "\t" + formValue.GetPostBackValueKey() );
+
+		if( modificationErrorsExist ) {
+			// Include mod error display keys. They shouldn't change across a transfer when there are modification errors because that could prevent some of the
+			// errors from being displayed.
+			contents.AppendLine( "Modification-error-display keys:" );
+			foreach( var modErrorDisplayKey in modErrorDisplaysByValidation.Values.SelectMany( i => i ) )
+				contents.AppendLine( "\t" + modErrorDisplayKey );
+		}
+
+		return ( contents.ToString(), staticStateItems, staticFormValues );
+	}
 
 	// Page-view data modifications. All data modifications that happen simply because of a request and require no other action by the user should happen once per
 	// page view, and prior to LoadData so that the modified data can be used in the page if necessary.
@@ -634,97 +711,14 @@ public abstract class PageBase: ResourceBase {
 		return null;
 	}
 
-	private EwfResponse navigate(
-		( ResourceInfo destination, Func<ResourceInfo, bool> authorizationCheckDisabledPredicate )? navigationBehavior,
-		Func<PageBase, EwfResponse> actionProcessor ) {
-		ResourceInfo destination;
-		bool authorizationCheckDisabled;
-		string destinationUrl;
-		try {
-			// Determine the final navigation destination. If a destination is already specified and it is the current page or a page with the same entity setup,
-			// replace any default optional parameter values it may have with new values from this post-back. If a destination isn't specified, make it the current
-			// page with new parameter values from this post back. At the end of this block, destination is always newly created with fresh data that reflects any
-			// data modifications that may have occurred (except when the destination is an external resource). It's important that every case below *actually
-			// creates* a new resource object to guard against this scenario:
-			// 1. A page modifies data such that a previously-created destination resource object that is then used here is no longer valid because it would throw
-			//    an exception from init if it were re-created.
-			// 2. The page redirects, or transfers, to this destination, leading the user to an error page without developers being notified. This is bad behavior.
-			// It would also be a problem if the destination were the current page object since it could then contain dirty state from this post-back after
-			// navigation.
-			if( !navigationBehavior.HasValue )
-				destination = ReCreate();
-			else {
-				RequestState.Instance.SetNewUrlParameterValuesEffective( true );
-				if( navigationBehavior.Value.destination is null )
-					destination = reCreateFromNewParameterValues();
-				else if( navigationBehavior.Value.destination is ResourceBase r )
-					destination = r.ReCreate();
-				else
-					destination = navigationBehavior.Value.destination;
-			}
-
-			// This GetUrl call is important even for the transfer case below for the same reason that we *actually create* a new page object in every case above.
-			// We want to force developers to get an error email if a page modifies data to make itself unauthorized/disabled without specifying a different page as
-			// the redirect destination. The resulting transfer would lead the user to an error page.
-			authorizationCheckDisabled = navigationBehavior?.authorizationCheckDisabledPredicate?.Invoke( destination ) == true;
-			destinationUrl = destination.GetUrl( !authorizationCheckDisabled, !authorizationCheckDisabled );
-		}
-		catch( Exception e ) {
-			throw getDeveloperMistakeException( "The post-modification destination page became invalid.", innerException: e );
-		}
-
-		if( destination is PageBase page ) {
-			RequestStateStatics.SetClientSideNewUrl( destinationUrl );
-
-			// If the destination page has the same origin as the current page, do a transfer instead of a redirect. Don’t do this if the authorization check was
-			// disabled since, if there is a possibility of the destination page sending a 403 status code, we need to always send a 303 code first (below) so the
-			// client knows the POST worked.
-			if( !authorizationCheckDisabled && Uri.Compare(
-				    new Uri( destinationUrl ),
-				    new Uri( EwfRequest.Current.Url ),
-				    UriComponents.SchemeAndServer,
-				    UriFormat.UriEscaped,
-				    StringComparison.Ordinal ) == 0 ) {
-				page.replaceUrlHandlers();
-				RequestState.Instance.SetNewUrlParameterValuesEffective( false );
-
-				page.requestState = requestState;
-				nextPageObject = page;
-				return actionProcessor( page );
-			}
-
-			destinationUrl = RequestStateStatics.StoreRequestStateForContinuation(
-				destinationUrl,
-				"GET",
-				context => {
-					page.replaceUrlHandlers();
-					RequestState.Instance.SetNewUrlParameterValuesEffective( false );
-
-					if( authorizationCheckDisabled )
-						page.HandleRequest( context, false );
-					else {
-						RequestState.Instance.SetResource( page );
-
-						page.requestState = requestState;
-						actionProcessor( page ).WriteToAspNetResponse( context.Response );
-					}
-				} );
-		}
-
-		return EwfResponse.Create(
-			ContentTypes.PlainText,
-			new EwfResponseBodyCreator( writer => writer.Write( "See Other: {0}".FormatWith( destinationUrl ) ) ),
-			statusCodeGetter: () => 303,
-			additionalHeaderFieldGetter: () => ( "Location", destinationUrl ).ToCollection() );
+	private void commitDataModificationsToRequestState() {
+		RequestStateStatics.AppendStatusMessages( statusMessages );
+		RequestStateStatics.RefreshRequestState();
 	}
 
-	private void replaceUrlHandlers() {
-		var urlHandlers = new List<BasicUrlHandler>();
-		UrlHandler urlHandler = this;
-		do
-			urlHandlers.Add( urlHandler );
-		while( ( urlHandler = urlHandler.GetParent() ) != null );
-		RequestState.Instance.SetUrlHandlers( urlHandlers );
+	private EwfResponse buildPageAndGetResponse( SpecifiedValue<string> focusKey, int? statusCode = null ) {
+		buildPage( null );
+		return getResponse( focusKey, statusCode: statusCode );
 	}
 
 	private void buildPage( string failingDataModificationId ) {
@@ -869,6 +863,16 @@ public abstract class PageBase: ResourceBase {
 				.AppendDelimiter( " };" ) );
 	}
 
+	/// <summary>
+	/// The desired scroll position of the browser when this response is received.
+	/// </summary>
+	protected virtual ScrollPosition scrollPositionForThisResponse => ScrollPosition.LastPositionOrStatusBar;
+
+	/// <summary>
+	/// Gets the function call that should be executed when the jQuery document ready event is fired.
+	/// </summary>
+	protected virtual string javaScriptDocumentReadyFunctionCall => "";
+
 	private ImmutableDictionary<EwfValidation, IReadOnlyCollection<string>> addModificationErrorDisplaysAndGetErrors( string id, ErrorSourceSet errorSources ) =>
 		errorSources.Validations.Select(
 				( validation, index ) => {
@@ -913,6 +917,10 @@ public abstract class PageBase: ResourceBase {
 
 	internal PostBack GetPostBack( string id ) => postBacksById.TryGetValue( id, out var value ) ? value : null;
 
+	internal bool ModificationErrorsOccurred => modificationErrorsExist && !postBackValidationDmExecuted;
+
+	private bool modificationErrorsExist => requestState.InLineModificationErrorsByDisplay.Any() || requestState.GeneralModificationErrors.Any();
+
 	internal void AddControlTreeValidation( Action validation ) {
 		controlTreeValidations.Add( validation );
 	}
@@ -921,104 +929,6 @@ public abstract class PageBase: ResourceBase {
 	/// Gets the status messages.
 	/// </summary>
 	internal IEnumerable<( StatusMessageType, string )> StatusMessages => RequestStateStatics.GetStatusMessages().Concat( statusMessages );
-
-	// Pass null for updateRegionKeysAndArguments when modification errors exist or during the validation stage of an intermediate post-back.
-	private void assertStaticRegionsUnchanged(
-		IReadOnlyCollection<( string key, string arg )> updateRegionKeysAndArguments, string previousStaticRegionContents ) {
-		var nodeUpdateRegionLinkersByKey = updateRegionLinkerNodes.SelectMany( i => i.KeyedUpdateRegionLinkers, ( node, keyedLinker ) => ( node, keyedLinker ) )
-			.ToImmutableDictionary( i => i.keyedLinker.key );
-		var updateRegions = updateRegionKeysAndArguments?.Select(
-			keyAndArg => {
-				if( !nodeUpdateRegionLinkersByKey.TryGetValue( keyAndArg.key, out var nodeLinker ) )
-					throw getDeveloperMistakeException(
-						"An update region linker with the key \"{0}\" does not exist. The post-back included {1}; the page contains {2}.".FormatWith(
-							keyAndArg.key,
-							StringTools.GetEnglishListPhrase( updateRegionKeysAndArguments.Select( i => $"\"{i.key}\"" ), true ),
-							nodeUpdateRegionLinkersByKey.Any()
-								? StringTools.GetEnglishListPhrase( nodeUpdateRegionLinkersByKey.Select( i => $"\"{i.Key}\"" ), true )
-								: "no linkers" ) );
-				return ( nodeLinker.node, nodeLinker.keyedLinker.linker.PostModificationRegionGetter( keyAndArg.arg ) );
-			} );
-
-		var message = new StringBuilder();
-		var staticRegionContents = getStaticRegionContents( updateRegions );
-		message.Append(
-			!string.Equals( staticRegionContents.contents, previousStaticRegionContents, StringComparison.Ordinal )
-				? "Previous static-region contents: " + Environment.NewLine + Environment.NewLine + previousStaticRegionContents + Environment.NewLine +
-				  "Current static-region contents: " + Environment.NewLine + Environment.NewLine + staticRegionContents.contents + Environment.NewLine
-				: "" );
-		message.Append(
-			StringTools
-				.ConcatenateWithDelimiter( Environment.NewLine, componentStateItemsById.Where( i => i.Value.ValueIsInvalid() ).Select( i => i.Key ).OrderBy( i => i ) )
-				.Surround(
-					"Component-state items whose values became invalid:" + Environment.NewLine + Environment.NewLine,
-					Environment.NewLine + Environment.NewLine ) );
-		message.Append(
-			StringTools.ConcatenateWithDelimiter(
-					Environment.NewLine,
-					formValues.Where( i => i.GetPostBackValueKey().Any() && i.PostBackValueIsInvalid() ).Select( i => i.GetPostBackValueKey() ).OrderBy( i => i ) )
-				.Surround(
-					"Form values whose post-back values became invalid:" + Environment.NewLine + Environment.NewLine,
-					Environment.NewLine + Environment.NewLine ) );
-		if( message.Length > 0 )
-			throw getDeveloperMistakeException(
-				" " + ( modificationErrorsExist
-					        ?
-					        "Post-backs, form controls, component-state items, and modification-error-display keys may not change if modification errors exist."
-					        : updateRegions is null
-						        ? "Post-backs, form controls, and component-state items may not change during the validation stage of an intermediate post-back."
-						        : "Form controls and component-state items outside of update regions may not change on an intermediate post-back." ) + Environment.NewLine +
-				Environment.NewLine + message );
-	}
-
-	// Pass null for updateRegions when modification errors exist or during the validation stage of an intermediate post-back.
-	private ( string contents, ImmutableHashSet<ComponentStateItem> stateItems, IReadOnlyCollection<FormValue> formValues ) getStaticRegionContents(
-		IEnumerable<( PageNode node, IEnumerable<PageComponent> components )> updateRegions ) {
-		var contents = new StringBuilder();
-
-		if( updateRegions is null ) {
-			// It’s probably bad if a developer puts a post-back object in the page because of a modification error. It will be gone on the post-back and cannot be
-			// processed.
-			contents.AppendLine( "Post-backs:" );
-			foreach( var postBack in postBacksById.Values.OrderBy( i => i.Id ) )
-				contents.AppendLine( "\t" + postBack.Id );
-		}
-
-		var staticNodes = pageTree.GetStaticRegionNodes( updateRegions );
-		var staticStateItems = staticNodes.Select( i => i.StateItem ).Where( i => i != null ).ToImmutableHashSet();
-		var staticFormValues = staticNodes.Select( i => i.FormValue ).Where( i => i != null ).Distinct().OrderBy( i => i.GetPostBackValueKey() ).Materialize();
-
-		// Intermediate post-backs sometimes have good reason to change durable values outside of update regions, e.g. when updating filters on a search page. We
-		// allow this (by omitting durable values here) under the assumption that all durable values are retrieved using a technique such as snapshot isolation to
-		// protect against concurrent modifications during the request. If concurrent modifications did occur they would be unintentionally ignored.
-		contents.AppendLine( "Component-state items:" );
-		foreach( var pair in componentStateItemsById.Where( i => staticStateItems.Contains( i.Value ) ).OrderBy( i => i.Key ) )
-			contents.AppendLine( "\t" + pair.Key );
-		contents.AppendLine( "Form values:" );
-		foreach( var formValue in staticFormValues )
-			contents.AppendLine( "\t" + formValue.GetPostBackValueKey() );
-
-		if( modificationErrorsExist ) {
-			// Include mod error display keys. They shouldn't change across a transfer when there are modification errors because that could prevent some of the
-			// errors from being displayed.
-			contents.AppendLine( "Modification-error-display keys:" );
-			foreach( var modErrorDisplayKey in modErrorDisplaysByValidation.Values.SelectMany( i => i ) )
-				contents.AppendLine( "\t" + modErrorDisplayKey );
-		}
-
-		return ( contents.ToString(), staticStateItems, staticFormValues );
-	}
-
-	private ApplicationException getDeveloperMistakeException( string messageSentence, Exception innerException = null ) {
-		const string firstSentence = "Developer mistake.";
-		const string lastSentence =
-			"There is a chance that this was caused by non-transactional data changing outside of the request, but it’s more likely that a developer incorrectly modified something.";
-		throw new Exception(
-			messageSentence.Contains( Environment.NewLine, StringComparison.Ordinal )
-				? firstSentence + messageSentence + lastSentence
-				: StringTools.ConcatenateWithDelimiter( " ", firstSentence, messageSentence, lastSentence ),
-			innerException );
-	}
 
 	// Null for focusKey means modification errors occurred.
 	private EwfResponse getResponse( SpecifiedValue<string> focusKey, int? statusCode = null ) {
@@ -1052,19 +962,109 @@ public abstract class PageBase: ResourceBase {
 			} );
 	}
 
-	internal bool ModificationErrorsOccurred => modificationErrorsExist && !postBackValidationDmExecuted;
+	private EwfResponse navigate(
+		( ResourceInfo destination, Func<ResourceInfo, bool> authorizationCheckDisabledPredicate )? navigationBehavior,
+		Func<PageBase, EwfResponse> actionProcessor ) {
+		ResourceInfo destination;
+		bool authorizationCheckDisabled;
+		string destinationUrl;
+		try {
+			// Determine the final navigation destination. If a destination is already specified and it is the current page or a page with the same entity setup,
+			// replace any default optional parameter values it may have with new values from this post-back. If a destination isn't specified, make it the current
+			// page with new parameter values from this post back. At the end of this block, destination is always newly created with fresh data that reflects any
+			// data modifications that may have occurred (except when the destination is an external resource). It's important that every case below *actually
+			// creates* a new resource object to guard against this scenario:
+			// 1. A page modifies data such that a previously-created destination resource object that is then used here is no longer valid because it would throw
+			//    an exception from init if it were re-created.
+			// 2. The page redirects, or transfers, to this destination, leading the user to an error page without developers being notified. This is bad behavior.
+			// It would also be a problem if the destination were the current page object since it could then contain dirty state from this post-back after
+			// navigation.
+			if( !navigationBehavior.HasValue )
+				destination = ReCreate();
+			else {
+				RequestState.Instance.SetNewUrlParameterValuesEffective( true );
+				if( navigationBehavior.Value.destination is null )
+					destination = reCreateFromNewParameterValues();
+				else if( navigationBehavior.Value.destination is ResourceBase r )
+					destination = r.ReCreate();
+				else
+					destination = navigationBehavior.Value.destination;
+			}
 
-	private bool modificationErrorsExist => requestState.InLineModificationErrorsByDisplay.Any() || requestState.GeneralModificationErrors.Any();
+			// This GetUrl call is important even for the transfer case below for the same reason that we *actually create* a new page object in every case above.
+			// We want to force developers to get an error email if a page modifies data to make itself unauthorized/disabled without specifying a different page as
+			// the redirect destination. The resulting transfer would lead the user to an error page.
+			authorizationCheckDisabled = navigationBehavior?.authorizationCheckDisabledPredicate?.Invoke( destination ) == true;
+			destinationUrl = destination.GetUrl( !authorizationCheckDisabled, !authorizationCheckDisabled );
+		}
+		catch( Exception e ) {
+			throw getDeveloperMistakeException( "The post-modification destination page became invalid.", innerException: e );
+		}
 
-	/// <summary>
-	/// The desired scroll position of the browser when this response is received.
-	/// </summary>
-	protected virtual ScrollPosition scrollPositionForThisResponse => ScrollPosition.LastPositionOrStatusBar;
+		if( destination is PageBase page ) {
+			RequestStateStatics.SetClientSideNewUrl( destinationUrl );
 
-	/// <summary>
-	/// Gets the function call that should be executed when the jQuery document ready event is fired.
-	/// </summary>
-	protected virtual string javaScriptDocumentReadyFunctionCall => "";
+			// If the destination page has the same origin as the current page, do a transfer instead of a redirect. Don’t do this if the authorization check was
+			// disabled since, if there is a possibility of the destination page sending a 403 status code, we need to always send a 303 code first (below) so the
+			// client knows the POST worked.
+			if( !authorizationCheckDisabled && Uri.Compare(
+				    new Uri( destinationUrl ),
+				    new Uri( EwfRequest.Current.Url ),
+				    UriComponents.SchemeAndServer,
+				    UriFormat.UriEscaped,
+				    StringComparison.Ordinal ) == 0 ) {
+				page.replaceUrlHandlers();
+				RequestState.Instance.SetNewUrlParameterValuesEffective( false );
+
+				page.requestState = requestState;
+				nextPageObject = page;
+				return actionProcessor( page );
+			}
+
+			destinationUrl = RequestStateStatics.StoreRequestStateForContinuation(
+				destinationUrl,
+				"GET",
+				context => {
+					page.replaceUrlHandlers();
+					RequestState.Instance.SetNewUrlParameterValuesEffective( false );
+
+					if( authorizationCheckDisabled )
+						page.HandleRequest( context, false );
+					else {
+						RequestState.Instance.SetResource( page );
+
+						page.requestState = requestState;
+						actionProcessor( page ).WriteToAspNetResponse( context.Response );
+					}
+				} );
+		}
+
+		return EwfResponse.Create(
+			ContentTypes.PlainText,
+			new EwfResponseBodyCreator( writer => writer.Write( "See Other: {0}".FormatWith( destinationUrl ) ) ),
+			statusCodeGetter: () => 303,
+			additionalHeaderFieldGetter: () => ( "Location", destinationUrl ).ToCollection() );
+	}
+
+	private ApplicationException getDeveloperMistakeException( string messageSentence, Exception innerException = null ) {
+		const string firstSentence = "Developer mistake.";
+		const string lastSentence =
+			"There is a chance that this was caused by non-transactional data changing outside of the request, but it’s more likely that a developer incorrectly modified something.";
+		throw new Exception(
+			messageSentence.Contains( Environment.NewLine, StringComparison.Ordinal )
+				? firstSentence + messageSentence + lastSentence
+				: StringTools.ConcatenateWithDelimiter( " ", firstSentence, messageSentence, lastSentence ),
+			innerException );
+	}
+
+	private void replaceUrlHandlers() {
+		var urlHandlers = new List<BasicUrlHandler>();
+		UrlHandler urlHandler = this;
+		do
+			urlHandlers.Add( urlHandler );
+		while( ( urlHandler = urlHandler.GetParent() ) != null );
+		RequestState.Instance.SetUrlHandlers( urlHandlers );
+	}
 
 	public sealed override bool MatchesCurrent() => Equals( Current );
 
