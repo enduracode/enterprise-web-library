@@ -247,49 +247,35 @@ public abstract class PageBase: ResourceBase {
 		if( !pageBuilt )
 			buildPage( hiddenFieldData.LastPostBackFailingDmId );
 
-		PostBack postBack = null;
-		DataModification lastPostBackFailingDm = null;
-		executeWithDataModificationExceptionHandling(
-			() => {
-				validateFormSubmission( formSubmission, hiddenFieldData.FormValueHash );
+		var errors = validateFormSubmission( formSubmission, hiddenFieldData.FormValueHash );
+		if( errors is not null ) {
+			requestState.GeneralModificationErrors = errors;
+			return navigateToCurrent( null );
+		}
 
-				// Get the post-back object and, if necessary, the last post-back’s failing data modification.
-				postBack = GetPostBack( hiddenFieldData.PostBackId );
-				if( postBack is null )
-					throw new DataModificationException( Translation.AnotherUserHasModifiedPageAndWeCouldNotInterpretAction );
-				lastPostBackFailingDm = postBack.IsIntermediate && hiddenFieldData.LastPostBackFailingDmId != null
-					                        ? hiddenFieldData.LastPostBackFailingDmId.Any()
-						                          ? GetPostBack( hiddenFieldData.LastPostBackFailingDmId ) as DataModification
-						                          : dataUpdate
-					                        : null;
-				if( postBack.IsIntermediate && hiddenFieldData.LastPostBackFailingDmId is not null && lastPostBackFailingDm is null )
-					throw new DataModificationException( Translation.AnotherUserHasModifiedPageAndWeCouldNotInterpretAction );
-			} );
-		if( modificationErrorsExist )
-			return navigate(
-				null,
-				page => {
-					page.buildPage( null );
-					page.assertStaticRegionsUnchanged();
-					return page.getResponse( null );
-				} );
+		// Get the post-back object and, if necessary, the last post-back’s failing data modification.
+		var postBack = GetPostBack( hiddenFieldData.PostBackId );
+		if( postBack is null ) {
+			requestState.GeneralModificationErrors = Translation.AnotherUserHasModifiedPageAndWeCouldNotInterpretAction.ToCollection();
+			return navigateToCurrent( null );
+		}
+		var lastPostBackFailingDm = postBack.IsIntermediate && hiddenFieldData.LastPostBackFailingDmId != null
+			                            ? hiddenFieldData.LastPostBackFailingDmId.Any()
+				                              ? GetPostBack( hiddenFieldData.LastPostBackFailingDmId ) as DataModification
+				                              : dataUpdate
+			                            : null;
+		if( postBack.IsIntermediate && hiddenFieldData.LastPostBackFailingDmId is not null && lastPostBackFailingDm is null ) {
+			requestState.GeneralModificationErrors = Translation.AnotherUserHasModifiedPageAndWeCouldNotInterpretAction.ToCollection();
+			return navigateToCurrent( null );
+		}
 
 		if( postBack.IsIntermediate )
 			return executePostBackAndGetResponse( (ActionPostBack)postBack, lastPostBackFailingDm );
 
 		// Execute the page’s data update.
 		var dataUpdateExecuted = dataUpdate.Execute( !postBack.ForcePageDataUpdate, changesExist( dataUpdate ) );
-
-		if( modificationErrorsExist ) {
-			requestState.SetStaticAndUpdateRegionState( getStaticRegionContents( null ).contents, null );
-			return navigate(
-				null,
-				page => {
-					page.buildPage( "" );
-					page.assertStaticRegionsUnchanged();
-					return page.getResponse( null );
-				} );
-		}
+		if( modificationErrorsExist )
+			return navigateToCurrent( "" );
 
 		if( dataUpdateExecuted )
 			commitDataModificationsToRequestState();
@@ -317,17 +303,8 @@ public abstract class PageBase: ResourceBase {
 				focusKey = postBackAction?.ReloadBehavior?.FocusKey ?? "";
 				fullSecondaryResponse = postBackAction?.ReloadBehavior?.SecondaryResponse?.GetFullResponse();
 			} );
-
-		if( modificationErrorsExist ) {
-			requestState.SetStaticAndUpdateRegionState( getStaticRegionContents( null ).contents, null );
-			return navigate(
-				null,
-				page => {
-					page.buildPage( postBack.Id );
-					page.assertStaticRegionsUnchanged();
-					return page.getResponse( null );
-				} );
-		}
+		if( modificationErrorsExist )
+			return navigateToCurrent( postBack.Id );
 
 		if( postBackExecuted )
 			commitDataModificationsToRequestState();
@@ -345,14 +322,12 @@ public abstract class PageBase: ResourceBase {
 			requestState.ComponentStateValuesById = componentStateItemsById.Where( i => staticRegionContents.stateItems.Contains( i.Value ) )
 				.ToImmutableDictionary( i => i.Key, i => i.Value.ValueAsJson );
 			requestState.PostBackValues.RemoveExcept( staticRegionContents.formValues.Select( i => i.GetPostBackValueKey() ) );
-			requestState.SetStaticAndUpdateRegionState(
-				staticRegionContents.contents,
-				updateRegions.Select( i => ( i.key, i.region.ArgumentGetter() ) ).Materialize() );
 
+			var updateRegionKeysAndArguments = updateRegions.Select( i => ( i.key, i.region.ArgumentGetter() ) ).Materialize();
 			actionProcessor = page => {
 				page = page.executePageViewDataModifications();
 				page.buildPage( null );
-				page.assertStaticRegionsUnchanged();
+				page.assertStaticRegionsUnchanged( updateRegionKeysAndArguments, staticRegionContents.contents );
 				return ( postBack.ValidationDm == lastPostBackFailingDm ? SecondaryPostBackOperation.Validate : SecondaryPostBackOperation.ValidateChangesOnly ) ==
 				       SecondaryPostBackOperation.Validate
 					       ? page.processSecondaryOperationAndGetResponse(
@@ -383,7 +358,7 @@ public abstract class PageBase: ResourceBase {
 		return getResponse( focusKey, statusCode: statusCode );
 	}
 
-	private void validateFormSubmission( IFormCollection submission, string formValueHash ) {
+	private IReadOnlyCollection<TrustedHtmlString> validateFormSubmission( IFormCollection submission, string formValueHash ) {
 		var extraComponentStateValues = requestState.ComponentStateValuesById.Keys.Where( i => !componentStateItemsById.ContainsKey( i ) ).Materialize();
 		var invalidComponentStateValues = componentStateItemsById
 			.Where( i => !requestState.ComponentStateValuesById.ContainsKey( i.Key ) || i.Value.ValueIsInvalid() )
@@ -405,86 +380,82 @@ public abstract class PageBase: ResourceBase {
 		var invalidPostBackValues = activeFormValues.Where( i => i.PostBackValueIsInvalid() ).Select( i => i.GetPostBackValueKey() ).Materialize();
 		var formValueHashesDisagree = generateFormValueHash() != formValueHash;
 
-		// Make sure data didn’t change under this page’s feet since the last request.
-		if( extraComponentStateValues.Any() || invalidComponentStateValues.Any() || extraPostBackValues.Any() || invalidPostBackValues.Any() ||
-		    formValueHashesDisagree ) {
-			if( extraComponentStateValues.Any() )
-				Log.Debug( "Form-submission validation failed due to extra component-state values: {Values}", extraComponentStateValues );
-			else if( invalidComponentStateValues.Any() )
-				Log.Debug(
-					"Form-submission validation failed due to invalid component-state values: {@Values}",
-					invalidComponentStateValues.Select(
-						i => new { Id = i, Value = requestState.ComponentStateValuesById.TryGetValue( i, out var value ) ? value : "missing" } ) );
-			else if( extraPostBackValues.Any() )
-				Log.Debug( "Form-submission validation failed due to extra post-back values: {Values}", extraPostBackValues );
-			else if( invalidPostBackValues.Any() )
-				Log.Debug(
-					"Form-submission validation failed due to invalid post-back values: {@Values}",
-					invalidPostBackValues.Select(
-						i => {
-							var value = requestState.PostBackValues.GetValue( i );
-							return new { Key = i, Value = value is not null ? "{0}".FormatWith( value ) : "missing" };
-						} ) );
-			else if( formValueHashesDisagree )
-				Log.Debug( "Form-submission validation failed due to disagreeing form-value hashes" );
+		if( !extraComponentStateValues.Any() && !invalidComponentStateValues.Any() && !extraPostBackValues.Any() && !invalidPostBackValues.Any() &&
+		    !formValueHashesDisagree )
+			return null;
 
-			removeInvalidComponentStateAndPostBackValues();
+		if( extraComponentStateValues.Any() )
+			Log.Debug( "Form-submission validation failed due to extra component-state values: {Values}", extraComponentStateValues );
+		else if( invalidComponentStateValues.Any() )
+			Log.Debug(
+				"Form-submission validation failed due to invalid component-state values: {@Values}",
+				invalidComponentStateValues.Select(
+					i => new { Id = i, Value = requestState.ComponentStateValuesById.TryGetValue( i, out var value ) ? value : "missing" } ) );
+		else if( extraPostBackValues.Any() )
+			Log.Debug( "Form-submission validation failed due to extra post-back values: {Values}", extraPostBackValues );
+		else if( invalidPostBackValues.Any() )
+			Log.Debug(
+				"Form-submission validation failed due to invalid post-back values: {@Values}",
+				invalidPostBackValues.Select(
+					i => {
+						var value = requestState.PostBackValues.GetValue( i );
+						return new { Key = i, Value = value is not null ? "{0}".FormatWith( value ) : "missing" };
+					} ) );
+		else if( formValueHashesDisagree )
+			Log.Debug( "Form-submission validation failed due to disagreeing form-value hashes" );
 
-			throw new DataModificationException( Translation.AnotherUserHasModifiedPageHtml.ToCollection() );
-		}
+		removeInvalidComponentStateAndPostBackValues();
+
+		return Translation.AnotherUserHasModifiedPageHtml.ToCollection();
 	}
 
 	private EwfResponse processPostBackAfterDataUpdate( string postBackId, string stateItemsAndFormValues ) {
 		buildPage( null );
 
-		ActionPostBack postBack = null;
-		executeWithDataModificationExceptionHandling(
-			() => {
-				postBack = (ActionPostBack)GetPostBack( postBackId );
-				if( postBack is null ) {
-					Log.Debug( "Post-back execution failed after the data update because the post-back was missing" );
-					throw new DataModificationException( Translation.YouHaveModifiedPageAndWeCouldNotInterpretAction );
-				}
+		var postBack = (ActionPostBack)GetPostBack( postBackId );
+		TrustedHtmlString validatePage() {
+			if( postBack is null ) {
+				Log.Debug( "Post-back execution failed after the data update because the post-back was missing" );
+				return Translation.YouHaveModifiedPageAndWeCouldNotInterpretAction;
+			}
 
-				if( !string.Equals( getPostBackStateItemsAndFormValues( postBack ), stateItemsAndFormValues, StringComparison.Ordinal ) ) {
-					Log.Debug( "Post-back execution failed after the data update because component-state items and/or form values changed" );
-					throw new DataModificationException( Translation.YouHaveModifiedPageAndWeCouldNotInterpretAction );
-				}
-				var invalidComponentStateValues = componentStateItemsById.Where( i => i.Value.ValueIsInvalid() && i.Value.DataModifications.Contains( postBack ) )
-					.Select( i => i.Key )
-					.OrderBy( i => i )
-					.Materialize();
-				if( invalidComponentStateValues.Any() ) {
-					Log.Debug(
-						"Post-back execution failed after the data update due to component-state values that became invalid: {@Values}",
-						invalidComponentStateValues.Select( i => new { Id = i, Value = requestState.ComponentStateValuesById[ i ] } ) );
-					throw new DataModificationException( Translation.YouHaveModifiedPageAndWeCouldNotInterpretAction );
-				}
-				var invalidPostBackValues = formValues
-					.Where( i => i.GetPostBackValueKey().Length > 0 && i.PostBackValueIsInvalid() && i.DataModifications.Contains( postBack ) )
-					.Select( i => i.GetPostBackValueKey() )
-					.OrderBy( i => i )
-					.Materialize();
-				if( invalidPostBackValues.Any() ) {
-					Log.Debug(
-						"Post-back execution failed after the data update due to post-back values that became invalid: {@Values}",
-						invalidPostBackValues.Select(
-							i => {
-								var value = requestState.PostBackValues.GetValue( i );
-								return new { Key = i, Value = value is not null ? "{0}".FormatWith( value ) : "missing" };
-							} ) );
-					throw new DataModificationException( Translation.YouHaveModifiedPageAndWeCouldNotInterpretAction );
-				}
-			} );
-		if( modificationErrorsExist ) {
+			if( !string.Equals( getPostBackStateItemsAndFormValues( postBack ), stateItemsAndFormValues, StringComparison.Ordinal ) ) {
+				Log.Debug( "Post-back execution failed after the data update because component-state items and/or form values changed" );
+				return Translation.YouHaveModifiedPageAndWeCouldNotInterpretAction;
+			}
+			var invalidComponentStateValues = componentStateItemsById.Where( i => i.Value.ValueIsInvalid() && i.Value.DataModifications.Contains( postBack ) )
+				.Select( i => i.Key )
+				.OrderBy( i => i )
+				.Materialize();
+			if( invalidComponentStateValues.Any() ) {
+				Log.Debug(
+					"Post-back execution failed after the data update due to component-state values that became invalid: {@Values}",
+					invalidComponentStateValues.Select( i => new { Id = i, Value = requestState.ComponentStateValuesById[ i ] } ) );
+				return Translation.YouHaveModifiedPageAndWeCouldNotInterpretAction;
+			}
+			var invalidPostBackValues = formValues
+				.Where( i => i.GetPostBackValueKey().Length > 0 && i.PostBackValueIsInvalid() && i.DataModifications.Contains( postBack ) )
+				.Select( i => i.GetPostBackValueKey() )
+				.OrderBy( i => i )
+				.Materialize();
+			if( invalidPostBackValues.Any() ) {
+				Log.Debug(
+					"Post-back execution failed after the data update due to post-back values that became invalid: {@Values}",
+					invalidPostBackValues.Select(
+						i => {
+							var value = requestState.PostBackValues.GetValue( i );
+							return new { Key = i, Value = value is not null ? "{0}".FormatWith( value ) : "missing" };
+						} ) );
+				return Translation.YouHaveModifiedPageAndWeCouldNotInterpretAction;
+			}
+
+			return null;
+		}
+		var error = validatePage();
+		if( error is not null ) {
+			requestState.GeneralModificationErrors = error.ToCollection();
 			removeInvalidComponentStateAndPostBackValues();
-			return navigate(
-				null,
-				page => {
-					page.buildPage( null );
-					page.assertStaticRegionsUnchanged();
-					return page.getResponse( null );
-				} );
+			return navigateToCurrent( null );
 		}
 
 		return executePostBackAndGetResponse( postBack, null );
@@ -516,6 +487,15 @@ public abstract class PageBase: ResourceBase {
 		requestState.PostBackValues.RemoveExcept( validPostBackValueKeys );
 	}
 
+	private EwfResponse navigateToCurrent( string failingDataModificationId ) =>
+		navigate(
+			null,
+			page => {
+				page.buildPage( failingDataModificationId );
+				page.assertStaticRegionsUnchanged( null, getStaticRegionContents( null ).contents );
+				return page.getResponse( null );
+			} );
+
 	private void commitDataModificationsToRequestState() {
 		RequestStateStatics.AppendStatusMessages( statusMessages );
 		RequestStateStatics.RefreshRequestState();
@@ -533,29 +513,14 @@ public abstract class PageBase: ResourceBase {
 		if( !navigationNeeded )
 			return getResponse( new SpecifiedValue<string>( focusKey ) );
 
-		requestState.SetStaticAndUpdateRegionState( getStaticRegionContents( null ).contents, null );
 		return navigate(
 			null,
 			page => {
 				page.postBackValidationDmExecuted = true;
 				page.buildPage( modificationErrorsExist && operation != SecondaryPostBackOperation.ValidateChangesOnly ? dataModificationId : null );
-				page.assertStaticRegionsUnchanged();
+				page.assertStaticRegionsUnchanged( null, getStaticRegionContents( null ).contents );
 				return page.getResponse( new SpecifiedValue<string>( focusKey ) );
 			} );
-	}
-
-	private void executeWithDataModificationExceptionHandling( Action method ) {
-		try {
-			method();
-		}
-		catch( Exception e ) {
-			var dmException = e.GetChain().OfType<DataModificationException>().FirstOrDefault();
-			if( dmException is null )
-				throw;
-
-			requestState.GeneralModificationErrors = dmException.HtmlMessages;
-			requestState.SetStaticAndUpdateRegionState( getStaticRegionContents( null ).contents, null );
-		}
 	}
 
 	private bool changesExist( DataModification dataModification ) =>
@@ -957,16 +922,18 @@ public abstract class PageBase: ResourceBase {
 	/// </summary>
 	internal IEnumerable<( StatusMessageType, string )> StatusMessages => RequestStateStatics.GetStatusMessages().Concat( statusMessages );
 
-	private void assertStaticRegionsUnchanged() {
+	// Pass null for updateRegionKeysAndArguments when modification errors exist or during the validation stage of an intermediate post-back.
+	private void assertStaticRegionsUnchanged(
+		IReadOnlyCollection<( string key, string arg )> updateRegionKeysAndArguments, string previousStaticRegionContents ) {
 		var nodeUpdateRegionLinkersByKey = updateRegionLinkerNodes.SelectMany( i => i.KeyedUpdateRegionLinkers, ( node, keyedLinker ) => ( node, keyedLinker ) )
 			.ToImmutableDictionary( i => i.keyedLinker.key );
-		var updateRegions = requestState.UpdateRegionKeysAndArguments?.Select(
+		var updateRegions = updateRegionKeysAndArguments?.Select(
 			keyAndArg => {
 				if( !nodeUpdateRegionLinkersByKey.TryGetValue( keyAndArg.key, out var nodeLinker ) )
 					throw getDeveloperMistakeException(
 						"An update region linker with the key \"{0}\" does not exist. The post-back included {1}; the page contains {2}.".FormatWith(
 							keyAndArg.key,
-							StringTools.GetEnglishListPhrase( requestState.UpdateRegionKeysAndArguments.Select( i => $"\"{i.key}\"" ), true ),
+							StringTools.GetEnglishListPhrase( updateRegionKeysAndArguments.Select( i => $"\"{i.key}\"" ), true ),
 							nodeUpdateRegionLinkersByKey.Any()
 								? StringTools.GetEnglishListPhrase( nodeUpdateRegionLinkersByKey.Select( i => $"\"{i.Key}\"" ), true )
 								: "no linkers" ) );
@@ -976,8 +943,8 @@ public abstract class PageBase: ResourceBase {
 		var message = new StringBuilder();
 		var staticRegionContents = getStaticRegionContents( updateRegions );
 		message.Append(
-			!string.Equals( staticRegionContents.contents, requestState.StaticRegionContents, StringComparison.Ordinal )
-				? "Previous static-region contents: " + Environment.NewLine + Environment.NewLine + requestState.StaticRegionContents + Environment.NewLine +
+			!string.Equals( staticRegionContents.contents, previousStaticRegionContents, StringComparison.Ordinal )
+				? "Previous static-region contents: " + Environment.NewLine + Environment.NewLine + previousStaticRegionContents + Environment.NewLine +
 				  "Current static-region contents: " + Environment.NewLine + Environment.NewLine + staticRegionContents.contents + Environment.NewLine
 				: "" );
 		message.Append(
