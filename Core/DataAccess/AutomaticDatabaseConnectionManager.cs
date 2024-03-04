@@ -16,7 +16,8 @@ public class AutomaticDatabaseConnectionManager {
 	internal static AutomaticDatabaseConnectionManager Current => currentManagerGetter!();
 
 	/// <summary>
-	/// Queues the specified non-transactional modification method to be executed after database transactions are committed.
+	/// Queues the specified non-transactional modification method to be executed after database transactions are committed. Must be called at a time when normal
+	/// modifications are enabled, or from another non-transactional modification method.
 	/// </summary>
 	public static void AddNonTransactionalModificationMethod( Action modificationMethod ) {
 		var current = Current;
@@ -169,19 +170,23 @@ public class AutomaticDatabaseConnectionManager {
 			() => {
 				try {
 					if( !skipNonTransactionalModificationMethods && !transactionsMarkedForRollback ) {
-						if( cacheEnabled ) {
-							dataAccessState.DisableCache();
-							try {
-								foreach( var i in nonTransactionalModificationMethods )
-									i();
+						modTransactionSecondaryDatabaseCount = 0;
+						try {
+							if( cacheEnabled ) {
+								dataAccessState.DisableCache();
+								try {
+									executeNonTransactionalModificationMethods();
+								}
+								finally {
+									dataAccessState.ResetCache();
+								}
 							}
-							finally {
-								dataAccessState.ResetCache();
-							}
+							else
+								executeNonTransactionalModificationMethods();
 						}
-						else
-							foreach( var i in nonTransactionalModificationMethods )
-								i();
+						finally {
+							modTransactionSecondaryDatabaseCount = null;
+						}
 					}
 				}
 				finally {
@@ -227,6 +232,12 @@ public class AutomaticDatabaseConnectionManager {
 			else
 				primaryDatabaseConnectionInitialized = false;
 		}
+	}
+
+	private void executeNonTransactionalModificationMethods() {
+		// This must support modification methods being added during iteration.
+		for( var i = 0; i < nonTransactionalModificationMethods.Count; i += 1 )
+			nonTransactionalModificationMethods[ i ]();
 	}
 
 	private bool inModificationTransaction => modTransactionSecondaryDatabaseCount.HasValue;
