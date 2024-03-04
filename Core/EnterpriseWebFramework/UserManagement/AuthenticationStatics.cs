@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Security.Principal;
 using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.EnterpriseWebFramework.PageInfrastructure;
 using EnterpriseWebLibrary.UserManagement;
 using EnterpriseWebLibrary.UserManagement.IdentityProviders;
@@ -256,7 +257,7 @@ public static class AuthenticationStatics {
 	}
 
 	internal static IReadOnlyCollection<EtherealComponent> GetLogInHiddenFieldsAndSetUpClientSideLogic( DataValue<string> clientTime ) {
-		setCookie( testCookieName, "No data" );
+		AutomaticDatabaseConnectionManager.Current.ExecuteWithModificationsEnabled( () => setCookie( testCookieName, "No data" ) );
 
 		var timeHiddenFieldId = new HiddenFieldId();
 		return new EwfHiddenField(
