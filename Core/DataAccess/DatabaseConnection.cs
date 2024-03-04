@@ -203,12 +203,13 @@ public class DatabaseConnection {
 			savepoints = new Stack<string>( 10 );
 			savepoint = null;
 		}
-		else if( createSavepointIfAlreadyInTransaction ) {
-			savepoint = savepointBaseName + savepoints.Count;
+		else {
+			if( createSavepointIfAlreadyInTransaction )
+				savepoint = savepointBaseName + savepoints.Count;
+			else
+				savepoint = "";
 			savepoints.Push( savepoint );
 		}
-		else
-			savepoint = "";
 
 		try {
 			if( savepoint is null ) {
