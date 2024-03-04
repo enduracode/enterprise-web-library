@@ -160,7 +160,7 @@ public class RequestState {
 			if( !UserAccessible )
 				throw new ApplicationException( "User cannot be accessed from a nonsecure connection in an application that supports secure connections." );
 			if( userAndImpersonator == null )
-				userAndImpersonator = AuthenticationStatics.GetUserAndImpersonatorFromRequest();
+				userAndImpersonator = AuthenticationStatics.GetUserAndImpersonatorFromCookies();
 			return userAndImpersonator;
 		}
 	}
@@ -169,25 +169,7 @@ public class RequestState {
 
 	internal void RefreshUserAndImpersonator() {
 		if( userAndImpersonator != null )
-			userAndImpersonator = AuthenticationStatics.RefreshUserAndImpersonator( userAndImpersonator );
-	}
-
-	/// <summary>
-	/// For use by user-management post back logic only. Assumes the user and impersonator (if one exists) are loaded.
-	/// </summary>
-	internal void SetUser( SystemUser user ) {
-		userAndImpersonator = Tuple.Create( user, userAndImpersonator.Item2 );
-	}
-
-	/// <summary>
-	/// For use by impersonation post back logic only. Assumes the user and impersonator (if one exists) are loaded.
-	/// </summary>
-	/// <param name="user">Pass null to end impersonation. Pass a value to begin impersonation for the specified user or an anonymous user.</param>
-	internal void SetUserAndImpersonator( SpecifiedValue<SystemUser> user ) {
-		var impersonator = userAndImpersonator.Item2;
-		userAndImpersonator = user != null
-			                      ? Tuple.Create( user.Value, impersonator ?? new SpecifiedValue<SystemUser>( userAndImpersonator.Item1 ) )
-			                      : Tuple.Create( impersonator.Value, (SpecifiedValue<SystemUser>)null );
+			userAndImpersonator = AuthenticationStatics.GetUserAndImpersonatorFromCookies();
 	}
 
 	internal ( string prefix, Exception exception ) GetLastError() => errors.Last();
@@ -212,8 +194,6 @@ public class RequestState {
 	internal void ResetForContinuation( string url, string baseUrl ) {
 		Url = url;
 		BaseUrl = baseUrl;
-
-		ResponseCookies.Clear();
 
 		AddNetworkWaitTime( SystemClock.Instance.GetCurrentInstant() - continuationSemaphoreReleaseTime.Value );
 		continuationSemaphoreReleaseTime = null;

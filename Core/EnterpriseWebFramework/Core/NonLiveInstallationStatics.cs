@@ -1,5 +1,4 @@
-﻿#nullable disable
-using NodaTime;
+﻿using NodaTime;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
@@ -11,7 +10,8 @@ internal static class NonLiveInstallationStatics {
 	internal static void Init() {}
 
 	internal static bool IntermediateAuthenticationCookieExists() =>
-		CookieStatics.TryGetCookieValueFromRequestOnly( intermediateAuthenticationCookieName, out var value ) && value == intermediateAuthenticationCookieValue;
+		CookieStatics.TryGetCookieValueFromResponseOrRequest( intermediateAuthenticationCookieName, out var value ) && value is not null &&
+		string.Equals( value, intermediateAuthenticationCookieValue, StringComparison.Ordinal );
 
 	/// <summary>
 	/// Sets the intermediate user cookie.

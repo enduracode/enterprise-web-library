@@ -373,6 +373,7 @@ public static class RequestDispatchingStatics {
 	/// Refreshes all state for the current request that could have become stale after data modifications, e.g. the authenticated user object.
 	/// </summary>
 	public static void RefreshRequestState() {
+		RequestState.IntermediateUserExists = NonLiveInstallationStatics.IntermediateAuthenticationCookieExists();
 		RequestState.RefreshUserAndImpersonator();
 	}
 

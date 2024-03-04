@@ -1,5 +1,5 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.Configuration;
+﻿using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.EnterpriseWebFramework.PageInfrastructure;
 
 // EwlPage
 // Parameter: string returnUrl
@@ -48,8 +48,8 @@ partial class NonLiveLogIn {
 
 	private void logIn( bool hideWarnings ) {
 		NonLiveInstallationStatics.SetIntermediateAuthenticationCookie();
-		RequestState.Instance.IntermediateUserExists = true;
 		if( hideWarnings )
 			NonLiveInstallationStatics.SetWarningsHiddenCookie();
+		RequestStateStatics.RefreshRequestState();
 	}
 }

@@ -3,7 +3,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Security.Principal;
 using EnterpriseWebLibrary.Configuration;
-using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.EnterpriseWebFramework.PageInfrastructure;
 using EnterpriseWebLibrary.UserManagement;
 using EnterpriseWebLibrary.UserManagement.IdentityProviders;
 using JetBrains.Annotations;
@@ -75,15 +75,15 @@ public static class AuthenticationStatics {
 
 
 	/// <summary>
-	/// The second item in the returned tuple will be (1) null if impersonation is not taking place, (2) a value with a null user if impersonation is taking
-	/// place with an impersonator who doesn't correspond to a user, or (3) a value containing the impersonator.
+	/// The second item in the returned tuple will be (1) null if impersonation is not taking place, (2) a value with a null user if impersonation is taking place
+	/// with an impersonator who doesn’t correspond to a user, or (3) a value containing the impersonator.
 	/// </summary>
-	internal static Tuple<SystemUser, SpecifiedValue<SystemUser>> GetUserAndImpersonatorFromRequest() {
+	internal static Tuple<SystemUser, SpecifiedValue<SystemUser>> GetUserAndImpersonatorFromCookies() {
 		if( !UserManagementStatics.UserManagementEnabled )
 			return Tuple.Create<SystemUser, SpecifiedValue<SystemUser>>( null, null );
 
 		SystemUser getUser() {
-			if( !CookieStatics.TryGetCookieValueFromRequestOnly( userCookieName, out var cookieValue ) )
+			if( !CookieStatics.TryGetCookieValueFromResponseOrRequest( userCookieName, out var cookieValue ) || cookieValue is null )
 				return null;
 			var ticket = GetFormsAuthTicket( cookieValue );
 			return ticket != null ? UserManagementStatics.GetUser( int.Parse( ticket.Principal.Identity.Name ), false ) : null;
@@ -91,25 +91,12 @@ public static class AuthenticationStatics {
 		var user = getUser();
 
 		if( UserCanImpersonate( user ) )
-			if( CookieStatics.TryGetCookieValueFromRequestOnly( UserImpersonationStatics.CookieName, out var cookieValue ) )
+			if( CookieStatics.TryGetCookieValueFromResponseOrRequest( UserImpersonationStatics.CookieName, out var cookieValue ) && cookieValue is not null )
 				return Tuple.Create(
-					cookieValue.Any() ? UserManagementStatics.GetUser( int.Parse( cookieValue ), false ) : null,
+					cookieValue.Length > 0 ? UserManagementStatics.GetUser( int.Parse( cookieValue ), false ) : null,
 					new SpecifiedValue<SystemUser>( user ) );
 
 		return Tuple.Create( user, (SpecifiedValue<SystemUser>)null );
-	}
-
-	internal static Tuple<SystemUser, SpecifiedValue<SystemUser>> RefreshUserAndImpersonator(
-		Tuple<SystemUser, SpecifiedValue<SystemUser>> userAndImpersonator ) {
-		SpecifiedValue<SystemUser> impersonator;
-		if( userAndImpersonator.Item2 == null )
-			impersonator = null;
-		else {
-			var impersonatorUser = userAndImpersonator.Item2.Value != null ? UserManagementStatics.GetUser( userAndImpersonator.Item2.Value.UserId, false ) : null;
-			impersonator = UserCanImpersonate( impersonatorUser ) ? new SpecifiedValue<SystemUser>( impersonatorUser ) : null;
-		}
-
-		return Tuple.Create( userAndImpersonator.Item1 != null ? UserManagementStatics.GetUser( userAndImpersonator.Item1.UserId, false ) : null, impersonator );
 	}
 
 	internal static bool UserCanImpersonate( SystemUser user ) => user is { Role.CanManageUsers: true } || !ConfigurationStatics.IsLiveInstallation;
@@ -300,14 +287,15 @@ public static class AuthenticationStatics {
 						ExpiresUtc = EwfRequest.Current.RequestTime.Plus( authenticationDuration.Value ).ToDateTimeOffset()
 					},
 				EwlStatics.EwlInitialism );
-			AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod( () => setFormsAuthCookie( ticket ) );
+			setFormsAuthCookie( ticket );
 		}
-		RequestState.Instance.SetUser( user );
 
 		if( identityProvider != null )
-			AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod( () => SetUserLastIdentityProvider( identityProvider ) );
+			SetUserLastIdentityProvider( identityProvider );
 		else
-			AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod( () => CookieStatics.ClearCookie( identityProviderCookieName ) );
+			CookieStatics.ClearCookie( identityProviderCookieName );
+
+		RequestStateStatics.RefreshRequestState();
 	}
 
 	private static void setFormsAuthCookie( AuthenticationTicket ticket ) {
@@ -330,7 +318,7 @@ public static class AuthenticationStatics {
 	// Cookie Updating
 
 	internal static void UpdateFormsAuthCookieIfNecessary() {
-		if( !CookieStatics.TryGetCookieValueFromRequestOnly( userCookieName, out var cookieValue ) )
+		if( !CookieStatics.TryGetCookieValueFromResponseOrRequest( userCookieName, out var cookieValue ) || cookieValue is null )
 			return;
 
 		var ticket = GetFormsAuthTicket( cookieValue );
@@ -366,10 +354,11 @@ public static class AuthenticationStatics {
 		if( RequestState.Instance.ImpersonatorExists )
 			UserImpersonationStatics.SetCookie( null );
 		else
-			AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod( clearFormsAuthCookie );
-		RequestState.Instance.SetUser( null );
+			clearFormsAuthCookie();
 
-		AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod( () => CookieStatics.ClearCookie( identityProviderCookieName ) );
+		CookieStatics.ClearCookie( identityProviderCookieName );
+
+		RequestStateStatics.RefreshRequestState();
 	}
 
 	private static void clearFormsAuthCookie() {
@@ -381,7 +370,7 @@ public static class AuthenticationStatics {
 
 	internal static IdentityProvider GetUserLastIdentityProvider() =>
 		// Ignore the cookie if the existence of a user has changed since that could mean the user timed out.
-		CookieStatics.TryGetCookieValueFromRequestOnly( identityProviderCookieName, out var cookieValue ) &&
+		CookieStatics.TryGetCookieValueFromResponseOrRequest( identityProviderCookieName, out var cookieValue ) && cookieValue is not null &&
 		cookieValue[ 0 ] == ( SystemUser.Current is not null ? '+' : '-' )
 			? UserManagementStatics.IdentityProviders.SingleOrDefault(
 				identityProvider => string.Equals(

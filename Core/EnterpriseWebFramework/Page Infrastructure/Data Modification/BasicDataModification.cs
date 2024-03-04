@@ -1,4 +1,5 @@
 ﻿using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.EnterpriseWebFramework.PageInfrastructure;
 using Tewl.InputValidation;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -69,8 +70,11 @@ internal class BasicDataModification: DataModification, ValidationList {
 		if( isSlow )
 			slowExecutionNotifier();
 
+		var modificationResponseCookieIndex = CookieStatics.ResponseCookies.Count;
+
 		AutomaticDatabaseConnectionManager.Current.EnableModifications();
 		DataAccessState.Current.DisableCache();
+
 		try {
 			if( !skipModification )
 				modificationMethod!();
@@ -83,6 +87,9 @@ internal class BasicDataModification: DataModification, ValidationList {
 			AutomaticDatabaseConnectionManager.Current.RollbackModifications();
 			DataAccessState.Current.ResetCache();
 
+			CookieStatics.RemoveResponseCookies( modificationResponseCookieIndex );
+			RequestStateStatics.RefreshRequestState();
+
 			var dmException = e.GetChain().OfType<DataModificationException>().FirstOrDefault();
 			if( dmException is null )
 				throw;
@@ -92,6 +99,7 @@ internal class BasicDataModification: DataModification, ValidationList {
 			modificationErrorHandler( dmException.HtmlMessages );
 			return true;
 		}
+
 		AutomaticDatabaseConnectionManager.Current.CommitModifications();
 
 		return true;

@@ -1,4 +1,4 @@
-﻿#nullable disable
+﻿using System.Diagnostics.CodeAnalysis;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
 using NodaTime;
@@ -6,15 +6,14 @@ using NodaTime;
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 [ PublicAPI ]
-public class CookieStatics {
+public static class CookieStatics {
 	// Remove after https://github.com/dotnet/aspnetcore/issues/52580 is resolved.
 	internal const string EmptyValue = "EwlEmpty";
 
-	private static Func<IReadOnlyCollection<( string, string, CookieOptions )>> responseCookieGetter;
-	private static Action<string, string, CookieOptions> responseCookieAdder;
+	private static Func<List<( string, string?, CookieOptions )>> responseCookieGetter = null!;
+	private static Action<string, string?, CookieOptions> responseCookieAdder = null!;
 
-	internal static void Init(
-		Func<IReadOnlyCollection<( string, string, CookieOptions )>> responseCookieGetter, Action<string, string, CookieOptions> responseCookieAdder ) {
+	internal static void Init( Func<List<( string, string?, CookieOptions )>> responseCookieGetter, Action<string, string?, CookieOptions> responseCookieAdder ) {
 		CookieStatics.responseCookieGetter = responseCookieGetter;
 		CookieStatics.responseCookieAdder = responseCookieAdder;
 	}
@@ -22,9 +21,9 @@ public class CookieStatics {
 	/// <summary>
 	/// Gets the value associated with the specified cookie name. Searches only the request.
 	/// </summary>
-	public static bool TryGetCookieValueFromRequestOnly( string name, out string value, bool omitNamePrefix = false ) {
+	public static bool TryGetCookieValueFromRequestOnly( string name, [ NotNullWhen( true ) ] out string? value, bool omitNamePrefix = false ) {
 		var defaultAttributes = EwfConfigurationStatics.AppConfiguration.DefaultCookieAttributes;
-		if( !EwfRequest.Current.AspNetRequest.Cookies.TryGetValue( ( omitNamePrefix ? "" : defaultAttributes.NamePrefix ?? "" ) + name, out value ) )
+		if( !EwfRequest.Current!.AspNetRequest.Cookies.TryGetValue( ( omitNamePrefix ? "" : defaultAttributes.NamePrefix ?? "" ) + name, out value ) )
 			return false;
 		if( string.Equals( value, EmptyValue ) )
 			value = "";
@@ -35,7 +34,7 @@ public class CookieStatics {
 	/// Gets the value associated with the specified cookie name, by first searching the response cookies and then searching the request. A null value represents
 	/// a cookie that is being cleared. Throws an exception if multiple cookies with the specified name have been added to the response.
 	/// </summary>
-	public static bool TryGetCookieValueFromResponseOrRequest( string name, out string value, bool omitNamePrefix = false ) {
+	public static bool TryGetCookieValueFromResponseOrRequest( string name, out string? value, bool omitNamePrefix = false ) {
 		var defaultAttributes = EwfConfigurationStatics.AppConfiguration.DefaultCookieAttributes;
 		var responseCookies = ResponseCookies
 			.Where( i => string.Equals( i.name, ( omitNamePrefix ? "" : defaultAttributes.NamePrefix ?? "" ) + name, StringComparison.Ordinal ) )
@@ -51,10 +50,10 @@ public class CookieStatics {
 	/// <summary>
 	/// Gets the cookies that have already been added to the response. A null value represents a cookie that is being cleared.
 	/// </summary>
-	public static IReadOnlyCollection<( string name, string value, CookieOptions options )> ResponseCookies => responseCookieGetter();
+	public static IReadOnlyCollection<( string name, string? value, CookieOptions options )> ResponseCookies => responseCookieGetter();
 
 	public static void SetCookie(
-		string name, string value, Instant? expires, bool secure, bool httpOnly, string domain = null, string path = null, bool omitNamePrefix = false ) {
+		string name, string value, Instant? expires, bool secure, bool httpOnly, string? domain = null, string? path = null, bool omitNamePrefix = false ) {
 		var nameAndDomainAndPath = getNameAndDomainAndPath( name, domain, path, omitNamePrefix );
 		responseCookieAdder(
 			nameAndDomainAndPath.Item1,
@@ -70,12 +69,12 @@ public class CookieStatics {
 				} );
 	}
 
-	public static void ClearCookie( string name, string domain = null, string path = null, bool omitNamePrefix = false ) {
+	public static void ClearCookie( string name, string? domain = null, string? path = null, bool omitNamePrefix = false ) {
 		var nameAndDomainAndPath = getNameAndDomainAndPath( name, domain, path, omitNamePrefix );
 		responseCookieAdder( nameAndDomainAndPath.Item1, null, new CookieOptions { Domain = nameAndDomainAndPath.Item2, Path = nameAndDomainAndPath.Item3 } );
 	}
 
-	private static Tuple<string, string, string> getNameAndDomainAndPath( string name, string domain, string path, bool omitNamePrefix ) {
+	private static Tuple<string, string, string> getNameAndDomainAndPath( string name, string? domain, string? path, bool omitNamePrefix ) {
 		var defaultAttributes = EwfConfigurationStatics.AppConfiguration.DefaultCookieAttributes;
 		var defaultBaseUrl = new Uri( RequestState.Instance.BaseUrl );
 
@@ -89,7 +88,7 @@ public class CookieStatics {
 
 		// Ensure that the domain and path of the cookie are in scope for both the request URL and page URL. These two URLs can be different on requests that
 		// transfer to the log-in page, etc.
-		var requestUrls = new List<string> { EwfRequest.Current.Url };
+		var requestUrls = new List<string> { EwfRequest.Current!.Url };
 		if( PageBase.Current != null )
 			requestUrls.Add( PageBase.Current.GetUrl( false, false ) );
 		foreach( var url in requestUrls ) {
@@ -108,5 +107,10 @@ public class CookieStatics {
 		}
 
 		return Tuple.Create( ( omitNamePrefix ? "" : defaultAttributes.NamePrefix ?? "" ) + name, domain, path );
+	}
+
+	internal static void RemoveResponseCookies( int index ) {
+		var cookies = responseCookieGetter();
+		cookies.RemoveRange( index, cookies.Count - index );
 	}
 }

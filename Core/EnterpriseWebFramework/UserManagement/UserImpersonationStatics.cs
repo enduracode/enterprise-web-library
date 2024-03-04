@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.DataAccess;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.PageInfrastructure;
 using EnterpriseWebLibrary.UserManagement;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
@@ -11,9 +10,9 @@ public static class UserImpersonationStatics {
 	/// <summary>
 	/// EWL use only.
 	/// </summary>
-	public static void BeginImpersonation( SystemUser userBeingImpersonated ) {
+	public static void BeginImpersonation( SystemUser? userBeingImpersonated ) {
 		SetCookie( userBeingImpersonated );
-		RequestState.Instance.SetUserAndImpersonator( new SpecifiedValue<SystemUser>( userBeingImpersonated ) );
+		RequestStateStatics.RefreshRequestState();
 	}
 
 	/// <summary>
@@ -21,21 +20,15 @@ public static class UserImpersonationStatics {
 	/// </summary>
 	public static void EndImpersonation() {
 		clearCookie();
-		RequestState.Instance.SetUserAndImpersonator( null );
+		RequestStateStatics.RefreshRequestState();
 	}
 
-	internal static void SetCookie( SystemUser userBeingImpersonated ) {
-		AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod(
-			() => CookieStatics.SetCookie(
-				CookieName,
-				userBeingImpersonated?.UserId.ToString() ?? "",
-				null,
-				EwfConfigurationStatics.AppSupportsSecureConnections,
-				true ) );
+	internal static void SetCookie( SystemUser? userBeingImpersonated ) {
+		CookieStatics.SetCookie( CookieName, userBeingImpersonated?.UserId.ToString() ?? "", null, EwfConfigurationStatics.AppSupportsSecureConnections, true );
 	}
 
 	private static void clearCookie() {
-		AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod( () => CookieStatics.ClearCookie( CookieName ) );
+		CookieStatics.ClearCookie( CookieName );
 	}
 
 	internal static string CookieName => "UserBeingImpersonated";
