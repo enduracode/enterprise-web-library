@@ -69,6 +69,8 @@ public class LocalIdentityProvider: IdentityProvider {
 	public delegate ( byte[]? salt, byte[]? hashedCode, Instant? expirationTime, byte? remainingAttemptCount, string destinationUrl ) LoginCodeGetterMethod(
 		int userId );
 
+	public delegate bool? PostAuthenticationMethod( SystemUser user, bool authenticationSuccessful, out Action? unconditionalModificationMethod );
+
 	public delegate void PasswordUpdaterMethod( int userId, int salt, byte[] saltedPassword );
 
 	public delegate void LoginCodeUpdaterMethod(
@@ -82,7 +84,7 @@ public class LocalIdentityProvider: IdentityProvider {
 	internal readonly string LogInHelpInstructions;
 	private readonly Func<string, ( SystemUser user, int salt, byte[]? saltedPassword )?> passwordLoginUserGetter;
 	private readonly LoginCodeGetterMethod loginCodeGetter;
-	private readonly Func<SystemUser, bool, bool?>? postAuthenticationMethod;
+	private readonly PostAuthenticationMethod? postAuthenticationMethod;
 	internal readonly Duration? AuthenticationDuration;
 	internal readonly Action<Validator, string>? PasswordValidationMethod;
 	internal readonly PasswordUpdaterMethod PasswordUpdater;
@@ -101,9 +103,10 @@ public class LocalIdentityProvider: IdentityProvider {
 	/// <param name="passwordUpdater">A method that takes a user ID and new password data and updates the corresponding user. Do not pass null.</param>
 	/// <param name="loginCodeUpdater">A method that takes a user ID and new login-code data and updates the corresponding user. Do not pass null.</param>
 	/// <param name="postAuthenticationMethod">Performs actions immediately after password or login-code authentication, which could include counting failed
-	/// authentication attempts or preventing a user from logging in. Takes a user object and whether built-in authentication was successful, and returns true
-	/// if authentication is successful, false if it failed for any reason, and null if it did not fail but is incomplete. Do not use unless the system
-	/// absolutely requires micromanagement of authentication behavior.</param>
+	/// authentication attempts or preventing a user from logging in. Takes a user object and whether built-in authentication was successful, and returns true if
+	/// authentication is successful, false if it failed for any reason, and null if it did not fail but is incomplete. Also has an out parameter for a
+	/// modification method that will unconditionally execute. Do not use unless the system absolutely requires micromanagement of authentication behavior.
+	/// </param>
 	/// <param name="authenticationDuration">The duration of an authentication session. Pass null to use the default. Do not use unless the system absolutely
 	/// requires micromanagement of authentication behavior.</param>
 	/// <param name="passwordValidationMethod">Validates the specified password. Called when a user changes their password. Do not use unless the system
@@ -111,7 +114,7 @@ public class LocalIdentityProvider: IdentityProvider {
 	public LocalIdentityProvider(
 		string administratingOrganizationName, string logInHelpInstructions,
 		Func<string, ( SystemUser user, int salt, byte[]? saltedPassword )?> passwordLoginUserGetter, LoginCodeGetterMethod loginCodeGetter,
-		PasswordUpdaterMethod passwordUpdater, LoginCodeUpdaterMethod loginCodeUpdater, Func<SystemUser, bool, bool?>? postAuthenticationMethod = null,
+		PasswordUpdaterMethod passwordUpdater, LoginCodeUpdaterMethod loginCodeUpdater, PostAuthenticationMethod? postAuthenticationMethod = null,
 		Duration? authenticationDuration = null, Action<Validator, string>? passwordValidationMethod = null ) {
 		AdministratingOrganizationName = administratingOrganizationName;
 		LogInHelpInstructions = logInHelpInstructions;
@@ -124,12 +127,14 @@ public class LocalIdentityProvider: IdentityProvider {
 		this.loginCodeUpdater = loginCodeUpdater;
 	}
 
-	internal string? LogInUserWithPassword( string emailAddress, string password, out SystemUser? user, string errorMessage = "" ) {
+	internal string? LogInUserWithPassword(
+		string emailAddress, string password, out SystemUser? user, out Action? unconditionalModificationMethod, string errorMessage = "" ) {
 		if( errorMessage.Length == 0 )
 			errorMessage =
 				"Login failed. Please check your email address and password. If you do not know your password, please set a new one using the button below.";
 
 		user = null;
+		unconditionalModificationMethod = null;
 
 		var userData = passwordLoginUserGetter( emailAddress );
 		if( !userData.HasValue )
@@ -144,7 +149,7 @@ public class LocalIdentityProvider: IdentityProvider {
 
 		bool? authenticationSuccessful = passwordCorrect;
 		if( postAuthenticationMethod != null )
-			authenticationSuccessful = postAuthenticationMethod( userData.Value.user, passwordCorrect );
+			authenticationSuccessful = postAuthenticationMethod( userData.Value.user, passwordCorrect, out unconditionalModificationMethod );
 
 		if( !passwordCorrect || authenticationSuccessful == false )
 			return errorMessage;
@@ -221,12 +226,14 @@ public class LocalIdentityProvider: IdentityProvider {
 		EmailStatics.SendEmailWithDefaultFromAddress( message );
 	}
 
-	internal string? LogInUserWithCode( string emailAddress, string code, out SystemUser? user, out string destinationUrl, string errorMessage = "" ) {
+	internal string? LogInUserWithCode(
+		string emailAddress, string code, out SystemUser? user, out string destinationUrl, out Action? unconditionalModificationMethod, string errorMessage = "" ) {
 		if( errorMessage.Length == 0 )
 			errorMessage = "The login code you entered is incorrect or has expired. Please check for typos. If there aren’t any, please send yourself another code.";
 
 		user = null;
 		destinationUrl = "";
+		unconditionalModificationMethod = null;
 
 		var userLocal = UserManagementStatics.SystemProvider.GetUser( emailAddress );
 		if( userLocal == null )
@@ -235,6 +242,7 @@ public class LocalIdentityProvider: IdentityProvider {
 		var codeValid = true;
 
 		var codeData = loginCodeGetter( userLocal.UserId );
+		var unconditionalModMethods = new List<Action>();
 		if( codeData.hashedCode == null )
 			codeValid = false;
 		else if( codeData.expirationTime!.Value <= SystemClock.Instance.GetCurrentInstant() )
@@ -243,22 +251,31 @@ public class LocalIdentityProvider: IdentityProvider {
 			codeValid = false;
 		else if( !codeData.hashedCode.SequenceEqual( getHashedLoginCode( code, codeData.salt! ) ) ) {
 			codeValid = false;
-			loginCodeUpdater(
-				userLocal.UserId,
-				codeData.salt,
-				codeData.hashedCode,
-				codeData.expirationTime.Value,
-				(byte)( codeData.remainingAttemptCount.Value - 1 ),
-				codeData.destinationUrl );
+			unconditionalModMethods.Add(
+				() => loginCodeUpdater(
+					userLocal.UserId,
+					codeData.salt,
+					codeData.hashedCode,
+					codeData.expirationTime.Value,
+					(byte)( codeData.remainingAttemptCount.Value - 1 ),
+					codeData.destinationUrl ) );
 		}
 
 		bool? authenticationSuccessful = codeValid;
 		if( postAuthenticationMethod != null ) {
-			authenticationSuccessful = postAuthenticationMethod( userLocal, codeValid );
+			authenticationSuccessful = postAuthenticationMethod( userLocal, codeValid, out var unconditionalModMethod );
+			if( unconditionalModMethod is not null )
+				unconditionalModMethods.Add( unconditionalModMethod );
 
 			// Re-retrieve the user in case postAuthenticationMethod modified it.
 			userLocal = UserManagementStatics.SystemProvider.GetUser( userLocal.UserId )!;
 		}
+
+		if( unconditionalModMethods.Any() )
+			unconditionalModificationMethod = () => {
+				foreach( var i in unconditionalModMethods )
+					i();
+			};
 
 		if( !codeValid || authenticationSuccessful == false )
 			return errorMessage;

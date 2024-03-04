@@ -193,6 +193,7 @@ public static class AuthenticationStatics {
 					                       emailAddress.Value,
 					                       password.Value,
 					                       out var user,
+					                       out var unconditionalModMethod,
 					                       errorMessage: errorMessage );
 				                       if( errorMessage == null )
 					                       LogOutUser();
@@ -205,7 +206,15 @@ public static class AuthenticationStatics {
 				                       addStatusMessageIfClockNotSynchronized( clientTime );
 
 				                       if( errors.Any() )
-					                       throw new DataModificationException( errors.ToArray() );
+					                       throw new DataModificationException( errors.ToArray(), modificationMethod: unconditionalModMethod );
+
+				                       if( unconditionalModMethod is not null ) {
+					                       unconditionalModMethod();
+
+					                       // Re-retrieve the user in case unconditionalModMethod modified it.
+					                       user = UserManagementStatics.SystemProvider.GetUser( user.UserId );
+				                       }
+
 				                       return user;
 			                       }, ( emailAddress, isPasswordReset, destinationUrl, newUserRoleId ) => {
 				                       UserManagementStatics.LocalIdentityProvider.SendLoginCode(
@@ -224,6 +233,7 @@ public static class AuthenticationStatics {
 					                       code,
 					                       out var user,
 					                       out var destinationUrl,
+					                       out var unconditionalModMethod,
 					                       errorMessage: errorMessage );
 				                       if( errorMessage == null )
 					                       LogOutUser();
@@ -236,7 +246,15 @@ public static class AuthenticationStatics {
 				                       addStatusMessageIfClockNotSynchronized( clientTime );
 
 				                       if( errors.Any() )
-					                       throw new DataModificationException( errors.ToArray() );
+					                       throw new DataModificationException( errors.ToArray(), modificationMethod: unconditionalModMethod );
+
+				                       if( unconditionalModMethod is not null ) {
+					                       unconditionalModMethod();
+
+					                       // Re-retrieve the user in case unconditionalModMethod modified it.
+					                       user = UserManagementStatics.SystemProvider.GetUser( user.UserId );
+				                       }
+
 				                       return ( user, destinationUrl );
 			                       }, ( userId, authenticationDuration ) => {
 				                       var user = UserManagementStatics.SystemProvider.GetUser( userId );
