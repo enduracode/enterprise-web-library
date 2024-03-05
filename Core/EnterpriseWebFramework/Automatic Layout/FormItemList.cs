@@ -1,5 +1,4 @@
-﻿#nullable disable
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
@@ -40,8 +39,8 @@ public class FormItemList: FlowComponent {
 	/// is constrained.
 	/// </summary>
 	public static FormItemList CreateStack(
-		FormItemListSetup generalSetup = null, ( ContentBasedLength label, ContentBasedLength content )? minWidths = null,
-		IReadOnlyCollection<FormItem> items = null ) {
+		FormItemListSetup? generalSetup = null, ( ContentBasedLength label, ContentBasedLength content )? minWidths = null,
+		IReadOnlyCollection<FormItem>? items = null ) {
 		minWidths ??= ( 12.ToEm(), 24.ToEm() );
 		return new FormItemList(
 			generalSetup,
@@ -82,7 +81,7 @@ public class FormItemList: FlowComponent {
 	/// </summary>
 	/// <param name="setup"></param>
 	/// <param name="items"></param>
-	public static FormItemList CreateWrapping( FormItemListSetup setup = null, IReadOnlyCollection<FormItem> items = null ) =>
+	public static FormItemList CreateWrapping( FormItemListSetup? setup = null, IReadOnlyCollection<FormItem>? items = null ) =>
 		new( setup, wrappingClass, "", _ => ElementClassSet.Empty, _ => "", null, getItemComponents, items );
 
 	/// <summary>
@@ -90,8 +89,8 @@ public class FormItemList: FlowComponent {
 	/// </summary>
 	// To support items with ColumnSpan > 1, we could use the technique described by https://stackoverflow.com/a/55243400/35349 when the viewport width changes.
 	public static FormItemList CreateResponsiveGrid(
-		FormItemListSetup generalSetup = null, ContentBasedLength columnMinWidth = null,
-		GridVerticalAlignment verticalAlignment = GridVerticalAlignment.NotSpecified, IReadOnlyCollection<FormItem> items = null ) =>
+		FormItemListSetup? generalSetup = null, ContentBasedLength? columnMinWidth = null,
+		GridVerticalAlignment verticalAlignment = GridVerticalAlignment.NotSpecified, IReadOnlyCollection<FormItem>? items = null ) =>
 		new(
 			generalSetup,
 			gridClass.Add( GridVerticalAlignmentStatics.Class( verticalAlignment ) ),
@@ -113,8 +112,8 @@ public class FormItemList: FlowComponent {
 	/// <param name="verticalAlignment"></param>
 	/// <param name="items"></param>
 	public static FormItemList CreateFixedGrid(
-		int numberOfColumns, FormItemListSetup generalSetup = null, ContentBasedLength minWidth = null, int defaultColumnSpan = 1,
-		GridVerticalAlignment verticalAlignment = GridVerticalAlignment.NotSpecified, IReadOnlyCollection<FormItem> items = null ) {
+		int numberOfColumns, FormItemListSetup? generalSetup = null, ContentBasedLength? minWidth = null, int defaultColumnSpan = 1,
+		GridVerticalAlignment verticalAlignment = GridVerticalAlignment.NotSpecified, IReadOnlyCollection<FormItem>? items = null ) {
 		if( defaultColumnSpan > numberOfColumns )
 			throw new ApplicationException( "The default column span is {0}, but the number of columns is {1}.".FormatWith( defaultColumnSpan, numberOfColumns ) );
 
@@ -144,7 +143,7 @@ public class FormItemList: FlowComponent {
 	/// </summary>
 	/// <param name="setup"></param>
 	/// <param name="items"></param>
-	public static FormItemList CreateRaw( FormItemListSetup setup = null, IReadOnlyCollection<FormItem> items = null ) =>
+	public static FormItemList CreateRaw( FormItemListSetup? setup = null, IReadOnlyCollection<FormItem>? items = null ) =>
 		new( setup, ElementClassSet.Empty, "", _ => ElementClassSet.Empty, _ => "", null, getItemComponents, items );
 
 	private static IReadOnlyCollection<FlowComponent> getItemComponents( FormItem item ) =>
@@ -160,9 +159,9 @@ public class FormItemList: FlowComponent {
 	private readonly List<FormItem> items;
 
 	private FormItemList(
-		FormItemListSetup setup, ElementClassSet classes, string listStyleAttribute, Func<FormItem, ElementClassSet> itemClassGetter,
-		Func<FormItem, string> itemStyleAttributeGetter, Func<DisplaySetup, FormItemSetup> buttonItemSetupGetter,
-		Func<FormItem, IReadOnlyCollection<FlowComponent>> itemComponentGetter, IReadOnlyCollection<FormItem> items ) {
+		FormItemListSetup? setup, ElementClassSet classes, string listStyleAttribute, Func<FormItem, ElementClassSet> itemClassGetter,
+		Func<FormItem, string> itemStyleAttributeGetter, Func<DisplaySetup, FormItemSetup>? buttonItemSetupGetter,
+		Func<FormItem, IReadOnlyCollection<FlowComponent>> itemComponentGetter, IReadOnlyCollection<FormItem>? items ) {
 		setup ??= new FormItemListSetup();
 		buttonItemSetupGetter ??= ( displaySetup => new FormItemSetup( displaySetup: displaySetup ) );
 
@@ -175,7 +174,7 @@ public class FormItemList: FlowComponent {
 					focusDependentData: new DisplayableElementFocusDependentData(
 						attributes: listStyleAttribute.Any() ? new ElementAttribute( "style", listStyleAttribute ).ToCollection() : null ) ),
 				classes: allListsClass.Add( classes ).Add( setup.Classes ?? ElementClassSet.Empty ),
-				children: this.items.Select( i => ( item: i, elementClass: itemClass ) )
+				children: this.items!.Select( i => ( item: i, elementClass: itemClass ) )
 					.Concat( buttonItem.Select( i => ( item: i, elementClass: buttonItemClass ) ) )
 					.Select(
 						i => new FlowIdContainer(
@@ -209,9 +208,7 @@ public class FormItemList: FlowComponent {
 	/// </summary>
 	public void AddItems( IReadOnlyCollection<FormItem> items ) => this.items.AddRange( items );
 
-	/// <summary>
-	/// Do not use.
-	/// </summary>
+	[ Obsolete( "Guaranteed through 30 June 2024." ) ]
 	public void AddFormItems( params FormItem[] items ) {
 		this.items.AddRange( items );
 	}
