@@ -3,8 +3,6 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Security.Principal;
 using EnterpriseWebLibrary.Configuration;
-using EnterpriseWebLibrary.DataAccess;
-using EnterpriseWebLibrary.EnterpriseWebFramework.PageInfrastructure;
 using EnterpriseWebLibrary.UserManagement;
 using EnterpriseWebLibrary.UserManagement.IdentityProviders;
 using JetBrains.Annotations;
@@ -257,7 +255,7 @@ public static class AuthenticationStatics {
 	}
 
 	internal static IReadOnlyCollection<EtherealComponent> GetLogInHiddenFieldsAndSetUpClientSideLogic( DataValue<string> clientTime ) {
-		AutomaticDatabaseConnectionManager.Current.ExecuteWithModificationsEnabled( () => setCookie( testCookieName, "No data" ) );
+		ResourceBase.ExecuteDataModificationMethod( () => setCookie( testCookieName, "No data" ) );
 
 		var timeHiddenFieldId = new HiddenFieldId();
 		return new EwfHiddenField(
@@ -296,7 +294,7 @@ public static class AuthenticationStatics {
 		else
 			CookieStatics.ClearCookie( identityProviderCookieName );
 
-		RequestStateStatics.RefreshRequestState();
+		ResourceBase.RefreshRequestState();
 	}
 
 	private static void setFormsAuthCookie( AuthenticationTicket ticket ) {
@@ -359,7 +357,7 @@ public static class AuthenticationStatics {
 
 		CookieStatics.ClearCookie( identityProviderCookieName );
 
-		RequestStateStatics.RefreshRequestState();
+		ResourceBase.RefreshRequestState();
 	}
 
 	private static void clearFormsAuthCookie() {

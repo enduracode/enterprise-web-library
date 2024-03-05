@@ -17,6 +17,7 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 	private static SystemProviderReference<AppResourceSerializationProvider>? appSerializationProviderRef;
 	private static Action<bool, ResourceBase>? urlHandlerStateUpdater;
 	private static Func<ResourceBase?>? currentResourceGetter;
+	private static Action? requestStateRefresher;
 
 	internal static void WriteRedirectResponse( HttpContext context, string url, bool permanent ) {
 		if( context.Request.Method == "GET" || context.Request.Method == "HEAD" )
@@ -38,12 +39,13 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 		Func<ResourceBase, ( string, string )?> frameworkResourceSerializer,
 		SystemProviderReference<SystemResourceSerializationProvider> systemSerializationProvider,
 		SystemProviderReference<AppResourceSerializationProvider> appSerializationProvider, Action<bool, ResourceBase> urlHandlerStateUpdater,
-		Func<ResourceBase?> currentResourceGetter ) {
+		Func<ResourceBase?> currentResourceGetter, Action requestStateRefresher ) {
 		ResourceBase.frameworkResourceSerializer = frameworkResourceSerializer;
 		systemSerializationProviderRef = systemSerializationProvider;
 		appSerializationProviderRef = appSerializationProvider;
 		ResourceBase.urlHandlerStateUpdater = urlHandlerStateUpdater;
 		ResourceBase.currentResourceGetter = currentResourceGetter;
+		ResourceBase.requestStateRefresher = requestStateRefresher;
 	}
 
 	private static SystemResourceSerializationProvider systemSerializationProvider => systemSerializationProviderRef!.GetProvider()!;
@@ -53,6 +55,24 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 	/// Gets the currently executing resource, or null if the URL has not yet been resolved.
 	/// </summary>
 	internal static ResourceBase? Current => currentResourceGetter!();
+
+	/// <summary>
+	/// Executes the specified method with data modifications (including cookie modifications) enabled and the data-access cache disabled. Rolls back
+	/// modifications if an exception occurs.
+	/// </summary>
+	public static void ExecuteDataModificationMethod( Action modificationMethod ) {
+		var modificationResponseCookieIndex = CookieStatics.ResponseCookies.Count;
+		try {
+			AutomaticDatabaseConnectionManager.Current.ExecuteWithModificationsEnabled( modificationMethod );
+		}
+		catch {
+			CookieStatics.RemoveResponseCookies( modificationResponseCookieIndex );
+			RefreshRequestState();
+			throw;
+		}
+	}
+
+	internal static void RefreshRequestState() => requestStateRefresher!();
 
 	private string uriFragmentIdentifierField = "";
 	private readonly Lazy<ResourceParent?> parent;
@@ -392,7 +412,7 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 			return method();
 
 		EwfResponse? response = null;
-		AutomaticDatabaseConnectionManager.Current.ExecuteWithModificationsEnabled( () => response = method() );
+		ExecuteDataModificationMethod( () => response = method() );
 		return response;
 	}
 

@@ -1,5 +1,4 @@
 ﻿using EnterpriseWebLibrary.Configuration;
-using EnterpriseWebLibrary.EnterpriseWebFramework.PageInfrastructure;
 
 // EwlPage
 // Parameter: string returnUrl
@@ -50,6 +49,6 @@ partial class NonLiveLogIn {
 		NonLiveInstallationStatics.SetIntermediateAuthenticationCookie();
 		if( hideWarnings )
 			NonLiveInstallationStatics.SetWarningsHiddenCookie();
-		RequestStateStatics.RefreshRequestState();
+		RefreshRequestState();
 	}
 }

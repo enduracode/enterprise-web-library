@@ -621,7 +621,7 @@ public abstract class PageBase: ResourceBase {
 		if( !modMethods.Any() )
 			return this;
 
-		AutomaticDatabaseConnectionManager.Current.ExecuteWithModificationsEnabled(
+		ExecuteDataModificationMethod(
 			() => {
 				foreach( var i in modMethods )
 					i();
@@ -713,7 +713,7 @@ public abstract class PageBase: ResourceBase {
 
 	private void commitDataModificationsToRequestState() {
 		RequestStateStatics.AppendStatusMessages( statusMessages );
-		RequestStateStatics.RefreshRequestState();
+		RefreshRequestState();
 	}
 
 	private EwfResponse buildPageAndGetResponse( SpecifiedValue<string> focusKey, int? statusCode = null ) {

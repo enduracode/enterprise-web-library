@@ -195,7 +195,7 @@ public static class RequestDispatchingStatics {
 			context,
 			() => {
 				try {
-					rollbackDatabaseTransactionsAndClearResponseIfPossible( context );
+					clearResponseIfPossible( context );
 
 					// We can remove this as soon as requesting a URL with a vertical pipe doesn't blow up our web applications.
 					var errorIsBogusPathException = exception is ArgumentException argException && argException.Message == "Illegal characters in path.";
@@ -274,7 +274,7 @@ public static class RequestDispatchingStatics {
 			resource.HandleRequest( context, true );
 		}
 		catch( Exception exception ) {
-			rollbackDatabaseTransactionsAndClearResponseIfPossible( context );
+			clearResponseIfPossible( context );
 			RequestState.AddError( "An exception occurred during a request for a handled error page or a log-in page:", exception );
 			if( !context.Response.HasStarted )
 				transferRequestToUnhandledExceptionPage( context );
@@ -300,7 +300,7 @@ public static class RequestDispatchingStatics {
 			page.HandleRequest( context, true );
 		}
 		catch( Exception exception ) {
-			rollbackDatabaseTransactionsAndClearResponseIfPossible( context );
+			clearResponseIfPossible( context );
 			RequestState.AddError( "An exception occurred during a request for the unhandled exception page:", exception );
 			if( !context.Response.HasStarted )
 				write500Response( context, "Unhandled Exception Page Error", null );
@@ -309,10 +309,7 @@ public static class RequestDispatchingStatics {
 
 	private static PageBase getErrorPage( PageBase ewfErrorPage ) => AppProvider.GetErrorPage() ?? ewfErrorPage;
 
-	private static void rollbackDatabaseTransactionsAndClearResponseIfPossible( HttpContext context ) {
-		AutomaticDatabaseConnectionManager.Current.RollbackTransactions( true );
-		DataAccessState.Current.ResetCache();
-
+	private static void clearResponseIfPossible( HttpContext context ) {
 		if( !context.Response.HasStarted )
 			context.Response.Clear();
 	}

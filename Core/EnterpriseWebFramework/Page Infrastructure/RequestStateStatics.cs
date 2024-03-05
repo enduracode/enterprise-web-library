@@ -9,13 +9,12 @@ internal static class RequestStateStatics {
 	private static Func<uint?>? secondaryResponseIdGetter;
 	private static Action<uint>? secondaryResponseIdSetter;
 	private static Action? slowDataModificationNotifier;
-	private static Action? requestStateRefresher;
 	private static Func<string, string, Action<HttpContext>, string>? continuationRequestStateStorer;
 
 	internal static void Init(
 		Action<string> clientSideNewUrlSetter, Func<IReadOnlyCollection<( StatusMessageType, string )>> statusMessageGetter,
 		Action<IEnumerable<( StatusMessageType, string )>> statusMessageAppender, Func<uint?> secondaryResponseIdGetter, Action<uint> secondaryResponseIdSetter,
-		Action slowDataModificationNotifier, Action requestStateRefresher, Func<string, string, Action<HttpContext>, string> continuationRequestStateStorer ) {
+		Action slowDataModificationNotifier, Func<string, string, Action<HttpContext>, string> continuationRequestStateStorer ) {
 		RequestStateStatics.clientSideNewUrlSetter = clientSideNewUrlSetter;
 
 		RequestStateStatics.statusMessageGetter = statusMessageGetter;
@@ -25,8 +24,6 @@ internal static class RequestStateStatics {
 		RequestStateStatics.secondaryResponseIdSetter = secondaryResponseIdSetter;
 
 		RequestStateStatics.slowDataModificationNotifier = slowDataModificationNotifier;
-
-		RequestStateStatics.requestStateRefresher = requestStateRefresher;
 
 		RequestStateStatics.continuationRequestStateStorer = continuationRequestStateStorer;
 	}
@@ -40,8 +37,6 @@ internal static class RequestStateStatics {
 	public static void SetSecondaryResponseId( uint id ) => secondaryResponseIdSetter!( id );
 
 	public static void NotifyOfSlowDataModification() => slowDataModificationNotifier!();
-
-	public static void RefreshRequestState() => requestStateRefresher!();
 
 	public static string StoreRequestStateForContinuation( string url, string requestMethod, Action<HttpContext> requestHandler ) =>
 		continuationRequestStateStorer!( url, requestMethod, requestHandler );

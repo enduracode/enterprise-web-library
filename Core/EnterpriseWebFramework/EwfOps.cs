@@ -278,7 +278,8 @@ public static class EwfOps {
 									else
 										RequestDispatchingStatics.RequestState.SetResource( resource );
 								},
-								() => RequestDispatchingStatics.RequestState.Resource );
+								() => RequestDispatchingStatics.RequestState.Resource,
+								RequestDispatchingStatics.RefreshRequestState );
 							WellKnownResource.Init(
 								() => RequestDispatchingStatics.AppProvider.GetFrameworkUrlParent(),
 								() => OpenIdProviderStatics.GetWellKnownUrls().Concat( RequestDispatchingStatics.AppProvider.GetWellKnownUrls() ) );
@@ -293,7 +294,6 @@ public static class EwfOps {
 								() => RequestDispatchingStatics.RequestState.SecondaryResponseId,
 								id => RequestDispatchingStatics.RequestState.SecondaryResponseId = id,
 								() => RequestDispatchingStatics.RequestState.AllowSlowRequest(),
-								RequestDispatchingStatics.RefreshRequestState,
 								( url, requestMethod, requestHandler ) => RequestContinuationDataStore.AddRequestState(
 									url,
 									requestMethod,

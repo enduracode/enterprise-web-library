@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.ExternalFunctionality;
 
 // EwlResource
@@ -23,7 +22,7 @@ partial class Assertions {
 
 		var identityProvider =
 			AuthenticationStatics.SamlIdentityProviders.Single( i => string.Equals( i.EntityId, assertion.identityProvider, StringComparison.Ordinal ) );
-		AutomaticDatabaseConnectionManager.Current.ExecuteWithModificationsEnabled(
+		ExecuteDataModificationMethod(
 			() => {
 				var user = identityProvider.LogInUser( assertion.userName, assertion.attributes );
 				if( user is not null )

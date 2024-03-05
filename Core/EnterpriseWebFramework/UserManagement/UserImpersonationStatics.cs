@@ -1,5 +1,4 @@
-﻿using EnterpriseWebLibrary.EnterpriseWebFramework.PageInfrastructure;
-using EnterpriseWebLibrary.UserManagement;
+﻿using EnterpriseWebLibrary.UserManagement;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 
@@ -12,7 +11,7 @@ public static class UserImpersonationStatics {
 	/// </summary>
 	public static void BeginImpersonation( SystemUser? userBeingImpersonated ) {
 		SetCookie( userBeingImpersonated );
-		RequestStateStatics.RefreshRequestState();
+		ResourceBase.RefreshRequestState();
 	}
 
 	/// <summary>
@@ -20,7 +19,7 @@ public static class UserImpersonationStatics {
 	/// </summary>
 	public static void EndImpersonation() {
 		clearCookie();
-		RequestStateStatics.RefreshRequestState();
+		ResourceBase.RefreshRequestState();
 	}
 
 	internal static void SetCookie( SystemUser? userBeingImpersonated ) {
