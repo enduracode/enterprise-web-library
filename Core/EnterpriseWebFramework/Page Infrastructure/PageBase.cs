@@ -605,7 +605,7 @@ public abstract class PageBase: ResourceBase {
 	}
 
 	// Page-view data modifications. All data modifications that happen simply because of a request and require no other action by the user should happen once per
-	// page view, and prior to LoadData so that the modified data can be used in the page if necessary.
+	// page view, and prior to getContent so that the modified data can be used in the page if necessary.
 	private PageBase executePageViewDataModifications() {
 		var modMethods = new List<Action>();
 		modMethods.Add( appProvider.pageViewDataModificationMethodGetter() );
@@ -615,6 +615,7 @@ public abstract class PageBase: ResourceBase {
 			if( RequestState.Instance.ImpersonatorExists && RequestState.Instance.ImpersonatorUser != null )
 				modMethods.Add( getLastPageRequestTimeUpdateMethod( RequestState.Instance.ImpersonatorUser ) );
 		}
+		modMethods.Add( AuthenticationStatics.GetUserCookieUpdater() );
 		modMethods.Add( getPageViewDataModificationMethod() );
 		modMethods = modMethods.Where( i => i != null ).ToList();
 
@@ -707,9 +708,7 @@ public abstract class PageBase: ResourceBase {
 	/// loadData call on post-back requests, and we provide no mechanism to do this because it would allow developers to accidentally cause false user
 	/// concurrency errors by modifying data that affects the rendering of the page.
 	/// </summary>
-	protected virtual Action getPageViewDataModificationMethod() {
-		return null;
-	}
+	protected virtual Action getPageViewDataModificationMethod() => null;
 
 	private void commitDataModificationsToRequestState() {
 		RequestStateStatics.AppendStatusMessages( statusMessages );
@@ -941,11 +940,7 @@ public abstract class PageBase: ResourceBase {
 
 		return EwfResponse.Create(
 			ContentTypes.Html,
-			new EwfResponseBodyCreator(
-				writer => {
-					AuthenticationStatics.UpdateFormsAuthCookieIfNecessary();
-					pageTree.WriteMarkup( writer );
-				} ),
+			new EwfResponseBodyCreator( pageTree.WriteMarkup ),
 			statusCodeGetter: () => statusCode,
 			additionalHeaderFieldGetter: () => {
 				var headerFields = new List<( string, string )>();

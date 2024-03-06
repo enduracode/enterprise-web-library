@@ -316,22 +316,26 @@ public static class AuthenticationStatics {
 
 	// Cookie Updating
 
-	internal static void UpdateFormsAuthCookieIfNecessary() {
-		if( !CookieStatics.TryGetCookieValueFromResponseOrRequest( userCookieName, out var cookieValue ) || cookieValue is null )
-			return;
+	internal static Action GetUserCookieUpdater() {
+		if( !CookieStatics.TryGetCookieValueFromRequestOnly( userCookieName, out var cookieValue ) )
+			return null;
+
+		var prefixedCookieName = ( EwfConfigurationStatics.AppConfiguration.DefaultCookieAttributes.NamePrefix ?? "" ) + userCookieName;
+		if( CookieStatics.ResponseCookies.Any( i => string.Equals( i.name, prefixedCookieName, StringComparison.Ordinal ) ) )
+			return null;
 
 		var ticket = GetFormsAuthTicket( cookieValue );
-		if( ticket != null ) {
-			var passedDuration = EwfRequest.Current.RequestTime - Instant.FromDateTimeOffset( ticket.Properties.IssuedUtc.Value );
-			var totalDuration = Duration.FromTimeSpan( ticket.Properties.ExpiresUtc.Value - ticket.Properties.IssuedUtc.Value );
-			if( passedDuration / totalDuration >= .5 ) {
-				ticket.Properties.IssuedUtc = ticket.Properties.IssuedUtc.Value + passedDuration.ToTimeSpan();
-				ticket.Properties.ExpiresUtc = ticket.Properties.ExpiresUtc.Value + passedDuration.ToTimeSpan();
-				setFormsAuthCookie( ticket );
-			}
-		}
-		else
-			clearFormsAuthCookie();
+		if( ticket is null )
+			return clearFormsAuthCookie;
+
+		var passedDuration = EwfRequest.Current.RequestTime - Instant.FromDateTimeOffset( ticket.Properties.IssuedUtc.Value );
+		var totalDuration = Duration.FromTimeSpan( ticket.Properties.ExpiresUtc.Value - ticket.Properties.IssuedUtc.Value );
+		if( passedDuration / totalDuration < .5 )
+			return null;
+
+		ticket.Properties.IssuedUtc = ticket.Properties.IssuedUtc.Value + passedDuration.ToTimeSpan();
+		ticket.Properties.ExpiresUtc = ticket.Properties.ExpiresUtc.Value + passedDuration.ToTimeSpan();
+		return () => setFormsAuthCookie( ticket );
 	}
 
 	internal static AuthenticationTicket GetFormsAuthTicket( string cookie ) {
