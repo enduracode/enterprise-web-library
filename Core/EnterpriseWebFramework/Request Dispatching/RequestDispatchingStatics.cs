@@ -68,8 +68,7 @@ public static class RequestDispatchingStatics {
 						await RequestContinuationDataStore.GetRequestState( url, baseUrl, context.Request.Method ) ??
 						new RequestState( context, url, baseUrl, AppProvider.GetSlowRequestThreshold() ) );
 				},
-				false,
-				true );
+				false );
 			if( context.Response.StatusCode != 200 )
 				return;
 
@@ -115,6 +114,9 @@ public static class RequestDispatchingStatics {
 						contextAccessor.UseFrameworkContext = true;
 					}
 				}
+
+				// Ensure that our Response.OnStarting callback (above) runs before we clean up request state.
+				await context.Response.StartAsync();
 			}
 			catch( Exception exception ) {
 				await handleError( context, exception );
@@ -130,7 +132,6 @@ public static class RequestDispatchingStatics {
 							RequestState.CleanUp( false );
 						return Task.CompletedTask;
 					},
-					false,
 					false );
 			}
 		}
@@ -242,10 +243,9 @@ public static class RequestDispatchingStatics {
 				}
 				return Task.CompletedTask;
 			},
-			true,
 			true );
 
-	private static async Task executeWithBasicExceptionHandling( HttpContext context, Func<Task> handler, bool addErrorToRequestState, bool write500Response ) {
+	private static async Task executeWithBasicExceptionHandling( HttpContext context, Func<Task> handler, bool addErrorToRequestState ) {
 		try {
 			await handler();
 		}
@@ -259,8 +259,8 @@ public static class RequestDispatchingStatics {
 						TelemetryStatics.ReportError( prefix, e );
 				},
 				delegate {
-					if( write500Response && !context.Response.HasStarted )
-						RequestDispatchingStatics.write500Response( context, "Exception", ( prefix, e ) );
+					if( !context.Response.HasStarted )
+						write500Response( context, "Exception", ( prefix, e ) );
 				} );
 		}
 	}
