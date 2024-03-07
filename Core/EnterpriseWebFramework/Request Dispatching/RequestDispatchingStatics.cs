@@ -122,7 +122,6 @@ public static class RequestDispatchingStatics {
 				await handleError( context, exception );
 			}
 			finally {
-				// Do not set a status code since we may have already set one or set a redirect page.
 				await executeWithBasicExceptionHandling(
 					context,
 					() => {
