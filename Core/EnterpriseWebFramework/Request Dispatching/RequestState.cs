@@ -205,8 +205,7 @@ public class RequestState {
 				if( rollbackDatabaseTransactions )
 					DatabaseConnectionManager.RollbackTransactions( true );
 				else
-					// Skip non-transactional modification methods because they could cause database connections to be reinitialized.
-					DatabaseConnectionManager.CleanUpConnectionsAndExecuteNonTransactionalModificationMethods( true, skipNonTransactionalModificationMethods: true );
+					DatabaseConnectionManager.CommitTransactionsForCleanup( true );
 			},
 			() => {
 				if( errors.Any() ) {

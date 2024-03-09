@@ -49,7 +49,8 @@ public static class RequestDispatchingStatics {
 
 					var baseUrl = getRequestBaseUrl( context.Request );
 					if( !baseUrl.Any() ) {
-						EwfResponse.Create( "", new EwfResponseBodyCreator( () => "" ), statusCodeGetter: () => 400 ).WriteToAspNetResponse( context.Response );
+						EwfResponse.Create( "", new EwfResponseBodyCreator( () => "" ), statusCodeGetter: () => 400 )
+							.WriteToAspNetResponse( context.Response, skipTransactionCommit: true );
 						return;
 					}
 
@@ -73,16 +74,6 @@ public static class RequestDispatchingStatics {
 				return;
 
 			try {
-				// Commit transactions and execute non-transactional modifications while the error handler still has the ability to send a 500-level response if needed.
-				context.Response.OnStarting(
-					() => {
-						if( RequestState.RequestHandler is null ) {
-							AutomaticDatabaseConnectionManager.Current.CommitTransactionsAndExecuteNonTransactionalModificationMethods( true );
-							DataAccessState.Current.ResetCache();
-						}
-						return Task.CompletedTask;
-					} );
-
 				Action<HttpContext> requestHandler;
 				if( RequestState.RequestHandler is not null ) {
 					requestHandler = RequestState.RequestHandler;
@@ -114,9 +105,6 @@ public static class RequestDispatchingStatics {
 						contextAccessor.UseFrameworkContext = true;
 					}
 				}
-
-				// Ensure that our Response.OnStarting callback (above) runs before we clean up request state.
-				await context.Response.StartAsync();
 			}
 			catch( Exception exception ) {
 				await handleError( context, exception );
@@ -195,7 +183,8 @@ public static class RequestDispatchingStatics {
 			context,
 			() => {
 				try {
-					clearResponseIfPossible( context );
+					if( !context.Response.HasStarted )
+						context.Response.Clear();
 
 					// We can remove this as soon as requesting a URL with a vertical pipe doesn't blow up our web applications.
 					var errorIsBogusPathException = exception is ArgumentException argException && argException.Message == "Illegal characters in path.";
@@ -230,14 +219,18 @@ public static class RequestDispatchingStatics {
 					else if( exception is PageDisabledException pageDisabledException )
 						transferRequest( context, null, new ResourceDisabled( pageDisabledException.Message ) );
 					else {
+						AutomaticDatabaseConnectionManager.Current.RollbackTransactions( true );
+						DataAccessState.Current.ResetCache();
+
 						RequestState.AddError( "", exception );
 						if( !context.Response.HasStarted )
 							transferRequestToUnhandledExceptionPage( context );
 					}
 				}
 				catch {
-					if( !context.Response.HasStarted )
-						context.Response.Clear();
+					AutomaticDatabaseConnectionManager.Current.RollbackTransactions( true );
+					DataAccessState.Current.ResetCache();
+
 					throw;
 				}
 				return Task.CompletedTask;
@@ -251,15 +244,17 @@ public static class RequestDispatchingStatics {
 		catch( Exception e ) {
 			const string prefix = "An exception occurred that could not be handled by the main exception handler:";
 			EwlStatics.CallEveryMethod(
-				delegate {
+				() => {
 					if( addErrorToRequestState )
 						RequestState.AddError( prefix, e );
 					else
 						TelemetryStatics.ReportError( prefix, e );
 				},
-				delegate {
-					if( !context.Response.HasStarted )
-						write500Response( context, "Exception", ( prefix, e ) );
+				() => {
+					if( context.Response.HasStarted )
+						return;
+					context.Response.Clear();
+					write500Response( context, "Exception", ( prefix, e ) );
 				} );
 		}
 	}
@@ -273,7 +268,7 @@ public static class RequestDispatchingStatics {
 			resource.HandleRequest( context, true );
 		}
 		catch( Exception exception ) {
-			clearResponseIfPossible( context );
+			rollbackDatabaseTransactionsAndClearResponseIfPossible( context );
 			RequestState.AddError( "An exception occurred during a request for a handled error page or a log-in page:", exception );
 			if( !context.Response.HasStarted )
 				transferRequestToUnhandledExceptionPage( context );
@@ -299,7 +294,7 @@ public static class RequestDispatchingStatics {
 			page.HandleRequest( context, true );
 		}
 		catch( Exception exception ) {
-			clearResponseIfPossible( context );
+			rollbackDatabaseTransactionsAndClearResponseIfPossible( context );
 			RequestState.AddError( "An exception occurred during a request for the unhandled exception page:", exception );
 			if( !context.Response.HasStarted )
 				write500Response( context, "Unhandled Exception Page Error", null );
@@ -308,7 +303,10 @@ public static class RequestDispatchingStatics {
 
 	private static PageBase getErrorPage( PageBase ewfErrorPage ) => AppProvider.GetErrorPage() ?? ewfErrorPage;
 
-	private static void clearResponseIfPossible( HttpContext context ) {
+	private static void rollbackDatabaseTransactionsAndClearResponseIfPossible( HttpContext context ) {
+		AutomaticDatabaseConnectionManager.Current.RollbackTransactions( true );
+		DataAccessState.Current.ResetCache();
+
 		if( !context.Response.HasStarted )
 			context.Response.Clear();
 	}
@@ -332,7 +330,10 @@ public static class RequestDispatchingStatics {
 						writer.Write( error.Value.exception.ToString() );
 					} ),
 				statusCodeGetter: () => 500 )
-			.WriteToAspNetResponse( context.Response, omitBody: string.Equals( context.Request.Method, "HEAD", StringComparison.Ordinal ) );
+			.WriteToAspNetResponse(
+				context.Response,
+				skipTransactionCommit: true,
+				omitBody: string.Equals( context.Request.Method, "HEAD", StringComparison.Ordinal ) );
 	}
 
 	/// <summary>

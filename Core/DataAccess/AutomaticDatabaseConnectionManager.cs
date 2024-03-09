@@ -149,15 +149,20 @@ public class AutomaticDatabaseConnectionManager {
 	}
 
 	internal void CommitTransactionsAndExecuteNonTransactionalModificationMethods( bool cacheEnabled ) {
-		CleanUpConnectionsAndExecuteNonTransactionalModificationMethods( cacheEnabled );
+		cleanUpConnectionsAndExecuteNonTransactionalModificationMethods( cacheEnabled );
 	}
 
 	internal void RollbackTransactions( bool cacheEnabled ) {
 		transactionsMarkedForRollback = true;
-		CleanUpConnectionsAndExecuteNonTransactionalModificationMethods( cacheEnabled );
+		cleanUpConnectionsAndExecuteNonTransactionalModificationMethods( cacheEnabled );
 	}
 
-	internal void CleanUpConnectionsAndExecuteNonTransactionalModificationMethods( bool cacheEnabled, bool skipNonTransactionalModificationMethods = false ) {
+	internal void CommitTransactionsForCleanup( bool cacheEnabled ) {
+		cleanUpConnectionsAndExecuteNonTransactionalModificationMethods( cacheEnabled, forbidNonTransactionalModificationMethodExecution: true );
+	}
+
+	private void cleanUpConnectionsAndExecuteNonTransactionalModificationMethods(
+		bool cacheEnabled, bool forbidNonTransactionalModificationMethodExecution = false ) {
 		if( inModificationTransaction )
 			throw new InvalidOperationException();
 
@@ -168,25 +173,33 @@ public class AutomaticDatabaseConnectionManager {
 			methods.Add( () => cleanUpConnection( dataAccessState.GetSecondaryDatabaseConnection( databaseName ) ) );
 		methods.Add(
 			() => {
+				if( !nonTransactionalModificationMethods.Any() )
+					return;
+
 				try {
-					if( !skipNonTransactionalModificationMethods && !transactionsMarkedForRollback ) {
-						modTransactionSecondaryDatabaseCount = 0;
-						try {
-							if( cacheEnabled ) {
-								dataAccessState.DisableCache();
-								try {
-									executeNonTransactionalModificationMethods();
-								}
-								finally {
-									dataAccessState.ResetCache();
-								}
-							}
-							else
+					if( transactionsMarkedForRollback )
+						return;
+
+					if( forbidNonTransactionalModificationMethodExecution )
+						throw new Exception(
+							"Non-transactional modification methods exist, but their execution is forbidden during connection cleanup because this could cause connections to be reinitialized." );
+
+					modTransactionSecondaryDatabaseCount = 0;
+					try {
+						if( cacheEnabled ) {
+							dataAccessState.DisableCache();
+							try {
 								executeNonTransactionalModificationMethods();
+							}
+							finally {
+								dataAccessState.ResetCache();
+							}
 						}
-						finally {
-							modTransactionSecondaryDatabaseCount = null;
-						}
+						else
+							executeNonTransactionalModificationMethods();
+					}
+					finally {
+						modTransactionSecondaryDatabaseCount = null;
 					}
 				}
 				finally {

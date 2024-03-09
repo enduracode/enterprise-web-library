@@ -237,7 +237,7 @@ public static class EwfOps {
 								() => RequestDispatchingStatics.RequestState.BeginInstant,
 								() => RequestDispatchingStatics.RequestState.Url,
 								networkWaitTime => RequestDispatchingStatics.RequestState.AddNetworkWaitTime( networkWaitTime ) );
-							EwfResponse.Init( () => contextAccessor.HttpContext );
+							EwfResponse.Init( () => contextAccessor.HttpContext, () => RequestDispatchingStatics.RequestState.RequestHandler is not null );
 							UrlHandlingStatics.Init(
 								() => RequestDispatchingStatics.AppProvider.GetBaseUrlPatterns(),
 								( baseUrlString, appRelativeUrl ) =>
