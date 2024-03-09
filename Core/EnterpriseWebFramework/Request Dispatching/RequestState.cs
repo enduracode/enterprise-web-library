@@ -149,7 +149,7 @@ public class RequestState {
 	internal int? ProfilingUserId => ( ImpersonatorExists ? ImpersonatorUser : UserAndImpersonator.Item1 )?.UserId;
 
 	/// <summary>
-	/// AppTools.User and private use only.
+	/// EwfOps.RunApplication and private use only.
 	/// </summary>
 	internal Tuple<SystemUser, SpecifiedValue<SystemUser>> UserAndImpersonator {
 		get {
@@ -167,9 +167,8 @@ public class RequestState {
 
 	internal bool UserAccessible => !EwfConfigurationStatics.AppSupportsSecureConnections || EwfRequest.Current.IsSecure;
 
-	internal void RefreshUserAndImpersonator() {
-		if( userAndImpersonator != null )
-			userAndImpersonator = AuthenticationStatics.GetUserAndImpersonatorFromCookies();
+	internal void ClearUserAndImpersonator() {
+		userAndImpersonator = null;
 	}
 
 	internal ( string prefix, Exception exception ) GetLastError() => errors.Last();
