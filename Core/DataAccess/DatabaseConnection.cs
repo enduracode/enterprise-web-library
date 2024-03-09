@@ -290,16 +290,23 @@ public class DatabaseConnection {
 					//to make sure the RollbackTransaction call (this method) does not throw
 					//an exception that blocks out the real exception that occurred.
 
-					// We set transactionDead to true so that we do not accumulate additional
+					// We set rollbackWasToLastSavepoint to false so that we do not accumulate additional
 					// exceptions while the client attempts to rollback all nest levels
-					if( e.Number == 3903 )
-						rollbackWasToLastSavepoint = false;
+					if( e.Number == 3903 ) {
+						if( savepoints is not null ) {
+							rollbackWasToLastSavepoint = false;
+							savepoint = null;
+						}
+					}
 					else
 						throw;
 				}
 				catch( InvalidOperationException ) {
 					// This means that the transaction had already been rolled back (by SQL, due to high error severity, as above).
-					rollbackWasToLastSavepoint = false;
+					if( savepoints is not null ) {
+						rollbackWasToLastSavepoint = false;
+						savepoint = null;
+					}
 				}
 			}
 			catch( Exception e ) {
@@ -309,7 +316,7 @@ public class DatabaseConnection {
 			if( savepoint is null )
 				resetTransactionFields();
 		}
-		else if( rollbackWasToLastSavepoint == true && savepoint is { Length: > 0 } )
+		else if( savepoint is null || ( rollbackWasToLastSavepoint == true && savepoint.Length > 0 ) )
 			rollbackWasToLastSavepoint = null;
 	}
 
@@ -389,7 +396,6 @@ public class DatabaseConnection {
 		DataAccessMethods.CreateDbConnectionException( databaseInfo, action, innerException );
 
 	private void resetTransactionFields() {
-		rollbackWasToLastSavepoint = null;
 		tx = null;
 		innerTx = null;
 		commitTimeValidationMethods = null;
