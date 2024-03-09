@@ -259,6 +259,7 @@ public static class EwfOps {
 							NonLiveInstallationStatics.Init();
 							Translation.Init( () => "en-US" );
 							CssPreprocessingStatics.Init( globalInitializer.GetType().Assembly, ConfigurationStatics.AppAssembly );
+							EwfSafeRequestHandler.Init( ResourceBase.ExecuteDataModificationMethod );
 							ResourceBase.Init(
 								ResourceSerializationStatics.SerializeResource,
 								ConfigurationStatics.GetSystemLibraryProvider<SystemResourceSerializationProvider>( "ResourceSerialization" ),
