@@ -1,4 +1,6 @@
-﻿namespace EnterpriseWebLibrary.DataAccess;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework;
+
+namespace EnterpriseWebLibrary.DataAccess;
 
 /// <summary>
 /// Manages transactions and cleanup for automatically-opened database connections in a data-access state object.
@@ -18,6 +20,12 @@ public class AutomaticDatabaseConnectionManager {
 	/// <summary>
 	/// Queues the specified non-transactional modification method to be executed after database transactions are committed. Must be called at a time when normal
 	/// modifications are enabled, or from another non-transactional modification method.
+	/// 
+	/// In a web application, the method cannot add status messages to the page. Please do so from a normal modification method instead. The web framework
+	/// guarantees that any unhandled exception from a non-transactional modification method will result in a 500-level [error] response to the client, so status
+	/// messages will only be displayed if all methods are successful. Also do not throw <see cref="DataModificationException"/> from the method. These are not
+	/// handled, and furthermore it is important that non-transactional modification methods succeed at all costs, even if that means retrying external-service
+	/// calls or queueing them to happen later if the services are currently unavailable.
 	/// </summary>
 	public static void AddNonTransactionalModificationMethod( Action modificationMethod ) {
 		var current = Current;
