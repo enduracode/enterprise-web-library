@@ -142,10 +142,9 @@ public abstract class PageBase: ResourceBase {
 	/// </summary>
 	public new static PageBase Current {
 		get {
-			if( !( ResourceBase.Current is PageBase pageObject ) )
+			if( ResourceBase.Current is not PageBase pageObject )
 				return null;
-			PageBase next;
-			while( ( next = pageObject.nextPageObject ) != null )
+			while( pageObject.nextPageObject is {} next )
 				pageObject = next;
 			return pageObject;
 		}
@@ -876,17 +875,17 @@ public abstract class PageBase: ResourceBase {
 		errorSources.Validations.Select(
 				( validation, index ) => {
 					var displayKey = id + index;
-					if( modErrorDisplaysByValidation.ContainsKey( validation ) )
-						modErrorDisplaysByValidation[ validation ].Add( displayKey );
+					if( modErrorDisplaysByValidation.TryGetValue( validation, out var displays ) )
+						displays.Add( displayKey );
 					else
 						modErrorDisplaysByValidation.Add( validation, displayKey.ToCollection().ToList() );
 
-					// We want to ignore all of the problems that could happen, such as the key not existing in the dictionary. This problem will be shown in a more
-					// helpful way when we compare form control hashes after a transfer.
+					// We want to ignore all the problems that could happen, such as the key not existing in the dictionary. This problem will be shown in a more helpful
+					// way when we compare form control hashes after a transfer.
 					//
-					// Avoid using exceptions here if possible. This method is sometimes called many times during a request, and we've seen exceptions take as long as
+					// Avoid using exceptions here if possible. This method is sometimes called many times during a request, and we’ve seen exceptions take as long as
 					// 50 ms each when debugging.
-					var errors = requestState.InLineModificationErrorsByDisplay.TryGetValue( displayKey, out var value ) ? value.Materialize() : new string[ 0 ];
+					var errors = requestState.InLineModificationErrorsByDisplay.TryGetValue( displayKey, out var value ) ? value.Materialize() : Array.Empty<string>();
 
 					if( errors.Any() )
 						validationsWithErrors.Add( validation );
