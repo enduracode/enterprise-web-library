@@ -8,6 +8,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 /// </summary>
 [ PublicAPI ]
 public abstract class EntitySetupBase: ResourceParent {
+	private static Func<Func<UrlHandler?>, UrlHandler?>? urlHandlerStateDisabledMethodExecutor;
+
+	internal static void Init( Func<Func<UrlHandler?>, UrlHandler?>? urlHandlerStateDisabledMethodExecutor ) {
+		EntitySetupBase.urlHandlerStateDisabledMethodExecutor = urlHandlerStateDisabledMethodExecutor;
+	}
+
 	private readonly Lazy<ResourceParent?> parent;
 	private readonly Lazy<string> name;
 	private readonly Lazy<AlternativeResourceMode?> alternativeMode;
@@ -136,7 +142,7 @@ public abstract class EntitySetupBase: ResourceParent {
 	public virtual ConnectionSecurity ConnectionSecurity => Parent?.ConnectionSecurity ?? ConnectionSecurity.SecureIfPossible;
 
 	( UrlHandler parent, UrlHandler child ) UrlHandler.GetCanonicalHandlerPair( UrlHandler child ) {
-		var requestHandler = RequestState.ExecuteWithUrlHandlerStateDisabled( getRequestHandler );
+		var requestHandler = urlHandlerStateDisabledMethodExecutor!( getRequestHandler );
 		return EwlStatics.AreEqual( child, requestHandler ) && canRepresentRequestHandler()
 			       ? ( (UrlHandler)this ).GetParent()?.GetCanonicalHandlerPair( this ) ?? ( null, this )
 			       : ( this, child );

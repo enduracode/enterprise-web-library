@@ -295,6 +295,7 @@ public static class EwfOps {
 								},
 								() => RequestDispatchingStatics.RequestState.Resource,
 								RequestDispatchingStatics.RefreshRequestState );
+							EntitySetupBase.Init( RequestState.ExecuteWithUrlHandlerStateDisabled );
 							WellKnownResource.Init(
 								() => RequestDispatchingStatics.AppProvider.GetFrameworkUrlParent(),
 								() => OpenIdProviderStatics.GetWellKnownUrls().Concat( RequestDispatchingStatics.AppProvider.GetWellKnownUrls() ) );
