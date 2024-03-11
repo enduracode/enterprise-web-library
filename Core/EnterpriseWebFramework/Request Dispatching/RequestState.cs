@@ -20,6 +20,16 @@ public class RequestState {
 	/// </summary>
 	internal static RequestState Instance => RequestDispatchingStatics.RequestState;
 
+	internal static void ExecuteWithUrlHandlerStateDisabled( Action method ) {
+		Instance.urlHandlerStateDisabled = true;
+		try {
+			method();
+		}
+		finally {
+			Instance.urlHandlerStateDisabled = false;
+		}
+	}
+
 	internal static T ExecuteWithUrlHandlerStateDisabled<T>( Func<T> method ) {
 		if( EwfRequest.Current == null )
 			return method();

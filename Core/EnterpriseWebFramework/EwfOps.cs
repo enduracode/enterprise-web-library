@@ -237,7 +237,21 @@ public static class EwfOps {
 								() => RequestDispatchingStatics.RequestState.BeginInstant,
 								() => RequestDispatchingStatics.RequestState.Url,
 								networkWaitTime => RequestDispatchingStatics.RequestState.AddNetworkWaitTime( networkWaitTime ) );
-							EwfResponse.Init( () => contextAccessor.HttpContext, () => RequestDispatchingStatics.RequestState.RequestHandler is not null );
+							EwfResponse.Init(
+								() => contextAccessor.HttpContext,
+								() => {
+									if( RequestDispatchingStatics.RequestState.RequestHandler is not null )
+										return;
+									RequestState.ExecuteWithUrlHandlerStateDisabled(
+										() => {
+											try {
+												AutomaticDatabaseConnectionManager.Current.CommitTransactionsAndExecuteNonTransactionalModificationMethods( true );
+											}
+											finally {
+												DataAccessState.Current.ResetCache();
+											}
+										} );
+								} );
 							UrlHandlingStatics.Init(
 								() => RequestDispatchingStatics.AppProvider.GetBaseUrlPatterns(),
 								( baseUrlString, appRelativeUrl ) =>

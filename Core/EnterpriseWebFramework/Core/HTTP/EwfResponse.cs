@@ -1,6 +1,5 @@
 ﻿#nullable disable
 using System.Threading.Tasks;
-using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.MailMerging;
 using EnterpriseWebLibrary.MailMerging.RowTree;
 using JetBrains.Annotations;
@@ -20,7 +19,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 [ PublicAPI ]
 public class EwfResponse {
 	private static Func<HttpContext> currentContextGetter;
-	private static Func<bool> requestContinuingPredicate;
+	private static Action transactionCommitter;
 
 	internal sealed class AspNetAdapter: HttpResponse {
 		internal int? StatusCodeNullable;
@@ -86,9 +85,9 @@ public class EwfResponse {
 		}
 	}
 
-	internal static void Init( Func<HttpContext> currentContextGetter, Func<bool> requestContinuingPredicate ) {
+	internal static void Init( Func<HttpContext> currentContextGetter, Action transactionCommitter ) {
 		EwfResponse.currentContextGetter = currentContextGetter;
-		EwfResponse.requestContinuingPredicate = requestContinuingPredicate;
+		EwfResponse.transactionCommitter = transactionCommitter;
 	}
 
 	/// <summary>
@@ -258,13 +257,8 @@ public class EwfResponse {
 
 	internal void WriteToAspNetResponse( HttpResponse aspNetResponse, bool skipTransactionCommit = false, bool omitBody = false ) {
 		// Commit transactions and execute non-transactional modifications while error handling still has the ability to send a 500-level response if needed.
-		if( !skipTransactionCommit && !requestContinuingPredicate() )
-			try {
-				AutomaticDatabaseConnectionManager.Current.CommitTransactionsAndExecuteNonTransactionalModificationMethods( true );
-			}
-			finally {
-				DataAccessState.Current.ResetCache();
-			}
+		if( !skipTransactionCommit )
+			transactionCommitter();
 
 		var statusCode = StatusCodeGetter();
 		if( statusCode.HasValue )
