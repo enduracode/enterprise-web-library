@@ -38,9 +38,7 @@ public class FormItemList: FlowComponent {
 	/// Creates a list with a classic "label on the left, content on the right" layout. Labels and content will automatically stack when the width of the list
 	/// is constrained.
 	/// </summary>
-	public static FormItemList CreateStack(
-		FormItemListSetup? generalSetup = null, ( ContentBasedLength label, ContentBasedLength content )? minWidths = null,
-		IReadOnlyCollection<FormItem>? items = null ) {
+	public static FormItemList CreateStack( FormItemListSetup? generalSetup = null, ( ContentBasedLength label, ContentBasedLength content )? minWidths = null ) {
 		minWidths ??= ( 12.ToEm(), 24.ToEm() );
 		return new FormItemList(
 			generalSetup,
@@ -72,17 +70,15 @@ public class FormItemList: FlowComponent {
 										? Enumerable.Empty<FlowComponent>()
 										: new FlowErrorContainer( i.ErrorSourceSet, new ListErrorDisplayStyle(), disableFocusabilityOnError: true ).ToCollection() )
 								.Materialize() ) ) )
-				.Materialize(),
-			items );
+				.Materialize() );
 	}
 
 	/// <summary>
 	/// Creates a wrapping list.
 	/// </summary>
 	/// <param name="setup"></param>
-	/// <param name="items"></param>
-	public static FormItemList CreateWrapping( FormItemListSetup? setup = null, IReadOnlyCollection<FormItem>? items = null ) =>
-		new( setup, wrappingClass, "", _ => ElementClassSet.Empty, _ => "", null, getItemComponents, items );
+	public static FormItemList CreateWrapping( FormItemListSetup? setup = null ) =>
+		new( setup, wrappingClass, "", _ => ElementClassSet.Empty, _ => "", null, getItemComponents );
 
 	/// <summary>
 	/// Creates a list with a variable number of columns, depending upon available width, where each form item’s label is placed directly on top of it.
@@ -90,7 +86,7 @@ public class FormItemList: FlowComponent {
 	// To support items with ColumnSpan > 1, we could use the technique described by https://stackoverflow.com/a/55243400/35349 when the viewport width changes.
 	public static FormItemList CreateResponsiveGrid(
 		FormItemListSetup? generalSetup = null, ContentBasedLength? columnMinWidth = null,
-		GridVerticalAlignment verticalAlignment = GridVerticalAlignment.NotSpecified, IReadOnlyCollection<FormItem>? items = null ) =>
+		GridVerticalAlignment verticalAlignment = GridVerticalAlignment.NotSpecified ) =>
 		new(
 			generalSetup,
 			gridClass.Add( GridVerticalAlignmentStatics.Class( verticalAlignment ) ),
@@ -98,8 +94,7 @@ public class FormItemList: FlowComponent {
 			i => TextAlignmentStatics.Class( i.Setup.TextAlignment ),
 			_ => "",
 			null,
-			getItemComponents,
-			items );
+			getItemComponents );
 
 	/// <summary>
 	/// Creates a list with the specified number of columns where each form item’s label is placed directly on top of it.
@@ -110,10 +105,9 @@ public class FormItemList: FlowComponent {
 	/// form of the grid on narrow screens.</param>
 	/// <param name="defaultColumnSpan"></param>
 	/// <param name="verticalAlignment"></param>
-	/// <param name="items"></param>
 	public static FormItemList CreateFixedGrid(
 		int numberOfColumns, FormItemListSetup? generalSetup = null, ContentBasedLength? minWidth = null, int defaultColumnSpan = 1,
-		GridVerticalAlignment verticalAlignment = GridVerticalAlignment.NotSpecified, IReadOnlyCollection<FormItem>? items = null ) {
+		GridVerticalAlignment verticalAlignment = GridVerticalAlignment.NotSpecified ) {
 		if( defaultColumnSpan > numberOfColumns )
 			throw new ApplicationException( "The default column span is {0}, but the number of columns is {1}.".FormatWith( defaultColumnSpan, numberOfColumns ) );
 
@@ -134,17 +128,15 @@ public class FormItemList: FlowComponent {
 				return span == 1 ? "" : "grid-column-end: span {0}".FormatWith( span );
 			},
 			displaySetup => new FormItemSetup( displaySetup: displaySetup, columnSpan: defaultColumnSpan ),
-			getItemComponents,
-			items );
+			getItemComponents );
 	}
 
 	/// <summary>
 	/// Creates a raw list, which is helpful when you want to handle responsiveness in your own style sheets.
 	/// </summary>
 	/// <param name="setup"></param>
-	/// <param name="items"></param>
-	public static FormItemList CreateRaw( FormItemListSetup? setup = null, IReadOnlyCollection<FormItem>? items = null ) =>
-		new( setup, ElementClassSet.Empty, "", _ => ElementClassSet.Empty, _ => "", null, getItemComponents, items );
+	public static FormItemList CreateRaw( FormItemListSetup? setup = null ) =>
+		new( setup, ElementClassSet.Empty, "", _ => ElementClassSet.Empty, _ => "", null, getItemComponents );
 
 	private static IReadOnlyCollection<FlowComponent> getItemComponents( FormItem item ) =>
 		( item.Label.Any() ? new GenericFlowContainer( item.Label, classes: labelClass ).ToCollection() : Enumerable.Empty<FlowComponent>() )
@@ -156,14 +148,14 @@ public class FormItemList: FlowComponent {
 		.Materialize();
 
 	private readonly IReadOnlyCollection<DisplayableElement> children;
-	private readonly List<FormItem> items;
+	private readonly List<( AutofocusCondition? autofocusCondition, IReadOnlyCollection<FormItem> items )> itemGroups = [ ];
 
 	private FormItemList(
 		FormItemListSetup? setup, ElementClassSet classes, string listStyleAttribute, Func<FormItem, ElementClassSet> itemClassGetter,
 		Func<FormItem, string> itemStyleAttributeGetter, Func<DisplaySetup, FormItemSetup>? buttonItemSetupGetter,
-		Func<FormItem, IReadOnlyCollection<FlowComponent>> itemComponentGetter, IReadOnlyCollection<FormItem>? items ) {
+		Func<FormItem, IReadOnlyCollection<FlowComponent>> itemComponentGetter ) {
 		setup ??= new FormItemListSetup();
-		buttonItemSetupGetter ??= ( displaySetup => new FormItemSetup( displaySetup: displaySetup ) );
+		buttonItemSetupGetter ??= displaySetup => new FormItemSetup( displaySetup: displaySetup );
 
 		var buttonItem = setup.ButtonItemGetter( buttonItemSetupGetter );
 		children = new DisplayableElement(
@@ -174,49 +166,56 @@ public class FormItemList: FlowComponent {
 					focusDependentData: new DisplayableElementFocusDependentData(
 						attributes: listStyleAttribute.Any() ? new ElementAttribute( "style", listStyleAttribute ).ToCollection() : null ) ),
 				classes: allListsClass.Add( classes ).Add( setup.Classes ?? ElementClassSet.Empty ),
-				children: this.items!.Select( i => ( item: i, elementClass: itemClass ) )
-					.Concat( buttonItem.Select( i => ( item: i, elementClass: buttonItemClass ) ) )
-					.Select(
-						i => new FlowIdContainer(
-							new DisplayableElement(
-								itemContext => new DisplayableElementData(
-									i.item.Setup.DisplaySetup,
-									() => {
-										var styleAttribute = itemStyleAttributeGetter( i.item );
-										return ListErrorDisplayStyle.GetErrorFocusableElementLocalData(
-											itemContext,
-											"div",
-											i.item.ErrorSourceSet,
-											styleAttribute.Any() ? new ElementAttribute( "style", styleAttribute ).ToCollection() : null );
-									},
-									classes: i.elementClass.Add( itemClassGetter( i.item ) ),
-									children: itemComponentGetter( i.item ) ) ).ToCollection(),
-							updateRegionSets: i.item.Setup.UpdateRegionSets ) )
+				children: itemGroups.Select( i => ( i.autofocusCondition, i.items, elementClass: itemClass ) )
+					.Concat( buttonItem.Select( i => ( autofocusCondition: (AutofocusCondition?)null, items: i.ToCollection(), elementClass: buttonItemClass ) ) )
+					.SelectMany(
+						group => {
+							var itemComponents = group.items.Select(
+									item => (FlowComponent)new FlowIdContainer(
+										new DisplayableElement(
+											itemContext => new DisplayableElementData(
+												item.Setup.DisplaySetup,
+												() => {
+													var styleAttribute = itemStyleAttributeGetter( item );
+													return ListErrorDisplayStyle.GetErrorFocusableElementLocalData(
+														itemContext,
+														"div",
+														item.ErrorSourceSet,
+														styleAttribute.Any() ? new ElementAttribute( "style", styleAttribute ).ToCollection() : null );
+												},
+												classes: group.elementClass.Add( itemClassGetter( item ) ),
+												children: itemComponentGetter( item ) ) ).ToCollection(),
+										updateRegionSets: item.Setup.UpdateRegionSets ) )
+								.Materialize();
+							return group.autofocusCondition is null ? itemComponents : new FlowAutofocusRegion( group.autofocusCondition, itemComponents ).ToCollection();
+						} )
 					.Materialize(),
 				etherealChildren: setup.EtherealContent ) ).ToCollection();
-
-		this.items = ( items ?? Enumerable.Empty<FormItem>() ).ToList();
 	}
 
 	/// <summary>
 	/// Adds an item to the list. This method can be called repeatedly and is chainable.
 	/// </summary>
-	public FormItemList AddItem( FormItem item ) {
-		items.Add( item );
+	/// <param name="item"></param>
+	/// <param name="autofocusCondition">Pass a value to wrap the item in an autofocus region with the specified condition.</param>
+	public FormItemList AddItem( FormItem item, AutofocusCondition? autofocusCondition = null ) {
+		itemGroups.Add( ( autofocusCondition, item.ToCollection() ) );
 		return this;
 	}
 
 	/// <summary>
 	/// Adds items to the list. This method can be called repeatedly and is chainable.
 	/// </summary>
-	public FormItemList AddItems( IReadOnlyCollection<FormItem> items ) {
-		this.items.AddRange( items );
+	/// <param name="items"></param>
+	/// <param name="autofocusCondition">Pass a value to wrap the items in an autofocus region with the specified condition.</param>
+	public FormItemList AddItems( IReadOnlyCollection<FormItem> items, AutofocusCondition? autofocusCondition = null ) {
+		itemGroups.Add( ( autofocusCondition, items ) );
 		return this;
 	}
 
 	[ Obsolete( "Guaranteed through 30 June 2024." ) ]
 	public void AddFormItems( params FormItem[] items ) {
-		this.items.AddRange( items );
+		itemGroups.Add( ( null, items ) );
 	}
 
 	IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() => children;
