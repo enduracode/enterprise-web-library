@@ -199,14 +199,20 @@ public class FormItemList: FlowComponent {
 	}
 
 	/// <summary>
-	/// Adds an item to the list. This method can be called repeatedly.
+	/// Adds an item to the list. This method can be called repeatedly and is chainable.
 	/// </summary>
-	public void AddItem( FormItem item ) => items.Add( item );
+	public FormItemList AddItem( FormItem item ) {
+		items.Add( item );
+		return this;
+	}
 
 	/// <summary>
-	/// Adds items to the list. This method can be called repeatedly.
+	/// Adds items to the list. This method can be called repeatedly and is chainable.
 	/// </summary>
-	public void AddItems( IReadOnlyCollection<FormItem> items ) => this.items.AddRange( items );
+	public FormItemList AddItems( IReadOnlyCollection<FormItem> items ) {
+		this.items.AddRange( items );
+		return this;
+	}
 
 	[ Obsolete( "Guaranteed through 30 June 2024." ) ]
 	public void AddFormItems( params FormItem[] items ) {
