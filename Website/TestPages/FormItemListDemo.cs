@@ -6,10 +6,10 @@ partial class FormItemListDemo {
 	protected override string getResourceName() => "Form Item List";
 
 	protected override PageContent getContent() =>
-		new UiPageContent( omitContentBox: true ).Add( getSection( "Stack", FormItemList.CreateStack( generalSetup: getSetup(), items: getFormItems() ) ) )
-			.Add( getSection( "Wrapping", FormItemList.CreateWrapping( setup: getSetup(), items: getFormItems() ) ) )
-			.Add( getSection( "Responsive grid", FormItemList.CreateResponsiveGrid( generalSetup: getSetup(), items: getFormItems() ) ) )
-			.Add( getSection( "Fixed grid", FormItemList.CreateFixedGrid( 6, generalSetup: getSetup(), items: getFormItems() ) ) );
+		new UiPageContent( omitContentBox: true ).Add( getSection( "Stack", FormItemList.CreateStack( generalSetup: getSetup() ).AddItems( getFormItems() ) ) )
+			.Add( getSection( "Wrapping", FormItemList.CreateWrapping( setup: getSetup() ).AddItems( getFormItems() ) ) )
+			.Add( getSection( "Responsive grid", FormItemList.CreateResponsiveGrid( generalSetup: getSetup() ).AddItems( getFormItems() ) ) )
+			.Add( getSection( "Fixed grid", FormItemList.CreateFixedGrid( 6, generalSetup: getSetup() ).AddItems( getFormItems() ) ) );
 
 	private Section getSection( string heading, FormItemList content ) => new( heading, content.ToCollection(), style: SectionStyle.Box );
 

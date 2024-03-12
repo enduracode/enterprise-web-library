@@ -34,19 +34,20 @@ partial class ContactSupport {
 			() => new UiPageContent( contentFootActions: new ButtonSetup( "Send Message" ).ToCollection() )
 				.Add( new Paragraph( "You may report any problems, make suggestions, or ask for help here.".ToComponents() ) )
 				.Add(
-					FormItemList.CreateStack(
-						items: new EmailAddress( AppTools.User.Email, AppTools.User.FriendlyName ).ToMailAddress()
-							.ToString()
-							.ToComponents()
-							.ToFormItem( label: "From".ToComponents() )
-							.Append(
-								"{0} ({1} for this system)".FormatWith(
-										StringTools.GetEnglishListPhrase( EmailStatics.GetAdministratorEmailAddresses().Select( i => i.DisplayName ), true ),
-										"support contacts".ToQuantity( EmailStatics.GetAdministratorEmailAddresses().Count(), showQuantityAs: ShowQuantityAs.None ) )
-									.ToComponents()
-									.ToFormItem( label: "To".ToComponents() ) )
-							.Append(
-								body.ToTextControl( false, setup: TextControlSetup.Create( numberOfRows: 10 ), value: "" ).ToFormItem( label: "Message".ToComponents() ) )
-							.Materialize() ) ) );
+					FormItemList.CreateStack()
+						.AddItems(
+							new EmailAddress( AppTools.User.Email, AppTools.User.FriendlyName ).ToMailAddress()
+								.ToString()
+								.ToComponents()
+								.ToFormItem( label: "From".ToComponents() )
+								.Append(
+									"{0} ({1} for this system)".FormatWith(
+											StringTools.GetEnglishListPhrase( EmailStatics.GetAdministratorEmailAddresses().Select( i => i.DisplayName ), true ),
+											"support contacts".ToQuantity( EmailStatics.GetAdministratorEmailAddresses().Count(), showQuantityAs: ShowQuantityAs.None ) )
+										.ToComponents()
+										.ToFormItem( label: "To".ToComponents() ) )
+								.Append(
+									body.ToTextControl( false, setup: TextControlSetup.Create( numberOfRows: 10 ), value: "" ).ToFormItem( label: "Message".ToComponents() ) )
+								.Materialize() ) ) );
 	}
 }

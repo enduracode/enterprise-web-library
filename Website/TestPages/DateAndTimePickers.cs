@@ -24,11 +24,11 @@ partial class DateAndTimePickers {
 								.Materialize() ) )
 					.Materialize() ) );
 
-		list.AddFormItems(
-			new TimeControl( null, true, validationMethod: ( _, _ ) => {} ).ToFormItem( label: "Time control".ToComponents() ),
-			new TimeControl( null, true, minuteInterval: 30, validationMethod: ( _, _ ) => {} ).ToFormItem( label: "Drop-down time control".ToComponents() ),
-			new DateAndTimeControl( null, true, validationMethod: ( _, _ ) => {} ).ToFormItem( label: "Date and time control".ToComponents() ),
-			new DurationControl( null, true, validationMethod: ( _, _ ) => {} ).ToFormItem( label: "Duration control".ToComponents() ) );
+		list.AddItem( new TimeControl( null, true, validationMethod: ( _, _ ) => {} ).ToFormItem( label: "Time control".ToComponents() ) )
+			.AddItem(
+				new TimeControl( null, true, minuteInterval: 30, validationMethod: ( _, _ ) => {} ).ToFormItem( label: "Drop-down time control".ToComponents() ) )
+			.AddItem( new DateAndTimeControl( null, true, validationMethod: ( _, _ ) => {} ).ToFormItem( label: "Date and time control".ToComponents() ) )
+			.AddItem( new DurationControl( null, true, validationMethod: ( _, _ ) => {} ).ToFormItem( label: "Duration control".ToComponents() ) );
 		return new UiPageContent( isAutoDataUpdater: true ).Add( list );
 	}
 }

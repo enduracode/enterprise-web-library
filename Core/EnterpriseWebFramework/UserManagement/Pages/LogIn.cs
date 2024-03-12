@@ -128,21 +128,21 @@ partial class LogIn {
 							.ToComponents() ) );
 
 				registeredComponents.Add(
-					FormItemList.CreateStack(
-						generalSetup: new FormItemListSetup( buttonSetup: new ButtonSetup( "Log In" ), enableSubmitButton: true ),
-						items: FormState
-							.ExecuteWithDataModificationsAndDefaultAction(
-								new[] { logInPb, sendCodePb, newPasswordPb }.Where( i => i != null ),
-								() => emailAddress.GetEmailAddressFormItem( "Email address".ToComponents() ) )
-							.Append(
-								codeEntryIsForPasswordReset.Value.Value.HasValue
-									? getLoginCodeFormItem( authenticationModeUpdateRegion.ToCollection(), AutofocusCondition.PostBack( passwordOrCodeFocusKey ), loginCode )
-									: getPasswordFormItem(
-										authenticationModeUpdateRegion.ToCollection(),
-										AutofocusCondition.PostBack( passwordOrCodeFocusKey ),
-										password,
-										new PostBackBehavior( postBack: sendCodePb ) ) )
-							.Materialize() ) );
+					FormItemList.CreateStack( generalSetup: new FormItemListSetup( buttonSetup: new ButtonSetup( "Log In" ), enableSubmitButton: true ) )
+						.AddItems(
+							FormState
+								.ExecuteWithDataModificationsAndDefaultAction(
+									new[] { logInPb, sendCodePb, newPasswordPb }.Where( i => i != null ),
+									() => emailAddress.GetEmailAddressFormItem( "Email address".ToComponents() ) )
+								.Append(
+									codeEntryIsForPasswordReset.Value.Value.HasValue
+										? getLoginCodeFormItem( authenticationModeUpdateRegion.ToCollection(), AutofocusCondition.PostBack( passwordOrCodeFocusKey ), loginCode )
+										: getPasswordFormItem(
+											authenticationModeUpdateRegion.ToCollection(),
+											AutofocusCondition.PostBack( passwordOrCodeFocusKey ),
+											password,
+											new PostBackBehavior( postBack: sendCodePb ) ) )
+								.Materialize() ) );
 
 				registeredComponents.Add(
 					new Paragraph(

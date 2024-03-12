@@ -28,36 +28,35 @@ partial class CreateSystem {
 									fileNameCreator: () => "{0}.zip".FormatWith( systemShortName.Value ) ) ) ) ) )
 				.ToCollection(),
 			() => new UiPageContent( contentFootActions: new ButtonSetup( "Create System" ).ToCollection() ).Add(
-				FormItemList.CreateStack(
-					items: new[]
-						{
-							systemName.ToTextControl(
-									false,
-									setup: TextControlSetup.Create( placeholder: "e.g. Bicycle Service Manager" ),
-									value: "",
-									maxLength: 50,
-									additionalValidationMethod: validator => {
-										if( systemName.Value != systemName.Value.RemoveNonAlphanumericCharacters( preserveWhiteSpace: true ) )
-											validator.NoteErrorAndAddMessage( "The system name must consist of only alphanumeric characters and white space." );
-										systemShortName.Value = systemName.Value.EnglishToPascal();
-									} )
-								.ToFormItem( label: "System name".ToComponents() ),
-							baseNamespace.ToTextControl(
-									false,
-									setup: TextControlSetup.Create( placeholder: "e.g. ServiceManager" ),
-									value: "",
-									maxLength: 50,
-									additionalValidationMethod: validator => {
-										if( baseNamespace.Value.Separate( ".", false )
-										   .Any(
-											   i => i.Length == 0 || !string.Equals(
-												        i,
-												        EwlStatics.GetCSharpIdentifier( i, omitAtSignPrefixIfNotRequired: true ),
-												        StringComparison.Ordinal ) ) )
-											validator.NoteErrorAndAddMessage( "The base namespace must be a valid C# identifier." );
-									} )
-								.ToFormItem( label: "Base namespace".ToComponents() )
-						} ) ) );
+				FormItemList.CreateStack()
+					.AddItem(
+						systemName.ToTextControl(
+								false,
+								setup: TextControlSetup.Create( placeholder: "e.g. Bicycle Service Manager" ),
+								value: "",
+								maxLength: 50,
+								additionalValidationMethod: validator => {
+									if( systemName.Value != systemName.Value.RemoveNonAlphanumericCharacters( preserveWhiteSpace: true ) )
+										validator.NoteErrorAndAddMessage( "The system name must consist of only alphanumeric characters and white space." );
+									systemShortName.Value = systemName.Value.EnglishToPascal();
+								} )
+							.ToFormItem( label: "System name".ToComponents() ) )
+					.AddItem(
+						baseNamespace.ToTextControl(
+								false,
+								setup: TextControlSetup.Create( placeholder: "e.g. ServiceManager" ),
+								value: "",
+								maxLength: 50,
+								additionalValidationMethod: validator => {
+									if( baseNamespace.Value.Separate( ".", false )
+									   .Any(
+										   i => i.Length == 0 || !string.Equals(
+											        i,
+											        EwlStatics.GetCSharpIdentifier( i, omitAtSignPrefixIfNotRequired: true ),
+											        StringComparison.Ordinal ) ) )
+										validator.NoteErrorAndAddMessage( "The base namespace must be a valid C# identifier." );
+								} )
+							.ToFormItem( label: "Base namespace".ToComponents() ) ) ) );
 
 	private void createAndZipSystem( Stream stream ) {
 		IoMethods.ExecuteWithTempFolder(

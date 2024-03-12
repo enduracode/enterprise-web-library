@@ -8,10 +8,10 @@ namespace EnterpriseWebLibrary.Website.TestPages {
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				PostBack.CreateFull().ToCollection(),
 				() => new UiPageContent( contentFootActions: new ButtonSetup( "Submit" ).ToCollection() ).Add(
-					new Section( "Radio Button List, Vertical", FormItemList.CreateStack( items: getRadioItems( false ).Materialize() ).ToCollection() )
-						.Append( new Section( "Radio Button List, Horizontal", FormItemList.CreateStack( items: getRadioItems( true ).Materialize() ).ToCollection() ) )
+					new Section( "Radio Button List, Vertical", FormItemList.CreateStack().AddItems( getRadioItems( false ).Materialize() ).ToCollection() )
+						.Append( new Section( "Radio Button List, Horizontal", FormItemList.CreateStack().AddItems( getRadioItems( true ).Materialize() ).ToCollection() ) )
 						.Append( getChosenUpgradeTestingInfo() )
-						.Append( new Section( "Drop-Down List", FormItemList.CreateStack( items: getDropDownItems().Materialize() ).ToCollection() ) )
+						.Append( new Section( "Drop-Down List", FormItemList.CreateStack().AddItems( getDropDownItems().Materialize() ).ToCollection() ) )
 						.Materialize() ) );
 
 		private IEnumerable<FormItem> getRadioItems( bool useHorizontalLayout ) {

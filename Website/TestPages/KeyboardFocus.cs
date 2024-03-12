@@ -30,7 +30,7 @@ partial class KeyboardFocus {
 					AutofocusCondition.InitialRequest(),
 					new Section(
 						"First Section",
-						FormItemList.CreateStack( items: getFormItems() ).ToCollection(),
+						FormItemList.CreateStack().AddItems( getFormItems() ).ToCollection(),
 						style: SectionStyle.Box,
 						postHeadingComponents: new SideComments( "Initially focused".ToComponents() ).ToCollection() ).ToCollection() ) )
 			.Add(
@@ -38,7 +38,7 @@ partial class KeyboardFocus {
 					AutofocusCondition.PostBack( focusKey ),
 					new Section(
 						"Second Section",
-						FormItemList.CreateStack( items: getFormItems() ).ToCollection(),
+						FormItemList.CreateStack().AddItems( getFormItems() ).ToCollection(),
 						style: SectionStyle.Box,
 						postHeadingComponents: new SideComments( "Focused after submission".ToComponents() ).ToCollection() ).ToCollection() ) );
 	}

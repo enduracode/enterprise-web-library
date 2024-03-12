@@ -38,8 +38,8 @@ partial class UserManagement {
 			content.Add(
 				new Section(
 					"Identity providers",
-					FormItemList.CreateStack(
-							items:
+					FormItemList.CreateStack()
+						.AddItems(
 							( certificate.Any()
 								  ? "Certificate valid until {0}.".FormatWith(
 										  new X509Certificate2( Convert.FromBase64String( certificate ), UserManagementStatics.CertificatePassword ).NotAfter.ToDayMonthYearString(

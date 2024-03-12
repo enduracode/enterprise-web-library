@@ -31,8 +31,9 @@ partial class NonLiveLogIn {
 			PostBack.CreateFull( modificationMethod: () => logIn( false ), actionGetter: () => new PostBackAction( new ExternalResource( ReturnUrl ) ) )
 				.ToCollection(),
 			() => new UiPageContent( contentFootActions: new ButtonSetup( "Log In" ).ToCollection() ).Add(
-				FormItemList.CreateStack(
-					items: new TextControl(
+				FormItemList.CreateStack()
+					.AddItem(
+						new TextControl(
 							"",
 							true,
 							setup: TextControlSetup.CreateObscured(),
@@ -41,8 +42,7 @@ partial class NonLiveLogIn {
 								var passwordMatch = postBackValue == ConfigurationStatics.SystemGeneralProvider.IntermediateLogInPassword;
 								if( !passwordMatch )
 									validator.NoteErrorAndAddMessage( "Incorrect password." );
-							} ).ToFormItem( label: "Enter your password for this non-live installation".ToComponents() )
-						.ToCollection() ) ) );
+							} ).ToFormItem( label: "Enter your password for this non-live installation".ToComponents() ) ) ) );
 	}
 
 	private void logIn( bool hideWarnings ) {

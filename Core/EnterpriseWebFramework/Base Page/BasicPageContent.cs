@@ -350,9 +350,9 @@ public sealed class BasicPageContent: PageContent {
 									etherealChildren: new ModalBox(
 										boxId,
 										true,
-										FormItemList.CreateFixedGrid(
-												1,
-												items: new[] { false, true }.Select(
+										FormItemList.CreateFixedGrid( 1 )
+											.AddItems(
+												new[] { false, true }.Select(
 														hideWarnings => new GenericPhrasingContainer(
 															intermediateUrlGetter( hideWarnings ).ToComponents(),
 															classes: new ElementClass( "ewfIntermediateUrl" /* This is used by EWF CSS files. */ ) ).ToFormItem(

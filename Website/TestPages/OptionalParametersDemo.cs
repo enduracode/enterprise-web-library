@@ -16,9 +16,10 @@ namespace EnterpriseWebLibrary.Website.TestPages {
 		protected override PageContent getContent() {
 			var content = new UiPageContent( isAutoDataUpdater: true );
 
-			var fil = FormItemList.CreateStack();
-			fil.AddFormItems( parametersModification.GetField1TextControlFormItem( true ), parametersModification.GetField2TextControlFormItem( true ) );
-			content.Add( fil );
+			content.Add(
+				FormItemList.CreateStack()
+					.AddItem( parametersModification.GetField1TextControlFormItem( true ) )
+					.AddItem( parametersModification.GetField2TextControlFormItem( true ) ) );
 
 			content.Add(
 				new EwfButton(

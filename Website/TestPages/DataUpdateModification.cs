@@ -8,14 +8,15 @@ partial class DataUpdateModification {
 
 	protected override PageContent getContent() =>
 		new UiPageContent().Add(
-				FormItemList.CreateStack(
-					items: new DataValue<string>().ToTextControl( false, setup: TextControlSetup.CreateReadOnly(), value: "John Doe" )
-						.ToFormItem( label: "Customer name".ToComponents() )
-						.Append(
-							parametersModification.GetCustomerIsBusinessRadioListFormItem(
-								RadioListSetup.Create( SelectList.GetTrueFalseItems( "Business", "Individual" ).Reverse() ),
-								label: "Customer type".ToComponents() ) )
-						.Materialize() ) )
+				FormItemList.CreateStack()
+					.AddItems(
+						new DataValue<string>().ToTextControl( false, setup: TextControlSetup.CreateReadOnly(), value: "John Doe" )
+							.ToFormItem( label: "Customer name".ToComponents() )
+							.Append(
+								parametersModification.GetCustomerIsBusinessRadioListFormItem(
+									RadioListSetup.Create( SelectList.GetTrueFalseItems( "Business", "Individual" ).Reverse() ),
+									label: "Customer type".ToComponents() ) )
+							.Materialize() ) )
 			.Add( getSendSampleSection() );
 
 	private FlowComponent getSendSampleSection() {
@@ -30,13 +31,12 @@ partial class DataUpdateModification {
 				.ToCollection(),
 			() => new Section(
 				"Send a sample",
-				FormItemList.CreateWrapping(
-						setup: new FormItemListSetup( buttonSetup: new ButtonSetup( "Send" ) ),
-						items: package.ToRadioList(
+				FormItemList.CreateWrapping( setup: new FormItemListSetup( buttonSetup: new ButtonSetup( "Send" ) ) )
+					.AddItem(
+						package.ToRadioList(
 								RadioListSetup.Create( new[] { "Single", "5-pack", "10-pack" }.Select( i => SelectListItem.Create( i, i ) ) ),
 								value: CustomerIsBusiness ? "" : "Single" )
-							.ToFormItem()
-							.ToCollection() )
+							.ToFormItem() )
 					.ToCollection() ) );
 	}
 }

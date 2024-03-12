@@ -29,17 +29,17 @@ partial class IntermediatePostBacks {
 					                  } )
 				                  : null );
 
-		var staticFil = FormItemList.CreateStack( generalSetup: new FormItemListSetup( buttonSetup: new ButtonSetup( "Submit" ) ) );
-		staticFil.AddFormItems(
-			new TextControl( "Values here will be retained across post-backs", true ).ToFormItem( label: "Static Field".ToComponents() ),
-			new TextControl( "", true ).ToFormItem( label: "Static Field".ToComponents() ),
-			new TextControl(
-				"Edit this one to get a validation error",
-				true,
-				setup: TextControlSetup.Create( validationPredicate: valueChangedOnPostBack => valueChangedOnPostBack ),
-				validationMethod: ( _, validator ) => validator.NoteErrorAndAddMessage( "You can't change the value in this box!" ) ).ToFormItem(
-				label: "Static Field".ToComponents() ) );
-		content.Add( staticFil );
+		content.Add(
+			FormItemList.CreateStack( generalSetup: new FormItemListSetup( buttonSetup: new ButtonSetup( "Submit" ) ) )
+				.AddItem( new TextControl( "Values here will be retained across post-backs", true ).ToFormItem( label: "Static Field".ToComponents() ) )
+				.AddItem( new TextControl( "", true ).ToFormItem( label: "Static Field".ToComponents() ) )
+				.AddItem(
+					new TextControl(
+						"Edit this one to get a validation error",
+						true,
+						setup: TextControlSetup.Create( validationPredicate: valueChangedOnPostBack => valueChangedOnPostBack ),
+						validationMethod: ( _, validator ) => validator.NoteErrorAndAddMessage( "You can't change the value in this box!" ) ).ToFormItem(
+						label: "Static Field".ToComponents() ) ) );
 
 		content.Add( getBasicRegionComponents().Materialize() );
 

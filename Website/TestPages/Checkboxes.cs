@@ -6,9 +6,8 @@ namespace EnterpriseWebLibrary.Website.TestPages {
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				PostBack.CreateFull().ToCollection(),
 				() => new UiPageContent().Add(
-					FormItemList.CreateStack(
-						generalSetup: new FormItemListSetup( buttonSetup: new ButtonSetup( "Submit" ) ),
-						items: getControls().Select( ( getter, i ) => getter( ( i + 1 ).ToString() ) ).Materialize() ) ) );
+					FormItemList.CreateStack( generalSetup: new FormItemListSetup( buttonSetup: new ButtonSetup( "Submit" ) ) )
+						.AddItems( getControls().Select( ( getter, i ) => getter( ( i + 1 ).ToString() ) ).Materialize() ) ) );
 
 		private IReadOnlyCollection<Func<string, FormItem>> getControls() =>
 			new[]
