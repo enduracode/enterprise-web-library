@@ -379,7 +379,7 @@ internal class UpdateDependentLogic: Operation {
 					false,
 					generatedCodeFolderName.ToCollection(),
 					StaticFile.AppStaticFilesFolderName,
-					"RequestDispatchingStatics.AppProvider.GetFrameworkUrlParent()",
+					$"RequestDispatchingStatics.GetAppProvider( applicationName: {installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName}.WebApplicationNames.{EwlStatics.GetCSharpIdentifier( project.name.EnglishToPascal() )} ).GetFrameworkUrlParent()",
 					out var resourceSerializationWriter );
 				writer.WriteLine();
 				writer.WriteLine( "namespace {0}.Providers {{".FormatWith( project.NamespaceAndAssemblyName ) );
