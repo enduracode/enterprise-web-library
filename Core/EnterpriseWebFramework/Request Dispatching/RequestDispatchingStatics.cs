@@ -13,6 +13,7 @@ using StackExchange.Profiling;
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 public static class RequestDispatchingStatics {
+	private static readonly Dictionary<string, SystemProviderReference<AppRequestDispatchingProvider>> providersByAppName = new( StringComparer.Ordinal );
 	internal const string RequestStateKey = EwlStatics.EwlInitialism;
 
 	private static SystemProviderReference<AppRequestDispatchingProvider> provider;
@@ -25,10 +26,17 @@ public static class RequestDispatchingStatics {
 		RequestDispatchingStatics.currentContextGetter = currentContextGetter;
 	}
 
+	internal static void AddApplication( string applicationName, SystemProviderReference<AppRequestDispatchingProvider> provider ) {
+		providersByAppName.Add( applicationName, provider );
+	}
+
 	/// <summary>
 	/// Framework use only.
 	/// </summary>
-	public static AppRequestDispatchingProvider AppProvider => provider.GetProvider();
+	public static AppRequestDispatchingProvider GetAppProvider( string applicationName = "" ) =>
+		applicationName.Length == 0 || string.Equals( applicationName, ConfigurationStatics.AppName, StringComparison.Ordinal )
+			? provider.GetProvider()
+			: providersByAppName[ applicationName ].GetProvider();
 
 	internal static async Task ProcessRequest( HttpContext context, RequestDelegate next ) {
 		var contextAccessor = (EwfHttpContextAccessor)context.RequestServices.GetRequiredService<IHttpContextAccessor>();
@@ -66,8 +74,11 @@ public static class RequestDispatchingStatics {
 
 					context.Items.Add(
 						RequestStateKey,
-						await RequestContinuationDataStore.GetRequestState( url, baseUrl, context.Request.Method ) ??
-						new RequestState( context, url, baseUrl, AppProvider.GetSlowRequestThreshold() ) );
+						await RequestContinuationDataStore.GetRequestState( url, baseUrl, context.Request.Method ) ?? new RequestState(
+							context,
+							url,
+							baseUrl,
+							GetAppProvider().GetSlowRequestThreshold() ) );
 				},
 				false );
 			if( context.Response.StatusCode != 200 )
@@ -82,7 +93,7 @@ public static class RequestDispatchingStatics {
 					return;
 				}
 
-				var ipAddresses = AppProvider.GetWhitelistedIpAddressesForMaintenance();
+				var ipAddresses = GetAppProvider().GetWhitelistedIpAddressesForMaintenance();
 				if( ipAddresses != null && !ipAddresses.Contains( context.Connection.RemoteIpAddress?.ToString() ) ) {
 					EwfResponse.Create( "", new EwfResponseBodyCreator( () => "" ), statusCodeGetter: () => 503 ).WriteToAspNetResponse( context.Response );
 					return;
@@ -301,7 +312,7 @@ public static class RequestDispatchingStatics {
 		}
 	}
 
-	private static PageBase getErrorPage( PageBase ewfErrorPage ) => AppProvider.GetErrorPage() ?? ewfErrorPage;
+	private static PageBase getErrorPage( PageBase ewfErrorPage ) => GetAppProvider().GetErrorPage() ?? ewfErrorPage;
 
 	private static void rollbackDatabaseTransactionsAndClearResponseIfPossible( HttpContext context ) {
 		AutomaticDatabaseConnectionManager.Current.RollbackTransactions( true );
@@ -339,11 +350,13 @@ public static class RequestDispatchingStatics {
 	/// <summary>
 	/// Returns a list of URL patterns for the framework, including one for well-known resources (i.e. the “.well-known” segment defined in RFC 8615).
 	/// </summary>
+	/// <param name="applicationName">The constant from WebApplicationNames that corresponds to this application.</param>
 	/// <param name="frameworkUrlSegment">The URL segment that will be a base for the framework’s own pages and resources. Pass the empty string to use the
 	/// default of “ewl”. Do not pass null.</param>
 	/// <param name="appStaticFileUrlSegment">The URL segment that will be a base for the application’s static files. Pass the empty string to use the default
 	/// of “static”. Do not pass null.</param>
-	public static IReadOnlyCollection<UrlPattern> GetFrameworkUrlPatterns( string frameworkUrlSegment = "", string appStaticFileUrlSegment = "" ) {
+	public static IReadOnlyCollection<UrlPattern> GetFrameworkUrlPatterns(
+		string applicationName, string frameworkUrlSegment = "", string appStaticFileUrlSegment = "" ) {
 		var patterns = new List<UrlPattern>();
 
 		if( !frameworkUrlSegment.Any() )
@@ -352,7 +365,7 @@ public static class RequestDispatchingStatics {
 
 		if( !appStaticFileUrlSegment.Any() )
 			appStaticFileUrlSegment = "static";
-		patterns.Add( AppProvider.GetStaticFilesFolderUrlPattern( appStaticFileUrlSegment ) );
+		patterns.Add( GetAppProvider( applicationName: applicationName ).GetStaticFilesFolderUrlPattern( appStaticFileUrlSegment ) );
 
 		patterns.Add(
 			new UrlPattern(

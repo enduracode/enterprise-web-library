@@ -1,5 +1,6 @@
 ﻿#nullable disable
 using System.Net.Http;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -187,14 +188,7 @@ public static class EwfOps {
 						using( var serviceScope = app.Services.CreateScope() ) {
 							MiniProfiler.Configure( app.Services.GetRequiredService<IOptions<MiniProfilerOptions>>().Value );
 
-							var providerGetter = new SystemProviderGetter(
-								ConfigurationStatics.AppAssembly,
-								ConfigurationStatics.AppAssembly.GetTypes()
-									.Single( i => typeof( AppRequestDispatchingProvider ).IsAssignableFrom( i ) && !i.IsInterface )
-									.Namespace,
-								providerName =>
-									@"{0} provider not found in application. To implement, create a class named {0} in ""Your Website\Providers"" that derives from App{0}Provider."
-										.FormatWith( providerName ) );
+							var providerGetter = getProviderGetter( ConfigurationStatics.AppAssembly );
 
 							if( ExternalFunctionalityStatics.OpenIdConnectFunctionalityEnabled )
 								ExternalFunctionalityStatics.ExternalOpenIdConnectProvider.InitAppStatics(
@@ -253,7 +247,7 @@ public static class EwfOps {
 										} );
 								} );
 							UrlHandlingStatics.Init(
-								() => RequestDispatchingStatics.AppProvider.GetBaseUrlPatterns(),
+								() => RequestDispatchingStatics.GetAppProvider().GetBaseUrlPatterns(),
 								( baseUrlString, appRelativeUrl ) =>
 									RequestState.ExecuteWithUrlHandlerStateDisabled( () => UrlHandlingStatics.ResolveUrl( baseUrlString, appRelativeUrl )?.Last() ) );
 							CookieStatics.Init(
@@ -277,7 +271,7 @@ public static class EwfOps {
 							ResourceBase.Init(
 								ResourceSerializationStatics.SerializeResource,
 								ConfigurationStatics.GetSystemLibraryProvider<SystemResourceSerializationProvider>( "ResourceSerialization" ),
-								providerGetter.GetProvider<AppResourceSerializationProvider>( "ResourceSerialization" ),
+								getAppResourceSerializationProvider( providerGetter ),
 								( requestTransferred, resource ) => {
 									if( requestTransferred ) {
 										var urlHandlers = new List<BasicUrlHandler>();
@@ -297,8 +291,8 @@ public static class EwfOps {
 								RequestDispatchingStatics.RefreshRequestState );
 							EntitySetupBase.Init( RequestState.ExecuteWithUrlHandlerStateDisabled );
 							WellKnownResource.Init(
-								() => RequestDispatchingStatics.AppProvider.GetFrameworkUrlParent(),
-								() => OpenIdProviderStatics.GetWellKnownUrls().Concat( RequestDispatchingStatics.AppProvider.GetWellKnownUrls() ) );
+								() => RequestDispatchingStatics.GetAppProvider().GetFrameworkUrlParent(),
+								() => OpenIdProviderStatics.GetWellKnownUrls().Concat( RequestDispatchingStatics.GetAppProvider().GetWellKnownUrls() ) );
 							StaticFile.Init( providerGetter.GetProvider<AppStaticFileHandlingProvider>( "StaticFileHandling" ) );
 							PageInfrastructure.RequestStateStatics.Init(
 								url => RequestDispatchingStatics.RequestState.ClientSideNewUrl = url,
@@ -466,10 +460,8 @@ public static class EwfOps {
 									} ).GetUrl(),
 								destinationUrl => new UserManagement.Pages.ChangePassword( destinationUrl ).GetUrl( disableAuthorizationCheck: true ) );
 							OpenIdProviderStatics.Init( providerGetter.GetProvider<AppOpenIdProviderProvider>( "OpenIdProvider" ) );
-							Admin.EntitySetup.Init( () => RequestDispatchingStatics.AppProvider.GetFrameworkUrlParent(), diagnosticLogLevelSwitch );
-							RequestDispatchingStatics.Init(
-								providerGetter.GetProvider<AppRequestDispatchingProvider>( "RequestDispatching" ),
-								() => contextAccessor.HttpContext );
+							Admin.EntitySetup.Init( () => RequestDispatchingStatics.GetAppProvider().GetFrameworkUrlParent(), diagnosticLogLevelSwitch );
+							RequestDispatchingStatics.Init( getAppRequestDispatchingProvider( providerGetter ), () => contextAccessor.HttpContext );
 
 							appInitializer?.InitStatics();
 
@@ -493,10 +485,10 @@ public static class EwfOps {
 						//	app.UseResponseCompression();
 						app.UseSerilogRequestLogging();
 						app.UseMiniProfiler(); // only used to handle MiniProfiler requests
-						RequestDispatchingStatics.AppProvider.AddCustomMiddleware( app );
+						RequestDispatchingStatics.GetAppProvider().AddCustomMiddleware( app );
 						app.Use( RequestDispatchingStatics.ProcessRequest );
 						app.UseRouting();
-						RequestDispatchingStatics.AppProvider.ConfigurePostFrameworkPipeline( app );
+						RequestDispatchingStatics.GetAppProvider().ConfigurePostFrameworkPipeline( app );
 						app.Use( ensureUrlResolved );
 
 						app.Run();
@@ -534,4 +526,38 @@ public static class EwfOps {
 			throw new ResourceNotAvailableException( "Failed to resolve the URL.", null );
 		await next( context );
 	}
+
+	/// <summary>
+	/// Initializes the calling application’s URL-generation functionality within the context of another web or non-web application in the system, enabling GetUrl
+	/// methods to succeed. We recommend calling this from a static method in AppInitializer, which in turn should be called by the other application’s
+	/// initializer.
+	/// </summary>
+	/// <param name="applicationName">The constant from WebApplicationNames that corresponds to the calling application.</param>
+	public static void InitUrlGeneration( string applicationName ) {
+		var appAssembly = Assembly.GetCallingAssembly();
+		var providerGetter = getProviderGetter( appAssembly );
+
+		UrlHandlingStatics.AddApplication(
+			appAssembly,
+			ConfigurationStatics.InstallationConfiguration.WebApplications.Single( i => string.Equals( i.Name, applicationName, StringComparison.Ordinal ) ),
+			() => RequestDispatchingStatics.GetAppProvider( applicationName: applicationName ).GetBaseUrlPatterns(),
+			( baseUrlString, appRelativeUrl ) => RequestState.ExecuteWithUrlHandlerStateDisabled(
+				() => UrlHandlingStatics.ResolveUrl( baseUrlString, appRelativeUrl, appAssembly: appAssembly )?.Last() ) );
+		ResourceBase.AddApplication( getAppResourceSerializationProvider( providerGetter ) );
+		RequestDispatchingStatics.AddApplication( applicationName, getAppRequestDispatchingProvider( providerGetter ) );
+	}
+
+	private static SystemProviderGetter getProviderGetter( Assembly appAssembly ) =>
+		new(
+			appAssembly,
+			appAssembly.GetTypes().Single( i => typeof( AppRequestDispatchingProvider ).IsAssignableFrom( i ) && !i.IsInterface ).Namespace,
+			providerName =>
+				@"{0} provider not found in application. To implement, create a class named {0} in ""Your Website\Providers"" that derives from App{0}Provider."
+					.FormatWith( providerName ) );
+
+	private static SystemProviderReference<AppResourceSerializationProvider> getAppResourceSerializationProvider( SystemProviderGetter providerGetter ) =>
+		providerGetter.GetProvider<AppResourceSerializationProvider>( "ResourceSerialization" );
+
+	private static SystemProviderReference<AppRequestDispatchingProvider> getAppRequestDispatchingProvider( SystemProviderGetter providerGetter ) =>
+		providerGetter.GetProvider<AppRequestDispatchingProvider>( "RequestDispatching" );
 }

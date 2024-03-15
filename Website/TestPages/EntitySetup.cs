@@ -39,7 +39,7 @@ partial class EntitySetup: UiEntitySetup {
 	protected override bool canRepresentRequestHandler() => true;
 
 	protected override IEnumerable<UrlPattern> getChildUrlPatterns() =>
-		RequestDispatchingStatics.GetFrameworkUrlPatterns()
+		RequestDispatchingStatics.GetFrameworkUrlPatterns( WebApplicationNames.Website )
 			.Append( BoxDemo.UrlPatterns.Literal( this, "box" ) )
 			.Append( FormItemListDemo.UrlPatterns.Literal( this, "form-item-list" ) )
 			.Append( EwfTableDemo.UrlPatterns.Literal( this, "standard-table" ) )

@@ -12,9 +12,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 /// </summary>
 [ PublicAPI ]
 public abstract class ResourceBase: ResourceInfo, ResourceParent {
+	private static readonly List<SystemProviderReference<AppResourceSerializationProvider>> appSerializationProviderRefs = [ ];
+
 	private static Func<ResourceBase, ( string name, string parameters )?>? frameworkResourceSerializer;
 	private static SystemProviderReference<SystemResourceSerializationProvider>? systemSerializationProviderRef;
-	private static SystemProviderReference<AppResourceSerializationProvider>? appSerializationProviderRef;
 	private static Action<bool, ResourceBase>? urlHandlerStateUpdater;
 	private static Func<ResourceBase?>? currentResourceGetter;
 	private static Action? requestStateRefresher;
@@ -42,14 +43,18 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 		Func<ResourceBase?> currentResourceGetter, Action requestStateRefresher ) {
 		ResourceBase.frameworkResourceSerializer = frameworkResourceSerializer;
 		systemSerializationProviderRef = systemSerializationProvider;
-		appSerializationProviderRef = appSerializationProvider;
+		appSerializationProviderRefs.Add( appSerializationProvider );
 		ResourceBase.urlHandlerStateUpdater = urlHandlerStateUpdater;
 		ResourceBase.currentResourceGetter = currentResourceGetter;
 		ResourceBase.requestStateRefresher = requestStateRefresher;
 	}
 
+	internal static void AddApplication( SystemProviderReference<AppResourceSerializationProvider> provider ) {
+		appSerializationProviderRefs.Add( provider );
+	}
+
 	private static SystemResourceSerializationProvider systemSerializationProvider => systemSerializationProviderRef!.GetProvider()!;
-	private static AppResourceSerializationProvider appSerializationProvider => appSerializationProviderRef!.GetProvider()!;
+	private static IEnumerable<AppResourceSerializationProvider> appSerializationProviders => appSerializationProviderRefs.Select( i => i.GetProvider()! );
 
 	/// <summary>
 	/// Gets the currently executing resource, or null if the URL has not yet been resolved.
@@ -261,8 +266,10 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 			       uriFragmentIdentifier.PrependDelimiter( "#" );
 		}
 		catch( Exception e ) {
-			var serializedResource = frameworkResourceSerializer!( this ) ?? systemSerializationProvider.SerializeResource( this ) ??
-			                         appSerializationProvider.SerializeResource( this ) ?? throw new UnexpectedValueException( "resource", this );
+			var serializedResource =
+				( frameworkResourceSerializer is null ? null : frameworkResourceSerializer( this ) ?? systemSerializationProvider.SerializeResource( this ) ) ??
+				appSerializationProviders.Select( i => i.SerializeResource( this ) ).FirstOrDefault( i => i.HasValue ) ??
+				throw new UnexpectedValueException( "resource", this );
 			throw new Exception(
 				"Failed to get a URL for {0}.".FormatWith( serializedResource.name + serializedResource.parameters.PrependDelimiter( " with parameters " ) ),
 				e );

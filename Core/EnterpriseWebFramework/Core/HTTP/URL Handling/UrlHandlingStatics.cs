@@ -1,18 +1,30 @@
 ﻿#nullable disable
 using System.Net;
+using System.Reflection;
 using System.Web;
+using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.TewlContrib;
 using Microsoft.AspNetCore.Http;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 internal static class UrlHandlingStatics {
+	private static readonly
+		Dictionary<Assembly, ( WebApplication configuration, Func<IEnumerable<BaseUrlPattern>> baseUrlPatternGetter, Func<string, string, BasicUrlHandler>
+			urlResolver )> appsByAssembly = new();
+
 	private static Func<IEnumerable<BaseUrlPattern>> baseUrlPatternGetter;
 	private static Func<string, string, BasicUrlHandler> urlResolver;
 
 	internal static void Init( Func<IEnumerable<BaseUrlPattern>> baseUrlPatternGetter, Func<string, string, BasicUrlHandler> urlResolver ) {
 		UrlHandlingStatics.baseUrlPatternGetter = baseUrlPatternGetter;
 		UrlHandlingStatics.urlResolver = urlResolver;
+	}
+
+	internal static void AddApplication(
+		Assembly assembly, WebApplication configuration, Func<IEnumerable<BaseUrlPattern>> baseUrlPatternGetter,
+		Func<string, string, BasicUrlHandler> urlResolver ) {
+		appsByAssembly.Add( assembly, ( configuration, baseUrlPatternGetter, urlResolver ) );
 	}
 
 	internal static string GetCanonicalUrl( BasicUrlHandler basicHandler, bool secure ) {
@@ -51,8 +63,13 @@ internal static class UrlHandlingStatics {
 			parent = parent.GetParent();
 		}
 
+		var appAssembly = encoder.GetType().Assembly;
+		var app = appAssembly == ConfigurationStatics.AppAssembly
+			          ? ( configuration: EwfConfigurationStatics.AppConfiguration, baseUrlPatternGetter, urlResolver )
+			          : appsByAssembly[ appAssembly ];
+
 		EncodingBaseUrl baseUrl = null;
-		foreach( var i in baseUrlPatternGetter() ) {
+		foreach( var i in app.baseUrlPatternGetter() ) {
 			baseUrl = i.Generator( encoder );
 			if( baseUrl != null )
 				break;
@@ -64,18 +81,18 @@ internal static class UrlHandlingStatics {
 		var baseUrlParameters = generateSegmentParameters( parameters.segmentParameters );
 		query ??= generateQuery( parameters.queryParameters );
 
-		var baseUrlString = baseUrl.BaseUrl.CompleteWithDefaults( EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl ).GetUrlString( secure );
+		var baseUrlString = baseUrl.BaseUrl.CompleteWithDefaults( app.configuration.DefaultBaseUrl ).GetUrlString( secure );
 		var path = generatePath( baseUrlParameters, segments.AsEnumerable().Reverse() );
 		var appRelativeUrl = generateAppRelativeUrl( path, query );
 
-		var resolvedHandler = urlResolver( baseUrlString, appRelativeUrl );
+		var resolvedHandler = app.urlResolver( baseUrlString, appRelativeUrl );
 		if( !EwlStatics.AreEqual( resolvedHandler, basicHandler ) )
 			throw new ApplicationException( "The handler’s canonical URL does not resolve back to the same handler." );
 
 		return baseUrlString + ( path.Length > 0 ? "/" : "" ) + appRelativeUrl;
 	}
 
-	internal static IReadOnlyCollection<BasicUrlHandler> ResolveUrl( string baseUrlString, string appRelativeUrl ) {
+	internal static IReadOnlyCollection<BasicUrlHandler> ResolveUrl( string baseUrlString, string appRelativeUrl, Assembly appAssembly = null ) {
 		var handlers = new List<BasicUrlHandler>();
 
 		var urlComponents = parseAppRelativeUrl( appRelativeUrl );
@@ -91,7 +108,7 @@ internal static class UrlHandlingStatics {
 				parseSegmentParameters( pathComponents.baseUrlParameters ),
 				pathComponents.segments.Any() ? Enumerable.Empty<( string, string )>() : parseQuery( urlComponents.query ) ) );
 		UrlDecoder decoder = null;
-		foreach( var i in baseUrlPatternGetter() ) {
+		foreach( var i in ( appAssembly is null ? baseUrlPatternGetter : appsByAssembly[ appAssembly ].baseUrlPatternGetter )() ) {
 			decoder = i.Parser( baseUrl );
 			if( decoder != null )
 				break;
