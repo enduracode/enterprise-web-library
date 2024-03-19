@@ -1,5 +1,4 @@
-﻿#nullable disable
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using NodaTime;
 using NodaTime.Text;
 using Tewl.InputValidation;
@@ -32,9 +31,9 @@ public class DateControlSetup {
 	/// <param name="validationPredicate"></param>
 	/// <param name="validationErrorNotifier"></param>
 	public static DateControlSetup Create(
-		DisplaySetup displaySetup = null, ElementClassSet classes = null, string autoFillTokens = "", SpecifiedValue<FormAction> action = null,
-		FormAction valueChangedAction = null, PageModificationValue<LocalDate?> pageModificationValue = null, Func<bool, bool> validationPredicate = null,
-		Action validationErrorNotifier = null ) =>
+		DisplaySetup? displaySetup = null, ElementClassSet? classes = null, string autoFillTokens = "", SpecifiedValue<FormAction>? action = null,
+		FormAction? valueChangedAction = null, PageModificationValue<LocalDate?>? pageModificationValue = null, Func<bool, bool>? validationPredicate = null,
+		Action? validationErrorNotifier = null ) =>
 		new( displaySetup, false, classes, autoFillTokens, action, valueChangedAction, pageModificationValue, validationPredicate, validationErrorNotifier );
 
 	/// <summary>
@@ -45,16 +44,17 @@ public class DateControlSetup {
 	/// <param name="validationPredicate"></param>
 	/// <param name="validationErrorNotifier"></param>
 	public static DateControlSetup CreateReadOnly(
-		DisplaySetup displaySetup = null, ElementClassSet classes = null, Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) =>
+		DisplaySetup? displaySetup = null, ElementClassSet? classes = null, Func<bool, bool>? validationPredicate = null,
+		Action? validationErrorNotifier = null ) =>
 		new( displaySetup, true, classes, "", null, null, null, validationPredicate, validationErrorNotifier );
 
-	internal readonly Func<LocalDate?, bool, LocalDate?, LocalDate?, Action<LocalDate?, Validator>, ( FormControlLabeler, PhrasingComponent, EwfValidation )>
+	internal readonly Func<LocalDate?, bool, LocalDate?, LocalDate?, Action<LocalDate?, Validator>?, ( FormControlLabeler, PhrasingComponent, EwfValidation )>
 		LabelerAndComponentAndValidationGetter;
 
 	internal DateControlSetup(
-		DisplaySetup displaySetup, bool isReadOnly, ElementClassSet classes, string autoFillTokens, SpecifiedValue<FormAction> specifiedAction,
-		FormAction valueChangedAction, PageModificationValue<LocalDate?> datePageModificationValue, Func<bool, bool> validationPredicate,
-		Action validationErrorNotifier ) {
+		DisplaySetup? displaySetup, bool isReadOnly, ElementClassSet? classes, string autoFillTokens, SpecifiedValue<FormAction>? specifiedAction,
+		FormAction? valueChangedAction, PageModificationValue<LocalDate?>? datePageModificationValue, Func<bool, bool>? validationPredicate,
+		Action? validationErrorNotifier ) {
 		var labeler = new FormControlLabeler();
 		if( autoFillTokens.Length > 0 )
 			throw new NotSupportedException( "Auto-fill detail tokens are not supported with the current implementation of the date control." );
@@ -62,6 +62,10 @@ public class DateControlSetup {
 		datePageModificationValue ??= new PageModificationValue<LocalDate?>();
 
 		LabelerAndComponentAndValidationGetter = ( value, allowEmpty, minValue, maxValue, validationMethod ) => {
+			var currentDate = PageBase.Current.FirstRequestTime.InUtc().Date;
+			minValue ??= currentDate.PlusYears( -120 );
+			maxValue ??= currentDate.PlusYears( 5 );
+
 			var id = new ElementId();
 			const int textControlMaxLength = 50;
 			var formValue = new FormValue<string>(
@@ -102,10 +106,8 @@ public class DateControlSetup {
 										       attributes.Add( new ElementAttribute( "disabled" ) );
 									       attributes.Add( new ElementAttribute( "first-day-of-week", "0" ) );
 									       attributes.Add( new ElementAttribute( "identifier", textControlId ) );
-									       if( maxValue.HasValue )
-										       attributes.Add( new ElementAttribute( "max", LocalDatePattern.Iso.Format( maxValue.Value ) ) );
-									       if( minValue.HasValue )
-										       attributes.Add( new ElementAttribute( "min", LocalDatePattern.Iso.Format( minValue.Value ) ) );
+									       attributes.Add( new ElementAttribute( "max", LocalDatePattern.Iso.Format( maxValue.Value ) ) );
+									       attributes.Add( new ElementAttribute( "min", LocalDatePattern.Iso.Format( minValue.Value ) ) );
 
 									       // Use the value of the text control instead of the hidden field to enable round-tripping of invalid dates.
 									       attributes.Add( new ElementAttribute( "name", "" ) );
@@ -184,8 +186,8 @@ picker.localization = {{
 										                                                postBackValue.Value.Trim(),
 										                                                null,
 										                                                allowEmpty,
-										                                                minValue?.ToDateTimeUnspecified() ?? DateTime.MinValue,
-										                                                maxValue?.PlusDays( 1 ).ToDateTimeUnspecified() ?? DateTime.MaxValue );
+										                                                minValue.Value.ToDateTimeUnspecified(),
+										                                                maxValue.Value.PlusDays( 1 ).ToDateTimeUnspecified() );
 									                                                if( errorHandler.LastResult != ErrorCondition.NoError ) {
 										                                                validationErrorNotifier?.Invoke();
 										                                                return;

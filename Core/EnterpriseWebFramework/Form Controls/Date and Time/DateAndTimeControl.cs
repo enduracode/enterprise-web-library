@@ -1,5 +1,4 @@
-﻿#nullable disable
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using NodaTime;
 using Tewl.InputValidation;
 
@@ -19,7 +18,7 @@ public class DateAndTimeControl: FormControl<FlowComponent> {
 
 	public FormControlLabeler Labeler { get; }
 	public FlowComponent PageComponent { get; }
-	public EwfValidation Validation { get; }
+	public EwfValidation? Validation { get; }
 
 	/// <summary>
 	/// Creates a date-and-time control.
@@ -27,12 +26,14 @@ public class DateAndTimeControl: FormControl<FlowComponent> {
 	/// <param name="value"></param>
 	/// <param name="allowEmpty"></param>
 	/// <param name="setup">The setup object for the date-and-time control.</param>
-	/// <param name="minValue">The earliest acceptable date.</param>
-	/// <param name="maxValue">The latest acceptable date.</param>
+	/// <param name="minValue">The earliest acceptable date. Pass null for one hundred twenty years ago. If you would like to reference the current date when
+	/// passing a value, use <see cref="PageBase.FirstRequestTime"/> to keep it stable across requests.</param>
+	/// <param name="maxValue">The latest acceptable date. Pass null for five years from now. If you would like to reference the current date when passing a
+	/// value, use <see cref="PageBase.FirstRequestTime"/> to keep it stable across requests.</param>
 	/// <param name="validationMethod">The validation method. Pass null if you’re only using this control for page modification.</param>
 	public DateAndTimeControl(
-		LocalDateTime? value, bool allowEmpty, DateAndTimeControlSetup setup = null, LocalDate? minValue = null, LocalDate? maxValue = null,
-		Action<LocalDateTime?, Validator> validationMethod = null ) {
+		LocalDateTime? value, bool allowEmpty, DateAndTimeControlSetup? setup = null, LocalDate? minValue = null, LocalDate? maxValue = null,
+		Action<LocalDateTime?, Validator>? validationMethod = null ) {
 		setup ??= DateAndTimeControlSetup.Create();
 
 		var date = new InitializationAwareValue<LocalDate?>();
