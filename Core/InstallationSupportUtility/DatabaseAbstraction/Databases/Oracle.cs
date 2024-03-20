@@ -12,10 +12,10 @@ using Tewl.IO;
 namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Databases;
 
 public class Oracle: Database {
-	private const string dataPumpOracleDirectoryName = "red_stapler_data_pump_dir";
+	private static readonly string dataPumpDirectoryObject = EwlStatics.EwlInitialism.ToLowerInvariant() + "_data_pump_dir";
+	private static readonly string dataPumpFolderPath = EwlStatics.CombinePaths( ConfigurationStatics.EwlFolderPath, "Oracle Data Pump" );
 	private const string databaseFileDumpFileName = "Dump File.dmp";
 	private const string databaseFileSchemaNameFileName = "Schema.txt";
-	private static readonly string dataPumpFolderPath = EwlStatics.CombinePaths( ConfigurationStatics.EwlFolderPath, "Oracle Data Pump" );
 
 	private readonly OracleInfo info;
 
@@ -75,7 +75,7 @@ public class Oracle: Database {
 						// We pass an enter keystroke as input in an attempt to kill the program if it gets stuck on a username prompt because of a bad logon string.
 						TewlContrib.ProcessTools.RunProgram(
 							"expdp",
-							getLogonString() + " DIRECTORY=" + dataPumpOracleDirectoryName + " DUMPFILE=\"\"\"" + getDumpFileName() + "\"\"\" NOLOGFILE=y VERSION=12.1",
+							$""""{getLogonString()} VERSION=19 DIRECTORY={dataPumpDirectoryObject} DUMPFILE="""{getDumpFileName()}""" NOLOGFILE=y"""",
 							Environment.NewLine,
 							true );
 					}
@@ -107,7 +107,7 @@ public class Oracle: Database {
 				info.SupportsConnectionPooling,
 				info.SupportsLinguisticIndexes ),
 			cn => {
-				executeLongRunningCommand( cn, "CREATE OR REPLACE DIRECTORY " + dataPumpOracleDirectoryName + " AS '" + dataPumpFolderPath + "'" );
+				executeLongRunningCommand( cn, "CREATE OR REPLACE DIRECTORY " + dataPumpDirectoryObject + " AS '" + dataPumpFolderPath + "'" );
 				deleteAndReCreateUser( cn );
 			} );
 
@@ -123,11 +123,10 @@ public class Oracle: Database {
 							executeMethodWithDbExceptionHandling(
 								delegate {
 									try {
+										var fileSchema = File.ReadAllText( EwlStatics.CombinePaths( folderPath, databaseFileSchemaNameFileName ) );
 										TewlContrib.ProcessTools.RunProgram(
 											"impdp",
-											getLogonString() + " DIRECTORY=" + dataPumpOracleDirectoryName + " DUMPFILE=\"\"\"" + getDumpFileName() +
-											"\"\"\" NOLOGFILE=y REMAP_SCHEMA=" + File.ReadAllText( EwlStatics.CombinePaths( folderPath, databaseFileSchemaNameFileName ) ) + ":" +
-											info.UserAndSchema,
+											$""""{getLogonString()} REMAP_SCHEMA={fileSchema}:{info.UserAndSchema} DIRECTORY={dataPumpDirectoryObject} DUMPFILE="""{getDumpFileName()}""" NOLOGFILE=y"""",
 											"",
 											true );
 									}
@@ -200,7 +199,7 @@ public class Oracle: Database {
 		executeLongRunningCommand( cn, "GRANT CREATE SEQUENCE TO " + info.UserAndSchema );
 		executeLongRunningCommand( cn, "GRANT CREATE TABLE TO " + info.UserAndSchema );
 		executeLongRunningCommand( cn, "GRANT CREATE TRIGGER TO " + info.UserAndSchema ); // Necessary for RLE Personnel secondary databases.
-		executeLongRunningCommand( cn, "GRANT READ, WRITE ON DIRECTORY " + dataPumpOracleDirectoryName + " TO " + info.UserAndSchema );
+		executeLongRunningCommand( cn, "GRANT READ, WRITE ON DIRECTORY " + dataPumpDirectoryObject + " TO " + info.UserAndSchema );
 	}
 
 	private string getLogonString() {
