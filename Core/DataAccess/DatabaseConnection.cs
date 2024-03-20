@@ -582,5 +582,8 @@ public class DatabaseConnection {
 	/// <summary>
 	/// Returns schema information about the database.
 	/// </summary>
-	internal DataTable GetSchema( string collectionName, params string[] restrictionValues ) => cn.GetSchema( collectionName, restrictionValues );
+	internal DataTable GetSchema( string collectionName, params string?[] restrictionValues ) =>
+#pragma warning disable CS8620
+		cn.GetSchema( collectionName, restrictionValues );
+#pragma warning restore CS8620
 }
