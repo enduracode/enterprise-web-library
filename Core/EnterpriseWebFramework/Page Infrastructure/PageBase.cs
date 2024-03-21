@@ -653,8 +653,8 @@ public abstract class PageBase: ResourceBase {
 	}
 
 	/// <summary>
-	/// It's important to call this from EwfPage instead of EwfApp because requests for some pages, with their associated images, CSS files, etc., can easily
-	/// cause 20-30 server requests, and we only want to update the time stamp once for all of these.
+	/// It’s important to call this for pages only (and not for all resources) because requests for some pages, with their associated images, CSS files, etc., can
+	/// easily cause 20-30 server requests, and we only want to update the time stamp once for all of these.
 	/// </summary>
 	private Action getLastPageRequestTimeUpdateMethod( SystemUser user ) {
 		// Only update the request time if a significant amount of time has passed since we did it last. This can dramatically reduce concurrency issues caused by
@@ -687,11 +687,12 @@ public abstract class PageBase: ResourceBase {
 						}
 						catch( DbConcurrencyException ) {
 							// Since this method is called on every page request, concurrency errors are common. They are caused when an authenticated user makes one request
-							// and then makes another before ASP.NET has finished processing the first. Since we are only updating the last request date and time, we don't
+							// and then makes another before ASP.NET has finished processing the first. Since we are only updating the last request date and time, we don’t
 							// need to get an error email if the update fails.
 							throw new DoNotCommitException();
 						}
-					} );
+					},
+					createSavepointIfAlreadyInTransaction: true );
 			else
 				updateUser();
 		};
