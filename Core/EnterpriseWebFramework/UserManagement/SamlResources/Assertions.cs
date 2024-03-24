@@ -29,6 +29,8 @@ partial class Assertions {
 					AuthenticationStatics.SetFormsAuthCookieAndUser( user, identityProvider: identityProvider );
 				else
 					AuthenticationStatics.SetUserLastIdentityProvider( identityProvider );
+
+				AuthenticationStatics.SetTestCookie();
 			} );
 
 		var destinationUrl = new VerifyClientFunctionality( assertion.returnUrl ).GetUrl();

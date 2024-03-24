@@ -25,7 +25,7 @@ partial class VerifyClientFunctionality {
 			actionGetter: () => new PostBackAction( verificationFailed() ? null : new ExternalResource( ReturnUrl ) ) );
 		return FormState.ExecuteWithDataModificationsAndDefaultAction(
 			postBack.ToCollection(),
-			() => new UiPageContent( pageLoadPostBack: postBack ).Add( AuthenticationStatics.GetLogInHiddenFieldsAndSetUpClientSideLogic( clientTime ) ) );
+			() => new UiPageContent( pageLoadPostBack: postBack ).Add( AuthenticationStatics.GetLogInHiddenFields( clientTime ) ) );
 	}
 
 	private PageContent getVerificationFailedContent() {

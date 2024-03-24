@@ -169,8 +169,9 @@ public static class AuthenticationStatics {
 	public static ( IReadOnlyCollection<EtherealComponent> hiddenFields, ( PasswordLoginModificationMethod passwordLoginMethod, LoginCodeSenderMethod
 		loginCodeSender, CodeLoginModificationMethod codeLoginMethod, SpecifiedUserLoginModificationMethod specifiedUserLoginMethod ) modificationMethods )
 		GetLogInHiddenFieldsAndMethods() {
+		ResourceBase.ExecuteDataModificationMethod( SetTestCookie );
 		var clientTime = new DataValue<string>();
-		var hiddenFields = GetLogInHiddenFieldsAndSetUpClientSideLogic( clientTime );
+		var hiddenFields = GetLogInHiddenFields( clientTime );
 
 		return ( hiddenFields, ( ( emailAddress, password, errorMessage ) => {
 				                       var errors = new List<string>();
@@ -254,9 +255,11 @@ public static class AuthenticationStatics {
 			                       } ) );
 	}
 
-	internal static IReadOnlyCollection<EtherealComponent> GetLogInHiddenFieldsAndSetUpClientSideLogic( DataValue<string> clientTime ) {
-		ResourceBase.ExecuteDataModificationMethod( () => setCookie( testCookieName, "No data" ) );
+	internal static void SetTestCookie() {
+		setCookie( testCookieName, "No data" );
+	}
 
+	internal static IReadOnlyCollection<EtherealComponent> GetLogInHiddenFields( DataValue<string> clientTime ) {
 		var timeHiddenFieldId = new HiddenFieldId();
 		return new EwfHiddenField(
 			"",
