@@ -1,5 +1,4 @@
-﻿#nullable disable
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using NodaTime;
 using Tewl.InputValidation;
 
@@ -27,16 +26,16 @@ public class TimeControl: FormControl<FlowComponent> {
 	/// <param name="value"></param>
 	/// <param name="allowEmpty"></param>
 	/// <param name="setup">The setup object for the time control.</param>
-	/// <param name="minValue">The earliest allowed time.</param>
-	/// <param name="maxValue">The latest allowed time. This can be earlier than <paramref name="minValue"/> to create a range spanning midnight.</param>
+	/// <param name="minValue">The earliest allowed time. Pass null for no minimum, which is the same as passing midnight.</param>
+	/// <param name="maxValue">The latest allowed time. This can be earlier than <paramref name="minValue"/> to create a range spanning midnight. Pass null for no
+	/// maximum, which is the same as passing <see cref="LocalTime.MaxValue"/>.</param>
 	/// <param name="minuteInterval">Allows the user to select values only in the given increments. Be aware that other values can still be sent from the
 	/// browser via a crafted request.</param>
 	/// <param name="validationMethod">The validation method. Pass null if you’re only using this control for page modification.</param>
 	public TimeControl(
-		LocalTime? value, bool allowEmpty, TimeControlSetup setup = null, LocalTime? minValue = null, LocalTime? maxValue = null, int minuteInterval = 15,
-		Action<LocalTime?, Validator> validationMethod = null ) {
+		LocalTime? value, bool allowEmpty, TimeControlSetup? setup = null, LocalTime? minValue = null, LocalTime? maxValue = null, int minuteInterval = 15,
+		Action<LocalTime?, Validator>? validationMethod = null ) {
 		setup ??= TimeControlSetup.Create();
-		minValue ??= LocalTime.Midnight;
 
 		if( minuteInterval < 30 ) {
 			var textControl = new TextControl(
@@ -67,10 +66,7 @@ public class TimeControl: FormControl<FlowComponent> {
 							                  return;
 						                  }
 
-						                  var wrap = maxValue < minValue.Value;
-						                  if( !wrap
-							                      ? validatedValue < minValue.Value || validatedValue > maxValue
-							                      : validatedValue < minValue.Value && validatedValue > maxValue ) {
+						                  if( validatedValue.HasValue && !validatedValue.Value.InRange( minValue, maxValue ) ) {
 							                  validator.NoteErrorAndAddMessage( "The time is too early or too late." );
 							                  setup.ValidationErrorNotifier?.Invoke();
 							                  return;
@@ -101,7 +97,7 @@ public class TimeControl: FormControl<FlowComponent> {
 			Validation = textControl.Validation;
 		}
 		else {
-			var items = from time in getTimes( minValue.Value, maxValue, minuteInterval )
+			var items = from time in LocalTimeTools.GetStepsInRange( minValue, maxValue, minuteInterval )
 			            let timeSpan = new TimeSpan( time.TickOfDay )
 			            select SelectListItem.Create<LocalTime?>( time, timeSpan.ToTimeOfDayHourAndMinuteString() );
 			var selectList = SelectList.CreateDropDown(
@@ -127,26 +123,6 @@ public class TimeControl: FormControl<FlowComponent> {
 			PageComponent = getContainer( setup, selectList, Enumerable.Empty<PhrasingComponent>() );
 			Validation = selectList.Validation;
 		}
-	}
-
-	private IReadOnlyCollection<LocalTime> getTimes( LocalTime minValue, LocalTime? maxValue, int minuteInterval ) {
-		var times = new List<LocalTime>();
-		var time = minValue;
-		var wrapAllowed = maxValue < minValue;
-		while( true ) {
-			times.Add( time );
-			time = time.PlusMinutes( minuteInterval );
-
-			if( time < times.Last() )
-				if( wrapAllowed )
-					wrapAllowed = false;
-				else
-					break;
-
-			if( !wrapAllowed && time > maxValue )
-				break;
-		}
-		return times;
 	}
 
 	private FlowComponent getContainer( TimeControlSetup setup, FormControl<FlowComponent> control, IEnumerable<PhrasingComponent> additionalContent ) =>
