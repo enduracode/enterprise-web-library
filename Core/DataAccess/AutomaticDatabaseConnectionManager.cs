@@ -172,7 +172,12 @@ public class AutomaticDatabaseConnectionManager {
 	private void cleanUpConnectionsAndExecuteNonTransactionalModificationMethods(
 		bool cacheEnabled, bool forbidNonTransactionalModificationMethodExecution = false ) {
 		if( inModificationTransaction )
-			throw new InvalidOperationException();
+			if( transactionsMarkedForRollback ) {
+				modTransactionIncludesPrimaryDatabase = false;
+				modTransactionSecondaryDatabaseCount = null;
+			}
+			else
+				throw new InvalidOperationException();
 
 		var methods = new List<Action>();
 		if( primaryDatabaseConnectionInitialized )
