@@ -30,9 +30,8 @@ partial class EntitySetup: UiEntitySetup {
 					new DataUpdateModification( this ),
 					new IntermediatePostBacks( this ),
 					new KeyboardFocus( this ) ),
-				new ResourceGroup( "Working Stuff", new ActionControls( this ) ),
-				new ResourceGroup( "First category", new HtmlEditing( this ), new RegexHelper( this ) ),
-				new ResourceGroup( "Other", new ModalBoxes( this ), new MailMerging( this ), new Charts( this ) )
+				new ResourceGroup( "Business Tools", new MailMerging( this ), new Charts( this ), new CalendarIntegration( this ) ),
+				new ResourceGroup( "Other", new ActionControls( this ), new HtmlEditing( this ), new RegexHelper( this ), new ModalBoxes( this ) )
 			};
 
 	protected override UrlHandler getRequestHandler() => new BoxDemo( this );
@@ -51,6 +50,9 @@ partial class EntitySetup: UiEntitySetup {
 			.Append( DataUpdateModification.UrlPatterns.Literal( this, "data-update-modification" ) )
 			.Append( IntermediatePostBacks.UrlPatterns.Literal( this, "intermediate-post-backs" ) )
 			.Append( KeyboardFocus.UrlPatterns.Literal( this, "keyboard-focus" ) )
+			.Append( MailMerging.UrlPatterns.Literal( this, "mail-merging" ) )
+			.Append( Charts.UrlPatterns.Literal( this, "chart" ) )
+			.Append( CalendarIntegration.UrlPatterns.Literal( this, "calendar-integration" ) )
 			.Append( UnauthorizedPage.UrlPatterns.Literal( this, "unauthorized-page" ) )
 			.Append( CreateSystem.UrlPatterns.Literal( "create-system" ) )
 			.Append( ConfigurationSchemas.EntitySetup.UrlPatterns.Literal( "ConfigurationSchemas" ) )
