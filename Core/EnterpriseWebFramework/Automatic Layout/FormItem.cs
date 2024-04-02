@@ -163,6 +163,17 @@ public static class FormItemExtensionCreators {
 		content.ToCollection().ToFormItem( setup: setup, label: label, validation: validation );
 
 	/// <summary>
+	/// Creates a form item with components that represent this string. Do not call on null.
+	/// </summary>
+	/// <param name="text"></param>
+	/// <param name="setup"></param>
+	/// <param name="label">The form-item label.</param>
+	/// <param name="validation"></param>
+	public static FormItem ToFormItem(
+		this string text, FormItemSetup? setup = null, IReadOnlyCollection<PhrasingComponent>? label = null, EwfValidation? validation = null ) =>
+		text.ToComponents().ToFormItem( setup: setup, label: label, validation: validation );
+
+	/// <summary>
 	/// Concatenates form items.
 	/// </summary>
 	public static IEnumerable<FormItem> Concat( this FormItem first, IEnumerable<FormItem> second ) => second.Prepend( first );
