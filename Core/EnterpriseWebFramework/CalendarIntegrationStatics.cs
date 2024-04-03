@@ -9,43 +9,36 @@ using NodaTime.Text;
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 public static class CalendarIntegrationStatics {
-	public static ButtonBehavior
-		GetAddToCalendarButtonBehavior( string eventTitle, ZonedDateTime beginDateAndTime, ZonedDateTime endDateAndTime, string description = "" ) =>
-		new MenuButtonBehavior(
-			new Paragraph(
-					new EwfButton(
-							new StandardButtonStyle( "Download ICS file", buttonSize: ButtonSize.ShrinkWrap ),
-							behavior: new PostBackBehavior(
-								postBack: PostBack.CreateIntermediate(
-									null,
-									id: PostBack.GetCompositeId( eventTitle, "downloadIcs" ),
-									reloadBehaviorGetter: () => new PageReloadBehavior(
-										secondaryResponse: new SecondaryResponse( () => getICalendarResponse( eventTitle, beginDateAndTime, endDateAndTime, description ) ) ) ) ) )
-						.Append<PhrasingComponent>( new LineBreak() )
-						.Append( new SideComments( "For Apple and other calendars".ToComponents() ) )
-						.Materialize() ).Append( new Paragraph( new ImportantContent( "Or create an event in:".ToComponents() ).ToCollection() ) )
-				.Append<FlowComponent>(
-					new StackList( getHyperlinks( eventTitle, beginDateAndTime, endDateAndTime, description ).Select( i => i.ToComponentListItem() ) ) )
-				.Materialize() );
+	public static ButtonBehavior GetAddToCalendarButtonBehavior(
+		string eventTitle, ZonedDateTime beginDateAndTime, ZonedDateTime endDateAndTime, string description = "" ) =>
+		getButtonBehavior(
+			eventTitle,
+			() => getICalendarResponse( eventTitle, beginDateAndTime, endDateAndTime, description ),
+			getHyperlinks( eventTitle, beginDateAndTime, endDateAndTime, description ) );
 
 	public static ButtonBehavior
 		GetAddToCalendarButtonBehaviorForAllDayEvent( string eventTitle, LocalDate beginDate, LocalDate endDate, string description = "" ) =>
+		getButtonBehavior(
+			eventTitle,
+			() => getICalendarResponseForAllDayEvent( eventTitle, beginDate, endDate, description ),
+			getHyperlinksForAllDayEvent( eventTitle, beginDate, endDate, description ) );
+
+	private static ButtonBehavior getButtonBehavior( string eventTitle, Func<EwfResponse> iCalendarResponseGetter, IEnumerable<EwfHyperlink> hyperlinks ) =>
 		new MenuButtonBehavior(
 			new Paragraph(
 					new EwfButton(
-							new StandardButtonStyle( "Download ICS file", buttonSize: ButtonSize.ShrinkWrap ),
+							new StandardButtonStyle( "Get iCal (.ics) file", buttonSize: ButtonSize.ShrinkWrap ),
 							behavior: new PostBackBehavior(
 								postBack: PostBack.CreateIntermediate(
 									null,
 									id: PostBack.GetCompositeId( eventTitle, "downloadIcs" ),
-									reloadBehaviorGetter: () => new PageReloadBehavior(
-										secondaryResponse: new SecondaryResponse( () => getICalendarResponseForAllDayEvent( eventTitle, beginDate, endDate, description ) ) ) ) ) )
+									reloadBehaviorGetter: () => new PageReloadBehavior( secondaryResponse: new SecondaryResponse( iCalendarResponseGetter ) ) ) ) )
 						.Append<PhrasingComponent>( new LineBreak() )
-						.Append( new SideComments( "For Apple and other calendars".ToComponents() ) )
-						.Materialize() ).Append( new Paragraph( new ImportantContent( "Or create an event in:".ToComponents() ).ToCollection() ) )
-				.Append<FlowComponent>(
-					new StackList( getHyperlinksForAllDayEvent( eventTitle, beginDate, endDate, description ).Select( i => i.ToComponentListItem() ) ) )
-				.Materialize() );
+						.Append( new SideComments( "For import into any calendar".ToComponents() ) )
+						.Materialize() ).Append( new Paragraph( new ImportantContent( "Or add event to:".ToComponents() ).ToCollection() ) )
+				.Append<FlowComponent>( new StackList( hyperlinks.Select( i => i.ToComponentListItem() ) ) )
+				.Materialize(),
+			menuTitle: "Please choose an option" );
 
 	private static EwfResponse getICalendarResponse( string eventTitle, ZonedDateTime beginDateAndTime, ZonedDateTime endDateAndTime, string description ) {
 		var calendar = new Calendar();
