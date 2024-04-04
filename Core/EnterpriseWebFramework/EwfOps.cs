@@ -411,6 +411,9 @@ public static class EwfOps {
 										icons.Add( ( favicon, "icon", "" ) );
 									}
 
+									if( !icons.Any() )
+										// see https://stackoverflow.com/a/62258760/35349
+										icons.Add( ( new ExternalResource( "data:," ), "icon", "" ) );
 									return icons;
 								},
 								hideWarnings => {
