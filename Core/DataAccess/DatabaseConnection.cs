@@ -302,7 +302,7 @@ public class DatabaseConnection {
 						throw;
 				}
 				catch( InvalidOperationException ) {
-					// This means that the transaction had already been rolled back (by SQL, due to high error severity, as above).
+					// This means that the transaction has already been rolled back (by SQL Server or MySQL, due to high error severity, as above).
 					if( savepoints is not null ) {
 						rollbackWasToLastSavepoint = false;
 						savepoint = null;
@@ -389,7 +389,8 @@ public class DatabaseConnection {
 	private void executeText( string commandText ) {
 		var command = databaseInfo.CreateCommand();
 		command.CommandText = commandText;
-		ExecuteNonQueryCommand( command );
+		prepareCommandForExecution( command, false );
+		command.ExecuteNonQuery();
 	}
 
 	private Exception createConnectionException( string action, Exception innerException ) =>
@@ -412,10 +413,7 @@ public class DatabaseConnection {
 		assertCurrentTransactionUsable();
 
 		try {
-			cmd.Connection = cn;
-			if( tx != null )
-				cmd.Transaction = tx;
-			cmd.CommandTimeout = isLongRunning ? 0 : defaultCommandTimeout;
+			prepareCommandForExecution( cmd, isLongRunning );
 			return cmd.ExecuteNonQuery();
 		}
 		catch( Exception e ) {
@@ -434,10 +432,7 @@ public class DatabaseConnection {
 		assertCurrentTransactionUsable();
 
 		try {
-			cmd.Connection = cn;
-			if( tx != null )
-				cmd.Transaction = tx;
-			cmd.CommandTimeout = isLongRunning ? 0 : defaultCommandTimeout;
+			prepareCommandForExecution( cmd, isLongRunning );
 			return cmd.ExecuteScalar();
 		}
 		catch( Exception e ) {
@@ -473,10 +468,7 @@ public class DatabaseConnection {
 		assertCurrentTransactionUsable();
 
 		try {
-			command.Connection = cn;
-			if( tx != null )
-				command.Transaction = tx;
-			command.CommandTimeout = isLongRunning ? 0 : defaultCommandTimeout;
+			prepareCommandForExecution( command, isLongRunning );
 
 			using var reader = command.ExecuteReader( behavior );
 			readerMethod( reader );
@@ -484,6 +476,13 @@ public class DatabaseConnection {
 		catch( Exception e ) {
 			throw createCommandException( command, e );
 		}
+	}
+
+	private void prepareCommandForExecution( DbCommand command, bool isLongRunning ) {
+		command.Connection = cn;
+		if( tx is not null )
+			command.Transaction = tx;
+		command.CommandTimeout = isLongRunning ? 0 : defaultCommandTimeout;
 	}
 
 	private Exception createCommandException( DbCommand command, Exception innerException ) {
