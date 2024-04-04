@@ -47,16 +47,20 @@ public class FormItem {
 	public IReadOnlyCollection<FlowComponent> Content => content;
 
 	/// <summary>
-	/// Creates a collection of components representing this form item.
-	/// This can be used to display a form item without a <see cref="FormItemList"/>.
+	/// Creates a component representing this form item, and returns it as a single-element collection. This can be used to display a form item without a
+	/// <see cref="FormItemList"/>.
 	/// </summary>
-	public IReadOnlyCollection<FlowComponent> ToComponentCollection( bool omitLabel = false, IReadOnlyCollection<EtherealComponent>? etherealContent = null ) =>
+	/// <param name="classes">The classes on the element.</param>
+	/// <param name="omitLabel"></param>
+	/// <param name="etherealContent"></param>
+	public IReadOnlyCollection<FlowComponent>
+		ToComponentCollection( ElementClassSet? classes = null, bool omitLabel = false, IReadOnlyCollection<EtherealComponent>? etherealContent = null ) =>
 		new FlowIdContainer(
 			new DisplayableElement(
 				context => new DisplayableElementData(
 					Setup.DisplaySetup,
 					() => ListErrorDisplayStyle.GetErrorFocusableElementLocalData( context, "div", ErrorSourceSet, null ),
-					classes: itemClass,
+					classes: itemClass.Add( classes ?? ElementClassSet.Empty ),
 					children: ( !label.Any() || omitLabel
 						            ? Enumerable.Empty<PhrasingComponent>()
 						            : new GenericPhrasingContainer( label, classes: labelClass ).ToCollection<PhrasingComponent>() )
