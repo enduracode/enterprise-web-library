@@ -1,8 +1,4 @@
-﻿using System.Linq;
-using EnterpriseWebLibrary.EnterpriseWebFramework;
-using Tewl.Tools;
-
-// EwlPage
+﻿// EwlPage
 
 namespace EnterpriseWebLibrary.Website.TestPages {
 	partial class HtmlEditing {
@@ -10,13 +6,13 @@ namespace EnterpriseWebLibrary.Website.TestPages {
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
 				PostBack.CreateFull().ToCollection(),
 				() => new UiPageContent( contentFootActions: new ButtonSetup( "Post Back" ).ToCollection() ).Add(
-					new HtmlBlockEditor( null, id => {}, out var mod ).ToFormItem( label: Enumerable.Empty<PhrasingComponent>().Materialize() )
+					new WysiwygHtmlEditor( "", true, ( _, _ ) => {} ).ToFormItem( label: Enumerable.Empty<PhrasingComponent>().Materialize() )
 						.ToComponentCollection() ) );
 	}
 }
 
 namespace EnterpriseWebLibrary.Website.TestPages {
-partial class HtmlEditing {
-protected override UrlHandler getUrlParent() => new LegacyUrlFolderSetup();
-}
+	partial class HtmlEditing {
+		protected override UrlHandler getUrlParent() => new LegacyUrlFolderSetup();
+	}
 }
