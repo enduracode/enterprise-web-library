@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Configuration.InstallationStandard;
-using EnterpriseWebLibrary.Configuration.SystemDevelopment;
 using EnterpriseWebLibrary.DevelopmentUtility.Configuration.Packaging;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.InstallationSupportUtility;
@@ -449,20 +448,19 @@ internal class ExportLogic: Operation {
 	}
 
 	private void packageWebApps( DevelopmentInstallation installation, string serverSideLogicFolderPath ) {
-		foreach( var webProject in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects ?? Enumerable.Empty<WebProject>() ) {
-			publishApp(
-				EwlStatics.CombinePaths( installation.GeneralLogic.Path, webProject.name ),
-				EwlStatics.CombinePaths( serverSideLogicFolderPath, webProject.name ) );
+		foreach( var app in installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications ) {
+			var project = installation.DevelopmentInstallationLogic.DevelopmentConfiguration.GetWebProject( app.Name );
+			publishApp( EwlStatics.CombinePaths( installation.GeneralLogic.Path, app.Name ), EwlStatics.CombinePaths( serverSideLogicFolderPath, app.Name ) );
 			IoMethods.CopyFolder(
-				EwlStatics.CombinePaths( installation.GeneralLogic.Path, webProject.name, StaticFile.AppStaticFilesFolderName ),
-				EwlStatics.CombinePaths( serverSideLogicFolderPath, webProject.name, StaticFile.AppStaticFilesFolderName ),
+				EwlStatics.CombinePaths( installation.GeneralLogic.Path, app.Name, StaticFile.AppStaticFilesFolderName ),
+				EwlStatics.CombinePaths( serverSideLogicFolderPath, app.Name, StaticFile.AppStaticFilesFolderName ),
 				false );
 			IoMethods.DeleteFolder(
-				EwlStatics.CombinePaths( serverSideLogicFolderPath, webProject.name, StaticFile.AppStaticFilesFolderName, AppStatics.StaticFileLogicFolderName ) );
+				EwlStatics.CombinePaths( serverSideLogicFolderPath, app.Name, StaticFile.AppStaticFilesFolderName, AppStatics.StaticFileLogicFolderName ) );
 			File.WriteAllText(
-				EwlStatics.CombinePaths( serverSideLogicFolderPath, webProject.name, "web.config" ),
+				EwlStatics.CombinePaths( serverSideLogicFolderPath, app.Name, "web.config" ),
 				File.ReadAllText( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "Web Project Configuration", "web.config" ) )
-					.Replace( "@@AssemblyPath", @".\{0}.exe".FormatWith( webProject.NamespaceAndAssemblyName ) )
+					.Replace( "@@AssemblyPath", @".\{0}.exe".FormatWith( project.NamespaceAndAssemblyName ) )
 					.Replace( "@@InitializationTimeoutSeconds", EwfOps.InitializationTimeoutSeconds.ToString() ),
 				Encoding.UTF8 );
 		}

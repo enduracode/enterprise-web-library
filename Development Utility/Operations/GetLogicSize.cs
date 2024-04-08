@@ -1,5 +1,4 @@
 ﻿using EnterpriseWebLibrary.Configuration;
-using EnterpriseWebLibrary.Configuration.SystemDevelopment;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
 using NDepend;
@@ -47,13 +46,14 @@ internal class GetLogicSize: Operation {
 				installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName + ".dll" )
 			.ToCollection()
 			.Concat(
-				from i in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects ?? Enumerable.Empty<WebProject>()
+				from app in installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications
+				let project = installation.DevelopmentInstallationLogic.DevelopmentConfiguration.GetWebProject( app.Name )
 				select
 					EwlStatics.CombinePaths(
 						installation.GeneralLogic.Path,
-						i.name,
+						app.Name,
 						ConfigurationStatics.GetProjectOutputFolderPath( debug, runtimeIdentifier: "win-x64" ),
-						i.NamespaceAndAssemblyName + ".dll" ) )
+						project.NamespaceAndAssemblyName + ".dll" ) )
 			.Concat(
 				from i in installation.ExistingInstallationLogic.RuntimeConfiguration.WindowsServices
 				select EwlStatics.CombinePaths( installation.ExistingInstallationLogic.GetWindowsServiceFolderPath( i, debug ), i.NamespaceAndAssemblyName + ".exe" ) )

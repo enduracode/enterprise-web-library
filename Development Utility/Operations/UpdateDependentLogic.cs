@@ -145,8 +145,8 @@ internal class UpdateDependentLogic: Operation {
 					writer.WriteLine( "}" );
 				} );
 		generateLibraryCode( installation );
-		foreach( var webProject in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects ?? Enumerable.Empty<WebProject>() )
-			generateWebProjectCode( installation, webProject );
+		foreach( var i in installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications.Select( ( app, index ) => ( app, index ) ) )
+			generateWebProjectCode( installation, i.app, i.index );
 		foreach( var service in installation.ExistingInstallationLogic.RuntimeConfiguration.WindowsServices )
 			generateWindowsServiceCode( installation, service );
 		foreach( var project in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.ServerSideConsoleProjectsNonNullable )
@@ -196,7 +196,7 @@ internal class UpdateDependentLogic: Operation {
 						fileName + FileExtensions.Xsd ) );
 
 		// If web projects exist for this installation, copy in web-framework static files.
-		else if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects is not null ) {
+		else if( installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications.Any() ) {
 			var webFrameworkStaticFilesFolderPath = EwlStatics.CombinePaths(
 				installation.GeneralLogic.Path,
 				InstallationFileStatics.WebFrameworkStaticFilesFolderName );
@@ -338,8 +338,8 @@ internal class UpdateDependentLogic: Operation {
 		writer.WriteLine( "}" );
 	}
 
-	private void generateWebProjectCode( DevelopmentInstallation installation, WebProject project ) {
-		var application = installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications.Single( i => i.Name == project.name );
+	private void generateWebProjectCode( DevelopmentInstallation installation, WebApplication application, int index ) {
+		var project = installation.DevelopmentInstallationLogic.DevelopmentConfiguration.GetWebProject( application.Name );
 
 		Directory.CreateDirectory( EwlStatics.CombinePaths( application.Path, StaticFile.AppStaticFilesFolderName ) );
 
@@ -410,6 +410,8 @@ internal class UpdateDependentLogic: Operation {
 		File.WriteAllText(
 			EwlStatics.CombinePaths( application.Path, @"Properties\launchSettings.json" ),
 			File.ReadAllText( EwlStatics.CombinePaths( configurationFilesFolderPath, "launchSettings.json" ) )
+				.Replace( "@@NonsecurePort", ( 44311 + index * 2 ).ToString() )
+				.Replace( "@@SecurePort", ( 44310 + index * 2 ).ToString() )
 				.Replace(
 					"@@Path",
 					installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName +
@@ -694,14 +696,14 @@ internal class UpdateDependentLogic: Operation {
 		writer.WriteLine( "Library/Directory.Build.props" );
 		writer.WriteLine( "Library/Generated Code/" );
 
-		foreach( var webProject in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects ?? Enumerable.Empty<WebProject>() ) {
+		foreach( var app in installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications ) {
 			writer.WriteLine();
-			writer.WriteLine( webProject.name + "/bin/" );
-			writer.WriteLine( webProject.name + "/obj/" );
-			writer.WriteLine( webProject.name + "/web.config" );
-			writer.WriteLine( webProject.name + "/Directory.Build.props" );
-			writer.WriteLine( webProject.name + "/Generated Code/" );
-			writer.WriteLine( webProject.name + "/Properties/launchSettings.json" );
+			writer.WriteLine( app.Name + "/bin/" );
+			writer.WriteLine( app.Name + "/obj/" );
+			writer.WriteLine( app.Name + "/web.config" );
+			writer.WriteLine( app.Name + "/Directory.Build.props" );
+			writer.WriteLine( app.Name + "/Generated Code/" );
+			writer.WriteLine( app.Name + "/Properties/launchSettings.json" );
 		}
 
 		foreach( var service in installation.ExistingInstallationLogic.RuntimeConfiguration.WindowsServices ) {

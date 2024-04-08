@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
+﻿namespace EnterpriseWebLibrary.Configuration.SystemDevelopment;
 
-namespace EnterpriseWebLibrary.Configuration.SystemDevelopment {
-	partial class SystemDevelopmentConfiguration {
-		public IEnumerable<ServerSideConsoleProject> ServerSideConsoleProjectsNonNullable {
-			get { return serverSideConsoleProjects ?? new ServerSideConsoleProject[ 0 ]; }
-		}
-	}
+partial class SystemDevelopmentConfiguration {
+	public WebProject GetWebProject( string name ) => webProjects.Single( i => string.Equals( i.name, name, StringComparison.Ordinal ) );
+
+	public IEnumerable<ServerSideConsoleProject> ServerSideConsoleProjectsNonNullable =>
+		serverSideConsoleProjects ?? Enumerable.Empty<ServerSideConsoleProject>();
 }

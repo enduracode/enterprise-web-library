@@ -1,5 +1,4 @@
 #nullable disable
-using System.Collections.Immutable;
 using EnterpriseWebLibrary.Configuration.InstallationStandard;
 using EnterpriseWebLibrary.Configuration.SystemGeneral;
 using EnterpriseWebLibrary.DatabaseSpecification;
@@ -126,34 +125,38 @@ public class InstallationConfiguration {
 		installationStandardConfiguration = XmlOps.DeserializeFromFile<InstallationStandardConfiguration>( installationStandardConfigurationFilePath, false );
 
 
-		var systemWebApplicationElements = systemGeneralConfiguration.WebApplications ?? new SystemGeneralConfigurationApplication[ 0 ];
-		webApplications = ( from systemElement in systemWebApplicationElements
-		                    let name = systemElement.Name
-		                    let supportsSecureConnections = systemElement.SupportsSecureConnections
-		                    select isDevelopmentInstallation
-			                           ?
-			                           new WebApplication(
-				                           name,
-				                           installationPath,
-				                           supportsSecureConnections,
-				                           SystemShortName,
-				                           systemWebApplicationElements.AtLeast( 2 ),
-				                           systemDevelopmentConfiguration.webProjects.Single( i => i.name == name ) )
-			                           : InstallationType == InstallationType.Live
-				                           ? new WebApplication(
-					                           name,
-					                           installationPath,
-					                           supportsSecureConnections,
-					                           LiveInstallationConfiguration.WebApplications.Single( i => i.Name == name ),
-					                           FullShortName,
-					                           systemWebApplicationElements.AtLeast( 2 ) )
-				                           : new WebApplication(
-					                           name,
-					                           installationPath,
-					                           true,
-					                           IntermediateInstallationConfiguration.WebApplications.Single( i => i.Name == name ),
-					                           FullShortName,
-					                           systemWebApplicationElements.AtLeast( 2 ) ) ).ToImmutableArray();
+		var systemWebApplicationElements = systemGeneralConfiguration.WebApplications ?? Enumerable.Empty<SystemGeneralConfigurationApplication>();
+		webApplications = systemWebApplicationElements.Select(
+				( element, index ) => {
+					var name = element.Name;
+					var supportsSecureConnections = element.SupportsSecureConnections;
+					return isDevelopmentInstallation
+						       ?
+						       new WebApplication(
+							       name,
+							       installationPath,
+							       supportsSecureConnections,
+							       index,
+							       SystemShortName,
+							       systemWebApplicationElements.AtLeast( 2 ),
+							       systemDevelopmentConfiguration.GetWebProject( name ) )
+						       : InstallationType == InstallationType.Live
+							       ? new WebApplication(
+								       name,
+								       installationPath,
+								       supportsSecureConnections,
+								       LiveInstallationConfiguration.WebApplications.Single( i => i.Name == name ),
+								       FullShortName,
+								       systemWebApplicationElements.AtLeast( 2 ) )
+							       : new WebApplication(
+								       name,
+								       installationPath,
+								       true,
+								       IntermediateInstallationConfiguration.WebApplications.Single( i => i.Name == name ),
+								       FullShortName,
+								       systemWebApplicationElements.AtLeast( 2 ) );
+				} )
+			.Materialize();
 
 		// installation custom configuration
 		installationCustomConfigurationFilePath = EwlStatics.CombinePaths( installationConfigurationFolderPath, "Custom" + FileExtensions.Xml );

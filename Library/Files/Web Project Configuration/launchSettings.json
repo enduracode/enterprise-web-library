@@ -11,7 +11,7 @@
     "Kestrel": {
       "commandName": "Project",
       "launchBrowser": true,
-      "applicationUrl": "https://localhost:44310;http://localhost:44311",
+      "applicationUrl": "https://localhost:@@SecurePort;http://localhost:@@NonsecurePort",
       "dotnetRunMessages": true
     },
     "IIS": {

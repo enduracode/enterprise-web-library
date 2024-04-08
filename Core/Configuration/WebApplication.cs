@@ -25,7 +25,7 @@ public class WebApplication {
 	internal readonly DefaultCookieAttributes DefaultCookieAttributes;
 
 	internal WebApplication(
-		string name, string installationPath, bool supportsSecureConnections, string systemShortName, bool systemHasMultipleWebApplications,
+		string name, string installationPath, bool supportsSecureConnections, int index, string systemShortName, bool systemHasMultipleWebApplications,
 		WebProject configuration ) {
 		Name = name;
 		Path = EwlStatics.CombinePaths( installationPath, name );
@@ -37,8 +37,8 @@ public class WebApplication {
 		// We must pass values for all components since we will not have defaults to fall back on when getting the URL string for this object.
 		DefaultBaseUrl = new BaseUrl(
 			"localhost",
-			UsesKestrel.Value ? 44311 : 80,
-			UsesKestrel.Value ? 44310 : 443,
+			UsesKestrel.Value ? 44311 + index * 2 : 80,
+			UsesKestrel.Value ? 44310 + index * 2 : 443,
 			systemShortName + ( systemHasMultipleWebApplications ? name.EnglishToPascal() : "" ) );
 
 		var cookieAttributes = configuration.DefaultCookieAttributes;
