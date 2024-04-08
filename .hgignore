@@ -33,6 +33,7 @@ Website/bin/
 Website/obj/
 Website/web.config
 Website/Directory.Build.props
+Website/Directory.Build.targets
 Website/Generated Code/
 Website/Properties/launchSettings.json
 

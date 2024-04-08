@@ -405,6 +405,12 @@ internal class UpdateDependentLogic: Operation {
 				throw new UserCorrectableException( message, e );
 			throw new ApplicationException( message, e );
 		}
+		using( var writer = new StreamWriter( EwlStatics.CombinePaths( application.Path, "Directory.Build.targets" ), false, Encoding.UTF8 ) ) {
+			writer.WriteLine( "<Project>" );
+			writer.WriteLine( """<ItemGroup><Content Remove="web.config" /></ItemGroup>""" );
+			writer.WriteLine( """<ItemGroup><None Include="web.config" /></ItemGroup>""" );
+			writer.WriteLine( "</Project>" );
+		}
 
 		Directory.CreateDirectory( EwlStatics.CombinePaths( application.Path, "Properties" ) );
 		File.WriteAllText(
@@ -702,6 +708,7 @@ internal class UpdateDependentLogic: Operation {
 			writer.WriteLine( app.Name + "/obj/" );
 			writer.WriteLine( app.Name + "/web.config" );
 			writer.WriteLine( app.Name + "/Directory.Build.props" );
+			writer.WriteLine( app.Name + "/Directory.Build.targets" );
 			writer.WriteLine( app.Name + "/Generated Code/" );
 			writer.WriteLine( app.Name + "/Properties/launchSettings.json" );
 		}
