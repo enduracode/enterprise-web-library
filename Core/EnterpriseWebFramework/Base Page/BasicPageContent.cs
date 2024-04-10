@@ -213,6 +213,8 @@ public sealed class BasicPageContent: PageContent {
 										BasePageStatics.AppProvider.AppDisplayName.Length > 0
 											? BasePageStatics.AppProvider.AppDisplayName
 											: ConfigurationStatics.SystemDisplayName ) )
+								.Append( getLink( "https://fonts.googleapis.com", "preconnect" ) )
+								.Append( getLink( "https://fonts.gstatic.com", "preconnect", attributes: new ElementAttribute( "crossorigin" ).ToCollection() ) )
 								.Concat( getTypekitLogicIfNecessary() )
 								.Concat( from i in cssInfoCreator( contentObjects ) select getStyleSheetLink( i.GetUrl() ) )
 								.Append( getModernizrLogic() )
