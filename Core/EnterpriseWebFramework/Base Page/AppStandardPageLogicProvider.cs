@@ -1,5 +1,4 @@
-﻿#nullable disable
-namespace EnterpriseWebLibrary.EnterpriseWebFramework;
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 /// <summary>
 /// Application-specific logic for the standard functionality in all pages.
@@ -15,7 +14,7 @@ public abstract class AppStandardPageLogicProvider {
 	/// loadData call on post-back requests, and we provide no mechanism to do this because it would allow developers to accidentally cause false user
 	/// concurrency errors by modifying data that affects the rendering of the page.
 	/// </summary>
-	protected internal virtual Action GetPageViewDataModificationMethod() => null;
+	protected internal virtual Action? GetPageViewDataModificationMethod() => null;
 
 	/// <summary>
 	/// Gets the display name of the application, which will be included in the title of all pages.
@@ -26,6 +25,11 @@ public abstract class AppStandardPageLogicProvider {
 	/// Gets the Typekit Kit ID. Never returns null.
 	/// </summary>
 	protected internal virtual string TypekitId => "";
+
+	/// <summary>
+	/// Returns a sequence of Google Fonts family specifications needed by the application. See https://developers.google.com/fonts/docs/css2.
+	/// </summary>
+	protected internal virtual IEnumerable<string>? GetGoogleFontsFamilySpecifications() => null;
 
 	/// <summary>
 	/// Creates and returns a list of custom style sheets that should be used on all EWF pages, including those not using the EWF user interface.
@@ -55,12 +59,12 @@ public abstract class AppStandardPageLogicProvider {
 	/// <summary>
 	/// Gets the favicon to be used for Chrome Application shortcuts.
 	/// </summary>
-	protected internal virtual ResourceInfo FaviconPng48X48 => null;
+	protected internal virtual ResourceInfo? FaviconPng48X48 => null;
 
 	/// <summary>
 	/// Gets the favicon. See http://en.wikipedia.org/wiki/Favicon.
 	/// </summary>
-	protected internal virtual ResourceInfo Favicon => null;
+	protected internal virtual ResourceInfo? Favicon => null;
 
 	/// <summary>
 	/// Gets the function call that should be executed when the jQuery document ready event is fired for any page in the application.

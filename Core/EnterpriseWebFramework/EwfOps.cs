@@ -324,9 +324,17 @@ public static class EwfOps {
 									var contentUsesUi = contentObjects.Any( i => i is UiPageContent );
 
 									var cssInfos = new List<ResourceInfo>();
+
 									cssInfos.Add(
 										new ExternalResource(
-											"//fonts.googleapis.com/css2?family=Libre+Franklin:wght@500;600;700&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400&family=Roboto+Mono&display=fallback" ) );
+											"https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@500;600;700&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400&family=Roboto+Mono&display=fallback" ) );
+									var fontFamilies = BasePageStatics.AppProvider.GetGoogleFontsFamilySpecifications();
+									if( fontFamilies is not null ) {
+										var familyParameters = StringTools.ConcatenateWithDelimiter( "&", fontFamilies.Select( i => "family=" + i ) );
+										if( familyParameters.Length > 0 )
+											cssInfos.Add( new ExternalResource( $"https://fonts.googleapis.com/css2?{familyParameters}&display=fallback" ) );
+									}
+
 									cssInfos.Add( new ExternalResource( "//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" ) );
 									cssInfos.Add( new StaticFiles.Versioned.Third_party.Jquery_ui.Jquery_ui_1132custom_v2.Jquery_uiminCss() );
 									cssInfos.Add( new ExternalResource( "//cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css" ) );
