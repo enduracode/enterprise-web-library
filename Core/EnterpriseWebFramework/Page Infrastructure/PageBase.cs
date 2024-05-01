@@ -675,27 +675,7 @@ public abstract class PageBase: ResourceBase {
 		if( newlyQueriedUser == null || newlyQueriedUser.LastRequestTime > user.LastRequestTime )
 			return null;
 
-		return () => {
-			void updateUser() {
-				UserManagementStatics.SystemProvider.InsertOrUpdateUser( user.UserId, user.Email, user.Role.RoleId, EwfRequest.Current.RequestTime );
-			}
-			if( ConfigurationStatics.DatabaseExists )
-				DataAccessState.Current.PrimaryDatabaseConnection.ExecuteInTransaction(
-					() => {
-						try {
-							updateUser();
-						}
-						catch( DbConcurrencyException ) {
-							// Since this method is called on every page request, concurrency errors are common. They are caused when an authenticated user makes one request
-							// and then makes another before ASP.NET has finished processing the first. Since we are only updating the last request date and time, we don’t
-							// need to get an error email if the update fails.
-							throw new DoNotCommitException();
-						}
-					},
-					createSavepointIfAlreadyInTransaction: true );
-			else
-				updateUser();
-		};
+		return () => UserManagementStatics.SystemProvider.InsertOrUpdateUser( user.UserId, user.Email, user.Role.RoleId, EwfRequest.Current.RequestTime );
 	}
 
 	// The warning below also appears on AppStandardPageLogicProvider.GetPageViewDataModificationMethod.
