@@ -1,3 +1,5 @@
+using EnterpriseWebLibrary.DatabaseSpecification.Databases;
+
 namespace EnterpriseWebLibrary.DataAccess.CommandWriting.Commands;
 
 /// <summary>
@@ -30,21 +32,17 @@ public class InlineInsert: InlineDbModificationCommand {
 	public object? Execute( DatabaseConnection cn, bool isLongRunning = false ) {
 		var cmd = cn.DatabaseInfo.CreateCommand();
 		cmd.CommandText = "INSERT INTO " + table;
-		if( columnModifications.Count == 0 )
+		if( columnModifications.Count is 0 && cn.DatabaseInfo is not MySqlInfo )
 			cmd.CommandText += " DEFAULT VALUES";
 		else {
-			cmd.CommandText += " ( ";
-			foreach( var columnMod in columnModifications )
-				cmd.CommandText += columnMod.GetColumnIdentifier( cn.DatabaseInfo ) + ", ";
-			cmd.CommandText = cmd.CommandText.Substring( 0, cmd.CommandText.Length - 2 );
-			cmd.CommandText += " ) VALUES( ";
-			foreach( var columnMod in columnModifications ) {
-				var parameter = columnMod.GetParameter();
-				cmd.CommandText += parameter.GetNameForCommandText( cn.DatabaseInfo ) + ", ";
+			var parameterNames = new List<string>( columnModifications.Count );
+			foreach( var parameter in columnModifications.Select( i => i.GetParameter() ) ) {
 				cmd.Parameters.Add( parameter.GetAdoDotNetParameter( cn.DatabaseInfo ) );
+				parameterNames.Add( parameter.GetNameForCommandText( cn.DatabaseInfo ) );
 			}
-			cmd.CommandText = cmd.CommandText.Substring( 0, cmd.CommandText.Length - 2 );
-			cmd.CommandText += " )";
+
+			cmd.CommandText += " ( " + StringTools.ConcatenateWithDelimiter( ", ", columnModifications.Select( i => i.GetColumnIdentifier( cn.DatabaseInfo ) ) ) +
+			                   " ) VALUES( " + StringTools.ConcatenateWithDelimiter( ", ", parameterNames ) + " )";
 		}
 		cn.ExecuteNonQueryCommand( cmd, isLongRunning: isLongRunning );
 
