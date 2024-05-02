@@ -61,15 +61,11 @@ public class MySqlInfo: DatabaseInfo {
 		return factory!.Value.CreateParameter()!;
 	}
 
-	string DatabaseInfo.GetDbTypeString( object databaseSpecificType ) {
-		return Enum.GetName( factory!.Value.GetType().Assembly.GetType( "MySql.Data.MySqlClient.MySqlDbType" )!, databaseSpecificType )!;
-	}
+	string DatabaseInfo.GetDbTypeString( object databaseSpecificType ) =>
+		Enum.GetName( factory!.Value.GetType().Assembly.GetType( "MySqlConnector.MySqlDbType" )!, databaseSpecificType )!;
 
 	void DatabaseInfo.SetParameterType( DbParameter parameter, string dbTypeString ) {
 		var mySqlDbTypeProperty = parameter.GetType().GetProperty( "MySqlDbType" )!;
-		mySqlDbTypeProperty.SetValue(
-			parameter,
-			Enum.Parse( factory!.Value.GetType().Assembly.GetType( "MySql.Data.MySqlClient.MySqlDbType" )!, dbTypeString ),
-			null );
+		mySqlDbTypeProperty.SetValue( parameter, Enum.Parse( factory!.Value.GetType().Assembly.GetType( "MySqlConnector.MySqlDbType" )!, dbTypeString ), null );
 	}
 }

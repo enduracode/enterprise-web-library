@@ -12,7 +12,8 @@ internal class Column {
 	/// <summary>
 	/// If includeKeyInfo is true, all key columns for involved tables will be returned even if they were not selected.
 	/// </summary>
-	internal static IReadOnlyCollection<Column> GetColumnsInQueryResults( DatabaseConnection cn, string commandText, bool includeKeyInfo, bool validateStringColumns ) {
+	internal static IReadOnlyCollection<Column> GetColumnsInQueryResults(
+		DatabaseConnection cn, string commandText, bool includeKeyInfo, bool validateStringColumns ) {
 		var columns = new List<Column>();
 
 		var cmd = DataAccessStatics.GetCommandFromRawQueryText( cn, commandText );
@@ -42,10 +43,6 @@ internal class Column {
 
 	private Column( DataRow schemaTableRow, bool includeKeyInfo, bool validateIfString, List<Action> validationMethods, DatabaseInfo databaseInfo ) {
 		ordinal = (int)schemaTableRow[ "ColumnOrdinal" ];
-
-		// MySQL incorrectly uses one-based ordinals; see http://bugs.mysql.com/bug.php?id=61477.
-		if( databaseInfo is MySqlInfo )
-			ordinal -= 1;
 
 		var dbTypeString = databaseInfo.GetDbTypeString( schemaTableRow[ "ProviderType" ] );
 		valueContainer = new ValueContainer(

@@ -58,10 +58,10 @@ public class DatabaseConnection {
 			connectionString += "; Connect Timeout={0}".FormatWith( timeout );
 		}
 		else if( databaseInfo is MySqlInfo mySqlInfo ) {
-			connectionString = "Server=localhost; UserID=root; Password=password; Database=" + mySqlInfo.Database;
+			connectionString = "Server=localhost; User ID=root; Password=password; Database=" + mySqlInfo.Database;
 			if( !mySqlInfo.SupportsConnectionPooling )
 				connectionString += "; Pooling=false";
-			connectionString += "; ConnectionTimeout={0}".FormatWith( timeout );
+			connectionString += "; Connection Timeout={0}".FormatWith( timeout );
 		}
 		else if( databaseInfo is OracleInfo oracleInfo ) {
 			connectionString = "Data Source=" + oracleInfo.DataSource + "; User Id=" + oracleInfo.UserAndSchema + "; Password=" + oracleInfo.Password +
