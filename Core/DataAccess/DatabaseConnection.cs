@@ -510,9 +510,13 @@ public class DatabaseConnection {
 			return new Exception( getCommandExceptionMessage( command, "Error number: " + errorNumber + "." ), innerException );
 		}
 
-		if( databaseInfo is MySqlInfo )
+		if( databaseInfo is MySqlInfo ) {
+			if( innerException.Message.Contains( "Lock wait timeout exceeded", StringComparison.Ordinal ) )
+				return new DbConcurrencyException( getCommandExceptionMessage( command, "A concurrency error occurred." ), innerException );
+
 			if( innerException.Message.Contains( "Command Timeout expired", StringComparison.Ordinal ) )
 				return new DbCommandTimeoutException( getCommandExceptionMessage( command, "A command timeout occurred." ), innerException );
+		}
 
 		if( databaseInfo is OracleInfo ) {
 			// ORA-00060 is the code for deadlock. ORA-08177 happens when we attempt to update a row that has changed since the transaction began.
