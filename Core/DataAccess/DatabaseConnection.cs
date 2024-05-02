@@ -530,7 +530,11 @@ public class DatabaseConnection {
 	private string getCommandExceptionMessage( DbCommand command, string customMessage ) {
 		using var sw = new StringWriter();
 		sw.WriteLine(
-			"Failed to execute a command against the " + DataAccessMethods.GetDbName( databaseInfo ) + " database. " + customMessage + " Command details:" );
+			StringTools.ConcatenateWithDelimiter(
+				" ",
+				$"Failed to execute a command against the {DataAccessMethods.GetDbName( databaseInfo )} database.",
+				customMessage,
+				"Command details:" ) );
 		sw.WriteLine();
 		sw.WriteLine( "Type: " + command.CommandType );
 		sw.WriteLine( "Text: " + command.CommandText );
