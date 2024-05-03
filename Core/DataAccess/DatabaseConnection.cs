@@ -523,6 +523,9 @@ public class DatabaseConnection {
 			if( new[] { "ORA-00060", "ORA-08177" }.Any( i => innerException.Message.Contains( i ) ) )
 				return new DbConcurrencyException( getCommandExceptionMessage( command, "A concurrency error occurred." ), innerException );
 
+			if( innerException.Message.Contains( "ORA-01013", StringComparison.Ordinal ) )
+				return new DbCommandTimeoutException( getCommandExceptionMessage( command, "A command timeout occurred." ), innerException );
+
 			// This has happened on RLE servers when Dave Foss has manually shut down Oracle.
 			if( innerException.Message.Contains( "ORA-01109" ) )
 				return new DbConnectionFailureException( getCommandExceptionMessage( command, "Failed to connect to Oracle." ), innerException );
