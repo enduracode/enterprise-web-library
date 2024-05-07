@@ -41,7 +41,7 @@ public static class AppMemoryCache {
 				// We need to schedule the next tick even if there is an exception thrown in this one. Use try-finally instead of CallEveryMethod so we don't lose
 				// exception stack traces.
 				try {
-					foreach( var key in periodicEvictionKeys! ) {
+					foreach( var key in periodicEvictionKeys!.Distinct() ) {
 						if( cache.Get( key ) is not PeriodicEvictionCompositeCacheEntry entry )
 							continue;
 
