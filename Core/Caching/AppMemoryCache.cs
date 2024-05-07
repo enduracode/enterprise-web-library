@@ -42,9 +42,7 @@ public static class AppMemoryCache {
 				// exception stack traces.
 				try {
 					foreach( var key in periodicEvictionKeys! ) {
-						if( cache.Get( key ) is not Lazy<object> entryWrapper )
-							continue;
-						if( entryWrapper.Value is not PeriodicEvictionCompositeCacheEntry entry )
+						if( cache.Get( key ) is not PeriodicEvictionCompositeCacheEntry entry )
 							continue;
 
 						entry.EvictOldEntries();
