@@ -39,7 +39,7 @@ internal static class TableStatics {
 								i => new Checkbox(
 									false,
 									Enumerable.Empty<PhrasingComponent>().Materialize(),
-									validationMethod: ( postBackValue, validator ) => {
+									validationMethod: ( postBackValue, _ ) => {
 										if( postBackValue.Value )
 											groupSelectedItemIds.Add( i().Setup.Id.Value );
 									} ).PageComponent )
@@ -70,7 +70,7 @@ internal static class TableStatics {
 					      } ) );
 
 		if( selectedItemIds != null )
-			new EwfValidation( validator => selectedItemIds.Value = selectedItemData.ItemGroupData.SelectMany( i => i.Value.selectedIds ).Materialize() );
+			new EwfValidation( _ => selectedItemIds.Value = selectedItemData.ItemGroupData.SelectMany( i => i.Value.selectedIds ).Materialize() );
 	}
 
 	internal static void AssertItemIdsUnique<ItemIdType>( IEnumerable<EwfTableItem<ItemIdType>> items ) {
@@ -100,7 +100,7 @@ internal static class TableStatics {
 		if( subCaption.Length > 0 )
 			subCaptionComponents.AddRange( new LineBreak().ToCollection().Concat( subCaption.ToComponents() ) );
 		return new DisplayableElement(
-			context => new DisplayableElementData(
+			_ => new DisplayableElementData(
 				null,
 				() => new DisplayableElementLocalData( "caption" ),
 				children: caption.ToComponents().Concat( subCaptionComponents ).Materialize() ) ).ToCollection();
@@ -130,7 +130,7 @@ internal static class TableStatics {
 	internal static FlowComponent GetColElement( EwfTableFieldOrItemSetup fieldOrItemSetup, decimal columnWidthFactor ) {
 		var width = fieldOrItemSetup.Size;
 		return new ElementComponent(
-			context => new ElementData(
+			_ => new ElementData(
 				() => new ElementLocalData(
 					"col",
 					focusDependentData: new ElementFocusDependentData(
@@ -289,7 +289,7 @@ internal static class TableStatics {
 						if( cellPlaceholderListsForItems[ itemIndex + itemSpanIndex ][ fieldIndex ] != null )
 							throw new ApplicationException( "Two cells spanning multiple fields and/or items have overlapped." );
 						cellPlaceholderListsForItems[ itemIndex + itemSpanIndex ][ fieldIndex ] = itemSpanIndex == 0 && fieldSpanIndex == 0
-							                                                                          ? (CellPlaceholder)cell
+							                                                                          ? cell
 							                                                                          : new SpaceForMultiColOrRowCell();
 					}
 					fieldIndex += 1;
