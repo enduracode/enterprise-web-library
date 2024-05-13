@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using EnterpriseWebLibrary.Configuration;
 using JetBrains.Annotations;
 using MoreLinq;
 using StackExchange.Profiling;
@@ -162,7 +163,7 @@ public static class RevisionHistoryStatics {
 	public static IReadOnlyDictionary<int, UserTransaction?> GetLatestTransactionsByEntityId<ConceptualEntityStateType, ConceptualEntityActivityType, UserType>(
 		IEnumerable<TransactionListItem<ConceptualEntityStateType, ConceptualEntityActivityType, UserType>> transactionList ) {
 		var latestRevisionTransactionsByEntityId = ImmutableDictionary<int, UserTransaction?>.Empty.ToBuilder();
-		var cutoffDateAndTime = DateTime.Now.AddMinutes( -5 );
+		var cutoffDateAndTime = DateTime.Now.AddMinutes( ConfigurationStatics.IsLiveInstallation ? -5 : -1 );
 		foreach( var i in transactionList ) {
 			if( latestRevisionTransactionsByEntityId.ContainsKey( i.ConceptualEntityId ) )
 				continue;
