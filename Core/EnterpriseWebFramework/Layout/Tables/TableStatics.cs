@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using EnterpriseWebLibrary.DataAccess.Ranking;
 using Tewl.IO;
 
@@ -10,11 +9,11 @@ internal static class TableStatics {
 	private static readonly ElementClass activatableElementContainerClass = new( "ewfAec" );
 
 	internal static void AddCheckboxes<ItemIdType>(
-		string postBackIdBase, IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions, TableSelectedItemData<ItemIdType> selectedItemData,
+		string postBackIdBase, IReadOnlyCollection<SelectedItemAction<ItemIdType>>? selectedItemActions, TableSelectedItemData<ItemIdType> selectedItemData,
 		IEnumerable<( IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions, IEnumerable<Func<EwfTableItem<ItemIdType>>> itemGetters )>
-			itemGroups, DataValue<IReadOnlyCollection<ItemIdType>> selectedItemIds, IReadOnlyCollection<DataModification> externalDataModifications ) {
+			itemGroups, DataValue<IReadOnlyCollection<ItemIdType>>? selectedItemIds, IReadOnlyCollection<DataModification> externalDataModifications ) {
 		var tablePostBackAndButtonPairs = ( selectedItemActions ?? Enumerable.Empty<SelectedItemAction<ItemIdType>>() ).Select(
-				action => action.GetPostBackAndButton( postBackIdBase, () => selectedItemData.ItemGroupData.SelectMany( i => i.Value.selectedIds ).Materialize() ) )
+				action => action.GetPostBackAndButton( postBackIdBase, () => selectedItemData.ItemGroupData.SelectMany( i => i!.Value.selectedIds ).Materialize() ) )
 			.Materialize();
 		selectedItemData.Buttons = tablePostBackAndButtonPairs.Select( i => i.button ).Materialize();
 
@@ -23,7 +22,7 @@ internal static class TableStatics {
 
 		selectedItemData.ItemGroupData = itemGroups.Select(
 				group => {
-					var groupSelectedItemIds = new List<ItemIdType>();
+					var groupSelectedItemIds = new List<ItemIdType?>();
 					var groupPostBackAndButtonPairs = group.selectedItemActions.Select( i => i.GetPostBackAndButton( postBackIdBase, () => groupSelectedItemIds ) )
 						.Materialize();
 
@@ -31,7 +30,7 @@ internal static class TableStatics {
 						.Concat( groupPostBackAndButtonPairs.Select( i => i.postBack ) )
 						.Materialize();
 					if( !dataModifications.Any() )
-						return (( IReadOnlyCollection<ButtonSetup>, EwfValidation, IReadOnlyCollection<PhrasingComponent>, List<ItemIdType> )?)null;
+						return (( IReadOnlyCollection<ButtonSetup>, EwfValidation?, IReadOnlyCollection<PhrasingComponent>, List<ItemIdType?> )?)null;
 
 					var checkboxes = FormState.ExecuteWithDataModificationsAndDefaultAction(
 						dataModifications,
@@ -41,7 +40,7 @@ internal static class TableStatics {
 									Enumerable.Empty<PhrasingComponent>().Materialize(),
 									validationMethod: ( postBackValue, _ ) => {
 										if( postBackValue.Value )
-											groupSelectedItemIds.Add( i().Setup.Id.Value );
+											groupSelectedItemIds.Add( i().Setup.Id!.Value );
 									} ).PageComponent )
 							.Materialize(),
 						formControlDefaultActionOverride: new SpecifiedValue<NonPostBackFormAction>( null ) );
@@ -65,16 +64,16 @@ internal static class TableStatics {
 				tablePostBackAndButtonPairs.Select( i => i.postBack ),
 				() => selectedItemData.Validation = new EwfValidation(
 					      validator => {
-						      if( !selectedItemData.ItemGroupData.SelectMany( i => i.Value.selectedIds ).Any() )
+						      if( !selectedItemData.ItemGroupData.SelectMany( i => i!.Value.selectedIds ).Any() )
 							      validator.NoteErrorAndAddMessage( "Please select at least one item." );
 					      } ) );
 
 		if( selectedItemIds != null )
-			new EwfValidation( _ => selectedItemIds.Value = selectedItemData.ItemGroupData.SelectMany( i => i.Value.selectedIds ).Materialize() );
+			new EwfValidation( _ => selectedItemIds.Value = selectedItemData.ItemGroupData.SelectMany( i => i!.Value.selectedIds ).Materialize() );
 	}
 
 	internal static void AssertItemIdsUnique<ItemIdType>( IEnumerable<EwfTableItem<ItemIdType>> items ) {
-		if( items.Where( i => i.Setup.Id != null ).Select( i => i.Setup.Id.Value ).GetDuplicates().Any() )
+		if( items.Where( i => i.Setup.Id is not null ).Select( i => i.Setup.Id!.Value ).GetDuplicates().Any() )
 			throw new ApplicationException( "Item IDs must be unique." );
 	}
 
@@ -107,12 +106,12 @@ internal static class TableStatics {
 	}
 
 	internal static IReadOnlyCollection<EwfTableField> GetFields<ItemIdType>(
-		IReadOnlyCollection<EwfTableField> fields, IReadOnlyCollection<EwfTableItem> headItems, IEnumerable<EwfTableItem<ItemIdType>> items ) {
+		IReadOnlyCollection<EwfTableField>? fields, IReadOnlyCollection<EwfTableItem> headItems, IEnumerable<EwfTableItem<ItemIdType>> items ) {
 		var firstSpecifiedItemCells = headItems.Select( i => i.Cells ).Concat( items.Select( i => i.Cells ) ).FirstOrDefault();
 		if( firstSpecifiedItemCells == null )
 			return Enumerable.Empty<EwfTableField>().Materialize();
 
-		if( fields != null )
+		if( fields is not null )
 			return fields;
 
 		// Set the fields up implicitly, based on the first item, if they weren't specified explicitly.
@@ -159,14 +158,14 @@ internal static class TableStatics {
 							return workbook;
 						} ) ) ) );
 
-	internal static IEnumerable<FlowComponent> GetGeneralActionList( PostBack exportToExcelPostBack, IReadOnlyCollection<ActionComponentSetup> actions ) {
-		if( exportToExcelPostBack != null )
+	internal static IEnumerable<FlowComponent> GetGeneralActionList( PostBack? exportToExcelPostBack, IReadOnlyCollection<ActionComponentSetup> actions ) {
+		if( exportToExcelPostBack is not null )
 			actions = actions.Append( new ButtonSetup( "Export to Excel", behavior: new PostBackBehavior( postBack: exportToExcelPostBack ) ) ).Materialize();
 		return GetActionList( actions );
 	}
 
 	internal static IReadOnlyCollection<FlowComponent>
-		GetItemSelectionAndActionComponents( string checkboxCellSelector, IReadOnlyCollection<ButtonSetup> buttons, EwfValidation validation ) =>
+		GetItemSelectionAndActionComponents( string checkboxCellSelector, IReadOnlyCollection<ButtonSetup> buttons, EwfValidation? validation ) =>
 		new DisplayableElement(
 				context => new DisplayableElementData(
 					null,
@@ -208,7 +207,7 @@ internal static class TableStatics {
 			classes: TableCssElementCreator.ActionListContainerClass ).ToCollection();
 	}
 
-	internal static IEnumerable<IReadOnlyCollection<PhrasingComponent>> GetReorderingControls<ItemIdType>(
+	internal static IEnumerable<IReadOnlyCollection<PhrasingComponent>?>? GetReorderingControls<ItemIdType>(
 		string postBackIdBase, bool tableIsColumnPrimary, bool enableItemReordering, bool hasExplicitItemGroups, IReadOnlyList<EwfTableItem<ItemIdType>> items ) {
 		if( !enableItemReordering ) {
 			if( items.Any( i => i.Setup.RankId.HasValue ) )
@@ -220,7 +219,7 @@ internal static class TableStatics {
 			throw new ApplicationException( "Every item must have a rank ID when item reordering is enabled." );
 
 		if( items.All( i => !i.Setup.RankId.HasValue ) )
-			return Enumerable.Repeat( (IReadOnlyCollection<PhrasingComponent>)null, items.Count );
+			return Enumerable.Repeat( (IReadOnlyCollection<PhrasingComponent>?)null, items.Count );
 
 		if( items.Any( i => !i.Setup.RankId.HasValue ) )
 			throw new ApplicationException(
@@ -238,8 +237,8 @@ internal static class TableStatics {
 								children: new FontAwesomeIcon( tableIsColumnPrimary ? "fa-chevron-circle-left" : "fa-chevron-circle-up", "fa-lg" ).ToCollection() ),
 							behavior: new PostBackBehavior(
 								postBack: PostBack.CreateFull(
-									id: PostBack.GetCompositeId( postBackIdBase, item.Setup.RankId.Value.ToString(), "up" ),
-									modificationMethod: () => RankingMethods.SwapRanks( items[ index - 1 ].Setup.RankId.Value, item.Setup.RankId.Value ) ) ) ) );
+									id: PostBack.GetCompositeId( postBackIdBase, item.Setup.RankId!.Value.ToString(), "up" ),
+									modificationMethod: () => RankingMethods.SwapRanks( items[ index - 1 ].Setup.RankId!.Value, item.Setup.RankId.Value ) ) ) ) );
 				if( index != 0 && index != items.Count - 1 )
 					components.AddRange( " ".ToComponents() );
 				if( index != items.Count - 1 )
@@ -251,16 +250,16 @@ internal static class TableStatics {
 								children: new FontAwesomeIcon( tableIsColumnPrimary ? "fa-chevron-circle-right" : "fa-chevron-circle-down", "fa-lg" ).ToCollection() ),
 							behavior: new PostBackBehavior(
 								postBack: PostBack.CreateFull(
-									id: PostBack.GetCompositeId( postBackIdBase, item.Setup.RankId.Value.ToString(), "down" ),
-									modificationMethod: () => RankingMethods.SwapRanks( item.Setup.RankId.Value, items[ index + 1 ].Setup.RankId.Value ) ) ) ) );
+									id: PostBack.GetCompositeId( postBackIdBase, item.Setup.RankId!.Value.ToString(), "down" ),
+									modificationMethod: () => RankingMethods.SwapRanks( item.Setup.RankId.Value, items[ index + 1 ].Setup.RankId!.Value ) ) ) ) );
 				return components;
 			} );
 	}
 
-	internal static List<List<CellPlaceholder>> BuildCellPlaceholderListsForItems(
+	internal static List<List<CellPlaceholder?>> BuildCellPlaceholderListsForItems(
 		IReadOnlyCollection<IReadOnlyCollection<EwfTableCell>> items, int fieldCount ) {
 		var itemIndex = 0;
-		var cellPlaceholderListsForItems = new List<List<CellPlaceholder>>();
+		var cellPlaceholderListsForItems = new List<List<CellPlaceholder?>>();
 		foreach( var itemCells in items ) {
 			// Add a list of cell placeholders for this item if necessary.
 			if( itemIndex >= cellPlaceholderListsForItems.Count )
@@ -269,7 +268,7 @@ internal static class TableStatics {
 			var cellPlaceholdersForItem = cellPlaceholderListsForItems[ itemIndex ];
 
 			// Sum the cells taken up by previous items, which can happen when cells have item span values greater than one.
-			var potentialCellPlaceholderCountForItem = cellPlaceholdersForItem.Count( cellPlaceholder => cellPlaceholder != null );
+			var potentialCellPlaceholderCountForItem = cellPlaceholdersForItem.Count( cellPlaceholder => cellPlaceholder is not null );
 
 			// Add to that the number of cells this item will take up.
 			potentialCellPlaceholderCountForItem += itemCells.Sum( cell => cell.Setup.FieldSpan );
@@ -306,15 +305,15 @@ internal static class TableStatics {
 		return cellPlaceholderListsForItems;
 	}
 
-	private static void addCellPlaceholderListForItem( List<List<CellPlaceholder>> cellPlaceholderListsForItems, int fieldCount ) {
-		var list = new List<CellPlaceholder>();
+	private static void addCellPlaceholderListForItem( List<List<CellPlaceholder?>> cellPlaceholderListsForItems, int fieldCount ) {
+		var list = new List<CellPlaceholder?>();
 		for( var i = 0; i < fieldCount; i++ )
 			list.Add( null );
 		cellPlaceholderListsForItems.Add( list );
 	}
 
 	internal static IEnumerable<FlowComponent> BuildRows(
-		List<List<CellPlaceholder>> cellPlaceholderListsForRows, IReadOnlyList<EwfTableFieldOrItemSetup> rowSetups, bool? useContrastForFirstRow,
+		List<List<CellPlaceholder?>> cellPlaceholderListsForRows, IReadOnlyList<EwfTableFieldOrItemSetup> rowSetups, bool? useContrastForFirstRow,
 		IReadOnlyList<EwfTableFieldOrItemSetup> columns, int firstDataColumnIndex, bool tableIsColumnPrimary ) {
 		return cellPlaceholderListsForRows.Select(
 			( row, rowIndex ) => {
@@ -331,11 +330,11 @@ internal static class TableStatics {
 								: Enumerable.Empty<ElementAttribute>().Materialize(),
 							rowActivationBehavior,
 							row.Select( ( cell, colIndex ) => new { Cell = cell as EwfTableCell, ColumnIndex = colIndex } )
-								.Where( cellAndIndex => cellAndIndex.Cell != null )
+								.Where( cellAndIndex => cellAndIndex.Cell is not null )
 								.Select(
 									cellAndIndex => {
 										var columnSetup = columns[ cellAndIndex.ColumnIndex ];
-										var cellSetup = cellAndIndex.Cell.Setup;
+										var cellSetup = cellAndIndex.Cell!.Setup;
 
 										var attributes = new List<ElementAttribute>();
 										var rowSpan = tableIsColumnPrimary ? cellSetup.FieldSpan : cellSetup.ItemSpan;
