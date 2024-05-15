@@ -74,7 +74,8 @@ public static class HttpClientTools {
 		if( requestIsIdempotent ) {
 			policyBuilder.OrInner<TaskCanceledException>() // timeout
 				.OrInner<HttpRequestException>( e => e.InnerException is SocketException { SocketErrorCode: SocketError.ConnectionRefused } )
-				.OrInner<HttpRequestException>( e => e.Message.Contains( "500 (Internal Server Error)" ) );
+				.OrInner<HttpRequestException>( e => e.StatusCode is HttpStatusCode.InternalServerError )
+				.OrInner<HttpRequestException>( e => e.StatusCode is HttpStatusCode.BadGateway );
 
 			if( additionalHandledMessage.Length > 0 )
 				policyBuilder = policyBuilder.OrInner<HttpRequestException>( e => e.Message.Contains( additionalHandledMessage ) );
@@ -83,7 +84,7 @@ public static class HttpClientTools {
 		var result = MiniProfiler.Current.Inline(
 			() => policyBuilder.WaitAndRetry( 7, attemptNumber => TimeSpan.FromSeconds( Math.Pow( 2, attemptNumber ) ) )
 				.ExecuteAndCapture(
-					() => Policy.HandleInner<HttpRequestException>( e => e.Message.Contains( "503 (Service Unavailable)" ) )
+					() => Policy.HandleInner<HttpRequestException>( e => e.StatusCode is HttpStatusCode.ServiceUnavailable )
 						.WaitAndRetry( 11, attemptNumber => TimeSpan.FromSeconds( Math.Pow( 2, attemptNumber ) ) )
 						.Execute( () => Task.Run( method ).Wait() ) ),
 			"{0} - Execute HTTP request with retry".FormatWith( EwlStatics.EwlInitialism ) );
