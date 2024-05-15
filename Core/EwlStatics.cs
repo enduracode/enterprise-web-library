@@ -148,21 +148,6 @@ public static partial class EwlStatics {
 	}
 
 	/// <summary>
-	/// Sequentially calls each of the specified methods, continuing even if exceptions are thrown. When finished, throws the first exception if there was one.
-	/// </summary>
-	internal static void CallEveryMethod( params Action[] methods ) {
-		ExceptionDispatchInfo exception = null;
-		foreach( var method in methods )
-			try {
-				method();
-			}
-			catch( Exception e ) {
-				exception ??= ExceptionDispatchInfo.Capture( e );
-			}
-		exception?.Throw();
-	}
-
-	/// <summary>
 	/// Runs tests of EWL functionality.
 	/// </summary>
 	public static void RunStandardLibraryTests() {
