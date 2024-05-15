@@ -1,5 +1,6 @@
 ﻿#nullable disable warnings
 using System.ComponentModel;
+using System.Runtime.ExceptionServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -146,18 +147,19 @@ public static partial class EwlStatics {
 		return list.Count == 0 ? null : list[ list.Count - 1 ];
 	}
 
+	/// <summary>
+	/// Sequentially calls each of the specified methods, continuing even if exceptions are thrown. When finished, throws the first exception if there was one.
+	/// </summary>
 	internal static void CallEveryMethod( params Action[] methods ) {
-		var exceptions = new List<Exception>();
+		ExceptionDispatchInfo exception = null;
 		foreach( var method in methods )
 			try {
 				method();
 			}
 			catch( Exception e ) {
-				exceptions.Add( e );
+				exception ??= ExceptionDispatchInfo.Capture( e );
 			}
-		if( exceptions.Any() )
-			// This clears the stack trace in the exception. There's not much we can do about that since we want to preserve the type of exception.
-			throw exceptions.First();
+		exception?.Throw();
 	}
 
 	/// <summary>
