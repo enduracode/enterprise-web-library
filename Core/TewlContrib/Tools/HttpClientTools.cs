@@ -37,7 +37,11 @@ public static class HttpClientTools {
 		}
 	}
 
-	public static string? GetTextWithRetry( this HttpClient client, string url, bool returnNullIfNotFound = false ) =>
+	/// <summary>
+	/// Makes a GET request for a text-based resource and returns its representation, retrying several times with exponential back-off in the event of network
+	/// problems or transient failures on the server. Use only from a background process that can tolerate a long delay.
+	/// </summary>
+	public static string? GetTextWithRetry( this HttpClient client, string url, bool returnNullIfNotFound = false, string additionalHandledMessage = "" ) =>
 		ExecuteRequestWithRetry(
 			true,
 			async () => {
@@ -46,7 +50,8 @@ public static class HttpClientTools {
 					return null;
 				response.EnsureSuccessStatusCode();
 				return await response.Content.ReadAsStringAsync();
-			} );
+			},
+			additionalHandledMessage: additionalHandledMessage );
 
 	/// <summary>
 	/// Creates the destination path if it does not exist, and downloads the file to that destination path. Use only from a background process that can tolerate a
