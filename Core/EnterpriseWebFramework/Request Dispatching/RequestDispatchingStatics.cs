@@ -254,7 +254,7 @@ public static class RequestDispatchingStatics {
 		}
 		catch( Exception e ) {
 			const string prefix = "An exception occurred that could not be handled by the main exception handler:";
-			EwlStatics.CallEveryMethod(
+			ExceptionHandlingTools.CallEveryMethod(
 				() => {
 					if( addErrorToRequestState )
 						RequestState.AddError( prefix, e );

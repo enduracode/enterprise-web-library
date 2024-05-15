@@ -58,7 +58,7 @@ public class TimeControl: FormControl<FlowComponent> {
 						                  var validatedValue = validator.GetNullableTimeOfDayTimeSpan(
 								                  errorHandler,
 								                  postBackValue.ToUpper(),
-								                  TewlContrib.DateTimeTools.HourAndMinuteFormat.ToCollection().ToArray(),
+								                  DateTimeTools.HourAndMinuteFormat.ToCollection().ToArray(),
 								                  allowEmpty )
 							                  .ToNewUnderlyingValue( v => LocalTime.FromTicksSinceMidnight( v.Ticks ) );
 						                  if( errorHandler.LastResult != ErrorCondition.NoError ) {

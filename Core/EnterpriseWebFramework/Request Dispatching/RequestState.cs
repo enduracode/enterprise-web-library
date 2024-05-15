@@ -209,7 +209,7 @@ public class RequestState {
 	}
 
 	internal void CleanUp( bool rollbackDatabaseTransactions ) {
-		EwlStatics.CallEveryMethod(
+		ExceptionHandlingTools.CallEveryMethod(
 			() => {
 				if( rollbackDatabaseTransactions )
 					DatabaseConnectionManager.RollbackTransactions( true );

@@ -219,7 +219,7 @@ public class AutomaticDatabaseConnectionManager {
 					nonTransactionalModificationMethods.Clear();
 				}
 			} );
-		EwlStatics.CallEveryMethod( methods.ToArray() );
+		ExceptionHandlingTools.CallEveryMethod( methods.ToArray() );
 		transactionsMarkedForRollback = false;
 	}
 

@@ -49,7 +49,7 @@ public static class TelemetryStatics {
 
 		appErrorContextWriter?.Invoke( sw );
 
-		EwlStatics.CallEveryMethod(
+		ExceptionHandlingTools.CallEveryMethod(
 			() => {
 				lock( errorEmailLimiter! ) {
 					errorEmailLimiter.RequestAction(

@@ -117,7 +117,7 @@ public static class DatabaseOps {
 		if( database is NoDatabase )
 			return;
 		StatusStatics.SetStatus( "Waiting for database to be ready..." );
-		ActionTools.Retry( () => database.GetLineMarker(), "Database failed to be ready." );
+		ExceptionHandlingTools.Retry( () => database.GetLineMarker(), "Database failed to be ready." );
 		StatusStatics.SetStatus( "Database is ready." );
 	}
 
