@@ -74,7 +74,8 @@ public static class HttpClientTools {
 	/// </summary>
 	public static void ExecuteRequestWithRetry(
 		bool requestIsIdempotent, Func<Task> method, string additionalHandledMessage = "", Action? persistentFailureHandler = null ) {
-		var policyBuilder = Policy.HandleInner<HttpRequestException>( e => e.InnerException is SocketException { SocketErrorCode: SocketError.HostNotFound } );
+		var policyBuilder = Policy.HandleInner<HttpRequestException>(
+			e => e.InnerException is SocketException { SocketErrorCode: SocketError.HostNotFound or SocketError.NoData } );
 
 		if( requestIsIdempotent ) {
 			policyBuilder.OrInner<TaskCanceledException>() // timeout
