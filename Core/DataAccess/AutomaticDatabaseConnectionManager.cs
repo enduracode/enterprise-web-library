@@ -69,13 +69,13 @@ public class AutomaticDatabaseConnectionManager {
 		dataAccessState.DisableCache();
 		try {
 			modificationMethod();
+			dataAccessState.ResetCache();
+			PreExecuteCommitTimeValidationMethods();
 		}
 		catch {
 			RollbackModifications();
-			throw;
-		}
-		finally {
 			dataAccessState.ResetCache();
+			throw;
 		}
 		CommitModifications();
 	}
