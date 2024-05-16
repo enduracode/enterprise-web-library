@@ -30,6 +30,7 @@ public class DatabaseConnection {
 	private ProfiledDbTransaction? tx;
 	private DbTransaction? innerTx;
 	private List<Func<string>>? commitTimeValidationMethods;
+	private Stack<int>? savepointCommitTimeValidationIndexes;
 	private int? userTransactionId;
 
 	/// <summary>
@@ -232,7 +233,10 @@ public class DatabaseConnection {
 		if( savepoint is null ) {
 			tx = new ProfiledDbTransaction( innerTx!, cn );
 			commitTimeValidationMethods = new List<Func<string>>();
+			savepointCommitTimeValidationIndexes = new Stack<int>();
 		}
+		else if( savepoint.Length > 0 )
+			savepointCommitTimeValidationIndexes!.Push( commitTimeValidationMethods!.Count );
 	}
 
 	private void createSavepoint( string name ) {
@@ -317,6 +321,10 @@ public class DatabaseConnection {
 
 			if( savepoint is null )
 				resetTransactionFields();
+			else {
+				var index = savepointCommitTimeValidationIndexes!.Pop();
+				commitTimeValidationMethods!.RemoveRange( index, commitTimeValidationMethods.Count - index );
+			}
 		}
 		else if( savepoint is null || ( rollbackWasToLastSavepoint == true && savepoint.Length > 0 ) )
 			rollbackWasToLastSavepoint = null;
@@ -362,6 +370,8 @@ public class DatabaseConnection {
 
 			if( savepoint is null )
 				resetTransactionFields();
+			else if( savepoint.Length > 0 )
+				savepointCommitTimeValidationIndexes!.Pop();
 		}
 		catch {
 			commitFailed = true;
@@ -402,6 +412,7 @@ public class DatabaseConnection {
 		tx = null;
 		innerTx = null;
 		commitTimeValidationMethods = null;
+		savepointCommitTimeValidationIndexes = null;
 		userTransactionId = null;
 	}
 
