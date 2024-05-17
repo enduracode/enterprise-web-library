@@ -1,11 +1,11 @@
 ﻿using System.Data;
 using System.Data.Common;
-using System.Data.SqlClient;
 using EnterpriseWebLibrary.DataAccess.RevisionHistory;
 using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using JetBrains.Annotations;
+using Microsoft.Data.SqlClient;
 using NodaTime;
 using StackExchange.Profiling;
 using StackExchange.Profiling.Data;
@@ -28,7 +28,6 @@ public class DatabaseConnection {
 	private bool? rollbackWasToLastSavepoint; // false only if SQL returned an error indicating rollback outside a transaction at the database level (error 3903)
 	private bool commitFailed;
 	private ProfiledDbTransaction? tx;
-	private DbTransaction? innerTx;
 	private List<Func<string>>? commitTimeValidationMethods;
 	private Stack<int>? savepointCommitTimeValidationIndexes;
 	private int? userTransactionId;
@@ -144,6 +143,13 @@ public class DatabaseConnection {
 		}
 	}
 
+	private void executeText( string commandText ) {
+		var command = databaseInfo.CreateCommand();
+		command.CommandText = commandText;
+		prepareCommandForExecution( command, false );
+		command.ExecuteNonQuery();
+	}
+
 	/// <summary>
 	/// Closes the database connection.
 	/// </summary>
@@ -215,14 +221,14 @@ public class DatabaseConnection {
 		}
 
 		try {
-			if( savepoint is null ) {
-				if( databaseInfo is SqlServerInfo )
-					innerTx = cn.WrappedConnection.BeginTransaction( IsolationLevel.Snapshot );
-				else if( databaseInfo is OracleInfo )
-					innerTx = cn.WrappedConnection.BeginTransaction( IsolationLevel.Serializable );
-				else
-					innerTx = cn.WrappedConnection.BeginTransaction();
-			}
+			if( savepoint is null )
+				tx = (ProfiledDbTransaction)cn.BeginTransaction(
+					databaseInfo switch
+						{
+							SqlServerInfo => IsolationLevel.Snapshot,
+							OracleInfo => IsolationLevel.Serializable,
+							_ => IsolationLevel.Unspecified
+						} );
 			else if( savepoint.Length > 0 )
 				createSavepoint( savepoint );
 		}
@@ -231,7 +237,6 @@ public class DatabaseConnection {
 		}
 
 		if( savepoint is null ) {
-			tx = new ProfiledDbTransaction( innerTx!, cn );
 			commitTimeValidationMethods = new List<Func<string>>();
 			savepointCommitTimeValidationIndexes = new Stack<int>();
 		}
@@ -240,14 +245,12 @@ public class DatabaseConnection {
 	}
 
 	private void createSavepoint( string name ) {
-		if( databaseInfo is SqlServerInfo )
-			( (SqlTransaction)innerTx! ).Save( name );
-		else if( databaseInfo is MySqlInfo )
-			executeText( "SAVEPOINT {0}".FormatWith( name ) );
-		else {
-			var saveMethod = innerTx!.GetType().GetMethod( "Save" )!;
-			saveMethod.Invoke( innerTx, [ name ] );
+		if( databaseInfo is OracleInfo ) {
+			var saveMethod = tx!.WrappedTransaction.GetType().GetMethod( "Save" )!;
+			saveMethod.Invoke( tx!.WrappedTransaction, [ name ] );
 		}
+		else
+			tx!.WrappedTransaction.Save( name );
 	}
 
 	/// <summary>
@@ -277,14 +280,12 @@ public class DatabaseConnection {
 					if( savepoint is null )
 						tx!.Rollback();
 					else if( savepoint.Length > 0 )
-						if( databaseInfo is SqlServerInfo )
-							( (SqlTransaction)innerTx! ).Rollback( savepoint );
-						else if( databaseInfo is MySqlInfo )
-							executeText( "ROLLBACK TO SAVEPOINT {0}".FormatWith( savepoint ) );
-						else {
-							var rollbackMethod = innerTx!.GetType().GetMethod( "Rollback", [ typeof( string ) ] )!;
-							rollbackMethod.Invoke( innerTx, [ savepoint ] );
+						if( databaseInfo is OracleInfo ) {
+							var rollbackMethod = tx!.WrappedTransaction.GetType().GetMethod( "Rollback", [ typeof( string ) ] )!;
+							rollbackMethod.Invoke( tx!.WrappedTransaction, [ savepoint ] );
 						}
+						else
+							tx!.WrappedTransaction.Rollback( savepoint );
 				}
 				catch( SqlException e ) {
 					//Explanation of why we need this hack:
@@ -395,14 +396,7 @@ public class DatabaseConnection {
 
 	private void releaseSavepoint( string name ) {
 		if( databaseInfo is MySqlInfo )
-			executeText( "RELEASE SAVEPOINT {0}".FormatWith( name ) );
-	}
-
-	private void executeText( string commandText ) {
-		var command = databaseInfo.CreateCommand();
-		command.CommandText = commandText;
-		prepareCommandForExecution( command, false );
-		command.ExecuteNonQuery();
+			tx!.WrappedTransaction.Release( name );
 	}
 
 	private Exception createConnectionException( string action, Exception innerException ) =>
@@ -410,7 +404,6 @@ public class DatabaseConnection {
 
 	private void resetTransactionFields() {
 		tx = null;
-		innerTx = null;
 		commitTimeValidationMethods = null;
 		savepointCommitTimeValidationIndexes = null;
 		userTransactionId = null;
