@@ -504,7 +504,8 @@ public class DatabaseConnection {
 		}
 
 		if( databaseInfo is MySqlInfo ) {
-			if( innerException.Message.Contains( "Lock wait timeout exceeded", StringComparison.Ordinal ) )
+			if( new[] { "Deadlock found when trying to get lock", "Lock wait timeout exceeded" }.Any(
+				   i => innerException.Message.Contains( i, StringComparison.Ordinal ) ) )
 				return new DbConcurrencyException( getCommandExceptionMessage( command, "A concurrency error occurred." ), innerException );
 
 			if( innerException.Message.Contains( "Command Timeout expired", StringComparison.Ordinal ) )
