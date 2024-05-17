@@ -287,29 +287,18 @@ public class DatabaseConnection {
 						else
 							tx!.WrappedTransaction.Rollback( savepoint );
 				}
-				catch( SqlException e ) {
-					//Explanation of why we need this hack:
-					//SQL Server will sometimes rollback a transaction on its own when it
-					//encounters a "serious" error. These seem to include any kind of command param
-					//error or any of our trigger errors with severity of 11 or higher. When
-					//we detect the error, we attempt to rollback the transaction. But if SQL Server
-					//has already done that, we will get an error 3903. Therefore, we catch it below
-					//to make sure the RollbackTransaction call (this method) does not throw
-					//an exception that blocks out the real exception that occurred.
 
-					// We set rollbackWasToLastSavepoint to false so that we do not accumulate additional
-					// exceptions while the client attempts to rollback all nest levels
-					if( e.Number == 3903 ) {
-						if( savepoints is not null ) {
-							rollbackWasToLastSavepoint = false;
-							savepoint = null;
-						}
-					}
-					else
-						throw;
-				}
-				catch( InvalidOperationException ) {
-					// This means that the transaction has already been rolled back (by SQL Server or MySQL, due to high error severity, as above).
+				// We need this catch block because databases will sometimes roll back a transaction on their own when they encounter a “serious” error. In SQL Server,
+				// these seem to include any kind of command param error or any of our trigger errors with severity of 11 or higher.
+				//
+				// When we detect the error, we attempt to roll back the transaction. But if the database has already done that, we will get one of these exceptions. We
+				// catch it to make sure the RollbackTransaction call (this method) does not throw an exception, which would block out the original exception that
+				// occurred.
+				//
+				// We set rollbackWasToLastSavepoint to false so that we do not accumulate additional exceptions while the client attempts to roll back all nest levels.
+				catch( Exception exception ) when( exception is InvalidOperationException or SqlException { Number: 3903 } ||
+				                                   ( databaseInfo is MySqlInfo && exception.Message.Contains( "SAVEPOINT", StringComparison.Ordinal ) &&
+				                                     exception.Message.Contains( "does not exist", StringComparison.Ordinal ) ) ) {
 					if( savepoints is not null ) {
 						rollbackWasToLastSavepoint = false;
 						savepoint = null;
