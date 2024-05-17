@@ -45,17 +45,22 @@ public class DatabaseConnection {
 		// Build the connection string.
 		string connectionString;
 		if( databaseInfo is SqlServerInfo sqlServerInfo ) {
-			connectionString = "Data Source=" + ( sqlServerInfo.Server ?? "(local)" );
-			if( sqlServerInfo.LoginName != null ) {
-				connectionString += "; User ID=" + sqlServerInfo.LoginName;
-				connectionString += "; Password='{0}'".FormatWith( sqlServerInfo.Password );
+			var builder = new SqlConnectionStringBuilder();
+
+			builder.DataSource = sqlServerInfo.Server ?? "(local)";
+			if( sqlServerInfo.LoginName is null )
+				builder.IntegratedSecurity = true;
+			else {
+				builder.UserID = sqlServerInfo.LoginName;
+				builder.Password = sqlServerInfo.Password;
 			}
-			else
-				connectionString += "; Integrated Security=SSPI";
-			connectionString += "; Initial Catalog=" + sqlServerInfo.Database;
+			builder.TrustServerCertificate = true;
+			builder.InitialCatalog = sqlServerInfo.Database;
 			if( !sqlServerInfo.SupportsConnectionPooling )
-				connectionString += "; Pooling=false";
-			connectionString += "; Connect Timeout={0}".FormatWith( timeout );
+				builder.Pooling = false;
+			builder.ConnectTimeout = timeout;
+
+			connectionString = builder.ConnectionString;
 		}
 		else if( databaseInfo is MySqlInfo mySqlInfo ) {
 			connectionString = "Server=localhost; User ID=root; Password=password; Database=" + mySqlInfo.Database;
