@@ -26,19 +26,19 @@ public static class AppMemoryCache {
 	}
 
 	internal static void CleanUp() {
-		cacheField?.Dispose();
+		if( timer is not null ) {
+			var waitHandle = new ManualResetEvent( false );
+			timer.Dispose( waitHandle );
+			waitHandle.WaitOne();
+		}
 
-		if( timer is null )
-			return;
-		var waitHandle = new ManualResetEvent( false );
-		timer.Dispose( waitHandle );
-		waitHandle.WaitOne();
+		cacheField?.Dispose();
 	}
 
 	private static void tick( object? state ) {
 		TelemetryStatics.ExecuteBlockWithStandardExceptionHandling(
 			delegate {
-				// We need to schedule the next tick even if there is an exception thrown in this one. Use try-finally instead of CallEveryMethod so we don't lose
+				// We need to schedule the next tick even if there is an exception thrown in this one. Use try-finally instead of CallEveryMethod so we don’t lose
 				// exception stack traces.
 				try {
 					foreach( var key in periodicEvictionKeys!.Distinct() ) {
