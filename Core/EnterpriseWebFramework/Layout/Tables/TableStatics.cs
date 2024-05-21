@@ -346,17 +346,20 @@ internal static class TableStatics {
 
 										var cellActivationBehavior = cellSetup.ActivationBehavior ??
 										                             ( tableIsColumnPrimary || rowActivationBehavior == null ? columnSetup.ActivationBehavior : null );
-										return ElementActivationBehavior.GetActivatableElement(
-											cellAndIndex.ColumnIndex < firstDataColumnIndex ? "th" : "td",
-											TableCssElementCreator.AllCellAlignmentsClass.Add( textAlignmentClass( cellAndIndex.Cell, rowSetup, columnSetup ) )
-												.Add( verticalAlignmentClass( rowSetup, columnSetup ) )
-												.Add( cellSetup.ContainsActivatableElements ? activatableElementContainerClass : ElementClassSet.Empty )
-												.Add( columnSetup.Classes )
-												.Add( cellSetup.Classes ),
-											attributes,
-											cellActivationBehavior,
-											cellAndIndex.Cell.Content,
-											cellSetup.EtherealContent );
+										return new FlowIdContainer(
+											ElementActivationBehavior.GetActivatableElement(
+													cellAndIndex.ColumnIndex < firstDataColumnIndex ? "th" : "td",
+													TableCssElementCreator.AllCellAlignmentsClass.Add( textAlignmentClass( cellAndIndex.Cell, rowSetup, columnSetup ) )
+														.Add( verticalAlignmentClass( rowSetup, columnSetup ) )
+														.Add( cellSetup.ContainsActivatableElements ? activatableElementContainerClass : ElementClassSet.Empty )
+														.Add( columnSetup.Classes )
+														.Add( cellSetup.Classes ),
+													attributes,
+													cellActivationBehavior,
+													cellAndIndex.Cell.Content,
+													cellSetup.EtherealContent )
+												.ToCollection(),
+											updateRegionSets: cellSetup.UpdateRegionSets );
 									} )
 								.Materialize(),
 							Enumerable.Empty<EtherealComponent>().Materialize() )
