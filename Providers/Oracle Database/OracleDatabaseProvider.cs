@@ -5,7 +5,12 @@ using Oracle.ManagedDataAccess.Client;
 namespace EnterpriseWebLibrary.OracleDatabase;
 
 public class OracleDatabaseProvider: ExternalOracleDatabaseProvider {
-	DbConnection ExternalOracleDatabaseProvider.CreateConnection( string connectionString ) => new OracleConnection( connectionString );
+	DbConnection ExternalOracleDatabaseProvider.CreateConnection( string connectionString, bool allowVersion11Authentication ) {
+		var connection = new OracleConnection( connectionString );
+		if( allowVersion11Authentication )
+			connection.SqlNetAllowedLogonVersionClient = OracleAllowedLogonVersionClient.Version11;
+		return connection;
+	}
 
 	DbCommand ExternalOracleDatabaseProvider.CreateCommand() {
 		var command = new OracleCommand();

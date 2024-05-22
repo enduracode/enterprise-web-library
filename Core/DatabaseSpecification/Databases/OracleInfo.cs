@@ -66,11 +66,11 @@ public class OracleInfo: DatabaseInfo {
 	public bool SupportsConnectionPooling => supportsConnectionPooling;
 
 	/// <summary>
-	/// Gets whether the database supports linguistic indexes, which impacts whether or not it can enable case-insensitive comparisons.
+	/// Gets whether the database supports linguistic indexes, which impacts whether it can enable case-insensitive comparisons.
 	/// </summary>
 	public bool SupportsLinguisticIndexes => supportsLinguisticIndexes;
 
-	DbConnection DatabaseInfo.CreateConnection( string connectionString ) => provider!.Value.CreateConnection( connectionString );
+	DbConnection DatabaseInfo.CreateConnection( string connectionString ) => provider!.Value.CreateConnection( connectionString, !supportsLinguisticIndexes );
 
 	DbCommand DatabaseInfo.CreateCommand() => new ProfiledDbCommand( provider!.Value.CreateCommand(), null, MiniProfiler.Current );
 

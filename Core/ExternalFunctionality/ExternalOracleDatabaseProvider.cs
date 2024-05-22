@@ -6,7 +6,7 @@ namespace EnterpriseWebLibrary.ExternalFunctionality;
 /// External Oracle Database logic.
 /// </summary>
 public interface ExternalOracleDatabaseProvider {
-	DbConnection CreateConnection( string connectionString );
+	DbConnection CreateConnection( string connectionString, bool allowVersion11Authentication );
 
 	DbCommand CreateCommand();
 
