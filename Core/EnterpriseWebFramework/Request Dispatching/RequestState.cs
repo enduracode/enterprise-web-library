@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System.Threading;
+﻿using System.Threading;
 using EnterpriseWebLibrary.Caching;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
@@ -44,7 +43,7 @@ public class RequestState {
 	}
 
 	internal readonly Instant BeginInstant;
-	internal MiniProfiler Profiler { get; set; }
+	internal MiniProfiler? Profiler { get; set; }
 	internal string Url { get; private set; }
 	internal string BaseUrl { get; private set; }
 
@@ -56,15 +55,15 @@ public class RequestState {
 	internal AutomaticDatabaseConnectionManager DatabaseConnectionManager { get; }
 
 	private bool urlHandlerStateDisabled;
-	private IReadOnlyCollection<BasicUrlHandler> urlHandlers;
-	private ResourceBase resource;
+	private IReadOnlyCollection<BasicUrlHandler>? urlHandlers;
+	private ResourceBase? resource;
 	private bool newUrlParameterValuesEffective;
 
 	internal bool IntermediateUserExists { get; set; }
 
 	private bool userEnabled;
 	private bool userDisabled;
-	private Tuple<SystemUser, SpecifiedValue<SystemUser>> userAndImpersonator;
+	private Tuple<SystemUser?, SpecifiedValue<SystemUser?>?>? userAndImpersonator;
 
 	// page infrastructure
 	internal string ClientSideNewUrl { get; set; }
@@ -79,12 +78,12 @@ public class RequestState {
 	// request continuation
 	internal SemaphoreSlim ContinuationSemaphore { get; } = new( 0, 1 );
 	private Instant? continuationSemaphoreReleaseTime { get; set; }
-	internal Action<HttpContext> RequestHandler { get; set; }
+	internal Action<HttpContext>? RequestHandler { get; set; }
 
 	internal RequestState( HttpContext context, string url, string baseUrl, SlowRequestThreshold slowRequestThreshold ) {
 		BeginInstant = SystemClock.Instance.GetCurrentInstant();
 
-		Profiler = MiniProfiler.StartNew( profilerName: url );
+		Profiler = MiniProfiler.StartNew( profilerName: url )!;
 		Profiler.User = ( (MiniProfilerOptions)Profiler.Options ).UserIdProvider( context.Request );
 
 		Url = url;
@@ -96,7 +95,7 @@ public class RequestState {
 		DatabaseConnectionManager.DataAccessState.ResetCache();
 
 		ClientSideNewUrl = "";
-		StatusMessages = Enumerable.Empty<( StatusMessageType, string )>().Materialize();
+		StatusMessages = Array.Empty<( StatusMessageType, string )>();
 
 		this.slowRequestThreshold = Duration.FromMilliseconds( (long)slowRequestThreshold )
 			.Plus(
@@ -111,14 +110,13 @@ public class RequestState {
 	/// <summary>
 	/// Framework use only.
 	/// </summary>
-	public IReadOnlyCollection<BasicUrlHandler> UrlHandlers =>
-		( urlHandlerStateDisabled ? null : urlHandlers ) ?? Enumerable.Empty<BasicUrlHandler>().Materialize();
+	public IReadOnlyCollection<BasicUrlHandler> UrlHandlers => ( urlHandlerStateDisabled ? null : urlHandlers ) ?? Array.Empty<BasicUrlHandler>();
 
 	internal void SetResource( ResourceBase resource ) {
 		this.resource = resource;
 	}
 
-	internal ResourceBase Resource => urlHandlerStateDisabled ? null : resource;
+	internal ResourceBase? Resource => urlHandlerStateDisabled ? null : resource;
 
 	internal void SetNewUrlParameterValuesEffective( bool effective ) {
 		newUrlParameterValuesEffective = effective;
@@ -139,7 +137,7 @@ public class RequestState {
 		// the installation is not live; doing so would prevent adequate testing of the user check.
 		var userIsProfiling = UserAccessible && ( ProfilingUserId.HasValue || ImpersonatorExists ) && AppMemoryCache.UserIsProfilingRequests( ProfilingUserId );
 		if( !userIsProfiling && ( ConfigurationStatics.IsLiveInstallation || AppMemoryCache.UnconditionalRequestProfilingDisabled() ) )
-			Profiler.Stop( discardResults: true );
+			Profiler!.Stop( discardResults: true );
 	}
 
 	internal T ExecuteWithUserDisabled<T>( Func<T> method ) {
@@ -152,16 +150,16 @@ public class RequestState {
 		}
 	}
 
-	internal bool ImpersonatorExists => UserAndImpersonator.Item2 != null;
+	internal bool ImpersonatorExists => UserAndImpersonator.Item2 is not null;
 
-	internal SystemUser ImpersonatorUser => UserAndImpersonator.Item2.Value;
+	internal SystemUser? ImpersonatorUser => UserAndImpersonator.Item2!.Value;
 
 	internal int? ProfilingUserId => ( ImpersonatorExists ? ImpersonatorUser : UserAndImpersonator.Item1 )?.UserId;
 
 	/// <summary>
 	/// EwfOps.RunApplication and private use only.
 	/// </summary>
-	internal Tuple<SystemUser, SpecifiedValue<SystemUser>> UserAndImpersonator {
+	internal Tuple<SystemUser?, SpecifiedValue<SystemUser?>?> UserAndImpersonator {
 		get {
 			if( !userEnabled )
 				throw new ApplicationException( "User cannot be accessed this early in the request life cycle." );
@@ -175,7 +173,7 @@ public class RequestState {
 		}
 	}
 
-	internal bool UserAccessible => !EwfConfigurationStatics.AppSupportsSecureConnections || EwfRequest.Current.IsSecure;
+	internal bool UserAccessible => !EwfConfigurationStatics.AppSupportsSecureConnections || EwfRequest.Current!.IsSecure;
 
 	internal void ClearUserAndImpersonator() {
 		userAndImpersonator = null;
@@ -204,7 +202,7 @@ public class RequestState {
 		Url = url;
 		BaseUrl = baseUrl;
 
-		AddNetworkWaitTime( SystemClock.Instance.GetCurrentInstant() - continuationSemaphoreReleaseTime.Value );
+		AddNetworkWaitTime( SystemClock.Instance.GetCurrentInstant() - continuationSemaphoreReleaseTime!.Value );
 		continuationSemaphoreReleaseTime = null;
 	}
 
