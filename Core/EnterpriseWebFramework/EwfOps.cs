@@ -303,6 +303,7 @@ public static class EwfOps {
 								},
 								() => RequestDispatchingStatics.RequestState.SecondaryResponseId,
 								id => RequestDispatchingStatics.RequestState.SecondaryResponseId = id,
+								() => RequestDispatchingStatics.RequestState.GetLastError(),
 								() => RequestDispatchingStatics.RequestState.AllowSlowRequest(),
 								( url, requestMethod, requestHandler ) => RequestContinuationDataStore.AddRequestState(
 									url,

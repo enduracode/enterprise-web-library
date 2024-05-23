@@ -607,17 +607,22 @@ public abstract class PageBase: ResourceBase {
 	// page view, and prior to getContent so that the modified data can be used in the page if necessary.
 	private PageBase executePageViewDataModifications() {
 		var modMethods = new List<Action>();
-		modMethods.Add( appProvider.pageViewDataModificationMethodGetter() );
-		if( RequestState.Instance.UserAccessible ) {
-			if( AppTools.User != null )
-				modMethods.Add( getLastPageRequestTimeUpdateMethod( AppTools.User ) );
-			if( RequestState.Instance.ImpersonatorExists && RequestState.Instance.ImpersonatorUser != null )
-				modMethods.Add( getLastPageRequestTimeUpdateMethod( RequestState.Instance.ImpersonatorUser ) );
+
+		// Skip application-level modifications on the unhandled-exception page to decrease the probability of getting another exception.
+		if( RequestStateStatics.GetLastError() is null ) {
+			modMethods.Add( appProvider.pageViewDataModificationMethodGetter() );
+			if( RequestState.Instance.UserAccessible ) {
+				if( AppTools.User != null )
+					modMethods.Add( getLastPageRequestTimeUpdateMethod( AppTools.User ) );
+				if( RequestState.Instance.ImpersonatorExists && RequestState.Instance.ImpersonatorUser != null )
+					modMethods.Add( getLastPageRequestTimeUpdateMethod( RequestState.Instance.ImpersonatorUser ) );
+			}
 		}
+
 		modMethods.Add( AuthenticationStatics.GetUserCookieUpdater() );
 		modMethods.Add( getPageViewDataModificationMethod() );
-		modMethods = modMethods.Where( i => i != null ).ToList();
 
+		modMethods = modMethods.Where( i => i is not null ).ToList();
 		if( !modMethods.Any() )
 			return this;
 

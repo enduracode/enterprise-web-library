@@ -70,7 +70,7 @@ public class RequestState {
 	internal IReadOnlyCollection<( StatusMessageType, string )> StatusMessages { get; set; }
 	internal uint? SecondaryResponseId { get; set; }
 
-	private readonly List<( string prefix, Exception exception )> errors = new();
+	private readonly List<( string prefix, Exception exception )> errors = [ ];
 
 	private Duration networkWaitDuration = Duration.Zero;
 	private Duration slowRequestThreshold;
@@ -179,7 +179,7 @@ public class RequestState {
 		userAndImpersonator = null;
 	}
 
-	internal ( string prefix, Exception exception ) GetLastError() => errors.Last();
+	internal ( string prefix, Exception exception )? GetLastError() => errors.Any() ? errors.Last() : null;
 
 	internal void AddError( string prefix, Exception exception ) {
 		errors.Add( ( prefix, exception ) );

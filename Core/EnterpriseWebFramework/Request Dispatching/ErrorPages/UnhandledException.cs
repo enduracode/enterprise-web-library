@@ -1,14 +1,13 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.Configuration;
+﻿using EnterpriseWebLibrary.Configuration;
 
 // EwlPage
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.ErrorPages;
 
 partial class UnhandledException {
-	private static Func<( string prefix, Exception exception )> errorGetter;
+	private static Func<( string prefix, Exception exception )?> errorGetter = null!;
 
-	internal static void Init( Func<( string, Exception )> errorGetter ) {
+	internal static void Init( Func<( string, Exception )?> errorGetter ) {
 		UnhandledException.errorGetter = errorGetter;
 	}
 
@@ -20,7 +19,7 @@ partial class UnhandledException {
 		var content = new List<FlowComponent>();
 
 		if( ConfigurationStatics.IsDevelopmentInstallation ) {
-			var error = errorGetter();
+			var error = errorGetter()!.Value;
 			if( error.prefix.Length > 0 )
 				content.Add( new Paragraph( error.prefix.ToComponents() ) );
 			content.Add(
