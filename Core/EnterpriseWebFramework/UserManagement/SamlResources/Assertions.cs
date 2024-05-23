@@ -18,13 +18,15 @@ partial class Assertions {
 	protected override bool managesDataModificationsInUnsafeRequestMethods => true;
 
 	protected override EwfResponse post() {
-		var assertion = Task.Run( async () => await ExternalFunctionalityStatics.ExternalSamlProvider.ReadAssertion() ).Result;
+		var assertion = Task.Run( ExternalFunctionalityStatics.ExternalSamlProvider.ReadAssertion ).Result;
+		if( !assertion.HasValue )
+			return EwfResponse.Create( ContentTypes.PlainText, new EwfResponseBodyCreator( () => "Invalid SAML response" ), statusCodeGetter: () => 400 );
 
 		var identityProvider =
-			AuthenticationStatics.SamlIdentityProviders.Single( i => string.Equals( i.EntityId, assertion.identityProvider, StringComparison.Ordinal ) );
+			AuthenticationStatics.SamlIdentityProviders.Single( i => string.Equals( i.EntityId, assertion.Value.identityProvider, StringComparison.Ordinal ) );
 		ExecuteDataModificationMethod(
 			() => {
-				var user = identityProvider.LogInUser( assertion.userName, assertion.attributes );
+				var user = identityProvider.LogInUser( assertion.Value.userName, assertion.Value.attributes );
 				if( user is not null )
 					AuthenticationStatics.SetFormsAuthCookieAndUser( user, identityProvider: identityProvider );
 				else
@@ -33,7 +35,7 @@ partial class Assertions {
 				AuthenticationStatics.SetTestCookie();
 			} );
 
-		var destinationUrl = new VerifyClientFunctionality( assertion.returnUrl ).GetUrl();
+		var destinationUrl = new VerifyClientFunctionality( assertion.Value.returnUrl ).GetUrl();
 		return EwfResponse.Create(
 			ContentTypes.PlainText,
 			new EwfResponseBodyCreator( writer => writer.Write( "See Other: {0}".FormatWith( destinationUrl ) ) ),

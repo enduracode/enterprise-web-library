@@ -34,5 +34,5 @@ public interface ExternalSamlProvider {
 
 	Task WriteLogInResponse( string identityProvider, bool forceReauthentication, string returnUrl );
 
-	Task<( string identityProvider, string userName, IReadOnlyDictionary<string, string> attributes, string returnUrl )> ReadAssertion();
+	Task<( string identityProvider, string userName, IReadOnlyDictionary<string, string> attributes, string returnUrl )?> ReadAssertion();
 }

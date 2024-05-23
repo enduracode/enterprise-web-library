@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using ComponentSpace.Saml2;
 using ComponentSpace.Saml2.Configuration;
+using ComponentSpace.Saml2.Exceptions;
 using ComponentSpace.Saml2.Metadata;
 using ComponentSpace.Saml2.Metadata.Export;
 using ComponentSpace.Saml2.Metadata.Import;
@@ -95,11 +96,20 @@ public class SamlProvider: ExternalSamlProvider {
 			ssoOptions: new SsoOptions { ForceAuthn = forceReauthentication } );
 	}
 
-	async Task<( string identityProvider, string userName, IReadOnlyDictionary<string, string> attributes, string returnUrl )> ExternalSamlProvider.
+	async Task<( string identityProvider, string userName, IReadOnlyDictionary<string, string> attributes, string returnUrl )?> ExternalSamlProvider.
 		ReadAssertion() {
 		var samlServiceProvider = currentServicesGetter!().GetRequiredService<ISamlServiceProvider>();
 		await samlServiceProvider.SetConfigurationNameAsync( samlConfigurationName );
-		var result = await samlServiceProvider.ReceiveSsoAsync();
+
+		ISpSsoResult result;
+		try {
+			result = await samlServiceProvider.ReceiveSsoAsync();
+		}
+		catch( SamlProtocolException e ) when( e.Message.Contains( "An SP-initiated SAML response from", StringComparison.Ordinal ) &&
+		                                       e.Message.Contains( "was received unexpectedly", StringComparison.Ordinal ) ) {
+			return null;
+		}
+
 		return ( result.PartnerName, result.UserID,
 			       result.Attributes.Where( i => i.AttributeValues.Any() && i.AttributeValues.First().Data != null )
 				       .ToImmutableDictionary( i => i.Name, i => i.AttributeValues.First().ToString() ), result.RelayState );
