@@ -234,14 +234,16 @@ public class TextControlSetup {
 		DisplaySetup displaySetup, string inputElementType, ContentBasedLength widthOverride, int? numberOfRows, bool isReadOnly, ElementClassSet classes,
 		bool disableTrimming, bool requiresNumericValue, string placeholder, string autoFillTokens, ResourceInfo autoCompleteResource,
 		bool? checksSpellingAndGrammar, Func<string, string> formattedValueExpressionGetter, SpecifiedValue<FormAction> specifiedAction,
-		bool? triggersActionWhenItemSelected, FormAction valueChangedAction, PageModificationValue<string> pageModificationValue,
+		bool? triggersActionWhenItemSelected, FormAction valueChangedAction, PageModificationValue<string> pageModificationValueParameter,
 		PageModificationValue<long?> numericPageModificationValue, Func<bool, bool> validationPredicate, Action validationErrorNotifier ) {
-		var labeler = new FormControlLabeler();
 		formattedValueExpressionGetter ??= _ => "";
 		var action = specifiedAction != null ? specifiedAction.Value : FormState.Current.FormControlDefaultAction;
-		pageModificationValue ??= new PageModificationValue<string>();
 
 		LabelerAndComponentAndValidationGetter = ( value, allowEmpty, minLength, maxLength, internalValidationMethod, externalValidationMethod ) => {
+			var pageModificationValue = pageModificationValueParameter ?? new PageModificationValue<string>();
+
+			var labeler = new FormControlLabeler();
+
 			var id = new ElementId();
 			var formValue = new FormValue<string>(
 				() => value,

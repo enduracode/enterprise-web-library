@@ -53,18 +53,20 @@ public class DateControlSetup {
 
 	internal DateControlSetup(
 		DisplaySetup? displaySetup, bool isReadOnly, ElementClassSet? classes, string autoFillTokens, SpecifiedValue<FormAction>? specifiedAction,
-		FormAction? valueChangedAction, PageModificationValue<LocalDate?>? datePageModificationValue, Func<bool, bool>? validationPredicate,
+		FormAction? valueChangedAction, PageModificationValue<LocalDate?>? datePageModificationValueParameter, Func<bool, bool>? validationPredicate,
 		Action? validationErrorNotifier ) {
-		var labeler = new FormControlLabeler();
 		if( autoFillTokens.Length > 0 )
 			throw new NotSupportedException( "Auto-fill detail tokens are not supported with the current implementation of the date control." );
 		var action = specifiedAction != null ? specifiedAction.Value : FormState.Current.FormControlDefaultAction;
-		datePageModificationValue ??= new PageModificationValue<LocalDate?>();
 
 		LabelerAndComponentAndValidationGetter = ( value, allowEmpty, minValue, maxValue, validationMethod ) => {
+			var datePageModificationValue = datePageModificationValueParameter ?? new PageModificationValue<LocalDate?>();
+
 			var currentDate = PageBase.Current.FirstRequestTime.InUtc().Date;
 			minValue ??= currentDate.PlusYears( -120 );
 			maxValue ??= currentDate.PlusYears( 5 );
+
+			var labeler = new FormControlLabeler();
 
 			var id = new ElementId();
 			const int textControlMaxLength = 50;

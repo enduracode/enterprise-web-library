@@ -1,4 +1,5 @@
 ﻿#nullable disable
+using JetBrains.Annotations;
 using MoreLinq;
 using Tewl.InputValidation;
 
@@ -18,7 +19,7 @@ public static class FreeFormRadioList {
 	/// state to be valid.</param>
 	/// <param name="selectedItemId"></param>
 	/// <param name="setup">The setup object for the free-form radio list.</param>
-	/// <param name="validationMethod">The validation method. Pass null if you�re only using this radio-button list for page modification.</param>
+	/// <param name="validationMethod">The validation method. Pass null if you’re only using this radio-button list for page modification.</param>
 	public static FreeFormRadioList<ItemIdType> Create<ItemIdType>(
 		bool? noSelectionIsValid, ItemIdType selectedItemId, FreeFormRadioListSetup<ItemIdType> setup = null,
 		Action<ItemIdType, Validator> validationMethod = null ) {
@@ -30,6 +31,7 @@ public static class FreeFormRadioList {
 /// A radio-button list that allows you to arrange the buttons on the page however you wish. If you want access to the individual selection state of each
 /// radio button and do not need the concept of a selected item ID for the group, use RadioButtonGroup instead.
 /// </summary>
+[ PublicAPI ]
 public class FreeFormRadioList<ItemIdType> {
 	private readonly FormValue<ElementId> formValue;
 	private readonly bool? noSelectionIsValid;
@@ -99,7 +101,7 @@ public class FreeFormRadioList<ItemIdType> {
 	/// <param name="label">The radio button label. Do not pass null. Pass an empty collection for no label.</param>
 	/// <param name="setup">The setup object for the radio button.</param>
 	public Checkbox CreateRadioButton( ItemIdType listItemId, IReadOnlyCollection<PhrasingComponent> label, RadioButtonSetup setup = null ) {
-		setup ??= RadioButtonSetup.Create();
+		setup = setup?.AddPmv() ?? RadioButtonSetup.Create( pageModificationValue: new PageModificationValue<bool>() );
 
 		validateListItem( listItemId );
 
@@ -132,7 +134,7 @@ public class FreeFormRadioList<ItemIdType> {
 	/// <param name="label">The radio button label. Do not pass null. Pass an empty collection for no label.</param>
 	/// <param name="setup">The setup object for the flow radio button.</param>
 	public FlowCheckbox CreateFlowRadioButton( ItemIdType listItemId, IReadOnlyCollection<PhrasingComponent> label, FlowRadioButtonSetup setup = null ) {
-		setup ??= FlowRadioButtonSetup.Create();
+		setup = setup?.AddPmv() ?? FlowRadioButtonSetup.Create( pageModificationValue: new PageModificationValue<bool>() );
 		return new FlowCheckbox( setup, CreateRadioButton( listItemId, label, setup: setup.RadioButtonSetup ) );
 	}
 

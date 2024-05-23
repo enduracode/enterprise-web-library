@@ -37,7 +37,7 @@ public class NumberControlSetup {
 			action,
 			null,
 			valueChangedAction,
-			pageModificationValue ?? new PageModificationValue<decimal?>(),
+			pageModificationValue,
 			validationPredicate,
 			validationErrorNotifier );
 	}
@@ -73,7 +73,7 @@ public class NumberControlSetup {
 			action,
 			triggersActionWhenItemSelected,
 			valueChangedAction,
-			pageModificationValue ?? new PageModificationValue<decimal?>(),
+			pageModificationValue,
 			validationPredicate,
 			validationErrorNotifier );
 	}
@@ -98,7 +98,7 @@ public class NumberControlSetup {
 			null,
 			null,
 			null,
-			new PageModificationValue<decimal?>(),
+			null,
 			validationPredicate,
 			validationErrorNotifier );
 	}
@@ -109,11 +109,15 @@ public class NumberControlSetup {
 	internal NumberControlSetup(
 		DisplaySetup displaySetup, bool isImprecise, bool isReadOnly, ElementClassSet classes, string placeholder, string autoFillTokens,
 		ResourceInfo autoCompleteResource, SpecifiedValue<FormAction> specifiedAction, bool? triggersActionWhenItemSelected, FormAction valueChangedAction,
-		object pageModificationValue, Func<bool, bool> validationPredicate, Action validationErrorNotifier ) {
-		var labeler = new FormControlLabeler();
+		object pageModificationValueParameter, Func<bool, bool> validationPredicate, Action validationErrorNotifier ) {
 		var action = specifiedAction != null ? specifiedAction.Value : FormState.Current.FormControlDefaultAction;
 
 		LabelerAndComponentAndValidationGetter = ( value, allowEmpty, minValue, maxValue, valueStep, validationMethod ) => {
+			var pageModificationValue =
+				pageModificationValueParameter ?? ( isImprecise ? new PageModificationValue<decimal>() : new PageModificationValue<decimal?>() );
+
+			var labeler = new FormControlLabeler();
+
 			var id = new ElementId();
 			var formValue = new FormValue<decimal?>(
 				() => value,
