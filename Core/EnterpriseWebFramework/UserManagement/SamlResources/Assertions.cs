@@ -20,7 +20,7 @@ partial class Assertions {
 	protected override EwfResponse post() {
 		var assertion = Task.Run( ExternalFunctionalityStatics.ExternalSamlProvider.ReadAssertion ).Result;
 		if( !assertion.HasValue )
-			return EwfResponse.Create( ContentTypes.PlainText, new EwfResponseBodyCreator( () => "Invalid SAML response" ), statusCodeGetter: () => 400 );
+			throw new LogInException();
 
 		var identityProvider =
 			AuthenticationStatics.SamlIdentityProviders.Single( i => string.Equals( i.EntityId, assertion.Value.identityProvider, StringComparison.Ordinal ) );

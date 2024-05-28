@@ -229,6 +229,8 @@ public static class RequestDispatchingStatics {
 					}
 					else if( exception is PageDisabledException pageDisabledException )
 						transferRequest( context, null, new ResourceDisabled( pageDisabledException.Message ) );
+					else if( exception is LogInException )
+						transferRequest( context, 400, getErrorPage( new LogInSessionExpired() ) );
 					else {
 						AutomaticDatabaseConnectionManager.Current.RollbackTransactions( true );
 						DataAccessState.Current.ResetCache();
