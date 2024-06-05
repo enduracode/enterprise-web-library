@@ -1,7 +1,7 @@
 syntax: glob
 
 .vs/
-_ReSharper*
+Enterprise Web Library.sln.DotSettings
 Enterprise Web Library.sln.DotSettings.user
 NDependOut/
 DependencyMatrixSnapshot.png

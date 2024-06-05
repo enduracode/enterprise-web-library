@@ -174,6 +174,8 @@ internal class UpdateDependentLogic: Operation {
 			writer.WriteLine( "</Project>" );
 		}
 
+		updateReSharperSettings( installation );
+
 		if( !installation.DevelopmentInstallationLogic.SystemIsEwl && !installation.SystemIsTewl() ) {
 			if( Directory.Exists( EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.MercurialRepositoryFolderName ) ) )
 				updateIgnoreFile( installation, false );
@@ -673,6 +675,35 @@ internal class UpdateDependentLogic: Operation {
 		}
 	}
 
+	private void updateReSharperSettings( DevelopmentInstallation installation ) {
+		const string defaultSettingsFileName = $"{EwlStatics.EwlInitialism} ReSharper Settings.DotSettings";
+		if( !installation.SystemIsTewl() )
+			File.WriteAllText(
+				EwlStatics.CombinePaths( installation.GeneralLogic.Path, installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + ".sln.DotSettings" ),
+				$"""
+				 <wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+				 	<s:String x:Key="/Default/Environment/InjectedLayers/FileInjectedLayer/=05EBF8F119D84B4B92F9F0399ECB948E/RelativePath/@EntryValue">..\Library\{InstallationConfiguration.ConfigurationFolderName}\ReSharper Settings.DotSettings</s:String>
+				 	<s:Boolean x:Key="/Default/Environment/InjectedLayers/FileInjectedLayer/=05EBF8F119D84B4B92F9F0399ECB948E/@KeyIndexDefined">True</s:Boolean>
+				 	<s:String x:Key="/Default/Environment/InjectedLayers/FileInjectedLayer/=87BDBF1965C117468DCA5BFA8DB0DF75/RelativePath/@EntryValue">..\Library\{generatedCodeFolderName}\{defaultSettingsFileName}</s:String>
+				 	<s:Boolean x:Key="/Default/Environment/InjectedLayers/FileInjectedLayer/=87BDBF1965C117468DCA5BFA8DB0DF75/@KeyIndexDefined">True</s:Boolean>
+				 	<s:Boolean x:Key="/Default/Environment/InjectedLayers/InjectedLayerCustomization/=File05EBF8F119D84B4B92F9F0399ECB948E/@KeyIndexDefined">True</s:Boolean>
+				 	<s:String x:Key="/Default/Environment/InjectedLayers/InjectedLayerCustomization/=File05EBF8F119D84B4B92F9F0399ECB948E/DisplayName/@EntryValue">Custom</s:String>
+				 	<s:Double x:Key="/Default/Environment/InjectedLayers/InjectedLayerCustomization/=File05EBF8F119D84B4B92F9F0399ECB948E/RelativePriority/@EntryValue">0.5</s:Double>
+				 	<s:Boolean x:Key="/Default/Environment/InjectedLayers/InjectedLayerCustomization/=File87BDBF1965C117468DCA5BFA8DB0DF75/@KeyIndexDefined">True</s:Boolean>
+				 	<s:String x:Key="/Default/Environment/InjectedLayers/InjectedLayerCustomization/=File87BDBF1965C117468DCA5BFA8DB0DF75/DisplayName/@EntryValue">{EwlStatics.EwlInitialism} Defaults</s:String>
+				 	<s:Double x:Key="/Default/Environment/InjectedLayers/InjectedLayerCustomization/=File87BDBF1965C117468DCA5BFA8DB0DF75/RelativePriority/@EntryValue">1</s:Double></wpf:ResourceDictionary>
+				 """,
+				Encoding.UTF8 );
+
+		IoMethods.CopyFile(
+			EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "ReSharper Settings.DotSettings" ),
+			EwlStatics.CombinePaths(
+				installation.SystemIsTewl()
+					? EwlStatics.CombinePaths( installation.GeneralLogic.Path, "Shared" )
+					: EwlStatics.CombinePaths( installation.DevelopmentInstallationLogic.LibraryPath, generatedCodeFolderName ),
+				defaultSettingsFileName ) );
+	}
+
 	private void updateIgnoreFile( DevelopmentInstallation installation, bool forGit ) {
 		var filePath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, forGit ? ".gitignore" : ".hgignore" );
 		var lines = File.Exists( filePath ) ? File.ReadAllLines( filePath ) : Enumerable.Empty<string>();
@@ -687,6 +718,7 @@ internal class UpdateDependentLogic: Operation {
 			writer.WriteLine( "syntax: glob" );
 		writer.WriteLine();
 		writer.WriteLine( ".vs/" );
+		writer.WriteLine( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + ".sln.DotSettings" );
 		writer.WriteLine( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + ".sln.DotSettings.user" );
 		writer.WriteLine( "{0}/".FormatWith( InstallationFileStatics.WebFrameworkStaticFilesFolderName ) );
 		writer.WriteLine( "Error Log.txt" );
