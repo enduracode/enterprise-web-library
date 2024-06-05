@@ -42,13 +42,13 @@ internal class UpdateDependentLogic: Operation {
 
 		if( !installation.SystemIsTewl() )
 			try {
-				copyInEwlFiles( installation );
+				copyInFileDependencies( installation );
 			}
 			catch( Exception e ) {
-				var message = "Failed to copy {0} files into the installation. Please try the operation again.".FormatWith( EwlStatics.EwlName );
-				if( e is UnauthorizedAccessException || e is IOException )
+				const string message = "Failed to copy file dependencies into the installation. Please try the operation again.";
+				if( e is UnauthorizedAccessException or IOException )
 					throw new UserCorrectableException( message, e );
-				throw new ApplicationException( message, e );
+				throw new Exception( message, e );
 			}
 
 		// Generate code.
@@ -182,7 +182,7 @@ internal class UpdateDependentLogic: Operation {
 		}
 	}
 
-	private void copyInEwlFiles( DevelopmentInstallation installation ) {
+	private void copyInFileDependencies( DevelopmentInstallation installation ) {
 		if( installation is RecognizedDevelopmentInstallation recognizedInstallation )
 			recognizedInstallation.KnownSystemLogic.DownloadAsposeLicenses( installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath );
 
