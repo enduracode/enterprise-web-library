@@ -151,6 +151,7 @@ internal class UpdateDependentLogic: Operation {
 			generateWindowsServiceCode( installation, service );
 		foreach( var project in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.ServerSideConsoleProjectsNonNullable )
 			generateServerSideConsoleProjectCode( installation, project );
+		generateDataCleanerProject( installation );
 		if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject != null )
 			generateCodeForProject(
 				installation,
@@ -478,6 +479,37 @@ internal class UpdateDependentLogic: Operation {
 			runtimeIdentifier: "win-x64" );
 	}
 
+	private void generateDataCleanerProject( DevelopmentInstallation installation ) {
+		var projectPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, IsuStatics.DataCleanerProjectName );
+
+		IoMethods.DeleteFolder( projectPath );
+		Directory.CreateDirectory( projectPath );
+		using( var writer = new StreamWriter( EwlStatics.CombinePaths( projectPath, $"{IsuStatics.DataCleanerProjectName}.csproj" ), false, Encoding.UTF8 ) ) {
+			writer.WriteLine( "<Project Sdk=\"Microsoft.NET.Sdk\">" );
+			writer.WriteLine( "<PropertyGroup>" );
+			writer.WriteLine( "<OutputType>Exe</OutputType>" );
+			writer.WriteLine( "</PropertyGroup>" );
+			writer.WriteLine( "<ItemGroup>" );
+			writer.WriteLine( """<ProjectReference Include="..\Library\Library.csproj" />""" );
+			writer.WriteLine( "</ItemGroup>" );
+			writer.WriteLine( "</Project>" );
+		}
+
+		using( var writer = new StreamWriter( EwlStatics.CombinePaths( projectPath, "Program.cs" ), false, Encoding.UTF8 ) ) {
+			writer.WriteLine( $"namespace {IsuStatics.DataCleanerNamespaceAndAssemblyName};" );
+			writer.WriteLine();
+			writer.WriteLine( "partial class Program {" );
+			writer.WriteLine( "static partial void ewlMain( IReadOnlyList<string> arguments ) {" );
+			writer.WriteLine( "DataCleanupOps.CleanUpData();" );
+			writer.WriteLine( "}" );
+			writer.WriteLine( "}" );
+		}
+
+		generateServerSideConsoleProjectCode(
+			installation,
+			new ServerSideConsoleProject { Name = IsuStatics.DataCleanerProjectName, NamespaceAndAssemblyName = IsuStatics.DataCleanerNamespaceAndAssemblyName } );
+	}
+
 	private void generateServerSideConsoleProjectCode( DevelopmentInstallation installation, ServerSideConsoleProject project ) {
 		generateCodeForProject(
 			installation,
@@ -486,19 +518,17 @@ internal class UpdateDependentLogic: Operation {
 			project.NamespaceAndAssemblyName,
 			writer => {
 				writer.WriteLine( "using System.Collections.Immutable;" );
-				writer.WriteLine( "using System.Threading;" );
 				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess;" );
+				writer.WriteLine( $"using {installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName};" );
 				writer.WriteLine();
 				writer.WriteLine( "namespace {0};".FormatWith( project.NamespaceAndAssemblyName ) );
 				writer.WriteLine();
 				writer.WriteLine( "internal static partial class Program {" );
 
 				writer.WriteLine( "private static int Main( string[] args ) {" );
-				writer.WriteLine( "SystemInitializer? globalInitializer = null;" );
-				writer.WriteLine( "initGlobalInitializer( ref globalInitializer );" );
-				writer.WriteLine( "var dataAccessState = new System.Lazy<DataAccessState>( () => new DataAccessState() );" );
+				writer.WriteLine( "var dataAccessState = new Lazy<DataAccessState>( () => new DataAccessState() );" );
 				writer.WriteLine(
-					"GlobalInitializationOps.InitStatics( globalInitializer!, \"{0}\", false, mainDataAccessStateGetter: () => dataAccessState.Value! );".FormatWith(
+					"GlobalInitializationOps.InitStatics( new GlobalInitializer(), \"{0}\", false, mainDataAccessStateGetter: () => dataAccessState.Value! );".FormatWith(
 						project.Name ) );
 				writer.WriteLine( "try {" );
 				writer.WriteLine( "return GlobalInitializationOps.ExecuteAppWithStandardExceptionHandling( () => {" );
@@ -507,7 +537,7 @@ internal class UpdateDependentLogic: Operation {
 				writer.WriteLine( "Console.SetIn( new StreamReader( Console.OpenStandardInput(), Console.InputEncoding, false, 4096 ) );" );
 
 				writer.WriteLine(
-					"ewlMain( args.Any() && string.Equals( args[ 0 ], \"{0}\", StringComparison.Ordinal ) ? Newtonsoft.Json.JsonConvert.DeserializeObject<ImmutableArray<string>>( Console.ReadLine()! ) : args );"
+					"ewlMain( args.Length > 0 && string.Equals( args[ 0 ], \"{0}\", StringComparison.Ordinal ) ? Newtonsoft.Json.JsonConvert.DeserializeObject<ImmutableArray<string>>( Console.ReadLine()! ) : args );"
 						.FormatWith( serverSideConsoleAppJsonArgument ) );
 				writer.WriteLine( "} );" );
 				writer.WriteLine( "}" );
@@ -516,7 +546,6 @@ internal class UpdateDependentLogic: Operation {
 				writer.WriteLine( "}" );
 				writer.WriteLine( "}" );
 
-				writer.WriteLine( "static partial void initGlobalInitializer( ref SystemInitializer? globalInitializer );" );
 				writer.WriteLine( "static partial void ewlMain( IReadOnlyList<string> arguments );" );
 
 				writer.WriteLine( "}" );
@@ -607,10 +636,9 @@ internal class UpdateDependentLogic: Operation {
 		}
 
 		var generatedCodeFolderPath = EwlStatics.CombinePaths( projectPath, generatedCodeFolderName );
+		IoMethods.DeleteFolder( generatedCodeFolderPath );
 		Directory.CreateDirectory( generatedCodeFolderPath );
-		var isuFilePath = EwlStatics.CombinePaths( generatedCodeFolderPath, "ISU.cs" );
-		IoMethods.DeleteFile( isuFilePath );
-		using( TextWriter writer = new StreamWriter( isuFilePath ) )
+		using( var writer = new StreamWriter( EwlStatics.CombinePaths( generatedCodeFolderPath, "Main.cs" ), false, Encoding.UTF8 ) )
 			codeWriter( writer );
 	}
 

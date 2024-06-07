@@ -1,6 +1,5 @@
 ﻿#nullable disable warnings
 using System.ComponentModel;
-using System.Runtime.ExceptionServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -53,11 +52,6 @@ public static partial class EwlStatics {
 	/// Development Utility and internal use only.
 	/// </summary>
 	public const string SamlProviderProjectName = "SAML";
-
-	/// <summary>
-	/// Installation Support Utility and internal use only.
-	/// </summary>
-	public const string TestRunnerProjectName = "Test Runner";
 
 	/// <summary>
 	/// Returns an Object with the specified Type and whose value is equivalent to the specified object.

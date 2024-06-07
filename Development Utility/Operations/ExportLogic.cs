@@ -490,9 +490,18 @@ internal class ExportLogic: Operation {
 			copyServerSideProject( installation, serverSideLogicFolderPath, project.Name );
 
 		// Always copy special projects.
-		var testRunnerFolder = EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.TestRunnerProjectName );
+		var testRunnerFolder = EwlStatics.CombinePaths( installation.GeneralLogic.Path, IsuStatics.TestRunnerProjectName );
 		if( Directory.Exists( testRunnerFolder ) )
-			copyServerSideProject( installation, serverSideLogicFolderPath, EwlStatics.TestRunnerProjectName );
+			copyServerSideProject( installation, serverSideLogicFolderPath, IsuStatics.TestRunnerProjectName );
+
+		TewlContrib.ProcessTools.RunProgram(
+			"dotnet",
+			$"""
+			 restore "{EwlStatics.CombinePaths( installation.GeneralLogic.Path, IsuStatics.DataCleanerProjectName )}"
+			 """,
+			"",
+			true );
+		copyServerSideProject( installation, serverSideLogicFolderPath, IsuStatics.DataCleanerProjectName );
 	}
 
 	private void copyServerSideProject( DevelopmentInstallation installation, string serverSideLogicFolderPath, string project ) {

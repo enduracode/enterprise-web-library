@@ -7,6 +7,21 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility;
 
 public class IsuStatics {
 	/// <summary>
+	/// Installation Support Utility use only.
+	/// </summary>
+	public const string TestRunnerProjectName = "Test Runner";
+
+	/// <summary>
+	/// Installation Support Utility use only.
+	/// </summary>
+	public const string DataCleanerProjectName = "Data Cleaner";
+
+	/// <summary>
+	/// Installation Support Utility use only.
+	/// </summary>
+	public const string DataCleanerNamespaceAndAssemblyName = "DataCleaner";
+
+	/// <summary>
 	/// ISU and internal use only.
 	/// </summary>
 	public static void ConfigureIis( bool useServerAppPoolSettings ) {
