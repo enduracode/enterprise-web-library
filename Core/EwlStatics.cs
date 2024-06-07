@@ -29,31 +29,6 @@ public static partial class EwlStatics {
 	public const string CoreProjectName = "Core";
 
 	/// <summary>
-	/// Development Utility and internal use only.
-	/// </summary>
-	public const string ProviderProjectFolderName = "Providers";
-
-	/// <summary>
-	/// Development Utility and internal use only.
-	/// </summary>
-	public const string MySqlProviderProjectName = "MySQL";
-
-	/// <summary>
-	/// Development Utility and internal use only.
-	/// </summary>
-	public const string OracleDatabaseProviderProjectName = "Oracle Database";
-
-	/// <summary>
-	/// Development Utility and internal use only.
-	/// </summary>
-	public const string OpenIdConnectProviderProjectName = "OpenID Connect";
-
-	/// <summary>
-	/// Development Utility and internal use only.
-	/// </summary>
-	public const string SamlProviderProjectName = "SAML";
-
-	/// <summary>
 	/// Returns an Object with the specified Type and whose value is equivalent to the specified object.
 	/// </summary>
 	/// <param name="value">An Object that implements the IConvertible interface.</param>
@@ -303,7 +278,7 @@ public static partial class EwlStatics {
 	/// </summary>
 	public static DestinationType? ToNewUnderlyingValue<SourceType, DestinationType>( this SourceType? value, Func<SourceType, DestinationType> valueSelector )
 		where SourceType: struct where DestinationType: struct =>
-		value.HasValue ? (DestinationType?)valueSelector( value.Value ) : null;
+		value.HasValue ? valueSelector( value.Value ) : null;
 
 	/// <summary>
 	/// Returns whether this time is within the hours when nightly operations are typically underway.

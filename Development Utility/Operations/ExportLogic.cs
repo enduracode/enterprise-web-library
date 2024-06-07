@@ -139,7 +139,7 @@ internal class ExportLogic: Operation {
 					createProviderNuGetPackages(
 						installation,
 						mainId,
-						EwlStatics.MySqlProviderProjectName,
+						AppStatics.MySqlProviderProjectName,
 						"EnterpriseWebLibrary.MySql",
 						mySqlId,
 						now,
@@ -153,7 +153,7 @@ internal class ExportLogic: Operation {
 					createProviderNuGetPackages(
 						installation,
 						mainId,
-						EwlStatics.OracleDatabaseProviderProjectName,
+						AppStatics.OracleDatabaseProviderProjectName,
 						"EnterpriseWebLibrary.OracleDatabase",
 						oracleDatabaseId,
 						now,
@@ -167,7 +167,7 @@ internal class ExportLogic: Operation {
 					createProviderNuGetPackages(
 						installation,
 						mainId,
-						EwlStatics.OpenIdConnectProviderProjectName,
+						AppStatics.OpenIdConnectProviderProjectName,
 						"EnterpriseWebLibrary.OpenIdConnect",
 						openIdConnectId,
 						now,
@@ -181,7 +181,7 @@ internal class ExportLogic: Operation {
 					createProviderNuGetPackages(
 						installation,
 						mainId,
-						EwlStatics.SamlProviderProjectName,
+						AppStatics.SamlProviderProjectName,
 						"EnterpriseWebLibrary.Saml",
 						samlId,
 						now,
@@ -213,7 +213,7 @@ internal class ExportLogic: Operation {
 							TewlContrib.ProcessTools.RunProgram(
 								"dotnet",
 								"build \"{0}\" --configuration {1} --no-restore".FormatWith(
-									EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.ProviderProjectFolderName, projectName ),
+									EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.ProviderProjectFolderName, projectName ),
 									useDebugAssembly ? "Debug" : "Release" ),
 								"",
 								true );
@@ -221,7 +221,7 @@ internal class ExportLogic: Operation {
 								IoMethods.CopyFile(
 									EwlStatics.CombinePaths(
 										installation.GeneralLogic.Path,
-										EwlStatics.ProviderProjectFolderName,
+										AppStatics.ProviderProjectFolderName,
 										projectName,
 										ConfigurationStatics.GetProjectOutputFolderPath( useDebugAssembly ),
 										fileName ),
@@ -235,7 +235,7 @@ internal class ExportLogic: Operation {
 									mainPackageId,
 									packageId,
 									"{0} Provider".FormatWith( projectName ),
-									EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.ProviderProjectFolderName, projectName, projectName + ".csproj" ),
+									EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.ProviderProjectFolderName, projectName, projectName + ".csproj" ),
 									prerelease,
 									localExportDateAndTime );
 

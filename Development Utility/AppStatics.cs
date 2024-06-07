@@ -10,6 +10,11 @@ internal static class AppStatics {
 	internal const string GitRepositoryFolderName = ".git";
 	internal const string TewlProjectPath = @"Shared\TEWL";
 	internal const string StaticFileLogicFolderName = "Logic";
+	internal const string ProviderProjectFolderName = "Providers";
+	internal const string MySqlProviderProjectName = "MySQL";
+	internal const string OracleDatabaseProviderProjectName = "Oracle Database";
+	internal const string OpenIdConnectProviderProjectName = "OpenID Connect";
+	internal const string SamlProviderProjectName = "SAML";
 
 	internal static bool NDependIsPresent;
 

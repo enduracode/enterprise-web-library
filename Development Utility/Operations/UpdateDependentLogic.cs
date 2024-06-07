@@ -105,25 +105,25 @@ internal class UpdateDependentLogic: Operation {
 			generateCodeForProject(
 				installation,
 				"MySQL Provider",
-				EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.ProviderProjectFolderName, EwlStatics.MySqlProviderProjectName ),
+				EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.ProviderProjectFolderName, AppStatics.MySqlProviderProjectName ),
 				"EnterpriseWebLibrary.MySql",
 				_ => {} );
 			generateCodeForProject(
 				installation,
 				"Oracle Database Provider",
-				EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.ProviderProjectFolderName, EwlStatics.OracleDatabaseProviderProjectName ),
+				EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.ProviderProjectFolderName, AppStatics.OracleDatabaseProviderProjectName ),
 				"EnterpriseWebLibrary.OracleDatabase",
 				_ => {} );
 			generateCodeForProject(
 				installation,
 				"OpenID Connect Provider",
-				EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.ProviderProjectFolderName, EwlStatics.OpenIdConnectProviderProjectName ),
+				EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.ProviderProjectFolderName, AppStatics.OpenIdConnectProviderProjectName ),
 				"EnterpriseWebLibrary.OpenIdConnect",
 				_ => {} );
 			generateCodeForProject(
 				installation,
 				"SAML Provider",
-				EwlStatics.CombinePaths( installation.GeneralLogic.Path, EwlStatics.ProviderProjectFolderName, EwlStatics.SamlProviderProjectName ),
+				EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.ProviderProjectFolderName, AppStatics.SamlProviderProjectName ),
 				"EnterpriseWebLibrary.Saml",
 				_ => {} );
 		}
