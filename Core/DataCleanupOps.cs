@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel;
+using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.UserManagement;
 using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary;
@@ -13,5 +15,16 @@ public static class DataCleanupOps {
 	/// EWL use only.
 	/// </summary>
 	[ EditorBrowsable( EditorBrowsableState.Never ) ]
-	public static void CleanUpData() {}
+	public static void CleanUpData() {
+		if( UserManagementStatics.UserManagementEnabled )
+			DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen(
+				() => DataAccessState.Current.PrimaryDatabaseConnection.ExecuteInTransaction(
+					() => {
+						var provider = UserManagementStatics.SystemProvider;
+						var latestRequests = provider.GetUserRequests().GroupBy( i => i.UserId, ( _, requests ) => requests.MaxBy( i => i.RequestTime )! ).Materialize();
+						provider.ClearUserRequests();
+						foreach( var i in latestRequests )
+							provider.InsertUserRequest( i.UserId, i.RequestTime );
+					} ) );
+	}
 }

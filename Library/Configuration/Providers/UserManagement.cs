@@ -22,13 +22,19 @@ internal class UserManagement: SystemUserManagementProvider {
 
 	protected override SystemUser GetUser( string emailAddress ) => createUser();
 
-	private SystemUser createUser() => new( 1, "john.doe@example.com", createRole(), null );
+	private SystemUser createUser() => new( 1, "john.doe@example.com", createRole() );
 
-	protected override int InsertOrUpdateUser( int? userId, string emailAddress, int roleId, Instant? lastRequestTime ) => 1;
+	protected override int InsertOrUpdateUser( int? userId, string emailAddress, int roleId ) => 1;
 
 	protected override void DeleteUser( int userId ) {}
 
 	protected override IEnumerable<Role> GetRoles() => createRole().ToCollection();
 
 	private Role createRole() => new( 1, "Admin", true, false );
+
+	protected override IEnumerable<UserRequest> GetUserRequests() => Enumerable.Empty<UserRequest>();
+
+	protected override void InsertUserRequest( int userId, Instant requestTime ) {}
+
+	protected override void ClearUserRequests() {}
 }

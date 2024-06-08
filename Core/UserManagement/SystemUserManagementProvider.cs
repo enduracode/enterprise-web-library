@@ -35,7 +35,7 @@ public abstract class SystemUserManagementProvider {
 	/// <summary>
 	/// Inserts a new user (if no user ID is passed) or updates an existing user with the specified parameters. Returns the user’s ID.
 	/// </summary>
-	protected internal abstract int InsertOrUpdateUser( int? userId, string emailAddress, int roleId, Instant? lastRequestTime );
+	protected internal abstract int InsertOrUpdateUser( int? userId, string emailAddress, int roleId );
 
 	/// <summary>
 	/// Deletes the user with the specified ID.
@@ -46,4 +46,19 @@ public abstract class SystemUserManagementProvider {
 	/// Retrieves all roles.
 	/// </summary>
 	protected internal abstract IEnumerable<Role> GetRoles();
+
+	/// <summary>
+	/// Retrieves all requests users made to the system.
+	/// </summary>
+	protected internal abstract IEnumerable<UserRequest> GetUserRequests();
+
+	/// <summary>
+	/// Inserts a new request for the specified user.
+	/// </summary>
+	protected internal abstract void InsertUserRequest( int userId, Instant requestTime );
+
+	/// <summary>
+	/// Clears all user requests. This method is only called during data cleanup.
+	/// </summary>
+	protected internal abstract void ClearUserRequests();
 }

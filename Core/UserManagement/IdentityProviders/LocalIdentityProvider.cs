@@ -175,7 +175,7 @@ public class LocalIdentityProvider: IdentityProvider {
 		if( user is null ) {
 			if( !newUserRoleId.HasValue )
 				return;
-			user = UserManagementStatics.GetUser( UserManagementStatics.SystemProvider.InsertOrUpdateUser( null, emailAddress, newUserRoleId.Value, null ), true )!;
+			user = UserManagementStatics.GetUser( UserManagementStatics.SystemProvider.InsertOrUpdateUser( null, emailAddress, newUserRoleId.Value ), true )!;
 		}
 
 		string code;

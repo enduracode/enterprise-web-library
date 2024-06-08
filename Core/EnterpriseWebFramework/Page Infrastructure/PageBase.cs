@@ -3,7 +3,6 @@ using System.Collections.Immutable;
 using System.Security.Cryptography;
 using System.Text;
 using EnterpriseWebLibrary.Configuration;
-using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.EnterpriseWebFramework.PageInfrastructure;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.UserManagement;
@@ -610,13 +609,15 @@ public abstract class PageBase: ResourceBase {
 
 		// Skip application-level modifications on the unhandled-exception page to decrease the probability of getting another exception.
 		if( RequestStateStatics.GetLastError() is null ) {
-			modMethods.Add( appProvider.pageViewDataModificationMethodGetter() );
 			if( RequestState.Instance.UserAccessible ) {
-				if( AppTools.User != null )
-					modMethods.Add( getLastPageRequestTimeUpdateMethod( AppTools.User ) );
-				if( RequestState.Instance.ImpersonatorExists && RequestState.Instance.ImpersonatorUser != null )
-					modMethods.Add( getLastPageRequestTimeUpdateMethod( RequestState.Instance.ImpersonatorUser ) );
+				// It’s important to do this for pages only (and not for all resources) because requests for some pages, with their associated images, CSS files, etc.,
+				// can easily cause 20-30 server requests, and we only want to insert one request row for all of these.
+				if( SystemUser.Current is {} user )
+					modMethods.Add( () => UserManagementStatics.SystemProvider.InsertUserRequest( user.UserId, EwfRequest.Current.RequestTime ) );
+				if( RequestState.Instance.ImpersonatorExists && RequestState.Instance.ImpersonatorUser is {} impersonatorUser )
+					modMethods.Add( () => UserManagementStatics.SystemProvider.InsertUserRequest( impersonatorUser.UserId, EwfRequest.Current.RequestTime ) );
 			}
+			modMethods.Add( appProvider.pageViewDataModificationMethodGetter() );
 		}
 
 		modMethods.Add( AuthenticationStatics.GetUserCookieUpdater() );
@@ -655,32 +656,6 @@ public abstract class PageBase: ResourceBase {
 			throw getDeveloperMistakeException( "The user lost access to the page or the page became disabled after page-view data modifications." );
 		newPageObject.requestState = requestState;
 		return nextPageObject = newPageObject;
-	}
-
-	/// <summary>
-	/// It’s important to call this for pages only (and not for all resources) because requests for some pages, with their associated images, CSS files, etc., can
-	/// easily cause 20-30 server requests, and we only want to update the time stamp once for all of these.
-	/// </summary>
-	private Action getLastPageRequestTimeUpdateMethod( SystemUser user ) {
-		// Only update the request time if a significant amount of time has passed since we did it last. This can dramatically reduce concurrency issues caused by
-		// people rapidly assigning tasks to one another in the System Manager or similar situations.
-		if( EwfRequest.Current.RequestTime - user.LastRequestTime < Duration.FromMinutes( 60 ) )
-			return null;
-
-		// Now we want to do a timestamp-based concurrency check so we don't update the last login date if we know another transaction already did.
-		// It is not perfect, but it reduces errors caused by one user doing a long-running request and then doing smaller requests
-		// in another browser window while the first one is still running.
-		// We have to query in a separate transaction because otherwise snapshot isolation will result in us always getting the original LastRequestTime, even if
-		// another transaction has modified its value during this transaction.
-		var newlyQueriedUser = new DataAccessState().ExecuteWithThis(
-			() => {
-				SystemUser getUser() => UserManagementStatics.GetUser( user.UserId, false );
-				return ConfigurationStatics.DatabaseExists ? DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( getUser ) : getUser();
-			} );
-		if( newlyQueriedUser == null || newlyQueriedUser.LastRequestTime > user.LastRequestTime )
-			return null;
-
-		return () => UserManagementStatics.SystemProvider.InsertOrUpdateUser( user.UserId, user.Email, user.Role.RoleId, EwfRequest.Current.RequestTime );
 	}
 
 	// The warning below also appears on AppStandardPageLogicProvider.GetPageViewDataModificationMethod.

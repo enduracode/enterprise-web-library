@@ -108,8 +108,6 @@ public static class ConfigurationStatics {
 		return InstallationConfiguration.WebApplications.Single( i => i.Name == applicationName ).DefaultBaseUrl.GetUrlString( secure );
 	}
 
-	internal static bool DatabaseExists => InstallationConfiguration.PrimaryDatabaseInfo != null;
-
 	internal static bool IsDevelopmentInstallation => InstallationConfiguration.InstallationType == InstallationType.Development;
 
 	/// <summary>

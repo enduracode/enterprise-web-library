@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.UserManagement;
+﻿using EnterpriseWebLibrary.UserManagement;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 
@@ -22,14 +21,14 @@ public class UserEditor: FlowComponent {
 	/// <param name="userInserterOrUpdater">A function that takes the validated data, inserts or updates the user, and returns the user’s ID. Pass null to have
 	/// the user-management provider handle the insert or update.</param>
 	public UserEditor(
-		int? userId, out Action modificationMethod, IEnumerable<Role> availableRoles = null, UserInserterOrUpdaterMethod userInserterOrUpdater = null ) {
+		int? userId, out Action modificationMethod, IEnumerable<Role>? availableRoles = null, UserInserterOrUpdaterMethod? userInserterOrUpdater = null ) {
 		availableRoles = availableRoles?.OrderBy( r => r.Name ) ?? UserManagementStatics.SystemProvider.GetRoles();
 
 		var user = userId.HasValue ? UserManagementStatics.GetUser( userId.Value, true ) : null;
 
 		var email = new DataValue<string>();
 		var roleId = new DataValue<int>();
-		Action<int> passwordUpdater = null;
+		Action<int>? passwordUpdater = null;
 
 		var b = FormItemList.CreateStack();
 
@@ -74,7 +73,7 @@ public class UserEditor: FlowComponent {
 			if( userInserterOrUpdater != null )
 				userId = userInserterOrUpdater( email, roleId );
 			else
-				userId = UserManagementStatics.SystemProvider.InsertOrUpdateUser( userId, email.Value, roleId.Value, user?.LastRequestTime );
+				userId = UserManagementStatics.SystemProvider.InsertOrUpdateUser( userId, email.Value, roleId.Value );
 			passwordUpdater?.Invoke( userId.Value );
 		};
 	}
