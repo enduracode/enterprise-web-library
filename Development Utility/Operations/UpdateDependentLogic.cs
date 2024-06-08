@@ -748,7 +748,8 @@ internal class UpdateDependentLogic: Operation {
 		writer.WriteLine( ".vs/" );
 		writer.WriteLine( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + ".sln.DotSettings" );
 		writer.WriteLine( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + ".sln.DotSettings.user" );
-		writer.WriteLine( "{0}/".FormatWith( InstallationFileStatics.WebFrameworkStaticFilesFolderName ) );
+		writer.WriteLine( $"{InstallationFileStatics.WebFrameworkStaticFilesFolderName}/" );
+		writer.WriteLine( $"{IsuStatics.DataCleanerProjectName}/" );
 		writer.WriteLine( "Error Log.txt" );
 		writer.WriteLine( "*.csproj.user" );
 		writer.WriteLine( "*" + CodeGeneration.DataAccess.DataAccessStatics.CSharpTemplateFileExtension );
