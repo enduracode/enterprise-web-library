@@ -60,10 +60,14 @@ internal static class StandardModificationStatics {
 		writeUpdateRowsMethod( cn, tableName, revisionHistorySuffix, "", true );
 		writeUpdateRowsMethod( cn, tableName, revisionHistorySuffix, "WithoutAdditionalLogic", false );
 		writeUpdateRowsMethod( cn, tableName, revisionHistorySuffix, "WithoutAdditionalLogic", true );
-		writeDeleteRowsMethod( cn, tableName, revisionHistorySuffix, false, true );
-		writeDeleteRowsMethod( cn, tableName, revisionHistorySuffix, true, true );
-		writeDeleteRowsMethod( cn, tableName, revisionHistorySuffix + "WithoutAdditionalLogic", false, false );
-		writeDeleteRowsMethod( cn, tableName, revisionHistorySuffix + "WithoutAdditionalLogic", true, false );
+		writeDeleteRowsMethod( cn, tableName, revisionHistorySuffix, "", false, false );
+		writeDeleteRowsMethod( cn, tableName, revisionHistorySuffix, "", false, true );
+		writeDeleteRowsMethod( cn, tableName, revisionHistorySuffix, "", true, false );
+		writeDeleteRowsMethod( cn, tableName, revisionHistorySuffix, "", true, true );
+		writeDeleteRowsMethod( cn, tableName, revisionHistorySuffix, "WithoutAdditionalLogic", false, false );
+		writeDeleteRowsMethod( cn, tableName, revisionHistorySuffix, "WithoutAdditionalLogic", false, true );
+		writeDeleteRowsMethod( cn, tableName, revisionHistorySuffix, "WithoutAdditionalLogic", true, false );
+		writeDeleteRowsMethod( cn, tableName, revisionHistorySuffix, "WithoutAdditionalLogic", true, true );
 		writePrivateDeleteRowsMethod( cn, tableName, hasModTable, isRevisionHistoryClass );
 		writer.WriteLine(
 			"static partial void preDelete( List<" + DataAccessStatics.GetTableConditionInterfaceName( cn, database, tableName ) + "> conditions, ref " +
@@ -177,38 +181,41 @@ internal static class StandardModificationStatics {
 	}
 
 	private static void writeDeleteRowsMethod(
-		DatabaseConnection cn, string tableName, string methodNameSuffix, bool includeIsLongRunningParameter, bool executeAdditionalLogic ) {
+		DatabaseConnection cn, string tableName, string revisionHistorySuffix, string additionalLogicSuffix, bool omitConditionParameters,
+		bool includeIsLongRunningParameter ) {
 		CodeGenerationStatics.AddSummaryDocComment(
 			writer,
-			"<para>Deletes the rows that match the specified conditions and returns the number of rows deleted.</para>" +
+			$"<para>Deletes {( omitConditionParameters ? "all rows" : "the rows that match the specified conditions" )} and returns the number of rows deleted.</para>" +
 			"<para>WARNING: After calling this method, delete referenced rows in other tables that are no longer needed.</para>" );
+		var parameters = StringTools.ConcatenateWithDelimiter(
+			", ",
+			includeIsLongRunningParameter ? "bool isLongRunning" : "",
+			omitConditionParameters ? "" : getConditionParameterDeclarations( cn, tableName ) );
 		writer.WriteLine(
-			"public static int DeleteRows{0}( {1} ) {{".FormatWith(
-				methodNameSuffix,
-				StringTools.ConcatenateWithDelimiter(
-					", ",
-					includeIsLongRunningParameter ? "bool isLongRunning" : "",
-					getConditionParameterDeclarations( cn, tableName ) ) ) );
-		if( executeAdditionalLogic )
+			$$"""public static int Delete{{( omitConditionParameters ? "All" : "" )}}Rows{{revisionHistorySuffix + additionalLogicSuffix}}( {{parameters}} ) {""" );
+		if( additionalLogicSuffix.Length is 0 )
 			writer.WriteLine( "return " + DataAccessStatics.GetConnectionExpression( database ) + ".ExecuteInTransaction( () => {" );
 
-		writer.WriteLine( "var conditions = getConditionList( requiredCondition, additionalConditions );" );
+		var conditionsExpression = omitConditionParameters
+			                           ? $"new List<{DataAccessStatics.GetTableConditionInterfaceName( cn, database, tableName )}>()"
+			                           : "getConditionList( requiredCondition, additionalConditions )";
+		writer.WriteLine( $"var conditions = {conditionsExpression};" );
 
-		if( executeAdditionalLogic ) {
+		if( additionalLogicSuffix.Length is 0 ) {
 			writer.WriteLine( getPostDeleteCallClassName( cn, tableName ) + "? postDeleteCall = null;" );
 			writer.WriteLine( "preDelete( conditions, ref postDeleteCall );" );
 		}
 
 		writer.WriteLine( "var rowsDeleted = deleteRows( conditions, {0} );".FormatWith( includeIsLongRunningParameter ? "isLongRunning" : "false" ) );
 
-		if( executeAdditionalLogic ) {
+		if( additionalLogicSuffix.Length is 0 ) {
 			writer.WriteLine( "if( postDeleteCall is not null )" );
 			writer.WriteLine( "postDeleteCall.Execute();" );
 		}
 
 		writer.WriteLine( "return rowsDeleted;" );
 
-		if( executeAdditionalLogic )
+		if( additionalLogicSuffix.Length is 0 )
 			writer.WriteLine( "} );" ); // cn.ExecuteInTransaction
 		writer.WriteLine( "}" );
 	}
