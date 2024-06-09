@@ -38,7 +38,7 @@ internal static class TableRetrievalStatics {
 						EwlStatics.GetCSharpIdentifier( columns.PrimaryKeyAndRevisionIdColumn!.PascalCasedNameExceptForOracle ) + " ) ].UserTransactionId ]; } }" );
 				},
 				_ => {
-					if( !columns.DataColumns.Any() )
+					if( !columns.HasKeyColumns || !columns.DataColumns.Any() )
 						return;
 
 					var modClass = database.SecondaryDatabaseName + "Modification." +
@@ -341,13 +341,14 @@ internal static class TableRetrievalStatics {
 
 		// body
 
+		writer.WriteLine( "var cache = Cache.Current;" );
+
 		if( tableColumns.HasKeyColumns ) {
 			// If it's a primary key query, use RowsByPk if possible.
 			foreach( var i in tableColumns.KeyColumns ) {
 				var equalityConditionClassName = DataAccessStatics.GetEqualityConditionClassName( cn, database, table, i );
 				writer.WriteLine( "var {0}Condition = conditions.OfType<{1}>().FirstOrDefault();".FormatWith( i.CamelCasedName, equalityConditionClassName ) );
 			}
-			writer.WriteLine( "var cache = Cache.Current;" );
 			var pkConditionVariableNames = tableColumns.KeyColumns.Select( i => i.CamelCasedName + "Condition" );
 			writer.WriteLine(
 				"var isPkQuery = " + StringTools.ConcatenateWithDelimiter( " && ", pkConditionVariableNames.Select( i => i + " is not null" ).ToArray() ) +
@@ -377,7 +378,16 @@ internal static class TableRetrievalStatics {
 		if( excludePreviousRevisions )
 			commandConditionsExpression += ".Append( getLatestRevisionsCondition() )";
 		writer.WriteLine( "return cache.Queries.GetResultSet( " + commandConditionsExpression + ", commandConditions => {" );
-		writeResultSetCreatorBody( cn, writer, database, table, tableColumns, hasModTable, tableUsesRowVersionedCaching, excludePreviousRevisions, "!isPkQuery" );
+		writeResultSetCreatorBody(
+			cn,
+			writer,
+			database,
+			table,
+			tableColumns,
+			hasModTable,
+			tableUsesRowVersionedCaching,
+			excludePreviousRevisions,
+			tableColumns.HasKeyColumns ? "!isPkQuery" : "true" );
 		writer.WriteLine( "} );" );
 
 		writer.WriteLine( "}" );
