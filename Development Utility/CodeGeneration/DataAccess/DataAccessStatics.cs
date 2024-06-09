@@ -91,6 +91,9 @@ internal static class DataAccessStatics {
 				foreach( var table in tables.Where( i => i.hasModTable ).Select( i => i.name ) ) {
 					var columns = new TableColumns( cn, table, false );
 
+					if( !columns.HasKeyColumns )
+						throw new UserCorrectableException( $"Table {table} is cached using a modification table but does not have a primary key." );
+
 					// This check ensures safety in the table-retrieval method that gets modified rows given a list of primary keys. This method uses inline SQL in order
 					// to support a potentially large number of keys in a single query.
 					var types = new[] { "System.Int32" }.Concat( cn.DatabaseInfo is OracleInfo ? "System.Decimal".ToCollection() : Enumerable.Empty<string>() )
@@ -146,9 +149,9 @@ internal static class DataAccessStatics {
 					writer.WriteLine( "namespace {0} {{".FormatWith( baseNamespace ) );
 					writer.WriteLine( "public static class {0}MainSequence {{".FormatWith( database.SecondaryDatabaseName ) );
 					writer.WriteLine( "public static int GetNextValue() {" );
-					writer.WriteLine( "var command = " + DataAccessStatics.GetConnectionExpression( database ) + ".DatabaseInfo.CreateCommand();" );
+					writer.WriteLine( "var command = " + GetConnectionExpression( database ) + ".DatabaseInfo.CreateCommand();" );
 					writer.WriteLine( "command.CommandText = \"SELECT NEXT VALUE FOR MainSequence\";" );
-					writer.WriteLine( "return (int)" + DataAccessStatics.GetConnectionExpression( database ) + ".ExecuteScalarCommand( command );" );
+					writer.WriteLine( "return (int)" + GetConnectionExpression( database ) + ".ExecuteScalarCommand( command );" );
 					writer.WriteLine( "}" );
 					writer.WriteLine( "}" );
 					writer.WriteLine( "}" );

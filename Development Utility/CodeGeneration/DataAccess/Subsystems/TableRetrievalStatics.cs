@@ -11,8 +11,9 @@ internal static class TableRetrievalStatics {
 	private const string oracleRowVersionDataType = "decimal";
 
 	internal static void Generate(
-		DatabaseConnection cn, TextWriter writer, string baseNamespace, string templateBasePath, Database database, IEnumerable<( string name, bool hasModTable )> tables,
-		EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration, List<string> initStatements ) {
+		DatabaseConnection cn, TextWriter writer, string baseNamespace, string templateBasePath, Database database,
+		IEnumerable<( string name, bool hasModTable )> tables, EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration,
+		List<string> initStatements ) {
 		var subsystemName = "{0}TableRetrieval".FormatWith( database.SecondaryDatabaseName );
 		var subsystemNamespace = "namespace {0}.{1}".FormatWith( baseNamespace, subsystemName );
 
@@ -28,7 +29,7 @@ internal static class TableRetrievalStatics {
 			RetrievalStatics.WriteRowClasses(
 				writer,
 				columns.AllColumns,
-				columns.KeyColumns,
+				columns.HasKeyColumns ? columns.KeyColumns : null,
 				_ => {
 					if( !isRevisionHistoryTable )
 						return;
@@ -69,11 +70,11 @@ internal static class TableRetrievalStatics {
 
 			var tableUsesRowVersionedCaching = configuration.TablesUsingRowVersionedDataCaching != null &&
 			                                   configuration.TablesUsingRowVersionedDataCaching.Any( i => i.EqualsIgnoreCase( table.name ) );
-			if( tableUsesRowVersionedCaching && columns.RowVersionColumn == null && !( cn.DatabaseInfo is OracleInfo ) )
+			if( tableUsesRowVersionedCaching && ( !columns.HasKeyColumns || ( columns.RowVersionColumn is null && cn.DatabaseInfo is not OracleInfo ) ) )
 				throw new UserCorrectableException(
-					cn.DatabaseInfo is MySqlInfo
-						? "Row-versioned data caching cannot currently be used with MySQL databases."
-						: "Row-versioned data caching can only be used with the {0} table if you add a rowversion column.".FormatWith( table.name ) );
+					cn.DatabaseInfo is MySqlInfo ? "Row-versioned data caching cannot currently be used with MySQL databases." :
+					cn.DatabaseInfo is OracleInfo ? "Row-versioned data caching can only be used with the {0} table if it has a primary key.".FormatWith( table.name ) :
+					"Row-versioned data caching can only be used with the {0} table if it has a primary key and a rowversion column.".FormatWith( table.name ) );
 
 			if( isSmallTable || table.hasModTable )
 				writeGetAllRowsMethod( writer, database, isSmallTable, table.hasModTable, isRevisionHistoryTable, false );
@@ -104,16 +105,17 @@ internal static class TableRetrievalStatics {
 					true );
 			}
 
-			writeGetRowMatchingPkMethod(
-				cn,
-				writer,
-				database,
-				table.name,
-				columns,
-				isSmallTable,
-				table.hasModTable,
-				tableUsesRowVersionedCaching,
-				isRevisionHistoryTable );
+			if( columns.HasKeyColumns )
+				writeGetRowMatchingPkMethod(
+					cn,
+					writer,
+					database,
+					table.name,
+					columns,
+					isSmallTable,
+					table.hasModTable,
+					tableUsesRowVersionedCaching,
+					isRevisionHistoryTable );
 
 			if( isRevisionHistoryTable )
 				DataAccessStatics.WriteGetLatestRevisionsConditionMethod( writer, columns.PrimaryKeyAndRevisionIdColumn!.Name );
@@ -134,7 +136,7 @@ internal static class TableRetrievalStatics {
 
 			// Initially we did not generate this method for small tables, but we found a need for it when the cache is disabled since that will cause
 			// GetRowMatchingId to repeatedly query.
-			if( columns.KeyColumns.Count == 1 && columns.KeyColumns.Single().Name.ToLower().EndsWith( "id" ) )
+			if( columns.HasKeyColumns && columns.KeyColumns.Count == 1 && columns.KeyColumns.Single().Name.ToLower().EndsWith( "id" ) )
 				writeToIdDictionaryMethod( writer, columns );
 
 			if( isRevisionHistoryTable )
@@ -180,8 +182,9 @@ internal static class TableRetrievalStatics {
 						.FormatWith( getTableCacheType( tableColumns ), getTableCacheName( true ) ) );
 		}
 		writer.WriteLine( "internal readonly TableRetrievalQueryCache<Row> Queries = new TableRetrievalQueryCache<Row>();" );
-		writer.WriteLine(
-			"internal readonly Cache<{0}, Row> RowsByPk = new( false );".FormatWith( RetrievalStatics.GetColumnTupleTypeName( tableColumns.KeyColumns ) ) );
+		if( tableColumns.HasKeyColumns )
+			writer.WriteLine(
+				"internal readonly Cache<{0}, Row> RowsByPk = new( false );".FormatWith( RetrievalStatics.GetColumnTupleTypeName( tableColumns.KeyColumns ) ) );
 		if( isRevisionHistoryTable )
 			writer.WriteLine(
 				"internal readonly Cache<{0}, Row> LatestRevisionRowsByPk = new( false );".FormatWith(
@@ -338,35 +341,37 @@ internal static class TableRetrievalStatics {
 
 		// body
 
-		// If it's a primary key query, use RowsByPk if possible.
-		foreach( var i in tableColumns.KeyColumns ) {
-			var equalityConditionClassName = DataAccessStatics.GetEqualityConditionClassName( cn, database, table, i );
-			writer.WriteLine( "var {0}Condition = conditions.OfType<{1}>().FirstOrDefault();".FormatWith( i.CamelCasedName, equalityConditionClassName ) );
-		}
-		writer.WriteLine( "var cache = Cache.Current;" );
-		var pkConditionVariableNames = tableColumns.KeyColumns.Select( i => i.CamelCasedName + "Condition" );
-		writer.WriteLine(
-			"var isPkQuery = " + StringTools.ConcatenateWithDelimiter( " && ", pkConditionVariableNames.Select( i => i + " is not null" ).ToArray() ) +
-			" && conditions.Count() == " + tableColumns.KeyColumns.Count + ";" );
-		writer.WriteLine( "if( isPkQuery ) {" );
-		writer.WriteLine(
-			"var pk = {0};".FormatWith( RetrievalStatics.GetColumnTupleExpression( pkConditionVariableNames.Select( i => i + "!.Value" ).Materialize() ) ) );
-		writer.WriteLine(
-			"if( cache." + ( excludePreviousRevisions ? "LatestRevision" : "" ) + "RowsByPk.TryGetValue( pk, out var row ) ) return row.ToCollection();" );
-		if( hasModTable ) {
-			writer.WriteLine( "BasicRow? basicRow = null;" );
+		if( tableColumns.HasKeyColumns ) {
+			// If it's a primary key query, use RowsByPk if possible.
+			foreach( var i in tableColumns.KeyColumns ) {
+				var equalityConditionClassName = DataAccessStatics.GetEqualityConditionClassName( cn, database, table, i );
+				writer.WriteLine( "var {0}Condition = conditions.OfType<{1}>().FirstOrDefault();".FormatWith( i.CamelCasedName, equalityConditionClassName ) );
+			}
+			writer.WriteLine( "var cache = Cache.Current;" );
+			var pkConditionVariableNames = tableColumns.KeyColumns.Select( i => i.CamelCasedName + "Condition" );
 			writer.WriteLine(
-				"if( {0}.ExecuteInTransaction( () => cache.{1}DataRetriever.Value.TryGetRowMatchingPk( pk, out basicRow ) ) ) {{".FormatWith(
-					DataAccessStatics.GetConnectionExpression( database ),
-					getTableCacheName( excludePreviousRevisions ) ) );
-			writer.WriteLine( "row = new Row( basicRow! );" );
-			writer.WriteLine( "cache.RowsByPk.TryAdd( basicRow!.PrimaryKey, row );" );
-			if( excludePreviousRevisions )
-				writer.WriteLine( "cache.LatestRevisionRowsByPk.TryAdd( basicRow!.PrimaryKey, row );" );
-			writer.WriteLine( "return row.ToCollection();" );
+				"var isPkQuery = " + StringTools.ConcatenateWithDelimiter( " && ", pkConditionVariableNames.Select( i => i + " is not null" ).ToArray() ) +
+				" && conditions.Count() == " + tableColumns.KeyColumns.Count + ";" );
+			writer.WriteLine( "if( isPkQuery ) {" );
+			writer.WriteLine(
+				"var pk = {0};".FormatWith( RetrievalStatics.GetColumnTupleExpression( pkConditionVariableNames.Select( i => i + "!.Value" ).Materialize() ) ) );
+			writer.WriteLine(
+				"if( cache." + ( excludePreviousRevisions ? "LatestRevision" : "" ) + "RowsByPk.TryGetValue( pk, out var row ) ) return row.ToCollection();" );
+			if( hasModTable ) {
+				writer.WriteLine( "BasicRow? basicRow = null;" );
+				writer.WriteLine(
+					"if( {0}.ExecuteInTransaction( () => cache.{1}DataRetriever.Value.TryGetRowMatchingPk( pk, out basicRow ) ) ) {{".FormatWith(
+						DataAccessStatics.GetConnectionExpression( database ),
+						getTableCacheName( excludePreviousRevisions ) ) );
+				writer.WriteLine( "row = new Row( basicRow! );" );
+				writer.WriteLine( "cache.RowsByPk.TryAdd( basicRow!.PrimaryKey, row );" );
+				if( excludePreviousRevisions )
+					writer.WriteLine( "cache.LatestRevisionRowsByPk.TryAdd( basicRow!.PrimaryKey, row );" );
+				writer.WriteLine( "return row.ToCollection();" );
+				writer.WriteLine( "}" );
+			}
 			writer.WriteLine( "}" );
 		}
-		writer.WriteLine( "}" );
 
 		var commandConditionsExpression = "conditions.Select( i => i.CommandCondition )";
 		if( excludePreviousRevisions )
@@ -517,14 +522,16 @@ internal static class TableRetrievalStatics {
 				writer.WriteLine( "}" );
 		}
 
-		// Add all results to RowsByPk.
-		writer.WriteLine( "foreach( var i in results ) {" );
-		var pk = RetrievalStatics.GetColumnTupleExpression(
-			tableColumns.KeyColumns.Select( i => "i." + EwlStatics.GetCSharpIdentifier( i.PascalCasedNameExceptForOracle ) ).Materialize() );
-		writer.WriteLine( "cache.RowsByPk.TryAdd( " + pk + ", i );" );
-		if( excludesPreviousRevisions )
-			writer.WriteLine( "cache.LatestRevisionRowsByPk.TryAdd( " + pk + ", i );" );
-		writer.WriteLine( "}" );
+		if( tableColumns.HasKeyColumns ) {
+			// Add all results to RowsByPk.
+			writer.WriteLine( "foreach( var i in results ) {" );
+			var pk = RetrievalStatics.GetColumnTupleExpression(
+				tableColumns.KeyColumns.Select( i => "i." + EwlStatics.GetCSharpIdentifier( i.PascalCasedNameExceptForOracle ) ).Materialize() );
+			writer.WriteLine( "cache.RowsByPk.TryAdd( " + pk + ", i );" );
+			if( excludesPreviousRevisions )
+				writer.WriteLine( "cache.LatestRevisionRowsByPk.TryAdd( " + pk + ", i );" );
+			writer.WriteLine( "}" );
+		}
 
 		writer.WriteLine( "return results;" );
 	}
@@ -532,11 +539,13 @@ internal static class TableRetrievalStatics {
 	private static string getTableCacheName( bool excludePreviousRevisions ) => excludePreviousRevisions ? "LatestRevisionTableCache" : "TableCache";
 
 	private static string getInlineSelectExpression( string table, TableColumns tableColumns, string selectExpressions, string cacheQueryInDbExpression ) =>
-		"new InlineSelect( {0}, \"FROM {1}\", {2}, orderByClause: \"ORDER BY {3}\" )".FormatWith(
+		"new InlineSelect( {0}, \"FROM {1}\", {2}, orderByClause: \"{3}\" )".FormatWith(
 			"new[] { " + selectExpressions + " }",
 			table,
 			cacheQueryInDbExpression,
-			StringTools.ConcatenateWithDelimiter( ", ", tableColumns.KeyColumns.Select( i => i.DelimitedIdentifier.EscapeForLiteral() ).ToArray() ) );
+			tableColumns.HasKeyColumns
+				? $"ORDER BY {StringTools.ConcatenateWithDelimiter( ", ", tableColumns.KeyColumns.Select( i => i.DelimitedIdentifier.EscapeForLiteral() ) )}"
+				: "" );
 
 	private static string getCommandConditionAddingStatement( string commandName ) => "{0}.AddConditions( commandConditions );".FormatWith( commandName );
 

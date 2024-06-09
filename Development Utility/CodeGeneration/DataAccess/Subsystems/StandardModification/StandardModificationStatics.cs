@@ -10,8 +10,8 @@ internal static class StandardModificationStatics {
 	private static TableColumns columns = null!;
 
 	internal static void Generate(
-		DatabaseConnection cn, TextWriter writer, string baseNamespace, string templateBasePath, Database database, IEnumerable<( string name, bool hasModTable )> tables,
-		EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
+		DatabaseConnection cn, TextWriter writer, string baseNamespace, string templateBasePath, Database database,
+		IEnumerable<( string name, bool hasModTable )> tables, EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
 		StandardModificationStatics.writer = writer;
 		StandardModificationStatics.database = database;
 
@@ -54,8 +54,8 @@ internal static class StandardModificationStatics {
 
 		var revisionHistorySuffix = GetRevisionHistorySuffix( isRevisionHistoryClass );
 
-		writeInsertRowMethod( tableName, revisionHistorySuffix, "", columns.KeyColumns );
-		writeInsertRowMethod( tableName, revisionHistorySuffix, "WithoutAdditionalLogic", columns.KeyColumns );
+		writeInsertRowMethod( tableName, revisionHistorySuffix, "" );
+		writeInsertRowMethod( tableName, revisionHistorySuffix, "WithoutAdditionalLogic" );
 		writeUpdateRowsMethod( cn, tableName, revisionHistorySuffix, "", false );
 		writeUpdateRowsMethod( cn, tableName, revisionHistorySuffix, "", true );
 		writeUpdateRowsMethod( cn, tableName, revisionHistorySuffix, "WithoutAdditionalLogic", false );
@@ -64,7 +64,7 @@ internal static class StandardModificationStatics {
 		writeDeleteRowsMethod( cn, tableName, revisionHistorySuffix, true, true );
 		writeDeleteRowsMethod( cn, tableName, revisionHistorySuffix + "WithoutAdditionalLogic", false, false );
 		writeDeleteRowsMethod( cn, tableName, revisionHistorySuffix + "WithoutAdditionalLogic", true, false );
-		writePrivateDeleteRowsMethod( cn, tableName, columns.KeyColumns, hasModTable, isRevisionHistoryClass );
+		writePrivateDeleteRowsMethod( cn, tableName, hasModTable, isRevisionHistoryClass );
 		writer.WriteLine(
 			"static partial void preDelete( List<" + DataAccessStatics.GetTableConditionInterfaceName( cn, database, tableName ) + "> conditions, ref " +
 			getPostDeleteCallClassName( cn, tableName ) + "? postDeleteCall );" );
@@ -72,7 +72,7 @@ internal static class StandardModificationStatics {
 		writeCreateForInsertMethod( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass, revisionHistorySuffix );
 		writeCreateForUpdateMethod( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass, revisionHistorySuffix );
 		writeGetConditionListMethod( cn, tableName );
-		if( columns.DataColumns.Any() )
+		if( columns.HasKeyColumns && columns.DataColumns.Any() )
 			writeCreateForSingleRowUpdateMethod( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass, revisionHistorySuffix );
 
 		writer.WriteLine( "private ModificationType modType;" );
@@ -103,7 +103,7 @@ internal static class StandardModificationStatics {
 		writer.WriteLine( "partial void preInsert();" );
 		writer.WriteLine( "partial void preUpdate();" );
 		writeExecuteWithoutAdditionalLogicMethod( tableName );
-		writeExecuteInsertOrUpdateMethod( cn, tableName, columns.KeyColumns, columns.IdentityColumn, hasModTable, isRevisionHistoryClass );
+		writeExecuteInsertOrUpdateMethod( cn, tableName, columns.IdentityColumn, hasModTable, isRevisionHistoryClass );
 		writeGetColumnModificationValuesMethod( columns.AllNonIdentityColumnsExceptRowVersion );
 		if( isRevisionHistoryClass ) {
 			writeCopyLatestRevisionsMethod( cn, tableName, columns.AllNonIdentityColumnsExceptRowVersion, hasModTable );
@@ -121,11 +121,11 @@ internal static class StandardModificationStatics {
 
 	internal static string GetRevisionHistorySuffix( bool isRevisionHistoryClass ) => isRevisionHistoryClass ? "AsRevision" : "";
 
-	private static void writeInsertRowMethod( string tableName, string revisionHistorySuffix, string additionalLogicSuffix, IEnumerable<Column> keyColumns ) {
+	private static void writeInsertRowMethod( string tableName, string revisionHistorySuffix, string additionalLogicSuffix ) {
 		Column? returnColumn = null;
 		var returnComment = "";
-		if( keyColumns.Count() == 1 && !columns.DataColumns.Contains( keyColumns.Single() ) ) {
-			returnColumn = keyColumns.Single();
+		if( columns.HasKeyColumns && columns.KeyColumns.Count == 1 && !columns.DataColumns.Contains( columns.KeyColumns.Single() ) ) {
+			returnColumn = columns.KeyColumns.Single();
 			returnComment = " Returns the value of the " + returnColumn.Name + " column.";
 		}
 
@@ -213,8 +213,7 @@ internal static class StandardModificationStatics {
 		writer.WriteLine( "}" );
 	}
 
-	private static void writePrivateDeleteRowsMethod(
-		DatabaseConnection cn, string tableName, IReadOnlyCollection<Column> keyColumns, bool hasModTable, bool isRevisionHistoryClass ) {
+	private static void writePrivateDeleteRowsMethod( DatabaseConnection cn, string tableName, bool hasModTable, bool isRevisionHistoryClass ) {
 		// NOTE: For revision history tables, we should have the delete method automatically clean up the revisions table (but not user transactions) for us when doing direct-with-revision-bypass deletions.
 
 		writer.WriteLine(
@@ -230,9 +229,9 @@ internal static class StandardModificationStatics {
 			writer.WriteLine(
 				"var modTableInsert = new InlineInsertWithSelect( \"{0}\", new[] {{ {1} }}, \"{2}\" );".FormatWith(
 					tableName + DatabaseOps.GetModificationTableSuffix( database ),
-					StringTools.ConcatenateWithDelimiter( ", ", keyColumns.Select( i => "\"{0}\"".FormatWith( i.Name ) ) ),
+					StringTools.ConcatenateWithDelimiter( ", ", columns.KeyColumns.Select( i => "\"{0}\"".FormatWith( i.Name ) ) ),
 					tableName ) );
-			foreach( var i in keyColumns )
+			foreach( var i in columns.KeyColumns )
 				writer.WriteLine( "modTableInsert.AddSelectExpression( \"{0}\" );".FormatWith( i.DelimitedIdentifier.EscapeForLiteral() ) );
 			writer.WriteLine( "modTableInsert.AddConditions( conditions.Select( i => i.CommandCondition ) );" );
 			if( isRevisionHistoryClass )
@@ -463,7 +462,7 @@ internal static class StandardModificationStatics {
 	}
 
 	private static void writeExecuteInsertOrUpdateMethod(
-		DatabaseConnection cn, string tableName, IReadOnlyCollection<Column> keyColumns, Column? identityColumn, bool hasModTable, bool isRevisionHistoryClass ) {
+		DatabaseConnection cn, string tableName, Column? identityColumn, bool hasModTable, bool isRevisionHistoryClass ) {
 		writer.WriteLine( "private void executeInsertOrUpdate( bool isLongRunning ) {" );
 		if( hasModTable || isRevisionHistoryClass )
 			writer.WriteLine( DataAccessStatics.GetConnectionExpression( database ) + ".ExecuteInTransaction( () => {" );
@@ -504,17 +503,19 @@ internal static class StandardModificationStatics {
 				"modTableInsert.AddColumnModifications( new[] {{ {0} }} );".FormatWith(
 					StringTools.ConcatenateWithDelimiter(
 						", ",
-						keyColumns.Select( i => i.GetCommandColumnValueExpression( EwlStatics.GetCSharpIdentifier( i.PascalCasedNameExceptForOracle ) ) ) ) ) );
+						columns.KeyColumns.Select( i => i.GetCommandColumnValueExpression( EwlStatics.GetCSharpIdentifier( i.PascalCasedNameExceptForOracle ) ) ) ) ) );
 			writer.WriteLine( "modTableInsert.Execute( {0}, isLongRunning: isLongRunning );".FormatWith( DataAccessStatics.GetConnectionExpression( database ) ) );
 		}
 
-		// Future calls to Execute should perform updates, not inserts. Use the values of key columns as conditions.
-		writer.WriteLine( "modType = ModificationType.Update;" );
-		writer.WriteLine( "conditions = new List<" + DataAccessStatics.GetTableConditionInterfaceName( cn, database, tableName ) + ">();" );
-		foreach( var column in keyColumns )
-			writer.WriteLine(
-				"conditions.Add( new " + DataAccessStatics.GetEqualityConditionClassName( cn, database, tableName, column ) + "( " +
-				EwlStatics.GetCSharpIdentifier( column.PascalCasedNameExceptForOracle ) + " ) );" );
+		if( columns.HasKeyColumns ) {
+			// Future calls to Execute should perform updates, not inserts. Use the values of key columns as conditions.
+			writer.WriteLine( "modType = ModificationType.Update;" );
+			writer.WriteLine( "conditions = new List<" + DataAccessStatics.GetTableConditionInterfaceName( cn, database, tableName ) + ">();" );
+			foreach( var column in columns.KeyColumns )
+				writer.WriteLine(
+					"conditions.Add( new " + DataAccessStatics.GetEqualityConditionClassName( cn, database, tableName, column ) + "( " +
+					EwlStatics.GetCSharpIdentifier( column.PascalCasedNameExceptForOracle ) + " ) );" );
+		}
 
 		writer.WriteLine( "}" ); // if insert
 
@@ -532,9 +533,9 @@ internal static class StandardModificationStatics {
 			writer.WriteLine(
 				"var modTableInsert = new InlineInsertWithSelect( \"{0}\", new[] {{ {1} }}, \"{2}\" );".FormatWith(
 					tableName + DatabaseOps.GetModificationTableSuffix( database ),
-					StringTools.ConcatenateWithDelimiter( ", ", keyColumns.Select( i => "\"{0}\"".FormatWith( i.Name ) ) ),
+					StringTools.ConcatenateWithDelimiter( ", ", columns.KeyColumns.Select( i => "\"{0}\"".FormatWith( i.Name ) ) ),
 					tableName ) );
-			foreach( var i in keyColumns )
+			foreach( var i in columns.KeyColumns )
 				writer.WriteLine( "modTableInsert.AddSelectExpression( \"{0}\" );".FormatWith( i.DelimitedIdentifier.EscapeForLiteral() ) );
 			writer.WriteLine( "modTableInsert.AddConditions( conditions!.Select( i => i.CommandCondition ) );" );
 			if( isRevisionHistoryClass )
@@ -542,7 +543,7 @@ internal static class StandardModificationStatics {
 			writer.WriteLine( "modTableInsert.Execute( {0}, isLongRunning: isLongRunning );".FormatWith( DataAccessStatics.GetConnectionExpression( database ) ) );
 
 			// If any primary-key columns are changing, insert the new key(s) into the modification table.
-			var nonIdentityKeyColumns = keyColumns.Where( i => !i.IsIdentity ).Materialize();
+			var nonIdentityKeyColumns = columns.KeyColumns.Where( i => !i.IsIdentity ).Materialize();
 			if( nonIdentityKeyColumns.Any() ) {
 				writer.WriteLine(
 					"if( {0} ) {{".FormatWith(
@@ -550,9 +551,9 @@ internal static class StandardModificationStatics {
 				writer.WriteLine(
 					"var modTableNewKeyInsert = new InlineInsertWithSelect( \"{0}\", new[] {{ {1} }}, \"{2}\" );".FormatWith(
 						tableName + DatabaseOps.GetModificationTableSuffix( database ),
-						StringTools.ConcatenateWithDelimiter( ", ", keyColumns.Select( i => "\"{0}\"".FormatWith( i.Name ) ) ),
+						StringTools.ConcatenateWithDelimiter( ", ", columns.KeyColumns.Select( i => "\"{0}\"".FormatWith( i.Name ) ) ),
 						tableName ) );
-				foreach( var column in keyColumns )
+				foreach( var column in columns.KeyColumns )
 					if( column.IsIdentity )
 						writer.WriteLine( "modTableNewKeyInsert.AddSelectExpression( \"{0}\" );".FormatWith( column.DelimitedIdentifier.EscapeForLiteral() ) );
 					else {

@@ -8,10 +8,13 @@ internal class TableColumns {
 
 	private readonly List<Column> keyColumns = new();
 
+	internal bool HasKeyColumns => keyColumns.Any();
+
 	/// <summary>
 	/// Returns either all components of the primary key, or the identity (alone).
 	/// </summary>
-	internal IReadOnlyCollection<Column> KeyColumns => keyColumns;
+	internal IReadOnlyCollection<Column> KeyColumns =>
+		keyColumns.Any() ? keyColumns : throw new Exception( "The table must contain a primary key or other means of uniquely identifying a row." );
 
 	private readonly Column? identityColumn;
 	internal Column? IdentityColumn => identityColumn;
@@ -51,8 +54,6 @@ internal class TableColumns {
 				else
 					nonIdentityColumns.Add( col );
 			}
-			if( !keyColumns.Any() )
-				throw new UserCorrectableException( "The table must contain a primary key or other means of uniquely identifying a row." );
 
 			// If the table has a composite key, try to use the identity as the key instead since this will enable InsertRow to return a value.
 			if( identityColumn != null && keyColumns.Count > 1 ) {
