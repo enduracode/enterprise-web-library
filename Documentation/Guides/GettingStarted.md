@@ -2,14 +2,14 @@
 
 **Please note:** While EWL has been in production use for many years, this Getting Started guide is brand new. If you run into problems please let us know in our [community forum](https://community.enterpriseweblibrary.org/) and one of the developers will help you out.
 
-Last updated for Enterprise Web Library version 78.
+Last updated for Enterprise Web Library version 81.
 
 
 ## Requirements
 
-*	Windows 10 or later
-*	Visual Studio 2022 or later (recommended), or .NET 7 SDK
-*	SQL Server 2022 or later, MySQL 8.0, or Oracle Database 12c (if you want a relational database)
+*	Windows 11
+*	Visual Studio 2022 or later (recommended), or .NET 8 SDK
+*	SQL Server 2022 or later, MySQL 8.0 or later, or Oracle Database 12c or later (if you want a relational database)
 
 For servers, the only requirement is Windows Server 2019 or later with IIS enabled.
 
