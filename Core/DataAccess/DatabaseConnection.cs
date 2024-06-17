@@ -40,7 +40,7 @@ public class DatabaseConnection {
 
 		// Sometimes databases are slow when nightly operations are underway.
 		var isNight = SystemClock.Instance.GetCurrentInstant().InZone( DateTimeZoneProviders.Tzdb.GetSystemDefault() ).TimeOfDay.IsInNight();
-		var timeout = isNight ? 120 : useLongTimeouts ? 60 : 15;
+		var timeout = isNight ? 300 : useLongTimeouts ? 60 : 15;
 
 		// Build the connection string.
 		string connectionString;
