@@ -29,6 +29,30 @@ Now open `Library/Configuration/Development.xml` and add entries for your roles 
 Run `Update-DependentLogic`.
 
 
+## Adding modification logic
+
+Locate `Library/DataAccess/Modification/UsersModification.ewlt.cs` and shorten the extension to just `.cs`. Then replace its contents with the following, making adjustments as necessary:
+
+```C#
+using EnterpriseWebLibrary.DataAccess.StandardModification;
+using ServiceManager.Library.DataAccess.CommandConditions;
+using ServiceManager.Library.DataAccess.TableRetrieval;
+
+namespace ServiceManager.Library.DataAccess.Modification;
+
+partial class UsersModification {
+	static partial void preDelete( List<UsersTableCondition> conditions, ref PostDeleteCall<IEnumerable<UsersTableRetrieval.Row>>? postDeleteCall ) {
+		foreach( var i in UsersTableRetrieval.GetRows( conditions.ToArray() ) )
+			UserRequestsModification.DeleteRows( new UserRequestsTableEqualityConditions.UserId( i.UserId ) );
+	}
+
+	static partial void populateConstraintNamesToViolationErrorMessages( Dictionary<string, string> constraintNamesToViolationErrorMessages ) {
+		constraintNamesToViolationErrorMessages.Add( "UsersEmailAddressUnique", "A user with this email address already exists." );
+	}
+}
+```
+
+
 ## Implementing the provider
 
 Add a class called `UserManagement` to your `Library/Configuration/Providers` folder. Paste the following into it, making adjustments as necessary to match the schema you created above:
@@ -86,27 +110,20 @@ internal class UserManagement: SystemUserManagementProvider {
 		getUserObject( UsersTableRetrieval.GetRows( new UsersTableEqualityConditions.EmailAddress( emailAddress ) ).SingleOrDefault() );
 
 	private SystemUser? getUserObject( UsersTableRetrieval.Row? user ) =>
-		user is null
-			? null
-			: new SystemUser(
-				user.UserId,
-				user.EmailAddress,
-				getRoleObject( user.RoleId ),
-				user.LastRequestDateAndTime.ToNewUnderlyingValue( v => LocalDateTime.FromDateTime( v ).InUtc().ToInstant() ) );
+		user is null ? null : new SystemUser( user.UserId, user.EmailAddress, getRoleObject( user.RoleId ) );
 
 	private Role getRoleObject( int roleId ) => new( roleId, UserRolesRows.GetNameFromValue( roleId ), roleId == UserRolesRows.Administrator, false );
 
-	protected override int InsertOrUpdateUser( int? userId, string emailAddress, int roleId, Instant? lastRequestTime ) {
+	protected override int InsertOrUpdateUser( int? userId, string emailAddress, int roleId ) {
 		if( userId.HasValue ) {
 			var mod = UsersModification.CreateForUpdate( new UsersTableEqualityConditions.UserId( userId.Value ) );
 			mod.EmailAddress = emailAddress;
 			mod.RoleId = roleId;
-			mod.LastRequestDateAndTime = lastRequestTime?.InUtc().ToDateTimeUnspecified();
 			mod.Execute();
 		}
 		else {
 			userId = MainSequence.GetNextValue();
-			UsersModification.InsertRow( userId.Value, emailAddress, roleId, lastRequestTime?.InUtc().ToDateTimeUnspecified(), 0, null, null, null, null, null, "" );
+			UsersModification.InsertRow( userId.Value, emailAddress, roleId, 0, null, null, null, null, null, "" );
 		}
 		return userId.Value;
 	}
@@ -114,5 +131,16 @@ internal class UserManagement: SystemUserManagementProvider {
 	protected override void DeleteUser( int userId ) => UsersModification.DeleteRows( new UsersTableEqualityConditions.UserId( userId ) );
 
 	protected override IEnumerable<Role> GetRoles() => UserRolesTableRetrieval.GetAllRows().Select( i => getRoleObject( i.UserRoleId ) );
+
+	protected override IEnumerable<UserRequest> GetUserRequests() =>
+		UserRequestsTableRetrieval.GetRows().Select( i => new UserRequest( i.UserId, LocalDateTime.FromDateTime( i.RequestTime ).InUtc().ToInstant() ) );
+
+	protected override void InsertUserRequest( int userId, Instant requestTime ) {
+		UserRequestsModification.InsertRow( userId, requestTime.ToDateTimeUtc() );
+	}
+
+	protected override void ClearUserRequests() {
+		UserRequestsModification.DeleteAllRows();
+	}
 }
 ```

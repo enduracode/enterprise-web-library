@@ -26,8 +26,6 @@ create table Users(
 	RoleId int
 		not null
 		constraint UsersRoleIdFk references UserRoles,
-	LastRequestDateAndTime datetime2
-		null,
 	Salt int
 		not null,
 	SaltedPassword varbinary( 20 )
@@ -45,7 +43,16 @@ create table Users(
 )
 go
 
-insert into Users values( next value for MainSequence, 'john.doe@example.com', 1, NULL, 0, NULL, NULL, NULL, NULL, NULL, '' );
+insert into Users values( next value for MainSequence, 'john.doe@example.com', 1, 0, NULL, NULL, NULL, NULL, NULL, '' );
+go
+
+create table UserRequests(
+	UserId int
+		not null
+		constraint UserRequestsUserIdFk references Users,
+	RequestTime datetime2
+		not null
+)
 go
 ```
 
