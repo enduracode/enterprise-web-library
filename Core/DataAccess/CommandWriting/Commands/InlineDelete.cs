@@ -31,16 +31,18 @@ public class InlineDelete: InlineDbCommandWithConditions {
 	/// <param name="cn"></param>
 	/// <param name="isLongRunning">Pass true to give the command as much time as it needs.</param>
 	public int Execute( DatabaseConnection cn, bool isLongRunning = false ) {
-		if( conditions.Count == 0 )
-			throw new ApplicationException( "Executing an inline delete command with no parameters in the where clause is not allowed." );
 		var command = cn.DatabaseInfo.CreateCommand();
-		command.CommandText = "DELETE FROM " + tableName + " WHERE ";
+		command.CommandText = "DELETE FROM " + tableName;
+
+		var first = true;
 		var paramNumber = 0;
 		foreach( var condition in conditions ) {
+			command.CommandText += first ? " WHERE " : " AND ";
+			first = false;
+
 			condition.AddToCommand( command, cn.DatabaseInfo, InlineUpdate.GetParamNameFromNumber( paramNumber++ ) );
-			command.CommandText += " AND ";
 		}
-		command.CommandText = command.CommandText.Remove( command.CommandText.Length - 5 );
+
 		return cn.ExecuteNonQueryCommand( command, isLongRunning: isLongRunning );
 	}
 }
