@@ -97,10 +97,10 @@ public class RequestState {
 		ClientSideNewUrl = "";
 		StatusMessages = Array.Empty<( StatusMessageType, string )>();
 
-		this.slowRequestThreshold = Duration.FromMilliseconds( (long)slowRequestThreshold )
-			.Plus(
-				// Sometimes requests are slow when nightly operations are underway.
-				BeginInstant.InZone( DateTimeZoneProviders.Tzdb.GetSystemDefault() ).TimeOfDay.IsInNight() ? Duration.FromSeconds( 3 ) : Duration.Zero );
+		// Sometimes requests are slow when nightly operations are underway.
+		this.slowRequestThreshold = BeginInstant.InZone( DateTimeZoneProviders.Tzdb.GetSystemDefault() ).TimeOfDay.IsInNight()
+			                            ? Duration.FromMinutes( 5 )
+			                            : Duration.FromMilliseconds( (long)slowRequestThreshold );
 	}
 
 	internal void SetUrlHandlers( IReadOnlyCollection<BasicUrlHandler> handlers ) {
