@@ -638,7 +638,7 @@ internal class UpdateDependentLogic: Operation {
 		var generatedCodeFolderPath = EwlStatics.CombinePaths( projectPath, generatedCodeFolderName );
 		IoMethods.DeleteFolder( generatedCodeFolderPath );
 		Directory.CreateDirectory( generatedCodeFolderPath );
-		using( var writer = new StreamWriter( EwlStatics.CombinePaths( generatedCodeFolderPath, "Main.cs" ), false, Encoding.UTF8 ) )
+		using( var writer = new StreamWriter( EwlStatics.CombinePaths( generatedCodeFolderPath, "Main.g.cs" ), false, Encoding.UTF8 ) )
 			codeWriter( writer );
 	}
 
