@@ -135,13 +135,15 @@ public class MySql: Database {
 				} );
 	}
 
-	private string binFolderPath =>
-		IoMethods.GetFirstExistingFolderPath(
-			@"C:\Program Files\MySQL\MySQL Server 8.1\bin".ToCollection()
-				.Append( @"C:\Program Files\MySQL\MySQL Server 8.0\bin" )
-				.Append( @"C:\Program Files\MySQL\MySQL Server 5.7\bin" )
-				.Materialize(),
-			"MySQL" );
+	private string binFolderPath {
+		get {
+			const string mySqlFolderPath = @"C:\Program Files\MySQL";
+			return EwlStatics.CombinePaths(
+				mySqlFolderPath,
+				IoMethods.GetFolderNamesInFolder( mySqlFolderPath ).Single( i => i.StartsWith( "MySQL Server ", StringComparison.Ordinal ) ),
+				"bin" );
+		}
+	}
 
 	private string getHostAndAuthenticationArguments() {
 		return "--host=localhost --user=root --password=password";
