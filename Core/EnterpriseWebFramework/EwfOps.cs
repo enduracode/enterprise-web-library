@@ -25,6 +25,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using NodaTime;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
@@ -38,7 +39,7 @@ public static class EwfOps {
 	/// <summary>
 	/// Development Utility and private use only.
 	/// </summary>
-	public const int InitializationTimeoutSeconds = 120;
+	public const int InitializationTimeoutSeconds = 180;
 
 	private class MiniProfilerConfigureOptions: IConfigureOptions<MiniProfilerOptions> {
 		private class ProfilerProvider: DefaultProfilerProvider {
@@ -77,8 +78,8 @@ public static class EwfOps {
 		SystemInitializer globalInitializer, Action<IServiceCollection> dependencyInjectionServicesRegistrationMethod = null,
 		SystemInitializer appInitializer = null ) {
 		// If the machine was recently started, delay initialization to give database services time to warm up. This avoids errors during data access.
-		if( TimeSpan.FromMilliseconds( GetTickCount64() ) < new TimeSpan( 0, 3, 0 ) )
-			Thread.Sleep( new TimeSpan( 0, 1, 0 ) );
+		if( Duration.FromMilliseconds( GetTickCount64() ) < Duration.FromMinutes( 3 ) )
+			Thread.Sleep( TimeSpan.FromSeconds( (double)InitializationTimeoutSeconds / 2 ) );
 
 		var initTimeDataAccessState = new Lazy<DataAccessState>( () => new DataAccessState() );
 		GlobalInitializationOps.InitStatics(
