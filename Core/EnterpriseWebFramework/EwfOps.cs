@@ -39,7 +39,7 @@ public static class EwfOps {
 	/// <summary>
 	/// Development Utility and private use only.
 	/// </summary>
-	public const int InitializationTimeoutSeconds = 180;
+	public const int InitializationTimeoutSeconds = 300;
 
 	private class MiniProfilerConfigureOptions: IConfigureOptions<MiniProfilerOptions> {
 		private class ProfilerProvider: DefaultProfilerProvider {
