@@ -1,4 +1,5 @@
 ﻿#nullable disable
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using EnterpriseWebLibrary.Configuration;
@@ -8,6 +9,7 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.UserManagement;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using NodaTime;
 using StackExchange.Profiling;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -18,9 +20,14 @@ public static class RequestDispatchingStatics {
 
 	private static SystemProviderReference<AppRequestDispatchingProvider> provider;
 	private static Func<HttpContext> currentContextGetter;
+	private static FirstRequestCompletionTime firstRequestCompletionTime;
+
+	// This wrapper around Instant enables us to safely set the time using Interlocked.CompareExchange, which cannot support structs.
+	private record FirstRequestCompletionTime( Instant Time );
 
 	internal static void Init( SystemProviderReference<AppRequestDispatchingProvider> provider, Func<HttpContext> currentContextGetter ) {
 		UnhandledException.Init( () => RequestState.GetLastError() );
+		RequestState.Init( () => firstRequestCompletionTime?.Time );
 
 		RequestDispatchingStatics.provider = provider;
 		RequestDispatchingStatics.currentContextGetter = currentContextGetter;
@@ -128,6 +135,9 @@ public static class RequestDispatchingStatics {
 							RequestState.ReleaseContinuationSemaphore();
 						else
 							RequestState.CleanUp( false );
+
+						Interlocked.CompareExchange( ref firstRequestCompletionTime, new FirstRequestCompletionTime( SystemClock.Instance.GetCurrentInstant() ), null );
+
 						return Task.CompletedTask;
 					},
 					false );

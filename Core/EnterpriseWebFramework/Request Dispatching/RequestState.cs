@@ -14,6 +14,14 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 /// The state for a request in an EWF application.
 /// </summary>
 public class RequestState {
+	private static readonly Duration warmupPeriodDuration = Duration.FromSeconds( 5 );
+
+	private static Func<Instant?>? firstRequestCompletionTimeGetter;
+
+	internal static void Init( Func<Instant?> firstRequestCompletionTimeGetter ) {
+		RequestState.firstRequestCompletionTimeGetter = firstRequestCompletionTimeGetter;
+	}
+
 	/// <summary>
 	/// Do not use. RequestDispatchingStatics.RequestState replaces this property.
 	/// </summary>
@@ -43,6 +51,7 @@ public class RequestState {
 	}
 
 	internal readonly Instant BeginInstant;
+	private readonly bool requestInWarmupPeriod;
 	internal MiniProfiler? Profiler { get; set; }
 	internal string Url { get; private set; }
 	internal string BaseUrl { get; private set; }
@@ -82,6 +91,8 @@ public class RequestState {
 
 	internal RequestState( HttpContext context, string url, string baseUrl, SlowRequestThreshold slowRequestThreshold ) {
 		BeginInstant = SystemClock.Instance.GetCurrentInstant();
+		var firstRequestCompletionTime = firstRequestCompletionTimeGetter!();
+		requestInWarmupPeriod = !firstRequestCompletionTime.HasValue || BeginInstant - firstRequestCompletionTime.Value < warmupPeriodDuration;
 
 		Profiler = MiniProfiler.StartNew( profilerName: url )!;
 		Profiler.User = ( (MiniProfilerOptions)Profiler.Options ).UserIdProvider( context.Request );
@@ -136,7 +147,7 @@ public class RequestState {
 		// Abandon the profiling session if it’s not needed. The boolean expressions are in this order because we don’t want to short circuit the user check if
 		// the installation is not live; doing so would prevent adequate testing of the user check.
 		var userIsProfiling = UserAccessible && ( ProfilingUserId.HasValue || ImpersonatorExists ) && AppMemoryCache.UserIsProfilingRequests( ProfilingUserId );
-		if( !userIsProfiling && ( ConfigurationStatics.IsLiveInstallation || AppMemoryCache.UnconditionalRequestProfilingDisabled() ) )
+		if( ( !userIsProfiling && ( ConfigurationStatics.IsLiveInstallation || AppMemoryCache.UnconditionalRequestProfilingDisabled() ) ) || requestInWarmupPeriod )
 			Profiler!.Stop( discardResults: true );
 	}
 
@@ -234,14 +245,16 @@ public class RequestState {
 						duration -= releasedDuration;
 					}
 
-					if( duration > slowRequestThreshold && !ConfigurationStatics.IsDevelopmentInstallation )
+					if( duration > slowRequestThreshold && !ConfigurationStatics.IsDevelopmentInstallation && !requestInWarmupPeriod )
 						TelemetryStatics.ReportError(
-							"Request took {0} to process. The threshold is {1}. If the performance problem is too difficult to fix, you can suppress this error by {2} or by {3}."
-								.FormatWith(
-									duration.ToTimeSpan().ToConciseString(),
-									slowRequestThreshold.ToTimeSpan().ToConciseString(),
+							StringTools.ConcatenateWithDelimiter(
+								" ",
+								$"Request took {duration.ToTimeSpan().ToConciseString()} to process.",
+								$"The threshold is {slowRequestThreshold.ToTimeSpan().ToConciseString()}.",
+								"If the performance problem is too difficult to fix, you can suppress this error by {0} or by {1}.".FormatWith(
 									"overriding PageBase.IsSlow (for GET request issues)",
 									"overriding PageBase.dataUpdateIsSlow or using the isSlow parameter on the PostBack constructors (for post-back issues)" ),
+								$"If the problem was caused by slow initial execution of a particular code path, you may be able to fix it by making a warmup request within {warmupPeriodDuration.ToTimeSpan().ToConciseString()} of the first request to the application, when performance problems are not reported." ),
 							null );
 				}
 			},
