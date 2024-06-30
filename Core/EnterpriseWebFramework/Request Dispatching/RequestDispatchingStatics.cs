@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using EnterpriseWebLibrary.Configuration;
@@ -18,9 +17,9 @@ public static class RequestDispatchingStatics {
 	private static readonly Dictionary<string, SystemProviderReference<AppRequestDispatchingProvider>> providersByAppName = new( StringComparer.Ordinal );
 	internal const string RequestStateKey = EwlStatics.EwlInitialism;
 
-	private static SystemProviderReference<AppRequestDispatchingProvider> provider;
-	private static Func<HttpContext> currentContextGetter;
-	private static FirstRequestCompletionTime firstRequestCompletionTime;
+	private static SystemProviderReference<AppRequestDispatchingProvider>? provider;
+	private static Func<HttpContext>? currentContextGetter;
+	private static FirstRequestCompletionTime? firstRequestCompletionTime;
 
 	// This wrapper around Instant enables us to safely set the time using Interlocked.CompareExchange, which cannot support structs.
 	private record FirstRequestCompletionTime( Instant Time );
@@ -42,15 +41,15 @@ public static class RequestDispatchingStatics {
 	/// </summary>
 	public static AppRequestDispatchingProvider GetAppProvider( string applicationName = "" ) =>
 		applicationName.Length == 0 || string.Equals( applicationName, ConfigurationStatics.AppName, StringComparison.Ordinal )
-			? provider.GetProvider()
-			: providersByAppName[ applicationName ].GetProvider();
+			? provider!.GetProvider()!
+			: providersByAppName[ applicationName ].GetProvider()!;
 
 	internal static async Task ProcessRequest( HttpContext context, RequestDelegate next ) {
 		var contextAccessor = (EwfHttpContextAccessor)context.RequestServices.GetRequiredService<IHttpContextAccessor>();
 		contextAccessor.UseFrameworkContext = true;
 
 		try {
-			string appRelativeUrl = null;
+			string? appRelativeUrl = null;
 			await executeWithBasicExceptionHandling(
 				context,
 				async () => {
@@ -92,7 +91,7 @@ public static class RequestDispatchingStatics {
 				return;
 
 			try {
-				Action<HttpContext> requestHandler;
+				Action<HttpContext>? requestHandler;
 				if( RequestState.RequestHandler is not null ) {
 					requestHandler = RequestState.RequestHandler;
 					RequestState.RequestHandler = null;
@@ -101,7 +100,7 @@ public static class RequestDispatchingStatics {
 				}
 
 				var ipAddresses = GetAppProvider().GetWhitelistedIpAddressesForMaintenance();
-				if( ipAddresses != null && !ipAddresses.Contains( context.Connection.RemoteIpAddress?.ToString() ) ) {
+				if( ipAddresses != null && !ipAddresses.Contains( context.Connection.RemoteIpAddress?.ToString()! ) ) {
 					EwfResponse.Create( "", new EwfResponseBodyCreator( () => "" ), statusCodeGetter: () => 503 ).WriteToAspNetResponse( context.Response );
 					return;
 				}
@@ -110,9 +109,9 @@ public static class RequestDispatchingStatics {
 				RequestState.EnableUser();
 
 				using( MiniProfiler.Current.Step( "EWF - Resolve URL" ) )
-					requestHandler = resolveUrl( context, appRelativeUrl );
+					requestHandler = resolveUrl( context, appRelativeUrl! );
 
-				if( requestHandler != null )
+				if( requestHandler is not null )
 					requestHandler( context );
 				else {
 					contextAccessor.UseFrameworkContext = false;
@@ -154,7 +153,7 @@ public static class RequestDispatchingStatics {
 		return host.Any() ? BaseUrl.GetUrlString( baseUrlProvider.RequestIsSecure( request ), host, baseUrlProvider.GetRequestBasePath( request ) ) : "";
 	}
 
-	private static Action<HttpContext> resolveUrl( HttpContext context, string appRelativeUrl ) {
+	private static Action<HttpContext>? resolveUrl( HttpContext context, string appRelativeUrl ) {
 		// Remove the leading slash if it exists. We are trying to normalize the difference between root applications and subdirectory applications by not
 		// distinguishing between app-relative URLs of "" and "/". In root applications this distinction doesn’t exist. We’ve decided on a standard of never
 		// allowing an app-relative URL of "/".
@@ -185,8 +184,9 @@ public static class RequestDispatchingStatics {
 		}
 
 		// ACME challenge response; see https://tools.ietf.org/html/rfc8555#section-8.3
-		var absoluteUrl = new Uri( EwfRequest.Current.Url );
-		if( absoluteUrl.Scheme == "http" && absoluteUrl.Port == 80 && absoluteUrl.AbsolutePath.StartsWith( "/.well-known/acme-challenge/" ) ) {
+		var absoluteUrl = new Uri( EwfRequest.Current!.Url );
+		if( string.Equals( absoluteUrl.Scheme, "http", StringComparison.Ordinal ) && absoluteUrl.Port == 80 &&
+		    absoluteUrl.AbsolutePath.StartsWith( "/.well-known/acme-challenge/" ) ) {
 			var systemManager = ConfigurationStatics.MachineConfiguration?.SystemManager;
 			if( systemManager != null )
 				return c => ResourceBase.WriteRedirectResponse(
@@ -212,28 +212,28 @@ public static class RequestDispatchingStatics {
 
 					var baseUrlRequest = new Lazy<bool>(
 						() => string.Equals(
-							EwfRequest.Current.Url,
+							EwfRequest.Current!.Url,
 							EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString( EwfConfigurationStatics.AppSupportsSecureConnections ),
 							StringComparison.Ordinal ) );
 					if( exception is ResourceNotAvailableException || errorIsBogusPathException )
 						transferRequest( context, 404, getErrorPage( new ResourceNotAvailable( !baseUrlRequest.Value ) ) );
 					else if( exception is AccessDeniedException accessDeniedException ) {
 						if( accessDeniedException.CausedByIntermediateUser )
-							transferRequest( context, 403, new NonLiveLogIn( EwfRequest.Current.Url ) );
+							transferRequest( context, 403, new NonLiveLogIn( EwfRequest.Current!.Url ) );
 						else if( UserManagementStatics.UserManagementEnabled && !ConfigurationStatics.IsLiveInstallation && RequestState.UserAccessible &&
 						         !RequestState.ImpersonatorExists )
-							transferRequest( context, 403, new UserManagement.Pages.Impersonate( EwfRequest.Current.Url ) );
+							transferRequest( context, 403, new UserManagement.Pages.Impersonate( EwfRequest.Current!.Url ) );
 						else if( accessDeniedException.LogInPage != null )
 							transferRequest( context, 403, accessDeniedException.LogInPage );
 						else if( RequestState.UserAccessible && ( UserManagementStatics.LocalIdentityProviderEnabled ||
 						                                          AuthenticationStatics.SamlIdentityProviders.Count > 1 ||
 						                                          ( AuthenticationStatics.SamlIdentityProviders.Any() && SystemUser.Current is not null ) ) )
-							transferRequest( context, 403, new UserManagement.Pages.LogIn( EwfRequest.Current.Url ) );
+							transferRequest( context, 403, new UserManagement.Pages.LogIn( EwfRequest.Current!.Url ) );
 						else if( RequestState.UserAccessible && AuthenticationStatics.SamlIdentityProviders.Any() )
 							transferRequest(
 								context,
 								403,
-								new UserManagement.SamlResources.LogIn( AuthenticationStatics.SamlIdentityProviders.Single().EntityId, EwfRequest.Current.Url ) );
+								new UserManagement.SamlResources.LogIn( AuthenticationStatics.SamlIdentityProviders.Single().EntityId, EwfRequest.Current!.Url ) );
 						else
 							transferRequest( context, 403, getErrorPage( new AccessDenied( !baseUrlRequest.Value ) ) );
 					}
@@ -346,7 +346,7 @@ public static class RequestDispatchingStatics {
 							return;
 						}
 
-						error ??= RequestState.GetLastError();
+						error ??= RequestState.GetLastError()!;
 
 						if( error.Value.prefix.Length > 0 ) {
 							writer.WriteLine( error.Value.prefix );
@@ -404,5 +404,5 @@ public static class RequestDispatchingStatics {
 	/// <summary>
 	/// Gets the request-state object for the current request. Throws an exception if called outside a request or from a non-web application. Framework use only.
 	/// </summary>
-	public static RequestState RequestState => (RequestState)currentContextGetter().Items[ RequestStateKey ];
+	public static RequestState RequestState => (RequestState)currentContextGetter!().Items[ RequestStateKey ]!;
 }
