@@ -8,6 +8,7 @@ using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
+using NodaTime.Text;
 using Tewl.IO;
 using static MoreLinq.Extensions.AtLeastExtension;
 
@@ -399,7 +400,7 @@ internal class UpdateDependentLogic: Operation {
 			File.WriteAllText(
 				application.WebConfigFilePath,
 				File.ReadAllText( EwlStatics.CombinePaths( configurationFilesFolderPath, "web.config" ) )
-					.Replace( "@@InitializationTimeoutSeconds", EwfOps.InitializationTimeoutSeconds.ToString() ),
+					.Replace( "@@InitializationTimeoutSeconds", DurationPattern.CreateWithInvariantCulture( "%S" ).Format( EwfOps.InitializationTimeout ) ),
 				Encoding.UTF8 );
 		}
 		catch( Exception e ) {

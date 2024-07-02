@@ -8,6 +8,7 @@ using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
 using EnterpriseWebLibrary.IO;
 using EnterpriseWebLibrary.TewlContrib;
+using NodaTime.Text;
 using Tewl.IO;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations;
@@ -461,7 +462,7 @@ internal class ExportLogic: Operation {
 				EwlStatics.CombinePaths( serverSideLogicFolderPath, app.Name, "web.config" ),
 				File.ReadAllText( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "Web Project Configuration", "web.config" ) )
 					.Replace( "@@AssemblyPath", @".\{0}.exe".FormatWith( project.NamespaceAndAssemblyName ) )
-					.Replace( "@@InitializationTimeoutSeconds", EwfOps.InitializationTimeoutSeconds.ToString() ),
+					.Replace( "@@InitializationTimeoutSeconds", DurationPattern.CreateWithInvariantCulture( "%S" ).Format( EwfOps.InitializationTimeout ) ),
 				Encoding.UTF8 );
 		}
 

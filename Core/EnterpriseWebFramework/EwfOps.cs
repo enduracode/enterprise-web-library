@@ -1,7 +1,6 @@
 ﻿#nullable disable
 using System.Net.Http;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
@@ -16,6 +15,7 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.EnterpriseWebFramework.WellKnownUrlHandling;
 using EnterpriseWebLibrary.ExternalFunctionality;
 using EnterpriseWebLibrary.UserManagement;
+using JetBrains.Annotations;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
@@ -35,11 +35,12 @@ using StackExchange.Profiling.Storage;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
+[ PublicAPI ]
 public static class EwfOps {
 	/// <summary>
 	/// Development Utility and private use only.
 	/// </summary>
-	public const int InitializationTimeoutSeconds = 300;
+	public static readonly Duration InitializationTimeout = GlobalInitializationOps.MachineStartupDelay * 2;
 
 	private class MiniProfilerConfigureOptions: IConfigureOptions<MiniProfilerOptions> {
 		private class ProfilerProvider: DefaultProfilerProvider {
@@ -78,8 +79,7 @@ public static class EwfOps {
 		SystemInitializer globalInitializer, Action<IServiceCollection> dependencyInjectionServicesRegistrationMethod = null,
 		SystemInitializer appInitializer = null ) {
 		// If the machine was recently started, delay initialization to give database services time to warm up. This avoids errors during data access.
-		if( Duration.FromMilliseconds( GetTickCount64() ) < Duration.FromMinutes( 3 ) )
-			Thread.Sleep( TimeSpan.FromSeconds( (double)InitializationTimeoutSeconds / 2 ) );
+		GlobalInitializationOps.DelayIfMachineWasRecentlyStarted();
 
 		var initTimeDataAccessState = new Lazy<DataAccessState>( () => new DataAccessState() );
 		GlobalInitializationOps.InitStatics(
@@ -518,12 +518,9 @@ public static class EwfOps {
 			// If initialization failed, ensure that we exceed the startupTimeLimit of the ASP.NET Core Module (ANCM). This will cause the module to recycle the IIS
 			// application pool and therefore retry initialization.
 			if( !frameworkInitialized && !ConfigurationStatics.IsDevelopmentInstallation )
-				Thread.Sleep( TimeSpan.FromSeconds( InitializationTimeoutSeconds + 10 ) );
+				Thread.Sleep( InitializationTimeout.Plus( Duration.FromSeconds( 10 ) ).ToTimeSpan() );
 		}
 	}
-
-	[ DllImport( "kernel32" ) ]
-	private static extern ulong GetTickCount64();
 
 	private static void assertResourceIsIntermediateInstallationPublicResourceWhenNecessary( ResourceInfo resource ) {
 		if( !PageBase.Current.IsIntermediateInstallationPublicResource )

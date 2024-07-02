@@ -1,4 +1,6 @@
 ﻿using System.Globalization;
+using System.Runtime.InteropServices;
+using System.Threading;
 using EnterpriseWebLibrary.Caching;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
@@ -16,6 +18,8 @@ using NodaTime.Serialization.JsonNet;
 namespace EnterpriseWebLibrary;
 
 public static class GlobalInitializationOps {
+	internal static readonly Duration MachineStartupDelay = Duration.FromSeconds( 150 );
+
 	private static bool initialized;
 	private static SystemInitializer? globalInitializer;
 	private static bool secondaryInitFailed;
@@ -165,4 +169,15 @@ public static class GlobalInitializationOps {
 		}
 		return 0;
 	}
+
+	/// <summary>
+	/// Installation Support Utility and internal use only.
+	/// </summary>
+	public static void DelayIfMachineWasRecentlyStarted() {
+		if( Duration.FromMilliseconds( GetTickCount64() ) < Duration.FromMinutes( 3 ) )
+			Thread.Sleep( MachineStartupDelay.ToTimeSpan() );
+	}
+
+	[ DllImport( "kernel32" ) ]
+	private static extern ulong GetTickCount64();
 }
