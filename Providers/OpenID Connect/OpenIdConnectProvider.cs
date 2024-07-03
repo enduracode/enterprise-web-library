@@ -109,7 +109,7 @@ public class OpenIdConnectProvider: ExternalOpenIdConnectProvider {
 			       null,
 			       accessToken: await openIdProvider.CreateJwtAccessTokenAsync(
 				                    clientIdentifier,
-				                    null,
+				                    null!,
 				                    subjectIdentifier,
 				                    null,
 				                    claims: additionalClaims.Select( i => new Claim( i.name, i.value ) ).ToImmutableArray() ) );

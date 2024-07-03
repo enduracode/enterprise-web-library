@@ -71,8 +71,8 @@ public class SamlProvider: ExternalSamlProvider {
 								identityProvider =>
 									( EntitiesDescriptor.IsValid( identityProvider.metadata )
 										  ? metadataImporter.Import( new EntitiesDescriptor( identityProvider.metadata ) )
-										  : metadataImporter.Import( new EntityDescriptor( identityProvider.metadata ) ) ).Configurations.Single()
-									.PartnerIdentityProviderConfigurations.Single( i => string.Equals( i.Name, identityProvider.entityId, StringComparison.Ordinal ) ) )
+										  : metadataImporter.Import( new EntityDescriptor( identityProvider.metadata ) ) ).PartnerIdentityProviderConfigurations.Single(
+										i => string.Equals( i.Name, identityProvider.entityId, StringComparison.Ordinal ) ) )
 							.ToImmutableArray()
 					} );
 		}
