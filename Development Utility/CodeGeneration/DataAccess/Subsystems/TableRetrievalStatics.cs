@@ -217,7 +217,7 @@ internal static class TableRetrievalStatics {
 		writer.WriteLine(
 			"countCommand.CommandText = \"SELECT {0} FROM {1}\";".FormatWith( cn.DatabaseInfo is SqlServerInfo ? "COUNT_BIG(*)" : "COUNT(*)", table ) );
 		writer.WriteLine(
-			"results = new List<BasicRow>( (int)({0}){1}.ExecuteScalarCommand( countCommand ) );".FormatWith(
+			"results = new List<BasicRow>( (int)({0}){1}.ExecuteScalarCommand( countCommand )! );".FormatWith(
 				cn.DatabaseInfo is OracleInfo ? "decimal" : "long",
 				DataAccessStatics.GetConnectionExpression( database ) ) );
 		writer.WriteLine( "var command = {0};".FormatWith( getInlineSelectExpression( table, tableColumns, "\"*\"", "true" ) ) );
