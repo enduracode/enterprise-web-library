@@ -106,7 +106,7 @@ internal static class TableRetrievalStatics {
 			}
 
 			if( columns.HasKeyColumns )
-				writeGetRowMatchingPkMethod(
+				writeGetRowMatchingPkMethods(
 					cn,
 					writer,
 					database,
@@ -393,7 +393,7 @@ internal static class TableRetrievalStatics {
 		writer.WriteLine( "}" );
 	}
 
-	private static void writeGetRowMatchingPkMethod(
+	private static void writeGetRowMatchingPkMethods(
 		DatabaseConnection cn, TextWriter writer, Database database, string table, TableColumns tableColumns, bool isSmallTable, bool hasModTable,
 		bool tableUsesRowVersionedCaching, bool isRevisionHistoryTable ) {
 		var pkIsId = tableColumns.KeyColumns.Count == 1 && tableColumns.KeyColumns.Single().Name.ToLower().EndsWith( "id" );
@@ -403,33 +403,47 @@ internal static class TableRetrievalStatics {
 			                   : StringTools.ConcatenateWithDelimiter(
 				                   ", ",
 				                   tableColumns.KeyColumns.Select( i => "{0} {1}".FormatWith( i.DataTypeName, i.CamelCasedName ) ).ToArray() );
-		writer.WriteLine( "public static Row " + methodName + "( " + pkParameters + ", bool returnNullIfNoMatch = false ) {" );
-		if( isSmallTable ) {
-			writer.WriteLine( "var cache = Cache.Current;" );
-			var commandConditionsExpression = isRevisionHistoryTable ? "getLatestRevisionsCondition().ToCollection()" : "new InlineDbCommandCondition[ 0 ]";
-			writer.WriteLine( "cache.Queries.GetResultSet( " + commandConditionsExpression + ", commandConditions => {" );
-			writeResultSetCreatorBody( cn, writer, database, table, tableColumns, hasModTable, tableUsesRowVersionedCaching, isRevisionHistoryTable, "true" );
-			writer.WriteLine( "} );" );
 
-			writer.WriteLine(
-				"return !returnNullIfNoMatch ? {0}[ {1} ] : {0}.TryGetValue( {1}, out var row ) ? row : null;".FormatWith(
-					"cache.{0}RowsByPk".FormatWith( isRevisionHistoryTable ? "LatestRevision" : "" ),
-					pkIsId ? "id" : RetrievalStatics.GetColumnTupleExpression( tableColumns.KeyColumns.Select( i => i.CamelCasedName ).Materialize() ) ) );
+		writeMethod( false );
+		writeMethod( true );
+		return;
+
+		void writeMethod( bool isTry ) {
+			if( isTry )
+				writer.WriteLine( $$"""public static bool Try{{methodName}}( {{pkParameters}}, [ MaybeNullWhen( false ) ] out Row row ) {""" );
+			else
+				writer.WriteLine( $$"""public static Row {{methodName}}( {{pkParameters}} ) {""" );
+			if( isSmallTable ) {
+				writer.WriteLine( "var cache = Cache.Current;" );
+				var commandConditionsExpression = isRevisionHistoryTable ? "getLatestRevisionsCondition().ToCollection()" : "new InlineDbCommandCondition[ 0 ]";
+				writer.WriteLine( "cache.Queries.GetResultSet( " + commandConditionsExpression + ", commandConditions => {" );
+				writeResultSetCreatorBody( cn, writer, database, table, tableColumns, hasModTable, tableUsesRowVersionedCaching, isRevisionHistoryTable, "true" );
+				writer.WriteLine( "} );" );
+
+				var cacheExpression = "cache.{0}RowsByPk".FormatWith( isRevisionHistoryTable ? "LatestRevision" : "" );
+				var keyExpression = pkIsId ? "id" : RetrievalStatics.GetColumnTupleExpression( tableColumns.KeyColumns.Select( i => i.CamelCasedName ).Materialize() );
+				writer.WriteLine( isTry ? $"return {cacheExpression}.TryGetValue( {keyExpression}, out row );" : $"return {cacheExpression}[ {keyExpression} ];" );
+			}
+			else {
+				writer.WriteLine(
+					"var rows = Get{0}( {1} );".FormatWith(
+						hasModTable ? "RowsMatchingConditions" : "Rows",
+						pkIsId
+							? "new {0}( id )".FormatWith( DataAccessStatics.GetEqualityConditionClassName( cn, database, table, tableColumns.KeyColumns.Single() ) )
+							: StringTools.ConcatenateWithDelimiter(
+								", ",
+								tableColumns.KeyColumns.Select(
+										i => "new {0}( {1} )".FormatWith( DataAccessStatics.GetEqualityConditionClassName( cn, database, table, i ), i.CamelCasedName ) )
+									.ToArray() ) ) );
+				if( isTry ) {
+					writer.WriteLine( "row = rows.SingleOrDefault();" );
+					writer.WriteLine( "return row is not null;" );
+				}
+				else
+					writer.WriteLine( "return rows.Single();" );
+			}
+			writer.WriteLine( "}" );
 		}
-		else {
-			writer.WriteLine(
-				"var rows = Get{0}( {1} );".FormatWith(
-					hasModTable ? "RowsMatchingConditions" : "Rows",
-					pkIsId
-						? "new {0}( id )".FormatWith( DataAccessStatics.GetEqualityConditionClassName( cn, database, table, tableColumns.KeyColumns.Single() ) )
-						: StringTools.ConcatenateWithDelimiter(
-							", ",
-							tableColumns.KeyColumns.Select(
-									i => "new {0}( {1} )".FormatWith( DataAccessStatics.GetEqualityConditionClassName( cn, database, table, i ), i.CamelCasedName ) )
-								.ToArray() ) ) );
-			writer.WriteLine( "return returnNullIfNoMatch ? rows.SingleOrDefault() : rows.Single();" );
-		}
-		writer.WriteLine( "}" );
 	}
 
 	private static void writeResultSetCreatorBody(
