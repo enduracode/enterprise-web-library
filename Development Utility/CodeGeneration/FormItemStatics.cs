@@ -228,7 +228,7 @@ internal static class FormItemStatics {
 			                            ? "var nonNullableValue = new DataValue<{0}>();".FormatWith( field.TypeIs( typeof( decimal? ) ) ? "decimal" : "bool" )
 			                            : "";
 		string getDataValueExpression( string dv ) => field.TypeName == field.NullableTypeName ? "nonNullableValue" : dv;
-		string getValueExpression( string dv ) => field.TypeName == field.NullableTypeName ? "value ?? {0}.Value.Value".FormatWith( dv ) : "value";
+		string getValueExpression( string dv ) => field.TypeName == field.NullableTypeName ? "value ?? {0}.Value!.Value".FormatWith( dv ) : "value";
 
 		string getAdditionalValidationMethodExpression( string dv ) =>
 			field.TypeName == field.NullableTypeName
