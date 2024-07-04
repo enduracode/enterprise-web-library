@@ -108,9 +108,17 @@ internal class WebItemParameter {
 	public string Comment => comment;
 
 	internal string GetUrlSerializationExpression( string valueExpression ) {
+		if( IsString )
+			return valueExpression;
+
 		if( IsEnumerable )
 			return "StringTools.ConcatenateWithDelimiter( \",\", " + valueExpression + ".Select( i => i.ToString() ).ToArray() )";
-		return valueExpression + ".ObjectToString( true )";
+
+		return TypeIsNullable
+			       ? $"""
+			          {valueExpression}.HasValue ? {valueExpression}.Value.ToString()! : ""
+			          """
+			       : valueExpression + ".ToString()!";
 	}
 
 	internal string GetUrlDeserializationExpression( string valueExpression ) {
