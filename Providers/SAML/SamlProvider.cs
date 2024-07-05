@@ -31,6 +31,7 @@ public class SamlProvider: ExternalSamlProvider {
 
 	void ExternalSamlProvider.RegisterDependencyInjectionServices( IServiceCollection services ) {
 		services.AddSaml();
+		services.AddTransient<ICertificateImporter, CertificateStringImporter>();
 	}
 
 	void ExternalSamlProvider.InitAppStatics(
