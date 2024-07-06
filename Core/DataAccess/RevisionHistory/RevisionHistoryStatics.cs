@@ -75,16 +75,15 @@ public static class RevisionHistoryStatics {
 					i => i,
 					( list, revisionId ) => {
 						var revision = revisionsById[ revisionId.Id ];
-						return new { revision.LatestRevisionId, ConceptualEntityId = revisionId.ConceptualEntityId ?? revision.LatestRevisionId, RevisionIdList = list };
+						return ( revision.LatestRevisionId, ConceptualEntityId: revisionId.ConceptualEntityId ?? revision.LatestRevisionId, RevisionIdList: list );
 					} )
 				.GroupBy( i => i.LatestRevisionId )
-				.ToImmutableDictionary(
+				.ToDictionary(
 					i => i.Key,
 					grouping => {
-						var cachedGrouping = grouping.ToImmutableArray();
-						return Tuple.Create(
-							new HashSet<int>( cachedGrouping.Select( i => i.ConceptualEntityId ) ),
-							new HashSet<IEnumerable<RevisionId>>( cachedGrouping.Select( i => i.RevisionIdList ) ) );
+						var cachedGrouping = grouping.Materialize();
+						return ( new HashSet<int>( cachedGrouping.Select( i => i.ConceptualEntityId ) ),
+							       new HashSet<IEnumerable<RevisionId>>( cachedGrouping.Select( i => i.RevisionIdList ) ) );
 					} );
 
 			var eventIdAndListPairsByUserTransactionId = entityTypeEventIdLists.SelectMany( i => i, ( list, eventId ) => new { eventId, list } )
@@ -101,11 +100,11 @@ public static class RevisionHistoryStatics {
 
 			var revisionsByUserTransactionId = RevisionsByUserTransactionId;
 			var entityTransactions = from transaction in from i in userTransactions orderby i.TransactionDateTime, i.UserTransactionId select i
-			                         let user = transaction.UserId.HasValue ? userSelector( transaction.UserId.Value ) : default( UserType )
+			                         let user = transaction.UserId.HasValue ? userSelector( transaction.UserId.Value ) : default
 			                         let revisionEntities =
 				                         from revision in revisionsByUserTransactionId[ transaction.UserTransactionId ]
 				                         let entityIdsAndRevisionIdLists = entityIdsAndRevisionIdListsByLatestRevisionId.GetValueOrDefault( revision.LatestRevisionId )
-				                         where entityIdsAndRevisionIdLists != null
+				                         where entityIdsAndRevisionIdLists != default
 				                         from entityId in entityIdsAndRevisionIdLists.Item1
 				                         from revisionIdList in entityIdsAndRevisionIdLists.Item2
 				                         group ( revisionIdList, revision ) by entityId
@@ -183,11 +182,14 @@ public static class RevisionHistoryStatics {
 	/// Gets a dictionary of all revisions by ID.
 	/// </summary>
 	public static Dictionary<int, Revision> RevisionsById =>
-		DataAccessState.Current.GetCacheValue( "ewl-revisionsById", () => SystemProvider.GetAllRevisions().ToDictionary( i => i.RevisionId ) );
+		DataAccessState.Current.GetCacheValue( "ewl-revisionsById", () => revisions.ToDictionary( i => i.RevisionId ) );
 
 	internal static ILookup<int, Revision> RevisionsByLatestRevisionId =>
-		DataAccessState.Current.GetCacheValue( "ewl-revisionsByLatestRevisionId", () => SystemProvider.GetAllRevisions().ToLookup( i => i.LatestRevisionId ) );
+		DataAccessState.Current.GetCacheValue( "ewl-revisionsByLatestRevisionId", () => revisions.ToLookup( i => i.LatestRevisionId ) );
 
 	internal static ILookup<int, Revision> RevisionsByUserTransactionId =>
-		DataAccessState.Current.GetCacheValue( "ewl-revisionsByUserTransactionId", () => SystemProvider.GetAllRevisions().ToLookup( i => i.UserTransactionId ) );
+		DataAccessState.Current.GetCacheValue( "ewl-revisionsByUserTransactionId", () => revisions.ToLookup( i => i.UserTransactionId ) );
+
+	private static IReadOnlyCollection<Revision> revisions =>
+		DataAccessState.Current.GetCacheValue( "ewl-revisions", () => SystemProvider.GetAllRevisions().Materialize() );
 }
