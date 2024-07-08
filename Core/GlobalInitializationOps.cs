@@ -18,7 +18,7 @@ using NodaTime.Serialization.JsonNet;
 namespace EnterpriseWebLibrary;
 
 public static class GlobalInitializationOps {
-	internal static readonly Duration MachineStartupDelay = Duration.FromSeconds( 150 );
+	internal static readonly Duration MachineStartupDelay = Duration.FromMinutes( 5 );
 
 	private static bool initialized;
 	private static SystemInitializer? globalInitializer;
@@ -174,8 +174,9 @@ public static class GlobalInitializationOps {
 	/// Installation Support Utility and internal use only.
 	/// </summary>
 	public static void DelayIfMachineWasRecentlyStarted() {
-		if( Duration.FromMilliseconds( GetTickCount64() ) < Duration.FromMinutes( 3 ) )
-			Thread.Sleep( MachineStartupDelay.ToTimeSpan() );
+		var timeSinceStartup = Duration.FromMilliseconds( GetTickCount64() );
+		if( timeSinceStartup < MachineStartupDelay )
+			Thread.Sleep( ( MachineStartupDelay - timeSinceStartup ).ToTimeSpan() );
 	}
 
 	[ DllImport( "kernel32" ) ]

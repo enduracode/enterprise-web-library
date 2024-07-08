@@ -40,7 +40,7 @@ public static class EwfOps {
 	/// <summary>
 	/// Development Utility and private use only.
 	/// </summary>
-	public static readonly Duration InitializationTimeout = GlobalInitializationOps.MachineStartupDelay * 2;
+	public static readonly Duration InitializationTimeout = GlobalInitializationOps.MachineStartupDelay + Duration.FromSeconds( 150 );
 
 	private class MiniProfilerConfigureOptions: IConfigureOptions<MiniProfilerOptions> {
 		private class ProfilerProvider: DefaultProfilerProvider {
