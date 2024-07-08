@@ -235,8 +235,12 @@ public static class EwfOps {
 							EwfResponse.Init(
 								() => contextAccessor.HttpContext,
 								() => {
-									if( RequestDispatchingStatics.RequestState.RequestHandler is not null )
+									var requestState = RequestDispatchingStatics.RequestState;
+									if( requestState.RequestHandler is not null )
 										return;
+
+									requestState.LogUserRequest();
+
 									RequestState.ExecuteWithUrlHandlerStateDisabled(
 										() => {
 											try {

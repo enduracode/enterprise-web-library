@@ -5,7 +5,6 @@ using System.Text;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.EnterpriseWebFramework.PageInfrastructure;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
-using EnterpriseWebLibrary.UserManagement;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
@@ -605,22 +604,12 @@ public abstract class PageBase: ResourceBase {
 	// Page-view data modifications. All data modifications that happen simply because of a request and require no other action by the user should happen once per
 	// page view, and prior to getContent so that the modified data can be used in the page if necessary.
 	private PageBase executePageViewDataModifications() {
-		var modMethods = new List<Action>();
+		var modMethods = new List<Action> { AuthenticationStatics.GetUserCookieUpdater() };
 
 		// Skip application-level modifications on the unhandled-exception page to decrease the probability of getting another exception.
-		if( RequestStateStatics.GetLastError() is null ) {
-			if( RequestState.Instance.UserAccessible ) {
-				// It’s important to do this for pages only (and not for all resources) because requests for some pages, with their associated images, CSS files, etc.,
-				// can easily cause 20-30 server requests, and we only want to insert one request row for all of these.
-				if( SystemUser.Current is {} user )
-					modMethods.Add( () => UserManagementStatics.SystemProvider.InsertUserRequest( user.UserId, EwfRequest.Current.RequestTime ) );
-				if( RequestState.Instance.ImpersonatorExists && RequestState.Instance.ImpersonatorUser is {} impersonatorUser )
-					modMethods.Add( () => UserManagementStatics.SystemProvider.InsertUserRequest( impersonatorUser.UserId, EwfRequest.Current.RequestTime ) );
-			}
+		if( RequestStateStatics.GetLastError() is null )
 			modMethods.Add( appProvider.pageViewDataModificationMethodGetter() );
-		}
 
-		modMethods.Add( AuthenticationStatics.GetUserCookieUpdater() );
 		modMethods.Add( getPageViewDataModificationMethod() );
 
 		modMethods = modMethods.Where( i => i is not null ).ToList();
