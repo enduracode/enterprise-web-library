@@ -152,7 +152,8 @@ internal class UpdateDependentLogic: Operation {
 			generateWindowsServiceCode( installation, service );
 		foreach( var project in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.ServerSideConsoleProjectsNonNullable )
 			generateServerSideConsoleProjectCode( installation, project );
-		generateDataCleanerProject( installation );
+		if( !installation.SystemIsTewl() )
+			generateDataCleanerProject( installation );
 		if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject != null )
 			generateCodeForProject(
 				installation,

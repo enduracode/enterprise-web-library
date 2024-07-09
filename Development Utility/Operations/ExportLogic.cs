@@ -495,6 +495,9 @@ internal class ExportLogic: Operation {
 		if( Directory.Exists( testRunnerFolder ) )
 			copyServerSideProject( installation, serverSideLogicFolderPath, IsuStatics.TestRunnerProjectName );
 
+		if( installation.SystemIsTewl() )
+			return;
+
 		TewlContrib.ProcessTools.RunProgram(
 			"dotnet",
 			$"""
