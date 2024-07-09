@@ -18,6 +18,7 @@ public class RowModificationCountTableCache<RowType, RowPkType>: PeriodicEvictio
 		public readonly IReadOnlyDictionary<RowPkType, RowType> RowsByPk;
 		public readonly IReadOnlyDictionary<RowPkType, long> RowModificationCountsByPk;
 
+		[ SuppressMessage( "ReSharper.DPA", "DPA0003: Excessive memory allocations in LOH" ) ]
 		public Cache( IReadOnlyCollection<RowType> rows, IReadOnlyCollection<( RowPkType pk, long count )> rowModificationCounts ) {
 			Rows = rows;
 			RowsByPk = rows.ToDictionary( i => i.PrimaryKey );
@@ -57,9 +58,9 @@ public class RowModificationCountTableCache<RowType, RowPkType>: PeriodicEvictio
 		/// modified rows).
 		/// </summary>
 		[ EditorBrowsable( EditorBrowsableState.Never ) ]
-		public IEnumerable<RowType> GetRows() {
+		public ( IEnumerable<RowType> rows, int capacity ) GetRowsAndListCapacity() {
 			var modifiedRowsRetrieved = modifiedRows.Value; // ensure modified rows are retrieved within the transaction
-			return rows.Where( i => !modifiedRowPks.Contains( i.PrimaryKey ) ).Concat( modifiedRowsRetrieved );
+			return ( rows.Where( i => !modifiedRowPks.Contains( i.PrimaryKey ) ).Concat( modifiedRowsRetrieved ), rows.Count + modifiedRowsRetrieved.Count );
 		}
 
 		/// <summary>
@@ -84,7 +85,13 @@ public class RowModificationCountTableCache<RowType, RowPkType>: PeriodicEvictio
 		cache = new Cache( rows, rowModificationCounts );
 		this.cacheRecreator = () => {
 			Cache? newCache = null;
-			cacheRecreator( ( counts, rowGetter ) => newCache = new Cache( GetDataRetriever( counts, rowGetter ).GetRows().Materialize(), counts ) );
+			cacheRecreator(
+				( counts, rowGetter ) => {
+					var rowsAndCapacity = GetDataRetriever( counts, rowGetter ).GetRowsAndListCapacity();
+					var rowList = new List<RowType>( rowsAndCapacity.capacity );
+					rowList.AddRange( rowsAndCapacity.rows );
+					newCache = new Cache( rowList, counts );
+				} );
 			return newCache!;
 		};
 	}

@@ -25,7 +25,7 @@ public class TableRetrievalQueryCache<RowType> {
 	/// EWL use only.
 	/// </summary>
 	[ EditorBrowsable( EditorBrowsableState.Never ) ]
-	public IEnumerable<RowType> GetResultSet(
+	public IReadOnlyCollection<RowType> GetResultSet(
 		IEnumerable<InlineDbCommandCondition> conditions, Func<IReadOnlyCollection<InlineDbCommandCondition>, IReadOnlyCollection<RowType>> resultSetCreator ) {
 		var conditionArray = conditions.OrderBy( i => i ).ToArray();
 		return cache.GetOrAdd( conditionArray, () => resultSetCreator( conditionArray ) );

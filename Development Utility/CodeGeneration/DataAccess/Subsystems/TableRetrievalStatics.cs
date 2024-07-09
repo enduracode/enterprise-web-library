@@ -292,21 +292,18 @@ internal static class TableRetrievalStatics {
 				  ? ""
 				  : " If you specify a predicate, we recommend storing the results of this call in the Cache object using a key that corresponds to the predicate." ) );
 		var allRowsStatement = "return GetRowsMatchingConditions{0}();".FormatWith( revisionHistorySuffix );
-		writer.WriteLine(
-			"public static IEnumerable<Row> {0} {{".FormatWith(
-				isSmallTable
-					? "GetAllRows{0}()".FormatWith( revisionHistorySuffix )
-					: "GetRows{0}( Func<BasicRow, bool>? predicate = null )".FormatWith( revisionHistorySuffix ) ) );
 
-		if( isSmallTable )
+		if( isSmallTable ) {
+			writer.WriteLine( $"public static IReadOnlyCollection<Row> GetAllRows{revisionHistorySuffix}() {{" );
 			writer.WriteLine( allRowsStatement );
+		}
 		else {
+			writer.WriteLine( $"public static IEnumerable<Row> GetRows{revisionHistorySuffix}( Func<BasicRow, bool>? predicate = null ) {{" );
 			writer.WriteLine( "if( predicate is null ) " + allRowsStatement );
 			writer.WriteLine( "var cache = Cache.Current;" );
 			writer.WriteLine(
-				"return {0}.ExecuteInTransaction( () => cache.{1}DataRetriever.Value.GetRows() ).Where( predicate ).Select( basicRow => {{".FormatWith(
-					DataAccessStatics.GetConnectionExpression( database ),
-					getTableCacheName( excludePreviousRevisions ) ) );
+				"return {0}.ExecuteInTransaction( () => cache.{1}DataRetriever.Value.GetRowsAndListCapacity().rows ).Where( predicate ).Select( basicRow => {{"
+					.FormatWith( DataAccessStatics.GetConnectionExpression( database ), getTableCacheName( excludePreviousRevisions ) ) );
 			writer.WriteLine( "var row = new Row( basicRow );" );
 			writer.WriteLine( "cache.RowsByPk.TryAdd( basicRow.PrimaryKey, row );" );
 			if( excludePreviousRevisions )
@@ -335,7 +332,7 @@ internal static class TableRetrievalStatics {
 					: "",
 				hasModTable ? "The rows are ordered in a stable way UNLESS you do not specify any conditions." : "The rows are ordered in a stable way." ) );
 		writer.WriteLine(
-			"public static IEnumerable<Row> " + methodName + "( params " + DataAccessStatics.GetTableConditionInterfaceName( cn, database, table ) +
+			"public static IReadOnlyCollection<Row> " + methodName + "( params " + DataAccessStatics.GetTableConditionInterfaceName( cn, database, table ) +
 			"[] conditions ) {" );
 
 
@@ -449,9 +446,10 @@ internal static class TableRetrievalStatics {
 	private static void writeResultSetCreatorBody(
 		DatabaseConnection cn, TextWriter writer, Database database, string table, TableColumns tableColumns, bool hasModTable, bool tableUsesRowVersionedCaching,
 		bool excludesPreviousRevisions, string cacheQueryInDbExpression ) {
-		writer.WriteLine( "var results = new List<Row>();" );
+		writer.WriteLine( "List<Row>? results = null;" );
 		if( tableUsesRowVersionedCaching ) {
 			writer.WriteLine( DataAccessStatics.GetConnectionExpression( database ) + ".ExecuteInTransaction( () => {" );
+			writer.WriteLine( "results = new List<Row>();" );
 
 			// Query for the cache keys of the results.
 			writer.WriteLine(
@@ -527,12 +525,12 @@ internal static class TableRetrievalStatics {
 		}
 		else {
 			if( hasModTable ) {
+				writer.WriteLine( $"if( commandConditions.Count == {( excludesPreviousRevisions ? "1" : "0" )} ) {{" );
 				writer.WriteLine(
-					"if( commandConditions.Count == {0} ) results.AddRange( {1}.ExecuteInTransaction( () => cache.{2}DataRetriever.Value.GetRows() ).Select( i => new Row( i ) ) );"
-						.FormatWith(
-							excludesPreviousRevisions ? "1" : "0",
-							DataAccessStatics.GetConnectionExpression( database ),
-							getTableCacheName( excludesPreviousRevisions ) ) );
+					$"var rowsAndCapacity = {DataAccessStatics.GetConnectionExpression( database )}.ExecuteInTransaction( () => cache.{getTableCacheName( excludesPreviousRevisions )}DataRetriever.Value.GetRowsAndListCapacity() );" );
+				writer.WriteLine( "results = new List<Row>( rowsAndCapacity.capacity );" );
+				writer.WriteLine( "results.AddRange( rowsAndCapacity.rows.Select( i => new Row( i ) ) );" );
+				writer.WriteLine( "}" );
 				writer.WriteLine( "else {" );
 			}
 
@@ -540,7 +538,7 @@ internal static class TableRetrievalStatics {
 			writer.WriteLine( getCommandConditionAddingStatement( "command" ) );
 			writer.WriteLine(
 				"command.Execute( " + DataAccessStatics.GetConnectionExpression( database ) +
-				", r => { while( r.Read() ) results.Add( new Row( new BasicRow( r ) ) ); } );" );
+				", r => { results = new List<Row>(); while( r.Read() ) results.Add( new Row( new BasicRow( r ) ) ); } );" );
 
 			if( hasModTable )
 				writer.WriteLine( "}" );
@@ -548,16 +546,17 @@ internal static class TableRetrievalStatics {
 
 		if( tableColumns.HasKeyColumns ) {
 			// Add all results to RowsByPk.
-			writer.WriteLine( "foreach( var i in results ) {" );
+			writer.WriteLine( "foreach( var i in results! ) {" );
 			var pk = RetrievalStatics.GetColumnTupleExpression(
 				tableColumns.KeyColumns.Select( i => "i." + EwlStatics.GetCSharpIdentifier( i.PascalCasedNameExceptForOracle ) ).Materialize() );
 			writer.WriteLine( "cache.RowsByPk.TryAdd( " + pk + ", i );" );
 			if( excludesPreviousRevisions )
 				writer.WriteLine( "cache.LatestRevisionRowsByPk.TryAdd( " + pk + ", i );" );
 			writer.WriteLine( "}" );
+			writer.WriteLine( "return results;" );
 		}
-
-		writer.WriteLine( "return results;" );
+		else
+			writer.WriteLine( "return results!;" );
 	}
 
 	private static string getTableCacheName( bool excludePreviousRevisions ) => excludePreviousRevisions ? "LatestRevisionTableCache" : "TableCache";
