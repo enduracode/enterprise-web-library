@@ -184,10 +184,10 @@ internal static class TableRetrievalStatics {
 		writer.WriteLine( "internal readonly TableRetrievalQueryCache<Row> Queries = new TableRetrievalQueryCache<Row>();" );
 		if( tableColumns.HasKeyColumns )
 			writer.WriteLine(
-				"internal readonly Cache<{0}, Row> RowsByPk = new( false );".FormatWith( RetrievalStatics.GetColumnTupleTypeName( tableColumns.KeyColumns ) ) );
+				"internal readonly Dictionary<{0}, Row> RowsByPk = new();".FormatWith( RetrievalStatics.GetColumnTupleTypeName( tableColumns.KeyColumns ) ) );
 		if( isRevisionHistoryTable )
 			writer.WriteLine(
-				"internal readonly Cache<{0}, Row> LatestRevisionRowsByPk = new( false );".FormatWith(
+				"internal readonly Dictionary<{0}, Row> LatestRevisionRowsByPk = new();".FormatWith(
 					RetrievalStatics.GetColumnTupleTypeName( tableColumns.KeyColumns ) ) );
 		writer.WriteLine( "private Cache() {}" );
 		writer.WriteLine( "}" );
@@ -546,7 +546,10 @@ internal static class TableRetrievalStatics {
 
 		if( tableColumns.HasKeyColumns ) {
 			// Add all results to RowsByPk.
-			writer.WriteLine( "foreach( var i in results! ) {" );
+			writer.WriteLine( "cache.RowsByPk.EnsureCapacity( cache.RowsByPk.Count + results!.Count );" );
+			if( excludesPreviousRevisions )
+				writer.WriteLine( "cache.LatestRevisionRowsByPk.EnsureCapacity( cache.LatestRevisionRowsByPk.Count + results.Count );" );
+			writer.WriteLine( "foreach( var i in results ) {" );
 			var pk = RetrievalStatics.GetColumnTupleExpression(
 				tableColumns.KeyColumns.Select( i => "i." + EwlStatics.GetCSharpIdentifier( i.PascalCasedNameExceptForOracle ) ).Materialize() );
 			writer.WriteLine( "cache.RowsByPk.TryAdd( " + pk + ", i );" );
