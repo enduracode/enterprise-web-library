@@ -176,7 +176,16 @@ public static class RevisionHistoryStatics {
 	/// Get a dictionary of all transactions by ID.
 	/// </summary>
 	public static Dictionary<int, UserTransaction> UserTransactionsById =>
-		DataAccessState.Current.GetCacheValue( "ewl-userTransactionsById", () => SystemProvider.GetAllUserTransactions().ToDictionary( i => i.UserTransactionId ) );
+		DataAccessState.Current.GetCacheValue(
+			"ewl-userTransactionsById",
+			() => {
+				var rows = SystemProvider.GetAllUserTransactions();
+				rows.TryGetNonEnumeratedCount( out var capacity );
+				var rowsById = new Dictionary<int, UserTransaction>( capacity );
+				foreach( var i in rows )
+					rowsById.Add( i.UserTransactionId, i );
+				return rowsById;
+			} );
 
 	/// <summary>
 	/// Gets a dictionary of all revisions by ID.
