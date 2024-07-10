@@ -12,13 +12,7 @@ namespace EnterpriseWebLibrary.TewlContrib;
 
 [ PublicAPI ]
 public static class HttpClientTools {
-	private class WriterContent: HttpContent {
-		private readonly Action<Stream> bodyWriter;
-
-		public WriterContent( Action<Stream> bodyWriter ) {
-			this.bodyWriter = bodyWriter;
-		}
-
+	private class WriterContent( Action<Stream> bodyWriter ): HttpContent {
 		protected override Task SerializeToStreamAsync( Stream stream, TransportContext? context ) {
 			bodyWriter( stream );
 			return Task.CompletedTask;
