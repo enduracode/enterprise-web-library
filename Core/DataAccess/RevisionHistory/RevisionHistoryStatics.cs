@@ -8,6 +8,8 @@ namespace EnterpriseWebLibrary.DataAccess.RevisionHistory;
 
 [ PublicAPI ]
 public static class RevisionHistoryStatics {
+	private const string profilerStepNamePrefix = $"{EwlStatics.EwlInitialism} Data Access - ";
+
 	private class TransactionListEntityData {
 		public int EntityId { get; }
 		public IEnumerable<Tuple<IEnumerable<RevisionId>, IEnumerable<Revision>>> RevisionIdListAndRevisionSetPairs { get; }
@@ -69,25 +71,28 @@ public static class RevisionHistoryStatics {
 			Func<Func<IEnumerable<RevisionId>, IEnumerable<int>>, ConceptualEntityStateType> conceptualEntityStateSelector,
 			Func<Func<IEnumerable<RevisionId>, IEnumerable<RevisionIdDelta<UserType>>>, Func<IEnumerable<EventId>, IEnumerable<int>>, ConceptualEntityActivityType>
 				conceptualEntityActivitySelector, Func<int, UserType> userSelector ) {
-		using( MiniProfiler.Current.Step( "{0} Data Access - Build transaction list".FormatWith( EwlStatics.EwlInitialism ) ) ) {
+		using( MiniProfiler.Current.Step( profilerStepNamePrefix + "Build transaction list" ) ) {
 			var revisionsById = RevisionsById;
-			var entityIdsAndRevisionIdListsByLatestRevisionId = entityTypeRevisionIdLists.SelectMany(
-					i => i,
-					( list, revisionId ) => {
-						var revision = revisionsById[ revisionId.Id ];
-						return ( revision.LatestRevisionId, ConceptualEntityId: revisionId.ConceptualEntityId ?? revision.LatestRevisionId, RevisionIdList: list );
-					} )
-				.GroupBy( i => i.LatestRevisionId )
-				.ToDictionary(
-					i => i.Key,
-					grouping => {
-						var cachedGrouping = grouping.Materialize();
-						return ( new HashSet<int>( cachedGrouping.Select( i => i.ConceptualEntityId ) ),
-							       new HashSet<IEnumerable<RevisionId>>( cachedGrouping.Select( i => i.RevisionIdList ) ) );
-					} );
+			var entityIdsAndRevisionIdListsByLatestRevisionId = MiniProfiler.Current.Inline(
+				() => entityTypeRevisionIdLists.SelectMany(
+						i => i,
+						( list, revisionId ) => {
+							var revision = revisionsById[ revisionId.Id ];
+							return ( revision.LatestRevisionId, ConceptualEntityId: revisionId.ConceptualEntityId ?? revision.LatestRevisionId, RevisionIdList: list );
+						} )
+					.GroupBy( i => i.LatestRevisionId )
+					.ToDictionary(
+						i => i.Key,
+						grouping => {
+							var cachedGrouping = grouping.Materialize();
+							return ( new HashSet<int>( cachedGrouping.Select( i => i.ConceptualEntityId ) ),
+								       new HashSet<IEnumerable<RevisionId>>( cachedGrouping.Select( i => i.RevisionIdList ) ) );
+						} ),
+				profilerStepNamePrefix + "Build entityIdsAndRevisionIdListsByLatestRevisionId" );
 
-			var eventIdAndListPairsByUserTransactionId = entityTypeEventIdLists.SelectMany( i => i, ( list, eventId ) => new { eventId, list } )
-				.ToLookup( i => i.eventId.UserTransactionId );
+			var eventIdAndListPairsByUserTransactionId = MiniProfiler.Current.Inline(
+				() => entityTypeEventIdLists.SelectMany( i => i, ( list, eventId ) => new { eventId, list } ).ToLookup( i => i.eventId.UserTransactionId ),
+				profilerStepNamePrefix + "Build eventIdAndListPairsByUserTransactionId" );
 
 			// Pre-filter user transactions to avoid having to sort the full list below.
 			var revisionsByLatestRevisionId = RevisionsByLatestRevisionId;
@@ -133,21 +138,22 @@ public static class RevisionHistoryStatics {
 
 			var listItems = new List<TransactionListItem<ConceptualEntityStateType, ConceptualEntityActivityType, UserType>>();
 			var lastListItemsByEntityId = new Dictionary<int, TransactionListItem<ConceptualEntityStateType, ConceptualEntityActivityType, UserType>>();
-			foreach( var entityTransaction in entityTransactions ) {
-				lastListItemsByEntityId.TryGetValue( entityTransaction.EntityId, out var lastListItem );
+			using( MiniProfiler.Current.Step( profilerStepNamePrefix + "Add items to list" ) )
+				foreach( var entityTransaction in entityTransactions ) {
+					lastListItemsByEntityId.TryGetValue( entityTransaction.EntityId, out var lastListItem );
 
-				var newListItem = new TransactionListItem<ConceptualEntityStateType, ConceptualEntityActivityType, UserType>(
-					entityTransaction.EntityId,
-					entityTransaction.RevisionIdListAndRevisionSetPairs,
-					entityTransaction.EventIdListAndEventIdSetPairs,
-					conceptualEntityStateSelector,
-					conceptualEntityActivitySelector,
-					entityTransaction.transaction,
-					entityTransaction.user,
-					lastListItem );
-				listItems.Add( newListItem );
-				lastListItemsByEntityId[ entityTransaction.EntityId ] = newListItem;
-			}
+					var newListItem = new TransactionListItem<ConceptualEntityStateType, ConceptualEntityActivityType, UserType>(
+						entityTransaction.EntityId,
+						entityTransaction.RevisionIdListAndRevisionSetPairs,
+						entityTransaction.EventIdListAndEventIdSetPairs,
+						conceptualEntityStateSelector,
+						conceptualEntityActivitySelector,
+						entityTransaction.transaction,
+						entityTransaction.user,
+						lastListItem );
+					listItems.Add( newListItem );
+					lastListItemsByEntityId[ entityTransaction.EntityId ] = newListItem;
+				}
 
 			return listItems.AsEnumerable().Reverse();
 		}
@@ -179,26 +185,40 @@ public static class RevisionHistoryStatics {
 		DataAccessState.Current.GetCacheValue(
 			"ewl-userTransactionsById",
 			() => {
-				var rows = SystemProvider.GetAllUserTransactions();
-				rows.TryGetNonEnumeratedCount( out var capacity );
-				var rowsById = new Dictionary<int, UserTransaction>( capacity );
-				foreach( var i in rows )
-					rowsById.Add( i.UserTransactionId, i );
-				return rowsById;
+				using( MiniProfiler.Current.Step( profilerStepNamePrefix + "Build dictionary of user transactions by ID" ) ) {
+					var rows = SystemProvider.GetAllUserTransactions();
+					rows.TryGetNonEnumeratedCount( out var capacity );
+					var rowsById = new Dictionary<int, UserTransaction>( capacity );
+					foreach( var i in rows )
+						rowsById.Add( i.UserTransactionId, i );
+					return rowsById;
+				}
 			} );
 
 	/// <summary>
 	/// Gets a dictionary of all revisions by ID.
 	/// </summary>
 	public static Dictionary<int, Revision> RevisionsById =>
-		DataAccessState.Current.GetCacheValue( "ewl-revisionsById", () => revisions.ToDictionary( i => i.RevisionId ) );
+		DataAccessState.Current.GetCacheValue(
+			"ewl-revisionsById",
+			() => MiniProfiler.Current.Inline( () => revisions.ToDictionary( i => i.RevisionId ), profilerStepNamePrefix + "Build dictionary of revisions by ID" ) );
 
 	internal static ILookup<int, Revision> RevisionsByLatestRevisionId =>
-		DataAccessState.Current.GetCacheValue( "ewl-revisionsByLatestRevisionId", () => revisions.ToLookup( i => i.LatestRevisionId ) );
+		DataAccessState.Current.GetCacheValue(
+			"ewl-revisionsByLatestRevisionId",
+			() => MiniProfiler.Current.Inline(
+				() => revisions.ToLookup( i => i.LatestRevisionId ),
+				profilerStepNamePrefix + "Build lookup of revisions by latest-revision ID" ) );
 
 	internal static ILookup<int, Revision> RevisionsByUserTransactionId =>
-		DataAccessState.Current.GetCacheValue( "ewl-revisionsByUserTransactionId", () => revisions.ToLookup( i => i.UserTransactionId ) );
+		DataAccessState.Current.GetCacheValue(
+			"ewl-revisionsByUserTransactionId",
+			() => MiniProfiler.Current.Inline(
+				() => revisions.ToLookup( i => i.UserTransactionId ),
+				profilerStepNamePrefix + "Build lookup of revisions by user-transaction ID" ) );
 
 	private static IReadOnlyCollection<Revision> revisions =>
-		DataAccessState.Current.GetCacheValue( "ewl-revisions", () => SystemProvider.GetAllRevisions().Materialize() );
+		DataAccessState.Current.GetCacheValue(
+			"ewl-revisions",
+			() => MiniProfiler.Current.Inline( () => SystemProvider.GetAllRevisions().Materialize(), profilerStepNamePrefix + "Build revisions collection" ) );
 }
