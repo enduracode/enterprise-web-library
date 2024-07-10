@@ -104,7 +104,7 @@ public static class RevisionHistoryStatics {
 				.Distinct();
 
 			var revisionsByUserTransactionId = RevisionsByUserTransactionId;
-			var entityTransactions = from transaction in from i in userTransactions orderby i.TransactionDateTime, i.UserTransactionId select i
+			var entityTransactions = from transaction in userTransactions.AsParallel().OrderBy( i => i.TransactionDateTime ).ThenBy( i => i.UserTransactionId )
 			                         let user = transaction.UserId.HasValue ? userSelector( transaction.UserId.Value ) : default
 			                         let revisionEntities =
 				                         from revision in revisionsByUserTransactionId[ transaction.UserTransactionId ]
