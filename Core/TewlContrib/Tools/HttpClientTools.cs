@@ -48,19 +48,22 @@ public static class HttpClientTools {
 			additionalHandledMessage: additionalHandledMessage );
 
 	/// <summary>
-	/// Creates the destination path if it does not exist, and downloads the file to that destination path. Use only from a background process that can tolerate a
-	/// long delay.
+	/// Makes a GET request for a resource and writes its representation to a file at the specified path, retrying several times with exponential back-off in the
+	/// event of network problems or transient failures on the server. Use only from a background process that can tolerate a long delay. Overwrites the
+	/// destination file if it already exists.
 	/// </summary>
-	public static void
-		DownloadFileWithRetry( string sourceUrl, string destinationFilePath, NetworkCredential? credentials = null, string customAuthorizationHeaderValue = "" ) =>
-		Policy.Handle<WebException>( e => e.Response is HttpWebResponse { StatusCode: HttpStatusCode.ServiceUnavailable } )
-			.WaitAndRetry( 11, attemptNumber => TimeSpan.FromSeconds( Math.Pow( 2, attemptNumber ) ) )
-			.Execute(
-				() => IoMethods.DownloadFile(
-					sourceUrl,
-					destinationFilePath,
-					credentials: credentials,
-					customAuthorizationHeaderValue: customAuthorizationHeaderValue ) );
+	public static void DownloadFileWithRetry( this HttpClient client, string url, string destinationPath, string additionalHandledMessage = "" ) =>
+		ExecuteRequestWithRetry(
+			true,
+			async () => {
+				using var response = await client.GetAsync( url, HttpCompletionOption.ResponseHeadersRead );
+				response.EnsureSuccessStatusCode();
+
+				IoMethods.DeleteFile( destinationPath );
+				await using var fileStream = IoMethods.GetFileStreamForWrite( destinationPath );
+				await response.Content.CopyToAsync( fileStream );
+			},
+			additionalHandledMessage: additionalHandledMessage );
 
 	/// <summary>
 	/// Executes a method that makes a request using <see cref="HttpClient"/>, retrying several times with exponential back-off in the event of network problems
