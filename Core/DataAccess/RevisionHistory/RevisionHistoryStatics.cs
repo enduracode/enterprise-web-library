@@ -67,7 +67,7 @@ public static class RevisionHistoryStatics {
 	/// <param name="userSelector">A function that takes a user ID and returns the corresponding user object. Do not pass null.</param>
 	public static IEnumerable<TransactionListItem<ConceptualEntityStateType, ConceptualEntityActivityType, UserType>>
 		GetTransactionList<ConceptualEntityStateType, ConceptualEntityActivityType, UserType>(
-			IEnumerable<IEnumerable<RevisionId>> entityTypeRevisionIdLists, IEnumerable<IEnumerable<EventId>> entityTypeEventIdLists,
+			IReadOnlyCollection<IEnumerable<RevisionId>> entityTypeRevisionIdLists, IEnumerable<IEnumerable<EventId>> entityTypeEventIdLists,
 			Func<Func<IEnumerable<RevisionId>, IEnumerable<int>>, ConceptualEntityStateType> conceptualEntityStateSelector,
 			Func<Func<IEnumerable<RevisionId>, IEnumerable<RevisionIdDelta<UserType>>>, Func<IEnumerable<EventId>, IEnumerable<int>>, ConceptualEntityActivityType>
 				conceptualEntityActivitySelector, Func<int, UserType> userSelector ) {
@@ -84,14 +84,15 @@ public static class RevisionHistoryStatics {
 					.ToDictionary(
 						i => i.Key,
 						grouping => {
-							var cachedGrouping = grouping.Materialize();
-							return ( new HashSet<int>( cachedGrouping.Select( i => i.ConceptualEntityId ) ),
-								       new HashSet<IEnumerable<RevisionId>>( cachedGrouping.Select( i => i.RevisionIdList ) ) );
+							var entityIds = new HashSet<int>( grouping.Select( i => i.ConceptualEntityId ) );
+							var revisionIdLists = new HashSet<IEnumerable<RevisionId>>( entityTypeRevisionIdLists.Count );
+							revisionIdLists.UnionWith( grouping.Select( i => i.RevisionIdList ) );
+							return ( entityIds, revisionIdLists );
 						} ),
 				profilerStepNamePrefix + "Build entityIdsAndRevisionIdListsByLatestRevisionId" );
 
 			var eventIdAndListPairsByUserTransactionId = MiniProfiler.Current.Inline(
-				() => entityTypeEventIdLists.SelectMany( i => i, ( list, eventId ) => new { eventId, list } ).ToLookup( i => i.eventId.UserTransactionId ),
+				() => entityTypeEventIdLists.SelectMany( i => i, ( list, eventId ) => ( eventId, list ) ).ToLookup( i => i.eventId.UserTransactionId ),
 				profilerStepNamePrefix + "Build eventIdAndListPairsByUserTransactionId" );
 
 			// Pre-filter user transactions to avoid having to sort the full list below.
@@ -110,8 +111,8 @@ public static class RevisionHistoryStatics {
 				                         from revision in revisionsByUserTransactionId[ transaction.UserTransactionId ]
 				                         let entityIdsAndRevisionIdLists = entityIdsAndRevisionIdListsByLatestRevisionId.GetValueOrDefault( revision.LatestRevisionId )
 				                         where entityIdsAndRevisionIdLists != default
-				                         from entityId in entityIdsAndRevisionIdLists.Item1
-				                         from revisionIdList in entityIdsAndRevisionIdLists.Item2
+				                         from entityId in entityIdsAndRevisionIdLists.entityIds
+				                         from revisionIdList in entityIdsAndRevisionIdLists.revisionIdLists
 				                         group ( revisionIdList, revision ) by entityId
 				                         into grouping
 				                         select new TransactionListEntityData( grouping.Key, grouping )
