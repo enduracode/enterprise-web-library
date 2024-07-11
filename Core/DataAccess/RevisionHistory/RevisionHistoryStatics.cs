@@ -105,37 +105,41 @@ public static class RevisionHistoryStatics {
 				.Distinct();
 
 			var revisionsByUserTransactionId = RevisionsByUserTransactionId;
-			var entityTransactions = from transaction in userTransactions.AsParallel().OrderBy( i => i.TransactionDateTime ).ThenBy( i => i.UserTransactionId )
-			                         let user = transaction.UserId.HasValue ? userSelector( transaction.UserId.Value ) : default
-			                         let revisionEntities =
-				                         from revision in revisionsByUserTransactionId[ transaction.UserTransactionId ]
-				                         let entityIdsAndRevisionIdLists = entityIdsAndRevisionIdListsByLatestRevisionId.GetValueOrDefault( revision.LatestRevisionId )
-				                         where entityIdsAndRevisionIdLists != default
-				                         from entityId in entityIdsAndRevisionIdLists.entityIds
-				                         from revisionIdList in entityIdsAndRevisionIdLists.revisionIdLists
-				                         group ( revisionIdList, revision ) by entityId
-				                         into grouping
-				                         select new TransactionListEntityData( grouping.Key, grouping )
-			                         let eventEntities =
-				                         from eventIdAndList in eventIdAndListPairsByUserTransactionId[ transaction.UserTransactionId ]
-				                         group ( eventIdAndList.list, eventIdAndList.eventId.Id ) by eventIdAndList.eventId.ConceptualEntityId
-				                         into grouping
-				                         select new TransactionListEntityData( grouping.Key, grouping )
-			                         from entityData in revisionEntities.FullJoin(
-					                         eventEntities,
-					                         i => i.EntityId,
-					                         i => i,
-					                         i => i,
-					                         ( r, e ) => new TransactionListEntityData( r, e ) )
-				                         .OrderBy( i => i.EntityId )
-			                         select new
-				                         {
-					                         entityData.EntityId,
-					                         entityData.RevisionIdListAndRevisionSetPairs,
-					                         entityData.EventIdListAndEventIdSetPairs,
-					                         transaction,
-					                         user
-				                         };
+			var entityTransactions = userTransactions.AsParallel()
+				.OrderBy( i => i.TransactionDateTime )
+				.ThenBy( i => i.UserTransactionId )
+				.SelectMany(
+					transaction => {
+						var user = transaction.UserId.HasValue ? userSelector( transaction.UserId.Value ) : default;
+						var revisionEntities = from revision in revisionsByUserTransactionId[ transaction.UserTransactionId ]
+						                       let entityIdsAndRevisionIdLists =
+							                       entityIdsAndRevisionIdListsByLatestRevisionId.GetValueOrDefault( revision.LatestRevisionId )
+						                       where entityIdsAndRevisionIdLists != default
+						                       from entityId in entityIdsAndRevisionIdLists.entityIds
+						                       from revisionIdList in entityIdsAndRevisionIdLists.revisionIdLists
+						                       group ( revisionIdList, revision ) by entityId
+						                       into grouping
+						                       select new TransactionListEntityData( grouping.Key, grouping );
+						var eventEntities = from eventIdAndList in eventIdAndListPairsByUserTransactionId[ transaction.UserTransactionId ]
+						                    group ( eventIdAndList.list, eventIdAndList.eventId.Id ) by eventIdAndList.eventId.ConceptualEntityId
+						                    into grouping
+						                    select new TransactionListEntityData( grouping.Key, grouping );
+						return from entityData in revisionEntities.FullJoin(
+								       eventEntities,
+								       i => i.EntityId,
+								       i => i,
+								       i => i,
+								       ( r, e ) => new TransactionListEntityData( r, e ) )
+							       .OrderBy( i => i.EntityId )
+						       select new
+							       {
+								       entityData.EntityId,
+								       entityData.RevisionIdListAndRevisionSetPairs,
+								       entityData.EventIdListAndEventIdSetPairs,
+								       transaction,
+								       user
+							       };
+					} );
 
 			var listItems = new List<TransactionListItem<ConceptualEntityStateType, ConceptualEntityActivityType, UserType>>();
 			var lastListItemsByEntityId = new Dictionary<int, TransactionListItem<ConceptualEntityStateType, ConceptualEntityActivityType, UserType>>();
