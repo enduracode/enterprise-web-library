@@ -20,8 +20,8 @@ public class TransactionListItem<ConceptualEntityStateType, ConceptualEntityActi
 	private readonly TransactionListItem<ConceptualEntityStateType, ConceptualEntityActivityType, UserType>? previous;
 
 	internal TransactionListItem(
-		int conceptualEntityId, IEnumerable<Tuple<IEnumerable<RevisionId>, IEnumerable<Revision>>> entityTypeAndRevisionSetPairs,
-		IEnumerable<Tuple<IEnumerable<EventId>, IEnumerable<int>>> eventListTypeAndEventIdSetPairs,
+		int conceptualEntityId, IEnumerable<( IEnumerable<RevisionId>, IEnumerable<Revision> )> entityTypeAndRevisionSetPairs,
+		IEnumerable<( IEnumerable<EventId>, IEnumerable<int> )> eventListTypeAndEventIdSetPairs,
 		Func<Func<IEnumerable<RevisionId>, IEnumerable<int>>, ConceptualEntityStateType> conceptualEntityStateSelector,
 		Func<Func<IEnumerable<RevisionId>, IEnumerable<RevisionIdDelta<UserType>>>, Func<IEnumerable<EventId>, IEnumerable<int>>, ConceptualEntityActivityType>
 			conceptualEntityActivitySelector, UserTransaction transaction, UserType user,
@@ -29,7 +29,7 @@ public class TransactionListItem<ConceptualEntityStateType, ConceptualEntityActi
 		this.conceptualEntityId = conceptualEntityId;
 
 		var cachedEntityTypeAndRevisionSetPairs =
-			new Lazy<IReadOnlyCollection<Tuple<IEnumerable<RevisionId>, IEnumerable<Revision>>>>( () => entityTypeAndRevisionSetPairs.ToImmutableArray() );
+			new Lazy<IReadOnlyCollection<( IEnumerable<RevisionId>, IEnumerable<Revision> )>>( () => entityTypeAndRevisionSetPairs.ToImmutableArray() );
 
 		revisionDictionariesByEntityType =
 			new Lazy<ImmutableDictionary<IEnumerable<RevisionId>, ImmutableDictionary<int, Tuple<Revision, UserTransaction, UserType>>>>(

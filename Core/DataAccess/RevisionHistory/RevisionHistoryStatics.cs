@@ -1,8 +1,8 @@
 ﻿using System.Collections.Immutable;
 using EnterpriseWebLibrary.Configuration;
 using JetBrains.Annotations;
-using MoreLinq;
 using StackExchange.Profiling;
+using static MoreLinq.Extensions.FullJoinExtension;
 
 namespace EnterpriseWebLibrary.DataAccess.RevisionHistory;
 
@@ -12,25 +12,24 @@ public static class RevisionHistoryStatics {
 
 	private class TransactionListEntityData {
 		public int EntityId { get; }
-		public IEnumerable<Tuple<IEnumerable<RevisionId>, IEnumerable<Revision>>> RevisionIdListAndRevisionSetPairs { get; }
-		public IEnumerable<Tuple<IEnumerable<EventId>, IEnumerable<int>>> EventIdListAndEventIdSetPairs { get; }
+		public IEnumerable<( IEnumerable<RevisionId>, IEnumerable<Revision> )> RevisionIdListAndRevisionSetPairs { get; }
+		public IEnumerable<( IEnumerable<EventId>, IEnumerable<int> )> EventIdListAndEventIdSetPairs { get; }
 
-		public TransactionListEntityData( int entityId, IEnumerable<( IEnumerable<RevisionId>, Revision )> revisionIdListAndRevisionPairs ) {
-			EntityId = entityId;
-			RevisionIdListAndRevisionSetPairs = from i in revisionIdListAndRevisionPairs
-			                                    group i.Item2 by i.Item1
-			                                    into grouping
-			                                    select Tuple.Create( grouping.Key, grouping.AsEnumerable() );
-			EventIdListAndEventIdSetPairs = Enumerable.Empty<Tuple<IEnumerable<EventId>, IEnumerable<int>>>();
+		public TransactionListEntityData( IGrouping<int, ( int entityId, HashSet<IEnumerable<RevisionId>> revisionIdLists, Revision revision )> revisionGrouping ) {
+			EntityId = revisionGrouping.Key;
+			RevisionIdListAndRevisionSetPairs = revisionGrouping
+				.SelectMany(
+					revisionIdListsAndRevision => revisionIdListsAndRevision.revisionIdLists,
+					( revisionIdListsAndRevision, revisionIdList ) => ( revisionIdList, revisionIdListsAndRevision.revision ) )
+				.GroupBy( i => i.revisionIdList, i => i.revision )
+				.Select( i => ( i.Key, i.AsEnumerable() ) );
+			EventIdListAndEventIdSetPairs = [ ];
 		}
 
-		public TransactionListEntityData( int entityId, IEnumerable<( IEnumerable<EventId>, int )> eventIdListAndEventIdPairs ) {
-			EntityId = entityId;
-			RevisionIdListAndRevisionSetPairs = Enumerable.Empty<Tuple<IEnumerable<RevisionId>, IEnumerable<Revision>>>();
-			EventIdListAndEventIdSetPairs = from i in eventIdListAndEventIdPairs
-			                                group i.Item2 by i.Item1
-			                                into grouping
-			                                select Tuple.Create( grouping.Key, grouping.AsEnumerable() );
+		public TransactionListEntityData( IGrouping<int, ( EventId eventId, IEnumerable<EventId> list )> eventGrouping ) {
+			EntityId = eventGrouping.Key;
+			RevisionIdListAndRevisionSetPairs = [ ];
+			EventIdListAndEventIdSetPairs = eventGrouping.GroupBy( i => i.list, i => i.eventId.Id ).Select( i => ( i.Key, i.AsEnumerable() ) );
 		}
 
 		public TransactionListEntityData( TransactionListEntityData revisionData, TransactionListEntityData eventData ) {
@@ -83,12 +82,8 @@ public static class RevisionHistoryStatics {
 					.GroupBy( i => i.LatestRevisionId )
 					.ToDictionary(
 						i => i.Key,
-						grouping => {
-							var entityIds = new HashSet<int>( grouping.Select( i => i.ConceptualEntityId ) );
-							var revisionIdLists = new HashSet<IEnumerable<RevisionId>>( entityTypeRevisionIdLists.Count );
-							revisionIdLists.UnionWith( grouping.Select( i => i.RevisionIdList ) );
-							return ( entityIds, revisionIdLists );
-						} ),
+						grouping => ( entityIds: grouping.Select( i => i.ConceptualEntityId ).ToHashSet(),
+							            revisionIdLists: grouping.Select( i => i.RevisionIdList ).ToHashSet() ) ),
 				profilerStepNamePrefix + "Build entityIdsAndRevisionIdListsByLatestRevisionId" );
 
 			var eventIdAndListPairsByUserTransactionId = MiniProfiler.Current.Inline(
@@ -111,34 +106,27 @@ public static class RevisionHistoryStatics {
 				.SelectMany(
 					transaction => {
 						var user = transaction.UserId.HasValue ? userSelector( transaction.UserId.Value ) : default;
-						var revisionEntities = from revision in revisionsByUserTransactionId[ transaction.UserTransactionId ]
-						                       let entityIdsAndRevisionIdLists =
-							                       entityIdsAndRevisionIdListsByLatestRevisionId.GetValueOrDefault( revision.LatestRevisionId )
-						                       where entityIdsAndRevisionIdLists != default
-						                       from entityId in entityIdsAndRevisionIdLists.entityIds
-						                       from revisionIdList in entityIdsAndRevisionIdLists.revisionIdLists
-						                       group ( revisionIdList, revision ) by entityId
-						                       into grouping
-						                       select new TransactionListEntityData( grouping.Key, grouping );
-						var eventEntities = from eventIdAndList in eventIdAndListPairsByUserTransactionId[ transaction.UserTransactionId ]
-						                    group ( eventIdAndList.list, eventIdAndList.eventId.Id ) by eventIdAndList.eventId.ConceptualEntityId
-						                    into grouping
-						                    select new TransactionListEntityData( grouping.Key, grouping );
-						return from entityData in revisionEntities.FullJoin(
-								       eventEntities,
-								       i => i.EntityId,
-								       i => i,
-								       i => i,
-								       ( r, e ) => new TransactionListEntityData( r, e ) )
-							       .OrderBy( i => i.EntityId )
-						       select new
-							       {
-								       entityData.EntityId,
-								       entityData.RevisionIdListAndRevisionSetPairs,
-								       entityData.EventIdListAndEventIdSetPairs,
-								       transaction,
-								       user
-							       };
+						var revisionEntities = revisionsByUserTransactionId[ transaction.UserTransactionId ]
+							.SelectMany(
+								revision => entityIdsAndRevisionIdListsByLatestRevisionId.TryGetValue( revision.LatestRevisionId, out var entityIdsAndRevisionIdLists )
+									            ? entityIdsAndRevisionIdLists.entityIds.Select( entityId => ( entityId, entityIdsAndRevisionIdLists.revisionIdLists, revision ) )
+									            : [ ] )
+							.GroupBy( i => i.entityId )
+							.Select( grouping => new TransactionListEntityData( grouping ) );
+						var eventEntities = eventIdAndListPairsByUserTransactionId[ transaction.UserTransactionId ]
+							.GroupBy( eventIdAndList => eventIdAndList.eventId.ConceptualEntityId )
+							.Select( grouping => new TransactionListEntityData( grouping ) );
+						return revisionEntities.FullJoin( eventEntities, i => i.EntityId, i => i, i => i, ( r, e ) => new TransactionListEntityData( r, e ) )
+							.OrderBy( i => i.EntityId )
+							.Select(
+								entityData => new
+									{
+										entityData.EntityId,
+										entityData.RevisionIdListAndRevisionSetPairs,
+										entityData.EventIdListAndEventIdSetPairs,
+										transaction,
+										user
+									} );
 					} );
 
 			var listItems = new List<TransactionListItem<ConceptualEntityStateType, ConceptualEntityActivityType, UserType>>();
