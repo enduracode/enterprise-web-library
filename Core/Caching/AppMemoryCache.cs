@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Runtime;
 using System.Threading;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Caching.Memory;
@@ -47,6 +48,10 @@ public static class AppMemoryCache {
 
 						entry.EvictOldEntries();
 					}
+
+					// This seems to minimize pauses during web request processing by keeping the garbage-collection backlog under control.
+					GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+					GC.Collect( GC.MaxGeneration, GCCollectionMode.Forced, true, true );
 				}
 				finally {
 					timer!.Change( tickInterval, Timeout.Infinite );
