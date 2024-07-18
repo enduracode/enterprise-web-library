@@ -71,6 +71,11 @@ public sealed class ServiceBaseAdapter: ServiceBase {
 				// Use try-finally because we need to schedule the next tick even if there is an exception thrown in this one.
 				try {
 					WindowsServiceStatics.TickTime = SystemClock.Instance.GetCurrentInstant();
+
+					// If the clock has run ahead by more than tickInterval, and then happens be synced, we cannot create an Interval.
+					if( WindowsServiceStatics.TickTime < lastTickInstant )
+						return;
+
 					var interval = new TickInterval( new Interval( lastTickInstant, WindowsServiceStatics.TickTime ) );
 					lastTickInstant = WindowsServiceStatics.TickTime;
 
