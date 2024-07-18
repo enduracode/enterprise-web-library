@@ -68,8 +68,7 @@ public sealed class ServiceBaseAdapter: ServiceBase {
 	private void tick( object? state ) {
 		TelemetryStatics.ExecuteBlockWithStandardExceptionHandling(
 			() => {
-				// We need to schedule the next tick even if there is an exception thrown in this one. Use try-finally instead of CallEveryMethod so we don't lose
-				// exception stack traces.
+				// Use try-finally because we need to schedule the next tick even if there is an exception thrown in this one.
 				try {
 					WindowsServiceStatics.TickTime = SystemClock.Instance.GetCurrentInstant();
 					var interval = new TickInterval( new Interval( lastTickInstant, WindowsServiceStatics.TickTime ) );
