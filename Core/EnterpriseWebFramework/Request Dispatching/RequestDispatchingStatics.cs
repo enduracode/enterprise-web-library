@@ -99,14 +99,14 @@ public static class RequestDispatchingStatics {
 					return;
 				}
 
+				RequestState.IntermediateUserExists = NonLiveInstallationStatics.IntermediateAuthenticationCookieExists();
+				RequestState.EnableUser();
+
 				var ipAddresses = GetAppProvider().GetWhitelistedIpAddressesForMaintenance();
 				if( ipAddresses != null && !ipAddresses.Contains( context.Connection.RemoteIpAddress?.ToString()! ) ) {
 					EwfResponse.Create( "", new EwfResponseBodyCreator( () => "" ), statusCodeGetter: () => 503 ).WriteToAspNetResponse( context.Response );
 					return;
 				}
-
-				RequestState.IntermediateUserExists = NonLiveInstallationStatics.IntermediateAuthenticationCookieExists();
-				RequestState.EnableUser();
 
 				using( MiniProfiler.Current.Step( "EWF - Resolve URL" ) )
 					requestHandler = resolveUrl( context, appRelativeUrl! );
