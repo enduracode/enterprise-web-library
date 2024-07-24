@@ -387,7 +387,7 @@ public static class EwfOps {
 									markup.Append( getElement( new StaticFiles.Third_party.Qtip2.JqueryqtipminJs() ) );
 									markup.Append( getElement( new ExternalResource( "//cdnjs.cloudflare.com/ajax/libs/dialog-polyfill/0.4.9/dialog-polyfill.min.js" ) ) );
 									markup.Append( getElement( new StaticFiles.Third_party.Spin_js.SpinminJs() ) );
-									markup.Append( getElement( new ExternalResource( "//cdn.ckeditor.com/4.5.8/full/ckeditor.js" ) ) );
+									markup.Append( getElement( new ExternalResource( "https://cdn.ckeditor.com/4.22.1/full/ckeditor.js" ) ) );
 									markup.Append( getElement( new ExternalResource( "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js" ) ) );
 									markup.Append( getElement( new StaticFiles.Instant_pageJs() ) );
 									if( includeStripeCheckout )
