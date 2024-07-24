@@ -2,59 +2,50 @@
 using System.Security.AccessControl;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Configuration.InstallationStandard;
+using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
 
+[ PublicAPI ]
 public class ExistingInstalledInstallationLogic {
-	public static void UpdateIisApplications( ExistingInstalledInstallationLogic newLogic, ExistingInstalledInstallationLogic oldLogic ) {
-		var appGetter = new Func<ExistingInstalledInstallationLogic, IEnumerable<WebApplication>>(
-			logic => logic?.existingInstallationLogic.RuntimeConfiguration.WebApplications.Where( i => i.IisApplication != null ).Materialize() ??
+	public static void UpdateIisApplications( ExistingInstalledInstallationLogic? newLogic, ExistingInstalledInstallationLogic? oldLogic ) {
+		var appGetter = new Func<ExistingInstalledInstallationLogic?, IEnumerable<WebApplication>>(
+			logic => logic?.existingInstallationLogic.RuntimeConfiguration.WebApplications.Where( i => i.IisAppPoolAndSiteName!.Length > 0 ).Materialize() ??
 			         Enumerable.Empty<WebApplication>() );
-		var newApps = appGetter( newLogic );
-		var oldApps = appGetter( oldLogic );
-
-		if( newApps.Any() )
-			IsuStatics.UpdateIisAppPool(
-				newLogic.existingInstallationLogic.IisAppPoolName,
-				usesClassicClr: newLogic.existingInstallationLogic.RuntimeConfiguration.WebApplications.All(
-					i => !File.ReadAllText( i.WebConfigFilePath ).Contains( "<aspNetCore" ) ) );
-
-		var newSiteNames = new HashSet<string>();
+		var newAppPoolAndSiteNames = new HashSet<string>();
 		var newVirtualDirectoryNames = new HashSet<string>();
-		foreach( var app in newApps ) {
-			if( app.IisApplication is Site site ) {
-				IsuStatics.UpdateIisSite( getIisSiteName( newLogic, app ), newLogic.existingInstallationLogic.IisAppPoolName, app.Path, site.HostNames );
-				newSiteNames.Add( getIisSiteName( newLogic, app ) );
-				continue;
+
+		foreach( var newApp in appGetter( newLogic ) ) {
+			IsuStatics.UpdateIisAppPool( newApp.IisAppPoolAndSiteName! );
+
+			if( newApp.IisApplication is Site site ) {
+				IsuStatics.UpdateIisSite( newApp.IisAppPoolAndSiteName!, newApp.IisAppPoolAndSiteName!, newApp.Path, site.HostNames );
+				newAppPoolAndSiteNames.Add( newApp.IisAppPoolAndSiteName! );
 			}
-			if( app.IisApplication is VirtualDirectory virtualDirectory ) {
-				IsuStatics.UpdateIisVirtualDirectory( virtualDirectory.Site, virtualDirectory.Name, newLogic.existingInstallationLogic.IisAppPoolName, app.Path );
+			else if( newApp.IisApplication is VirtualDirectory virtualDirectory ) {
+				IsuStatics.UpdateIisVirtualDirectory( virtualDirectory.Site, virtualDirectory.Name, newApp.IisAppPoolAndSiteName!, newApp.Path );
 				newVirtualDirectoryNames.Add( virtualDirectory.Name );
-				continue;
 			}
-			throw new ApplicationException( "unrecognized IIS application type" );
+			else
+				throw new ApplicationException( "unrecognized IIS application type" );
 		}
 
-		foreach( var app in oldApps ) {
-			if( app.IisApplication is Site ) {
-				if( !newSiteNames.Contains( getIisSiteName( oldLogic, app ) ) )
-					IsuStatics.DeleteIisSite( getIisSiteName( oldLogic, app ) );
-				continue;
+		foreach( var oldApp in appGetter( oldLogic ) ) {
+			if( oldApp.IisApplication is Site ) {
+				if( !newAppPoolAndSiteNames.Contains( oldApp.IisAppPoolAndSiteName! ) )
+					IsuStatics.DeleteIisSite( oldApp.IisAppPoolAndSiteName! );
 			}
-			if( app.IisApplication is VirtualDirectory virtualDirectory ) {
+			else if( oldApp.IisApplication is VirtualDirectory virtualDirectory ) {
 				if( !newVirtualDirectoryNames.Contains( virtualDirectory.Name ) )
 					IsuStatics.DeleteIisVirtualDirectory( virtualDirectory.Site, virtualDirectory.Name );
-				continue;
 			}
-			throw new ApplicationException( "unrecognized IIS application type" );
+			else
+				throw new ApplicationException( "unrecognized IIS application type" );
+
+			if( !newAppPoolAndSiteNames.Contains( oldApp.IisAppPoolAndSiteName! ) )
+				IsuStatics.DeleteIisAppPool( oldApp.IisAppPoolAndSiteName! );
 		}
-
-		if( oldApps.Any() && ( !newApps.Any() || newLogic.existingInstallationLogic.IisAppPoolName != oldLogic.existingInstallationLogic.IisAppPoolName ) )
-			IsuStatics.DeleteIisAppPool( oldLogic.existingInstallationLogic.IisAppPoolName );
 	}
-
-	private static string getIisSiteName( ExistingInstalledInstallationLogic logic, WebApplication app ) =>
-		"{0} - {1}".FormatWith( logic.existingInstallationLogic.RuntimeConfiguration.FullShortName, app.Name );
 
 	private readonly ExistingInstallationLogic existingInstallationLogic;
 

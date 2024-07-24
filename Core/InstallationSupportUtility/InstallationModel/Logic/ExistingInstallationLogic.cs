@@ -2,9 +2,11 @@
 using System.ServiceProcess;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Configuration.SystemGeneral;
+using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
 
+[ PublicAPI ]
 public class ExistingInstallationLogic {
 	public const string SystemDatabaseUpdatesFileName = "Database Updates.sql";
 	private const int serviceFailureResetPeriod = 3600; // seconds
@@ -27,11 +29,11 @@ public class ExistingInstallationLogic {
 	public string DatabaseUpdateFilePath => EwlStatics.CombinePaths( runtimeConfiguration.ConfigurationFolderPath, SystemDatabaseUpdatesFileName );
 
 	/// <summary>
-	/// Stops all web sites and services associated with this installation.
+	/// Stops all web applications and services associated with this installation.
 	/// </summary>
 	public void Stop( bool stopServices ) {
-		if( runtimeConfiguration.WebApplications.Any( i => i.IisApplication != null ) && runtimeConfiguration.InstallationType != InstallationType.Development )
-			IsuStatics.StopIisAppPool( IisAppPoolName );
+		foreach( var iisAppPoolName in runtimeConfiguration.WebApplications.Select( i => i.IisAppPoolAndSiteName! ).Where( i => i.Length > 0 ) )
+			IsuStatics.StopIisAppPool( iisAppPoolName );
 		if( stopServices )
 			this.stopServices();
 	}
@@ -69,7 +71,7 @@ public class ExistingInstallationLogic {
 	}
 
 	/// <summary>
-	/// Starts all web sites and services associated with this installation.
+	/// Starts all web applications and services associated with this installation.
 	/// </summary>
 	public void Start() {
 		var allServices = ServiceController.GetServices();
@@ -108,8 +110,8 @@ public class ExistingInstallationLogic {
 				true );
 			TewlContrib.ProcessTools.RunProgram( "sc", "failureflag \"{0}\" 1".FormatWith( serviceController.ServiceName ), "", true );
 		}
-		if( runtimeConfiguration.WebApplications.Any( i => i.IisApplication != null ) && runtimeConfiguration.InstallationType != InstallationType.Development )
-			IsuStatics.StartIisAppPool( IisAppPoolName );
+		foreach( var iisAppPoolName in runtimeConfiguration.WebApplications.Select( i => i.IisAppPoolAndSiteName! ).Where( i => i.Length > 0 ) )
+			IsuStatics.StartIisAppPool( iisAppPoolName );
 	}
 
 	public void InstallServices() {
@@ -130,8 +132,6 @@ public class ExistingInstallationLogic {
 				true );
 		}
 	}
-
-	internal string IisAppPoolName => runtimeConfiguration.FullShortName;
 
 	public string GetWindowsServiceFolderPath( WindowsService service, bool useDebugFolderIfDevelopmentInstallation ) {
 		var path = EwlStatics.CombinePaths( generalInstallationLogic.Path, service.Name );

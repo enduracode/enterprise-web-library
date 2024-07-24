@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.Configuration.InstallationStandard;
+﻿using EnterpriseWebLibrary.Configuration.InstallationStandard;
 using EnterpriseWebLibrary.Configuration.SystemDevelopment;
 
 namespace EnterpriseWebLibrary.Configuration;
@@ -20,7 +19,8 @@ public class WebApplication {
 
 	internal readonly bool SupportsSecureConnections;
 	internal readonly bool? UsesKestrel;
-	internal readonly IisApplication IisApplication;
+	internal readonly string? IisAppPoolAndSiteName;
+	internal readonly IisApplication? IisApplication;
 	internal readonly BaseUrl DefaultBaseUrl;
 	internal readonly DefaultCookieAttributes DefaultCookieAttributes;
 
@@ -53,13 +53,14 @@ public class WebApplication {
 		Name = name;
 		Path = EwlStatics.CombinePaths( installationPath, name );
 		SupportsSecureConnections = supportsSecureConnections;
+		IisAppPoolAndSiteName = configuration.IisApplication is null ? "" : $"{installationFullShortName} - {name}";
 		IisApplication = configuration.IisApplication;
 
 		var site = configuration.IisApplication as Site;
 		var siteHostName = site?.HostNames.First();
 		var virtualDirectory = configuration.IisApplication as VirtualDirectory;
 
-		if( virtualDirectory != null && virtualDirectory.Name == null )
+		if( virtualDirectory is { Name: null } )
 			virtualDirectory.Name = installationFullShortName + ( systemHasMultipleWebApplications ? name.EnglishToPascal() : "" );
 
 		// We must pass values for all components since we will not have defaults to fall back on when getting the URL string for this object.
@@ -72,11 +73,11 @@ public class WebApplication {
 				                 configuration.DefaultBaseUrl.Path ?? "" )
 			                 : site != null
 				                 ? new BaseUrl(
-					                 siteHostName.Name,
+					                 siteHostName!.Name,
 					                 siteHostName.NonsecurePortSpecified ? siteHostName.NonsecurePort : 80,
-					                 siteHostName.SecureBinding != null && siteHostName.SecureBinding.PortSpecified ? siteHostName.SecureBinding.Port : 443,
+					                 siteHostName.SecureBinding is { PortSpecified: true } ? siteHostName.SecureBinding.Port : 443,
 					                 "" )
-				                 : new BaseUrl( virtualDirectory.Site, 80, 443, virtualDirectory.Name );
+				                 : new BaseUrl( virtualDirectory!.Site, 80, 443, virtualDirectory.Name );
 
 		DefaultCookieAttributes = configuration.DefaultCookieAttributes != null
 			                          ? new DefaultCookieAttributes(
