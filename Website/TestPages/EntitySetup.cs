@@ -96,7 +96,7 @@ partial class EntitySetup: UiEntitySetup {
 								etherealChildren: new ModalBox(
 									two,
 									true,
-									new EwfImage( new ImageSetup( "Houses in the mountains" ), new ExternalResource( "http://r0k.us/graphics/kodak/kodak/kodim08.png" ) )
+									new EwfImage( new ImageSetup( "Houses in the mountains" ), new ExternalResource( "https://www.leveragere.com/assets/1440.jpg" ) )
 										.ToCollection() ).ToCollection() ) ) )
 					.Append( new HyperlinkSetup( unauthorizedPage.ToHyperlinkDefaultBehavior( disableAuthorizationCheck: true ), unauthorizedPage.ResourceName ) )
 					.Materialize();
