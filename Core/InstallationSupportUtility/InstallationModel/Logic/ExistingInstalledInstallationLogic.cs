@@ -12,15 +12,17 @@ public class ExistingInstalledInstallationLogic {
 		var appGetter = new Func<ExistingInstalledInstallationLogic?, IEnumerable<WebApplication>>(
 			logic => logic?.existingInstallationLogic.RuntimeConfiguration.WebApplications.Where( i => i.IisAppPoolAndSiteName!.Length > 0 ).Materialize() ??
 			         Enumerable.Empty<WebApplication>() );
-		var newAppPoolAndSiteNames = new HashSet<string>();
+		var newAppPoolNames = new HashSet<string>();
+		var newSiteNames = new HashSet<string>();
 		var newVirtualDirectoryNames = new HashSet<string>();
 
 		foreach( var newApp in appGetter( newLogic ) ) {
 			IsuStatics.UpdateIisAppPool( newApp.IisAppPoolAndSiteName! );
+			newAppPoolNames.Add( newApp.IisAppPoolAndSiteName! );
 
 			if( newApp.IisApplication is Site site ) {
 				IsuStatics.UpdateIisSite( newApp.IisAppPoolAndSiteName!, newApp.IisAppPoolAndSiteName!, newApp.Path, site.HostNames );
-				newAppPoolAndSiteNames.Add( newApp.IisAppPoolAndSiteName! );
+				newSiteNames.Add( newApp.IisAppPoolAndSiteName! );
 			}
 			else if( newApp.IisApplication is VirtualDirectory virtualDirectory ) {
 				IsuStatics.UpdateIisVirtualDirectory( virtualDirectory.Site, virtualDirectory.Name, newApp.IisAppPoolAndSiteName!, newApp.Path );
@@ -32,7 +34,7 @@ public class ExistingInstalledInstallationLogic {
 
 		foreach( var oldApp in appGetter( oldLogic ) ) {
 			if( oldApp.IisApplication is Site ) {
-				if( !newAppPoolAndSiteNames.Contains( oldApp.IisAppPoolAndSiteName! ) )
+				if( !newSiteNames.Contains( oldApp.IisAppPoolAndSiteName! ) )
 					IsuStatics.DeleteIisSite( oldApp.IisAppPoolAndSiteName! );
 			}
 			else if( oldApp.IisApplication is VirtualDirectory virtualDirectory ) {
@@ -42,7 +44,7 @@ public class ExistingInstalledInstallationLogic {
 			else
 				throw new ApplicationException( "unrecognized IIS application type" );
 
-			if( !newAppPoolAndSiteNames.Contains( oldApp.IisAppPoolAndSiteName! ) )
+			if( !newAppPoolNames.Contains( oldApp.IisAppPoolAndSiteName! ) )
 				IsuStatics.DeleteIisAppPool( oldApp.IisAppPoolAndSiteName! );
 		}
 	}
