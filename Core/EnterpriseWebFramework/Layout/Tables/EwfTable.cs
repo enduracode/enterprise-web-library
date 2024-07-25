@@ -254,7 +254,8 @@ public class EwfTable<ItemIdType>: FlowComponent {
 													  classes: TableCssElementCreator.ItemLimitingAndGeneralActionContainerClass ).ToCell(
 													  new TableCellSetup( fieldSpan: fields.Count ) ) )
 											  .ToCollection()
-										  : Enumerable.Empty<EwfTableItem>() ).Concat(
+										  : Enumerable.Empty<EwfTableItem>() )
+									.Concat(
 										selectedItemData.ItemGroupData != null
 											? EwfTableItem.Create(
 													TableStatics.GetItemSelectionAndActionComponents(
@@ -629,10 +630,9 @@ public class EwfTable<ItemIdType>: FlowComponent {
 		var list = new LineList(
 			new PhrasingIdContainer(
 					"Item".ToQuantity( itemCount ).ToComponents(),
-					updateRegionSets: itemGroups.SelectMany( i => i.RemainingData.Value.TailUpdateRegions )
-						.Materialize()
-						.Concat( tailUpdateRegions )
-						.SelectMany( i => i.Sets ) ).ToComponentListItem()
+					updateRegionSets:
+					itemGroups.SelectMany( i => i.RemainingData.Value.TailUpdateRegions ).Materialize().Concat( tailUpdateRegions ).SelectMany( i => i.Sets ) )
+				.ToComponentListItem()
 				.AppendLineListItem( "".ToComponentListItem() )
 				.Append( "Show:".ToComponentListItem() )
 				.Append( getItemLimitButtonItem( postBackIdBase, currentItemLimit, DataRowLimit.Fifty, itemLimitingUpdateRegionSet ) )
