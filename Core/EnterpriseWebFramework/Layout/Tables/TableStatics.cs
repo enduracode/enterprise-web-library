@@ -120,10 +120,15 @@ internal static class TableStatics {
 	}
 
 	internal static decimal GetColumnWidthFactor( IEnumerable<EwfTableFieldOrItemSetup> fieldOrItemSetups ) {
-		if( fieldOrItemSetups.Any( f => f.Size == null ) )
+		if( fieldOrItemSetups.Any( f => f.Size is null ) )
 			return 1;
-		return 100 / fieldOrItemSetups.Where( f => f.Size is AncestorRelativeLength && f.Size.Value.EndsWith( "%" ) )
-			       .Sum( f => decimal.Parse( f.Size.Value.Remove( f.Size.Value.Length - 1 ) ) );
+
+		var percentageSum = fieldOrItemSetups.Where( f => f.Size is AncestorRelativeLength && f.Size.Value.EndsWith( "%" ) )
+			.Sum( f => decimal.Parse( f.Size.Value.Remove( f.Size.Value.Length - 1 ) ) );
+		if( percentageSum == 0 )
+			return 1;
+
+		return 100 / percentageSum;
 	}
 
 	internal static FlowComponent GetColElement( EwfTableFieldOrItemSetup fieldOrItemSetup, decimal columnWidthFactor ) {
