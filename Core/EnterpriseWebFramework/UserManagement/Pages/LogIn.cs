@@ -243,6 +243,6 @@ partial class LogIn {
 			validation: control.Validation );
 	}
 
-	protected override string javaScriptDocumentReadyFunctionCall =>
+	protected override string javaScriptPageInitFunctionCall =>
 		"initLogInPage( '.{0}', '.{1}' )".FormatWith( passwordClass.ClassName, loginCodeButtonClass.ClassName );
 }
