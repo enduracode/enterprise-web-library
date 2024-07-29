@@ -9,7 +9,6 @@ partial class ResponsiveTableDemo {
 		new UiPageContent().Add(
 			ResponsiveDataTable
 				.Create(
-					style: EwfTableStyle.StandardExceptLayout,
 					caption: "Caption",
 					subCaption: "Sub caption",
 					allowExportToExcel: true,
@@ -17,11 +16,11 @@ partial class ResponsiveTableDemo {
 						.Concat( Enumerable.Repeat( new EwfTableField( size: 3.ToPercentage() ), 3 ) )
 						.Materialize(),
 					headItems: EwfTableItem.Create(
-							"First Column".ToCell(),
-							"Second Column".ToCell(),
-							"Third Column".ToCell(),
-							"Fourth Column".ToCell(),
-							"Fifth Column".ToCell() )
+							"First column".ToCell(),
+							"Second column".ToCell(),
+							"Third column".ToCell(),
+							"Long column".ToCell(),
+							"Fifth column".ToCell() )
 						.ToCollection(),
 					defaultItemLimit: DataRowLimit.Fifty )
 				.AddData(
@@ -31,6 +30,6 @@ partial class ResponsiveTableDemo {
 						i.ToString().ToCell(),
 						( i * 2 + Environment.NewLine + "extra stuff" ).ToCell(),
 						"Lorem ipsum dolor sit amet".ToCell(),
-						"Lorem ipsum dolor sit amet".ToCell(),
-						"Lorem ipsum dolor sit amet".ToCell() ) ) );
+						i < 3 ? "Lorem ipsum dolor sit amet".ToCell() : "Lorem ipsum dolor sit amet, consectetur.".ToCell(),
+						"Lorem ipsum dolor ".ToComponents().Append( new LineBreakOpportunity() ).Concat( "sit amet".ToComponents() ).Materialize().ToCell() ) ) );
 }

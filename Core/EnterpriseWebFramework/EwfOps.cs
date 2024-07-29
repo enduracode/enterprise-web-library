@@ -342,8 +342,8 @@ public static class EwfOps {
 
 									cssInfos.Add( new ExternalResource( "//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" ) );
 									cssInfos.Add( new StaticFiles.Versioned.Third_party.Jquery_ui.Jquery_ui_1132custom_v2.Jquery_uiminCss() );
-									cssInfos.Add( new ExternalResource( "//cdn.datatables.net/1.13.1/css/jquery.dataTables.min.css" ) );
-									cssInfos.Add( new ExternalResource( "//cdn.datatables.net/responsive/2.4.0/css/responsive.dataTables.min.css" ) );
+									cssInfos.Add( new ExternalResource( "https://cdn.datatables.net/2.1.2/css/dataTables.dataTables.min.css" ) );
+									cssInfos.Add( new ExternalResource( "https://cdn.datatables.net/responsive/3.0.2/css/responsive.dataTables.min.css" ) );
 									cssInfos.Add( new StaticFiles.Third_party.Select_cssCss() );
 									cssInfos.Add( new StaticFiles.Versioned.Third_party.Chosen.Chosen_v187.ChosenminCss() );
 									cssInfos.Add( new StaticFiles.Third_party.Qtip2.JqueryqtipminCss() );
@@ -378,8 +378,8 @@ public static class EwfOps {
 									markup.Append( getElement( new ExternalResource( "https://cdn.jsdelivr.net/npm/luxon@3.3.0/build/global/luxon.min.js" ) ) );
 									markup.Append( getElement( new ExternalResource( "//code.jquery.com/jquery-3.6.3.min.js" ) ) );
 									markup.Append( getElement( new StaticFiles.Versioned.Third_party.Jquery_ui.Jquery_ui_1132custom_v2.Jquery_uiminJs() ) );
-									markup.Append( getElement( new ExternalResource( "//cdn.datatables.net/1.13.1/js/jquery.dataTables.min.js" ) ) );
-									markup.Append( getElement( new ExternalResource( "//cdn.datatables.net/responsive/2.4.0/js/dataTables.responsive.min.js" ) ) );
+									markup.Append( getElement( new ExternalResource( "https://cdn.datatables.net/2.1.2/js/dataTables.min.js" ) ) );
+									markup.Append( getElement( new ExternalResource( "https://cdn.datatables.net/responsive/3.0.2/js/dataTables.responsive.min.js" ) ) );
 									markup.Append( getElement( new StaticFiles.Versioned.Third_party.Chosen.Chosen_v187.ChosenjqueryminJs() ) );
 									markup.Append( "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@duetds/date-picker@1.4.0/dist/duet/duet.esm.js\"></script>" );
 									markup.Append( "<script nomodule src=\"https://cdn.jsdelivr.net/npm/@duetds/date-picker@1.4.0/dist/duet/duet.js\"></script>" );

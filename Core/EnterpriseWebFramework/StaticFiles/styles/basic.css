@@ -87,6 +87,7 @@ ewfHtmlBlock ul,
 ewfFormItemList,
 ewfFormItem,
 ewfTableStandardAndStandardLayoutOnlyStyles,
+.dt-container,
 ewfFlowCheckboxAllStates > ewfFlowCheckboxNestedContentContainer,
 ewfCheckboxList,
 ewfHtmlBlockEditor,
@@ -106,6 +107,7 @@ ewfHtmlBlock ul:first-child,
 ewfFormItemList:first-child,
 ewfFormItem:first-child,
 ewfTableStandardAndStandardLayoutOnlyStyles:first-child,
+.dt-container:first-child,
 ewfCheckboxList:first-child,
 ewfHtmlBlockEditor:first-child,
 ewfMergeFieldTreeContainer:first-child,
@@ -443,6 +445,9 @@ ewfTableStandardAndStandardLayoutOnlyStyles {
 	table-layout: fixed;
 	clear: both;
 }
+ewfTableStandardAndStandardLayoutOnlyStyles.ewfResponsive {
+	table-layout: revert;
+}
 th {
 	padding: 0;
 	text-align: left;
@@ -483,6 +488,9 @@ ewfTableItemSelectionLabelAndControlContainer {
 }
 ewfTableItemGroupNameAndGeneralActionContainer > ewfTableActionListContainer {
 	font-weight: initial;
+}
+div.dt-container div.dt-layout-row {
+	margin: 0;
 }
 
 /* text control */

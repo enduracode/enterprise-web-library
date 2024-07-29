@@ -1,7 +1,7 @@
 function initPage() {
 	stopActivatableTableRowNestedEvents();
 
-	$( "table.responsiveDataTable" ).dataTable( { responsive: true, searching: false, paging: false, info: false } );
+	// Stop click events on responsive DataTables control cells from triggering row activation behavior.
 	$( "tr.ewfAc > .dtr-control" ).click( function( e ) {
 		var table = $( this ).closest( "table" );
 		if( table.hasClass( "collapsed" ) ) {

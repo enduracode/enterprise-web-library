@@ -12,56 +12,10 @@
   transition: opacity .2s;
 }
 
-  .breadcrumbHome:hover {
-    opacity: 1;
-  }
-
-/*******************/
-/* DATATABLE   
-/*******************/
-.dataTables_wrapper {
-  margin: 2vw 0;
-  padding: var(--ewf-ui-top-level-spacing);
-  background-color: var(--ewf-ui-inverted-text-color);
-  box-shadow:none;
-  border-radius: var(--default-border-radius);
+.breadcrumbHome:hover {
+  opacity: 1;
 }
 
-table.responsiveDataTable {
-  padding: 1vw 0;
-  width: 100% !important; /*This shouldn't have to be here. Should be able to get rid of important for sure. Also if we eliminate this, table.dataTable takes over which is already 100%, so...*/
-}
-
-table.responsiveDataTable tbody {
-    color: var(--ewf-ui-entity-action-color);
-  }
-
-table.responsiveDataTable.compact thead th, table.dataTable.compact thead td {
-    padding: 4px 3px;
-  }
-
-.dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_processing, .dataTables_wrapper .dataTables_paginate {
-  color: var(--ewf-ui-entity-action-color) !important;
-  font-size: var(--default-small-font-size);
-}
-
-  .dataTables_wrapper .dataTables_length select {
-    color: var(--ewf-ui-entity-action-color);
-    border-color: var(--default-form-color) !important;
-    margin: 0 5px;
-  }
-
-  .dataTables_wrapper .dataTables_filter input {
-    margin-left: 5px !important;
-    width: 35vw;
-    border-color: var(--default-form-color) !important;
-    max-width: 300px;
-  }
-
-  .dataTables_wrapper .dataTables_paginate .paginate_button:not(.disabled,.current):hover {
-    background: var(--hover-color) !important;
-    border-color: transparent;
-  }
 
 /* TABLET */
 @media only screen and (max-width: 1200px) {

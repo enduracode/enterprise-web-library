@@ -179,7 +179,7 @@ public class ResponsiveDataTable<ItemIdType>: FlowComponent {
 
 		var excelRowAdders = new List<Action<ExcelWorksheet>>();
 		outerChildren = new DisplayableElement(
-			_ => {
+			context => {
 				if( selectedItemData.Buttons == null )
 					TableStatics.AddCheckboxes(
 						idBase,
@@ -216,26 +216,6 @@ public class ResponsiveDataTable<ItemIdType>: FlowComponent {
 								if( enableItemReordering )
 									fields = fields.Append( new EwfTableField( size: 5.ToEm(), textAlignment: TextAlignment.Center ) ).Materialize();
 							}
-
-							// Fields, and therefore column specifications, change when a table goes from no items to having items or vice versa.
-							FlowComponentOrNode columnIdentifiedComponent = null;
-							children.Add(
-								columnIdentifiedComponent = new IdentifiedFlowComponent(
-									() => new IdentifiedComponentData<FlowComponentOrNode>(
-										"",
-										new UpdateRegionLinker(
-											"",
-											headItems.Any()
-												? Enumerable.Empty<PreModificationUpdateRegion>()
-												: new PreModificationUpdateRegion(
-													this.tailUpdateRegions.Where( i => itemGroups.Count - i.UpdatingItemCount == 0 )
-														.Concat( visibleItemGroupsAndItems.Select( i => i.Item1 ).SelectMany( i => i.GetTailUpdateRegionsIncludingAllItems() ) )
-														.SelectMany( i => i.Sets ),
-													columnIdentifiedComponent.ToCollection,
-													() => "" ).ToCollection(),
-											_ => columnIdentifiedComponent.ToCollection() ).ToCollection(),
-										new ErrorSourceSet(),
-										_ => getColumnSpecifications( fields ) ) ) );
 
 							var allVisibleItems = new List<IReadOnlyCollection<EwfTableCell>>();
 
@@ -453,15 +433,19 @@ public class ResponsiveDataTable<ItemIdType>: FlowComponent {
 								TableStatics.AssertAtLeastOneCellPerField( fieldCount, cellPlaceholderListsForItems );
 						} );
 
-				var effectiveClasses = TableStatics.GetClasses( style, classes ?? ElementClassSet.Empty )
-					.Add( new ElementClass( "responsiveDataTable" ) )
-					.Add( new ElementClass( "compact" ) )
-					.Add( new ElementClass( "nowrap" ) );
-
 				return new DisplayableElementData(
 					displaySetup,
-					() => new DisplayableElementLocalData( "table" ),
-					classes: effectiveClasses,
+					() => new DisplayableElementLocalData(
+						"table",
+						focusDependentData: new DisplayableElementFocusDependentData(
+							includeIdAttribute: true,
+							jsInitStatements:
+							$"$( '#{context.Id}' ).DataTable( {{ columns: [ {getDataTablesColumnSpecifications( fields )} ], info: false, order: [], paging: false, responsive: true, searching: false }} );" ) ),
+					classes: TableStatics.GetClasses(
+						style,
+						new ElementClass( "ewfResponsive" )
+							.Add( new ElementClass( "compact" ).Add( new ElementClass( "nowrap" ) ) ) // see https://datatables.net/manual/styling/classes
+							.Add( classes ?? ElementClassSet.Empty ) ),
 					children: children,
 					etherealChildren: ( defaultItemLimit != DataRowLimit.Unlimited ? itemLimit.ToCollection() : Enumerable.Empty<EtherealComponent>() )
 					.Concat( etherealContent ?? Enumerable.Empty<EtherealComponent>() )
@@ -591,12 +575,6 @@ public class ResponsiveDataTable<ItemIdType>: FlowComponent {
 		return this;
 	}
 
-	private IReadOnlyCollection<FlowComponent> getColumnSpecifications( IReadOnlyCollection<EwfTableField> fields ) {
-		var fieldOrItemSetups = fields.Select( i => i.FieldOrItemSetup );
-		var factor = TableStatics.GetColumnWidthFactor( fieldOrItemSetups );
-		return fieldOrItemSetups.Select( f => TableStatics.GetColElement( f, factor ) ).Materialize();
-	}
-
 	private FlowComponent getItemLimitingControlContainer(
 		string postBackIdBase, DataValue<int> currentItemLimit, UpdateRegionSet itemLimitingUpdateRegionSet,
 		IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions ) {
@@ -656,6 +634,27 @@ public class ResponsiveDataTable<ItemIdType>: FlowComponent {
 
 		allVisibleItems?.AddRange( items.Select( i => i.Cells ) );
 		return rows;
+	}
+
+	private string getDataTablesColumnSpecifications( IReadOnlyCollection<EwfTableField> fields ) {
+		var fieldOrItemSetups = fields.Select( i => i.FieldOrItemSetup );
+		var factor = TableStatics.GetColumnWidthFactor( fieldOrItemSetups );
+		return StringTools.ConcatenateWithDelimiter( ", ", fieldOrItemSetups.Select( f => getDataTablesColumnSpecification( f, factor ) ) );
+	}
+
+	private string getDataTablesColumnSpecification( EwfTableFieldOrItemSetup fieldOrItemSetup, decimal columnWidthFactor ) {
+		var properties = new List<string>();
+		properties.Add( "type: 'html'" );
+
+		var width = fieldOrItemSetup.Size;
+		if( width is not null ) {
+			var widthValue = ( width is AncestorRelativeLength && width.Value.EndsWith( "%" )
+				                   ? ( decimal.Parse( width.Value.Remove( width.Value.Length - 1 ) ) * columnWidthFactor ).ToPercentage()
+				                   : width ).Value;
+			properties.Add( $"width: '{widthValue}'" );
+		}
+
+		return $"{{ {StringTools.ConcatenateWithDelimiter( ", ", properties )} }}";
 	}
 
 	IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() => outerChildren;
