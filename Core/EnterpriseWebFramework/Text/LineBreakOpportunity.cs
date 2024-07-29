@@ -3,17 +3,17 @@
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 /// <summary>
-/// A line break.
+/// A line break opportunity.
 /// </summary>
 [ PublicAPI ]
-public sealed class LineBreak: PhrasingComponent {
+public sealed class LineBreakOpportunity: PhrasingComponent {
 	private readonly IReadOnlyCollection<FlowComponentOrNode> children;
 
 	/// <summary>
-	/// Creates a line break.
+	/// Creates a line break opportunity.
 	/// </summary>
-	public LineBreak() {
-		children = new ElementComponent( _ => new ElementData( () => new ElementLocalData( "br" ) ) ).ToCollection();
+	public LineBreakOpportunity() {
+		children = new ElementComponent( _ => new ElementData( () => new ElementLocalData( "wbr" ) ) ).ToCollection();
 	}
 
 	IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() => children;
