@@ -1,5 +1,4 @@
-// This function gets called by jQuery's on-document-ready event. This will run the following code after the page has loaded.
-function OnDocumentReady() {
+function initPage() {
 	stopActivatableTableRowNestedEvents();
 
 	$( "table.responsiveDataTable" ).dataTable( { responsive: true, searching: false, paging: false, info: false } );

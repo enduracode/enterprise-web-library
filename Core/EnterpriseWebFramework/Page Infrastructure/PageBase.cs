@@ -26,7 +26,7 @@ public abstract class PageBase: ResourceBase {
 
 	internal const string ButtonElementName = "ewfButton";
 
-	private static ( Func<Action> pageViewDataModificationMethodGetter, Func<string> javaScriptDocumentReadyFunctionCallGetter ) appProvider;
+	private static ( Func<Action> pageViewDataModificationMethodGetter, Func<string> javaScriptPageInitFunctionCallGetter ) appProvider;
 
 	private static Func<Func<Func<PageContent>, PageContent>, Func<string>, Func<string>, ( PageContent basicContent, FlowComponent component, FlowComponent
 			etherealContainer, FlowComponent jsInitElement, Action dataUpdateModificationMethod, bool isAutoDataUpdater, ActionPostBack pageLoadPostBack )>
@@ -796,15 +796,15 @@ public abstract class PageBase: ResourceBase {
 
 		return StringTools.ConcatenateWithDelimiter(
 			" ",
-			"OnDocumentReady();",
 			"$( '#{0}' ).submit( function( e, postBackId ) {{ postBackRequestStarting( e, postBackId !== undefined ? postBackId : '{1}' ); }} );".FormatWith(
 				FormId,
 				SubmitButtonPostBack != null
 					? SubmitButtonPostBack.Id
 					: "" /* This empty string we're using when no submit button exists is arbitrary and meaningless; it should never actually be submitted. */ ),
 			elementJsInitStatements,
-			appProvider.javaScriptDocumentReadyFunctionCallGetter().AppendDelimiter( ";" ),
-			javaScriptDocumentReadyFunctionCall.AppendDelimiter( ";" ),
+			"initPage();",
+			appProvider.javaScriptPageInitFunctionCallGetter().AppendDelimiter( ";" ),
+			javaScriptPageInitFunctionCall.AppendDelimiter( ";" ),
 			"addSpeculationRules();",
 			StringTools.ConcatenateWithDelimiter( " ", scrollStatement, ModificationErrorsOccurred ? "" : pageLoadActionStatements, secondaryResponseStatements )
 				.PrependDelimiter( "window.onload = function() { " )
@@ -817,9 +817,9 @@ public abstract class PageBase: ResourceBase {
 	protected virtual ScrollPosition scrollPositionForThisResponse => ScrollPosition.LastPositionOrStatusBar;
 
 	/// <summary>
-	/// Gets the function call that should be executed when the jQuery document ready event is fired.
+	/// Gets the function call that should be executed when the DOMContentLoaded event is fired.
 	/// </summary>
-	protected virtual string javaScriptDocumentReadyFunctionCall => "";
+	protected virtual string javaScriptPageInitFunctionCall => "";
 
 	private ImmutableDictionary<EwfValidation, IReadOnlyCollection<string>> addModificationErrorDisplaysAndGetErrors( string id, ErrorSourceSet errorSources ) =>
 		errorSources.Validations.Select(

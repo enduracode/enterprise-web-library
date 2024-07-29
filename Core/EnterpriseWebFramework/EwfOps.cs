@@ -316,8 +316,7 @@ public static class EwfOps {
 									RequestDispatchingStatics.RequestState,
 									requestHandler ) );
 							PageBase.Init(
-								( () => BasePageStatics.AppProvider.GetPageViewDataModificationMethod(),
-									() => BasePageStatics.AppProvider.JavaScriptDocumentReadyFunctionCall ),
+								( () => BasePageStatics.AppProvider.GetPageViewDataModificationMethod(), () => BasePageStatics.AppProvider.JavaScriptPageInitFunctionCall ),
 								BasicPageContent.GetContent );
 							HyperlinkBehaviorExtensionCreators.Init( ModalBox.GetBrowsingModalBoxOpenStatements );
 							FileUpload.Init( () => ( (BasicPageContent)PageBase.Current.BasicContent ).FormUsesMultipartEncoding = true );

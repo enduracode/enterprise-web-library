@@ -67,7 +67,7 @@ public abstract class AppStandardPageLogicProvider {
 	protected internal virtual ResourceInfo? Favicon => null;
 
 	/// <summary>
-	/// Gets the function call that should be executed when the jQuery document ready event is fired for any page in the application.
+	/// Gets the function call that should be executed when the DOMContentLoaded event is fired for any page in the application.
 	/// </summary>
-	protected internal virtual string JavaScriptDocumentReadyFunctionCall => "";
+	protected internal virtual string JavaScriptPageInitFunctionCall => "";
 }
