@@ -7,7 +7,7 @@ partial class ResponsiveTableDemo {
 
 	protected override PageContent getContent() =>
 		new UiPageContent().Add(
-			ResponsiveDataTable
+			ResponsiveTable
 				.Create(
 					caption: "Caption",
 					subCaption: "Sub caption",

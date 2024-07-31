@@ -12,7 +12,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 /// A table.
 /// </summary>
 [ PublicAPI ]
-public class ResponsiveDataTable: ResponsiveDataTable<int> {
+public class ResponsiveTable: ResponsiveTable<int> {
 	/// <summary>
 	/// Creates a table.
 	/// </summary>
@@ -43,7 +43,7 @@ public class ResponsiveDataTable: ResponsiveDataTable<int> {
 	/// <param name="tailUpdateRegions">The tail update regions for the table, which will operate on the item level if you add items, or the item-group level if
 	/// you add item groups.</param>
 	/// <param name="etherealContent"></param>
-	public static ResponsiveDataTable Create(
+	public static ResponsiveTable Create(
 		DisplaySetup displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string idBase = "", string caption = "",
 		string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
 		IReadOnlyCollection<SelectedItemAction<int>> selectedItemActions = null, IReadOnlyCollection<EwfTableField> fields = null,
@@ -98,7 +98,7 @@ public class ResponsiveDataTable: ResponsiveDataTable<int> {
 	/// <param name="tailUpdateRegions">The tail update regions for the table, which will operate on the item level if you add items, or the item-group level if
 	/// you add item groups.</param>
 	/// <param name="etherealContent"></param>
-	public static ResponsiveDataTable<ItemIdType> CreateWithItemIdType<ItemIdType>(
+	public static ResponsiveTable<ItemIdType> CreateWithItemIdType<ItemIdType>(
 		DisplaySetup displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string idBase = "", string caption = "",
 		string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
 		IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions = null, IReadOnlyCollection<EwfTableField> fields = null,
@@ -123,7 +123,7 @@ public class ResponsiveDataTable: ResponsiveDataTable<int> {
 			tailUpdateRegions,
 			etherealContent );
 
-	private ResponsiveDataTable(
+	private ResponsiveTable(
 		DisplaySetup displaySetup, EwfTableStyle style, ElementClassSet classes, string postBackIdBase, string caption, string subCaption, bool allowExportToExcel,
 		IReadOnlyCollection<ActionComponentSetup> tableActions, IReadOnlyCollection<SelectedItemAction<int>> selectedItemActions,
 		IReadOnlyCollection<EwfTableField> fields, IReadOnlyCollection<EwfTableItem> headItems, DataRowLimit defaultItemLimit, bool enableItemReordering,
@@ -150,7 +150,7 @@ public class ResponsiveDataTable: ResponsiveDataTable<int> {
 /// A table.
 /// </summary>
 [ PublicAPI ]
-public class ResponsiveDataTable<ItemIdType>: FlowComponent {
+public class ResponsiveTable<ItemIdType>: FlowComponent {
 	private readonly IReadOnlyCollection<DisplayableElement> outerChildren;
 	private readonly string idBase;
 	private readonly PostBack exportToExcelPostBack;
@@ -161,7 +161,7 @@ public class ResponsiveDataTable<ItemIdType>: FlowComponent {
 	private bool? hasExplicitItemGroups;
 	private IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions;
 
-	internal ResponsiveDataTable(
+	internal ResponsiveTable(
 		DisplaySetup displaySetup, EwfTableStyle style, ElementClassSet classes, string idBase, string caption, string subCaption, bool allowExportToExcel,
 		IReadOnlyCollection<ActionComponentSetup> tableActions, IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions,
 		IReadOnlyCollection<EwfTableField> fields, IReadOnlyCollection<EwfTableItem> headItems, DataRowLimit defaultItemLimit, bool enableItemReordering,
@@ -432,7 +432,6 @@ public class ResponsiveDataTable<ItemIdType>: FlowComponent {
 							if( !disableEmptyFieldDetection )
 								TableStatics.AssertAtLeastOneCellPerField( fieldCount, cellPlaceholderListsForItems );
 						} );
-
 				return new DisplayableElementData(
 					displaySetup,
 					() => new DisplayableElementLocalData(
@@ -480,8 +479,7 @@ public class ResponsiveDataTable<ItemIdType>: FlowComponent {
 	/// <param name="createItemsImmediately">Pass true to create the table items during this call rather than deferring their creation. Use if you are directly
 	/// or indirectly creating validations inside the item selector that will be added to an outside data modification. Deferring item creation would likely
 	/// cause your validations to execute in the wrong order or be skipped.</param>
-	public ResponsiveDataTable<ItemIdType> AddData<T>(
-		IEnumerable<T> data, Func<T, EwfTableItem<ItemIdType>> itemSelector, bool createItemsImmediately = false ) {
+	public ResponsiveTable<ItemIdType> AddData<T>( IEnumerable<T> data, Func<T, EwfTableItem<ItemIdType>> itemSelector, bool createItemsImmediately = false ) {
 		if( createItemsImmediately )
 			foreach( var i in data )
 				AddItem( itemSelector( i ) );
@@ -498,7 +496,7 @@ public class ResponsiveDataTable<ItemIdType>: FlowComponent {
 	/// </summary>
 	/// <param name="itemGetter">A function that takes the remaining number of items that can be shown based on the current limit and returns the items to add
 	/// along with the total number of items that could be added if there was no limit.</param>
-	public ResponsiveDataTable<ItemIdType> AddLimitedItems( Func<int, ( IEnumerable<EwfTableItem<ItemIdType>> items, int totalItemCount )> itemGetter ) {
+	public ResponsiveTable<ItemIdType> AddLimitedItems( Func<int, ( IEnumerable<EwfTableItem<ItemIdType>> items, int totalItemCount )> itemGetter ) {
 		var itemsAndCount = itemGetter( ( itemLimit != null ? itemLimit.Value.Value : (int)DataRowLimit.Unlimited ) - itemGroups.Sum( i => i.Items.Count ) );
 
 		var count = 0;
@@ -522,7 +520,7 @@ public class ResponsiveDataTable<ItemIdType>: FlowComponent {
 	/// 
 	/// You can pass EwfTableItem wherever EwfTableItem&lt;int&gt; is expected.
 	/// </summary>
-	public ResponsiveDataTable<ItemIdType> AddItem( EwfTableItem<ItemIdType> item ) {
+	public ResponsiveTable<ItemIdType> AddItem( EwfTableItem<ItemIdType> item ) {
 		AddItem( () => item );
 		return this;
 	}
@@ -533,7 +531,7 @@ public class ResponsiveDataTable<ItemIdType>: FlowComponent {
 	/// 
 	/// You can pass EwfTableItem wherever EwfTableItem&lt;int&gt; is expected.
 	/// </summary>
-	public ResponsiveDataTable<ItemIdType> AddItem( Func<EwfTableItem<ItemIdType>> item ) {
+	public ResponsiveTable<ItemIdType> AddItem( Func<EwfTableItem<ItemIdType>> item ) {
 		if( selectedItemData.Buttons != null )
 			throw new ApplicationException( "You cannot modify the table after checkboxes have been added." );
 
@@ -564,7 +562,7 @@ public class ResponsiveDataTable<ItemIdType>: FlowComponent {
 	/// Adds a new column to the table containing a checkbox for each item with an ID. Validation will put the selected-item IDs in the specified <see cref="DataValue{T}"/>.
 	/// </summary>
 	/// <param name="selectedItemIds">Do not pass null.</param>
-	public ResponsiveDataTable<ItemIdType> AddCheckboxes( DataValue<IReadOnlyCollection<ItemIdType>> selectedItemIds ) {
+	public ResponsiveTable<ItemIdType> AddCheckboxes( DataValue<IReadOnlyCollection<ItemIdType>> selectedItemIds ) {
 		TableStatics.AddCheckboxes(
 			idBase,
 			selectedItemActions,
