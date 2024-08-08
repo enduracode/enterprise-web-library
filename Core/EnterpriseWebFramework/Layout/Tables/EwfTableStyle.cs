@@ -1,27 +1,29 @@
-﻿#nullable disable
-namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+﻿using JetBrains.Annotations;
+
+namespace EnterpriseWebLibrary.EnterpriseWebFramework;
+
+/// <summary>
+/// A style for a table.
+/// </summary>
+[ PublicAPI ]
+public enum EwfTableStyle {
 	/// <summary>
-	/// A style for a table.
+	/// None of the standard aspects that are defined by the style sheets.
 	/// </summary>
-	public enum EwfTableStyle {
-		/// <summary>
-		/// None of the standard aspects that are defined by the style sheets.
-		/// </summary>
-		Raw,
+	Raw,
 
-		/// <summary>
-		/// Standard layout, i.e. 100% width and fixed table layout.
-		/// </summary>
-		StandardLayoutOnly,
+	/// <summary>
+	/// Standard layout, i.e. 100% width and fixed table layout.
+	/// </summary>
+	StandardLayoutOnly,
 
-		/// <summary>
-		/// Standard non-layout aspects.
-		/// </summary>
-		StandardExceptLayout,
+	/// <summary>
+	/// Standard non-layout aspects.
+	/// </summary>
+	StandardExceptLayout,
 
-		/// <summary>
-		/// Fully standard.
-		/// </summary>
-		Standard
-	}
+	/// <summary>
+	/// Fully standard.
+	/// </summary>
+	Standard
 }

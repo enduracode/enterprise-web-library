@@ -447,6 +447,10 @@ ewfTableStandardAndStandardLayoutOnlyStyles {
 }
 ewfTableStandardAndStandardLayoutOnlyStyles.ewfResponsive {
 	table-layout: revert;
+	white-space: nowrap;
+}
+ewfTableStandardAndStandardLayoutOnlyStyles.ewfResponsive > tbody > tr.child {
+	white-space: initial;
 }
 th {
 	padding: 0;

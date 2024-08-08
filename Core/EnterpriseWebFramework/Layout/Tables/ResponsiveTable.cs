@@ -442,8 +442,7 @@ public class ResponsiveTable<ItemIdType>: FlowComponent {
 							$"$( '#{context.Id}' ).DataTable( {{ columns: [ {getDataTablesColumnSpecifications( fields )} ], info: false, order: [], paging: false, responsive: true, searching: false }} );" ) ),
 					classes: TableStatics.GetClasses(
 						style,
-						new ElementClass( "ewfResponsive" )
-							.Add( new ElementClass( "compact" ).Add( new ElementClass( "nowrap" ) ) ) // see https://datatables.net/manual/styling/classes
+						new ElementClass( "ewfResponsive" ).Add( new ElementClass( "compact" ) ) // see https://datatables.net/manual/styling/classes
 							.Add( classes ?? ElementClassSet.Empty ) ),
 					children: children,
 					etherealChildren: ( defaultItemLimit != DataRowLimit.Unlimited ? itemLimit.ToCollection() : Enumerable.Empty<EtherealComponent>() )
