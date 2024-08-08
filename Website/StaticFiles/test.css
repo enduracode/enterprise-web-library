@@ -4,6 +4,11 @@ body {
 }
 */
 
+.longColumn {
+	white-space: normal;
+	min-width: 20em;
+}
+
 .navigationBox {
 	background-color: Green;
 }
