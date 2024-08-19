@@ -148,9 +148,9 @@ public class DataUpdateStatics {
 		// Never delete the last (most recent) file. It makes it really inconvenient for developers if this happens.
 		foreach( var fileName in files.Skip( 1 ) ) {
 			var creationTime = File.GetCreationTime( fileName );
-			// We will delete everything more than 2 months old, keep saturday backups between 1 week and 2 months old, and keep everything less than 4 days old.
-			if( !keepHistoricalArchive || creationTime < DateTime.Now.AddMonths( -2 ) ||
-			    ( creationTime < DateTime.Now.AddDays( -4 ) && creationTime.DayOfWeek != DayOfWeek.Saturday ) )
+			// We will delete everything except Saturday backups less than 45 days old and any backup less than 3 days old.
+			if( !keepHistoricalArchive || creationTime < DateTime.Now.AddDays( -45 ) ||
+			    ( creationTime < DateTime.Now.AddDays( -3 ) && creationTime.DayOfWeek != DayOfWeek.Saturday ) )
 				IoMethods.DeleteFile( fileName );
 		}
 	}
