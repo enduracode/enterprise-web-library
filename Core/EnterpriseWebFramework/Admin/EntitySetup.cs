@@ -1,11 +1,10 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.UserManagement;
+﻿using EnterpriseWebLibrary.UserManagement;
 using Serilog.Core;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin;
 
 partial class EntitySetup: UiEntitySetup {
-	private static Func<UrlHandler> frameworkUrlParentGetter;
+	private static Func<UrlHandler>? frameworkUrlParentGetter;
 
 	internal static void Init( Func<UrlHandler> frameworkUrlParentGetter, LoggingLevelSwitch diagnosticLogLevelSwitch ) {
 		DiagnosticLog.Init( diagnosticLogLevelSwitch );
@@ -13,7 +12,7 @@ partial class EntitySetup: UiEntitySetup {
 		EntitySetup.frameworkUrlParentGetter = frameworkUrlParentGetter;
 	}
 
-	protected override ResourceParent createParent() => null;
+	protected override ResourceParent? createParent() => null;
 
 	protected override string getEntitySetupName() => "{0} Admin".FormatWith( EwlStatics.EwlInitialism );
 
@@ -36,7 +35,7 @@ partial class EntitySetup: UiEntitySetup {
 			new OpenIdProvider( this ),
 			new CssElements( this ) ).ToCollection();
 
-	protected override UrlHandler getUrlParent() => frameworkUrlParentGetter();
+	protected override UrlHandler getUrlParent() => frameworkUrlParentGetter!();
 
 	protected override UrlHandler getRequestHandler() => new BasicTests( this );
 
@@ -61,10 +60,14 @@ partial class EntitySetup: UiEntitySetup {
 			.Append( DiagnosticLog.UrlPatterns.Literal( this, "log" ) )
 			.Append( UserManagement.UrlPatterns.Literal( this, "users" ) )
 			.Append( OpenIdProvider.UrlPatterns.Literal( this, "openid-provider" ) )
-			.Append( CssElements.UrlPatterns.Literal( this, "css-elements" ) );
+			.Append( CssElements.UrlPatterns.Literal( this, "css-elements" ) )
+			.Append( ErrorLog.UrlPatterns.Literal( this, "system-error-log" ) );
 
 	EntityUiSetup UiEntitySetup.GetUiSetup() =>
 		new(
+			navActionGetter:
+			_ => new HyperlinkSetup( new ErrorLog( this ), "System Error Log", icon: new ActionComponentIcon( new FontAwesomeIcon( "fa-exclamation-triangle" ) ) )
+				.ToCollection(),
 			actionGetter: _ =>
 				UserManagementStatics.UserManagementEnabled
 					? new HyperlinkSetup(
