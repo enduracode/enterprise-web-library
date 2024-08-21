@@ -3,6 +3,7 @@ using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Email;
 using JetBrains.Annotations;
 using NodaTime;
+using NodaTime.Text;
 
 namespace EnterpriseWebLibrary;
 
@@ -72,9 +73,12 @@ public static class TelemetryStatics {
 	private static readonly object key = new();
 
 	private static void logError( string errorText ) {
+		var currentTime = SystemClock.Instance.GetCurrentInstant().InZone( DateTimeZoneProviders.Tzdb.GetSystemDefault() );
+		var timePattern = ZonedDateTimePattern.CreateWithInvariantCulture( "d MMM uuuu',' H:mm:ss '(UTC'o<+H>')'", null );
+
 		lock( key ) {
 			using var writer = new StreamWriter( File.Open( ConfigurationStatics.InstallationConfiguration.ErrorLogFilePath, FileMode.Append ) );
-			writer.WriteLine( DateTime.Now + ":" );
+			writer.WriteLine( timePattern.Format( currentTime ) + ":" );
 			writer.WriteLine();
 			writer.Write( errorText );
 			writer.WriteLine();
