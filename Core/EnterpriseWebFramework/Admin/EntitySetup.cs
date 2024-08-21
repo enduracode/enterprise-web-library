@@ -66,7 +66,7 @@ partial class EntitySetup: UiEntitySetup {
 	EntityUiSetup UiEntitySetup.GetUiSetup() =>
 		new(
 			navActionGetter:
-			_ => new HyperlinkSetup( new ErrorLog( this ), "System Error Log", icon: new ActionComponentIcon( new FontAwesomeIcon( "fa-exclamation-triangle" ) ) )
+			_ => new HyperlinkSetup( new ErrorLog( this ), "System error log", icon: new ActionComponentIcon( new FontAwesomeIcon( "fa-exclamation-triangle" ) ) )
 				.ToCollection(),
 			actionGetter: _ =>
 				UserManagementStatics.UserManagementEnabled
