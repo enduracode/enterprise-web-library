@@ -255,7 +255,11 @@ public static class AuthenticationStatics {
 			                       } ) );
 	}
 
-	internal static void SetTestCookie() {
+	/// <summary>
+	/// Sets a test cookie that is verified during user log-in. Only necessary when calling a log-in modification method from a page-load post-back, in which case
+	/// the log-in page may not be able to set the cookie itself in time for verification.
+	/// </summary>
+	public static void SetTestCookie() {
 		setCookie( testCookieName, "No data" );
 	}
 
