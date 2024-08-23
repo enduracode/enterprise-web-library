@@ -68,13 +68,13 @@ public static class RequestDispatchingStatics {
 						return;
 					}
 
-					appRelativeUrl = UrlHandlingStatics.EncodePathForPredictableNormalization( context.Request.Path.ToUriComponent() ) +
-					                 context.Request.QueryString.ToUriComponent();
+					var appRelativePath = UrlHandlingStatics.EncodePathForPredictableNormalization( context.Request.Path.ToUriComponent() );
+					appRelativeUrl = appRelativePath + context.Request.QueryString.ToUriComponent();
 
-					// If the base URL doesn’t include a path and the app-relative URL is just a slash, don’t include this trailing slash in the URL since it will not be
+					// If the base URL doesn’t include a path and the app-relative path is just a slash, don’t include this trailing slash in the URL since it will not be
 					// present in the canonical URLs that we construct and therefore it would cause problems with URL normalization.
-					var url = !EwfRequest.AppBaseUrlProvider.GetRequestBasePath( context.Request ).Any() && appRelativeUrl.Length == "/".Length
-						          ? baseUrl
+					var url = EwfRequest.AppBaseUrlProvider.GetRequestBasePath( context.Request ).Length == 0 && appRelativePath.Length == "/".Length
+						          ? baseUrl + appRelativeUrl[ 1.. ]
 						          : baseUrl + appRelativeUrl;
 
 
