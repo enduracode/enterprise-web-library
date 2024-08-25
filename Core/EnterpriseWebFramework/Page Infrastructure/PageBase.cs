@@ -4,7 +4,6 @@ using System.Security.Cryptography;
 using System.Text;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.EnterpriseWebFramework.PageInfrastructure;
-using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
@@ -604,7 +603,7 @@ public abstract class PageBase: ResourceBase {
 	// Page-view data modifications. All data modifications that happen simply because of a request and require no other action by the user should happen once per
 	// page view, and prior to getContent so that the modified data can be used in the page if necessary.
 	private PageBase executePageViewDataModifications() {
-		var modMethods = new List<Action> { AuthenticationStatics.GetUserCookieUpdater() };
+		var modMethods = new List<Action>();
 
 		// Skip application-level modifications on the unhandled-exception page to decrease the probability of getting another exception.
 		if( RequestStateStatics.GetLastError() is null )

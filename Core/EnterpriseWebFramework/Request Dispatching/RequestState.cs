@@ -193,13 +193,13 @@ public class RequestState {
 	/// <summary>
 	/// EwfOps.RunApplication use only.
 	/// </summary>
-	internal void LogUserRequest() {
+	internal Action? GetUserRequestLogger() {
 		// Skip on the unhandled-exception page to decrease the probability of getting another exception.
 		if( GetLastError() is not null )
-			return;
+			return null;
 
 		if( !UserAccessible )
-			return;
+			return null;
 
 		var modMethods = new List<Action>();
 		if( SystemUser.Current is {} user )
@@ -207,13 +207,12 @@ public class RequestState {
 		if( ImpersonatorExists && ImpersonatorUser is {} impersonatorUser )
 			modMethods.Add( () => UserManagementStatics.SystemProvider.InsertUserRequest( impersonatorUser.UserId, EwfRequest.Current!.RequestTime ) );
 		if( !modMethods.Any() )
-			return;
+			return null;
 
-		ResourceBase.ExecuteDataModificationMethod(
-			() => {
-				foreach( var i in modMethods )
-					i();
-			} );
+		return () => {
+			foreach( var i in modMethods )
+				i();
+		};
 	}
 
 	internal ( string prefix, Exception exception )? GetLastError() => errors.Any() ? errors.Last() : null;

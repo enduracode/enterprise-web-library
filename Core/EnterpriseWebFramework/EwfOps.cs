@@ -239,7 +239,17 @@ public static class EwfOps {
 									if( requestState.RequestHandler is not null )
 										return;
 
-									requestState.LogUserRequest();
+									var modMethods = requestState.GetUserRequestLogger()
+										.ToCollection()
+										.Append( AuthenticationStatics.GetUserCookieUpdater() )
+										.Where( i => i is not null )
+										.Materialize();
+									if( modMethods.Any() )
+										ResourceBase.ExecuteDataModificationMethod(
+											() => {
+												foreach( var i in modMethods )
+													i();
+											} );
 
 									RequestState.ExecuteWithUrlHandlerStateDisabled(
 										() => {
