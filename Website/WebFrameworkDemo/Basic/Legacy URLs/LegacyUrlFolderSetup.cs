@@ -3,7 +3,7 @@
 namespace EnterpriseWebLibrary.Website.WebFrameworkDemo.Basic;
 
 partial class LegacyUrlFolderSetup {
-	protected override UrlHandler getUrlParent() => new TestPages.LegacyUrlFolderSetup();
+	protected override UrlHandler getUrlParent() => new WebFrameworkDemo.LegacyUrlFolderSetup();
 	public override ConnectionSecurity ConnectionSecurity => ConnectionSecurity.MatchingCurrentRequest;
 
 	protected override IEnumerable<UrlPattern> getChildUrlPatterns() {

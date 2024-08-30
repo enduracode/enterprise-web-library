@@ -14,7 +14,7 @@ partial class CreateSystem {
 
 	protected override string getResourceName() => "Create a New {0} System".FormatWith( EwlStatics.EwlInitialism );
 
-	protected override UrlHandler getUrlParent() => new TestPages.EntitySetup();
+	protected override UrlHandler getUrlParent() => new WebFrameworkDemo.EntitySetup();
 
 	protected override PageContent getContent() =>
 		FormState.ExecuteWithDataModificationsAndDefaultAction(
