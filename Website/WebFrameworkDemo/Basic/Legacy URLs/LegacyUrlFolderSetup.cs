@@ -1,6 +1,6 @@
 ﻿// EwlResource
 
-namespace EnterpriseWebLibrary.Website.TestPages.Basic;
+namespace EnterpriseWebLibrary.Website.WebFrameworkDemo.Basic;
 
 partial class LegacyUrlFolderSetup {
 	protected override UrlHandler getUrlParent() => new TestPages.LegacyUrlFolderSetup();

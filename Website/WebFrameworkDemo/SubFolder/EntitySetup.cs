@@ -1,4 +1,4 @@
-﻿namespace EnterpriseWebLibrary.Website.TestPages.SubFolder;
+﻿namespace EnterpriseWebLibrary.Website.WebFrameworkDemo.SubFolder;
 
 partial class EntitySetup: UiEntitySetup {
 	protected override ResourceBase createParent() => ActionControls.GetInfo();

@@ -2,7 +2,7 @@
 
 // EwlPage
 
-namespace EnterpriseWebLibrary.Website.TestPages;
+namespace EnterpriseWebLibrary.Website.WebFrameworkDemo;
 
 partial class KeyboardFocus {
 	protected override PageContent getContent() {

@@ -2,7 +2,7 @@
 
 // EwlPage
 
-namespace EnterpriseWebLibrary.Website.TestPages.SubFolder {
+namespace EnterpriseWebLibrary.Website.WebFrameworkDemo.SubFolder {
 	partial class General {
 		protected override PageContent getContent() =>
 			new UiPageContent().Add(
@@ -12,7 +12,7 @@ namespace EnterpriseWebLibrary.Website.TestPages.SubFolder {
 	}
 }
 
-namespace EnterpriseWebLibrary.Website.TestPages.SubFolder {
+namespace EnterpriseWebLibrary.Website.WebFrameworkDemo.SubFolder {
 partial class General {
 protected override UrlHandler getUrlParent() => new LegacyUrlFolderSetup();
 }

@@ -2,7 +2,7 @@
 
 // EwlPage
 
-namespace EnterpriseWebLibrary.Website.TestPages;
+namespace EnterpriseWebLibrary.Website.WebFrameworkDemo;
 
 partial class MailMerging {
 	protected override PageContent getContent() =>

@@ -1,6 +1,6 @@
 ﻿// EwlPage
 
-namespace EnterpriseWebLibrary.Website.TestPages;
+namespace EnterpriseWebLibrary.Website.WebFrameworkDemo;
 
 partial class FileUploadDemo {
 	protected override string getResourceName() => "File Upload";

@@ -1,6 +1,6 @@
 ﻿// OptionalParameter: string someText
 
-namespace EnterpriseWebLibrary.Website.TestPages;
+namespace EnterpriseWebLibrary.Website.WebFrameworkDemo;
 
 partial class EntitySetup: UiEntitySetup {
 	protected override ResourceBase? createParent() => null;

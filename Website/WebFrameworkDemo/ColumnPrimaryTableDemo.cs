@@ -1,6 +1,6 @@
 ﻿// EwlPage
 
-namespace EnterpriseWebLibrary.Website.TestPages {
+namespace EnterpriseWebLibrary.Website.WebFrameworkDemo {
 	partial class ColumnPrimaryTableDemo {
 		protected override string getResourceName() => "Column Primary Table";
 
@@ -85,7 +85,7 @@ namespace EnterpriseWebLibrary.Website.TestPages {
 	}
 }
 
-namespace EnterpriseWebLibrary.Website.TestPages {
+namespace EnterpriseWebLibrary.Website.WebFrameworkDemo {
 	partial class ColumnPrimaryTableDemo {
 		protected override UrlHandler getUrlParent() => new LegacyUrlFolderSetup();
 	}

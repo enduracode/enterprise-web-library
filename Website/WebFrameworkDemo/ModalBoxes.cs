@@ -1,6 +1,6 @@
 ﻿// EwlPage
 
-namespace EnterpriseWebLibrary.Website.TestPages {
+namespace EnterpriseWebLibrary.Website.WebFrameworkDemo {
 	partial class ModalBoxes {
 		protected override PageContent getContent() {
 			var content = new UiPageContent();
@@ -45,7 +45,7 @@ namespace EnterpriseWebLibrary.Website.TestPages {
 	}
 }
 
-namespace EnterpriseWebLibrary.Website.TestPages {
+namespace EnterpriseWebLibrary.Website.WebFrameworkDemo {
 	partial class ModalBoxes {
 		protected override UrlHandler getUrlParent() => new LegacyUrlFolderSetup();
 	}

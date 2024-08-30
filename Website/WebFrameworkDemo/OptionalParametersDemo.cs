@@ -5,7 +5,7 @@
 // OptionalParameter: string field2
 // OptionalParameter: int? field3
 
-namespace EnterpriseWebLibrary.Website.TestPages {
+namespace EnterpriseWebLibrary.Website.WebFrameworkDemo {
 	partial class OptionalParametersDemo {
 		static partial void specifyParameterDefaults( OptionalParameterSpecifier specifier, EntitySetup entitySetup, Parameters parameters ) {
 			specifier.Field1 = "Default value";
@@ -67,7 +67,7 @@ namespace EnterpriseWebLibrary.Website.TestPages {
 	}
 }
 
-namespace EnterpriseWebLibrary.Website.TestPages {
+namespace EnterpriseWebLibrary.Website.WebFrameworkDemo {
 	partial class OptionalParametersDemo {
 		protected override UrlHandler getUrlParent() => new LegacyUrlFolderSetup();
 	}

@@ -1,6 +1,6 @@
 ﻿// EwlPage
 
-namespace EnterpriseWebLibrary.Website.TestPages;
+namespace EnterpriseWebLibrary.Website.WebFrameworkDemo;
 
 partial class TextControlDemo {
 	protected override string getResourceName() => "Text Control";

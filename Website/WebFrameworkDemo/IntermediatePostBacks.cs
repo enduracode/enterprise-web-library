@@ -5,7 +5,7 @@
 // OptionalParameter: IEnumerable<int> nonIdItemStates
 // OptionalParameter: IEnumerable<int> itemIds
 
-namespace EnterpriseWebLibrary.Website.TestPages;
+namespace EnterpriseWebLibrary.Website.WebFrameworkDemo;
 
 partial class IntermediatePostBacks {
 	static partial void specifyParameterDefaults( OptionalParameterSpecifier specifier, EntitySetup entitySetup, Parameters parameters ) {

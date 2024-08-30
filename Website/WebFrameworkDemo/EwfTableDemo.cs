@@ -2,7 +2,7 @@
 // OptionalParameter: int groupCount
 // OptionalParameter: int firstGroupItemCount
 
-namespace EnterpriseWebLibrary.Website.TestPages;
+namespace EnterpriseWebLibrary.Website.WebFrameworkDemo;
 
 partial class EwfTableDemo {
 	static partial void specifyParameterDefaults( OptionalParameterSpecifier specifier, EntitySetup entitySetup, Parameters parameters ) {

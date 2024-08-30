@@ -1,6 +1,6 @@
 ﻿// EwlPage
 
-namespace EnterpriseWebLibrary.Website.TestPages;
+namespace EnterpriseWebLibrary.Website.WebFrameworkDemo;
 
 partial class NumberControlDemo {
 	protected override string getResourceName() => "Number Control";

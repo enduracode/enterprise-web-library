@@ -1,7 +1,7 @@
 ﻿// EwlPage
 // OptionalParameter: bool customerIsBusiness
 
-namespace EnterpriseWebLibrary.Website.TestPages;
+namespace EnterpriseWebLibrary.Website.WebFrameworkDemo;
 
 partial class DataUpdateModification {
 	protected override string getResourceName() => "Data-Update Modification";

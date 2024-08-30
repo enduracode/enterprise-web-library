@@ -3,7 +3,7 @@ using NodaTime.Text;
 
 // EwlPage
 
-namespace EnterpriseWebLibrary.Website.TestPages;
+namespace EnterpriseWebLibrary.Website.WebFrameworkDemo;
 
 partial class DateAndTimePickers {
 	protected override string getResourceName() => "Date/Time Controls";

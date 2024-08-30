@@ -2,7 +2,7 @@
 
 // EwlPage
 
-namespace EnterpriseWebLibrary.Website.TestPages;
+namespace EnterpriseWebLibrary.Website.WebFrameworkDemo;
 
 partial class StatusMessages {
 	protected override UrlHandler getUrlParent() => new LegacyUrlFolderSetup();

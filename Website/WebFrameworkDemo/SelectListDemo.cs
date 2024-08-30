@@ -1,6 +1,6 @@
 ﻿// EwlPage
 
-namespace EnterpriseWebLibrary.Website.TestPages {
+namespace EnterpriseWebLibrary.Website.WebFrameworkDemo {
 	partial class SelectListDemo {
 		protected override string getResourceName() => "Select List";
 
@@ -91,7 +91,7 @@ namespace EnterpriseWebLibrary.Website.TestPages {
 	}
 }
 
-namespace EnterpriseWebLibrary.Website.TestPages {
+namespace EnterpriseWebLibrary.Website.WebFrameworkDemo {
 	partial class SelectListDemo {
 		protected override UrlHandler getUrlParent() => new LegacyUrlFolderSetup();
 	}

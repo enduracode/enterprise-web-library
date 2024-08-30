@@ -1,6 +1,6 @@
 ﻿// EwlPage
 
-namespace EnterpriseWebLibrary.Website.TestPages {
+namespace EnterpriseWebLibrary.Website.WebFrameworkDemo {
 	partial class HtmlEditing {
 		protected override PageContent getContent() =>
 			FormState.ExecuteWithDataModificationsAndDefaultAction(
@@ -11,7 +11,7 @@ namespace EnterpriseWebLibrary.Website.TestPages {
 	}
 }
 
-namespace EnterpriseWebLibrary.Website.TestPages {
+namespace EnterpriseWebLibrary.Website.WebFrameworkDemo {
 	partial class HtmlEditing {
 		protected override UrlHandler getUrlParent() => new LegacyUrlFolderSetup();
 	}

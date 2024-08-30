@@ -1,6 +1,6 @@
 ﻿// EwlPage
 
-namespace EnterpriseWebLibrary.Website.TestPages {
+namespace EnterpriseWebLibrary.Website.WebFrameworkDemo {
 	partial class CheckboxListDemo {
 		protected override string getResourceName() => "Checkbox List";
 
@@ -16,7 +16,7 @@ namespace EnterpriseWebLibrary.Website.TestPages {
 	}
 }
 
-namespace EnterpriseWebLibrary.Website.TestPages {
+namespace EnterpriseWebLibrary.Website.WebFrameworkDemo {
 	partial class CheckboxListDemo {
 		protected override UrlHandler getUrlParent() => new LegacyUrlFolderSetup();
 	}
