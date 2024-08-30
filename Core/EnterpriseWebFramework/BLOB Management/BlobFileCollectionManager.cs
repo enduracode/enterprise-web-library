@@ -136,17 +136,14 @@ public sealed class BlobFileCollectionManager: FlowComponent {
 			} );
 		return FormState.ExecuteWithDataModificationsAndDefaultAction(
 			dm.ToCollection(),
-			() => new StackList(
+			() => FormItemList.CreateWrapping( setup: new FormItemListSetup( displaySetup: displaySetup, buttonSetup: new ButtonSetup( "Upload new file" ) ) )
+				.AddItem(
 					new FileUpload(
-							validationMethod: ( postBackValue, validator ) => {
-								file = postBackValue;
-								uploadValidationMethod?.Invoke( postBackValue, validator );
-							} ).ToFormItem()
-						.ToListItem()
-						.Append( new EwfButton( new StandardButtonStyle( "Upload new file" ) ).ToCollection().ToComponentListItem() ) ).ToFormItem(
-					setup: new FormItemSetup( displaySetup: displaySetup ),
-					label: "Select and upload a new file:".ToComponents() )
-				.ToComponentCollection() );
+						validationMethod: ( postBackValue, validator ) => {
+							file = postBackValue;
+							uploadValidationMethod?.Invoke( postBackValue, validator );
+						} ).ToFormItem( label: "Select a new file:".ToComponents() ) )
+				.ToCollection() );
 	}
 
 	IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() => children;
