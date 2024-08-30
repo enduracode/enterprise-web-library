@@ -95,7 +95,7 @@ public class EwfResponse {
 	/// </summary>
 	public static EwfResponse CreateExcelWorkbookResponse( Func<string> extensionlessFileNameCreator, Func<ExcelFileWriter> workbookCreator ) =>
 		Create(
-			TewlContrib.ContentTypes.ExcelXlsx,
+			ContentTypes.ExcelXlsx,
 			new EwfResponseBodyCreator( stream => workbookCreator().SaveToStream( stream ) ),
 			fileNameCreator: () => ExcelFileWriter.GetSafeFileName( extensionlessFileNameCreator() ) );
 
@@ -121,7 +121,7 @@ public class EwfResponse {
 	public static EwfResponse CreateMergedMsWordDocResponse(
 		Func<string> extensionlessFileNameCreator, MergeRowTree rowTree, bool ensureAllFieldsHaveValues, Action<Action<Stream>> inputStreamProvider ) =>
 		Create(
-			TewlContrib.ContentTypes.WordDoc,
+			ContentTypes.WordDoc,
 			new EwfResponseBodyCreator(
 				destinationStream =>
 					inputStreamProvider( inputStream => MergeOps.CreateMsWordDoc( rowTree, ensureAllFieldsHaveValues, inputStream, destinationStream ) ) ),
@@ -134,7 +134,7 @@ public class EwfResponse {
 	public static EwfResponse CreateMergedCsvResponse(
 		Func<string> extensionlessFileNameCreator, MergeRowTree rowTree, IEnumerable<string> fieldNames, bool omitHeaderRow = false ) =>
 		Create(
-			TewlContrib.ContentTypes.Csv,
+			ContentTypes.Csv,
 			new EwfResponseBodyCreator( writer => MergeOps.CreateTabularTextFile( rowTree, fieldNames, writer, omitHeaderRow: omitHeaderRow ) ),
 			fileNameCreator: () => extensionlessFileNameCreator() + FileExtensions.Csv );
 
@@ -145,7 +145,7 @@ public class EwfResponse {
 	public static EwfResponse CreateMergedTabSeparatedValuesResponse(
 		Func<string> extensionlessFileNameCreator, MergeRowTree rowTree, IEnumerable<string> fieldNames, bool omitHeaderRow = false ) =>
 		Create(
-			TewlContrib.ContentTypes.TabSeparatedValues,
+			ContentTypes.TabSeparatedValues,
 			new EwfResponseBodyCreator(
 				writer => MergeOps.CreateTabularTextFile( rowTree, fieldNames, writer, useTabAsSeparator: true, omitHeaderRow: omitHeaderRow ) ),
 			fileNameCreator: () => extensionlessFileNameCreator() + FileExtensions.Txt );

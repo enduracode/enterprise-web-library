@@ -152,7 +152,7 @@ public static class EmailStatics {
 
 				// Add an alternate view for the HTML part.
 				m.AlternateViews.Add(
-					System.Net.Mail.AlternateView.CreateAlternateViewFromString( message.BodyHtml, new System.Net.Mime.ContentType( TewlContrib.ContentTypes.Html ) ) );
+					System.Net.Mail.AlternateView.CreateAlternateViewFromString( message.BodyHtml, new System.Net.Mime.ContentType( ContentTypes.Html ) ) );
 
 				foreach( var attachment in message.Attachments )
 					m.Attachments.Add( attachment.ToAttachment() );

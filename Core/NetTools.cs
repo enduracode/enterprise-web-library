@@ -26,7 +26,7 @@ public static class NetTools {
 	/// </summary>
 	public static EwfResponse CreateImageFromText( string text, Font? font ) {
 		return EwfResponse.Create(
-			TewlContrib.ContentTypes.Png,
+			ContentTypes.Png,
 			new EwfResponseBodyCreator(
 				stream => {
 					font ??= new Font( FontFamily.GenericSansSerif, 10 );

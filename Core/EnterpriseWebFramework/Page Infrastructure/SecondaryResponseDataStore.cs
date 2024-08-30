@@ -1,7 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Threading;
 using EnterpriseWebLibrary.Caching;
-using EnterpriseWebLibrary.TewlContrib;
 using NodaTime;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.PageInfrastructure;
@@ -31,7 +30,7 @@ internal class SecondaryResponseDataStore: PeriodicEvictionCompositeCacheEntry {
 		var id = Interlocked.Increment( ref dataStore.responseId );
 		( (IDictionary<uint, ResponseData>)dataStore.responseDataById ).Add(
 			id,
-			new ResponseData( RandomStatics.GetRandomHexString(), response, SystemClock.Instance.GetCurrentInstant() ) );
+			new ResponseData( RandomTools.GetRandomHexString(), response, SystemClock.Instance.GetCurrentInstant() ) );
 		return id;
 	}
 

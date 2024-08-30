@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using EnterpriseWebLibrary.Caching;
-using EnterpriseWebLibrary.TewlContrib;
 using Microsoft.AspNetCore.Http;
 using NodaTime;
 
@@ -53,7 +52,7 @@ internal class RequestContinuationDataStore: PeriodicEvictionCompositeCacheEntry
 
 		// Character structure: 1 parameter separator + 7 parameter name + 1 name/value separator + 9 ID number + 1 number/secret separator + 32 ID secret = 51.
 		// If this changes, you must update the parsing logic in GetRequestState.
-		var requestId = "{0:d9}-{1}".FormatWith( Interlocked.Increment( ref dataStore.requestIdNumber ) % 1000000000, RandomStatics.GetRandomHexString() );
+		var requestId = "{0:d9}-{1}".FormatWith( Interlocked.Increment( ref dataStore.requestIdNumber ) % 1000000000, RandomTools.GetRandomHexString() );
 		var parameter = "{0}request={1}".FormatWith( url.Contains( '?' ) ? "&" : "?", requestId );
 
 		( (IDictionary<string, RequestData>)dataStore.requestDataById ).Add(

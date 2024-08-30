@@ -159,7 +159,7 @@ public sealed class BasicPageContent: PageContent {
 						attributes: new ElementAttribute(
 							"src",
 							"data:{0};charset=utf-8;base64,{1}".FormatWith(
-								TewlContrib.ContentTypes.JavaScript,
+								ContentTypes.JavaScript,
 								Convert.ToBase64String(
 									Encoding.UTF8.GetBytes( "window.addEventListener( 'DOMContentLoaded', function() { " + jsInitStatementGetter() + " } );" ) ) ) ).Append(
 							new ElementAttribute( "defer" ) ) ) ) ) );

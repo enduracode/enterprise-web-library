@@ -104,7 +104,7 @@ public abstract class StaticFile: ResourceBase {
 		var urlVersionString = isVersioned ? "invariant" : "";
 		string getCacheKey() => "staticFile-{0}-{1}".FormatWith( isFrameworkFile, relativeFilePath );
 		EwfSafeResponseWriter responseWriter;
-		if( contentType == TewlContrib.ContentTypes.Css ) {
+		if( contentType == ContentTypes.Css ) {
 			Func<string> cssGetter = () => File.ReadAllText( filePath );
 			responseWriter = urlVersionString.Any()
 				                 ? new EwfSafeResponseWriter(
@@ -112,9 +112,7 @@ public abstract class StaticFile: ResourceBase {
 					                 urlVersionString,
 					                 () => new ResponseMemoryCachingSetup( getCacheKey(), GetResourceLastModificationDateAndTime() ) )
 				                 : new EwfSafeResponseWriter(
-					                 () => EwfResponse.Create(
-						                 TewlContrib.ContentTypes.Css,
-						                 new EwfResponseBodyCreator( () => CssPreprocessor.TransformCssFile( cssGetter() ) ) ),
+					                 () => EwfResponse.Create( ContentTypes.Css, new EwfResponseBodyCreator( () => CssPreprocessor.TransformCssFile( cssGetter() ) ) ),
 					                 GetResourceLastModificationDateAndTime(),
 					                 memoryCacheKeyGetter: getCacheKey );
 		}
