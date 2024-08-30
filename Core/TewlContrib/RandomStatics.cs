@@ -1,6 +1,4 @@
-﻿using System.Security.Cryptography;
-
-namespace EnterpriseWebLibrary.TewlContrib;
+﻿namespace EnterpriseWebLibrary.TewlContrib;
 
 /// <summary>
 /// Provides helpful methods to get random numbers and strings without falling into random pitfalls.
@@ -87,16 +85,6 @@ public static class RandomStatics {
 	/// Returns one of the items passed.
 	/// </summary>
 	public static T? Choose<T>( params T[] items ) => items.GetRandomElement();
-
-	/// <summary>
-	/// Returns a 32-character, cryptographically-secure random hex string, which at the time of this writing can resist any brute-force attack.
-	/// </summary>
-	public static string GetRandomHexString() {
-		var bytes = new byte[ 16 ];
-		using( var rng = RandomNumberGenerator.Create() )
-			rng.GetBytes( bytes );
-		return BitConverter.ToString( bytes ).Replace( "-", "" ).ToLowerInvariant();
-	}
 
 	/// <summary>
 	/// Returns null if the enumeration has no elements.
