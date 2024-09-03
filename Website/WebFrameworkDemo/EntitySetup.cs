@@ -28,6 +28,7 @@ partial class EntitySetup: UiEntitySetup {
 					new OptionalParametersDemo( this ),
 					new StatusMessages( this ),
 					new DataUpdateModification( this ),
+					new PageModificationValues( this ),
 					new IntermediatePostBacks( this ),
 					new KeyboardFocus( this ) ),
 				new ResourceGroup( "Business Tools", new FileManagers( this ), new MailMerging( this ), new Charts( this ), new CalendarIntegration( this ) ),
@@ -48,6 +49,7 @@ partial class EntitySetup: UiEntitySetup {
 			.Append( DateAndTimePickers.UrlPatterns.Literal( this, "date-time-controls" ) )
 			.Append( FileUploadDemo.UrlPatterns.Literal( this, "file-upload" ) )
 			.Append( DataUpdateModification.UrlPatterns.Literal( this, "data-update-modification" ) )
+			.Append( PageModificationValues.UrlPatterns.Literal( this, "page-modification-values" ) )
 			.Append( IntermediatePostBacks.UrlPatterns.Literal( this, "intermediate-post-backs" ) )
 			.Append( KeyboardFocus.UrlPatterns.Literal( this, "keyboard-focus" ) )
 			.Append( FileManagers.UrlPatterns.Literal( this, "file-managers" ) )
