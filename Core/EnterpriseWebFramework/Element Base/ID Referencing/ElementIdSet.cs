@@ -1,31 +1,31 @@
-﻿#nullable disable
-using System.Collections.Generic;
+﻿using JetBrains.Annotations;
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework {
-	public sealed class ElementIdSet: ElementIdReference {
-		private readonly List<string> ids = new List<string>();
+namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
-		/// <summary>
-		/// Creates an element-ID set.
-		/// </summary>
-		public ElementIdSet() {}
+[ PublicAPI ]
+public sealed class ElementIdSet: ElementIdReference {
+	private readonly List<string> ids = new();
 
-		/// <summary>
-		/// Adds an element’s client-side ID to this set. ElementData use only.
-		/// </summary>
-		internal override void AddId( string id ) {
-			PageBase.AssertPageTreeNotBuilt();
-			ids.Add( id );
-		}
+	/// <summary>
+	/// Creates an element-ID set.
+	/// </summary>
+	public ElementIdSet() {}
 
-		/// <summary>
-		/// Gets the element client-side IDs in this set, which are not available until after the page tree has been built.
-		/// </summary>
-		public IReadOnlyCollection<string> Ids {
-			get {
-				PageBase.AssertPageTreeBuilt();
-				return ids;
-			}
+	/// <summary>
+	/// Adds an element’s client-side ID to this set. ElementData use only.
+	/// </summary>
+	internal override void AddId( string id ) {
+		PageBase.AssertPageTreeNotBuilt();
+		ids.Add( id );
+	}
+
+	/// <summary>
+	/// Gets the element client-side IDs in this set, which are not available until after the page tree has been built.
+	/// </summary>
+	public IReadOnlyCollection<string> Ids {
+		get {
+			PageBase.AssertPageTreeBuilt();
+			return ids;
 		}
 	}
 }

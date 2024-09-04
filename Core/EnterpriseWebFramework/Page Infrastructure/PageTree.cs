@@ -39,6 +39,8 @@ internal class PageTree {
 	private int nodeCount;
 	private int etherealComponentCount;
 
+	public bool RenderingPreparationStarted;
+
 	public PageTree(
 		PageComponent rootComponent, Action<string> idSetter,
 		Func<string, ErrorSourceSet, ImmutableDictionary<EwfValidation, IReadOnlyCollection<string>>> modificationErrorGetter,
@@ -186,6 +188,8 @@ internal class PageTree {
 	}
 
 	public void PrepareForRendering( SpecifiedValue<string> focusKey, Func<FocusabilityCondition, bool> isFocusablePredicate ) {
+		RenderingPreparationStarted = true;
+
 		var etherealChildren = new List<PageNode>( etherealComponentCount );
 
 		var activeAutofocusRegionsExist = false;

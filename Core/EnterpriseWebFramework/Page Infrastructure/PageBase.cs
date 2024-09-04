@@ -156,12 +156,17 @@ public abstract class PageBase: ResourceBase {
 
 	internal static void AssertPageTreeNotBuilt() {
 		if( Current.formState == null )
-			throw new ApplicationException( "The page tree has already been built." );
+			throw new Exception( "The page tree has already been built." );
 	}
 
 	internal static void AssertPageTreeBuilt() {
 		if( Current.formState != null )
-			throw new ApplicationException( "The page tree has not yet been built." );
+			throw new Exception( "The page tree has not yet been built." );
+	}
+
+	internal static void AssertRenderingPreparationStarted() {
+		if( Current.pageTree?.RenderingPreparationStarted != true )
+			throw new Exception( "Rendering preparation has not yet started." );
 	}
 
 	private PageBase nextPageObject;
@@ -735,9 +740,6 @@ public abstract class PageBase: ResourceBase {
 		foreach( var i in controlTreeValidations )
 			i();
 
-		foreach( var i in formValues )
-			i.SetPageModificationValues();
-
 		// This must happen after LoadData and before modifications are executed.
 		statusMessages.Clear();
 	}
@@ -879,6 +881,9 @@ public abstract class PageBase: ResourceBase {
 
 	// Null for focusKey means modification errors occurred.
 	private EwfResponse getResponse( SpecifiedValue<string> focusKey, int? statusCode = null ) {
+		foreach( var i in formValues )
+			i.SetPageModificationValues();
+
 		pageTree.PrepareForRendering(
 			focusKey,
 			focusKey is null
