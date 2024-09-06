@@ -505,10 +505,8 @@ public static class EwfOps {
 
 						if( ConfigurationStatics.IsDevelopmentInstallation && EwfConfigurationStatics.AppConfiguration.UsesKestrel.Value )
 							app.UsePathBase( "/{0}".FormatWith( EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.Path ) );
-						// This caused intermittent response-corruption issues; see https://github.com/dotnet/aspnetcore/issues/32767. We may be able to restore it after
-						// updating to .NET 7.
-						//if( ConfigurationStatics.IsDevelopmentInstallation && EwfConfigurationStatics.AppConfiguration.UsesKestrel.Value )
-						//	app.UseResponseCompression();
+						if( ConfigurationStatics.IsDevelopmentInstallation && EwfConfigurationStatics.AppConfiguration.UsesKestrel.Value )
+							app.UseResponseCompression();
 						app.UseSerilogRequestLogging();
 						app.UseMiniProfiler(); // only used to handle MiniProfiler requests
 						RequestDispatchingStatics.GetAppProvider().AddCustomMiddleware( app );
