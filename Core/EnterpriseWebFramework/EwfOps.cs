@@ -132,8 +132,7 @@ public static class EwfOps {
 					try {
 						EwfConfigurationStatics.Init();
 
-						var diagnosticLogLevelSwitch = new LoggingLevelSwitch(
-							initialMinimumLevel: ConfigurationStatics.IsDevelopmentInstallation ? LogEventLevel.Information : LogEventLevel.Warning );
+						var diagnosticLogLevelSwitch = new LoggingLevelSwitch( initialMinimumLevel: LogEventLevel.Information );
 						var loggerConfiguration = new LoggerConfiguration().Destructure.JsonNetTypes()
 							.MinimumLevel.ControlledBy( diagnosticLogLevelSwitch )
 							.MinimumLevel.Override( "Microsoft.AspNetCore", LogEventLevel.Warning );
@@ -507,7 +506,7 @@ public static class EwfOps {
 						initTimeDataAccessState = null;
 						frameworkInitialized = true;
 
-						// See https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-watch#response-compression. We're both causing BasicPageContent to include the
+						// See https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-watch#response-compression. We’re both causing BasicPageContent to include the
 						// script, and suppressing the warning when it is, by tricking BrowserRefreshMiddleware into thinking that its own ResponseStreamWrapper injected
 						// the script.
 						if( Environment.GetEnvironmentVariable( "__ASPNETCORE_BROWSER_TOOLS" ) is not null )
@@ -531,8 +530,8 @@ public static class EwfOps {
 							app.UsePathBase( "/{0}".FormatWith( EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.Path ) );
 						if( ConfigurationStatics.IsDevelopmentInstallation && EwfConfigurationStatics.AppConfiguration.UsesKestrel.Value )
 							app.UseResponseCompression();
-						app.UseSerilogRequestLogging();
-						app.UseMiniProfiler(); // only used to handle MiniProfiler requests
+						app.UseMiniProfiler(); // only used to handle MiniProfiler requests, and placed before Serilog middleware to exclude these requests from logging
+						app.UseSerilogRequestLogging( options => { options.IncludeQueryInRequestPath = true; } );
 						RequestDispatchingStatics.GetAppProvider().AddCustomMiddleware( app );
 						app.Use( RequestDispatchingStatics.ProcessRequest );
 						app.UseRouting();
