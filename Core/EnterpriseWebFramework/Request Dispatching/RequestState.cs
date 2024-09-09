@@ -285,13 +285,16 @@ public class RequestState {
 									"overriding PageBase.IsSlow (for GET request issues)",
 									"overriding PageBase.dataUpdateIsSlow or using the isSlow parameter on the PostBack constructors (for post-back issues)" ),
 								$"If the problem was caused by slow initial execution of a particular code path, you may be able to fix it by making a warmup request within {warmupPeriodDuration.ToTimeSpan().ToConciseString()} of the first request to the application, when performance problems are not reported." ) +
-							Environment.NewLine + Environment.NewLine + "Profiler results:" +
-							Profiler.RenderPlainText().Separate( Environment.NewLine, false )
-								[ 2..^1 ] // Remove machine name, UTC date/time, root timing, and trailing line break.
-								.Aggregate( new StringBuilder(), ( builder, line ) => builder.AppendLine().Append( line ) ),
+							Environment.NewLine + Environment.NewLine + "Profiler results:" + getProfilerResults(),
 							null );
 				}
 			},
 			ContinuationSemaphore.Dispose );
 	}
+
+	// Remove machine name, UTC date/time, and trailing line break.
+	private string getProfilerResults() =>
+		Profiler.RenderPlainText().Separate( Environment.NewLine, false )[ 1..^1 ]
+			.Aggregate( new StringBuilder(), ( builder, line ) => builder.AppendLine().Append( line ) )
+			.ToString();
 }
