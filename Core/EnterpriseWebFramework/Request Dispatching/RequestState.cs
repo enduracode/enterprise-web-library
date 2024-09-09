@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Text;
+using System.Threading;
 using EnterpriseWebLibrary.Caching;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
@@ -144,11 +145,15 @@ public class RequestState {
 	internal void EnableUser() {
 		userEnabled = true;
 
-		// Abandon the profiling session if it’s not needed. The boolean expressions are in this order because we don’t want to short circuit the user check if
-		// the installation is not live; doing so would prevent adequate testing of the user check.
-		var userIsProfiling = UserAccessible && ( ProfilingUserId.HasValue || ImpersonatorExists ) && AppMemoryCache.UserIsProfilingRequests( ProfilingUserId );
-		if( ( !userIsProfiling && ( ConfigurationStatics.IsLiveInstallation || AppMemoryCache.UnconditionalRequestProfilingDisabled() ) ) || requestInWarmupPeriod )
+		if( requestInWarmupPeriod )
 			Profiler!.Stop( discardResults: true );
+		else {
+			// Abandon the profiling session if it’s not needed. The boolean expressions are in this order because we don’t want to short circuit the user check if
+			// the installation is not live; doing so would prevent adequate testing of the user check.
+			var userIsProfiling = UserAccessible && ( ProfilingUserId.HasValue || ImpersonatorExists ) && AppMemoryCache.UserIsProfilingRequests( ProfilingUserId );
+			if( !userIsProfiling && ( ConfigurationStatics.IsLiveInstallation || AppMemoryCache.UnconditionalRequestProfilingDisabled() ) )
+				Profiler!.Storage = new StackExchange.Profiling.Storage.NullStorage();
+		}
 	}
 
 	internal T ExecuteWithUserDisabled<T>( Func<T> method ) {
@@ -279,7 +284,11 @@ public class RequestState {
 								"If the performance problem is too difficult to fix, you can suppress this error by {0} or by {1}.".FormatWith(
 									"overriding PageBase.IsSlow (for GET request issues)",
 									"overriding PageBase.dataUpdateIsSlow or using the isSlow parameter on the PostBack constructors (for post-back issues)" ),
-								$"If the problem was caused by slow initial execution of a particular code path, you may be able to fix it by making a warmup request within {warmupPeriodDuration.ToTimeSpan().ToConciseString()} of the first request to the application, when performance problems are not reported." ),
+								$"If the problem was caused by slow initial execution of a particular code path, you may be able to fix it by making a warmup request within {warmupPeriodDuration.ToTimeSpan().ToConciseString()} of the first request to the application, when performance problems are not reported." ) +
+							Environment.NewLine + Environment.NewLine + "Profiler results:" +
+							Profiler.RenderPlainText().Separate( Environment.NewLine, false )
+								[ 2..^1 ] // Remove machine name, UTC date/time, root timing, and trailing line break.
+								.Aggregate( new StringBuilder(), ( builder, line ) => builder.AppendLine().Append( line ) ),
 							null );
 				}
 			},
