@@ -186,6 +186,7 @@ public static class EwfOps {
 
 						var app = builder.Build();
 
+						var aspNetScriptKey = "{0}AspNetScript".FormatWith( EwlStatics.EwlInitialism.ToLowerInvariant() );
 						using( var serviceScope = app.Services.CreateScope() ) {
 							MiniProfiler.Configure( app.Services.GetRequiredService<IOptions<MiniProfilerOptions>>().Value );
 
@@ -418,6 +419,9 @@ public static class EwfOps {
 										assertResourceIsIntermediateInstallationPublicResourceWhenNecessary( resource );
 										markup.Append( getElement( resource ) );
 									}
+
+									if( contextAccessor.HttpContext.Items.TryGetValue( aspNetScriptKey, out var aspNetScriptGetter ) )
+										markup.Append( getElement( new ExternalResource( ( (Func<string>)aspNetScriptGetter )() ) ) );
 								},
 								() => {
 									var icons = new List<( ResourceInfo, string, string )>();
@@ -502,6 +506,26 @@ public static class EwfOps {
 
 						initTimeDataAccessState = null;
 						frameworkInitialized = true;
+
+						// See https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-watch#response-compression. We're both causing BasicPageContent to include the
+						// script, and suppressing the warning when it is, by tricking BrowserRefreshMiddleware into thinking that its own ResponseStreamWrapper injected
+						// the script.
+						if( Environment.GetEnvironmentVariable( "__ASPNETCORE_BROWSER_TOOLS" ) is not null )
+							app.Use(
+								async ( context, next ) => {
+									var bodyFeature = context.Features.Get<IHttpResponseBodyFeature>();
+									if( bodyFeature is StreamResponseBodyFeature streamBodyFeature ) {
+										var stream = streamBodyFeature.Stream;
+										context.Items.Add(
+											aspNetScriptKey,
+											() => {
+												stream.GetType().GetProperty( "ScriptInjectionPerformed" ).SetValue( stream, true );
+												return "/_framework/aspnetcore-browser-refresh.js";
+											} );
+									}
+
+									await next( context );
+								} );
 
 						if( ConfigurationStatics.IsDevelopmentInstallation && EwfConfigurationStatics.AppConfiguration.UsesKestrel.Value )
 							app.UsePathBase( "/{0}".FormatWith( EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.Path ) );
