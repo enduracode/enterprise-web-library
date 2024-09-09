@@ -63,7 +63,11 @@ public static class EwfOps {
 			options.Storage = new MemoryCacheStorage( cache, TimeSpan.FromMinutes( 30 ) );
 			options.ShouldProfile = _ => false;
 			options.ProfilerProvider = new ProfilerProvider();
-			options.StackMaxLength = 750;
+
+			if( ConfigurationStatics.IsLiveInstallation )
+				options.ExcludeStackTraceSnippetFromCustomTimings = true;
+			else
+				options.StackMaxLength = 750;
 		}
 	}
 
