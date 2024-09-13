@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Email.SystemManagerInterface;
+using StackExchange.Profiling;
 using Tewl.IO;
 
 namespace EnterpriseWebLibrary.Email;
@@ -56,7 +57,9 @@ public static class EmailStatics {
 					try {
 						Task.Run(
 								async () => {
-									var response = await client.SendEmailAsync( sendGridMessage );
+									SendGrid.Response response;
+									using( MiniProfiler.Current.Step( $"{EwlStatics.EwlInitialism} Email - Send message using SendGrid" ) )
+										response = await client.SendEmailAsync( sendGridMessage );
 									if( response.StatusCode != System.Net.HttpStatusCode.Accepted )
 										throw new ApplicationException( await response.Body.ReadAsStringAsync() );
 								} )
