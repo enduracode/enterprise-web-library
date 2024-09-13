@@ -1,8 +1,11 @@
 ﻿using System.ComponentModel;
+using System.Text;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.UserManagement;
 using JetBrains.Annotations;
+using NodaTime;
+using NodaTime.Text;
 
 namespace EnterpriseWebLibrary;
 
@@ -23,6 +26,23 @@ public static class DataCleanupOps {
 					() => DataAccessState.Current.PrimaryDatabaseConnection.ExecuteInTransaction( cleanUpUserRequests ) );
 			else
 				cleanUpUserRequests();
+
+		var cutoffTime = SystemClock.Instance.GetCurrentInstant() - Duration.FromDays( 14 );
+		foreach( var app in ConfigurationStatics.InstallationConfiguration.WebApplications ) {
+			var filePath = app.DiagnosticLogFilePath;
+			if( !File.Exists( filePath ) )
+				continue;
+			var timeStampPattern = OffsetDateTimePattern.CreateWithInvariantCulture( "uuuu'-'MM'-'dd HH:mm:ss.FFFFFFFFF o<m>" );
+			File.WriteAllLines(
+				filePath,
+				File.ReadAllLines( filePath )
+					.SkipWhile(
+						line => {
+							var timeStamp = line[ ..line.IndexOf( " [", StringComparison.Ordinal ) ];
+							return timeStampPattern.Parse( timeStamp ).GetValueOrThrow().ToInstant() < cutoffTime;
+						} ),
+				Encoding.UTF8 );
+		}
 	}
 
 	private static void cleanUpUserRequests() {

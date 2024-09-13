@@ -1,6 +1,7 @@
 ﻿#nullable disable
 using System.Net.Http;
 using System.Reflection;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
@@ -146,7 +147,8 @@ public static class EwfOps {
 								                      c => c.File(
 									                      EwfConfigurationStatics.AppConfiguration.DiagnosticLogFilePath,
 									                      rollingInterval: RollingInterval.Infinite,
-									                      rollOnFileSizeLimit: false ) );
+									                      rollOnFileSizeLimit: false,
+									                      encoding: Encoding.UTF8 ) );
 						Log.Logger = loggerConfiguration.CreateLogger();
 
 						var builder = Microsoft.AspNetCore.Builder.WebApplication.CreateBuilder(
