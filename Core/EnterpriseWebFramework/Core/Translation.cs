@@ -24,8 +24,8 @@ internal static class Translation {
 	internal static TrustedHtmlString ApplicationHasBeenUpdatedAndWeCouldNotInterpretAction =>
 		new(
 			getCorrectTranslation(
-				"This application has been updated since the last time you saw this page and we couldn't interpret your last action. The latest version of the page has been loaded.",
-				"Esta aplicación ha sido actualizado desde la última vez que vio esta página y que no podía interpretar la última acción. La última versión de la página se ha cargado." ) );
+				"This application has been updated since the last time you saw this page and we couldn’t interpret your last action. Please repeat it.",
+				"Esta aplicación ha sido actualizado desde la última vez que vio esta página y que no podía interpretar la última acción. Por favor, repítelo." ) );
 
 	internal static TrustedHtmlString AnotherUserHasModifiedPageHtml =>
 		new(
