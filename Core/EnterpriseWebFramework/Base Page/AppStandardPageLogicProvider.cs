@@ -9,9 +9,9 @@ public abstract class AppStandardPageLogicProvider {
 	/// Returns a method that executes data modifications that happen simply because of a request and require no other action by the user. Returns null if there
 	/// are no modifications, which can improve page performance since the data-access cache does not need to be reset.
 	/// 
-	/// WARNING: Don't ever use this to correct for missing loadData preconditions. For example, do not create a page that requires a user preferences row to
+	/// WARNING: Don’t ever use this to correct for missing getContent preconditions. For example, do not create a page that requires a user preferences row to
 	/// exist and then use a page-view data modification to create the row if it is missing. Page-view data modifications will not execute before the first
-	/// loadData call on post-back requests, and we provide no mechanism to do this because it would allow developers to accidentally cause false user
+	/// getContent call on post-back requests, and we provide no mechanism to do this because it would allow developers to accidentally cause false user
 	/// concurrency errors by modifying data that affects the rendering of the page.
 	/// </summary>
 	protected internal virtual Action? GetPageViewDataModificationMethod() => null;
