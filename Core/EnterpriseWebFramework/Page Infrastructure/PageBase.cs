@@ -242,7 +242,12 @@ public abstract class PageBase: ResourceBase {
 			// Set a 400 status code if there are any problems loading hidden field state. We’re assuming these problems are never the developers’ fault.
 			requestState ??= new PageRequestState();
 			requestState.GeneralModificationErrors = Translation.ApplicationHasBeenUpdatedAndWeCouldNotInterpretAction.ToCollection();
-			return executePageViewDataModifications().buildPageAndGetResponse( null, statusCode: 400 );
+			return navigate(
+				null,
+				page => {
+					page.buildPage( null );
+					return page.getResponse( null, statusCode: 400 );
+				} );
 		}
 
 		if( !pageBuilt )
