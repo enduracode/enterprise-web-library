@@ -251,14 +251,14 @@ public abstract class PageBase: ResourceBase {
 		var errors = validateFormSubmission( formSubmission, hiddenFieldData.FormValueHash );
 		if( errors is not null ) {
 			requestState.GeneralModificationErrors = errors;
-			return navigateToCurrent( null );
+			return navigateToCurrent( null, statusCode: 409 );
 		}
 
 		// Get the post-back object and, if necessary, the last post-back’s failing data modification.
 		var postBack = GetPostBack( hiddenFieldData.PostBackId );
 		if( postBack is null ) {
 			requestState.GeneralModificationErrors = Translation.AnotherUserHasModifiedPageAndWeCouldNotInterpretAction.ToCollection();
-			return navigateToCurrent( null );
+			return navigateToCurrent( null, statusCode: 409 );
 		}
 		var lastPostBackFailingDm = postBack.IsIntermediate && hiddenFieldData.LastPostBackFailingDmId != null
 			                            ? hiddenFieldData.LastPostBackFailingDmId.Any()
@@ -267,7 +267,7 @@ public abstract class PageBase: ResourceBase {
 			                            : null;
 		if( postBack.IsIntermediate && hiddenFieldData.LastPostBackFailingDmId is not null && lastPostBackFailingDm is null ) {
 			requestState.GeneralModificationErrors = Translation.AnotherUserHasModifiedPageAndWeCouldNotInterpretAction.ToCollection();
-			return navigateToCurrent( null );
+			return navigateToCurrent( null, statusCode: 409 );
 		}
 
 		if( postBack.IsIntermediate )
@@ -480,13 +480,13 @@ public abstract class PageBase: ResourceBase {
 			} );
 	}
 
-	private EwfResponse navigateToCurrent( string failingDataModificationId ) =>
+	private EwfResponse navigateToCurrent( string failingDataModificationId, int? statusCode = null ) =>
 		navigate(
 			null,
 			page => {
 				page.buildPage( failingDataModificationId );
 				page.assertStaticRegionsUnchanged( null, getStaticRegionContents( null ).contents );
-				return page.getResponse( null );
+				return page.getResponse( null, statusCode: statusCode );
 			} );
 
 	private EwfResponse processValidationDmAfterIntermediatePostBack( string dataModificationId, bool validateChangesOnly, string focusKey ) {
