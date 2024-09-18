@@ -61,7 +61,7 @@ public static class EmailStatics {
 									using( MiniProfiler.Current.Step( $"{EwlStatics.EwlInitialism} Email - Send message using SendGrid" ) )
 										response = await client.SendEmailAsync( sendGridMessage );
 									if( response.StatusCode != System.Net.HttpStatusCode.Accepted )
-										throw new ApplicationException( await response.Body.ReadAsStringAsync() );
+										throw new Exception( await response.Body.ReadAsStringAsync() );
 								} )
 							.Wait();
 					}
@@ -73,21 +73,15 @@ public static class EmailStatics {
 			else if( service is Configuration.InstallationStandard.SmtpServer smtpServerService )
 				emailSender = message => sendEmailWithSmtpServer( smtpServerService, message );
 			else
-				emailSender = message => { throw new ApplicationException( "Failed to find an email-sending service in the installation configuration file." ); };
+				emailSender = _ => throw new Exception( "Failed to find an email-sending service in the installation configuration file." );
 		}
 	}
 
 	private static SendGrid.Helpers.Mail.SendGridMessage getSendGridMessage( EmailMessage message ) {
 		var m = new SendGrid.Helpers.Mail.SendGridMessage();
 
-		SendGrid.Helpers.Mail.EmailAddress getAddress( EmailAddress address ) =>
-			new( address.Address, name: address.DisplayName.Any() ? address.DisplayName : null );
-
 		m.From = getAddress( message.From );
-		// As of 12 September 2017 SendGrid does not support multiple reply-to addresses. See https://github.com/sendgrid/sendgrid-csharp/issues/339.
-		var replyToAddress = message.ReplyToAddresses.SingleOrDefault();
-		if( replyToAddress != null )
-			m.ReplyTo = getAddress( replyToAddress );
+		m.ReplyTos = message.ReplyToAddresses.Select( getAddress ).ToList();
 
 		foreach( var i in message.ToAddresses.Select( getAddress ) )
 			m.AddTo( i );
@@ -107,13 +101,16 @@ public static class EmailStatics {
 		foreach( var i in message.Attachments )
 			if( i.Stream == null )
 				m.AddAttachment( Path.GetFileName( i.FilePath ), Convert.ToBase64String( File.ReadAllBytes( i.FilePath ) ) );
-			else
-				using( var stream = new MemoryStream() ) {
-					i.Stream.CopyTo( stream );
-					m.AddAttachment( i.AttachmentDisplayName, Convert.ToBase64String( stream.ToArray() ) );
-				}
+			else {
+				using var stream = new MemoryStream();
+				i.Stream.CopyTo( stream );
+				m.AddAttachment( i.AttachmentDisplayName, Convert.ToBase64String( stream.ToArray() ) );
+			}
 
 		return m;
+
+		SendGrid.Helpers.Mail.EmailAddress getAddress( EmailAddress address ) =>
+			new( address.Address, name: address.DisplayName.Any() ? address.DisplayName : null );
 	}
 
 	private static void sendEmailWithSmtpServer( Configuration.InstallationStandard.SmtpServer smtpServer, EmailMessage message ) {
