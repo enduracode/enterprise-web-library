@@ -41,7 +41,6 @@ partial class EntitySetup: UiEntitySetup {
 
 	protected override IEnumerable<UrlPattern> getChildUrlPatterns() =>
 		StaticFiles.FolderSetup.UrlPatterns.Literal( "static" )
-			.ToCollection()
 			.Append( NonLiveLogIn.UrlPatterns.Literal( "non-live-log-in" ) )
 			.Append( EnterpriseWebFramework.UserManagement.Pages.LogIn.UrlPatterns.Literal( "log-in" ) )
 			.Append( EnterpriseWebFramework.UserManagement.Pages.ChangePassword.UrlPatterns.Literal( "change-password" ) )

@@ -17,3 +17,15 @@ public sealed class UrlPattern {
 		Parser = parser;
 	}
 }
+
+public static class UrlPatternExtensionCreators {
+	/// <summary>
+	/// Concatenates URL patterns.
+	/// </summary>
+	public static IEnumerable<UrlPattern> Concat( this UrlPattern first, IEnumerable<UrlPattern> second ) => second.Prepend( first );
+
+	/// <summary>
+	/// Returns a sequence of two URL patterns.
+	/// </summary>
+	public static IEnumerable<UrlPattern> Append( this UrlPattern first, UrlPattern second ) => Enumerable.Empty<UrlPattern>().Append( first ).Append( second );
+}

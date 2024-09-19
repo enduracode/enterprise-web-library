@@ -21,7 +21,6 @@ partial class EntitySetup {
 
 	protected override IEnumerable<UrlPattern> getChildUrlPatterns() =>
 		Keys.UrlPatterns.Literal( this, "jwks" )
-			.ToCollection()
 			.Append( Authenticate.UrlPatterns.Literal( this, "authenticate" ) )
 			.Append( Token.UrlPatterns.Literal( this, "token" ) )
 			.Append( UserInfo.UrlPatterns.Literal( this, "userinfo" ) );
