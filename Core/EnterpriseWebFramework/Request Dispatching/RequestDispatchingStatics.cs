@@ -183,7 +183,7 @@ public static class RequestDispatchingStatics {
 			return handler.HandleRequest;
 		}
 
-		// ACME challenge response; see https://tools.ietf.org/html/rfc8555#section-8.3
+		// ACME challenge response; see https://www.rfc-editor.org/rfc/rfc8555#section-8.3
 		var absoluteUrl = new Uri( EwfRequest.Current!.Url );
 		if( string.Equals( absoluteUrl.Scheme, "http", StringComparison.Ordinal ) && absoluteUrl.Port == 80 &&
 		    absoluteUrl.AbsolutePath.StartsWith( "/.well-known/acme-challenge/" ) ) {
@@ -192,7 +192,7 @@ public static class RequestDispatchingStatics {
 				return c => ResourceBase.WriteRedirectResponse(
 					c,
 					systemManager.HttpBaseUrl.Replace( "https://", "http://" ) +
-					"/Pages/Public/AcmeChallengeResponse.aspx;token={0}".FormatWith( HttpUtility.UrlEncode( absoluteUrl.Segments.Last() ) ),
+					"acme-challenge-response;token={0}".FormatWith( HttpUtility.UrlEncode( absoluteUrl.Segments.Last() ) ),
 					false );
 		}
 
