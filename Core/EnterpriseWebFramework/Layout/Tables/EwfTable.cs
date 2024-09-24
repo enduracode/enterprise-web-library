@@ -468,11 +468,7 @@ public class EwfTable<ItemIdType>: FlowComponent {
 		exportToExcelPostBack = TableStatics.GetExportToExcelPostBack( idBase, caption, excelRowAdders );
 		this.selectedItemActions = selectedItemActions;
 		if( defaultItemLimit != DataRowLimit.Unlimited )
-			itemLimit = ComponentStateItem.Create(
-				PostBack.GetCompositeId( idBase, "itemLimit" ),
-				(int)defaultItemLimit,
-				value => Enum.IsDefined( typeof( DataRowLimit ), value ),
-				false );
+			itemLimit = TableStatics.GetItemLimit( idBase, defaultItemLimit );
 		this.tailUpdateRegions = tailUpdateRegions;
 	}
 

@@ -8,6 +8,23 @@ internal static class TableStatics {
 	// This class name is used by EWF CSS and JavaScript files.
 	private static readonly ElementClass activatableElementContainerClass = new( "ewfAec" );
 
+	private static Action highItemLimitNotifier = null!;
+
+	internal static void Init( Action highItemLimitNotifier ) {
+		TableStatics.highItemLimitNotifier = highItemLimitNotifier;
+	}
+
+	internal static ComponentStateItem<int> GetItemLimit( string idBase, DataRowLimit defaultItemLimit ) {
+		var itemLimit = ComponentStateItem.Create(
+			PostBack.GetCompositeId( idBase, "itemLimit" ),
+			(int)defaultItemLimit,
+			value => Enum.IsDefined( typeof( DataRowLimit ), value ),
+			false );
+		if( itemLimit.Value.Value > (int)defaultItemLimit )
+			highItemLimitNotifier();
+		return itemLimit;
+	}
+
 	internal static void AddCheckboxes<ItemIdType>(
 		string postBackIdBase, IReadOnlyCollection<SelectedItemAction<ItemIdType>>? selectedItemActions, TableSelectedItemData<ItemIdType> selectedItemData,
 		IEnumerable<( IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions, IEnumerable<Func<EwfTableItem<ItemIdType>>> itemGetters )>
