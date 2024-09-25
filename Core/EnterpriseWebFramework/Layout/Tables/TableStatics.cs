@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using EnterpriseWebLibrary.DataAccess.Ranking;
+using StackExchange.Profiling;
 using Tewl.IO;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -175,8 +176,9 @@ internal static class TableStatics {
 						() => caption.Any() ? caption : "Excel export",
 						() => {
 							var workbook = new ExcelFileWriter();
-							foreach( var i in rowAdders )
-								i( workbook.DefaultWorksheet );
+							using( MiniProfiler.Current.Step( "EWF - Add table rows to Excel worksheet" ) )
+								foreach( var i in rowAdders )
+									i( workbook.DefaultWorksheet );
 							return workbook;
 						} ) ) ) );
 
