@@ -1,5 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using EnterpriseWebLibrary.MailMerging.Fields;
+﻿using EnterpriseWebLibrary.MailMerging.Fields;
 using EnterpriseWebLibrary.MailMerging.RowTree;
 
 namespace EnterpriseWebLibrary.MailMerging.DataTree;
@@ -19,16 +18,18 @@ public interface MergeDataTreeChild<in ParentRowType> {
 /// </summary>
 public class MergeDataTreeChild<ParentRowType, RowType>: MergeDataTreeChild<ParentRowType> {
 	private readonly string name;
-	private readonly ReadOnlyCollection<MergeField<RowType>> fields;
-	private readonly Func<ParentRowType, IEnumerable<RowType?>> dataRowSelector;
-	private readonly ReadOnlyCollection<MergeDataTreeChild<RowType>>? children;
+	private readonly IReadOnlyCollection<MergeField<RowType>> fields;
+	private readonly Func<ParentRowType?, IEnumerable<RowType?>> dataRowSelector;
+	private readonly IReadOnlyCollection<MergeDataTreeChild<RowType>>? children;
 
 	/// <summary>
 	/// Create a merge data tree child node. The data row selector is a function that returns the rows that are children of the specified parent row.
 	/// </summary>
 	public MergeDataTreeChild(
-		string name, ReadOnlyCollection<MergeField<RowType>> fields, Func<ParentRowType, IEnumerable<RowType?>> dataRowSelector,
-		ReadOnlyCollection<MergeDataTreeChild<RowType>>? children = null ) {
+		string name, IReadOnlyCollection<MergeField<RowType>> fields, Func<ParentRowType?, IEnumerable<RowType?>> dataRowSelector,
+		IReadOnlyCollection<MergeDataTreeChild<RowType>>? children = null ) {
+		MergeDataTreeOps.AssertFieldNamesUnique( fields );
+
 		this.name = name;
 		this.fields = fields;
 		this.dataRowSelector = dataRowSelector;
@@ -36,9 +37,8 @@ public class MergeDataTreeChild<ParentRowType, RowType>: MergeDataTreeChild<Pare
 	}
 
 	IEnumerable<MergeRowTree> MergeDataTreeChild<ParentRowType>.CreateRowTreesForParentRow( ParentRowType? parentRow, MergeDataTreeRemapping parentRemapping ) {
-		var remappings = parentRemapping != null && parentRemapping.ChildRemappingsByChildName.ContainsKey( name )
-			                 ? parentRemapping.ChildRemappingsByChildName[ name ]
-			                 : new MergeDataTreeRemapping().ToCollection();
-		return from remapping in remappings select MergeDataTreeOps.CreateMergeRowTree( name, fields, dataRowSelector( parentRow ), children, remapping );
+		if( !parentRemapping.ChildRemappingsByChildName.TryGetValue( name, out var remappings ) )
+			remappings = new MergeDataTreeRemapping().ToCollection();
+		return remappings.Select( remapping => MergeDataTreeOps.CreateMergeRowTree( name, fields, dataRowSelector( parentRow ), children, remapping ) );
 	}
 }

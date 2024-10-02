@@ -70,12 +70,12 @@ internal class MergeOpsTester {
 		var internalTableDataFields = new List<MergeField<MergeTestData.Thing>>( new[] { MergeFieldOps.CreateBasicField( new TheValue() ) } );
 
 		var mergeTree = MergeDataTreeOps.CreateRowTree(
-			mergingInfoFields.AsReadOnly(),
+			mergingInfoFields,
 			singlePersonMergeData.ToCollection(),
 			new List<MergeDataTreeChild<MergeTestData>>
 				{
-					new MergeDataTreeChild<MergeTestData, MergeTestData.Thing>( "Things", internalTableDataFields.AsReadOnly(), info => info.Things )
-				}.AsReadOnly() );
+					new MergeDataTreeChild<MergeTestData, MergeTestData.Thing>( "Things", internalTableDataFields, info => info.Things )
+				} );
 
 		using( var templateStream = File.OpenRead( testingWordTemplatePath ) ) {
 			using( var destinationStream = File.Create( getFilePath( "basic_merge_test" ) ) ) {
@@ -106,15 +106,12 @@ internal class MergeOpsTester {
 					MergeFieldOps.CreateBasicField( new LastName() )
 				} );
 
-		var managersChild = new MergeDataTreeChild<PracticeMockData, PracticeManagerMockData>(
-			"PracticeManagers",
-			managerFields.AsReadOnly(),
-			data => data.Managers );
-		var physiciansChild = new MergeDataTreeChild<PracticeMockData, PhysicianMockData>( "Physicians", physicianFields.AsReadOnly(), data => data.Physicians );
+		var managersChild = new MergeDataTreeChild<PracticeMockData, PracticeManagerMockData>( "PracticeManagers", managerFields, data => data.Managers );
+		var physiciansChild = new MergeDataTreeChild<PracticeMockData, PhysicianMockData>( "Physicians", physicianFields, data => data.Physicians );
 		var mergeTree = MergeDataTreeOps.CreateRowTree(
-			practiceFields.AsReadOnly(),
+			practiceFields,
 			practiceData.ToCollection(),
-			new List<MergeDataTreeChild<PracticeMockData>> { managersChild, physiciansChild }.AsReadOnly() );
+			new List<MergeDataTreeChild<PracticeMockData>> { managersChild, physiciansChild } );
 
 		using( var templateStream = File.OpenRead( testingPracticesWordTemplatePath ) ) {
 			using( var destinationStream = File.Create( getFilePath( "practices_merge_test" ) ) ) {

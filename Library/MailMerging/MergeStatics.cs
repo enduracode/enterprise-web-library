@@ -1,5 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using EnterpriseWebLibrary.MailMerging.DataTree;
+﻿using EnterpriseWebLibrary.MailMerging.DataTree;
 using EnterpriseWebLibrary.MailMerging.FieldImplementation;
 using EnterpriseWebLibrary.MailMerging.Fields;
 using EnterpriseWebLibrary.MailMerging.PseudoTableFields;
@@ -19,19 +18,19 @@ public static class MergeStatics {
 	/// Must be called before other methods in this class.
 	/// </summary>
 	public static void Init() {
-		var nativeTableFields = getNativeTableFields().ToList().AsReadOnly();
-		var nativeChildFields = getNativeChildFields().ToList().AsReadOnly();
+		var nativeTableFields = getNativeTableFields().ToList();
+		var nativeChildFields = getNativeChildFields().ToList();
 
 		initPseudoFields( nativeTableFields );
 		initPseudoChildFields( nativeChildFields );
 	}
 
-	private static void initPseudoFields( ReadOnlyCollection<MergeField<PseudoTableRow>> nativeTableFields ) {
+	private static void initPseudoFields( IReadOnlyCollection<MergeField<PseudoTableRow>> nativeTableFields ) {
 		foreach( var field in nativeTableFields )
 			tableFields.Add( field );
 	}
 
-	private static void initPseudoChildFields( ReadOnlyCollection<MergeField<PseudoChildRow>> nativeChildFields ) {
+	private static void initPseudoChildFields( IReadOnlyCollection<MergeField<PseudoChildRow>> nativeChildFields ) {
 		childFields.AddRange( nativeChildFields );
 	}
 
@@ -45,28 +44,25 @@ public static class MergeStatics {
 
 	public static MergeRowTree CreateEmptyPseudoTableRowTree() {
 		return MergeDataTreeOps.CreateRowTree(
-			tableFields.AsReadOnly(),
+			tableFields,
 			new PseudoTableRow?[] { null },
 			children: new List<MergeDataTreeChild<PseudoTableRow>>
 				{
-					new MergeDataTreeChild<PseudoTableRow, PseudoChildRow>(
-						"Things",
-						childFields.AsReadOnly(),
-						pseudoTableRow => ( (PseudoChildRow?)null ).ToCollection() )
-				}.AsReadOnly() );
+					new MergeDataTreeChild<PseudoTableRow, PseudoChildRow>( "Things", childFields, _ => [ null ] )
+				} );
 	}
 
 	public static MergeRowTree CreatePseudoTableRowTree( IEnumerable<PseudoTableRow> rows ) {
 		var rand = new Random();
 		return MergeDataTreeOps.CreateRowTree(
-			tableFields.AsReadOnly(),
+			tableFields,
 			rows,
 			new List<MergeDataTreeChild<PseudoTableRow>>
 				{
 					new MergeDataTreeChild<PseudoTableRow, PseudoChildRow>(
 						"Things",
-						childFields.AsReadOnly(),
+						childFields,
 						pseudoTableRow => new[] { new PseudoChildRow( rand.Next( 20 ) ), new PseudoChildRow( rand.Next( 20 ) ) } )
-				}.AsReadOnly() );
+				} );
 	}
 }
