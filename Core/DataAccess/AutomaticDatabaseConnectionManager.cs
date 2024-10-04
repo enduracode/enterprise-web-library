@@ -1,4 +1,5 @@
-﻿using EnterpriseWebLibrary.EnterpriseWebFramework;
+﻿using System.Threading;
+using EnterpriseWebLibrary.EnterpriseWebFramework;
 
 namespace EnterpriseWebLibrary.DataAccess;
 
@@ -6,16 +7,31 @@ namespace EnterpriseWebLibrary.DataAccess;
 /// Manages transactions and cleanup for automatically-opened database connections in a data-access state object.
 /// </summary>
 public class AutomaticDatabaseConnectionManager {
-	private static Func<AutomaticDatabaseConnectionManager>? currentManagerGetter;
+	private static Func<AutomaticDatabaseConnectionManager?>? currentManagerGetter;
+	private static AsyncLocal<AutomaticDatabaseConnectionManager?> currentManagerOverride = null!;
 
 	internal static void Init( Func<AutomaticDatabaseConnectionManager>? currentManagerGetter ) {
 		AutomaticDatabaseConnectionManager.currentManagerGetter = currentManagerGetter;
+		currentManagerOverride = new AsyncLocal<AutomaticDatabaseConnectionManager?>();
 	}
+
+	internal static bool HasCurrent => currentManagerOverride.Value is not null || currentManagerGetter?.Invoke() is not null;
 
 	/// <summary>
 	/// Gets the current connection manager.
 	/// </summary>
-	internal static AutomaticDatabaseConnectionManager Current => currentManagerGetter!();
+	public static AutomaticDatabaseConnectionManager Current {
+		get {
+			if( currentManagerOverride.Value is {} managerOverride )
+				return managerOverride;
+			if( currentManagerGetter is null )
+				throw new Exception( "No current-connection-manager getter was specified during application initialization." );
+			var manager = currentManagerGetter();
+			if( manager is null )
+				throw new Exception( "No current connection manager exists at this time." );
+			return manager;
+		}
+	}
 
 	/// <summary>
 	/// Queues the specified non-transactional modification method to be executed after database transactions are committed. Must be called at a time when normal
@@ -32,6 +48,36 @@ public class AutomaticDatabaseConnectionManager {
 		if( !current.inModificationTransaction )
 			throw new Exception( "You can only queue a non-transactional modification method at a time when normal modifications are enabled." );
 		current.nonTransactionalModificationMethods.Add( modificationMethod );
+	}
+
+	/// <summary>
+	/// Executes the specified method with a current connection manager, then commits transactions and executes non-transactional modifications. The data-access
+	/// cache is enabled except during modifications.
+	/// </summary>
+	public static void ExecuteWithAutomaticDatabaseConnections( Action method ) {
+		if( HasCurrent )
+			throw new InvalidOperationException( "A current connection manager already exists." );
+
+		var manager = new AutomaticDatabaseConnectionManager();
+		manager.DataAccessState.ResetCache();
+		try {
+			currentManagerOverride.Value = manager;
+			try {
+				manager.DataAccessState.ExecuteWithThis(
+					() => {
+						method();
+						manager.CommitTransactionsAndExecuteNonTransactionalModificationMethods( true );
+					} );
+			}
+			finally {
+				currentManagerOverride.Value = null;
+			}
+		}
+		catch {
+			manager.RollbackTransactions( true );
+			throw;
+		}
+		manager.CommitTransactionsForCleanup( true );
 	}
 
 	private readonly DataAccessState dataAccessState;
@@ -64,7 +110,10 @@ public class AutomaticDatabaseConnectionManager {
 
 	internal DataAccessState DataAccessState => dataAccessState;
 
-	internal void ExecuteWithModificationsEnabled( Action modificationMethod ) {
+	/// <summary>
+	/// Executes the specified method with data modifications enabled and the data-access cache disabled. Rolls back modifications if an exception occurs.
+	/// </summary>
+	public void ExecuteWithModificationsEnabled( Action modificationMethod ) {
 		EnableModifications();
 		dataAccessState.DisableCache();
 		try {

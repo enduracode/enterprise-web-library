@@ -128,7 +128,7 @@ public static class EwfOps {
 			},
 			mainDataAccessStateGetter: () =>
 				EwfRequest.Current is not null ? RequestDispatchingStatics.RequestState.DatabaseConnectionManager.DataAccessState : initTimeDataAccessState.Value,
-			currentDatabaseConnectionManagerGetter: () => RequestDispatchingStatics.RequestState.DatabaseConnectionManager,
+			currentDatabaseConnectionManagerGetter: () => EwfRequest.Current is not null ? RequestDispatchingStatics.RequestState.DatabaseConnectionManager : null,
 			currentUserGetter: () => EwfRequest.Current is not null ? RequestDispatchingStatics.RequestState.UserAndImpersonator.Item1 : null );
 		var frameworkInitialized = false;
 		try {
@@ -501,7 +501,7 @@ public static class EwfOps {
 
 							appInitializer?.InitStatics();
 
-							var executeWithAutomaticDatabaseConnections = GlobalInitializationOps.ExecuteWithAutomaticDatabaseConnections;
+							var executeWithAutomaticDatabaseConnections = AutomaticDatabaseConnectionManager.ExecuteWithAutomaticDatabaseConnections;
 							executeWithAutomaticDatabaseConnections( AuthenticationStatics.InitAppSpecificLogicDependencies );
 							executeWithAutomaticDatabaseConnections( OpenIdProviderStatics.InitAppSpecificLogicDependencies );
 							if( OpenIdProviderStatics.OpenIdProviderEnabled )

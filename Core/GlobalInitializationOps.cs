@@ -108,7 +108,7 @@ public static class GlobalInitializationOps {
 			GlobalInitializationOps.globalInitializer = globalInitializer;
 			globalInitializer.InitStatics();
 
-			ExecuteWithAutomaticDatabaseConnections( UserManagementStatics.InitSystemSpecificLogicDependencies );
+			AutomaticDatabaseConnectionManager.ExecuteWithAutomaticDatabaseConnections( UserManagementStatics.InitSystemSpecificLogicDependencies );
 		}
 		catch( Exception e ) {
 			secondaryInitFailed = true;
@@ -135,18 +135,6 @@ public static class GlobalInitializationOps {
 		}
 		catch( Exception e ) {
 			TelemetryStatics.ReportError( "An exception occurred during application cleanup:", e );
-		}
-	}
-
-	internal static void ExecuteWithAutomaticDatabaseConnections( Action method ) {
-		var connectionManager = new AutomaticDatabaseConnectionManager();
-		try {
-			connectionManager.DataAccessState.ExecuteWithThis( method );
-			connectionManager.CommitTransactionsAndExecuteNonTransactionalModificationMethods( false );
-		}
-		catch {
-			connectionManager.RollbackTransactions( false );
-			throw;
 		}
 	}
 
