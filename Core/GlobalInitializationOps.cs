@@ -57,7 +57,13 @@ public static class GlobalInitializationOps {
 
 			// Initialize these before the exception handling block below because it's reasonable for the exception handling to depend on them.
 			ConfigurationStatics.Init( assemblyFolderPath, globalInitializer.GetType(), appName, isClientSideApp, ref initializationLog );
-			EmailStatics.Init();
+			EmailStatics.Init(
+				( forceImmediateExecution, method ) => {
+					if( !AutomaticDatabaseConnectionManager.HasCurrent || forceImmediateExecution )
+						method();
+					else
+						AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod( method );
+				} );
 			TelemetryStatics.Init( telemetryAppErrorContextWriter );
 
 			// Setting the initialized flag to true must be done before executing the secondary init block below so that exception handling works.

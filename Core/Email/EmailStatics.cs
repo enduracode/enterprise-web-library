@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Specialized;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -20,16 +19,18 @@ public static class EmailStatics {
 	/// </summary>
 	public const string InstallationIdHeaderFieldName = "X-EWL-Installation-ID";
 
-	private static SystemManagerEmailInterface systemManagerInterface;
-	private static Action<EmailMessage> emailSender;
+	private static SystemManagerEmailInterface? systemManagerInterface;
+	private static Action<EmailMessage, bool> emailSender = null!;
 
-	internal static void Init() {
+	internal static void Init( Action<bool, Action> emailSendingMethodExecutor ) {
 		systemManagerInterface = File.Exists( SystemManagerInterfaceFilePath )
 			                         ? XmlOps.DeserializeFromFile<SystemManagerEmailInterface>( SystemManagerInterfaceFilePath, false )
 			                         : null;
 
 		if( ConfigurationStatics.InstallationConfiguration.InstallationType == InstallationType.Development )
-			emailSender = message => sendEmailWithSmtpServer( null, message );
+			emailSender = ( message, isDeveloperNotificationEmail ) => emailSendingMethodExecutor(
+				isDeveloperNotificationEmail,
+				() => sendEmailWithSmtpServer( null, message ) );
 		else {
 			Configuration.InstallationStandard.EmailSendingService service;
 			if( ConfigurationStatics.InstallationConfiguration.InstallationType == InstallationType.Live ) {
@@ -52,35 +53,41 @@ public static class EmailStatics {
 								TimeSpan.FromSeconds( 3 ),
 								TimeSpan.FromSeconds( .5 ) )
 						} );
-				emailSender = message => {
+				emailSender = ( message, isDeveloperNotificationEmail ) => {
 					var sendGridMessage = getSendGridMessage( message );
-					try {
-						Task.Run(
-								async () => {
-									SendGrid.Response response;
-									using( MiniProfiler.Current.Step( $"{EwlStatics.EwlInitialism} Email - Send message using SendGrid" ) )
-										response = await client.SendEmailAsync( sendGridMessage );
-									if( response.StatusCode != System.Net.HttpStatusCode.Accepted )
-										throw new Exception( await response.Body.ReadAsStringAsync() );
-								} )
-							.Wait();
-					}
-					catch( Exception e ) {
-						throw new EmailSendingException( "Failed to send an email message using SendGrid.", e );
-					}
+					emailSendingMethodExecutor(
+						isDeveloperNotificationEmail,
+						() => {
+							try {
+								Task.Run(
+										async () => {
+											SendGrid.Response response;
+											using( MiniProfiler.Current.Step( $"{EwlStatics.EwlInitialism} Email - Send message using SendGrid" ) )
+												response = await client.SendEmailAsync( sendGridMessage );
+											if( response.StatusCode != System.Net.HttpStatusCode.Accepted )
+												throw new Exception( await response.Body.ReadAsStringAsync() );
+										} )
+									.Wait();
+							}
+							catch( Exception e ) {
+								throw new EmailSendingException( "Failed to send an email message using SendGrid.", e );
+							}
+						} );
 				};
 			}
 			else if( service is Configuration.InstallationStandard.SmtpServer smtpServerService )
-				emailSender = message => sendEmailWithSmtpServer( smtpServerService, message );
+				emailSender = ( message, isDeveloperNotificationEmail ) => emailSendingMethodExecutor(
+					isDeveloperNotificationEmail,
+					() => sendEmailWithSmtpServer( smtpServerService, message ) );
 			else
-				emailSender = _ => throw new Exception( "Failed to find an email-sending service in the installation configuration file." );
+				emailSender = ( _, _ ) => throw new Exception( "Failed to find an email-sending service in the installation configuration file." );
 		}
 	}
 
 	private static SendGrid.Helpers.Mail.SendGridMessage getSendGridMessage( EmailMessage message ) {
 		var m = new SendGrid.Helpers.Mail.SendGridMessage();
 
-		m.From = getAddress( message.From );
+		m.From = getAddress( message.From! );
 		m.ReplyTos = message.ReplyToAddresses.Select( getAddress ).ToList();
 
 		foreach( var i in message.ToAddresses.Select( getAddress ) )
@@ -113,7 +120,7 @@ public static class EmailStatics {
 			new( address.Address, name: address.DisplayName.Any() ? address.DisplayName : null );
 	}
 
-	private static void sendEmailWithSmtpServer( Configuration.InstallationStandard.SmtpServer smtpServer, EmailMessage message ) {
+	private static void sendEmailWithSmtpServer( Configuration.InstallationStandard.SmtpServer? smtpServer, EmailMessage message ) {
 		// We used to cache the SmtpClient object. It turned out not to be thread safe, so now we create a new one for every email.
 		var smtpClient = new System.Net.Mail.SmtpClient();
 		try {
@@ -136,7 +143,7 @@ public static class EmailStatics {
 			}
 
 			using( var m = new System.Net.Mail.MailMessage() ) {
-				m.From = message.From.ToMailAddress();
+				m.From = message.From!.ToMailAddress();
 				addAddressesToMailAddressCollection( message.ReplyToAddresses, m.ReplyToList );
 
 				addAddressesToMailAddressCollection( message.ToAddresses, m.To );
@@ -222,7 +229,11 @@ public static class EmailStatics {
 		return regexToReplacements.Cast<DictionaryEntry>()
 			.Aggregate(
 				html,
-				( current, regexToReplacement ) => Regex.Replace( current, (string)regexToReplacement.Key, (string)regexToReplacement.Value, RegexOptions.IgnoreCase ) )
+				( current, regexToReplacement ) => Regex.Replace(
+					current,
+					(string)regexToReplacement.Key,
+					(string)regexToReplacement.Value!,
+					RegexOptions.IgnoreCase ) )
 			.Trim();
 	}
 
@@ -257,12 +268,12 @@ public static class EmailStatics {
 	private static void sendEmail( EmailMessage message, bool isDeveloperNotificationEmail ) {
 		if( ConfigurationStatics.InstallationConfiguration.InstallationType == InstallationType.Intermediate && !isDeveloperNotificationEmail )
 			alterMessageForIntermediateInstallation( message );
-		emailSender( message );
+		emailSender( message, isDeveloperNotificationEmail );
 	}
 
 	private static void alterMessageForIntermediateInstallation( EmailMessage m ) {
 		var originalInfoParagraph = "Had this been a live installation, this message would have been sent from {0} to the following recipients: {1}".FormatWith(
-			                            m.From.ToMailAddress(),
+			                            m.From!.ToMailAddress(),
 			                            m.ToAddresses.Select( eml => eml.Address ).GetCommaDelimitedStringFromCollection() ) + Environment.NewLine +
 		                            Environment.NewLine;
 
@@ -277,7 +288,7 @@ public static class EmailStatics {
 		m.BccAddresses.Clear();
 
 		if( ConfigurationStatics.InstallationConfiguration.RsisInstallationId.HasValue ) {
-			m.ToAddresses.Add( systemManagerInterface.GetEmailAddress() );
+			m.ToAddresses.Add( systemManagerInterface!.GetEmailAddress() );
 			m.CustomHeaders.Add( Tuple.Create( InstallationIdHeaderFieldName, ConfigurationStatics.InstallationConfiguration.RsisInstallationId.Value.ToString() ) );
 		}
 		else {
@@ -291,14 +302,12 @@ public static class EmailStatics {
 	/// <summary>
 	/// Returns a list of developer email addresses.
 	/// </summary>
-	private static IEnumerable<EmailAddress> getDeveloperEmailAddresses() {
-		return ConfigurationStatics.InstallationConfiguration.Developers.Select( i => new EmailAddress( i.EmailAddress, i.Name ) );
-	}
+	private static IEnumerable<EmailAddress> getDeveloperEmailAddresses() =>
+		ConfigurationStatics.InstallationConfiguration.Developers.Select( i => new EmailAddress( i.EmailAddress, i.Name ) );
 
 	/// <summary>
 	/// Returns a list of administrator email addresses.
 	/// </summary>
-	public static IEnumerable<EmailAddress> GetAdministratorEmailAddresses() {
-		return ConfigurationStatics.InstallationConfiguration.Administrators.Select( i => new EmailAddress( i.EmailAddress, i.Name ) );
-	}
+	public static IEnumerable<EmailAddress> GetAdministratorEmailAddresses() =>
+		ConfigurationStatics.InstallationConfiguration.Administrators.Select( i => new EmailAddress( i.EmailAddress, i.Name ) );
 }
