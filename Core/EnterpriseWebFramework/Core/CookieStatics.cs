@@ -65,7 +65,7 @@ public static class CookieStatics {
 					Expires = expires?.ToDateTimeUtc(),
 					Secure = secure,
 					HttpOnly = httpOnly,
-					SameSite = secure ? SameSiteMode.None : SameSiteMode.Lax
+					SameSite = SameSiteMode.Lax
 				} );
 	}
 
