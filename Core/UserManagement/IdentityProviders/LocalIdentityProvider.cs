@@ -18,23 +18,10 @@ public class LocalIdentityProvider: IdentityProvider {
 	/// Code from http://www.aspheute.com/english/20040105.asp.
 	/// </summary>
 	internal class Password {
-		private static int createRandomSalt() {
-			var saltBytes = new byte[ 4 ];
-			var rng = new RNGCryptoServiceProvider();
-			rng.GetBytes( saltBytes );
-
-			return ( saltBytes[ 0 ] << 24 ) + ( saltBytes[ 1 ] << 16 ) + ( saltBytes[ 2 ] << 8 ) + saltBytes[ 3 ];
-		}
-
 		private readonly string password;
 		private readonly int salt;
 
 		public int Salt => salt;
-
-		/// <summary>
-		/// Create a new password with the given text and randomly generated salt.
-		/// </summary>
-		public Password( string passwordText ): this( passwordText, createRandomSalt() ) {}
 
 		/// <summary>
 		/// Create a password from a stored salt and the given password text.
@@ -87,7 +74,7 @@ public class LocalIdentityProvider: IdentityProvider {
 	private readonly PostAuthenticationMethod? postAuthenticationMethod;
 	internal readonly Duration? AuthenticationDuration;
 	internal readonly Action<Validator, string>? PasswordValidationMethod;
-	internal readonly PasswordUpdaterMethod PasswordUpdater;
+	private readonly PasswordUpdaterMethod passwordUpdater;
 	private readonly LoginCodeUpdaterMethod loginCodeUpdater;
 
 	/// <summary>
@@ -123,8 +110,13 @@ public class LocalIdentityProvider: IdentityProvider {
 		this.postAuthenticationMethod = postAuthenticationMethod;
 		AuthenticationDuration = authenticationDuration;
 		PasswordValidationMethod = passwordValidationMethod;
-		PasswordUpdater = passwordUpdater;
+		this.passwordUpdater = passwordUpdater;
 		this.loginCodeUpdater = loginCodeUpdater;
+	}
+
+	internal void UpdatePassword( int userId, string password ) {
+		var salt = BitConverter.ToInt32( RandomNumberGenerator.GetBytes( 4 ), 0 );
+		passwordUpdater( userId, salt, new Password( password, salt ).ComputeSaltedHash() );
 	}
 
 	internal string? LogInUserWithPassword(

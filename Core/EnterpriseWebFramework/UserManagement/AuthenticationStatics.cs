@@ -131,10 +131,8 @@ public static class AuthenticationStatics {
 			} ).ToFormItem( label: firstLabel?.Materialize() ?? "Password".ToComponents() );
 
 		passwordUpdater = userId => {
-			if( !password.Changed )
-				return;
-			var p = new LocalIdentityProvider.Password( password.Value );
-			UserManagementStatics.LocalIdentityProvider.PasswordUpdater( userId, p.Salt, p.ComputeSaltedHash() );
+			if( password.Changed )
+				UserManagementStatics.LocalIdentityProvider.UpdatePassword( userId, password.Value );
 		};
 
 		return new[] { passwordFormItem, passwordAgainFormItem };
