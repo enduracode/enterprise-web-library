@@ -13,46 +13,6 @@ namespace EnterpriseWebLibrary.UserManagement.IdentityProviders;
 /// </summary>
 [ PublicAPI ]
 public class LocalIdentityProvider: IdentityProvider {
-	/// <summary>
-	/// Class for generating and hashing passwords.
-	/// Code from http://www.aspheute.com/english/20040105.asp.
-	/// </summary>
-	internal class Password {
-		private readonly string password;
-		private readonly int salt;
-
-		public int Salt => salt;
-
-		/// <summary>
-		/// Create a password from a stored salt and the given password text.
-		/// </summary>
-		public Password( string strPassword, int nSalt ) {
-			password = strPassword;
-			salt = nSalt;
-		}
-
-		public byte[] ComputeSaltedHash() {
-			// Create a new salt
-			var saltBytes = new byte[ 4 ];
-			saltBytes[ 0 ] = (byte)( salt >> 24 );
-			saltBytes[ 1 ] = (byte)( salt >> 16 );
-			saltBytes[ 2 ] = (byte)( salt >> 8 );
-			saltBytes[ 3 ] = (byte)( salt );
-
-			// Create Byte array of password string
-			var encoder = new ASCIIEncoding();
-			var secretBytes = encoder.GetBytes( password );
-
-			// append the two arrays
-			var toHash = new byte[ secretBytes.Length + saltBytes.Length ];
-			Array.Copy( secretBytes, 0, toHash, 0, secretBytes.Length );
-			Array.Copy( saltBytes, 0, toHash, secretBytes.Length, saltBytes.Length );
-
-			var sha1 = SHA1.Create();
-			return sha1.ComputeHash( toHash );
-		}
-	}
-
 	public delegate ( byte[]? salt, byte[]? hashedCode, Instant? expirationTime, byte? remainingAttemptCount, string destinationUrl ) LoginCodeGetterMethod(
 		int userId );
 
@@ -116,7 +76,7 @@ public class LocalIdentityProvider: IdentityProvider {
 
 	internal void UpdatePassword( int userId, string password ) {
 		var salt = BitConverter.ToInt32( RandomNumberGenerator.GetBytes( 4 ), 0 );
-		passwordUpdater( userId, salt, new Password( password, salt ).ComputeSaltedHash() );
+		passwordUpdater( userId, salt, getHashedPassword( password, salt ) );
 	}
 
 	internal string? LogInUserWithPassword(
@@ -134,7 +94,7 @@ public class LocalIdentityProvider: IdentityProvider {
 
 		var passwordCorrect = false;
 		if( userData.Value.saltedPassword != null ) {
-			var hashedPassword = new Password( password, userData.Value.salt ).ComputeSaltedHash();
+			var hashedPassword = getHashedPassword( password, userData.Value.salt );
 			if( userData.Value.saltedPassword.SequenceEqual( hashedPassword ) )
 				passwordCorrect = true;
 		}
@@ -157,7 +117,30 @@ public class LocalIdentityProvider: IdentityProvider {
 	/// </summary>
 	public bool UserCredentialsAreCorrect( string emailAddress, string password ) {
 		var userData = passwordLoginUserGetter( emailAddress );
-		return userData?.saltedPassword != null && userData.Value.saltedPassword.SequenceEqual( new Password( password, userData.Value.salt ).ComputeSaltedHash() );
+		return userData?.saltedPassword != null && userData.Value.saltedPassword.SequenceEqual( getHashedPassword( password, userData.Value.salt ) );
+	}
+
+	private byte[] getHashedPassword( string password, int salt ) {
+		// Code from http://www.aspheute.com/english/20040105.asp.
+
+		// Create a new salt
+		var saltBytes = new byte[ 4 ];
+		saltBytes[ 0 ] = (byte)( salt >> 24 );
+		saltBytes[ 1 ] = (byte)( salt >> 16 );
+		saltBytes[ 2 ] = (byte)( salt >> 8 );
+		saltBytes[ 3 ] = (byte)( salt );
+
+		// Create Byte array of password string
+		var encoder = new ASCIIEncoding();
+		var secretBytes = encoder.GetBytes( password );
+
+		// append the two arrays
+		var toHash = new byte[ secretBytes.Length + saltBytes.Length ];
+		Array.Copy( secretBytes, 0, toHash, 0, secretBytes.Length );
+		Array.Copy( saltBytes, 0, toHash, secretBytes.Length, saltBytes.Length );
+
+		var sha1 = SHA1.Create();
+		return sha1.ComputeHash( toHash );
 	}
 
 	internal void SendLoginCode(
