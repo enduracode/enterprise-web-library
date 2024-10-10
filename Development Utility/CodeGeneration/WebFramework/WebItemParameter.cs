@@ -102,7 +102,7 @@ internal class WebItemParameter {
 	internal string EnumerableInitExpression => IsEnumerable ? "new " + normalizedElementTypeName + "[ 0 ]" : "";
 
 	public string Name => name;
-	public string PropertyName => name.CapitalizeString();
+	public string PropertyName => name.Capitalize();
 	public string FieldName => "__" + name;
 
 	public string Comment => comment;

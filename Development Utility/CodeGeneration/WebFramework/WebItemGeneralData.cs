@@ -9,7 +9,7 @@ internal class WebItemGeneralData {
 	internal static string GetNamespaceFromPath( string projectNamespace, string pathRelativeToProject, bool isFilePath ) {
 		var tokens = pathRelativeToProject.Separate( Path.DirectorySeparatorChar.ToString(), false );
 		var namespaceTokens = isFilePath ? tokens.Take( tokens.Count - 1 ) : tokens;
-		return projectNamespace + StringTools.ConcatenateWithDelimiter( ".", namespaceTokens.Select( i => EwlStatics.GetCSharpIdentifier( i.CapitalizeString() ) ) )
+		return projectNamespace + StringTools.ConcatenateWithDelimiter( ".", namespaceTokens.Select( i => EwlStatics.GetCSharpIdentifier( i.Capitalize() ) ) )
 			       .PrependDelimiter( "." );
 	}
 
@@ -35,7 +35,7 @@ internal class WebItemGeneralData {
 		Namespace ??= GetNamespaceFromPath( projectNamespace, pathRelativeToProject, true );
 
 		ClassName = EwlStatics.GetCSharpIdentifier(
-			Path.GetFileNameWithoutExtension( path ).CapitalizeString() + ( isStaticFile ? Path.GetExtension( path ).CapitalizeString() : "" ) );
+			Path.GetFileNameWithoutExtension( path ).Capitalize() + ( isStaticFile ? Path.GetExtension( path ).Capitalize() : "" ) );
 
 		RequiredParameters = readParametersFromCode( false );
 		OptionalParameters = readParametersFromCode( true );

@@ -213,7 +213,7 @@ public class LocalIdentityProvider: IdentityProvider {
 		body.AppendLine(
 			"<p>This login information is valid for {0}. If you need to log in later, please return to the page you were on and send yourself another login email.</p>"
 				.FormatWith( codeDuration.ToTimeSpan().ToConciseString() ) );
-		body.AppendLine( "<p>Thank you,<br>{0}</p>".FormatWith( AdministratingOrganizationName.CapitalizeString() ) );
+		body.AppendLine( "<p>Thank you,<br>{0}</p>".FormatWith( AdministratingOrganizationName.Capitalize() ) );
 
 		var message = new EmailMessage
 			{

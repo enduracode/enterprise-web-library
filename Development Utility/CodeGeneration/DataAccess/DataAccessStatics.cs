@@ -171,7 +171,7 @@ internal static class DataAccessStatics {
 		var nonexistentTables = specifiedTables.Where( specifiedTable => databaseTables.All( i => !i.EqualsIgnoreCase( specifiedTable ) ) ).ToArray();
 		if( nonexistentTables.Any() )
 			throw new UserCorrectableException(
-				tableAdjective.CapitalizeString() + " " + ( nonexistentTables.Length > 1 ? "tables" : "table" ) + " " +
+				tableAdjective.Capitalize() + " " + ( nonexistentTables.Length > 1 ? "tables" : "table" ) + " " +
 				StringTools.GetEnglishListPhrase( nonexistentTables.Select( i => "'" + i + "'" ), true ) + " " + ( nonexistentTables.Length > 1 ? "do" : "does" ) +
 				" not exist." );
 	}

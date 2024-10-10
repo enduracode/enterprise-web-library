@@ -61,7 +61,7 @@ public class ValueContainer {
 	public string Name => name;
 	public string PascalCasedName => pascalCasedName;
 	public string PascalCasedNameExceptForOracle => pascalCasedNameExceptForOracle;
-	public string CamelCasedName => pascalCasedName.LowercaseString();
+	public string CamelCasedName => pascalCasedName.Uncapitalize();
 
 	public Type DataType => dataType;
 

@@ -29,7 +29,7 @@ internal static class TypedCssClassStatics {
 				writer.WriteLine( "/// <summary>" );
 				writer.WriteLine( "/// Constant for the '{0}' class.".FormatWith( elementClass ) );
 				writer.WriteLine( "/// </summary>" );
-				var identifier = EwlStatics.GetCSharpIdentifier( elementClass.CapitalizeString() );
+				var identifier = EwlStatics.GetCSharpIdentifier( elementClass.Capitalize() );
 				if( identifiers.Contains( identifier ) ) {
 					var uniqueIdentifier = identifier;
 					var i = 0;
