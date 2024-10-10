@@ -1,6 +1,7 @@
 ﻿#nullable disable
 using System.Collections.Immutable;
 using System.Text;
+using StackExchange.Profiling;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
@@ -216,7 +217,8 @@ internal class PageTree {
 		}
 
 		using( var jsInitStatementWriter = new StringWriter( elementJsInitStatements ) )
-			prepareForRendering( rootNode, focusKey is null, jsInitStatementWriter );
+			using( MiniProfiler.Current.Step( "EWF - Prepare page tree for rendering" ) )
+				prepareForRendering( rootNode, focusKey is null, jsInitStatementWriter );
 
 		if( focusKey is not null && activeAutofocusRegionsExist && !elementFocused )
 			throw new ApplicationException( "The active autofocus regions do not contain any focusable elements." );
@@ -226,6 +228,7 @@ internal class PageTree {
 
 	public void WriteMarkup( TextWriter writer ) {
 		writer.Write( "<!DOCTYPE html>" );
-		rootNode.MarkupWriter( writer );
+		using( MiniProfiler.Current.Step( "EWF - Write markup" ) )
+			rootNode.MarkupWriter( writer );
 	}
 }
