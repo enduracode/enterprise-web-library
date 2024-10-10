@@ -153,22 +153,14 @@ public class LocalIdentityProvider: IdentityProvider {
 			user = UserManagementStatics.GetUser( UserManagementStatics.SystemProvider.InsertOrUpdateUser( null, emailAddress, newUserRoleId.Value ), true )!;
 		}
 
-		string code;
-		var salt = new byte[ 16 ];
 		const string numbers = "123456789";
-		using( var rng = RandomNumberGenerator.Create() ) {
-			var bytes = new byte[ 4 ];
-			var codeBuilder = new StringBuilder();
-			for( var i = 0; i < 6; i += 1 ) {
-				rng.GetBytes( bytes );
-				codeBuilder.Append( numbers[ (int)( BitConverter.ToUInt32( bytes, 0 ) % numbers.Length ) ] );
-			}
-			code = codeBuilder.ToString();
-
-			rng.GetBytes( salt );
-		}
-
+		var codeBuilder = new StringBuilder();
+		for( var i = 0; i < 6; i += 1 )
+			codeBuilder.Append( numbers[ RandomNumberGenerator.GetInt32( numbers.Length ) ] );
+		var code = codeBuilder.ToString();
 		var codeDuration = Duration.FromMinutes( 10 );
+
+		var salt = RandomNumberGenerator.GetBytes( 16 );
 		loginCodeUpdater(
 			user.UserId,
 			salt,
