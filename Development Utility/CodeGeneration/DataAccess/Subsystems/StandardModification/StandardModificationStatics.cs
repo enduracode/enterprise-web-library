@@ -378,8 +378,8 @@ internal static class StandardModificationStatics {
 			writer,
 			"Gets " + ( columnIsReadOnly ? "" : "or sets " ) + "the value for the " + column.Name +
 			$" column, which {column.GetNullabilityPhrase()}. Throws an exception if the value has not been initialized." );
-		var propertyDeclarationBeginning = "public " + column.DataTypeName + " " + EwlStatics.GetCSharpIdentifier( column.PascalCasedNameExceptForOracle ) +
-		                                   " { get { return " + getColumnFieldName( column ) + ".Value; } ";
+		var propertyDeclarationBeginning = "public " + column.DataTypeName + " " + EwlStatics.GetCSharpIdentifier( column.PascalCasedName ) + " { get { return " +
+		                                   getColumnFieldName( column ) + ".Value; } ";
 		if( columnIsReadOnly )
 			writer.WriteLine( propertyDeclarationBeginning + "}" );
 		else {
@@ -390,8 +390,8 @@ internal static class StandardModificationStatics {
 				"Indicates whether or not the value for the " + column.Name +
 				" has been set since object creation or the last call to Execute, whichever was latest." );
 			writer.WriteLine(
-				"public bool " + EwlStatics.GetCSharpIdentifier( column.PascalCasedNameExceptForOracle + "HasChanged" ) + " { get { return " +
-				getColumnFieldName( column ) + ".Changed; } }" );
+				"public bool " + EwlStatics.GetCSharpIdentifier( column.PascalCasedName + "HasChanged" ) + " { get { return " + getColumnFieldName( column ) +
+				".Changed; } }" );
 		}
 	}
 
@@ -513,7 +513,7 @@ internal static class StandardModificationStatics {
 				"modTableInsert.AddColumnModifications( new[] {{ {0} }} );".FormatWith(
 					StringTools.ConcatenateWithDelimiter(
 						", ",
-						columns.KeyColumns.Select( i => i.GetCommandColumnValueExpression( EwlStatics.GetCSharpIdentifier( i.PascalCasedNameExceptForOracle ) ) ) ) ) );
+						columns.KeyColumns.Select( i => i.GetCommandColumnValueExpression( EwlStatics.GetCSharpIdentifier( i.PascalCasedName ) ) ) ) ) );
 			writer.WriteLine( "modTableInsert.Execute( {0}, isLongRunning: isLongRunning );".FormatWith( DataAccessStatics.GetConnectionExpression( database ) ) );
 		}
 
@@ -524,7 +524,7 @@ internal static class StandardModificationStatics {
 			foreach( var column in columns.KeyColumns )
 				writer.WriteLine(
 					"conditions.Add( new " + DataAccessStatics.GetEqualityConditionClassName( cn, database, tableName, column ) + "( " +
-					EwlStatics.GetCSharpIdentifier( column.PascalCasedNameExceptForOracle ) + " ) );" );
+					EwlStatics.GetCSharpIdentifier( column.PascalCasedName ) + " ) );" );
 		}
 
 		writer.WriteLine( "}" ); // if insert
@@ -570,7 +570,7 @@ internal static class StandardModificationStatics {
 						writer.WriteLine(
 							"if( {0}.Changed ) modTableNewKeyInsert.AddSelectValue( {1} );".FormatWith(
 								getColumnFieldName( column ),
-								column.GetCommandParameterValueExpression( EwlStatics.GetCSharpIdentifier( column.PascalCasedNameExceptForOracle ) ) ) );
+								column.GetCommandParameterValueExpression( EwlStatics.GetCSharpIdentifier( column.PascalCasedName ) ) ) );
 						writer.WriteLine( "else modTableNewKeyInsert.AddSelectExpression( \"{0}\" );".FormatWith( column.DelimitedIdentifier.EscapeForLiteral() ) );
 					}
 				writer.WriteLine( "modTableNewKeyInsert.AddConditions( conditions!.Select( i => i.CommandCondition ) );" );
@@ -610,8 +610,7 @@ internal static class StandardModificationStatics {
 		writer.WriteLine( "var values = new List<InlineDbCommandColumnValue>();" );
 		foreach( var column in nonIdentityColumns ) {
 			writer.WriteLine( "if( " + getColumnFieldName( column ) + ".Changed )" );
-			writer.WriteLine(
-				"values.Add( {0} );".FormatWith( column.GetCommandColumnValueExpression( EwlStatics.GetCSharpIdentifier( column.PascalCasedNameExceptForOracle ) ) ) );
+			writer.WriteLine( "values.Add( {0} );".FormatWith( column.GetCommandColumnValueExpression( EwlStatics.GetCSharpIdentifier( column.PascalCasedName ) ) ) );
 		}
 		writer.WriteLine( "return values;" );
 		writer.WriteLine( "}" );

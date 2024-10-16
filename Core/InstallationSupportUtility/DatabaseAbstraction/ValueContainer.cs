@@ -22,13 +22,9 @@ public class ValueContainer {
 	private readonly bool allowsNull;
 	private readonly bool? allowsEmpty;
 
-	// We'll remove this when we're ready to migrate Oracle systems to Pascal-cased column names.
-	private readonly string pascalCasedNameExceptForOracle;
-
 	public ValueContainer( string name, Type dataType, string dbTypeString, int size, short? numericScale, bool allowsNull, DatabaseInfo databaseInfo ) {
 		this.name = name;
 		pascalCasedName = databaseInfo is OracleInfo ? name.OracleToEnglish().EnglishToPascal() : name;
-		pascalCasedNameExceptForOracle = databaseInfo is OracleInfo ? name : pascalCasedName;
 		unconvertedDataType = dataType;
 
 		// MySQL LONGTEXT returns -1 for size.
@@ -68,7 +64,6 @@ public class ValueContainer {
 
 	public string Name => name;
 	public string PascalCasedName => pascalCasedName;
-	public string PascalCasedNameExceptForOracle => pascalCasedNameExceptForOracle;
 	public string CamelCasedName => pascalCasedName.Uncapitalize();
 
 	public Type DataType => dataType;

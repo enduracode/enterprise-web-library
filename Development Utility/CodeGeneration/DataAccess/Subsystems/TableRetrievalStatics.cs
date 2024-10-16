@@ -40,7 +40,7 @@ internal static class TableRetrievalStatics {
 						return;
 					writer.WriteLine(
 						"public UserTransaction Transaction { get { return RevisionHistoryStatics.UserTransactionsById[ RevisionHistoryStatics.RevisionsById[ System.Convert.ToInt32( " +
-						EwlStatics.GetCSharpIdentifier( columns.PrimaryKeyAndRevisionIdColumn!.PascalCasedNameExceptForOracle ) + " ) ].UserTransactionId ]; } }" );
+						EwlStatics.GetCSharpIdentifier( columns.PrimaryKeyAndRevisionIdColumn!.PascalCasedName ) + " ) ].UserTransactionId ]; } }" );
 				},
 				_ => {
 					if( !columns.HasKeyColumns || !columns.DataColumns.Any() )
@@ -53,7 +53,7 @@ internal static class TableRetrievalStatics {
 					writer.WriteLine(
 						"return " + modClass + ".CreateForSingleRowUpdate" + revisionHistorySuffix + "( " + StringTools.ConcatenateWithDelimiter(
 							", ",
-							columns.AllColumnsExceptRowVersion.Select( i => EwlStatics.GetCSharpIdentifier( i.PascalCasedNameExceptForOracle ) ).ToArray() ) + " );" );
+							columns.AllColumnsExceptRowVersion.Select( i => EwlStatics.GetCSharpIdentifier( i.PascalCasedName ) ).ToArray() ) + " );" );
 					writer.WriteLine( "}" );
 				} );
 			writeCacheClass( cn, writer, database, table.name, columns, table.hasModTable, isRevisionHistoryTable );
@@ -555,7 +555,7 @@ internal static class TableRetrievalStatics {
 				writer.WriteLine( "cache.LatestRevisionRowsByPk.EnsureCapacity( cache.LatestRevisionRowsByPk.Count + results.Count );" );
 			writer.WriteLine( "foreach( var i in results ) {" );
 			var pk = RetrievalStatics.GetColumnTupleExpression(
-				tableColumns.KeyColumns.Select( i => "i." + EwlStatics.GetCSharpIdentifier( i.PascalCasedNameExceptForOracle ) ).Materialize() );
+				tableColumns.KeyColumns.Select( i => "i." + EwlStatics.GetCSharpIdentifier( i.PascalCasedName ) ).Materialize() );
 			writer.WriteLine( "cache.RowsByPk.TryAdd( " + pk + ", i );" );
 			if( excludesPreviousRevisions )
 				writer.WriteLine( "cache.LatestRevisionRowsByPk.TryAdd( " + pk + ", i );" );
@@ -589,8 +589,7 @@ internal static class TableRetrievalStatics {
 
 	private static void writeToIdDictionaryMethod( TextWriter writer, TableColumns tableColumns ) {
 		writer.WriteLine( "public static Dictionary<" + tableColumns.KeyColumns.Single().DataTypeName + ", Row> ToIdDictionary( this IEnumerable<Row> rows ) {" );
-		writer.WriteLine(
-			"return rows.ToDictionary( i => i." + EwlStatics.GetCSharpIdentifier( tableColumns.KeyColumns.Single().PascalCasedNameExceptForOracle ) + " );" );
+		writer.WriteLine( "return rows.ToDictionary( i => i." + EwlStatics.GetCSharpIdentifier( tableColumns.KeyColumns.Single().PascalCasedName ) + " );" );
 		writer.WriteLine( "}" );
 	}
 

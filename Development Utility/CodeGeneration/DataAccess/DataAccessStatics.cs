@@ -263,8 +263,7 @@ internal static class DataAccessStatics {
 					column.PascalCasedName,
 					retrievalClassName,
 					column.PascalCasedName.CamelToEnglish() ) );
-			writer.WriteLine(
-				"return revisionDelta.GetValueDelta( valueName, i => i.{0} );".FormatWith( EwlStatics.GetCSharpIdentifier( column.PascalCasedNameExceptForOracle ) ) );
+			writer.WriteLine( "return revisionDelta.GetValueDelta( valueName, i => i.{0} );".FormatWith( EwlStatics.GetCSharpIdentifier( column.PascalCasedName ) ) );
 			writer.WriteLine( "}" );
 		}
 	}

@@ -74,7 +74,6 @@ internal class Column {
 	internal string Name => valueContainer.Name;
 	internal string DelimitedIdentifier => delimitedIdentifier;
 	internal string PascalCasedName => valueContainer.PascalCasedName;
-	internal string PascalCasedNameExceptForOracle => valueContainer.PascalCasedNameExceptForOracle;
 	internal string CamelCasedName => valueContainer.CamelCasedName;
 
 	/// <summary>
