@@ -48,7 +48,7 @@ public class DateControlSetup {
 		Action? validationErrorNotifier = null ) =>
 		new( displaySetup, true, classes, "", null, null, null, validationPredicate, validationErrorNotifier );
 
-	internal readonly Func<LocalDate?, bool, LocalDate?, LocalDate?, Action<LocalDate?, Validator>?, ( FormControlLabeler, PhrasingComponent, EwfValidation )>
+	internal readonly Func<LocalDate?, bool, LocalDate?, LocalDate?, Action<LocalDate?, Validator>?, ( FormControlLabeler, PhrasingComponent, EwfValidation? )>
 		LabelerAndComponentAndValidationGetter;
 
 	internal DateControlSetup(
