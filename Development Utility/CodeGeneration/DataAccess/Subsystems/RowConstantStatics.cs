@@ -9,7 +9,8 @@ internal static class RowConstantStatics {
 	private const string dictionaryName = "valuesAndNames";
 
 	internal static void Generate(
-		DatabaseConnection cn, TextWriter writer, string baseNamespace, Database database, EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
+		DatabaseConnection cn, TextWriter writer, string baseNamespace, Database database,
+		EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
 		if( configuration.rowConstantTables == null )
 			return;
 
@@ -33,12 +34,7 @@ internal static class RowConstantStatics {
 					cn,
 					reader => {
 						while( reader.Read() ) {
-							if( reader.IsDBNull( reader.GetOrdinal( valueColumn.Name ) ) )
-								values.Add( valueColumn.NullValueExpression.Any() ? valueColumn.NullValueExpression : "null" );
-							else {
-								var valueString = valueColumn.ConvertIncomingValue( reader[ valueColumn.Name ] ).ToString()!;
-								values.Add( valueColumn.DataTypeName == typeof( string ).ToString() ? "\"{0}\"".FormatWith( valueString ) : valueString );
-							}
+							values.Add( valueColumn.GetDataReaderValue( reader ) );
 							names.Add( nameColumn.ConvertIncomingValue( reader[ nameColumn.Name ] ).ToString()! );
 						}
 					} );

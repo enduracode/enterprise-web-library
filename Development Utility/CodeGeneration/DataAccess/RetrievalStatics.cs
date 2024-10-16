@@ -96,11 +96,7 @@ internal static class RetrievalStatics {
 	}
 
 	private static void writeColumnComment( TextWriter writer, Column column ) {
-		CodeGenerationStatics.AddSummaryDocComment(
-			writer,
-			"Gets the value in the {0} column, which will {1} be null.".FormatWith(
-				column.Name,
-				column.AllowsNull && !column.NullValueExpression.Any() ? "sometimes" : "never" ) );
+		CodeGenerationStatics.AddSummaryDocComment( writer, $"Gets the value in the {column.Name} column, which {column.GetNullabilityPhrase()}." );
 	}
 
 	public static string GetColumnTupleTypeName( IReadOnlyCollection<Column> columns ) =>

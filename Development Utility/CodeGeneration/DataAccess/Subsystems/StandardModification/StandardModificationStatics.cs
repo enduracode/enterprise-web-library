@@ -373,7 +373,7 @@ internal static class StandardModificationStatics {
 		CodeGenerationStatics.AddSummaryDocComment(
 			writer,
 			"Gets " + ( columnIsReadOnly ? "" : "or sets " ) + "the value for the " + column.Name +
-			" column. Throws an exception if the value has not been initialized. " + getComment( column ) );
+			$" column, which {column.GetNullabilityPhrase()}. Throws an exception if the value has not been initialized." );
 		var propertyDeclarationBeginning = "public " + column.DataTypeName + " " + EwlStatics.GetCSharpIdentifier( column.PascalCasedNameExceptForOracle ) +
 		                                   " { get { return " + getColumnFieldName( column ) + ".Value; } ";
 		if( columnIsReadOnly )
@@ -408,11 +408,10 @@ internal static class StandardModificationStatics {
 
 	private static void writeDocCommentsForColumnParams( IEnumerable<Column> columns ) {
 		foreach( var column in columns )
-			CodeGenerationStatics.AddParamDocComment( writer, column.CamelCasedName, getComment( column ) );
-	}
-
-	private static string getComment( Column column ) {
-		return column.AllowsNull && !column.NullValueExpression.Any() ? "Object allows null." : "Object does not allow null.";
+			CodeGenerationStatics.AddParamDocComment(
+				writer,
+				column.CamelCasedName,
+				$"The value for the {column.Name} column, which {column.GetNullabilityPhrase()}." );
 	}
 
 	private static void writeColumnParameterDeclarations( IEnumerable<Column> columns ) {

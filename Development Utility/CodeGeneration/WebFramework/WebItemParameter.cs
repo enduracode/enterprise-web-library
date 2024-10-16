@@ -142,7 +142,7 @@ internal class WebItemParameter {
 			name,
 			type,
 			normalizedTypeName,
-			normalizedTypeName + ( TypeIsNullable ? "" : "?" ),
+			normalizedTypeName + ( TypeIsNullable || IsString ? "" : "?" ),
 			normalizedElementTypeName,
 			null,
 			null );

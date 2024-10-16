@@ -349,7 +349,7 @@ internal static class FormItemStatics {
 				new CSharpParameter( "RadioListSetup<{0}>".FormatWith( field.TypeName ), "controlSetup" ).ToCollection(),
 				false,
 				new CSharpParameter( "string", "defaultValueItemLabel", defaultValue: field.TypeIs( typeof( string ) ) ? "\"\"" : "\"None\"" ).ToCollection(),
-				field.TypeIs( typeof( string ) ) ? field.NullableTypeName : "SpecifiedValue<{0}>?".FormatWith( field.NullableTypeName ),
+				field.TypeIs( typeof( string ) ) ? field.NullableTypeName + "?" : "SpecifiedValue<{0}>?".FormatWith( field.NullableTypeName ),
 				Enumerable.Empty<CSharpParameter>(),
 				true,
 				dv =>
@@ -382,7 +382,7 @@ internal static class FormItemStatics {
 					  ? new CSharpParameter( "string", "defaultValueItemLabel", defaultValue: "\"\"" ).ToCollection()
 					  : Enumerable.Empty<CSharpParameter>() )
 				.Append( new CSharpParameter( "bool", "placeholderIsValid", field.TypeIs( typeof( string ) ) ? "false" : "true" ) ),
-				field.TypeIs( typeof( string ) ) ? field.NullableTypeName : "SpecifiedValue<{0}>?".FormatWith( field.NullableTypeName ),
+				field.TypeIs( typeof( string ) ) ? field.NullableTypeName + "?" : "SpecifiedValue<{0}>?".FormatWith( field.NullableTypeName ),
 				Enumerable.Empty<CSharpParameter>(),
 				true,
 				dv =>
@@ -559,9 +559,8 @@ internal static class FormItemStatics {
 		parameters.Add( new CSharpParameter( "IReadOnlyCollection<PhrasingComponent>?", "label", "null" ) );
 		parameters.Add(
 			new CSharpParameter(
-				field.TypeIs( typeof( string ) ) || field.EnumerableElementTypeName.Length > 0
-					? field.NullableTypeName
-					: "SpecifiedValue<{0}>?".FormatWith( field.NullableTypeName ),
+				field.TypeIs( typeof( string ) ) ? field.NullableTypeName + "?" :
+				field.EnumerableElementTypeName.Length > 0 ? field.NullableTypeName : "SpecifiedValue<{0}>?".FormatWith( field.NullableTypeName ),
 				"value",
 				"null" ) );
 		parameters.Add( new CSharpParameter( "System.Func<System.Action<{0}>,EwfValidation>?".FormatWith( field.TypeName ), "validationGetter", "null" ) );

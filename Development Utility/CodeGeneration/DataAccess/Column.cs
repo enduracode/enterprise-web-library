@@ -1,4 +1,4 @@
-using System.Data;
+ï»¿using System.Data;
 using System.Data.Common;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.DatabaseSpecification;
@@ -83,12 +83,11 @@ internal class Column {
 	internal string DataTypeName => valueContainer.DataTypeName;
 
 	/// <summary>
-	/// Gets the name of the nullable data type for this column, regardless of whether the column allows null. The nullable data type is equivalent to the data
-	/// type if the null value is represented with an expression other than “null”.
+	/// Gets the name of the nullable data type for this column, regardless of whether the column allows null. If the data type is string, the nullable data type
+	/// is also string since the null value is represented with the empty string.
 	/// </summary>
 	internal string NullableDataTypeName => valueContainer.NullableDataTypeName;
 
-	internal string NullValueExpression => valueContainer.NullValueExpression;
 	internal string UnconvertedDataTypeName => valueContainer.UnconvertedDataTypeName;
 
 	internal string GetIncomingValueConversionExpression( string valueExpression ) => valueContainer.GetIncomingValueConversionExpression( valueExpression );
@@ -97,6 +96,7 @@ internal class Column {
 
 	internal int Size => valueContainer.Size;
 	internal bool AllowsNull => valueContainer.AllowsNull;
+	internal bool? AllowsEmpty => valueContainer.AllowsEmpty;
 	internal bool IsIdentity => isIdentity;
 	internal bool IsRowVersion => isRowVersion;
 	internal bool IsKey => isKey!.Value;
@@ -119,13 +119,21 @@ internal class Column {
 			       ? "{0}.IsDBNull( {1} ) ? {2} : {3}".FormatWith(
 				       readerName,
 				       ordinalOverride ?? ordinal,
-				       valueContainer.NullValueExpression.Any() ? valueContainer.NullValueExpression : "({0})null".FormatWith( valueContainer.NullableDataTypeName ),
+				       valueContainer.DataType == typeof( string ) ? "\"\"" : "({0})null".FormatWith( valueContainer.NullableDataTypeName ),
 				       getValueExpression )
 			       : getValueExpression;
 	}
 
+	internal string GetDataReaderValue( DbDataReader reader ) {
+		if( valueContainer.AllowsNull && reader.IsDBNull( ordinal ) )
+			return valueContainer.DataType == typeof( string ) ? "\"\"" : "null";
+
+		var valueString = valueContainer.ConvertIncomingValue( reader.GetValue( ordinal ) ).ToString()!;
+		return valueContainer.DataType == typeof( string ) ? $"\"{valueString}\"" : valueString;
+	}
+
 	internal ModificationField GetModificationField( string privateFieldName ) {
-		var type = valueContainer.DataType.IsValueType && valueContainer.NullValueExpression.Length == 0 && valueContainer.AllowsNull
+		var type = valueContainer.DataType.IsValueType && valueContainer.AllowsNull
 			           ? typeof( Nullable<> ).MakeGenericType( valueContainer.DataType )
 			           : valueContainer.DataType;
 		return new ModificationField(
@@ -140,4 +148,6 @@ internal class Column {
 			valueContainer.NumericScale,
 			privateFieldNameOverride: privateFieldName );
 	}
+
+	internal string GetNullabilityPhrase() => valueContainer.GetNullabilityPhrase();
 }

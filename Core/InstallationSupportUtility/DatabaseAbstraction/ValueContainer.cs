@@ -11,7 +11,6 @@ public class ValueContainer {
 	private readonly string pascalCasedName;
 
 	private readonly Type dataType;
-	private readonly string nullValueExpression;
 	private readonly Type unconvertedDataType;
 	private readonly Func<string, string> incomingValueConversionExpressionGetter;
 	private readonly Func<object, object> incomingValueConverter;
@@ -21,6 +20,7 @@ public class ValueContainer {
 	private readonly int size;
 	private readonly short? numericScale;
 	private readonly bool allowsNull;
+	private readonly bool? allowsEmpty;
 
 	// We'll remove this when we're ready to migrate Oracle systems to Pascal-cased column names.
 	private readonly string pascalCasedNameExceptForOracle;
@@ -29,7 +29,6 @@ public class ValueContainer {
 		this.name = name;
 		pascalCasedName = databaseInfo is OracleInfo ? name.OracleToEnglish().EnglishToPascal() : name;
 		pascalCasedNameExceptForOracle = databaseInfo is OracleInfo ? name : pascalCasedName;
-		nullValueExpression = databaseInfo is OracleInfo && new[] { "Clob", "NClob" }.Contains( dbTypeString ) ? "\"\"" : "";
 		unconvertedDataType = dataType;
 
 		// MySQL LONGTEXT returns -1 for size.
@@ -56,6 +55,15 @@ public class ValueContainer {
 		this.size = size;
 		this.numericScale = numericScale;
 		this.allowsNull = allowsNull;
+
+		allowsEmpty = dataType != typeof( string )
+			              ? null
+			              : allowsNull || databaseInfo switch
+				              {
+					              MySqlInfo => !string.Equals( dbTypeString, "JSON", StringComparison.Ordinal ),
+					              OracleInfo => new[] { "Clob", "NClob" }.Contains( dbTypeString, StringComparer.Ordinal ),
+					              _ => true
+				              };
 	}
 
 	public string Name => name;
@@ -71,12 +79,10 @@ public class ValueContainer {
 	public string DataTypeName => allowsNull ? NullableDataTypeName : dataType.ToString();
 
 	/// <summary>
-	/// Gets the name of the nullable data type for this container, regardless of whether the container allows null. The nullable data type is equivalent to the
-	/// data type if the null value is represented with an expression other than “null”.
+	/// Gets the name of the nullable data type for this container, regardless of whether the container allows null. If the data type is string, the nullable data
+	/// type is also string since the null value is represented with the empty string.
 	/// </summary>
-	public string NullableDataTypeName => nullValueExpression.Length > 0 ? dataType.ToString() : dataType + "?";
-
-	public string NullValueExpression => nullValueExpression;
+	public string NullableDataTypeName => dataType == typeof( string ) ? dataType.ToString() : dataType + "?";
 
 	public string UnconvertedDataTypeName => unconvertedDataType.ToString();
 
@@ -91,20 +97,21 @@ public class ValueContainer {
 	public int Size => size;
 	public short? NumericScale => numericScale;
 	public bool AllowsNull => allowsNull;
+	public bool? AllowsEmpty => allowsEmpty;
 
 	public string GetParameterValueExpression( string valueExpression ) {
 		var conversionExpression = outgoingValueConversionExpressionGetter( valueExpression );
-		var parameterValueExpression = valueExpression == "null"
-			                               ? valueExpression
-			                               :
-			                               conversionExpression == valueExpression || ( dataType.IsValueType && ( nullValueExpression.Any() || !allowsNull ) )
-				                               ?
-				                               conversionExpression
-				                               : "{0} != null ? {1} : null".FormatWith(
-					                               valueExpression,
-					                               dataType.IsValueType
-						                               ? "({0}?){1}".FormatWith( UnconvertedDataTypeName, conversionExpression )
-						                               : conversionExpression );
+		var parameterValueExpression = valueExpression == "null" ? valueExpression :
+		                               conversionExpression == valueExpression || ( dataType.IsValueType && !allowsNull ) ? conversionExpression :
+		                               "{0} is null ? null : {1}".FormatWith( valueExpression, conversionExpression );
 		return "new DbParameterValue( {0}, \"{1}\" )".FormatWith( parameterValueExpression, dbTypeString );
+	}
+
+	public string GetNullabilityPhrase() {
+		if( !allowsEmpty.HasValue )
+			return allowsNull ? "can be null" : "cannot be null";
+		if( allowsEmpty.Value )
+			return "cannot be null but can be empty";
+		return allowsNull ? "can be null but cannot be empty" : "cannot be null or empty";
 	}
 }
