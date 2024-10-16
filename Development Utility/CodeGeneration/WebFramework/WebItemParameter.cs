@@ -33,7 +33,7 @@ internal class WebItemParameter {
 						references: MetadataReference.CreateFromFile( typeof( object ).Assembly.Location ).ToCollection(),
 						options: new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary ) )
 					.Emit( stream );
-				if( !result.Success )
+				if( !result.Success || result.Diagnostics.Any( i => string.Equals( i.Id, "CS8632", StringComparison.Ordinal ) ) )
 					throw new UserCorrectableException( "The type name \"" + typeName + "\" is invalid." );
 				type = ( (FieldInfo)Assembly.Load( stream.ToArray() ).GetType( "A" )!.GetMember( "B" ).Single() ).FieldType;
 			}
