@@ -18,6 +18,11 @@ internal static class StandardModificationStatics {
 		var subsystemName = "{0}Modification".FormatWith( database.SecondaryDatabaseName );
 		var subsystemNamespace = "namespace {0}.{1}".FormatWith( baseNamespace, subsystemName );
 
+		foreach( var filePath in IoMethods.GetFilePathsInFolder(
+			        EwlStatics.CombinePaths( templateBasePath, subsystemName ),
+			        searchPattern: "*" + DataAccessStatics.CSharpTemplateFileExtension ) )
+			IoMethods.DeleteFile( filePath );
+
 		writer.WriteLine( "{0} {{".FormatWith( subsystemNamespace ) );
 		foreach( var table in tables ) {
 			var isRevisionHistoryTable = DataAccessStatics.IsRevisionHistoryTable( table.name, configuration );
@@ -27,10 +32,9 @@ internal static class StandardModificationStatics {
 				writeClass( cn, table.name, true, table.hasModTable, true );
 
 			// We do not create templates for direct modification classes.
-			var templateClassName = GetClassName( cn, table.name, isRevisionHistoryTable, isRevisionHistoryTable );
+			var templateClassName = GetClassName( cn, table.name, isRevisionHistoryTable, isRevisionHistoryTable, omitAtSignPrefixIfNotRequired: true );
 
 			var templateFilePath = EwlStatics.CombinePaths( templateBasePath, subsystemName, templateClassName );
-			IoMethods.DeleteFile( templateFilePath + DataAccessStatics.CSharpTemplateFileExtension );
 
 			// If a real file exists, don’t create a template.
 			if( File.Exists( templateFilePath + ".cs" ) )
@@ -693,9 +697,11 @@ internal static class StandardModificationStatics {
 
 	private static string getColumnFieldName( Column column ) => EwlStatics.GetCSharpIdentifier( column.CamelCasedName + "ColumnValue" );
 
-	internal static string GetClassName( DatabaseConnection cn, string table, bool isRevisionHistoryTable, bool isRevisionHistoryClass ) =>
+	internal static string GetClassName(
+		DatabaseConnection cn, string table, bool isRevisionHistoryTable, bool isRevisionHistoryClass, bool omitAtSignPrefixIfNotRequired = false ) =>
 		EwlStatics.GetCSharpIdentifier(
 			isRevisionHistoryTable && !isRevisionHistoryClass
 				? "Direct" + table.TableNameToPascal( cn ) + "ModificationWithRevisionBypass"
-				: table.TableNameToPascal( cn ) + "Modification" );
+				: table.TableNameToPascal( cn ) + "Modification",
+			omitAtSignPrefixIfNotRequired: omitAtSignPrefixIfNotRequired );
 }

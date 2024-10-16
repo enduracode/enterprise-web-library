@@ -17,6 +17,11 @@ internal static class TableRetrievalStatics {
 		var subsystemName = "{0}TableRetrieval".FormatWith( database.SecondaryDatabaseName );
 		var subsystemNamespace = "namespace {0}.{1}".FormatWith( baseNamespace, subsystemName );
 
+		foreach( var filePath in IoMethods.GetFilePathsInFolder(
+			        EwlStatics.CombinePaths( templateBasePath, subsystemName ),
+			        searchPattern: "*" + DataAccessStatics.CSharpTemplateFileExtension ) )
+			IoMethods.DeleteFile( filePath );
+
 		writer.WriteLine( "{0} {{".FormatWith( subsystemNamespace ) );
 		foreach( var table in tables ) {
 			CodeGenerationStatics.AddSummaryDocComment( writer, "Contains logic that retrieves rows from the " + table.name + " table." );
@@ -147,9 +152,8 @@ internal static class TableRetrievalStatics {
 			if( table.hasModTable )
 				initStatements.Add( "{0}.{1}.{2}.__Init();".FormatWith( baseNamespace, subsystemName, GetClassName( cn, table.name ) ) );
 
-			var templateClassName = GetClassName( cn, table.name );
+			var templateClassName = GetClassName( cn, table.name, omitAtSignPrefixIfNotRequired: true );
 			var templateFilePath = EwlStatics.CombinePaths( templateBasePath, subsystemName, templateClassName );
-			IoMethods.DeleteFile( templateFilePath + DataAccessStatics.CSharpTemplateFileExtension );
 
 			// If a real file exists, don’t create a template.
 			if( File.Exists( templateFilePath + ".cs" ) )
@@ -590,6 +594,8 @@ internal static class TableRetrievalStatics {
 		writer.WriteLine( "}" );
 	}
 
-	internal static string GetClassName( DatabaseConnection cn, string table ) =>
-		EwlStatics.GetCSharpIdentifier( "{0}TableRetrieval".FormatWith( table.TableNameToPascal( cn ) ) );
+	internal static string GetClassName( DatabaseConnection cn, string table, bool omitAtSignPrefixIfNotRequired = false ) =>
+		EwlStatics.GetCSharpIdentifier(
+			"{0}TableRetrieval".FormatWith( table.TableNameToPascal( cn ) ),
+			omitAtSignPrefixIfNotRequired: omitAtSignPrefixIfNotRequired );
 }
