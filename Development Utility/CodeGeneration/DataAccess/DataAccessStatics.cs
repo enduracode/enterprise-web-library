@@ -245,9 +245,8 @@ internal static class DataAccessStatics {
 		writer.WriteLine( "}" );
 	}
 
-	internal static string TableNameToPascal( this string tableName, DatabaseConnection cn ) {
-		return cn.DatabaseInfo is MySqlInfo ? tableName.OracleToEnglish().EnglishToPascal() : tableName;
-	}
+	internal static string TableNameToPascal( this string tableName, DatabaseConnection cn ) =>
+		cn.DatabaseInfo is MySqlInfo or OracleInfo ? tableName.OracleToEnglish().EnglishToPascal() : tableName;
 
 	internal static string GetConnectionExpression( Database database ) {
 		return "DataAccessState.Current.{0}".FormatWith(
