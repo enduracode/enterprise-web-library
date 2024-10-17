@@ -573,9 +573,9 @@ internal static class FormItemStatics {
 			"return {0}.ToFormItem( setup: setup, label: label, validation: {1} );".FormatWith(
 				"contentGetter( {0} )".FormatWith(
 					field.TypeIs( typeof( string ) ) || field.EnumerableElementTypeName.Length > 0
-						? "value ?? {0}".FormatWith( EwlStatics.GetCSharpIdentifier( field.Name ) )
-						: "value != null ? value.Value : {0}".FormatWith( EwlStatics.GetCSharpIdentifier( field.Name ) ) ),
-				"validationGetter?.Invoke( v => {0} = v )".FormatWith( EwlStatics.GetCSharpIdentifier( field.Name ) ) ) );
+						? "value ?? {0}".FormatWith( EwlStatics.GetCSharpIdentifier( field.PascalCasedName ) )
+						: "value != null ? value.Value : {0}".FormatWith( EwlStatics.GetCSharpIdentifier( field.PascalCasedName ) ) ),
+				"validationGetter?.Invoke( v => {0} = v )".FormatWith( EwlStatics.GetCSharpIdentifier( field.PascalCasedName ) ) ) );
 		writer.WriteLine( "}" );
 	}
 
