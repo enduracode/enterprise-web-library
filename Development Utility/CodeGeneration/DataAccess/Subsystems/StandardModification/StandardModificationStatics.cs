@@ -153,7 +153,7 @@ internal static class StandardModificationStatics {
 		writeColumnValueAssignmentsFromParameters( columns.DataColumns, "mod" );
 		writer.WriteLine( "mod.Execute{0}( isLongRunning: isLongRunning );".FormatWith( additionalLogicSuffix ) );
 		if( returnColumn != null )
-			writer.WriteLine( "return mod." + returnColumn.Name + ";" );
+			writer.WriteLine( "return mod." + returnColumn.PascalCasedName + ";" );
 		writer.WriteLine( "}" );
 	}
 
