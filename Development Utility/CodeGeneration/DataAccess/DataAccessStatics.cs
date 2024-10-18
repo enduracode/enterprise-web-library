@@ -151,7 +151,7 @@ internal static class DataAccessStatics {
 					writer.WriteLine( "public static int GetNextValue() {" );
 					writer.WriteLine( "var command = " + GetConnectionExpression( database ) + ".DatabaseInfo.CreateCommand();" );
 					writer.WriteLine( "command.CommandText = \"SELECT NEXT VALUE FOR MainSequence\";" );
-					writer.WriteLine( "return (int)" + GetConnectionExpression( database ) + ".ExecuteScalarCommand( command );" );
+					writer.WriteLine( "return (int)" + GetConnectionExpression( database ) + ".ExecuteScalarCommand( command )!;" );
 					writer.WriteLine( "}" );
 					writer.WriteLine( "}" );
 					writer.WriteLine( "}" );
