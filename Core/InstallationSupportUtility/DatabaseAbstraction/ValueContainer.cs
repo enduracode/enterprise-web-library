@@ -106,7 +106,7 @@ public class ValueContainer {
 		if( !allowsEmpty.HasValue )
 			return allowsNull ? "can be null" : "cannot be null";
 		if( allowsEmpty.Value )
-			return "cannot be null but can be empty";
-		return allowsNull ? "can be null but cannot be empty" : "cannot be null or empty";
+			return "cannot be null but CAN be empty";
+		return allowsNull ? "can be null but CANNOT be empty" : "cannot be null or empty";
 	}
 }
