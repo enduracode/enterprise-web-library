@@ -35,7 +35,7 @@ public class EmailAttachment {
 		if( FilePath is not null )
 			return new System.Net.Mail.Attachment( FilePath );
 
-		var attachment = new System.Net.Mail.Attachment( new MemoryStream( Content! ), contentType );
+		var attachment = new System.Net.Mail.Attachment( new MemoryStream( Content! ), null, contentType );
 		attachment.ContentDisposition!.FileName = FileName;
 		return attachment;
 	}
