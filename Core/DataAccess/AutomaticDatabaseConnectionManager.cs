@@ -1,11 +1,14 @@
 ﻿using System.Threading;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
+using JetBrains.Annotations;
+using Tewl.IO;
 
 namespace EnterpriseWebLibrary.DataAccess;
 
 /// <summary>
 /// Manages transactions and cleanup for automatically-opened database connections in a data-access state object.
 /// </summary>
+[ PublicAPI ]
 public class AutomaticDatabaseConnectionManager {
 	private static Func<AutomaticDatabaseConnectionManager?>? currentManagerGetter;
 	private static AsyncLocal<AutomaticDatabaseConnectionManager?> currentManagerOverride = null!;
@@ -51,6 +54,12 @@ public class AutomaticDatabaseConnectionManager {
 	}
 
 	/// <summary>
+	/// Returns the path to a temporary folder that will be available for the lifetime of the connection manager, including during non-transactional modification
+	/// method execution.
+	/// </summary>
+	public static string GetTempFolderPath() => Current.tempFolderPath.Value;
+
+	/// <summary>
 	/// Executes the specified method with a current connection manager, then commits transactions and executes non-transactional modifications. The data-access
 	/// cache is enabled except during modifications.
 	/// </summary>
@@ -84,6 +93,7 @@ public class AutomaticDatabaseConnectionManager {
 	private bool primaryDatabaseConnectionInitialized;
 	private readonly List<string> secondaryDatabasesWithInitializedConnections = new();
 	private readonly List<Action> nonTransactionalModificationMethods = new();
+	private readonly Lazy<string> tempFolderPath = new( IoMethods.CreateTempFolder );
 	private bool modTransactionIncludesPrimaryDatabase;
 	private int? modTransactionSecondaryDatabaseCount;
 	private int modTransactionNonTransactionalMethodIndex;
@@ -211,15 +221,14 @@ public class AutomaticDatabaseConnectionManager {
 
 	internal void RollbackTransactions( bool cacheEnabled ) {
 		transactionsMarkedForRollback = true;
-		cleanUpConnectionsAndExecuteNonTransactionalModificationMethods( cacheEnabled );
+		cleanUpConnectionsAndExecuteNonTransactionalModificationMethods( cacheEnabled, ensureAllResourcesCleanedUp: true );
 	}
 
 	internal void CommitTransactionsForCleanup( bool cacheEnabled ) {
-		cleanUpConnectionsAndExecuteNonTransactionalModificationMethods( cacheEnabled, forbidNonTransactionalModificationMethodExecution: true );
+		cleanUpConnectionsAndExecuteNonTransactionalModificationMethods( cacheEnabled, ensureAllResourcesCleanedUp: true );
 	}
 
-	private void cleanUpConnectionsAndExecuteNonTransactionalModificationMethods(
-		bool cacheEnabled, bool forbidNonTransactionalModificationMethodExecution = false ) {
+	private void cleanUpConnectionsAndExecuteNonTransactionalModificationMethods( bool cacheEnabled, bool ensureAllResourcesCleanedUp = false ) {
 		if( inModificationTransaction )
 			if( transactionsMarkedForRollback ) {
 				modTransactionIncludesPrimaryDatabase = false;
@@ -229,10 +238,12 @@ public class AutomaticDatabaseConnectionManager {
 				throw new InvalidOperationException();
 
 		var methods = new List<Action>();
+
 		if( primaryDatabaseConnectionInitialized )
 			methods.Add( () => cleanUpConnection( dataAccessState.PrimaryDatabaseConnection ) );
 		foreach( var databaseName in secondaryDatabasesWithInitializedConnections )
 			methods.Add( () => cleanUpConnection( dataAccessState.GetSecondaryDatabaseConnection( databaseName ) ) );
+
 		methods.Add(
 			() => {
 				if( !nonTransactionalModificationMethods.Any() )
@@ -242,7 +253,7 @@ public class AutomaticDatabaseConnectionManager {
 					if( transactionsMarkedForRollback )
 						return;
 
-					if( forbidNonTransactionalModificationMethodExecution )
+					if( ensureAllResourcesCleanedUp )
 						throw new Exception(
 							"Non-transactional modification methods exist, but their execution is forbidden during connection cleanup because this could cause connections to be reinitialized." );
 
@@ -268,6 +279,14 @@ public class AutomaticDatabaseConnectionManager {
 					nonTransactionalModificationMethods.Clear();
 				}
 			} );
+
+		if( ensureAllResourcesCleanedUp )
+			methods.Add(
+				() => {
+					if( tempFolderPath.IsValueCreated )
+						IoMethods.DeleteFolder( tempFolderPath.Value );
+				} );
+
 		ExceptionHandlingTools.CallEveryMethod( methods.ToArray() );
 		transactionsMarkedForRollback = false;
 	}
