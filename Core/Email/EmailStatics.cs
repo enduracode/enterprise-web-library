@@ -106,13 +106,10 @@ public static class EmailStatics {
 		m.HtmlContent = message.BodyHtml;
 
 		foreach( var i in message.Attachments )
-			if( i.Stream == null )
+			if( i.FilePath is not null )
 				m.AddAttachment( Path.GetFileName( i.FilePath ), Convert.ToBase64String( File.ReadAllBytes( i.FilePath ) ) );
-			else {
-				using var stream = new MemoryStream();
-				i.Stream.CopyTo( stream );
-				m.AddAttachment( i.AttachmentDisplayName, Convert.ToBase64String( stream.ToArray() ) );
-			}
+			else
+				m.AddAttachment( i.FileName, Convert.ToBase64String( i.Content! ) );
 
 		return m;
 
