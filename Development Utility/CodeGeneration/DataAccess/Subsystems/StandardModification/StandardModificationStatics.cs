@@ -488,8 +488,8 @@ internal static class StandardModificationStatics {
 			writer.WriteLine( "var revisionHistorySetup = RevisionHistoryStatics.SystemProvider;" );
 			writer.WriteLine( getColumnFieldName( columns.PrimaryKeyAndRevisionIdColumn! ) + ".Value = revisionHistorySetup.GetNextMainSequenceValue();" );
 			writer.WriteLine(
-				"revisionHistorySetup.InsertRevision( System.Convert.ToInt32( " + getColumnFieldName( columns.PrimaryKeyAndRevisionIdColumn! ) +
-				".Value ), System.Convert.ToInt32( " + getColumnFieldName( columns.PrimaryKeyAndRevisionIdColumn! ) + ".Value ), " +
+				"revisionHistorySetup.InsertRevision( global::System.Convert.ToInt32( " + getColumnFieldName( columns.PrimaryKeyAndRevisionIdColumn! ) +
+				".Value ), global::System.Convert.ToInt32( " + getColumnFieldName( columns.PrimaryKeyAndRevisionIdColumn! ) + ".Value ), " +
 				DataAccessStatics.GetConnectionExpression( database ) + ".GetUserTransactionId() );" );
 		}
 
@@ -630,8 +630,8 @@ internal static class StandardModificationStatics {
 		writer.WriteLine( "command.AddConditions( getLatestRevisionsCondition().ToCollection() );" );
 		writer.WriteLine( "var latestRevisionIds = new List<int>();" );
 		writer.WriteLine(
-			"command.Execute( {0}, r => {{ while( r.Read() ) latestRevisionIds.Add( System.Convert.ToInt32( r[0] ) ); }}, isLongRunning: isLongRunning );".FormatWith(
-				DataAccessStatics.GetConnectionExpression( database ) ) );
+			"command.Execute( {0}, r => {{ while( r.Read() ) latestRevisionIds.Add( global::System.Convert.ToInt32( r[0] ) ); }}, isLongRunning: isLongRunning );"
+				.FormatWith( DataAccessStatics.GetConnectionExpression( database ) ) );
 		writer.WriteLine( "foreach( var latestRevisionId in latestRevisionIds ) {" );
 
 		// Get the latest revision.

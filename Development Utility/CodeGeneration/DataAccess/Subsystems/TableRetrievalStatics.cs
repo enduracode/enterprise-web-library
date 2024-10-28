@@ -39,7 +39,7 @@ internal static class TableRetrievalStatics {
 					if( !isRevisionHistoryTable )
 						return;
 					writer.WriteLine(
-						"public UserTransaction Transaction { get { return RevisionHistoryStatics.UserTransactionsById[ RevisionHistoryStatics.RevisionsById[ System.Convert.ToInt32( " +
+						"public UserTransaction Transaction { get { return RevisionHistoryStatics.UserTransactionsById[ RevisionHistoryStatics.RevisionsById[ global::System.Convert.ToInt32( " +
 						EwlStatics.GetCSharpIdentifier( columns.PrimaryKeyAndRevisionIdColumn!.PascalCasedName ) + " ) ].UserTransactionId ]; } }" );
 				},
 				_ => {
