@@ -28,7 +28,7 @@ create table Revisions(
 		not null
 		constraint RevisionsLatestRevisionIdFk references Revisions,
 	UserTransactionId int
-		null
+		not null
 		constraint RevisionsUserTransactionIdFk references UserTransactions,
 	constraint RevisionsLatestRevisionIdAndUserTransactionIdUnique unique( LatestRevisionId, UserTransactionId )
 )
