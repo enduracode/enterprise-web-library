@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using EnterpriseWebLibrary.Configuration;
 using JetBrains.Annotations;
+using NodaTime;
 using StackExchange.Profiling;
 using static MoreLinq.Extensions.FullJoinExtension;
 
@@ -101,7 +102,7 @@ public static class RevisionHistoryStatics {
 
 			var revisionsByUserTransactionId = RevisionsByUserTransactionId;
 			var entityTransactions = userTransactions.AsParallel()
-				.OrderBy( i => i.TransactionDateTime )
+				.OrderBy( i => i.TransactionTime )
 				.ThenBy( i => i.UserTransactionId )
 				.SelectMany(
 					transaction => {
@@ -156,12 +157,13 @@ public static class RevisionHistoryStatics {
 	public static IReadOnlyDictionary<int, UserTransaction?> GetLatestTransactionsByEntityId<ConceptualEntityStateType, ConceptualEntityActivityType, UserType>(
 		IEnumerable<TransactionListItem<ConceptualEntityStateType, ConceptualEntityActivityType, UserType>> transactionList ) {
 		var latestRevisionTransactionsByEntityId = ImmutableDictionary<int, UserTransaction?>.Empty.ToBuilder();
-		var cutoffDateAndTime = DateTime.Now.AddMinutes( ConfigurationStatics.IsLiveInstallation ? -5 : -1 );
+		var cutoffTime = SystemClock.Instance.GetCurrentInstant()
+			.Minus( ConfigurationStatics.IsLiveInstallation ? Duration.FromMinutes( 5 ) : Duration.FromMinutes( 1 ) );
 		foreach( var i in transactionList ) {
 			if( latestRevisionTransactionsByEntityId.ContainsKey( i.ConceptualEntityId ) )
 				continue;
 			var transaction = i.Transaction;
-			latestRevisionTransactionsByEntityId.Add( i.ConceptualEntityId, transaction.TransactionDateTime < cutoffDateAndTime ? transaction : null );
+			latestRevisionTransactionsByEntityId.Add( i.ConceptualEntityId, transaction.TransactionTime < cutoffTime ? transaction : null );
 		}
 		return latestRevisionTransactionsByEntityId.ToImmutable();
 	}

@@ -1,4 +1,5 @@
 ﻿using JetBrains.Annotations;
+using NodaTime;
 
 namespace EnterpriseWebLibrary.DataAccess.RevisionHistory;
 
@@ -8,37 +9,37 @@ namespace EnterpriseWebLibrary.DataAccess.RevisionHistory;
 [ PublicAPI ]
 public class UserTransaction {
 	private readonly int userTransactionId;
-	private readonly DateTime transactionDateTime;
 	private readonly int? userId;
+	private readonly Instant transactionTime;
 
 	/// <summary>
 	/// Creates a user transaction.
 	/// </summary>
-	public UserTransaction( int userTransactionId, DateTime transactionDateTime, int? userId ) {
+	public UserTransaction( int userTransactionId, int? userId, Instant transactionTime ) {
 		this.userTransactionId = userTransactionId;
-		this.transactionDateTime = transactionDateTime;
 		this.userId = userId;
+		this.transactionTime = transactionTime;
 	}
 
 	/// <summary>
-	/// Gets the transaction's ID.
+	/// Gets the transaction’s ID.
 	/// </summary>
 	public int UserTransactionId => userTransactionId;
 
 	/// <summary>
-	/// Gets the transaction's date/time.
+	/// Gets the transaction’s user ID.
 	/// </summary>
-	public DateTime TransactionDateTime => transactionDateTime;
+	public int? UserId => userId;
+
+	/// <summary>
+	/// Gets the transaction’s time.
+	/// </summary>
+	public Instant TransactionTime => transactionTime;
 
 	public string LocalTransactionDateAndTimeString {
 		get {
-			var localDateAndTime = TransactionDateTime;
+			var localDateAndTime = transactionTime.InZone( DateTimeZoneProviders.Tzdb.GetSystemDefault() ).ToDateTimeUnspecified();
 			return "{0}, {1}".FormatWith( localDateAndTime.ToDayMonthYearString( false ), localDateAndTime.ToHourAndMinuteString() );
 		}
 	}
-
-	/// <summary>
-	/// Gets the transaction's user ID.
-	/// </summary>
-	public int? UserId => userId;
 }

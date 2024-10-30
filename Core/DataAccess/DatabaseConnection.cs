@@ -579,7 +579,7 @@ public class DatabaseConnection {
 
 			var revisionHistorySetup = RevisionHistoryStatics.SystemProvider;
 			userTransactionId = revisionHistorySetup.GetNextMainSequenceValue();
-			revisionHistorySetup.InsertUserTransaction( userTransactionId.Value, DateTime.Now, userId );
+			revisionHistorySetup.InsertUserTransaction( userTransactionId.Value, userId, SystemClock.Instance.GetCurrentInstant() );
 		}
 		return userTransactionId.Value;
 	}
