@@ -10,21 +10,21 @@ namespace EnterpriseWebLibrary.DataAccess.RevisionHistory;
 public class TransactionListItem<ConceptualEntityStateType, ConceptualEntityActivityType, UserType> {
 	private readonly int conceptualEntityId;
 
-	private readonly Lazy<ImmutableDictionary<IEnumerable<RevisionId>, ImmutableDictionary<int, Tuple<Revision, UserTransaction, UserType>>>>
+	private readonly Lazy<ImmutableDictionary<IEnumerable<RevisionId>, ImmutableDictionary<int, Tuple<Revision, UserTransaction, UserType?>>>>
 		revisionDictionariesByEntityType;
 
 	private readonly Lazy<ConceptualEntityStateType> conceptualEntityState;
 	private readonly Lazy<ConceptualEntityActivityType> conceptualEntityActivity;
 	private readonly UserTransaction transaction;
-	private readonly UserType user;
+	private readonly UserType? user;
 	private readonly TransactionListItem<ConceptualEntityStateType, ConceptualEntityActivityType, UserType>? previous;
 
 	internal TransactionListItem(
 		int conceptualEntityId, IEnumerable<( IEnumerable<RevisionId>, IEnumerable<Revision> )> entityTypeAndRevisionSetPairs,
 		IEnumerable<( IEnumerable<EventId>, IEnumerable<int> )> eventListTypeAndEventIdSetPairs,
 		Func<Func<IEnumerable<RevisionId>, IEnumerable<int>>, ConceptualEntityStateType> conceptualEntityStateSelector,
-		Func<Func<IEnumerable<RevisionId>, IEnumerable<RevisionIdDelta<UserType>>>, Func<IEnumerable<EventId>, IEnumerable<int>>, ConceptualEntityActivityType>
-			conceptualEntityActivitySelector, UserTransaction transaction, UserType user,
+		Func<Func<IEnumerable<RevisionId>, IEnumerable<RevisionIdDelta<UserType?>>>, Func<IEnumerable<EventId>, IEnumerable<int>>, ConceptualEntityActivityType>
+			conceptualEntityActivitySelector, UserTransaction transaction, UserType? user,
 		TransactionListItem<ConceptualEntityStateType, ConceptualEntityActivityType, UserType>? previous ) {
 		this.conceptualEntityId = conceptualEntityId;
 
@@ -32,7 +32,7 @@ public class TransactionListItem<ConceptualEntityStateType, ConceptualEntityActi
 			new Lazy<IReadOnlyCollection<( IEnumerable<RevisionId>, IEnumerable<Revision> )>>( () => entityTypeAndRevisionSetPairs.ToImmutableArray() );
 
 		revisionDictionariesByEntityType =
-			new Lazy<ImmutableDictionary<IEnumerable<RevisionId>, ImmutableDictionary<int, Tuple<Revision, UserTransaction, UserType>>>>(
+			new Lazy<ImmutableDictionary<IEnumerable<RevisionId>, ImmutableDictionary<int, Tuple<Revision, UserTransaction, UserType?>>>>(
 				() => {
 					if( previous == null )
 						return cachedEntityTypeAndRevisionSetPairs.Value.ToImmutableDictionary(
@@ -41,18 +41,18 @@ public class TransactionListItem<ConceptualEntityStateType, ConceptualEntityActi
 								entityTypeAndRevisions.Item2.ToImmutableDictionary( i => i.LatestRevisionId, i => Tuple.Create( i, transaction, user ) ) );
 
 					var newEntityTypeAndRevisionDictionaryPairs =
-						new List<KeyValuePair<IEnumerable<RevisionId>, ImmutableDictionary<int, Tuple<Revision, UserTransaction, UserType>>>>(
+						new List<KeyValuePair<IEnumerable<RevisionId>, ImmutableDictionary<int, Tuple<Revision, UserTransaction, UserType?>>>>(
 							cachedEntityTypeAndRevisionSetPairs.Value.Count );
 					foreach( var entityTypeAndRevisions in cachedEntityTypeAndRevisionSetPairs.Value ) {
 						var revisionsByLatestRevisionId = previous.revisionDictionariesByEntityType.Value.GetValueOrDefault(
 							entityTypeAndRevisions.Item1,
-							ImmutableDictionary<int, Tuple<Revision, UserTransaction, UserType>>.Empty );
+							ImmutableDictionary<int, Tuple<Revision, UserTransaction, UserType?>>.Empty );
 						newEntityTypeAndRevisionDictionaryPairs.Add(
-							new KeyValuePair<IEnumerable<RevisionId>, ImmutableDictionary<int, Tuple<Revision, UserTransaction, UserType>>>(
+							new KeyValuePair<IEnumerable<RevisionId>, ImmutableDictionary<int, Tuple<Revision, UserTransaction, UserType?>>>(
 								entityTypeAndRevisions.Item1,
 								revisionsByLatestRevisionId.SetItems(
 									entityTypeAndRevisions.Item2.Select(
-										i => new KeyValuePair<int, Tuple<Revision, UserTransaction, UserType>>( i.LatestRevisionId, Tuple.Create( i, transaction, user ) ) ) ) ) );
+										i => new KeyValuePair<int, Tuple<Revision, UserTransaction, UserType?>>( i.LatestRevisionId, Tuple.Create( i, transaction, user ) ) ) ) ) );
 					}
 					return previous.revisionDictionariesByEntityType.Value.SetItems( newEntityTypeAndRevisionDictionaryPairs );
 				} );
@@ -60,7 +60,7 @@ public class TransactionListItem<ConceptualEntityStateType, ConceptualEntityActi
 		conceptualEntityState = new Lazy<ConceptualEntityStateType>(
 			() => conceptualEntityStateSelector(
 				entityType => revisionDictionariesByEntityType.Value
-					.GetValueOrDefault( entityType, ImmutableDictionary<int, Tuple<Revision, UserTransaction, UserType>>.Empty )
+					.GetValueOrDefault( entityType, ImmutableDictionary<int, Tuple<Revision, UserTransaction, UserType?>>.Empty )
 					.Values.Select( i => i.Item1.RevisionId ) ) );
 
 		conceptualEntityActivity = new Lazy<ConceptualEntityActivityType>(
@@ -71,15 +71,15 @@ public class TransactionListItem<ConceptualEntityStateType, ConceptualEntityActi
 					entityType => revisionSetsByEntityType.GetValueOrDefault( entityType, Enumerable.Empty<Revision>() )
 						.Select(
 							revision => {
-								Tuple<Revision, UserTransaction, UserType>? previousRevisionAndTransactionAndUser = null;
+								Tuple<Revision, UserTransaction, UserType?>? previousRevisionAndTransactionAndUser = null;
 								if( previous != null ) {
 									var previousRevisionsByLatestRevisionId = previous.revisionDictionariesByEntityType.Value.GetValueOrDefault( entityType );
 									if( previousRevisionsByLatestRevisionId != null )
 										previousRevisionAndTransactionAndUser = previousRevisionsByLatestRevisionId.GetValueOrDefault( revision.LatestRevisionId );
 								}
 								return previousRevisionAndTransactionAndUser == null
-									       ? new RevisionIdDelta<UserType>( revision.RevisionId, null )
-									       : new RevisionIdDelta<UserType>(
+									       ? new RevisionIdDelta<UserType?>( revision.RevisionId, null )
+									       : new RevisionIdDelta<UserType?>(
 										       revision.RevisionId,
 										       Tuple.Create(
 											       previousRevisionAndTransactionAndUser.Item1.RevisionId,
@@ -117,7 +117,7 @@ public class TransactionListItem<ConceptualEntityStateType, ConceptualEntityActi
 	/// <summary>
 	/// Gets the user.
 	/// </summary>
-	public UserType User => user;
+	public UserType? User => user;
 
 	/// <summary>
 	/// Gets whether there is a previous transaction for the same conceptual entity.

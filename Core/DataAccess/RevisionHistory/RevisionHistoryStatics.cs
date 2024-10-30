@@ -68,7 +68,7 @@ public static class RevisionHistoryStatics {
 		GetTransactionList<ConceptualEntityStateType, ConceptualEntityActivityType, UserType>(
 			IReadOnlyCollection<IEnumerable<RevisionId>> entityTypeRevisionIdLists, IEnumerable<IEnumerable<EventId>> entityTypeEventIdLists,
 			Func<Func<IEnumerable<RevisionId>, IEnumerable<int>>, ConceptualEntityStateType> conceptualEntityStateSelector,
-			Func<Func<IEnumerable<RevisionId>, IEnumerable<RevisionIdDelta<UserType>>>, Func<IEnumerable<EventId>, IEnumerable<int>>, ConceptualEntityActivityType>
+			Func<Func<IEnumerable<RevisionId>, IEnumerable<RevisionIdDelta<UserType?>>>, Func<IEnumerable<EventId>, IEnumerable<int>>, ConceptualEntityActivityType>
 				conceptualEntityActivitySelector, Func<int, UserType> userSelector ) {
 		using( MiniProfiler.Current.Step( profilerStepNamePrefix + "Build transaction list" ) ) {
 			var revisionsById = RevisionsById;
