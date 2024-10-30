@@ -105,7 +105,6 @@ public static class RevisionHistoryStatics {
 				.ThenBy( i => i.UserTransactionId )
 				.SelectMany(
 					transaction => {
-						var user = transaction.UserId.HasValue ? userSelector( transaction.UserId.Value ) : default;
 						var revisionEntities = revisionsByUserTransactionId[ transaction.UserTransactionId ]
 							.SelectMany(
 								revision => entityIdsAndRevisionIdListsByLatestRevisionId.TryGetValue( revision.LatestRevisionId, out var entityIdsAndRevisionIdLists )
@@ -120,13 +119,9 @@ public static class RevisionHistoryStatics {
 							.OrderBy( i => i.EntityId )
 							.Select(
 								entityData => new
-									{
-										entityData.EntityId,
-										entityData.RevisionIdListAndRevisionSetPairs,
-										entityData.EventIdListAndEventIdSetPairs,
-										transaction,
-										user
-									} );
+										{
+											entityData.EntityId, entityData.RevisionIdListAndRevisionSetPairs, entityData.EventIdListAndEventIdSetPairs, transaction
+										} );
 					} );
 
 			var listItems = new List<TransactionListItem<ConceptualEntityStateType, ConceptualEntityActivityType, UserType>>();
@@ -142,7 +137,7 @@ public static class RevisionHistoryStatics {
 						conceptualEntityStateSelector,
 						conceptualEntityActivitySelector,
 						entityTransaction.transaction,
-						entityTransaction.user,
+						entityTransaction.transaction.UserId.HasValue ? userSelector( entityTransaction.transaction.UserId.Value ) : default,
 						lastListItem );
 					listItems.Add( newListItem );
 					lastListItemsByEntityId[ entityTransaction.EntityId ] = newListItem;
