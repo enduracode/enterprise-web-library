@@ -42,12 +42,9 @@ public class IsuStatics {
 					// https://learn.microsoft.com/en-us/aspnet/core/host-and-deploy/iis/advanced?view=aspnetcore-6.0#data-protection
 					poolDefaults.ProcessModel.LoadUserProfile = true;
 
-					// Disable regular time interval recycling.
+					// Disable regular time interval recycling and recycling at specific times.
 					poolDefaults.Recycling.PeriodicRestart.Time = TimeSpan.Zero;
-
 					poolDefaults.Recycling.PeriodicRestart.Schedule.Clear();
-					if( useServerAppPoolSettings )
-						poolDefaults.Recycling.PeriodicRestart.Schedule.Add( new TimeSpan( 23, 55, 0 ) );
 
 
 					var config = serverManager.GetApplicationHostConfiguration();
