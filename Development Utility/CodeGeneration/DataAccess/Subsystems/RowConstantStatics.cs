@@ -25,17 +25,13 @@ internal static class RowConstantStatics {
 				valueColumn = columns.AllColumnsExceptRowVersion.Single( column => column.Name.ToLower() == table.valueColumn.ToLower() );
 				var nameColumn = columns.AllColumnsExceptRowVersion.Single( column => column.Name.ToLower() == table.nameColumn.ToLower() );
 
-				var cmd = new InlineSelect(
-					new[] { valueColumn.DelimitedIdentifier, nameColumn.DelimitedIdentifier },
-					"FROM " + table.tableName,
-					false,
-					orderByClause: orderIsSpecified ? "ORDER BY " + table.orderByColumn : "" );
+				var cmd = new InlineSelect( [ "*" ], $"FROM {table.tableName}", false, orderByClause: orderIsSpecified ? $"ORDER BY {table.orderByColumn}" : "" );
 				cmd.Execute(
 					cn,
 					reader => {
 						while( reader.Read() ) {
 							values.Add( valueColumn.GetDataReaderValue( reader ) );
-							names.Add( nameColumn.ConvertIncomingValue( reader[ nameColumn.Name ] ).ToString()! );
+							names.Add( nameColumn.GetDataReaderValue( reader ) );
 						}
 					} );
 			}
@@ -83,7 +79,7 @@ internal static class RowConstantStatics {
 		writer.WriteLine( "static " + className + "() {" );
 
 		for( var i = 0; i < names.Count; i++ )
-			writer.WriteLine( @"{0}.Add( ({1})({2}), ""{3}"" );".FormatWith( dictionaryName, valueTypeName, values[ i ], names[ i ] ) );
+			writer.WriteLine( "{0}.Add( ({1}){2}, {3} );".FormatWith( dictionaryName, valueTypeName, values[ i ], names[ i ] ) );
 
 		writer.WriteLine( "}" ); // constructor
 	}

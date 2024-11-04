@@ -91,8 +91,6 @@ internal class Column {
 
 	internal string GetIncomingValueConversionExpression( string valueExpression ) => valueContainer.GetIncomingValueConversionExpression( valueExpression );
 
-	internal object ConvertIncomingValue( object value ) => valueContainer.ConvertIncomingValue( value );
-
 	internal int Size => valueContainer.Size;
 	internal bool AllowsNull => valueContainer.AllowsNull;
 	internal bool? AllowsEmpty => valueContainer.AllowsEmpty;
