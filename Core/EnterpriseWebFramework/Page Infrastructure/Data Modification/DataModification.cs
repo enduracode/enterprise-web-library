@@ -5,15 +5,25 @@
 /// </summary>
 public interface DataModification;
 
-public static class DataModificationExtensionCreators {
-	/// <summary>
-	/// Concatenates data modifications.
-	/// </summary>
-	public static IEnumerable<DataModification> Concat( this DataModification first, IEnumerable<DataModification> second ) => second.Prepend( first );
+public class DataModificationsParameter {
+	private readonly IEnumerable<DataModification> sequence;
+
+	internal DataModificationsParameter( IEnumerable<DataModification> sequence ) {
+		this.sequence = sequence;
+	}
 
 	/// <summary>
-	/// Returns a sequence of two data modifications.
+	/// Returns a new parameter with the specified data-modification actions added to this parameter.
 	/// </summary>
-	public static IEnumerable<DataModification> Append( this DataModification first, DataModification second ) =>
-		Enumerable.Empty<DataModification>().Append( first ).Append( second );
+	public DataModificationsParameter Add( DataModificationsParameter dataModificationActions ) => new( sequence.Concat( dataModificationActions.sequence ) );
+
+	internal IReadOnlyCollection<DataModification> GetCollection() => sequence.Materialize();
+}
+
+public static class DataModificationsParameterExtensionCreators {
+	/// <summary>
+	/// Returns a parameter with the specified data-modification actions added to this action.
+	/// </summary>
+	public static DataModificationsParameter Add( this DataModification dataModificationAction, DataModificationsParameter dataModificationActions ) =>
+		new DataModificationsParameter( [ dataModificationAction ] ).Add( dataModificationActions );
 }

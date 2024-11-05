@@ -84,6 +84,8 @@ public class PostBack {
 }
 
 public class ActionPostBack: PostBack, DataModification, ValidationList {
+	public static implicit operator DataModificationsParameter( ActionPostBack postBack ) => new( [ postBack ] );
+
 	private readonly IEnumerable<UpdateRegionSet> updateRegions;
 	private readonly bool skipModificationIfNoChanges;
 	private readonly BasicDataModification dataModification;
@@ -107,7 +109,7 @@ public class ActionPostBack: PostBack, DataModification, ValidationList {
 	internal IEnumerable<UpdateRegionSet> UpdateRegions => updateRegions;
 
 	void ValidationList.AddValidation( EwfValidation validation ) {
-		( (ValidationList)dataModification ).AddValidation( validation );
+		dataModification.AddValidation( validation );
 	}
 
 	internal bool Execute( bool changesExist, Action<PostBackAction> actionSetter ) {

@@ -3,12 +3,12 @@ using Tewl.InputValidation;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
-internal class BasicDataModification: DataModification, ValidationList {
+internal class BasicDataModification {
 	private static Action slowExecutionNotifier = null!;
 	private static Action<EwfValidation, IEnumerable<string>> validationErrorHandler = null!;
 	private static Action<IReadOnlyCollection<TrustedHtmlString>> modificationErrorHandler = null!;
 
-	internal static void Init(
+	public static void Init(
 		Action slowExecutionNotifier, Action<EwfValidation, IEnumerable<string>> validationErrorHandler,
 		Action<IReadOnlyCollection<TrustedHtmlString>> modificationErrorHandler ) {
 		BasicDataModification.slowExecutionNotifier = slowExecutionNotifier;
@@ -20,11 +20,11 @@ internal class BasicDataModification: DataModification, ValidationList {
 	private readonly List<EwfValidation> validations = new();
 	private Action? modificationMethod;
 
-	internal BasicDataModification( bool isSlow ) {
+	public BasicDataModification( bool isSlow ) {
 		this.isSlow = isSlow;
 	}
 
-	void ValidationList.AddValidation( EwfValidation validation ) {
+	public void AddValidation( EwfValidation validation ) {
 		validations.Add( validation );
 	}
 
@@ -40,7 +40,7 @@ internal class BasicDataModification: DataModification, ValidationList {
 	/// <summary>
 	/// Returns whether anything executed.
 	/// </summary>
-	internal bool Execute(
+	public bool Execute(
 		bool skipIfNoChanges, bool changesExist, bool performValidationOnly = false, Tuple<Action, Action>? actionMethodAndPostModificationMethod = null ) {
 		var validationNeeded = validations.Any() && ( !skipIfNoChanges || changesExist );
 		if( validationNeeded ) {

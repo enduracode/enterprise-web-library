@@ -126,7 +126,7 @@ public abstract class PageBase: ResourceBase {
 			dataModifications => {
 				if( dataModifications.Contains( Current.dataUpdate ) && dataModifications.Any( i => i != Current.dataUpdate && !( (ActionPostBack)i ).IsIntermediate ) )
 					throw new ApplicationException(
-						"If the data-update modification is included, it is meaningless to include any full post-backs since these inherently update the page's data." );
+						"If the data-update action is included, it is meaningless to include any full post-backs since these inherently update the page's data." );
 			},
 			dataModification => dataModification == Current.dataUpdate ? Current.dataUpdatePostBack : (ActionPostBack)dataModification );
 
@@ -178,7 +178,7 @@ public abstract class PageBase: ResourceBase {
 	internal PageContent BasicContent;
 	private PageTree pageTree;
 	private Func<string> elementOrIdentifiedComponentIdGetter = () => "";
-	private BasicDataModification dataUpdate;
+	private DataUpdateAction dataUpdate;
 	private readonly PostBack dataUpdatePostBack = PostBack.CreateDataUpdate();
 	internal bool? IsAutoDataUpdater;
 	private readonly Dictionary<string, PostBack> postBacksById = new();
@@ -279,7 +279,7 @@ public abstract class PageBase: ResourceBase {
 			return executePostBackAndGetResponse( (ActionPostBack)postBack, lastPostBackFailingDm );
 
 		// Execute the page’s data update.
-		var dataUpdateExecuted = dataUpdate.Execute( !postBack.ForcePageDataUpdate, changesExist( dataUpdate ) );
+		var dataUpdateExecuted = dataUpdate.Action.Execute( !postBack.ForcePageDataUpdate, changesExist( dataUpdate ) );
 		if( modificationErrorsExist )
 			return navigateToCurrent( "" );
 
@@ -504,7 +504,7 @@ public abstract class PageBase: ResourceBase {
 			throw getDeveloperMistakeException( "A data modification with an ID of \"{0}\" does not exist.".FormatWith( dataModificationId ) );
 
 		var navigationNeeded = dataModification == dataUpdate
-			                       ? dataUpdate.Execute( true, changesExist( dataModification ), performValidationOnly: true )
+			                       ? dataUpdate.Action.Execute( true, changesExist( dataModification ), performValidationOnly: true )
 			                       : ( (ActionPostBack)dataModification ).Execute( changesExist( dataModification ), null );
 
 		return navigationNeeded
@@ -692,12 +692,12 @@ public abstract class PageBase: ResourceBase {
 		while( ( urlHandler = urlHandler.GetParent() ) != null );
 
 		formState = new FormState();
-		dataUpdate = new BasicDataModification( dataUpdateIsSlow );
+		dataUpdate = new DataUpdateAction( new BasicDataModification( dataUpdateIsSlow ) );
 		FormAction pageLoadAction = null;
 		var elementJsInitStatements = new StringBuilder();
 		var content = contentGetter(
-			defaultContentGetter => FormState.ExecuteWithDataModificationsAndDefaultAction(
-				DataUpdate.ToCollection(),
+			defaultContentGetter => FormState.ExecuteWithActions(
+				DataUpdate,
 				() => {
 					using( MiniProfiler.Current.Step( "EWF - Get page content" ) )
 						return getContent() ?? defaultContentGetter();
@@ -716,7 +716,7 @@ public abstract class PageBase: ResourceBase {
 			() => getJsInitStatements( elementJsInitStatements.ToString(), pageLoadAction != null ? pageLoadAction.GetJsStatements() : "" ) );
 		BasicContent = content.basicContent;
 		if( content.dataUpdateModificationMethod != null )
-			dataUpdate.AddModificationMethod( content.dataUpdateModificationMethod );
+			dataUpdate.Action.AddModificationMethod( content.dataUpdateModificationMethod );
 		IsAutoDataUpdater = content.isAutoDataUpdater;
 		if( content.pageLoadPostBack != null )
 			( pageLoadAction = new PostBackFormAction( content.pageLoadPostBack ) ).AddToPageIfNecessary();
@@ -856,13 +856,13 @@ public abstract class PageBase: ResourceBase {
 	public Instant FirstRequestTime => requestState.FirstRequestTime;
 
 	/// <summary>
-	/// Gets the page’s data-update modification, which executes on every full post-back prior to the post-back object. WARNING: Do *not* use this for
+	/// Gets the page’s data-update action, which executes on every full post-back prior to the post-back’s own actions. WARNING: Do *not* use this for
 	/// modifications that should happen because of a specific post-back action, e.g. adding a new item to the database when a button is clicked. There are two
 	/// reasons for this. First, there may be other post-back controls such as buttons or lookup boxes on the page, any of which could also cause the update to
-	/// execute. Second, by default the update only runs if form values were modified, which would not be the case if a user clicks the button on an add-item
-	/// page before entering any data.
+	/// execute. Second, by default the update only runs if form values were modified, which would not be the case if a user clicks the button on an add-item page
+	/// before entering any data.
 	/// </summary>
-	public DataModification DataUpdate => dataUpdate;
+	public DataUpdateAction DataUpdate => dataUpdate;
 
 	/// <summary>
 	/// Gets a post-back that updates the page’s data without performing any other actions.
