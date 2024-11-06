@@ -7,15 +7,15 @@ partial class TextControlDemo {
 
 	protected override PageContent getContent() =>
 		new UiPageContent().Add(
-			FormState.ExecuteWithDataModificationsAndDefaultAction(
-					PostBack.CreateFull().ToCollection(),
+			FormState.ExecuteWithActions(
+					PostBack.CreateFull(),
 					() => FormItemList.CreateStack( generalSetup: new FormItemListSetup( buttonSetup: new ButtonSetup( "Submit" ) ) )
 						.AddItems( getControls().Select( ( getter, i ) => getter( ( i + 1 ).ToString() ) ).Materialize() ) )
 				.Append<FlowComponent>(
 					new Section(
 						"Independent Controls",
 						FormItemList.CreateStack()
-							.AddItems( getIndependentControls().Select( ( getter, i ) => getter( "I-" + ( i + 1 ).ToString() ) ).Materialize() )
+							.AddItems( getIndependentControls().Select( ( getter, i ) => getter( "I-" + ( i + 1 ) ) ).Materialize() )
 							.ToCollection() ) )
 				.Materialize() );
 
@@ -28,8 +28,8 @@ partial class TextControlDemo {
 				get( "Spell-checking disabled", TextControlSetup.Create( checksSpellingAndGrammar: false ) ),
 				get( "Spell-checking enabled", TextControlSetup.Create( checksSpellingAndGrammar: true ) ), id => {
 					var pb = PostBack.CreateIntermediate( null, id: id );
-					return FormState.ExecuteWithDataModificationsAndDefaultAction(
-						FormState.Current.DataModifications.Append( pb ),
+					return FormState.ExecuteWithActions(
+						FormState.Current.DataModificationActions.Add( pb ),
 						() => get( "Separate value-changed action", TextControlSetup.Create( valueChangedAction: new PostBackFormAction( pb ) ) )( id ) );
 				},
 				get( "Read-only", TextControlSetup.CreateReadOnly() ), get( "Multiline", TextControlSetup.Create( numberOfRows: 3 ) ),
@@ -40,8 +40,8 @@ partial class TextControlDemo {
 				get( "Multiline, spell-checking disabled", TextControlSetup.Create( numberOfRows: 3, checksSpellingAndGrammar: false ) ),
 				get( "Multiline, spell-checking enabled", TextControlSetup.Create( numberOfRows: 3, checksSpellingAndGrammar: true ) ), id => {
 					var pb = PostBack.CreateIntermediate( null, id: id );
-					return FormState.ExecuteWithDataModificationsAndDefaultAction(
-						FormState.Current.DataModifications.Append( pb ),
+					return FormState.ExecuteWithActions(
+						FormState.Current.DataModificationActions.Add( pb ),
 						() => get(
 							"Multiline with separate value-changed action",
 							TextControlSetup.Create( numberOfRows: 3, valueChangedAction: new PostBackFormAction( pb ) ) )( id ) );
@@ -51,8 +51,8 @@ partial class TextControlDemo {
 				get( "Obscured with placeholder", TextControlSetup.CreateObscured( placeholder: "Type here" ) ),
 				get( "Obscured auto-fill", TextControlSetup.CreateObscured( autoFillTokens: "new-password" ) ), id => {
 					var pb = PostBack.CreateIntermediate( null, id: id );
-					return FormState.ExecuteWithDataModificationsAndDefaultAction(
-						FormState.Current.DataModifications.Append( pb ),
+					return FormState.ExecuteWithActions(
+						FormState.Current.DataModificationActions.Add( pb ),
 						() => get(
 							"Obscured with separate value-changed action",
 							TextControlSetup.CreateObscured( valueChangedAction: new PostBackFormAction( pb ) ) )( id ) );
@@ -62,22 +62,16 @@ partial class TextControlDemo {
 	private IReadOnlyCollection<Func<string, FormItem>> getIndependentControls() =>
 		new Func<string, FormItem>[]
 			{
+				id => FormState.ExecuteWithActions( PostBack.CreateFull( id: id ), () => get( "Standard", null )( id ) ),
+				id => FormState.ExecuteWithActions(
+					PostBack.CreateFull( id: id ),
+					() => get(
+						"Auto-complete, triggers action when item selected",
+						TextControlSetup.CreateAutoComplete( TestService.GetInfo(), triggersActionWhenItemSelected: true ) )( id ) ),
 				id => {
 					var pb = PostBack.CreateFull( id: id );
-					return FormState.ExecuteWithDataModificationsAndDefaultAction( pb.ToCollection(), () => get( "Standard", null )( id ) );
-				},
-				id => {
-					var pb = PostBack.CreateFull( id: id );
-					return FormState.ExecuteWithDataModificationsAndDefaultAction(
-						pb.ToCollection(),
-						() => get(
-							"Auto-complete, triggers action when item selected",
-							TextControlSetup.CreateAutoComplete( TestService.GetInfo(), triggersActionWhenItemSelected: true ) )( id ) );
-				},
-				id => {
-					var pb = PostBack.CreateFull( id: id );
-					return FormState.ExecuteWithDataModificationsAndDefaultAction(
-						pb.ToCollection(),
+					return FormState.ExecuteWithActions(
+						pb,
 						() => get(
 							"Auto-complete, triggers action when item selected or value changed",
 							TextControlSetup.CreateAutoComplete(

@@ -108,34 +108,33 @@ public sealed class BlobFileCollectionManager: FlowComponent {
 		int fileCollectionId, IReadOnlyCollection<BlobFile> files, DisplaySetup displaySetup, string postBackIdBase,
 		Action<RsFile, Validator> uploadValidationMethod, NewFileNotificationMethod fileCreatedOrReplacedNotifier ) {
 		RsFile file = null;
-		var dm = PostBack.CreateFull(
-			id: PostBack.GetCompositeId( postBackIdBase, "add" ),
-			modificationMethod: () => {
-				if( file == null )
-					return;
+		return FormState.ExecuteWithActions(
+			PostBack.CreateFull(
+				id: PostBack.GetCompositeId( postBackIdBase, "add" ),
+				modificationMethod: () => {
+					if( file == null )
+						return;
 
-				var existingFile = files.SingleOrDefault( i => i.FileName == file.FileName );
-				int newFileId;
-				if( existingFile != null ) {
-					BlobStorageStatics.SystemProvider.UpdateFile(
-						existingFile.FileId,
-						file.FileName,
-						file.Contents,
-						BlobStorageStatics.GetContentTypeForPostedFile( file ) );
-					newFileId = existingFile.FileId;
-				}
-				else
-					newFileId = BlobStorageStatics.SystemProvider.InsertFile(
-						fileCollectionId,
-						file.FileName,
-						file.Contents,
-						BlobStorageStatics.GetContentTypeForPostedFile( file ) );
+					var existingFile = files.SingleOrDefault( i => i.FileName == file.FileName );
+					int newFileId;
+					if( existingFile != null ) {
+						BlobStorageStatics.SystemProvider.UpdateFile(
+							existingFile.FileId,
+							file.FileName,
+							file.Contents,
+							BlobStorageStatics.GetContentTypeForPostedFile( file ) );
+						newFileId = existingFile.FileId;
+					}
+					else
+						newFileId = BlobStorageStatics.SystemProvider.InsertFile(
+							fileCollectionId,
+							file.FileName,
+							file.Contents,
+							BlobStorageStatics.GetContentTypeForPostedFile( file ) );
 
-				fileCreatedOrReplacedNotifier?.Invoke( newFileId );
-				PageBase.AddStatusMessage( StatusMessageType.Info, "File uploaded successfully." );
-			} );
-		return FormState.ExecuteWithDataModificationsAndDefaultAction(
-			dm.ToCollection(),
+					fileCreatedOrReplacedNotifier?.Invoke( newFileId );
+					PageBase.AddStatusMessage( StatusMessageType.Info, "File uploaded successfully." );
+				} ),
 			() => FormItemList.CreateWrapping( setup: new FormItemListSetup( displaySetup: displaySetup, buttonSetup: new ButtonSetup( "Upload new file" ) ) )
 				.AddItem(
 					new FileUpload(

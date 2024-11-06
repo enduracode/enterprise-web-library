@@ -3,8 +3,8 @@
 namespace EnterpriseWebLibrary.Website.WebFrameworkDemo {
 	partial class HtmlEditing {
 		protected override PageContent getContent() =>
-			FormState.ExecuteWithDataModificationsAndDefaultAction(
-				PostBack.CreateFull().ToCollection(),
+			FormState.ExecuteWithActions(
+				PostBack.CreateFull(),
 				() => new UiPageContent( contentFootActions: new ButtonSetup( "Post Back" ).ToCollection() ).Add(
 					new WysiwygHtmlEditor( "", true, ( _, _ ) => {} ).ToFormItem( label: Enumerable.Empty<PhrasingComponent>().Materialize() )
 						.ToComponentCollection() ) );

@@ -17,16 +17,15 @@ partial class CreateSystem {
 	protected override UrlHandler getUrlParent() => new WebFrameworkDemo.EntitySetup();
 
 	protected override PageContent getContent() =>
-		FormState.ExecuteWithDataModificationsAndDefaultAction(
+		FormState.ExecuteWithActions(
 			PostBack.CreateFull(
-					actionGetter: () => new PostBackAction(
-						new PageReloadBehavior(
-							secondaryResponse: new SecondaryResponse(
-								() => EwfResponse.Create(
-									ContentTypes.ApplicationZip,
-									new EwfResponseBodyCreator( createAndZipSystem ),
-									fileNameCreator: () => "{0}.zip".FormatWith( systemShortName.Value ) ) ) ) ) )
-				.ToCollection(),
+				actionGetter: () => new PostBackAction(
+					new PageReloadBehavior(
+						secondaryResponse: new SecondaryResponse(
+							() => EwfResponse.Create(
+								ContentTypes.ApplicationZip,
+								new EwfResponseBodyCreator( createAndZipSystem ),
+								fileNameCreator: () => "{0}.zip".FormatWith( systemShortName.Value ) ) ) ) ) ),
 			() => new UiPageContent( contentFootActions: new ButtonSetup( "Create System" ).ToCollection() ).Add(
 				FormItemList.CreateStack()
 					.AddItem(

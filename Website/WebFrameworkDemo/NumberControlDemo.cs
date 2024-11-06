@@ -7,15 +7,15 @@ partial class NumberControlDemo {
 
 	protected override PageContent getContent() =>
 		new UiPageContent().Add(
-			FormState.ExecuteWithDataModificationsAndDefaultAction(
-					PostBack.CreateFull().ToCollection(),
+			FormState.ExecuteWithActions(
+					PostBack.CreateFull(),
 					() => FormItemList.CreateStack( generalSetup: new FormItemListSetup( buttonSetup: new ButtonSetup( "Submit" ) ) )
 						.AddItems( getControls().Select( ( getter, i ) => getter( ( i + 1 ).ToString() ) ).Materialize() ) )
 				.Append<FlowComponent>(
 					new Section(
 						"Independent Controls",
 						FormItemList.CreateStack()
-							.AddItems( getIndependentControls().Select( ( getter, i ) => getter( "I-" + ( i + 1 ).ToString() ) ).Materialize() )
+							.AddItems( getIndependentControls().Select( ( getter, i ) => getter( "I-" + ( i + 1 ) ) ).Materialize() )
 							.ToCollection() ) )
 				.Materialize() );
 
@@ -27,8 +27,8 @@ partial class NumberControlDemo {
 				get( "Birthday year auto-fill", NumberControlSetup.Create( autoFillTokens: "bday-year" ) ),
 				get( "Auto-complete", NumberControlSetup.CreateAutoComplete( TestService.GetInfo() ) ), id => {
 					var pb = PostBack.CreateIntermediate( null, id: id );
-					return FormState.ExecuteWithDataModificationsAndDefaultAction(
-						FormState.Current.DataModifications.Append( pb ),
+					return FormState.ExecuteWithActions(
+						FormState.Current.DataModificationActions.Add( pb ),
 						() => get( "Separate value-changed action", NumberControlSetup.Create( valueChangedAction: new PostBackFormAction( pb ) ) )( id ) );
 				},
 				new Func<Func<string, FormItem>>(
@@ -39,8 +39,8 @@ partial class NumberControlDemo {
 				get( "Read-only", NumberControlSetup.CreateReadOnly() ), getImprecise( "Imprecise", null ),
 				getImprecise( "Imprecise [1,2] with .25 step", null, minValue: 1, maxValue: 2, valueStep: .25m ), id => {
 					var pb = PostBack.CreateIntermediate( null, id: id );
-					return FormState.ExecuteWithDataModificationsAndDefaultAction(
-						FormState.Current.DataModifications.Append( pb ),
+					return FormState.ExecuteWithActions(
+						FormState.Current.DataModificationActions.Add( pb ),
 						() => getImprecise(
 							"Imprecise with separate value-changed action",
 							ImpreciseNumberControlSetup.Create( valueChangedAction: new PostBackFormAction( pb ) ) )( id ) );
@@ -59,22 +59,16 @@ partial class NumberControlDemo {
 	private IReadOnlyCollection<Func<string, FormItem>> getIndependentControls() =>
 		new Func<string, FormItem>[]
 			{
+				id => FormState.ExecuteWithActions( PostBack.CreateFull( id: id ), () => get( "Standard", null )( id ) ),
+				id => FormState.ExecuteWithActions(
+					PostBack.CreateFull( id: id ),
+					() => get(
+						"Auto-complete, triggers action when item selected",
+						NumberControlSetup.CreateAutoComplete( TestService.GetInfo(), triggersActionWhenItemSelected: true ) )( id ) ),
 				id => {
 					var pb = PostBack.CreateFull( id: id );
-					return FormState.ExecuteWithDataModificationsAndDefaultAction( pb.ToCollection(), () => get( "Standard", null )( id ) );
-				},
-				id => {
-					var pb = PostBack.CreateFull( id: id );
-					return FormState.ExecuteWithDataModificationsAndDefaultAction(
-						pb.ToCollection(),
-						() => get(
-							"Auto-complete, triggers action when item selected",
-							NumberControlSetup.CreateAutoComplete( TestService.GetInfo(), triggersActionWhenItemSelected: true ) )( id ) );
-				},
-				id => {
-					var pb = PostBack.CreateFull( id: id );
-					return FormState.ExecuteWithDataModificationsAndDefaultAction(
-						pb.ToCollection(),
+					return FormState.ExecuteWithActions(
+						pb,
 						() => get(
 							"Auto-complete, triggers action when item selected or value changed",
 							NumberControlSetup.CreateAutoComplete(

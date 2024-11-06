@@ -54,7 +54,7 @@ public static class SelectedItemAction {
 		string text, IEnumerable<UpdateRegionSet>? updateRegions, Action<IReadOnlyCollection<IdType?>> modificationMethod, DisplaySetup? displaySetup = null,
 		ActionComponentIcon? icon = null, IReadOnlyCollection<FlowComponent>? confirmationDialogContent = null, bool forceFullPagePostBack = false,
 		Func<PageReloadBehavior>? reloadBehaviorGetter = null, DataModification? validationDm = null ) {
-		validationDm ??= FormState.Current.DataModifications.First();
+		validationDm ??= FormState.Current.DataModificationActions.Collection.Value.First();
 		return new SelectedItemAction<IdType>(
 			( postBackIdBase, selectedItemIdGetter ) => {
 				var postBack = PostBack.CreateIntermediate(

@@ -3,8 +3,8 @@
 namespace EnterpriseWebLibrary.Website.WebFrameworkDemo {
 	partial class Checkboxes {
 		protected override PageContent getContent() =>
-			FormState.ExecuteWithDataModificationsAndDefaultAction(
-				PostBack.CreateFull().ToCollection(),
+			FormState.ExecuteWithActions(
+				PostBack.CreateFull(),
 				() => new UiPageContent().Add(
 					FormItemList.CreateStack( generalSetup: new FormItemListSetup( buttonSetup: new ButtonSetup( "Submit" ) ) )
 						.AddItems( getControls().Select( ( getter, i ) => getter( ( i + 1 ).ToString() ) ).Materialize() ) ) );
@@ -14,8 +14,8 @@ namespace EnterpriseWebLibrary.Website.WebFrameworkDemo {
 				{
 					getCheckbox( "Standard", null ), id => {
 						var pb = PostBack.CreateIntermediate( null, id: id );
-						return FormState.ExecuteWithDataModificationsAndDefaultAction(
-							FormState.Current.DataModifications.Append( pb ),
+						return FormState.ExecuteWithActions(
+							FormState.Current.DataModificationActions.Add( pb ),
 							() => getCheckbox( "Separate value-changed action", CheckboxSetup.Create( valueChangedAction: new PostBackFormAction( pb ) ) )( id ) );
 					},
 					new Func<Func<string, FormItem>>(
@@ -43,8 +43,8 @@ namespace EnterpriseWebLibrary.Website.WebFrameworkDemo {
 					getRadioGroup( "Radio group with no selection", null, noSelection: true ),
 					getRadioGroup( "Radio group with single button", null, singleButton: true ), id => {
 						var pb = PostBack.CreateIntermediate( null, id: id );
-						return FormState.ExecuteWithDataModificationsAndDefaultAction(
-							FormState.Current.DataModifications.Append( pb ),
+						return FormState.ExecuteWithActions(
+							FormState.Current.DataModificationActions.Add( pb ),
 							() => getRadioGroup( "Radio group with separate selection-changed action", null, selectionChangedAction: new PostBackFormAction( pb ) )( id ) );
 					},
 					new Func<Func<string, FormItem>>(

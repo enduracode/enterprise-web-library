@@ -23,8 +23,8 @@ partial class VerifyClientFunctionality {
 					parametersModification.ClockWrong = true;
 			},
 			actionGetter: () => new PostBackAction( verificationFailed() ? null : new ExternalResource( ReturnUrl ) ) );
-		return FormState.ExecuteWithDataModificationsAndDefaultAction(
-			postBack.ToCollection(),
+		return FormState.ExecuteWithActions(
+			postBack,
 			() => new UiPageContent( pageLoadPostBack: postBack ).Add( AuthenticationStatics.GetLogInHiddenFields( clientTime ) ) );
 	}
 

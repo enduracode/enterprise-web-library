@@ -5,8 +5,8 @@ namespace EnterpriseWebLibrary.Website.WebFrameworkDemo {
 		protected override string getResourceName() => "Select List";
 
 		protected override PageContent getContent() =>
-			FormState.ExecuteWithDataModificationsAndDefaultAction(
-				PostBack.CreateFull().ToCollection(),
+			FormState.ExecuteWithActions(
+				PostBack.CreateFull(),
 				() => new UiPageContent( contentFootActions: new ButtonSetup( "Submit" ).ToCollection() ).Add(
 					new Section( "Radio Button List, Vertical", FormItemList.CreateStack().AddItems( getRadioItems( false ).Materialize() ).ToCollection() )
 						.Append( new Section( "Radio Button List, Horizontal", FormItemList.CreateStack().AddItems( getRadioItems( true ).Materialize() ).ToCollection() ) )

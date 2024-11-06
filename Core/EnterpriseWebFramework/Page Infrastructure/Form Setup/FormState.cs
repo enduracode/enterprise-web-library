@@ -43,12 +43,11 @@ public class FormState {
 	public static void ExecuteWithActions(
 		DataModificationsParameter dataModificationActions, Action method, NonPostBackFormAction defaultActionOverride = null,
 		SpecifiedValue<NonPostBackFormAction> formControlDefaultActionOverride = null ) {
-		IReadOnlyCollection<DataModification> dmCollection = dataModificationActions.GetCollection();
-		if( dmCollection.Count == 0 )
+		if( dataModificationActions.Collection.Value.Count == 0 )
 			throw new ApplicationException( "There must be at least one data modification." );
-		dataModificationAsserter( dmCollection );
+		dataModificationAsserter( dataModificationActions.Collection.Value );
 
-		Current.stack.Push( ( defaultActionOverride, formControlDefaultActionOverride, new Stack<Func<bool>>(), dmCollection ) );
+		Current.stack.Push( ( defaultActionOverride, formControlDefaultActionOverride, new Stack<Func<bool>>(), dataModificationActions ) );
 		try {
 			method();
 		}
@@ -69,12 +68,11 @@ public class FormState {
 	public static T ExecuteWithActions<T>(
 		DataModificationsParameter dataModificationActions, Func<T> method, NonPostBackFormAction defaultActionOverride = null,
 		SpecifiedValue<NonPostBackFormAction> formControlDefaultActionOverride = null ) {
-		IReadOnlyCollection<DataModification> dmCollection = dataModificationActions.GetCollection();
-		if( dmCollection.Count == 0 )
+		if( dataModificationActions.Collection.Value.Count == 0 )
 			throw new ApplicationException( "There must be at least one data modification." );
-		dataModificationAsserter( dmCollection );
+		dataModificationAsserter( dataModificationActions.Collection.Value );
 
-		Current.stack.Push( ( defaultActionOverride, formControlDefaultActionOverride, new Stack<Func<bool>>(), dmCollection ) );
+		Current.stack.Push( ( defaultActionOverride, formControlDefaultActionOverride, new Stack<Func<bool>>(), dataModificationActions ) );
 		try {
 			return method();
 		}
@@ -110,13 +108,9 @@ public class FormState {
 	}
 
 	private readonly Stack<( NonPostBackFormAction actionOverride, SpecifiedValue<NonPostBackFormAction> formControlActionOverride, Stack<Func<bool>>
-		validationPredicateStack, IReadOnlyCollection<DataModification> dataModifications )> stack = new();
+		validationPredicateStack, DataModificationsParameter dataModificationActions )> stack = new();
 
-	/// <summary>
-	/// EwfPage and private use only.
-	/// </summary>
-	internal readonly HashSet<DataModification> DataModificationsWithValidationsFromOtherElements = new();
-
+	private readonly HashSet<DataModification> dataModificationsWithValidationsFromOtherElements = new();
 	private readonly HashSet<DataModification> dataModificationsWithValidations = new();
 
 	internal FormState() {}
@@ -134,13 +128,13 @@ public class FormState {
 	/// <summary>
 	/// Gets the post-back corresponding to the first of the current data modifications.
 	/// </summary>
-	public PostBack PostBack => postBackSelector( DataModifications.First() );
+	public PostBack PostBack => postBackSelector( DataModificationActions.Collection.Value.First() );
 
 	private NonPostBackFormAction actionOverride => stack.Peek().actionOverride;
 	private SpecifiedValue<NonPostBackFormAction> formControlActionOverride => stack.Peek().formControlActionOverride;
 
 	/// <summary>
-	/// EwfPage use only.
+	/// PageBase use only.
 	/// </summary>
 	internal Func<bool> ValidationPredicate {
 		get {
@@ -157,22 +151,28 @@ public class FormState {
 	private Stack<Func<bool>> validationPredicateStack => stack.Peek().validationPredicateStack;
 
 	/// <summary>
-	/// Gets the current data modifications.
+	/// Gets the current data-modification actions.
 	/// </summary>
-	public IReadOnlyCollection<DataModification> DataModifications => stack.Peek().dataModifications;
+	public DataModificationsParameter DataModificationActions => stack.Peek().dataModificationActions;
 
 	/// <summary>
-	/// EwfPage use only.
+	/// PageBase use only.
 	/// </summary>
-	internal void ReportValidationCreated() {
-		dataModificationsWithValidations.UnionWith( DataModifications );
+	internal void AddValidationToDataModificationActions( EwfValidation validation ) {
+		var dataModificationActions = DataModificationActions.Collection.Value;
+		if( dataModificationsWithValidationsFromOtherElements.Overlaps( dataModificationActions ) )
+			throw new Exception( "One or more of the data modifications contain validations from other page elements." );
+
+		foreach( var i in dataModificationActions )
+			( (ValidationList)i ).AddValidation( validation );
+		dataModificationsWithValidations.UnionWith( dataModificationActions );
 	}
 
 	/// <summary>
-	/// EwfPage use only.
+	/// PageTree use only.
 	/// </summary>
 	internal void SetForNextElement() {
-		DataModificationsWithValidationsFromOtherElements.UnionWith( dataModificationsWithValidations );
+		dataModificationsWithValidationsFromOtherElements.UnionWith( dataModificationsWithValidations );
 		dataModificationsWithValidations.Clear();
 	}
 }

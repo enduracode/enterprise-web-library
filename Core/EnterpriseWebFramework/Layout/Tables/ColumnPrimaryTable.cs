@@ -409,7 +409,7 @@ public class ColumnPrimaryTable<ItemIdType>: FlowComponent {
 			selectedItemData,
 			itemGroups.Select( i => ( i.SelectedItemActions, i.Items.ToFunctions() ) ),
 			selectedItemIds,
-			FormState.Current.DataModifications );
+			FormState.Current.DataModificationActions.Collection.Value );
 		return this;
 	}
 

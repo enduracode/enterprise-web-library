@@ -74,11 +74,7 @@ public abstract class PageBase: ResourceBase {
 		( Func<Action>, Func<string> ) appProvider,
 		Func<Func<Func<PageContent>, PageContent>, Func<string>, Func<string>, ( PageContent, FlowComponent, FlowComponent, FlowComponent, Action, bool,
 			ActionPostBack )> contentGetter ) {
-		EwfValidation.Init(
-			() => Current.formState.ValidationPredicate,
-			() => Current.formState.DataModifications,
-			() => Current.formState.DataModificationsWithValidationsFromOtherElements,
-			() => Current.formState.ReportValidationCreated() );
+		EwfValidation.Init( () => FormState.Current.ValidationPredicate, validation => FormState.Current.AddValidationToDataModificationActions( validation ) );
 		BasicDataModification.Init(
 			RequestStateStatics.NotifyOfSlowDataModification,
 			( validation, errorMessages ) => {
@@ -96,7 +92,7 @@ public abstract class PageBase: ResourceBase {
 			errors => Current.requestState.GeneralModificationErrors = errors );
 		FormValueStatics.Init(
 			formValue => Current.formValues.Add( formValue ),
-			() => Current.formState.DataModifications,
+			() => FormState.Current.DataModificationActions.Collection.Value,
 			() => Current.requestState.PostBackValues );
 		ComponentStateItem.Init(
 			AssertPageTreeNotBuilt,
@@ -105,9 +101,9 @@ public abstract class PageBase: ResourceBase {
 				var valuesById = Current.requestState.ComponentStateValuesById;
 				return valuesById != null && valuesById.TryGetValue( id, out var value ) ? value : null;
 			},
-			() => Current.formState.DataModifications,
+			() => FormState.Current.DataModificationActions.Collection.Value,
 			( id, item ) => Current.componentStateItemsById.Add( id, item ) );
-		PostBack.Init( () => Current.formState.DataModifications );
+		PostBack.Init( () => FormState.Current.DataModificationActions.Collection.Value );
 		PostBackFormAction.Init(
 			postBack => {
 				if( !Current.postBacksById.TryGetValue( postBack.Id, out var existingPostBack ) )

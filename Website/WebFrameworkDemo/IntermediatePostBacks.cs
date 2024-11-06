@@ -78,18 +78,15 @@ partial class IntermediatePostBacks {
 		var rs = new UpdateRegionSet();
 		var dynamicFieldValue = new DataValue<string>();
 		const string focusKey = "basicRegion";
-		FormState.ExecuteWithDataModificationsAndDefaultAction(
+		FormState.ExecuteWithActions(
 			PostBack.CreateIntermediate(
-					rs.ToCollection(),
-					id: "basic",
-					modificationMethod: () => {
-						parametersModification.Toggled = !parametersModification.Toggled;
-						AddStatusMessage(
-							StatusMessageType.Info,
-							Toggled ? "Dynamic field value was '{0}'.".FormatWith( dynamicFieldValue.Value ) : "Dynamic field added." );
-					},
-					reloadBehaviorGetter: Toggled ? null : () => new PageReloadBehavior( focusKey: focusKey ) )
-				.ToCollection(),
+				rs.ToCollection(),
+				id: "basic",
+				modificationMethod: () => {
+					parametersModification.Toggled = !parametersModification.Toggled;
+					AddStatusMessage( StatusMessageType.Info, Toggled ? "Dynamic field value was '{0}'.".FormatWith( dynamicFieldValue.Value ) : "Dynamic field added." );
+				},
+				reloadBehaviorGetter: Toggled ? null : () => new PageReloadBehavior( focusKey: focusKey ) ),
 			() => {
 				components.Add( new Paragraph( new EwfButton( new StandardButtonStyle( "Toggle Basic Region Below" ) ).ToCollection() ) );
 

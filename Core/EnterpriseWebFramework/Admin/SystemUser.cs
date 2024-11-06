@@ -20,8 +20,8 @@ partial class SystemUser {
 
 	protected override PageContent getContent() {
 		Action? userModMethod = null;
-		return FormState.ExecuteWithDataModificationsAndDefaultAction(
-			PostBack.CreateFull( modificationMethod: () => userModMethod!(), actionGetter: () => new PostBackAction( ParentResource ) ).ToCollection(),
+		return FormState.ExecuteWithActions(
+			PostBack.CreateFull( modificationMethod: () => userModMethod!(), actionGetter: () => new PostBackAction( ParentResource ) ),
 			() => new UiPageContent(
 				pageActions: UserId.HasValue
 					             ? new ButtonSetup(

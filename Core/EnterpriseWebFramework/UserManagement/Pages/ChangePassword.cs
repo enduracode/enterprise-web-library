@@ -15,14 +15,13 @@ partial class ChangePassword {
 			return customContent;
 
 		Action<int>? passwordUpdater = null;
-		return FormState.ExecuteWithDataModificationsAndDefaultAction(
+		return FormState.ExecuteWithActions(
 			PostBack.CreateFull(
-					modificationMethod: () => {
-						passwordUpdater!( SystemUser.Current!.UserId );
-						AddStatusMessage( StatusMessageType.Info, "Your password has been successfully changed. Use it the next time you log in." );
-					},
-					actionGetter: () => new PostBackAction( new ExternalResource( ReturnUrl ) ) )
-				.ToCollection(),
+				modificationMethod: () => {
+					passwordUpdater!( SystemUser.Current!.UserId );
+					AddStatusMessage( StatusMessageType.Info, "Your password has been successfully changed. Use it the next time you log in." );
+				},
+				actionGetter: () => new PostBackAction( new ExternalResource( ReturnUrl ) ) ),
 			() => new UiPageContent(
 				pageActions: new HyperlinkSetup( new ExternalResource( ReturnUrl ), "Back" ).ToCollection(),
 				contentFootActions: new ButtonSetup( "Change Password" ).ToCollection() ).Add(

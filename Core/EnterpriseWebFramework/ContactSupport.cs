@@ -14,23 +14,22 @@ partial class ContactSupport {
 
 	protected override PageContent getContent() {
 		var body = new DataValue<string>();
-		return FormState.ExecuteWithDataModificationsAndDefaultAction(
+		return FormState.ExecuteWithActions(
 			PostBack.CreateFull(
-					modificationMethod: () => {
-						var message = new EmailMessage
-							{
-								Subject = "Support request from {0} in {1}".FormatWith(
-									AppTools.User.FriendlyName.Any() ? AppTools.User.FriendlyName : AppTools.User.Email,
-									ConfigurationStatics.SystemDisplayName ),
-								BodyHtml = body.Value.GetTextAsEncodedHtml()
-							};
-						message.ReplyToAddresses.Add( new EmailAddress( AppTools.User.Email, AppTools.User.FriendlyName ) );
-						message.ToAddresses.AddRange( EmailStatics.GetAdministratorEmailAddresses() );
-						EmailStatics.SendEmailWithDefaultFromAddress( message );
-						AddStatusMessage( StatusMessageType.Info, "Your message has been sent." );
-					},
-					actionGetter: () => new PostBackAction( new ExternalResource( ReturnUrl ) ) )
-				.ToCollection(),
+				modificationMethod: () => {
+					var message = new EmailMessage
+						{
+							Subject = "Support request from {0} in {1}".FormatWith(
+								AppTools.User.FriendlyName.Any() ? AppTools.User.FriendlyName : AppTools.User.Email,
+								ConfigurationStatics.SystemDisplayName ),
+							BodyHtml = body.Value.GetTextAsEncodedHtml()
+						};
+					message.ReplyToAddresses.Add( new EmailAddress( AppTools.User.Email, AppTools.User.FriendlyName ) );
+					message.ToAddresses.AddRange( EmailStatics.GetAdministratorEmailAddresses() );
+					EmailStatics.SendEmailWithDefaultFromAddress( message );
+					AddStatusMessage( StatusMessageType.Info, "Your message has been sent." );
+				},
+				actionGetter: () => new PostBackAction( new ExternalResource( ReturnUrl ) ) ),
 			() => new UiPageContent( contentFootActions: new ButtonSetup( "Send Message" ).ToCollection() )
 				.Add( new Paragraph( "You may report any problems, make suggestions, or ask for help here.".ToComponents() ) )
 				.Add(

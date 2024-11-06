@@ -47,8 +47,8 @@ partial class LogIn {
 						                          "The login link you just used has expired. Please return to the page you were on and send yourself another login email." )
 					                          .destinationUrl,
 				actionGetter: () => new PostBackAction( new ExternalResource( destinationUrl ) ) );
-			return FormState.ExecuteWithDataModificationsAndDefaultAction(
-				postBack.ToCollection(),
+			return FormState.ExecuteWithActions(
+				postBack,
 				() => {
 					var logInHiddenFieldsAndMethods = AuthenticationStatics.GetLogInHiddenFieldsAndMethods();
 					codeLoginMethod = logInHiddenFieldsAndMethods.modificationMethods.codeLoginMethod;
@@ -117,8 +117,8 @@ partial class LogIn {
 				                    reloadBehaviorGetter: () => new PageReloadBehavior( focusKey: passwordOrCodeFocusKey ) )
 			                    : null;
 
-		FormState.ExecuteWithDataModificationsAndDefaultAction(
-			logInPb.ToCollection(),
+		FormState.ExecuteWithActions(
+			logInPb,
 			() => {
 				var registeredComponents = new List<FlowComponent>();
 				registeredComponents.Add(
@@ -131,8 +131,8 @@ partial class LogIn {
 					FormItemList.CreateStack( generalSetup: new FormItemListSetup( buttonSetup: new ButtonSetup( "Log In" ), enableSubmitButton: true ) )
 						.AddItems(
 							FormState
-								.ExecuteWithDataModificationsAndDefaultAction(
-									new[] { logInPb, sendCodePb, newPasswordPb }.Where( i => i != null ),
+								.ExecuteWithActions(
+									logInPb.Add( sendCodePb ).Add( newPasswordPb ),
 									() => emailAddress.GetEmailAddressFormItem( "Email address".ToComponents() ) )
 								.Append(
 									codeEntryIsForPasswordReset.Value.Value.HasValue
@@ -182,8 +182,8 @@ partial class LogIn {
 												postBack: newPasswordPb ) ) ),
 							updateRegionSets: authenticationModeUpdateRegion.ToCollection() ).ToCollection() ) );
 
-				var logInHiddenFieldsAndMethods = FormState.ExecuteWithDataModificationsAndDefaultAction(
-					new[] { logInPb, sendCodePb, newPasswordPb }.Where( i => i != null ),
+				var logInHiddenFieldsAndMethods = FormState.ExecuteWithActions(
+					logInPb.Add( sendCodePb ).Add( newPasswordPb ),
 					AuthenticationStatics.GetLogInHiddenFieldsAndMethods );
 
 				components.Add(

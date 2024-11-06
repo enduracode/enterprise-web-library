@@ -50,8 +50,8 @@ internal static class TableStatics {
 					if( !dataModifications.Any() )
 						return (( IReadOnlyCollection<ButtonSetup>, EwfValidation?, IReadOnlyCollection<PhrasingComponent>, List<ItemIdType?> )?)null;
 
-					var checkboxes = FormState.ExecuteWithDataModificationsAndDefaultAction(
-						dataModifications,
+					var checkboxes = FormState.ExecuteWithActions(
+						dataModifications.ToParameter(),
 						() => group.itemGetters.Select(
 								i => new Checkbox(
 									false,
@@ -64,8 +64,8 @@ internal static class TableStatics {
 						formControlDefaultActionOverride: new SpecifiedValue<NonPostBackFormAction>( null ) );
 
 					var validation = groupPostBackAndButtonPairs.Any()
-						                 ? FormState.ExecuteWithDataModificationsAndDefaultAction(
-							                 groupPostBackAndButtonPairs.Select( i => i.postBack ),
+						                 ? FormState.ExecuteWithActions(
+							                 groupPostBackAndButtonPairs.Select( i => i.postBack ).ToParameter(),
 							                 () => new EwfValidation(
 								                 validator => {
 									                 if( !groupSelectedItemIds.Any() )
@@ -78,8 +78,8 @@ internal static class TableStatics {
 			.ToImmutableArray();
 
 		if( tablePostBackAndButtonPairs.Any() )
-			FormState.ExecuteWithDataModificationsAndDefaultAction(
-				tablePostBackAndButtonPairs.Select( i => i.postBack ),
+			FormState.ExecuteWithActions(
+				tablePostBackAndButtonPairs.Select( i => i.postBack ).ToParameter(),
 				() => selectedItemData.Validation = new EwfValidation(
 					      validator => {
 						      if( !selectedItemData.ItemGroupData.SelectMany( i => i!.Value.selectedIds ).Any() )

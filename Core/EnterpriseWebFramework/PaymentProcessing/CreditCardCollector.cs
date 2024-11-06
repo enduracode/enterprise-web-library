@@ -81,10 +81,10 @@ public sealed class CreditCardCollector: EtherealComponent {
 
 		var hiddenFieldId = new HiddenFieldId();
 		var hiddenFields = new List<EtherealComponent>();
-		FormState.ExecuteWithDataModificationsAndDefaultAction(
-			postBack.ToCollection(),
+		FormState.ExecuteWithActions(
+			postBack,
 			() => hiddenFields.Add(
-				new EwfHiddenField( "", validationMethod: ( postBackValue, validator ) => token.Value = postBackValue.Value, id: hiddenFieldId ).PageComponent ) );
+				new EwfHiddenField( "", validationMethod: ( postBackValue, _ ) => token.Value = postBackValue.Value, id: hiddenFieldId ).PageComponent ) );
 
 		FormAction action = new PostBackFormAction( postBack );
 		childGetter = () => {

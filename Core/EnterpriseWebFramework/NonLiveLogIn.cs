@@ -27,9 +27,8 @@ partial class NonLiveLogIn {
 					modificationMethod: () => logIn( HideWarnings ),
 					actionGetter: () => new PostBackAction( new ExternalResource( ReturnUrl ) ) ) );
 
-		return FormState.ExecuteWithDataModificationsAndDefaultAction(
-			PostBack.CreateFull( modificationMethod: () => logIn( false ), actionGetter: () => new PostBackAction( new ExternalResource( ReturnUrl ) ) )
-				.ToCollection(),
+		return FormState.ExecuteWithActions(
+			PostBack.CreateFull( modificationMethod: () => logIn( false ), actionGetter: () => new PostBackAction( new ExternalResource( ReturnUrl ) ) ),
 			() => new UiPageContent( contentFootActions: new ButtonSetup( "Log In" ).ToCollection() ).Add(
 				FormItemList.CreateStack()
 					.AddItem(

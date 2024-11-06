@@ -175,7 +175,7 @@ public class ResponsiveTable<ItemIdType>: FlowComponent {
 		headItems ??= Enumerable.Empty<EwfTableItem>().Materialize();
 		tailUpdateRegions ??= Enumerable.Empty<TailUpdateRegion>().Materialize();
 
-		var dataModifications = FormState.Current.DataModifications;
+		var dataModifications = FormState.Current.DataModificationActions;
 
 		var excelRowAdders = new List<Action<ExcelWorksheet>>();
 		outerChildren = new DisplayableElement(
@@ -191,7 +191,7 @@ public class ResponsiveTable<ItemIdType>: FlowComponent {
 
 				var children = new List<FlowComponentOrNode>();
 				using( MiniProfiler.Current.Step( "EWF - Load table data" ) )
-					FormState.ExecuteWithDataModificationsAndDefaultAction(
+					FormState.ExecuteWithActions(
 						dataModifications,
 						() => {
 							children.AddRange( TableStatics.GetCaption( caption, subCaption ) );
@@ -564,7 +564,7 @@ public class ResponsiveTable<ItemIdType>: FlowComponent {
 			selectedItemData,
 			itemGroups.Select( group => ( group.SelectedItemActions, group.Items.Select( i => new Func<EwfTableItem<ItemIdType>>( () => i.Value ) ) ) ),
 			selectedItemIds,
-			FormState.Current.DataModifications );
+			FormState.Current.DataModificationActions.Collection.Value );
 		return this;
 	}
 

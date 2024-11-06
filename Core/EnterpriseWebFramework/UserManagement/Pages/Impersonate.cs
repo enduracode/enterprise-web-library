@@ -67,8 +67,8 @@ partial class Impersonate {
 					ReturnUrl.Any()
 						? ReturnUrl
 						: EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString( EwfConfigurationStatics.AppSupportsSecureConnections ) ) ) );
-		FormState.ExecuteWithDataModificationsAndDefaultAction(
-			pb.ToCollection(),
+		FormState.ExecuteWithActions(
+			pb,
 			() => {
 				content.Add(
 					new EmailAddressControl(

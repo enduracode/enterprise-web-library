@@ -21,14 +21,13 @@ partial class DataUpdateModification {
 
 	private FlowComponent getSendSampleSection() {
 		var package = new DataValue<string>();
-		return FormState.ExecuteWithDataModificationsAndDefaultAction(
+		return FormState.ExecuteWithActions(
 			PostBack.CreateFull(
-					id: "sample",
-					modificationMethod: () => {
-						var customerType = CustomerIsBusiness ? "business" : "individual";
-						AddStatusMessage( StatusMessageType.Info, $"{package.Value} sent to {customerType}." );
-					} )
-				.ToCollection(),
+				id: "sample",
+				modificationMethod: () => {
+					var customerType = CustomerIsBusiness ? "business" : "individual";
+					AddStatusMessage( StatusMessageType.Info, $"{package.Value} sent to {customerType}." );
+				} ),
 			() => new Section(
 				"Send a sample",
 				FormItemList.CreateWrapping( setup: new FormItemListSetup( buttonSetup: new ButtonSetup( "Send" ) ) )
