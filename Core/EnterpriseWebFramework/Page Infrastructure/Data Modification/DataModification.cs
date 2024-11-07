@@ -15,14 +15,14 @@ public class DataModificationsParameter {
 	}
 
 	/// <summary>
-	/// Returns a new parameter with the specified data-modification actions added to this parameter.
+	/// Returns a new parameter with this parameter’s data-modification actions plus the specified actions.
 	/// </summary>
 	public DataModificationsParameter Add( DataModificationsParameter dataModificationActions ) => new( sequence.Concat( dataModificationActions.sequence ) );
 }
 
 public static class DataModificationsParameterExtensionCreators {
 	/// <summary>
-	/// Returns a parameter with the specified data-modification actions added to this action.
+	/// Returns a parameter with this data-modification action plus the specified actions.
 	/// </summary>
 	public static DataModificationsParameter Add( this DataModification dataModificationAction, DataModificationsParameter dataModificationActions ) =>
 		new DataModificationsParameter( [ dataModificationAction ] ).Add( dataModificationActions );
