@@ -51,7 +51,7 @@ public static class SelectedItemAction {
 	/// <param name="validationDm">The data modification that will have its validations executed if there were no errors in this post-back. Pass null to use the
 	/// first of the current data modifications.</param>
 	public static SelectedItemAction<IdType> CreateWithIntermediatePostBackBehavior<IdType>(
-		string text, IEnumerable<UpdateRegionSet>? updateRegions, Action<IReadOnlyCollection<IdType?>> modificationMethod, DisplaySetup? displaySetup = null,
+		string text, UpdateRegionSetsParameter? updateRegions, Action<IReadOnlyCollection<IdType?>> modificationMethod, DisplaySetup? displaySetup = null,
 		ActionComponentIcon? icon = null, IReadOnlyCollection<FlowComponent>? confirmationDialogContent = null, bool forceFullPagePostBack = false,
 		Func<PageReloadBehavior>? reloadBehaviorGetter = null, DataModification? validationDm = null ) {
 		validationDm ??= FormState.Current.DataModificationActions.Collection.Value.First();

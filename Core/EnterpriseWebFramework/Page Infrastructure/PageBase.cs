@@ -442,10 +442,10 @@ public abstract class PageBase: ResourceBase {
 
 		Func<PageBase, EwfResponse> actionProcessor;
 		if( postBack.IsIntermediate ) {
-			var regionSets = postBack.UpdateRegions.ToImmutableHashSet();
+			var regionSets = postBack.UpdateRegions?.Collection.Value.ToHashSet() ?? [ ];
 			var updateRegions = updateRegionLinkerNodes.SelectMany( i => i.KeyedUpdateRegionLinkers, ( node, keyedLinker ) => ( node, keyedLinker ) )
 				.SelectMany(
-					nodeLinker => nodeLinker.keyedLinker.linker.PreModificationRegions.Where( i => regionSets.Overlaps( i.Sets ) ),
+					nodeLinker => nodeLinker.keyedLinker.linker.PreModificationRegions.Where( i => i.Sets is not null && regionSets.Overlaps( i.Sets.Collection.Value ) ),
 					( nodeLinker, region ) => ( nodeLinker.node, nodeLinker.keyedLinker.key, region ) )
 				.Materialize();
 			var staticRegionContents = getStaticRegionContents( updateRegions.Select( i => ( i.node, i.region.ComponentGetter() ) ) );

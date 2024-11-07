@@ -6,7 +6,7 @@
 public class FormItemSetup {
 	internal readonly DisplaySetup? DisplaySetup;
 	internal readonly int? ColumnSpan;
-	internal readonly IEnumerable<UpdateRegionSet>? UpdateRegionSets;
+	internal readonly UpdateRegionSetsParameter? UpdateRegionSets;
 	internal readonly TextAlignment TextAlignment;
 
 	/// <summary>
@@ -17,7 +17,7 @@ public class FormItemSetup {
 	/// <param name="updateRegionSets">The intermediate-post-back update-region sets that the form item will be a part of.</param>
 	/// <param name="textAlignment"></param>
 	public FormItemSetup(
-		DisplaySetup? displaySetup = null, int? columnSpan = null, IEnumerable<UpdateRegionSet>? updateRegionSets = null,
+		DisplaySetup? displaySetup = null, int? columnSpan = null, UpdateRegionSetsParameter? updateRegionSets = null,
 		TextAlignment textAlignment = TextAlignment.NotSpecified ) {
 		DisplaySetup = displaySetup;
 		ColumnSpan = columnSpan;

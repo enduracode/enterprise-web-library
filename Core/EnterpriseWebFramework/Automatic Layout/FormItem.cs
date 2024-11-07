@@ -88,7 +88,7 @@ public class FormItem {
 	/// <param name="removalUpdateRegionSets">The intermediate-post-back update-region sets that this item's removal will be a part of.</param>
 	/// <param name="etherealContent"></param>
 	public ComponentListItem ToListItem(
-		string id, int? visualOrderRank = null, IEnumerable<UpdateRegionSet>? removalUpdateRegionSets = null,
+		string id, int? visualOrderRank = null, UpdateRegionSetsParameter? removalUpdateRegionSets = null,
 		IReadOnlyCollection<EtherealComponent>? etherealContent = null ) =>
 		getListItemContent()
 			.ToComponentListItem(
@@ -110,7 +110,7 @@ public class FormItem {
 			: Enumerable.Empty<FlowComponent>();
 
 	private DisplayableElementLocalData getErrorFocusableElementLocalData(
-		ElementContext context, string elementName, IReadOnlyCollection<ElementAttribute> attributes ) =>
+		ElementContext context, string elementName, IReadOnlyCollection<ElementAttribute>? attributes ) =>
 		ListErrorDisplayStyle.GetErrorFocusableElementLocalData( context, elementName, ErrorSourceSet, attributes );
 
 	/// <summary>

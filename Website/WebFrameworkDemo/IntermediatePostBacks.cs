@@ -80,7 +80,7 @@ partial class IntermediatePostBacks {
 		const string focusKey = "basicRegion";
 		FormState.ExecuteWithActions(
 			PostBack.CreateIntermediate(
-				rs.ToCollection(),
+				rs,
 				id: "basic",
 				modificationMethod: () => {
 					parametersModification.Toggled = !parametersModification.Toggled;
@@ -103,7 +103,7 @@ partial class IntermediatePostBacks {
 						new FlowAutofocusRegion(
 							AutofocusCondition.PostBack( focusKey ),
 							new Section( "Basic Update Region", regionComponents, style: SectionStyle.Box ).ToCollection() ).ToCollection(),
-						updateRegionSets: rs.ToCollection() ) );
+						updateRegionSets: rs ) );
 			} );
 
 		return components;
@@ -120,7 +120,7 @@ partial class IntermediatePostBacks {
 						new StandardButtonStyle( "Add Two Items" ),
 						behavior: new PostBackBehavior(
 							postBack: PostBack.CreateIntermediate(
-								addRs.ToCollection(),
+								addRs,
 								id: "nonIdAdd",
 								modificationMethod: () => parametersModification.NonIdItemStates = parametersModification.NonIdItemStates.Concat( new[] { 0, 0 } ) ) ) )
 					.ToCollection()
@@ -129,7 +129,7 @@ partial class IntermediatePostBacks {
 							new StandardButtonStyle( "Remove Two Items" ),
 							behavior: new PostBackBehavior(
 								postBack: PostBack.CreateIntermediate(
-									removeRs.ToCollection(),
+									removeRs,
 									id: "nonIdRemove",
 									modificationMethod: () =>
 										parametersModification.NonIdItemStates =
@@ -138,8 +138,7 @@ partial class IntermediatePostBacks {
 
 		var stack = new StackList(
 			Enumerable.Range( 0, NonIdItemStates.Count() ).Select( getNonIdItem ),
-			setup: new ComponentListSetup(
-				tailUpdateRegions: new[] { new TailUpdateRegion( addRs.ToCollection(), 0 ), new TailUpdateRegion( removeRs.ToCollection(), 2 ) } ) );
+			setup: new ComponentListSetup( tailUpdateRegions: new[] { new TailUpdateRegion( addRs, 0 ), new TailUpdateRegion( removeRs, 2 ) } ) );
 
 		components.Add( new Section( "Control List With Non-ID Items", stack.ToCollection(), style: SectionStyle.Box ) );
 		return components;
@@ -158,14 +157,14 @@ partial class IntermediatePostBacks {
 					new StandardButtonStyle( "Toggle", buttonSize: ButtonSize.ShrinkWrap ),
 					behavior: new PostBackBehavior(
 						postBack: PostBack.CreateIntermediate(
-							rs.ToCollection(),
+							rs,
 							id: PostBack.GetCompositeId( "nonId", i.ToString() ),
 							modificationMethod: () => parametersModification.NonIdItemStates =
 								                          parametersModification.NonIdItemStates.Select( ( state, index ) => index == i ? ( state + 1 ) % 2 : state ) ) ) )
 				.ToCollection()
 				.ToComponentListItem() );
 
-		return new StackList( items ).ToCollection().ToComponentListItem( updateRegionSets: rs.ToCollection() );
+		return new StackList( items ).ToCollection().ToComponentListItem( updateRegionSets: rs );
 	}
 
 	private IReadOnlyCollection<FlowComponent> getIdListRegionComponents() {
@@ -178,7 +177,7 @@ partial class IntermediatePostBacks {
 						new StandardButtonStyle( "Add Item" ),
 						behavior: new PostBackBehavior(
 							postBack: PostBack.CreateIntermediate(
-								rs.ToCollection(),
+								rs,
 								id: "idAdd",
 								modificationMethod: () => parametersModification.ItemIds =
 									                          ( parametersModification.ItemIds.Any() ? parametersModification.ItemIds.Min() - 1 : 0 )
@@ -190,7 +189,7 @@ partial class IntermediatePostBacks {
 		var stack = new StackList(
 			ItemIds.Select( getIdItem ),
 			setup: new ComponentListSetup(
-				itemInsertionUpdateRegions: new ItemInsertionUpdateRegion( rs.ToCollection(), () => parametersModification.ItemIds.First().ToString().ToCollection() )
+				itemInsertionUpdateRegions: new ItemInsertionUpdateRegion( rs, () => parametersModification.ItemIds.First().ToString().ToCollection() )
 					.ToCollection() ) );
 
 		components.Add( new Section( "Control List With ID Items", stack.ToCollection(), style: SectionStyle.Box ) );
@@ -207,11 +206,11 @@ partial class IntermediatePostBacks {
 					new StandardButtonStyle( "Remove", buttonSize: ButtonSize.ShrinkWrap ),
 					behavior: new PostBackBehavior(
 						postBack: PostBack.CreateIntermediate(
-							rs.ToCollection(),
+							rs,
 							id: PostBack.GetCompositeId( "id", id.ToString() ),
 							modificationMethod: () => parametersModification.ItemIds = parametersModification.ItemIds.Where( i => i != id ).ToArray() ) ) ).ToCollection()
 				.ToComponentListItem() );
 
-		return new StackList( items ).ToCollection().ToComponentListItem( id.ToString(), removalUpdateRegionSets: rs.ToCollection() );
+		return new StackList( items ).ToCollection().ToComponentListItem( id.ToString(), removalUpdateRegionSets: rs );
 	}
 }

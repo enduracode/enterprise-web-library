@@ -25,7 +25,7 @@ partial class EwfTableDemo {
 						"Remove Last Group",
 						behavior: new PostBackBehavior(
 							postBack: PostBack.CreateIntermediate(
-								updateRegionSet.ToCollection(),
+								updateRegionSet,
 								id: "removeLastGroup",
 								modificationMethod: () => {
 									if( GroupCount <= 0 )
@@ -48,7 +48,7 @@ partial class EwfTableDemo {
 					fields: new[] { new EwfTableField( size: 1.ToPercentage() ), new EwfTableField( size: 2.ToPercentage() ) },
 					headItems: EwfTableItem.Create( "First Column".ToCell(), "Second Column".ToCell() ).ToCollection(),
 					defaultItemLimit: DataRowLimit.Fifty,
-					tailUpdateRegions: new TailUpdateRegion( updateRegionSet.ToCollection(), 1 ).ToCollection() )
+					tailUpdateRegions: new TailUpdateRegion( updateRegionSet, 1 ).ToCollection() )
 				.AddItemGroups( Enumerable.Range( 1, GroupCount ).Select( getItemGroup ).Materialize() ) );
 
 		return content;
@@ -90,7 +90,7 @@ partial class EwfTableDemo {
 							null,
 							id: "group{0}".FormatWith( groupNumber ),
 							modificationMethod: () => AddStatusMessage( StatusMessageType.Info, "You clicked group {0}.".FormatWith( groupNumber ) ) ) ) ),
-				tailUpdateRegions: groupNumber == 1 ? new TailUpdateRegion( updateRegionSet.ToCollection(), 1 ).ToCollection() : null ),
+				tailUpdateRegions: groupNumber == 1 ? new TailUpdateRegion( updateRegionSet, 1 ).ToCollection() : null ),
 			groupNumber == 1
 				? getItems( FirstGroupItemCount, true )
 					.Concat(
@@ -100,7 +100,7 @@ partial class EwfTableDemo {
 										new StandardButtonStyle( "Add Row" ),
 										behavior: new PostBackBehavior(
 											postBack: PostBack.CreateIntermediate(
-												updateRegionSet.ToCollection(),
+												updateRegionSet,
 												id: "addRow",
 												modificationMethod: () => parametersModification.FirstGroupItemCount += 1 ) ) ).ToCollection()
 									.ToCell(),

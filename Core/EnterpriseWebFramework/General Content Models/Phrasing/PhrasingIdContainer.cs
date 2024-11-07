@@ -1,31 +1,27 @@
-﻿#nullable disable
-using System.Collections.Generic;
-using Tewl.Tools;
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+/// <summary>
+/// A phrasing component that prevents its children from affecting the ID of any other component.
+/// </summary>
+public class PhrasingIdContainer: PhrasingComponent {
+	private readonly FlowComponentOrNode identifiedComponent;
+
 	/// <summary>
-	/// A phrasing component that prevents its children from affecting the ID of any other component.
+	/// Creates an ID container.
 	/// </summary>
-	public class PhrasingIdContainer: PhrasingComponent {
-		private readonly FlowComponentOrNode identifiedComponent;
-
-		/// <summary>
-		/// Creates an ID container.
-		/// </summary>
-		/// <param name="children"></param>
-		/// <param name="updateRegionSets">The intermediate-post-back update-region sets that this component will be a part of.</param>
-		public PhrasingIdContainer( IEnumerable<PhrasingComponent> children, IEnumerable<UpdateRegionSet> updateRegionSets = null ) {
-			identifiedComponent = new IdentifiedFlowComponent(
-				() => new IdentifiedComponentData<FlowComponentOrNode>(
+	/// <param name="children"></param>
+	/// <param name="updateRegionSets">The intermediate-post-back update-region sets that this component will be a part of.</param>
+	public PhrasingIdContainer( IEnumerable<PhrasingComponent> children, UpdateRegionSetsParameter? updateRegionSets = null ) {
+		identifiedComponent = new IdentifiedFlowComponent(
+			() => new IdentifiedComponentData<FlowComponentOrNode>(
+				"",
+				new UpdateRegionLinker(
 					"",
-					new UpdateRegionLinker(
-						"",
-						new PreModificationUpdateRegion( updateRegionSets, identifiedComponent.ToCollection, () => "" ).ToCollection(),
-						arg => identifiedComponent.ToCollection() ).ToCollection(),
-					new ErrorSourceSet(),
-					errorsBySource => children ) );
-		}
-
-		IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() => identifiedComponent.ToCollection();
+					new PreModificationUpdateRegion( updateRegionSets, identifiedComponent!.ToCollection, () => "" ).ToCollection(),
+					arg => identifiedComponent.ToCollection() ).ToCollection(),
+				new ErrorSourceSet(),
+				errorsBySource => children ) );
 	}
+
+	IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() => identifiedComponent.ToCollection();
 }

@@ -98,7 +98,7 @@ partial class LogIn {
 		const string passwordOrCodeFocusKey = "code";
 		var sendCodePb = codeEntryIsForPasswordReset.Value.Value != true
 			                 ? PostBack.CreateIntermediate(
-				                 authenticationModeUpdateRegion.ToCollection(),
+				                 authenticationModeUpdateRegion,
 				                 id: "sendCode",
 				                 modificationMethod: () => {
 					                 loginCodeSender( emailAddress, false, ReturnUrl );
@@ -108,7 +108,7 @@ partial class LogIn {
 			                 : null;
 		var newPasswordPb = codeEntryIsForPasswordReset.Value.Value != false
 			                    ? PostBack.CreateIntermediate(
-				                    authenticationModeUpdateRegion.ToCollection(),
+				                    authenticationModeUpdateRegion,
 				                    id: "newPw",
 				                    modificationMethod: () => {
 					                    loginCodeSender( emailAddress, true, ReturnUrl );
@@ -136,9 +136,9 @@ partial class LogIn {
 									() => emailAddress.GetEmailAddressFormItem( "Email address".ToComponents() ) )
 								.Append(
 									codeEntryIsForPasswordReset.Value.Value.HasValue
-										? getLoginCodeFormItem( authenticationModeUpdateRegion.ToCollection(), AutofocusCondition.PostBack( passwordOrCodeFocusKey ), loginCode )
+										? getLoginCodeFormItem( authenticationModeUpdateRegion, AutofocusCondition.PostBack( passwordOrCodeFocusKey ), loginCode )
 										: getPasswordFormItem(
-											authenticationModeUpdateRegion.ToCollection(),
+											authenticationModeUpdateRegion,
 											AutofocusCondition.PostBack( passwordOrCodeFocusKey ),
 											password,
 											new PostBackBehavior( postBack: sendCodePb ) ) )
@@ -162,7 +162,7 @@ partial class LogIn {
 												buttonSize: ButtonSize.ShrinkWrap ),
 											behavior: new PostBackBehavior(
 												postBack: PostBack.CreateIntermediate(
-													authenticationModeUpdateRegion.ToCollection(),
+													authenticationModeUpdateRegion,
 													id: "revertToPasswordEntry",
 													modificationMethod: () => codeEntryIsForPasswordReset.Value.Value = null,
 													reloadBehaviorGetter: () => new PageReloadBehavior( focusKey: passwordOrCodeFocusKey ) ) ) ) )
@@ -180,7 +180,7 @@ partial class LogIn {
 																.ToComponents() ) )
 													.Materialize(),
 												postBack: newPasswordPb ) ) ),
-							updateRegionSets: authenticationModeUpdateRegion.ToCollection() ).ToCollection() ) );
+							updateRegionSets: authenticationModeUpdateRegion ).ToCollection() ) );
 
 				var logInHiddenFieldsAndMethods = FormState.ExecuteWithActions(
 					logInPb.Add( sendCodePb ).Add( newPasswordPb ),
@@ -215,7 +215,7 @@ partial class LogIn {
 	}
 
 	private FormItem getPasswordFormItem(
-		IEnumerable<UpdateRegionSet> updateRegionSets, AutofocusCondition autofocusCondition, DataValue<string> password, ButtonBehavior sendCodeButtonBehavior ) {
+		UpdateRegionSetsParameter updateRegionSets, AutofocusCondition autofocusCondition, DataValue<string> password, ButtonBehavior sendCodeButtonBehavior ) {
 		var control = password.ToTextControl(
 			false,
 			setup: TextControlSetup.CreateObscured( classes: passwordClass, autoFillTokens: "current-password" ),
@@ -235,7 +235,7 @@ partial class LogIn {
 			validation: control.Validation );
 	}
 
-	private FormItem getLoginCodeFormItem( IEnumerable<UpdateRegionSet> updateRegionSets, AutofocusCondition autofocusCondition, DataValue<string> loginCode ) {
+	private FormItem getLoginCodeFormItem( UpdateRegionSetsParameter updateRegionSets, AutofocusCondition autofocusCondition, DataValue<string> loginCode ) {
 		var control = loginCode.ToNumericTextControl( false, value: "", maxLength: 10 );
 		return new FlowAutofocusRegion( autofocusCondition, control.PageComponent.ToCollection() ).ToFormItem(
 			setup: new FormItemSetup( updateRegionSets: updateRegionSets ),

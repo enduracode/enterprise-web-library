@@ -6,7 +6,7 @@
 public class TableCellSetup {
 	internal readonly int FieldSpan;
 	internal readonly int ItemSpan;
-	internal readonly IEnumerable<UpdateRegionSet>? UpdateRegionSets;
+	internal readonly UpdateRegionSetsParameter? UpdateRegionSets;
 	internal readonly ElementClassSet Classes;
 	internal readonly TextAlignment TextAlignment;
 	internal readonly ElementActivationBehavior? ActivationBehavior;
@@ -29,7 +29,7 @@ public class TableCellSetup {
 	/// <param name="containsActivatableElements">Pass true if the cell contains “activatable” elements, e.g. hyperlinks, buttons, or form controls.</param>
 	/// <param name="etherealContent"></param>
 	public TableCellSetup(
-		int fieldSpan = 1, int itemSpan = 1, IEnumerable<UpdateRegionSet>? updateRegionSets = null, ElementClassSet? classes = null,
+		int fieldSpan = 1, int itemSpan = 1, UpdateRegionSetsParameter? updateRegionSets = null, ElementClassSet? classes = null,
 		TextAlignment textAlignment = TextAlignment.NotSpecified, ElementActivationBehavior? activationBehavior = null, bool containsActivatableElements = false,
 		IReadOnlyCollection<EtherealComponent>? etherealContent = null ) {
 		FieldSpan = fieldSpan;

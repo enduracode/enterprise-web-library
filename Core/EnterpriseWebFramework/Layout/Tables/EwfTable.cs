@@ -230,7 +230,8 @@ public class EwfTable<ItemIdType>: FlowComponent {
 												: new PreModificationUpdateRegion(
 													this.tailUpdateRegions.Where( i => itemGroups.Count - i.UpdatingItemCount == 0 )
 														.Concat( visibleItemGroupsAndItems.Select( i => i.Item1 ).SelectMany( i => i.GetTailUpdateRegionsIncludingAllItems() ) )
-														.SelectMany( i => i.Sets ),
+														.SelectMany( i => i.Sets.Collection.Value )
+														.ToParameter(),
 													columnIdentifiedComponent.ToCollection,
 													() => "" ).ToCollection(),
 											_ => columnIdentifiedComponent.ToCollection() ).ToCollection(),
@@ -287,7 +288,7 @@ public class EwfTable<ItemIdType>: FlowComponent {
 							excelRowAdders.AddRange( headItems.Select( i => TableStatics.GetExcelRowAdder( true, i.Cells ) ) );
 
 							var bodyRowGroupsAndRows = new List<Tuple<FlowComponent, IReadOnlyCollection<FlowComponent>>>();
-							var updateRegionSetListsAndStaticRowGroupCounts = new List<Tuple<IReadOnlyCollection<UpdateRegionSet>, int>>();
+							var updateRegionSetListsAndStaticRowGroupCounts = new List<( UpdateRegionSetsParameter, int )>();
 							for( var visibleGroupIndex = 0; visibleGroupIndex < visibleItemGroupsAndItems.Count; visibleGroupIndex += 1 ) {
 								var groupAndItems = visibleItemGroupsAndItems[ visibleGroupIndex ];
 								var groupSelectedItemData = selectedItemData.ItemGroupData?[ visibleGroupIndex ];
@@ -354,8 +355,8 @@ public class EwfTable<ItemIdType>: FlowComponent {
 
 								// If item limiting is enabled, include all subsequent item groups in tail update regions since any number of items could be appended.
 								if( defaultItemLimit != DataRowLimit.Unlimited )
-									updateRegionSetListsAndStaticRowGroupCounts.Add(
-										Tuple.Create( groupAndItems.Item1.RemainingData.Value.TailUpdateRegions.SelectMany( i => i.Sets ).Materialize(), visibleGroupIndex + 1 ) );
+									updateRegionSetListsAndStaticRowGroupCounts.AddRange(
+										groupAndItems.Item1.RemainingData.Value.TailUpdateRegions.Select( i => ( i.Sets, visibleGroupIndex + 1 ) ) );
 							}
 							var linkers = new List<UpdateRegionLinker>();
 							children.Add(
@@ -388,7 +389,7 @@ public class EwfTable<ItemIdType>: FlowComponent {
 									new UpdateRegionLinker(
 										"itemLimitingTail",
 										new PreModificationUpdateRegion(
-											itemLimitingUpdateRegionSet.ToCollection(),
+											itemLimitingUpdateRegionSet,
 											() => itemLimitingTailUpdateRegionComponentGetter( lowerItemLimit.Value ),
 											() => lowerItemLimit.Value.ToString() ).ToCollection(),
 										arg => itemLimitingTailUpdateRegionComponentGetter( int.Parse( arg ) ) ) );
@@ -418,7 +419,7 @@ public class EwfTable<ItemIdType>: FlowComponent {
 									new StandardButtonStyle( "Show " + itemIncrementCount + " more item" + ( itemIncrementCount != 1 ? "s" : "" ) ),
 									behavior: new PostBackBehavior(
 										postBack: PostBack.CreateIntermediate(
-											itemLimitingUpdateRegionSet.ToCollection(),
+											itemLimitingUpdateRegionSet,
 											id: PostBack.GetCompositeId( idBase, "showMore" ),
 											modificationMethod: () => itemLimit.Value.Value = (int)nextLimit ) ) );
 								var item = EwfTableItem.Create( button.ToCollection().ToCell( new TableCellSetup( fieldSpan: fields.Count ) ) );
@@ -440,12 +441,12 @@ public class EwfTable<ItemIdType>: FlowComponent {
 							children.Add(
 								new FlowIdContainer(
 									itemLimitingRowGroup,
-									updateRegionSets: itemLimitingUpdateRegionSet.ToCollection()
-										.Concat(
-											itemGroups.SelectMany( i => i.RemainingData.Value.TailUpdateRegions )
-												.Materialize()
-												.Concat( this.tailUpdateRegions )
-												.SelectMany( i => i.Sets ) ) ) );
+									updateRegionSets: itemLimitingUpdateRegionSet.Add(
+										itemGroups.SelectMany( i => i.RemainingData.Value.TailUpdateRegions )
+											.Materialize()
+											.Concat( this.tailUpdateRegions )
+											.SelectMany( i => i.Sets.Collection.Value )
+											.ToParameter() ) ) );
 
 							// Assert that every visible item in the table has the same number of cells and store a data structure for below.
 							var fieldCount = fields.Count - ( selectedItemData.ItemGroupData != null ? 1 : 0 ) - ( enableItemReordering ? 1 : 0 );
@@ -627,8 +628,11 @@ public class EwfTable<ItemIdType>: FlowComponent {
 			new PhrasingIdContainer(
 					"Item".ToQuantity( itemCount ).ToComponents(),
 					updateRegionSets:
-					itemGroups.SelectMany( i => i.RemainingData.Value.TailUpdateRegions ).Materialize().Concat( tailUpdateRegions ).SelectMany( i => i.Sets ) )
-				.ToComponentListItem()
+					itemGroups.SelectMany( i => i.RemainingData.Value.TailUpdateRegions )
+						.Materialize()
+						.Concat( tailUpdateRegions )
+						.SelectMany( i => i.Sets.Collection.Value )
+						.ToParameter() ).ToComponentListItem()
 				.AppendLineListItem( "".ToComponentListItem() )
 				.Append( "Show:".ToComponentListItem() )
 				.Append( getItemLimitButtonItem( postBackIdBase, currentItemLimit, DataRowLimit.Fifty, itemLimitingUpdateRegionSet ) )
@@ -646,7 +650,7 @@ public class EwfTable<ItemIdType>: FlowComponent {
 			new StandardButtonStyle( text, buttonSize: ButtonSize.ShrinkWrap ),
 			behavior: new PostBackBehavior(
 				postBack: PostBack.CreateIntermediate(
-					updateRegionSet.ToCollection(),
+					updateRegionSet,
 					id: PostBack.GetCompositeId( postBackIdBase, itemLimit.ToString() ),
 					modificationMethod: () => currentItemLimit.Value = (int)itemLimit ) ) ).ToComponentListItem();
 	}
