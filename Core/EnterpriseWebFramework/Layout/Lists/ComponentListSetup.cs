@@ -30,7 +30,7 @@ public class ComponentListSetup {
 	/// <param name="etherealContent"></param>
 	public ComponentListSetup(
 		DisplaySetup? displaySetup = null, bool isOrdered = false, ElementClassSet? classes = null, AutofocusCondition? lastItemAutofocusCondition = null,
-		TailUpdateRegionsParameter? tailUpdateRegions = null, IEnumerable<ItemInsertionUpdateRegion>? itemInsertionUpdateRegions = null,
+		TailUpdateRegionsParameter? tailUpdateRegions = null, ItemInsertionUpdateRegionsParameter? itemInsertionUpdateRegions = null,
 		IReadOnlyCollection<EtherealComponent>? etherealContent = null ) {
 		componentGetter = ( listTypeClasses, items ) => {
 			items = items.ToImmutableArray();
@@ -51,7 +51,7 @@ public class ComponentListSetup {
 								arg => itemComponents.Skip( int.Parse( arg ) ) ),
 							new UpdateRegionLinker(
 								"add",
-								from region in itemInsertionUpdateRegions ?? ImmutableArray<ItemInsertionUpdateRegion>.Empty
+								from region in itemInsertionUpdateRegions?.Collection.Value ?? [ ]
 								select
 									new PreModificationUpdateRegion(
 										region.Sets,

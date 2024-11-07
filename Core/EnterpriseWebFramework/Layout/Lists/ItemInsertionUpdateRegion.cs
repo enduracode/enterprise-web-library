@@ -1,4 +1,6 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework;
+﻿using JetBrains.Annotations;
+
+namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 public class ItemInsertionUpdateRegion {
 	internal readonly UpdateRegionSetsParameter Sets;
@@ -13,4 +15,39 @@ public class ItemInsertionUpdateRegion {
 		Sets = sets;
 		NewItemIdGetter = newItemIdGetter;
 	}
+}
+
+public class ItemInsertionUpdateRegionsParameter {
+	public static implicit operator ItemInsertionUpdateRegionsParameter( ItemInsertionUpdateRegion? itemInsertionUpdateRegion ) =>
+		new( itemInsertionUpdateRegion is null ? [ ] : [ itemInsertionUpdateRegion ] );
+
+	private readonly IEnumerable<ItemInsertionUpdateRegion> sequence;
+	internal readonly Lazy<IReadOnlyCollection<ItemInsertionUpdateRegion>> Collection;
+
+	internal ItemInsertionUpdateRegionsParameter( IEnumerable<ItemInsertionUpdateRegion> sequence ) {
+		this.sequence = sequence;
+		Collection = new Lazy<IReadOnlyCollection<ItemInsertionUpdateRegion>>( sequence.Materialize );
+	}
+
+	/// <summary>
+	/// Returns a new parameter with this parameter’s item-insertion update regions plus the specified regions.
+	/// </summary>
+	public ItemInsertionUpdateRegionsParameter Add( ItemInsertionUpdateRegionsParameter itemInsertionUpdateRegions ) =>
+		new( sequence.Concat( itemInsertionUpdateRegions.sequence ) );
+}
+
+[ PublicAPI ]
+public static class ItemInsertionUpdateRegionsParameterExtensionCreators {
+	/// <summary>
+	/// Returns a parameter with this item-insertion update region plus the specified regions.
+	/// </summary>
+	public static ItemInsertionUpdateRegionsParameter Add(
+		this ItemInsertionUpdateRegion itemInsertionUpdateRegion, ItemInsertionUpdateRegionsParameter itemInsertionUpdateRegions ) =>
+		new ItemInsertionUpdateRegionsParameter( [ itemInsertionUpdateRegion ] ).Add( itemInsertionUpdateRegions );
+
+	/// <summary>
+	/// Returns a parameter with the item-insertion update regions in this sequence.
+	/// </summary>
+	public static ItemInsertionUpdateRegionsParameter ToParameter( this IEnumerable<ItemInsertionUpdateRegion> itemInsertionUpdateRegions ) =>
+		new( itemInsertionUpdateRegions );
 }

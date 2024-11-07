@@ -189,8 +189,7 @@ partial class IntermediatePostBacks {
 		var stack = new StackList(
 			ItemIds.Select( getIdItem ),
 			setup: new ComponentListSetup(
-				itemInsertionUpdateRegions: new ItemInsertionUpdateRegion( rs, () => parametersModification.ItemIds.First().ToString().ToCollection() )
-					.ToCollection() ) );
+				itemInsertionUpdateRegions: new ItemInsertionUpdateRegion( rs, () => parametersModification.ItemIds.First().ToString().ToCollection() ) ) );
 
 		components.Add( new Section( "Control List With ID Items", stack.ToCollection(), style: SectionStyle.Box ) );
 		return components;
