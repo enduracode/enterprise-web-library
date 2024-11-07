@@ -48,7 +48,7 @@ public class ResponsiveTable: ResponsiveTable<int> {
 		string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
 		IReadOnlyCollection<SelectedItemAction<int>> selectedItemActions = null, IReadOnlyCollection<EwfTableField> fields = null,
 		IReadOnlyCollection<EwfTableItem> headItems = null, DataRowLimit defaultItemLimit = DataRowLimit.Unlimited, bool enableItemReordering = false,
-		bool disableEmptyFieldDetection = false, IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions = null,
+		bool disableEmptyFieldDetection = false, TailUpdateRegionsParameter tailUpdateRegions = null,
 		IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
 		new(
 			displaySetup,
@@ -103,7 +103,7 @@ public class ResponsiveTable: ResponsiveTable<int> {
 		string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
 		IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions = null, IReadOnlyCollection<EwfTableField> fields = null,
 		IReadOnlyCollection<EwfTableItem> headItems = null, DataRowLimit defaultItemLimit = DataRowLimit.Unlimited, bool enableItemReordering = false,
-		bool disableEmptyFieldDetection = false, IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions = null,
+		bool disableEmptyFieldDetection = false, TailUpdateRegionsParameter tailUpdateRegions = null,
 		IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
 		new(
 			displaySetup,
@@ -127,7 +127,7 @@ public class ResponsiveTable: ResponsiveTable<int> {
 		DisplaySetup displaySetup, EwfTableStyle style, ElementClassSet classes, string postBackIdBase, string caption, string subCaption, bool allowExportToExcel,
 		IReadOnlyCollection<ActionComponentSetup> tableActions, IReadOnlyCollection<SelectedItemAction<int>> selectedItemActions,
 		IReadOnlyCollection<EwfTableField> fields, IReadOnlyCollection<EwfTableItem> headItems, DataRowLimit defaultItemLimit, bool enableItemReordering,
-		bool disableEmptyFieldDetection, IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions, IReadOnlyCollection<EtherealComponent> etherealContent ): base(
+		bool disableEmptyFieldDetection, TailUpdateRegionsParameter tailUpdateRegions, IReadOnlyCollection<EtherealComponent> etherealContent ): base(
 		displaySetup,
 		style,
 		classes,
@@ -159,13 +159,13 @@ public class ResponsiveTable<ItemIdType>: FlowComponent {
 	private readonly ComponentStateItem<int> itemLimit;
 	private readonly List<EwfTableItemGroup<ItemIdType>> itemGroups = new();
 	private bool? hasExplicitItemGroups;
-	private IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions;
+	private TailUpdateRegionsParameter tailUpdateRegions;
 
 	internal ResponsiveTable(
 		DisplaySetup displaySetup, EwfTableStyle style, ElementClassSet classes, string idBase, string caption, string subCaption, bool allowExportToExcel,
 		IReadOnlyCollection<ActionComponentSetup> tableActions, IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions,
 		IReadOnlyCollection<EwfTableField> fields, IReadOnlyCollection<EwfTableItem> headItems, DataRowLimit defaultItemLimit, bool enableItemReordering,
-		bool disableEmptyFieldDetection, IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions, IReadOnlyCollection<EtherealComponent> etherealContent ) {
+		bool disableEmptyFieldDetection, TailUpdateRegionsParameter tailUpdateRegions, IReadOnlyCollection<EtherealComponent> etherealContent ) {
 		idBase = PostBack.GetCompositeId( idBase, "ewfTable" );
 		tableActions ??= Enumerable.Empty<ActionComponentSetup>().Materialize();
 
@@ -173,7 +173,6 @@ public class ResponsiveTable<ItemIdType>: FlowComponent {
 			throw new ApplicationException( "If fields are specified, there must be at least one of them." );
 
 		headItems ??= Enumerable.Empty<EwfTableItem>().Materialize();
-		tailUpdateRegions ??= Enumerable.Empty<TailUpdateRegion>().Materialize();
 
 		var dataModifications = FormState.Current.DataModificationActions;
 
@@ -380,8 +379,9 @@ public class ResponsiveTable<ItemIdType>: FlowComponent {
 										               ? visibleItemGroupsAndItems.Single()
 											               .Item1.GetTailUpdateRegionsIncludingAllItems()
 											               .Select( i => new { sets = i.Sets, staticRowGroupCount = 0 } )
-										               : this.tailUpdateRegions.Select( i => new { sets = i.Sets, staticRowGroupCount = itemGroups.Count - i.UpdatingItemCount } )
-											               .Concat( updateRegionSetListsAndStaticRowGroupCounts.Select( i => new { sets = i.Item1, staticRowGroupCount = i.Item2 } ) )
+										               : ( this.tailUpdateRegions?.Collection.Value.Select(
+											                   i => new { sets = i.Sets, staticRowGroupCount = itemGroups.Count - i.UpdatingItemCount } ) ?? [ ] ).Concat(
+											               updateRegionSetListsAndStaticRowGroupCounts.Select( i => new { sets = i.Item1, staticRowGroupCount = i.Item2 } ) )
 									select new PreModificationUpdateRegion(
 										region.sets,
 										() => bodyRowGroupsAndRows.Skip( region.staticRowGroupCount ).Select( i => i.Item1 ),
@@ -421,7 +421,7 @@ public class ResponsiveTable<ItemIdType>: FlowComponent {
 									updateRegionSets: itemLimitingUpdateRegionSet.Add(
 										itemGroups.SelectMany( i => i.RemainingData.Value.TailUpdateRegions )
 											.Materialize()
-											.Concat( this.tailUpdateRegions )
+											.Concat( this.tailUpdateRegions?.Collection.Value ?? [ ] )
 											.SelectMany( i => i.Sets.Collection.Value )
 											.ToParameter() ) ) );
 
@@ -541,7 +541,7 @@ public class ResponsiveTable<ItemIdType>: FlowComponent {
 				group = EwfTableItemGroup.CreateWithItemIdType(
 					() => new EwfTableItemGroupRemainingData( null, tailUpdateRegions: tableTailUpdateRegions ),
 					Enumerable.Empty<Func<EwfTableItem<ItemIdType>>>() ) );
-			tailUpdateRegions = Enumerable.Empty<TailUpdateRegion>().Materialize();
+			tailUpdateRegions = null;
 		}
 
 		group.Items.Add( EwfTableItemGroup.GetItemLazy( item ) );
@@ -569,8 +569,7 @@ public class ResponsiveTable<ItemIdType>: FlowComponent {
 	}
 
 	private FlowComponent getItemLimitingControlContainer(
-		string postBackIdBase, DataValue<int> currentItemLimit, UpdateRegionSet itemLimitingUpdateRegionSet,
-		IReadOnlyCollection<TailUpdateRegion> tailUpdateRegions ) {
+		string postBackIdBase, DataValue<int> currentItemLimit, UpdateRegionSet itemLimitingUpdateRegionSet, TailUpdateRegionsParameter tailUpdateRegions ) {
 		var itemCount = itemGroups.Sum( i => i.Items.Count );
 		var list = new LineList(
 			new PhrasingIdContainer(
@@ -578,7 +577,7 @@ public class ResponsiveTable<ItemIdType>: FlowComponent {
 					updateRegionSets:
 					itemGroups.SelectMany( i => i.RemainingData.Value.TailUpdateRegions )
 						.Materialize()
-						.Concat( tailUpdateRegions )
+						.Concat( tailUpdateRegions?.Collection.Value ?? [ ] )
 						.SelectMany( i => i.Sets.Collection.Value )
 						.ToParameter() ).ToComponentListItem()
 				.AppendLineListItem( "".ToComponentListItem() )

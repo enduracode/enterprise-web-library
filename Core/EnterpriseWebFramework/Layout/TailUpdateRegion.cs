@@ -1,4 +1,6 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework;
+﻿using JetBrains.Annotations;
+
+namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 public class TailUpdateRegion {
 	internal readonly UpdateRegionSetsParameter Sets;
@@ -14,4 +16,36 @@ public class TailUpdateRegion {
 		Sets = sets;
 		UpdatingItemCount = updatingItemCount;
 	}
+}
+
+public class TailUpdateRegionsParameter {
+	public static implicit operator TailUpdateRegionsParameter( TailUpdateRegion? tailUpdateRegion ) =>
+		new( tailUpdateRegion is null ? [ ] : [ tailUpdateRegion ] );
+
+	private readonly IEnumerable<TailUpdateRegion> sequence;
+	internal readonly Lazy<IReadOnlyCollection<TailUpdateRegion>> Collection;
+
+	internal TailUpdateRegionsParameter( IEnumerable<TailUpdateRegion> sequence ) {
+		this.sequence = sequence;
+		Collection = new Lazy<IReadOnlyCollection<TailUpdateRegion>>( sequence.Materialize );
+	}
+
+	/// <summary>
+	/// Returns a new parameter with this parameter’s tail update regions plus the specified regions.
+	/// </summary>
+	public TailUpdateRegionsParameter Add( TailUpdateRegionsParameter tailUpdateRegions ) => new( sequence.Concat( tailUpdateRegions.sequence ) );
+}
+
+[ PublicAPI ]
+public static class TailUpdateRegionsParameterExtensionCreators {
+	/// <summary>
+	/// Returns a parameter with this tail update region plus the specified regions.
+	/// </summary>
+	public static TailUpdateRegionsParameter Add( this TailUpdateRegion tailUpdateRegion, TailUpdateRegionsParameter tailUpdateRegions ) =>
+		new TailUpdateRegionsParameter( [ tailUpdateRegion ] ).Add( tailUpdateRegions );
+
+	/// <summary>
+	/// Returns a parameter with the tail update regions in this sequence.
+	/// </summary>
+	public static TailUpdateRegionsParameter ToParameter( this IEnumerable<TailUpdateRegion> tailUpdateRegions ) => new( tailUpdateRegions );
 }

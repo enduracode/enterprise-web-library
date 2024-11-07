@@ -138,7 +138,7 @@ partial class IntermediatePostBacks {
 
 		var stack = new StackList(
 			Enumerable.Range( 0, NonIdItemStates.Count() ).Select( getNonIdItem ),
-			setup: new ComponentListSetup( tailUpdateRegions: new[] { new TailUpdateRegion( addRs, 0 ), new TailUpdateRegion( removeRs, 2 ) } ) );
+			setup: new ComponentListSetup( tailUpdateRegions: new TailUpdateRegion( addRs, 0 ).Add( new TailUpdateRegion( removeRs, 2 ) ) ) );
 
 		components.Add( new Section( "Control List With Non-ID Items", stack.ToCollection(), style: SectionStyle.Box ) );
 		return components;
