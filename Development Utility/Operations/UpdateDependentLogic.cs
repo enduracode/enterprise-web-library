@@ -612,6 +612,9 @@ internal class UpdateDependentLogic: Operation {
 			writeMsBuildProperty(
 				$"<DefaultItemExcludesInProjectFolder>$(DefaultItemExcludesInProjectFolder);Directory.Build.props;Directory.Build.targets;**/*{CodeGeneration.DataAccess.DataAccessStatics.CSharpTemplateFileExtension}</DefaultItemExcludesInProjectFolder>" );
 
+			// see https://learn.microsoft.com/en-us/nuget/concepts/auditing-packages#configuring-nuget-audit
+			writeMsBuildProperty( "<NuGetAuditMode>direct</NuGetAuditMode>" );
+
 			// affects only web apps; see https://learn.microsoft.com/en-us/aspnet/core/host-and-deploy/iis/web-config?view=aspnetcore-6.0
 			writeMsBuildProperty( "<IsTransformWebConfigDisabled>true</IsTransformWebConfigDisabled>" );
 

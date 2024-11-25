@@ -5,6 +5,7 @@
     <AssemblyName>EnterpriseWebLibrary.Tests</AssemblyName>
     <RootNamespace>EnterpriseWebLibrary.Tests</RootNamespace>
     <Nullable>enable</Nullable>
+    <NuGetAuditMode>direct</NuGetAuditMode>
   </PropertyGroup>
 
   <ItemGroup>
