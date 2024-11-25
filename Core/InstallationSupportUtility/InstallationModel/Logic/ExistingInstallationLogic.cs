@@ -32,8 +32,9 @@ public class ExistingInstallationLogic {
 	/// Stops all web applications and services associated with this installation.
 	/// </summary>
 	public void Stop( bool stopServices ) {
-		foreach( var iisAppPoolName in runtimeConfiguration.WebApplications.Select( i => i.IisAppPoolAndSiteName! ).Where( i => i.Length > 0 ) )
-			IsuStatics.StopIisAppPool( iisAppPoolName );
+		if( runtimeConfiguration.InstallationType != InstallationType.Development )
+			foreach( var iisAppPoolName in runtimeConfiguration.WebApplications.Select( i => i.IisAppPoolAndSiteName! ).Where( i => i.Length > 0 ) )
+				IsuStatics.StopIisAppPool( iisAppPoolName );
 		if( stopServices )
 			this.stopServices();
 	}
@@ -110,8 +111,9 @@ public class ExistingInstallationLogic {
 				true );
 			TewlContrib.ProcessTools.RunProgram( "sc", "failureflag \"{0}\" 1".FormatWith( serviceController.ServiceName ), "", true );
 		}
-		foreach( var iisAppPoolName in runtimeConfiguration.WebApplications.Select( i => i.IisAppPoolAndSiteName! ).Where( i => i.Length > 0 ) )
-			IsuStatics.StartIisAppPool( iisAppPoolName );
+		if( runtimeConfiguration.InstallationType != InstallationType.Development )
+			foreach( var iisAppPoolName in runtimeConfiguration.WebApplications.Select( i => i.IisAppPoolAndSiteName! ).Where( i => i.Length > 0 ) )
+				IsuStatics.StartIisAppPool( iisAppPoolName );
 	}
 
 	public void InstallServices() {
