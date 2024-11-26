@@ -75,7 +75,7 @@ public abstract class PageBase: ResourceBase {
 		Func<Func<Func<PageContent>, PageContent>, Func<string>, Func<string>, ( PageContent, FlowComponent, FlowComponent, FlowComponent, Action, bool,
 			ActionPostBack )> contentGetter ) {
 		EwfValidation.Init( () => FormState.Current.ValidationPredicate, validation => FormState.Current.AddValidationToDataModificationActions( validation ) );
-		BasicDataModification.Init(
+		BasicDataModificationAction.Init(
 			RequestStateStatics.NotifyOfSlowDataModification,
 			( validation, errorMessages ) => {
 				if( !errorMessages.Any() )
@@ -690,7 +690,7 @@ public abstract class PageBase: ResourceBase {
 		while( ( urlHandler = urlHandler.GetParent() ) != null );
 
 		formState = new FormState();
-		dataUpdate = new DataUpdateAction( new BasicDataModification( dataUpdateIsSlow ) );
+		dataUpdate = new DataUpdateAction( new BasicDataModificationAction( dataUpdateIsSlow ) );
 		FormAction pageLoadAction = null;
 		var elementJsInitStatements = new StringBuilder();
 		var content = contentGetter(

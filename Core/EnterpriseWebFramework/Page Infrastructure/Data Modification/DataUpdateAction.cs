@@ -3,9 +3,9 @@
 public class DataUpdateAction: DataModificationAction, ValidationList {
 	public static implicit operator DataModificationActionsParameter( DataUpdateAction action ) => new( [ action ] );
 
-	internal readonly BasicDataModification Action;
+	internal readonly BasicDataModificationAction Action;
 
-	internal DataUpdateAction( BasicDataModification dataModificationAction ) {
+	internal DataUpdateAction( BasicDataModificationAction dataModificationAction ) {
 		Action = dataModificationAction;
 	}
 

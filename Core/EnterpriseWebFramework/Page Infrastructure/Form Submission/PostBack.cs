@@ -88,7 +88,7 @@ public class ActionPostBack: PostBack, DataModificationAction, ValidationList {
 
 	private readonly UpdateRegionSetsParameter? updateRegions;
 	private readonly bool skipModificationIfNoChanges;
-	private readonly BasicDataModification dataModification;
+	private readonly BasicDataModificationAction dataModificationAction;
 	private readonly Func<PostBackAction>? actionGetter;
 	private readonly DataModificationAction? validationAction;
 
@@ -101,9 +101,9 @@ public class ActionPostBack: PostBack, DataModificationAction, ValidationList {
 		this.updateRegions = updateRegions;
 		this.skipModificationIfNoChanges = skipModificationIfNoChanges;
 
-		dataModification = new BasicDataModification( isSlow );
+		dataModificationAction = new BasicDataModificationAction( isSlow );
 		if( modificationMethod != null )
-			dataModification.AddModificationMethod( modificationMethod );
+			dataModificationAction.AddModificationMethod( modificationMethod );
 
 		this.actionGetter = actionGetter;
 		this.validationAction = validationAction;
@@ -112,12 +112,12 @@ public class ActionPostBack: PostBack, DataModificationAction, ValidationList {
 	internal UpdateRegionSetsParameter? UpdateRegions => updateRegions;
 
 	void ValidationList.AddValidation( EwfValidation validation ) {
-		dataModification.AddValidation( validation );
+		dataModificationAction.AddValidation( validation );
 	}
 
 	internal bool Execute( bool changesExist, Action<PostBackAction?>? actionSetter ) {
 		PostBackAction? action = null;
-		return dataModification.Execute(
+		return dataModificationAction.Execute(
 			skipModificationIfNoChanges,
 			changesExist,
 			performValidationOnly: actionSetter == null,

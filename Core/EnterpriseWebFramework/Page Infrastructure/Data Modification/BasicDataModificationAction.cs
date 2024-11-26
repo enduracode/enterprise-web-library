@@ -3,7 +3,7 @@ using Tewl.InputValidation;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
-internal class BasicDataModification {
+internal class BasicDataModificationAction {
 	private static Action slowExecutionNotifier = null!;
 	private static Action<EwfValidation, IEnumerable<string>> validationErrorHandler = null!;
 	private static Action<IReadOnlyCollection<TrustedHtmlString>> modificationErrorHandler = null!;
@@ -11,16 +11,16 @@ internal class BasicDataModification {
 	public static void Init(
 		Action slowExecutionNotifier, Action<EwfValidation, IEnumerable<string>> validationErrorHandler,
 		Action<IReadOnlyCollection<TrustedHtmlString>> modificationErrorHandler ) {
-		BasicDataModification.slowExecutionNotifier = slowExecutionNotifier;
-		BasicDataModification.validationErrorHandler = validationErrorHandler;
-		BasicDataModification.modificationErrorHandler = modificationErrorHandler;
+		BasicDataModificationAction.slowExecutionNotifier = slowExecutionNotifier;
+		BasicDataModificationAction.validationErrorHandler = validationErrorHandler;
+		BasicDataModificationAction.modificationErrorHandler = modificationErrorHandler;
 	}
 
 	private readonly bool isSlow;
 	private readonly List<EwfValidation> validations = new();
 	private Action? modificationMethod;
 
-	public BasicDataModification( bool isSlow ) {
+	public BasicDataModificationAction( bool isSlow ) {
 		this.isSlow = isSlow;
 	}
 
