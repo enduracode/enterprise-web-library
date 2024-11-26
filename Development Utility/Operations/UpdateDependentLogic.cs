@@ -612,6 +612,10 @@ internal class UpdateDependentLogic: Operation {
 			writeMsBuildProperty(
 				$"<DefaultItemExcludesInProjectFolder>$(DefaultItemExcludesInProjectFolder);Directory.Build.props;Directory.Build.targets;**/*{CodeGeneration.DataAccess.DataAccessStatics.CSharpTemplateFileExtension}</DefaultItemExcludesInProjectFolder>" );
 
+			// runtime configuration properties; see https://learn.microsoft.com/en-us/dotnet/core/project-sdk/msbuild-props#runtime-configuration-properties
+			if( runtimeIdentifier.Any() )
+				writeMsBuildProperty( "<GarbageCollectionAdaptationMode>0</GarbageCollectionAdaptationMode>" );
+
 			// see https://learn.microsoft.com/en-us/nuget/concepts/auditing-packages#configuring-nuget-audit
 			writeMsBuildProperty( "<NuGetAuditMode>direct</NuGetAuditMode>" );
 
