@@ -1,7 +1,7 @@
 ﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
-public class DataUpdateAction: DataModification, ValidationList {
-	public static implicit operator DataModificationsParameter( DataUpdateAction action ) => new( [ action ] );
+public class DataUpdateAction: DataModificationAction, ValidationList {
+	public static implicit operator DataModificationActionsParameter( DataUpdateAction action ) => new( [ action ] );
 
 	internal readonly BasicDataModification Action;
 

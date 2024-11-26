@@ -186,7 +186,7 @@ public class EwfTable<ItemIdType>: FlowComponent {
 						selectedItemData,
 						itemGroups.Select( group => ( group.SelectedItemActions, group.Items.Select( i => new Func<EwfTableItem<ItemIdType>>( () => i.Value ) ) ) ),
 						null,
-						Enumerable.Empty<DataModification>().Materialize() );
+						Array.Empty<DataModificationAction>() );
 
 				var children = new List<FlowComponentOrNode>();
 				using( MiniProfiler.Current.Step( "EWF - Load table data" ) )

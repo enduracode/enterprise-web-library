@@ -156,7 +156,7 @@ public class ColumnPrimaryTable<ItemIdType>: FlowComponent {
 						selectedItemData,
 						itemGroups.Select( i => ( i.SelectedItemActions, i.Items.ToFunctions() ) ),
 						null,
-						Enumerable.Empty<DataModification>().Materialize() );
+						Array.Empty<DataModificationAction>() );
 
 				TableStatics.AssertItemIdsUnique( itemGroups.SelectMany( i => i.Items ) );
 

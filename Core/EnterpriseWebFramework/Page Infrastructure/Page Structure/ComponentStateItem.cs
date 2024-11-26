@@ -8,16 +8,16 @@ public abstract class ComponentStateItem {
 	private static Action creationTimeAsserter;
 	private static Func<string> elementOrIdentifiedComponentIdGetter;
 	private static Func<string, JToken> valueGetter;
-	private static Func<IReadOnlyCollection<DataModification>> dataModificationGetter;
+	private static Func<IReadOnlyCollection<DataModificationAction>> dataModificationActionGetter;
 	private static Action<string, ComponentStateItem> itemAdder;
 
 	internal static void Init(
 		Action creationTimeAsserter, Func<string> elementOrIdentifiedComponentIdGetter, Func<string, JToken> valueGetter,
-		Func<IReadOnlyCollection<DataModification>> dataModificationGetter, Action<string, ComponentStateItem> itemAdder ) {
+		Func<IReadOnlyCollection<DataModificationAction>> dataModificationActionGetter, Action<string, ComponentStateItem> itemAdder ) {
 		ComponentStateItem.creationTimeAsserter = creationTimeAsserter;
 		ComponentStateItem.elementOrIdentifiedComponentIdGetter = elementOrIdentifiedComponentIdGetter;
 		ComponentStateItem.valueGetter = valueGetter;
-		ComponentStateItem.dataModificationGetter = dataModificationGetter;
+		ComponentStateItem.dataModificationActionGetter = dataModificationActionGetter;
 		ComponentStateItem.itemAdder = itemAdder;
 	}
 
@@ -29,14 +29,14 @@ public abstract class ComponentStateItem {
 	/// post-backs, or non-deterministic state such as a randomly generated string, pass the default value.</param>
 	/// <param name="valueValidator">A predicate that takes a value and returns true if it is valid for this state item. Used primarily to validate post-back
 	/// values.</param>
-	/// <param name="includeInChangeDetection">Pass true to include this state item in change detection for the current data modifications. This is necessary when
-	/// a change in the value of this state item affects what will be persisted by the data modifications. For transient state that is used only to support intermediate
-	/// post-backs, or non-deterministic state such as a randomly generated string, pass false.</param>
+	/// <param name="includeInChangeDetection">Pass true to include this state item in change detection for the current data modification actions. This is
+	/// necessary when a change in the value of this state item affects what will be persisted by the actions. For transient state that is used only to support
+	/// intermediate post-backs, or non-deterministic state such as a randomly generated string, pass false.</param>
 	public static ComponentStateItem<T> Create<T>( string id, T durableValue, Func<T, bool> valueValidator, bool includeInChangeDetection ) {
 		creationTimeAsserter();
 
 		id = elementOrIdentifiedComponentIdGetter().AppendDelimiter( "_" ) + id;
-		var item = new ComponentStateItem<T>( durableValue, valueGetter( id ), valueValidator, includeInChangeDetection, dataModificationGetter() );
+		var item = new ComponentStateItem<T>( durableValue, valueGetter( id ), valueValidator, includeInChangeDetection, dataModificationActionGetter() );
 		itemAdder( id, item );
 		return item;
 	}
@@ -44,7 +44,7 @@ public abstract class ComponentStateItem {
 	internal abstract string DurableValueAsString { get; }
 	internal abstract bool ValueIsInvalid();
 	internal abstract bool IncludedInChangeDetection { get; }
-	internal abstract IReadOnlyCollection<DataModification> DataModifications { get; }
+	internal abstract IReadOnlyCollection<DataModificationAction> DataModificationActions { get; }
 	internal abstract bool ValueChanged();
 	internal abstract JToken ValueAsJson { get; }
 }
@@ -54,10 +54,11 @@ public sealed class ComponentStateItem<T>: ComponentStateItem, EtherealComponent
 	private readonly DataValue<T> value;
 	private readonly bool valueIsInvalid;
 	private readonly bool includedInChangeDetection;
-	private readonly IReadOnlyCollection<DataModification> dataModifications;
+	private readonly IReadOnlyCollection<DataModificationAction> dataModificationActions;
 
 	internal ComponentStateItem(
-		T durableValue, JToken value, Func<T, bool> valueValidator, bool includeInChangeDetection, IReadOnlyCollection<DataModification> dataModifications ) {
+		T durableValue, JToken value, Func<T, bool> valueValidator, bool includeInChangeDetection,
+		IReadOnlyCollection<DataModificationAction> dataModificationActions ) {
 		if( !valueValidator( durableValue ) )
 			throw new ApplicationException( "The specified durable value is invalid according to the specified value validator." );
 		if( includeInChangeDetection )
@@ -71,7 +72,7 @@ public sealed class ComponentStateItem<T>: ComponentStateItem, EtherealComponent
 		}
 
 		includedInChangeDetection = includeInChangeDetection;
-		this.dataModifications = dataModifications;
+		this.dataModificationActions = dataModificationActions;
 	}
 
 	private bool tryConvertValue( JToken valueAsJson, out T convertedValue ) {
@@ -94,7 +95,7 @@ public sealed class ComponentStateItem<T>: ComponentStateItem, EtherealComponent
 	internal override string DurableValueAsString => JsonConvert.SerializeObject( durableValue.Value, Formatting.None );
 	internal override bool ValueIsInvalid() => valueIsInvalid;
 	internal override bool IncludedInChangeDetection => includedInChangeDetection;
-	internal override IReadOnlyCollection<DataModification> DataModifications => dataModifications;
+	internal override IReadOnlyCollection<DataModificationAction> DataModificationActions => dataModificationActions;
 	internal override bool ValueChanged() => !EwlStatics.AreEqual( value.Value, durableValue.Value );
 	internal override JToken ValueAsJson => value.Value == null ? JValue.CreateNull() : JToken.FromObject( value.Value );
 }

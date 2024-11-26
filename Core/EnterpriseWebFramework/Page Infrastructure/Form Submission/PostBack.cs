@@ -1,10 +1,10 @@
 ﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 public class PostBack {
-	private static Func<IReadOnlyCollection<DataModification>> dataModificationGetter = null!;
+	private static Func<IReadOnlyCollection<DataModificationAction>> dataModificationActionGetter = null!;
 
-	internal static void Init( Func<IReadOnlyCollection<DataModification>> dataModificationGetter ) {
-		PostBack.dataModificationGetter = dataModificationGetter;
+	internal static void Init( Func<IReadOnlyCollection<DataModificationAction>> dataModificationActionGetter ) {
+		PostBack.dataModificationActionGetter = dataModificationActionGetter;
 	}
 
 	public static string GetCompositeId( params string[] parts ) {
@@ -30,7 +30,7 @@ public class PostBack {
 	}
 
 	/// <summary>
-	/// Creates an intermediate post-back, which skips the page's data update and only executes itself plus the validations from another data modification.
+	/// Creates an intermediate post-back, which skips the page's data update and only executes itself plus the validations from another data modification action.
 	/// Supports async post-backs, but does not allow navigation to another page.
 	/// </summary>
 	/// <param name="updateRegions">The regions of the page that will change as a result of this post-back. If forceFullPagePostBack is true, the regions only
@@ -45,11 +45,12 @@ public class PostBack {
 	/// <param name="modificationMethod">The modification method.</param>
 	/// <param name="reloadBehaviorGetter">A method that returns the reload behavior, if there were no modification errors. If you do pass a method, the page
 	/// will block interaction even for async post-backs. This prevents an abrupt focus change for the user when the page reloads.</param>
-	/// <param name="validationDm">The data modification that will have its validations executed if there were no errors in this post-back. Pass null to use the
-	/// first of the current data modifications.</param>
+	/// <param name="validationAction">The data modification action that will have its validations executed if there were no errors in this post-back. Pass null
+	/// to use the first of the current data modification actions.</param>
 	public static ActionPostBack CreateIntermediate(
 		UpdateRegionSetsParameter? updateRegions, bool forceFullPagePostBack = false, string id = "main", bool skipModificationIfNoChanges = false,
-		bool isSlow = false, Action? modificationMethod = null, Func<PageReloadBehavior>? reloadBehaviorGetter = null, DataModification? validationDm = null ) {
+		bool isSlow = false, Action? modificationMethod = null, Func<PageReloadBehavior>? reloadBehaviorGetter = null,
+		DataModificationAction? validationAction = null ) {
 		if( !id.Any() )
 			throw new ApplicationException( "The post-back must have an ID." );
 		return new ActionPostBack(
@@ -61,7 +62,7 @@ public class PostBack {
 			isSlow,
 			modificationMethod,
 			reloadBehaviorGetter != null ? new Func<PostBackAction>( () => new PostBackAction( reloadBehaviorGetter() ) ) : null,
-			validationDm ?? dataModificationGetter().First() );
+			validationAction ?? dataModificationActionGetter().First() );
 	}
 
 	internal static PostBack CreateDataUpdate() => new( true, "", false );
@@ -82,18 +83,21 @@ public class PostBack {
 	internal bool ForcePageDataUpdate => forcePageDataUpdate!.Value;
 }
 
-public class ActionPostBack: PostBack, DataModification, ValidationList {
-	public static implicit operator DataModificationsParameter( ActionPostBack? postBack ) => new( postBack is null ? [ ] : [ postBack ] );
+public class ActionPostBack: PostBack, DataModificationAction, ValidationList {
+	public static implicit operator DataModificationActionsParameter( ActionPostBack? postBack ) => new( postBack is null ? [ ] : [ postBack ] );
 
 	private readonly UpdateRegionSetsParameter? updateRegions;
 	private readonly bool skipModificationIfNoChanges;
 	private readonly BasicDataModification dataModification;
 	private readonly Func<PostBackAction>? actionGetter;
-	private readonly DataModification? validationDm;
+	private readonly DataModificationAction? validationAction;
 
 	internal ActionPostBack(
 		bool forceFullPagePostBack, UpdateRegionSetsParameter? updateRegions, string id, bool? forcePageDataUpdate, bool skipModificationIfNoChanges, bool isSlow,
-		Action? modificationMethod, Func<PostBackAction>? actionGetter, DataModification? validationDm ): base( forceFullPagePostBack, id, forcePageDataUpdate ) {
+		Action? modificationMethod, Func<PostBackAction>? actionGetter, DataModificationAction? validationAction ): base(
+		forceFullPagePostBack,
+		id,
+		forcePageDataUpdate ) {
 		this.updateRegions = updateRegions;
 		this.skipModificationIfNoChanges = skipModificationIfNoChanges;
 
@@ -102,7 +106,7 @@ public class ActionPostBack: PostBack, DataModification, ValidationList {
 			dataModification.AddModificationMethod( modificationMethod );
 
 		this.actionGetter = actionGetter;
-		this.validationDm = validationDm;
+		this.validationAction = validationAction;
 	}
 
 	internal UpdateRegionSetsParameter? UpdateRegions => updateRegions;
@@ -122,5 +126,5 @@ public class ActionPostBack: PostBack, DataModification, ValidationList {
 				                                       : null );
 	}
 
-	internal DataModification? ValidationDm => validationDm;
+	internal DataModificationAction? ValidationAction => validationAction;
 }

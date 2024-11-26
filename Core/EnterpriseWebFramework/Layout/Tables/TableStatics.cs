@@ -29,7 +29,7 @@ internal static class TableStatics {
 	internal static void AddCheckboxes<ItemIdType>(
 		string postBackIdBase, IReadOnlyCollection<SelectedItemAction<ItemIdType>>? selectedItemActions, TableSelectedItemData<ItemIdType> selectedItemData,
 		IEnumerable<( IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions, IEnumerable<Func<EwfTableItem<ItemIdType>>> itemGetters )>
-			itemGroups, DataValue<IReadOnlyCollection<ItemIdType>>? selectedItemIds, IReadOnlyCollection<DataModification> externalDataModifications ) {
+			itemGroups, DataValue<IReadOnlyCollection<ItemIdType>>? selectedItemIds, IReadOnlyCollection<DataModificationAction> externalActions ) {
 		var tablePostBackAndButtonPairs = ( selectedItemActions ?? Enumerable.Empty<SelectedItemAction<ItemIdType>>() ).Select(
 				action => action.GetPostBackAndButton( postBackIdBase, () => selectedItemData.ItemGroupData.SelectMany( i => i!.Value.selectedIds ).Materialize() ) )
 			.Materialize();
@@ -44,14 +44,14 @@ internal static class TableStatics {
 					var groupPostBackAndButtonPairs = group.selectedItemActions.Select( i => i.GetPostBackAndButton( postBackIdBase, () => groupSelectedItemIds ) )
 						.Materialize();
 
-					var dataModifications = externalDataModifications.Concat( tablePostBackAndButtonPairs.Select( i => i.postBack ) )
+					var actions = externalActions.Concat( tablePostBackAndButtonPairs.Select( i => i.postBack ) )
 						.Concat( groupPostBackAndButtonPairs.Select( i => i.postBack ) )
 						.Materialize();
-					if( !dataModifications.Any() )
+					if( !actions.Any() )
 						return (( IReadOnlyCollection<ButtonSetup>, EwfValidation?, IReadOnlyCollection<PhrasingComponent>, List<ItemIdType?> )?)null;
 
 					var checkboxes = FormState.ExecuteWithActions(
-						dataModifications.ToParameter(),
+						actions.ToParameter(),
 						() => group.itemGetters.Select(
 								i => new Checkbox(
 									false,

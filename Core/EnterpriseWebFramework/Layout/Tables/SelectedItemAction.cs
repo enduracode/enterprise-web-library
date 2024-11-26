@@ -48,13 +48,13 @@ public static class SelectedItemAction {
 	/// automatically fall back to a full-page post-back if the page has changed in any way since it was last sent.</param>
 	/// <param name="reloadBehaviorGetter">A method that returns the reload behavior, if there were no modification errors. If you do pass a method, the page
 	/// will block interaction even for async post-backs. This prevents an abrupt focus change for the user when the page reloads.</param>
-	/// <param name="validationDm">The data modification that will have its validations executed if there were no errors in this post-back. Pass null to use the
-	/// first of the current data modifications.</param>
+	/// <param name="validationAction">The data modification action that will have its validations executed if there were no errors in this post-back. Pass null
+	/// to use the first of the current data modification actions.</param>
 	public static SelectedItemAction<IdType> CreateWithIntermediatePostBackBehavior<IdType>(
 		string text, UpdateRegionSetsParameter? updateRegions, Action<IReadOnlyCollection<IdType?>> modificationMethod, DisplaySetup? displaySetup = null,
 		ActionComponentIcon? icon = null, IReadOnlyCollection<FlowComponent>? confirmationDialogContent = null, bool forceFullPagePostBack = false,
-		Func<PageReloadBehavior>? reloadBehaviorGetter = null, DataModification? validationDm = null ) {
-		validationDm ??= FormState.Current.DataModificationActions.Collection.Value.First();
+		Func<PageReloadBehavior>? reloadBehaviorGetter = null, DataModificationAction? validationAction = null ) {
+		validationAction ??= FormState.Current.DataModificationActions.Collection.Value.First();
 		return new SelectedItemAction<IdType>(
 			( postBackIdBase, selectedItemIdGetter ) => {
 				var postBack = PostBack.CreateIntermediate(
@@ -63,7 +63,7 @@ public static class SelectedItemAction {
 					id: PostBack.GetCompositeId( postBackIdBase, text ),
 					modificationMethod: () => modificationMethod( selectedItemIdGetter() ),
 					reloadBehaviorGetter: reloadBehaviorGetter,
-					validationDm: validationDm );
+					validationAction: validationAction );
 				return ( postBack,
 					       new ButtonSetup(
 						       text,
@@ -80,13 +80,13 @@ public static class SelectedItemAction {
 /// An action performed on selected items in a list or table.
 /// </summary>
 public sealed class SelectedItemAction<IdType> {
-	private readonly Func<string, Func<IReadOnlyCollection<IdType?>>, ( DataModification, ButtonSetup )> postBackAndButtonGetter;
+	private readonly Func<string, Func<IReadOnlyCollection<IdType?>>, ( DataModificationAction, ButtonSetup )> postBackAndButtonGetter;
 
-	internal SelectedItemAction( Func<string, Func<IReadOnlyCollection<IdType?>>, ( DataModification, ButtonSetup )> postBackAndButtonGetter ) {
+	internal SelectedItemAction( Func<string, Func<IReadOnlyCollection<IdType?>>, ( DataModificationAction, ButtonSetup )> postBackAndButtonGetter ) {
 		this.postBackAndButtonGetter = postBackAndButtonGetter;
 	}
 
-	internal ( DataModification postBack, ButtonSetup button ) GetPostBackAndButton(
+	internal ( DataModificationAction postBack, ButtonSetup button ) GetPostBackAndButton(
 		string postBackIdBase, Func<IReadOnlyCollection<IdType?>> selectedItemIdGetter ) =>
 		postBackAndButtonGetter( postBackIdBase, selectedItemIdGetter );
 }

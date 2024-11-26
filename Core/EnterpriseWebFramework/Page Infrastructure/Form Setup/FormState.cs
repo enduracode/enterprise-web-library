@@ -7,12 +7,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 [ PublicAPI ]
 public class FormState {
 	private static Func<FormState> stateGetter;
-	private static Action<IReadOnlyCollection<DataModification>> dataModificationAsserter;
-	private static Func<DataModification, PostBack> postBackSelector;
+	private static Action<IReadOnlyCollection<DataModificationAction>> dataModificationAsserter;
+	private static Func<DataModificationAction, PostBack> postBackSelector;
 
 	internal static void Init(
-		Func<FormState> formStateGetter, Action<IReadOnlyCollection<DataModification>> dataModificationAsserter,
-		Func<DataModification, PostBack> postBackSelector ) {
+		Func<FormState> formStateGetter, Action<IReadOnlyCollection<DataModificationAction>> dataModificationAsserter,
+		Func<DataModificationAction, PostBack> postBackSelector ) {
 		stateGetter = formStateGetter;
 		FormState.dataModificationAsserter = dataModificationAsserter;
 		FormState.postBackSelector = postBackSelector;
@@ -37,14 +37,15 @@ public class FormState {
 	/// </summary>
 	/// <param name="dataModificationActions"></param>
 	/// <param name="method"></param>
-	/// <param name="defaultActionOverride">The default action. Pass null to use the post-back corresponding to the first of the data modifications.</param>
+	/// <param name="defaultActionOverride">The default action. Pass null to use the post-back corresponding to the first of the data modification actions.
+	/// </param>
 	/// <param name="formControlDefaultActionOverride">The form-control-specific default action. Pass null to use the same action for both form controls and
 	/// buttons.</param>
 	public static void ExecuteWithActions(
-		DataModificationsParameter dataModificationActions, Action method, NonPostBackFormAction defaultActionOverride = null,
+		DataModificationActionsParameter dataModificationActions, Action method, NonPostBackFormAction defaultActionOverride = null,
 		SpecifiedValue<NonPostBackFormAction> formControlDefaultActionOverride = null ) {
 		if( dataModificationActions.Collection.Value.Count == 0 )
-			throw new ApplicationException( "There must be at least one data modification." );
+			throw new ApplicationException( "There must be at least one data modification action." );
 		dataModificationAsserter( dataModificationActions.Collection.Value );
 
 		Current.stack.Push( ( defaultActionOverride, formControlDefaultActionOverride, new Stack<Func<bool>>(), dataModificationActions ) );
@@ -62,14 +63,15 @@ public class FormState {
 	/// </summary>
 	/// <param name="dataModificationActions"></param>
 	/// <param name="method"></param>
-	/// <param name="defaultActionOverride">The default action. Pass null to use the post-back corresponding to the first of the data modifications.</param>
+	/// <param name="defaultActionOverride">The default action. Pass null to use the post-back corresponding to the first of the data modification actions.
+	/// </param>
 	/// <param name="formControlDefaultActionOverride">The form-control-specific default action. Pass null to use the same action for both form controls and
 	/// buttons.</param>
 	public static T ExecuteWithActions<T>(
-		DataModificationsParameter dataModificationActions, Func<T> method, NonPostBackFormAction defaultActionOverride = null,
+		DataModificationActionsParameter dataModificationActions, Func<T> method, NonPostBackFormAction defaultActionOverride = null,
 		SpecifiedValue<NonPostBackFormAction> formControlDefaultActionOverride = null ) {
 		if( dataModificationActions.Collection.Value.Count == 0 )
-			throw new ApplicationException( "There must be at least one data modification." );
+			throw new ApplicationException( "There must be at least one data modification action." );
 		dataModificationAsserter( dataModificationActions.Collection.Value );
 
 		Current.stack.Push( ( defaultActionOverride, formControlDefaultActionOverride, new Stack<Func<bool>>(), dataModificationActions ) );
@@ -108,10 +110,10 @@ public class FormState {
 	}
 
 	private readonly Stack<( NonPostBackFormAction actionOverride, SpecifiedValue<NonPostBackFormAction> formControlActionOverride, Stack<Func<bool>>
-		validationPredicateStack, DataModificationsParameter dataModificationActions )> stack = new();
+		validationPredicateStack, DataModificationActionsParameter dataModificationActions )> stack = new();
 
-	private readonly HashSet<DataModification> dataModificationsWithValidationsFromOtherElements = new();
-	private readonly HashSet<DataModification> dataModificationsWithValidations = new();
+	private readonly HashSet<DataModificationAction> dataModificationsWithValidationsFromOtherElements = new();
+	private readonly HashSet<DataModificationAction> dataModificationsWithValidations = new();
 
 	internal FormState() {}
 
@@ -126,7 +128,7 @@ public class FormState {
 	public FormAction FormControlDefaultAction => formControlActionOverride != null ? formControlActionOverride.Value : DefaultAction;
 
 	/// <summary>
-	/// Gets the post-back corresponding to the first of the current data modifications.
+	/// Gets the post-back corresponding to the first of the current data modification actions.
 	/// </summary>
 	public PostBack PostBack => postBackSelector( DataModificationActions.Collection.Value.First() );
 
@@ -153,7 +155,7 @@ public class FormState {
 	/// <summary>
 	/// Gets the current data-modification actions.
 	/// </summary>
-	public DataModificationsParameter DataModificationActions => stack.Peek().dataModificationActions;
+	public DataModificationActionsParameter DataModificationActions => stack.Peek().dataModificationActions;
 
 	/// <summary>
 	/// PageBase use only.
@@ -161,7 +163,7 @@ public class FormState {
 	internal void AddValidationToDataModificationActions( EwfValidation validation ) {
 		var dataModificationActions = DataModificationActions.Collection.Value;
 		if( dataModificationsWithValidationsFromOtherElements.Overlaps( dataModificationActions ) )
-			throw new Exception( "One or more of the data modifications contain validations from other page elements." );
+			throw new Exception( "One or more of the data modification actions contain validations from other page elements." );
 
 		foreach( var i in dataModificationActions )
 			( (ValidationList)i ).AddValidation( validation );
