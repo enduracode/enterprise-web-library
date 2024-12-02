@@ -66,9 +66,9 @@ internal static class WebFrameworkStatics {
 					.Concat( resource.RequiredParameters.Concat( resource.OptionalParameters ).Select( i => getMember( i, "resource" ) ) ) );
 
 				if( members.Length > 0 ) {
-					writer.WriteLine( "#pragma warning disable CS0472" );
+					writer.WriteLine( "#pragma warning disable CS0472, CS8073" );
 					writer.WriteLine( "var jsonObject = new JObject( {0} );".FormatWith( members ) );
-					writer.WriteLine( "#pragma warning restore CS0472" );
+					writer.WriteLine( "#pragma warning restore CS0472, CS8073" );
 
 					writer.WriteLine( "return jsonObject.ToString( Formatting.None );" );
 				}
