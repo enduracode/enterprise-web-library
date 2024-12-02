@@ -54,10 +54,10 @@ public class ValueContainer {
 
 		allowsEmpty = dataType != typeof( string )
 			              ? null
-			              : allowsNull || databaseInfo switch
+			              : databaseInfo switch
 				              {
 					              MySqlInfo => !string.Equals( dbTypeString, "JSON", StringComparison.Ordinal ),
-					              OracleInfo => new[] { "Clob", "NClob" }.Contains( dbTypeString, StringComparer.Ordinal ),
+					              OracleInfo => allowsNull || new[] { "Clob", "NClob" }.Contains( dbTypeString, StringComparer.Ordinal ),
 					              _ => true
 				              };
 	}
@@ -96,17 +96,15 @@ public class ValueContainer {
 
 	public string GetParameterValueExpression( string valueExpression ) {
 		var conversionExpression = outgoingValueConversionExpressionGetter( valueExpression );
+		if( allowsNull && allowsEmpty == false )
+			conversionExpression += " is { Length: > 0 } nonempty ? nonempty : null";
 		var parameterValueExpression = valueExpression == "null" ? valueExpression :
-		                               conversionExpression == valueExpression || ( dataType.IsValueType && !allowsNull ) ? conversionExpression :
+		                               conversionExpression == valueExpression || !allowsNull || allowsEmpty.HasValue ? conversionExpression :
 		                               "{0} is null ? null : {1}".FormatWith( valueExpression, conversionExpression );
 		return "new DbParameterValue( {0}, \"{1}\" )".FormatWith( parameterValueExpression, dbTypeString );
 	}
 
-	public string GetNullabilityPhrase() {
-		if( !allowsEmpty.HasValue )
-			return allowsNull ? "can be null" : "cannot be null";
-		if( allowsEmpty.Value )
-			return "cannot be null but CAN be empty";
-		return allowsNull ? "can be null but CANNOT be empty" : "cannot be null or empty";
-	}
+	public string GetNullabilityPhrase() =>
+		!allowsEmpty.HasValue ? allowsNull ? "can be null" : "cannot be null" :
+		allowsNull || allowsEmpty.Value ? "cannot be null but CAN be empty" : "cannot be null or empty";
 }
