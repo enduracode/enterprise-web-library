@@ -10,12 +10,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 [ PublicAPI ]
 public static class FormControlExtensionCreators {
 	public static TextControl ToTextControl(
-		this DataValue<string> dataValue, bool allowEmpty, TextControlSetup? setup = null, string? value = null, int? maxLength = null,
+		this DataValue<string> dataValue, bool allowEmpty, TextControlSetup? setup = null, string? value = null, int? minLength = null, int? maxLength = null,
 		Action<Validator>? additionalValidationMethod = null ) {
 		return new TextControl(
 			value ?? dataValue.Value,
 			allowEmpty,
 			setup: setup,
+			minLength: minLength,
 			maxLength: maxLength,
 			validationMethod: ( postBackValue, validator ) => {
 				dataValue.Value = postBackValue;
@@ -833,7 +834,7 @@ public static class FormControlExtensionCreators {
 		this DataValue<bool> dataValue, FreeFormRadioListSetup<bool?>? setup = null, SpecifiedValue<bool?>? value = null,
 		Action<Validator>? additionalValidationMethod = null ) =>
 		FreeFormRadioList.Create(
-			value == null || value.Value.HasValue ? (bool?)null : false,
+			value == null || value.Value.HasValue ? null : false,
 			value != null ? value.Value : dataValue.Value,
 			setup: setup,
 			validationMethod: ( postBackValue, validator ) => {
@@ -857,7 +858,7 @@ public static class FormControlExtensionCreators {
 		this DataValue<int> dataValue, FreeFormRadioListSetup<int?>? setup = null, SpecifiedValue<int?>? value = null,
 		Action<Validator>? additionalValidationMethod = null ) =>
 		FreeFormRadioList.Create(
-			value == null || value.Value.HasValue ? (bool?)null : false,
+			value == null || value.Value.HasValue ? null : false,
 			value != null ? value.Value : dataValue.Value,
 			setup: setup,
 			validationMethod: ( postBackValue, validator ) => {
@@ -881,7 +882,7 @@ public static class FormControlExtensionCreators {
 		this DataValue<long> dataValue, FreeFormRadioListSetup<long?>? setup = null, SpecifiedValue<long?>? value = null,
 		Action<Validator>? additionalValidationMethod = null ) =>
 		FreeFormRadioList.Create(
-			value == null || value.Value.HasValue ? (bool?)null : false,
+			value == null || value.Value.HasValue ? null : false,
 			value != null ? value.Value : dataValue.Value,
 			setup: setup,
 			validationMethod: ( postBackValue, validator ) => {
@@ -917,7 +918,7 @@ public static class FormControlExtensionCreators {
 		this DataValue<decimal> dataValue, FreeFormRadioListSetup<decimal?>? setup = null, SpecifiedValue<decimal?>? value = null,
 		Action<Validator>? additionalValidationMethod = null ) =>
 		FreeFormRadioList.Create(
-			value == null || value.Value.HasValue ? (bool?)null : false,
+			value == null || value.Value.HasValue ? null : false,
 			value != null ? value.Value : dataValue.Value,
 			setup: setup,
 			validationMethod: ( postBackValue, validator ) => {

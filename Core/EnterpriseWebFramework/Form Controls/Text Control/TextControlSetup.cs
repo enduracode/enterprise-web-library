@@ -379,17 +379,25 @@ public class TextControlSetup {
 										                                                return;
 
 									                                                string validatedValue;
-									                                                if( inputElementType != "password"
-										                                                    ? postBackValue.Value.Trim().Any()
-										                                                    : postBackValue.Value.Any() )
-										                                                validatedValue = internalValidationMethod(
-											                                                disableTrimming ? postBackValue.Value : postBackValue.Value.Trim(),
-											                                                validator );
-									                                                else if( allowEmpty )
-										                                                validatedValue = "";
+									                                                if( string.Equals( inputElementType, "password", StringComparison.Ordinal )
+										                                                    ? postBackValue.Value.Length == 0
+										                                                    : postBackValue.Value.IsWhitespace() ) {
+										                                                if( allowEmpty )
+											                                                validatedValue = "";
+										                                                else {
+											                                                validatedValue = null;
+											                                                validator.NoteErrorAndAddMessage( "Please enter a value." );
+										                                                }
+									                                                }
 									                                                else {
-										                                                validatedValue = null;
-										                                                validator.NoteErrorAndAddMessage( "Please enter a value." );
+										                                                var trimmedValue = disableTrimming ? postBackValue.Value : postBackValue.Value.Trim();
+										                                                if( minLength.HasValue && trimmedValue.Length < minLength.Value ) {
+											                                                validatedValue = null;
+											                                                validator.NoteErrorAndAddMessage(
+												                                                $"The value must have at least {minLength.Value} characters." );
+										                                                }
+										                                                else
+											                                                validatedValue = internalValidationMethod( trimmedValue, validator );
 									                                                }
 
 									                                                if( validatedValue == null ) {

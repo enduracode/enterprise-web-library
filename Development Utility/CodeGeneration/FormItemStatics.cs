@@ -25,10 +25,11 @@ internal static class FormItemStatics {
 				false,
 				new CSharpParameter( "TextControlSetup?", "controlSetup", defaultValue: "null" ).ToCollection(),
 				"string?",
-				Enumerable.Empty<CSharpParameter>(),
+				new CSharpParameter( "int?", "minLength", defaultValue: "null" ).ToCollection(),
 				true,
-				dv => "{0}.ToTextControl( allowEmpty, setup: controlSetup, value: value, maxLength: {1}, additionalValidationMethod: additionalValidationMethod )"
-					.FormatWith( dv, field.Size?.ToString() ?? "null" ) );
+				dv =>
+					"{0}.ToTextControl( allowEmpty, setup: controlSetup, value: value, minLength: minLength, maxLength: {1}, additionalValidationMethod: additionalValidationMethod )"
+						.FormatWith( dv, field.Size?.ToString() ?? "null" ) );
 			writeFormItemGetter(
 				writer,
 				field,
