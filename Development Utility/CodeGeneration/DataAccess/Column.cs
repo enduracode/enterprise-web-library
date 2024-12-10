@@ -129,7 +129,7 @@ internal class Column {
 		return valueContainer.DataType == typeof( string ) ? $"\"{valueString}\"" : valueString;
 	}
 
-	internal ModificationField GetModificationField( string privateFieldName ) {
+	internal ModificationField GetModificationField() {
 		var type = valueContainer.DataType.IsValueType && valueContainer.AllowsNull
 			           ? typeof( Nullable<> ).MakeGenericType( valueContainer.DataType )
 			           : valueContainer.DataType;
@@ -142,8 +142,7 @@ internal class Column {
 			valueContainer.NullableDataTypeName,
 			"",
 			valueContainer.Size,
-			valueContainer.NumericScale,
-			privateFieldNameOverride: privateFieldName );
+			valueContainer.NumericScale );
 	}
 
 	internal string GetNullabilityPhrase() => valueContainer.GetNullabilityPhrase();

@@ -90,7 +90,7 @@ internal static class StandardModificationStatics {
 			writeFieldsAndPropertiesForColumn( column );
 
 		foreach( var column in columns.DataColumns )
-			FormItemStatics.WriteFormItemGetters( writer, column.GetModificationField( getColumnFieldName( column ) ) );
+			FormItemStatics.WriteFormItemGetters( writer, column.GetModificationField() );
 
 		writer.WriteLine( "private " + GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass ) + "() {}" );
 
@@ -694,7 +694,7 @@ internal static class StandardModificationStatics {
 		writer.WriteLine( "}" );
 	}
 
-	private static string getColumnFieldName( Column column ) => EwlStatics.GetCSharpIdentifier( column.CamelCasedName + "ColumnValue" );
+	private static string getColumnFieldName( Column column ) => EwlStatics.GetCSharpIdentifier( column.CamelCasedName );
 
 	internal static string GetClassName(
 		DatabaseConnection cn, string table, bool isRevisionHistoryTable, bool isRevisionHistoryClass, bool omitAtSignPrefixIfNotRequired = false ) =>

@@ -15,6 +15,9 @@ internal static class FormItemStatics {
 		writeGenericGetter( writer, field );
 	}
 
+	// NOTE: How can we make these have a default empty value for mods in insert mode?
+	// What can we do for page parameters? They always have a value, so it's not a problem.
+
 	private static void writeTextFormItemGetters( TextWriter writer, ModificationField field ) {
 		if( field.TypeIs( typeof( string ) ) ) {
 			writeFormItemGetter(
@@ -540,7 +543,7 @@ internal static class FormItemStatics {
 				Environment.NewLine,
 				preFormItemStatements,
 				"var formItem = {0}.ToFormItem( setup: formItemSetup, label: {1} );".FormatWith(
-					formControlExpressionGetter( EwlStatics.GetCSharpIdentifier( field.PrivateFieldName ) ),
+					formControlExpressionGetter( EwlStatics.GetCSharpIdentifier( field.CamelCasedName ) ),
 					controlIsLabeled ? "formItemLabel" : "label" ),
 				postFormItemStatements,
 				"return formItem;" ) );
