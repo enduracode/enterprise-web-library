@@ -1,5 +1,4 @@
-﻿#nullable disable warnings
-using System.Globalization;
+﻿using System.Globalization;
 using JetBrains.Annotations;
 using NodaTime;
 using Tewl.InputValidation;
@@ -106,7 +105,7 @@ public static class FormControlExtensionCreators {
 			minValue: minValue,
 			maxValue: maxValue,
 			additionalValidationMethod: validator => {
-				dataValue.Value = nullableValue.Value.Value;
+				dataValue.Value = nullableValue.Value!.Value;
 				additionalValidationMethod?.Invoke( validator );
 			} );
 	}
@@ -138,7 +137,7 @@ public static class FormControlExtensionCreators {
 			minValue: minValue,
 			maxValue: maxValue,
 			additionalValidationMethod: validator => {
-				dataValue.Value = nullableValue.Value.Value;
+				dataValue.Value = nullableValue.Value!.Value;
 				additionalValidationMethod?.Invoke( validator );
 			} );
 	}
@@ -193,7 +192,7 @@ public static class FormControlExtensionCreators {
 			maxValue: maxValue,
 			valueStep: valueStep,
 			additionalValidationMethod: validator => {
-				dataValue.Value = nullableValue.Value.Value;
+				dataValue.Value = nullableValue.Value!.Value;
 				additionalValidationMethod?.Invoke( validator );
 			} );
 	}
@@ -227,7 +226,7 @@ public static class FormControlExtensionCreators {
 			maxValue: maxValue,
 			valueStep: valueStep,
 			additionalValidationMethod: validator => {
-				dataValue.Value = nullableValue.Value.Value;
+				dataValue.Value = nullableValue.Value!.Value;
 				additionalValidationMethod?.Invoke( validator );
 			} );
 	}
@@ -261,7 +260,7 @@ public static class FormControlExtensionCreators {
 			maxValue: maxValue,
 			valueStep: valueStep,
 			additionalValidationMethod: validator => {
-				dataValue.Value = nullableValue.Value.Value;
+				dataValue.Value = nullableValue.Value!.Value;
 				additionalValidationMethod?.Invoke( validator );
 			} );
 	}
@@ -295,7 +294,7 @@ public static class FormControlExtensionCreators {
 			maxValue: maxValue,
 			valueStep: valueStep,
 			additionalValidationMethod: validator => {
-				dataValue.Value = nullableValue.Value.Value;
+				dataValue.Value = nullableValue.Value!.Value;
 				additionalValidationMethod?.Invoke( validator );
 			} );
 	}
@@ -328,7 +327,7 @@ public static class FormControlExtensionCreators {
 			maxValue: maxValue,
 			valueStep: valueStep,
 			validationMethod: ( postBackValue, validator ) => {
-				dataValue.Value = postBackValue.Value;
+				dataValue.Value = postBackValue!.Value;
 				additionalValidationMethod?.Invoke( validator );
 			} );
 	}
@@ -616,7 +615,7 @@ public static class FormControlExtensionCreators {
 			value is not null ? value.Value : dataValue.DataExists ? dataValue.Value : null,
 			defaultValueItemLabel: "",
 			validationMethod: ( postBackValue, validator ) => {
-				dataValue.Value = postBackValue.Value;
+				dataValue.Value = postBackValue!.Value;
 				additionalValidationMethod?.Invoke( validator );
 			} );
 	}
@@ -643,7 +642,7 @@ public static class FormControlExtensionCreators {
 			value is not null ? value.Value : dataValue.DataExists ? dataValue.Value : null,
 			defaultValueItemLabel: "",
 			validationMethod: ( postBackValue, validator ) => {
-				dataValue.Value = postBackValue.Value;
+				dataValue.Value = postBackValue!.Value;
 				additionalValidationMethod?.Invoke( validator );
 			} );
 	}
@@ -670,7 +669,7 @@ public static class FormControlExtensionCreators {
 			value is not null ? value.Value : dataValue.DataExists ? dataValue.Value : null,
 			defaultValueItemLabel: "",
 			validationMethod: ( postBackValue, validator ) => {
-				dataValue.Value = postBackValue.Value;
+				dataValue.Value = postBackValue!.Value;
 				additionalValidationMethod?.Invoke( validator );
 			} );
 	}
@@ -709,7 +708,7 @@ public static class FormControlExtensionCreators {
 			value is not null ? value.Value : dataValue.DataExists ? dataValue.Value : null,
 			defaultValueItemLabel: "",
 			validationMethod: ( postBackValue, validator ) => {
-				dataValue.Value = postBackValue.Value;
+				dataValue.Value = postBackValue!.Value;
 				additionalValidationMethod?.Invoke( validator );
 			} );
 	}
@@ -737,7 +736,7 @@ public static class FormControlExtensionCreators {
 			defaultValueItemLabel: "",
 			placeholderIsValid: false,
 			validationMethod: ( postBackValue, validator ) => {
-				dataValue.Value = postBackValue.Value;
+				dataValue.Value = postBackValue!.Value;
 				additionalValidationMethod?.Invoke( validator );
 			} );
 	}
@@ -766,7 +765,7 @@ public static class FormControlExtensionCreators {
 			defaultValueItemLabel: "",
 			placeholderIsValid: false,
 			validationMethod: ( postBackValue, validator ) => {
-				dataValue.Value = postBackValue.Value;
+				dataValue.Value = postBackValue!.Value;
 				additionalValidationMethod?.Invoke( validator );
 			} );
 	}
@@ -795,7 +794,7 @@ public static class FormControlExtensionCreators {
 			defaultValueItemLabel: "",
 			placeholderIsValid: false,
 			validationMethod: ( postBackValue, validator ) => {
-				dataValue.Value = postBackValue.Value;
+				dataValue.Value = postBackValue!.Value;
 				additionalValidationMethod?.Invoke( validator );
 			} );
 	}
@@ -837,7 +836,7 @@ public static class FormControlExtensionCreators {
 			defaultValueItemLabel: "",
 			placeholderIsValid: false,
 			validationMethod: ( postBackValue, validator ) => {
-				dataValue.Value = postBackValue.Value;
+				dataValue.Value = postBackValue!.Value;
 				additionalValidationMethod?.Invoke( validator );
 			} );
 	}
@@ -863,7 +862,7 @@ public static class FormControlExtensionCreators {
 			value != null ? value.Value : dataValue.Value,
 			setup: setup,
 			validationMethod: ( postBackValue, validator ) => {
-				dataValue.Value = postBackValue.Value;
+				dataValue.Value = postBackValue!.Value;
 				additionalValidationMethod?.Invoke( validator );
 			} );
 
@@ -887,7 +886,7 @@ public static class FormControlExtensionCreators {
 			value != null ? value.Value : dataValue.Value,
 			setup: setup,
 			validationMethod: ( postBackValue, validator ) => {
-				dataValue.Value = postBackValue.Value;
+				dataValue.Value = postBackValue!.Value;
 				additionalValidationMethod?.Invoke( validator );
 			} );
 
@@ -911,7 +910,7 @@ public static class FormControlExtensionCreators {
 			value != null ? value.Value : dataValue.Value,
 			setup: setup,
 			validationMethod: ( postBackValue, validator ) => {
-				dataValue.Value = postBackValue.Value;
+				dataValue.Value = postBackValue!.Value;
 				additionalValidationMethod?.Invoke( validator );
 			} );
 
@@ -947,7 +946,7 @@ public static class FormControlExtensionCreators {
 			value != null ? value.Value : dataValue.Value,
 			setup: setup,
 			validationMethod: ( postBackValue, validator ) => {
-				dataValue.Value = postBackValue.Value;
+				dataValue.Value = postBackValue!.Value;
 				additionalValidationMethod?.Invoke( validator );
 			} );
 
@@ -992,7 +991,7 @@ public static class FormControlExtensionCreators {
 			minValue: minValue,
 			maxValue: maxValue,
 			validationMethod: ( postBackValue, validator ) => {
-				dataValue.Value = postBackValue.Value;
+				dataValue.Value = postBackValue!.Value;
 				additionalValidationMethod?.Invoke( validator );
 			} );
 
@@ -1021,7 +1020,7 @@ public static class FormControlExtensionCreators {
 			minValue: minValue,
 			maxValue: maxValue,
 			additionalValidationMethod: validator => {
-				dataValue.Value = nullableValue.Value.Value;
+				dataValue.Value = nullableValue.Value!.Value;
 				additionalValidationMethod?.Invoke( validator );
 			} );
 	}
@@ -1053,7 +1052,7 @@ public static class FormControlExtensionCreators {
 			maxValue: maxValue,
 			minuteInterval: minuteInterval,
 			validationMethod: ( postBackValue, validator ) => {
-				dataValue.Value = postBackValue.Value;
+				dataValue.Value = postBackValue!.Value;
 				additionalValidationMethod?.Invoke( validator );
 			} );
 
@@ -1084,7 +1083,7 @@ public static class FormControlExtensionCreators {
 			maxValue: maxValue,
 			minuteInterval: minuteInterval,
 			additionalValidationMethod: validator => {
-				dataValue.Value = nullableValue.Value.Value;
+				dataValue.Value = nullableValue.Value!.Value;
 				additionalValidationMethod?.Invoke( validator );
 			} );
 	}
@@ -1116,7 +1115,7 @@ public static class FormControlExtensionCreators {
 			minValue: minValue,
 			maxValue: maxValue,
 			validationMethod: ( postBackValue, validator ) => {
-				dataValue.Value = postBackValue.Value;
+				dataValue.Value = postBackValue!.Value;
 				additionalValidationMethod?.Invoke( validator );
 			} );
 	}
@@ -1147,7 +1146,7 @@ public static class FormControlExtensionCreators {
 			minValue: minValue,
 			maxValue: maxValue,
 			additionalValidationMethod: validator => {
-				dataValue.Value = nullableValue.Value.Value;
+				dataValue.Value = nullableValue.Value!.Value;
 				additionalValidationMethod?.Invoke( validator );
 			} );
 	}
@@ -1176,7 +1175,7 @@ public static class FormControlExtensionCreators {
 			false,
 			setup: setup,
 			validationMethod: ( postBackValue, validator ) => {
-				dataValue.Value = postBackValue.Value;
+				dataValue.Value = postBackValue!.Value;
 				additionalValidationMethod?.Invoke( validator );
 			} );
 	}
@@ -1203,7 +1202,7 @@ public static class FormControlExtensionCreators {
 			value: value,
 			allowEmpty: false,
 			additionalValidationMethod: validator => {
-				dataValue.Value = nullableValue.Value.Value;
+				dataValue.Value = nullableValue.Value!.Value;
 				additionalValidationMethod?.Invoke( validator );
 			} );
 	}
@@ -1231,7 +1230,7 @@ public static class FormControlExtensionCreators {
 			value: value,
 			allowEmpty: false,
 			additionalValidationMethod: validator => {
-				dataValue.Value = nullableValue.Value.Value;
+				dataValue.Value = nullableValue.Value!.Value;
 				additionalValidationMethod?.Invoke( validator );
 			} );
 	}
