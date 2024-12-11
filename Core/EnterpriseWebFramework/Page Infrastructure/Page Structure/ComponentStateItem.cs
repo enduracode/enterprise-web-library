@@ -1,18 +1,17 @@
-﻿#nullable disable
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 public abstract class ComponentStateItem {
-	private static Action creationTimeAsserter;
-	private static Func<string> elementOrIdentifiedComponentIdGetter;
-	private static Func<string, JToken> valueGetter;
-	private static Func<IReadOnlyCollection<DataModificationAction>> dataModificationActionGetter;
-	private static Action<string, ComponentStateItem> itemAdder;
+	private static Action creationTimeAsserter = null!;
+	private static Func<string> elementOrIdentifiedComponentIdGetter = null!;
+	private static Func<string, JToken?> valueGetter = null!;
+	private static Func<IReadOnlyCollection<DataModificationAction>> dataModificationActionGetter = null!;
+	private static Action<string, ComponentStateItem> itemAdder = null!;
 
 	internal static void Init(
-		Action creationTimeAsserter, Func<string> elementOrIdentifiedComponentIdGetter, Func<string, JToken> valueGetter,
+		Action creationTimeAsserter, Func<string> elementOrIdentifiedComponentIdGetter, Func<string, JToken?> valueGetter,
 		Func<IReadOnlyCollection<DataModificationAction>> dataModificationActionGetter, Action<string, ComponentStateItem> itemAdder ) {
 		ComponentStateItem.creationTimeAsserter = creationTimeAsserter;
 		ComponentStateItem.elementOrIdentifiedComponentIdGetter = elementOrIdentifiedComponentIdGetter;
@@ -32,7 +31,7 @@ public abstract class ComponentStateItem {
 	/// <param name="includeInChangeDetection">Pass true to include this state item in change detection for the current data modification actions. This is
 	/// necessary when a change in the value of this state item affects what will be persisted by the actions. For transient state that is used only to support
 	/// intermediate post-backs, or non-deterministic state such as a randomly generated string, pass false.</param>
-	public static ComponentStateItem<T> Create<T>( string id, T durableValue, Func<T, bool> valueValidator, bool includeInChangeDetection ) {
+	public static ComponentStateItem<T> Create<T>( string id, T durableValue, Func<T?, bool> valueValidator, bool includeInChangeDetection ) {
 		creationTimeAsserter();
 
 		id = elementOrIdentifiedComponentIdGetter().AppendDelimiter( "_" ) + id;
@@ -49,33 +48,33 @@ public abstract class ComponentStateItem {
 	internal abstract JToken ValueAsJson { get; }
 }
 
-public sealed class ComponentStateItem<T>: ComponentStateItem, EtherealComponent {
-	private readonly SpecifiedValue<T> durableValue;
-	private readonly DataValue<T> value;
+public sealed class ComponentStateItem<T>: ComponentStateItem, AbstractDataValue<T>, EtherealComponent {
+	private readonly SpecifiedValue<T>? durableValue;
+	private T value;
 	private readonly bool valueIsInvalid;
 	private readonly bool includedInChangeDetection;
 	private readonly IReadOnlyCollection<DataModificationAction> dataModificationActions;
 
 	internal ComponentStateItem(
-		T durableValue, JToken value, Func<T, bool> valueValidator, bool includeInChangeDetection,
+		T durableValue, JToken? value, Func<T?, bool> valueValidator, bool includeInChangeDetection,
 		IReadOnlyCollection<DataModificationAction> dataModificationActions ) {
 		if( !valueValidator( durableValue ) )
 			throw new ApplicationException( "The specified durable value is invalid according to the specified value validator." );
 		if( includeInChangeDetection )
 			this.durableValue = new SpecifiedValue<T>( durableValue );
 
-		if( value != null && tryConvertValue( value, out var convertedValue ) && valueValidator( convertedValue ) )
-			this.value = new DataValue<T> { Value = convertedValue };
+		if( value is not null && tryConvertValue( value, out var convertedValue ) && valueValidator( convertedValue ) )
+			this.value = convertedValue!;
 		else {
-			this.value = new DataValue<T> { Value = durableValue };
-			valueIsInvalid = value != null;
+			this.value = durableValue;
+			valueIsInvalid = value is not null;
 		}
 
 		includedInChangeDetection = includeInChangeDetection;
 		this.dataModificationActions = dataModificationActions;
 	}
 
-	private bool tryConvertValue( JToken valueAsJson, out T convertedValue ) {
+	private bool tryConvertValue( JToken valueAsJson, out T? convertedValue ) {
 		try {
 			convertedValue = valueAsJson.ToObject<T>();
 		}
@@ -87,15 +86,16 @@ public sealed class ComponentStateItem<T>: ComponentStateItem, EtherealComponent
 	}
 
 	/// <summary>
-	/// Gets the <see cref="DataValue{T}"/> representing the state.
+	/// Gets or sets the value representing the state.
 	/// </summary>
-	public DataValue<T> Value => value;
+	public T Value { get => value; set => this.value = value; }
 
-	IReadOnlyCollection<EtherealComponentOrElement> EtherealComponent.GetChildren() => Enumerable.Empty<EtherealComponentOrElement>().Materialize();
-	internal override string DurableValueAsString => JsonConvert.SerializeObject( durableValue.Value, Formatting.None );
+	bool AbstractDataValue<T>.DataExists => true;
+	IReadOnlyCollection<EtherealComponentOrElement> EtherealComponent.GetChildren() => [ ];
+	internal override string DurableValueAsString => JsonConvert.SerializeObject( durableValue!.Value, Formatting.None );
 	internal override bool ValueIsInvalid() => valueIsInvalid;
 	internal override bool IncludedInChangeDetection => includedInChangeDetection;
 	internal override IReadOnlyCollection<DataModificationAction> DataModificationActions => dataModificationActions;
-	internal override bool ValueChanged() => !EwlStatics.AreEqual( value.Value, durableValue.Value );
-	internal override JToken ValueAsJson => value.Value == null ? JValue.CreateNull() : JToken.FromObject( value.Value );
+	internal override bool ValueChanged() => !EwlStatics.AreEqual( value, durableValue!.Value );
+	internal override JToken ValueAsJson => value is null ? JValue.CreateNull() : JToken.FromObject( value );
 }

@@ -1,4 +1,4 @@
-﻿namespace EnterpriseWebLibrary;
+﻿namespace EnterpriseWebLibrary.DataValueManagement;
 
 /// <summary>
 /// A value that knows whether it has been initialized.
