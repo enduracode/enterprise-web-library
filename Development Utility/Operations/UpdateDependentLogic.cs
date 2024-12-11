@@ -625,20 +625,21 @@ internal class UpdateDependentLogic: Operation {
 			writer.WriteLine( "</PropertyGroup>" );
 			writer.WriteLine( "<ItemGroup>" );
 
-			writer.WriteLine( "<Using Include=\"System\" />" );
-			writer.WriteLine( "<Using Include=\"System.Collections.Generic\" />" );
-			writer.WriteLine( "<Using Include=\"System.IO\" />" );
-			writer.WriteLine( "<Using Include=\"System.Linq\" />" );
+			writer.WriteLine( """<Using Include="System" />""" );
+			writer.WriteLine( """<Using Include="System.Collections.Generic" />""" );
+			writer.WriteLine( """<Using Include="System.IO" />""" );
+			writer.WriteLine( """<Using Include="System.Linq" />""" );
 
 			if( !installation.SystemIsTewl() ) {
-				writer.WriteLine( "<Using Include=\"EnterpriseWebLibrary\" />" );
+				writer.WriteLine( """<Using Include="EnterpriseWebLibrary" />""" );
+				writer.WriteLine( """<Using Include="EnterpriseWebLibrary.DataValueManagement" />""" );
 				if( includeWebFrameworkUsingDirectives )
-					writer.WriteLine( "<Using Include=\"EnterpriseWebLibrary.EnterpriseWebFramework\" />" );
+					writer.WriteLine( """<Using Include="EnterpriseWebLibrary.EnterpriseWebFramework" />""" );
 			}
-			writer.WriteLine( "<Using Include=\"Tewl\" />" );
-			writer.WriteLine( "<Using Include=\"Tewl.Tools\" />" );
+			writer.WriteLine( """<Using Include="Tewl" />""" );
+			writer.WriteLine( """<Using Include="Tewl.Tools" />""" );
 
-			writer.WriteLine( "<Using Include=\"Humanizer.StringExtensions\"><Static>True</Static></Using>" );
+			writer.WriteLine( """<Using Include="Humanizer.StringExtensions"><Static>True</Static></Using>""" );
 
 			writer.WriteLine( "</ItemGroup>" );
 			writer.WriteLine( "</Project>" );

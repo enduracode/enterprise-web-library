@@ -92,7 +92,11 @@ internal static class StandardModificationStatics {
 		foreach( var column in columns.DataColumns )
 			FormItemStatics.WriteFormItemGetters( writer, column.GetModificationField() );
 
-		writer.WriteLine( "private " + GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass ) + "() {}" );
+		writer.WriteLine( $"private {GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass )}( ModificationType modType ) {{" );
+		writer.WriteLine( "this.modType = modType;" );
+		foreach( var column in columns.AllColumnsExceptRowVersion )
+			writer.WriteLine( $"{getColumnFieldName( column )} = new DataValue<{column.DataTypeName}>( modType == ModificationType.Update )" );
+		writer.WriteLine( "}" );
 
 		CodeGenerationStatics.AddSummaryDocComment(
 			writer,
@@ -278,8 +282,7 @@ internal static class StandardModificationStatics {
 			"Creates a modification object in insert mode, which can be used to do a piecemeal insert of a new row in the " + tableName + " table." );
 		writer.WriteLine(
 			"public static " + GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass ) + " CreateForInsert" + methodNameSuffix + "() {" );
-		writer.WriteLine(
-			"return new " + GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass ) + " { modType = ModificationType.Insert };" );
+		writer.WriteLine( "return new " + GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass ) + "( ModificationType.Insert );" );
 		writer.WriteLine( "}" );
 	}
 
@@ -299,7 +302,7 @@ internal static class StandardModificationStatics {
 
 		writer.WriteLine(
 			"var mod = new " + GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass ) +
-			" { modType = ModificationType.Update, conditions = getConditionList( requiredCondition, additionalConditions ) };" );
+			"( ModificationType.Update ) { conditions = getConditionList( requiredCondition, additionalConditions ) };" );
 
 		// Set column values that correspond to modification conditions to the values of those conditions. One reason this is important is so the primary
 		// key can be retrieved in a consistent way regardless of whether the modification object is an insert or an update.
@@ -353,8 +356,7 @@ internal static class StandardModificationStatics {
 
 		// body
 
-		writer.WriteLine(
-			"var mod = new " + GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass ) + " { modType = ModificationType.Update };" );
+		writer.WriteLine( "var mod = new " + GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass ) + "( ModificationType.Update );" );
 
 		// Use the values of key columns as conditions.
 		writer.WriteLine( "mod.conditions = new List<" + DataAccessStatics.GetTableConditionInterfaceName( cn, database, tableName ) + ">();" );
@@ -372,8 +374,7 @@ internal static class StandardModificationStatics {
 	private static void writeFieldsAndPropertiesForColumn( Column column ) {
 		var columnIsReadOnly = !columns.DataColumns.Contains( column );
 
-		writer.WriteLine(
-			"private readonly DataValue<" + column.DataTypeName + "> " + getColumnFieldName( column ) + " = new DataValue<" + column.DataTypeName + ">();" );
+		writer.WriteLine( "private readonly DataValue<" + column.DataTypeName + "> " + getColumnFieldName( column ) + ";" );
 		CodeGenerationStatics.AddSummaryDocComment(
 			writer,
 			"Gets " + ( columnIsReadOnly ? "" : "or sets " ) + "the value for the " + column.Name +
@@ -690,7 +691,7 @@ internal static class StandardModificationStatics {
 	private static void writeMarkColumnValuesUnchangedMethod() {
 		writer.WriteLine( "private void markColumnValuesUnchanged() {" );
 		foreach( var column in columns.AllColumnsExceptRowVersion )
-			writer.WriteLine( getColumnFieldName( column ) + ".ClearChanged();" );
+			writer.WriteLine( getColumnFieldName( column ) + ".NotifyPersisted();" );
 		writer.WriteLine( "}" );
 	}
 
