@@ -13,7 +13,7 @@ partial class ContactSupport {
 	protected override UrlHandler getUrlParent() => new Admin.EntitySetup();
 
 	protected override PageContent getContent() {
-		var body = new DataValue<string>();
+		var body = new DataValue<string>( false );
 		return FormState.ExecuteWithActions(
 			PostBack.CreateFull(
 				modificationMethod: () => {
@@ -45,8 +45,7 @@ partial class ContactSupport {
 											"support contacts".ToQuantity( EmailStatics.GetAdministratorEmailAddresses().Count(), showQuantityAs: ShowQuantityAs.None ) )
 										.ToComponents()
 										.ToFormItem( label: "To".ToComponents() ) )
-								.Append(
-									body.ToTextControl( false, setup: TextControlSetup.Create( numberOfRows: 10 ), value: "" ).ToFormItem( label: "Message".ToComponents() ) )
+								.Append( body.ToTextControl( false, setup: TextControlSetup.Create( numberOfRows: 10 ) ).ToFormItem( label: "Message".ToComponents() ) )
 								.Materialize() ) ) );
 	}
 }

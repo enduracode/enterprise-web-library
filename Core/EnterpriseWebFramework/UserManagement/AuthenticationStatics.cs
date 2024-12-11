@@ -111,8 +111,8 @@ public static class AuthenticationStatics {
 	/// <param name="secondLabel"></param>
 	public static IReadOnlyCollection<FormItem> GetPasswordModificationFormItems(
 		out Action<int> passwordUpdater, IEnumerable<PhrasingComponent> firstLabel = null, IEnumerable<PhrasingComponent> secondLabel = null ) {
-		var password = new DataValue<string>();
-		var passwordAgainFormItem = password.ToTextControl( true, setup: TextControlSetup.CreateObscured( autoFillTokens: "new-password" ), value: "" )
+		var password = new DataValue<string>( false );
+		var passwordAgainFormItem = password.ToTextControl( true, setup: TextControlSetup.CreateObscured( autoFillTokens: "new-password" ) )
 			.ToFormItem( label: secondLabel?.Materialize() ?? "Password again".ToComponents() );
 
 		var passwordFormItem = new TextControl(
@@ -131,7 +131,7 @@ public static class AuthenticationStatics {
 			} ).ToFormItem( label: firstLabel?.Materialize() ?? "Password".ToComponents() );
 
 		passwordUpdater = userId => {
-			if( password.Changed )
+			if( password.HasChanged )
 				UserManagementStatics.LocalIdentityProvider.UpdatePassword( userId, password.Value );
 		};
 
@@ -150,7 +150,6 @@ public static class AuthenticationStatics {
 		emailAddress.ToEmailAddressControl(
 				false,
 				setup: EmailAddressControlSetup.Create( autoFillTokens: "username" ),
-				value: "",
 				additionalValidationMethod: additionalValidationMethod )
 			.ToFormItem( label: label );
 
@@ -158,7 +157,7 @@ public static class AuthenticationStatics {
 	/// Gets a login code form item for use on log-in pages.
 	/// </summary>
 	public static FormItem GetLoginCodeFormItem( this DataValue<string> loginCode ) =>
-		loginCode.ToNumericTextControl( false, value: "", maxLength: 10 ).ToFormItem( label: "Login code".ToComponents() );
+		loginCode.ToNumericTextControl( false, maxLength: 10 ).ToFormItem( label: "Login code".ToComponents() );
 
 	/// <summary>
 	/// Returns log-in hidden fields and modification methods for logging in a user. Also sets up client-side logic for user log-in. Do not call if user
@@ -168,7 +167,7 @@ public static class AuthenticationStatics {
 		loginCodeSender, CodeLoginModificationMethod codeLoginMethod, SpecifiedUserLoginModificationMethod specifiedUserLoginMethod ) modificationMethods )
 		GetLogInHiddenFieldsAndMethods() {
 		ResourceBase.ExecuteDataModificationMethod( SetTestCookie );
-		var clientTime = new DataValue<string>();
+		var clientTime = new DataValue<string>( false );
 		var hiddenFields = GetLogInHiddenFields( clientTime );
 
 		return ( hiddenFields, ( ( emailAddress, password, errorMessage ) => {

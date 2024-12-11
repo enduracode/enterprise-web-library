@@ -26,25 +26,23 @@ public class UserEditor: FlowComponent {
 
 		var user = userId.HasValue ? UserManagementStatics.GetUser( userId.Value, true ) : null;
 
-		var email = new DataValue<string>();
-		var roleId = new DataValue<int>();
+		var email = new DataValue<string>( userId.HasValue, () => user!.Email );
+		var roleId = new DataValue<int>( userId.HasValue, () => user!.Role.RoleId );
 		Action<int>? passwordUpdater = null;
 
 		var b = FormItemList.CreateStack();
 
 		b.AddItems(
-			email.ToEmailAddressControl( false, value: user != null ? user.Email : "" )
+			email.ToEmailAddressControl( false )
 				.ToFormItem( label: "Email address".ToComponents() )
 				.Append(
-					roleId.ToDropDown(
-							DropDownSetup.Create( from i in availableRoles select SelectListItem.Create( (int?)i.RoleId, i.Name ) ),
-							value: new SpecifiedValue<int?>( user?.Role.RoleId ) )
+					roleId.ToDropDown( DropDownSetup.Create( from i in availableRoles select SelectListItem.Create( (int?)i.RoleId, i.Name ) ) )
 						.ToFormItem( label: "Role".ToComponents() ) )
 				.Materialize() );
 
 		if( UserManagementStatics.LocalIdentityProviderEnabled ) {
 			var group = new RadioButtonGroup( false );
-			var providePasswordSelected = new DataValue<bool>();
+			var providePasswordSelected = new DataValue<bool>( false );
 			b.AddItem(
 				new StackList(
 					group.CreateRadioButton( true, label: userId.HasValue ? "Keep the current password".ToComponents() : "Do not create a password".ToComponents() )
@@ -61,8 +59,7 @@ public class UserEditor: FlowComponent {
 												() => FormItemList.CreateStack( generalSetup: new FormItemListSetup( classes: new ElementClass( "newPassword" ) ) )
 													.AddItems( AuthenticationStatics.GetPasswordModificationFormItems( out passwordUpdater ) )
 													.ToCollection() );
-										} ),
-									value: false )
+										} ) )
 								.ToFormItem()
 								.ToListItem() ) ).ToFormItem( label: "Password".ToComponents() ) );
 		}

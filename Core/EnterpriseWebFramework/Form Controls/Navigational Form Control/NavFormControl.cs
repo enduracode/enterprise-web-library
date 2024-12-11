@@ -1,4 +1,4 @@
-﻿#nullable disable
+﻿using JetBrains.Annotations;
 using Tewl.InputValidation;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -6,6 +6,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 /// <summary>
 /// A form control that navigates to a resource using the entered value as a parameter.
 /// </summary>
+[ PublicAPI ]
 public class NavFormControl {
 	/// <summary>
 	/// Creates a text control.
@@ -76,7 +77,7 @@ public class NavFormControl {
 		new(
 			setup,
 			validationResultHandler => {
-				var val = new DataValue<int>();
+				var val = new DataValue<int>( false );
 				return val.ToTextControl(
 					setup: setup.AutoCompleteResource != null
 						       ? NumericTextControlSetup.CreateAutoComplete(
@@ -84,7 +85,6 @@ public class NavFormControl {
 							       placeholder: setup.Placeholder,
 							       triggersActionWhenItemSelected: true )
 						       : NumericTextControlSetup.Create( placeholder: setup.Placeholder ),
-					value: new SpecifiedValue<int?>( null ),
 					additionalValidationMethod: validator => validationResultHandler( validationMethod( val.Value ), validator ) );
 			} );
 
@@ -97,7 +97,7 @@ public class NavFormControl {
 		new(
 			setup,
 			validationResultHandler => {
-				var val = new DataValue<long>();
+				var val = new DataValue<long>( false );
 				return val.ToTextControl(
 					setup: setup.AutoCompleteResource != null
 						       ? NumericTextControlSetup.CreateAutoComplete(
@@ -105,7 +105,6 @@ public class NavFormControl {
 							       placeholder: setup.Placeholder,
 							       triggersActionWhenItemSelected: true )
 						       : NumericTextControlSetup.Create( placeholder: setup.Placeholder ),
-					value: new SpecifiedValue<long?>( null ),
 					additionalValidationMethod: validator => validationResultHandler( validationMethod( val.Value ), validator ) );
 			} );
 
@@ -114,7 +113,7 @@ public class NavFormControl {
 	private NavFormControl(
 		NavFormControlSetup setup, Func<Action<NavFormControlValidationResult, Validator>, FormControl<PhrasingComponent>> formControlGetter ) {
 		formItemGetter = postBackId => {
-			var destination = new DataValue<ResourceInfo>();
+			var destination = new DataValue<ResourceInfo>( false );
 			return FormState.ExecuteWithActions(
 				PostBack.CreateFull( id: postBackId, actionGetter: () => new PostBackAction( destination.Value ) ),
 				() => {
@@ -126,7 +125,7 @@ public class NavFormControl {
 								validator.NoteErrorAndAddMessage( result.ErrorMessage );
 						} );
 					return new DisplayableElement(
-						context => new DisplayableElementData(
+						_ => new DisplayableElementData(
 							null,
 							() => new DisplayableElementLocalData(
 								"span",

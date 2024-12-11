@@ -10,7 +10,7 @@ partial class DataUpdateModification {
 		new UiPageContent().Add(
 				FormItemList.CreateStack()
 					.AddItems(
-						new DataValue<string>().ToTextControl( false, setup: TextControlSetup.CreateReadOnly(), value: "John Doe" )
+						new DataValue<string>( false ).ToTextControl( false, setup: TextControlSetup.CreateReadOnly(), value: "John Doe" )
 							.ToFormItem( label: "Customer name".ToComponents() )
 							.Append(
 								parametersModification.GetCustomerIsBusinessRadioListFormItem(
@@ -20,7 +20,7 @@ partial class DataUpdateModification {
 			.Add( getSendSampleSection() );
 
 	private FlowComponent getSendSampleSection() {
-		var package = new DataValue<string>();
+		var package = new DataValue<string>( false );
 		return FormState.ExecuteWithActions(
 			PostBack.CreateFull(
 				id: "sample",
@@ -34,7 +34,7 @@ partial class DataUpdateModification {
 					.AddItem(
 						package.ToRadioList(
 								RadioListSetup.Create( new[] { "Single", "5-pack", "10-pack" }.Select( i => SelectListItem.Create( i, i ) ) ),
-								value: CustomerIsBusiness ? "" : "Single" )
+								value: CustomerIsBusiness ? null : "Single" )
 							.ToFormItem() )
 					.ToCollection() ) );
 	}

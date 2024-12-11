@@ -18,12 +18,12 @@ partial class IntermediatePostBacks {
 	protected override PageContent getContent() {
 		var includePageLoadPostBack = ComponentStateItem.Create( "includePageLoadPostBack", false, _ => true, false );
 		var content = new UiPageContent(
-			pageLoadPostBack: includePageLoadPostBack.Value.Value
+			pageLoadPostBack: includePageLoadPostBack.Value
 				                  ? PostBack.CreateIntermediate(
 					                  null,
 					                  id: "pageLoadPostBack",
 					                  modificationMethod: () => {
-						                  includePageLoadPostBack.Value.Value = false;
+						                  includePageLoadPostBack.Value = false;
 						                  AddStatusMessage( StatusMessageType.Info, "Page-load post-back executed." );
 						                  Thread.Sleep( TimeSpan.FromSeconds( 2 ) );
 					                  } )
@@ -63,7 +63,7 @@ partial class IntermediatePostBacks {
 							null,
 							id: PostBack.GetCompositeId( "pageLoadPostBack", "add" ),
 							modificationMethod: () => {
-								includePageLoadPostBack.Value.Value = true;
+								includePageLoadPostBack.Value = true;
 								AddStatusMessage( StatusMessageType.Info, "Page-load post-back added." );
 								Thread.Sleep( TimeSpan.FromSeconds( 1 ) );
 							} ) ) ).ToCollection(),
@@ -76,7 +76,7 @@ partial class IntermediatePostBacks {
 		var components = new List<FlowComponent>();
 
 		var rs = new UpdateRegionSet();
-		var dynamicFieldValue = new DataValue<string>();
+		var dynamicFieldValue = new DataValue<string>( false );
 		const string focusKey = "basicRegion";
 		FormState.ExecuteWithActions(
 			PostBack.CreateIntermediate(

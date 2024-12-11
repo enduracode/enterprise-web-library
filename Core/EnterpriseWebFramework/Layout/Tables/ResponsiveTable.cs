@@ -197,7 +197,7 @@ public class ResponsiveTable<ItemIdType>: FlowComponent {
 
 							var visibleItemGroupsAndItems = new List<( EwfTableItemGroup<ItemIdType>, IReadOnlyList<EwfTableItem<ItemIdType>> )>();
 							foreach( var itemGroup in itemGroups ) {
-								var limit = defaultItemLimit != DataRowLimit.Unlimited ? itemLimit.Value.Value : (int)DataRowLimit.Unlimited;
+								var limit = defaultItemLimit != DataRowLimit.Unlimited ? itemLimit.Value : (int)DataRowLimit.Unlimited;
 								var visibleItems = itemGroup.Items.Take( limit - visibleItemGroupsAndItems.Sum( i => i.Item2.Count ) ).Select( i => i.Value );
 								visibleItemGroupsAndItems.Add( ( itemGroup, visibleItems.ToImmutableArray() ) );
 								if( visibleItemGroupsAndItems.Sum( i => i.Item2.Count ) == limit )
@@ -221,7 +221,7 @@ public class ResponsiveTable<ItemIdType>: FlowComponent {
 							var itemLimitingUpdateRegionSet = new UpdateRegionSet();
 							var itemLimitingAndGeneralActionComponents =
 								( defaultItemLimit != DataRowLimit.Unlimited
-									  ? getItemLimitingControlContainer( idBase, itemLimit.Value, itemLimitingUpdateRegionSet, this.tailUpdateRegions ).ToCollection()
+									  ? getItemLimitingControlContainer( idBase, itemLimit, itemLimitingUpdateRegionSet, this.tailUpdateRegions ).ToCollection()
 									  : Enumerable.Empty<FlowComponent>() )
 								.Concat( TableStatics.GetGeneralActionList( allowExportToExcel ? exportToExcelPostBack : null, tableActions ) )
 								.Materialize();
@@ -345,8 +345,8 @@ public class ResponsiveTable<ItemIdType>: FlowComponent {
 										_ => bodyRowGroupsAndRows.Select( i => i.Item1 ) ) ) );
 
 							if( defaultItemLimit != DataRowLimit.Unlimited ) {
-								var oldItemLimit = itemLimit.Value.Value;
-								var lowerItemLimit = new Lazy<int>( () => Math.Min( oldItemLimit, itemLimit.Value.Value ) );
+								var oldItemLimit = itemLimit.Value;
+								var lowerItemLimit = new Lazy<int>( () => Math.Min( oldItemLimit, itemLimit.Value ) );
 
 								var itemLimitingTailUpdateRegionComponentGetter = new Func<int, IEnumerable<FlowComponent>>(
 									staticItemCount => {
@@ -390,16 +390,16 @@ public class ResponsiveTable<ItemIdType>: FlowComponent {
 
 							var itemCount = itemGroups.Sum( i => i.Items.Count );
 							var itemLimitingRowGroup = new List<FlowComponent>();
-							if( defaultItemLimit != DataRowLimit.Unlimited && itemLimit.Value.Value < itemCount ) {
-								var nextLimit = EnumTools.GetValues<DataRowLimit>().First( i => i > (DataRowLimit)itemLimit.Value.Value );
-								var itemIncrementCount = Math.Min( (int)nextLimit, itemCount ) - itemLimit.Value.Value;
+							if( defaultItemLimit != DataRowLimit.Unlimited && itemLimit.Value < itemCount ) {
+								var nextLimit = EnumTools.GetValues<DataRowLimit>().First( i => i > (DataRowLimit)itemLimit.Value );
+								var itemIncrementCount = Math.Min( (int)nextLimit, itemCount ) - itemLimit.Value;
 								var button = new EwfButton(
 									new StandardButtonStyle( "Show " + itemIncrementCount + " more item" + ( itemIncrementCount != 1 ? "s" : "" ) ),
 									behavior: new PostBackBehavior(
 										postBack: PostBack.CreateIntermediate(
 											itemLimitingUpdateRegionSet,
 											id: PostBack.GetCompositeId( idBase, "showMore" ),
-											modificationMethod: () => itemLimit.Value.Value = (int)nextLimit ) ) );
+											modificationMethod: () => itemLimit.Value = (int)nextLimit ) ) );
 								var item = EwfTableItem.Create( button.ToCollection().ToCell( new TableCellSetup( fieldSpan: fields.Count ) ) );
 								itemLimitingRowGroup.Add(
 									new ElementComponent(
@@ -492,7 +492,7 @@ public class ResponsiveTable<ItemIdType>: FlowComponent {
 	/// <param name="itemGetter">A function that takes the remaining number of items that can be shown based on the current limit and returns the items to add
 	/// along with the total number of items that could be added if there was no limit.</param>
 	public ResponsiveTable<ItemIdType> AddLimitedItems( Func<int, ( IEnumerable<EwfTableItem<ItemIdType>> items, int totalItemCount )> itemGetter ) {
-		var itemsAndCount = itemGetter( ( itemLimit != null ? itemLimit.Value.Value : (int)DataRowLimit.Unlimited ) - itemGroups.Sum( i => i.Items.Count ) );
+		var itemsAndCount = itemGetter( ( itemLimit?.Value ?? (int)DataRowLimit.Unlimited ) - itemGroups.Sum( i => i.Items.Count ) );
 
 		var count = 0;
 		foreach( var i in itemsAndCount.items ) {
@@ -569,7 +569,8 @@ public class ResponsiveTable<ItemIdType>: FlowComponent {
 	}
 
 	private FlowComponent getItemLimitingControlContainer(
-		string postBackIdBase, DataValue<int> currentItemLimit, UpdateRegionSet itemLimitingUpdateRegionSet, TailUpdateRegionsParameter tailUpdateRegions ) {
+		string postBackIdBase, AbstractDataValue<int> currentItemLimit, UpdateRegionSet itemLimitingUpdateRegionSet,
+		TailUpdateRegionsParameter tailUpdateRegions ) {
 		var itemCount = itemGroups.Sum( i => i.Items.Count );
 		var list = new LineList(
 			new PhrasingIdContainer(
@@ -589,7 +590,7 @@ public class ResponsiveTable<ItemIdType>: FlowComponent {
 	}
 
 	private ComponentListItem getItemLimitButtonItem(
-		string postBackIdBase, DataValue<int> currentItemLimit, DataRowLimit itemLimit, UpdateRegionSet updateRegionSet ) {
+		string postBackIdBase, AbstractDataValue<int> currentItemLimit, DataRowLimit itemLimit, UpdateRegionSet updateRegionSet ) {
 		var text = itemLimit == DataRowLimit.Unlimited ? "All" : ( (int)itemLimit ).ToString();
 		if( itemLimit == (DataRowLimit)currentItemLimit.Value )
 			return text.ToComponentListItem();

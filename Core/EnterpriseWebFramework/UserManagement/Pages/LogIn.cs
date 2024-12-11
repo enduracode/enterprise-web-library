@@ -77,9 +77,9 @@ partial class LogIn {
 
 		var codeEntryIsForPasswordReset = ComponentStateItem.Create<bool?>( "codeEntryIsForPasswordReset", null, _ => true, false );
 
-		var emailAddress = new DataValue<string>();
-		var password = new DataValue<string>();
-		var loginCode = new DataValue<string>();
+		var emailAddress = new DataValue<string>( false );
+		var password = new DataValue<string>( false );
+		var loginCode = new DataValue<string>( false );
 		AuthenticationStatics.PasswordLoginModificationMethod passwordLoginMethod = null;
 		AuthenticationStatics.LoginCodeSenderMethod loginCodeSender = null;
 		AuthenticationStatics.CodeLoginModificationMethod codeLoginMethod = null;
@@ -87,32 +87,32 @@ partial class LogIn {
 		string destinationUrl = null;
 		var logInPb = PostBack.CreateFull(
 			modificationMethod: () => {
-				if( codeEntryIsForPasswordReset.Value.Value.HasValue )
+				if( codeEntryIsForPasswordReset.Value.HasValue )
 					destinationUrl = codeLoginMethod( emailAddress.Value, loginCode.Value ).destinationUrl;
 				else
 					passwordLoginMethod( emailAddress, password );
 			},
-			actionGetter: () => new PostBackAction( new ExternalResource( codeEntryIsForPasswordReset.Value.Value.HasValue ? destinationUrl : ReturnUrl ) ) );
+			actionGetter: () => new PostBackAction( new ExternalResource( codeEntryIsForPasswordReset.Value.HasValue ? destinationUrl : ReturnUrl ) ) );
 
 		var authenticationModeUpdateRegion = new UpdateRegionSet();
 		const string passwordOrCodeFocusKey = "code";
-		var sendCodePb = codeEntryIsForPasswordReset.Value.Value != true
+		var sendCodePb = codeEntryIsForPasswordReset.Value != true
 			                 ? PostBack.CreateIntermediate(
 				                 authenticationModeUpdateRegion,
 				                 id: "sendCode",
 				                 modificationMethod: () => {
 					                 loginCodeSender( emailAddress, false, ReturnUrl );
-					                 codeEntryIsForPasswordReset.Value.Value = false;
+					                 codeEntryIsForPasswordReset.Value = false;
 				                 },
 				                 reloadBehaviorGetter: () => new PageReloadBehavior( focusKey: passwordOrCodeFocusKey ) )
 			                 : null;
-		var newPasswordPb = codeEntryIsForPasswordReset.Value.Value != false
+		var newPasswordPb = codeEntryIsForPasswordReset.Value != false
 			                    ? PostBack.CreateIntermediate(
 				                    authenticationModeUpdateRegion,
 				                    id: "newPw",
 				                    modificationMethod: () => {
 					                    loginCodeSender( emailAddress, true, ReturnUrl );
-					                    codeEntryIsForPasswordReset.Value.Value = true;
+					                    codeEntryIsForPasswordReset.Value = true;
 				                    },
 				                    reloadBehaviorGetter: () => new PageReloadBehavior( focusKey: passwordOrCodeFocusKey ) )
 			                    : null;
@@ -135,7 +135,7 @@ partial class LogIn {
 									logInPb.Add( sendCodePb ).Add( newPasswordPb ),
 									() => emailAddress.GetEmailAddressFormItem( "Email address".ToComponents() ) )
 								.Append(
-									codeEntryIsForPasswordReset.Value.Value.HasValue
+									codeEntryIsForPasswordReset.Value.HasValue
 										? getLoginCodeFormItem( authenticationModeUpdateRegion, AutofocusCondition.PostBack( passwordOrCodeFocusKey ), loginCode )
 										: getPasswordFormItem(
 											authenticationModeUpdateRegion,
@@ -147,24 +147,24 @@ partial class LogIn {
 				registeredComponents.Add(
 					new Paragraph(
 						new PhrasingIdContainer(
-							codeEntryIsForPasswordReset.Value.Value.HasValue
+							codeEntryIsForPasswordReset.Value.HasValue
 								? new ImportantContent( "Having trouble?".ToComponents() ).ToCollection()
 									.Concat( " ".ToComponents() )
 									.Append(
 										new EwfButton(
 											new StandardButtonStyle( "Send me another code", buttonSize: ButtonSize.ShrinkWrap ),
-											behavior: new PostBackBehavior( postBack: codeEntryIsForPasswordReset.Value.Value.Value ? newPasswordPb : sendCodePb ) ) )
+											behavior: new PostBackBehavior( postBack: codeEntryIsForPasswordReset.Value.Value ? newPasswordPb : sendCodePb ) ) )
 									.Concat( " ".ToComponents() )
 									.Append(
 										new EwfButton(
 											new StandardButtonStyle(
-												codeEntryIsForPasswordReset.Value.Value.Value ? "Try password again" : "Log in with password",
+												codeEntryIsForPasswordReset.Value.Value ? "Try password again" : "Log in with password",
 												buttonSize: ButtonSize.ShrinkWrap ),
 											behavior: new PostBackBehavior(
 												postBack: PostBack.CreateIntermediate(
 													authenticationModeUpdateRegion,
 													id: "revertToPasswordEntry",
-													modificationMethod: () => codeEntryIsForPasswordReset.Value.Value = null,
+													modificationMethod: () => codeEntryIsForPasswordReset.Value = null,
 													reloadBehaviorGetter: () => new PageReloadBehavior( focusKey: passwordOrCodeFocusKey ) ) ) ) )
 								: new ImportantContent( "Forgot password?".ToComponents() ).Concat( " ".ToComponents() )
 									.Append(
@@ -216,10 +216,7 @@ partial class LogIn {
 
 	private FormItem getPasswordFormItem(
 		UpdateRegionSetsParameter updateRegionSets, AutofocusCondition autofocusCondition, DataValue<string> password, ButtonBehavior sendCodeButtonBehavior ) {
-		var control = password.ToTextControl(
-			false,
-			setup: TextControlSetup.CreateObscured( classes: passwordClass, autoFillTokens: "current-password" ),
-			value: "" );
+		var control = password.ToTextControl( false, setup: TextControlSetup.CreateObscured( classes: passwordClass, autoFillTokens: "current-password" ) );
 		return new FlowAutofocusRegion(
 			autofocusCondition,
 			new GenericFlowContainer(
@@ -236,7 +233,7 @@ partial class LogIn {
 	}
 
 	private FormItem getLoginCodeFormItem( UpdateRegionSetsParameter updateRegionSets, AutofocusCondition autofocusCondition, DataValue<string> loginCode ) {
-		var control = loginCode.ToNumericTextControl( false, value: "", maxLength: 10 );
+		var control = loginCode.ToNumericTextControl( false, maxLength: 10 );
 		return new FlowAutofocusRegion( autofocusCondition, control.PageComponent.ToCollection() ).ToFormItem(
 			setup: new FormItemSetup( updateRegionSets: updateRegionSets ),
 			label: control.Labeler.CreateLabel( "Login code".ToComponents() ),

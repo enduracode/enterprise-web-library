@@ -44,7 +44,7 @@ public sealed class CreditCardCollector: EtherealComponent {
 		if( amountInDollars.HasValue && amountInDollars.Value.DollarValueHasFractionalCents() )
 			throw new ApplicationException( "Amount must not include fractional cents." );
 
-		var token = new DataValue<string>();
+		var token = new DataValue<string>( false );
 		ResourceInfo successDestination = null;
 		var postBack = PostBack.CreateFull(
 			id: PostBack.GetCompositeId( "ewfCreditCardCollection", description ),

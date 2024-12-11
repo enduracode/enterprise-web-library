@@ -8,9 +8,9 @@ using Tewl.IO;
 namespace EnterpriseWebLibrary.Website;
 
 partial class CreateSystem {
-	private readonly DataValue<string> systemName = new();
-	private readonly DataValue<string> systemShortName = new();
-	private readonly DataValue<string> baseNamespace = new();
+	private readonly DataValue<string> systemName = new( false );
+	private readonly DataValue<string> systemShortName = new( false );
+	private readonly DataValue<string> baseNamespace = new( false );
 
 	protected override string getResourceName() => "Create a New {0} System".FormatWith( EwlStatics.EwlInitialism );
 
@@ -32,7 +32,6 @@ partial class CreateSystem {
 						systemName.ToTextControl(
 								false,
 								setup: TextControlSetup.Create( placeholder: "e.g. Bicycle Service Manager" ),
-								value: "",
 								maxLength: 50,
 								additionalValidationMethod: validator => {
 									if( systemName.Value != systemName.Value.RemoveNonAlphanumericCharacters( preserveWhiteSpace: true ) )
@@ -44,7 +43,6 @@ partial class CreateSystem {
 						baseNamespace.ToTextControl(
 								false,
 								setup: TextControlSetup.Create( placeholder: "e.g. ServiceManager" ),
-								value: "",
 								maxLength: 50,
 								additionalValidationMethod: validator => {
 									if( baseNamespace.Value.Separate( ".", false )

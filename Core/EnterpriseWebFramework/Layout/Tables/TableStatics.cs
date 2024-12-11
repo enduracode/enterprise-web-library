@@ -21,7 +21,7 @@ internal static class TableStatics {
 			(int)defaultItemLimit,
 			value => Enum.IsDefined( typeof( DataRowLimit ), value ),
 			false );
-		if( itemLimit.Value.Value > (int)defaultItemLimit )
+		if( itemLimit.Value > (int)defaultItemLimit )
 			highItemLimitNotifier();
 		return itemLimit;
 	}

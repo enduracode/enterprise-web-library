@@ -14,7 +14,7 @@ partial class VerifyClientFunctionality {
 		if( verificationFailed() )
 			return getVerificationFailedContent();
 
-		var clientTime = new DataValue<string>();
+		var clientTime = new DataValue<string>( false );
 		var postBack = PostBack.CreateFull(
 			modificationMethod: () => {
 				if( AuthenticationStatics.TestCookieMissing() )
