@@ -84,19 +84,20 @@ internal static class StandardModificationStatics {
 			writeCreateForSingleRowUpdateMethod( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass, revisionHistorySuffix );
 
 		writer.WriteLine( "private ModificationType modType;" );
-		writer.WriteLine( "private List<" + DataAccessStatics.GetTableConditionInterfaceName( cn, database, tableName ) + ">? conditions;" );
-
-		foreach( var column in columns.AllColumnsExceptRowVersion )
-			writeFieldsAndPropertiesForColumn( column );
-
-		foreach( var column in columns.DataColumns )
-			FormItemStatics.WriteFormItemGetters( writer, column.GetModificationField() );
+		writer.WriteLine( $"private List<{DataAccessStatics.GetTableConditionInterfaceName( cn, database, tableName )}>? conditions;" );
+		foreach( var column in columns.AllColumnsExceptRowVersion ) {
+			CodeGenerationStatics.AddGeneratedCodeUseOnlyComment( writer );
+			writer.WriteLine( $"private readonly DataValue<{column.DataTypeName}> {getColumnFieldName( column )};" );
+		}
 
 		writer.WriteLine( $"private {GetClassName( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass )}( ModificationType modType ) {{" );
 		writer.WriteLine( "this.modType = modType;" );
 		foreach( var column in columns.AllColumnsExceptRowVersion )
-			writer.WriteLine( $"{getColumnFieldName( column )} = new DataValue<{column.DataTypeName}>( modType == ModificationType.Update )" );
+			writer.WriteLine( $"{getColumnFieldName( column )} = new DataValue<{column.DataTypeName}>( modType == ModificationType.Update );" );
 		writer.WriteLine( "}" );
+
+		foreach( var column in columns.AllColumnsExceptRowVersion )
+			writePropertiesForColumn( column );
 
 		CodeGenerationStatics.AddSummaryDocComment(
 			writer,
@@ -105,10 +106,13 @@ internal static class StandardModificationStatics {
 			"public bool AnyColumnValueHasChanged => {0};".FormatWith(
 				StringTools.ConcatenateWithDelimiter(
 					" || ",
-					columns.AllColumnsExceptRowVersion.Select( i => "{0}.Changed".FormatWith( getColumnFieldName( i ) ) ) ) ) );
+					columns.AllColumnsExceptRowVersion.Select( i => "{0}.HasChanged".FormatWith( getColumnFieldName( i ) ) ) ) ) );
 
 		if( columns.DataColumns.Any() )
 			writeSetAllDataMethod();
+
+		foreach( var column in columns.DataColumns )
+			FormItemStatics.WriteFormItemGetters( writer, column.GetModificationField() );
 
 		// Write execute methods and helpers.
 		writeExecuteMethod( tableName );
@@ -314,7 +318,7 @@ internal static class StandardModificationStatics {
 					prefix,
 					DataAccessStatics.GetEqualityConditionClassName( cn, database, tableName, column ),
 					EwlStatics.GetCSharpIdentifier( column.CamelCasedName ) ) );
-			writer.WriteLine( "mod.{0}.Value = {1}.Value;".FormatWith( getColumnFieldName( column ), EwlStatics.GetCSharpIdentifier( column.CamelCasedName ) ) );
+			writer.WriteLine( "mod.{0}.Value = {0}.Value;".FormatWith( EwlStatics.GetCSharpIdentifier( column.CamelCasedName ) ) );
 			prefix = "else if";
 		}
 		writer.WriteLine( "}" );
@@ -371,20 +375,22 @@ internal static class StandardModificationStatics {
 		writer.WriteLine( "}" );
 	}
 
-	private static void writeFieldsAndPropertiesForColumn( Column column ) {
+	private static void writePropertiesForColumn( Column column ) {
 		var columnIsReadOnly = !columns.DataColumns.Contains( column );
 
-		writer.WriteLine( "private readonly DataValue<" + column.DataTypeName + "> " + getColumnFieldName( column ) + ";" );
+		writer.WriteLine(
+			$"private AbstractDataValue<{column.DataTypeName}> {EwlStatics.GetCSharpIdentifier( column.CamelCasedName )} => {getColumnFieldName( column )};" );
+
 		CodeGenerationStatics.AddSummaryDocComment(
 			writer,
 			"Gets " + ( columnIsReadOnly ? "" : "or sets " ) + "the value for the " + column.Name +
 			$" column, which {column.GetNullabilityPhrase()}. Throws an exception if the value has not been initialized." );
 		var propertyDeclarationBeginning = "public " + column.DataTypeName + " " + EwlStatics.GetCSharpIdentifier( column.PascalCasedName ) + " { get { return " +
-		                                   getColumnFieldName( column ) + ".Value; } ";
+		                                   EwlStatics.GetCSharpIdentifier( column.CamelCasedName ) + ".Value; } ";
 		if( columnIsReadOnly )
 			writer.WriteLine( propertyDeclarationBeginning + "}" );
 		else {
-			writer.WriteLine( propertyDeclarationBeginning + "set { " + getColumnFieldName( column ) + ".Value = value; } }" );
+			writer.WriteLine( propertyDeclarationBeginning + "set { " + EwlStatics.GetCSharpIdentifier( column.CamelCasedName ) + ".Value = value; } }" );
 
 			CodeGenerationStatics.AddSummaryDocComment(
 				writer,
@@ -392,7 +398,7 @@ internal static class StandardModificationStatics {
 				" has been set since object creation or the last call to Execute, whichever was latest." );
 			writer.WriteLine(
 				"public bool " + EwlStatics.GetCSharpIdentifier( column.PascalCasedName + "HasChanged" ) + " { get { return " + getColumnFieldName( column ) +
-				".Changed; } }" );
+				".HasChanged; } }" );
 		}
 	}
 
@@ -428,7 +434,8 @@ internal static class StandardModificationStatics {
 
 	private static void writeColumnValueAssignmentsFromParameters( IEnumerable<Column> columns, string modObjectName ) {
 		foreach( var column in columns )
-			writer.WriteLine( modObjectName + "." + getColumnFieldName( column ) + ".Value = " + EwlStatics.GetCSharpIdentifier( column.CamelCasedName ) + ";" );
+			writer.WriteLine(
+				$"{modObjectName}.{EwlStatics.GetCSharpIdentifier( column.CamelCasedName )}.Value = {EwlStatics.GetCSharpIdentifier( column.CamelCasedName )};" );
 	}
 
 	private static void writeExecuteMethod( string tableName ) {
@@ -487,11 +494,11 @@ internal static class StandardModificationStatics {
 		// If this is a revision history table, write code to insert a new revision when a row is inserted into this table.
 		if( isRevisionHistoryClass ) {
 			writer.WriteLine( "var revisionHistorySetup = RevisionHistoryStatics.SystemProvider;" );
-			writer.WriteLine( getColumnFieldName( columns.PrimaryKeyAndRevisionIdColumn! ) + ".Value = revisionHistorySetup.GetNextMainSequenceValue();" );
+			var revisionIdProperty = EwlStatics.GetCSharpIdentifier( columns.PrimaryKeyAndRevisionIdColumn!.CamelCasedName );
+			writer.WriteLine( revisionIdProperty + ".Value = revisionHistorySetup.GetNextMainSequenceValue();" );
 			writer.WriteLine(
-				"revisionHistorySetup.InsertRevision( global::System.Convert.ToInt32( " + getColumnFieldName( columns.PrimaryKeyAndRevisionIdColumn! ) +
-				".Value ), global::System.Convert.ToInt32( " + getColumnFieldName( columns.PrimaryKeyAndRevisionIdColumn! ) + ".Value ), " +
-				DataAccessStatics.GetConnectionExpression( database ) + ".GetUserTransactionId() );" );
+				"revisionHistorySetup.InsertRevision( global::System.Convert.ToInt32( " + revisionIdProperty + ".Value ), global::System.Convert.ToInt32( " +
+				revisionIdProperty + ".Value ), " + DataAccessStatics.GetConnectionExpression( database ) + ".GetUserTransactionId() );" );
 		}
 
 		writer.WriteLine( "var insert = new InlineInsert( \"" + tableName + "\" );" );
@@ -500,7 +507,7 @@ internal static class StandardModificationStatics {
 			// One reason the ChangeType call is necessary: SQL Server identities always come back as decimal, and you can't cast a boxed decimal to an int.
 			writer.WriteLine(
 				"{0}.Value = {1};".FormatWith(
-					getColumnFieldName( identityColumn ),
+					EwlStatics.GetCSharpIdentifier( identityColumn.CamelCasedName ),
 					identityColumn.GetIncomingValueConversionExpression(
 						"EwlStatics.ChangeType( insert.Execute( {0}, isLongRunning: isLongRunning ), typeof( {1} ) )".FormatWith(
 							DataAccessStatics.GetConnectionExpression( database ),
@@ -558,7 +565,7 @@ internal static class StandardModificationStatics {
 			if( nonIdentityKeyColumns.Any() ) {
 				writer.WriteLine(
 					"if( {0} ) {{".FormatWith(
-						StringTools.ConcatenateWithDelimiter( " || ", nonIdentityKeyColumns.Select( i => "{0}.Changed".FormatWith( getColumnFieldName( i ) ) ) ) ) );
+						StringTools.ConcatenateWithDelimiter( " || ", nonIdentityKeyColumns.Select( i => "{0}.HasChanged".FormatWith( getColumnFieldName( i ) ) ) ) ) );
 				writer.WriteLine(
 					"var modTableNewKeyInsert = new InlineInsertWithSelect( \"{0}\", new[] {{ {1} }}, \"{2}\" );".FormatWith(
 						tableName + DatabaseOps.GetModificationTableSuffix( database ),
@@ -569,7 +576,7 @@ internal static class StandardModificationStatics {
 						writer.WriteLine( "modTableNewKeyInsert.AddSelectExpression( \"{0}\" );".FormatWith( column.DelimitedIdentifier.EscapeForLiteral() ) );
 					else {
 						writer.WriteLine(
-							"if( {0}.Changed ) modTableNewKeyInsert.AddSelectValue( {1} );".FormatWith(
+							"if( {0}.HasChanged ) modTableNewKeyInsert.AddSelectValue( {1} );".FormatWith(
 								getColumnFieldName( column ),
 								column.GetCommandParameterValueExpression( EwlStatics.GetCSharpIdentifier( column.PascalCasedName ) ) ) );
 						writer.WriteLine( "else modTableNewKeyInsert.AddSelectExpression( \"{0}\" );".FormatWith( column.DelimitedIdentifier.EscapeForLiteral() ) );
@@ -610,7 +617,7 @@ internal static class StandardModificationStatics {
 		writer.WriteLine( "private IReadOnlyCollection<InlineDbCommandColumnValue> getColumnModificationValues() {" );
 		writer.WriteLine( "var values = new List<InlineDbCommandColumnValue>();" );
 		foreach( var column in nonIdentityColumns ) {
-			writer.WriteLine( "if( " + getColumnFieldName( column ) + ".Changed )" );
+			writer.WriteLine( "if( " + getColumnFieldName( column ) + ".HasChanged )" );
 			writer.WriteLine( "values.Add( {0} );".FormatWith( column.GetCommandColumnValueExpression( EwlStatics.GetCSharpIdentifier( column.PascalCasedName ) ) ) );
 		}
 		writer.WriteLine( "return values;" );
@@ -695,7 +702,7 @@ internal static class StandardModificationStatics {
 		writer.WriteLine( "}" );
 	}
 
-	private static string getColumnFieldName( Column column ) => EwlStatics.GetCSharpIdentifier( column.CamelCasedName );
+	private static string getColumnFieldName( Column column ) => EwlStatics.GetCSharpIdentifier( "__" + column.CamelCasedName );
 
 	internal static string GetClassName(
 		DatabaseConnection cn, string table, bool isRevisionHistoryTable, bool isRevisionHistoryClass, bool omitAtSignPrefixIfNotRequired = false ) =>

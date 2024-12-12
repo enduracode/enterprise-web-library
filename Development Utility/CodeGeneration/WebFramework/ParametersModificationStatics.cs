@@ -7,7 +7,7 @@ internal static class ParametersModificationStatics {
 
 		writer.WriteLine( "internal class ParametersModification {" );
 		foreach( var parameter in parameters ) {
-			writer.WriteLine( "private readonly DataValue<{0}> {1} = new DataValue<{0}>( true );".FormatWith( parameter.TypeName, parameter.Name ) );
+			writer.WriteLine( "private readonly AbstractDataValue<{0}> {1} = new DataValue<{0}>( true );".FormatWith( parameter.TypeName, parameter.Name ) );
 			if( parameter.IsString || parameter.IsEnumerable ) {
 				writePropertyDocComment( writer, parameter );
 				writer.WriteLine( "internal " + parameter.TypeName + " " + parameter.PropertyName + " {" );
