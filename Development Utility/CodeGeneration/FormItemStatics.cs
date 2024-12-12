@@ -229,10 +229,12 @@ internal static class FormItemStatics {
 			return;
 
 		var preFormItemStatements = field.TypeName == field.NullableTypeName
-			                            ? "var nonNullableValue = new DataValue<{0}>();".FormatWith( field.TypeIs( typeof( decimal? ) ) ? "decimal" : "bool" )
+			                            ? "var nonNullableValue = value.HasValue ? new DataValue<{0}>( {1}.DataExists ) : {1}.CreateNewValue( v => v!.Value );"
+				                            .FormatWith(
+					                            field.TypeIs( typeof( decimal? ) ) ? "decimal" : "bool",
+					                            EwlStatics.GetCSharpIdentifier( field.CamelCasedName ) )
 			                            : "";
 		string getDataValueExpression( string dv ) => field.TypeName == field.NullableTypeName ? "nonNullableValue" : dv;
-		string getValueExpression( string dv ) => field.TypeName == field.NullableTypeName ? "value ?? {0}.Value!.Value".FormatWith( dv ) : "value";
 
 		string getAdditionalValidationMethodExpression( string dv ) =>
 			field.TypeName == field.NullableTypeName
@@ -250,9 +252,8 @@ internal static class FormItemStatics {
 			field.NullableTypeName,
 			new CSharpParameter[ 0 ],
 			true,
-			dv => "{0}.ToCheckbox( label, setup: checkboxSetup, value: {1}, additionalValidationMethod: {2} )".FormatWith(
+			dv => "{0}.ToCheckbox( label, setup: checkboxSetup, value: value, additionalValidationMethod: {1} )".FormatWith(
 				getDataValueExpression( dv ),
-				getValueExpression( dv ),
 				getAdditionalValidationMethodExpression( dv ) ),
 			preFormItemStatements: preFormItemStatements );
 		writeFormItemGetter(
@@ -265,9 +266,8 @@ internal static class FormItemStatics {
 			field.NullableTypeName,
 			new CSharpParameter[ 0 ],
 			true,
-			dv => "{0}.ToFlowCheckbox( label, setup: checkboxSetup, value: {1}, additionalValidationMethod: {2} )".FormatWith(
+			dv => "{0}.ToFlowCheckbox( label, setup: checkboxSetup, value: value, additionalValidationMethod: {1} )".FormatWith(
 				getDataValueExpression( dv ),
-				getValueExpression( dv ),
 				getAdditionalValidationMethodExpression( dv ) ),
 			preFormItemStatements: preFormItemStatements );
 
@@ -282,9 +282,8 @@ internal static class FormItemStatics {
 			field.NullableTypeName,
 			new CSharpParameter[ 0 ],
 			true,
-			dv => "{0}.ToRadioButton( group, label, setup: radioButtonSetup, value: {1}, additionalValidationMethod: {2} )".FormatWith(
+			dv => "{0}.ToRadioButton( group, label, setup: radioButtonSetup, value: value, additionalValidationMethod: {1} )".FormatWith(
 				getDataValueExpression( dv ),
-				getValueExpression( dv ),
 				getAdditionalValidationMethodExpression( dv ) ),
 			preFormItemStatements: preFormItemStatements );
 		writeFormItemGetter(
@@ -297,9 +296,8 @@ internal static class FormItemStatics {
 			field.NullableTypeName,
 			new CSharpParameter[ 0 ],
 			true,
-			dv => "{0}.ToFlowRadioButton( group, label, setup: radioButtonSetup, value: {1}, additionalValidationMethod: {2} )".FormatWith(
+			dv => "{0}.ToFlowRadioButton( group, label, setup: radioButtonSetup, value: value, additionalValidationMethod: {1} )".FormatWith(
 				getDataValueExpression( dv ),
-				getValueExpression( dv ),
 				getAdditionalValidationMethodExpression( dv ) ),
 			preFormItemStatements: preFormItemStatements );
 	}
