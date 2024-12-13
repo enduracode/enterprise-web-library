@@ -192,7 +192,7 @@ public static class RequestDispatchingStatics {
 				return c => ResourceBase.WriteRedirectResponse(
 					c,
 					systemManager.HttpBaseUrl.Replace( "https://", "http://" ) +
-					"acme-challenge-response;token={0}".FormatWith( HttpUtility.UrlEncode( absoluteUrl.Segments.Last() ) ),
+					"/acme-challenge-response;token={0}".FormatWith( HttpUtility.UrlEncode( absoluteUrl.Segments.Last() ) ),
 					false );
 		}
 
