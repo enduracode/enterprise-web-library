@@ -15,6 +15,8 @@ public class DataValue<T>: AbstractDataValue<T>, IEquatable<DataValue<T>> {
 
 	/// <summary>
 	/// Creates a data value.
+	/// <para>Argument style: We recommend not using named arguments when calling this method due to its ubiquity. Additionally, when both parameters are used,
+	/// having the values together improves readability since they slightly resemble a ternary conditional expression.</para>
 	/// </summary>
 	/// <param name="dataExists">Pass true if this value corresponds to existing data.</param>
 	/// <param name="existingValueGetter">A function that gets the initial value from existing data. Will only be called if <paramref name="dataExists"/> is true.
