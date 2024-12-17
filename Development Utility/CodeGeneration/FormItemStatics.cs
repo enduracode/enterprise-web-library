@@ -588,9 +588,9 @@ internal static class FormItemStatics {
 	}
 
 	private static string getDefaultLabel( ModificationField field ) {
-		var result = field.PascalCasedName.CamelToEnglish();
-		if( result.ToLower().EndsWith( " id" ) )
-			result = result.Substring( 0, result.Length - 3 );
+		var result = field.PascalCasedName.CamelToEnglish().ToLowerInvariant().Capitalize();
+		if( result.EndsWith( " id", StringComparison.Ordinal ) )
+			result = result[ ..^3 ];
 		return result;
 	}
 
