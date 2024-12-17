@@ -15,9 +15,6 @@ internal static class FormItemStatics {
 		writeGenericGetter( writer, field );
 	}
 
-	// NOTE: How can we make these have a default empty value for mods in insert mode?
-	// What can we do for page parameters? They always have a value, so it's not a problem.
-
 	private static void writeTextFormItemGetters( TextWriter writer, ModificationField field ) {
 		if( field.TypeIs( typeof( string ) ) ) {
 			writeFormItemGetter(
@@ -230,9 +227,7 @@ internal static class FormItemStatics {
 
 		var preFormItemStatements = field.TypeName == field.NullableTypeName
 			                            ? "var nonNullableValue = value.HasValue ? new DataValue<{0}>( {1}.DataExists ) : {1}.CreateNewValue( v => v!.Value );"
-				                            .FormatWith(
-					                            field.TypeIs( typeof( decimal? ) ) ? "decimal" : "bool",
-					                            EwlStatics.GetCSharpIdentifier( field.CamelCasedName ) )
+				                            .FormatWith( field.TypeIs( typeof( decimal? ) ) ? "decimal" : "bool", getDataValueMember( field ) )
 			                            : "";
 		string getDataValueExpression( string dv ) => field.TypeName == field.NullableTypeName ? "nonNullableValue" : dv;
 
@@ -541,7 +536,7 @@ internal static class FormItemStatics {
 				Environment.NewLine,
 				preFormItemStatements,
 				"var formItem = {0}.ToFormItem( setup: formItemSetup, label: {1} );".FormatWith(
-					formControlExpressionGetter( EwlStatics.GetCSharpIdentifier( field.CamelCasedName ) ),
+					formControlExpressionGetter( getDataValueMember( field ) ),
 					controlIsLabeled ? "formItemLabel" : "label" ),
 				postFormItemStatements,
 				"return formItem;" ) );
@@ -575,8 +570,8 @@ internal static class FormItemStatics {
 			"return {0}.ToFormItem( setup: setup, label: label, validation: {1} );".FormatWith(
 				"contentGetter( {0} )".FormatWith(
 					field.TypeIs( typeof( string ) ) || field.EnumerableElementTypeName.Length > 0
-						? "value ?? {0}".FormatWith( EwlStatics.GetCSharpIdentifier( field.PascalCasedName ) )
-						: "value != null ? value.Value : {0}".FormatWith( EwlStatics.GetCSharpIdentifier( field.PascalCasedName ) ) ),
+						? $"value ?? {getDataValueMember( field )}.Value"
+						: $"value is not null ? value.Value : {getDataValueMember( field )}.Value" ),
 				"validationGetter?.Invoke( v => {0} = v )".FormatWith( EwlStatics.GetCSharpIdentifier( field.PascalCasedName ) ) ) );
 		writer.WriteLine( "}" );
 	}
@@ -598,4 +593,6 @@ internal static class FormItemStatics {
 			result = result.Substring( 0, result.Length - 3 );
 		return result;
 	}
+
+	private static string getDataValueMember( ModificationField field ) => $"this.{EwlStatics.GetCSharpIdentifier( field.CamelCasedName )}";
 }

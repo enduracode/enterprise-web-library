@@ -385,12 +385,12 @@ internal static class StandardModificationStatics {
 			writer,
 			"Gets " + ( columnIsReadOnly ? "" : "or sets " ) + "the value for the " + column.Name +
 			$" column, which {column.GetNullabilityPhrase()}. Throws an exception if the value has not been initialized." );
-		var propertyDeclarationBeginning = "public " + column.DataTypeName + " " + EwlStatics.GetCSharpIdentifier( column.PascalCasedName ) + " { get { return " +
-		                                   EwlStatics.GetCSharpIdentifier( column.CamelCasedName ) + ".Value; } ";
+		var propertyDeclarationBeginning = "public " + column.DataTypeName + " " + EwlStatics.GetCSharpIdentifier( column.PascalCasedName ) +
+		                                   " { get { return this." + EwlStatics.GetCSharpIdentifier( column.CamelCasedName ) + ".Value; } ";
 		if( columnIsReadOnly )
 			writer.WriteLine( propertyDeclarationBeginning + "}" );
 		else {
-			writer.WriteLine( propertyDeclarationBeginning + "set { " + EwlStatics.GetCSharpIdentifier( column.CamelCasedName ) + ".Value = value; } }" );
+			writer.WriteLine( propertyDeclarationBeginning + "set { this." + EwlStatics.GetCSharpIdentifier( column.CamelCasedName ) + ".Value = value; } }" );
 
 			CodeGenerationStatics.AddSummaryDocComment(
 				writer,
@@ -494,7 +494,7 @@ internal static class StandardModificationStatics {
 		// If this is a revision history table, write code to insert a new revision when a row is inserted into this table.
 		if( isRevisionHistoryClass ) {
 			writer.WriteLine( "var revisionHistorySetup = RevisionHistoryStatics.SystemProvider;" );
-			var revisionIdProperty = EwlStatics.GetCSharpIdentifier( columns.PrimaryKeyAndRevisionIdColumn!.CamelCasedName );
+			var revisionIdProperty = $"this.{EwlStatics.GetCSharpIdentifier( columns.PrimaryKeyAndRevisionIdColumn!.CamelCasedName )}";
 			writer.WriteLine( revisionIdProperty + ".Value = revisionHistorySetup.GetNextMainSequenceValue();" );
 			writer.WriteLine(
 				"revisionHistorySetup.InsertRevision( global::System.Convert.ToInt32( " + revisionIdProperty + ".Value ), global::System.Convert.ToInt32( " +
@@ -506,7 +506,7 @@ internal static class StandardModificationStatics {
 		if( identityColumn != null )
 			// One reason the ChangeType call is necessary: SQL Server identities always come back as decimal, and you can't cast a boxed decimal to an int.
 			writer.WriteLine(
-				"{0}.Value = {1};".FormatWith(
+				"this.{0}.Value = {1};".FormatWith(
 					EwlStatics.GetCSharpIdentifier( identityColumn.CamelCasedName ),
 					identityColumn.GetIncomingValueConversionExpression(
 						"EwlStatics.ChangeType( insert.Execute( {0}, isLongRunning: isLongRunning ), typeof( {1} ) )".FormatWith(
