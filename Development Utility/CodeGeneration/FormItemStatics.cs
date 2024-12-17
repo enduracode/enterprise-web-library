@@ -12,7 +12,7 @@ internal static class FormItemStatics {
 		writeListFormItemGetters( writer, field );
 		writeDateAndTimeFormItemGetters( writer, field );
 
-		writeGenericGetter( writer, field );
+		writeComponentGetter( writer, field );
 	}
 
 	private static void writeTextFormItemGetters( TextWriter writer, ModificationField field ) {
@@ -547,8 +547,8 @@ internal static class FormItemStatics {
 		return new CSharpParameter( "bool", "allowEmpty", isOptional ? "true" : "" );
 	}
 
-	private static void writeGenericGetter( TextWriter writer, ModificationField field ) {
-		CodeGenerationStatics.AddSummaryDocComment( writer, getFormItemGetterSummary( field, "", new string[ 0 ] ) );
+	private static void writeComponentGetter( TextWriter writer, ModificationField field ) {
+		CodeGenerationStatics.AddSummaryDocComment( writer, getFormItemGetterSummary( field, "", [ ] ) );
 
 		var parameters = new List<CSharpParameter>();
 		parameters.Add( new CSharpParameter( "System.Func<{0},IReadOnlyCollection<FlowComponent>>".FormatWith( field.NullableTypeName ), "contentGetter" ) );
@@ -563,7 +563,7 @@ internal static class FormItemStatics {
 		parameters.Add( new CSharpParameter( "System.Func<System.Action<{0}>,EwfValidation>?".FormatWith( field.TypeName ), "validationGetter", "null" ) );
 
 		writer.WriteLine(
-			"public FormItem " + EwlStatics.GetCSharpIdentifier( "Get" + field.PascalCasedName + "FormItem" ) + "( " +
+			"public FormItem " + EwlStatics.GetCSharpIdentifier( "Get" + field.PascalCasedName + "ComponentFormItem" ) + "( " +
 			parameters.Select( i => i.MethodSignatureDeclaration ).GetCommaDelimitedStringFromCollection() + " ) {" );
 		writer.WriteLine( "label = label ?? \"{0}\".ToComponents();".FormatWith( getDefaultLabel( field ) ) );
 		writer.WriteLine(
@@ -581,10 +581,12 @@ internal static class FormItemStatics {
 			{
 				"Creates a " + field.Name + controlType.PrependDelimiter( " " ) + " form item, which includes a label, a page component, and a validation.",
 				"The default label is “{0}”.".FormatWith( getDefaultLabel( field ) ),
-				controlType.Any() ? "" : "This is a generic form-item getter; use it only if there is no specific getter for the control type that you need.",
+				controlType.Length > 0
+					? ""
+					: "This method creates the form item from components; if you instead want to create it with a type of form control for which there is no automatically generated method, write your own custom method within the modification class so you can access the private data-value object.",
 				"You almost certainly should not call this method from a deferred block of code since this could cause validations to be added to the data modification in the wrong order."
 			};
-		return StringTools.ConcatenateWithDelimiter( " ", sentences.Concat( additionalSentences ).ToArray() );
+		return StringTools.ConcatenateWithDelimiter( " ", sentences.Concat( additionalSentences ) );
 	}
 
 	private static string getDefaultLabel( ModificationField field ) {
