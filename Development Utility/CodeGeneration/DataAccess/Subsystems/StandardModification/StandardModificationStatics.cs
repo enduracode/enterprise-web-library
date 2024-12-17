@@ -112,7 +112,7 @@ internal static class StandardModificationStatics {
 			writeSetAllDataMethod();
 
 		foreach( var column in columns.DataColumns )
-			FormItemStatics.WriteFormItemGetters( writer, column.GetModificationField() );
+			new ModificationFormItemMethodWriter( column.GetModificationField() ).WriteFormItemGetters( writer );
 
 		// Write execute methods and helpers.
 		writeExecuteMethod( tableName );

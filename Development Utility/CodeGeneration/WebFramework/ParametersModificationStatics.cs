@@ -29,7 +29,7 @@ internal static class ParametersModificationStatics {
 					".Value = value; } }" );
 			}
 
-			FormItemStatics.WriteFormItemGetters( writer, parameter.GetModificationField() );
+			new ModificationFormItemMethodWriter( parameter.GetModificationField() ).WriteFormItemGetters( writer );
 		}
 		writer.WriteLine( "}" );
 	}
