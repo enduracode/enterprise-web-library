@@ -137,6 +137,7 @@ internal class WebItemParameter {
 
 	internal ModificationField GetModificationField() =>
 		new(
+			"parameter",
 			PropertyName,
 			PropertyName,
 			name,

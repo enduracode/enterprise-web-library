@@ -2,32 +2,48 @@
 
 internal class ModificationFormItemMethodWriter {
 	private readonly ModificationField field;
-	private TextWriter writer = null!;
+
+	private readonly List<string> controls = new();
+	private readonly Dictionary<string, Action<TextWriter, bool, IReadOnlyCollection<( string, Func<string, string> )>>> writersByControl = new();
+
+	private string mainControl = "";
+	private readonly Dictionary<string, Func<string, string>> inclusionInstructionsByExcludedControl = new( StringComparer.Ordinal );
 
 	public ModificationFormItemMethodWriter( ModificationField field ) {
 		this.field = field;
-	}
-
-	internal void WriteFormItemGetters( TextWriter writer ) {
-		this.writer = writer;
 
 		// Some of these form item getters need modification methods to be executed to work properly. They return these methods, as out parameters. This allows
 		// client code on a page to specify the order of modification methods, which is important because there may be both child modifications (like file
 		// collections) and one-to-many modifications (like M+Vision references for an applicant) on the same page, and the main modification needs to execute
 		// between these.
-		writeTextFormItemGetters( writer );
-		writeNumericFormItemGetters( writer );
-		writeCheckboxFormItemGetters( writer );
-		writeListFormItemGetters( writer );
-		writeDateAndTimeFormItemGetters( writer );
+		addTextControls();
+		addNumericControls();
+		addCheckboxControls();
+		addListControls();
+		addDateAndTimeControls();
 
-		writeComponentGetter( writer );
+		if( field.TypeIs( typeof( string ) ) ) {
+			addExclusion( "TelephoneNumberControl", fieldSource => $"suffix the {fieldSource} name with “Phone”" );
+			addExclusion( "UrlControl", fieldSource => $"suffix the {fieldSource} name with “Url”" );
+
+			if( field.HasSuffix( "Phone" ) ) {
+				mainControl = "TelephoneNumberControl";
+				removeExclusion( "TelephoneNumberControl" );
+			}
+			else if( field.HasSuffix( "Url" ) ) {
+				mainControl = "UrlControl";
+				removeExclusion( "UrlControl" );
+			}
+			else
+				mainControl = "TextControl";
+		}
+		else if( field.TypeIs( typeof( decimal ) ) || field.TypeIs( typeof( decimal? ) ) )
+			mainControl = "NumberControl";
 	}
 
-	private void writeTextFormItemGetters( TextWriter writer ) {
+	private void addTextControls() {
 		if( field.TypeIs( typeof( string ) ) ) {
-			writeControlGetter(
-				writer,
+			addControl(
 				"TextControl",
 				getAllowEmptyParameter( false ).ToCollection(),
 				false,
@@ -38,8 +54,7 @@ internal class ModificationFormItemMethodWriter {
 				dv =>
 					"{0}.ToTextControl( allowEmpty, setup: controlSetup, value: value, minLength: minLength, maxLength: {1}, additionalValidationMethod: additionalValidationMethod )"
 						.FormatWith( dv, field.Size?.ToString() ?? "null" ) );
-			writeControlGetter(
-				writer,
+			addControl(
 				"EmailAddressControl",
 				getAllowEmptyParameter( false ).ToCollection(),
 				false,
@@ -50,8 +65,7 @@ internal class ModificationFormItemMethodWriter {
 				dv =>
 					"{0}.ToEmailAddressControl( allowEmpty, setup: controlSetup, value: value, maxLength: {1}, additionalValidationMethod: additionalValidationMethod )"
 						.FormatWith( dv, field.Size?.ToString() ?? "null" ) );
-			writeControlGetter(
-				writer,
+			addControl(
 				"TelephoneNumberControl",
 				getAllowEmptyParameter( false ).ToCollection(),
 				false,
@@ -62,8 +76,7 @@ internal class ModificationFormItemMethodWriter {
 				dv =>
 					"{0}.ToTelephoneNumberControl( allowEmpty, setup: controlSetup, value: value, maxLength: {1}, additionalValidationMethod: additionalValidationMethod )"
 						.FormatWith( dv, field.Size?.ToString() ?? "null" ) );
-			writeControlGetter(
-				writer,
+			addControl(
 				"UrlControl",
 				getAllowEmptyParameter( false ).ToCollection(),
 				false,
@@ -76,8 +89,7 @@ internal class ModificationFormItemMethodWriter {
 		}
 
 		if( field.TypeIs( typeof( string ) ) )
-			writeControlGetter(
-				writer,
+			addControl(
 				"NumericTextControl",
 				getAllowEmptyParameter( false ).ToCollection(),
 				false,
@@ -89,8 +101,7 @@ internal class ModificationFormItemMethodWriter {
 					"{0}.ToNumericTextControl( allowEmpty, setup: controlSetup, value: value, minLength: minLength, maxLength: {1}, additionalValidationMethod: additionalValidationMethod )"
 						.FormatWith( dv, field.Size?.ToString() ?? "null" ) );
 		if( field.TypeIs( typeof( int ) ) || field.TypeIs( typeof( long ) ) )
-			writeControlGetter(
-				writer,
+			addControl(
 				"TextControl",
 					[ ],
 				false,
@@ -103,8 +114,7 @@ internal class ModificationFormItemMethodWriter {
 					"{0}.ToTextControl( setup: controlSetup, value: value, minValue: minValue, maxValue: maxValue, additionalValidationMethod: additionalValidationMethod )"
 						.FormatWith( dv ) );
 		if( field.TypeIs( typeof( int? ) ) || field.TypeIs( typeof( long? ) ) )
-			writeControlGetter(
-				writer,
+			addControl(
 				"TextControl",
 					[ ],
 				false,
@@ -120,8 +130,7 @@ internal class ModificationFormItemMethodWriter {
 						.FormatWith( dv ) );
 
 		if( field.TypeIs( typeof( string ) ) )
-			writeControlGetter(
-				writer,
+			addControl(
 				"Html",
 				getAllowEmptyParameter( false ).ToCollection(),
 				false,
@@ -140,11 +149,10 @@ internal class ModificationFormItemMethodWriter {
 					] );
 	}
 
-	private void writeNumericFormItemGetters( TextWriter writer ) {
+	private void addNumericControls() {
 		if( field.TypeIs( typeof( int ) ) || field.TypeIs( typeof( long ) ) || field.TypeIs( typeof( short ) ) || field.TypeIs( typeof( byte ) ) ||
 		    field.TypeIs( typeof( decimal ) ) )
-			writeControlGetter(
-				writer,
+			addControl(
 				"NumberControl",
 					[ ],
 				false,
@@ -160,8 +168,7 @@ internal class ModificationFormItemMethodWriter {
 				preFormItemStatements: getNumberControlValueStepStatements() );
 		if( field.TypeIs( typeof( int? ) ) || field.TypeIs( typeof( long? ) ) || field.TypeIs( typeof( short? ) ) || field.TypeIs( typeof( byte? ) ) ||
 		    field.TypeIs( typeof( decimal? ) ) )
-			writeControlGetter(
-				writer,
+			addControl(
 				"NumberControl",
 					[ ],
 				false,
@@ -180,8 +187,7 @@ internal class ModificationFormItemMethodWriter {
 
 		if( field.TypeIs( typeof( int ) ) || field.TypeIs( typeof( long ) ) || field.TypeIs( typeof( short ) ) || field.TypeIs( typeof( byte ) ) ||
 		    field.TypeIs( typeof( decimal ) ) )
-			writeControlGetter(
-				writer,
+			addControl(
 				"ImpreciseNumberControl",
 				new CSharpParameter( field.TypeName, "minValue" ).ToCollection().Append( new CSharpParameter( field.TypeName, "maxValue" ) ),
 				false,
@@ -195,14 +201,14 @@ internal class ModificationFormItemMethodWriter {
 				preFormItemStatements: getNumberControlValueStepStatements() );
 
 		if( field.TypeIs( typeof( int ) ) )
-			writeHtmlAndFileFormItemGetters( writer, "int?" );
+			writeHtmlAndFileFormItemGetters( "int?" );
 		if( field.TypeIs( typeof( int? ) ) )
-			writeHtmlAndFileFormItemGetters( writer, "int?" );
+			writeHtmlAndFileFormItemGetters( "int?" );
 
 		if( field.TypeIs( typeof( decimal ) ) )
-			writeHtmlAndFileFormItemGetters( writer, "decimal?" );
+			writeHtmlAndFileFormItemGetters( "decimal?" );
 		if( field.TypeIs( typeof( decimal? ) ) )
-			writeHtmlAndFileFormItemGetters( writer, "decimal?" );
+			writeHtmlAndFileFormItemGetters( "decimal?" );
 	}
 
 	private string getNumberControlValueStepStatements() {
@@ -219,7 +225,7 @@ internal class ModificationFormItemMethodWriter {
 				.FormatWith( minStep ) );
 	}
 
-	private void writeCheckboxFormItemGetters( TextWriter writer ) {
+	private void addCheckboxControls() {
 		if( !field.TypeIs( typeof( bool ) ) && !field.TypeIs( typeof( bool? ) ) && !field.TypeIs( typeof( decimal ) ) && !field.TypeIs( typeof( decimal? ) ) )
 			return;
 
@@ -235,8 +241,7 @@ internal class ModificationFormItemMethodWriter {
 				: "additionalValidationMethod";
 
 		// checkboxes
-		writeControlGetter(
-			writer,
+		addControl(
 			"Checkbox",
 				[ ],
 			true,
@@ -248,8 +253,7 @@ internal class ModificationFormItemMethodWriter {
 				getDataValueExpression( dv ),
 				getAdditionalValidationMethodExpression( dv ) ),
 			preFormItemStatements: preFormItemStatements );
-		writeControlGetter(
-			writer,
+		addControl(
 			"FlowCheckbox",
 				[ ],
 			true,
@@ -263,8 +267,7 @@ internal class ModificationFormItemMethodWriter {
 			preFormItemStatements: preFormItemStatements );
 
 		// radio buttons
-		writeControlGetter(
-			writer,
+		addControl(
 			"RadioButton",
 			new CSharpParameter( "RadioButtonGroup", "group" ).ToCollection(),
 			true,
@@ -276,8 +279,7 @@ internal class ModificationFormItemMethodWriter {
 				getDataValueExpression( dv ),
 				getAdditionalValidationMethodExpression( dv ) ),
 			preFormItemStatements: preFormItemStatements );
-		writeControlGetter(
-			writer,
+		addControl(
 			"FlowRadioButton",
 			new CSharpParameter( "RadioButtonGroup", "group" ).ToCollection(),
 			true,
@@ -291,9 +293,8 @@ internal class ModificationFormItemMethodWriter {
 			preFormItemStatements: preFormItemStatements );
 	}
 
-	private void writeHtmlAndFileFormItemGetters( TextWriter writer, string valueParamTypeName ) {
-		writeControlGetter(
-			writer,
+	private void writeHtmlAndFileFormItemGetters( string valueParamTypeName ) {
+		addControl(
 			"Html",
 			new CSharpParameter( "out HtmlBlockEditorModification", "mod" ).ToCollection(),
 			false,
@@ -302,8 +303,7 @@ internal class ModificationFormItemMethodWriter {
 				[ ],
 			false,
 			dv => "new HtmlBlockEditor( (int?)( value != null ? value.Value : {0}.Value ), id => {0}.Value = id, out mod, setup: editorSetup )".FormatWith( dv ) );
-		writeControlGetter(
-			writer,
+		addControl(
 			"File",
 			new CSharpParameter( "out System.Action", "modificationMethod" ).ToCollection(),
 			false,
@@ -316,10 +316,9 @@ internal class ModificationFormItemMethodWriter {
 					.FormatWith( dv ) );
 	}
 
-	private void writeListFormItemGetters( TextWriter writer ) {
+	private void addListControls() {
 		if( field.TypeIs( typeof( bool ) ) || field.TypeIs( typeof( int ) ) || field.TypeIs( typeof( long ) ) || field.TypeIs( typeof( decimal ) ) )
-			writeControlGetter(
-				writer,
+			addControl(
 				"RadioList",
 				new CSharpParameter( "RadioListSetup<{0}>".FormatWith( field.NullableTypeName ), "controlSetup" ).ToCollection(),
 				false,
@@ -330,8 +329,7 @@ internal class ModificationFormItemMethodWriter {
 				dv => "{0}.ToRadioList( controlSetup, value: value, additionalValidationMethod: additionalValidationMethod )".FormatWith( dv ) );
 		if( field.TypeIs( typeof( bool? ) ) || field.TypeIs( typeof( int? ) ) || field.TypeIs( typeof( long? ) ) || field.TypeIs( typeof( string ) ) ||
 		    field.TypeIs( typeof( decimal? ) ) )
-			writeControlGetter(
-				writer,
+			addControl(
 				"RadioList",
 				new CSharpParameter( "RadioListSetup<{0}>".FormatWith( field.TypeName ), "controlSetup" ).ToCollection(),
 				false,
@@ -344,8 +342,7 @@ internal class ModificationFormItemMethodWriter {
 						.FormatWith( dv ) );
 
 		if( field.TypeIs( typeof( bool ) ) || field.TypeIs( typeof( int ) ) || field.TypeIs( typeof( long ) ) || field.TypeIs( typeof( decimal ) ) )
-			writeControlGetter(
-				writer,
+			addControl(
 				"DropDown",
 				new CSharpParameter( "DropDownSetup<{0}>".FormatWith( field.NullableTypeName ), "controlSetup" ).ToCollection(),
 				false,
@@ -356,8 +353,7 @@ internal class ModificationFormItemMethodWriter {
 				dv => "{0}.ToDropDown( controlSetup, value: value, additionalValidationMethod: additionalValidationMethod )".FormatWith( dv ) );
 		if( field.TypeIs( typeof( bool? ) ) || field.TypeIs( typeof( int? ) ) || field.TypeIs( typeof( long? ) ) || field.TypeIs( typeof( string ) ) ||
 		    field.TypeIs( typeof( decimal? ) ) )
-			writeControlGetter(
-				writer,
+			addControl(
 				"DropDown",
 				new CSharpParameter( "DropDownSetup<{0}>".FormatWith( field.TypeName ), "controlSetup" ).ToCollection()
 					.Concat( field.TypeIs( typeof( string ) ) ? [ ] : new CSharpParameter( "string", "defaultValueItemLabel" ).ToCollection() ),
@@ -372,8 +368,7 @@ internal class ModificationFormItemMethodWriter {
 						.FormatWith( dv, field.TypeIs( typeof( string ) ) ? "defaultValueItemLabel: " : "" ) );
 
 		if( field.EnumerableElementTypeName.Any() )
-			writeControlGetter(
-				writer,
+			addControl(
 				"CheckboxList",
 				new CSharpParameter( "CheckboxListSetup<{0}>".FormatWith( field.EnumerableElementTypeName ), "checkboxListSetup" ).ToCollection(),
 				false,
@@ -384,10 +379,9 @@ internal class ModificationFormItemMethodWriter {
 				dv => "{0}.ToCheckboxList( checkboxListSetup, value: value, additionalValidationMethod: additionalValidationMethod )".FormatWith( dv ) );
 	}
 
-	private void writeDateAndTimeFormItemGetters( TextWriter writer ) {
+	private void addDateAndTimeControls() {
 		if( field.TypeIs( typeof( DateTime ) ) )
-			writeControlGetter(
-				writer,
+			addControl(
 				"DateControl",
 					[ ],
 				false,
@@ -399,8 +393,7 @@ internal class ModificationFormItemMethodWriter {
 					"{0}.ToDateControl( setup: controlSetup, value: value, minValue: minValue, maxValue: maxValue, additionalValidationMethod: additionalValidationMethod )"
 						.FormatWith( dv ) );
 		if( field.TypeIs( typeof( DateTime? ) ) )
-			writeControlGetter(
-				writer,
+			addControl(
 				"DateControl",
 					[ ],
 				false,
@@ -416,8 +409,7 @@ internal class ModificationFormItemMethodWriter {
 						.FormatWith( dv ) );
 
 		if( field.TypeIs( typeof( TimeSpan ) ) || field.TypeIs( typeof( TimeSpan? ) ) )
-			writeControlGetter(
-				writer,
+			addControl(
 				"TimeControl",
 					[ ],
 				false,
@@ -435,8 +427,7 @@ internal class ModificationFormItemMethodWriter {
 						      .FormatWith( dv ) );
 
 		if( field.TypeIs( typeof( DateTime ) ) )
-			writeControlGetter(
-				writer,
+			addControl(
 				"DateAndTimeControl",
 					[ ],
 				false,
@@ -448,8 +439,7 @@ internal class ModificationFormItemMethodWriter {
 					"{0}.ToDateAndTimeControl( setup: controlSetup, value: value, minValue: minValue, maxValue: maxValue, additionalValidationMethod: additionalValidationMethod )"
 						.FormatWith( dv ) );
 		if( field.TypeIs( typeof( DateTime? ) ) )
-			writeControlGetter(
-				writer,
+			addControl(
 				"DateAndTimeControl",
 					[ ],
 				false,
@@ -465,8 +455,7 @@ internal class ModificationFormItemMethodWriter {
 						.FormatWith( dv ) );
 
 		if( field.TypeIs( typeof( int ) ) || field.TypeIs( typeof( int? ) ) || field.TypeIs( typeof( decimal ) ) || field.TypeIs( typeof( decimal? ) ) )
-			writeControlGetter(
-				writer,
+			addControl(
 				"DurationControl",
 					[ ],
 				false,
@@ -480,49 +469,87 @@ internal class ModificationFormItemMethodWriter {
 					      : "{0}.ToDurationControl( setup: controlSetup, value: value, additionalValidationMethod: additionalValidationMethod )".FormatWith( dv ) );
 	}
 
-	private void writeControlGetter(
-		TextWriter writer, string controlTypeForName, IEnumerable<CSharpParameter> requiredParams, bool controlIsLabeled,
-		IEnumerable<CSharpParameter> preValueOptionalParams, string valueParamTypeName, IEnumerable<CSharpParameter> postValueOptionalParams,
-		bool includeAdditionalValidationMethodParam, Func<string, string> formControlExpressionGetter, string preFormItemStatements = "",
-		string postFormItemStatements = "", IEnumerable<string>? additionalSummarySentences = null ) {
-		var parameters = new List<CSharpParameter>();
-		parameters.AddRange( requiredParams );
-		parameters.Add( new CSharpParameter( "FormItemSetup?", "formItemSetup", "null" ) );
-		parameters.Add( new CSharpParameter( "IReadOnlyCollection<PhrasingComponent>?", "label", "null" ) );
-		if( controlIsLabeled )
-			parameters.Add( new CSharpParameter( "IReadOnlyCollection<PhrasingComponent>?", "formItemLabel", "null" ) );
-		parameters.AddRange( preValueOptionalParams );
-		parameters.Add( new CSharpParameter( valueParamTypeName, "value", "null" ) );
-		parameters.AddRange( postValueOptionalParams );
-		if( includeAdditionalValidationMethodParam )
-			parameters.Add(
-				new CSharpParameter(
-					"System.Action<Validator>?",
-					"additionalValidationMethod",
-					defaultValue: "null",
-					description: "A method that takes the form control’s validator and performs additional validation." ) );
+	private void addControl(
+		string control, IEnumerable<CSharpParameter> requiredParams, bool controlIsLabeled, IEnumerable<CSharpParameter> preValueOptionalParams,
+		string valueParamTypeName, IEnumerable<CSharpParameter> postValueOptionalParams, bool includeAdditionalValidationMethodParam,
+		Func<string, string> formControlExpressionGetter, string preFormItemStatements = "", string postFormItemStatements = "",
+		IEnumerable<string>? additionalSummarySentences = null ) {
+		controls.Add( control );
+		writersByControl.Add(
+			control,
+			( writer, omitControlFromMethodName, excludedControls ) => {
+				var parameters = new List<CSharpParameter>();
+				parameters.AddRange( requiredParams );
+				parameters.Add( new CSharpParameter( "FormItemSetup?", "formItemSetup", "null" ) );
+				parameters.Add( new CSharpParameter( "IReadOnlyCollection<PhrasingComponent>?", "label", "null" ) );
+				if( controlIsLabeled )
+					parameters.Add( new CSharpParameter( "IReadOnlyCollection<PhrasingComponent>?", "formItemLabel", "null" ) );
+				parameters.AddRange( preValueOptionalParams );
+				parameters.Add( new CSharpParameter( valueParamTypeName, "value", "null" ) );
+				parameters.AddRange( postValueOptionalParams );
+				if( includeAdditionalValidationMethodParam )
+					parameters.Add(
+						new CSharpParameter(
+							"System.Action<Validator>?",
+							"additionalValidationMethod",
+							defaultValue: "null",
+							description: "A method that takes the form control’s validator and performs additional validation." ) );
 
-		CodeGenerationStatics.AddSummaryDocComment( writer, getFormItemGetterSummary( controlTypeForName, additionalSummarySentences ?? [ ] ) );
-		foreach( var i in parameters )
-			CodeGenerationStatics.AddParamDocComment( writer, i.Name, i.Description );
-		writer.WriteLine(
-			"public FormItem " + EwlStatics.GetCSharpIdentifier( "Get" + field.PascalCasedName + controlTypeForName + "FormItem" ) + "( " +
-			parameters.Select( i => i.MethodSignatureDeclaration ).GetCommaDelimitedStringFromCollection() + " ) {" );
-		writer.WriteLine( "label = label ?? \"{0}\".ToComponents();".FormatWith( getDefaultLabel() ) );
-		writer.WriteLine(
-			StringTools.ConcatenateWithDelimiter(
-				Environment.NewLine,
-				preFormItemStatements,
-				"var formItem = {0}.ToFormItem( setup: formItemSetup, label: {1} );".FormatWith(
-					formControlExpressionGetter( getDataValueMember() ),
-					controlIsLabeled ? "formItemLabel" : "label" ),
-				postFormItemStatements,
-				"return formItem;" ) );
-		writer.WriteLine( "}" );
+				CodeGenerationStatics.AddSummaryDocComment(
+					writer,
+					getFormItemGetterSummary(
+						control,
+						( additionalSummarySentences ?? [ ] ).Concat(
+							excludedControls.Any()
+								? $"<para>{StringTools.ConcatenateWithDelimiter( "<br/>", excludedControls.Select( i => $"If you need a {i.Item1} form item, {i.Item2( field.Source )}." ) )}</para>"
+									.ToCollection()
+								: [ ] ) ) );
+				foreach( var i in parameters )
+					CodeGenerationStatics.AddParamDocComment( writer, i.Name, i.Description );
+				var name = EwlStatics.GetCSharpIdentifier( $"Get{field.PascalCasedName}{( omitControlFromMethodName ? "" : control )}FormItem" );
+				writer.WriteLine( $"public FormItem {name}( {parameters.Select( i => i.MethodSignatureDeclaration ).GetCommaDelimitedStringFromCollection()} ) {{" );
+				writer.WriteLine( "label = label ?? \"{0}\".ToComponents();".FormatWith( getDefaultLabel() ) );
+				writer.WriteLine(
+					StringTools.ConcatenateWithDelimiter(
+						Environment.NewLine,
+						preFormItemStatements,
+						"var formItem = {0}.ToFormItem( setup: formItemSetup, label: {1} );".FormatWith(
+							formControlExpressionGetter( getDataValueMember() ),
+							controlIsLabeled ? "formItemLabel" : "label" ),
+						postFormItemStatements,
+						"return formItem;" ) );
+				writer.WriteLine( "}" );
+			} );
 	}
 
-	private CSharpParameter getAllowEmptyParameter( bool isOptional ) {
-		return new CSharpParameter( "bool", "allowEmpty", isOptional ? "true" : "" );
+	private CSharpParameter getAllowEmptyParameter( bool isOptional ) => new( "bool", "allowEmpty", isOptional ? "true" : "" );
+
+	private void addExclusion( string control, Func<string, string> inclusionInstructions ) {
+		inclusionInstructionsByExcludedControl.Add( control, inclusionInstructions );
+	}
+
+	private void removeExclusion( string control ) {
+		inclusionInstructionsByExcludedControl.Remove( control );
+	}
+
+	internal void WriteFormItemGetters( TextWriter writer ) {
+		if( mainControl.Length > 0 && inclusionInstructionsByExcludedControl.ContainsKey( mainControl ) )
+			throw new ArgumentException( $"A control specified as {nameof(mainControl)} cannot also be excluded." );
+
+		var excludedControls = inclusionInstructionsByExcludedControl.Select( i => ( i.Key, i.Value ) ).OrderBy( i => i.Key ).Materialize();
+
+		if( mainControl.Length > 0 )
+			writersByControl[ mainControl ]( writer, true, excludedControls );
+
+		foreach( var control in controls ) {
+			if( string.Equals( control, mainControl, StringComparison.Ordinal ) )
+				continue;
+			if( inclusionInstructionsByExcludedControl.ContainsKey( control ) )
+				continue;
+			writersByControl[ control ]( writer, false, excludedControls );
+		}
+
+		writeComponentGetter( writer );
 	}
 
 	private void writeComponentGetter( TextWriter writer ) {
@@ -554,12 +581,12 @@ internal class ModificationFormItemMethodWriter {
 		writer.WriteLine( "}" );
 	}
 
-	private string getFormItemGetterSummary( string controlType, IEnumerable<string> additionalSentences ) {
+	private string getFormItemGetterSummary( string control, IEnumerable<string> additionalSentences ) {
 		var sentences = new[]
 			{
-				"Creates a " + field.Name + controlType.PrependDelimiter( " " ) + " form item, which includes a label, a page component, and a validation.",
+				"Creates a " + field.Name + control.PrependDelimiter( " " ) + " form item, which includes a label, a page component, and a validation.",
 				"The default label is “{0}”.".FormatWith( getDefaultLabel() ),
-				controlType.Length > 0
+				control.Length > 0
 					? ""
 					: "This method creates the form item from components; if you instead want to create it with a type of form control for which there is no automatically generated method, write your own custom method within the modification class so you can access the private data-value object.",
 				"You almost certainly should not call this method from a deferred block of code since this could cause validations to be added to the data modification in the wrong order."

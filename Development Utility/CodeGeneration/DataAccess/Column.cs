@@ -134,6 +134,7 @@ internal class Column {
 			           ? typeof( Nullable<> ).MakeGenericType( valueContainer.DataType )
 			           : valueContainer.DataType;
 		return new ModificationField(
+			"column",
 			valueContainer.Name,
 			valueContainer.PascalCasedName,
 			valueContainer.CamelCasedName,
