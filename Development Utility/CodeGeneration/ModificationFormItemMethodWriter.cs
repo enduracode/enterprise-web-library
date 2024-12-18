@@ -1,4 +1,6 @@
-﻿namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration;
+﻿using NodaTime;
+
+namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration;
 
 internal class ModificationFormItemMethodWriter {
 	private readonly ModificationField field;
@@ -39,6 +41,8 @@ internal class ModificationFormItemMethodWriter {
 		}
 		else if( field.TypeIs( typeof( decimal ) ) || field.TypeIs( typeof( decimal? ) ) )
 			mainControl = "NumberControl";
+		else if( field.TypeIs( typeof( LocalDate ) ) || field.TypeIs( typeof( LocalDate? ) ) )
+			mainControl = "DateControl";
 	}
 
 	private void addTextControls() {
@@ -380,7 +384,7 @@ internal class ModificationFormItemMethodWriter {
 	}
 
 	private void addDateAndTimeControls() {
-		if( field.TypeIs( typeof( DateTime ) ) )
+		if( field.TypeIs( typeof( LocalDate ) ) || field.TypeIs( typeof( DateTime ) ) )
 			addControl(
 				"DateControl",
 					[ ],
@@ -392,7 +396,7 @@ internal class ModificationFormItemMethodWriter {
 				dv =>
 					"{0}.ToDateControl( setup: controlSetup, value: value, minValue: minValue, maxValue: maxValue, additionalValidationMethod: additionalValidationMethod )"
 						.FormatWith( dv ) );
-		if( field.TypeIs( typeof( DateTime? ) ) )
+		if( field.TypeIs( typeof( LocalDate? ) ) || field.TypeIs( typeof( DateTime? ) ) )
 			addControl(
 				"DateControl",
 					[ ],

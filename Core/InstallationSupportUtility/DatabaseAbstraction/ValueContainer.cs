@@ -1,5 +1,6 @@
 ﻿using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
+using NodaTime;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 
@@ -33,12 +34,21 @@ public class ValueContainer {
 
 		if( databaseInfo is MySqlInfo && dbTypeString == "Bit" && size == 1 ) {
 			if( unconvertedDataType != typeof( ulong ) )
-				throw new ApplicationException( "The unconverted data type was not ulong." );
+				throw new Exception( "The unconverted data type was not ulong." );
 
 			this.dataType = typeof( bool );
-			incomingValueConversionExpressionGetter = valueExpression => "System.Convert.ToBoolean( {0} )".FormatWith( valueExpression );
+			incomingValueConversionExpressionGetter = valueExpression => "Convert.ToBoolean( {0} )".FormatWith( valueExpression );
 			incomingValueConverter = value => Convert.ToBoolean( value );
-			outgoingValueConversionExpressionGetter = valueExpression => "System.Convert.ToUInt64( {0} )".FormatWith( valueExpression );
+			outgoingValueConversionExpressionGetter = valueExpression => "Convert.ToUInt64( {0} )".FormatWith( valueExpression );
+		}
+		else if( databaseInfo is SqlServerInfo && string.Equals( dbTypeString, "Date", StringComparison.Ordinal ) ) {
+			if( unconvertedDataType != typeof( DateTime ) )
+				throw new Exception( $"The unconverted data type was not {nameof(DateTime)}." );
+
+			this.dataType = typeof( LocalDate );
+			incomingValueConversionExpressionGetter = valueExpression => $"LocalDate.FromDateTime( (DateTime){valueExpression} )";
+			incomingValueConverter = value => LocalDate.FromDateTime( (DateTime)value );
+			outgoingValueConversionExpressionGetter = valueExpression => $"{valueExpression}.ToDateTimeUnspecified()";
 		}
 		else {
 			this.dataType = unconvertedDataType;
