@@ -17,9 +17,7 @@ namespace EnterpriseWebLibrary.Website.WebFrameworkDemo {
 			var content = new UiPageContent( isAutoDataUpdater: true );
 
 			content.Add(
-				FormItemList.CreateStack()
-					.AddItem( parametersModification.GetField1TextControlFormItem( true ) )
-					.AddItem( parametersModification.GetField2TextControlFormItem( true ) ) );
+				FormItemList.CreateStack().AddItem( parametersModification.GetField1FormItem( true ) ).AddItem( parametersModification.GetField2FormItem( true ) ) );
 
 			content.Add(
 				new EwfButton(
