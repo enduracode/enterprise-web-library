@@ -32,7 +32,7 @@ partial class SystemUser {
 								             modificationMethod: deleteUser,
 								             actionGetter: () => new PostBackAction( ParentResource ) ) ) ).ToCollection()
 					             : null,
-				contentFootActions: new ButtonSetup( "OK" ).ToCollection() ).Add( new UserEditor( UserId, out userModMethod ) ) );
+				contentFootActions: new ButtonSetup( "OK" ) ).Add( new UserEditor( UserId, out userModMethod ) ) );
 	}
 
 	private void deleteUser() {

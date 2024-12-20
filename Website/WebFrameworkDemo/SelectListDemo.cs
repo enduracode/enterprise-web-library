@@ -7,7 +7,7 @@ namespace EnterpriseWebLibrary.Website.WebFrameworkDemo {
 		protected override PageContent getContent() =>
 			FormState.ExecuteWithActions(
 				PostBack.CreateFull(),
-				() => new UiPageContent( contentFootActions: new ButtonSetup( "Submit" ).ToCollection() ).Add(
+				() => new UiPageContent( contentFootActions: new ButtonSetup( "Submit" ) ).Add(
 					new Section( "Radio Button List, Vertical", FormItemList.CreateStack().AddItems( getRadioItems( false ).Materialize() ).ToCollection() )
 						.Append( new Section( "Radio Button List, Horizontal", FormItemList.CreateStack().AddItems( getRadioItems( true ).Materialize() ).ToCollection() ) )
 						.Append( getChosenUpgradeTestingInfo() )

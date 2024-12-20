@@ -29,7 +29,7 @@ partial class NonLiveLogIn {
 
 		return FormState.ExecuteWithActions(
 			PostBack.CreateFull( modificationMethod: () => logIn( false ), actionGetter: () => new PostBackAction( new ExternalResource( ReturnUrl ) ) ),
-			() => new UiPageContent( contentFootActions: new ButtonSetup( "Log In" ).ToCollection() ).Add(
+			() => new UiPageContent( contentFootActions: new ButtonSetup( "Log In" ) ).Add(
 				FormItemList.CreateStack()
 					.AddItem(
 						new TextControl(

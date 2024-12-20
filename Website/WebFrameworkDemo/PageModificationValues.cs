@@ -8,7 +8,7 @@ partial class PageModificationValues {
 	protected override PageContent getContent() {
 		var pmv = new PageModificationValue<bool>();
 		return new UiPageContent(
-				contentFootActions: new ButtonSetup( "Post Back", behavior: new PostBackBehavior( postBack: PostBack.CreateIntermediate( null ) ) ).ToCollection() )
+				contentFootActions: new ButtonSetup( "Post Back", behavior: new PostBackBehavior( postBack: PostBack.CreateIntermediate( null ) ) ) )
 			.Add( new Checkbox( false, "Test".ToComponents(), setup: CheckboxSetup.Create( pageModificationValue: pmv ) ).ToFormItem().ToComponentCollection() )
 			.Add(
 				new Paragraph(

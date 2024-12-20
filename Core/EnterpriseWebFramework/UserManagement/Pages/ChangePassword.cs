@@ -24,7 +24,7 @@ partial class ChangePassword {
 				actionGetter: () => new PostBackAction( new ExternalResource( ReturnUrl ) ) ),
 			() => new UiPageContent(
 				pageActions: new HyperlinkSetup( new ExternalResource( ReturnUrl ), "Back" ).ToCollection(),
-				contentFootActions: new ButtonSetup( "Change Password" ).ToCollection() ).Add(
+				contentFootActions: new ButtonSetup( "Change Password" ) ).Add(
 				FormItemList.CreateStack()
 					.AddItems(
 						AuthenticationStatics.GetPasswordModificationFormItems(

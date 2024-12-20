@@ -15,7 +15,7 @@ partial class KeyboardFocus {
 						behavior:
 						new PostBackBehavior(
 							postBack: PostBack.CreateFull( id: "full", actionGetter: () => new PostBackAction( new PageReloadBehavior( focusKey: focusKey ) ) ) ) )
-					.Append(
+					.Add(
 						new ButtonSetup(
 							"Submit with Intermediate Post-Back",
 							behavior:
@@ -23,8 +23,7 @@ partial class KeyboardFocus {
 								postBack: PostBack.CreateIntermediate(
 									null,
 									id: "intermediate",
-									reloadBehaviorGetter: () => new PageReloadBehavior( focusKey: focusKey ) ) ) ) )
-					.Materialize() )
+									reloadBehaviorGetter: () => new PageReloadBehavior( focusKey: focusKey ) ) ) ) ) )
 			.Add(
 				new FlowAutofocusRegion(
 					AutofocusCondition.InitialRequest(),

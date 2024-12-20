@@ -5,7 +5,7 @@ namespace EnterpriseWebLibrary.Website.WebFrameworkDemo {
 		protected override PageContent getContent() =>
 			FormState.ExecuteWithActions(
 				PostBack.CreateFull(),
-				() => new UiPageContent( contentFootActions: new ButtonSetup( "Post Back" ).ToCollection() ).Add(
+				() => new UiPageContent( contentFootActions: new ButtonSetup( "Post Back" ) ).Add(
 					new WysiwygHtmlEditor( "", true, ( _, _ ) => {} ).ToFormItem( label: Enumerable.Empty<PhrasingComponent>().Materialize() )
 						.ToComponentCollection() ) );
 	}

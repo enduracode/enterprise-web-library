@@ -30,7 +30,7 @@ partial class ContactSupport {
 					AddStatusMessage( StatusMessageType.Info, "Your message has been sent." );
 				},
 				actionGetter: () => new PostBackAction( new ExternalResource( ReturnUrl ) ) ),
-			() => new UiPageContent( contentFootActions: new ButtonSetup( "Send Message" ).ToCollection() )
+			() => new UiPageContent( contentFootActions: new ButtonSetup( "Send Message" ) )
 				.Add( new Paragraph( "You may report any problems, make suggestions, or ask for help here.".ToComponents() ) )
 				.Add(
 					FormItemList.CreateStack()

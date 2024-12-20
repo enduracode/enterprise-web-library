@@ -1,4 +1,6 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework;
+﻿using JetBrains.Annotations;
+
+namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 /// <summary>
 /// The configuration for a button.
@@ -37,4 +39,35 @@ public class ButtonSetup: ActionComponentSetup {
 		Func<string, ActionComponentIcon?, HyperlinkStyle>? hyperlinkStyleSelector, Func<string, ActionComponentIcon?, ButtonStyle> buttonStyleSelector,
 		bool enableSubmitButton = false ) =>
 		buttonGetter( enableSubmitButton, buttonStyleSelector );
+}
+
+public class ButtonSetupsParameter {
+	public static implicit operator ButtonSetupsParameter( ButtonSetup? setup ) => new( setup is null ? [ ] : [ setup ] );
+
+	private readonly IEnumerable<ButtonSetup> sequence;
+	internal readonly Lazy<IReadOnlyCollection<ButtonSetup>> Collection;
+
+	internal ButtonSetupsParameter( IEnumerable<ButtonSetup> sequence ) {
+		this.sequence = sequence;
+		Collection = new Lazy<IReadOnlyCollection<ButtonSetup>>( sequence.Materialize );
+	}
+
+	/// <summary>
+	/// Returns a new parameter with this parameter’s button setups plus the specified setups.
+	/// </summary>
+	public ButtonSetupsParameter Add( ButtonSetupsParameter buttonSetups ) => new( sequence.Concat( buttonSetups.sequence ) );
+}
+
+[ PublicAPI ]
+public static class ButtonSetupsParameterExtensionCreators {
+	/// <summary>
+	/// Returns a parameter with this button setup plus the specified setups.
+	/// </summary>
+	public static ButtonSetupsParameter Add( this ButtonSetup buttonSetup, ButtonSetupsParameter buttonSetups ) =>
+		new ButtonSetupsParameter( [ buttonSetup ] ).Add( buttonSetups );
+
+	/// <summary>
+	/// Returns a parameter with the button setups in this sequence.
+	/// </summary>
+	public static ButtonSetupsParameter ToParameter( this IEnumerable<ButtonSetup> buttonSetups ) => new( buttonSetups );
 }

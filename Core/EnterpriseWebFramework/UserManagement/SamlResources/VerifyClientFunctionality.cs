@@ -31,9 +31,8 @@ partial class VerifyClientFunctionality {
 	private PageContent getVerificationFailedContent() {
 		var content = new UiPageContent(
 			contentFootActions: new ButtonSetup(
-					"Proceed Anyway",
-					behavior: new PostBackBehavior( postBack: PostBack.CreateFull( actionGetter: () => new PostBackAction( new ExternalResource( ReturnUrl ) ) ) ) )
-				.ToCollection() );
+				"Proceed Anyway",
+				behavior: new PostBackBehavior( postBack: PostBack.CreateFull( actionGetter: () => new PostBackAction( new ExternalResource( ReturnUrl ) ) ) ) ) );
 		if( CookiesDisabled )
 			content.Add( new Paragraph( Translation.YourBrowserHasCookiesDisabled.ToComponents() ) );
 		if( ClockWrong )

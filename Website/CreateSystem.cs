@@ -26,7 +26,7 @@ partial class CreateSystem {
 								ContentTypes.ApplicationZip,
 								new EwfResponseBodyCreator( createAndZipSystem ),
 								fileNameCreator: () => "{0}.zip".FormatWith( systemShortName.Value ) ) ) ) ) ),
-			() => new UiPageContent( contentFootActions: new ButtonSetup( "Create System" ).ToCollection() ).Add(
+			() => new UiPageContent( contentFootActions: new ButtonSetup( "Create System" ) ).Add(
 				FormItemList.CreateStack()
 					.AddItem(
 						systemName.ToTextControl(

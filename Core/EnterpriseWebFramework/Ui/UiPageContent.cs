@@ -160,13 +160,11 @@ public class UiPageContent: PageContent {
 	/// framework will hide all content on the page and show a loading icon instead.</param>
 	public UiPageContent(
 		ElementClassSet bodyClasses = null, IReadOnlyCollection<ActionComponentSetup> pageActions = null, bool omitContentBox = false,
-		IReadOnlyCollection<ButtonSetup> contentFootActions = null, IReadOnlyCollection<FlowComponent> contentFootComponents = null,
+		ButtonSetupsParameter contentFootActions = null, IReadOnlyCollection<FlowComponent> contentFootComponents = null,
 		Action dataUpdateModificationMethod = null, bool isAutoDataUpdater = false, ActionPostBack pageLoadPostBack = null ) {
 		pageActions ??= Enumerable.Empty<ActionComponentSetup>().Materialize();
-		if( contentFootActions != null && contentFootComponents != null )
+		if( contentFootActions?.Collection.Value.Any() == true && contentFootComponents != null )
 			throw new ApplicationException( "Either contentFootActions or contentFootComponents may be specified, but not both." );
-		if( contentFootActions == null && contentFootComponents == null )
-			contentFootActions = Enumerable.Empty<ButtonSetup>().Materialize();
 
 		entityUiSetup = ( PageBase.Current.EsAsBaseType as UiEntitySetup )?.GetUiSetup();
 		basicContent =
@@ -188,7 +186,11 @@ public class UiPageContent: PageContent {
 									classes: omitContentBox ? contentGridClass : contentBoxClass,
 									children: content ) ).ToCollection(),
 							classes: contentContainerClass ) )
-					.Concat( getContentFootBlock( isAutoDataUpdater, contentFootActions, contentFootComponents ) )
+					.Concat(
+						getContentFootBlock(
+							isAutoDataUpdater,
+							contentFootActions is null && contentFootComponents is null ? [ ] : contentFootActions?.Collection.Value,
+							contentFootComponents ) )
 					.Concat( getGlobalFootContainer() )
 					.Materialize() );
 	}
