@@ -30,7 +30,7 @@ partial class SystemUser {
 							             postBack: PostBack.CreateFull(
 								             id: "delete",
 								             modificationMethod: deleteUser,
-								             actionGetter: () => new PostBackAction( ParentResource ) ) ) ).ToCollection()
+								             actionGetter: () => new PostBackAction( ParentResource ) ) ) )
 					             : null,
 				contentFootActions: new ButtonSetup( "OK" ) ).Add( new UserEditor( UserId, out userModMethod ) ) );
 	}

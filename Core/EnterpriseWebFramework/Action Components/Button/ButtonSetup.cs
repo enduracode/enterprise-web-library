@@ -6,6 +6,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 /// The configuration for a button.
 /// </summary>
 public class ButtonSetup: ActionComponentSetup {
+	public static implicit operator ActionComponentSetupsParameter( ButtonSetup? setup ) => new( setup is null ? [ ] : [ setup ] );
+
 	private readonly Func<bool, Func<string, ActionComponentIcon?, ButtonStyle>, PhrasingComponent> buttonGetter;
 
 	/// <summary>
@@ -43,6 +45,9 @@ public class ButtonSetup: ActionComponentSetup {
 
 public class ButtonSetupsParameter {
 	public static implicit operator ButtonSetupsParameter( ButtonSetup? setup ) => new( setup is null ? [ ] : [ setup ] );
+
+	public static implicit operator ActionComponentSetupsParameter?( ButtonSetupsParameter? setup ) =>
+		setup is null ? null : new ActionComponentSetupsParameter( setup.sequence );
 
 	private readonly IEnumerable<ButtonSetup> sequence;
 	internal readonly Lazy<IReadOnlyCollection<ButtonSetup>> Collection;

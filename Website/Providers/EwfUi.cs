@@ -1,10 +1,11 @@
 ﻿namespace EnterpriseWebLibrary.Website.Providers;
 
 internal class EwfUi: AppEwfUiProvider {
-	public override IReadOnlyCollection<ActionComponentSetup> GetGlobalNavActions( string postBackIdBase ) {
-		var navButtonSetups = new List<ActionComponentSetup>();
+	public override ActionComponentSetupsParameter? GetGlobalNavActions( string postBackIdBase ) {
 		if( CreateSystem.GetInfo().MatchesCurrent() )
-			return navButtonSetups;
+			return null;
+
+		var navButtonSetups = new List<ActionComponentSetup>();
 
 		// This will hide itself because Contact Us requires a logged-in user, and this website has no users.
 		var contactPage = ContactSupport.GetInfo( PageBase.Current.GetUrl() );
@@ -21,7 +22,7 @@ internal class EwfUi: AppEwfUiProvider {
 								id: PostBack.GetCompositeId( postBackIdBase, "testMethod" ),
 								modificationMethod: () => PageBase.AddStatusMessage( StatusMessageType.Info, "Successful method execution." ) ) ) ).ToCollection() ) ) );
 
-		return navButtonSetups;
+		return navButtonSetups.ToParameter();
 	}
 
 	public override IReadOnlyCollection<NavFormControl> GetGlobalNavFormControls() {

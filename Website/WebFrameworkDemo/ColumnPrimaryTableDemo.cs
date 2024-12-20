@@ -19,15 +19,14 @@ namespace EnterpriseWebLibrary.Website.WebFrameworkDemo {
 										null,
 										id: PostBack.GetCompositeId( group.ToString(), "action1" ),
 										modificationMethod: () => AddStatusMessage( StatusMessageType.Info, "Action 1" ) ) ) )
-							.Append(
+							.Add(
 								new ButtonSetup(
 									"Action 2",
 									behavior: new PostBackBehavior(
 										postBack: PostBack.CreateIntermediate(
 											null,
 											id: PostBack.GetCompositeId( group.ToString(), "action2" ),
-											modificationMethod: () => AddStatusMessage( StatusMessageType.Info, "Action 2" ) ) ) ) )
-							.Materialize(),
+											modificationMethod: () => AddStatusMessage( StatusMessageType.Info, "Action 2" ) ) ) ) ),
 						selectedItemActions: group == 1
 							                     ? SelectedItemAction.CreateWithIntermediatePostBackBehavior<int>(
 									                     "Echo group IDs",
@@ -54,15 +53,14 @@ namespace EnterpriseWebLibrary.Website.WebFrameworkDemo {
 						allowExportToExcel: true,
 						tableActions:
 						new ButtonSetup(
-								"Action",
-								behavior:
-								new PostBackBehavior(
-									postBack:
-									PostBack.CreateIntermediate(
-										null,
-										id: "action",
-										modificationMethod: () => AddStatusMessage( StatusMessageType.Info, "You clicked action." ) ) ) )
-							.ToCollection(),
+							"Action",
+							behavior:
+							new PostBackBehavior(
+								postBack:
+								PostBack.CreateIntermediate(
+									null,
+									id: "action",
+									modificationMethod: () => AddStatusMessage( StatusMessageType.Info, "You clicked action." ) ) ) ),
 						selectedItemActions: SelectedItemAction
 							.CreateWithIntermediatePostBackBehavior<int>(
 								"Echo IDs",

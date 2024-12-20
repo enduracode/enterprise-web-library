@@ -64,14 +64,15 @@ partial class EntitySetup: UiEntitySetup {
 
 	EntityUiSetup UiEntitySetup.GetUiSetup() =>
 		new(
-			navActionGetter:
-			_ => new HyperlinkSetup( new ErrorLog( this ), "System error log", icon: new ActionComponentIcon( new FontAwesomeIcon( "fa-exclamation-triangle" ) ) )
-				.ToCollection(),
+			navActionGetter: _ => new HyperlinkSetup(
+				new ErrorLog( this ),
+				"System error log",
+				icon: new ActionComponentIcon( new FontAwesomeIcon( "fa-exclamation-triangle" ) ) ),
 			actionGetter: _ =>
 				UserManagementStatics.UserManagementEnabled
 					? new HyperlinkSetup(
 						new EnterpriseWebFramework.UserManagement.Pages.Impersonate( PageBase.Current.GetUrl() ),
 						"Impersonate user",
-						icon: new ActionComponentIcon( new FontAwesomeIcon( "fa-key" ) ) ).ToCollection()
-					: Array.Empty<ActionComponentSetup>() );
+						icon: new ActionComponentIcon( new FontAwesomeIcon( "fa-key" ) ) )
+					: null );
 }

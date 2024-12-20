@@ -68,8 +68,8 @@ partial class EntitySetup: UiEntitySetup {
 				var two = new ModalBoxId();
 				var unauthorizedPage = new UnauthorizedPage( this );
 				return new HyperlinkSetup( new ExternalResource( "http://www.microsoft.com" ), "Go to Microsoft" )
-					.Append<ActionComponentSetup>( new ButtonSetup( "Custom script", behavior: new CustomButtonBehavior( () => "alert('test');" ) ) )
-					.Append(
+					.Add( new ButtonSetup( "Custom script", behavior: new CustomButtonBehavior( () => "alert('test');" ) ) )
+					.Add(
 						new ButtonSetup(
 							"Menu",
 							behavior: new MenuButtonBehavior(
@@ -91,7 +91,7 @@ partial class EntitySetup: UiEntitySetup {
 															true,
 															new Paragraph( "This is a modal box!".ToComponents() ).ToCollection() ).ToCollection() ) )
 												.ToComponentListItem() ) ).ToCollection() ) ) )
-					.Append(
+					.Add(
 						new ButtonSetup(
 							"Modal Window",
 							behavior: new OpenModalBehavior(
@@ -101,8 +101,7 @@ partial class EntitySetup: UiEntitySetup {
 									true,
 									new EwfImage( new ImageSetup( "Houses in the mountains" ), new ExternalResource( "https://www.leveragere.com/assets/1440.jpg" ) )
 										.ToCollection() ).ToCollection() ) ) )
-					.Append( new HyperlinkSetup( unauthorizedPage.ToHyperlinkDefaultBehavior( disableAuthorizationCheck: true ), unauthorizedPage.ResourceName ) )
-					.Materialize();
+					.Add( new HyperlinkSetup( unauthorizedPage.ToHyperlinkDefaultBehavior( disableAuthorizationCheck: true ), unauthorizedPage.ResourceName ) );
 			},
 			navFormControls:
 			NavFormControl.CreateText(
@@ -116,16 +115,14 @@ partial class EntitySetup: UiEntitySetup {
 							postBack: PostBack.CreateFull(
 								id: PostBack.GetCompositeId( postBackIdBase, "delegate" ),
 								modificationMethod: () => PageBase.AddStatusMessage( StatusMessageType.Info, "Did Something." ) ) ) )
-					.Append<ActionComponentSetup>(
-						new HyperlinkSetup( new ExternalResource( "http://www.google.com" ).ToHyperlinkNewTabBehavior(), "Go to Google in new window" ) )
-					.Append(
+					.Add( new HyperlinkSetup( new ExternalResource( "http://www.google.com" ).ToHyperlinkNewTabBehavior(), "Go to Google in new window" ) )
+					.Add(
 						new ButtonSetup(
 							"Generate error",
 							behavior: new PostBackBehavior(
 								postBack: PostBack.CreateFull(
 									id: PostBack.GetCompositeId( postBackIdBase, "error" ),
-									modificationMethod: () => { throw new ApplicationException(); } ) ) ) )
-					.Materialize(),
+									modificationMethod: () => { throw new ApplicationException(); } ) ) ) ),
 			entitySummaryContent: new Paragraph(
 				"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed quis semper dui. Aenean egestas dolor ac elementum lacinia. Vestibulum eget."
 					.ToComponents() ).ToCollection() );

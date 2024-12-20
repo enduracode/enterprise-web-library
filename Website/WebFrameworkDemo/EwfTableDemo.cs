@@ -31,7 +31,7 @@ partial class EwfTableDemo {
 									if( GroupCount <= 0 )
 										throw new DataModificationException( "No groups to remove." );
 									parametersModification.GroupCount -= 1;
-								} ) ) ).ToCollection(),
+								} ) ) ),
 					selectedItemActions: SelectedItemAction
 						.CreateWithIntermediatePostBackBehavior<
 							int>(
@@ -70,7 +70,7 @@ partial class EwfTableDemo {
 									null,
 									id: PostBack.GetCompositeId( groupNumber.ToString(), "action1" ),
 									modificationMethod: () => AddStatusMessage( StatusMessageType.Info, "Action 1" ) ) ) )
-						.Append(
+						.Add(
 							new ButtonSetup(
 								"Action 2",
 								behavior:
@@ -80,7 +80,6 @@ partial class EwfTableDemo {
 										null,
 										id: PostBack.GetCompositeId( groupNumber.ToString(), "action2" ),
 										modificationMethod: () => AddStatusMessage( StatusMessageType.Info, "Action 2" ) ) ) ) )
-						.Materialize()
 					: null,
 				groupHeadActivationBehavior:
 				ElementActivationBehavior.CreateButton(

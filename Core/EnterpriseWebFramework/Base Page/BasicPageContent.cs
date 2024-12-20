@@ -21,7 +21,7 @@ public sealed class BasicPageContent: PageContent {
 	private static Action<StringBuilder, bool> javaScriptIncludeBuilder;
 	private static Func<IEnumerable<( ResourceInfo resource, string rel, string sizes )>> appIconGetter;
 	private static Func<bool, string> intermediateUrlGetter;
-	private static Func<( string message, IReadOnlyCollection<ActionComponentSetup> actions )?> impersonationWarningLineGetter;
+	private static Func<( string message, ActionComponentSetupsParameter actions )?> impersonationWarningLineGetter;
 
 	[ UsedImplicitly ]
 	private class CssElementCreator: ControlCssElementCreator {
@@ -125,7 +125,7 @@ public sealed class BasicPageContent: PageContent {
 	internal static void Init(
 		Func<string> clientSideNewUrlGetter, Func<IReadOnlyCollection<PageContent>, IEnumerable<ResourceInfo>> cssInfoCreator,
 		Action<StringBuilder, bool> javaScriptIncludeBuilder, Func<IEnumerable<( ResourceInfo, string, string )>> appIconGetter,
-		Func<bool, string> intermediateUrlGetter, Func<( string, IReadOnlyCollection<ActionComponentSetup> )?> impersonationWarningLineGetter ) {
+		Func<bool, string> intermediateUrlGetter, Func<( string, ActionComponentSetupsParameter )?> impersonationWarningLineGetter ) {
 		BasicPageContent.clientSideNewUrlGetter = clientSideNewUrlGetter;
 		BasicPageContent.cssInfoCreator = cssInfoCreator;
 		BasicPageContent.javaScriptIncludeBuilder = javaScriptIncludeBuilder;
@@ -371,7 +371,7 @@ public sealed class BasicPageContent: PageContent {
 				impersonationWarningLine.Value.message.ToComponents()
 					.Concat( " ".ToComponents() )
 					.Concat(
-						impersonationWarningLine.Value.actions
+						impersonationWarningLine.Value.actions.Collection.Value
 							.Select(
 								i => i.GetActionComponent(
 									( text, _ ) => new ButtonHyperlinkStyle( text, buttonSize: ButtonSize.ShrinkWrap ),

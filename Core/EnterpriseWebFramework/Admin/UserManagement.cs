@@ -72,7 +72,7 @@ partial class UserManagement {
 			new Section(
 				"System users",
 				EwfTable.Create(
-						tableActions: new HyperlinkSetup( new SystemUser( Es, null ), "Create User" ).ToCollection(),
+						tableActions: new HyperlinkSetup( new SystemUser( Es, null ), "Create User" ),
 						headItems: EwfTableItem.Create( "Email".ToCell().Append( "Role".ToCell() ).Materialize() ).ToCollection() )
 					.AddData(
 						UserManagementStatics.SystemProvider.GetUsers(),

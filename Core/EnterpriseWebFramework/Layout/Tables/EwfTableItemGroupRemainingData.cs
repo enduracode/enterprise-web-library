@@ -5,7 +5,7 @@
 /// </summary>
 public class EwfTableItemGroupRemainingData {
 	internal readonly IReadOnlyCollection<FlowComponent> GroupName;
-	internal readonly IReadOnlyCollection<ActionComponentSetup> GroupActions;
+	internal readonly ActionComponentSetupsParameter? GroupActions;
 	internal readonly ElementActivationBehavior? GroupHeadActivationBehavior;
 	internal readonly bool? InitiallyCollapsed;
 	internal readonly IReadOnlyCollection<TailUpdateRegion> TailUpdateRegions;
@@ -22,10 +22,10 @@ public class EwfTableItemGroupRemainingData {
 	/// groups in the table. This is necessary because any number of items could be appended to this item group, potentially causing subsequent item groups to
 	/// become invisible.</param>
 	public EwfTableItemGroupRemainingData(
-		IReadOnlyCollection<FlowComponent>? groupName, IReadOnlyCollection<ActionComponentSetup>? groupActions = null,
+		IReadOnlyCollection<FlowComponent>? groupName, ActionComponentSetupsParameter? groupActions = null,
 		ElementActivationBehavior? groupHeadActivationBehavior = null, bool? initiallyCollapsed = null, TailUpdateRegionsParameter? tailUpdateRegions = null ) {
 		GroupName = groupName ?? Enumerable.Empty<FlowComponent>().Materialize();
-		GroupActions = groupActions ?? Enumerable.Empty<ActionComponentSetup>().Materialize();
+		GroupActions = groupActions;
 		GroupHeadActivationBehavior = groupHeadActivationBehavior;
 		InitiallyCollapsed = initiallyCollapsed;
 		TailUpdateRegions = tailUpdateRegions?.Collection.Value ?? [ ];

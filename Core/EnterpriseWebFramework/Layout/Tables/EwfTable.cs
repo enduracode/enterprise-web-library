@@ -45,7 +45,7 @@ public class EwfTable: EwfTable<int> {
 	/// <param name="etherealContent"></param>
 	public static EwfTable Create(
 		DisplaySetup displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string idBase = "", string caption = "",
-		string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
+		string subCaption = "", bool allowExportToExcel = false, ActionComponentSetupsParameter tableActions = null,
 		IReadOnlyCollection<SelectedItemAction<int>> selectedItemActions = null, IReadOnlyCollection<EwfTableField> fields = null,
 		IReadOnlyCollection<EwfTableItem> headItems = null, DataRowLimit defaultItemLimit = DataRowLimit.Unlimited, bool enableItemReordering = false,
 		bool disableEmptyFieldDetection = false, TailUpdateRegionsParameter tailUpdateRegions = null,
@@ -100,7 +100,7 @@ public class EwfTable: EwfTable<int> {
 	/// <param name="etherealContent"></param>
 	public static EwfTable<ItemIdType> CreateWithItemIdType<ItemIdType>(
 		DisplaySetup displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string idBase = "", string caption = "",
-		string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
+		string subCaption = "", bool allowExportToExcel = false, ActionComponentSetupsParameter tableActions = null,
 		IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions = null, IReadOnlyCollection<EwfTableField> fields = null,
 		IReadOnlyCollection<EwfTableItem> headItems = null, DataRowLimit defaultItemLimit = DataRowLimit.Unlimited, bool enableItemReordering = false,
 		bool disableEmptyFieldDetection = false, TailUpdateRegionsParameter tailUpdateRegions = null,
@@ -125,9 +125,9 @@ public class EwfTable: EwfTable<int> {
 
 	private EwfTable(
 		DisplaySetup displaySetup, EwfTableStyle style, ElementClassSet classes, string postBackIdBase, string caption, string subCaption, bool allowExportToExcel,
-		IReadOnlyCollection<ActionComponentSetup> tableActions, IReadOnlyCollection<SelectedItemAction<int>> selectedItemActions,
-		IReadOnlyCollection<EwfTableField> fields, IReadOnlyCollection<EwfTableItem> headItems, DataRowLimit defaultItemLimit, bool enableItemReordering,
-		bool disableEmptyFieldDetection, TailUpdateRegionsParameter tailUpdateRegions, IReadOnlyCollection<EtherealComponent> etherealContent ): base(
+		ActionComponentSetupsParameter tableActions, IReadOnlyCollection<SelectedItemAction<int>> selectedItemActions, IReadOnlyCollection<EwfTableField> fields,
+		IReadOnlyCollection<EwfTableItem> headItems, DataRowLimit defaultItemLimit, bool enableItemReordering, bool disableEmptyFieldDetection,
+		TailUpdateRegionsParameter tailUpdateRegions, IReadOnlyCollection<EtherealComponent> etherealContent ): base(
 		displaySetup,
 		style,
 		classes,
@@ -163,11 +163,10 @@ public class EwfTable<ItemIdType>: FlowComponent {
 
 	internal EwfTable(
 		DisplaySetup displaySetup, EwfTableStyle style, ElementClassSet classes, string idBase, string caption, string subCaption, bool allowExportToExcel,
-		IReadOnlyCollection<ActionComponentSetup> tableActions, IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions,
+		ActionComponentSetupsParameter tableActions, IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions,
 		IReadOnlyCollection<EwfTableField> fields, IReadOnlyCollection<EwfTableItem> headItems, DataRowLimit defaultItemLimit, bool enableItemReordering,
 		bool disableEmptyFieldDetection, TailUpdateRegionsParameter tailUpdateRegions, IReadOnlyCollection<EtherealComponent> etherealContent ) {
 		idBase = PostBack.GetCompositeId( idBase, "ewfTable" );
-		tableActions ??= Enumerable.Empty<ActionComponentSetup>().Materialize();
 
 		if( fields != null && !fields.Any() )
 			throw new ApplicationException( "If fields are specified, there must be at least one of them." );

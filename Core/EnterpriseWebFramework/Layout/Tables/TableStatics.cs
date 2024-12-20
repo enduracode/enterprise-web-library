@@ -182,10 +182,11 @@ internal static class TableStatics {
 							return workbook;
 						} ) ) ) );
 
-	internal static IEnumerable<FlowComponent> GetGeneralActionList( PostBack? exportToExcelPostBack, IReadOnlyCollection<ActionComponentSetup> actions ) {
+	internal static IEnumerable<FlowComponent> GetGeneralActionList( PostBack? exportToExcelPostBack, ActionComponentSetupsParameter? actions ) {
+		actions ??= new ActionComponentSetupsParameter( [ ] );
 		if( exportToExcelPostBack is not null )
-			actions = actions.Append( new ButtonSetup( "Export to Excel", behavior: new PostBackBehavior( postBack: exportToExcelPostBack ) ) ).Materialize();
-		return GetActionList( actions );
+			actions = actions.Add( new ButtonSetup( "Export to Excel", behavior: new PostBackBehavior( postBack: exportToExcelPostBack ) ) );
+		return GetActionList( actions.Collection.Value );
 	}
 
 	internal static IReadOnlyCollection<FlowComponent>
@@ -219,7 +220,7 @@ internal static class TableStatics {
 
 	internal static IEnumerable<FlowComponent> GetActionList( IReadOnlyCollection<ActionComponentSetup> actions ) {
 		if( !actions.Any() )
-			return Enumerable.Empty<FlowComponent>();
+			return [ ];
 		return new GenericFlowContainer(
 			new WrappingList(
 				from action in actions

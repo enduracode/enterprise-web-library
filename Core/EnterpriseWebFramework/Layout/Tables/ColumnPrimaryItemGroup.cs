@@ -1,5 +1,4 @@
-﻿#nullable disable
-namespace EnterpriseWebLibrary.EnterpriseWebFramework;
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 /// <summary>
 /// An item group in a column primary table.
@@ -16,9 +15,9 @@ public class ColumnPrimaryItemGroup: ColumnPrimaryItemGroup<int> {
 	/// each item with an ID, within this group.</param>
 	/// <param name="items">The items</param>
 	public static ColumnPrimaryItemGroup Create(
-		IReadOnlyCollection<FlowComponent> groupName, IReadOnlyCollection<ActionComponentSetup> groupActions = null,
-		ElementActivationBehavior groupHeadActivationBehavior = null, IReadOnlyCollection<SelectedItemAction<int>> selectedItemActions = null,
-		IEnumerable<EwfTableItem> items = null ) =>
+		IReadOnlyCollection<FlowComponent>? groupName, ActionComponentSetupsParameter? groupActions = null,
+		ElementActivationBehavior? groupHeadActivationBehavior = null, IReadOnlyCollection<SelectedItemAction<int>>? selectedItemActions = null,
+		IEnumerable<EwfTableItem>? items = null ) =>
 		new( groupName, groupActions, groupHeadActivationBehavior, selectedItemActions, items );
 
 	/// <summary>
@@ -32,14 +31,14 @@ public class ColumnPrimaryItemGroup: ColumnPrimaryItemGroup<int> {
 	/// each item with an ID, within this group.</param>
 	/// <param name="items">The items</param>
 	public static ColumnPrimaryItemGroup<ItemIdType> CreateWithItemIdType<ItemIdType>(
-		IReadOnlyCollection<FlowComponent> groupName, IReadOnlyCollection<ActionComponentSetup> groupActions = null,
-		ElementActivationBehavior groupHeadActivationBehavior = null, IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions = null,
-		IEnumerable<EwfTableItem<ItemIdType>> items = null ) =>
+		IReadOnlyCollection<FlowComponent>? groupName, ActionComponentSetupsParameter? groupActions = null,
+		ElementActivationBehavior? groupHeadActivationBehavior = null, IReadOnlyCollection<SelectedItemAction<ItemIdType>>? selectedItemActions = null,
+		IEnumerable<EwfTableItem<ItemIdType>>? items = null ) =>
 		new( groupName, groupActions, groupHeadActivationBehavior, selectedItemActions, items );
 
 	private ColumnPrimaryItemGroup(
-		IReadOnlyCollection<FlowComponent> groupName, IReadOnlyCollection<ActionComponentSetup> groupActions, ElementActivationBehavior groupHeadActivationBehavior,
-		IReadOnlyCollection<SelectedItemAction<int>> selectedItemActions, IEnumerable<EwfTableItem> items ): base(
+		IReadOnlyCollection<FlowComponent>? groupName, ActionComponentSetupsParameter? groupActions, ElementActivationBehavior? groupHeadActivationBehavior,
+		IReadOnlyCollection<SelectedItemAction<int>>? selectedItemActions, IEnumerable<EwfTableItem>? items ): base(
 		groupName,
 		groupActions,
 		groupHeadActivationBehavior,
@@ -52,19 +51,19 @@ public class ColumnPrimaryItemGroup: ColumnPrimaryItemGroup<int> {
 /// </summary>
 public class ColumnPrimaryItemGroup<ItemIdType> {
 	private readonly IReadOnlyCollection<FlowComponent> groupName;
-	private readonly IReadOnlyCollection<ActionComponentSetup> groupActions;
-	private readonly ElementActivationBehavior groupHeadActivationBehavior;
+	private readonly ActionComponentSetupsParameter? groupActions;
+	private readonly ElementActivationBehavior? groupHeadActivationBehavior;
 	internal readonly IReadOnlyCollection<SelectedItemAction<ItemIdType>> SelectedItemActions;
 	internal readonly List<EwfTableItem<ItemIdType>> Items;
 
 	internal ColumnPrimaryItemGroup(
-		IReadOnlyCollection<FlowComponent> groupName, IReadOnlyCollection<ActionComponentSetup> groupActions, ElementActivationBehavior groupHeadActivationBehavior,
-		IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions, IEnumerable<EwfTableItem<ItemIdType>> items ) {
+		IReadOnlyCollection<FlowComponent>? groupName, ActionComponentSetupsParameter? groupActions, ElementActivationBehavior? groupHeadActivationBehavior,
+		IReadOnlyCollection<SelectedItemAction<ItemIdType>>? selectedItemActions, IEnumerable<EwfTableItem<ItemIdType>>? items ) {
 		this.groupName = groupName ?? Enumerable.Empty<FlowComponent>().Materialize();
-		this.groupActions = groupActions ?? Enumerable.Empty<ActionComponentSetup>().Materialize();
+		this.groupActions = groupActions;
 		this.groupHeadActivationBehavior = groupHeadActivationBehavior;
 		SelectedItemActions = selectedItemActions ?? Enumerable.Empty<SelectedItemAction<ItemIdType>>().Materialize();
-		Items = ( items ?? Enumerable.Empty<EwfTableItem<ItemIdType>>() ).ToList();
+		Items = ( items ?? [ ] ).ToList();
 	}
 
 	internal IReadOnlyCollection<FlowComponent> GetHeadCellContent() {

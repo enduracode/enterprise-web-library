@@ -159,10 +159,9 @@ public class UiPageContent: PageContent {
 	/// <param name="pageLoadPostBack">A post-back that will be triggered automatically by the browser when the page is finished loading. If this is not null, the
 	/// framework will hide all content on the page and show a loading icon instead.</param>
 	public UiPageContent(
-		ElementClassSet bodyClasses = null, IReadOnlyCollection<ActionComponentSetup> pageActions = null, bool omitContentBox = false,
+		ElementClassSet bodyClasses = null, ActionComponentSetupsParameter pageActions = null, bool omitContentBox = false,
 		ButtonSetupsParameter contentFootActions = null, IReadOnlyCollection<FlowComponent> contentFootComponents = null,
 		Action dataUpdateModificationMethod = null, bool isAutoDataUpdater = false, ActionPostBack pageLoadPostBack = null ) {
-		pageActions ??= Enumerable.Empty<ActionComponentSetup>().Materialize();
 		if( contentFootActions?.Collection.Value.Any() == true && contentFootComponents != null )
 			throw new ApplicationException( "Either contentFootActions or contentFootComponents may be specified, but not both." );
 
@@ -425,15 +424,15 @@ public class UiPageContent: PageContent {
 		return hyperlinks;
 	}
 
-	private IReadOnlyCollection<FlowComponent> getPageActionListContainer( IReadOnlyCollection<ActionComponentSetup> pageActions ) {
+	private IReadOnlyCollection<FlowComponent> getPageActionListContainer( ActionComponentSetupsParameter pageActions ) {
 		var listItems = getActionListItems( pageActions ).Materialize();
 		if( !listItems.Any() )
 			return Enumerable.Empty<FlowComponent>().Materialize();
 		return new GenericFlowContainer( new WrappingList( listItems ).ToCollection(), classes: pageActionListContainerClass ).ToCollection();
 	}
 
-	private IEnumerable<WrappingListItem> getActionListItems( IReadOnlyCollection<ActionComponentSetup> actions ) =>
-		from action in actions
+	private IEnumerable<WrappingListItem> getActionListItems( ActionComponentSetupsParameter actions ) =>
+		from action in actions?.Collection.Value ?? [ ]
 		let actionComponent = action.GetActionComponent(
 			( text, icon ) => new CustomHyperlinkStyle(
 				childGetter: destinationUrl => ActionComponentIcon.GetIconAndTextComponents( icon, text.Any() ? text : destinationUrl ) ),

@@ -35,7 +35,7 @@ public class ColumnPrimaryTable: ColumnPrimaryTable<int> {
 	/// <param name="etherealContent"></param>
 	public static ColumnPrimaryTable Create(
 		DisplaySetup displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string postBackIdBase = "",
-		string caption = "", string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
+		string caption = "", string subCaption = "", bool allowExportToExcel = false, ActionComponentSetupsParameter tableActions = null,
 		IReadOnlyCollection<SelectedItemAction<int>> selectedItemActions = null, IReadOnlyCollection<EwfTableField> fields = null,
 		IReadOnlyCollection<EwfTableItem> headItems = null, int firstDataFieldIndex = 0, bool enableItemReordering = false,
 		IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
@@ -81,7 +81,7 @@ public class ColumnPrimaryTable: ColumnPrimaryTable<int> {
 	/// <param name="etherealContent"></param>
 	public static ColumnPrimaryTable<ItemIdType> CreateWithItemIdType<ItemIdType>(
 		DisplaySetup displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string postBackIdBase = "",
-		string caption = "", string subCaption = "", bool allowExportToExcel = false, IReadOnlyCollection<ActionComponentSetup> tableActions = null,
+		string caption = "", string subCaption = "", bool allowExportToExcel = false, ActionComponentSetupsParameter tableActions = null,
 		IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions = null, IReadOnlyCollection<EwfTableField> fields = null,
 		IReadOnlyCollection<EwfTableItem> headItems = null, int firstDataFieldIndex = 0, bool enableItemReordering = false,
 		IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
@@ -103,8 +103,8 @@ public class ColumnPrimaryTable: ColumnPrimaryTable<int> {
 
 	private ColumnPrimaryTable(
 		DisplaySetup displaySetup, EwfTableStyle style, ElementClassSet classes, string postBackIdBase, string caption, string subCaption, bool allowExportToExcel,
-		IReadOnlyCollection<ActionComponentSetup> tableActions, IReadOnlyCollection<SelectedItemAction<int>> selectedItemActions,
-		IReadOnlyCollection<EwfTableField> fields, IReadOnlyCollection<EwfTableItem> headItems, int firstDataFieldIndex, bool enableItemReordering,
+		ActionComponentSetupsParameter tableActions, IReadOnlyCollection<SelectedItemAction<int>> selectedItemActions, IReadOnlyCollection<EwfTableField> fields,
+		IReadOnlyCollection<EwfTableItem> headItems, int firstDataFieldIndex, bool enableItemReordering,
 		IReadOnlyCollection<EtherealComponent> etherealContent ): base(
 		displaySetup,
 		style,
@@ -136,11 +136,9 @@ public class ColumnPrimaryTable<ItemIdType>: FlowComponent {
 
 	internal ColumnPrimaryTable(
 		DisplaySetup displaySetup, EwfTableStyle style, ElementClassSet classes, string postBackIdBase, string caption, string subCaption, bool allowExportToExcel,
-		IReadOnlyCollection<ActionComponentSetup> tableActions, IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions,
+		ActionComponentSetupsParameter tableActions, IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions,
 		IReadOnlyCollection<EwfTableField> fields, IReadOnlyCollection<EwfTableItem> headItems, int firstDataFieldIndex, bool enableItemReordering,
 		IReadOnlyCollection<EtherealComponent> etherealContent ) {
-		tableActions = tableActions ?? Enumerable.Empty<ActionComponentSetup>().Materialize();
-
 		if( fields != null && !fields.Any() )
 			throw new ApplicationException( "If fields are specified, there must be at least one of them." );
 

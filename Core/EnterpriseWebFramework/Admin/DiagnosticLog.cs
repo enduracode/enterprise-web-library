@@ -28,29 +28,27 @@ partial class DiagnosticLog {
 		return new UiPageContent(
 			bodyClasses: new ElementClass( "ewfDiagnosticLog" /* This is used by EWF CSS files. */ ),
 			pageActions: new ButtonSetup(
-					"Download Log",
+				"Download Log",
+				behavior: new PostBackBehavior(
+					postBack: PostBack.CreateIntermediate(
+						null,
+						id: "download",
+						reloadBehaviorGetter:
+						() => new PageReloadBehavior(
+							secondaryResponse:
+							new SecondaryResponse(
+								() => EwfResponse.Create(
+									ContentTypes.PlainText,
+									new EwfResponseBodyCreator( () => logText ),
+									fileNameCreator: () => "Log" + FileExtensions.Txt ) ) ) ) ) ).Add(
+				new ButtonSetup(
+					"{0} Debug Logging".FormatWith( levelSwitch.MinimumLevel is debugEnabledLevel ? "Disable" : "Enable" ),
 					behavior: new PostBackBehavior(
-						postBack: PostBack.CreateIntermediate(
-							null,
-							id: "download",
-							reloadBehaviorGetter:
-							() => new PageReloadBehavior(
-								secondaryResponse:
-								new SecondaryResponse(
-									() => EwfResponse.Create(
-										ContentTypes.PlainText,
-										new EwfResponseBodyCreator( () => logText ),
-										fileNameCreator: () => "Log" + FileExtensions.Txt ) ) ) ) ) )
-				.Append(
-					new ButtonSetup(
-						"{0} Debug Logging".FormatWith( levelSwitch.MinimumLevel is debugEnabledLevel ? "Disable" : "Enable" ),
-						behavior: new PostBackBehavior(
-							postBack: PostBack.CreateFull(
-								id: "debug",
-								modificationMethod: () => {
-									levelSwitch.MinimumLevel = levelSwitch.MinimumLevel is debugEnabledLevel ? debugDisabledLevel : debugEnabledLevel;
-								} ) ) ) )
-				.Materialize() ).Add(
+						postBack: PostBack.CreateFull(
+							id: "debug",
+							modificationMethod: () => {
+								levelSwitch.MinimumLevel = levelSwitch.MinimumLevel is debugEnabledLevel ? debugDisabledLevel : debugEnabledLevel;
+							} ) ) ) ) ).Add(
 			(FlowComponent)new DisplayableElement(
 				_ => new DisplayableElementData(
 					null,

@@ -1,4 +1,6 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework;
+﻿using JetBrains.Annotations;
+
+namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 /// <summary>
 /// The configuration for an action component.
@@ -17,16 +19,31 @@ public interface ActionComponentSetup {
 		bool enableSubmitButton = false );
 }
 
-public static class ActionComponentSetupExtensionCreators {
-	/// <summary>
-	/// Concatenates action-component setup objects.
-	/// </summary>
-	public static IEnumerable<SetupType> Concat<SetupType>( this SetupType first, IEnumerable<SetupType> second ) where SetupType: ActionComponentSetup =>
-		second.Prepend( first );
+public class ActionComponentSetupsParameter {
+	private readonly IEnumerable<ActionComponentSetup> sequence;
+	internal readonly Lazy<IReadOnlyCollection<ActionComponentSetup>> Collection;
+
+	internal ActionComponentSetupsParameter( IEnumerable<ActionComponentSetup> sequence ) {
+		this.sequence = sequence;
+		Collection = new Lazy<IReadOnlyCollection<ActionComponentSetup>>( sequence.Materialize );
+	}
 
 	/// <summary>
-	/// Returns a sequence of two action-component setup objects.
+	/// Returns a new parameter with this parameter’s action-component setups plus the specified setups.
 	/// </summary>
-	public static IEnumerable<SetupType> Append<SetupType>( this SetupType first, SetupType second ) where SetupType: ActionComponentSetup =>
-		Enumerable.Empty<SetupType>().Append( first ).Append( second );
+	public ActionComponentSetupsParameter Add( ActionComponentSetupsParameter actionComponentSetups ) => new( sequence.Concat( actionComponentSetups.sequence ) );
+}
+
+[ PublicAPI ]
+public static class ActionComponentSetupsParameterExtensionCreators {
+	/// <summary>
+	/// Returns a parameter with this action-component setup plus the specified setups.
+	/// </summary>
+	public static ActionComponentSetupsParameter Add( this ActionComponentSetup actionComponentSetup, ActionComponentSetupsParameter actionComponentSetups ) =>
+		new ActionComponentSetupsParameter( [ actionComponentSetup ] ).Add( actionComponentSetups );
+
+	/// <summary>
+	/// Returns a parameter with the action-component setups in this sequence.
+	/// </summary>
+	public static ActionComponentSetupsParameter ToParameter( this IEnumerable<ActionComponentSetup> actionComponentSetups ) => new( actionComponentSetups );
 }

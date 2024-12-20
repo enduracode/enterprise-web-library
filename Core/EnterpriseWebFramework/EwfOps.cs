@@ -468,18 +468,17 @@ public static class EwfOps {
 									    ( ConfigurationStatics.IsIntermediateInstallation && !RequestDispatchingStatics.RequestState.IntermediateUserExists ) )
 										return null;
 									return ( "User impersonation is in effect.",
-										       new HyperlinkSetup( new UserManagement.Pages.Impersonate( EwfRequest.Current.Url ), "Change user" ).Append<ActionComponentSetup>(
-												       new ButtonSetup(
-													       "End impersonation",
-													       behavior: new PostBackBehavior(
-														       postBack: PostBack.CreateFull(
-															       id: "ewfEndImpersonation",
-															       modificationMethod: UserImpersonationStatics.EndImpersonation,
-															       actionGetter: () => new PostBackAction(
-																       new ExternalResource(
-																	       EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString(
-																		       EwfConfigurationStatics.AppSupportsSecureConnections ) ) ) ) ) ) )
-											       .Materialize() );
+										       new HyperlinkSetup( new UserManagement.Pages.Impersonate( EwfRequest.Current.Url ), "Change user" ).Add(
+											       new ButtonSetup(
+												       "End impersonation",
+												       behavior: new PostBackBehavior(
+													       postBack: PostBack.CreateFull(
+														       id: "ewfEndImpersonation",
+														       modificationMethod: UserImpersonationStatics.EndImpersonation,
+														       actionGetter: () => new PostBackAction(
+															       new ExternalResource(
+																       EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString(
+																	       EwfConfigurationStatics.AppSupportsSecureConnections ) ) ) ) ) ) ) );
 								} );
 							EwfUiStatics.Init( providerGetter.GetProvider<AppEwfUiProvider>( "EwfUi" ) );
 							AuthenticationStatics.Init(

@@ -4,6 +4,8 @@
 /// The configuration for a hyperlink.
 /// </summary>
 public class HyperlinkSetup: ActionComponentSetup {
+	public static implicit operator ActionComponentSetupsParameter( HyperlinkSetup? setup ) => new( setup is null ? [ ] : [ setup ] );
+
 	private readonly Func<Func<string, ActionComponentIcon?, HyperlinkStyle>, PhrasingComponent?> hyperlinkGetter;
 
 	/// <summary>
