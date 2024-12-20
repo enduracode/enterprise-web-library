@@ -152,7 +152,7 @@ public class FormItemList: FlowComponent {
 
 	private FormItemList(
 		FormItemListSetup? setup, ElementClassSet classes, string listStyleAttribute, Func<FormItem, ElementClassSet> itemClassGetter,
-		Func<FormItem, string> itemStyleAttributeGetter, Func<DisplaySetup, FormItemSetup>? buttonItemSetupGetter,
+		Func<FormItem, string> itemStyleAttributeGetter, Func<DisplaySetup?, FormItemSetup>? buttonItemSetupGetter,
 		Func<FormItem, IReadOnlyCollection<FlowComponent>> itemComponentGetter ) {
 		setup ??= new FormItemListSetup();
 		buttonItemSetupGetter ??= displaySetup => new FormItemSetup( displaySetup: displaySetup );
