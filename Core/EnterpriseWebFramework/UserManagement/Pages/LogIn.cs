@@ -90,7 +90,7 @@ partial class LogIn {
 				if( codeEntryIsForPasswordReset.Value.HasValue )
 					destinationUrl = codeLoginMethod( emailAddress.Value, loginCode.Value ).destinationUrl;
 				else
-					passwordLoginMethod( emailAddress, password );
+					passwordLoginMethod( emailAddress.Value, password );
 			},
 			actionGetter: () => new PostBackAction( new ExternalResource( codeEntryIsForPasswordReset.Value.HasValue ? destinationUrl : ReturnUrl ) ) );
 
@@ -101,7 +101,7 @@ partial class LogIn {
 				                 authenticationModeUpdateRegion,
 				                 id: "sendCode",
 				                 modificationMethod: () => {
-					                 loginCodeSender( emailAddress, false, ReturnUrl );
+					                 loginCodeSender( emailAddress.Value, false, ReturnUrl );
 					                 codeEntryIsForPasswordReset.Value = false;
 				                 },
 				                 reloadBehaviorGetter: () => new PageReloadBehavior( focusKey: passwordOrCodeFocusKey ) )
@@ -111,7 +111,7 @@ partial class LogIn {
 				                    authenticationModeUpdateRegion,
 				                    id: "newPw",
 				                    modificationMethod: () => {
-					                    loginCodeSender( emailAddress, true, ReturnUrl );
+					                    loginCodeSender( emailAddress.Value, true, ReturnUrl );
 					                    codeEntryIsForPasswordReset.Value = true;
 				                    },
 				                    reloadBehaviorGetter: () => new PageReloadBehavior( focusKey: passwordOrCodeFocusKey ) )

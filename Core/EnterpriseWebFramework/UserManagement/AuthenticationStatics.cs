@@ -30,9 +30,9 @@ public static class AuthenticationStatics {
 
 	private static IReadOnlyCollection<SamlIdentityProvider> samlIdentityProviders;
 
-	public delegate SystemUser PasswordLoginModificationMethod( DataValue<string> emailAddress, DataValue<string> password, string errorMessage = "" );
+	public delegate SystemUser PasswordLoginModificationMethod( string emailAddress, DataValue<string> password, string errorMessage = "" );
 
-	public delegate void LoginCodeSenderMethod( DataValue<string> emailAddress, bool isPasswordReset, string destinationUrl, int? newUserRoleId = null );
+	public delegate void LoginCodeSenderMethod( string emailAddress, bool isPasswordReset, string destinationUrl, int? newUserRoleId = null );
 
 	public delegate ( SystemUser user, string destinationUrl ) CodeLoginModificationMethod( string emailAddress, string code, string errorMessage = "" );
 
@@ -59,10 +59,9 @@ public static class AuthenticationStatics {
 
 	internal static void InitAppSpecificLogicDependencies() {
 		// In the future we expect this to use logic from AppAuthenticationProvider to potentially filter the system’s identity providers.
-		samlIdentityProviders =
-			( UserManagementStatics.UserManagementEnabled
-				  ? UserManagementStatics.IdentityProviders.OfType<SamlIdentityProvider>()
-				  : Enumerable.Empty<SamlIdentityProvider>() ).Materialize();
+		samlIdentityProviders = UserManagementStatics.UserManagementEnabled
+			                        ? UserManagementStatics.IdentityProviders.OfType<SamlIdentityProvider>().Materialize()
+			                        : [ ];
 	}
 
 	internal static IReadOnlyCollection<SamlIdentityProvider> SamlIdentityProviders => samlIdentityProviders;
@@ -135,7 +134,7 @@ public static class AuthenticationStatics {
 				UserManagementStatics.LocalIdentityProvider.UpdatePassword( userId, password.Value );
 		};
 
-		return new[] { passwordFormItem, passwordAgainFormItem };
+		return [ passwordFormItem, passwordAgainFormItem ];
 	}
 
 
@@ -145,7 +144,7 @@ public static class AuthenticationStatics {
 	/// Gets an email address form item for use on log-in pages.
 	/// </summary>
 	public static FormItem GetEmailAddressFormItem(
-		this DataValue<string> emailAddress, IReadOnlyCollection<PhrasingComponent> label, Action<Validator> additionalValidationMethod = null ) =>
+		this AbstractDataValue<string> emailAddress, IReadOnlyCollection<PhrasingComponent> label, Action<Validator> additionalValidationMethod = null ) =>
 		// The username token probably works better for password managers; see https://stackoverflow.com/a/57902690/35349.
 		emailAddress.ToEmailAddressControl(
 				false,
@@ -174,7 +173,7 @@ public static class AuthenticationStatics {
 				                       var errors = new List<string>();
 
 				                       errorMessage = UserManagementStatics.LocalIdentityProvider.LogInUserWithPassword(
-					                       emailAddress.Value,
+					                       emailAddress,
 					                       password.Value,
 					                       out var user,
 					                       out var unconditionalModMethod,
@@ -202,13 +201,13 @@ public static class AuthenticationStatics {
 				                       return user;
 			                       }, ( emailAddress, isPasswordReset, destinationUrl, newUserRoleId ) => {
 				                       UserManagementStatics.LocalIdentityProvider.SendLoginCode(
-					                       emailAddress.Value,
+					                       emailAddress,
 					                       isPasswordReset,
 					                       autoLogInPageUrlGetter,
 					                       changePasswordPageUrlGetter,
 					                       destinationUrl,
 					                       newUserRoleId: newUserRoleId );
-				                       PageBase.AddStatusMessage( StatusMessageType.Info, "Your login code has been sent to {0}.".FormatWith( emailAddress.Value ) );
+				                       PageBase.AddStatusMessage( StatusMessageType.Info, "Your login code has been sent to {0}.".FormatWith( emailAddress ) );
 			                       }, ( emailAddress, code, errorMessage ) => {
 				                       var errors = new List<string>();
 
