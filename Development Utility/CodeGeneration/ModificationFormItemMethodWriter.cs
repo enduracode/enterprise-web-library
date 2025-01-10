@@ -25,10 +25,15 @@ internal class ModificationFormItemMethodWriter {
 		addDateAndTimeControls();
 
 		if( field.TypeIs( typeof( string ) ) ) {
+			addExclusion( "EmailAddressControl", fieldSource => $"suffix the {fieldSource} name with “Email”" );
 			addExclusion( "TelephoneNumberControl", fieldSource => $"suffix the {fieldSource} name with “Phone”" );
 			addExclusion( "UrlControl", fieldSource => $"suffix the {fieldSource} name with “Url”" );
 
-			if( field.HasSuffix( "Phone" ) ) {
+			if( field.HasSuffix( "Email" ) ) {
+				mainControl = "EmailAddressControl";
+				removeExclusion( "EmailAddressControl" );
+			}
+			else if( field.HasSuffix( "Phone" ) ) {
 				mainControl = "TelephoneNumberControl";
 				removeExclusion( "TelephoneNumberControl" );
 			}
