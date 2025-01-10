@@ -1,6 +1,6 @@
 # Using the web framework
 
-Last updated for Enterprise Web Library version 72.
+Last updated for Enterprise Web Library version 83.
 
 
 ## Setup: creating a system and database
@@ -29,7 +29,7 @@ Then open `Library/Configuration/Development.xml` and replace the empty `<databa
 
 We’re going to build a simple service-order management system for a bicycle repair shop, consisting of two pages: a list of service orders and a form to create/update a service order. We can use the existing home page (`Home.cs` in the `Website` project) as the list page.
 
-For the form, add a class called `ServiceOrder` to the `Website` project. In `ServiceOrder.cs`, first change the declaration from `public class ServiceOrder` to `partial class ServiceOrder`. Then paste the following lines between the using directives and namespace declaration:
+For the form, add a class called `ServiceOrder` to the `Website` project. In `ServiceOrder.cs`, first change the declaration from `public class ServiceOrder` to `partial class ServiceOrder`. Then paste the following lines just above this class declaration:
 
 ```C#
 // EwlPage
@@ -41,7 +41,7 @@ The first line tells the framework to generate code for this class, to make it a
 Now we need to set up a URL pattern for the form page. Open `Home.cs`, add a using directive for `System.Linq`, and replace the implementation of `getChildUrlPatterns` with the following expression:
 
 ```C#
-RequestDispatchingStatics.GetFrameworkUrlPatterns().Append( ServiceOrder.UrlPatterns.ServiceOrderIdPositiveInt( "create" ) )
+RequestDispatchingStatics.GetFrameworkUrlPatterns( WebApplicationNames.Website ).Append( ServiceOrder.UrlPatterns.ServiceOrderIdPositiveInt( "create" ) )
 ```
 
 This adds child URLs to the home page for every existing service order ID (e.g. `/123`) and one more for creating a new service order: `/create`.
@@ -49,7 +49,7 @@ This adds child URLs to the home page for every existing service order ID (e.g. 
 There is one more step we must take to make this work. Open `ServiceOrder.cs` and add the following method to the class:
 
 ```C#
-protected override ResourceBase createParentResource() => new Home();
+protected override ResourceParent createParent() => new Home();
 ```
 
 This method specifies the parent of this page, which is used to inherit security settings and for other purposes such as automatic navigational breadcrumbs for users. It also determines the page’s canonical URL.
@@ -74,7 +74,7 @@ Click the `Website` project in the Solution Explorer and then select Start Witho
 
 ## Using page initialization logic
 
-Open up `ServiceOrder.cs` (the form page) and paste the following within the class, above `createParentResource`:
+Open up `ServiceOrder.cs` (the form page) and paste the following within the class, above `createParent`:
 
 ```C#
 private ServiceOrdersTableRetrieval.Row serviceOrderRow;
@@ -92,33 +92,31 @@ In our implementation here, we load the query-parameter-specified service order 
 
 ## Creating a form
 
-Paste the following complete form implementation into the class, below the `createParentResource` method:
+Paste the following complete form implementation into the class, below the `createParent` method:
 
 ```C#
 protected override PageContent getContent() {
 	var mod = ServiceOrderId.HasValue ? serviceOrderRow.ToModification() : ServiceOrdersModification.CreateForInsert();
-	return FormState.ExecuteWithDataModificationsAndDefaultAction(
+	return FormState.ExecuteWithActions(
 		PostBack.CreateFull(
-				modificationMethod: () => {
-					if( !ServiceOrderId.HasValue )
-						mod.ServiceOrderId = MainSequence.GetNextValue();
-					mod.Execute();
-				},
-				actionGetter: () => new PostBackAction( ParentResource ) )
-			.ToCollection(),
+			modificationMethod: () => {
+				if( !ServiceOrderId.HasValue )
+					mod.ServiceOrderId = MainSequence.GetNextValue();
+				mod.Execute();
+			},
+			actionGetter: () => new PostBackAction( ParentResource ) ),
 		() => {
-			var content = new UiPageContent( contentFootActions: new ButtonSetup( "Submit" ).ToCollection() );
+			var content = new UiPageContent( contentFootActions: new ButtonSetup( "Submit" ) );
 
-			var formItemList = FormItemList.CreateStack();
-
-			formItemList.AddItem( mod.GetCustomerNameTextControlFormItem( false, value: ServiceOrderId.HasValue ? null : "" ) );
-			formItemList.AddItem( mod.GetCustomerEmailEmailAddressControlFormItem( false, value: ServiceOrderId.HasValue ? null : "" ) );
-			formItemList.AddItem( mod.GetBicycleDescriptionTextControlFormItem( false, value: ServiceOrderId.HasValue ? null : "" ) );
+			var formItemList = FormItemList.CreateStack()
+				.AddItem( mod.GetCustomerNameFormItem( false ) )
+				.AddItem( mod.GetCustomerEmailFormItem( false ) )
+				.AddItem( mod.GetBicycleDescriptionFormItem( false ) );
 
 			formItemList.AddItem(
 				mod.GetServiceTypeIdRadioListFormItem(
-					RadioListSetup.Create( ServiceTypesTableRetrieval.GetAllRows().Select( i => SelectListItem.Create( (int?)i.ServiceTypeId, i.ServiceTypeName ) ) ),
-					value: ServiceOrderId.HasValue ? null : new SpecifiedValue<int?>( null ) ) );
+					RadioListSetup.Create(
+						ServiceTypesTableRetrieval.GetAllRows().Select( i => SelectListItem.Create( (int?)i.ServiceTypeId, i.ServiceTypeName ) ) ) ) );
 
 			content.Add( formItemList );
 
@@ -139,7 +137,7 @@ var mod = ServiceOrderId.HasValue ? serviceOrderRow.ToModification() : ServiceOr
 
 If we’re updating an order, we set the object up to modify the row we loaded in `init`. For a new order we set it up to do a row insert. Learn more in the [Data Access](DataAccess.md) guide.
 
-Then we have a call to `FormState.ExecuteWithDataModificationsAndDefaultAction`. The first argument is a `PostBack` object and the second is a method (starting with `var content`). There are a couple of important concepts here.
+Then we have a call to `FormState.ExecuteWithActions`. The first argument is a `PostBack` object and the second is a method (starting with `var content`). There are a couple of important concepts here.
 
 First is the `PostBack` object, which represents a server-side action that executes when the browser submits the form (in this framework there is always one form per page) with an HTTP `POST` request. Only one `PostBack` executes per request. `PostBack` execution has three stages:
 
@@ -147,9 +145,9 @@ First is the `PostBack` object, which represents a server-side action that execu
 2.  Modification method
 3.  Post-modification action (e.g. navigation)
 
-The **form validation** stage involves executing all validation objects that were added to the `PostBack`, in the order they were added. We don’t directly add validations to a `PostBack`, and this leads us to the second important concept: `FormState.ExecuteWithDataModificationsAndDefaultAction`.
+The **form validation** stage involves executing all validation objects that were added to the `PostBack`, in the order they were added. We don’t directly add validations to a `PostBack`, and this leads us to the second important concept: `FormState.ExecuteWithActions`.
 
-This method takes one or more `DataModification` objects. `DataModification` is a base class of `PostBack` with one other derived type that isn’t important at the moment. The `DataModification`/`PostBack` objects are made available while the passed-in method executes so that whenever a validation is created, it is added to those objects.
+This method takes one or more `DataModificationAction` objects. `DataModificationAction` is a base class of `PostBack` with one other derived type that isn’t important at the moment. The `DataModificationAction`/`PostBack` objects are made available while the passed-in method executes so that whenever a validation is created, it is added to those objects.
 
 You can create validations directly, but they are most commonly created by form-control components (for example text controls or drop-down lists). The validations created by form controls are responsible for taking the posted-back values from the controls, validating them (of course), and preparing them to be persisted. In this page the validations are hidden under the hood but they place the values in the `ServiceOrdersModification` object.
 
@@ -171,15 +169,15 @@ The **post-modification action** stage of the `PostBack` determines what happens
 
 We don’t refererence the list page directly. Instead we just navigate back to the parent page, which does the same thing since we already designated the list as the parent. But this makes our page more maintainable in the event we change the parent.
 
-Now let’s break down the method we are passing to `FormState.ExecuteWithDataModificationsAndDefaultAction`. The first statement creates a `UiPageContent` object with a built-in button. We could have created an `EwfButton` component ourselves, but by using `ButtonSetup` with the functionality we want, we’re letting the EWF UI decide on the style.
+Now let’s break down the method we are passing to `FormState.ExecuteWithActions`. The first statement creates a `UiPageContent` object with a built-in button. We could have created an `EwfButton` component ourselves, but by using `ButtonSetup` with the functionality we want, we’re letting the EWF UI decide on the style.
 
 The next statement creates a `FormItemList` component, to which we will add several `FormItem` objects. A form item is an abstract container that includes content (usually a form control), a label, and a validation object. Here, we create the form items using generated methods in the `ServiceOrdersModification` class. For example:
 
 ```C#
-mod.GetCustomerEmailEmailAddressControlFormItem( false, value: ServiceOrderId.HasValue ? null : "" )
+mod.GetCustomerEmailFormItem( false )
 ```
 
-This creates a form item containing an email-address form control. The first parameter specifies that it should require a value from the user. The second parameter (`value`) determines the initial value in the control. When updating a service order, we pass `null` which tells the control to get its value from the `ServiceOrdersModification` object. For new orders we specify the empty string.
+This creates a form item containing an email-address control (the control type was inferred by the code generator). The parameter specifies that it should require a value from the user. When updating a service order, the initial value in the control comes from the `ServiceOrdersModification` object. For new orders it defaults to the empty string.
 
 The form control has full email-address semantics, bringing up the correct keyboard on mobile devices and enforcing a valid email address according to the spec.
 
@@ -254,15 +252,15 @@ addServiceDetailFormItems( mod, formItemList );
 Now add this as the first line in our helper method:
 
 ```C#
-var customerHasBudget = new DataValue<bool>();
+var customerHasBudget = new DataValue<bool>( ServiceOrderId.HasValue, () => serviceOrderRow.CustomerBudget.HasValue );
 ```
 
-This is our temporary state. `DataValue` is a simple type that contains a value (a `bool` in this case) and tracks whether the value has been initialized and whether it has changed. It’s a good fit for temporary state because it lets us say, as we do on the line above, that the state is currently uninitialized and will throw an exception if anything attempts to get the value. We won’t have a meaningful value until the checkbox’s validation executes.
+This is our temporary state. `DataValue` is a simple type that contains a value (a `bool` in this case) and tracks whether the value corresponds to existing data, whether it has been initialized, and whether it has changed. On the line above we are saying that if there’s an existing service order, the value does correspond to existing data and is `true` if `CustomerBudget` has a value. For a new service order we’re saying the value does not correspond to existing data and therefore is uninitialized; in this case we won’t have a meaningful value until the checkbox’s validation executes.
 
 We’ll also add this line, directly under the line above:
 
 ```C#
-Action budgetClearer = null;
+Action? budgetClearer = null;
 ```
 
 This will be a method sometimes called during validation that is responsible for storing `null` as the value to be persisted for the nested budget control, in the case that the control is ignored.
@@ -278,21 +276,19 @@ formItemList.AddItem(
 					() => customerHasBudget.Value,
 					() => {
 						budgetClearer = () => mod.CustomerBudget = null;
-						return mod.GetCustomerBudgetNumberControlFormItem(
+						return mod.GetCustomerBudgetFormItem(
 								label: "Amount ($)".ToComponents()
 									.Append( new LineBreak() )
 									.Append( new SideComments( "Multiple of $5, minimum $10".ToComponents() ) )
 									.Materialize(),
-								value: ServiceOrderId.HasValue ? null : new SpecifiedValue<decimal?>( null ),
 								allowEmpty: false,
 								minValue: 10,
 								valueStep: 5 )
 							.ToComponentCollection();
 					} ) ),
-			value: ServiceOrderId.HasValue && serviceOrderRow.CustomerBudget.HasValue,
 			additionalValidationMethod: validator => {
 				if( !customerHasBudget.Value )
-					budgetClearer();
+					budgetClearer!();
 			} )
 		.ToFormItem( label: "Budget".ToComponents() ) );
 ```
@@ -303,9 +299,7 @@ We create the checkbox using an extension method on `DataValue<bool>` called `To
 
 The wrapped method first initializes `budgetClearer` and then returns the nested components. The creation of the budget form item here is just like the creation of the earlier form items, but with a few more parameters to get the behavior just right.
 
-The third argument for `ToFlowCheckbox` determines whether the box is initially checked, which will only be the case if we’re updating a service order and a budget exists.
-
-The fourth argument, `additionalValidationMethod`, runs during the checkbox’s validation after the built-in part that populates the `DataValue`. Every form-item-creation method includes this parameter and you’d typically use it to perform additional domain-specific validation for the control, adding your own error messages to `validator`. But in this case we’re using it to run the `budgetClearer` when the box is unchecked.
+The third argument for `ToFlowCheckbox`, `additionalValidationMethod`, runs during the checkbox’s validation after the built-in part that populates the `DataValue`. Every form-item-creation method includes this parameter and you’d typically use it to perform additional domain-specific validation for the control, adding your own error messages to `validator`. But in this case we’re using it to run the `budgetClearer` when the box is unchecked.
 
 Try out the form again and see how it works with the new checkbox and nested control!
 
@@ -367,7 +361,7 @@ FormState.ExecuteWithValidationPredicate( () => !serviceTypeInvalid && mod.Servi
 Finally, let’s clear the budget when the service type is not General Service. This requires exposing the `budgetClearer` from `addServiceDetailFormItems`. Add a fourth parameter to the method:
 
 ```C#
-out Action dataClearer
+out Action? dataClearer
 ```
 
 And set it with this line at the end of the method:
@@ -379,7 +373,7 @@ dataClearer = budgetClearer;
 Now, in `getContent`, add this line just below the `serviceTypeInvalid` declaration:
 
 ```C#
-Action serviceDetailClearer = null;
+Action? serviceDetailClearer = null;
 ```
 
 And use it as the fourth argument to `addServiceDetailFormItems`:
@@ -393,7 +387,7 @@ And finally add an `additionalValidationMethod` argument to the `mod.GetServiceT
 ```C#
 additionalValidationMethod: validator => {
 	if( mod.ServiceTypeId != ServiceTypesRows.GeneralService )
-		serviceDetailClearer();
+		serviceDetailClearer!();
 }
 ```
 
@@ -410,7 +404,7 @@ We’ll use CSS to do this, and our first step is to add a style sheet. Click th
 Run `Update-DependentLogic` to generate some code for our new style sheet. Open `Providers/StandardPageLogic.cs` and override `GetStyleSheets`:
 
 ```C#
-protected override List<ResourceInfo> GetStyleSheets() => new List<ResourceInfo> { new StaticFiles.StylesCss() };
+public override List<ResourceInfo> GetStyleSheets() => [ new StaticFiles.StylesCss() ];
 ```
 
 This will include the style sheet on all pages in the application. Now we’ll conditionally add the `flatTire` class to the `FormItemList`. Paste in the following as the first argument to `FormItemList.CreateStack`:
@@ -430,7 +424,7 @@ The instant, client-side page modifications above require the server to replicat
 
 We’ve created a solution to this, and it involves a couple of new concepts. First is the **intermediate post-back**. This is a post-back that changes parts of the page, but does not fully process the form. It keeps the user on the page and leaves the form values in unchanged regions intact so that a future *full* post-back can properly persist them. Intermediate post-backs can be performed asynchronously (coming soon), enabling the user to continue working while parts of the page update in the background.
 
-An intermediate post-back must declare the page regions that it will change. This is essential for usability: since any post-back requires a round trip to the server that could take one second or more, we prevent the user from interacting with the updating parts of the page until the updates are received and applied. Also, since the framework knows which regions are intentionally being changed, it can detect accidental changes outside those regions that would otherwise result in lost form values for the user.
+An intermediate post-back must declare the page regions that it will change. This is essential for usability: since any post-back requires a round trip to the server that could take a few hundred milliseconds or more, we prevent the user from interacting with the updating parts of the page until the updates are received and applied. Also, since the framework knows which regions are intentionally being changed, it can detect accidental changes outside those regions that would otherwise result in lost form values for the user.
 
 The other concept we need here is **component state**. In order to change a page, an intermediate post-back needs to modify some data that causes the page to be different when it is rebuilt. In many cases it is not feasible to use the database or other persistent storage since you don’t yet have a completed form. Furthermore, the data may represent some type of transient state that won’t ever be persisted.
 
@@ -442,9 +436,9 @@ Add these three lines at the top of the `addServiceDetailFormItems` method:
 
 ```C#
 var requests = ServiceOrderId.HasValue
-					? ServiceOrderRequestsTableRetrieval.GetRows( new ServiceOrderRequestsTableEqualityConditions.ServiceOrderId( ServiceOrderId.Value ) )
-					: Enumerable.Empty<ServiceOrderRequestsTableRetrieval.Row>();
-var requestLineCount = ComponentStateItem.Create( "requestLineCount", Math.Max( requests.Count(), 1 ), v => v > 0, false );
+			            ? ServiceOrderRequestsTableRetrieval.GetRows( new ServiceOrderRequestsTableEqualityConditions.ServiceOrderId( ServiceOrderId.Value ) )
+			            : [ ];
+var requestLineCount = ComponentStateItem.Create( "requestLineCount", Math.Max( requests.Count, 1 ), v => v > 0, false );
 var addRequestUpdateRegion = new UpdateRegionSet();
 ```
 
@@ -465,30 +459,26 @@ We can now add a form item for our expandable list of requests. Put this line di
 ```C#
 formItemList.AddItem(
 	new StackList(
-			Enumerable.Range( 0, requestLineCount.Value.Value )
+			Enumerable.Range( 0, requestLineCount.Value )
 				.Select(
 					i => {
 						var insert = ServiceOrderRequestsModification.CreateForInsert();
 						requestInserts.Add( insert );
-						return insert.GetRequestDescriptionTextControlFormItem( i != 0, value: requests.ElementAtOrDefault( i )?.RequestDescription ?? "" )
-							.ToListItem();
+						return insert.GetRequestDescriptionFormItem( i != 0, value: requests.ElementAtOrDefault( i )?.RequestDescription ).ToListItem();
 					} )
 				.Materialize(),
 			setup: new ComponentListSetup(
-				tailUpdateRegions: new TailUpdateRegion( addRequestUpdateRegion.ToCollection(), 0 ).ToCollection(),
+				tailUpdateRegions: new TailUpdateRegion( addRequestUpdateRegion, 0 ),
 				etherealContent: requestLineCount.ToCollection() ) ).Append<FlowComponent>(
 			new EwfButton(
 				new StandardButtonStyle( "Add another request" ),
 				behavior: new PostBackBehavior(
-					postBack: PostBack.CreateIntermediate(
-						addRequestUpdateRegion.ToCollection(),
-						id: "addRequest",
-						modificationMethod: () => requestLineCount.Value.Value += 1 ) ) ) )
+					postBack: PostBack.CreateIntermediate( addRequestUpdateRegion, id: "addRequest", modificationMethod: () => requestLineCount.Value += 1 ) ) ) )
 		.Materialize()
 		.ToFormItem( setup: new FormItemSetup( displaySetup: displaySetup ), label: "Service requests".ToComponents() ) );
 ```
 
-Let’s break this down. The first half is the creation of a `StackList` that contains N items, where N equals the current value of our `requestLineCount` state item. For each list item, we create a service-request modification object, add it to the `requestInserts` parameter, and create a text control in which the user can type the request. The first argument of `GetRequestDescriptionTextControlFormItem` specifies that it will only require a value from the user if it’s the first line. The second argument prefills the text control with the existing request text from that line if there is any.
+Let’s break this down. The first half is the creation of a `StackList` that contains N items, where N equals the current value of our `requestLineCount` state item. For each list item, we create a service-request modification object, add it to the `requestInserts` parameter, and create a text control in which the user can type the request. The first argument of `GetRequestDescriptionFormItem` specifies that it will only require a value from the user if it’s the first line. The second argument prefills the text control with the existing request text from that line if there is any.
 
 The `ComponentListSetup` object passes two important things to the `StackList`. First, a tail update region, which declares that any new items added to the list on an intermediate post-back request will be part of `addRequestUpdateRegion`. Second, the `requestLineCount` state item. This places the state item logically within the list. If the list itself were ever included within an update region of another intermediate post-back, the state item’s value would be silently forgotten in just the same way as form values within the list.
 
@@ -565,20 +555,20 @@ go
 Run `Update-DependentLogic` to execute that and regenerate code. Now let’s prevent anonymous users from visiting the list of service orders. In `Home.cs` add this property above `getChildUrlPatterns`:
 
 ```C#
-protected override bool userCanAccessResource => AppTools.User != null;
+protected override bool userCanAccess => SystemUser.Current is not null;
 ```
 
-The `AppTools.User` property gives us the currently-authenticated user, or null if authentication hasn’t taken place. Therefore this expression will allow access to the page only if the user has logged in. Try it out by visiting the site. You should see a page titled Select User, which is a special log in page provided by the framework when you are running the system locally for development. It saves you from having to enter a password. If you were visiting a live installation of the system you’d see a real log in page.
+The `SystemUser.Current` property gives us the currently-authenticated user, or null if authentication hasn’t taken place. Therefore this expression will allow access to the page only if the user has logged in. Try it out by visiting the site. You should see a page titled Select User, which is a special log in page provided by the framework when you are running the system locally for development. It saves you from having to enter a password. If you were visiting a live installation of the system you’d see a real log in page.
 
 Type in whatever email address you used for the first user and you should land on the Service Orders page. Notice the new Logged In As section in the upper-right corner of the page.
 
 Let’s now restrict the creation and updating of service orders such that this can only be done by mechanics and administrators. Open `ServiceOrder.cs` and add this property override above `getContent`:
 
 ```C#
-protected override bool userCanAccessResource => new[] { UserRolesRows.BicycleMechanic, UserRolesRows.Administrator }.Contains( AppTools.User.Role.RoleId );
+protected override bool userCanAccess => new[] { UserRolesRows.BicycleMechanic, UserRolesRows.Administrator }.Contains( SystemUser.Current!.Role.RoleId );
 ```
 
-Notice that we’re not handling a null `AppTools.User`. That’s because, if you recall, this page uses the service-order list as its parent. A child page inherits the parent’s authorization logic and can never be less restrictive. The child’s `userCanAccessResource` property can only add additional restrictions. To access the child, the user must effectively pass `parentConditions && childConditions`. This is recursive all the way up the tree of pages.
+Notice that we’re not handling a null `SystemUser.Current`. That’s because, if you recall, this page uses the service-order list as its parent. A child page inherits the parent’s authorization logic and can never be less restrictive. The child’s `userCanAccess` property can only add additional restrictions. To access the child, the user must effectively pass `parentConditions && childConditions`. This is recursive all the way up the tree of pages.
 
 There’s one more thing we need to do. Go back to `Home.cs`. Add this as the first statement in `getContent`:
 
@@ -589,9 +579,9 @@ var newOrderPage = new ServiceOrder( null );
 Then replace the argument of the first `UiPageContent.Add` call with the following:
 
 ```C#
-newOrderPage.UserCanAccessResource
+newOrderPage.UserCanAccess
 	? new EwfHyperlink( newOrderPage, new ButtonHyperlinkStyle( "New service order", buttonSize: ButtonSize.Large ) ).ToCollection()
-	: Enumerable.Empty<FlowComponent>().Materialize()
+	: [ ]
 ```
 
 And replace the second argument of the `AddData` call for the table with:
@@ -606,8 +596,7 @@ i => {
 			.Append( i.BicycleDescription.ToCell() )
 			.Append( ServiceTypesTableRetrieval.GetRowMatchingId( i.ServiceTypeId ).ServiceTypeName.ToCell() )
 			.Materialize(),
-		setup: EwfTableItemSetup.Create(
-			activationBehavior: page.UserCanAccessResource ? ElementActivationBehavior.CreateHyperlink( page ) : null ) );
+		setup: EwfTableItemSetup.Create( activationBehavior: page.UserCanAccess ? ElementActivationBehavior.CreateHyperlink( page ) : null ) );
 }
 ```
 

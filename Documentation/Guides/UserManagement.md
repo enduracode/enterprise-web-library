@@ -1,6 +1,6 @@
 # Adding user management
 
-Last updated for Enterprise Web Library version 81.
+Last updated for Enterprise Web Library version 83.
 
 
 ## Creating database schema
@@ -104,7 +104,7 @@ internal class UserManagement: SystemUserManagementProvider {
 
 	protected override IEnumerable<SystemUser> GetUsers() => UsersTableRetrieval.GetRows().OrderBy( i => i.EmailAddress ).Select( getUserObject )!;
 
-	protected override SystemUser? GetUser( int userId ) => getUserObject( UsersTableRetrieval.GetRowMatchingId( userId, returnNullIfNoMatch: true ) );
+	protected override SystemUser? GetUser( int userId ) => UsersTableRetrieval.TryGetRowMatchingId( userId, out var user ) ? getUserObject( user ) : null;
 
 	protected override SystemUser? GetUser( string emailAddress ) =>
 		getUserObject( UsersTableRetrieval.GetRows( new UsersTableEqualityConditions.EmailAddress( emailAddress ) ).SingleOrDefault() );

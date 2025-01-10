@@ -2,7 +2,7 @@
 
 **Please note:** While EWL has been in production use for many years, this Getting Started guide is brand new. If you run into problems please let us know in our [community forum](https://community.enterpriseweblibrary.org/) and one of the developers will help you out.
 
-Last updated for Enterprise Web Library version 81.
+Last updated for Enterprise Web Library version 83.
 
 
 ## Requirements
