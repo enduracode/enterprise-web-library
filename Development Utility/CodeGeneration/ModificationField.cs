@@ -31,7 +31,10 @@ internal class ModificationField {
 	internal string Name => name;
 	internal string PascalCasedName => pascalCasedName;
 	internal string CamelCasedName => camelCasedName;
-	internal bool HasSuffix( string suffix ) => pascalCasedName.EndsWith( suffix, StringComparison.Ordinal );
+
+	internal bool HasSuffix( string suffix, string contains = "" ) =>
+		pascalCasedName.EndsWith( suffix, StringComparison.Ordinal ) && ( contains.Length == 0 || pascalCasedName.Contains( contains, StringComparison.Ordinal ) );
+
 	internal bool TypeIs( Type type ) => this.type == type;
 	internal string TypeName => typeName;
 	internal string NullableTypeName => nullableTypeName;

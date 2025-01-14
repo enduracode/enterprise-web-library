@@ -29,7 +29,7 @@ internal class ModificationFormItemMethodWriter {
 			addExclusion( "TelephoneNumberControl", fieldSource => $"suffix the {fieldSource} name with “Phone”" );
 			addExclusion( "UrlControl", fieldSource => $"suffix the {fieldSource} name with “Url”" );
 
-			if( field.HasSuffix( "Email" ) || field.HasSuffix( "EmailAddress" ) ) {
+			if( field.HasSuffix( "Email" ) || field.HasSuffix( "Address", contains: "Email" ) ) {
 				mainControl = "EmailAddressControl";
 				removeExclusion( "EmailAddressControl" );
 			}
