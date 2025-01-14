@@ -51,7 +51,7 @@ internal class WebItemGeneralData {
 	}
 
 	private IEnumerable<WebItemParameter> getVariablesFromCode( string code, string keyword ) {
-		var pattern = @"^//\s*" + keyword + @":\s(?<type>[a-zA-Z_0-9<>]*\??)\s(?<name>\w*)(\ *//(?<comment>[^\n]*))?";
+		var pattern = @"^[\t ]*// " + keyword + @": (?<type>[a-zA-Z_0-9<>]*\??) (?<name>\w*)(\ *//(?<comment>[^\n]*))?";
 		return from Match match in Regex.Matches( code, pattern, RegexOptions.Multiline )
 		       select new WebItemParameter( match.Groups[ "type" ].Value, match.Groups[ "name" ].Value, match.Groups[ "comment" ].Value );
 	}
@@ -59,11 +59,11 @@ internal class WebItemGeneralData {
 	internal string FullClassName => Namespace + "." + ClassName;
 
 	internal bool IsResource() =>
-		Regex.IsMatch( code, "^// {0}Resource\r?$".FormatWith( EwlStatics.EwlInitialism.EnglishToPascal() ), RegexOptions.Multiline ) || IsPage() ||
+		Regex.IsMatch( code, "^[\\t ]*// {0}Resource\r?$".FormatWith( EwlStatics.EwlInitialism.EnglishToPascal() ), RegexOptions.Multiline ) || IsPage() ||
 		IsAutoCompleteService();
 
-	internal bool IsPage() => Regex.IsMatch( code, "^// {0}Page\r?$".FormatWith( EwlStatics.EwlInitialism.EnglishToPascal() ), RegexOptions.Multiline );
+	internal bool IsPage() => Regex.IsMatch( code, "^[\\t ]*// {0}Page\r?$".FormatWith( EwlStatics.EwlInitialism.EnglishToPascal() ), RegexOptions.Multiline );
 
 	internal bool IsAutoCompleteService() =>
-		Regex.IsMatch( code, "^// {0}AutoCompleteService\r?$".FormatWith( EwlStatics.EwlInitialism.EnglishToPascal() ), RegexOptions.Multiline );
+		Regex.IsMatch( code, "^[\\t ]*// {0}AutoCompleteService\r?$".FormatWith( EwlStatics.EwlInitialism.EnglishToPascal() ), RegexOptions.Multiline );
 }
