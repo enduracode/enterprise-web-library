@@ -38,9 +38,18 @@ public static class DataCleanupOps {
 				File.ReadAllLines( filePath )
 					.SkipWhile(
 						line => {
-							var timeStamp = line[ ..line.IndexOf( " [", StringComparison.Ordinal ) ];
-							return timeStampPattern.Parse( timeStamp ).GetValueOrThrow().ToInstant() < cutoffTime;
-						} ),
+							var endIndex = line.IndexOf( " [", StringComparison.Ordinal );
+							if( endIndex < 0 )
+								return true;
+
+							var timeStamp = line[ ..endIndex ];
+							var parseResult = timeStampPattern.Parse( timeStamp );
+							if( !parseResult.TryGetValue( default, out var time ) )
+								return true;
+
+							return time.ToInstant() < cutoffTime;
+						} )
+					.Materialize(),
 				Encoding.UTF8 );
 		}
 	}
