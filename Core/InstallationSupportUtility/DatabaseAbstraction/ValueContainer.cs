@@ -15,7 +15,7 @@ public class ValueContainer {
 	private readonly Type unconvertedDataType;
 	private readonly Func<string, string> incomingValueConversionExpressionGetter;
 	private readonly Func<object, object> incomingValueConverter;
-	private readonly Func<string, string> outgoingValueConversionExpressionGetter;
+	private readonly Func<string, string>? outgoingValueConversionExpressionGetter;
 	private readonly string dbTypeString;
 
 	private readonly int size;
@@ -54,7 +54,6 @@ public class ValueContainer {
 			this.dataType = unconvertedDataType;
 			incomingValueConversionExpressionGetter = valueExpression => "({0}){1}".FormatWith( dataType, valueExpression );
 			incomingValueConverter = value => value;
-			outgoingValueConversionExpressionGetter = valueExpression => valueExpression;
 		}
 
 		this.dbTypeString = dbTypeString;
@@ -105,13 +104,17 @@ public class ValueContainer {
 	public bool? AllowsEmpty => allowsEmpty;
 
 	public string GetParameterValueExpression( string valueExpression ) {
-		var conversionExpression = outgoingValueConversionExpressionGetter( valueExpression );
-		if( allowsNull && allowsEmpty == false )
-			conversionExpression += " is { Length: > 0 } nonempty ? nonempty : null";
-		var parameterValueExpression = valueExpression == "null" ? valueExpression :
-		                               conversionExpression == valueExpression || !allowsNull || allowsEmpty.HasValue ? conversionExpression :
-		                               "{0} is null ? null : {1}".FormatWith( valueExpression, conversionExpression );
-		return "new DbParameterValue( {0}, \"{1}\" )".FormatWith( parameterValueExpression, dbTypeString );
+		if( valueExpression.Equals( "null", StringComparison.Ordinal ) )
+			return getExpression( valueExpression );
+
+		if( outgoingValueConversionExpressionGetter is not null && allowsNull && allowsEmpty is null )
+			return getExpression( $"{valueExpression} is {{}} __nonnullable ? {outgoingValueConversionExpressionGetter( "__nonnullable" )} : null" );
+		var conversionExpression = outgoingValueConversionExpressionGetter?.Invoke( valueExpression ) ?? valueExpression;
+		return allowsNull && allowsEmpty == false
+			       ? getExpression( $"{conversionExpression} is {{ Length: > 0 }} __nonempty ? __nonempty : null" )
+			       : getExpression( conversionExpression );
+
+		string getExpression( string parameterValueExpression ) => $"new DbParameterValue( {parameterValueExpression}, \"{dbTypeString}\" )";
 	}
 
 	public string GetNullabilityPhrase() =>
