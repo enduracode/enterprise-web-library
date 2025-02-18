@@ -1,9 +1,9 @@
 ﻿using System.Net;
 using Ical.Net;
 using Ical.Net.CalendarComponents;
-using Ical.Net.DataTypes;
 using NodaTime;
 using NodaTime.Text;
+using Tewl.ICalendar;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
@@ -42,29 +42,24 @@ public static class CalendarIntegrationStatics {
 	private static EwfResponse getICalendarResponse( string eventTitle, ZonedDateTime beginDateAndTime, ZonedDateTime endDateAndTime, string description ) {
 		var calendar = new Calendar();
 
-		var e = new CalendarEvent { Summary = eventTitle, Start = getICalendarTime( beginDateAndTime ), End = getICalendarTime( endDateAndTime ) };
+		var e = new CalendarEvent { Summary = eventTitle, Start = beginDateAndTime.ToICalendarTime(), End = endDateAndTime.ToICalendarTime() };
 		if( description.Length > 0 )
 			e.Description = description;
 		calendar.Events.Add( e );
 
 		return EwfResponse.CreateICalendarResponse( () => calendar, extensionlessFileNameCreator: () => "Event" );
 	}
-
-	private static CalDateTime getICalendarTime( ZonedDateTime time ) =>
-		new( time.Year, time.Month, time.Day, time.Hour, time.Minute, time.Second, time.Zone.Id );
 
 	private static EwfResponse getICalendarResponseForAllDayEvent( string eventTitle, LocalDate beginDate, LocalDate endDate, string description ) {
 		var calendar = new Calendar();
 
-		var e = new CalendarEvent { Summary = eventTitle, Start = getICalendarDate( beginDate ), End = getICalendarDate( endDate ), IsAllDay = true };
+		var e = new CalendarEvent { Summary = eventTitle, Start = beginDate.ToICalendarDate(), End = endDate.ToICalendarDate(), IsAllDay = true };
 		if( description.Length > 0 )
 			e.Description = description;
 		calendar.Events.Add( e );
 
 		return EwfResponse.CreateICalendarResponse( () => calendar, extensionlessFileNameCreator: () => "Event" );
 	}
-
-	private static CalDateTime getICalendarDate( LocalDate date ) => new( date.Year, date.Month, date.Day );
 
 	private static IEnumerable<EwfHyperlink> getHyperlinks(
 		string eventTitle, ZonedDateTime beginDateAndTime, ZonedDateTime endDateAndTime, string description ) {
