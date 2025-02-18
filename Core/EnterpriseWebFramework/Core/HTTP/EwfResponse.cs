@@ -2,6 +2,8 @@
 using System.Threading.Tasks;
 using EnterpriseWebLibrary.MailMerging;
 using EnterpriseWebLibrary.MailMerging.RowTree;
+using Ical.Net;
+using Ical.Net.Serialization;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -98,6 +100,18 @@ public class EwfResponse {
 			ContentTypes.ExcelXlsx,
 			new EwfResponseBodyCreator( stream => workbookCreator().SaveToStream( stream ) ),
 			fileNameCreator: () => ExcelFileWriter.GetSafeFileName( extensionlessFileNameCreator() ) );
+
+	/// <summary>
+	/// Creates an iCalendar response.
+	/// </summary>
+	/// <param name="calendarGetter">A function that gets the iCalendar object.</param>
+	/// <param name="extensionlessFileNameCreator">A function that creates the file name for saving the response. If you return a nonempty string, the response
+	/// will be processed as an attachment with the specified file name. Do not return null from the function.</param>
+	public static EwfResponse CreateICalendarResponse( Func<Calendar> calendarGetter, Func<string> extensionlessFileNameCreator = null ) =>
+		Create(
+			"text/calendar",
+			new EwfResponseBodyCreator( () => new CalendarSerializer().SerializeToString( calendarGetter() ) ),
+			fileNameCreator: extensionlessFileNameCreator is null ? null : () => extensionlessFileNameCreator().AppendDelimiter( ".ics" ) );
 
 	/// <summary>
 	/// Creates a response by merging a row tree with a Microsoft Word document. If you would like each row to be on a separate page, set the first paragraph in

@@ -2,7 +2,6 @@
 using Ical.Net;
 using Ical.Net.CalendarComponents;
 using Ical.Net.DataTypes;
-using Ical.Net.Serialization;
 using NodaTime;
 using NodaTime.Text;
 
@@ -48,10 +47,7 @@ public static class CalendarIntegrationStatics {
 			e.Description = description;
 		calendar.Events.Add( e );
 
-		return EwfResponse.Create(
-			"text/calendar",
-			new EwfResponseBodyCreator( () => new CalendarSerializer().SerializeToString( calendar ) ),
-			fileNameCreator: () => "Event.ics" );
+		return EwfResponse.CreateICalendarResponse( () => calendar, extensionlessFileNameCreator: () => "Event" );
 	}
 
 	private static CalDateTime getICalendarTime( ZonedDateTime time ) =>
@@ -65,10 +61,7 @@ public static class CalendarIntegrationStatics {
 			e.Description = description;
 		calendar.Events.Add( e );
 
-		return EwfResponse.Create(
-			"text/calendar",
-			new EwfResponseBodyCreator( () => new CalendarSerializer().SerializeToString( calendar ) ),
-			fileNameCreator: () => "Event.ics" );
+		return EwfResponse.CreateICalendarResponse( () => calendar, extensionlessFileNameCreator: () => "Event" );
 	}
 
 	private static CalDateTime getICalendarDate( LocalDate date ) => new( date.Year, date.Month, date.Day );
