@@ -381,7 +381,10 @@
     &lt;Entry DisplayName="Instance fields"&gt;&#xD;
       &lt;Entry.Match&gt;&#xD;
         &lt;And&gt;&#xD;
-          &lt;Kind Is="Field" /&gt;&#xD;
+          &lt;Or&gt;&#xD;
+            &lt;Kind Is="Field" /&gt;&#xD;
+            &lt;Kind Is="Autoproperty" /&gt;&#xD;
+          &lt;/Or&gt;&#xD;
           &lt;Not&gt;&#xD;
             &lt;Static /&gt;&#xD;
           &lt;/Not&gt;&#xD;
