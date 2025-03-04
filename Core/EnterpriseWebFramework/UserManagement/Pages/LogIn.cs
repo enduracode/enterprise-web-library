@@ -76,7 +76,7 @@ partial class LogIn {
 
 		var codeEntryIsForPasswordReset = ComponentStateItem.Create<bool?>( "codeEntryIsForPasswordReset", User.Length > 0 ? false : null, _ => true, false );
 
-		var emailAddress = new DataValue<string>( false );
+		var emailAddress = new DataValue<string>( User.Length > 0, existingValueGetter: () => User );
 		var password = new DataValue<string>( false );
 		var loginCode = new DataValue<string>( false );
 		AuthenticationStatics.PasswordLoginModificationMethod? passwordLoginMethod = null;
