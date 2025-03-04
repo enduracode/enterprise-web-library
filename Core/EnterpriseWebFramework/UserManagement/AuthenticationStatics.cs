@@ -207,7 +207,11 @@ public static class AuthenticationStatics {
 					                       changePasswordPageUrlGetter,
 					                       destinationUrl,
 					                       newUserRoleId: newUserRoleId );
-				                       PageBase.AddStatusMessage( StatusMessageType.Info, "Your login code has been sent to {0}.".FormatWith( emailAddress ) );
+				                       PageBase.AddStatusMessage(
+					                       StatusMessageType.Info,
+					                       newUserRoleId.HasValue
+						                       ? $"Your login code has been sent to {emailAddress}."
+						                       : $"Your login code has been sent to {emailAddress} if this address is registered with {UserManagementStatics.LocalIdentityProvider.AdministratingOrganizationName}." );
 			                       }, ( emailAddress, code, errorMessage ) => {
 				                       var errors = new List<string>();
 

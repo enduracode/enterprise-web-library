@@ -1,15 +1,13 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.UserManagement;
 using Tewl.InputValidation;
+
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages;
 
 // EwlPage
 // Parameter: string returnUrl
 // OptionalParameter: string user
 // OptionalParameter: string code
-
-namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages;
-
 partial class LogIn {
 	// This class name is used by EWF CSS files.
 	private static readonly ElementClass passwordContainerClass = new( "ewfLogInPasswordContainer" );
@@ -36,11 +34,11 @@ partial class LogIn {
 		if( customContent != null )
 			return customContent;
 
-		if( User.Length > 0 ) {
-			AuthenticationStatics.CodeLoginModificationMethod codeLoginMethod = null;
-			string destinationUrl = null;
+		if( User.Length > 0 && Code.Length > 0 ) {
+			AuthenticationStatics.CodeLoginModificationMethod? codeLoginMethod = null;
+			string? destinationUrl = null;
 			var postBack = PostBack.CreateFull(
-				modificationMethod: () => destinationUrl = codeLoginMethod(
+				modificationMethod: () => destinationUrl = codeLoginMethod!(
 						                          User,
 						                          Code,
 						                          errorMessage:
@@ -59,7 +57,7 @@ partial class LogIn {
 		return new UiPageContent( omitContentBox: true ).Add( authenticatedUserDeniedAccess ? getAuthenticatedUserDeniedAccessComponents() : getLogInComponents() );
 	}
 
-	private bool authenticatedUserDeniedAccess => SystemUser.Current is not null && !string.Equals( GetUrl(), EwfRequest.Current.Url, StringComparison.Ordinal );
+	private bool authenticatedUserDeniedAccess => SystemUser.Current is not null && !string.Equals( GetUrl(), EwfRequest.Current!.Url, StringComparison.Ordinal );
 
 	private IReadOnlyCollection<FlowComponent> getAuthenticatedUserDeniedAccessComponents() =>
 		new Section(
@@ -74,23 +72,24 @@ partial class LogIn {
 
 	private IReadOnlyCollection<FlowComponent> getLogInComponents() {
 		var components = new List<FlowComponent>();
+		var autoRegistrationSetup = AuthenticationStatics.AppProvider.GetLogInPageAutoUserRegistrationSetup();
 
 		var codeEntryIsForPasswordReset = ComponentStateItem.Create<bool?>( "codeEntryIsForPasswordReset", null, _ => true, false );
 
 		var emailAddress = new DataValue<string>( false );
 		var password = new DataValue<string>( false );
 		var loginCode = new DataValue<string>( false );
-		AuthenticationStatics.PasswordLoginModificationMethod passwordLoginMethod = null;
-		AuthenticationStatics.LoginCodeSenderMethod loginCodeSender = null;
-		AuthenticationStatics.CodeLoginModificationMethod codeLoginMethod = null;
+		AuthenticationStatics.PasswordLoginModificationMethod? passwordLoginMethod = null;
+		AuthenticationStatics.LoginCodeSenderMethod? loginCodeSender = null;
+		AuthenticationStatics.CodeLoginModificationMethod? codeLoginMethod = null;
 
-		string destinationUrl = null;
+		string? destinationUrl = null;
 		var logInPb = PostBack.CreateFull(
 			modificationMethod: () => {
 				if( codeEntryIsForPasswordReset.Value.HasValue )
-					destinationUrl = codeLoginMethod( emailAddress.Value, loginCode.Value ).destinationUrl;
+					destinationUrl = codeLoginMethod!( emailAddress.Value, loginCode.Value ).destinationUrl;
 				else
-					passwordLoginMethod( emailAddress.Value, password );
+					passwordLoginMethod!( emailAddress.Value, password );
 			},
 			actionGetter: () => new PostBackAction( new ExternalResource( codeEntryIsForPasswordReset.Value.HasValue ? destinationUrl : ReturnUrl ) ) );
 
@@ -101,7 +100,11 @@ partial class LogIn {
 				                 authenticationModeUpdateRegion,
 				                 id: "sendCode",
 				                 modificationMethod: () => {
-					                 loginCodeSender( emailAddress.Value, false, ReturnUrl );
+					                 loginCodeSender!(
+						                 emailAddress.Value,
+						                 false,
+						                 ReturnUrl,
+						                 newUserRoleId: autoRegistrationSetup?.GetRoleIdForEmailAddress( emailAddress.Value ) );
 					                 codeEntryIsForPasswordReset.Value = false;
 				                 },
 				                 reloadBehaviorGetter: () => new PageReloadBehavior( focusKey: passwordOrCodeFocusKey ) )
@@ -111,7 +114,11 @@ partial class LogIn {
 				                    authenticationModeUpdateRegion,
 				                    id: "newPw",
 				                    modificationMethod: () => {
-					                    loginCodeSender( emailAddress.Value, true, ReturnUrl );
+					                    loginCodeSender!(
+						                    emailAddress.Value,
+						                    true,
+						                    ReturnUrl,
+						                    newUserRoleId: autoRegistrationSetup?.GetRoleIdForEmailAddress( emailAddress.Value ) );
 					                    codeEntryIsForPasswordReset.Value = true;
 				                    },
 				                    reloadBehaviorGetter: () => new PageReloadBehavior( focusKey: passwordOrCodeFocusKey ) )
@@ -190,7 +197,7 @@ partial class LogIn {
 					new FlowAutofocusRegion(
 						AutofocusCondition.InitialRequest(),
 						new Section(
-							"Registered users",
+							autoRegistrationSetup is null ? "Registered users" : "",
 							registeredComponents,
 							style: SectionStyle.Box,
 							etherealContent: logInHiddenFieldsAndMethods.hiddenFields.Append( codeEntryIsForPasswordReset ).Materialize() ).ToCollection() ) );
@@ -207,8 +214,20 @@ partial class LogIn {
 			var unregisteredComponents = new List<FlowComponent>();
 			unregisteredComponents.Add(
 				new Paragraph(
-					"If you have difficulty logging in, please {0}".FormatWith( UserManagementStatics.LocalIdentityProvider.LogInHelpInstructions ).ToComponents() ) );
-			components.Add( new Section( "Unregistered users", unregisteredComponents, style: SectionStyle.Box ) );
+					autoRegistrationSetup is null
+						? $"If you have difficulty logging in, please {UserManagementStatics.LocalIdentityProvider.LogInHelpInstructions}".ToComponents()
+						: "If you did not receive a code, you may not be registered yet.".ToComponents()
+							.Concat( " ".ToComponents() )
+							.Concat(
+								$"We only automatically register email addresses that end in {StringTools.GetEnglishListPhrase( autoRegistrationSetup.AllowedEmailAddressDomains, true )}."
+									.ToComponents() )
+							.Concat( " ".ToComponents() )
+							.Concat(
+								$"If you know an existing user of the system, you can ask them to invite you; otherwise please {UserManagementStatics.LocalIdentityProvider.LogInHelpInstructions}"
+									.ToComponents() )
+							.Materialize() ) );
+			components.Add(
+				new Section( autoRegistrationSetup is null ? "Unregistered users" : "Not receiving a code?", unregisteredComponents, style: SectionStyle.Box ) );
 		}
 
 		return components;

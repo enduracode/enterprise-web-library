@@ -6,6 +6,11 @@
 public class SystemUser {
 	private static Func<SystemUser?>? currentUserGetter;
 
+	/// <summary>
+	/// Returns whether the specified email address is within one of the specified domains.
+	/// </summary>
+	public static bool EmailAddressWithinDomain( string email, IEnumerable<string> domains ) => domains.Any( email.EndsWithIgnoreCase );
+
 	internal static void Init( Func<SystemUser?> currentUserGetter ) {
 		SystemUser.currentUserGetter = currentUserGetter;
 	}
