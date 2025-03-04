@@ -9,7 +9,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 /// domains to be automatically registered.</param>
 /// <param name="NewUserRoleId">The authorization role ID that newly-registered users will have.</param>
 public sealed record LogInPageAutoUserRegistrationSetup( IReadOnlyCollection<string> AllowedEmailAddressDomains, int NewUserRoleId ) {
-	public string AllowedDomainsListPhrase => StringTools.GetEnglishListPhrase( AllowedEmailAddressDomains, true );
+	public string AllowedDomainsListPhrase => StringTools.GetEnglishListPhrase( AllowedEmailAddressDomains, true, conjunction: StringTools.ListConjunction.Or );
 
 	public int? GetRoleIdForEmailAddress( string email ) =>
 		!AllowedEmailAddressDomains.Any() ? NewUserRoleId : SystemUser.EmailAddressWithinDomain( email, AllowedEmailAddressDomains ) ? NewUserRoleId : null;
