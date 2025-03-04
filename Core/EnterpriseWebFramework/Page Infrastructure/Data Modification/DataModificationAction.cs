@@ -21,7 +21,7 @@ public class DataModificationActionsParameter {
 		new( sequence.Concat( dataModificationActions.sequence ) );
 }
 
-public static class DataModificationsParameterExtensionCreators {
+public static class DataModificationActionsParameterExtensionCreators {
 	/// <summary>
 	/// Returns a parameter with this data-modification action plus the specified actions.
 	/// </summary>
