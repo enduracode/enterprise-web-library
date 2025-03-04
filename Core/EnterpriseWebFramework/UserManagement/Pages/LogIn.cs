@@ -128,11 +128,13 @@ partial class LogIn {
 			logInPb,
 			() => {
 				var registeredComponents = new List<FlowComponent>();
-				registeredComponents.Add(
-					new Paragraph(
-						"You may log in to this system if you have registered your email address with {0}."
-							.FormatWith( UserManagementStatics.LocalIdentityProvider.AdministratingOrganizationName )
-							.ToComponents() ) );
+
+				if( autoRegistrationSetup is null )
+					registeredComponents.Add(
+						new Paragraph(
+							"You may log in to this system if you have registered your email address with {0}."
+								.FormatWith( UserManagementStatics.LocalIdentityProvider.AdministratingOrganizationName )
+								.ToComponents() ) );
 
 				registeredComponents.Add(
 					FormItemList.CreateStack( generalSetup: new FormItemListSetup( buttonSetup: new ButtonSetup( "Log In" ), enableSubmitButton: true ) )
