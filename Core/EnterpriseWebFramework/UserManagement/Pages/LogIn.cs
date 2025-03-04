@@ -145,7 +145,10 @@ partial class LogIn {
 									() => emailAddress.GetEmailAddressFormItem( "Email address".ToComponents() ) )
 								.Append(
 									codeEntryIsForPasswordReset.Value.HasValue
-										? getLoginCodeFormItem( authenticationModeUpdateRegion, AutofocusCondition.PostBack( passwordOrCodeFocusKey ), loginCode )
+										? getLoginCodeFormItem(
+											authenticationModeUpdateRegion,
+											User.Length > 0 ? AutofocusCondition.InitialRequest() : AutofocusCondition.PostBack( passwordOrCodeFocusKey ),
+											loginCode )
 										: getPasswordFormItem(
 											authenticationModeUpdateRegion,
 											AutofocusCondition.PostBack( passwordOrCodeFocusKey ),
@@ -197,7 +200,7 @@ partial class LogIn {
 
 				components.Add(
 					new FlowAutofocusRegion(
-						AutofocusCondition.InitialRequest(),
+						User.Length > 0 ? null : AutofocusCondition.InitialRequest(),
 						new Section(
 							autoRegistrationSetup is null ? "Registered users" : "",
 							registeredComponents,

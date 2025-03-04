@@ -1,25 +1,22 @@
-﻿#nullable disable
-using System.Collections.Generic;
-using Tewl.Tools;
+﻿using JetBrains.Annotations;
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework;
+
+/// <summary>
+/// A phrasing component that can be autofocused.
+/// </summary>
+[ PublicAPI ]
+public class PhrasingAutofocusRegion: PhrasingComponent {
+	private readonly IReadOnlyCollection<FlowComponentOrNode> children;
+
 	/// <summary>
-	/// A phrasing component that can be autofocused.
+	/// Creates an autofocus region.
 	/// </summary>
-	public class PhrasingAutofocusRegion: PhrasingComponent {
-		private readonly IReadOnlyCollection<FlowComponentOrNode> children;
-
-		/// <summary>
-		/// Creates an autofocus region.
-		/// </summary>
-		/// <param name="condition">Do not pass null.</param>
-		/// <param name="children"></param>
-		public PhrasingAutofocusRegion( AutofocusCondition condition, IReadOnlyCollection<PhrasingComponent> children ) {
-			this.children = new FlowAutofocusRegion( condition, children ).ToCollection();
-		}
-
-		IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() {
-			return children;
-		}
+	/// <param name="condition"></param>
+	/// <param name="children"></param>
+	public PhrasingAutofocusRegion( AutofocusCondition? condition, IReadOnlyCollection<PhrasingComponent> children ) {
+		this.children = new FlowAutofocusRegion( condition, children ).ToCollection();
 	}
+
+	IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() => children;
 }
