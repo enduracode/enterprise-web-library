@@ -211,23 +211,18 @@ partial class LogIn {
 		if( specialInstructions.Any() )
 			components.AddRange( specialInstructions );
 		else {
-			var unregisteredComponents = new List<FlowComponent>();
-			unregisteredComponents.Add(
-				new Paragraph(
-					autoRegistrationSetup is null
-						? $"If you have difficulty logging in, please {UserManagementStatics.LocalIdentityProvider.LogInHelpInstructions}".ToComponents()
-						: "If you did not receive a code, you may not be registered yet.".ToComponents()
-							.Concat( " ".ToComponents() )
-							.Concat(
-								$"We only automatically register email addresses that end in {StringTools.GetEnglishListPhrase( autoRegistrationSetup.AllowedEmailAddressDomains, true )}."
-									.ToComponents() )
-							.Concat( " ".ToComponents() )
-							.Concat(
-								$"If you know an existing user of the system, you can ask them to invite you; otherwise please {UserManagementStatics.LocalIdentityProvider.LogInHelpInstructions}"
-									.ToComponents() )
-							.Materialize() ) );
+			var instructionPhrase = UserManagementStatics.LocalIdentityProvider.LogInHelpInstructions;
 			components.Add(
-				new Section( autoRegistrationSetup is null ? "Unregistered users" : "Not receiving a code?", unregisteredComponents, style: SectionStyle.Box ) );
+				new Section(
+					autoRegistrationSetup is null ? "Unregistered users" : "Not receiving login codes?",
+					new Paragraph(
+						autoRegistrationSetup is null || !autoRegistrationSetup.AllowedEmailAddressDomains.Any()
+							? $"If you have difficulty logging in, please {instructionPhrase}".ToComponents()
+							: "If you are not receiving login codes, you may not be registered.".ToComponents()
+								.Concat( $" We only automatically register email addresses that end in {autoRegistrationSetup.AllowedDomainsListPhrase}.".ToComponents() )
+								.Concat( $" If you know an existing user of the system, you can ask them to invite you; otherwise please {instructionPhrase}".ToComponents() )
+								.Materialize() ).ToCollection(),
+					style: SectionStyle.Box ) );
 		}
 
 		return components;
