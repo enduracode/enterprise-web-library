@@ -74,7 +74,7 @@ partial class LogIn {
 		var components = new List<FlowComponent>();
 		var autoRegistrationSetup = AuthenticationStatics.AppProvider.GetLogInPageAutoUserRegistrationSetup();
 
-		var codeEntryIsForPasswordReset = ComponentStateItem.Create<bool?>( "codeEntryIsForPasswordReset", null, _ => true, false );
+		var codeEntryIsForPasswordReset = ComponentStateItem.Create<bool?>( "codeEntryIsForPasswordReset", User.Length > 0 ? false : null, _ => true, false );
 
 		var emailAddress = new DataValue<string>( false );
 		var password = new DataValue<string>( false );
