@@ -432,7 +432,7 @@ public abstract class PageBase: ResourceBase {
 			changesExist( postBack ),
 			postBackAction => {
 				navigationBehavior = postBackAction?.NavigationBehavior;
-				focusKey = postBackAction?.ReloadBehavior?.FocusKey ?? "";
+				focusKey = navigationBehavior is null ? postBackAction?.ReloadBehavior?.FocusKey ?? "" : null;
 				fullSecondaryResponse = postBackAction?.ReloadBehavior?.SecondaryResponse?.GetFullResponse();
 			} );
 		if( modificationErrorsExist )
