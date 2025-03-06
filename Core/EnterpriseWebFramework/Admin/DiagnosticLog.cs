@@ -1,10 +1,10 @@
-﻿using Serilog.Core;
+﻿using Humanizer;
+using Serilog.Core;
 using Serilog.Events;
-
-// EwlPage
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin;
 
+// EwlPage
 partial class DiagnosticLog {
 	private const LogEventLevel debugEnabledLevel = LogEventLevel.Debug;
 
@@ -25,10 +25,11 @@ partial class DiagnosticLog {
 				      File.Open( EwfConfigurationStatics.AppConfiguration.DiagnosticLogFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite ) ) )
 				logText = reader.ReadToEnd();
 
+		const int tailLength = 10000;
 		return new UiPageContent(
 			bodyClasses: new ElementClass( "ewfDiagnosticLog" /* This is used by EWF CSS files. */ ),
 			pageActions: new ButtonSetup(
-				"Download Log",
+				"Download Full Log",
 				behavior: new PostBackBehavior(
 					postBack: PostBack.CreateIntermediate(
 						null,
@@ -49,11 +50,24 @@ partial class DiagnosticLog {
 							modificationMethod: () => {
 								levelSwitch.MinimumLevel = levelSwitch.MinimumLevel is debugEnabledLevel ? debugDisabledLevel : debugEnabledLevel;
 							} ) ) ) ) ).Add(
-			(FlowComponent)new DisplayableElement(
-				_ => new DisplayableElementData(
-					null,
-					() => new DisplayableElementLocalData( "pre" ),
-					children: new DisplayableElement(
-						_ => new DisplayableElementData( null, () => new DisplayableElementLocalData( "samp" ), children: logText.ToComponents() ) ).ToCollection() ) ) );
+			new Section(
+				$"Tail of log (last {tailLength.ToWords()} characters)",
+				new DisplayableElement(
+					_ => new DisplayableElementData(
+						null,
+						() => new DisplayableElementLocalData( "pre" ),
+						children: new DisplayableElement(
+							_ => {
+								var minIndex = Math.Max( logText.Length - tailLength, 0 );
+
+								var newline = Environment.NewLine;
+								var index = logText.IndexOf( newline, minIndex, StringComparison.Ordinal );
+								if( index == -1 )
+									index = minIndex;
+								else
+									index += newline.Length;
+
+								return new DisplayableElementData( null, () => new DisplayableElementLocalData( "samp" ), children: logText[ index.. ].ToComponents() );
+							} ).ToCollection() ) ).ToCollection() ) );
 	}
 }
