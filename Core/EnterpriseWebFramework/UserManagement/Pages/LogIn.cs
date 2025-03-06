@@ -225,7 +225,7 @@ partial class LogIn {
 							? $"If you have difficulty logging in, please {instructionPhrase}".ToComponents()
 							: "If you are not receiving login codes, you may not be registered.".ToComponents()
 								.Concat( $" We only automatically register email addresses that end in {autoRegistrationSetup.AllowedDomainsListPhrase}.".ToComponents() )
-								.Concat( $" If you know an existing user of the system, you can ask them to invite you; otherwise please {instructionPhrase}".ToComponents() )
+								.Concat( $" For help please {instructionPhrase}".ToComponents() )
 								.Materialize() ).ToCollection(),
 					style: SectionStyle.Box ) );
 		}
