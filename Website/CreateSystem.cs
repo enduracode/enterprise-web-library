@@ -3,10 +3,9 @@ using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.IO;
 using Tewl.IO;
 
-// EwlPage
-
 namespace EnterpriseWebLibrary.Website;
 
+// EwlPage
 partial class CreateSystem {
 	private readonly DataValue<string> systemName = new( false );
 	private readonly DataValue<string> systemShortName = new( false );
@@ -21,7 +20,8 @@ partial class CreateSystem {
 			PostBack.CreateFull(
 				actionGetter: () => new PostBackAction(
 					new PageReloadBehavior(
-						secondaryResponse: new SecondaryResponse(
+						secondaryResponse:
+						new SecondaryResponse(
 							() => EwfResponse.Create(
 								ContentTypes.ApplicationZip,
 								new EwfResponseBodyCreator( createAndZipSystem ),
@@ -33,12 +33,12 @@ partial class CreateSystem {
 								false,
 								setup: TextControlSetup.Create( placeholder: "e.g. Bicycle Service Manager" ),
 								maxLength: 50,
-								additionalValidationMethod: validator => {
-									if( systemName.Value != systemName.Value.RemoveNonAlphanumericCharacters( preserveWhiteSpace: true ) )
-										validator.NoteErrorAndAddMessage( "The system name must consist of only alphanumeric characters and white space." );
-									systemShortName.Value = systemName.Value.EnglishToPascal();
-								} )
-							.ToFormItem( label: "System name".ToComponents() ) )
+								additionalValidationMethod: _ => systemShortName.Value = systemName.Value.EnglishToPascal() )
+							.ToFormItem(
+								label: "System name".ToComponents()
+									.Append( new LineBreak() )
+									.Append( new SideComments( "We recommend using only alphanumeric characters and white space.".ToComponents() ) )
+									.Materialize() ) )
 					.AddItem(
 						baseNamespace.ToTextControl(
 								false,
