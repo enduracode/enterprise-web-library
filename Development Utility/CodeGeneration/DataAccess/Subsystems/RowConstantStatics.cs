@@ -20,6 +20,7 @@ internal static class RowConstantStatics {
 			var orderIsSpecified = !table.orderByColumn.IsNullOrWhiteSpace();
 			var values = new List<string>();
 			var names = new List<string>();
+			var identifierNames = new List<string>();
 			try {
 				var columns = new TableColumns( cn, table.tableName, false );
 				valueColumn = columns.AllColumnsExceptRowVersion.Single( column => column.Name.ToLower() == table.valueColumn.ToLower() );
@@ -32,6 +33,7 @@ internal static class RowConstantStatics {
 						while( reader.Read() ) {
 							values.Add( valueColumn.GetDataReaderValue( reader ) );
 							names.Add( nameColumn.GetDataReaderValue( reader ) );
+							identifierNames.Add( nameColumn.GetDataReaderValue( reader, forIdentifier: true ) );
 						}
 					} );
 			}
@@ -49,11 +51,10 @@ internal static class RowConstantStatics {
 			// constants
 			for( var i = 0; i < values.Count; i++ ) {
 				CodeGenerationStatics.AddSummaryDocComment( writer, "Constant generated from row in database table." );
+				var identifier = EwlStatics.GetCSharpIdentifier( isPascalCase( identifierNames[ i ] ) ? identifierNames[ i ] : identifierNames[ i ].EnglishToPascal() );
 
-				// It's important that row constants actually *be* constants (instead of static readonly) so they can be used in switch statements.
-				writer.WriteLine(
-					"public const " + valueColumn.DataTypeName + " " + EwlStatics.GetCSharpIdentifier( names[ i ].CamelToEnglish().EnglishToPascal() ) + " = " +
-					values[ i ] + ";" );
+				// It’s important that row constants actually *be* constants (instead of static readonly) so they can be used in switch statements.
+				writer.WriteLine( $"public const {valueColumn.DataTypeName} {identifier} = {values[ i ]};" );
 			}
 
 			// one to one map
@@ -74,6 +75,9 @@ internal static class RowConstantStatics {
 		}
 		writer.WriteLine( "}" ); // namespace
 	}
+
+	private static bool isPascalCase( string text ) =>
+		text.Any( char.IsLower ) && text.RemoveNonAlphanumericCharacters( preserveWhiteSpace: false ).Equals( text, StringComparison.Ordinal );
 
 	private static void writeStaticConstructor( TextWriter writer, string className, List<string> names, List<string> values, string valueTypeName ) {
 		writer.WriteLine( "static " + className + "() {" );

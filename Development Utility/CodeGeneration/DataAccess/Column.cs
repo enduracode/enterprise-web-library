@@ -121,12 +121,12 @@ internal class Column {
 			       : getValueExpression;
 	}
 
-	internal string GetDataReaderValue( DbDataReader reader ) {
+	internal string GetDataReaderValue( DbDataReader reader, bool forIdentifier = false ) {
 		if( valueContainer.AllowsNull && reader.IsDBNull( ordinal ) )
-			return valueContainer.DataType == typeof( string ) ? "\"\"" : "null";
+			return forIdentifier ? throw new Exception( "null" ) : valueContainer.DataType == typeof( string ) ? "\"\"" : "null";
 
 		var valueString = valueContainer.ConvertIncomingValue( reader.GetValue( ordinal ) ).ToString()!;
-		return valueContainer.DataType == typeof( string ) ? $"\"{valueString}\"" : valueString;
+		return valueContainer.DataType == typeof( string ) && !forIdentifier ? $"\"{valueString}\"" : valueString;
 	}
 
 	internal ModificationField GetModificationField() {
