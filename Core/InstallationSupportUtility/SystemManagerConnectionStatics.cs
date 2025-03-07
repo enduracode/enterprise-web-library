@@ -1,10 +1,8 @@
 ﻿using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.InstallationSupportUtility.SystemManagerInterface.Messages.SystemListMessage;
-using EnterpriseWebLibrary.TewlContrib;
 using JetBrains.Annotations;
 using Tewl.IO;
 
@@ -109,7 +107,7 @@ public static class SystemManagerConnectionStatics {
 	public static void ExecuteActionWithSystemManagerClient( string action, Action<HttpClient> method, bool supportLargePayload = false ) {
 		using var client = new HttpClient();
 
-		client.Timeout = supportLargePayload ? Timeout.InfiniteTimeSpan : new TimeSpan( 0, 2, 0 );
+		client.Timeout = supportLargePayload ? new TimeSpan( 0, 30, 0 ) : new TimeSpan( 0, 2, 0 );
 		client.BaseAddress = new Uri( Configuration.HttpBaseUrl + "/" );
 		client.DefaultRequestHeaders.TryAddWithoutValidation( "Authorization", Configuration.AccessToken );
 
