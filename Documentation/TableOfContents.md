@@ -10,6 +10,7 @@
 	*	[Creating database schema for common types](Procedures/CreatingSchemaForCommonTypes.md)
 	*	[Adding revision history](Procedures/AddingRevisionHistory.md)
 	*	[Making an EWF-UI web site](Procedures/MakingEwfUiSite.md)
+	*	[Adding re-ordering to a table](Procedures/AddingReordering.md)
 * Reference
 	* [Configuration files](Reference/ConfigurationFiles.md)
 *	[FAQ](Faq.md)
