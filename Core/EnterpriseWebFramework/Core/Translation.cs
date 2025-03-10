@@ -1,7 +1,7 @@
 ﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 internal static class Translation {
-	private static Func<string> requestLanguageGetter;
+	private static Func<string> requestLanguageGetter = null!;
 
 	internal static void Init( Func<string> requestLanguageGetter ) {
 		Translation.requestLanguageGetter = requestLanguageGetter;
