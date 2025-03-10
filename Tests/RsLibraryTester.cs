@@ -78,7 +78,6 @@ internal static class RsLibraryTester {
 		Console.WriteLine( EwlStatics.CombinePaths( @"Inetpub", @"Files" ) );
 		Console.WriteLine( EwlStatics.CombinePaths( @"D:\Source Control Repository\Charette", @"", @"\Aspose.Words.lic" ) );
 
-		Console.WriteLine( Tewl.Tools.StringTools.CamelToEnglish( null ) );
 		Console.WriteLine( "".CamelToEnglish() );
 		Console.WriteLine( "L".CamelToEnglish() );
 		Console.WriteLine( "l".CamelToEnglish() );
