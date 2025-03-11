@@ -74,8 +74,8 @@ internal static class StandardModificationStatics {
 		writeDeleteRowsMethod( cn, tableName, revisionHistorySuffix, "WithoutAdditionalLogic", true, true );
 		writePrivateDeleteRowsMethod( cn, tableName, hasModTable, isRevisionHistoryClass );
 		writer.WriteLine(
-			"static partial void preDelete( List<" + DataAccessStatics.GetTableConditionInterfaceName( cn, database, tableName ) + "> conditions, ref " +
-			getPostDeleteCallClassName( cn, tableName ) + "? postDeleteCall );" );
+			"static partial void preDelete( List<" + DataAccessStatics.GetTableConditionInterfaceName( cn, database, tableName ) + "> conditions, " +
+			getPostDeleteExecutorClassName() + " postDeleteExecutor );" );
 
 		writeCreateForInsertMethod( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass, revisionHistorySuffix );
 		writeCreateForUpdateMethod( cn, tableName, isRevisionHistoryTable, isRevisionHistoryClass, revisionHistorySuffix );
@@ -214,16 +214,14 @@ internal static class StandardModificationStatics {
 		writer.WriteLine( $"var conditions = {conditionsExpression};" );
 
 		if( additionalLogicSuffix.Length is 0 ) {
-			writer.WriteLine( getPostDeleteCallClassName( cn, tableName ) + "? postDeleteCall = null;" );
-			writer.WriteLine( "preDelete( conditions, ref postDeleteCall );" );
+			writer.WriteLine( $"var postDeleteExecutor = new {getPostDeleteExecutorClassName()}();" );
+			writer.WriteLine( "preDelete( conditions, postDeleteExecutor );" );
 		}
 
 		writer.WriteLine( "var rowsDeleted = deleteRows( conditions, {0} );".FormatWith( includeIsLongRunningParameter ? "isLongRunning" : "false" ) );
 
-		if( additionalLogicSuffix.Length is 0 ) {
-			writer.WriteLine( "if( postDeleteCall is not null )" );
-			writer.WriteLine( "postDeleteCall.Execute();" );
-		}
+		if( additionalLogicSuffix.Length is 0 )
+			writer.WriteLine( "postDeleteExecutor.Execute();" );
 
 		writer.WriteLine( "return rowsDeleted;" );
 
@@ -276,8 +274,7 @@ internal static class StandardModificationStatics {
 		writer.WriteLine( "}" );
 	}
 
-	private static string getPostDeleteCallClassName( DatabaseConnection cn, string tableName ) =>
-		"PostDeleteCall<IEnumerable<" + database.SecondaryDatabaseName + "TableRetrieval." + TableRetrievalStatics.GetClassName( cn, tableName ) + ".Row>>";
+	private static string getPostDeleteExecutorClassName() => "PostDeleteExecutor";
 
 	private static void writeCreateForInsertMethod(
 		DatabaseConnection cn, string tableName, bool isRevisionHistoryTable, bool isRevisionHistoryClass, string methodNameSuffix ) {

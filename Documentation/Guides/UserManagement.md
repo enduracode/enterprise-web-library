@@ -41,7 +41,7 @@ using ServiceManager.Library.DataAccess.TableRetrieval;
 namespace ServiceManager.Library.DataAccess.Modification;
 
 partial class UsersModification {
-	static partial void preDelete( List<UsersTableCondition> conditions, ref PostDeleteCall<IEnumerable<UsersTableRetrieval.Row>>? postDeleteCall ) {
+	static partial void preDelete( List<UsersTableCondition> conditions, PostDeleteExecutor postDeleteExecutor ) {
 		foreach( var i in UsersTableRetrieval.GetRows( conditions.ToArray() ) )
 			UserRequestsModification.DeleteRows( new UserRequestsTableEqualityConditions.UserId( i.UserId ) );
 	}
