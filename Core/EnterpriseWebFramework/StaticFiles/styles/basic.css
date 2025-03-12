@@ -514,12 +514,13 @@ ewfMultilineTextControlAllStates {
 	width: 35em;
 	resize: vertical;
 }
-/* This prevents Chrome and Safari from allowing the user to resize textareas. */
-textarea {
-	resize: none;
-}
 ewfSingleLineTextControlAllStates[type="password"], ewfSingleLineTextControlAllStates[type="email"], ewfSingleLineTextControlAllStates[type="tel"] {
 	width: 20em;
+}
+ewfComponentListItem > ewfFormItem > ewfMultilineTextControlAllStates,
+ewfFormItemListItemContent > ewfMultilineTextControlAllStates,
+ewfFormItemContent > ewfMultilineTextControlAllStates {
+	display: block;
 }
 
 /* checkboxes */
