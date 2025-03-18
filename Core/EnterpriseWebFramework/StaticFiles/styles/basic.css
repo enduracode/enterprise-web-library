@@ -542,7 +542,9 @@ ewfDropDownListContainer > ewfDropDownList {
 	text-align: start;
 }
 ewfStackFormItemList > ewfFormItemListItem > ewfFormItemListItemContent > ewfDropDownListContainer > ewfDropDownList,
+ewfStackFormItemList > ewfFormItemListItem > ewfFormItemListItemContent > ewfUnorderedStackList > ewfComponentListItem > ewfFormItem > ewfDropDownListContainer > ewfDropDownList,
 ewfGridFormItemList > ewfFormItemListItem > ewfFormItemListItemContent > ewfDropDownListContainer > ewfDropDownList,
+ewfGridFormItemList > ewfFormItemListItem > ewfFormItemListItemContent > ewfUnorderedStackList > ewfComponentListItem > ewfFormItem > ewfDropDownListContainer > ewfDropDownList,
 ewfTableStandardAndStandardLayoutOnlyStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > ewfThAndTd > ewfFormItem > ewfFormItemContent > ewfDropDownListContainer > ewfDropDownList {
 	width: 100%;
 }
