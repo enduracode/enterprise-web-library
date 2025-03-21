@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using EnterpriseWebLibrary.IO;
 
-namespace EnterpriseWebLibrary; 
+namespace EnterpriseWebLibrary;
 
 public static class TestStatics {
 	public static readonly string OutputFolderPath = EwlStatics.CombinePaths(
@@ -10,6 +10,7 @@ public static class TestStatics {
 
 	public static readonly string InputTestFilesFolderPath = EwlStatics.CombinePaths(
 		Path.GetDirectoryName( Assembly.GetExecutingAssembly().Location )!,
+		"..",
 		"..",
 		"..",
 		"TestFiles" );
