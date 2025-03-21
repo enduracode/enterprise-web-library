@@ -82,13 +82,8 @@ public class DateControlSetup {
 			formValue.AddPageModificationValue( pageModificationValue, v => v.Trim() );
 			formValue.AddPageModificationValue(
 				datePageModificationValue,
-				v => {
-					var errorHandler = new ValidationErrorHandler( "value" );
-					var validatedValue = new Validator().GetNullableDateTime( errorHandler, v, null, true, DateTime.MinValue, DateTime.MaxValue );
-					if( errorHandler.LastResult is not ErrorCondition.NoError )
-						validatedValue = null;
-					return validatedValue.ToNewUnderlyingValue( LocalDate.FromDateTime );
-				} );
+				v => new Validator().GetNullableDateTime( null, v, null, true, DateTime.MinValue, DateTime.MaxValue )
+					.Value.ToNewUnderlyingValue( LocalDate.FromDateTime ) );
 
 			return ( labeler, new CustomPhrasingComponent(
 					       new DisplayableElement(
@@ -182,15 +177,14 @@ picker.localization = {{
 									                                                if( validationPredicate != null && !validationPredicate( postBackValue.ChangedOnPostBack ) )
 										                                                return;
 
-									                                                var errorHandler = new ValidationErrorHandler( "date" );
-									                                                var validatedValue = validator.GetNullableDateTime(
-										                                                errorHandler,
-										                                                postBackValue.Value.Trim(),
-										                                                null,
-										                                                allowEmpty,
-										                                                minValue.Value.ToDateTimeUnspecified(),
-										                                                maxValue.Value.PlusDays( 1 ).ToDateTimeUnspecified() );
-									                                                if( errorHandler.LastResult != ErrorCondition.NoError ) {
+									                                                if( validator.GetNullableDateTime(
+											                                                    new ValidationErrorHandler( "date" ),
+											                                                    postBackValue.Value,
+											                                                    null,
+											                                                    allowEmpty,
+											                                                    minValue.Value.ToDateTimeUnspecified(),
+											                                                    maxValue.Value.PlusDays( 1 ).ToDateTimeUnspecified() )
+										                                                    .Error( out var validatedValue ) is not null ) {
 										                                                validationErrorNotifier?.Invoke();
 										                                                return;
 									                                                }

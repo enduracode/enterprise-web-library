@@ -16,9 +16,8 @@ partial class LogIn {
 	private static readonly ElementClass loginCodeButtonClass = new( "ewfLogInLcB" );
 
 	protected override void init() {
-		var userErrorHandler = new ValidationErrorHandler( "value" );
-		var validatedUser = new Validator().GetEmailAddress( userErrorHandler, User, true );
-		if( userErrorHandler.LastResult is not ErrorCondition.NoError || !string.Equals( validatedUser, User, StringComparison.Ordinal ) )
+		if( new Validator().GetEmailAddress( new ValidationErrorHandler( "value" ), User, true ).Error( out var validatedUser ) is not null ||
+		    !string.Equals( validatedUser, User, StringComparison.Ordinal ) )
 			throw new Exception( "user" );
 	}
 

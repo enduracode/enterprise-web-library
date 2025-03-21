@@ -54,17 +54,17 @@ public class TimeControl: FormControl<FlowComponent> {
 				validationMethod: validationMethod == null
 					                  ? null
 					                  : ( postBackValue, validator ) => {
-						                  var errorHandler = new ValidationErrorHandler( "time" );
-						                  var validatedValue = validator.GetNullableTimeOfDayTimeSpan(
-								                  errorHandler,
-								                  postBackValue.ToUpper(),
-								                  DateTimeTools.HourAndMinuteFormat.ToCollection().ToArray(),
-								                  allowEmpty )
-							                  .ToNewUnderlyingValue( v => LocalTime.FromTicksSinceMidnight( v.Ticks ) );
-						                  if( errorHandler.LastResult != ErrorCondition.NoError ) {
+						                  var validationResult = validator.GetNullableTimeOfDayTimeSpan(
+							                  new ValidationErrorHandler( "time" ),
+							                  postBackValue.ToUpper(),
+							                  DateTimeTools.HourAndMinuteFormat.ToCollection().ToArray(),
+							                  allowEmpty );
+						                  if( validationResult.Error( out _ ) is not null ) {
 							                  setup.ValidationErrorNotifier?.Invoke();
 							                  return;
 						                  }
+
+						                  var validatedValue = validationResult.Value.ToNewUnderlyingValue( v => LocalTime.FromTicksSinceMidnight( v.Ticks ) );
 
 						                  if( validatedValue.HasValue && !validatedValue.Value.InRange( minValue, maxValue ) ) {
 							                  validator.NoteErrorAndAddMessage( "The time is too early or too late." );

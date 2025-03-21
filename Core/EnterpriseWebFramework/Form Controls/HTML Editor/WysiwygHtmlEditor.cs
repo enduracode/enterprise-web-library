@@ -79,10 +79,9 @@ public class WysiwygHtmlEditor: FormControl<FlowComponent> {
 					return;
 
 				var errorHandler = new ValidationErrorHandler( "HTML" );
-				var validatedValue = maxLength.HasValue
-					                     ? validator.GetString( errorHandler, postBackValue.Value, allowEmpty, maxLength.Value )
-					                     : validator.GetString( errorHandler, postBackValue.Value, allowEmpty );
-				if( errorHandler.LastResult != ErrorCondition.NoError ) {
+				if( ( maxLength.HasValue
+					      ? validator.GetString( errorHandler, postBackValue.Value, allowEmpty, maxLength.Value )
+					      : validator.GetString( errorHandler, postBackValue.Value, allowEmpty ) ).Error( out var validatedValue ) is not null ) {
 					setup.ValidationErrorNotifier?.Invoke();
 					return;
 				}
