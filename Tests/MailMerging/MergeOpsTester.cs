@@ -24,11 +24,11 @@ namespace EnterpriseWebLibrary.Tests.MailMerging;
 internal class MergeOpsTester {
 	private static readonly string testingWordTemplatePath = EwlStatics.CombinePaths(
 		TestContext.CurrentContext.TestDirectory,
-		"..\\..\\TestFiles\\MergeOps\\word.docx" );
+		"..\\..\\..\\..\\TestFiles\\MergeOps\\word.docx" );
 
 	private static readonly string testingPracticesWordTemplatePath = EwlStatics.CombinePaths(
 		TestContext.CurrentContext.TestDirectory,
-		"..\\..\\TestFiles\\MergeOps\\PracticesUserAccess.docx" );
+		"..\\..\\..\\..\\TestFiles\\MergeOps\\PracticesUserAccess.docx" );
 
 	private string timestampPrefix;
 	private string outputFolderPath;
