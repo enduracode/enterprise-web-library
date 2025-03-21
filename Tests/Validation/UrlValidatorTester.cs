@@ -148,6 +148,6 @@ internal class UrlValidatorTester {
 	}
 
 	private string getValidationResult( string possibleUrl ) {
-		return validator.GetUrl( new ValidationErrorHandler( "" ), possibleUrl, false );
+		return validator.GetUrl( new ValidationErrorHandler( "" ), possibleUrl, false ).Value;
 	}
 }
