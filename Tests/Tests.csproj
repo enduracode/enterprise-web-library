@@ -4,6 +4,7 @@
     <TargetFramework>net8.0-windows</TargetFramework>
     <AssemblyName>EnterpriseWebLibrary.Tests</AssemblyName>
     <RootNamespace>EnterpriseWebLibrary.Tests</RootNamespace>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <Nullable>enable</Nullable>
     <NuGetAuditMode>direct</NuGetAuditMode>
   </PropertyGroup>
