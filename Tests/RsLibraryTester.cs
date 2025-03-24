@@ -14,11 +14,10 @@ using static Humanizer.StringExtensions;
 
 namespace EnterpriseWebLibrary.Tests;
 
-internal static class RsLibraryTester {
-	[ MTAThread ]
-	public static void Main() {
-		GlobalInitializationOps.InitStatics( new GlobalInitializer(), "Tester", false );
-
+[ TestFixture ]
+internal class RsLibraryTester {
+	[ Test ]
+	public void OldMain() {
 		EwlStatics.RunStandardLibraryTests();
 		testMailMerging();
 
@@ -107,91 +106,91 @@ internal static class RsLibraryTester {
 		var vp = new ValidationErrorHandler(
 			validationErrorType => Console.WriteLine( "\nThe following validation resulted in an error: " + validationErrorType ) );
 
-		Console.WriteLine( validator.GetUrl( vp, "hTTp://RedStapler.biZ/fRed", false ).value( out var errorType ) );
-		Assert.IsFalse( errorType is not null );
+		Console.WriteLine( validator.GetUrl( vp, "hTTp://RedStapler.biZ/fRed", false ).Value( out var errorType ) );
+		Assert.That( errorType is not null, Is.False );
 
-		Console.WriteLine( validator.GetUrl( vp, "fred", true ).value( out errorType ) );
-		Assert.IsFalse( errorType is null );
+		Console.WriteLine( validator.GetUrl( vp, "fred", true ).Value( out errorType ) );
+		Assert.That( errorType is null, Is.False );
 
-		Console.Write( validator.GetNullableSqlSmallDateTimeExact( vp, "fred", "MM/dd/yyy", false ).value( out errorType ) );
-		Assert.IsFalse( errorType is null );
+		Console.Write( validator.GetNullableSqlSmallDateTimeExact( vp, "fred", "MM/dd/yyy", false ).Value( out errorType ) );
+		Assert.That( errorType is null, Is.False );
 
-		Console.WriteLine( validator.GetInt( vp, "fred" ).value( out errorType ) );
-		Assert.IsFalse( errorType is null );
+		Console.WriteLine( validator.GetInt( vp, "fred" ).Value( out errorType ) );
+		Assert.That( errorType is null, Is.False );
 
-		Console.WriteLine( validator.GetInt( vp, "-342" ).value( out errorType ) );
-		Assert.IsFalse( errorType is not null );
+		Console.WriteLine( validator.GetInt( vp, "-342" ).Value( out errorType ) );
+		Assert.That( errorType is not null, Is.False );
 
-		Console.WriteLine( validator.GetSqlSmallDateTimeFromParts( vp, "3", "", "" ).value( out errorType ) );
-		Assert.IsFalse( errorType is null );
+		Console.WriteLine( validator.GetSqlSmallDateTimeFromParts( vp, "3", "", "" ).Value( out errorType ) );
+		Assert.That( errorType is null, Is.False );
 
-		Console.WriteLine( validator.GetSqlSmallDateTimeFromParts( vp, "", "", "" ).value( out errorType ) );
-		Assert.IsFalse( errorType is null );
+		Console.WriteLine( validator.GetSqlSmallDateTimeFromParts( vp, "", "", "" ).Value( out errorType ) );
+		Assert.That( errorType is null, Is.False );
 
-		Console.WriteLine( validator.GetZipCode( vp, "14580", true ).value( out errorType ).FullZipCode );
-		Assert.IsFalse( errorType is not null );
+		Console.WriteLine( validator.GetZipCode( vp, "14580", true ).Value( out errorType ).FullZipCode );
+		Assert.That( errorType is not null, Is.False );
 
-		Console.WriteLine( validator.GetZipCode( vp, "14580-1234", true ).value( out errorType ).FullZipCode );
-		Assert.IsFalse( errorType is not null );
+		Console.WriteLine( validator.GetZipCode( vp, "14580-1234", true ).Value( out errorType ).FullZipCode );
+		Assert.That( errorType is not null, Is.False );
 
-		Console.WriteLine( validator.GetZipCode( vp, "123", false ).value( out errorType ).FullZipCode );
-		Assert.IsFalse( errorType is null );
+		Console.WriteLine( validator.GetZipCode( vp, "123", false ).Value( out errorType ).FullZipCode );
+		Assert.That( errorType is null, Is.False );
 
 		Console.WriteLine( "---------------------------------\nPhone Numbers:\n------------------------------------\n" );
-		Console.WriteLine( validator.GetPhoneNumber( vp, "5854556476", true, true, false ).value( out errorType ) );
-		Assert.IsFalse( errorType is not null );
+		Console.WriteLine( validator.GetPhoneNumber( vp, "5854556476", true, true, false ).Value( out errorType ) );
+		Assert.That( errorType is not null, Is.False );
 
 
-		Console.WriteLine( validator.GetPhoneNumber( vp, "585 4556476", true, true, false ).value( out errorType ) );
-		Assert.IsFalse( errorType is not null );
+		Console.WriteLine( validator.GetPhoneNumber( vp, "585 4556476", true, true, false ).Value( out errorType ) );
+		Assert.That( errorType is not null, Is.False );
 
-		Console.WriteLine( validator.GetPhoneNumber( vp, "( 585 )455-6476", true, true, false ).value( out errorType ) );
-		Assert.IsFalse( errorType is not null );
+		Console.WriteLine( validator.GetPhoneNumber( vp, "( 585 )455-6476", true, true, false ).Value( out errorType ) );
+		Assert.That( errorType is not null, Is.False );
 
-		Console.WriteLine( validator.GetPhoneNumber( vp, "(585)455-6476", true, true, false ).value( out errorType ) );
-		Assert.IsFalse( errorType is not null );
+		Console.WriteLine( validator.GetPhoneNumber( vp, "(585)455-6476", true, true, false ).Value( out errorType ) );
+		Assert.That( errorType is not null, Is.False );
 
-		Console.WriteLine( validator.GetPhoneNumber( vp, "585-455-6476", true, true, false ).value( out errorType ) );
-		Assert.IsFalse( errorType is not null );
+		Console.WriteLine( validator.GetPhoneNumber( vp, "585-455-6476", true, true, false ).Value( out errorType ) );
+		Assert.That( errorType is not null, Is.False );
 
-		Console.WriteLine( "With lots of spaces: " + validator.GetPhoneNumber( vp, "585   872   0291  ", true, true, false ).value( out errorType ) );
-		Assert.IsFalse( errorType is not null );
+		Console.WriteLine( "With lots of spaces: " + validator.GetPhoneNumber( vp, "585   872   0291  ", true, true, false ).Value( out errorType ) );
+		Assert.That( errorType is not null, Is.False );
 
-		Console.WriteLine( "With x: " + validator.GetPhoneNumber( vp, "5854556476   x   12345", true, true, false ).value( out errorType ) );
-		Assert.IsFalse( errorType is not null );
+		Console.WriteLine( "With x: " + validator.GetPhoneNumber( vp, "5854556476   x   12345", true, true, false ).Value( out errorType ) );
+		Assert.That( errorType is not null, Is.False );
 
-		Console.WriteLine( "With space ext. allowed: " + validator.GetPhoneNumber( vp, "5854556476 12345", true, true, false ).value( out errorType ) );
-		Assert.IsFalse( errorType is not null );
+		Console.WriteLine( "With space ext. allowed: " + validator.GetPhoneNumber( vp, "5854556476 12345", true, true, false ).Value( out errorType ) );
+		Assert.That( errorType is not null, Is.False );
 
-		Console.WriteLine( "Toni example 1: " + validator.GetPhoneNumber( vp, "321-663-4810", true, true, false ).value( out errorType ) );
-		Assert.IsFalse( errorType is not null );
+		Console.WriteLine( "Toni example 1: " + validator.GetPhoneNumber( vp, "321-663-4810", true, true, false ).Value( out errorType ) );
+		Assert.That( errorType is not null, Is.False );
 
-		Console.WriteLine( "Toni example 2: " + validator.GetPhoneNumber( vp, "585-336-7600 ext 65361", true, true, false ).value( out errorType ) );
-		Assert.IsFalse( errorType is not null );
+		Console.WriteLine( "Toni example 2: " + validator.GetPhoneNumber( vp, "585-336-7600 ext 65361", true, true, false ).Value( out errorType ) );
+		Assert.That( errorType is not null, Is.False );
 
-		Console.WriteLine( "Gibberish, should fail^ " + validator.GetPhoneNumber( vp, "sodifuoisafdoiu", true, true, true ).value( out errorType ) );
-		Assert.IsFalse( errorType is null );
-
-		Console.WriteLine(
-			"With space no ext. allowed, should fail^ " + validator.GetPhoneNumber( vp, "5854556476 12345", false, false, true ).value( out errorType ) );
-		Assert.IsFalse( errorType is null );
+		Console.WriteLine( "Gibberish, should fail^ " + validator.GetPhoneNumber( vp, "sodifuoisafdoiu", true, true, true ).Value( out errorType ) );
+		Assert.That( errorType is null, Is.False );
 
 		Console.WriteLine(
-			"With extension and no delimeters, should fail^ " + validator.GetPhoneNumber( vp, "585455647612345", true, true, false ).value( out errorType ) );
-		Assert.IsFalse( errorType is null );
+			"With space no ext. allowed, should fail^ " + validator.GetPhoneNumber( vp, "5854556476 12345", false, false, true ).Value( out errorType ) );
+		Assert.That( errorType is null, Is.False );
+
+		Console.WriteLine(
+			"With extension and no delimeters, should fail^ " + validator.GetPhoneNumber( vp, "585455647612345", true, true, false ).Value( out errorType ) );
+		Assert.That( errorType is null, Is.False );
 
 		Console.WriteLine(
 			"With extension and no delimeters, should succeed since allowGarbage is on. " +
-			validator.GetPhoneNumber( vp, "585455647612345", true, true, true ).value( out errorType ) );
-		Assert.IsFalse( errorType is not null );
+			validator.GetPhoneNumber( vp, "585455647612345", true, true, true ).Value( out errorType ) );
+		Assert.That( errorType is not null, Is.False );
 
-		Console.WriteLine( "Should fail^ " + validator.GetPhoneNumber( vp, "02934", true, true, false ).value( out errorType ) );
-		Assert.IsFalse( errorType is null );
+		Console.WriteLine( "Should fail^ " + validator.GetPhoneNumber( vp, "02934", true, true, false ).Value( out errorType ) );
+		Assert.That( errorType is null, Is.False );
 
 		Console.WriteLine( "------------------------\nEnd phone numbers.\n-------------------------------\n" );
 
-		Console.WriteLine( validator.GetByte( vp, "234987234" ).value( out errorType ) );
-		Assert.IsFalse( errorType is null );
+		Console.WriteLine( validator.GetByte( vp, "234987234" ).Value( out errorType ) );
+		Assert.That( errorType is null, Is.False );
 
 		var key = Rijndael.Create().Key;
 		Console.Write( "Encryption Key: { " );
@@ -202,7 +201,7 @@ internal static class RsLibraryTester {
 		Console.WriteLine( "SSN length: " + EncryptionOps.EncryptString( EncryptionOps.GenerateInitVector(), "987654321" ).Length );
 	}
 
-	private static void testMailMerging() {
+	private void testMailMerging() {
 		const string outputFolderName = "MergeOps";
 		var outputFolder = EwlStatics.CombinePaths( TestStatics.OutputFolderPath, outputFolderName );
 		IoMethods.DeleteFolder( outputFolder );
@@ -284,8 +283,10 @@ internal static class RsLibraryTester {
 
 		TestStatics.OutputReadme( outputFolder, explanations );
 	}
+}
 
-	private static T value<T>( this ValidationResult<T> result, out ValidationErrorType? errorType ) {
+internal static class ValidationResultExtensions {
+	public static T Value<T>( this ValidationResult<T> result, out ValidationErrorType? errorType ) {
 		errorType = result.Error( out var value )?.Type;
 		return value;
 	}

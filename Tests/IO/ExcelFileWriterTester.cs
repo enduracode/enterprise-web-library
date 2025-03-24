@@ -62,7 +62,7 @@ internal class ExcelFileWriterTester {
 		runTest(
 			writer => {
 				Console.WriteLine( "Making sure having no default worksheet works." );
-				Assert.IsNull( writer.DefaultWorksheet );
+				Assert.That( writer.DefaultWorksheet, Is.Null );
 				writer.AddWorksheet( "Test" );
 				return "no_default_worksheet_testing";
 			},
@@ -80,7 +80,7 @@ internal class ExcelFileWriterTester {
 				writer.DefaultWorksheet.AddRowToWorksheet( "500", "5000", "5", "50" );
 				writer.DefaultWorksheet.AddRowToWorksheet( "500", "5000", "5", "50" );
 
-				Assert.IsNotNull( writer.DefaultWorksheet );
+				Assert.That( writer.DefaultWorksheet, Is.Not.Null );
 
 				return "default_worksheet_testing";
 			} );
@@ -212,7 +212,7 @@ internal class ExcelFileWriterTester {
 		var writer = new ExcelFileWriter();
 		const string fileName = "get safe filename testing :" + "_gibberish_here_*$#*&(#@)*(?|\\/@#_end_gibberish";
 		var safeFileName = ExcelFileWriter.GetSafeFileName( fileName );
-		Assert.AreEqual( safeFileName, "GetSafeFilenameTesting_Gibberish_here_$#&(#@)(@#_end_gibberish.xlsx" );
+		Assert.That( safeFileName, Is.EqualTo( "GetSafeFilenameTesting_Gibberish_here_$#&(#@)(@#_end_gibberish.xlsx" ) );
 
 		/* Then actually write it so we're sure the filesystem accepts it too. */
 		runTest( actualWriter => fileName );
@@ -269,17 +269,17 @@ internal class ExcelFileWriterTester {
 				const string url = "http://www.google.com";
 				const string email = "bob@bob.bob";
 				const double @double = 1.23;
-				var @dateTime = DateTime.Now.ToString();
+				var dateTime = DateTime.Now.ToString();
 
 				Console.WriteLine( "Writing supported data types to the worksheet." );
 
 				writer.DefaultWorksheet.AddHeaderToWorksheet(
-					"string '{0}', url '{3}', email '{4}', double '{1}', DateTime '{2}' to the worksheet.".FormatWith( str, @double, @dateTime, url, email ) );
+					"string '{0}', url '{3}', email '{4}', double '{1}', DateTime '{2}' to the worksheet.".FormatWith( str, @double, dateTime, url, email ) );
 				writer.DefaultWorksheet.AddRowToWorksheet( str );
 				writer.DefaultWorksheet.AddRowToWorksheet( url );
 				writer.DefaultWorksheet.AddRowToWorksheet( email );
 				writer.DefaultWorksheet.AddRowToWorksheet( @double.ToString() );
-				writer.DefaultWorksheet.AddRowToWorksheet( @dateTime );
+				writer.DefaultWorksheet.AddRowToWorksheet( dateTime );
 
 				return "supported_data_types";
 			} );

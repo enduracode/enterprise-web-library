@@ -136,7 +136,7 @@ internal class MergeOpsTester {
 			.CreateDirectory( Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.DesktopDirectory ), "MergeOps Test Output" ) )
 			.FullName;
 
-		Assert.IsTrue( File.Exists( testingWordTemplatePath ), "Template file wasn't found: " + testingWordTemplatePath );
+		Assert.That( File.Exists( testingWordTemplatePath ), Is.True, "Template file wasn't found: " + testingWordTemplatePath );
 	}
 
 	[ SetUp ]
