@@ -364,7 +364,6 @@ public static class EwfOps {
 									cssInfos.Add( new StaticFiles.Third_party.Select_cssCss() );
 									cssInfos.Add( new StaticFiles.Versioned.Third_party.Chosen.Chosen_v187.ChosenminCss() );
 									cssInfos.Add( new StaticFiles.Third_party.Qtip2.JqueryqtipminCss() );
-									cssInfos.Add( new ExternalResource( "//cdnjs.cloudflare.com/ajax/libs/dialog-polyfill/0.4.9/dialog-polyfill.min.css" ) );
 									cssInfos.Add( new StaticFiles.Styles.BasicCss() );
 									if( contentUsesUi )
 										cssInfos.AddRange(
@@ -401,7 +400,6 @@ public static class EwfOps {
 									markup.Append( "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@duetds/date-picker@1.4.0/dist/duet/duet.esm.js\"></script>" );
 									markup.Append( "<script nomodule src=\"https://cdn.jsdelivr.net/npm/@duetds/date-picker@1.4.0/dist/duet/duet.js\"></script>" );
 									markup.Append( getElement( new StaticFiles.Third_party.Qtip2.JqueryqtipminJs() ) );
-									markup.Append( getElement( new ExternalResource( "//cdnjs.cloudflare.com/ajax/libs/dialog-polyfill/0.4.9/dialog-polyfill.min.js" ) ) );
 									markup.Append( getElement( new StaticFiles.Third_party.Spin_js.SpinminJs() ) );
 									markup.Append( getElement( new ExternalResource( "https://cdn.ckeditor.com/4.22.1/full/ckeditor.js" ) ) );
 									markup.Append( getElement( new ExternalResource( "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js" ) ) );

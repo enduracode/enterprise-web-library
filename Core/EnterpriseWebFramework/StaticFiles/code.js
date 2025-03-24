@@ -13,7 +13,6 @@ function initPage() {
 		}
 	} );
 
-	$( "dialog" ).each( function() { dialogPolyfill.registerDialog( this ); } );
 	Chart.defaults.global.defaultFontColor = $( "body" ).css( "color" );
 	$( document ).keydown( function( e ) { if( $( ".ewfProcessingDialog" ).get( 0 ).open && e.key === "Escape" ) e.preventDefault(); } );
 }
