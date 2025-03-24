@@ -13,6 +13,7 @@ public static class TestStatics {
 		"..",
 		"..",
 		"..",
+		"..",
 		"TestFiles" );
 
 	public static void RunTests() {
