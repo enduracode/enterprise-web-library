@@ -285,16 +285,43 @@ public class RequestState {
 									"overriding PageBase.IsSlow (for GET request issues)",
 									"overriding PageBase.dataUpdateIsSlow or using the isSlow parameter on the PostBack constructors (for post-back issues)" ),
 								$"If the problem was caused by slow initial execution of a particular code path, you may be able to fix it by making a warmup request within {warmupPeriodDuration.ToTimeSpan().ToConciseString()} of the first request to the application, when performance problems are not reported." ) +
-							Environment.NewLine + Environment.NewLine + "Profiler results:" + getProfilerResults(),
+							Environment.NewLine + Environment.NewLine + "Profiler results (durations in ms):" + getProfilerResults(),
 							null );
 				}
 			},
 			ContinuationSemaphore.Dispose );
 	}
 
-	// Remove machine name, UTC date/time, and trailing line break.
-	private string getProfilerResults() =>
-		Profiler.RenderPlainText().Separate( Environment.NewLine, false )[ 1..^1 ]
-			.Aggregate( new StringBuilder(), ( builder, line ) => builder.AppendLine().Append( line ) )
-			.ToString();
+	private string getProfilerResults() {
+		var builder = new StringBuilder();
+		foreach( var timing in Profiler!.GetTimingHierarchy() ) {
+			builder.AppendLine();
+			for( var i = 0; i < timing.Depth; i += 1 )
+				builder.Append( ">" );
+			if( timing.Depth > 0 )
+				builder.Append( ' ' );
+			builder.Append( $"{timing.Name} {( timing.DurationMilliseconds ?? 0 ).ToString( "#####0.##" )}" );
+			if( timing.Depth > 0 )
+				builder.Append( $" +{timing.StartMilliseconds.ToString( "#####0" )}" );
+
+			if( !timing.HasCustomTimings )
+				continue;
+
+			foreach( var pair in timing.CustomTimings ) {
+				var type = pair.Key;
+				var customTimings = pair.Value;
+
+				builder.Append( " (" )
+					.Append( type )
+					.Append( " = " )
+					.Append( ( customTimings.Sum( ct => ct.DurationMilliseconds ) ?? 0 ).ToString( "###,##0.##" ) )
+					.Append( " in " )
+					.Append( customTimings.Count )
+					.Append( " cmd" )
+					.Append( customTimings.Count == 1 ? string.Empty : "s" )
+					.Append( ")" );
+			}
+		}
+		return builder.ToString();
+	}
 }
