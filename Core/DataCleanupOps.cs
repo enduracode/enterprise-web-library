@@ -10,13 +10,13 @@ using NodaTime.Text;
 namespace EnterpriseWebLibrary;
 
 /// <summary>
-/// EWL use only.
+/// Generated code use only.
 /// </summary>
 [ PublicAPI ]
 [ EditorBrowsable( EditorBrowsableState.Never ) ]
 public static class DataCleanupOps {
 	/// <summary>
-	/// EWL use only.
+	/// Generated code use only.
 	/// </summary>
 	[ EditorBrowsable( EditorBrowsableState.Never ) ]
 	public static void CleanUpData() {
