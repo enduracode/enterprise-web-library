@@ -42,43 +42,7 @@ public class DatabaseConnection {
 		var isNight = SystemClock.Instance.GetCurrentInstant().InZone( DateTimeZoneProviders.Tzdb.GetSystemDefault() ).TimeOfDay.IsInNight();
 		var timeout = isNight ? 300 : useLongTimeouts ? 60 : 15;
 
-		// Build the connection string.
-		string connectionString;
-		if( databaseInfo is SqlServerInfo sqlServerInfo ) {
-			var builder = new SqlConnectionStringBuilder();
-
-			builder.DataSource = sqlServerInfo.Server ?? "(local)";
-			if( sqlServerInfo.LoginName is null )
-				builder.IntegratedSecurity = true;
-			else {
-				builder.UserID = sqlServerInfo.LoginName;
-				builder.Password = sqlServerInfo.Password;
-			}
-			builder.TrustServerCertificate = true;
-			builder.InitialCatalog = sqlServerInfo.Database;
-			if( !sqlServerInfo.SupportsConnectionPooling )
-				builder.Pooling = false;
-			builder.ConnectTimeout = timeout;
-
-			connectionString = builder.ConnectionString;
-		}
-		else if( databaseInfo is MySqlInfo mySqlInfo ) {
-			connectionString = "Server=localhost; User ID=root; Password=password; Database=" + mySqlInfo.Database;
-			if( !mySqlInfo.SupportsConnectionPooling )
-				connectionString += "; Pooling=false";
-			connectionString += "; Connection Timeout={0}".FormatWith( timeout );
-		}
-		else if( databaseInfo is OracleInfo oracleInfo ) {
-			connectionString = "Data Source=" + oracleInfo.DataSource + "; User Id=" + oracleInfo.UserAndSchema + "; Password=" + oracleInfo.Password +
-			                   ( oracleInfo.UserAndSchema == "sys" ? "; DBA Privilege=SYSDBA" : "" );
-			if( !oracleInfo.SupportsConnectionPooling )
-				connectionString = StringTools.ConcatenateWithDelimiter( "; ", connectionString, "Pooling=false" );
-			connectionString += "; Connection Timeout={0}".FormatWith( timeout );
-		}
-		else
-			throw new Exception( "Invalid database information object type." );
-
-		cn = new ProfiledDbConnection( databaseInfo.CreateConnection( connectionString ), MiniProfiler.Current );
+		cn = new ProfiledDbConnection( databaseInfo.CreateConnection( databaseInfo.GetConnectionString( timeout ) ), MiniProfiler.Current );
 
 		defaultCommandTimeout = timeout;
 	}

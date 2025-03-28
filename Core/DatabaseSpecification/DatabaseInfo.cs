@@ -32,6 +32,11 @@ public interface DatabaseInfo {
 	string QueryCacheHint { get; }
 
 	/// <summary>
+	/// Returns the connection string for the database.
+	/// </summary>
+	string GetConnectionString( int timeout );
+
+	/// <summary>
 	/// Creates an ADO.NET database connection to the database.
 	/// </summary>
 	DbConnection CreateConnection( string connectionString );

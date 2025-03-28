@@ -74,6 +74,25 @@ public class SqlServerInfo: DatabaseInfo {
 	/// </summary>
 	public string? FullTextCatalog => fullTextCatalog;
 
+	string DatabaseInfo.GetConnectionString( int timeout ) {
+		var builder = new SqlConnectionStringBuilder();
+
+		builder.DataSource = server ?? "(local)";
+		if( loginName is null )
+			builder.IntegratedSecurity = true;
+		else {
+			builder.UserID = loginName;
+			builder.Password = password;
+		}
+		builder.TrustServerCertificate = true;
+		builder.InitialCatalog = database;
+		if( !supportsConnectionPooling )
+			builder.Pooling = false;
+		builder.ConnectTimeout = timeout;
+
+		return builder.ConnectionString;
+	}
+
 	DbConnection DatabaseInfo.CreateConnection( string connectionString ) => new SqlConnection( connectionString );
 
 	DbCommand DatabaseInfo.CreateCommand() => new ProfiledDbCommand( new SqlCommand(), null, MiniProfiler.Current );

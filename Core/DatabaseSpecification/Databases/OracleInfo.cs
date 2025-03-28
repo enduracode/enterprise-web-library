@@ -70,6 +70,15 @@ public class OracleInfo: DatabaseInfo {
 	/// </summary>
 	public bool SupportsLinguisticIndexes => supportsLinguisticIndexes;
 
+	string DatabaseInfo.GetConnectionString( int timeout ) {
+		var connectionString = "Data Source=" + dataSource + "; User Id=" + userAndSchema + "; Password=" + password +
+		                       ( userAndSchema == "sys" ? "; DBA Privilege=SYSDBA" : "" );
+		if( !supportsConnectionPooling )
+			connectionString = StringTools.ConcatenateWithDelimiter( "; ", connectionString, "Pooling=false" );
+		connectionString += "; Connection Timeout={0}".FormatWith( timeout );
+		return connectionString;
+	}
+
 	DbConnection DatabaseInfo.CreateConnection( string connectionString ) => provider!.Value.CreateConnection( connectionString, !supportsLinguisticIndexes );
 
 	DbCommand DatabaseInfo.CreateCommand() => new ProfiledDbCommand( provider!.Value.CreateCommand(), null, MiniProfiler.Current );

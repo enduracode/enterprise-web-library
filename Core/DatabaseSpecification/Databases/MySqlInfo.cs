@@ -47,6 +47,14 @@ public class MySqlInfo: DatabaseInfo {
 	/// </summary>
 	public bool SupportsConnectionPooling => supportsConnectionPooling;
 
+	string DatabaseInfo.GetConnectionString( int timeout ) {
+		var connectionString = "Server=localhost; User ID=root; Password=password; Database=" + database;
+		if( !supportsConnectionPooling )
+			connectionString += "; Pooling=false";
+		connectionString += "; Connection Timeout={0}".FormatWith( timeout );
+		return connectionString;
+	}
+
 	DbConnection DatabaseInfo.CreateConnection( string connectionString ) {
 		var connection = factory!.Value.CreateConnection()!;
 		connection.ConnectionString = connectionString;
