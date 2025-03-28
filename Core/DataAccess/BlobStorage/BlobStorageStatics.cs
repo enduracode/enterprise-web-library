@@ -11,7 +11,7 @@ public static class BlobStorageStatics {
 	private static SystemProviderReference<SystemBlobStorageProvider>? provider;
 
 	internal static void Init() {
-		provider = SystemSpecificLogicStatics.GetSystemLibraryProvider<SystemBlobStorageProvider>( providerName );
+		provider = SystemSpecificLogicStatics.GetLibraryProvider<SystemBlobStorageProvider>( providerName );
 	}
 
 	internal static SystemBlobStorageProvider SystemProvider => provider!.GetProvider()!;

@@ -24,7 +24,7 @@ public static class UserManagementStatics {
 
 		SystemUser.Init( currentUserGetter );
 
-		provider = SystemSpecificLogicStatics.GetSystemLibraryProvider<SystemUserManagementProvider>( providerName );
+		provider = SystemSpecificLogicStatics.GetLibraryProvider<SystemUserManagementProvider>( providerName );
 		UserManagementStatics.certificateUpdateNotifier = certificateUpdateNotifier;
 	}
 

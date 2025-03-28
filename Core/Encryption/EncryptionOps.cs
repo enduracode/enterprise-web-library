@@ -11,7 +11,7 @@ public static class EncryptionOps {
 	private static SystemProviderReference<SystemEncryptionProvider>? provider;
 
 	internal static void Init() {
-		provider = SystemSpecificLogicStatics.GetSystemLibraryProvider<SystemEncryptionProvider>( providerName );
+		provider = SystemSpecificLogicStatics.GetLibraryProvider<SystemEncryptionProvider>( providerName );
 	}
 
 	internal static SystemEncryptionProvider SystemProvider => provider!.GetProvider()!;

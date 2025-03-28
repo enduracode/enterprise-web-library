@@ -292,7 +292,7 @@ public static class EwfOps {
 							EwfSafeRequestHandler.Init( ResourceBase.ExecuteDataModificationMethod );
 							ResourceBase.Init(
 								ResourceSerializationStatics.SerializeResource,
-								SystemSpecificLogicStatics.GetSystemLibraryProvider<SystemResourceSerializationProvider>( "ResourceSerialization" ),
+								SystemSpecificLogicStatics.GetLibraryProvider<SystemResourceSerializationProvider>( "ResourceSerialization" ),
 								getAppResourceSerializationProvider( providerGetter ),
 								( requestTransferred, resource ) => {
 									if( requestTransferred ) {

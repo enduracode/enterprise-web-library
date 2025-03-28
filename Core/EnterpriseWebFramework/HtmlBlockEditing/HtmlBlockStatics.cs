@@ -15,7 +15,7 @@ public static class HtmlBlockStatics {
 	private static SystemProviderReference<SystemHtmlBlockEditingProvider> provider;
 
 	internal static void Init() {
-		provider = SystemSpecificLogicStatics.GetSystemLibraryProvider<SystemHtmlBlockEditingProvider>( providerName );
+		provider = SystemSpecificLogicStatics.GetLibraryProvider<SystemHtmlBlockEditingProvider>( providerName );
 	}
 
 	internal static SystemHtmlBlockEditingProvider SystemProvider => provider.GetProvider();

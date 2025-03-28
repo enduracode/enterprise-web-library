@@ -17,7 +17,7 @@ public static class DataAccessStatics {
 	private static IReadOnlyCollection<DatabaseInfo> disabledAutomaticTransactionSecondaryDatabases = null!;
 
 	internal static void Init() {
-		provider = SystemSpecificLogicStatics.GetSystemLibraryProvider<SystemDataAccessProvider>( ProviderName );
+		provider = SystemSpecificLogicStatics.GetLibraryProvider<SystemDataAccessProvider>( ProviderName );
 
 		disabledAutomaticTransactionSecondaryDatabases =
 			provider.GetProvider( returnNullIfNotFound: true ) is AutomaticTransactionDisablingProvider automaticTransactionDisablingProvider

@@ -13,7 +13,7 @@ internal static class ExternalFunctionalityStatics {
 	private static ExternalSamlProvider? samlProvider;
 
 	internal static void Init() {
-		provider = SystemSpecificLogicStatics.GetSystemLibraryProvider<SystemExternalFunctionalityProvider>( ProviderName );
+		provider = SystemSpecificLogicStatics.GetLibraryProvider<SystemExternalFunctionalityProvider>( ProviderName );
 
 		mySqlProvider = provider.GetProvider( returnNullIfNotFound: true )?.GetMySqlProvider();
 

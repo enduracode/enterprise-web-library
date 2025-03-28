@@ -13,7 +13,7 @@ public static class SystemSpecificLogicStatics {
 
 	internal static void Init( Type globalInitializerType ) {
 		SystemSpecificLogicStatics.globalInitializerType = globalInitializerType;
-		GeneralProvider = GetSystemLibraryProvider<SystemGeneralProvider>( "General" ).GetProvider()!;
+		GeneralProvider = GetLibraryProvider<SystemGeneralProvider>( "General" ).GetProvider()!;
 	}
 
 	/// <summary>
@@ -22,7 +22,7 @@ public static class SystemSpecificLogicStatics {
 	public static string SystemDisplayName =>
 		GeneralProvider.SystemDisplayName.Length > 0 ? GeneralProvider.SystemDisplayName : ConfigurationStatics.InstallationConfiguration.SystemName;
 
-	internal static SystemProviderReference<ProviderType> GetSystemLibraryProvider<ProviderType>( string providerName ) where ProviderType: class =>
+	internal static SystemProviderReference<ProviderType> GetLibraryProvider<ProviderType>( string providerName ) where ProviderType: class =>
 		new SystemProviderGetter(
 			globalInitializerType.Assembly,
 			globalInitializerType.Namespace + ".Configuration." + ProvidersFolderAndNamespaceName,
