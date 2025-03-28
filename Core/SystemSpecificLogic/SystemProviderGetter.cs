@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 
-namespace EnterpriseWebLibrary.Configuration;
+namespace EnterpriseWebLibrary.SystemSpecificLogic;
 
 /// <summary>
 /// EWL use only.

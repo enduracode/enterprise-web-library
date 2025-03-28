@@ -1,7 +1,7 @@
 ﻿#nullable disable
-using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.EnterpriseWebFramework.WellKnownUrlHandling;
 using EnterpriseWebLibrary.ExternalFunctionality;
+using EnterpriseWebLibrary.SystemSpecificLogic;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.OpenIdProvider;
 

@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Email.SystemManagerInterface;
+using EnterpriseWebLibrary.SystemSpecificLogic;
 using StackExchange.Profiling;
 using Tewl.IO;
 
@@ -250,8 +251,8 @@ public static class EmailStatics {
 	/// </summary>
 	public static void SendEmailWithDefaultFromAddress( EmailMessage message ) {
 		message.From = new EmailAddress(
-			ConfigurationStatics.SystemGeneralProvider.EmailDefaultFromAddress,
-			ConfigurationStatics.SystemGeneralProvider.EmailDefaultFromName );
+			SystemSpecificLogicStatics.GeneralProvider.EmailDefaultFromAddress,
+			SystemSpecificLogicStatics.GeneralProvider.EmailDefaultFromName );
 		SendEmail( message );
 	}
 

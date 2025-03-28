@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.SystemSpecificLogic;
 using Imageflow.Fluent;
 using NodaTime;
 
@@ -197,7 +197,7 @@ public static partial class EwlStatics {
 	/// <param name="newHeight">The new height of the image. If you specify this, the image may be cropped in one of the dimensions in order to keep the new
 	/// width and height as close as possible to the values you specify without stretching the image.</param>
 	public static ReadOnlySpan<byte> ResizeImage( byte[] image, int newWidth, int? newHeight = null ) {
-		if( !ConfigurationStatics.SystemGeneralProvider.ImageflowLicensed )
+		if( !SystemSpecificLogicStatics.GeneralProvider.ImageflowLicensed )
 			throw new Exception(
 				StringTools.ConcatenateWithSpace(
 					" ",

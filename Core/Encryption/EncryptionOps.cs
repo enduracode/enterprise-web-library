@@ -1,5 +1,5 @@
 using System.Security.Cryptography;
-using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.SystemSpecificLogic;
 
 namespace EnterpriseWebLibrary.Encryption;
 
@@ -11,7 +11,7 @@ public static class EncryptionOps {
 	private static SystemProviderReference<SystemEncryptionProvider>? provider;
 
 	internal static void Init() {
-		provider = ConfigurationStatics.GetSystemLibraryProvider<SystemEncryptionProvider>( providerName );
+		provider = SystemSpecificLogicStatics.GetSystemLibraryProvider<SystemEncryptionProvider>( providerName );
 	}
 
 	internal static SystemEncryptionProvider SystemProvider => provider!.GetProvider()!;

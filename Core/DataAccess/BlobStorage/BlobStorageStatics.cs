@@ -1,6 +1,6 @@
 using Aspose.Pdf.Facades;
-using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.IO;
+using EnterpriseWebLibrary.SystemSpecificLogic;
 using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.DataAccess.BlobStorage;
@@ -11,7 +11,7 @@ public static class BlobStorageStatics {
 	private static SystemProviderReference<SystemBlobStorageProvider>? provider;
 
 	internal static void Init() {
-		provider = ConfigurationStatics.GetSystemLibraryProvider<SystemBlobStorageProvider>( providerName );
+		provider = SystemSpecificLogicStatics.GetSystemLibraryProvider<SystemBlobStorageProvider>( providerName );
 	}
 
 	internal static SystemBlobStorageProvider SystemProvider => provider!.GetProvider()!;

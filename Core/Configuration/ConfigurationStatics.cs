@@ -9,11 +9,6 @@ namespace EnterpriseWebLibrary.Configuration;
 [ PublicAPI ]
 public static class ConfigurationStatics {
 	/// <summary>
-	/// EWL Core and Development Utility use only.
-	/// </summary>
-	public const string ProvidersFolderAndNamespaceName = "Providers";
-
-	/// <summary>
 	/// Development Utility and private use only.
 	/// </summary>
 	public const string TargetFramework = "net8.0-windows";
@@ -35,17 +30,10 @@ public static class ConfigurationStatics {
 	/// </summary>
 	public static InstallationConfiguration InstallationConfiguration { get; private set; } = null!;
 
-	private static Type globalInitializerType { get; set; } = null!;
-
-	/// <summary>
-	/// EWL use only.
-	/// </summary>
-	public static SystemGeneralProvider SystemGeneralProvider { get; private set; } = null!;
-
 	internal static string AppName { get; private set; } = null!;
 	internal static bool IsClientSideApp { get; private set; }
 
-	internal static void Init( string assemblyFolderPath, Type globalInitializerType, string appName, bool isClientSideApp, ref string initializationLog ) {
+	internal static void Init( string assemblyFolderPath, string appName, bool isClientSideApp, ref string initializationLog ) {
 		EwlFolderPath = Environment.GetEnvironmentVariable( "{0}FolderPath".FormatWith( EwlStatics.EwlInitialism.EnglishToPascal() ) ) ??
 		                @"C:\{0}".FormatWith( EwlStatics.EwlName );
 
@@ -88,18 +76,9 @@ public static class ConfigurationStatics {
 		InstallationConfiguration = new InstallationConfiguration( installationPath, isDevelopmentInstallation );
 		initializationLog += Environment.NewLine + "Successfully loaded installation configuration";
 
-		ConfigurationStatics.globalInitializerType = globalInitializerType;
-		SystemGeneralProvider = GetSystemLibraryProvider<SystemGeneralProvider>( "General" ).GetProvider()!;
-
 		AppName = appName;
 		IsClientSideApp = isClientSideApp;
 	}
-
-	/// <summary>
-	/// Gets the display name of the system.
-	/// </summary>
-	public static string SystemDisplayName =>
-		SystemGeneralProvider.SystemDisplayName.Length > 0 ? SystemGeneralProvider.SystemDisplayName : InstallationConfiguration.SystemName;
 
 	/// <summary>
 	/// Returns the default base URL for the specified web application. This will never have a trailing slash.
@@ -155,17 +134,6 @@ public static class ConfigurationStatics {
 	public static T LoadInstallationSharedConfiguration<T>() {
 		return XmlOps.DeserializeFromFile<T>( InstallationConfiguration.InstallationSharedConfigurationFilePath, false );
 	}
-
-
-	internal static SystemProviderReference<ProviderType> GetSystemLibraryProvider<ProviderType>( string providerName ) where ProviderType: class =>
-		new SystemProviderGetter(
-			globalInitializerType.Assembly,
-			globalInitializerType.Namespace + ".Configuration." + ProvidersFolderAndNamespaceName,
-			getProviderNotFoundErrorMessage ).GetProvider<ProviderType>( providerName );
-
-	private static string getProviderNotFoundErrorMessage( string providerName ) =>
-		providerName + " provider not found in system. To implement, create a class named " + providerName + @" in Library\Configuration\" +
-		ProvidersFolderAndNamespaceName + " and implement the System" + providerName + "Provider interface.";
 
 	/// <summary>
 	/// Installation Support Utility and private use only.

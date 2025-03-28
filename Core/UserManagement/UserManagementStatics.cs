@@ -1,4 +1,5 @@
 ﻿using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.SystemSpecificLogic;
 using EnterpriseWebLibrary.UserManagement.IdentityProviders;
 
 namespace EnterpriseWebLibrary.UserManagement;
@@ -23,7 +24,7 @@ public static class UserManagementStatics {
 
 		SystemUser.Init( currentUserGetter );
 
-		provider = ConfigurationStatics.GetSystemLibraryProvider<SystemUserManagementProvider>( providerName );
+		provider = SystemSpecificLogicStatics.GetSystemLibraryProvider<SystemUserManagementProvider>( providerName );
 		UserManagementStatics.certificateUpdateNotifier = certificateUpdateNotifier;
 	}
 

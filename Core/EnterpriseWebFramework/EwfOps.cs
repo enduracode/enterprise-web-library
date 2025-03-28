@@ -15,6 +15,7 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.EnterpriseWebFramework.WellKnownUrlHandling;
 using EnterpriseWebLibrary.ExternalFunctionality;
+using EnterpriseWebLibrary.SystemSpecificLogic;
 using EnterpriseWebLibrary.UserManagement;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Builder;
@@ -291,7 +292,7 @@ public static class EwfOps {
 							EwfSafeRequestHandler.Init( ResourceBase.ExecuteDataModificationMethod );
 							ResourceBase.Init(
 								ResourceSerializationStatics.SerializeResource,
-								ConfigurationStatics.GetSystemLibraryProvider<SystemResourceSerializationProvider>( "ResourceSerialization" ),
+								SystemSpecificLogicStatics.GetSystemLibraryProvider<SystemResourceSerializationProvider>( "ResourceSerialization" ),
 								getAppResourceSerializationProvider( providerGetter ),
 								( requestTransferred, resource ) => {
 									if( requestTransferred ) {
@@ -457,7 +458,7 @@ public static class EwfOps {
 									return new NonLiveLogIn(
 										url,
 										optionalParameterSetter: ( specifier, _ ) => {
-											specifier.Password = ConfigurationStatics.SystemGeneralProvider.IntermediateLogInPassword;
+											specifier.Password = SystemSpecificLogicStatics.GeneralProvider.IntermediateLogInPassword;
 											specifier.HideWarnings = hideWarnings;
 										} ).GetUrl();
 								},

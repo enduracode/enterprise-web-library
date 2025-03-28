@@ -2,6 +2,7 @@
 using System.Text.RegularExpressions;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.MailMerging;
+using EnterpriseWebLibrary.SystemSpecificLogic;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
@@ -14,7 +15,7 @@ public static class HtmlBlockStatics {
 	private static SystemProviderReference<SystemHtmlBlockEditingProvider> provider;
 
 	internal static void Init() {
-		provider = ConfigurationStatics.GetSystemLibraryProvider<SystemHtmlBlockEditingProvider>( providerName );
+		provider = SystemSpecificLogicStatics.GetSystemLibraryProvider<SystemHtmlBlockEditingProvider>( providerName );
 	}
 
 	internal static SystemHtmlBlockEditingProvider SystemProvider => provider.GetProvider();

@@ -2,6 +2,7 @@
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
+using EnterpriseWebLibrary.SystemSpecificLogic;
 using EnterpriseWebLibrary.UserManagement;
 using JetBrains.Annotations;
 
@@ -200,7 +201,7 @@ public class UiPageContent: PageContent {
 				  ? EwfUiStatics.AppProvider.GetLogoComponent()
 				  : null ) ?? ( BasePageStatics.AppProvider.AppDisplayName.Length > 0
 					                ? BasePageStatics.AppProvider.AppDisplayName
-					                : ConfigurationStatics.SystemDisplayName ).ToComponents(),
+					                : SystemSpecificLogicStatics.SystemDisplayName ).ToComponents(),
 			classes: appLogoClass );
 
 		var userInfo = new List<FlowComponent>();

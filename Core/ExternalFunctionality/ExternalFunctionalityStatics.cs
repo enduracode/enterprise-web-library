@@ -1,4 +1,4 @@
-﻿using EnterpriseWebLibrary.Configuration;
+﻿using EnterpriseWebLibrary.SystemSpecificLogic;
 using EnterpriseWebLibrary.UserManagement;
 
 namespace EnterpriseWebLibrary.ExternalFunctionality;
@@ -13,7 +13,7 @@ internal static class ExternalFunctionalityStatics {
 	private static ExternalSamlProvider? samlProvider;
 
 	internal static void Init() {
-		provider = ConfigurationStatics.GetSystemLibraryProvider<SystemExternalFunctionalityProvider>( ProviderName );
+		provider = SystemSpecificLogicStatics.GetSystemLibraryProvider<SystemExternalFunctionalityProvider>( ProviderName );
 
 		mySqlProvider = provider.GetProvider( returnNullIfNotFound: true )?.GetMySqlProvider();
 

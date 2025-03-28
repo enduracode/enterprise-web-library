@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.SystemSpecificLogic;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
 using NodaTime;

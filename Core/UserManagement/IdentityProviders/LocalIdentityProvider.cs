@@ -1,7 +1,7 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
-using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Email;
+using EnterpriseWebLibrary.SystemSpecificLogic;
 using JetBrains.Annotations;
 using NodaTime;
 using Tewl.InputValidation;
@@ -185,8 +185,8 @@ public class LocalIdentityProvider: IdentityProvider {
 		var message = new EmailMessage
 			{
 				Subject = isPasswordReset
-					          ? "Reset password for {0}".FormatWith( ConfigurationStatics.SystemDisplayName )
-					          : "Log in to {0}".FormatWith( ConfigurationStatics.SystemDisplayName ),
+					          ? "Reset password for {0}".FormatWith( SystemSpecificLogicStatics.SystemDisplayName )
+					          : "Log in to {0}".FormatWith( SystemSpecificLogicStatics.SystemDisplayName ),
 				BodyHtml = body.ToString()
 			};
 		message.ToAddresses.Add( new EmailAddress( emailAddress ) );

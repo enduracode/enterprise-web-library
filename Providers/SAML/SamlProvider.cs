@@ -7,8 +7,8 @@ using ComponentSpace.Saml2.Exceptions;
 using ComponentSpace.Saml2.Metadata;
 using ComponentSpace.Saml2.Metadata.Export;
 using ComponentSpace.Saml2.Metadata.Import;
-using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.ExternalFunctionality;
+using EnterpriseWebLibrary.SystemSpecificLogic;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 

@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 using System.Xml;
-using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.SystemSpecificLogic;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EnterpriseWebLibrary.ExternalFunctionality;

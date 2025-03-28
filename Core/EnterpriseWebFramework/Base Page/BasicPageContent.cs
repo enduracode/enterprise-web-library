@@ -2,6 +2,7 @@
 using System.Text;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.EnterpriseWebFramework.PageInfrastructure;
+using EnterpriseWebLibrary.SystemSpecificLogic;
 using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -212,7 +213,7 @@ public sealed class BasicPageContent: PageContent {
 										"application-name",
 										BasePageStatics.AppProvider.AppDisplayName.Length > 0
 											? BasePageStatics.AppProvider.AppDisplayName
-											: ConfigurationStatics.SystemDisplayName ) )
+											: SystemSpecificLogicStatics.SystemDisplayName ) )
 								.Append( getLink( "https://fonts.googleapis.com", "preconnect" ) )
 								.Append( getLink( "https://fonts.gstatic.com", "preconnect", attributes: new ElementAttribute( "crossorigin" ).ToCollection() ) )
 								.Concat( getTypekitLogicIfNecessary() )
@@ -426,7 +427,7 @@ public sealed class BasicPageContent: PageContent {
 	private string getTitle() =>
 		StringTools.ConcatenateWithDelimiter(
 			" - ",
-			BasePageStatics.AppProvider.AppDisplayName.Length > 0 ? BasePageStatics.AppProvider.AppDisplayName : ConfigurationStatics.SystemDisplayName,
+			BasePageStatics.AppProvider.AppDisplayName.Length > 0 ? BasePageStatics.AppProvider.AppDisplayName : SystemSpecificLogicStatics.SystemDisplayName,
 			PageBase.Current.ResourceFullName );
 
 	private IEnumerable<FlowComponent> getTypekitLogicIfNecessary() {

@@ -1,18 +1,18 @@
 ﻿using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.SystemSpecificLogic;
+
+namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 // EwlPage
 // Parameter: string returnUrl
 // OptionalParameter: string password
 // OptionalParameter: bool hideWarnings
-
-namespace EnterpriseWebLibrary.EnterpriseWebFramework;
-
 partial class NonLiveLogIn {
 	protected override void init() {
 		if( !ConfigurationStatics.IsIntermediateInstallation )
 			throw new ApplicationException( "installation type" );
 
-		if( Password.Any() && Password != ConfigurationStatics.SystemGeneralProvider.IntermediateLogInPassword )
+		if( Password.Any() && Password != SystemSpecificLogicStatics.GeneralProvider.IntermediateLogInPassword )
 			throw new ApplicationException( "password" );
 	}
 
@@ -38,7 +38,7 @@ partial class NonLiveLogIn {
 							setup: TextControlSetup.CreateObscured(),
 							validationMethod: ( postBackValue, validator ) => {
 								// NOTE: Using a single password here is a hack. The real solution is being able to use System Manager credentials, which is a goal.
-								var passwordMatch = postBackValue == ConfigurationStatics.SystemGeneralProvider.IntermediateLogInPassword;
+								var passwordMatch = postBackValue == SystemSpecificLogicStatics.GeneralProvider.IntermediateLogInPassword;
 								if( !passwordMatch )
 									validator.NoteErrorAndAddMessage( "Incorrect password." );
 							} ).ToFormItem( label: "Enter your password for this non-live installation".ToComponents() ) ) ) );

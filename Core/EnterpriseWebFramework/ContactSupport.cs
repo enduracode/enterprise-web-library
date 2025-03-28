@@ -1,13 +1,12 @@
 ﻿#nullable disable
-using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Email;
+using EnterpriseWebLibrary.SystemSpecificLogic;
 using Humanizer;
-
-// EwlPage
-// Parameter: string returnUrl
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
+// EwlPage
+// Parameter: string returnUrl
 partial class ContactSupport {
 	protected override bool userCanAccess => AppTools.User != null;
 	protected override UrlHandler getUrlParent() => new Admin.EntitySetup();
@@ -21,7 +20,7 @@ partial class ContactSupport {
 						{
 							Subject = "Support request from {0} in {1}".FormatWith(
 								AppTools.User.FriendlyName.Any() ? AppTools.User.FriendlyName : AppTools.User.Email,
-								ConfigurationStatics.SystemDisplayName ),
+								SystemSpecificLogicStatics.SystemDisplayName ),
 							BodyHtml = body.Value.GetTextAsEncodedHtml()
 						};
 					message.ReplyToAddresses.Add( new EmailAddress( AppTools.User.Email, AppTools.User.FriendlyName ) );

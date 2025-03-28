@@ -1,5 +1,6 @@
 ﻿using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DatabaseSpecification;
+using EnterpriseWebLibrary.SystemSpecificLogic;
 
 namespace EnterpriseWebLibrary.DataAccess;
 
@@ -16,7 +17,7 @@ public static class DataAccessStatics {
 	private static IReadOnlyCollection<DatabaseInfo> disabledAutomaticTransactionSecondaryDatabases = null!;
 
 	internal static void Init() {
-		provider = ConfigurationStatics.GetSystemLibraryProvider<SystemDataAccessProvider>( ProviderName );
+		provider = SystemSpecificLogicStatics.GetSystemLibraryProvider<SystemDataAccessProvider>( ProviderName );
 
 		disabledAutomaticTransactionSecondaryDatabases =
 			provider.GetProvider( returnNullIfNotFound: true ) is AutomaticTransactionDisablingProvider automaticTransactionDisablingProvider

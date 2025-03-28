@@ -1,5 +1,5 @@
 ﻿#nullable disable
-using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.SystemSpecificLogic;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 

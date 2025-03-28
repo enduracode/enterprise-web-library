@@ -10,6 +10,7 @@ using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.Encryption;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.ExternalFunctionality;
+using EnterpriseWebLibrary.SystemSpecificLogic;
 using EnterpriseWebLibrary.UserManagement;
 using Newtonsoft.Json;
 using NodaTime;
@@ -52,11 +53,12 @@ public static class GlobalInitializationOps {
 			if( initialized )
 				throw new ApplicationException( "This class can only be initialized once." );
 
-			if( globalInitializer == null )
+			if( globalInitializer is null )
 				throw new ApplicationException( "The system must have a global initializer." );
 
 			// Initialize these before the exception handling block below because it's reasonable for the exception handling to depend on them.
-			ConfigurationStatics.Init( assemblyFolderPath, globalInitializer.GetType(), appName, isClientSideApp, ref initializationLog );
+			ConfigurationStatics.Init( assemblyFolderPath, appName, isClientSideApp, ref initializationLog );
+			SystemSpecificLogicStatics.Init( globalInitializer.GetType() );
 			EmailStatics.Init(
 				( forceImmediateExecution, method ) => {
 					if( !AutomaticDatabaseConnectionManager.HasCurrent || forceImmediateExecution )
