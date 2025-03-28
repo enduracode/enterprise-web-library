@@ -1,4 +1,5 @@
 using System.Data.Common;
+using FluentMigrator.Runner;
 
 namespace EnterpriseWebLibrary.DatabaseSpecification;
 
@@ -60,4 +61,9 @@ public interface DatabaseInfo {
 	/// Sets the specified parameter's database-specific type to the type represented by the specified string.
 	/// </summary>
 	void SetParameterType( DbParameter parameter, string dbTypeString );
+
+	/// <summary>
+	/// Registers the dependency-injection services needed by the database for data migration.
+	/// </summary>
+	void RegisterDependencyInjectionServicesForMigration( IMigrationRunnerBuilder builder );
 }

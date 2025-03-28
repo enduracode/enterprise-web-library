@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using System.Data.Common;
+using FluentMigrator.Runner;
 using Microsoft.Data.SqlClient;
 using StackExchange.Profiling;
 using StackExchange.Profiling.Data;
@@ -103,5 +104,9 @@ public class SqlServerInfo: DatabaseInfo {
 
 	void DatabaseInfo.SetParameterType( DbParameter parameter, string dbTypeString ) {
 		( (SqlParameter)parameter ).SqlDbType = dbTypeString.ToEnum<SqlDbType>();
+	}
+
+	void DatabaseInfo.RegisterDependencyInjectionServicesForMigration( IMigrationRunnerBuilder builder ) {
+		builder.AddSqlServer2016();
 	}
 }

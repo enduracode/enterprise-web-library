@@ -1,5 +1,6 @@
 using System.Data.Common;
 using EnterpriseWebLibrary.ExternalFunctionality;
+using FluentMigrator.Runner;
 using StackExchange.Profiling;
 using StackExchange.Profiling.Data;
 
@@ -89,5 +90,9 @@ public class OracleInfo: DatabaseInfo {
 
 	void DatabaseInfo.SetParameterType( DbParameter parameter, string dbTypeString ) {
 		provider!.Value.SetParameterType( parameter, dbTypeString );
+	}
+
+	void DatabaseInfo.RegisterDependencyInjectionServicesForMigration( IMigrationRunnerBuilder builder ) {
+		throw new NotImplementedException();
 	}
 }

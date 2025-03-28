@@ -10,6 +10,7 @@
     <PackageReference Include="Aspose.Words" Version="23.8.0" />
     <PackageReference Include="Destructurama.JsonNet" Version="4.0.2" />
     <PackageReference Include="Ewl.Tools" Version="18.0.0" />
+    <PackageReference Include="FluentMigrator.Runner.SqlServer" Version="7.0.0" />
     <PackageReference Include="Humanizer.Core" Version="2.14.1" />
     <PackageReference Include="Ical.Net" Version="4.3.1" />
     <PackageReference Include="Imageflow.AllPlatforms" Version="0.13.2" />

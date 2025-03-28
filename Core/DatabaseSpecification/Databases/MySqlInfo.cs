@@ -1,5 +1,6 @@
 ﻿using System.Data.Common;
 using EnterpriseWebLibrary.ExternalFunctionality;
+using FluentMigrator.Runner;
 using StackExchange.Profiling;
 using StackExchange.Profiling.Data;
 
@@ -75,5 +76,9 @@ public class MySqlInfo: DatabaseInfo {
 	void DatabaseInfo.SetParameterType( DbParameter parameter, string dbTypeString ) {
 		var mySqlDbTypeProperty = parameter.GetType().GetProperty( "MySqlDbType" )!;
 		mySqlDbTypeProperty.SetValue( parameter, Enum.Parse( factory!.Value.GetType().Assembly.GetType( "MySqlConnector.MySqlDbType" )!, dbTypeString ), null );
+	}
+
+	void DatabaseInfo.RegisterDependencyInjectionServicesForMigration( IMigrationRunnerBuilder builder ) {
+		throw new NotImplementedException();
 	}
 }
