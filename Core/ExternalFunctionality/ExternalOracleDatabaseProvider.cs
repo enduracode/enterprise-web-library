@@ -1,4 +1,5 @@
 ﻿using System.Data.Common;
+using FluentMigrator.Runner;
 
 namespace EnterpriseWebLibrary.ExternalFunctionality;
 
@@ -15,4 +16,6 @@ public interface ExternalOracleDatabaseProvider {
 	string GetDbTypeString( object databaseSpecificType );
 
 	void SetParameterType( DbParameter parameter, string dbTypeString );
+
+	void RegisterDependencyInjectionServicesForMigration( IMigrationRunnerBuilder builder );
 }

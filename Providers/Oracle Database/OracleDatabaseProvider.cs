@@ -1,5 +1,6 @@
 ﻿using System.Data.Common;
 using EnterpriseWebLibrary.ExternalFunctionality;
+using FluentMigrator.Runner;
 using Oracle.ManagedDataAccess.Client;
 
 namespace EnterpriseWebLibrary.OracleDatabase;
@@ -33,5 +34,9 @@ public class OracleDatabaseProvider: ExternalOracleDatabaseProvider {
 
 	void ExternalOracleDatabaseProvider.SetParameterType( DbParameter parameter, string dbTypeString ) {
 		( (OracleParameter)parameter ).OracleDbType = dbTypeString.ToEnum<OracleDbType>();
+	}
+
+	void ExternalOracleDatabaseProvider.RegisterDependencyInjectionServicesForMigration( IMigrationRunnerBuilder builder ) {
+		builder.AddOracleManaged();
 	}
 }

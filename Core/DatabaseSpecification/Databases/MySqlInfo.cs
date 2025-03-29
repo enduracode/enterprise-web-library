@@ -10,10 +10,12 @@ namespace EnterpriseWebLibrary.DatabaseSpecification.Databases;
 /// Contains information about a MySQL database.
 /// </summary>
 public class MySqlInfo: DatabaseInfo {
+	private static Lazy<ExternalMySqlProvider>? provider;
 	private static Lazy<DbProviderFactory>? factory;
 
 	internal static void Init( Func<ExternalMySqlProvider> providerGetter ) {
-		factory = new Lazy<DbProviderFactory>( () => providerGetter().GetDbProviderFactory() );
+		provider = new Lazy<ExternalMySqlProvider>( providerGetter );
+		factory = new Lazy<DbProviderFactory>( () => provider.Value.GetDbProviderFactory() );
 	}
 
 	private readonly string secondaryDatabaseName;
@@ -79,6 +81,6 @@ public class MySqlInfo: DatabaseInfo {
 	}
 
 	void DatabaseInfo.RegisterDependencyInjectionServicesForMigration( IMigrationRunnerBuilder builder ) {
-		throw new NotImplementedException();
+		provider!.Value.RegisterDependencyInjectionServicesForMigration( builder );
 	}
 }

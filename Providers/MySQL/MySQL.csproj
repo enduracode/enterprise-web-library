@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <PackageReference Include="FluentMigrator.Runner.MySql" Version="7.1.0" />
     <PackageReference Include="MySqlConnector" Version="2.4.0" />
   </ItemGroup>
 

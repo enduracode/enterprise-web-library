@@ -93,6 +93,6 @@ public class OracleInfo: DatabaseInfo {
 	}
 
 	void DatabaseInfo.RegisterDependencyInjectionServicesForMigration( IMigrationRunnerBuilder builder ) {
-		throw new NotImplementedException();
+		provider!.Value.RegisterDependencyInjectionServicesForMigration( builder );
 	}
 }
