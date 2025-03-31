@@ -14,6 +14,16 @@ public class IsuStatics {
 	/// <summary>
 	/// Installation Support Utility use only.
 	/// </summary>
+	public const string DataMigratorProjectName = "Data Migrator";
+
+	/// <summary>
+	/// Installation Support Utility use only.
+	/// </summary>
+	public const string DataMigratorNamespaceAndAssemblyName = "DataMigrator";
+
+	/// <summary>
+	/// Installation Support Utility use only.
+	/// </summary>
 	public const string DataCleanerProjectName = "Data Cleaner";
 
 	/// <summary>
