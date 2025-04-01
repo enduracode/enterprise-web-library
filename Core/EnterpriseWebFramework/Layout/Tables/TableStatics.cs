@@ -61,7 +61,7 @@ internal static class TableStatics {
 											groupSelectedItemIds.Add( i().Setup.Id!.Value );
 									} ).PageComponent )
 							.Materialize(),
-						formControlDefaultActionOverride: new SpecifiedValue<NonPostBackFormAction>( null ) );
+						formControlDefaultActionOverride: new SpecifiedValue<NonPostBackFormAction?>( null ) );
 
 					var validation = groupPostBackAndButtonPairs.Any()
 						                 ? FormState.ExecuteWithActions(

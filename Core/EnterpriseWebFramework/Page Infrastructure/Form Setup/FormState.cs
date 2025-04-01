@@ -1,14 +1,13 @@
-﻿#nullable disable
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 [ PublicAPI ]
 public class FormState {
-	private static Func<FormState> stateGetter;
-	private static Action<IReadOnlyCollection<DataModificationAction>> dataModificationAsserter;
-	private static Func<DataModificationAction, PostBack> postBackSelector;
+	private static Func<FormState> stateGetter = null!;
+	private static Action<IReadOnlyCollection<DataModificationAction>> dataModificationAsserter = null!;
+	private static Func<DataModificationAction, PostBack> postBackSelector = null!;
 
 	internal static void Init(
 		Func<FormState> formStateGetter, Action<IReadOnlyCollection<DataModificationAction>> dataModificationAsserter,
@@ -42,8 +41,8 @@ public class FormState {
 	/// <param name="formControlDefaultActionOverride">The form-control-specific default action. Pass null to use the same action for both form controls and
 	/// buttons.</param>
 	public static void ExecuteWithActions(
-		DataModificationActionsParameter dataModificationActions, Action method, NonPostBackFormAction defaultActionOverride = null,
-		SpecifiedValue<NonPostBackFormAction> formControlDefaultActionOverride = null ) {
+		DataModificationActionsParameter dataModificationActions, Action method, NonPostBackFormAction? defaultActionOverride = null,
+		SpecifiedValue<NonPostBackFormAction?>? formControlDefaultActionOverride = null ) {
 		if( dataModificationActions.Collection.Value.Count == 0 )
 			throw new ApplicationException( "There must be at least one data modification action." );
 		dataModificationAsserter( dataModificationActions.Collection.Value );
@@ -68,8 +67,8 @@ public class FormState {
 	/// <param name="formControlDefaultActionOverride">The form-control-specific default action. Pass null to use the same action for both form controls and
 	/// buttons.</param>
 	public static T ExecuteWithActions<T>(
-		DataModificationActionsParameter dataModificationActions, Func<T> method, NonPostBackFormAction defaultActionOverride = null,
-		SpecifiedValue<NonPostBackFormAction> formControlDefaultActionOverride = null ) {
+		DataModificationActionsParameter dataModificationActions, Func<T> method, NonPostBackFormAction? defaultActionOverride = null,
+		SpecifiedValue<NonPostBackFormAction?>? formControlDefaultActionOverride = null ) {
 		if( dataModificationActions.Collection.Value.Count == 0 )
 			throw new ApplicationException( "There must be at least one data modification action." );
 		dataModificationAsserter( dataModificationActions.Collection.Value );
@@ -109,7 +108,7 @@ public class FormState {
 		}
 	}
 
-	private readonly Stack<( NonPostBackFormAction actionOverride, SpecifiedValue<NonPostBackFormAction> formControlActionOverride, Stack<Func<bool>>
+	private readonly Stack<( NonPostBackFormAction? actionOverride, SpecifiedValue<NonPostBackFormAction?>? formControlActionOverride, Stack<Func<bool>>
 		validationPredicateStack, DataModificationActionsParameter dataModificationActions )> stack = new();
 
 	private readonly HashSet<DataModificationAction> dataModificationsWithValidationsFromOtherElements = new();
@@ -125,15 +124,15 @@ public class FormState {
 	/// <summary>
 	/// Gets the current form-control-specific default action. Returns null for no action.
 	/// </summary>
-	public FormAction FormControlDefaultAction => formControlActionOverride != null ? formControlActionOverride.Value : DefaultAction;
+	public FormAction? FormControlDefaultAction => formControlActionOverride is null ? DefaultAction : formControlActionOverride.Value;
 
 	/// <summary>
 	/// Gets the post-back corresponding to the first of the current data modification actions.
 	/// </summary>
 	public PostBack PostBack => postBackSelector( DataModificationActions.Collection.Value.First() );
 
-	private NonPostBackFormAction actionOverride => stack.Peek().actionOverride;
-	private SpecifiedValue<NonPostBackFormAction> formControlActionOverride => stack.Peek().formControlActionOverride;
+	private NonPostBackFormAction? actionOverride => stack.Peek().actionOverride;
+	private SpecifiedValue<NonPostBackFormAction?>? formControlActionOverride => stack.Peek().formControlActionOverride;
 
 	/// <summary>
 	/// PageBase use only.
