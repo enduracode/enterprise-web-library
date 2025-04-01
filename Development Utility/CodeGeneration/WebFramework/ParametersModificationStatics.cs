@@ -5,7 +5,7 @@ internal static class ParametersModificationStatics {
 		if( !parameters.Any() )
 			return;
 
-		writer.WriteLine( "internal class ParametersModification {" );
+		writer.WriteLine( "internal partial class ParametersModification {" );
 		foreach( var parameter in parameters ) {
 			writer.WriteLine( "private readonly AbstractDataValue<{0}> {1} = new DataValue<{0}>( true );".FormatWith( parameter.TypeName, parameter.Name ) );
 			if( parameter.IsString || parameter.IsEnumerable ) {
