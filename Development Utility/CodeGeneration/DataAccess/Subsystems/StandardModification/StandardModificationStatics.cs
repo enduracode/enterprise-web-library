@@ -430,8 +430,7 @@ internal static class StandardModificationStatics {
 
 	private static void writeColumnValueAssignmentsFromParameters( IEnumerable<Column> columns, string modObjectName ) {
 		foreach( var column in columns )
-			writer.WriteLine(
-				$"{modObjectName}.{EwlStatics.GetCSharpIdentifier( column.CamelCasedName )}.Value = {EwlStatics.GetCSharpIdentifier( column.CamelCasedName )};" );
+			writer.WriteLine( $"{modObjectName}.{getColumnDataValueName( column )}.Value = {EwlStatics.GetCSharpIdentifier( column.CamelCasedName )};" );
 	}
 
 	private static void writeExecuteMethod( string tableName ) {
