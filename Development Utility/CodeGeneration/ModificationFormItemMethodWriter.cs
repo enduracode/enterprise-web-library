@@ -610,5 +610,5 @@ internal class ModificationFormItemMethodWriter {
 		return result;
 	}
 
-	private string getDataValueMember() => $"this.{EwlStatics.GetCSharpIdentifier( field.CamelCasedName )}";
+	private string getDataValueMember() => $"this.{EwlStatics.GetCSharpIdentifier( field.CamelCasedName )}DataValue";
 }

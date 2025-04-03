@@ -1,6 +1,5 @@
-﻿// EwlPage
-
-namespace EnterpriseWebLibrary.Website.WebFrameworkDemo {
+﻿namespace EnterpriseWebLibrary.Website.WebFrameworkDemo {
+	// EwlPage
 	partial class Checkboxes {
 		protected override PageContent getContent() =>
 			FormState.ExecuteWithActions(
@@ -70,12 +69,12 @@ namespace EnterpriseWebLibrary.Website.WebFrameworkDemo {
 									.Append(
 										new SideComments(
 											"Value: ".ToComponents()
-												.Concat(
+												.Append(
 													pageModificationValue.ToGenericPhrasingContainer(
 														v => v.ToString(),
 														valueExpression => "{0} ? 'True' : 'False'".FormatWith( valueExpression ) ) )
 												.Materialize() ) )
-								: Enumerable.Empty<PhrasingComponent>() )
+								: [ ] )
 						.Materialize() );
 
 		private Func<string, FormItem> getFlowCheckbox( string label, FlowCheckboxSetup? setup ) =>
@@ -104,7 +103,7 @@ namespace EnterpriseWebLibrary.Website.WebFrameworkDemo {
 						.ToCollection()
 						.Concat(
 							singleButton
-								? Enumerable.Empty<ComponentListItem>()
+								? [ ]
 								: group.CreateFlowRadioButton(
 										false,
 										"Second".ToComponents(),
@@ -133,12 +132,12 @@ namespace EnterpriseWebLibrary.Website.WebFrameworkDemo {
 									.Append(
 										new SideComments(
 											"First button value: ".ToComponents()
-												.Concat(
+												.Append(
 													pageModificationValue.ToGenericPhrasingContainer(
 														v => v.ToString(),
 														valueExpression => "{0} ? 'True' : 'False'".FormatWith( valueExpression ) ) )
 												.Materialize() ) )
-								: Enumerable.Empty<PhrasingComponent>() )
+								: [ ] )
 						.Materialize() );
 			};
 	}

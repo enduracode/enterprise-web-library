@@ -1,10 +1,9 @@
 ﻿using NodaTime;
 using NodaTime.Text;
 
-// EwlPage
-
 namespace EnterpriseWebLibrary.Website.WebFrameworkDemo;
 
+// EwlPage
 partial class DateAndTimePickers {
 	protected override string getResourceName() => "Date/Time Controls";
 
@@ -19,7 +18,7 @@ partial class DateAndTimePickers {
 					.Append(
 						new SideComments(
 							"Value: ".ToComponents()
-								.Concat(
+								.Append(
 									datePmv.ToGenericPhrasingContainer( v => v.HasValue ? LocalDatePattern.Iso.Format( v.Value ) : "", valueExpression => valueExpression ) )
 								.Materialize() ) )
 					.Materialize() ) );

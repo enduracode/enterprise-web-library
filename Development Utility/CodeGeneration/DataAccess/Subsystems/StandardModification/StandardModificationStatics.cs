@@ -315,7 +315,7 @@ internal static class StandardModificationStatics {
 					prefix,
 					DataAccessStatics.GetEqualityConditionClassName( cn, database, tableName, column ),
 					EwlStatics.GetCSharpIdentifier( column.CamelCasedName ) ) );
-			writer.WriteLine( "mod.{0}.Value = {0}.Value;".FormatWith( EwlStatics.GetCSharpIdentifier( column.CamelCasedName ) ) );
+			writer.WriteLine( "mod.{0}.Value = {1}.Value;".FormatWith( getColumnDataValueName( column ), EwlStatics.GetCSharpIdentifier( column.CamelCasedName ) ) );
 			prefix = "else if";
 		}
 		writer.WriteLine( "}" );
@@ -375,19 +375,18 @@ internal static class StandardModificationStatics {
 	private static void writePropertiesForColumn( Column column ) {
 		var columnIsReadOnly = !columns.DataColumns.Contains( column );
 
-		writer.WriteLine(
-			$"private AbstractDataValue<{column.DataTypeName}> {EwlStatics.GetCSharpIdentifier( column.CamelCasedName )} => {getColumnFieldName( column )};" );
+		writer.WriteLine( $"private AbstractDataValue<{column.DataTypeName}> {getColumnDataValueName( column )} => {getColumnFieldName( column )};" );
 
 		CodeGenerationStatics.AddSummaryDocComment(
 			writer,
 			"Gets " + ( columnIsReadOnly ? "" : "or sets " ) + "the value for the " + column.Name +
 			$" column, which {column.GetNullabilityPhrase()}. Throws an exception if the value has not been initialized." );
 		var propertyDeclarationBeginning = "public " + column.DataTypeName + " " + EwlStatics.GetCSharpIdentifier( column.PascalCasedName ) +
-		                                   " { get { return this." + EwlStatics.GetCSharpIdentifier( column.CamelCasedName ) + ".Value; } ";
+		                                   " { get { return this." + getColumnDataValueName( column ) + ".Value; } ";
 		if( columnIsReadOnly )
 			writer.WriteLine( propertyDeclarationBeginning + "}" );
 		else {
-			writer.WriteLine( propertyDeclarationBeginning + "set { this." + EwlStatics.GetCSharpIdentifier( column.CamelCasedName ) + ".Value = value; } }" );
+			writer.WriteLine( propertyDeclarationBeginning + "set { this." + getColumnDataValueName( column ) + ".Value = value; } }" );
 
 			CodeGenerationStatics.AddSummaryDocComment(
 				writer,
@@ -431,8 +430,7 @@ internal static class StandardModificationStatics {
 
 	private static void writeColumnValueAssignmentsFromParameters( IEnumerable<Column> columns, string modObjectName ) {
 		foreach( var column in columns )
-			writer.WriteLine(
-				$"{modObjectName}.{EwlStatics.GetCSharpIdentifier( column.CamelCasedName )}.Value = {EwlStatics.GetCSharpIdentifier( column.CamelCasedName )};" );
+			writer.WriteLine( $"{modObjectName}.{getColumnDataValueName( column )}.Value = {EwlStatics.GetCSharpIdentifier( column.CamelCasedName )};" );
 	}
 
 	private static void writeExecuteMethod( string tableName ) {
@@ -491,7 +489,7 @@ internal static class StandardModificationStatics {
 		// If this is a revision history table, write code to insert a new revision when a row is inserted into this table.
 		if( isRevisionHistoryClass ) {
 			writer.WriteLine( "var revisionHistorySetup = RevisionHistoryStatics.SystemProvider;" );
-			var revisionIdProperty = $"this.{EwlStatics.GetCSharpIdentifier( columns.PrimaryKeyAndRevisionIdColumn!.CamelCasedName )}";
+			var revisionIdProperty = $"this.{getColumnDataValueName( columns.PrimaryKeyAndRevisionIdColumn! )}";
 			writer.WriteLine( revisionIdProperty + ".Value = revisionHistorySetup.GetNextMainSequenceValue();" );
 			writer.WriteLine(
 				"revisionHistorySetup.InsertRevision( global::System.Convert.ToInt32( " + revisionIdProperty + ".Value ), global::System.Convert.ToInt32( " +
@@ -504,7 +502,7 @@ internal static class StandardModificationStatics {
 			// One reason the ChangeType call is necessary: SQL Server identities always come back as decimal, and you can't cast a boxed decimal to an int.
 			writer.WriteLine(
 				"this.{0}.Value = {1};".FormatWith(
-					EwlStatics.GetCSharpIdentifier( identityColumn.CamelCasedName ),
+					getColumnDataValueName( identityColumn ),
 					identityColumn.GetIncomingValueConversionExpression(
 						"EwlStatics.ChangeType( insert.Execute( {0}, isLongRunning: isLongRunning ), typeof( {1} ) )".FormatWith(
 							DataAccessStatics.GetConnectionExpression( database ),
@@ -609,6 +607,8 @@ internal static class StandardModificationStatics {
 			writer.WriteLine( "} );" ); // ExecuteInTransaction
 		writer.WriteLine( "}" ); // method
 	}
+
+	private static string getColumnDataValueName( Column column ) => EwlStatics.GetCSharpIdentifier( column.CamelCasedName ) + "DataValue";
 
 	private static void writeGetColumnModificationValuesMethod( IEnumerable<Column> nonIdentityColumns ) {
 		writer.WriteLine( "private IReadOnlyCollection<InlineDbCommandColumnValue> getColumnModificationValues() {" );

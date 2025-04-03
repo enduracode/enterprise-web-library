@@ -36,10 +36,15 @@ public class RadioButtonSetup {
 		DisplaySetup = displaySetup;
 		IsReadOnly = isReadOnly;
 		Classes = classes;
-		Action = action != null ? action.Value : FormState.Current.FormControlDefaultAction;
+		Action = action is null ? FormState.Current.FormControlDefaultAction : action.Value;
 		PageModificationValue = pageModificationValue;
 	}
 
 	internal RadioButtonSetup AddPmv() =>
-		new( DisplaySetup, IsReadOnly, Classes, new SpecifiedValue<FormAction>( Action ), PageModificationValue ?? new PageModificationValue<bool>() );
+		new(
+			DisplaySetup,
+			IsReadOnly,
+			Classes,
+			Action is null ? null : new SpecifiedValue<FormAction>( Action ),
+			PageModificationValue ?? new PageModificationValue<bool>() );
 }

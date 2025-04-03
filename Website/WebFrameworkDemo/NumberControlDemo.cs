@@ -1,7 +1,6 @@
-﻿// EwlPage
+﻿namespace EnterpriseWebLibrary.Website.WebFrameworkDemo;
 
-namespace EnterpriseWebLibrary.Website.WebFrameworkDemo;
-
+// EwlPage
 partial class NumberControlDemo {
 	protected override string getResourceName() => "Number Control";
 
@@ -98,12 +97,12 @@ partial class NumberControlDemo {
 							.Append(
 								new SideComments(
 									"Value: ".ToComponents()
-										.Concat(
+										.Append(
 											pageModificationValue.ToGenericPhrasingContainer(
 												v => v?.Normalize().ToString() ?? "",
 												valueExpression => "{0}.toString()".FormatWith( valueExpression ) ) )
 										.Materialize() ) )
-						: Enumerable.Empty<PhrasingComponent>() )
+						: [ ] )
 				.Materialize() );
 
 	private Func<string, FormItem>
@@ -125,11 +124,11 @@ partial class NumberControlDemo {
 							.Append(
 								new SideComments(
 									"Value: ".ToComponents()
-										.Concat(
+										.Append(
 											pageModificationValue.ToGenericPhrasingContainer(
 												v => v.Normalize().ToString(),
 												valueExpression => "{0}.toString()".FormatWith( valueExpression ) ) )
 										.Materialize() ) )
-						: Enumerable.Empty<PhrasingComponent>() )
+						: [ ] )
 				.Materialize() );
 }
