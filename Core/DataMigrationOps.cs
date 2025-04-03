@@ -22,11 +22,12 @@ public static class DataMigrationOps {
 		var initializationLog = "";
 		ConfigurationStatics.Init( "", "Data Migrator", false, ref initializationLog );
 
+		var appAssembly = Assembly.GetCallingAssembly();
 		using var serviceProvider = new ServiceCollection().AddFluentMigratorCore()
 			.ConfigureRunner(
 				builder => builder.addDatabaseServices( ConfigurationStatics.InstallationConfiguration.PrimaryDatabaseInfo )
 					.WithGlobalConnectionString( ConfigurationStatics.InstallationConfiguration.PrimaryDatabaseInfo.GetConnectionString( 60 ) )
-					.ScanIn( Assembly.GetExecutingAssembly() )
+					.ScanIn( appAssembly )
 					.For.Migrations() )
 			.AddLogging( builder => builder.AddFluentMigratorConsole() )
 			.BuildServiceProvider();
