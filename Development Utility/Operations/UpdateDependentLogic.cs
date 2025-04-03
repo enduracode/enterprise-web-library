@@ -613,12 +613,14 @@ internal class UpdateDependentLogic: Operation {
 			writer.WriteLine( "<Project>" );
 			writer.WriteLine( "<PropertyGroup>" );
 
-			var projectFilePath = EwlStatics.CombinePaths( projectPath, "{0}.csproj".FormatWith( Path.GetFileName( projectPath ) ) );
-			var projectFile = "";
-			if( File.Exists( projectFilePath ) )
-				projectFile = File.ReadAllText( projectFilePath );
-			else
+			var projectFilePaths = ".csproj".ToCollection()
+				.Append( ".ewlt.csproj" )
+				.Select( extension => EwlStatics.CombinePaths( projectPath, Path.GetFileName( projectPath ) + extension ) );
+			var projectFile = projectFilePaths.Where( File.Exists ).Select( File.ReadAllText ).FirstOrDefault();
+			if( projectFile is null ) {
 				StatusStatics.SetStatus( "Warning: Failed to locate the project file for {0}.".FormatWith( projectName ) );
+				projectFile = "";
+			}
 
 			void writeMsBuildProperty( string property ) {
 				writer.WriteLine( property );
@@ -804,6 +806,9 @@ internal class UpdateDependentLogic: Operation {
 		const string regionBegin = $"# {EwlStatics.EwlInitialism}-REGION";
 		const string regionEnd = $"# END-{EwlStatics.EwlInitialism}-REGION";
 
+		var dataMigratorProjectExists = File.Exists(
+			EwlStatics.CombinePaths( installation.GeneralLogic.Path, IsuStatics.DataMigratorProjectName, $"{IsuStatics.DataMigratorProjectName}.csproj" ) );
+
 		writer.WriteLine( regionBegin );
 		if( !forGit )
 			writer.WriteLine( "syntax: glob" );
@@ -812,6 +817,8 @@ internal class UpdateDependentLogic: Operation {
 		writer.WriteLine( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + ".sln.DotSettings" );
 		writer.WriteLine( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + ".sln.DotSettings.user" );
 		writer.WriteLine( $"{InstallationFileStatics.WebFrameworkStaticFilesFolderName}/" );
+		if( !dataMigratorProjectExists )
+			writer.WriteLine( $"{IsuStatics.DataMigratorProjectName}/" );
 		writer.WriteLine( $"{IsuStatics.DataCleanerProjectName}/" );
 		writer.WriteLine( "Error Log.txt" );
 		writer.WriteLine( "*.csproj.user" );
@@ -861,8 +868,7 @@ internal class UpdateDependentLogic: Operation {
 			writer.WriteLine( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.Name + "/Generated Code/" );
 		}
 
-		if( File.Exists(
-			   EwlStatics.CombinePaths( installation.GeneralLogic.Path, IsuStatics.DataMigratorProjectName, $"{IsuStatics.DataMigratorProjectName}.csproj" ) ) ) {
+		if( dataMigratorProjectExists ) {
 			writer.WriteLine();
 			writer.WriteLine( IsuStatics.DataMigratorProjectName + "/bin/" );
 			writer.WriteLine( IsuStatics.DataMigratorProjectName + "/obj/" );
