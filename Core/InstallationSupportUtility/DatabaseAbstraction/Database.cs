@@ -1,10 +1,16 @@
 using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.DatabaseSpecification;
 using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 
 [ PublicAPI ]
 public interface Database {
+	/// <summary>
+	/// Gets the database information object for this database.
+	/// </summary>
+	DatabaseInfo? Info { get; }
+
 	/// <summary>
 	/// Returns the empty string if this is the primary database.
 	/// </summary>

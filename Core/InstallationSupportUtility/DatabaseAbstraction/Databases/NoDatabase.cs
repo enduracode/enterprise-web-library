@@ -1,8 +1,11 @@
 using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.DatabaseSpecification;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Databases;
 
 internal class NoDatabase: Database {
+	DatabaseInfo? Database.Info => null;
+
 	string Database.SecondaryDatabaseName => throw new NotSupportedException();
 
 	void Database.ExecuteSqlScriptInTransaction( string script ) {

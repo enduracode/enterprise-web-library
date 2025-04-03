@@ -21,6 +21,8 @@ public class SqlServer: Database {
 		this.logLogicalFileName = logLogicalFileName;
 	}
 
+	DatabaseInfo Database.Info => info;
+
 	string Database.SecondaryDatabaseName => ( info as DatabaseInfo ).SecondaryDatabaseName;
 
 	void Database.ExecuteSqlScriptInTransaction( string script ) {

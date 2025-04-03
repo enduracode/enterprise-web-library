@@ -69,7 +69,10 @@ internal static class DataAccessStatics {
 	private static void generateDataAccessCodeForDatabase(
 		TextWriter writer, string baseNamespace, string templateBasePath, Database database,
 		EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration, List<string> initStatements ) {
-		var tables = DatabaseOps.GetDatabaseTables( database ).Materialize();
+		var migrationTable = database.Info is null ? null : DataMigrationOps.GetMigrationTableName( database.Info );
+		var tables = DatabaseOps.GetDatabaseTables( database )
+			.Where( i => migrationTable is null || !i.name.Equals( migrationTable, StringComparison.Ordinal ) )
+			.Materialize();
 		var tableNames = tables.Select( i => i.name ).Materialize();
 
 		ensureTablesExist( tableNames, configuration.SmallTables, "small" );
