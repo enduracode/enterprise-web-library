@@ -29,7 +29,7 @@ partial class UserManagement {
 	protected override AlternativeResourceMode createAlternativeMode() =>
 		UserManagementStatics.UserManagementEnabled ? null : new DisabledResourceMode( "User management is not enabled in this system." );
 
-	protected override IEnumerable<UrlPattern> getChildUrlPatterns() => SystemUser.UrlPatterns.UserIdPositiveInt( Es, "create" ).ToCollection();
+	protected override IEnumerable<UrlPattern> getChildUrlPatterns() => User.UrlPatterns.UserIdPositiveInt( Es, "create" ).ToCollection();
 
 	protected override PageContent getContent() {
 		var content = new UiPageContent( omitContentBox: true );
@@ -72,13 +72,13 @@ partial class UserManagement {
 			new Section(
 				"System users",
 				EwfTable.Create(
-						tableActions: new HyperlinkSetup( new SystemUser( Es, null ), "Create User" ),
+						tableActions: new HyperlinkSetup( new User( Es, null ), "Create User" ),
 						headItems: EwfTableItem.Create( "Email".ToCell().Append( "Role".ToCell() ).Materialize() ).ToCollection() )
 					.AddData(
 						UserManagementStatics.SystemProvider.GetUsers(),
 						user => EwfTableItem.Create(
 							user.Email.ToCell().Append( user.Role.Name.ToCell() ).Materialize(),
-							setup: EwfTableItemSetup.Create( activationBehavior: ElementActivationBehavior.CreateHyperlink( new SystemUser( Es, user.UserId ) ) ) ) )
+							setup: EwfTableItemSetup.Create( activationBehavior: ElementActivationBehavior.CreateHyperlink( new User( Es, user.UserId ) ) ) ) )
 					.ToCollection(),
 				style: SectionStyle.Box ) );
 		return content;

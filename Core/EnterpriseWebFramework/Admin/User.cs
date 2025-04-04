@@ -1,22 +1,21 @@
 ﻿using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.UserManagement;
 
-// EwlPage
-// Parameter: int? userId
-
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin;
 
-partial class SystemUser {
-	internal EnterpriseWebLibrary.UserManagement.SystemUser? User { get; private set; }
+// EwlPage
+// Parameter: int? userId
+partial class User {
+	private SystemUser? user;
 
 	protected override void init() {
 		if( UserId.HasValue )
-			User = UserManagementStatics.GetUser( UserId.Value, true );
+			user = UserManagementStatics.GetUser( UserId.Value, true );
 	}
 
 	protected override ResourceParent createParent() => new UserManagement( Es );
 
-	protected override string getResourceName() => User == null ? "New User" : User.Email;
+	protected override string getResourceName() => user == null ? "New User" : user.Email;
 
 	protected override PageContent getContent() {
 		Action? userModMethod = null;
@@ -36,6 +35,6 @@ partial class SystemUser {
 	}
 
 	private void deleteUser() {
-		UserManagementStatics.SystemProvider.DeleteUser( User!.UserId );
+		UserManagementStatics.SystemProvider.DeleteUser( user!.UserId );
 	}
 }
