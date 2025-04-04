@@ -56,10 +56,7 @@ public class DataUpdateStatics {
 			if( !installationIsStandbyDb ) {
 				// Bring database logic up to date with the rest of the logic in this installation. In other words, reapply changes lost when we deleted the database.
 				StatusStatics.SetStatus( "Updating database logic..." );
-				DatabaseOps.UpdateDatabaseLogicIfUpdateFileExists(
-					installation.ExistingInstallationLogic.Database,
-					installation.ExistingInstallationLogic.DatabaseUpdateFilePath,
-					installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationType == InstallationType.Development );
+				installation.ExistingInstallationLogic.MigrateData();
 			}
 
 			// If we’re an intermediate installation and we are getting data from a live installation, sanitize the data and do other conversion commands.

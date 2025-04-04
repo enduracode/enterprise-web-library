@@ -6,7 +6,6 @@ using EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration;
 using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.InstallationSupportUtility;
-using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
 using NodaTime.Text;
 using Tewl.IO;
@@ -50,10 +49,7 @@ internal class UpdateDependentLogic: Operation {
 				throw new UserCorrectableException( $"Failed to build {IsuStatics.DataMigratorProjectName}.", e );
 			}
 
-		DatabaseOps.UpdateDatabaseLogicIfUpdateFileExists(
-			installation.ExistingInstallationLogic.Database,
-			installation.ExistingInstallationLogic.DatabaseUpdateFilePath,
-			true );
+		installation.ExistingInstallationLogic.MigrateData();
 
 		if( !installation.SystemIsTewl() )
 			try {

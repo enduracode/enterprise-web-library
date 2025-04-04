@@ -14,7 +14,7 @@ public static class DatabaseOps {
 				null => new NoDatabase(),
 				SqlServerInfo info => new SqlServer( info, "Data", "Log" ),
 				MySqlInfo info => new MySql( info ),
-				OracleInfo info => new Databases.Oracle( info ),
+				OracleInfo info => new Oracle( info ),
 				_ => throw new ApplicationException( "Invalid database information object type." )
 			};
 
@@ -23,67 +23,6 @@ public static class DatabaseOps {
 	/// </summary>
 	public static string GetDatabaseNounPhrase( Database database ) =>
 		"{0} database".FormatWith( database.SecondaryDatabaseName.Any() ? "{0} secondary".FormatWith( database.SecondaryDatabaseName ) : "primary" );
-
-	public static void UpdateDatabaseLogicIfUpdateFileExists( Database database, string databaseUpdateFilePath, bool allFailuresUserCorrectable ) {
-		var linesInScriptOnHd = getNumberOfLinesInDatabaseScript( databaseUpdateFilePath );
-
-		// We don't want to ask the database for the line number if there is no script.
-		if( linesInScriptOnHd == null )
-			return;
-
-		int lineMarker;
-		try {
-			lineMarker = database.GetLineMarker();
-		}
-		catch( Exception e ) {
-			const string message = "Failed to get line marker.";
-			if( allFailuresUserCorrectable )
-				throw new UserCorrectableException( message, e );
-			throw UserCorrectableException.CreateSecondaryException( message, e );
-		}
-
-		// We don't want to execute blank scripts against the database because this will cause an error with read-only databases.
-		if( lineMarker == linesInScriptOnHd )
-			return;
-
-		using( var sw = new StringWriter() ) {
-			// If the string writer's value is not the empty string, it will end with the line terminator string.
-			using( var tr = new StreamReader( File.OpenRead( databaseUpdateFilePath ) ) ) {
-				// Read and discard all text before the marker line.
-				for( var i = 0; i < lineMarker; i++ )
-					tr.ReadLine();
-
-				// Store all text on and after the marker line and move the marker to the end of the file.
-				for( string? lineText; ( lineText = tr.ReadLine() ) != null; lineMarker += 1 )
-					sw.WriteLine( lineText );
-			}
-
-			try {
-				database.ExecuteSqlScriptInTransaction( sw.ToString() );
-			}
-			catch( Exception e ) {
-				const string message = "Failed to update database logic.";
-				if( allFailuresUserCorrectable )
-					throw new UserCorrectableException( message, e );
-				throw UserCorrectableException.CreateSecondaryException( message, e );
-			}
-		}
-		database.UpdateLineMarker( lineMarker );
-	}
-
-	/// <summary>
-	/// Returns null if no database script exists on the hard drive.
-	/// </summary>
-	private static int? getNumberOfLinesInDatabaseScript( string databaseUpdateFilePath ) {
-		if( !File.Exists( databaseUpdateFilePath ) )
-			return null;
-
-		var lines = 0;
-		using var reader = new StreamReader( File.OpenRead( databaseUpdateFilePath ) );
-		while( reader.ReadLine() != null )
-			lines++;
-		return lines;
-	}
 
 	public static void ExportDatabaseToFile( Database database, string dataPackageFolderPath ) {
 		if( database is not NoDatabase )

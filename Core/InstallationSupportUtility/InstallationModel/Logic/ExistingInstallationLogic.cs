@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.ServiceProcess;
 using EnterpriseWebLibrary.Configuration;
-using EnterpriseWebLibrary.Configuration.SystemGeneral;
+using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
@@ -13,18 +13,18 @@ public class ExistingInstallationLogic {
 
 	private readonly GeneralInstallationLogic generalInstallationLogic;
 	private readonly InstallationConfiguration runtimeConfiguration;
-	private readonly DatabaseAbstraction.Database database;
+	private readonly Database database;
 
 	public ExistingInstallationLogic( GeneralInstallationLogic generalInstallationLogic, InstallationConfiguration runtimeConfiguration ) {
 		this.generalInstallationLogic = generalInstallationLogic;
 		this.runtimeConfiguration = runtimeConfiguration;
 
-		database = DatabaseAbstraction.DatabaseOps.CreateDatabase( runtimeConfiguration.PrimaryDatabaseInfo );
+		database = DatabaseOps.CreateDatabase( runtimeConfiguration.PrimaryDatabaseInfo );
 	}
 
 	public InstallationConfiguration RuntimeConfiguration => runtimeConfiguration;
 
-	public string GetWindowsServiceFolderPath( WindowsService service, bool useDebugFolderIfDevelopmentInstallation ) {
+	public string GetWindowsServiceFolderPath( Configuration.SystemGeneral.WindowsService service, bool useDebugFolderIfDevelopmentInstallation ) {
 		var path = EwlStatics.CombinePaths( generalInstallationLogic.Path, service.Name );
 		if( runtimeConfiguration.InstallationType == InstallationType.Development )
 			path = EwlStatics.CombinePaths(
@@ -33,9 +33,7 @@ public class ExistingInstallationLogic {
 		return path;
 	}
 
-	public DatabaseAbstraction.Database Database => database;
-
-	public string DatabaseUpdateFilePath => EwlStatics.CombinePaths( runtimeConfiguration.ConfigurationFolderPath, SystemDatabaseUpdatesFileName );
+	public Database Database => database;
 
 	public void InstallServices() {
 		foreach( var service in runtimeConfiguration.WindowsServices ) {
@@ -142,5 +140,67 @@ public class ExistingInstallationLogic {
 			}
 			service.WaitForStatusWithTimeOut( ServiceControllerStatus.Stopped );
 		}
+	}
+
+	public void MigrateData() {
+		var databaseUpdateFilePath = EwlStatics.CombinePaths( runtimeConfiguration.ConfigurationFolderPath, SystemDatabaseUpdatesFileName );
+		var linesInScriptOnHd = getNumberOfLinesInDatabaseScript( databaseUpdateFilePath );
+
+		// We don't want to ask the database for the line number if there is no script.
+		if( linesInScriptOnHd == null )
+			return;
+
+		int lineMarker;
+		try {
+			lineMarker = database.GetLineMarker();
+		}
+		catch( Exception e ) {
+			const string message = "Failed to get line marker.";
+			if( runtimeConfiguration.InstallationType == InstallationType.Development )
+				throw new UserCorrectableException( message, e );
+			throw UserCorrectableException.CreateSecondaryException( message, e );
+		}
+
+		// We don't want to execute blank scripts against the database because this will cause an error with read-only databases.
+		if( lineMarker == linesInScriptOnHd )
+			return;
+
+		using( var sw = new StringWriter() ) {
+			// If the string writer's value is not the empty string, it will end with the line terminator string.
+			using( var tr = new StreamReader( File.OpenRead( databaseUpdateFilePath ) ) ) {
+				// Read and discard all text before the marker line.
+				for( var i = 0; i < lineMarker; i++ )
+					tr.ReadLine();
+
+				// Store all text on and after the marker line and move the marker to the end of the file.
+				for( string? lineText; ( lineText = tr.ReadLine() ) != null; lineMarker += 1 )
+					sw.WriteLine( lineText );
+			}
+
+			try {
+				database.ExecuteSqlScriptInTransaction( sw.ToString() );
+			}
+			catch( Exception e ) {
+				const string message = "Failed to update database logic.";
+				if( runtimeConfiguration.InstallationType == InstallationType.Development )
+					throw new UserCorrectableException( message, e );
+				throw UserCorrectableException.CreateSecondaryException( message, e );
+			}
+		}
+		database.UpdateLineMarker( lineMarker );
+	}
+
+	/// <summary>
+	/// Returns null if no database script exists on the hard drive.
+	/// </summary>
+	private int? getNumberOfLinesInDatabaseScript( string databaseUpdateFilePath ) {
+		if( !File.Exists( databaseUpdateFilePath ) )
+			return null;
+
+		var lines = 0;
+		using var reader = new StreamReader( File.OpenRead( databaseUpdateFilePath ) );
+		while( reader.ReadLine() != null )
+			lines++;
+		return lines;
 	}
 }
