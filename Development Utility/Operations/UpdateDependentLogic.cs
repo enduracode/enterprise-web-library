@@ -49,7 +49,10 @@ internal class UpdateDependentLogic: Operation {
 				throw new UserCorrectableException( $"Failed to build {IsuStatics.DataMigratorProjectName}.", e );
 			}
 
-		installation.ExistingInstallationLogic.MigrateData();
+		StatusStatics.SetStatus( "Migrating data." );
+		if( installation.ExistingInstallationLogic.MigrateData() is { Length: > 0 } output )
+			Console.WriteLine( output );
+		StatusStatics.SetStatus( "Migrated data." );
 
 		if( !installation.SystemIsTewl() )
 			try {
@@ -228,7 +231,7 @@ internal class UpdateDependentLogic: Operation {
 			IsuStatics.DataMigratorProjectName,
 			projectPath,
 			IsuStatics.DataMigratorNamespaceAndAssemblyName,
-			writer => { writer.Write( "DataMigrationOps.MigrateData();" ); },
+			writer => { writer.Write( "return DataMigrationOps.MigrateData();" ); },
 			runtimeIdentifier: "win-x64" );
 
 		return projectExists;

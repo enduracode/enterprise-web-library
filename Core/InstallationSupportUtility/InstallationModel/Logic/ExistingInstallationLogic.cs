@@ -142,52 +142,74 @@ public class ExistingInstallationLogic {
 		}
 	}
 
-	public void MigrateData() {
+	public string MigrateData() {
 		var databaseUpdateFilePath = EwlStatics.CombinePaths( runtimeConfiguration.ConfigurationFolderPath, SystemDatabaseUpdatesFileName );
 		var linesInScriptOnHd = getNumberOfLinesInDatabaseScript( databaseUpdateFilePath );
 
 		// We don't want to ask the database for the line number if there is no script.
-		if( linesInScriptOnHd == null )
-			return;
-
-		int lineMarker;
-		try {
-			lineMarker = database.GetLineMarker();
-		}
-		catch( Exception e ) {
-			const string message = "Failed to get line marker.";
-			if( runtimeConfiguration.InstallationType == InstallationType.Development )
-				throw new UserCorrectableException( message, e );
-			throw UserCorrectableException.CreateSecondaryException( message, e );
-		}
-
-		// We don't want to execute blank scripts against the database because this will cause an error with read-only databases.
-		if( lineMarker == linesInScriptOnHd )
-			return;
-
-		using( var sw = new StringWriter() ) {
-			// If the string writer's value is not the empty string, it will end with the line terminator string.
-			using( var tr = new StreamReader( File.OpenRead( databaseUpdateFilePath ) ) ) {
-				// Read and discard all text before the marker line.
-				for( var i = 0; i < lineMarker; i++ )
-					tr.ReadLine();
-
-				// Store all text on and after the marker line and move the marker to the end of the file.
-				for( string? lineText; ( lineText = tr.ReadLine() ) != null; lineMarker += 1 )
-					sw.WriteLine( lineText );
-			}
-
+		if( linesInScriptOnHd is not null ) {
+			int lineMarker;
 			try {
-				database.ExecuteSqlScriptInTransaction( sw.ToString() );
+				lineMarker = database.GetLineMarker();
 			}
 			catch( Exception e ) {
-				const string message = "Failed to update database logic.";
+				const string message = "Failed to get line marker.";
 				if( runtimeConfiguration.InstallationType == InstallationType.Development )
 					throw new UserCorrectableException( message, e );
 				throw UserCorrectableException.CreateSecondaryException( message, e );
 			}
+
+			// We don't want to execute blank scripts against the database because this will cause an error with read-only databases.
+			if( lineMarker != linesInScriptOnHd ) {
+				using( var sw = new StringWriter() ) {
+					// If the string writer's value is not the empty string, it will end with the line terminator string.
+					using( var tr = new StreamReader( File.OpenRead( databaseUpdateFilePath ) ) ) {
+						// Read and discard all text before the marker line.
+						for( var i = 0; i < lineMarker; i++ )
+							tr.ReadLine();
+
+						// Store all text on and after the marker line and move the marker to the end of the file.
+						for( string? lineText; ( lineText = tr.ReadLine() ) != null; lineMarker += 1 )
+							sw.WriteLine( lineText );
+					}
+
+					try {
+						database.ExecuteSqlScriptInTransaction( sw.ToString() );
+					}
+					catch( Exception e ) {
+						const string message = "Failed to update database logic.";
+						if( runtimeConfiguration.InstallationType == InstallationType.Development )
+							throw new UserCorrectableException( message, e );
+						throw UserCorrectableException.CreateSecondaryException( message, e );
+					}
+				}
+				database.UpdateLineMarker( lineMarker );
+			}
 		}
-		database.UpdateLineMarker( lineMarker );
+
+		var output = "";
+		if( Directory.Exists( EwlStatics.CombinePaths( generalInstallationLogic.Path, IsuStatics.DataMigratorProjectName ) ) )
+			try {
+				output = TewlContrib.ProcessTools.RunProgram(
+						EwlStatics.CombinePaths(
+							generalInstallationLogic.Path,
+							IsuStatics.DataMigratorProjectName,
+							runtimeConfiguration.InstallationType == InstallationType.Development
+								? ConfigurationStatics.GetProjectOutputFolderPath( true, runtimeIdentifier: "win-x64" )
+								: "",
+							IsuStatics.DataMigratorNamespaceAndAssemblyName ),
+						"",
+						"",
+						true )
+					.TrimEnd();
+			}
+			catch( Exception e ) {
+				const string message = "Failed to migrate data.";
+				if( runtimeConfiguration.InstallationType == InstallationType.Development )
+					throw new UserCorrectableException( message, e );
+				throw UserCorrectableException.CreateSecondaryException( message, e );
+			}
+		return output;
 	}
 
 	/// <summary>

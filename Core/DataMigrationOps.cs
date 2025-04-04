@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Reflection;
 using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using FluentMigrator.Runner;
@@ -35,7 +36,7 @@ public static class DataMigrationOps {
 	/// Generated code use only.
 	/// </summary>
 	[ EditorBrowsable( EditorBrowsableState.Never ) ]
-	public static void MigrateData() {
+	public static int MigrateData() {
 		var initializationLog = "";
 		ConfigurationStatics.Init( "", "Data Migrator", false, ref initializationLog );
 
@@ -52,7 +53,17 @@ public static class DataMigrationOps {
 		using var scope = serviceProvider.CreateScope();
 
 		var runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
-		runner.MigrateUp();
+		try {
+			runner.MigrateUp();
+		}
+		catch( Exception e ) {
+			var outer = DataAccessMethods.CreateDbConnectionException( ConfigurationStatics.InstallationConfiguration.PrimaryDatabaseInfo, "migrating data in", e );
+			Console.Error.WriteLine( outer.Message );
+			Console.Error.WriteLine( e.ToString() );
+			return 1;
+		}
+
+		return 0;
 	}
 
 	private static IMigrationRunnerBuilder addDatabaseServices( this IMigrationRunnerBuilder builder, DatabaseInfo databaseInfo ) {
