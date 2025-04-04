@@ -4,6 +4,7 @@ using EnterpriseWebLibrary.DataAccess.RevisionHistory;
 using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary.UserManagement;
 using JetBrains.Annotations;
 using Microsoft.Data.SqlClient;
 using NodaTime;
@@ -538,8 +539,8 @@ public class DatabaseConnection {
 
 		if( !userTransactionId.HasValue ) {
 			int? userId = null;
-			if( AppTools.User != null )
-				userId = AppTools.User.UserId;
+			if( SystemUser.Current != null )
+				userId = SystemUser.Current.UserId;
 
 			var revisionHistorySetup = RevisionHistoryStatics.SystemProvider;
 			userTransactionId = revisionHistorySetup.GetNextMainSequenceValue();

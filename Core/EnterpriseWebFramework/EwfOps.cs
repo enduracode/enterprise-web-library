@@ -118,7 +118,7 @@ public static class EwfOps {
 
 					// exception-prone code
 					try {
-						user = AppTools.User;
+						user = SystemUser.Current;
 						impersonator = RequestDispatchingStatics.RequestState.ImpersonatorExists ? RequestDispatchingStatics.RequestState.ImpersonatorUser : null;
 					}
 					catch {}
@@ -454,7 +454,7 @@ public static class EwfOps {
 										url = new UserManagement.Pages.Impersonate(
 											url,
 											optionalParameterSetter: ( specifier, _ ) =>
-												specifier.User = AppTools.User != null ? AppTools.User.Email : UserManagement.Pages.Impersonate.AnonymousUser ).GetUrl();
+												specifier.User = SystemUser.Current != null ? SystemUser.Current.Email : UserManagement.Pages.Impersonate.AnonymousUser ).GetUrl();
 									return new NonLiveLogIn(
 										url,
 										optionalParameterSetter: ( specifier, _ ) => {

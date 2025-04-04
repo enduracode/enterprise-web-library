@@ -229,10 +229,10 @@ public class UiPageContent: PageContent {
 		var components = new List<FlowComponent>();
 
 		var changePasswordPage = new UserManagement.Pages.ChangePassword( PageBase.Current.GetUrl() );
-		if( !changePasswordPage.UserCanAccess || AppTools.User == null )
+		if( !changePasswordPage.UserCanAccess || SystemUser.Current == null )
 			return components;
 
-		components.Add( new Paragraph( "Logged in as {0}".FormatWith( AppTools.User.Email ).ToComponents() ) );
+		components.Add( new Paragraph( "Logged in as {0}".FormatWith( SystemUser.Current.Email ).ToComponents() ) );
 		if( !UserManagementStatics.LocalIdentityProviderEnabled )
 			return components;
 

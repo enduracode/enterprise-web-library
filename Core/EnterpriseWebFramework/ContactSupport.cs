@@ -1,6 +1,7 @@
 ﻿#nullable disable
 using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.SystemSpecificLogic;
+using EnterpriseWebLibrary.UserManagement;
 using Humanizer;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -8,7 +9,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 // EwlPage
 // Parameter: string returnUrl
 partial class ContactSupport {
-	protected override bool userCanAccess => AppTools.User != null;
+	protected override bool userCanAccess => SystemUser.Current != null;
 	protected override UrlHandler getUrlParent() => new Admin.EntitySetup();
 
 	protected override PageContent getContent() {
@@ -19,11 +20,11 @@ partial class ContactSupport {
 					var message = new EmailMessage
 						{
 							Subject = "Support request from {0} in {1}".FormatWith(
-								AppTools.User.FriendlyName.Any() ? AppTools.User.FriendlyName : AppTools.User.Email,
+								SystemUser.Current.FriendlyName.Any() ? SystemUser.Current.FriendlyName : SystemUser.Current.Email,
 								SystemSpecificLogicStatics.SystemDisplayName ),
 							BodyHtml = body.Value.GetTextAsEncodedHtml()
 						};
-					message.ReplyToAddresses.Add( new EmailAddress( AppTools.User.Email, AppTools.User.FriendlyName ) );
+					message.ReplyToAddresses.Add( new EmailAddress( SystemUser.Current.Email, SystemUser.Current.FriendlyName ) );
 					message.ToAddresses.AddRange( EmailStatics.GetAdministratorEmailAddresses() );
 					EmailStatics.SendEmailWithDefaultFromAddress( message );
 					AddStatusMessage( StatusMessageType.Info, "Your message has been sent." );
@@ -34,7 +35,7 @@ partial class ContactSupport {
 				.Add(
 					FormItemList.CreateStack()
 						.AddItems(
-							new EmailAddress( AppTools.User.Email, AppTools.User.FriendlyName ).ToMailAddress()
+							new EmailAddress( SystemUser.Current.Email, SystemUser.Current.FriendlyName ).ToMailAddress()
 								.ToString()
 								.ToComponents()
 								.ToFormItem( label: "From".ToComponents() )

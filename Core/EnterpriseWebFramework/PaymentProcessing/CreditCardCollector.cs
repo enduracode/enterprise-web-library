@@ -1,5 +1,6 @@
 ﻿#nullable disable
 using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.UserManagement;
 using ServiceStack.Stripe;
 using ServiceStack.Stripe.Types;
 
@@ -31,9 +32,9 @@ public sealed class CreditCardCollector: EtherealComponent {
 	/// <param name="liveSecretKey">Your live secret API key. Will be used in live installations. Do not pass null.</param>
 	/// <param name="successHandler">A method that executes if the credit-card submission is successful. The first parameter is the charge ID and the second
 	/// parameter is the amount of the charge, in dollars.</param>
-	/// <param name="prefilledEmailAddressOverride">By default, the email will be prefilled with AppTools.User.Email if AppTools.User is not null. You can
-	/// override this with either a specified email address (if user is paying on behalf of someone else) or the empty string (to force the user to type in the
-	/// email address).</param>
+	/// <param name="prefilledEmailAddressOverride">By default, the email will be prefilled with SystemUser.Current.Email if SystemUser.Current is not null. You
+	/// can override this with either a specified email address (if user is paying on behalf of someone else) or the empty string (to force the user to type in
+	/// the email address).</param>
 	public CreditCardCollector(
 		JsStatementList jsOpenStatements, string testPublishableKey, string livePublishableKey, string name, string description, decimal? amountInDollars,
 		string testSecretKey, string liveSecretKey, Func<string, decimal, StatusMessageAndDestination> successHandler,
@@ -97,7 +98,7 @@ public sealed class CreditCardCollector: EtherealComponent {
 					return "StripeCheckout.open( { key: '" + ( ConfigurationStatics.IsLiveInstallation ? livePublishableKey : testPublishableKey ) + "', token: " +
 					       jsTokenHandler + ", name: '" + name + "', description: '" + description + "', " +
 					       ( amountInDollars.HasValue ? "amount: " + amountInDollars.Value * 100 + ", " : "" ) + "email: '" +
-					       ( prefilledEmailAddressOverride ?? ( AppTools.User == null ? "" : AppTools.User.Email ) ) + "' } );";
+					       ( prefilledEmailAddressOverride ?? ( SystemUser.Current == null ? "" : SystemUser.Current.Email ) ) + "' } );";
 				} );
 			return hiddenFields;
 		};

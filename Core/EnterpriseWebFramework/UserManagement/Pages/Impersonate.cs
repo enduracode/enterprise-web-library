@@ -33,7 +33,7 @@ partial class Impersonate {
 
 	protected override bool userCanAccess {
 		get {
-			var user = RequestState.Instance.ImpersonatorExists ? RequestState.Instance.ImpersonatorUser : AppTools.User;
+			var user = RequestState.Instance.ImpersonatorExists ? RequestState.Instance.ImpersonatorUser : SystemUser.Current;
 			return AuthenticationStatics.UserCanImpersonate( user );
 		}
 	}

@@ -20,7 +20,7 @@ partial class EntitySetup: UiEntitySetup {
 		get {
 			if( !UserManagementStatics.UserManagementEnabled )
 				return true;
-			return AppTools.User != null && AppTools.User.Role.CanManageUsers;
+			return SystemUser.Current != null && SystemUser.Current.Role.CanManageUsers;
 		}
 	}
 
