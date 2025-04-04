@@ -35,19 +35,7 @@ internal class UpdateDependentLogic: Operation {
 
 		var installation = (DevelopmentInstallation)genericInstallation;
 
-		if( generateDataMigratorProjectCode( installation ) )
-			try {
-				TewlContrib.ProcessTools.RunProgram(
-					"dotnet",
-					"build \"{0}\" --configuration {1}".FormatWith(
-						EwlStatics.CombinePaths( installation.GeneralLogic.Path, IsuStatics.DataMigratorProjectName ),
-						"Debug" ),
-					"",
-					true );
-			}
-			catch( Exception e ) {
-				throw new UserCorrectableException( $"Failed to build {IsuStatics.DataMigratorProjectName}.", e );
-			}
+		generateDataMigratorProjectCode( installation );
 
 		StatusStatics.SetStatus( "Migrating data." );
 		if( installation.ExistingInstallationLogic.MigrateData() is { Length: > 0 } output )
@@ -200,11 +188,10 @@ internal class UpdateDependentLogic: Operation {
 		}
 	}
 
-	private bool generateDataMigratorProjectCode( DevelopmentInstallation installation ) {
+	private void generateDataMigratorProjectCode( DevelopmentInstallation installation ) {
 		var projectPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, IsuStatics.DataMigratorProjectName );
-		var projectExists = File.Exists( EwlStatics.CombinePaths( projectPath, $"{IsuStatics.DataMigratorProjectName}.csproj" ) );
 
-		if( !projectExists ) {
+		if( !File.Exists( EwlStatics.CombinePaths( projectPath, $"{IsuStatics.DataMigratorProjectName}.csproj" ) ) ) {
 			IoMethods.DeleteFolder( projectPath );
 			Directory.CreateDirectory( projectPath );
 			using var writer = new StreamWriter( EwlStatics.CombinePaths( projectPath, $"{IsuStatics.DataMigratorProjectName}.ewlt.csproj" ), false, Encoding.UTF8 );
@@ -233,8 +220,6 @@ internal class UpdateDependentLogic: Operation {
 			IsuStatics.DataMigratorNamespaceAndAssemblyName,
 			writer => { writer.Write( "return DataMigrationOps.MigrateData();" ); },
 			runtimeIdentifier: "win-x64" );
-
-		return projectExists;
 	}
 
 	private void copyInFileDependencies( DevelopmentInstallation installation ) {

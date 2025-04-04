@@ -188,7 +188,28 @@ public class ExistingInstallationLogic {
 		}
 
 		var output = "";
-		if( Directory.Exists( EwlStatics.CombinePaths( generalInstallationLogic.Path, IsuStatics.DataMigratorProjectName ) ) )
+		var migratorExists = runtimeConfiguration.InstallationType == InstallationType.Development
+			                     ? File.Exists(
+				                     EwlStatics.CombinePaths(
+					                     generalInstallationLogic.Path,
+					                     IsuStatics.DataMigratorProjectName,
+					                     $"{IsuStatics.DataMigratorProjectName}.csproj" ) )
+			                     : Directory.Exists( EwlStatics.CombinePaths( generalInstallationLogic.Path, IsuStatics.DataMigratorProjectName ) );
+		if( migratorExists ) {
+			if( runtimeConfiguration.InstallationType == InstallationType.Development )
+				try {
+					TewlContrib.ProcessTools.RunProgram(
+						"dotnet",
+						"build \"{0}\" --configuration {1}".FormatWith(
+							EwlStatics.CombinePaths( generalInstallationLogic.Path, IsuStatics.DataMigratorProjectName ),
+							"Debug" ),
+						"",
+						true );
+				}
+				catch( Exception e ) {
+					throw new UserCorrectableException( $"Failed to build {IsuStatics.DataMigratorProjectName}.", e );
+				}
+
 			try {
 				output = TewlContrib.ProcessTools.RunProgram(
 						EwlStatics.CombinePaths(
@@ -209,6 +230,7 @@ public class ExistingInstallationLogic {
 					throw new UserCorrectableException( message, e );
 				throw UserCorrectableException.CreateSecondaryException( message, e );
 			}
+		}
 		return output;
 	}
 
