@@ -498,6 +498,10 @@ internal class ExportLogic: Operation {
 		if( installation.SystemIsTewl() )
 			return;
 
+		if( File.Exists(
+			   EwlStatics.CombinePaths( installation.GeneralLogic.Path, IsuStatics.DataMigratorProjectName, $"{IsuStatics.DataMigratorProjectName}.csproj" ) ) )
+			copyServerSideProject( installation, serverSideLogicFolderPath, IsuStatics.DataMigratorProjectName );
+
 		TewlContrib.ProcessTools.RunProgram(
 			"dotnet",
 			$"""
