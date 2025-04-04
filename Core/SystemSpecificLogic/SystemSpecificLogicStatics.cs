@@ -3,10 +3,7 @@
 namespace EnterpriseWebLibrary.SystemSpecificLogic;
 
 public static class SystemSpecificLogicStatics {
-	/// <summary>
-	/// EWL Core and Development Utility use only.
-	/// </summary>
-	public const string ProvidersFolderAndNamespaceName = "Providers";
+	private const string providersFolderAndNamespaceName = "Providers";
 
 	private static Type globalInitializerType { get; set; } = null!;
 	internal static SystemGeneralProvider GeneralProvider { get; private set; } = null!;
@@ -25,10 +22,11 @@ public static class SystemSpecificLogicStatics {
 	internal static SystemProviderReference<ProviderType> GetLibraryProvider<ProviderType>( string providerName ) where ProviderType: class =>
 		new SystemProviderGetter(
 			globalInitializerType.Assembly,
-			globalInitializerType.Namespace + ".Configuration." + ProvidersFolderAndNamespaceName,
+			$"{globalInitializerType.Namespace}.{providersFolderAndNamespaceName}",
 			getProviderNotFoundErrorMessage ).GetProvider<ProviderType>( providerName );
 
 	private static string getProviderNotFoundErrorMessage( string providerName ) =>
-		providerName + " provider not found in system. To implement, create a class named " + providerName + @" in Library\Configuration\" +
-		ProvidersFolderAndNamespaceName + " and implement the System" + providerName + "Provider interface.";
+		"""{0} provider not found in system. To implement, create a class named {0} in Library\{1} and implement the System{0}Provider interface.""".FormatWith(
+			providerName,
+			providersFolderAndNamespaceName );
 }

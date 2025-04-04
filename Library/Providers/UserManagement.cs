@@ -3,7 +3,7 @@ using EnterpriseWebLibrary.UserManagement.IdentityProviders;
 using JetBrains.Annotations;
 using NodaTime;
 
-namespace EnterpriseWebLibrary.Configuration.Providers;
+namespace EnterpriseWebLibrary.Providers;
 
 [ UsedImplicitly ]
 internal class UserManagement: SystemUserManagementProvider {

@@ -3,7 +3,7 @@ using EnterpriseWebLibrary.MySql;
 using EnterpriseWebLibrary.OracleDatabase;
 using JetBrains.Annotations;
 
-namespace EnterpriseWebLibrary.Configuration.Providers;
+namespace EnterpriseWebLibrary.Providers;
 
 [ UsedImplicitly ]
 internal class ExternalFunctionality: SystemExternalFunctionalityProvider {

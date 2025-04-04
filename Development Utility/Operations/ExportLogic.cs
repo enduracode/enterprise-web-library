@@ -7,7 +7,6 @@ using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
 using EnterpriseWebLibrary.IO;
-using EnterpriseWebLibrary.SystemSpecificLogic;
 using NodaTime.Text;
 using Tewl.IO;
 
@@ -266,7 +265,6 @@ internal class ExportLogic: Operation {
 		IoMethods.RecursivelyRemoveReadOnlyAttributeFromItem( configurationFolderPath );
 		IoMethods.DeleteFolder( EwlStatics.CombinePaths( configurationFolderPath, InstallationConfiguration.AsposeLicenseFolderName ) );
 		IoMethods.DeleteFolder( EwlStatics.CombinePaths( configurationFolderPath, InstallationConfiguration.InstallationConfigurationFolderName ) );
-		IoMethods.DeleteFolder( EwlStatics.CombinePaths( configurationFolderPath, SystemSpecificLogicStatics.ProvidersFolderAndNamespaceName ) );
 		if( !includeDatabaseUpdates )
 			IoMethods.DeleteFile( EwlStatics.CombinePaths( configurationFolderPath, ExistingInstallationLogic.SystemDatabaseUpdatesFileName ) );
 		IoMethods.DeleteFile( EwlStatics.CombinePaths( configurationFolderPath, InstallationConfiguration.SystemDevelopmentConfigurationFileName ) );

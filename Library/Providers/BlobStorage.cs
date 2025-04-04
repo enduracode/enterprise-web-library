@@ -1,7 +1,7 @@
 ﻿using EnterpriseWebLibrary.DataAccess.BlobStorage;
 using JetBrains.Annotations;
 
-namespace EnterpriseWebLibrary.Configuration.Providers;
+namespace EnterpriseWebLibrary.Providers;
 
 [ UsedImplicitly ]
 public class BlobStorage: SystemBlobStorageProvider {

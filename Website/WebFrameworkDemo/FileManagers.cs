@@ -1,9 +1,8 @@
-﻿using EnterpriseWebLibrary.Configuration.Providers;
-
-// EwlPage
+﻿using EnterpriseWebLibrary.Providers;
 
 namespace EnterpriseWebLibrary.Website.WebFrameworkDemo;
 
+// EwlPage
 partial class FileManagers {
 	protected override PageContent getContent() =>
 		new UiPageContent( omitContentBox: true )
