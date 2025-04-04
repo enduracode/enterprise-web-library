@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using EnterpriseWebLibrary.SystemSpecificLogic;
+using EnterpriseWebLibrary.TewlContrib;
 using Imageflow.Fluent;
 using NodaTime;
 
@@ -270,7 +271,7 @@ public static partial class EwlStatics {
 	public static TimeSpan ExecuteTimedRegion( Action method ) {
 		var chrono = new Chronometer();
 		method();
-		return chrono.Elapsed;
+		return chrono.Elapsed.ToTimeSpan();
 	}
 
 	/// <summary>
