@@ -89,6 +89,7 @@ public class RequestState {
 	internal SemaphoreSlim ContinuationSemaphore { get; } = new( 0, 1 );
 	private Instant? continuationSemaphoreReleaseTime { get; set; }
 	internal Action<HttpContext>? RequestHandler { get; set; }
+	private IRequestCookieCollection? requestCookies;
 
 	internal RequestState( HttpContext context, string url, string baseUrl, SlowRequestThreshold slowRequestThreshold ) {
 		BeginInstant = SystemClock.Instance.GetCurrentInstant();
@@ -114,6 +115,8 @@ public class RequestState {
 			                            ? Duration.FromMinutes( 5 )
 			                            : Duration.FromMilliseconds( (long)slowRequestThreshold );
 	}
+
+	internal IRequestCookieCollection RequestCookies => requestCookies ?? EwfRequest.Current!.AspNetRequest.Cookies;
 
 	internal void SetUrlHandlers( IReadOnlyCollection<BasicUrlHandler> handlers ) {
 		urlHandlers = handlers;
@@ -235,6 +238,8 @@ public class RequestState {
 	}
 
 	internal void ReleaseContinuationSemaphore() {
+		requestCookies = RequestCookies;
+
 		continuationSemaphoreReleaseTime = SystemClock.Instance.GetCurrentInstant();
 		ContinuationSemaphore.Release();
 	}
@@ -246,6 +251,8 @@ public class RequestState {
 		AddNetworkWaitTime( SystemClock.Instance.GetCurrentInstant() - continuationSemaphoreReleaseTime!.Value );
 		continuationSemaphoreReleaseTime = null;
 	}
+
+	internal bool ContinuedRequest => requestCookies is not null;
 
 	internal void CleanUp( bool rollbackDatabaseTransactions ) {
 		ExceptionHandlingTools.CallEveryMethod(

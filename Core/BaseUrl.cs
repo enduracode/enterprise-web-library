@@ -5,13 +5,13 @@ public class BaseUrl {
 		// Creating the URI allows us to remove explicit default ports from the URL.
 		Uri url;
 		try {
-			url = new Uri( ( secure ? "https" : "http" ) + "://" + host );
+			url = new Uri( ( secure ? "https" : "http" ) + Uri.SchemeDelimiter + host );
 		}
 		catch( Exception e ) {
 			throw new ApplicationException( "Failed to initialize URL. Host was \"" + host + "\".", e );
 		}
 
-		return url.Scheme + "://" + url.Host + ( url.IsDefaultPort ? "" : ( ":" + url.Port ) ) + path.PrependDelimiter( "/" );
+		return url.Scheme + Uri.SchemeDelimiter + url.Host + ( url.IsDefaultPort ? "" : ":" + url.Port ) + path.PrependDelimiter( "/" );
 	}
 
 	internal static ( bool secure, string host, int port, string path ) GetComponents( string urlString ) {

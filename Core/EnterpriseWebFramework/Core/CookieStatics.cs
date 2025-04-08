@@ -10,10 +10,14 @@ public static class CookieStatics {
 	// Remove after https://github.com/dotnet/aspnetcore/issues/52580 is resolved.
 	internal const string EmptyValue = "EwlEmpty";
 
+	private static Func<IRequestCookieCollection> requestCookieGetter = null!;
 	private static Func<List<( string, string?, CookieOptions )>> responseCookieGetter = null!;
 	private static Action<string, string?, CookieOptions> responseCookieAdder = null!;
 
-	internal static void Init( Func<List<( string, string?, CookieOptions )>> responseCookieGetter, Action<string, string?, CookieOptions> responseCookieAdder ) {
+	internal static void Init(
+		Func<IRequestCookieCollection> requestCookieGetter, Func<List<( string, string?, CookieOptions )>> responseCookieGetter,
+		Action<string, string?, CookieOptions> responseCookieAdder ) {
+		CookieStatics.requestCookieGetter = requestCookieGetter;
 		CookieStatics.responseCookieGetter = responseCookieGetter;
 		CookieStatics.responseCookieAdder = responseCookieAdder;
 	}
@@ -23,7 +27,7 @@ public static class CookieStatics {
 	/// </summary>
 	public static bool TryGetCookieValueFromRequestOnly( string name, [ NotNullWhen( true ) ] out string? value, bool omitNamePrefix = false ) {
 		var defaultAttributes = EwfConfigurationStatics.AppConfiguration.DefaultCookieAttributes;
-		if( !EwfRequest.Current!.AspNetRequest.Cookies.TryGetValue( ( omitNamePrefix ? "" : defaultAttributes.NamePrefix ?? "" ) + name, out value ) )
+		if( !requestCookieGetter().TryGetValue( ( omitNamePrefix ? "" : defaultAttributes.NamePrefix ?? "" ) + name, out value ) )
 			return false;
 		if( string.Equals( value, EmptyValue ) )
 			value = "";

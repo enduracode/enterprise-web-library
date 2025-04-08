@@ -94,38 +94,51 @@ public static class EwfOps {
 			false,
 			telemetryAppErrorContextWriter: writer => {
 				// This check ensures that there is an actual request, which is not the case during application initialization.
-				if( EwfRequest.Current != null ) {
+				if( EwfRequest.Current is null )
+					return;
+
+				var aspNetRequest = EwfRequest.Current.AspNetRequest;
+
+				writer.WriteLine();
+				writer.WriteLine( "URL: " + EwfRequest.Current.Url );
+				writer.WriteLine(
+					"Raw URL: " + BaseUrl.GetUrlString(
+						aspNetRequest.IsHttps,
+						aspNetRequest.Host.ToUriComponent(),
+						aspNetRequest.PathBase.HasValue ? aspNetRequest.PathBase.ToUriComponent()[ 1.. ] : "" ) +
+					UrlHandlingStatics.EncodePathForPredictableNormalization( aspNetRequest.Path.ToUriComponent() ) + aspNetRequest.QueryString.ToUriComponent() );
+
+				if( aspNetRequest.HasFormContentType ) {
 					writer.WriteLine();
-					writer.WriteLine( "URL: " + EwfRequest.Current.Url );
-
-					if( EwfRequest.Current.AspNetRequest.HasFormContentType ) {
-						writer.WriteLine();
-						foreach( var pair in EwfRequest.Current.AspNetRequest.Form )
-						foreach( var value in pair.Value )
-							writer.WriteLine( "Form field " + pair.Key + ": " + value );
-					}
-
-					writer.WriteLine();
-					foreach( var cookie in EwfRequest.Current.AspNetRequest.Cookies )
-						writer.WriteLine( "Cookie " + cookie.Key + ": " + cookie.Value );
-
-					writer.WriteLine();
-					writer.WriteLine( "User agent: " + EwfRequest.Current.Headers.UserAgent );
-					writer.WriteLine( "Referrer: " + EwfRequest.Current.Headers.Referer );
-
-					SystemUser user = null;
-					SystemUser impersonator = null;
-
-					// exception-prone code
-					try {
-						user = SystemUser.Current;
-						impersonator = RequestDispatchingStatics.RequestState.ImpersonatorExists ? RequestDispatchingStatics.RequestState.ImpersonatorUser : null;
-					}
-					catch {}
-
-					if( user != null )
-						writer.WriteLine( "User: {0}{1}".FormatWith( user.Email, impersonator != null ? " (impersonated by {0})".FormatWith( impersonator.Email ) : "" ) );
+					foreach( var pair in aspNetRequest.Form )
+					foreach( var value in pair.Value )
+						writer.WriteLine( "Form field " + pair.Key + ": " + value );
 				}
+
+				writer.WriteLine();
+				foreach( var cookie in RequestDispatchingStatics.RequestState.RequestCookies )
+					writer.WriteLine( $"Cookie {cookie.Key}: {cookie.Value}" );
+
+				writer.WriteLine();
+				writer.WriteLine( "User agent: " + EwfRequest.Current.Headers.UserAgent );
+				writer.WriteLine( "Referrer: " + EwfRequest.Current.Headers.Referer );
+				writer.WriteLine( "Continued request: " + RequestDispatchingStatics.RequestState.ContinuedRequest.ToYesOrNo() );
+
+				SystemUser user = null;
+				SystemUser impersonator = null;
+
+				// exception-prone code
+				try {
+					user = SystemUser.Current;
+					impersonator = RequestDispatchingStatics.RequestState.ImpersonatorExists ? RequestDispatchingStatics.RequestState.ImpersonatorUser : null;
+				}
+				catch {}
+
+				writer.WriteLine();
+				foreach( var cookie in CookieStatics.ResponseCookies )
+					writer.WriteLine( $"Response cookie {cookie.name}" + ( cookie.value is null ? " cleared" : ": " + cookie.value ) );
+				if( user is not null )
+					writer.WriteLine( "User: {0}{1}".FormatWith( user.Email, impersonator != null ? $" (impersonated by {impersonator.Email})" : "" ) );
 			},
 			mainDataAccessStateGetter: () =>
 				EwfRequest.Current is not null ? RequestDispatchingStatics.RequestState.DatabaseConnectionManager.DataAccessState : initTimeDataAccessState.Value,
@@ -273,12 +286,13 @@ public static class EwfOps {
 								( baseUrlString, appRelativeUrl ) =>
 									RequestState.ExecuteWithUrlHandlerStateDisabled( () => UrlHandlingStatics.ResolveUrl( baseUrlString, appRelativeUrl )?.Last() ) );
 							CookieStatics.Init(
+								() => RequestDispatchingStatics.RequestState.RequestCookies,
 								() => RequestDispatchingStatics.RequestState.ResponseCookies,
 								( name, value, options ) => {
 									AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod(
 										() => {
 											var cookies = contextAccessor.HttpContext.Response.Cookies;
-											if( value != null )
+											if( value is not null )
 												cookies.Append( name, value.Length == 0 ? CookieStatics.EmptyValue : value, options );
 											else
 												cookies.Delete( name, options );
