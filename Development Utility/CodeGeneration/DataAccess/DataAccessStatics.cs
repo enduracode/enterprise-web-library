@@ -53,8 +53,7 @@ internal static class DataAccessStatics {
 		if( initStatements.Any() ) {
 			writer.WriteLine();
 			writer.WriteLine(
-				"namespace {0}.Configuration.Providers {{".FormatWith(
-					installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName ) );
+				"namespace {0}.Providers {{".FormatWith( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName ) );
 			writer.WriteLine(
 				"internal partial class {0}: SystemDataAccessProvider {{".FormatWith( EnterpriseWebLibrary.DataAccess.DataAccessStatics.ProviderName ) );
 			writer.WriteLine( "void SystemDataAccessProvider.InitRetrievalCaches() {" );

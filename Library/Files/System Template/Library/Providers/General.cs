@@ -1,4 +1,4 @@
-﻿namespace @@BaseNamespace.Library.Configuration.Providers;
+﻿namespace @@BaseNamespace.Library.Providers;
 
 internal class General: SystemGeneralProvider {
 	protected override string IntermediateLogInPassword => "your-password";
