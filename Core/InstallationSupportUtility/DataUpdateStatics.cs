@@ -55,8 +55,15 @@ public class DataUpdateStatics {
 
 			if( !installationIsStandbyDb ) {
 				// Bring database logic up to date with the rest of the logic in this installation. In other words, reapply changes lost when we deleted the database.
-				StatusStatics.SetStatus( "Updating database logic..." );
-				installation.ExistingInstallationLogic.MigrateData();
+				StatusStatics.SetStatus( "Migrating data." );
+				var message = "Migrated data.";
+				try {
+					installation.ExistingInstallationLogic.MigrateData();
+				}
+				catch when( installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationType == InstallationType.Development ) {
+					message = "Did not migrate data, likely because the system’s Migrator application was not yet available. Please update dependent logic.";
+				}
+				StatusStatics.SetStatus( message );
 			}
 
 			// If we’re an intermediate installation and we are getting data from a live installation, sanitize the data and do other conversion commands.
