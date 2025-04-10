@@ -1,25 +1,12 @@
 # Database migration
 
-If you need to make changes to your database schema or your reference data, you can use the `Library/Configuration/Database Updates.sql` file. Create the file if it does not already exist. Scroll to the bottom, add SQL statements that make your changes, save the file, and run `Update-DependentLogic`. This will run your statements against your local copy of the database. Every installation of your system stores its current position in the `Database Updates.sql` file, so when you commit your new version of this file, and deploy the system to a server, all of your changes that have not already run against that installation’s database will run.
+Last updated for Enterprise Web Library version 83.
 
-## Examples (for SQL Server)
 
-### Creating a table
+If you need to make changes to your database schema or your reference data, you can use the `Data Migrator` project. If this project is not yet included in your solution, locate the generated `Data Migrator/Data Migrator.ewlt.csproj`, change the extension to just `.csproj`, add the project to your solution, and reference the same version of EWL that the other projects do.
 
-```SQL
-CREATE TABLE Customers(
-	CustomerId int
-		NOT NULL
-		CONSTRAINT CustomersPk PRIMARY KEY,
-	CustomerName varchar( 50 )
-		NOT NULL
-)
-GO
-```
+Add migration classes to the project (see https://fluentmigrator.github.io/ for more info), and run `Update-DependentLogic`. This will run your migrations against your local copy of the database. Every installation of your system stores the migrations that have already been applied to it, so when you commit your new migration classes, and deploy the system to a server, all of your changes that have not already run against that installation’s database will run. **Please note:** If you don’t use the EWL System Manager, you’ll need to call `DataMigrator.exe` as part of deployment.
 
-### Adding a row of reference data
+## Examples
 
-```SQL
-INSERT INTO Countries VALUES( 123, 'Czech Republic' )
-GO
-```
+See https://fluentmigrator.github.io/.
