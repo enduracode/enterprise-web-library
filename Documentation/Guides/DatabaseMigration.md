@@ -10,3 +10,5 @@ Add migration classes to the project (see https://fluentmigrator.github.io/ for 
 ## Examples
 
 See https://fluentmigrator.github.io/.
+
+If you need cursor-type logic of looping through rows and doing something for each one, use `Execute.WithConnection`, which provides a raw `IDbConnection` and transaction. Then you can query that with Dapper (https://github.com/DapperLib/Dapper) to cleanly access results.
