@@ -128,6 +128,18 @@ internal class UpdateDependentLogic: Operation {
 				EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.ProviderProjectFolderName, AppStatics.SamlProviderProjectName ),
 				"EnterpriseWebLibrary.Saml",
 				_ => {} );
+			generateCodeForProject(
+				installation,
+				"PDF Provider",
+				EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.ProviderProjectFolderName, AppStatics.PdfProviderProjectName ),
+				"EnterpriseWebLibrary.Pdf",
+				_ => {} );
+			generateCodeForProject(
+				installation,
+				"Word Provider",
+				EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.ProviderProjectFolderName, AppStatics.WordProviderProjectName ),
+				"EnterpriseWebLibrary.Word",
+				_ => {} );
 		}
 		if( installation.SystemIsTewl() )
 			generateCodeForProject(

@@ -15,6 +15,8 @@ internal static class AppStatics {
 	internal const string OracleDatabaseProviderProjectName = "Oracle Database";
 	internal const string OpenIdConnectProviderProjectName = "OpenID Connect";
 	internal const string SamlProviderProjectName = "SAML";
+	internal const string PdfProviderProjectName = "PDF";
+	internal const string WordProviderProjectName = "Word";
 
 	internal static bool NDependIsPresent;
 

@@ -194,6 +194,34 @@ internal class ExportLogic: Operation {
 						useDebugAssembly,
 						outputFolderPath,
 						prereleaseValues ) ) );
+
+			var pdfId = mainId + ".Pdf";
+			packages.Add(
+				( pdfId,
+					createProviderNuGetPackages(
+						installation,
+						mainId,
+						AppStatics.PdfProviderProjectName,
+						"EnterpriseWebLibrary.Pdf",
+						pdfId,
+						now,
+						useDebugAssembly,
+						outputFolderPath,
+						prereleaseValues ) ) );
+
+			var wordId = mainId + ".Word";
+			packages.Add(
+				( wordId,
+					createProviderNuGetPackages(
+						installation,
+						mainId,
+						AppStatics.WordProviderProjectName,
+						"EnterpriseWebLibrary.Word",
+						wordId,
+						now,
+						useDebugAssembly,
+						outputFolderPath,
+						prereleaseValues ) ) );
 		}
 
 		return packages;
