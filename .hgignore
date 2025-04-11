@@ -61,3 +61,13 @@ Providers/SAML/bin/
 Providers/SAML/obj/
 Providers/SAML/Directory.Build.props
 Providers/SAML/Generated Code/
+
+Providers/PDF/bin/
+Providers/PDF/obj/
+Providers/PDF/Directory.Build.props
+Providers/PDF/Generated Code/
+
+Providers/Word/bin/
+Providers/Word/obj/
+Providers/Word/Directory.Build.props
+Providers/Word/Generated Code/

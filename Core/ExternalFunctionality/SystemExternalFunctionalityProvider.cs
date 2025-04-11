@@ -23,4 +23,14 @@ public abstract class SystemExternalFunctionalityProvider {
 	/// Returns the external SAML provider for the system. This should be a simple constructor expression with no other logic.
 	/// </summary>
 	protected internal virtual ExternalSamlProvider? GetSamlProvider() => null;
+
+	/// <summary>
+	/// Returns the external PDF provider for the system. This should be a simple constructor expression with no other logic.
+	/// </summary>
+	protected internal virtual ExternalPdfProvider? GetPdfProvider() => null;
+
+	/// <summary>
+	/// Returns the external Word provider for the system. This should be a simple constructor expression with no other logic.
+	/// </summary>
+	protected internal virtual ExternalWordProvider? GetWordProvider() => null;
 }

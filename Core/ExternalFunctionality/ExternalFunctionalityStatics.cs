@@ -1,4 +1,5 @@
-﻿using EnterpriseWebLibrary.SystemSpecificLogic;
+﻿using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.SystemSpecificLogic;
 using EnterpriseWebLibrary.UserManagement;
 
 namespace EnterpriseWebLibrary.ExternalFunctionality;
@@ -11,6 +12,8 @@ internal static class ExternalFunctionalityStatics {
 	private static ExternalOracleDatabaseProvider? oracleDatabaseProvider;
 	private static ExternalOpenIdConnectProvider? openIdConnectProvider;
 	private static ExternalSamlProvider? samlProvider;
+	private static ExternalPdfProvider? pdfProvider;
+	private static ExternalWordProvider? wordProvider;
 
 	internal static void Init() {
 		provider = SystemSpecificLogicStatics.GetLibraryProvider<SystemExternalFunctionalityProvider>( ProviderName );
@@ -23,6 +26,16 @@ internal static class ExternalFunctionalityStatics {
 
 		samlProvider = provider.GetProvider( returnNullIfNotFound: true )?.GetSamlProvider();
 		samlProvider?.InitStatics( UserManagementStatics.GetCertificate, UserManagementStatics.CertificatePassword );
+
+		pdfProvider = provider.GetProvider( returnNullIfNotFound: true )?.GetPdfProvider();
+		var asposePdfLicensePath = EwlStatics.CombinePaths( ConfigurationStatics.InstallationConfiguration.AsposeLicenseFolderPath, "Aspose.Pdf.lic" );
+		if( File.Exists( asposePdfLicensePath ) )
+			pdfProvider?.InitStatics( asposePdfLicensePath );
+
+		wordProvider = provider.GetProvider( returnNullIfNotFound: true )?.GetWordProvider();
+		var asposeWordsLicensePath = EwlStatics.CombinePaths( ConfigurationStatics.InstallationConfiguration.AsposeLicenseFolderPath, "Aspose.Words.lic" );
+		if( File.Exists( asposeWordsLicensePath ) )
+			wordProvider?.InitStatics( asposeWordsLicensePath );
 	}
 
 	internal static ExternalMySqlProvider ExternalMySqlProvider {
