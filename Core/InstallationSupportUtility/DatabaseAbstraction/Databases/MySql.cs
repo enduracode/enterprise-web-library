@@ -1,4 +1,5 @@
-﻿using EnterpriseWebLibrary.DataAccess;
+﻿using System.Data;
+using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.DataAccess.CommandWriting;
 using EnterpriseWebLibrary.DataAccess.CommandWriting.Commands;
 using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction.Conditions;
@@ -151,6 +152,8 @@ public class MySql: Database {
 		return "--host=localhost --user=root --password=password";
 	}
 
+	IEnumerable<DataRow> Database.GetDataTypes() => throw new NotSupportedException();
+
 	IEnumerable<string> Database.GetTables() {
 		var tables = new List<string>();
 		ExecuteDbMethod(
@@ -168,13 +171,9 @@ public class MySql: Database {
 		return tables;
 	}
 
-	IEnumerable<string> Database.GetProcedures() {
-		throw new NotSupportedException();
-	}
+	IEnumerable<string> Database.GetProcedures() => throw new NotSupportedException();
 
-	IEnumerable<ProcedureParameter> Database.GetProcedureParameters( string procedure ) {
-		throw new NotSupportedException();
-	}
+	IEnumerable<ProcedureParameter> Database.GetProcedureParameters( string procedure ) => throw new NotSupportedException();
 
 	void Database.PerformMaintenance() {}
 

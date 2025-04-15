@@ -1,3 +1,4 @@
+using System.Data;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.DatabaseSpecification;
 
@@ -23,16 +24,10 @@ internal class NoDatabase: Database {
 	void Database.ExportToFile( string filePath ) {}
 	void Database.DeleteAndReCreateFromFile( string filePath ) {}
 
-	IEnumerable<string> Database.GetTables() => Enumerable.Empty<string>();
-
-	IEnumerable<string> Database.GetProcedures() {
-		throw new NotSupportedException();
-	}
-
-	IEnumerable<ProcedureParameter> Database.GetProcedureParameters( string procedure ) {
-		throw new NotSupportedException();
-	}
-
+	IEnumerable<DataRow> Database.GetDataTypes() => throw new NotSupportedException();
+	IEnumerable<string> Database.GetTables() => [ ];
+	IEnumerable<string> Database.GetProcedures() => throw new NotSupportedException();
+	IEnumerable<ProcedureParameter> Database.GetProcedureParameters( string procedure ) => throw new NotSupportedException();
 	void Database.PerformMaintenance() {}
 	void Database.ShrinkAfterPostUpdateDataCommands() {}
 

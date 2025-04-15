@@ -244,6 +244,12 @@ public class Oracle: Database {
 		}
 	}
 
+	public IEnumerable<DataRow> GetDataTypes() {
+		IReadOnlyCollection<DataRow>? rows = null;
+		ExecuteDbMethod( cn => rows = cn.GetSchema( "DataTypes" ).Rows.Cast<DataRow>().Materialize() );
+		return rows!;
+	}
+
 	IEnumerable<string> Database.GetTables() {
 		var tables = new List<string>();
 		ExecuteDbMethod(
@@ -286,8 +292,14 @@ public class Oracle: Database {
 					// ExecuteReader. Per the Oracle Data Provider for .NET documentation for OracleCommand.ExecuteReader, output
 					// REF CURSOR parameters in a procedure can be accessed through the returned data reader and don't need to be
 					// treated as ordinary command parameters. That's why we don't include them here.
-					if( dataType != "REF CURSOR" || parameterDirection != ParameterDirection.Output )
-						parameters.Add( new ProcedureParameter( cn, (string)row[ "ARGUMENT_NAME" ], dataType, (int)row[ "DATA_LENGTH" ], parameterDirection ) );
+					if( dataType != "REF CURSOR" || parameterDirection != ParameterDirection.Output ) {
+						var dataTypeRows = GetDataTypes().Where( r => (string)r[ "TypeName" ] == dataType ).Materialize();
+						if( dataTypeRows.Count != 1 )
+							throw new Exception( "There must be exactly one data type row matching the specified data type name." );
+
+						parameters.Add(
+							new ProcedureParameter( cn, (string)row[ "ARGUMENT_NAME" ], dataTypeRows.Single(), (int)row[ "DATA_LENGTH" ], parameterDirection ) );
+					}
 				}
 			} );
 		return parameters;

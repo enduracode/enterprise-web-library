@@ -1,3 +1,4 @@
+using System.Data;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.DatabaseSpecification;
 using JetBrains.Annotations;
@@ -34,6 +35,7 @@ public interface Database {
 	void DeleteAndReCreateFromFile( string filePath );
 
 	// Other
+	IEnumerable<DataRow> GetDataTypes();
 	IEnumerable<string> GetTables();
 	IEnumerable<string> GetProcedures();
 	IEnumerable<ProcedureParameter> GetProcedureParameters( string procedure );

@@ -10,18 +10,10 @@ public class ProcedureParameter {
 	private readonly ValueContainer valueContainer;
 	private readonly ParameterDirection direction;
 
-	internal ProcedureParameter( DatabaseConnection cn, string name, string dataTypeFromGetSchema, int size, ParameterDirection direction ) {
-		var table = cn.GetSchema( "DataTypes" );
-		var rows = new List<DataRow>();
-		foreach( DataRow r in table.Rows )
-			if( (string)r[ "TypeName" ] == dataTypeFromGetSchema )
-				rows.Add( r );
-		if( rows.Count != 1 )
-			throw new ApplicationException( "There must be exactly one data type row matching the specified data type name." );
-		var row = rows[ 0 ];
-		var dataType = Type.GetType( (string)row[ "DataType" ], true )!;
-		var dbTypeString = cn.DatabaseInfo.GetDbTypeString( row[ "ProviderDbType" ] );
-		var allowsNull = (bool)row[ "IsNullable" ];
+	internal ProcedureParameter( DatabaseConnection cn, string name, DataRow dataTypeRow, int size, ParameterDirection direction ) {
+		var dataType = Type.GetType( (string)dataTypeRow[ "DataType" ], true )!;
+		var dbTypeString = cn.DatabaseInfo.GetDbTypeString( dataTypeRow[ "ProviderDbType" ] );
+		var allowsNull = (bool)dataTypeRow[ "IsNullable" ];
 
 		valueContainer = new ValueContainer( name, dataType, dbTypeString, size, null, allowsNull, cn.DatabaseInfo );
 		this.direction = direction;

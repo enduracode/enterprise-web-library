@@ -1,3 +1,4 @@
+using System.Data;
 using System.Threading;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
@@ -166,6 +167,8 @@ LOG ON (
 	// Use the EWL folder for all backup/restore operations because the SQL Server account probably already has access to it.
 	private string backupFilePath => EwlStatics.CombinePaths( ConfigurationStatics.EwlFolderPath, info.Database + ".bak" );
 
+	IEnumerable<DataRow> Database.GetDataTypes() => throw new NotSupportedException();
+
 	IEnumerable<string> Database.GetTables() {
 		var tables = new List<string>();
 		ExecuteDbMethod(
@@ -182,13 +185,9 @@ LOG ON (
 		return tables;
 	}
 
-	IEnumerable<string> Database.GetProcedures() {
-		throw new NotSupportedException();
-	}
+	IEnumerable<string> Database.GetProcedures() => throw new NotSupportedException();
 
-	IEnumerable<ProcedureParameter> Database.GetProcedureParameters( string procedure ) {
-		throw new NotSupportedException();
-	}
+	IEnumerable<ProcedureParameter> Database.GetProcedureParameters( string procedure ) => throw new NotSupportedException();
 
 	void Database.PerformMaintenance() {
 		ExecuteDbMethod(
