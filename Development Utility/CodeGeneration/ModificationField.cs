@@ -1,6 +1,9 @@
 ﻿namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration;
 
 internal class ModificationField {
+	public static bool NameHasSuffix( string name, string suffix, string contains ) =>
+		name.EndsWith( suffix, StringComparison.Ordinal ) && ( contains.Length == 0 || name.Contains( contains, StringComparison.Ordinal ) );
+
 	private readonly string source;
 	private readonly string name;
 	private readonly string pascalCasedName;
@@ -31,10 +34,7 @@ internal class ModificationField {
 	internal string Name => name;
 	internal string PascalCasedName => pascalCasedName;
 	internal string CamelCasedName => camelCasedName;
-
-	internal bool HasSuffix( string suffix, string contains = "" ) =>
-		pascalCasedName.EndsWith( suffix, StringComparison.Ordinal ) && ( contains.Length == 0 || pascalCasedName.Contains( contains, StringComparison.Ordinal ) );
-
+	internal bool HasSuffix( string suffix, string contains = "" ) => NameHasSuffix( pascalCasedName, suffix, contains );
 	internal bool TypeIs( Type type ) => this.type == type;
 	internal string TypeName => typeName;
 	internal string NullableTypeName => nullableTypeName;

@@ -47,6 +47,12 @@ internal class ValueContainer {
 			incomingValueConverter = value => LocalDate.FromDateTime( (DateTime)value );
 			outgoingValueConversionExpressionGetter = valueExpression => $"{valueExpression}.ToDateTimeUnspecified()";
 		}
+		else if( dataType == typeof( DateTime ) && hasSuffix( "Time" ) && !hasSuffix( "DateAndTime" ) && !hasSuffix( "DateTime" ) ) {
+			this.dataType = typeof( Instant );
+			incomingValueConversionExpressionGetter = valueExpression => $"LocalDateTime.FromDateTime( (DateTime){valueExpression} ).InUtc().ToInstant()";
+			incomingValueConverter = value => LocalDateTime.FromDateTime( (DateTime)value ).InUtc().ToInstant();
+			outgoingValueConversionExpressionGetter = valueExpression => $"{valueExpression}.ToDateTimeUtc()";
+		}
 		else {
 			this.dataType = unconvertedDataType;
 			incomingValueConversionExpressionGetter = valueExpression => "({0}){1}".FormatWith( dataType, valueExpression );
@@ -67,6 +73,8 @@ internal class ValueContainer {
 					              _ => true
 				              };
 	}
+
+	private bool hasSuffix( string suffix, string contains = "" ) => ModificationField.NameHasSuffix( pascalCasedName, suffix, contains );
 
 	public string Name => name;
 	public string PascalCasedName => pascalCasedName;
