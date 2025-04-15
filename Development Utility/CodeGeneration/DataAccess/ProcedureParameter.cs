@@ -1,6 +1,5 @@
 ﻿using System.Data;
 using EnterpriseWebLibrary.DatabaseSpecification;
-using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess;
 

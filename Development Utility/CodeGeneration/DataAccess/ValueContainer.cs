@@ -2,12 +2,9 @@
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using NodaTime;
 
-namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
+namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess;
 
-/// <summary>
-/// Internal and Development Utility use only.
-/// </summary>
-public class ValueContainer {
+internal class ValueContainer {
 	private readonly string name;
 	private readonly string pascalCasedName;
 
