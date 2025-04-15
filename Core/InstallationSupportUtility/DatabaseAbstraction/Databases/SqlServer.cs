@@ -187,7 +187,7 @@ LOG ON (
 
 	IEnumerable<string> Database.GetProcedures() => throw new NotSupportedException();
 
-	IEnumerable<ProcedureParameter> Database.GetProcedureParameters( string procedure ) => throw new NotSupportedException();
+	IEnumerable<DataRow> Database.GetProcedureParameters( string procedure ) => throw new NotSupportedException();
 
 	void Database.PerformMaintenance() {
 		ExecuteDbMethod(

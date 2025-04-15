@@ -38,7 +38,7 @@ public interface Database {
 	IEnumerable<DataRow> GetDataTypes();
 	IEnumerable<string> GetTables();
 	IEnumerable<string> GetProcedures();
-	IEnumerable<ProcedureParameter> GetProcedureParameters( string procedure );
+	IEnumerable<DataRow> GetProcedureParameters( string procedure );
 	void PerformMaintenance();
 	void ShrinkAfterPostUpdateDataCommands();
 

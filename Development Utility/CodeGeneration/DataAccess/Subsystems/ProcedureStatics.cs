@@ -9,7 +9,7 @@ internal static class ProcedureStatics {
 		writer.WriteLine( "namespace " + baseNamespace + " {" );
 		writer.WriteLine( "public static class " + database.SecondaryDatabaseName + "Procedures {" );
 		foreach( var procedure in database.GetProcedures() ) {
-			var parameters = database.GetProcedureParameters( procedure );
+			var parameters = getParameters( database, procedure );
 
 			// header
 			CodeGenerationStatics.AddSummaryDocComment( writer, "Executes the " + procedure + " procedure." );
@@ -58,6 +58,40 @@ internal static class ProcedureStatics {
 		}
 		writer.WriteLine( "}" );
 		writer.WriteLine( "}" );
+	}
+
+	private static IEnumerable<ProcedureParameter> getParameters( Database database, string procedure ) {
+		foreach( var row in database.GetProcedureParameters( procedure ) ) {
+			var dataType = (string)row[ "DATA_TYPE" ];
+			var parameterDirection = getParameterDirection( (string)row[ "IN_OUT" ] );
+
+			// The parameters returned by this method are used with an OracleCommand object that will be executed using
+			// ExecuteReader. Per the Oracle Data Provider for .NET documentation for OracleCommand.ExecuteReader, output
+			// REF CURSOR parameters in a procedure can be accessed through the returned data reader and don't need to be
+			// treated as ordinary command parameters. That's why we don't include them here.
+			if( dataType != "REF CURSOR" || parameterDirection != ParameterDirection.Output ) {
+				var dataTypeRows = database.GetDataTypes().Where( r => (string)r[ "TypeName" ] == dataType ).Materialize();
+				if( dataTypeRows.Count != 1 )
+					throw new Exception( "There must be exactly one data type row matching the specified data type name." );
+
+				yield return new ProcedureParameter(
+					database.Info!,
+					(string)row[ "ARGUMENT_NAME" ],
+					dataTypeRows.Single(),
+					(int)row[ "DATA_LENGTH" ],
+					parameterDirection );
+			}
+		}
+	}
+
+	private static ParameterDirection getParameterDirection( string direction ) {
+		if( direction == "IN" )
+			return ParameterDirection.Input;
+		if( direction == "OUT" )
+			return ParameterDirection.Output;
+		if( direction == "IN/OUT" )
+			return ParameterDirection.InputOutput;
+		throw new ApplicationException( "Unknown parameter direction string." );
 	}
 
 	private static string getDbCommandParameterCreationExpression( ProcedureParameter parameter ) {

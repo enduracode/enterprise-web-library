@@ -276,43 +276,14 @@ public class Oracle: Database {
 		return procedures;
 	}
 
-	IEnumerable<ProcedureParameter> Database.GetProcedureParameters( string procedure ) {
-		var parameters = new List<ProcedureParameter>();
+	IEnumerable<DataRow> Database.GetProcedureParameters( string procedure ) {
+		List<DataRow>? rows = null;
 		ExecuteDbMethod(
-			delegate( DatabaseConnection cn ) {
-				var rows = new List<DataRow>();
-				foreach( DataRow row in cn.GetSchema( "ProcedureParameters", null, procedure ).Rows )
-					rows.Add( row );
+			cn => {
+				rows = cn.GetSchema( "ProcedureParameters", null, procedure ).Rows.Cast<DataRow>().ToList();
 				rows.Sort( ( x, y ) => (int)( (decimal)x[ "POSITION" ] - (decimal)y[ "POSITION" ] ) );
-				foreach( var row in rows ) {
-					var dataType = (string)row[ "DATA_TYPE" ];
-					var parameterDirection = getParameterDirection( (string)row[ "IN_OUT" ] );
-
-					// The parameters returned by this method are used with an OracleCommand object that will be executed using
-					// ExecuteReader. Per the Oracle Data Provider for .NET documentation for OracleCommand.ExecuteReader, output
-					// REF CURSOR parameters in a procedure can be accessed through the returned data reader and don't need to be
-					// treated as ordinary command parameters. That's why we don't include them here.
-					if( dataType != "REF CURSOR" || parameterDirection != ParameterDirection.Output ) {
-						var dataTypeRows = GetDataTypes().Where( r => (string)r[ "TypeName" ] == dataType ).Materialize();
-						if( dataTypeRows.Count != 1 )
-							throw new Exception( "There must be exactly one data type row matching the specified data type name." );
-
-						parameters.Add(
-							new ProcedureParameter( cn, (string)row[ "ARGUMENT_NAME" ], dataTypeRows.Single(), (int)row[ "DATA_LENGTH" ], parameterDirection ) );
-					}
-				}
 			} );
-		return parameters;
-	}
-
-	private ParameterDirection getParameterDirection( string direction ) {
-		if( direction == "IN" )
-			return ParameterDirection.Input;
-		if( direction == "OUT" )
-			return ParameterDirection.Output;
-		if( direction == "IN/OUT" )
-			return ParameterDirection.InputOutput;
-		throw new ApplicationException( "Unknown parameter direction string." );
+		return rows!;
 	}
 
 	void Database.PerformMaintenance() {

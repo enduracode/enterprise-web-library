@@ -1,21 +1,19 @@
 ﻿using System.Data;
-using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.DatabaseSpecification;
+using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 
-namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
+namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess;
 
-/// <summary>
-/// Internal and Development Utility use only.
-/// </summary>
-public class ProcedureParameter {
+internal class ProcedureParameter {
 	private readonly ValueContainer valueContainer;
 	private readonly ParameterDirection direction;
 
-	internal ProcedureParameter( DatabaseConnection cn, string name, DataRow dataTypeRow, int size, ParameterDirection direction ) {
+	public ProcedureParameter( DatabaseInfo databaseInfo, string name, DataRow dataTypeRow, int size, ParameterDirection direction ) {
 		var dataType = Type.GetType( (string)dataTypeRow[ "DataType" ], true )!;
-		var dbTypeString = cn.DatabaseInfo.GetDbTypeString( dataTypeRow[ "ProviderDbType" ] );
+		var dbTypeString = databaseInfo.GetDbTypeString( dataTypeRow[ "ProviderDbType" ] );
 		var allowsNull = (bool)dataTypeRow[ "IsNullable" ];
 
-		valueContainer = new ValueContainer( name, dataType, dbTypeString, size, null, allowsNull, cn.DatabaseInfo );
+		valueContainer = new ValueContainer( name, dataType, dbTypeString, size, null, allowsNull, databaseInfo );
 		this.direction = direction;
 	}
 
