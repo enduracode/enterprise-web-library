@@ -4,8 +4,6 @@
 /// An email message.
 /// </summary>
 public class EmailMessage {
-	private readonly List<EmailAttachment> attachments = [ ];
-
 	/// <summary>
 	/// The from address.
 	/// </summary>
@@ -47,7 +45,7 @@ public class EmailMessage {
 	/// <summary>
 	/// Collection of attachments.
 	/// </summary>
-	public List<EmailAttachment> Attachments => attachments;
+	public List<EmailAttachment> Attachments { get; } = [ ];
 
 	/// <summary>
 	/// Creates a new Email message.
