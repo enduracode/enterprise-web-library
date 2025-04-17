@@ -206,7 +206,7 @@ internal class PageTree {
 
 			var focusabilityCondition = node.FocusabilityConditionGetter?.Invoke();
 
-			var isFocused = !elementFocused && inActiveAutofocusRegion && focusabilityCondition != null && isFocusablePredicate( node.FocusabilityConditionGetter() );
+			var isFocused = !elementFocused && inActiveAutofocusRegion && focusabilityCondition is not null && isFocusablePredicate( focusabilityCondition );
 			if( isFocused )
 				elementFocused = true;
 
@@ -221,7 +221,7 @@ internal class PageTree {
 				prepareForRendering( rootNode, focusKey is null, jsInitStatementWriter );
 
 		if( activeAutofocusRegionsExist && !elementFocused )
-			throw new ApplicationException( "The active autofocus regions do not contain any focusable elements." );
+			throw new Exception( "The active autofocus regions do not contain any focusable elements." );
 
 		etherealContainerNode.Children = etherealChildren;
 	}
