@@ -220,7 +220,7 @@ internal class PageTree {
 			using( MiniProfiler.Current.Step( "EWF - Prepare page tree for rendering" ) )
 				prepareForRendering( rootNode, focusKey is null, jsInitStatementWriter );
 
-		if( focusKey is not null && activeAutofocusRegionsExist && !elementFocused )
+		if( activeAutofocusRegionsExist && !elementFocused )
 			throw new ApplicationException( "The active autofocus regions do not contain any focusable elements." );
 
 		etherealContainerNode.Children = etherealChildren;
