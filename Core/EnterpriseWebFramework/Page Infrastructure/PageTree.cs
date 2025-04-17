@@ -35,24 +35,23 @@ internal class PageTree {
 	private readonly IReadOnlyCollection<TrustedHtmlString> generalModificationErrors;
 	private readonly FlowComponent etherealContainer;
 	private readonly FlowComponent jsInitElement;
-	private readonly StringBuilder elementJsInitStatements;
 
 	private int nodeCount;
 	private int etherealComponentCount;
 
 	public bool RenderingPreparationStarted;
+	public bool? AutofocusActivated;
+	public StringBuilder? ElementJsInitStatements;
 
 	public PageTree(
 		PageComponent rootComponent, Action<string> idSetter,
 		Func<string, ErrorSourceSet, ImmutableDictionary<EwfValidation, IReadOnlyCollection<string>>> modificationErrorGetter,
-		IReadOnlyCollection<TrustedHtmlString> generalModificationErrors, FlowComponent etherealContainer, FlowComponent jsInitElement,
-		StringBuilder elementJsInitStatements ) {
+		IReadOnlyCollection<TrustedHtmlString> generalModificationErrors, FlowComponent etherealContainer, FlowComponent jsInitElement ) {
 		this.idSetter = idSetter;
 		this.modificationErrorGetter = modificationErrorGetter;
 		this.generalModificationErrors = generalModificationErrors;
 		this.etherealContainer = etherealContainer;
 		this.jsInitElement = jsInitElement;
-		this.elementJsInitStatements = elementJsInitStatements;
 
 		rootNode = buildNode( rootComponent, new IdGenerator(), false, false );
 
@@ -216,9 +215,12 @@ internal class PageTree {
 				prepareForRendering( i, inActiveAutofocusRegion, jsInitStatementWriter );
 		}
 
-		using( var jsInitStatementWriter = new StringWriter( elementJsInitStatements ) )
+		ElementJsInitStatements = new StringBuilder();
+		using( var jsInitStatementWriter = new StringWriter( ElementJsInitStatements ) )
 			using( MiniProfiler.Current.Step( "EWF - Prepare page tree for rendering" ) )
 				prepareForRendering( rootNode, focusKey is null, jsInitStatementWriter );
+
+		AutofocusActivated = focusKey is null || activeAutofocusRegionsExist;
 
 		if( activeAutofocusRegionsExist && !elementFocused )
 			throw new Exception( "The active autofocus regions do not contain any focusable elements." );

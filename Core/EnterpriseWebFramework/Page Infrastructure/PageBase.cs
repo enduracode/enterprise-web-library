@@ -692,7 +692,6 @@ public abstract class PageBase: ResourceBase {
 		formState = new FormState();
 		dataUpdate = new DataUpdateAction( new BasicDataModificationAction( dataUpdateIsSlow ) );
 		FormAction pageLoadAction = null;
-		var elementJsInitStatements = new StringBuilder();
 		var content = contentGetter(
 			defaultContentGetter => FormState.ExecuteWithActions(
 				DataUpdate,
@@ -711,7 +710,7 @@ public abstract class PageBase: ResourceBase {
 					"",
 					"" ),
 				Formatting.None ),
-			() => getJsInitStatements( elementJsInitStatements.ToString(), pageLoadAction != null ? pageLoadAction.GetJsStatements() : "" ) );
+			() => getJsInitStatements( pageLoadAction is not null ? pageLoadAction.GetJsStatements() : "" ) );
 		BasicContent = content.basicContent;
 		if( content.dataUpdateModificationMethod != null )
 			dataUpdate.Action.AddModificationMethod( content.dataUpdateModificationMethod );
@@ -725,8 +724,7 @@ public abstract class PageBase: ResourceBase {
 				addModificationErrorDisplaysAndGetErrors,
 				requestState.GeneralModificationErrors,
 				content.etherealContainer,
-				content.jsInitElement,
-				elementJsInitStatements );
+				content.jsInitElement );
 		formState = null;
 
 		var activeStateItems = pageTree.AllNodes.Select( i => i.StateItem ).Where( i => i != null ).ToImmutableHashSet();
@@ -777,8 +775,8 @@ public abstract class PageBase: ResourceBase {
 		return hashString;
 	}
 
-	private string getJsInitStatements( string elementJsInitStatements, string pageLoadActionStatements ) {
-		var scroll = scrollPositionForThisResponse == ScrollPosition.LastPositionOrStatusBar && !ModificationErrorsOccurred;
+	private string getJsInitStatements( string pageLoadActionStatements ) {
+		var scroll = !pageTree.AutofocusActivated.Value;
 		var scrollStatement = "";
 		if( scroll && requestState.ScrollPositionX != null && requestState.ScrollPositionY != null )
 			scrollStatement = "window.scroll(" + requestState.ScrollPositionX + "," + requestState.ScrollPositionY + ");";
@@ -805,7 +803,7 @@ public abstract class PageBase: ResourceBase {
 				SubmitButtonPostBack != null
 					? SubmitButtonPostBack.Id
 					: "" /* This empty string we're using when no submit button exists is arbitrary and meaningless; it should never actually be submitted. */ ),
-			elementJsInitStatements,
+			pageTree.ElementJsInitStatements.ToString(),
 			"initPage();",
 			appProvider.javaScriptPageInitFunctionCallGetter().AppendDelimiter( ";" ),
 			javaScriptPageInitFunctionCall.AppendDelimiter( ";" ),
@@ -814,11 +812,6 @@ public abstract class PageBase: ResourceBase {
 				.PrependDelimiter( "window.onload = function() { " )
 				.AppendDelimiter( " };" ) );
 	}
-
-	/// <summary>
-	/// The desired scroll position of the browser when this response is received.
-	/// </summary>
-	protected virtual ScrollPosition scrollPositionForThisResponse => ScrollPosition.LastPositionOrStatusBar;
 
 	/// <summary>
 	/// Gets the function call that should be executed when the DOMContentLoaded event is fired.
