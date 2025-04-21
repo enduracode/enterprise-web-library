@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Text;
 using StackExchange.Profiling;
 
@@ -28,7 +27,7 @@ internal class PageTree {
 
 	private readonly PageNode rootNode;
 	public readonly List<PageNode> AllNodes;
-	private PageNode etherealContainerNode;
+	private PageNode? etherealContainerNode;
 
 	private readonly Action<string> idSetter;
 	private readonly Func<string, ErrorSourceSet, ImmutableDictionary<EwfValidation, IReadOnlyCollection<string>>> modificationErrorGetter;
@@ -59,7 +58,7 @@ internal class PageTree {
 		addTreeToAllNodes( rootNode );
 	}
 
-	private PageNode buildNode( PageComponent component, IdGenerator idGenerator, bool inEtherealContainer, bool inJsInitElement ) {
+	private PageNode buildNode( PageComponent? component, IdGenerator idGenerator, bool inEtherealContainer, bool inJsInitElement ) {
 		nodeCount += 1;
 
 		IReadOnlyCollection<PageNode> buildChildren( IEnumerable<PageComponent> children, IdGenerator g ) =>
@@ -72,8 +71,8 @@ internal class PageTree {
 			idSetter( id );
 
 			var data = elementNode.ElementDataGetter( new ElementContext( id ) );
-			ElementNodeLocalData localData = null;
-			ElementNodeFocusDependentData focusDependentData = null;
+			ElementNodeLocalData? localData = null;
+			ElementNodeFocusDependentData? focusDependentData = null;
 			var node = new PageNode(
 				elementNode,
 				elementNode.FormValue,
@@ -92,7 +91,7 @@ internal class PageTree {
 					if( inJsInitElement )
 						return;
 
-					focusDependentData = localData.FocusDependentDataGetter( isFocused );
+					focusDependentData = localData!.FocusDependentDataGetter( isFocused );
 					writer.Write( focusDependentData.JsInitStatements );
 				},
 				() => {
@@ -101,10 +100,10 @@ internal class PageTree {
 						focusDependentData = localData.FocusDependentDataGetter( false );
 					}
 
-					var attributes = focusDependentData.Attributes;
+					var attributes = focusDependentData!.Attributes;
 					if( focusDependentData.IncludeIdAttribute )
 						attributes = attributes.Append( new ElementAttribute( "id", data.ClientSideIdOverride.Any() ? data.ClientSideIdOverride : id ) );
-					return ( localData.ElementName, attributes );
+					return ( localData!.ElementName, attributes );
 				} );
 
 			if( inEtherealContainer )
@@ -153,7 +152,7 @@ internal class PageTree {
 			return buildIdentifiedComponentNode( data, data.ChildGetter );
 		}
 
-		if( component == null )
+		if( component is null )
 			return new PageNode();
 
 		throw new UnexpectedValueException( "component", component );
@@ -165,8 +164,8 @@ internal class PageTree {
 			addTreeToAllNodes( child );
 	}
 
-	public IReadOnlyCollection<PageNode> GetStaticRegionNodes( IEnumerable<( PageNode node, IEnumerable<PageComponent> components )> updateRegions ) {
-		if( updateRegions == null )
+	public IReadOnlyCollection<PageNode> GetStaticRegionNodes( IEnumerable<( PageNode node, IEnumerable<PageComponent> components )>? updateRegions ) {
+		if( updateRegions is null )
 			return AllNodes;
 
 		var nodes = new List<PageNode>( nodeCount );
@@ -187,7 +186,7 @@ internal class PageTree {
 		return nodes;
 	}
 
-	public void PrepareForRendering( SpecifiedValue<string> focusKey, Func<FocusabilityCondition, bool> isFocusablePredicate ) {
+	public void PrepareForRendering( SpecifiedValue<string>? focusKey, Func<FocusabilityCondition, bool> isFocusablePredicate ) {
 		RenderingPreparationStarted = true;
 
 		var etherealChildren = new List<PageNode>( etherealComponentCount );
@@ -198,7 +197,7 @@ internal class PageTree {
 		void prepareForRendering( PageNode node, bool inActiveAutofocusRegion, TextWriter jsInitStatementWriter ) {
 			etherealChildren.AddRange( node.EtherealChildren );
 
-			if( !inActiveAutofocusRegion && node.AutofocusCondition?.IsTrue( focusKey.Value ) == true ) {
+			if( !inActiveAutofocusRegion && node.AutofocusCondition?.IsTrue( focusKey!.Value ) == true ) {
 				inActiveAutofocusRegion = true;
 				activeAutofocusRegionsExist = true;
 			}
@@ -225,7 +224,7 @@ internal class PageTree {
 		if( activeAutofocusRegionsExist && !elementFocused )
 			throw new Exception( "The active autofocus regions do not contain any focusable elements." );
 
-		etherealContainerNode.Children = etherealChildren;
+		etherealContainerNode!.Children = etherealChildren;
 	}
 
 	public void WriteMarkup( TextWriter writer ) {
