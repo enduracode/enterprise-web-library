@@ -169,30 +169,28 @@ public class UiPageContent: PageContent {
 		entityUiSetup = ( PageBase.Current.EsAsBaseType as UiEntitySetup )?.GetUiSetup();
 		basicContent =
 			new BasicPageContent(
-				bodyClasses: bodyClasses,
-				dataUpdateModificationMethod: dataUpdateModificationMethod,
-				isAutoDataUpdater: isAutoDataUpdater,
-				pageLoadPostBack: pageLoadPostBack ).Add(
-				getGlobalContainer()
-					.Concat( getEntityAndTopTabContainer() )
-					.Concat( entityUsesTabMode( TabMode.Vertical ) ? getSideTabContainer().ToCollection() : Enumerable.Empty<FlowComponent>() )
-					.Concat( getPageActionListContainer( pageActions ) )
-					.Append(
-						new GenericFlowContainer(
-							new DisplayableElement(
-								_ => new DisplayableElementData(
-									null,
-									() => new DisplayableElementLocalData( "div" ),
-									classes: omitContentBox ? contentGridClass : contentBoxClass,
-									children: content ) ).ToCollection(),
-							classes: contentContainerClass ) )
-					.Concat(
-						getContentFootBlock(
-							isAutoDataUpdater,
-							contentFootActions is null && contentFootComponents is null ? [ ] : contentFootActions?.Collection.Value,
-							contentFootComponents ) )
-					.Concat( getGlobalFootContainer() )
-					.Materialize() );
+					bodyClasses: bodyClasses,
+					dataUpdateModificationMethod: dataUpdateModificationMethod,
+					isAutoDataUpdater: isAutoDataUpdater,
+					pageLoadPostBack: pageLoadPostBack ).Add( getGlobalContainer() )
+				.Add( getEntityAndTopTabContainer() )
+				.Add( entityUsesTabMode( TabMode.Vertical ) ? getSideTabContainer().ToCollection() : [ ] )
+				.Add( getPageActionListContainer( pageActions ) )
+				.Add(
+					new GenericFlowContainer(
+						new DisplayableElement(
+							_ => new DisplayableElementData(
+								null,
+								() => new DisplayableElementLocalData( "div" ),
+								classes: omitContentBox ? contentGridClass : contentBoxClass,
+								children: content ) ).ToCollection(),
+						classes: contentContainerClass ) )
+				.Add(
+					getContentFootBlock(
+						isAutoDataUpdater,
+						contentFootActions is null && contentFootComponents is null ? [ ] : contentFootActions?.Collection.Value,
+						contentFootComponents ) )
+				.Add( getGlobalFootContainer() );
 	}
 
 	private FlowComponent getGlobalContainer() {
@@ -321,7 +319,7 @@ public class UiPageContent: PageContent {
 		return components.Any() ? new GenericFlowContainer( components, classes: mobileMenuTabContainerClass ).ToCollection() : Enumerable.Empty<FlowComponent>();
 	}
 
-	private IEnumerable<FlowComponent> getEntityAndTopTabContainer() {
+	private IReadOnlyCollection<FlowComponent> getEntityAndTopTabContainer() {
 		var components = new List<FlowComponent>();
 		components.AddRange( getEntityContainer() );
 		if( entityUsesTabMode( TabMode.Horizontal ) ) {
@@ -330,7 +328,7 @@ public class UiPageContent: PageContent {
 				throw new ApplicationException( "Top tabs are not supported with multiple resource groups." );
 			components.Add( getTopTabListContainer( resourceGroups.Single() ) );
 		}
-		return components.Any() ? new GenericFlowContainer( components, classes: entityAndTopTabContainerClass ).ToCollection() : Enumerable.Empty<FlowComponent>();
+		return components.Any() ? new GenericFlowContainer( components, classes: entityAndTopTabContainerClass ).ToCollection() : [ ];
 	}
 
 	private IEnumerable<FlowComponent> getEntityContainer() {
@@ -425,11 +423,10 @@ public class UiPageContent: PageContent {
 		return hyperlinks;
 	}
 
-	private IReadOnlyCollection<FlowComponent> getPageActionListContainer( ActionComponentSetupsParameter pageActions ) {
+	private FlowComponent getPageActionListContainer( ActionComponentSetupsParameter pageActions ) {
 		var listItems = getActionListItems( pageActions ).Materialize();
-		if( !listItems.Any() )
-			return Enumerable.Empty<FlowComponent>().Materialize();
-		return new GenericFlowContainer( new WrappingList( listItems ).ToCollection(), classes: pageActionListContainerClass ).ToCollection();
+		return new FlowIdContainer(
+			listItems.Any() ? new GenericFlowContainer( new WrappingList( listItems ).ToCollection(), classes: pageActionListContainerClass ).ToCollection() : [ ] );
 	}
 
 	private IEnumerable<WrappingListItem> getActionListItems( ActionComponentSetupsParameter actions ) =>
