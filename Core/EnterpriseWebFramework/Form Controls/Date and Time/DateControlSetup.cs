@@ -55,8 +55,6 @@ public class DateControlSetup {
 		DisplaySetup? displaySetup, bool isReadOnly, ElementClassSet? classes, string autoFillTokens, SpecifiedValue<FormAction>? specifiedAction,
 		FormAction? valueChangedAction, PageModificationValue<LocalDate?>? datePageModificationValueParameter, Func<bool, bool>? validationPredicate,
 		Action? validationErrorNotifier ) {
-		if( autoFillTokens.Length > 0 )
-			throw new NotSupportedException( "Auto-fill detail tokens are not supported with the current implementation of the date control." );
 		var action = specifiedAction != null ? specifiedAction.Value : FormState.Current.FormControlDefaultAction;
 
 		LabelerAndComponentAndValidationGetter = ( value, allowEmpty, minValue, maxValue, validationMethod ) => {
@@ -110,8 +108,13 @@ public class DateControlSetup {
 
 											       // Use the value of the text control instead of the hidden field to enable round-tripping of invalid dates.
 											       attributes.Add( new ElementAttribute( "name", "" ) );
-											       var textControlNameAndValueAddStatements =
-												       "textControl.name = '{0}'; textControl.value = '{1}';".FormatWith( context.Id, pageModificationValue.Value );
+											       var textControlNameAndValueStatements = string.Join(
+												       " ",
+												       $"textControl.name = '{context.Id}'".ToCollection()
+													       .Append( $"textControl.value = '{pageModificationValue.Value}'" )
+													       .Append( $"textControl.autocomplete = '{autoFillTokens}'" )
+													       .Append( "textControl.removeAttribute( 'aria-autocomplete' )" )
+													       .Select( i => i + ";" ) );
 
 											       attributes.Add(
 												       new ElementAttribute(
@@ -157,10 +160,10 @@ picker.localization = {{
 ".FormatWith( Cultures.EnglishUnitedStates.Name ),
 															       "picker.componentOnReady().then( () => {{ const textControl = document.querySelector( '#{0}' ); {1} }} );".FormatWith(
 																       textControlId,
-																       textControlNameAndValueAddStatements + ( isReadOnly
-																	                                                ? ""
-																	                                                : SubmitButton.GetImplicitSubmissionKeyPressStatements( action, false )
-																		                                                .Surround( "$( textControl ).keypress( function( e ) { ", " } );" ) )
+																       textControlNameAndValueStatements + ( isReadOnly
+																	                                             ? ""
+																	                                             : SubmitButton.GetImplicitSubmissionKeyPressStatements( action, false )
+																		                                             .Surround( "$( textControl ).keypress( function( e ) { ", " } );" ) )
 																       .PrependDelimiter( " " ) ),
 															       "$( picker ).on( 'duetChange', function( e ) {{ {0} }} );".FormatWith(
 																       StringTools.ConcatenateWithDelimiter(
