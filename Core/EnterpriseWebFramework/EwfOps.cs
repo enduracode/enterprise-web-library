@@ -110,7 +110,7 @@ public static class EwfOps {
 
 				if( aspNetRequest.HasFormContentType ) {
 					writer.WriteLine();
-					foreach( var pair in aspNetRequest.Form )
+					foreach( var pair in aspNetRequest.Form.Where( i => !i.Key.Equals( PageBase.IgnoredFormFieldName, StringComparison.Ordinal ) ) )
 					foreach( var value in pair.Value )
 						writer.WriteLine( "Form field " + pair.Key + ": " + value );
 				}
