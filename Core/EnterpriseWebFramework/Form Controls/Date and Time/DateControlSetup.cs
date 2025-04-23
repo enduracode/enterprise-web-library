@@ -86,47 +86,49 @@ public class DateControlSetup {
 					.Value.ToNewUnderlyingValue( LocalDate.FromDateTime ) );
 
 			return ( labeler, new CustomPhrasingComponent(
-					       new DisplayableElement(
-						       context => {
-							       if( !isReadOnly ) {
-								       action?.AddToPageIfNecessary();
-								       valueChangedAction?.AddToPageIfNecessary();
-							       }
+					       getChromeFormRestorationHiddenFields()
+						       .Append(
+							       new DisplayableElement(
+								       context => {
+									       if( !isReadOnly ) {
+										       action?.AddToPageIfNecessary();
+										       valueChangedAction?.AddToPageIfNecessary();
+									       }
 
-							       var textControlId = context.Id + "__text";
-							       labeler.ControlId.AddId( textControlId );
-							       return new DisplayableElementData(
-								       displaySetup,
-								       () => {
-									       var attributes = new List<ElementAttribute>();
-									       if( isReadOnly )
-										       attributes.Add( new ElementAttribute( "disabled" ) );
-									       attributes.Add( new ElementAttribute( "first-day-of-week", "0" ) );
-									       attributes.Add( new ElementAttribute( "identifier", textControlId ) );
-									       attributes.Add( new ElementAttribute( "max", LocalDatePattern.Iso.Format( maxValue.Value ) ) );
-									       attributes.Add( new ElementAttribute( "min", LocalDatePattern.Iso.Format( minValue.Value ) ) );
+									       var textControlId = context.Id + "__text";
+									       labeler.ControlId.AddId( textControlId );
+									       return new DisplayableElementData(
+										       displaySetup,
+										       () => {
+											       var attributes = new List<ElementAttribute>();
+											       if( isReadOnly )
+												       attributes.Add( new ElementAttribute( "disabled" ) );
+											       attributes.Add( new ElementAttribute( "first-day-of-week", "0" ) );
+											       attributes.Add( new ElementAttribute( "identifier", textControlId ) );
+											       attributes.Add( new ElementAttribute( "max", LocalDatePattern.Iso.Format( maxValue.Value ) ) );
+											       attributes.Add( new ElementAttribute( "min", LocalDatePattern.Iso.Format( minValue.Value ) ) );
 
-									       // Use the value of the text control instead of the hidden field to enable round-tripping of invalid dates.
-									       attributes.Add( new ElementAttribute( "name", "" ) );
-									       var textControlNameAndValueAddStatements =
-										       "textControl.name = '{0}'; textControl.value = '{1}';".FormatWith( context.Id, pageModificationValue.Value );
+											       // Use the value of the text control instead of the hidden field to enable round-tripping of invalid dates.
+											       attributes.Add( new ElementAttribute( "name", "" ) );
+											       var textControlNameAndValueAddStatements =
+												       "textControl.name = '{0}'; textControl.value = '{1}';".FormatWith( context.Id, pageModificationValue.Value );
 
-									       attributes.Add(
-										       new ElementAttribute(
-											       "value",
-											       datePageModificationValue.Value.HasValue ? LocalDatePattern.Iso.Format( datePageModificationValue.Value.Value ) : "" ) );
+											       attributes.Add(
+												       new ElementAttribute(
+													       "value",
+													       datePageModificationValue.Value.HasValue ? LocalDatePattern.Iso.Format( datePageModificationValue.Value.Value ) : "" ) );
 
-									       return new DisplayableElementLocalData(
-										       "duet-date-picker",
-										       new FocusabilityCondition( !isReadOnly ),
-										       isFocused => new DisplayableElementFocusDependentData(
-											       attributes: attributes,
-											       includeIdAttribute: true,
-											       jsInitStatements: "customElements.whenDefined( 'duet-date-picker' ).then( () => {{ {0} }} );".FormatWith(
-												       StringTools.ConcatenateWithDelimiter(
-													       " ",
-													       "const picker = document.querySelector( '#{0}' );".FormatWith( context.Id ),
-													       @"
+											       return new DisplayableElementLocalData(
+												       "duet-date-picker",
+												       new FocusabilityCondition( !isReadOnly ),
+												       isFocused => new DisplayableElementFocusDependentData(
+													       attributes: attributes,
+													       includeIdAttribute: true,
+													       jsInitStatements: "customElements.whenDefined( 'duet-date-picker' ).then( () => {{ {0} }} );".FormatWith(
+														       StringTools.ConcatenateWithDelimiter(
+															       " ",
+															       "const picker = document.querySelector( '#{0}' );".FormatWith( context.Id ),
+															       @"
 picker.dateAdapter = {
 	parse( value = '', createDate ) {
 		const match = value.match( /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/ ); if( match ) return createDate( match[3], match[1], match[2] );
@@ -136,7 +138,7 @@ picker.dateAdapter = {
 	}
 };
 ",
-													       @"
+															       @"
 picker.localization = {{
 	buttonLabel: 'Choose date',
 	placeholder: 'm/d/y',
@@ -153,50 +155,66 @@ picker.localization = {{
 	locale: '{0}'
 }};
 ".FormatWith( Cultures.EnglishUnitedStates.Name ),
-													       "picker.componentOnReady().then( () => {{ const textControl = document.querySelector( '#{0}' ); {1} }} );".FormatWith(
-														       textControlId,
-														       textControlNameAndValueAddStatements + ( isReadOnly
-															                                                ? ""
-															                                                : SubmitButton.GetImplicitSubmissionKeyPressStatements( action, false )
-																                                                .Surround( "$( textControl ).keypress( function( e ) { ", " } );" ) )
-														       .PrependDelimiter( " " ) ),
-													       "$( picker ).on( 'duetChange', function( e ) {{ {0} }} );".FormatWith(
-														       StringTools.ConcatenateWithDelimiter(
-															       " ",
-															       valueChangedAction is null ? "" : valueChangedAction.GetJsStatements(),
-															       datePageModificationValue.GetJsModificationStatements( "e.originalEvent.detail.value" ) ) ),
-													       isFocused ? "picker.setFocus();" : "" ) ) ) );
+															       "picker.componentOnReady().then( () => {{ const textControl = document.querySelector( '#{0}' ); {1} }} );".FormatWith(
+																       textControlId,
+																       textControlNameAndValueAddStatements + ( isReadOnly
+																	                                                ? ""
+																	                                                : SubmitButton.GetImplicitSubmissionKeyPressStatements( action, false )
+																		                                                .Surround( "$( textControl ).keypress( function( e ) { ", " } );" ) )
+																       .PrependDelimiter( " " ) ),
+															       "$( picker ).on( 'duetChange', function( e ) {{ {0} }} );".FormatWith(
+																       StringTools.ConcatenateWithDelimiter(
+																	       " ",
+																	       valueChangedAction is null ? "" : valueChangedAction.GetJsStatements(),
+																	       datePageModificationValue.GetJsModificationStatements( "e.originalEvent.detail.value" ) ) ),
+															       isFocused ? "picker.setFocus();" : "" ) ) ) );
+										       },
+										       classes: elementClass.Add( classes ?? ElementClassSet.Empty ),
+										       clientSideIdReferences: id.ToCollection() );
 								       },
-								       classes: elementClass.Add( classes ?? ElementClassSet.Empty ),
-								       clientSideIdReferences: id.ToCollection() );
-						       },
-						       formValue: formValue ).ToCollection() ), validationMethod == null
-							                                                ? null
-							                                                : formValue.CreateValidation(
-								                                                ( postBackValue, validator ) => {
-									                                                if( validationPredicate != null && !validationPredicate( postBackValue.ChangedOnPostBack ) )
-										                                                return;
+								       formValue: formValue ) ) ), validationMethod == null
+									                                   ? null
+									                                   : formValue.CreateValidation(
+										                                   ( postBackValue, validator ) => {
+											                                   if( validationPredicate != null && !validationPredicate( postBackValue.ChangedOnPostBack ) )
+												                                   return;
 
-									                                                if( validator.GetNullableDateTime(
-											                                                    new ValidationErrorHandler( "date" ),
-											                                                    postBackValue.Value,
-											                                                    null,
-											                                                    allowEmpty,
-											                                                    minValue.Value.ToDateTimeUnspecified(),
-											                                                    maxValue.Value.PlusDays( 1 ).ToDateTimeUnspecified() )
-										                                                    .Error( out var validatedValue ) is not null ) {
-										                                                validationErrorNotifier?.Invoke();
-										                                                return;
-									                                                }
+											                                   if( validator.GetNullableDateTime(
+													                                       new ValidationErrorHandler( "date" ),
+													                                       postBackValue.Value,
+													                                       null,
+													                                       allowEmpty,
+													                                       minValue.Value.ToDateTimeUnspecified(),
+													                                       maxValue.Value.PlusDays( 1 ).ToDateTimeUnspecified() )
+												                                       .Error( out var validatedValue ) is not null ) {
+												                                   validationErrorNotifier?.Invoke();
+												                                   return;
+											                                   }
 
-									                                                if( validatedValue.HasTime() ) {
-										                                                validator.NoteErrorAndAddMessage( "Time information is not allowed." );
-										                                                validationErrorNotifier?.Invoke();
-										                                                return;
-									                                                }
+											                                   if( validatedValue.HasTime() ) {
+												                                   validator.NoteErrorAndAddMessage( "Time information is not allowed." );
+												                                   validationErrorNotifier?.Invoke();
+												                                   return;
+											                                   }
 
-									                                                validationMethod( validatedValue.ToNewUnderlyingValue( LocalDate.FromDateTime ), validator );
-								                                                } ) );
+											                                   validationMethod( validatedValue.ToNewUnderlyingValue( LocalDate.FromDateTime ), validator );
+										                                   } ) );
 		};
 	}
+
+	// As of April 2025, with Chrome 135 and Duet Date Picker 1.4.0, these are necessary to keep back-button form restoration working for other fields on the page
+	// when there are not already at least two standard fields (i.e. built-in elements that don’t require hydration like the date picker) appearing before the
+	// date control in the HTML.
+	private IEnumerable<FlowComponent> getChromeFormRestorationHiddenFields() {
+		var field = getIgnoredHiddenField();
+		return field.Append( field );
+	}
+
+	private FlowComponent getIgnoredHiddenField() =>
+		new ElementComponent(
+			_ => new ElementData(
+				() => new ElementLocalData(
+					"input",
+					focusDependentData: new ElementFocusDependentData(
+						attributes: new ElementAttribute( "type", "hidden" ).Append( new ElementAttribute( "name", PageBase.IgnoredFormFieldName ) ) ) ) ) );
 }

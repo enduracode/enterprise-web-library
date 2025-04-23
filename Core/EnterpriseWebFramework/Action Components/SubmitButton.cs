@@ -48,7 +48,7 @@ public class SubmitButton: PhrasingComponent {
 						"button",
 						new FocusabilityCondition( true ),
 						isFocused => {
-							var attributes = new List<ElementAttribute> { new( "name", PageBase.ButtonElementName ), new( "value", "v" ) };
+							var attributes = new List<ElementAttribute> { new( "name", PageBase.IgnoredFormFieldName ), new( "value", "v" ) };
 							attributes.AddRange( style.GetAttributes() );
 							if( isFocused )
 								attributes.Add( new ElementAttribute( "autofocus" ) );

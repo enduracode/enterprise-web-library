@@ -23,7 +23,7 @@ public abstract class PageBase: ResourceBase {
 	internal const string FormId = "ewfForm";
 	internal const string HiddenFieldName = "ewfData";
 
-	internal const string ButtonElementName = "ewfButton";
+	internal const string IgnoredFormFieldName = "ewfIgnored";
 
 	private static ( Func<Action> pageViewDataModificationMethodGetter, Func<string> javaScriptPageInitFunctionCallGetter ) appProvider;
 
@@ -307,7 +307,7 @@ public abstract class PageBase: ResourceBase {
 		requestState.PostBackValues = new PostBackValueDictionary();
 		var extraPostBackValues = requestState.PostBackValues.AddFromRequest(
 				submission.Where(
-						i => !string.Equals( i.Key, HiddenFieldName, StringComparison.Ordinal ) && !string.Equals( i.Key, ButtonElementName, StringComparison.Ordinal ) )
+						i => !string.Equals( i.Key, HiddenFieldName, StringComparison.Ordinal ) && !string.Equals( i.Key, IgnoredFormFieldName, StringComparison.Ordinal ) )
 					.SelectMany( pair => pair.Value.Select( value => KeyValuePair.Create( pair.Key, (object)value ) ) ),
 				postBackValueKeys.Contains )
 			.Concat(
