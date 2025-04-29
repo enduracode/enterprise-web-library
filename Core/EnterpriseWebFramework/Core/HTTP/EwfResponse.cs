@@ -22,11 +22,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 public class EwfResponse {
 	private static Func<HttpContext> currentContextGetter;
 	private static Action transactionCommitter;
+	private static Func<string> serverTimingGetter;
 
 	internal sealed class AspNetAdapter: HttpResponse {
 		internal int? StatusCodeNullable;
 		private readonly HeaderDictionary headers = new();
 		private Stream body;
+		public override IResponseCookies Cookies { get; }
 		internal string RedirectUrl = "";
 
 		public AspNetAdapter( IResponseCookies cookies ) {
@@ -68,7 +70,6 @@ public class EwfResponse {
 
 		public override long? ContentLength { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 		public override string ContentType { get => Headers.ContentType; set => Headers.ContentType = value.IsNullOrEmpty() ? value : default( StringValues ); }
-		public override IResponseCookies Cookies { get; }
 		public override bool HasStarted => throw new NotImplementedException();
 		public override void OnStarting( Func<object, Task> callback, object state ) => throw new NotImplementedException();
 		public override void OnCompleted( Func<object, Task> callback, object state ) => throw new NotImplementedException();
@@ -87,9 +88,10 @@ public class EwfResponse {
 		}
 	}
 
-	internal static void Init( Func<HttpContext> currentContextGetter, Action transactionCommitter ) {
+	internal static void Init( Func<HttpContext> currentContextGetter, Action transactionCommitter, Func<string> serverTimingGetter ) {
 		EwfResponse.currentContextGetter = currentContextGetter;
 		EwfResponse.transactionCommitter = transactionCommitter;
+		EwfResponse.serverTimingGetter = serverTimingGetter;
 	}
 
 	/// <summary>
@@ -287,6 +289,10 @@ public class EwfResponse {
 		var fileName = FileNameCreator();
 		if( fileName.Any() )
 			aspNetResponse.Headers.ContentDisposition = "attachment; filename=\"" + fileName + "\"";
+
+		var serverTiming = serverTimingGetter();
+		if( serverTiming.Length > 0 )
+			aspNetResponse.Headers.Append( "Server-Timing", serverTiming );
 
 		foreach( var i in AdditionalHeaderFieldGetter() )
 			aspNetResponse.Headers.Append( i.Item1, i.Item2 );

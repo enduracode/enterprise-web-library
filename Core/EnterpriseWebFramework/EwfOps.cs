@@ -28,6 +28,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using NodaTime;
+using NodaTime.Text;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
@@ -143,7 +144,7 @@ public static class EwfOps {
 			mainDataAccessStateGetter: () =>
 				EwfRequest.Current is not null ? RequestDispatchingStatics.RequestState.DatabaseConnectionManager.DataAccessState : initTimeDataAccessState.Value,
 			currentDatabaseConnectionManagerGetter: () => EwfRequest.Current is not null ? RequestDispatchingStatics.RequestState.DatabaseConnectionManager : null,
-			currentUserGetter: () => EwfRequest.Current is not null ? RequestDispatchingStatics.RequestState.UserAndImpersonator.Item1 : null );
+			currentUserGetter: () => EwfRequest.Current is not null ? RequestDispatchingStatics.RequestState.AuthenticationData.user : null );
 		var frameworkInitialized = false;
 		try {
 			return GlobalInitializationOps.ExecuteAppWithStandardExceptionHandling(
@@ -280,6 +281,16 @@ public static class EwfOps {
 												DataAccessState.Current.ResetCache();
 											}
 										} );
+								},
+								() => {
+									if( EwfRequest.Current is null )
+										return "";
+									var requestState = RequestDispatchingStatics.RequestState;
+									if( !requestState.UserAccessible || !requestState.AuthenticationData.expirationTime.HasValue )
+										return "";
+									return $"""
+									        {EwlStatics.EwlInitialism.ToLowerInvariant()};desc="authExp {InstantPattern.General.Format( requestState.AuthenticationData.expirationTime.Value )}"
+									        """;
 								} );
 							UrlHandlingStatics.Init(
 								() => RequestDispatchingStatics.GetAppProvider().GetBaseUrlPatterns(),

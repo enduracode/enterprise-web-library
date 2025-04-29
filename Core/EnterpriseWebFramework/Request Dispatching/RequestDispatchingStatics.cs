@@ -399,7 +399,7 @@ public static class RequestDispatchingStatics {
 	/// </summary>
 	public static void RefreshRequestState() {
 		RequestState.IntermediateUserExists = NonLiveInstallationStatics.IntermediateAuthenticationCookieExists();
-		RequestState.ClearUserAndImpersonator();
+		RequestState.ClearAuthenticationData();
 	}
 
 	/// <summary>

@@ -77,25 +77,26 @@ public static class AuthenticationStatics {
 	/// The second item in the returned tuple will be (1) null if impersonation is not taking place, (2) a value with a null user if impersonation is taking place
 	/// with an impersonator who doesn’t correspond to a user, or (3) a value containing the impersonator.
 	/// </summary>
-	internal static Tuple<SystemUser, SpecifiedValue<SystemUser>> GetUserAndImpersonatorFromCookies() {
+	internal static ( SystemUser, SpecifiedValue<SystemUser>, Instant? ) GetSessionDataFromCookies() {
 		if( !UserManagementStatics.UserManagementEnabled )
-			return Tuple.Create<SystemUser, SpecifiedValue<SystemUser>>( null, null );
+			return ( null, null, null );
 
-		SystemUser getUser() {
+		var ticketData = getTicketData();
+		return UserCanImpersonate( ticketData.user ) &&
+		       CookieStatics.TryGetCookieValueFromResponseOrRequest( UserImpersonationStatics.CookieName, out var cookieValue ) && cookieValue is not null
+			       ? ( cookieValue.Length > 0 ? UserManagementStatics.GetUser( int.Parse( cookieValue ), false ) : null,
+				         new SpecifiedValue<SystemUser>( ticketData.user ), ticketData.expirationTime )
+			       : ( ticketData.user, null, ticketData.expirationTime );
+
+		( SystemUser user, Instant? expirationTime ) getTicketData() {
 			if( !CookieStatics.TryGetCookieValueFromResponseOrRequest( userCookieName, out var cookieValue ) || cookieValue is null )
-				return null;
+				return ( null, null );
 			var ticket = GetFormsAuthTicket( cookieValue );
-			return ticket != null ? UserManagementStatics.GetUser( int.Parse( ticket.Principal.Identity.Name ), false ) : null;
+			if( ticket is null )
+				return ( null, null );
+			return ( UserManagementStatics.GetUser( int.Parse( ticket.Principal.Identity.Name ), false ),
+				       Instant.FromDateTimeOffset( ticket.Properties.ExpiresUtc.Value ) );
 		}
-		var user = getUser();
-
-		if( UserCanImpersonate( user ) )
-			if( CookieStatics.TryGetCookieValueFromResponseOrRequest( UserImpersonationStatics.CookieName, out var cookieValue ) && cookieValue is not null )
-				return Tuple.Create(
-					cookieValue.Length > 0 ? UserManagementStatics.GetUser( int.Parse( cookieValue ), false ) : null,
-					new SpecifiedValue<SystemUser>( user ) );
-
-		return Tuple.Create( user, (SpecifiedValue<SystemUser>)null );
 	}
 
 	internal static bool UserCanImpersonate( SystemUser user ) => user is { Role.CanManageUsers: true } || !ConfigurationStatics.IsLiveInstallation;
@@ -352,7 +353,7 @@ public static class AuthenticationStatics {
 			ticket = authenticationTicketProtector.Unprotect( cookie );
 		}
 		catch( CryptographicException ) {}
-		return ticket != null && EwfRequest.Current.RequestTime < Instant.FromDateTimeOffset( ticket.Properties.ExpiresUtc.Value ) ? ticket : null;
+		return ticket is not null && EwfRequest.Current.RequestTime < Instant.FromDateTimeOffset( ticket.Properties.ExpiresUtc.Value ) ? ticket : null;
 	}
 
 

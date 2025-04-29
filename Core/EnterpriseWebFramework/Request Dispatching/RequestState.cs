@@ -73,7 +73,7 @@ public class RequestState {
 
 	private bool userEnabled;
 	private bool userDisabled;
-	private Tuple<SystemUser?, SpecifiedValue<SystemUser?>?>? userAndImpersonator;
+	private ( SystemUser?, SpecifiedValue<SystemUser?>?, Instant? )? authenticationData;
 
 	// page infrastructure
 	internal string ClientSideNewUrl { get; set; }
@@ -169,16 +169,16 @@ public class RequestState {
 		}
 	}
 
-	internal bool ImpersonatorExists => UserAndImpersonator.Item2 is not null;
+	internal bool ImpersonatorExists => AuthenticationData.impersonator is not null;
 
-	internal SystemUser? ImpersonatorUser => UserAndImpersonator.Item2!.Value;
+	internal SystemUser? ImpersonatorUser => AuthenticationData.impersonator!.Value;
 
-	internal int? ProfilingUserId => ( ImpersonatorExists ? ImpersonatorUser : UserAndImpersonator.Item1 )?.UserId;
+	internal int? ProfilingUserId => ( ImpersonatorExists ? ImpersonatorUser : AuthenticationData.user )?.UserId;
 
 	/// <summary>
 	/// EwfOps.RunApplication and private use only.
 	/// </summary>
-	internal Tuple<SystemUser?, SpecifiedValue<SystemUser?>?> UserAndImpersonator {
+	internal ( SystemUser? user, SpecifiedValue<SystemUser?>? impersonator, Instant? expirationTime ) AuthenticationData {
 		get {
 			if( !userEnabled )
 				throw new ApplicationException( "User cannot be accessed this early in the request life cycle." );
@@ -186,16 +186,15 @@ public class RequestState {
 				throw new UserDisabledException( "User cannot be accessed. See the SystemUser.Current documentation for details." );
 			if( !UserAccessible )
 				throw new ApplicationException( "User cannot be accessed from a nonsecure connection in an application that supports secure connections." );
-			if( userAndImpersonator == null )
-				userAndImpersonator = AuthenticationStatics.GetUserAndImpersonatorFromCookies();
-			return userAndImpersonator;
+			authenticationData ??= AuthenticationStatics.GetSessionDataFromCookies();
+			return authenticationData.Value;
 		}
 	}
 
 	internal bool UserAccessible => !EwfConfigurationStatics.AppSupportsSecureConnections || EwfRequest.Current!.IsSecure;
 
-	internal void ClearUserAndImpersonator() {
-		userAndImpersonator = null;
+	internal void ClearAuthenticationData() {
+		authenticationData = null;
 	}
 
 	/// <summary>
