@@ -29,8 +29,14 @@ public class EwfSafeResponseWriter {
 		else
 			headerValue.Private = true;
 
-		if( responseNeverExpires.HasValue )
-			headerValue.MaxAge = responseNeverExpires.Value ? TimeSpan.FromDays( 365 ) : TimeSpan.Zero;
+		if( responseNeverExpires.HasValue ) {
+			if( responseNeverExpires.Value )
+				// Add immutable here when ASP.NET adds support for it.
+				headerValue.MaxAge = TimeSpan.FromDays( 365 );
+			else
+				headerValue.NoCache = true;
+		}
+
 		aspNetResponse.GetTypedHeaders().CacheControl = headerValue;
 	}
 
