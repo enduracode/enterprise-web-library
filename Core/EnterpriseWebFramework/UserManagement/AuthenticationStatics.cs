@@ -339,7 +339,7 @@ public static class AuthenticationStatics {
 
 		var passedDuration = EwfRequest.Current.RequestTime - Instant.FromDateTimeOffset( ticket.Properties.IssuedUtc.Value );
 		var totalDuration = Duration.FromTimeSpan( ticket.Properties.ExpiresUtc.Value - ticket.Properties.IssuedUtc.Value );
-		if( passedDuration / totalDuration < .5 )
+		if( passedDuration / totalDuration < .1 )
 			return null;
 
 		ticket.Properties.IssuedUtc = ticket.Properties.IssuedUtc.Value + passedDuration.ToTimeSpan();
