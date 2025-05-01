@@ -656,6 +656,7 @@ internal class UpdateDependentLogic: Operation {
 			}
 
 			// build-related properties; see https://learn.microsoft.com/en-us/dotnet/core/project-sdk/msbuild-props#build-related-properties
+			writeMsBuildProperty( "<CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>" );
 			writeMsBuildProperty( "<Nullable>enable</Nullable>" );
 			writeMsBuildProperty( "<CopyDebugSymbolFilesFromPackages>true</CopyDebugSymbolFilesFromPackages>" );
 
