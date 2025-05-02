@@ -204,7 +204,7 @@ public class UiPageContent: PageContent {
 
 		var userInfo = new List<FlowComponent>();
 		if( RequestState.Instance.UserAccessible ) {
-			var components = EwfUiStatics.AppProvider.GetUserInfoComponents() ?? getUserInfoComponents();
+			var components = AuthenticationStatics.AppProvider.GetUserInfoComponents() ?? getUserInfoComponents();
 			if( components.Any() )
 				userInfo.Add( new GenericFlowContainer( components, classes: userInfoClass ) );
 		}

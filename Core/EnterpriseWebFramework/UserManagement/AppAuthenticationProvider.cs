@@ -5,6 +5,12 @@
 /// </summary>
 public class AppAuthenticationProvider {
 	/// <summary>
+	/// Returns the components that identify the authenticated user and let them log out, change their password, etc. Returns null for the framework’s built-in
+	/// components.
+	/// </summary>
+	public virtual IReadOnlyCollection<FlowComponent>? GetUserInfoComponents() => null;
+
+	/// <summary>
 	/// Returns the default log-in page for the application, or null for the framework’s built-in page.
 	/// </summary>
 	protected internal virtual PageContent? GetLogInPageContent( string returnUrl, string user, string code, bool authenticatedUserDeniedAccess ) => null;

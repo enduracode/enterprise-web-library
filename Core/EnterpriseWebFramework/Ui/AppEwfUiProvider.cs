@@ -26,12 +26,6 @@ public abstract class AppEwfUiProvider {
 	public virtual IReadOnlyCollection<NavFormControl> GetGlobalNavFormControls() => Enumerable.Empty<NavFormControl>().Materialize();
 
 	/// <summary>
-	/// Returns the components that identify the authenticated user and let them log out, change their password, etc. Returns null for the framework’s built-in
-	/// components.
-	/// </summary>
-	public virtual IReadOnlyCollection<FlowComponent>? GetUserInfoComponents() => null;
-
-	/// <summary>
 	/// Gets the global foot components.
 	/// </summary>
 	public virtual IReadOnlyCollection<FlowComponent> GetGlobalFootComponents() => Enumerable.Empty<FlowComponent>().Materialize();
