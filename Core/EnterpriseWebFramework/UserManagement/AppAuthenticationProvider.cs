@@ -16,6 +16,11 @@ public class AppAuthenticationProvider {
 	protected internal virtual LogInPageAutoUserRegistrationSetup? GetLogInPageAutoUserRegistrationSetup() => null;
 
 	/// <summary>
+	/// Returns the components to be shown at the bottom of the framework’s built-in log-in page.
+	/// </summary>
+	protected internal virtual IReadOnlyCollection<FlowComponent> GetLogInPageSpecialInstructions() => [ ];
+
+	/// <summary>
 	/// Returns the change-password page for the application, or null for the framework’s built-in page.
 	/// </summary>
 	protected internal virtual PageContent? GetChangePasswordPageContent( string returnUrl ) => null;

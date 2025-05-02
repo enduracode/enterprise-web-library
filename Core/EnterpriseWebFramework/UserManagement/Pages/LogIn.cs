@@ -1,5 +1,4 @@
-﻿using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
-using EnterpriseWebLibrary.UserManagement;
+﻿using EnterpriseWebLibrary.UserManagement;
 using Tewl.InputValidation;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages;
@@ -211,7 +210,7 @@ partial class LogIn {
 				codeLoginMethod = logInHiddenFieldsAndMethods.modificationMethods.codeLoginMethod;
 			} );
 
-		var specialInstructions = EwfUiStatics.AppProvider.GetSpecialInstructionsForLogInPage();
+		var specialInstructions = AuthenticationStatics.AppProvider.GetLogInPageSpecialInstructions();
 		if( specialInstructions.Any() )
 			components.AddRange( specialInstructions );
 		else {

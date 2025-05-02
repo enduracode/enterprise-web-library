@@ -32,11 +32,6 @@ public abstract class AppEwfUiProvider {
 	public virtual IReadOnlyCollection<FlowComponent>? GetUserInfoComponents() => null;
 
 	/// <summary>
-	/// Gets the components to be shown at the bottom of the log-in page for systems with forms authentication.
-	/// </summary>
-	public virtual IReadOnlyCollection<FlowComponent> GetSpecialInstructionsForLogInPage() => Enumerable.Empty<FlowComponent>().Materialize();
-
-	/// <summary>
 	/// Gets the global foot components.
 	/// </summary>
 	public virtual IReadOnlyCollection<FlowComponent> GetGlobalFootComponents() => Enumerable.Empty<FlowComponent>().Materialize();
