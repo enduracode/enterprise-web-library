@@ -114,6 +114,12 @@ public class FormItem {
 		ListErrorDisplayStyle.GetErrorFocusableElementLocalData( context, elementName, ErrorSourceSet, attributes );
 
 	/// <summary>
+	/// Creates a table cell representing this form item, without its label. Useful for lists of checkboxes, or any single control that needs to be repeated.
+	/// </summary>
+	/// <param name="setup"></param>
+	public EwfTableCell ToCell( TableCellSetup? setup = null ) => ToComponentCollection( omitLabel: true ).ToCell( setup: setup );
+
+	/// <summary>
 	/// Adds an extraneous validation to this form item. Useful when you have validation logic that needs to execute in a different set of data modifications
 	/// than the form item’s built-in validation. For example, you may have a form item that modifies a piece of component state during an intermediate
 	/// post-back. If you later need to update the state item’s durable value during a full post-back, and this involves additional validation, you can create a
