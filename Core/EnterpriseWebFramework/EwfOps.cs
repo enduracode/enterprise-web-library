@@ -504,7 +504,7 @@ public static class EwfOps {
 																       EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString(
 																	       EwfConfigurationStatics.AppSupportsSecureConnections ) ) ) ) ) ) ) );
 								} );
-							EwfUiStatics.Init( providerGetter.GetProvider<AppEwfUiProvider>( "EwfUi" ) );
+							EwfUiStatics.Init( providerGetter.GetProvider<AppEwfUiProvider>( "EwfUi" ), AuthenticationStatics.GetUserInfoComponents );
 							AuthenticationStatics.Init(
 								providerGetter.GetProvider<AppAuthenticationProvider>( "Authentication" ),
 								app.Services.GetRequiredService<IDataProtectionProvider>(),

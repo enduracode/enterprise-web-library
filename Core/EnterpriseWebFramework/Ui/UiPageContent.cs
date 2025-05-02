@@ -1,9 +1,7 @@
 ﻿#nullable disable
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
-using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.SystemSpecificLogic;
-using EnterpriseWebLibrary.UserManagement;
 using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -204,7 +202,7 @@ public class UiPageContent: PageContent {
 
 		var userInfo = new List<FlowComponent>();
 		if( RequestState.Instance.UserAccessible ) {
-			var components = AuthenticationStatics.AppProvider.GetUserInfoComponents() ?? getUserInfoComponents();
+			var components = EwfUiStatics.UserInfoComponentGetter();
 			if( components.Any() )
 				userInfo.Add( new GenericFlowContainer( components, classes: userInfoClass ) );
 		}
@@ -221,34 +219,6 @@ public class UiPageContent: PageContent {
 					.Materialize(),
 				classes: innerGlobalContainerClass ).ToCollection(),
 			classes: outerGlobalContainerClass );
-	}
-
-	private IReadOnlyCollection<FlowComponent> getUserInfoComponents() {
-		var components = new List<FlowComponent>();
-
-		var changePasswordPage = new UserManagement.Pages.ChangePassword( PageBase.Current.GetUrl() );
-		if( !changePasswordPage.UserCanAccess || SystemUser.Current == null )
-			return components;
-
-		components.Add( new Paragraph( "Logged in as {0}".FormatWith( SystemUser.Current.Email ).ToComponents() ) );
-		if( !UserManagementStatics.LocalIdentityProviderEnabled )
-			return components;
-
-		components.Add(
-			new RawList(
-				new EwfHyperlink(
-						changePasswordPage,
-						new CustomHyperlinkStyle( childGetter: _ => ActionComponentIcon.GetIconAndTextComponents( null, "Change password" ) ) ).ToComponentListItem()
-					.Append(
-						new EwfButton(
-							new CustomButtonStyle( children: ActionComponentIcon.GetIconAndTextComponents( null, "Log out" ) ),
-							behavior: new PostBackBehavior(
-								postBack: PostBack.CreateFull(
-									id: "ewfLogOut",
-									modificationMethod: AuthenticationStatics.LogOutUser,
-									actionGetter: () => new PostBackAction( null, authorizationCheckDisabledPredicate: _ => true ) ) ) ).ToComponentListItem() ) ) );
-
-		return components;
 	}
 
 	private FlowComponent getMobileMenuContainer() {

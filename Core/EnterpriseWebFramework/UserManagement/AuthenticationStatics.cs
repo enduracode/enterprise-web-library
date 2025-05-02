@@ -67,6 +67,38 @@ public static class AuthenticationStatics {
 
 	internal static IReadOnlyCollection<SamlIdentityProvider> SamlIdentityProviders => samlIdentityProviders;
 
+	internal static IReadOnlyCollection<FlowComponent> GetUserInfoComponents() {
+		var customComponents = AppProvider.GetUserInfoComponents();
+		if( customComponents is not null )
+			return customComponents;
+
+		var components = new List<FlowComponent>();
+
+		var changePasswordPage = new Pages.ChangePassword( PageBase.Current.GetUrl() );
+		if( !changePasswordPage.UserCanAccess || SystemUser.Current == null )
+			return components;
+
+		components.Add( new Paragraph( "Logged in as {0}".FormatWith( SystemUser.Current.Email ).ToComponents() ) );
+		if( !UserManagementStatics.LocalIdentityProviderEnabled )
+			return components;
+
+		components.Add(
+			new RawList(
+				new EwfHyperlink(
+						changePasswordPage,
+						new CustomHyperlinkStyle( childGetter: _ => ActionComponentIcon.GetIconAndTextComponents( null, "Change password" ) ) ).ToComponentListItem()
+					.Append(
+						new EwfButton(
+							new CustomButtonStyle( children: ActionComponentIcon.GetIconAndTextComponents( null, "Log out" ) ),
+							behavior: new PostBackBehavior(
+								postBack: PostBack.CreateFull(
+									id: "ewfLogOut",
+									modificationMethod: LogOutUser,
+									actionGetter: () => new PostBackAction( null, authorizationCheckDisabledPredicate: _ => true ) ) ) ).ToComponentListItem() ) ) );
+
+		return components;
+	}
+
 	/// <summary>
 	/// Returns the default log-in page for the application. This is useful if you need a direct hyperlink to it.
 	/// </summary>
@@ -83,9 +115,9 @@ public static class AuthenticationStatics {
 
 		var ticketData = getTicketData();
 		return UserCanImpersonate( ticketData.user ) &&
-		       CookieStatics.TryGetCookieValueFromResponseOrRequest( UserImpersonationStatics.CookieName, out var cookieValue ) && cookieValue is not null
-			       ? ( cookieValue.Length > 0 ? UserManagementStatics.GetUser( int.Parse( cookieValue ), false ) : null,
-				         new SpecifiedValue<SystemUser>( ticketData.user ), ticketData.expirationTime )
+		       CookieStatics.TryGetCookieValueFromResponseOrRequest( UserImpersonationStatics.CookieName, out var value ) && value is not null
+			       ? ( value.Length > 0 ? UserManagementStatics.GetUser( int.Parse( value ), false ) : null, new SpecifiedValue<SystemUser>( ticketData.user ),
+				         ticketData.expirationTime )
 			       : ( ticketData.user, null, ticketData.expirationTime );
 
 		( SystemUser user, Instant? expirationTime ) getTicketData() {

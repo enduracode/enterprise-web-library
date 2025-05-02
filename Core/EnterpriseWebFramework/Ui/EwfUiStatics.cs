@@ -1,20 +1,15 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.SystemSpecificLogic;
+﻿using EnterpriseWebLibrary.SystemSpecificLogic;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 
-/// <summary>
-/// EWL use only.
-/// </summary>
-public static class EwfUiStatics {
-	private static SystemProviderReference<AppEwfUiProvider> provider;
+internal static class EwfUiStatics {
+	private static SystemProviderReference<AppEwfUiProvider>? provider;
+	internal static Func<IReadOnlyCollection<FlowComponent>>? UserInfoComponentGetter { get; private set; }
 
-	internal static void Init( SystemProviderReference<AppEwfUiProvider> provider ) {
+	internal static void Init( SystemProviderReference<AppEwfUiProvider> provider, Func<IReadOnlyCollection<FlowComponent>> userInfoComponentGetter ) {
 		EwfUiStatics.provider = provider;
+		UserInfoComponentGetter = userInfoComponentGetter;
 	}
 
-	/// <summary>
-	/// EWL use only.
-	/// </summary>
-	public static AppEwfUiProvider AppProvider => provider.GetProvider();
+	internal static AppEwfUiProvider AppProvider => provider!.GetProvider()!;
 }
