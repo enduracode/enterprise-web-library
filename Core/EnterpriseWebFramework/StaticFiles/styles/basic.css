@@ -314,6 +314,7 @@ ewfStackFormItemList > ewfFormItemListButtonItem > ewfFormItemListItemContent {
 ewfWrappingFormItemList > ewfFormItemListItem > ewfFormItemListItemLabel, ewfWrappingFormItemList > ewfFormItemListItem > ewfFormItemListItemContent,
 ewfWrappingFormItemList > ewfFormItemListButtonItem > ewfFormItemListItemLabel, ewfWrappingFormItemList > ewfFormItemListButtonItem > ewfFormItemListItemContent {
 	width: max-content;
+	max-width: 100%;
 }
 .ewfFaL {
 	justify-content: flex-start;
