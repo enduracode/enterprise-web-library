@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.Configuration;
+﻿using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.SystemSpecificLogic;
 using JetBrains.Annotations;
@@ -140,7 +139,7 @@ public class UiPageContent: PageContent {
 	}
 
 	private readonly BasicPageContent basicContent;
-	private readonly EntityUiSetup entityUiSetup;
+	private readonly EntityUiSetup? entityUiSetup;
 	private readonly List<FlowComponent> content = new();
 
 	/// <summary>
@@ -158,9 +157,9 @@ public class UiPageContent: PageContent {
 	/// <param name="pageLoadPostBack">A post-back that will be triggered automatically by the browser when the page is finished loading. If this is not null, the
 	/// framework will hide all content on the page and show a loading icon instead.</param>
 	public UiPageContent(
-		ElementClassSet bodyClasses = null, ActionComponentSetupsParameter pageActions = null, bool omitContentBox = false,
-		ButtonSetupsParameter contentFootActions = null, IReadOnlyCollection<FlowComponent> contentFootComponents = null,
-		Action dataUpdateModificationMethod = null, bool isAutoDataUpdater = false, ActionPostBack pageLoadPostBack = null ) {
+		ElementClassSet? bodyClasses = null, ActionComponentSetupsParameter? pageActions = null, bool omitContentBox = false,
+		ButtonSetupsParameter? contentFootActions = null, IReadOnlyCollection<FlowComponent>? contentFootComponents = null,
+		Action? dataUpdateModificationMethod = null, bool isAutoDataUpdater = false, ActionPostBack? pageLoadPostBack = null ) {
 		if( contentFootActions?.Collection.Value.Any() == true && contentFootComponents != null )
 			throw new ApplicationException( "Either contentFootActions or contentFootComponents may be specified, but not both." );
 
@@ -202,7 +201,7 @@ public class UiPageContent: PageContent {
 
 		var userInfo = new List<FlowComponent>();
 		if( RequestState.Instance.UserAccessible ) {
-			var components = EwfUiStatics.UserInfoComponentGetter();
+			var components = EwfUiStatics.UserInfoComponentGetter!();
 			if( components.Any() )
 				userInfo.Add( new GenericFlowContainer( components, classes: userInfoClass ) );
 		}
@@ -270,10 +269,10 @@ public class UiPageContent: PageContent {
 	}
 
 	private IEnumerable<FlowComponent> getMobileMenuTabContainer() {
-		if( entityUiSetup == null || !PageBase.Current.EntitySetupIsParent )
-			return Enumerable.Empty<FlowComponent>();
+		if( entityUiSetup is null || !PageBase.Current.EntitySetupIsParent )
+			return [ ];
 
-		var components = PageBase.Current.EsAsBaseType.ListedResources.SelectMany(
+		var components = PageBase.Current.EsAsBaseType!.ListedResources.SelectMany(
 				resourceGroup => {
 					var tabs = getTabHyperlinksForResources( resourceGroup );
 					return tabs.Any()
@@ -293,7 +292,7 @@ public class UiPageContent: PageContent {
 		var components = new List<FlowComponent>();
 		components.AddRange( getEntityContainer() );
 		if( entityUsesTabMode( TabMode.Horizontal ) ) {
-			var resourceGroups = PageBase.Current.EsAsBaseType.ListedResources;
+			var resourceGroups = PageBase.Current.EsAsBaseType!.ListedResources;
 			if( resourceGroups.Count > 1 )
 				throw new ApplicationException( "Top tabs are not supported with multiple resource groups." );
 			components.Add( getTopTabListContainer( resourceGroups.Single() ) );
@@ -315,15 +314,15 @@ public class UiPageContent: PageContent {
 	}
 
 	private IReadOnlyCollection<FlowComponent> getEntityNavAndActionContainer( bool inMobileMenu ) {
-		var items = new[] { getEntityNavListContainer( inMobileMenu ), getEntityActionListContainer( inMobileMenu ) }.Where( i => i != null ).Materialize();
+		var items = new[] { getEntityNavListContainer( inMobileMenu ), getEntityActionListContainer( inMobileMenu ) }.Where( i => i is not null ).Materialize();
 		return items.Any()
 			       ? new GenericFlowContainer( items, classes: inMobileMenu ? mobileMenuEntityNavAndActionContainerClass : entityNavAndActionContainerClass )
 				       .ToCollection()
 			       : Enumerable.Empty<FlowComponent>().Materialize();
 	}
 
-	private FlowComponent getEntityNavListContainer( bool inMobileMenu ) {
-		if( entityUiSetup == null )
+	private FlowComponent? getEntityNavListContainer( bool inMobileMenu ) {
+		if( entityUiSetup is null )
 			return null;
 
 		var postBackIdBase = inMobileMenu ? "mobileMenuEntity" : "entity";
@@ -340,7 +339,7 @@ public class UiPageContent: PageContent {
 			classes: inMobileMenu ? mobileMenuEntityNavListContainerClass : entityNavListContainerClass );
 	}
 
-	private FlowComponent getEntityActionListContainer( bool inMobileMenu ) {
+	private FlowComponent? getEntityActionListContainer( bool inMobileMenu ) {
 		if( entityUiSetup == null || !PageBase.Current.EntitySetupIsParent )
 			return null;
 		var listItems = getActionListItems( entityUiSetup.ActionGetter( inMobileMenu ? "mobileMenuEntity" : "entity" ) ).Materialize();
@@ -365,11 +364,11 @@ public class UiPageContent: PageContent {
 			classes: topTabListContainerClass );
 
 	private bool entityUsesTabMode( TabMode tabMode ) =>
-		entityUiSetup != null && PageBase.Current.EntitySetupIsParent && entityUiSetup.GetTabMode( PageBase.Current.EsAsBaseType ) == tabMode;
+		entityUiSetup is not null && PageBase.Current.EntitySetupIsParent && entityUiSetup.GetTabMode( PageBase.Current.EsAsBaseType! ) == tabMode;
 
 	private FlowComponent getSideTabContainer() {
 		var components = new List<FlowComponent>();
-		foreach( var resourceGroup in PageBase.Current.EsAsBaseType.ListedResources ) {
+		foreach( var resourceGroup in PageBase.Current.EsAsBaseType!.ListedResources ) {
 			var tabs = getTabHyperlinksForResources( resourceGroup );
 			if( tabs.Any() && resourceGroup.Name.Any() )
 				components.Add( new GenericFlowContainer( resourceGroup.Name.ToComponents(), classes: sideTabGroupHeadClass ) );
@@ -393,13 +392,13 @@ public class UiPageContent: PageContent {
 		return hyperlinks;
 	}
 
-	private FlowComponent getPageActionListContainer( ActionComponentSetupsParameter pageActions ) {
+	private FlowComponent getPageActionListContainer( ActionComponentSetupsParameter? pageActions ) {
 		var listItems = getActionListItems( pageActions ).Materialize();
 		return new FlowIdContainer(
 			listItems.Any() ? new GenericFlowContainer( new WrappingList( listItems ).ToCollection(), classes: pageActionListContainerClass ).ToCollection() : [ ] );
 	}
 
-	private IEnumerable<WrappingListItem> getActionListItems( ActionComponentSetupsParameter actions ) =>
+	private IEnumerable<WrappingListItem> getActionListItems( ActionComponentSetupsParameter? actions ) =>
 		from action in actions?.Collection.Value ?? [ ]
 		let actionComponent = action.GetActionComponent(
 			( text, icon ) => new CustomHyperlinkStyle(
@@ -409,9 +408,9 @@ public class UiPageContent: PageContent {
 		select (WrappingListItem)actionComponent.ToComponentListItem( displaySetup: action.DisplaySetup );
 
 	private IReadOnlyCollection<FlowComponent> getContentFootBlock(
-		bool isAutoDataUpdater, IReadOnlyCollection<ButtonSetup> contentFootActions, IReadOnlyCollection<FlowComponent> contentFootComponents ) {
+		bool isAutoDataUpdater, IReadOnlyCollection<ButtonSetup>? contentFootActions, IReadOnlyCollection<FlowComponent>? contentFootComponents ) {
 		var components = new List<FlowComponent>();
-		if( contentFootActions != null ) {
+		if( contentFootActions is not null ) {
 			if( contentFootActions.Any() )
 				components.Add(
 					new GenericFlowContainer(
@@ -429,7 +428,7 @@ public class UiPageContent: PageContent {
 		else {
 			if( isAutoDataUpdater )
 				throw new ApplicationException( "AutoDataUpdater is not currently compatible with custom content foot controls." );
-			components.AddRange( contentFootComponents );
+			components.AddRange( contentFootComponents! );
 		}
 
 		return components.Any()
@@ -445,20 +444,19 @@ public class UiPageContent: PageContent {
 		if( !ConfigurationStatics.IsIntermediateInstallation || RequestState.Instance.IntermediateUserExists )
 			components.AddRange( EwfUiStatics.AppProvider.GetGlobalFootComponents() );
 
-		var ewlWebSite = new ExternalResource( "http://enterpriseweblibrary.org/" );
-		if( ewlWebSite.UserCanAccess && !EwfUiStatics.AppProvider.PoweredByEwlFooterDisabled() )
+		var ewlWebSite = new ExternalResource( "https://enterpriseweblibrary.org/" );
+		if( ewlWebSite.UserCanAccess && !EwfUiStatics.AppProvider.PoweredByEwlFooterDisabled() ) {
+			var buildDateAndTime = TimeZoneInfo.ConvertTime( EwlStatics.EwlBuildDateTime, TimeZoneInfo.Local );
 			components.Add(
 				new Paragraph(
-					"Powered by the ".ToComponents()
+					"Powered by the free and open ".ToComponents()
 						.Append( new EwfHyperlink( ewlWebSite.ToHyperlinkNewTabBehavior(), new StandardHyperlinkStyle( EwlStatics.EwlName ) ) )
-						.Concat(
-							" ({0} version)".FormatWith( TimeZoneInfo.ConvertTime( EwlStatics.EwlBuildDateTime, TimeZoneInfo.Local ).ToMonthYearString() ).ToComponents() )
+						.Concat( $" ({buildDateAndTime.ToMonthYearString()} version)".ToComponents() )
 						.Materialize(),
 					classes: poweredByEwlFooterClass ) );
+		}
 
-		return components.Any()
-			       ? new GenericFlowContainer( components, classes: globalFootContainerClass ).ToCollection()
-			       : Enumerable.Empty<FlowComponent>().Materialize();
+		return components.Any() ? new GenericFlowContainer( components, classes: globalFootContainerClass ).ToCollection() : [ ];
 	}
 
 	public UiPageContent Add( IReadOnlyCollection<FlowComponent> components ) {
