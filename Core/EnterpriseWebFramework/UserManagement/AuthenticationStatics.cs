@@ -75,7 +75,7 @@ public static class AuthenticationStatics {
 		var components = new List<FlowComponent>();
 
 		var changePasswordPage = new Pages.ChangePassword( PageBase.Current.GetUrl() );
-		if( !changePasswordPage.UserCanAccess || SystemUser.Current == null )
+		if( !changePasswordPage.UserCanAccess || SystemUser.Current is null )
 			return components;
 
 		components.Add( new Paragraph( "Logged in as {0}".FormatWith( SystemUser.Current.Email ).ToComponents() ) );

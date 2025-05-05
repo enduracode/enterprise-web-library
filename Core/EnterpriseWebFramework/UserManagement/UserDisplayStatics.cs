@@ -5,6 +5,7 @@ using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 
+[ PublicAPI ]
 public static class UserDisplayStatics {
 	private static readonly ElementClass avatarClass = new( "ewfUa" );
 
