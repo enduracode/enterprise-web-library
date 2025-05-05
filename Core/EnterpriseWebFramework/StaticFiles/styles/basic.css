@@ -661,6 +661,14 @@ ewfModalBoxBackdrop {
 }
 
 /* user management */
+ewfUserAvatar > ewfImage {
+	display: inline;
+	vertical-align: middle;
+	border-radius: 50%;
+}
+ewfUserAvatar > span {
+	margin-left: var(--ewf-list-item-spacing);
+}
 ewfFormItemList.newPassword ewfSingleLineTextControlAllStates {
 	width: 200px;
 }
