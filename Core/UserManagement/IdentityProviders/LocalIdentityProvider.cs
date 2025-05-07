@@ -125,10 +125,12 @@ public class LocalIdentityProvider: IdentityProvider {
 
 		// Create a new salt
 		var saltBytes = new byte[ 4 ];
-		saltBytes[ 0 ] = (byte)( salt >> 24 );
-		saltBytes[ 1 ] = (byte)( salt >> 16 );
-		saltBytes[ 2 ] = (byte)( salt >> 8 );
-		saltBytes[ 3 ] = (byte)( salt );
+		unchecked {
+			saltBytes[ 0 ] = (byte)( salt >> 24 );
+			saltBytes[ 1 ] = (byte)( salt >> 16 );
+			saltBytes[ 2 ] = (byte)( salt >> 8 );
+			saltBytes[ 3 ] = (byte)( salt );
+		}
 
 		// Create Byte array of password string
 		var encoder = new ASCIIEncoding();
