@@ -234,13 +234,14 @@ public static class AuthenticationStatics {
 
 				                       return user;
 			                       }, ( emailAddress, isPasswordReset, destinationUrl, newUserRoleId ) => {
-				                       UserManagementStatics.LocalIdentityProvider.SendLoginCode(
-					                       emailAddress,
-					                       isPasswordReset,
-					                       autoLogInPageUrlGetter,
-					                       changePasswordPageUrlGetter,
-					                       destinationUrl,
-					                       newUserRoleId: newUserRoleId );
+				                       if( UserManagementStatics.LocalIdentityProvider.SendLoginCode(
+					                           emailAddress,
+					                           isPasswordReset,
+					                           autoLogInPageUrlGetter,
+					                           changePasswordPageUrlGetter,
+					                           destinationUrl,
+					                           newUserRoleId: newUserRoleId ) is { Length: > 0 } errorMessage )
+					                       throw new DataModificationException( errorMessage );
 				                       PageBase.AddStatusMessage(
 					                       StatusMessageType.Info,
 					                       newUserRoleId.HasValue

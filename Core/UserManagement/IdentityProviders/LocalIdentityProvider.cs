@@ -145,13 +145,13 @@ public class LocalIdentityProvider: IdentityProvider {
 		return sha1.ComputeHash( toHash );
 	}
 
-	internal void SendLoginCode(
+	internal string SendLoginCode(
 		string emailAddress, bool isPasswordReset, AutoLogInPageUrlGetterMethod autologInPageUrlGetter,
 		ChangePasswordPageUrlGetterMethod changePasswordPageUrlGetter, string destinationUrl, int? newUserRoleId = null ) {
 		var user = UserManagementStatics.SystemProvider.GetUser( emailAddress );
 		if( user is null ) {
 			if( !newUserRoleId.HasValue )
-				return;
+				return "";
 			user = UserManagementStatics.GetUser( UserManagementStatics.SystemProvider.InsertOrUpdateUser( null, emailAddress, newUserRoleId.Value ), true )!;
 		}
 
@@ -193,6 +193,8 @@ public class LocalIdentityProvider: IdentityProvider {
 			};
 		message.ToAddresses.Add( new EmailAddress( emailAddress ) );
 		EmailStatics.SendEmailWithDefaultFromAddress( message );
+
+		return "";
 	}
 
 	internal string? LogInUserWithCode(
