@@ -1,37 +1,34 @@
-﻿#nullable disable
-using System;
-using System.Web;
-using Humanizer;
+﻿using System.Web;
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework;
+
+/// <summary>
+/// An action that causes a post-back.
+/// </summary>
+public class PostBackFormAction: FormAction {
+	private static Action<PostBack>? postBackAdder;
+	private static Action<PostBack>? postBackAsserter;
+
+	internal static void Init( Action<PostBack> postBackAdder, Action<PostBack> postBackAsserter ) {
+		PostBackFormAction.postBackAdder = postBackAdder;
+		PostBackFormAction.postBackAsserter = postBackAsserter;
+	}
+
 	/// <summary>
-	/// An action that causes a post-back.
+	/// SubmitButton, UiButtonSetup, and private use only.
 	/// </summary>
-	public class PostBackFormAction: FormAction {
-		private static Action<PostBack> postBackAdder;
-		private static Action<PostBack> postBackAsserter;
+	internal readonly PostBack PostBack;
 
-		internal static void Init( Action<PostBack> postBackAdder, Action<PostBack> postBackAsserter ) {
-			PostBackFormAction.postBackAdder = postBackAdder;
-			PostBackFormAction.postBackAsserter = postBackAsserter;
-		}
+	public PostBackFormAction( PostBack postBack ) {
+		PostBack = postBack;
+	}
 
-		/// <summary>
-		/// SubmitButton, UiButtonSetup, and private use only.
-		/// </summary>
-		internal readonly PostBack PostBack;
+	void FormAction.AddToPageIfNecessary() {
+		postBackAdder!( PostBack );
+	}
 
-		public PostBackFormAction( PostBack postBack ) {
-			PostBack = postBack;
-		}
-
-		void FormAction.AddToPageIfNecessary() {
-			postBackAdder( PostBack );
-		}
-
-		string FormAction.GetJsStatements() {
-			postBackAsserter( PostBack );
-			return "postBack( '{0}' );".FormatWith( HttpUtility.JavaScriptStringEncode( PostBack.Id ) );
-		}
+	string FormAction.GetJsStatements() {
+		postBackAsserter!( PostBack );
+		return "postBack( '{0}' );".FormatWith( HttpUtility.JavaScriptStringEncode( PostBack.Id ) );
 	}
 }
