@@ -194,6 +194,7 @@ internal class UpdateDependentLogic: Operation {
 			installation.GeneralLogic.Path,
 			writer => {
 				writer.WriteLine( "dotnet_style_collection_initializer = false" );
+				writer.WriteLine( "csharp_style_prefer_primary_constructors = false" );
 				writer.WriteLine( "dotnet_diagnostic.IDE1006.severity = none" );
 			} );
 		updateReSharperSettings( installation );
