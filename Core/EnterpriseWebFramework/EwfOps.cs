@@ -93,6 +93,7 @@ public static class EwfOps {
 			globalInitializer,
 			Path.GetFileName( Directory.GetCurrentDirectory() ),
 			false,
+			timeGetters: ( SystemClock.Instance.GetCurrentInstant, () => EwfRequest.Current?.RequestTime ?? SystemClock.Instance.GetCurrentInstant() ),
 			telemetryAppErrorContextWriter: writer => {
 				// This check ensures that there is an actual request, which is not the case during application initialization.
 				if( EwfRequest.Current is null )

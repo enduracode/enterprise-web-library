@@ -35,6 +35,7 @@ public static class GlobalInitializationOps {
 	/// <param name="globalInitializer">The system's global initializer. Do not pass null.</param>
 	/// <param name="appName"></param>
 	/// <param name="isClientSideApp"></param>
+	/// <param name="timeGetters">Methods that return the current time and transaction time.</param>
 	/// <param name="assemblyFolderPath">Pass a nonempty string to override the assembly folder path, which is used to locate the installation folder. Use with
 	/// caution.</param>
 	/// <param name="telemetryAppErrorContextWriter"></param>
@@ -45,9 +46,10 @@ public static class GlobalInitializationOps {
 	/// <param name="currentUserGetter">A method that returns the current authenticated user. If you pass null, the authenticated user will not be available in
 	/// the application.</param>
 	public static void InitStatics(
-		SystemInitializer globalInitializer, string appName, bool isClientSideApp, string assemblyFolderPath = "",
-		Action<TextWriter>? telemetryAppErrorContextWriter = null, Func<DataAccessState>? mainDataAccessStateGetter = null, bool useLongDatabaseTimeouts = false,
-		Func<AutomaticDatabaseConnectionManager>? currentDatabaseConnectionManagerGetter = null, Func<SystemUser?>? currentUserGetter = null ) {
+		SystemInitializer globalInitializer, string appName, bool isClientSideApp, ( Func<Instant> current, Func<Instant> transaction )? timeGetters = null,
+		string assemblyFolderPath = "", Action<TextWriter>? telemetryAppErrorContextWriter = null, Func<DataAccessState>? mainDataAccessStateGetter = null,
+		bool useLongDatabaseTimeouts = false, Func<AutomaticDatabaseConnectionManager>? currentDatabaseConnectionManagerGetter = null,
+		Func<SystemUser?>? currentUserGetter = null ) {
 		var initializationLog = "Starting init";
 		try {
 			if( initialized )
@@ -57,6 +59,7 @@ public static class GlobalInitializationOps {
 				throw new ApplicationException( "The system must have a global initializer." );
 
 			// Initialize these before the exception handling block below because it's reasonable for the exception handling to depend on them.
+			Clock.Init( timeGetters ?? ( SystemClock.Instance.GetCurrentInstant, SystemClock.Instance.GetCurrentInstant ) );
 			ConfigurationStatics.Init( assemblyFolderPath, appName, isClientSideApp, ref initializationLog );
 			SystemSpecificLogicStatics.Init( globalInitializer.GetType() );
 			EmailStatics.Init(
