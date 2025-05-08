@@ -71,9 +71,9 @@ public class EwfRequest {
 	/// Parses the request body as a form and returns the values.
 	/// </summary>
 	public IFormCollection GetFormSubmission() {
-		var requestBodyReadBeginTime = SystemClock.Instance.GetCurrentInstant();
+		var requestBodyReadBeginTime = Clock.GetCurrentTime();
 		var formSubmission = Task.Run( async () => await AspNetRequest.ReadFormAsync() ).Result;
-		networkWaitTimeAdder!( SystemClock.Instance.GetCurrentInstant() - requestBodyReadBeginTime );
+		networkWaitTimeAdder!( Clock.GetCurrentTime() - requestBodyReadBeginTime );
 
 		return formSubmission;
 	}

@@ -40,7 +40,7 @@ public class DatabaseConnection {
 		this.databaseInfo = databaseInfo;
 
 		// Sometimes databases are slow when nightly operations are underway.
-		var isNight = SystemClock.Instance.GetCurrentInstant().InZone( DateTimeZoneProviders.Tzdb.GetSystemDefault() ).TimeOfDay.IsInNight();
+		var isNight = Clock.TransactionTime.InZone( DateTimeZoneProviders.Tzdb.GetSystemDefault() ).TimeOfDay.IsInNight();
 		var timeout = isNight ? 300 : useLongTimeouts ? 60 : 15;
 
 		cn = new ProfiledDbConnection( databaseInfo.CreateConnection( databaseInfo.GetConnectionString( timeout ) ), MiniProfiler.Current );
@@ -544,7 +544,7 @@ public class DatabaseConnection {
 
 			var revisionHistorySetup = RevisionHistoryStatics.SystemProvider;
 			userTransactionId = revisionHistorySetup.GetNextMainSequenceValue();
-			revisionHistorySetup.InsertUserTransaction( userTransactionId.Value, userId, SystemClock.Instance.GetCurrentInstant() );
+			revisionHistorySetup.InsertUserTransaction( userTransactionId.Value, userId, Clock.TransactionTime );
 		}
 		return userTransactionId.Value;
 	}

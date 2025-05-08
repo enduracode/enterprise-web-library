@@ -168,7 +168,7 @@ public class LocalIdentityProvider: IdentityProvider {
 			user.UserId,
 			salt,
 			getHashedLoginCode( code, salt ),
-			SystemClock.Instance.GetCurrentInstant().Plus( codeDuration ),
+			Clock.TransactionTime.Plus( codeDuration ),
 			10,
 			isPasswordReset ? changePasswordPageUrlGetter( destinationUrl ) : destinationUrl );
 
@@ -217,7 +217,7 @@ public class LocalIdentityProvider: IdentityProvider {
 		var unconditionalModMethods = new List<Action>();
 		if( codeData.hashedCode == null )
 			codeValid = false;
-		else if( codeData.expirationTime!.Value <= SystemClock.Instance.GetCurrentInstant() )
+		else if( codeData.expirationTime!.Value <= Clock.TransactionTime )
 			codeValid = false;
 		else if( codeData.remainingAttemptCount!.Value == 0 )
 			codeValid = false;

@@ -30,7 +30,7 @@ internal class SecondaryResponseDataStore: PeriodicEvictionCompositeCacheEntry {
 		var id = Interlocked.Increment( ref dataStore.responseId );
 		( (IDictionary<uint, ResponseData>)dataStore.responseDataById ).Add(
 			id,
-			new ResponseData( RandomTools.GetRandomHexString(), response, SystemClock.Instance.GetCurrentInstant() ) );
+			new ResponseData( RandomTools.GetRandomHexString(), response, Clock.GetCurrentTime() ) );
 		return id;
 	}
 
@@ -41,7 +41,7 @@ internal class SecondaryResponseDataStore: PeriodicEvictionCompositeCacheEntry {
 	private uint responseId;
 
 	void PeriodicEvictionCompositeCacheEntry.EvictOldEntries() {
-		var cutoffTime = SystemClock.Instance.GetCurrentInstant() - Duration.FromMinutes( 2 );
+		var cutoffTime = Clock.GetCurrentTime() - Duration.FromMinutes( 2 );
 		foreach( var id in responseDataById.Keys )
 			if( responseDataById[ id ].StorageTime < cutoffTime )
 				responseDataById.TryRemove( id, out _ );

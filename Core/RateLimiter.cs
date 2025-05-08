@@ -17,12 +17,12 @@ public class RateLimiter {
 		this.maxBurstSize = maxBurstSize;
 
 		count = 0;
-		lastDecrementTime = SystemClock.Instance.GetCurrentInstant();
+		lastDecrementTime = Clock.GetCurrentTime();
 	}
 
 	public void RequestAction( Action actionMethod, Action atLimitMethod, Action limitExceededMethod ) {
 		// Decrement the count as time passes.
-		var currentTime = SystemClock.Instance.GetCurrentInstant();
+		var currentTime = Clock.GetCurrentTime();
 		if( currentTime > lastDecrementTime ) {
 			uint intervalsPassed;
 			checked {

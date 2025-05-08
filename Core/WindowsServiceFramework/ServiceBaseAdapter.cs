@@ -38,7 +38,7 @@ public sealed class ServiceBaseAdapter: ServiceBase {
 		}
 
 		void init() {
-			lastTickInstant = SystemClock.Instance.GetCurrentInstant();
+			lastTickInstant = Clock.GetCurrentTime();
 			service.Init();
 
 			timer = new Timer( tick, null, tickInterval, Timeout.Infinite );
@@ -70,7 +70,7 @@ public sealed class ServiceBaseAdapter: ServiceBase {
 			() => {
 				// Use try-finally because we need to schedule the next tick even if there is an exception thrown in this one.
 				try {
-					WindowsServiceStatics.TickTime = SystemClock.Instance.GetCurrentInstant();
+					WindowsServiceStatics.TickTime = Clock.GetCurrentTime();
 
 					// If the clock has run ahead by more than tickInterval, and then happens be synced, we cannot create an Interval.
 					if( WindowsServiceStatics.TickTime < lastTickInstant )

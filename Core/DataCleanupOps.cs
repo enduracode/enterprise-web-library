@@ -27,7 +27,7 @@ public static class DataCleanupOps {
 			else
 				cleanUpUserRequests();
 
-		var cutoffTime = SystemClock.Instance.GetCurrentInstant() - Duration.FromDays( 14 );
+		var cutoffTime = Clock.TransactionTime - Duration.FromDays( 14 );
 		foreach( var app in ConfigurationStatics.InstallationConfiguration.WebApplications ) {
 			var filePath = app.DiagnosticLogFilePath;
 			if( !File.Exists( filePath ) )

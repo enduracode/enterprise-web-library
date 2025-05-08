@@ -136,7 +136,7 @@ public static class RequestDispatchingStatics {
 						else
 							RequestState.CleanUp( false );
 
-						Interlocked.CompareExchange( ref firstRequestCompletionTime, new FirstRequestCompletionTime( SystemClock.Instance.GetCurrentInstant() ), null );
+						Interlocked.CompareExchange( ref firstRequestCompletionTime, new FirstRequestCompletionTime( Clock.GetCurrentTime() ), null );
 
 						return Task.CompletedTask;
 					},

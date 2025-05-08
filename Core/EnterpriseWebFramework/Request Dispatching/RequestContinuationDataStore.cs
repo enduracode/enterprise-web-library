@@ -57,7 +57,7 @@ internal class RequestContinuationDataStore: PeriodicEvictionCompositeCacheEntry
 
 		( (IDictionary<string, RequestData>)dataStore.requestDataById ).Add(
 			requestId,
-			new RequestData( url, requestMethod, requestState, SystemClock.Instance.GetCurrentInstant() ) );
+			new RequestData( url, requestMethod, requestState, Clock.GetCurrentTime() ) );
 
 		var fragmentIndex = url.IndexOf( '#' );
 		return fragmentIndex >= 0 ? url.Insert( fragmentIndex, parameter ) : url + parameter;
@@ -70,7 +70,7 @@ internal class RequestContinuationDataStore: PeriodicEvictionCompositeCacheEntry
 	private uint requestIdNumber;
 
 	void PeriodicEvictionCompositeCacheEntry.EvictOldEntries() {
-		var cutoffTime = SystemClock.Instance.GetCurrentInstant() - Duration.FromSeconds( 30 );
+		var cutoffTime = Clock.GetCurrentTime() - Duration.FromSeconds( 30 );
 		foreach( var requestId in requestDataById.Keys ) {
 			if( !requestDataById.TryGetValue( requestId, out var requestData ) || requestData.StorageTime > cutoffTime )
 				continue;

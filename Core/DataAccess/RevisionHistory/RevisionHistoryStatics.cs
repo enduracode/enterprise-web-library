@@ -157,8 +157,7 @@ public static class RevisionHistoryStatics {
 	public static IReadOnlyDictionary<int, UserTransaction?> GetLatestTransactionsByEntityId<ConceptualEntityStateType, ConceptualEntityActivityType, UserType>(
 		IEnumerable<TransactionListItem<ConceptualEntityStateType, ConceptualEntityActivityType, UserType>> transactionList ) {
 		var latestRevisionTransactionsByEntityId = ImmutableDictionary<int, UserTransaction?>.Empty.ToBuilder();
-		var cutoffTime = SystemClock.Instance.GetCurrentInstant()
-			.Minus( ConfigurationStatics.IsLiveInstallation ? Duration.FromMinutes( 5 ) : Duration.FromMinutes( 1 ) );
+		var cutoffTime = Clock.TransactionTime.Minus( ConfigurationStatics.IsLiveInstallation ? Duration.FromMinutes( 5 ) : Duration.FromMinutes( 1 ) );
 		foreach( var i in transactionList ) {
 			if( latestRevisionTransactionsByEntityId.ContainsKey( i.ConceptualEntityId ) )
 				continue;

@@ -73,7 +73,7 @@ public static class TelemetryStatics {
 	private static readonly object key = new();
 
 	private static void logError( string errorText ) {
-		var currentTime = SystemClock.Instance.GetCurrentInstant().InZone( DateTimeZoneProviders.Tzdb.GetSystemDefault() );
+		var currentTime = Clock.GetCurrentTime().InZone( DateTimeZoneProviders.Tzdb.GetSystemDefault() );
 		var timePattern = ZonedDateTimePattern.CreateWithInvariantCulture( "d MMM uuuu',' H:mm:ss '(UTC'o<+H>')'", null );
 
 		lock( key ) {

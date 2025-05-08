@@ -92,7 +92,7 @@ public class RequestState {
 	private IRequestCookieCollection? requestCookies;
 
 	internal RequestState( HttpContext context, string url, string baseUrl, SlowRequestThreshold slowRequestThreshold ) {
-		BeginInstant = SystemClock.Instance.GetCurrentInstant();
+		BeginInstant = Clock.GetCurrentTime();
 		var firstRequestCompletionTime = firstRequestCompletionTimeGetter!();
 		requestInWarmupPeriod = !firstRequestCompletionTime.HasValue || BeginInstant - firstRequestCompletionTime.Value < warmupPeriodDuration;
 
@@ -239,7 +239,7 @@ public class RequestState {
 	internal void ReleaseContinuationSemaphore() {
 		requestCookies = RequestCookies;
 
-		continuationSemaphoreReleaseTime = SystemClock.Instance.GetCurrentInstant();
+		continuationSemaphoreReleaseTime = Clock.GetCurrentTime();
 		ContinuationSemaphore.Release();
 	}
 
@@ -247,7 +247,7 @@ public class RequestState {
 		Url = url;
 		BaseUrl = baseUrl;
 
-		AddNetworkWaitTime( SystemClock.Instance.GetCurrentInstant() - continuationSemaphoreReleaseTime!.Value );
+		AddNetworkWaitTime( Clock.GetCurrentTime() - continuationSemaphoreReleaseTime!.Value );
 		continuationSemaphoreReleaseTime = null;
 	}
 
@@ -268,7 +268,7 @@ public class RequestState {
 					Profiler?.Stop();
 				}
 				else {
-					var currentTime = SystemClock.Instance.GetCurrentInstant();
+					var currentTime = Clock.GetCurrentTime();
 
 					var duration = currentTime - BeginInstant;
 					Profiler?.Stop();

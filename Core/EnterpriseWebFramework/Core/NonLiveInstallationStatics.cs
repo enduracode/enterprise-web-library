@@ -22,7 +22,7 @@ internal static class NonLiveInstallationStatics {
 		CookieStatics.SetCookie(
 			intermediateAuthenticationCookieName,
 			intermediateAuthenticationCookieValue,
-			SystemClock.Instance.GetCurrentInstant() + Duration.FromDays( 30 ),
+			Clock.TransactionTime + Duration.FromDays( 30 ),
 			true,
 			true );
 	}
@@ -37,6 +37,6 @@ internal static class NonLiveInstallationStatics {
 	internal static bool WarningsHiddenCookieExists() => CookieStatics.TryGetCookieValueFromResponseOrRequest( warningsHiddenCookieName, out _ );
 
 	internal static void SetWarningsHiddenCookie() {
-		CookieStatics.SetCookie( warningsHiddenCookieName, "", SystemClock.Instance.GetCurrentInstant() + Duration.FromHours( 1 ), false, false );
+		CookieStatics.SetCookie( warningsHiddenCookieName, "", Clock.TransactionTime + Duration.FromHours( 1 ), false, false );
 	}
 }

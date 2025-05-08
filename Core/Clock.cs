@@ -11,7 +11,7 @@ public static class Clock {
 		transactionTimeGetter = timeGetters.transaction;
 	}
 
-	internal static Instant CurrentTime => currentTimeGetter!();
+	internal static Instant GetCurrentTime() => currentTimeGetter!();
 
 	/// <summary>
 	/// Gets the time instant for the current user transaction.

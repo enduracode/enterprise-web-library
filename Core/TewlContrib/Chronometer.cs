@@ -7,10 +7,10 @@ namespace EnterpriseWebLibrary.TewlContrib;
 /// never stops.
 /// </summary>
 public class Chronometer {
-	private readonly Instant created = SystemClock.Instance.GetCurrentInstant();
+	private readonly Instant created = Clock.GetCurrentTime();
 
 	/// <summary>
 	/// Returns the time elasped since this object was created.
 	/// </summary>
-	public Duration Elapsed => SystemClock.Instance.GetCurrentInstant() - created;
+	public Duration Elapsed => Clock.GetCurrentTime() - created;
 }
