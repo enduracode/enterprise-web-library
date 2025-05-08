@@ -1,16 +1,15 @@
 ﻿using System.Threading;
 
-// EwlPage
-// OptionalParameter: bool toggled
-// OptionalParameter: IEnumerable<int> nonIdItemStates
-// OptionalParameter: IEnumerable<int> itemIds
-
 namespace EnterpriseWebLibrary.Website.WebFrameworkDemo;
 
+// EwlPage
+// OptionalParameter: bool toggled
+// OptionalParameter: IReadOnlyCollection<int> nonIdItemStates
+// OptionalParameter: IReadOnlyCollection<int> itemIds
 partial class IntermediatePostBacks {
 	static partial void specifyParameterDefaults( OptionalParameterSpecifier specifier, EntitySetup entitySetup, Parameters parameters ) {
-		specifier.NonIdItemStates = new[] { 0, 0, 0 };
-		specifier.ItemIds = new[] { 0, 1, 2 };
+		specifier.NonIdItemStates = [ 0, 0, 0 ];
+		specifier.ItemIds = [ 0, 1, 2 ];
 	}
 
 	protected override string getResourceName() => "Intermediate Post-Backs";
@@ -122,7 +121,7 @@ partial class IntermediatePostBacks {
 							postBack: PostBack.CreateIntermediate(
 								addRs,
 								id: "nonIdAdd",
-								modificationMethod: () => parametersModification.NonIdItemStates = parametersModification.NonIdItemStates.Concat( new[] { 0, 0 } ) ) ) )
+								modificationMethod: () => parametersModification.NonIdItemStates = parametersModification.NonIdItemStates.Concat( [ 0, 0 ] ).Materialize() ) ) )
 					.ToCollection()
 					.Append(
 						new EwfButton(
@@ -133,11 +132,11 @@ partial class IntermediatePostBacks {
 									id: "nonIdRemove",
 									modificationMethod: () =>
 										parametersModification.NonIdItemStates =
-											parametersModification.NonIdItemStates.Take( parametersModification.NonIdItemStates.Count() - 2 ) ) ) ) )
+											parametersModification.NonIdItemStates.Take( parametersModification.NonIdItemStates.Count - 2 ).Materialize() ) ) ) )
 					.Select( i => (LineListItem)i.ToCollection().ToComponentListItem() ) ) );
 
 		var stack = new StackList(
-			Enumerable.Range( 0, NonIdItemStates.Count() ).Select( getNonIdItem ),
+			Enumerable.Range( 0, NonIdItemStates.Count ).Select( getNonIdItem ),
 			setup: new ComponentListSetup( tailUpdateRegions: new TailUpdateRegion( addRs, 0 ).Add( new TailUpdateRegion( removeRs, 2 ) ) ) );
 
 		components.Add( new Section( "Control List With Non-ID Items", stack.ToCollection(), style: SectionStyle.Box ) );
@@ -160,8 +159,8 @@ partial class IntermediatePostBacks {
 							rs,
 							id: PostBack.GetCompositeId( "nonId", i.ToString() ),
 							modificationMethod: () => parametersModification.NonIdItemStates =
-								                          parametersModification.NonIdItemStates.Select( ( state, index ) => index == i ? ( state + 1 ) % 2 : state ) ) ) )
-				.ToCollection()
+								                          parametersModification.NonIdItemStates.Select( ( state, index ) => index == i ? ( state + 1 ) % 2 : state )
+									                          .Materialize() ) ) ).ToCollection()
 				.ToComponentListItem() );
 
 		return new StackList( items ).ToCollection().ToComponentListItem( updateRegionSets: rs );
@@ -182,7 +181,8 @@ partial class IntermediatePostBacks {
 								modificationMethod: () => parametersModification.ItemIds =
 									                          ( parametersModification.ItemIds.Any() ? parametersModification.ItemIds.Min() - 1 : 0 )
 									                          .ToCollection()
-									                          .Concat( parametersModification.ItemIds ) ) ) ).ToCollection()
+									                          .Concat( parametersModification.ItemIds )
+									                          .Materialize() ) ) ).ToCollection()
 					.ToComponentListItem()
 					.ToLineListItemCollection() ) );
 

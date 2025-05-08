@@ -970,7 +970,7 @@ public static class FormControlExtensionCreators {
 	/// <param name="value"></param>
 	/// <param name="additionalValidationMethod"></param>
 	public static CheckboxList<ItemIdType> ToCheckboxList<ItemIdType>(
-		this AbstractDataValue<IEnumerable<ItemIdType>> dataValue, CheckboxListSetup<ItemIdType> setup, IEnumerable<ItemIdType>? value = null,
+		this AbstractDataValue<IReadOnlyCollection<ItemIdType>> dataValue, CheckboxListSetup<ItemIdType> setup, IEnumerable<ItemIdType>? value = null,
 		Action<Validator>? additionalValidationMethod = null ) {
 		return new CheckboxList<ItemIdType>(
 			setup,
