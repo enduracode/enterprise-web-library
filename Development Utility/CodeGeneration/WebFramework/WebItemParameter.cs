@@ -44,7 +44,7 @@ internal class WebItemParameter {
 			throw new UserCorrectableException( "The type \"" + typeName + "\" is not supported." );
 
 		normalizedTypeName = getNormalizedTypeName( type );
-		normalizedElementTypeName = type.IsGenericType && type.GetGenericTypeDefinition() == typeof( IEnumerable<> )
+		normalizedElementTypeName = type.IsGenericType && type.GetGenericTypeDefinition() == typeof( IReadOnlyCollection<> )
 			                            ? getNormalizedTypeName( type.GetGenericArguments().Single() )
 			                            : "";
 		this.name = name;
@@ -52,7 +52,7 @@ internal class WebItemParameter {
 	}
 
 	private static bool isSupportedEnumerable( Type type ) {
-		if( !type.IsGenericType || type.GetGenericTypeDefinition() != typeof( IEnumerable<> ) )
+		if( !type.IsGenericType || type.GetGenericTypeDefinition() != typeof( IReadOnlyCollection<> ) )
 			return false;
 		var elementType = type.GetGenericArguments().Single();
 

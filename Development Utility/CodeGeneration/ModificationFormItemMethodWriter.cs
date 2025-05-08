@@ -382,7 +382,7 @@ internal class ModificationFormItemMethodWriter {
 				new CSharpParameter( "CheckboxListSetup<{0}>".FormatWith( field.EnumerableElementTypeName ), "checkboxListSetup" ).ToCollection(),
 				false,
 					[ ],
-				field.NullableTypeName,
+				$"IEnumerable<{field.EnumerableElementTypeName}>?",
 					[ ],
 				true,
 				dv => "{0}.ToCheckboxList( checkboxListSetup, value: value, additionalValidationMethod: additionalValidationMethod )".FormatWith( dv ) );
