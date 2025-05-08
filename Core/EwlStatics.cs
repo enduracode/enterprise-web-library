@@ -158,15 +158,6 @@ public static partial class EwlStatics {
 				"this", "throw", "true", "try", "typeof", "uint", "ulong", "unchecked", "unsafe", "ushort", "using", "virtual", "void", "volatile", "while"
 			};
 
-	internal static void EmergencyLog( string subject, string body ) {
-		try {
-			const string destinationPath = @"c:\AnyoneFullControl\";
-			if( Directory.Exists( destinationPath ) )
-				File.WriteAllText( CombinePaths( destinationPath, subject + ".txt" ), DateTime.Now.ToHourAndMinuteString() + ":" + body );
-		}
-		catch {}
-	}
-
 	/// <summary>
 	/// Returns true if the specified objects are equal according to the default equality comparer.
 	/// </summary>

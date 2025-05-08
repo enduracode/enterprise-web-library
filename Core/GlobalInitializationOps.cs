@@ -77,7 +77,16 @@ public static class GlobalInitializationOps {
 		}
 		catch( Exception e ) {
 			initializationLog += Environment.NewLine + e;
-			EwlStatics.EmergencyLog( "Initialization log", initializationLog );
+
+			try {
+				const string destinationPath = @"c:\AnyoneFullControl\";
+				if( Directory.Exists( destinationPath ) )
+					File.WriteAllText(
+						EwlStatics.CombinePaths( destinationPath, "Initialization log" + FileExtensions.Txt ),
+						DateTime.Now.ToHourAndMinuteString() + ":" + initializationLog );
+			}
+			catch {}
+
 			throw;
 		}
 
