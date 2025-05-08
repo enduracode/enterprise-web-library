@@ -80,10 +80,12 @@ public static class GlobalInitializationOps {
 
 			try {
 				const string destinationPath = @"c:\AnyoneFullControl\";
-				if( Directory.Exists( destinationPath ) )
+				if( Directory.Exists( destinationPath ) ) {
+					var currentTime = SystemClock.Instance.GetCurrentInstant(); // Don’t use Clock since it may not have been initialized.
 					File.WriteAllText(
 						EwlStatics.CombinePaths( destinationPath, "Initialization log" + FileExtensions.Txt ),
-						DateTime.Now.ToHourAndMinuteString() + ":" + initializationLog );
+						currentTime.InZone( DateTimeZoneProviders.Tzdb.GetSystemDefault() ).ToDateTimeUnspecified().ToHourAndMinuteString() + ":" + initializationLog );
+				}
 			}
 			catch {}
 
