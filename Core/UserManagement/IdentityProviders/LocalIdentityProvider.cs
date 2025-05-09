@@ -1,7 +1,10 @@
-﻿using System.Security.Cryptography;
+﻿using System.Collections.Concurrent;
+using System.Security.Cryptography;
 using System.Text;
+using EnterpriseWebLibrary.Caching;
 using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.SystemSpecificLogic;
+using Humanizer;
 using JetBrains.Annotations;
 using NodaTime;
 using Tewl.InputValidation;
@@ -149,6 +152,35 @@ public class LocalIdentityProvider: IdentityProvider {
 	internal string SendLoginCode(
 		string emailAddress, bool isPasswordReset, AutoLogInPageUrlGetterMethod autologInPageUrlGetter,
 		ChangePasswordPageUrlGetterMethod changePasswordPageUrlGetter, string destinationUrl, int? newUserRoleId = null ) {
+		var transactionTime = Clock.TransactionTime;
+
+		var nextSendTimesByEmailAddress = AppMemoryCache.GetCacheValue(
+			EwlStatics.EwlInitialism.ToLowerInvariant() + "LocalIdentityProviderCodeNextSendTimes",
+			() => new ConcurrentDictionary<string, Instant>( StringComparer.Ordinal ) );
+
+		var normalizedEmail = emailAddress.ToUpperInvariant();
+		bool nextSendTimeExists;
+		Instant nextSendTime;
+		Instant newNextSendTime;
+		do {
+			nextSendTimeExists = nextSendTimesByEmailAddress.TryGetValue( normalizedEmail, out nextSendTime );
+			if( nextSendTimeExists ) {
+				var waitDuration = nextSendTime - transactionTime;
+				if( waitDuration > Duration.Zero )
+					return StringTools.ConcatenateWithDelimiter(
+						" ",
+						newUserRoleId.HasValue
+							? $"A login code has already been sent to {emailAddress}."
+							: $"A login code has already been sent to {emailAddress} if this address is registered with {AdministratingOrganizationName}.",
+						$"Please wait {waitDuration.ToTimeSpan().Humanize( minUnit: Humanizer.Localisation.TimeUnit.Second )} before sending yourself another code." );
+			}
+
+			newNextSendTime = transactionTime + Duration.FromMinutes( 1 );
+		}
+		while( nextSendTimeExists
+			       ? !nextSendTimesByEmailAddress.TryUpdate( normalizedEmail, newNextSendTime, nextSendTime )
+			       : !nextSendTimesByEmailAddress.TryAdd( normalizedEmail, newNextSendTime ) );
+
 		var user = UserManagementStatics.SystemProvider.GetUser( emailAddress );
 		if( user is null ) {
 			if( !newUserRoleId.HasValue )
@@ -168,7 +200,7 @@ public class LocalIdentityProvider: IdentityProvider {
 			user.UserId,
 			salt,
 			getHashedLoginCode( code, salt ),
-			Clock.TransactionTime.Plus( codeDuration ),
+			transactionTime.Plus( codeDuration ),
 			10,
 			isPasswordReset ? changePasswordPageUrlGetter( destinationUrl ) : destinationUrl );
 
