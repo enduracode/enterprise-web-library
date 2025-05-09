@@ -99,7 +99,7 @@ internal class WebItemParameter {
 	public bool TypeIsNullable => type.IsValueType && Nullable.GetUnderlyingType( type ) is not null;
 	public bool IsString => type == typeof( string );
 	internal bool IsEnumerable => normalizedElementTypeName.Any();
-	internal string EnumerableInitExpression => IsEnumerable ? "new " + normalizedElementTypeName + "[ 0 ]" : "";
+	internal string EnumerableInitExpression => IsEnumerable ? "[]" : "";
 
 	public string Name => name;
 	public string PropertyName => name.Capitalize();
@@ -112,7 +112,7 @@ internal class WebItemParameter {
 			return valueExpression;
 
 		if( IsEnumerable )
-			return "StringTools.ConcatenateWithDelimiter( \",\", " + valueExpression + ".Select( i => i.ToString() ).ToArray() )";
+			return "StringTools.ConcatenateWithDelimiter( \",\", " + valueExpression + ".Select( i => i.ToString() ).Materialize() )";
 
 		return TypeIsNullable
 			       ? $"""
@@ -128,7 +128,7 @@ internal class WebItemParameter {
 
 		if( IsEnumerable )
 			return valueExpression + ".Separate( \",\", true ).Select( i => (" + normalizedElementTypeName + ")EwlStatics.ChangeType( i, typeof( " +
-			       normalizedElementTypeName + " ) ) ).ToArray()";
+			       normalizedElementTypeName + " ) ) ).Materialize()";
 
 		// For non-strings, coalesce empty string into null, because things like int? need to be null to change their type from string properly.
 		var expressionToConvert = valueExpression + " == \"\" ? null : " + valueExpression;
