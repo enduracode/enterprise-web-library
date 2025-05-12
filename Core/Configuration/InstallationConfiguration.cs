@@ -84,18 +84,28 @@ public class InstallationConfiguration {
 	private readonly string installationSharedConfigurationFilePath;
 
 	/// <summary>
+	/// Development Utility and private use only.
+	/// </summary>
+	public bool? SystemUsesLegacyEwl { get; }
+
+	/// <summary>
 	/// Creates a new installation configuration.
 	/// </summary>
 	public InstallationConfiguration( string installationPath, bool isDevelopmentInstallation ) {
 		this.installationPath = installationPath;
 
-		// The EWL configuration folder is not inside any particular app's folder the way that Web.config and app.config are. This is for two reasons. First, EWL
-		// configuration is system-wide (technically installation-wide) and not app-specific like Web.config and app.config. Second, it could be disastrous to
-		// have EWL configuration files inside a web app's folder since then these files, which often contain database passwords and other sensitive information,
-		// could potentially be served up to users.
+		// legacy .NET and EWL support
+		if( isDevelopmentInstallation ) {
+			var libraryProjectFile = File.ReadAllText(
+				EwlStatics.CombinePaths( InstallationFileStatics.GetGeneralFilesFolderPath( installationPath, true ), "Library.csproj" ) );
+			if( libraryProjectFile.Contains( "<TargetFramework>net4", StringComparison.OrdinalIgnoreCase ) )
+				SystemUsesLegacyEwl = libraryProjectFile.Contains( """<PackageReference Include="Ewl""", StringComparison.OrdinalIgnoreCase );
+		}
+
+		// The configuration folder is not inside any particular app’s folder because it is system-wide (technically installation-wide) and not app-specific.
 		configurationFolderPath = EwlStatics.CombinePaths(
 			InstallationFileStatics.GetGeneralFilesFolderPath( installationPath, isDevelopmentInstallation ),
-			ConfigurationFolderName );
+			ConfigurationFolderName + ( SystemUsesLegacyEwl == true ? " New" : "" ) );
 
 
 		// Do not perform schema validation for non-development installations because the schema files may not be available. For development installations, also

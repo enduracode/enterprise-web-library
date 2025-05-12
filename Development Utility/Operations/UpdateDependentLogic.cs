@@ -347,6 +347,10 @@ internal class UpdateDependentLogic: Operation {
 						installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName,
 						false,
 						InstallationConfiguration.ConfigurationFolderName.ToCollection()
+							.Concat(
+								installation.ExistingInstallationLogic.RuntimeConfiguration.SystemUsesLegacyEwl == true
+									? $"{InstallationConfiguration.ConfigurationFolderName} New".ToCollection()
+									: [ ] )
 							.Append( InstallationFileStatics.FilesFolderName )
 							.Append( generatedCodeFolderName ),
 						null,
@@ -542,7 +546,8 @@ internal class UpdateDependentLogic: Operation {
 			writer.WriteLine( "<OutputType>Exe</OutputType>" );
 			writer.WriteLine( "</PropertyGroup>" );
 			writer.WriteLine( "<ItemGroup>" );
-			writer.WriteLine( """<ProjectReference Include="..\Library\Library.csproj" />""" );
+			writer.WriteLine(
+				$"""<ProjectReference Include="..\Library\{( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemUsesLegacyEwl.HasValue ? "Library New" : "Library" )}.csproj" />""" );
 			writer.WriteLine( "</ItemGroup>" );
 			writer.WriteLine( "</Project>" );
 		}
@@ -615,7 +620,10 @@ internal class UpdateDependentLogic: Operation {
 			var projectFilePaths = ".csproj".ToCollection()
 				.Append( ".ewlt.csproj" )
 				.Select( extension => EwlStatics.CombinePaths( projectPath, Path.GetFileName( projectPath ) + extension ) );
-			var projectFile = projectFilePaths.Where( File.Exists ).Select( File.ReadAllText ).FirstOrDefault();
+			var projectFile =
+				installation.ExistingInstallationLogic.RuntimeConfiguration.SystemUsesLegacyEwl.HasValue && projectName.Equals( "Library", StringComparison.Ordinal )
+					? File.ReadAllText( EwlStatics.CombinePaths( projectPath, "Library New.csproj" ) )
+					: projectFilePaths.Where( File.Exists ).Select( File.ReadAllText ).FirstOrDefault();
 			if( projectFile is null ) {
 				StatusStatics.SetStatus( "Warning: Failed to locate the project file for {0}.".FormatWith( projectName ) );
 				projectFile = "";
@@ -634,6 +642,11 @@ internal class UpdateDependentLogic: Operation {
 			// common MSBuild properties; see https://learn.microsoft.com/en-us/visualstudio/msbuild/common-msbuild-project-properties
 			writeMsBuildProperty( "<AssemblyName>{0}</AssemblyName>".FormatWith( assemblyNameAndRootNamespace ) );
 			writeMsBuildProperty( "<RootNamespace>{0}</RootNamespace>".FormatWith( assemblyNameAndRootNamespace ) );
+			if( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemUsesLegacyEwl.HasValue &&
+			    projectName.Equals( "Library", StringComparison.Ordinal ) ) {
+				writeMsBuildProperty( "<BaseOutputPath>bin New</BaseOutputPath>" );
+				writeMsBuildProperty( "<BaseIntermediateOutputPath>obj New</BaseIntermediateOutputPath>" );
+			}
 
 			// framework properties; see https://learn.microsoft.com/en-us/dotnet/core/project-sdk/msbuild-props#framework-properties
 			writeMsBuildProperty( "<TargetFramework>{0}</TargetFramework>".FormatWith( ConfigurationStatics.TargetFramework ) );
@@ -782,7 +795,9 @@ internal class UpdateDependentLogic: Operation {
 				EwlStatics.CombinePaths( installation.GeneralLogic.Path, installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + ".sln.DotSettings" ),
 				$"""
 				 <wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
-				 	<s:String x:Key="/Default/Environment/InjectedLayers/FileInjectedLayer/=05EBF8F119D84B4B92F9F0399ECB948E/RelativePath/@EntryValue">..\Library\{InstallationConfiguration.ConfigurationFolderName}\ReSharper Settings.DotSettings</s:String>
+				 	<s:String x:Key="/Default/Environment/InjectedLayers/FileInjectedLayer/=05EBF8F119D84B4B92F9F0399ECB948E/RelativePath/@EntryValue">..\Library\{(
+						 installation.ExistingInstallationLogic.RuntimeConfiguration.SystemUsesLegacyEwl == true ? $"{InstallationConfiguration.ConfigurationFolderName} New" :
+							 InstallationConfiguration.ConfigurationFolderName )}\ReSharper Settings.DotSettings</s:String>
 				 	<s:Boolean x:Key="/Default/Environment/InjectedLayers/FileInjectedLayer/=05EBF8F119D84B4B92F9F0399ECB948E/@KeyIndexDefined">True</s:Boolean>
 				 	<s:String x:Key="/Default/Environment/InjectedLayers/FileInjectedLayer/=87BDBF1965C117468DCA5BFA8DB0DF75/RelativePath/@EntryValue">..\Library\{generatedCodeFolderName}\{defaultSettingsFileName}</s:String>
 				 	<s:Boolean x:Key="/Default/Environment/InjectedLayers/FileInjectedLayer/=87BDBF1965C117468DCA5BFA8DB0DF75/@KeyIndexDefined">True</s:Boolean>
@@ -834,9 +849,12 @@ internal class UpdateDependentLogic: Operation {
 		writer.WriteLine( "Solution Files/bin/" );
 		writer.WriteLine( "Solution Files/obj/" );
 		writer.WriteLine();
-		writer.WriteLine( "Library/bin/" );
-		writer.WriteLine( "Library/obj/" );
-		writer.WriteLine( $"Library/{InstallationConfiguration.ConfigurationFolderName}/{InstallationConfiguration.AsposeLicenseFolderName}/" );
+		writer.WriteLine( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemUsesLegacyEwl.HasValue ? "Library/bin New/" : "Library/bin/" );
+		writer.WriteLine( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemUsesLegacyEwl.HasValue ? "Library/obj New/" : "Library/obj/" );
+		writer.WriteLine(
+			$"Library/{
+				( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemUsesLegacyEwl == true ? $"{InstallationConfiguration.ConfigurationFolderName} New" :
+					  InstallationConfiguration.ConfigurationFolderName )}/{InstallationConfiguration.AsposeLicenseFolderName}/" );
 		writer.WriteLine( "Library/Directory.Build.props" );
 		writer.WriteLine( "Library/Generated Code/" );
 
