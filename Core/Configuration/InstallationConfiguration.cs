@@ -1,4 +1,3 @@
-#nullable disable
 using EnterpriseWebLibrary.Configuration.InstallationStandard;
 using EnterpriseWebLibrary.Configuration.SystemGeneral;
 using EnterpriseWebLibrary.DatabaseSpecification;
@@ -77,9 +76,14 @@ public class InstallationConfiguration {
 	private readonly string installationPath;
 	private readonly string configurationFolderPath;
 	private readonly SystemGeneralConfiguration systemGeneralConfiguration;
-	private readonly SystemDevelopment.SystemDevelopmentConfiguration systemDevelopmentConfiguration;
+	public SystemDevelopment.SystemDevelopmentConfiguration? SystemDevelopmentConfiguration { get; }
 	private readonly InstallationStandardConfiguration installationStandardConfiguration;
-	private readonly IReadOnlyCollection<WebApplication> webApplications;
+
+	/// <summary>
+	/// Gets a list of the web applications in the system.
+	/// </summary>
+	public IReadOnlyCollection<WebApplication> WebApplications { get; }
+
 	private readonly string installationCustomConfigurationFilePath;
 	private readonly string installationSharedConfigurationFilePath;
 
@@ -118,7 +122,7 @@ public class InstallationConfiguration {
 
 		// system development configuration
 		if( isDevelopmentInstallation )
-			systemDevelopmentConfiguration = XmlOps.DeserializeFromFile<SystemDevelopment.SystemDevelopmentConfiguration>(
+			SystemDevelopmentConfiguration = XmlOps.DeserializeFromFile<SystemDevelopment.SystemDevelopmentConfiguration>(
 				EwlStatics.CombinePaths( configurationFolderPath, SystemDevelopmentConfigurationFileName ),
 				false );
 
@@ -136,7 +140,7 @@ public class InstallationConfiguration {
 
 
 		var systemWebApplicationElements = systemGeneralConfiguration.WebApplications ?? Enumerable.Empty<SystemGeneralConfigurationApplication>();
-		webApplications = systemWebApplicationElements.Select(
+		WebApplications = systemWebApplicationElements.Select(
 				( element, index ) => {
 					var name = element.Name;
 					var supportsSecureConnections = element.SupportsSecureConnections;
@@ -149,7 +153,7 @@ public class InstallationConfiguration {
 							       index,
 							       SystemShortName,
 							       systemWebApplicationElements.AtLeast( 2 ),
-							       systemDevelopmentConfiguration.GetWebProject( name ) )
+							       SystemDevelopmentConfiguration!.GetWebProject( name ) )
 						       : InstallationType == InstallationType.Live
 							       ? new WebApplication(
 								       name,
@@ -200,22 +204,17 @@ public class InstallationConfiguration {
 	public string FullShortName => GetFullShortNameFromSystemAndInstallationNames( SystemShortName, InstallationShortName );
 
 	/// <summary>
-	/// Gets a list of the web applications in the system.
-	/// </summary>
-	public IReadOnlyCollection<WebApplication> WebApplications => webApplications;
-
-	/// <summary>
 	/// Gets a list of the services in the system.
 	/// </summary>
 	public IEnumerable<WindowsService> WindowsServices =>
-		systemGeneralConfiguration.WindowsServices != null
-			? systemGeneralConfiguration.WindowsServices.Select( ws => new WindowsService( ws, FullShortName ) )
-			: new WindowsService[ 0 ];
+		systemGeneralConfiguration.WindowsServices is null
+			? [ ]
+			: systemGeneralConfiguration.WindowsServices.Select( ws => new WindowsService( ws, FullShortName ) );
 
 	/// <summary>
 	/// Gets a list of the developers for the system.
 	/// </summary>
-	public List<NameAndEmailAddress> Developers => new( systemGeneralConfiguration.developers );
+	public IReadOnlyCollection<NameAndEmailAddress> Developers => systemGeneralConfiguration.developers;
 
 	/// <summary>
 	/// Installation Support Utility use only.
@@ -225,7 +224,7 @@ public class InstallationConfiguration {
 	/// <summary>
 	/// Installation Support Utility use only.
 	/// </summary>
-	public SystemGeneral.Database GetSecondaryDatabaseSystemConfiguration( string name ) =>
+	public SystemGeneral.Database? GetSecondaryDatabaseSystemConfiguration( string name ) =>
 		systemGeneralConfiguration.SecondaryDatabases.SingleOrDefault( i => i.Name == name )?.Database;
 
 	internal bool SystemIsEwl => SystemShortName == "Ewl";
@@ -248,12 +247,12 @@ public class InstallationConfiguration {
 	/// <summary>
 	/// Gets a list of the administrators for the installation.
 	/// </summary>
-	public List<InstallationStandardNameAndEmailAddress> Administrators => new( installationStandardConfiguration.administrators );
+	public IReadOnlyCollection<InstallationStandardNameAndEmailAddress> Administrators => installationStandardConfiguration.administrators;
 
 	/// <summary>
 	/// Gets a database information object corresponding to the primary database for this configuration. Returns null if there is no database configured.
 	/// </summary>
-	public DatabaseInfo PrimaryDatabaseInfo =>
+	public DatabaseInfo? PrimaryDatabaseInfo =>
 		installationStandardConfiguration.database != null ? getDatabaseInfo( "", installationStandardConfiguration.database ) : null;
 
 	/// <summary>
@@ -267,23 +266,18 @@ public class InstallationConfiguration {
 	}
 
 	private DatabaseInfo getDatabaseInfo( string secondaryDatabaseName, InstallationStandard.Database database ) {
-		if( database is SqlServerDatabase ) {
-			var sqlServerDatabase = database as SqlServerDatabase;
+		if( database is SqlServerDatabase sqlServerDatabase )
 			return new SqlServerInfo(
 				secondaryDatabaseName,
 				sqlServerDatabase.server,
-				sqlServerDatabase.SqlServerAuthenticationLogin != null ? sqlServerDatabase.SqlServerAuthenticationLogin.LoginName : null,
-				sqlServerDatabase.SqlServerAuthenticationLogin != null ? sqlServerDatabase.SqlServerAuthenticationLogin.Password : null,
+				sqlServerDatabase.SqlServerAuthenticationLogin?.LoginName,
+				sqlServerDatabase.SqlServerAuthenticationLogin?.Password,
 				sqlServerDatabase.database ?? FullShortName,
 				true,
 				sqlServerDatabase.FullTextCatalog );
-		}
-		if( database is MySqlDatabase ) {
-			var mySqlDatabase = database as MySqlDatabase;
+		if( database is MySqlDatabase mySqlDatabase )
 			return new MySqlInfo( secondaryDatabaseName, mySqlDatabase.database ?? FullShortName.CamelToEnglish().EnglishToOracle(), true );
-		}
-		if( database is OracleDatabase ) {
-			var oracleDatabase = database as OracleDatabase;
+		if( database is OracleDatabase oracleDatabase )
 			return new OracleInfo(
 				secondaryDatabaseName,
 				oracleDatabase.tnsName,
@@ -291,7 +285,6 @@ public class InstallationConfiguration {
 				oracleDatabase.password,
 				!oracleDatabase.SupportsConnectionPoolingSpecified || oracleDatabase.SupportsConnectionPooling,
 				!oracleDatabase.SupportsLinguisticIndexesSpecified || oracleDatabase.SupportsLinguisticIndexes );
-		}
 		throw new ApplicationException( "Unknown database type." );
 	}
 
@@ -303,9 +296,7 @@ public class InstallationConfiguration {
 		installationStandardConfiguration.installedInstallation.InstallationTypeConfiguration is LiveInstallationConfiguration ? InstallationType.Live :
 		InstallationType.Intermediate;
 
-	private bool isDevelopmentInstallation => systemDevelopmentConfiguration != null;
-
-	public SystemDevelopment.SystemDevelopmentConfiguration SystemDevelopmentConfiguration => systemDevelopmentConfiguration;
+	private bool isDevelopmentInstallation => SystemDevelopmentConfiguration is not null;
 
 	internal string DeveloperNotificationEmailFromAddress => installationStandardConfiguration.installedInstallation.DeveloperNotificationEmailFromAddress;
 
