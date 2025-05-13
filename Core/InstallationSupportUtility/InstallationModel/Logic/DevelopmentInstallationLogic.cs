@@ -13,27 +13,23 @@ public class DevelopmentInstallationLogic {
 		this.generalInstallationLogic = generalInstallationLogic;
 		this.existingInstallationLogic = existingInstallationLogic;
 
-		var developmentConfiguration = existingInstallationLogic.RuntimeConfiguration.SystemDevelopmentConfiguration;
-		databasesForCodeGeneration = new List<DatabaseAbstraction.Database>();
+		var developmentConfiguration = existingInstallationLogic.RuntimeConfiguration.SystemDevelopmentConfiguration!;
+		databasesForCodeGeneration = [ ];
 		if( developmentConfiguration.database != null )
-			DatabasesForCodeGeneration.Add( existingInstallationLogic.Database );
+			databasesForCodeGeneration.Add( existingInstallationLogic.Database );
 		if( developmentConfiguration.secondaryDatabases != null )
 			foreach( var secondaryDatabaseInDevelopmentConfiguration in developmentConfiguration.secondaryDatabases )
-				DatabasesForCodeGeneration.Add(
-					( recognizedInstallationLogic != null
-						  ? recognizedInstallationLogic.SecondaryDatabasesIncludedInDataPackages.SingleOrDefault(
-							  sd => sd.SecondaryDatabaseName == secondaryDatabaseInDevelopmentConfiguration.name )
-						  : null ) ?? DatabaseAbstraction.DatabaseOps.CreateDatabase(
+				databasesForCodeGeneration.Add(
+					recognizedInstallationLogic?.SecondaryDatabasesIncludedInDataPackages.SingleOrDefault(
+						sd => sd.SecondaryDatabaseName == secondaryDatabaseInDevelopmentConfiguration.name ) ?? DatabaseAbstraction.DatabaseOps.CreateDatabase(
 						this.existingInstallationLogic.RuntimeConfiguration.GetSecondaryDatabaseInfo( secondaryDatabaseInDevelopmentConfiguration.name ) ) );
 	}
 
-	public SystemDevelopmentConfiguration DevelopmentConfiguration {
-		get { return existingInstallationLogic.RuntimeConfiguration.SystemDevelopmentConfiguration; }
-	}
+	public SystemDevelopmentConfiguration DevelopmentConfiguration => existingInstallationLogic.RuntimeConfiguration.SystemDevelopmentConfiguration!;
 
-	public string LibraryPath { get { return EwlStatics.CombinePaths( generalInstallationLogic.Path, "Library" ); } }
+	public string LibraryPath => EwlStatics.CombinePaths( generalInstallationLogic.Path, "Library" );
 
-	public List<DatabaseAbstraction.Database> DatabasesForCodeGeneration { get { return databasesForCodeGeneration; } }
+	public IReadOnlyCollection<DatabaseAbstraction.Database> DatabasesForCodeGeneration => databasesForCodeGeneration;
 
 	public bool SystemIsEwl => existingInstallationLogic.RuntimeConfiguration.SystemIsEwl;
 }

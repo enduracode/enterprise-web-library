@@ -20,7 +20,7 @@ public static class DataMigrationOps {
 	private class TableConfiguration: IVersionTableMetaData {
 		bool IVersionTableMetaData.OwnsSchema => true;
 		string IVersionTableMetaData.SchemaName => "";
-		public string TableName => GetMigrationTableName( ConfigurationStatics.InstallationConfiguration.PrimaryDatabaseInfo );
+		public string TableName => GetMigrationTableName( ConfigurationStatics.InstallationConfiguration.PrimaryDatabaseInfo! );
 		string IVersionTableMetaData.ColumnName => isOracle ? "VERSION" : "Version";
 		string IVersionTableMetaData.AppliedOnColumnName => isOracle ? "APPLIED_TIME" : "AppliedTime";
 		string IVersionTableMetaData.DescriptionColumnName => isOracle ? "DESCRIPTION" : "Description";
@@ -43,8 +43,8 @@ public static class DataMigrationOps {
 		var appAssembly = Assembly.GetCallingAssembly();
 		using var serviceProvider = new ServiceCollection().AddFluentMigratorCore()
 			.ConfigureRunner(
-				builder => builder.addDatabaseServices( ConfigurationStatics.InstallationConfiguration.PrimaryDatabaseInfo )
-					.WithGlobalConnectionString( ConfigurationStatics.InstallationConfiguration.PrimaryDatabaseInfo.GetConnectionString( 60 ) )
+				builder => builder.addDatabaseServices( ConfigurationStatics.InstallationConfiguration.PrimaryDatabaseInfo! )
+					.WithGlobalConnectionString( ConfigurationStatics.InstallationConfiguration.PrimaryDatabaseInfo!.GetConnectionString( 60 ) )
 					.ScanIn( appAssembly )
 					.For.Migrations() )
 			.AddScoped( typeof( IVersionTableMetaData ), typeof( TableConfiguration ) )
@@ -57,7 +57,7 @@ public static class DataMigrationOps {
 			runner.MigrateUp();
 		}
 		catch( Exception e ) {
-			var outer = DataAccessMethods.CreateDbConnectionException( ConfigurationStatics.InstallationConfiguration.PrimaryDatabaseInfo, "migrating data in", e );
+			var outer = DataAccessMethods.CreateDbConnectionException( ConfigurationStatics.InstallationConfiguration.PrimaryDatabaseInfo!, "migrating data in", e );
 			Console.Error.WriteLine( outer.Message );
 			Console.Error.WriteLine( e.ToString() );
 			return 1;
