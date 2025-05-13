@@ -24,6 +24,34 @@ internal class UpdateDependentLogic: Operation {
 	bool Operation.IsValid( Installation installation ) => installation is DevelopmentInstallation;
 
 	void Operation.Execute( Installation genericInstallation, IReadOnlyList<string> arguments, OperationResult operationResult ) {
+		var installation = (DevelopmentInstallation)genericInstallation;
+
+		if( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemUsesLegacyEwl == true ) {
+			StatusStatics.SetStatus( "Running legacy Update-DependentLogic command." );
+			var referenceSubstrings = File.ReadAllLines( EwlStatics.CombinePaths( installation.DevelopmentInstallationLogic.LibraryPath, "Library.csproj" ) )
+				.Select( i => i.Trim() )
+				.First( i => i.StartsWith( """<PackageReference Include="Ewl""", StringComparison.Ordinal ) )
+				.Separate( "\"", false );
+			var id = referenceSubstrings[ 1 ];
+			var version = referenceSubstrings[ 3 ];
+			Console.WriteLine(
+				TewlContrib.ProcessTools.RunProgram(
+						EwlStatics.CombinePaths(
+							ConfigurationStatics.InstallationConfiguration.InstallationType == InstallationType.Development
+								? EwlStatics.CombinePaths( Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ), @".nuget\packages" )
+								: EwlStatics.CombinePaths( ConfigurationStatics.InstallationConfiguration.InstallationPath, @"..\..\.." ),
+							id,
+							version,
+							@"Development Utility\EnterpriseWebLibrary.DevelopmentUtility" ),
+						$"""
+						 "{genericInstallation.GeneralLogic.Path}" UpdateAllDependentLogic
+						 """,
+						"",
+						true )
+					.TrimEnd() );
+			StatusStatics.SetStatus( "Ran legacy Update-DependentLogic command." );
+		}
+
 		// This block exists because of https://enduracode.kilnhg.com/Review/K164316.
 		try {
 			IsuStatics.ConfigureIis( false );
@@ -32,8 +60,6 @@ internal class UpdateDependentLogic: Operation {
 		catch {
 			StatusStatics.SetStatus( "Did not configure IIS." );
 		}
-
-		var installation = (DevelopmentInstallation)genericInstallation;
 
 		generateDataMigratorProjectCode( installation );
 
@@ -273,6 +299,9 @@ internal class UpdateDependentLogic: Operation {
 			installation.DevelopmentInstallationLogic.LibraryPath,
 			installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName,
 			writer => {
+				if( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemUsesLegacyEwl.HasValue )
+					writer.WriteLine( "#if EWL_NEW" );
+
 				// Don't add "using System" here. It will create a huge number of ReSharper warnings in the generated code file.
 				writer.WriteLine( "using System.Collections.Generic;" );
 				writer.WriteLine( "using System.Data;" ); // Necessary for stored procedure logic
@@ -364,6 +393,9 @@ internal class UpdateDependentLogic: Operation {
 					writer.WriteLine( "}" );
 					writer.WriteLine( "}" );
 				}
+
+				if( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemUsesLegacyEwl.HasValue )
+					writer.WriteLine( "#endif" );
 			} );
 	}
 
@@ -644,8 +676,9 @@ internal class UpdateDependentLogic: Operation {
 			writeMsBuildProperty( "<RootNamespace>{0}</RootNamespace>".FormatWith( assemblyNameAndRootNamespace ) );
 			if( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemUsesLegacyEwl.HasValue &&
 			    projectName.Equals( "Library", StringComparison.Ordinal ) ) {
-				writeMsBuildProperty( "<BaseOutputPath>bin New</BaseOutputPath>" );
-				writeMsBuildProperty( "<BaseIntermediateOutputPath>obj New</BaseIntermediateOutputPath>" );
+				writeMsBuildProperty( """<BaseOutputPath Condition="'$(MSBuildProjectName)'=='Library New'">bin New</BaseOutputPath>""" );
+				writeMsBuildProperty( """<BaseIntermediateOutputPath Condition="'$(MSBuildProjectName)'=='Library New'">obj New</BaseIntermediateOutputPath>""" );
+				writeMsBuildProperty( """<DefineConstants Condition="'$(MSBuildProjectName)'=='Library New'">EWL_NEW</DefineConstants>""" );
 			}
 
 			// framework properties; see https://learn.microsoft.com/en-us/dotnet/core/project-sdk/msbuild-props#framework-properties
@@ -675,8 +708,16 @@ internal class UpdateDependentLogic: Operation {
 			writeMsBuildProperty( "<Nullable>enable</Nullable>" );
 			writeMsBuildProperty( "<CopyDebugSymbolFilesFromPackages>true</CopyDebugSymbolFilesFromPackages>" );
 
-			writeMsBuildProperty(
-				$"<DefaultItemExcludesInProjectFolder>$(DefaultItemExcludesInProjectFolder);Directory.Build.props;Directory.Build.targets;**/*{CodeGeneration.DataAccess.DataAccessStatics.CSharpTemplateFileExtension}</DefaultItemExcludesInProjectFolder>" );
+			if( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemUsesLegacyEwl.HasValue &&
+			    projectName.Equals( "Library", StringComparison.Ordinal ) ) {
+				writeMsBuildProperty(
+					$"""<DefaultItemExcludesInProjectFolder Condition="'$(MSBuildProjectName)'=='Library New'">$(DefaultItemExcludesInProjectFolder);Directory.Build.props;Directory.Build.targets;**/*{CodeGeneration.DataAccess.DataAccessStatics.CSharpTemplateFileExtension};bin/**;obj/**;Generated Code/ISU.cs</DefaultItemExcludesInProjectFolder>""" );
+				writeMsBuildProperty(
+					$"""<DefaultItemExcludesInProjectFolder Condition="'$(MSBuildProjectName)'=='Library'">$(DefaultItemExcludesInProjectFolder);Directory.Build.props;Directory.Build.targets;**/*{CodeGeneration.DataAccess.DataAccessStatics.CSharpTemplateFileExtension};bin New/**;obj New/**</DefaultItemExcludesInProjectFolder>""" );
+			}
+			else
+				writeMsBuildProperty(
+					$"<DefaultItemExcludesInProjectFolder>$(DefaultItemExcludesInProjectFolder);Directory.Build.props;Directory.Build.targets;**/*{CodeGeneration.DataAccess.DataAccessStatics.CSharpTemplateFileExtension}</DefaultItemExcludesInProjectFolder>" );
 
 			// runtime configuration properties; see https://learn.microsoft.com/en-us/dotnet/core/project-sdk/msbuild-props#runtime-configuration-properties
 			if( runtimeIdentifier.Any() )
@@ -689,7 +730,11 @@ internal class UpdateDependentLogic: Operation {
 			writeMsBuildProperty( "<IsTransformWebConfigDisabled>true</IsTransformWebConfigDisabled>" );
 
 			writer.WriteLine( "</PropertyGroup>" );
-			writer.WriteLine( "<ItemGroup>" );
+			if( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemUsesLegacyEwl.HasValue &&
+			    projectName.Equals( "Library", StringComparison.Ordinal ) )
+				writer.WriteLine( """<ItemGroup Condition="'$(MSBuildProjectName)'=='Library New'">""" );
+			else
+				writer.WriteLine( "<ItemGroup>" );
 
 			writer.WriteLine( """<Using Include="System" />""" );
 			writer.WriteLine( """<Using Include="System.Collections.Generic" />""" );
@@ -712,7 +757,8 @@ internal class UpdateDependentLogic: Operation {
 		}
 
 		var generatedCodeFolderPath = EwlStatics.CombinePaths( projectPath, generatedCodeFolderName );
-		IoMethods.DeleteFolder( generatedCodeFolderPath );
+		if( !installation.ExistingInstallationLogic.RuntimeConfiguration.SystemUsesLegacyEwl.HasValue )
+			IoMethods.DeleteFolder( generatedCodeFolderPath );
 		Directory.CreateDirectory( generatedCodeFolderPath );
 		using( var writer = new StreamWriter( EwlStatics.CombinePaths( generatedCodeFolderPath, "Main.g.cs" ), false, Encoding.UTF8 ) ) {
 			writer.WriteLine( "#nullable enable" );
@@ -721,7 +767,9 @@ internal class UpdateDependentLogic: Operation {
 	}
 
 	private void generateXmlSchemaLogicForInstallationConfigurationFile( DevelopmentInstallation installation, string schemaFileName ) {
-		var schemaPathInProject = EwlStatics.CombinePaths( @"Configuration\Installation", schemaFileName + FileExtensions.Xsd );
+		var schemaPathInProject = EwlStatics.CombinePaths(
+			$"""{( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemUsesLegacyEwl == true ? $"{InstallationConfiguration.ConfigurationFolderName} New" : InstallationConfiguration.ConfigurationFolderName )}\Installation""",
+			schemaFileName + FileExtensions.Xsd );
 		if( File.Exists( EwlStatics.CombinePaths( installation.DevelopmentInstallationLogic.LibraryPath, schemaPathInProject ) ) )
 			generateXmlSchemaLogic(
 				installation.DevelopmentInstallationLogic.LibraryPath,
