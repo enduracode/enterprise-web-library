@@ -61,7 +61,8 @@ internal class UpdateDependentLogic: Operation {
 			StatusStatics.SetStatus( "Did not configure IIS." );
 		}
 
-		generateDataMigratorProjectCode( installation );
+		if( !installation.SystemIsTewl() )
+			generateDataMigratorProjectCode( installation );
 
 		StatusStatics.SetStatus( "Migrating data." );
 		if( installation.ExistingInstallationLogic.MigrateData() is { Length: > 0 } output )
