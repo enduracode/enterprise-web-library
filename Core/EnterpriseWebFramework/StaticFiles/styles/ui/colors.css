@@ -27,13 +27,18 @@
 	--ewf-ui-current-side-tab-background-color: hsla(213, 22%, 89%, 1);
 	--ewf-ui-global-foot-background-color: hsla(215, 33%, 96%, 1);
 }
+@media print {
+	:root {
+		--ewf-ui-important-border-color: black;
+	}
+}
 
 body {
 	background-color: var(--ewf-ui-background-color);
 }
 @media print {
 	body {
-		background-color: unset;
+		background-color: revert;
 	}
 }
 body,
@@ -58,6 +63,12 @@ ewfTableStandardAndStandardExceptLayoutStyles > thead > ewfTrAllStates > ewfThAn
 ewfUiTopTabListContainer ewfUiCurrentTabActionControl {
 	border-bottom-color: transparent;
 }
+@media print {
+	ewfTableStandardAndStandardExceptLayoutStyles,
+	ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTrAllStates > ewfThAndTd {
+		border-color: var(--ewf-ui-important-border-color);
+	}
+}
 
 /* boxes */
 ewfSectionBoxStyleBothStates, ewfTableStandardAndStandardExceptLayoutStyles, ewfUiContentBox {
@@ -65,9 +76,9 @@ ewfSectionBoxStyleBothStates, ewfTableStandardAndStandardExceptLayoutStyles, ewf
 	background-color: white;
 }
 @media print {
-	ewfSectionBoxStyleBothStates, ewfUiContentBox {
-		box-shadow: unset;
-		background-color: unset;
+	ewfSectionBoxStyleBothStates, ewfTableStandardAndStandardExceptLayoutStyles, ewfUiContentBox {
+		box-shadow: revert;
+		background-color: revert;
 	}
 }
 
@@ -82,6 +93,13 @@ ewfTableStandardAndStandardExceptLayoutStyles,
 ewfTableStandardAndStandardExceptLayoutStyles > tbody > ewfTrStatesWithContrast,
 ewfCheckboxList {
 	background-image: linear-gradient(rgba(0, 0, 0, .02), rgba(0, 0, 0, .02));
+}
+@media print {
+	ewfTableStandardAndStandardExceptLayoutStyles,
+	ewfTableStandardAndStandardExceptLayoutStyles > tbody > ewfTrStatesWithContrast,
+	ewfCheckboxList {
+		background-image: revert;
+	}
 }
 
 /* block highlighting */
@@ -100,6 +118,12 @@ ewfActionComponentAllStylesAllVisitedStates.icon,
 ewfUiTopTabListContainer ewfUiCurrentTabActionControl,
 ewfUiSideTabContainer ewfUiCurrentTabActionControl {
 	color: var(--ewf-ui-secondary-color);
+}
+@media print {
+	ewfHyperlinkStandardStyleAllNormalStates,
+	ewfHyperlinkStandardStyleAllVisitedStates {
+		color: inherit;
+	}
 }
 ewfActionComponentAllButtonStylesAllNormalStates, ewfActionComponentAllButtonStylesAllVisitedStates {
 	background-color: var(--ewf-ui-secondary-color);
@@ -177,6 +201,12 @@ ewfUiOuterGlobalContainer, ewfNotificationSectionContainer > ewfSectionBoxStyleB
 	background-color: var(--ewf-ui-primary-color);
 	color: var(--ewf-ui-inverted-text-color);
 }
+@media print {
+	ewfUiOuterGlobalContainer {
+		background-color: revert;
+		color: revert;
+	}
+}
 ewfUiInnerGlobalContainer ewfActionComponentAllStylesAllStates, ewfUiTopErrorMessageListContainer a {
 	color: var(--ewf-ui-inverted-text-color);
 }
@@ -230,6 +260,11 @@ ewfUiTopErrorMessageListContainer {
 }
 ewfUiEntityAndTopTabContainer, ewfUiSideTabContainer {
 	background-color: var(--ewf-ui-nav-background-color);
+}
+@media print {
+	ewfUiEntityAndTopTabContainer {
+		background-color: revert;
+	}
 }
 ewfUiEntityContainer > ewfPagePathContainer ewfComponentListItem {
 	background: url(../../versioned/ui/arrow-v1.svg ) no-repeat;
@@ -292,6 +327,11 @@ ewfUiPageActionListContainer ewfActionComponentAllStylesStatesWithHover {
 }
 ewfUiGlobalFootContainer {
 	background-color: var(--ewf-ui-global-foot-background-color);
+}
+@media print {
+	ewfUiGlobalFootContainer {
+		background-color: revert;
+	}
 }
 ewfNotificationSectionContainer > ewfSectionBoxStyleBothStates > ewfSectionHeadingContainer {
 	box-shadow: revert;
