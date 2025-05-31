@@ -61,6 +61,20 @@ internal class UpdateDependentLogic: Operation {
 			StatusStatics.SetStatus( "Did not configure IIS." );
 		}
 
+		// see https://stackoverflow.com/a/27976558/35349
+		var bomlessEncoding = new UTF8Encoding( false );
+		foreach( var filePath in IoMethods.GetFilePathsInFolder(
+			        installation.GeneralLogic.Path,
+			        searchPattern: "*.cs",
+			        searchOption: SearchOption.AllDirectories ) ) {
+			if( Path.GetFileName( filePath ).Count( i => i == '.' ) > 1 )
+				continue;
+			using var reader = new StreamReader( filePath, bomlessEncoding );
+			reader.Peek();
+			if( reader.CurrentEncoding.Equals( bomlessEncoding ) )
+				StatusStatics.SetStatus( $"Warning: {filePath} does not have a byte-order mark (BOM); please update its encoding." );
+		}
+
 		if( !installation.SystemIsTewl() )
 			generateDataMigratorProjectCode( installation );
 
