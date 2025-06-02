@@ -63,10 +63,8 @@ internal class UpdateDependentLogic: Operation {
 
 		// see https://stackoverflow.com/a/27976558/35349
 		var bomlessEncoding = new UTF8Encoding( false );
-		foreach( var filePath in IoMethods.GetFilePathsInFolder(
-			        installation.GeneralLogic.Path,
-			        searchPattern: "*.cs",
-			        searchOption: SearchOption.AllDirectories ) ) {
+		foreach( var filePath in IoMethods.GetFilePathsInFolder( installation.GeneralLogic.Path, searchPattern: "*.cs", searchOption: SearchOption.AllDirectories )
+			        .OrderBy( i => i ) ) {
 			if( Path.GetFileName( filePath ).Count( i => i == '.' ) > 1 )
 				continue;
 			using var reader = new StreamReader( filePath, bomlessEncoding );
