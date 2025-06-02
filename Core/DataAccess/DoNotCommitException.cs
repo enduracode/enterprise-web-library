@@ -1,4 +1,4 @@
-namespace EnterpriseWebLibrary.DataAccess;
+﻿namespace EnterpriseWebLibrary.DataAccess;
 
 /// <summary>
 /// Use in ExecuteInTransaction to rollback the transaction instead of committing it.

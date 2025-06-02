@@ -1,4 +1,4 @@
-using ICSharpCode.SharpZipLib.Zip;
+﻿using ICSharpCode.SharpZipLib.Zip;
 using JetBrains.Annotations;
 using Tewl.IO;
 

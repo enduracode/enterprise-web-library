@@ -1,4 +1,4 @@
-using Microsoft.CodeAnalysis.CSharp;
+﻿using Microsoft.CodeAnalysis.CSharp;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration;
 

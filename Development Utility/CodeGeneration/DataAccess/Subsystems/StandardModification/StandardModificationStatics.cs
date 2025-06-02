@@ -1,4 +1,4 @@
-using EnterpriseWebLibrary.DataAccess;
+﻿using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 using Tewl.IO;
 
@@ -36,7 +36,7 @@ internal static class StandardModificationStatics {
 
 			var templateFilePath = EwlStatics.CombinePaths( templateBasePath, subsystemName, templateClassName );
 
-			// If a real file exists, don�t create a template.
+			// If a real file exists, don’t create a template.
 			if( File.Exists( templateFilePath + ".cs" ) )
 				continue;
 

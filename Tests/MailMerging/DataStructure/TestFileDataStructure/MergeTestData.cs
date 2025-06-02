@@ -1,4 +1,4 @@
-#nullable disable
+﻿#nullable disable
 using System.Collections.Generic;
 
 namespace EnterpriseWebLibrary.Tests.MailMerging.DataStructure.TestFileDataStructure;

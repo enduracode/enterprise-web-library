@@ -1,4 +1,4 @@
-namespace EnterpriseWebLibrary.Tests.MailMerging.DataStructure.PracticeDocumentDataStructure.PhysicianDataStructure {
+﻿namespace EnterpriseWebLibrary.Tests.MailMerging.DataStructure.PracticeDocumentDataStructure.PhysicianDataStructure {
 	public class PhysicianMockData {
 		public readonly string Email;
 		public readonly string FirstName;

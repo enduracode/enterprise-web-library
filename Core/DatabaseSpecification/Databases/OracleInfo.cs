@@ -1,4 +1,4 @@
-using System.Data.Common;
+﻿using System.Data.Common;
 using EnterpriseWebLibrary.ExternalFunctionality;
 using FluentMigrator.Runner;
 using StackExchange.Profiling;

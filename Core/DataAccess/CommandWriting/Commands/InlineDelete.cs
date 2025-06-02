@@ -1,4 +1,4 @@
-using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction;
+﻿using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction;
 using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.DataAccess.CommandWriting.Commands;

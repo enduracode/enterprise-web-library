@@ -1,4 +1,4 @@
-using System.Data.Common;
+﻿using System.Data.Common;
 using FluentMigrator.Runner;
 
 namespace EnterpriseWebLibrary.DatabaseSpecification;

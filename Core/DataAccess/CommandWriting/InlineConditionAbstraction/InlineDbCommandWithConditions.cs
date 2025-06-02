@@ -1,4 +1,4 @@
-namespace EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction;
+﻿namespace EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction;
 
 /// <summary>
 /// EWL use only.

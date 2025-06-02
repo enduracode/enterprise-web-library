@@ -1,4 +1,4 @@
-using Aspose.Pdf.Facades;
+﻿using Aspose.Pdf.Facades;
 using EnterpriseWebLibrary.IO;
 using EnterpriseWebLibrary.SystemSpecificLogic;
 using JetBrains.Annotations;

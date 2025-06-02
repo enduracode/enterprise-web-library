@@ -1,4 +1,4 @@
-using System.Data;
+﻿using System.Data;
 using EnterpriseWebLibrary.DatabaseSpecification;
 
 namespace EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction.Conditions;

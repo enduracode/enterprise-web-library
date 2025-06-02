@@ -1,4 +1,4 @@
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Text;
 using EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.WebFramework.WebItems;
 using Tewl.IO;
@@ -281,7 +281,7 @@ internal static class WebFrameworkStatics {
 		var templateFilePath = EwlStatics.CombinePaths( folderPath, className + DataAccess.DataAccessStatics.CSharpTemplateFileExtension );
 		IoMethods.DeleteFile( templateFilePath );
 
-		// If a real file exists, don�t create a template.
+		// If a real file exists, don’t create a template.
 		if( File.Exists( EwlStatics.CombinePaths( folderPath, className + ".cs" ) ) )
 			return;
 

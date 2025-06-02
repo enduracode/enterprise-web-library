@@ -1,4 +1,4 @@
-namespace EnterpriseWebLibrary.MailMerging.FieldImplementation {
+﻿namespace EnterpriseWebLibrary.MailMerging.FieldImplementation {
 	/// <summary>
 	/// An implementation for a basic merge field.
 	/// </summary>

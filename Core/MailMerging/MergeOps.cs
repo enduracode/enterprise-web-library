@@ -1,4 +1,4 @@
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using System.Xml;
 using Aspose.Words.MailMerging;
 using EnterpriseWebLibrary.IO;

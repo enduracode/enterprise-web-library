@@ -1,4 +1,4 @@
-using EnterpriseWebLibrary.DatabaseSpecification.Databases;
+﻿using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 
 namespace EnterpriseWebLibrary.DataAccess.CommandWriting.Commands;
 

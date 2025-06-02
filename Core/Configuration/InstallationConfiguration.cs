@@ -1,4 +1,4 @@
-using EnterpriseWebLibrary.Configuration.InstallationStandard;
+﻿using EnterpriseWebLibrary.Configuration.InstallationStandard;
 using EnterpriseWebLibrary.Configuration.SystemGeneral;
 using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
@@ -106,7 +106,7 @@ public class InstallationConfiguration {
 				SystemUsesLegacyEwl = libraryProjectFile.Contains( """<PackageReference Include="Ewl""", StringComparison.OrdinalIgnoreCase );
 		}
 
-		// The configuration folder is not inside any particular app�s folder because it is system-wide (technically installation-wide) and not app-specific.
+		// The configuration folder is not inside any particular app’s folder because it is system-wide (technically installation-wide) and not app-specific.
 		configurationFolderPath = EwlStatics.CombinePaths(
 			InstallationFileStatics.GetGeneralFilesFolderPath( installationPath, isDevelopmentInstallation ),
 			ConfigurationFolderName + ( SystemUsesLegacyEwl == true ? " New" : "" ) );

@@ -1,4 +1,4 @@
-using EnterpriseWebLibrary.DataAccess;
+﻿using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.DataAccess.CommandWriting.Commands;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
@@ -53,7 +53,7 @@ internal static class RowConstantStatics {
 				CodeGenerationStatics.AddSummaryDocComment( writer, "Constant generated from row in database table." );
 				var identifier = EwlStatics.GetCSharpIdentifier( isPascalCase( identifierNames[ i ] ) ? identifierNames[ i ] : identifierNames[ i ].EnglishToPascal() );
 
-				// It�s important that row constants actually *be* constants (instead of static readonly) so they can be used in switch statements.
+				// It’s important that row constants actually *be* constants (instead of static readonly) so they can be used in switch statements.
 				writer.WriteLine( $"public const {valueColumn.DataTypeName} {identifier} = {values[ i ]};" );
 			}
 

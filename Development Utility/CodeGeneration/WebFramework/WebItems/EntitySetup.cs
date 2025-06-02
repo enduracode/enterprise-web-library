@@ -1,4 +1,4 @@
-namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.WebFramework.WebItems;
+﻿namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.WebFramework.WebItems;
 
 internal class EntitySetup {
 	private readonly bool projectContainsFramework;
