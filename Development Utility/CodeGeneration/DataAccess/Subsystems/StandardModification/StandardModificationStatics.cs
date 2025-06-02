@@ -40,7 +40,7 @@ internal static class StandardModificationStatics {
 			if( File.Exists( templateFilePath + ".cs" ) )
 				continue;
 
-			using var templateWriter = IoMethods.GetTextWriterForWrite( templateFilePath + DataAccessStatics.CSharpTemplateFileExtension );
+			using var templateWriter = IoMethods.GetTextWriterForWrite( templateFilePath + DataAccessStatics.CSharpTemplateFileExtension, true );
 			templateWriter.WriteLine( "{0};".FormatWith( subsystemNamespace ) );
 			templateWriter.WriteLine();
 			templateWriter.WriteLine( "partial class {0} {{".FormatWith( templateClassName ) );

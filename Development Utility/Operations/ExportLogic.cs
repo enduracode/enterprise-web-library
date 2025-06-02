@@ -107,7 +107,7 @@ internal class ExportLogic: Operation {
 							}
 
 							var manifestPath = EwlStatics.CombinePaths( folderPath, "Package.nuspec" );
-							using( var writer = IoMethods.GetTextWriterForWrite( manifestPath ) )
+							using( var writer = IoMethods.GetTextWriterForWrite( manifestPath, false ) )
 								writeNuGetPackageManifest(
 									writer,
 									installation,
@@ -262,7 +262,7 @@ internal class ExportLogic: Operation {
 									EwlStatics.CombinePaths( folderPath, @"lib\{0}".FormatWith( nuGetTargetFramework ), fileName ) );
 
 							var manifestPath = EwlStatics.CombinePaths( folderPath, "Package.nuspec" );
-							using( var writer = IoMethods.GetTextWriterForWrite( manifestPath ) )
+							using( var writer = IoMethods.GetTextWriterForWrite( manifestPath, false ) )
 								writeNuGetPackageManifest(
 									writer,
 									installation,
