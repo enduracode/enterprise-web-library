@@ -4,6 +4,7 @@
 	<complexType name="SystemDevelopmentConfiguration">
 		<sequence>
 			<element name="LibraryNamespaceAndAssemblyName" type="string" />
+			<element name="UpdateFileEncodings" type="boolean" minOccurs="0" />
 			<element name="webProjects" minOccurs="0">
 				<complexType>
 					<sequence>

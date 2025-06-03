@@ -61,16 +61,36 @@ internal class UpdateDependentLogic: Operation {
 			StatusStatics.SetStatus( "Did not configure IIS." );
 		}
 
-		// see https://stackoverflow.com/a/27976558/35349
+		if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.UpdateFileEncodingsSpecified )
+			StatusStatics.SetStatus(
+				$"Warning: {nameof(installation.DevelopmentInstallationLogic.DevelopmentConfiguration.UpdateFileEncodings)} is present in configuration; please remove it when updates are complete." );
+
 		var bomlessEncoding = new UTF8Encoding( false );
 		foreach( var filePath in IoMethods.GetFilePathsInFolder( installation.GeneralLogic.Path, searchPattern: "*.cs", searchOption: SearchOption.AllDirectories )
 			        .OrderBy( i => i ) ) {
 			if( Path.GetFileName( filePath ).Count( i => i == '.' ) > 1 )
 				continue;
-			using var reader = new StreamReader( filePath, bomlessEncoding );
-			reader.Peek();
-			if( reader.CurrentEncoding.Equals( bomlessEncoding ) )
+			if( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemUsesLegacyEwl == true &&
+			    new[] { "ISU.cs", "MetaLogicFactory.cs" }.Contains( Path.GetFileName( filePath ), StringComparer.Ordinal ) )
+				continue;
+
+			// see https://stackoverflow.com/a/27976558/35349
+			using( var reader = new StreamReader( filePath, bomlessEncoding ) ) {
+				reader.Peek();
+				if( !reader.CurrentEncoding.Equals( bomlessEncoding ) )
+					continue;
+			}
+
+			var config = installation.DevelopmentInstallationLogic.DevelopmentConfiguration;
+			if( !config.UpdateFileEncodingsSpecified || !config.UpdateFileEncodings ) {
 				StatusStatics.SetStatus( $"Warning: {filePath} does not have a byte-order mark (BOM); please update its encoding." );
+				continue;
+			}
+
+			var win1252Encoding = CodePagesEncodingProvider.Instance.GetEncoding( 1252 );
+			if( win1252Encoding is null )
+				throw new Exception();
+			File.WriteAllText( filePath, File.ReadAllText( filePath, win1252Encoding ), Encoding.UTF8 );
 		}
 
 		if( !installation.SystemIsTewl() )
