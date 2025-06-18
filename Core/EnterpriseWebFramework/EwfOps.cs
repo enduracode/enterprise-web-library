@@ -148,434 +148,425 @@ public static class EwfOps {
 			currentUserGetter: () => EwfRequest.Current is not null ? RequestDispatchingStatics.RequestState.AuthenticationData.user : null );
 		var frameworkInitialized = false;
 		try {
-			return GlobalInitializationOps.ExecuteAppWithStandardExceptionHandling(
-				() => {
-					try {
-						EwfConfigurationStatics.Init();
+			return GlobalInitializationOps.ExecuteAppWithStandardExceptionHandling( () => {
+				try {
+					EwfConfigurationStatics.Init();
 
-						var diagnosticLogLevelSwitch = new LoggingLevelSwitch( initialMinimumLevel: LogEventLevel.Information );
-						var loggerConfiguration = new LoggerConfiguration().Destructure.JsonNetTypes()
-							.MinimumLevel.ControlledBy( diagnosticLogLevelSwitch )
-							.MinimumLevel.Override( "Microsoft.AspNetCore", LogEventLevel.Warning );
-						loggerConfiguration = ConfigurationStatics.IsDevelopmentInstallation
-							                      ? loggerConfiguration.WriteTo.Console()
-							                      : loggerConfiguration.WriteTo.Async(
-								                      c => c.File(
-									                      EwfConfigurationStatics.AppConfiguration.DiagnosticLogFilePath,
-									                      rollingInterval: RollingInterval.Infinite,
-									                      rollOnFileSizeLimit: false,
-									                      encoding: Encoding.UTF8 ) );
-						Log.Logger = loggerConfiguration.CreateLogger();
+					var diagnosticLogLevelSwitch = new LoggingLevelSwitch( initialMinimumLevel: LogEventLevel.Information );
+					var loggerConfiguration = new LoggerConfiguration().Destructure.JsonNetTypes()
+						.MinimumLevel.ControlledBy( diagnosticLogLevelSwitch )
+						.MinimumLevel.Override( "Microsoft.AspNetCore", LogEventLevel.Warning );
+					loggerConfiguration = ConfigurationStatics.IsDevelopmentInstallation
+						                      ? loggerConfiguration.WriteTo.Console()
+						                      : loggerConfiguration.WriteTo.Async( c => c.File(
+							                      EwfConfigurationStatics.AppConfiguration.DiagnosticLogFilePath,
+							                      rollingInterval: RollingInterval.Infinite,
+							                      rollOnFileSizeLimit: false,
+							                      encoding: Encoding.UTF8 ) );
+					Log.Logger = loggerConfiguration.CreateLogger();
 
-						var builder = Microsoft.AspNetCore.Builder.WebApplication.CreateBuilder(
-							new WebApplicationOptions
-								{
-									EnvironmentName = ConfigurationStatics.IsDevelopmentInstallation ? Environments.Development : Environments.Production,
-									ContentRootPath = EwfConfigurationStatics.AppConfiguration.Path
-								} );
-
-						builder.WebHost.ConfigureKestrel(
-							options => {
-								options.Limits.MaxRequestBodySize = null;
-								options.AllowSynchronousIO = true;
-								options.AddServerHeader = false;
+					var builder = Microsoft.AspNetCore.Builder.WebApplication.CreateBuilder(
+						new WebApplicationOptions
+							{
+								EnvironmentName = ConfigurationStatics.IsDevelopmentInstallation ? Environments.Development : Environments.Production,
+								ContentRootPath = EwfConfigurationStatics.AppConfiguration.Path
 							} );
-						if( ConfigurationStatics.IsDevelopmentInstallation && EwfConfigurationStatics.AppConfiguration.UsesKestrel.Value )
-							builder.Services.AddResponseCompression( options => { options.EnableForHttps = true; } );
 
-						builder.Services.Configure<IISServerOptions>( options => { options.AllowSynchronousIO = true; } );
+					builder.WebHost.ConfigureKestrel( options => {
+						options.Limits.MaxRequestBodySize = null;
+						options.AllowSynchronousIO = true;
+						options.AddServerHeader = false;
+					} );
+					if( ConfigurationStatics.IsDevelopmentInstallation && EwfConfigurationStatics.AppConfiguration.UsesKestrel.Value )
+						builder.Services.AddResponseCompression( options => { options.EnableForHttps = true; } );
 
-						builder.Services.Configure<FormOptions>( options => { options.ValueCountLimit = 10000; } );
+					builder.Services.Configure<IISServerOptions>( options => { options.AllowSynchronousIO = true; } );
 
-						builder.Services.AddDataProtection();
-						builder.Services.AddMvcCore();
+					builder.Services.Configure<FormOptions>( options => { options.ValueCountLimit = 10000; } );
 
-						builder.Host.UseSerilog();
+					builder.Services.AddDataProtection();
+					builder.Services.AddMvcCore();
 
-						builder.Services.AddSingleton<IConfigureOptions<MiniProfilerOptions>, MiniProfilerConfigureOptions>();
+					builder.Host.UseSerilog();
+
+					builder.Services.AddSingleton<IConfigureOptions<MiniProfilerOptions>, MiniProfilerConfigureOptions>();
+
+					if( ExternalFunctionalityStatics.OpenIdConnectFunctionalityEnabled )
+						ExternalFunctionalityStatics.ExternalOpenIdConnectProvider.RegisterDependencyInjectionServices( builder.Services );
+					if( ExternalFunctionalityStatics.SamlFunctionalityEnabled )
+						ExternalFunctionalityStatics.ExternalSamlProvider.RegisterDependencyInjectionServices( builder.Services );
+
+					dependencyInjectionServicesRegistrationMethod?.Invoke( builder.Services );
+
+					// Register these last so they cannot be overridden.
+					builder.Services.AddSingleton( AppMemoryCache.UnderlyingCache );
+					builder.Services.AddSingleton<IHttpContextAccessor, EwfHttpContextAccessor>();
+
+					var app = builder.Build();
+
+					var aspNetScriptKey = "{0}AspNetScript".FormatWith( EwlStatics.EwlInitialism.ToLowerInvariant() );
+					using( var serviceScope = app.Services.CreateScope() ) {
+						MiniProfiler.Configure( app.Services.GetRequiredService<IOptions<MiniProfilerOptions>>().Value );
+
+						var providerGetter = getProviderGetter( ConfigurationStatics.AppAssembly );
 
 						if( ExternalFunctionalityStatics.OpenIdConnectFunctionalityEnabled )
-							ExternalFunctionalityStatics.ExternalOpenIdConnectProvider.RegisterDependencyInjectionServices( builder.Services );
+							ExternalFunctionalityStatics.ExternalOpenIdConnectProvider.InitAppStatics(
+								() => AspNetStatics.Services,
+								EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString( true ),
+								OpenIdProviderStatics.GetCertificate,
+								OpenIdProviderStatics.CertificatePassword,
+								() => OpenIdProviderStatics.AppProvider.GetClients() );
 						if( ExternalFunctionalityStatics.SamlFunctionalityEnabled )
-							ExternalFunctionalityStatics.ExternalSamlProvider.RegisterDependencyInjectionServices( builder.Services );
-
-						dependencyInjectionServicesRegistrationMethod?.Invoke( builder.Services );
-
-						// Register these last so they cannot be overridden.
-						builder.Services.AddSingleton( AppMemoryCache.UnderlyingCache );
-						builder.Services.AddSingleton<IHttpContextAccessor, EwfHttpContextAccessor>();
-
-						var app = builder.Build();
-
-						var aspNetScriptKey = "{0}AspNetScript".FormatWith( EwlStatics.EwlInitialism.ToLowerInvariant() );
-						using( var serviceScope = app.Services.CreateScope() ) {
-							MiniProfiler.Configure( app.Services.GetRequiredService<IOptions<MiniProfilerOptions>>().Value );
-
-							var providerGetter = getProviderGetter( ConfigurationStatics.AppAssembly );
-
-							if( ExternalFunctionalityStatics.OpenIdConnectFunctionalityEnabled )
-								ExternalFunctionalityStatics.ExternalOpenIdConnectProvider.InitAppStatics(
-									() => AspNetStatics.Services,
-									EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString( true ),
-									OpenIdProviderStatics.GetCertificate,
-									OpenIdProviderStatics.CertificatePassword,
-									() => OpenIdProviderStatics.AppProvider.GetClients() );
-							if( ExternalFunctionalityStatics.SamlFunctionalityEnabled )
-								ExternalFunctionalityStatics.ExternalSamlProvider.InitAppStatics(
-									() => AspNetStatics.Services,
-									providerGetter,
-									() => AuthenticationStatics.SamlIdentityProviders.Select(
-											identityProvider => {
-												using var client = new HttpClient();
-												client.Timeout = new TimeSpan( 0, 0, 10 );
-												var metadata = Task.Run(
-														async () => {
-															using var response = await client.GetAsync( identityProvider.MetadataUrl, HttpCompletionOption.ResponseHeadersRead );
-															response.EnsureSuccessStatusCode();
-															var document = new XmlDocument();
-															await using( var stream = await response.Content.ReadAsStreamAsync() )
-																using( var reader = XmlReader.Create( stream ) )
-																	document.Load( reader );
-															return document.DocumentElement;
-														} )
-													.Result;
-												return ( metadata, identityProvider.EntityId );
+							ExternalFunctionalityStatics.ExternalSamlProvider.InitAppStatics(
+								() => AspNetStatics.Services,
+								providerGetter,
+								() => AuthenticationStatics.SamlIdentityProviders.Select( identityProvider => {
+										using var client = new HttpClient();
+										client.Timeout = new TimeSpan( 0, 0, 10 );
+										var metadata = Task.Run( async () => {
+												using var response = await client.GetAsync( identityProvider.MetadataUrl, HttpCompletionOption.ResponseHeadersRead );
+												response.EnsureSuccessStatusCode();
+												var document = new XmlDocument();
+												await using( var stream = await response.Content.ReadAsStreamAsync() )
+													using( var reader = XmlReader.Create( stream ) )
+														document.Load( reader );
+												return document.DocumentElement;
 											} )
-										.Materialize() );
+											.Result;
+										return ( metadata, identityProvider.EntityId );
+									} )
+									.Materialize() );
 
-							var contextAccessor = app.Services.GetRequiredService<IHttpContextAccessor>();
-							AspNetStatics.Init( () => contextAccessor.HttpContext?.RequestServices ?? serviceScope.ServiceProvider );
-							EwfRequest.Init(
-								providerGetter.GetProvider<AppRequestBaseUrlProvider>( "RequestBaseUrl" ),
-								() => {
-									var context = contextAccessor.HttpContext;
-									return context is not null && context.Items.ContainsKey( RequestDispatchingStatics.RequestStateKey ) ? context.Request : null;
-								},
-								() => RequestDispatchingStatics.RequestState.BeginInstant,
-								() => RequestDispatchingStatics.RequestState.Url,
-								networkWaitTime => RequestDispatchingStatics.RequestState.AddNetworkWaitTime( networkWaitTime ) );
-							EwfResponse.Init(
-								() => contextAccessor.HttpContext,
-								() => {
-									var requestState = RequestDispatchingStatics.RequestState;
-									if( requestState.RequestHandler is not null )
-										return;
+						var contextAccessor = app.Services.GetRequiredService<IHttpContextAccessor>();
+						AspNetStatics.Init( () => contextAccessor.HttpContext?.RequestServices ?? serviceScope.ServiceProvider );
+						EwfRequest.Init(
+							providerGetter.GetProvider<AppClientRequestProvider>( "ClientRequest" ),
+							() => {
+								var context = contextAccessor.HttpContext;
+								return context is not null && context.Items.ContainsKey( RequestDispatchingStatics.RequestStateKey ) ? context.Request : null;
+							},
+							() => RequestDispatchingStatics.RequestState.BeginInstant,
+							() => RequestDispatchingStatics.RequestState.Url,
+							networkWaitTime => RequestDispatchingStatics.RequestState.AddNetworkWaitTime( networkWaitTime ) );
+						EwfResponse.Init(
+							() => contextAccessor.HttpContext,
+							() => {
+								var requestState = RequestDispatchingStatics.RequestState;
+								if( requestState.RequestHandler is not null )
+									return;
 
-									var modMethods = requestState.GetUserRequestLogger()
-										.ToCollection()
-										.Append( AuthenticationStatics.GetUserCookieUpdater() )
-										.Where( i => i is not null )
-										.Materialize();
-									if( modMethods.Any() )
-										ResourceBase.ExecuteDataModificationMethod(
-											() => {
-												foreach( var i in modMethods )
-													i();
-											} );
+								var modMethods = requestState.GetUserRequestLogger()
+									.ToCollection()
+									.Append( AuthenticationStatics.GetUserCookieUpdater() )
+									.Where( i => i is not null )
+									.Materialize();
+								if( modMethods.Any() )
+									ResourceBase.ExecuteDataModificationMethod( () => {
+										foreach( var i in modMethods )
+											i();
+									} );
 
-									RequestState.ExecuteWithUrlHandlerStateDisabled(
-										() => {
-											try {
-												AutomaticDatabaseConnectionManager.Current.CommitTransactionsAndExecuteNonTransactionalModificationMethods( true );
-											}
-											finally {
-												DataAccessState.Current.ResetCache();
-											}
-										} );
-								},
-								() => {
-									if( EwfRequest.Current is null )
-										return "";
-									var requestState = RequestDispatchingStatics.RequestState;
-									if( !requestState.UserAccessible || !requestState.AuthenticationData.expirationTime.HasValue )
-										return "";
-									return $"""
-									        {EwlStatics.EwlInitialism.ToLowerInvariant()};desc="authExp {InstantPattern.General.Format( requestState.AuthenticationData.expirationTime.Value )}"
-									        """;
-								} );
-							UrlHandlingStatics.Init(
-								() => RequestDispatchingStatics.GetAppProvider().GetBaseUrlPatterns(),
-								( baseUrlString, appRelativeUrl ) =>
-									RequestState.ExecuteWithUrlHandlerStateDisabled( () => UrlHandlingStatics.ResolveUrl( baseUrlString, appRelativeUrl )?.Last() ) );
-							CookieStatics.Init(
-								() => RequestDispatchingStatics.RequestState.RequestCookies,
-								() => RequestDispatchingStatics.RequestState.ResponseCookies,
-								( name, value, options ) => {
-									AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod(
-										() => {
-											var cookies = contextAccessor.HttpContext.Response.Cookies;
-											if( value is not null )
-												cookies.Append( name, value.Length == 0 ? CookieStatics.EmptyValue : value, options );
-											else
-												cookies.Delete( name, options );
-										} );
-
-									RequestDispatchingStatics.RequestState.ResponseCookies.Add( ( name, value, options ) );
-								} );
-							NonLiveInstallationStatics.Init();
-							Translation.Init( () => "en-US" );
-							CssPreprocessingStatics.Init( globalInitializer.GetType().Assembly, ConfigurationStatics.AppAssembly );
-							EwfSafeRequestHandler.Init( ResourceBase.ExecuteDataModificationMethod );
-							ResourceBase.Init(
-								ResourceSerializationStatics.SerializeResource,
-								SystemSpecificLogicStatics.GetLibraryProvider<SystemResourceSerializationProvider>( "ResourceSerialization" ),
-								getAppResourceSerializationProvider( providerGetter ),
-								( requestTransferred, resource ) => {
-									if( requestTransferred ) {
-										var urlHandlers = new List<BasicUrlHandler>();
-										UrlHandler urlHandler = resource;
-										do
-											urlHandlers.Add( urlHandler );
-										while( ( urlHandler = urlHandler.GetParent() ) != null );
-										RequestDispatchingStatics.RequestState.SetUrlHandlers( urlHandlers );
-
-										RequestDispatchingStatics.RequestState.SetNewUrlParameterValuesEffective( false );
-										RequestDispatchingStatics.RequestState.SetResource( resource );
+								RequestState.ExecuteWithUrlHandlerStateDisabled( () => {
+									try {
+										AutomaticDatabaseConnectionManager.Current.CommitTransactionsAndExecuteNonTransactionalModificationMethods( true );
 									}
+									finally {
+										DataAccessState.Current.ResetCache();
+									}
+								} );
+							},
+							() => {
+								if( EwfRequest.Current is null )
+									return "";
+								var requestState = RequestDispatchingStatics.RequestState;
+								if( !requestState.UserAccessible || !requestState.AuthenticationData.expirationTime.HasValue )
+									return "";
+								return $"""
+								        {EwlStatics.EwlInitialism.ToLowerInvariant()};desc="authExp {InstantPattern.General.Format( requestState.AuthenticationData.expirationTime.Value )}"
+								        """;
+							} );
+						UrlHandlingStatics.Init(
+							() => RequestDispatchingStatics.GetAppProvider().GetBaseUrlPatterns(),
+							( baseUrlString, appRelativeUrl ) =>
+								RequestState.ExecuteWithUrlHandlerStateDisabled( () => UrlHandlingStatics.ResolveUrl( baseUrlString, appRelativeUrl )?.Last() ) );
+						CookieStatics.Init(
+							() => RequestDispatchingStatics.RequestState.RequestCookies,
+							() => RequestDispatchingStatics.RequestState.ResponseCookies,
+							( name, value, options ) => {
+								AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod( () => {
+									var cookies = contextAccessor.HttpContext.Response.Cookies;
+									if( value is not null )
+										cookies.Append( name, value.Length == 0 ? CookieStatics.EmptyValue : value, options );
 									else
-										RequestDispatchingStatics.RequestState.SetResource( resource );
-								},
-								() => RequestDispatchingStatics.RequestState.Resource,
-								RequestDispatchingStatics.RefreshRequestState );
-							EntitySetupBase.Init( RequestState.ExecuteWithUrlHandlerStateDisabled );
-							WellKnownResource.Init(
-								() => RequestDispatchingStatics.GetAppProvider().GetFrameworkUrlParent(),
-								() => OpenIdProviderStatics.GetWellKnownUrls().Concat( RequestDispatchingStatics.GetAppProvider().GetWellKnownUrls() ) );
-							StaticFile.Init( providerGetter.GetProvider<AppStaticFileHandlingProvider>( "StaticFileHandling" ) );
-							PageInfrastructure.RequestStateStatics.Init(
-								url => RequestDispatchingStatics.RequestState.ClientSideNewUrl = url,
-								() => RequestDispatchingStatics.RequestState.StatusMessages,
-								messages => {
-									var state = RequestDispatchingStatics.RequestState;
-									state.StatusMessages = state.StatusMessages.Concat( messages ).Materialize();
-								},
-								() => RequestDispatchingStatics.RequestState.SecondaryResponseId,
-								id => RequestDispatchingStatics.RequestState.SecondaryResponseId = id,
-								() => RequestDispatchingStatics.RequestState.GetLastError(),
-								() => RequestDispatchingStatics.RequestState.AllowSlowRequest(),
-								( url, requestMethod, requestHandler ) => RequestContinuationDataStore.AddRequestState(
-									url,
-									requestMethod,
-									RequestDispatchingStatics.RequestState,
-									requestHandler ) );
-							PageBase.Init(
-								( () => BasePageStatics.AppProvider.GetPageViewDataModificationMethod(), () => BasePageStatics.AppProvider.JavaScriptPageInitFunctionCall ),
-								BasicPageContent.GetContent );
-							HyperlinkBehaviorExtensionCreators.Init( ModalBox.GetBrowsingModalBoxOpenStatements );
-							FileUpload.Init( () => ( (BasicPageContent)PageBase.Current.BasicContent ).FormUsesMultipartEncoding = true );
-							ModalBox.Init( () => ( (BasicPageContent)PageBase.Current.BasicContent ).BrowsingModalBoxId );
-							TableStatics.Init( () => RequestDispatchingStatics.RequestState.AllowSlowRequest() );
-							CreditCardCollector.Init( () => ( (BasicPageContent)PageBase.Current.BasicContent ).IncludesStripeCheckout = true );
-							BasePageStatics.Init( providerGetter.GetProvider<AppStandardPageLogicProvider>( "StandardPageLogic" ) );
-							BasicPageContent.Init(
-								() => RequestDispatchingStatics.RequestState.ClientSideNewUrl,
-								contentObjects => {
-									var contentUsesUi = contentObjects.Any( i => i is UiPageContent );
+										cookies.Delete( name, options );
+								} );
 
-									var cssInfos = new List<ResourceInfo>();
+								RequestDispatchingStatics.RequestState.ResponseCookies.Add( ( name, value, options ) );
+							} );
+						NonLiveInstallationStatics.Init();
+						Translation.Init( () => "en-US" );
+						CssPreprocessingStatics.Init( globalInitializer.GetType().Assembly, ConfigurationStatics.AppAssembly );
+						EwfSafeRequestHandler.Init( ResourceBase.ExecuteDataModificationMethod );
+						ResourceBase.Init(
+							ResourceSerializationStatics.SerializeResource,
+							SystemSpecificLogicStatics.GetLibraryProvider<SystemResourceSerializationProvider>( "ResourceSerialization" ),
+							getAppResourceSerializationProvider( providerGetter ),
+							( requestTransferred, resource ) => {
+								if( requestTransferred ) {
+									var urlHandlers = new List<BasicUrlHandler>();
+									UrlHandler urlHandler = resource;
+									do
+										urlHandlers.Add( urlHandler );
+									while( ( urlHandler = urlHandler.GetParent() ) != null );
+									RequestDispatchingStatics.RequestState.SetUrlHandlers( urlHandlers );
 
-									cssInfos.Add(
-										new ExternalResource(
-											"https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@500;600;700&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400&family=Roboto+Mono&display=fallback" ) );
-									var fontFamilies = BasePageStatics.AppProvider.GetGoogleFontsFamilySpecifications();
-									if( fontFamilies is not null ) {
-										var familyParameters = StringTools.ConcatenateWithDelimiter( "&", fontFamilies.Select( i => "family=" + i ) );
-										if( familyParameters.Length > 0 )
-											cssInfos.Add( new ExternalResource( $"https://fonts.googleapis.com/css2?{familyParameters}&display=fallback" ) );
-									}
+									RequestDispatchingStatics.RequestState.SetNewUrlParameterValuesEffective( false );
+									RequestDispatchingStatics.RequestState.SetResource( resource );
+								}
+								else
+									RequestDispatchingStatics.RequestState.SetResource( resource );
+							},
+							() => RequestDispatchingStatics.RequestState.Resource,
+							RequestDispatchingStatics.RefreshRequestState );
+						EntitySetupBase.Init( RequestState.ExecuteWithUrlHandlerStateDisabled );
+						WellKnownResource.Init(
+							() => RequestDispatchingStatics.GetAppProvider().GetFrameworkUrlParent(),
+							() => OpenIdProviderStatics.GetWellKnownUrls().Concat( RequestDispatchingStatics.GetAppProvider().GetWellKnownUrls() ) );
+						StaticFile.Init( providerGetter.GetProvider<AppStaticFileHandlingProvider>( "StaticFileHandling" ) );
+						PageInfrastructure.RequestStateStatics.Init(
+							url => RequestDispatchingStatics.RequestState.ClientSideNewUrl = url,
+							() => RequestDispatchingStatics.RequestState.StatusMessages,
+							messages => {
+								var state = RequestDispatchingStatics.RequestState;
+								state.StatusMessages = state.StatusMessages.Concat( messages ).Materialize();
+							},
+							() => RequestDispatchingStatics.RequestState.SecondaryResponseId,
+							id => RequestDispatchingStatics.RequestState.SecondaryResponseId = id,
+							() => RequestDispatchingStatics.RequestState.GetLastError(),
+							() => RequestDispatchingStatics.RequestState.AllowSlowRequest(),
+							( url, requestMethod, requestHandler ) => RequestContinuationDataStore.AddRequestState(
+								url,
+								requestMethod,
+								RequestDispatchingStatics.RequestState,
+								requestHandler ) );
+						PageBase.Init(
+							( () => BasePageStatics.AppProvider.GetPageViewDataModificationMethod(), () => BasePageStatics.AppProvider.JavaScriptPageInitFunctionCall ),
+							BasicPageContent.GetContent );
+						HyperlinkBehaviorExtensionCreators.Init( ModalBox.GetBrowsingModalBoxOpenStatements );
+						FileUpload.Init( () => ( (BasicPageContent)PageBase.Current.BasicContent ).FormUsesMultipartEncoding = true );
+						ModalBox.Init( () => ( (BasicPageContent)PageBase.Current.BasicContent ).BrowsingModalBoxId );
+						TableStatics.Init( () => RequestDispatchingStatics.RequestState.AllowSlowRequest() );
+						CreditCardCollector.Init( () => ( (BasicPageContent)PageBase.Current.BasicContent ).IncludesStripeCheckout = true );
+						BasePageStatics.Init( providerGetter.GetProvider<AppStandardPageLogicProvider>( "StandardPageLogic" ) );
+						BasicPageContent.Init(
+							() => RequestDispatchingStatics.RequestState.ClientSideNewUrl,
+							contentObjects => {
+								var contentUsesUi = contentObjects.Any( i => i is UiPageContent );
 
-									cssInfos.Add( new ExternalResource( "//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" ) );
-									cssInfos.Add( new StaticFiles.Versioned.Third_party.Jquery_ui.Jquery_ui_1132custom_v2.Jquery_uiminCss() );
-									cssInfos.Add( new ExternalResource( "https://cdn.datatables.net/2.1.2/css/dataTables.dataTables.min.css" ) );
-									cssInfos.Add( new ExternalResource( "https://cdn.datatables.net/responsive/3.0.2/css/responsive.dataTables.min.css" ) );
-									cssInfos.Add( new StaticFiles.Third_party.Select_cssCss() );
-									cssInfos.Add( new StaticFiles.Versioned.Third_party.Chosen.Chosen_v187.ChosenminCss() );
-									cssInfos.Add( new StaticFiles.Third_party.Qtip2.JqueryqtipminCss() );
-									cssInfos.Add( new StaticFiles.Styles.BasicCss() );
-									if( contentUsesUi )
-										cssInfos.AddRange(
-											new ResourceInfo[]
-												{
-													new StaticFiles.Styles.Ui.ColorsCss(), new StaticFiles.Styles.Ui.FontsCss(), new StaticFiles.Styles.Ui.LayoutCss(),
-													new StaticFiles.Styles.Ui.TransitionsCss(), new StaticFiles.Styles.Ui.NewUICss()
-												} );
-									foreach( var resource in BasePageStatics.AppProvider.GetStyleSheets() ) {
+								var cssInfos = new List<ResourceInfo>();
+
+								cssInfos.Add(
+									new ExternalResource(
+										"https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@500;600;700&family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400&family=Roboto+Mono&display=fallback" ) );
+								var fontFamilies = BasePageStatics.AppProvider.GetGoogleFontsFamilySpecifications();
+								if( fontFamilies is not null ) {
+									var familyParameters = StringTools.ConcatenateWithDelimiter( "&", fontFamilies.Select( i => "family=" + i ) );
+									if( familyParameters.Length > 0 )
+										cssInfos.Add( new ExternalResource( $"https://fonts.googleapis.com/css2?{familyParameters}&display=fallback" ) );
+								}
+
+								cssInfos.Add( new ExternalResource( "//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" ) );
+								cssInfos.Add( new StaticFiles.Versioned.Third_party.Jquery_ui.Jquery_ui_1132custom_v2.Jquery_uiminCss() );
+								cssInfos.Add( new ExternalResource( "https://cdn.datatables.net/2.1.2/css/dataTables.dataTables.min.css" ) );
+								cssInfos.Add( new ExternalResource( "https://cdn.datatables.net/responsive/3.0.2/css/responsive.dataTables.min.css" ) );
+								cssInfos.Add( new StaticFiles.Third_party.Select_cssCss() );
+								cssInfos.Add( new StaticFiles.Versioned.Third_party.Chosen.Chosen_v187.ChosenminCss() );
+								cssInfos.Add( new StaticFiles.Third_party.Qtip2.JqueryqtipminCss() );
+								cssInfos.Add( new StaticFiles.Styles.BasicCss() );
+								if( contentUsesUi )
+									cssInfos.AddRange(
+										new ResourceInfo[]
+											{
+												new StaticFiles.Styles.Ui.ColorsCss(), new StaticFiles.Styles.Ui.FontsCss(), new StaticFiles.Styles.Ui.LayoutCss(),
+												new StaticFiles.Styles.Ui.TransitionsCss(), new StaticFiles.Styles.Ui.NewUICss()
+											} );
+								foreach( var resource in BasePageStatics.AppProvider.GetStyleSheets() ) {
+									assertResourceIsIntermediateInstallationPublicResourceWhenNecessary( resource );
+									cssInfos.Add( resource );
+								}
+								if( contentUsesUi )
+									foreach( var resource in EwfUiStatics.AppProvider.GetStyleSheets() ) {
 										assertResourceIsIntermediateInstallationPublicResourceWhenNecessary( resource );
 										cssInfos.Add( resource );
 									}
-									if( contentUsesUi )
-										foreach( var resource in EwfUiStatics.AppProvider.GetStyleSheets() ) {
-											assertResourceIsIntermediateInstallationPublicResourceWhenNecessary( resource );
-											cssInfos.Add( resource );
-										}
-									else
-										foreach( var resource in BasePageStatics.AppProvider.GetCustomUiStyleSheets() ) {
-											assertResourceIsIntermediateInstallationPublicResourceWhenNecessary( resource );
-											cssInfos.Add( resource );
-										}
-									return cssInfos;
-								},
-								( markup, includeStripeCheckout ) => {
-									string getElement( ResourceInfo resource ) => "<script src=\"{0}\" defer></script>".FormatWith( resource.GetUrl() );
-
-									markup.Append( getElement( new ExternalResource( "https://cdn.jsdelivr.net/npm/luxon@3.3.0/build/global/luxon.min.js" ) ) );
-									markup.Append( getElement( new ExternalResource( "//code.jquery.com/jquery-3.6.3.min.js" ) ) );
-									markup.Append( getElement( new StaticFiles.Versioned.Third_party.Jquery_ui.Jquery_ui_1132custom_v2.Jquery_uiminJs() ) );
-									markup.Append( getElement( new ExternalResource( "https://cdn.datatables.net/2.1.2/js/dataTables.min.js" ) ) );
-									markup.Append( getElement( new ExternalResource( "https://cdn.datatables.net/responsive/3.0.2/js/dataTables.responsive.min.js" ) ) );
-									markup.Append( getElement( new StaticFiles.Versioned.Third_party.Chosen.Chosen_v187.ChosenjqueryminJs() ) );
-									markup.Append( "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@duetds/date-picker@1.4.0/dist/duet/duet.esm.js\"></script>" );
-									markup.Append( "<script nomodule src=\"https://cdn.jsdelivr.net/npm/@duetds/date-picker@1.4.0/dist/duet/duet.js\"></script>" );
-									markup.Append( getElement( new StaticFiles.Third_party.Qtip2.JqueryqtipminJs() ) );
-									markup.Append( getElement( new StaticFiles.Third_party.Spin_js.SpinminJs() ) );
-									markup.Append( getElement( new ExternalResource( "https://cdn.ckeditor.com/4.22.1/full/ckeditor.js" ) ) );
-									markup.Append( getElement( new ExternalResource( "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js" ) ) );
-									markup.Append( getElement( new StaticFiles.Instant_pageJs() ) );
-									if( includeStripeCheckout )
-										markup.Append( getElement( new ExternalResource( "https://checkout.stripe.com/checkout.js" ) ) );
-									markup.Append( getElement( new StaticFiles.CodeJs() ) );
-									if( MiniProfiler.Current != null ) {
-										var profiler = MiniProfiler.Current;
-										var ids = profiler.Options.ExpireAndGetUnviewed( profiler.User ) ?? new List<Guid>( 1 );
-										ids.Add( profiler.Id );
-										markup.Append(
-											Render.Includes(
-												profiler,
-												path: contextAccessor.HttpContext.Request.PathBase + ( (MiniProfilerOptions)profiler.Options ).RouteBasePath + "/",
-												isAuthorized: true,
-												null,
-												requestIDs: ids ) );
-									}
-									foreach( var resource in BasePageStatics.AppProvider.GetJavaScriptFiles() ) {
+								else
+									foreach( var resource in BasePageStatics.AppProvider.GetCustomUiStyleSheets() ) {
 										assertResourceIsIntermediateInstallationPublicResourceWhenNecessary( resource );
-										markup.Append( getElement( resource ) );
+										cssInfos.Add( resource );
 									}
+								return cssInfos;
+							},
+							( markup, includeStripeCheckout ) => {
+								string getElement( ResourceInfo resource ) => "<script src=\"{0}\" defer></script>".FormatWith( resource.GetUrl() );
 
-									if( contextAccessor.HttpContext.Items.TryGetValue( aspNetScriptKey, out var aspNetScriptGetter ) )
-										markup.Append( getElement( new ExternalResource( ( (Func<string>)aspNetScriptGetter )() ) ) );
-								},
-								() => {
-									var icons = new List<( ResourceInfo, string, string )>();
+								markup.Append( getElement( new ExternalResource( "https://cdn.jsdelivr.net/npm/luxon@3.3.0/build/global/luxon.min.js" ) ) );
+								markup.Append( getElement( new ExternalResource( "//code.jquery.com/jquery-3.6.3.min.js" ) ) );
+								markup.Append( getElement( new StaticFiles.Versioned.Third_party.Jquery_ui.Jquery_ui_1132custom_v2.Jquery_uiminJs() ) );
+								markup.Append( getElement( new ExternalResource( "https://cdn.datatables.net/2.1.2/js/dataTables.min.js" ) ) );
+								markup.Append( getElement( new ExternalResource( "https://cdn.datatables.net/responsive/3.0.2/js/dataTables.responsive.min.js" ) ) );
+								markup.Append( getElement( new StaticFiles.Versioned.Third_party.Chosen.Chosen_v187.ChosenjqueryminJs() ) );
+								markup.Append( "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@duetds/date-picker@1.4.0/dist/duet/duet.esm.js\"></script>" );
+								markup.Append( "<script nomodule src=\"https://cdn.jsdelivr.net/npm/@duetds/date-picker@1.4.0/dist/duet/duet.js\"></script>" );
+								markup.Append( getElement( new StaticFiles.Third_party.Qtip2.JqueryqtipminJs() ) );
+								markup.Append( getElement( new StaticFiles.Third_party.Spin_js.SpinminJs() ) );
+								markup.Append( getElement( new ExternalResource( "https://cdn.ckeditor.com/4.22.1/full/ckeditor.js" ) ) );
+								markup.Append( getElement( new ExternalResource( "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js" ) ) );
+								markup.Append( getElement( new StaticFiles.Instant_pageJs() ) );
+								if( includeStripeCheckout )
+									markup.Append( getElement( new ExternalResource( "https://checkout.stripe.com/checkout.js" ) ) );
+								markup.Append( getElement( new StaticFiles.CodeJs() ) );
+								if( MiniProfiler.Current != null ) {
+									var profiler = MiniProfiler.Current;
+									var ids = profiler.Options.ExpireAndGetUnviewed( profiler.User ) ?? new List<Guid>( 1 );
+									ids.Add( profiler.Id );
+									markup.Append(
+										Render.Includes(
+											profiler,
+											path: contextAccessor.HttpContext.Request.PathBase + ( (MiniProfilerOptions)profiler.Options ).RouteBasePath + "/",
+											isAuthorized: true,
+											null,
+											requestIDs: ids ) );
+								}
+								foreach( var resource in BasePageStatics.AppProvider.GetJavaScriptFiles() ) {
+									assertResourceIsIntermediateInstallationPublicResourceWhenNecessary( resource );
+									markup.Append( getElement( resource ) );
+								}
 
-									var faviconPng48X48 = BasePageStatics.AppProvider.FaviconPng48X48;
-									if( faviconPng48X48 != null ) {
-										assertResourceIsIntermediateInstallationPublicResourceWhenNecessary( faviconPng48X48 );
-										icons.Add( ( faviconPng48X48, "icon", "48x48" ) );
-									}
+								if( contextAccessor.HttpContext.Items.TryGetValue( aspNetScriptKey, out var aspNetScriptGetter ) )
+									markup.Append( getElement( new ExternalResource( ( (Func<string>)aspNetScriptGetter )() ) ) );
+							},
+							() => {
+								var icons = new List<( ResourceInfo, string, string )>();
 
-									var favicon = BasePageStatics.AppProvider.Favicon;
-									if( favicon != null ) {
-										assertResourceIsIntermediateInstallationPublicResourceWhenNecessary( favicon );
-										icons.Add( ( favicon, "icon", "" ) );
-									}
+								var faviconPng48X48 = BasePageStatics.AppProvider.FaviconPng48X48;
+								if( faviconPng48X48 != null ) {
+									assertResourceIsIntermediateInstallationPublicResourceWhenNecessary( faviconPng48X48 );
+									icons.Add( ( faviconPng48X48, "icon", "48x48" ) );
+								}
 
-									if( !icons.Any() )
-										// see https://stackoverflow.com/a/62258760/35349
-										icons.Add( ( new ExternalResource( "data:," ), "icon", "" ) );
-									return icons;
-								},
-								hideWarnings => {
-									var url = EwfRequest.Current.Url;
-									if( RequestDispatchingStatics.RequestState.UserAccessible && RequestDispatchingStatics.RequestState.ImpersonatorExists )
-										url = new UserManagement.Pages.Impersonate(
-											url,
-											optionalParameterSetter: ( specifier, _ ) =>
-												specifier.User = SystemUser.Current != null ? SystemUser.Current.Email : UserManagement.Pages.Impersonate.AnonymousUser ).GetUrl();
-									return new NonLiveLogIn(
+								var favicon = BasePageStatics.AppProvider.Favicon;
+								if( favicon != null ) {
+									assertResourceIsIntermediateInstallationPublicResourceWhenNecessary( favicon );
+									icons.Add( ( favicon, "icon", "" ) );
+								}
+
+								if( !icons.Any() )
+									// see https://stackoverflow.com/a/62258760/35349
+									icons.Add( ( new ExternalResource( "data:," ), "icon", "" ) );
+								return icons;
+							},
+							hideWarnings => {
+								var url = EwfRequest.Current.Url;
+								if( RequestDispatchingStatics.RequestState.UserAccessible && RequestDispatchingStatics.RequestState.ImpersonatorExists )
+									url = new UserManagement.Pages.Impersonate(
 										url,
-										optionalParameterSetter: ( specifier, _ ) => {
-											specifier.Password = SystemSpecificLogicStatics.GeneralProvider.IntermediateLogInPassword;
-											specifier.HideWarnings = hideWarnings;
-										} ).GetUrl();
-								},
-								() => {
-									if( !RequestDispatchingStatics.RequestState.UserAccessible || !RequestDispatchingStatics.RequestState.ImpersonatorExists ||
-									    ( ConfigurationStatics.IsIntermediateInstallation && !RequestDispatchingStatics.RequestState.IntermediateUserExists ) )
-										return null;
-									return ( "User impersonation is in effect.",
-										       new HyperlinkSetup( new UserManagement.Pages.Impersonate( EwfRequest.Current.Url ), "Change user" ).Add(
-											       new ButtonSetup(
-												       "End impersonation",
-												       behavior: new PostBackBehavior(
-													       postBack: PostBack.CreateFull(
-														       id: "ewfEndImpersonation",
-														       modificationMethod: UserImpersonationStatics.EndImpersonation,
-														       actionGetter: () => new PostBackAction(
-															       new ExternalResource(
-																       EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString(
-																	       EwfConfigurationStatics.AppSupportsSecureConnections ) ) ) ) ) ) ) );
-								} );
-							EwfUiStatics.Init( providerGetter.GetProvider<AppEwfUiProvider>( "EwfUi" ), AuthenticationStatics.GetUserInfoComponents );
-							AuthenticationStatics.Init(
-								providerGetter.GetProvider<AppAuthenticationProvider>( "Authentication" ),
-								app.Services.GetRequiredService<IDataProtectionProvider>(),
-								returnUrl => UserManagementStatics.LocalIdentityProviderEnabled || AuthenticationStatics.SamlIdentityProviders.Count > 1
-									             ? new UserManagement.Pages.LogIn( returnUrl )
-									             : new UserManagement.SamlResources.LogIn( AuthenticationStatics.SamlIdentityProviders.Single().EntityId, returnUrl ),
-								( user, code ) => new UserManagement.Pages.LogIn(
-									"",
+										optionalParameterSetter: ( specifier, _ ) =>
+											specifier.User = SystemUser.Current != null ? SystemUser.Current.Email : UserManagement.Pages.Impersonate.AnonymousUser ).GetUrl();
+								return new NonLiveLogIn(
+									url,
 									optionalParameterSetter: ( specifier, _ ) => {
-										specifier.User = user;
-										specifier.Code = code;
-									} ).GetUrl(),
-								destinationUrl => new UserManagement.Pages.ChangePassword( destinationUrl ).GetUrl( disableAuthorizationCheck: true ) );
-							OpenIdProviderStatics.Init( providerGetter.GetProvider<AppOpenIdProviderProvider>( "OpenIdProvider" ) );
-							Admin.EntitySetup.Init( () => RequestDispatchingStatics.GetAppProvider().GetFrameworkUrlParent(), diagnosticLogLevelSwitch );
-							RequestDispatchingStatics.Init( getAppRequestDispatchingProvider( providerGetter ), () => contextAccessor.HttpContext );
+										specifier.Password = SystemSpecificLogicStatics.GeneralProvider.IntermediateLogInPassword;
+										specifier.HideWarnings = hideWarnings;
+									} ).GetUrl();
+							},
+							() => {
+								if( !RequestDispatchingStatics.RequestState.UserAccessible || !RequestDispatchingStatics.RequestState.ImpersonatorExists ||
+								    ( ConfigurationStatics.IsIntermediateInstallation && !RequestDispatchingStatics.RequestState.IntermediateUserExists ) )
+									return null;
+								return ( "User impersonation is in effect.",
+									       new HyperlinkSetup( new UserManagement.Pages.Impersonate( EwfRequest.Current.Url ), "Change user" ).Add(
+										       new ButtonSetup(
+											       "End impersonation",
+											       behavior: new PostBackBehavior(
+												       postBack: PostBack.CreateFull(
+													       id: "ewfEndImpersonation",
+													       modificationMethod: UserImpersonationStatics.EndImpersonation,
+													       actionGetter: () => new PostBackAction(
+														       new ExternalResource(
+															       EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString(
+																       EwfConfigurationStatics.AppSupportsSecureConnections ) ) ) ) ) ) ) );
+							} );
+						EwfUiStatics.Init( providerGetter.GetProvider<AppEwfUiProvider>( "EwfUi" ), AuthenticationStatics.GetUserInfoComponents );
+						AuthenticationStatics.Init(
+							providerGetter.GetProvider<AppAuthenticationProvider>( "Authentication" ),
+							app.Services.GetRequiredService<IDataProtectionProvider>(),
+							returnUrl => UserManagementStatics.LocalIdentityProviderEnabled || AuthenticationStatics.SamlIdentityProviders.Count > 1
+								             ? new UserManagement.Pages.LogIn( returnUrl )
+								             : new UserManagement.SamlResources.LogIn( AuthenticationStatics.SamlIdentityProviders.Single().EntityId, returnUrl ),
+							( user, code ) => new UserManagement.Pages.LogIn(
+								"",
+								optionalParameterSetter: ( specifier, _ ) => {
+									specifier.User = user;
+									specifier.Code = code;
+								} ).GetUrl(),
+							destinationUrl => new UserManagement.Pages.ChangePassword( destinationUrl ).GetUrl( disableAuthorizationCheck: true ) );
+						OpenIdProviderStatics.Init( providerGetter.GetProvider<AppOpenIdProviderProvider>( "OpenIdProvider" ) );
+						Admin.EntitySetup.Init( () => RequestDispatchingStatics.GetAppProvider().GetFrameworkUrlParent(), diagnosticLogLevelSwitch );
+						RequestDispatchingStatics.Init( getAppRequestDispatchingProvider( providerGetter ), () => contextAccessor.HttpContext );
 
-							appInitializer?.InitStatics();
+						appInitializer?.InitStatics();
 
-							var executeWithAutomaticDatabaseConnections = AutomaticDatabaseConnectionManager.ExecuteWithAutomaticDatabaseConnections;
-							executeWithAutomaticDatabaseConnections( AuthenticationStatics.InitAppSpecificLogicDependencies );
-							executeWithAutomaticDatabaseConnections( OpenIdProviderStatics.InitAppSpecificLogicDependencies );
-							if( OpenIdProviderStatics.OpenIdProviderEnabled )
-								executeWithAutomaticDatabaseConnections( ExternalFunctionalityStatics.ExternalOpenIdConnectProvider.InitAppSpecificLogicDependencies );
-							if( AuthenticationStatics.SamlIdentityProviders.Any() || ExternalFunctionalityStatics.SamlFunctionalityEnabled )
-								executeWithAutomaticDatabaseConnections( ExternalFunctionalityStatics.ExternalSamlProvider.InitAppSpecificLogicDependencies );
-						}
-
-						initTimeDataAccessState = null;
-						frameworkInitialized = true;
-
-						// See https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-watch#response-compression. We’re both causing BasicPageContent to include the
-						// script, and suppressing the warning when it is, by tricking BrowserRefreshMiddleware into thinking that its own ResponseStreamWrapper injected
-						// the script.
-						if( Environment.GetEnvironmentVariable( "__ASPNETCORE_BROWSER_TOOLS" ) is not null )
-							app.Use(
-								async ( context, next ) => {
-									var bodyFeature = context.Features.Get<IHttpResponseBodyFeature>();
-									if( bodyFeature is StreamResponseBodyFeature streamBodyFeature ) {
-										var stream = streamBodyFeature.Stream;
-										context.Items.Add(
-											aspNetScriptKey,
-											() => {
-												stream.GetType().GetProperty( "ScriptInjectionPerformed" ).SetValue( stream, true );
-												return "/_framework/aspnetcore-browser-refresh.js";
-											} );
-									}
-
-									await next( context );
-								} );
-
-						if( ConfigurationStatics.IsDevelopmentInstallation && EwfConfigurationStatics.AppConfiguration.UsesKestrel.Value )
-							app.UsePathBase( "/{0}".FormatWith( EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.Path ) );
-						if( ConfigurationStatics.IsDevelopmentInstallation && EwfConfigurationStatics.AppConfiguration.UsesKestrel.Value )
-							app.UseResponseCompression();
-						app.UseMiniProfiler(); // only used to handle MiniProfiler requests, and placed before Serilog middleware to exclude these requests from logging
-						app.UseSerilogRequestLogging( options => { options.IncludeQueryInRequestPath = true; } );
-						RequestDispatchingStatics.GetAppProvider().AddCustomMiddleware( app );
-						app.Use( RequestDispatchingStatics.ProcessRequest );
-						app.UseRouting();
-						RequestDispatchingStatics.GetAppProvider().ConfigurePostFrameworkPipeline( app );
-						app.Use( ensureUrlResolved );
-
-						app.Run();
+						var executeWithAutomaticDatabaseConnections = AutomaticDatabaseConnectionManager.ExecuteWithAutomaticDatabaseConnections;
+						executeWithAutomaticDatabaseConnections( AuthenticationStatics.InitAppSpecificLogicDependencies );
+						executeWithAutomaticDatabaseConnections( OpenIdProviderStatics.InitAppSpecificLogicDependencies );
+						if( OpenIdProviderStatics.OpenIdProviderEnabled )
+							executeWithAutomaticDatabaseConnections( ExternalFunctionalityStatics.ExternalOpenIdConnectProvider.InitAppSpecificLogicDependencies );
+						if( AuthenticationStatics.SamlIdentityProviders.Any() || ExternalFunctionalityStatics.SamlFunctionalityEnabled )
+							executeWithAutomaticDatabaseConnections( ExternalFunctionalityStatics.ExternalSamlProvider.InitAppSpecificLogicDependencies );
 					}
-					finally {
-						appInitializer?.CleanUpStatics();
-						Log.CloseAndFlush();
-					}
-				} );
+
+					initTimeDataAccessState = null;
+					frameworkInitialized = true;
+
+					// See https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-watch#response-compression. We’re both causing BasicPageContent to include the
+					// script, and suppressing the warning when it is, by tricking BrowserRefreshMiddleware into thinking that its own ResponseStreamWrapper injected
+					// the script.
+					if( Environment.GetEnvironmentVariable( "__ASPNETCORE_BROWSER_TOOLS" ) is not null )
+						app.Use( async ( context, next ) => {
+							var bodyFeature = context.Features.Get<IHttpResponseBodyFeature>();
+							if( bodyFeature is StreamResponseBodyFeature streamBodyFeature ) {
+								var stream = streamBodyFeature.Stream;
+								context.Items.Add(
+									aspNetScriptKey,
+									() => {
+										stream.GetType().GetProperty( "ScriptInjectionPerformed" ).SetValue( stream, true );
+										return "/_framework/aspnetcore-browser-refresh.js";
+									} );
+							}
+
+							await next( context );
+						} );
+
+					if( ConfigurationStatics.IsDevelopmentInstallation && EwfConfigurationStatics.AppConfiguration.UsesKestrel.Value )
+						app.UsePathBase( "/{0}".FormatWith( EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.Path ) );
+					if( ConfigurationStatics.IsDevelopmentInstallation && EwfConfigurationStatics.AppConfiguration.UsesKestrel.Value )
+						app.UseResponseCompression();
+					app.UseMiniProfiler(); // only used to handle MiniProfiler requests, and placed before Serilog middleware to exclude these requests from logging
+					app.UseSerilogRequestLogging( options => { options.IncludeQueryInRequestPath = true; } );
+					RequestDispatchingStatics.GetAppProvider().AddCustomMiddleware( app );
+					app.Use( RequestDispatchingStatics.ProcessRequest );
+					app.UseRouting();
+					RequestDispatchingStatics.GetAppProvider().ConfigurePostFrameworkPipeline( app );
+					app.Use( ensureUrlResolved );
+
+					app.Run();
+				}
+				finally {
+					appInitializer?.CleanUpStatics();
+					Log.CloseAndFlush();
+				}
+			} );
 		}
 		finally {
 			GlobalInitializationOps.CleanUpStatics();
@@ -616,8 +607,9 @@ public static class EwfOps {
 			appAssembly,
 			ConfigurationStatics.InstallationConfiguration.WebApplications.Single( i => string.Equals( i.Name, applicationName, StringComparison.Ordinal ) ),
 			() => RequestDispatchingStatics.GetAppProvider( applicationName: applicationName ).GetBaseUrlPatterns(),
-			( baseUrlString, appRelativeUrl ) => RequestState.ExecuteWithUrlHandlerStateDisabled(
-				() => UrlHandlingStatics.ResolveUrl( baseUrlString, appRelativeUrl, appAssembly: appAssembly )?.Last() ) );
+			( baseUrlString, appRelativeUrl ) =>
+				RequestState.ExecuteWithUrlHandlerStateDisabled( () =>
+					UrlHandlingStatics.ResolveUrl( baseUrlString, appRelativeUrl, appAssembly: appAssembly )?.Last() ) );
 		ResourceBase.AddApplication( getAppResourceSerializationProvider( providerGetter ) );
 		RequestDispatchingStatics.AddApplication( applicationName, getAppRequestDispatchingProvider( providerGetter ) );
 	}

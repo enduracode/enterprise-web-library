@@ -10,25 +10,25 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 [ PublicAPI ]
 public class EwfRequest {
-	private static AppRequestBaseUrlProvider? baseUrlDefaultProvider;
-	private static SystemProviderReference<AppRequestBaseUrlProvider>? baseUrlProvider;
+	private static AppClientRequestProvider? defaultProvider;
+	private static SystemProviderReference<AppClientRequestProvider>? provider;
 	private static Func<HttpRequest>? currentRequestGetter;
 	private static Func<Instant>? requestTimeGetter;
 	private static Func<string>? urlGetter;
 	private static Action<Duration>? networkWaitTimeAdder;
 
 	internal static void Init(
-		SystemProviderReference<AppRequestBaseUrlProvider> baseUrlProvider, Func<HttpRequest> currentRequestGetter, Func<Instant>? requestTimeGetter,
+		SystemProviderReference<AppClientRequestProvider> provider, Func<HttpRequest> currentRequestGetter, Func<Instant>? requestTimeGetter,
 		Func<string>? urlGetter, Action<Duration> networkWaitTimeAdder ) {
-		baseUrlDefaultProvider = new AppRequestBaseUrlProvider();
-		EwfRequest.baseUrlProvider = baseUrlProvider;
+		defaultProvider = new AppClientRequestProvider();
+		EwfRequest.provider = provider;
 		EwfRequest.currentRequestGetter = currentRequestGetter;
 		EwfRequest.requestTimeGetter = requestTimeGetter;
 		EwfRequest.urlGetter = urlGetter;
 		EwfRequest.networkWaitTimeAdder = networkWaitTimeAdder;
 	}
 
-	internal static AppRequestBaseUrlProvider AppBaseUrlProvider => baseUrlProvider!.GetProvider( returnNullIfNotFound: true ) ?? baseUrlDefaultProvider!;
+	internal static AppClientRequestProvider AppProvider => provider!.GetProvider( returnNullIfNotFound: true ) ?? defaultProvider!;
 
 	/// <summary>
 	/// Gets the current request, or null if called outside of a request or from a non-web application.
@@ -60,7 +60,7 @@ public class EwfRequest {
 	/// <summary>
 	/// Returns true if this request is secure.
 	/// </summary>
-	public bool IsSecure => AppBaseUrlProvider.RequestIsSecure( AspNetRequest );
+	public bool IsSecure => AppProvider.RequestIsSecure( AspNetRequest );
 
 	/// <summary>
 	/// Gets the request headers.
@@ -98,20 +98,24 @@ public class EwfRequest {
 	}
 
 	/// <summary>
+	/// Gets the client IP address, or null if the request is not on a TCP connection.
+	/// </summary>
+	public IPAddress? ClientIp => AppProvider.GetClientIp( AspNetRequest );
+
+	/// <summary>
 	/// Gets whether the request is from the local computer.
 	/// </summary>
 	internal bool IsLocal {
 		get {
 			// From https://www.strathweb.com/2016/04/request-islocal-in-asp-net-core/
 
+			var clientIp = ClientIp;
 			var connection = AspNetRequest.HttpContext.Connection;
-			if( connection.RemoteIpAddress != null )
-				return connection.LocalIpAddress != null
-					       ? connection.RemoteIpAddress.Equals( connection.LocalIpAddress )
-					       : IPAddress.IsLoopback( connection.RemoteIpAddress );
+			if( clientIp is not null )
+				return connection.LocalIpAddress is not null ? clientIp.Equals( connection.LocalIpAddress ) : IPAddress.IsLoopback( clientIp );
 
 			// for in memory TestServer or when dealing with default connection info
-			if( connection.RemoteIpAddress == null && connection.LocalIpAddress == null )
+			if( clientIp is null && connection.LocalIpAddress is null )
 				return true;
 
 			return false;

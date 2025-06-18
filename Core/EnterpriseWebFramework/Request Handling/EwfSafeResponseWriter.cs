@@ -54,7 +54,7 @@ public class EwfSafeResponseWriter {
 
 			AddCacheControlHeader(
 				aspNetResponse,
-				EwfRequest.AppBaseUrlProvider.RequestIsSecure( aspNetRequest ),
+				EwfRequest.AppProvider.RequestIsSecure( aspNetRequest ),
 				urlVersionString.Any() || eTagBase.Any() || lastModificationDateAndTimeGetter != null,
 				urlVersionString.Any() && !forceImmediateResponseExpiration );
 

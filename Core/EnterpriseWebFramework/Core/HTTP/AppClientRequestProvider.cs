@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Net;
+using Microsoft.AspNetCore.Http;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 /// <summary>
-/// Application-specific logic for the request base URL.
+/// Application-specific logic for the client request.
 /// </summary>
-public class AppRequestBaseUrlProvider {
+public class AppClientRequestProvider {
 	/// <summary>
 	/// Returns true if the specified request is secure. Override this to be more than just <see cref="HttpRequest.IsHttps"/> if you are using a reverse proxy to
 	/// perform SSL termination. Remember that your implementation should support not just live installations, but also development and intermediate
@@ -27,4 +28,10 @@ public class AppRequestBaseUrlProvider {
 	/// intermediate installations.
 	/// </summary>
 	protected internal virtual string GetRequestBasePath( HttpRequest request ) => request.PathBase.HasValue ? request.PathBase.ToUriComponent()[ 1.. ] : "";
+
+	/// <summary>
+	/// Returns the client IP address for the specified request. Override this if you are using a reverse proxy. Return null only if the request is not on a TCP
+	/// connection. Remember that your implementation should support not just live installations, but also development and intermediate installations.
+	/// </summary>
+	protected internal virtual IPAddress? GetClientIp( HttpRequest request ) => request.HttpContext.Connection.RemoteIpAddress;
 }

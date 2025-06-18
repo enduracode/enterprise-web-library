@@ -25,7 +25,7 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 		if( context.Request.Method == "GET" || context.Request.Method == "HEAD" )
 			EwfSafeResponseWriter.AddCacheControlHeader(
 				context.Response,
-				EwfRequest.AppBaseUrlProvider.RequestIsSecure( context.Request ),
+				EwfRequest.AppProvider.RequestIsSecure( context.Request ),
 				false,
 				permanent && !ConfigurationStatics.IsDevelopmentInstallation ? null : false );
 
@@ -300,7 +300,7 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 
 			var connectionSecurity = ConnectionSecurity;
 			return connectionSecurity == ConnectionSecurity.MatchingCurrentRequest
-				       ? EwfRequest.Current != null && EwfRequest.AppBaseUrlProvider.RequestIsSecure( EwfRequest.Current.AspNetRequest )
+				       ? EwfRequest.Current != null && EwfRequest.AppProvider.RequestIsSecure( EwfRequest.Current.AspNetRequest )
 				       : connectionSecurity == ConnectionSecurity.SecureIfPossible && EwfConfigurationStatics.AppSupportsSecureConnections;
 		}
 	}
@@ -326,17 +326,17 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 	internal void HandleRequest( HttpContext context, bool requestTransferred ) {
 		var canonicalUrl = GetUrl( false, false );
 		if( requestTransferred ) {
-			if( ShouldBeSecureGivenCurrentRequest != EwfRequest.AppBaseUrlProvider.RequestIsSecure( context.Request ) )
+			if( ShouldBeSecureGivenCurrentRequest != EwfRequest.AppProvider.RequestIsSecure( context.Request ) )
 				throw new ApplicationException( "{0} has a connection security setting that is incompatible with the current request.".FormatWith( canonicalUrl ) );
 		}
 		else {
 			if( disablesUrlNormalization ) {
-				if( ShouldBeSecureGivenCurrentRequest != EwfRequest.AppBaseUrlProvider.RequestIsSecure( context.Request ) )
+				if( ShouldBeSecureGivenCurrentRequest != EwfRequest.AppProvider.RequestIsSecure( context.Request ) )
 					throw new ResourceNotAvailableException( "The resource has a connection security setting that is incompatible with the current request.", null );
 			}
 			else {
 				if( !string.Equals( canonicalUrl, EwfRequest.Current!.Url, StringComparison.Ordinal ) ) {
-					if( !ShouldBeSecureGivenCurrentRequest && EwfRequest.AppBaseUrlProvider.RequestIsSecure( context.Request ) && Uri.Compare(
+					if( !ShouldBeSecureGivenCurrentRequest && EwfRequest.AppProvider.RequestIsSecure( context.Request ) && Uri.Compare(
 						    new Uri( canonicalUrl ),
 						    new Uri( EwfRequest.Current.Url ),
 						    UriComponents.Host,

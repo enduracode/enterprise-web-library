@@ -74,7 +74,7 @@ public static class RequestDispatchingStatics {
 
 					// If the base URL doesn’t include a path and the app-relative path is just a slash, don’t include this trailing slash in the URL since it will not be
 					// present in the canonical URLs that we construct and therefore it would cause problems with URL normalization.
-					var url = EwfRequest.AppBaseUrlProvider.GetRequestBasePath( context.Request ).Length == 0 && appRelativePath.Length == "/".Length
+					var url = EwfRequest.AppProvider.GetRequestBasePath( context.Request ).Length == 0 && appRelativePath.Length == "/".Length
 						          ? baseUrl + appRelativeUrl[ 1.. ]
 						          : baseUrl + appRelativeUrl;
 
@@ -149,9 +149,9 @@ public static class RequestDispatchingStatics {
 	}
 
 	private static string getRequestBaseUrl( HttpRequest request ) {
-		var baseUrlProvider = EwfRequest.AppBaseUrlProvider;
-		var host = baseUrlProvider.GetRequestHost( request );
-		return host.Any() ? BaseUrl.GetUrlString( baseUrlProvider.RequestIsSecure( request ), host, baseUrlProvider.GetRequestBasePath( request ) ) : "";
+		var requestProvider = EwfRequest.AppProvider;
+		var host = requestProvider.GetRequestHost( request );
+		return host.Any() ? BaseUrl.GetUrlString( requestProvider.RequestIsSecure( request ), host, requestProvider.GetRequestBasePath( request ) ) : "";
 	}
 
 	private static Action<HttpContext>? resolveUrl( HttpContext context, string appRelativeUrl ) {
@@ -161,18 +161,17 @@ public static class RequestDispatchingStatics {
 		if( context.Request.Path.HasValue )
 			appRelativeUrl = appRelativeUrl[ 1.. ];
 
-		var handlers = RequestState.ExecuteWithUserDisabled(
-			() => {
-				try {
-					return UrlHandlingStatics.ResolveUrl( RequestState.BaseUrl, appRelativeUrl );
-				}
-				catch( UnresolvableUrlException e ) {
-					// An init method could take a long time to run, and then throw an exception, and there’d be no way for the resource to prevent slow-request errors.
-					RequestState.AllowSlowRequest( allowUnlimitedTime: true );
+		var handlers = RequestState.ExecuteWithUserDisabled( () => {
+			try {
+				return UrlHandlingStatics.ResolveUrl( RequestState.BaseUrl, appRelativeUrl );
+			}
+			catch( UnresolvableUrlException e ) {
+				// An init method could take a long time to run, and then throw an exception, and there’d be no way for the resource to prevent slow-request errors.
+				RequestState.AllowSlowRequest( allowUnlimitedTime: true );
 
-					throw new ResourceNotAvailableException( "Failed to resolve the URL.", e );
-				}
-			} );
+				throw new ResourceNotAvailableException( "Failed to resolve the URL.", e );
+			}
+		} );
 		if( handlers != null ) {
 			// Before URL normalization, multiple copies of the same handler can exist in the list. When a new handler object is created and it matches more than
 			// one handler in the list, we want parameters to be taken from the lowest-level segment. That’s why we reverse the handlers here.
@@ -211,11 +210,10 @@ public static class RequestDispatchingStatics {
 					// We can remove this as soon as requesting a URL with a vertical pipe doesn't blow up our web applications.
 					var errorIsBogusPathException = exception is ArgumentException argException && argException.Message == "Illegal characters in path.";
 
-					var baseUrlRequest = new Lazy<bool>(
-						() => string.Equals(
-							EwfRequest.Current!.Url,
-							EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString( EwfConfigurationStatics.AppSupportsSecureConnections ),
-							StringComparison.Ordinal ) );
+					var baseUrlRequest = new Lazy<bool>( () => string.Equals(
+						EwfRequest.Current!.Url,
+						EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString( EwfConfigurationStatics.AppSupportsSecureConnections ),
+						StringComparison.Ordinal ) );
 					if( exception is ResourceNotAvailableException || errorIsBogusPathException )
 						transferRequest( context, 404, getErrorPage( new ResourceNotAvailable( !baseUrlRequest.Value ) ) );
 					else if( exception is AccessDeniedException accessDeniedException ) {
@@ -340,21 +338,20 @@ public static class RequestDispatchingStatics {
 	private static void write500Response( HttpContext context, string description, ( string prefix, Exception exception )? error ) {
 		EwfResponse.Create(
 				ContentTypes.PlainText,
-				new EwfResponseBodyCreator(
-					writer => {
-						if( !ConfigurationStatics.IsDevelopmentInstallation ) {
-							writer.Write( "{0} in EWF Application".FormatWith( description ) );
-							return;
-						}
+				new EwfResponseBodyCreator( writer => {
+					if( !ConfigurationStatics.IsDevelopmentInstallation ) {
+						writer.Write( "{0} in EWF Application".FormatWith( description ) );
+						return;
+					}
 
-						error ??= RequestState.GetLastError()!;
+					error ??= RequestState.GetLastError()!;
 
-						if( error.Value.prefix.Length > 0 ) {
-							writer.WriteLine( error.Value.prefix );
-							writer.WriteLine();
-						}
-						writer.Write( error.Value.exception.ToString() );
-					} ),
+					if( error.Value.prefix.Length > 0 ) {
+						writer.WriteLine( error.Value.prefix );
+						writer.WriteLine();
+					}
+					writer.Write( error.Value.exception.ToString() );
+				} ),
 				statusCodeGetter: () => 500 )
 			.WriteToAspNetResponse(
 				context.Response,
