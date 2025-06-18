@@ -104,7 +104,7 @@ public static class RequestDispatchingStatics {
 				RequestState.EnableUser();
 
 				var ipAddresses = GetAppProvider().GetWhitelistedIpAddressesForMaintenance();
-				if( ipAddresses != null && !ipAddresses.Contains( context.Connection.RemoteIpAddress?.ToString()! ) ) {
+				if( ipAddresses != null && !ipAddresses.Contains( EwfRequest.AppProvider.GetClientIp( context.Request )?.ToString()! ) ) {
 					EwfResponse.Create( "", new EwfResponseBodyCreator( () => "" ), statusCodeGetter: () => 503 ).WriteToAspNetResponse( context.Response );
 					return;
 				}
