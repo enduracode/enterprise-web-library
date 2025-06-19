@@ -117,11 +117,14 @@ public class LocalIdentityProvider: IdentityProvider {
 	}
 
 	/// <summary>
-	/// Returns true if the given credentials correspond to a user and are correct.
+	/// Returns the user with the specified email address if the specified password is correct. Returns null if a user with that email address does not exist or
+	/// if the password is incorrect.
 	/// </summary>
-	public bool UserCredentialsAreCorrect( string emailAddress, string password ) {
+	public SystemUser? AuthenticatePassword( string emailAddress, string password ) {
 		var userData = passwordLoginUserGetter( emailAddress );
-		return userData?.saltedPassword != null && userData.Value.saltedPassword.SequenceEqual( getHashedPassword( password, userData.Value.salt ) );
+		return userData?.saltedPassword is not null && userData.Value.saltedPassword.SequenceEqual( getHashedPassword( password, userData.Value.salt ) )
+			       ? userData.Value.user
+			       : null;
 	}
 
 	private byte[] getHashedPassword( string password, int salt ) {
@@ -255,14 +258,13 @@ public class LocalIdentityProvider: IdentityProvider {
 			codeValid = false;
 		else if( !codeData.hashedCode.SequenceEqual( getHashedLoginCode( code, codeData.salt! ) ) ) {
 			codeValid = false;
-			unconditionalModMethods.Add(
-				() => loginCodeUpdater(
-					userLocal.UserId,
-					codeData.salt,
-					codeData.hashedCode,
-					codeData.expirationTime.Value,
-					(byte)( codeData.remainingAttemptCount.Value - 1 ),
-					codeData.destinationUrl ) );
+			unconditionalModMethods.Add( () => loginCodeUpdater(
+				userLocal.UserId,
+				codeData.salt,
+				codeData.hashedCode,
+				codeData.expirationTime.Value,
+				(byte)( codeData.remainingAttemptCount.Value - 1 ),
+				codeData.destinationUrl ) );
 		}
 
 		bool? authenticationSuccessful = codeValid;
