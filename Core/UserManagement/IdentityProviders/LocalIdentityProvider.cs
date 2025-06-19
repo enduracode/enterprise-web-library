@@ -19,7 +19,8 @@ public class LocalIdentityProvider: IdentityProvider {
 	public delegate ( byte[]? salt, byte[]? hashedCode, Instant? expirationTime, byte? remainingAttemptCount, string destinationUrl ) LoginCodeGetterMethod(
 		int userId );
 
-	public delegate bool? PostAuthenticationMethod( SystemUser user, bool authenticationSuccessful, out Action? unconditionalModificationMethod );
+	public delegate bool? PostAuthenticationMethod(
+		SystemUser user, bool authenticationSuccessful, AuthenticationType authenticationType, out Action? unconditionalModificationMethod );
 
 	public delegate void PasswordUpdaterMethod( int userId, int salt, byte[] saltedPassword );
 
@@ -29,6 +30,11 @@ public class LocalIdentityProvider: IdentityProvider {
 	internal delegate string AutoLogInPageUrlGetterMethod( string user, string code );
 
 	internal delegate string ChangePasswordPageUrlGetterMethod( string destinationUrl );
+
+	public enum AuthenticationType {
+		Password,
+		LoginCode
+	}
 
 	internal readonly string AdministratingOrganizationName;
 	internal readonly string LogInHelpInstructions;
@@ -105,7 +111,11 @@ public class LocalIdentityProvider: IdentityProvider {
 
 		bool? authenticationSuccessful = passwordCorrect;
 		if( postAuthenticationMethod != null )
-			authenticationSuccessful = postAuthenticationMethod( userData.Value.user, passwordCorrect, out unconditionalModificationMethod );
+			authenticationSuccessful = postAuthenticationMethod(
+				userData.Value.user,
+				passwordCorrect,
+				AuthenticationType.Password,
+				out unconditionalModificationMethod );
 
 		if( !passwordCorrect || authenticationSuccessful == false )
 			return errorMessage;
@@ -269,7 +279,7 @@ public class LocalIdentityProvider: IdentityProvider {
 
 		bool? authenticationSuccessful = codeValid;
 		if( postAuthenticationMethod != null ) {
-			authenticationSuccessful = postAuthenticationMethod( userLocal, codeValid, out var unconditionalModMethod );
+			authenticationSuccessful = postAuthenticationMethod( userLocal, codeValid, AuthenticationType.LoginCode, out var unconditionalModMethod );
 			if( unconditionalModMethod is not null )
 				unconditionalModMethods.Add( unconditionalModMethod );
 
