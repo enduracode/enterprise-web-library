@@ -11,9 +11,8 @@ internal class UserManagement: SystemUserManagementProvider {
 		new LocalIdentityProvider(
 			"{0} Team".FormatWith( EwlStatics.EwlInitialism ),
 			"contact the {0} Team.".FormatWith( EwlStatics.EwlInitialism ),
-			emailAddress => ( createUser(), 1, null ),
+			PasswordStorageSetup.CreateStandard( emailAddress => ( createUser(), 1, null ), ( userId, salt, saltedPassword ) => {} ),
 			userId => ( null, null, null, null, "" ),
-			( userId, salt, saltedPassword ) => {},
 			( userId, salt, hashedCode, expirationTime, remainingAttemptCount, destinationUrl ) => {} ).ToCollection();
 
 	protected override IEnumerable<SystemUser> GetUsers() => createUser().ToCollection();

@@ -22,8 +22,6 @@ public class LocalIdentityProvider: IdentityProvider {
 	public delegate bool? PostAuthenticationMethod(
 		SystemUser user, bool authenticationSuccessful, AuthenticationType authenticationType, out Action? unconditionalModificationMethod );
 
-	public delegate void PasswordUpdaterMethod( int userId, int salt, byte[] saltedPassword );
-
 	public delegate void LoginCodeUpdaterMethod(
 		int userId, byte[]? salt, byte[]? hashedCode, Instant? expirationTime, byte? remainingAttemptCount, string destinationUrl );
 
@@ -38,12 +36,11 @@ public class LocalIdentityProvider: IdentityProvider {
 
 	internal readonly string AdministratingOrganizationName;
 	internal readonly string LogInHelpInstructions;
-	private readonly Func<string, ( SystemUser user, int salt, byte[]? saltedPassword )?> passwordLoginUserGetter;
+	private readonly PasswordStorageSetup passwordStorageSetup;
 	private readonly LoginCodeGetterMethod loginCodeGetter;
 	private readonly PostAuthenticationMethod? postAuthenticationMethod;
 	internal readonly Duration? AuthenticationDuration;
 	internal readonly Action<Validator, string>? PasswordValidationMethod;
-	private readonly PasswordUpdaterMethod passwordUpdater;
 	private readonly LoginCodeUpdaterMethod loginCodeUpdater;
 
 	/// <summary>
@@ -52,11 +49,8 @@ public class LocalIdentityProvider: IdentityProvider {
 	/// <param name="administratingOrganizationName">The name of the company/organization responsible for administrating the website. Do not pass null.</param>
 	/// <param name="logInHelpInstructions">The text explaining what to do if the user has trouble logging in. An example is "call 555-555-5555." or "talk to
 	/// XXX." Do not pass null.</param>
-	/// <param name="passwordLoginUserGetter">A function that takes an email address and returns the corresponding user object along with the user’s salt and
-	/// salted password, or null if a user with that email address does not exist. Do not pass null. We recommend that you use case-insensitive comparison.
-	/// </param>
+	/// <param name="passwordStorageSetup">The setup object for password storage.</param>
 	/// <param name="loginCodeGetter">A function that takes a user ID and returns the corresponding user’s login-code data.</param>
-	/// <param name="passwordUpdater">A method that takes a user ID and new password data and updates the corresponding user. Do not pass null.</param>
 	/// <param name="loginCodeUpdater">A method that takes a user ID and new login-code data and updates the corresponding user. You can also use this method to
 	/// log that a login code has been sent. Do not pass null.</param>
 	/// <param name="postAuthenticationMethod">Performs actions immediately after password or login-code authentication, which could include counting failed
@@ -69,24 +63,21 @@ public class LocalIdentityProvider: IdentityProvider {
 	/// <param name="passwordValidationMethod">Validates the specified password. Called when a user changes their password. Do not use unless the system
 	/// absolutely requires micromanagement of authentication behavior.</param>
 	public LocalIdentityProvider(
-		string administratingOrganizationName, string logInHelpInstructions,
-		Func<string, ( SystemUser user, int salt, byte[]? saltedPassword )?> passwordLoginUserGetter, LoginCodeGetterMethod loginCodeGetter,
-		PasswordUpdaterMethod passwordUpdater, LoginCodeUpdaterMethod loginCodeUpdater, PostAuthenticationMethod? postAuthenticationMethod = null,
-		Duration? authenticationDuration = null, Action<Validator, string>? passwordValidationMethod = null ) {
+		string administratingOrganizationName, string logInHelpInstructions, PasswordStorageSetup passwordStorageSetup, LoginCodeGetterMethod loginCodeGetter,
+		LoginCodeUpdaterMethod loginCodeUpdater, PostAuthenticationMethod? postAuthenticationMethod = null, Duration? authenticationDuration = null,
+		Action<Validator, string>? passwordValidationMethod = null ) {
 		AdministratingOrganizationName = administratingOrganizationName;
 		LogInHelpInstructions = logInHelpInstructions;
-		this.passwordLoginUserGetter = passwordLoginUserGetter;
+		this.passwordStorageSetup = passwordStorageSetup;
 		this.loginCodeGetter = loginCodeGetter;
 		this.postAuthenticationMethod = postAuthenticationMethod;
 		AuthenticationDuration = authenticationDuration;
 		PasswordValidationMethod = passwordValidationMethod;
-		this.passwordUpdater = passwordUpdater;
 		this.loginCodeUpdater = loginCodeUpdater;
 	}
 
 	internal void UpdatePassword( int userId, string password ) {
-		var salt = BitConverter.ToInt32( RandomNumberGenerator.GetBytes( 4 ), 0 );
-		passwordUpdater( userId, salt, getHashedPassword( password, salt ) );
+		passwordStorageSetup.Updater( userId, password );
 	}
 
 	internal string? LogInUserWithPassword(
@@ -98,29 +89,21 @@ public class LocalIdentityProvider: IdentityProvider {
 		user = null;
 		unconditionalModificationMethod = null;
 
-		var userData = passwordLoginUserGetter( emailAddress );
-		if( !userData.HasValue )
+		if( passwordStorageSetup.Authenticator( emailAddress, password ) is not {} authenticationResult )
 			return errorMessage;
 
-		var passwordCorrect = false;
-		if( userData.Value.saltedPassword != null ) {
-			var hashedPassword = getHashedPassword( password, userData.Value.salt );
-			if( userData.Value.saltedPassword.SequenceEqual( hashedPassword ) )
-				passwordCorrect = true;
-		}
-
-		bool? authenticationSuccessful = passwordCorrect;
+		bool? authenticationSuccessful = authenticationResult.passwordCorrect;
 		if( postAuthenticationMethod != null )
 			authenticationSuccessful = postAuthenticationMethod(
-				userData.Value.user,
-				passwordCorrect,
+				authenticationResult.user,
+				authenticationResult.passwordCorrect,
 				AuthenticationType.Password,
 				out unconditionalModificationMethod );
 
-		if( !passwordCorrect || authenticationSuccessful == false )
+		if( !authenticationResult.passwordCorrect || authenticationSuccessful == false )
 			return errorMessage;
-		user = userData.Value.user;
-		if( postAuthenticationMethod != null )
+		user = authenticationResult.user;
+		if( postAuthenticationMethod is not null )
 			// Re-retrieve the user in case postAuthenticationMethod modified it.
 			user = UserManagementStatics.SystemProvider.GetUser( user.UserId );
 		return authenticationSuccessful == true ? "" : null;
@@ -130,37 +113,8 @@ public class LocalIdentityProvider: IdentityProvider {
 	/// Returns the user with the specified email address if the specified password is correct. Returns null if a user with that email address does not exist or
 	/// if the password is incorrect.
 	/// </summary>
-	public SystemUser? AuthenticatePassword( string emailAddress, string password ) {
-		var userData = passwordLoginUserGetter( emailAddress );
-		return userData?.saltedPassword is not null && userData.Value.saltedPassword.SequenceEqual( getHashedPassword( password, userData.Value.salt ) )
-			       ? userData.Value.user
-			       : null;
-	}
-
-	private byte[] getHashedPassword( string password, int salt ) {
-		// Code from http://www.aspheute.com/english/20040105.asp.
-
-		// Create a new salt
-		var saltBytes = new byte[ 4 ];
-		unchecked {
-			saltBytes[ 0 ] = (byte)( salt >> 24 );
-			saltBytes[ 1 ] = (byte)( salt >> 16 );
-			saltBytes[ 2 ] = (byte)( salt >> 8 );
-			saltBytes[ 3 ] = (byte)( salt );
-		}
-
-		// Create Byte array of password string
-		var encoder = new ASCIIEncoding();
-		var secretBytes = encoder.GetBytes( password );
-
-		// append the two arrays
-		var toHash = new byte[ secretBytes.Length + saltBytes.Length ];
-		Array.Copy( secretBytes, 0, toHash, 0, secretBytes.Length );
-		Array.Copy( saltBytes, 0, toHash, secretBytes.Length, saltBytes.Length );
-
-		var sha1 = SHA1.Create();
-		return sha1.ComputeHash( toHash );
-	}
+	public SystemUser? AuthenticatePassword( string emailAddress, string password ) =>
+		passwordStorageSetup.Authenticator( emailAddress, password ) is { passwordCorrect: true } result ? result.user : null;
 
 	internal string SendLoginCode(
 		string emailAddress, bool isPasswordReset, AutoLogInPageUrlGetterMethod autologInPageUrlGetter,
@@ -308,5 +262,74 @@ public class LocalIdentityProvider: IdentityProvider {
 
 		// see https://security.stackexchange.com/a/167403/20277
 		return pbkdf2.GetBytes( 20 );
+	}
+}
+
+/// <summary>
+/// A configuration for password storage.
+/// </summary>
+[ PublicAPI ]
+public class PasswordStorageSetup {
+	public delegate ( SystemUser user, bool passwordCorrect )? AuthenticatorMethod( string emailAddress, string password );
+
+	public delegate void HashingUpdaterMethod( int userId, string password );
+
+	public delegate void UpdaterMethod( int userId, int salt, byte[] saltedPassword );
+
+	/// <summary>
+	/// Creates a setup object for standard password storage.
+	/// </summary>
+	/// <param name="getter">A function that takes an email address and returns the corresponding user object along with the user’s salt and salted password, or
+	/// null if a user with that email address does not exist. Do not pass null. We recommend that you use case-insensitive comparison.</param>
+	/// <param name="updater">A method that takes a user ID and new password data and updates the corresponding user. Do not pass null.</param>
+	public static PasswordStorageSetup CreateStandard( Func<string, ( SystemUser user, int salt, byte[]? saltedPassword )?> getter, UpdaterMethod updater ) =>
+		new(
+			( emailAddress, password ) => {
+				if( getter( emailAddress ) is not {} userData )
+					return null;
+				var passwordCorrect = userData.saltedPassword?.SequenceEqual( getHashedPassword( password, userData.salt ) ) == true;
+				return ( userData.user, passwordCorrect );
+			},
+			( userId, password ) => {
+				var salt = BitConverter.ToInt32( RandomNumberGenerator.GetBytes( 4 ), 0 );
+				updater( userId, salt, getHashedPassword( password, salt ) );
+			} );
+
+	private static byte[] getHashedPassword( string password, int salt ) {
+		// Code from http://www.aspheute.com/english/20040105.asp.
+
+		// Create a new salt
+		var saltBytes = new byte[ 4 ];
+		unchecked {
+			saltBytes[ 0 ] = (byte)( salt >> 24 );
+			saltBytes[ 1 ] = (byte)( salt >> 16 );
+			saltBytes[ 2 ] = (byte)( salt >> 8 );
+			saltBytes[ 3 ] = (byte)( salt );
+		}
+
+		// Create Byte array of password string
+		var encoder = new ASCIIEncoding();
+		var secretBytes = encoder.GetBytes( password );
+
+		// append the two arrays
+		var toHash = new byte[ secretBytes.Length + saltBytes.Length ];
+		Array.Copy( secretBytes, 0, toHash, 0, secretBytes.Length );
+		Array.Copy( saltBytes, 0, toHash, secretBytes.Length, saltBytes.Length );
+
+		var sha1 = SHA1.Create();
+		return sha1.ComputeHash( toHash );
+	}
+
+	/// <summary>
+	/// Creates a setup object for custom password storage. Do not use unless the system absolutely requires micromanagement of authentication behavior.
+	/// </summary>
+	public static PasswordStorageSetup CreateCustom( AuthenticatorMethod authenticator, HashingUpdaterMethod updater ) => new( authenticator, updater );
+
+	internal readonly AuthenticatorMethod Authenticator;
+	internal readonly HashingUpdaterMethod Updater;
+
+	private PasswordStorageSetup( AuthenticatorMethod authenticator, HashingUpdaterMethod updater ) {
+		Authenticator = authenticator;
+		Updater = updater;
 	}
 }
