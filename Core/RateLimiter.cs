@@ -8,21 +8,29 @@ namespace EnterpriseWebLibrary;
 public class RateLimiter {
 	private readonly Duration interval;
 	private readonly uint maxBurstSize;
+	private readonly Func<Instant> timeGetter;
 
 	private uint count;
 	private Instant lastDecrementTime;
 
-	public RateLimiter( Duration interval, uint maxBurstSize ) {
+	/// <summary>
+	/// Creates a rate limiter.
+	/// </summary>
+	/// <param name="interval"></param>
+	/// <param name="maxBurstSize"></param>
+	/// <param name="timeGetter">A function that gets the time instant for an action.</param>
+	public RateLimiter( Duration interval, uint maxBurstSize, Func<Instant> timeGetter ) {
 		this.interval = interval;
 		this.maxBurstSize = maxBurstSize;
+		this.timeGetter = timeGetter;
 
 		count = 0;
-		lastDecrementTime = Clock.GetCurrentTime();
+		lastDecrementTime = timeGetter();
 	}
 
 	public void RequestAction( Action actionMethod, Action atLimitMethod, Action limitExceededMethod ) {
 		// Decrement the count as time passes.
-		var currentTime = Clock.GetCurrentTime();
+		var currentTime = timeGetter();
 		if( currentTime > lastDecrementTime ) {
 			uint intervalsPassed;
 			checked {

@@ -14,7 +14,7 @@ public static class TelemetryStatics {
 
 	internal static void Init( Action<TextWriter>? appErrorContextWriter ) {
 		TelemetryStatics.appErrorContextWriter = appErrorContextWriter;
-		errorEmailLimiter = new RateLimiter( Duration.FromMinutes( 5 ), 10 );
+		errorEmailLimiter = new RateLimiter( Duration.FromMinutes( 5 ), 10, () => Clock.TransactionTime );
 	}
 
 	/// <summary>
