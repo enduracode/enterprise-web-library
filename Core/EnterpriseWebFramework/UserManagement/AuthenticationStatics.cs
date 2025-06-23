@@ -1,11 +1,14 @@
 ﻿#nullable disable
+using System.Collections.Concurrent;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Security.Principal;
+using EnterpriseWebLibrary.Caching;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.SystemSpecificLogic;
 using EnterpriseWebLibrary.UserManagement;
 using EnterpriseWebLibrary.UserManagement.IdentityProviders;
+using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.DataProtection;
@@ -206,25 +209,28 @@ public static class AuthenticationStatics {
 		return ( hiddenFields, ( ( emailAddress, password, errorMessage ) => {
 				                       var errors = new List<string>();
 
-				                       errorMessage = UserManagementStatics.LocalIdentityProvider.LogInUserWithPassword(
-					                       emailAddress,
-					                       password.Value,
-					                       out var user,
-					                       out var unconditionalModMethod,
-					                       errorMessage: errorMessage );
-				                       if( errorMessage == null )
-					                       LogOutUser();
-				                       else if( errorMessage.Any() )
-					                       errors.Add( errorMessage );
-				                       else
-					                       SetFormsAuthCookieAndUser( user, identityProvider: UserManagementStatics.LocalIdentityProvider );
+				                       var rateLimitersByEmailAndIp = AppMemoryCache.GetCacheValue(
+					                       "ewfLocalIdentityProviderLoginRateLimiters",
+					                       () => new ConcurrentDictionary<string, RateLimiter>( StringComparer.Ordinal ) );
+				                       var normalizedEmail = emailAddress.ToUpperInvariant();
+				                       var rateLimiter = rateLimitersByEmailAndIp.GetOrAdd(
+					                       normalizedEmail + ( EwfRequest.Current.ClientIp?.ToString() ?? "NonTcp" ),
+					                       createPasswordRateLimiter() );
+
+				                       rateLimiter.RequestAction(
+					                       logInUser,
+					                       logInUser,
+					                       waitDuration => errors.Add(
+						                       $"Too many login attempts. Please wait {waitDuration.ToTimeSpan().Humanize( minUnit: Humanizer.Localisation.TimeUnit.Second )} before trying again." ) );
 
 				                       errors.AddRange( verifyTestCookie() );
 				                       addStatusMessageIfClockNotSynchronized( clientTime );
 
+				                       Action unconditionalModMethod = null;
 				                       if( errors.Any() )
 					                       throw new DataModificationException( errors.ToArray(), modificationMethod: unconditionalModMethod );
 
+				                       SystemUser user = null;
 				                       if( unconditionalModMethod is not null ) {
 					                       unconditionalModMethod();
 
@@ -233,6 +239,21 @@ public static class AuthenticationStatics {
 				                       }
 
 				                       return user;
+
+				                       void logInUser() {
+					                       errorMessage = UserManagementStatics.LocalIdentityProvider.LogInUserWithPassword(
+						                       emailAddress,
+						                       password.Value,
+						                       out user,
+						                       out unconditionalModMethod,
+						                       errorMessage: errorMessage );
+					                       if( errorMessage == null )
+						                       LogOutUser();
+					                       else if( errorMessage.Any() )
+						                       errors.Add( errorMessage );
+					                       else
+						                       SetFormsAuthCookieAndUser( user, identityProvider: UserManagementStatics.LocalIdentityProvider );
+				                       }
 			                       }, ( emailAddress, isPasswordReset, destinationUrl, newUserRoleId ) => {
 				                       if( UserManagementStatics.LocalIdentityProvider.SendLoginCode(
 					                           emailAddress,
@@ -355,6 +376,8 @@ public static class AuthenticationStatics {
 			PageBase.AddStatusMessage( StatusMessageType.Warning, GetClockWrongMessage() );
 	}
 
+	private static RateLimiter createPasswordRateLimiter() => new( Duration.FromSeconds( 30 ), 5, () => Clock.TransactionTime );
+
 
 	// Cookie Updating
 
@@ -417,12 +440,11 @@ public static class AuthenticationStatics {
 		// Ignore the cookie if the existence of a user has changed since that could mean the user timed out.
 		CookieStatics.TryGetCookieValueFromResponseOrRequest( identityProviderCookieName, out var cookieValue ) && cookieValue is not null &&
 		cookieValue[ 0 ] == ( SystemUser.Current is not null ? '+' : '-' )
-			? UserManagementStatics.IdentityProviders.SingleOrDefault(
-				identityProvider => string.Equals(
-					identityProvider is LocalIdentityProvider ? "Local" :
-					identityProvider is SamlIdentityProvider saml ? saml.EntityId : throw new ApplicationException( "identity provider" ),
-					cookieValue.Substring( 1 ),
-					StringComparison.Ordinal ) )
+			? UserManagementStatics.IdentityProviders.SingleOrDefault( identityProvider => string.Equals(
+				identityProvider is LocalIdentityProvider ? "Local" :
+				identityProvider is SamlIdentityProvider saml ? saml.EntityId : throw new ApplicationException( "identity provider" ),
+				cookieValue.Substring( 1 ),
+				StringComparison.Ordinal ) )
 			: null;
 
 	internal static void SetUserLastIdentityProvider( IdentityProvider identityProvider ) {
