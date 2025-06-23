@@ -175,7 +175,7 @@ public static class AuthenticationStatics {
 	}
 
 
-	// Log-In
+	// Log-in and reauthentication
 
 	/// <summary>
 	/// Gets an email address form item for use on log-in pages.
@@ -374,6 +374,36 @@ public static class AuthenticationStatics {
 	private static void addStatusMessageIfClockNotSynchronized( DataValue<string> clientTime ) {
 		if( ClockNotSynchronized( clientTime ) )
 			PageBase.AddStatusMessage( StatusMessageType.Warning, GetClockWrongMessage() );
+	}
+
+	/// <summary>
+	/// Returns the empty string if the specified password is correct for the authenticated user. Otherwise, returns an error message. Use only if the local
+	/// identity provider is enabled.
+	/// </summary>
+	public static string ReauthenticateUser( string emailAddress, string password ) {
+		if( SystemUser.Current is null )
+			throw new Exception( "no authenticated user" );
+
+		var rateLimitersByUserId = AppMemoryCache.GetCacheValue(
+			"ewfLocalIdentityProviderReauthenticationRateLimiters",
+			() => new ConcurrentDictionary<int, RateLimiter>() );
+		var rateLimiter = rateLimitersByUserId.GetOrAdd( SystemUser.Current.UserId, createPasswordRateLimiter() );
+
+		string errorMessage = null;
+		rateLimiter.RequestAction(
+			authenticate,
+			authenticate,
+			waitDuration => errorMessage =
+				                $"Too many current-password attempts. Please wait {waitDuration.ToTimeSpan().Humanize( minUnit: Humanizer.Localisation.TimeUnit.Second )} before trying again." );
+
+		return errorMessage;
+
+		void authenticate() {
+			var user = UserManagementStatics.LocalIdentityProvider.AuthenticatePassword( emailAddress, password );
+			if( user is not null && user.UserId != SystemUser.Current.UserId )
+				throw new Exception( "specified user does not match authenticated user" );
+			errorMessage = user is null ? "Current password is incorrect." : "";
+		}
 	}
 
 	private static RateLimiter createPasswordRateLimiter() => new( Duration.FromSeconds( 30 ), 5, () => Clock.TransactionTime );
