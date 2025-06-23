@@ -312,25 +312,6 @@ public static class AuthenticationStatics {
 	}
 
 	/// <summary>
-	/// Sets a test cookie that is verified during user log-in. Only necessary when calling a log-in modification method from a page-load post-back, in which case
-	/// the log-in page may not be able to set the cookie itself in time for verification.
-	/// </summary>
-	public static void SetTestCookie() {
-		setCookie( testCookieName, "No data" );
-	}
-
-	internal static IReadOnlyCollection<EtherealComponent> GetLogInHiddenFields( DataValue<string> clientTime ) {
-		var timeHiddenFieldId = new HiddenFieldId();
-		return new EwfHiddenField(
-			"",
-			id: timeHiddenFieldId,
-			validationMethod: ( postBackValue, _ ) => clientTime.Value = postBackValue.Value,
-			jsInitStatementGetter: id => "$( document.getElementById( '{0}' ).form ).submit( function() {{ {1} }} );".FormatWith(
-				id,
-				timeHiddenFieldId.GetJsValueModificationStatements( "new Date().toISOString()" ) ) ).PageComponent.ToCollection();
-	}
-
-	/// <summary>
 	/// MVC and private use only.
 	/// </summary>
 	public static void SetFormsAuthCookieAndUser( SystemUser user, IdentityProvider identityProvider = null, Duration? authenticationDuration = null ) {
@@ -362,10 +343,6 @@ public static class AuthenticationStatics {
 
 	private static void setFormsAuthCookie( AuthenticationTicket ticket ) {
 		setCookie( userCookieName, authenticationTicketProtector.Protect( ticket ) );
-	}
-
-	private static void setCookie( string name, string value ) {
-		CookieStatics.SetCookie( name, value, null, EwfConfigurationStatics.AppSupportsSecureConnections, true );
 	}
 
 	private static IEnumerable<string> verifyTestCookie() =>
@@ -488,7 +465,26 @@ public static class AuthenticationStatics {
 
 	// Client-side functionality verification
 
+	/// <summary>
+	/// Sets a test cookie that is verified during user log-in. Only necessary when calling a log-in modification method from a page-load post-back, in which case
+	/// the log-in page may not be able to set the cookie itself in time for verification.
+	/// </summary>
+	public static void SetTestCookie() {
+		setCookie( testCookieName, "No data" );
+	}
+
 	internal static bool TestCookieMissing() => !CookieStatics.TryGetCookieValueFromRequestOnly( testCookieName, out _ );
+
+	internal static IReadOnlyCollection<EtherealComponent> GetLogInHiddenFields( DataValue<string> clientTime ) {
+		var timeHiddenFieldId = new HiddenFieldId();
+		return new EwfHiddenField(
+			"",
+			id: timeHiddenFieldId,
+			validationMethod: ( postBackValue, _ ) => clientTime.Value = postBackValue.Value,
+			jsInitStatementGetter: id => "$( document.getElementById( '{0}' ).form ).submit( function() {{ {1} }} );".FormatWith(
+				id,
+				timeHiddenFieldId.GetJsValueModificationStatements( "new Date().toISOString()" ) ) ).PageComponent.ToCollection();
+	}
 
 	internal static bool ClockNotSynchronized( DataValue<string> clientTime ) {
 		var clientParseResult = InstantPattern.ExtendedIso.Parse( clientTime.Value );
@@ -503,5 +499,12 @@ public static class AuthenticationStatics {
 		var timeZone = DateTimeZoneProviders.Tzdb.GetSystemDefault();
 		return Translation.YourClockIsWrong + " " + EwfRequest.Current.RequestTime.InZone( timeZone ).ToDateTimeUnspecified().ToHourAndMinuteString() + " " +
 		       timeZone.GetZoneInterval( EwfRequest.Current.RequestTime ).Name + ".";
+	}
+
+
+	// Cookie setting
+
+	private static void setCookie( string name, string value ) {
+		CookieStatics.SetCookie( name, value, null, EwfConfigurationStatics.AppSupportsSecureConnections, true );
 	}
 }
