@@ -55,7 +55,7 @@ public static class TelemetryStatics {
 				() => EmailStatics.SendDeveloperNotificationEmail( getErrorEmailMessage( sw.ToString() ) ),
 				() => SendDeveloperNotification(
 					"An error occurred and the email rate-limit was reached! See the log file for this and any other errors that may occur in the near future." ),
-				() => {} ),
+				_ => {} ),
 			() => logError( sw.ToString() ) );
 	}
 

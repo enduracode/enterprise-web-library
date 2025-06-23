@@ -6,6 +6,12 @@ namespace EnterpriseWebLibrary;
 /// A leaky-bucket rate limiter. See https://en.wikipedia.org/wiki/Leaky_bucket.
 /// </summary>
 public class RateLimiter {
+	/// <summary>
+	/// A method executed if the rate limit has been exceeded.
+	/// </summary>
+	/// <param name="waitDuration">The time remaining until an action can execute within the rate limit.</param>
+	public delegate void LimitExceededMethod( Duration waitDuration );
+
 	private readonly Duration interval;
 	private readonly uint maxBurstSize;
 	private readonly Func<Instant> timeGetter;
@@ -33,7 +39,10 @@ public class RateLimiter {
 	/// Executes one of the specified actions based on the state of this rate limiter. This method is thread safe, but the action executes after the lock is
 	/// released.
 	/// </summary>
-	public void RequestAction( Action actionMethod, Action atLimitMethod, Action limitExceededMethod ) {
+	/// <param name="actionMethod"></param>
+	/// <param name="atLimitMethod"></param>
+	/// <param name="limitExceededMethod">The method executed if the rate limit has been exceeded.</param>
+	public void RequestAction( Action actionMethod, Action atLimitMethod, LimitExceededMethod limitExceededMethod ) {
 		Action method;
 		lock( actionLock ) {
 			// Decrement the count as time passes.
@@ -51,8 +60,10 @@ public class RateLimiter {
 				count += 1;
 				method = count < maxBurstSize ? actionMethod : atLimitMethod;
 			}
-			else
-				method = limitExceededMethod;
+			else {
+				var remainingTime = currentTime - lastDecrementTime;
+				method = () => limitExceededMethod( remainingTime );
+			}
 		}
 
 		method();
