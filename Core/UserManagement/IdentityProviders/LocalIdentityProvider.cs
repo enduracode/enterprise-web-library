@@ -280,7 +280,7 @@ public class PasswordStorageSetup {
 	/// Creates a setup object for standard password storage.
 	/// </summary>
 	/// <param name="getter">A function that takes an email address and returns the corresponding user object along with the user’s salt and salted password, or
-	/// null if a user with that email address does not exist. Do not pass null. We recommend that you use case-insensitive comparison.</param>
+	/// null if a user with that email address does not exist. Do not pass null. You must use case-insensitive comparison.</param>
 	/// <param name="updater">A method that takes a user ID and new password data and updates the corresponding user. Do not pass null.</param>
 	public static PasswordStorageSetup CreateStandard( Func<string, ( SystemUser user, int salt, byte[]? saltedPassword )?> getter, UpdaterMethod updater ) =>
 		new(
