@@ -51,15 +51,11 @@ public static class TelemetryStatics {
 		appErrorContextWriter?.Invoke( sw );
 
 		ExceptionHandlingTools.CallEveryMethod(
-			() => {
-				lock( errorEmailLimiter! ) {
-					errorEmailLimiter.RequestAction(
-						() => EmailStatics.SendDeveloperNotificationEmail( getErrorEmailMessage( sw.ToString() ) ),
-						() => SendDeveloperNotification(
-							"An error occurred and the email rate-limit was reached! See the log file for this and any other errors that may occur in the near future." ),
-						() => {} );
-				}
-			},
+			() => errorEmailLimiter!.RequestAction(
+				() => EmailStatics.SendDeveloperNotificationEmail( getErrorEmailMessage( sw.ToString() ) ),
+				() => SendDeveloperNotification(
+					"An error occurred and the email rate-limit was reached! See the log file for this and any other errors that may occur in the near future." ),
+				() => {} ),
 			() => logError( sw.ToString() ) );
 	}
 

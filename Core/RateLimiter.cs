@@ -9,6 +9,7 @@ public class RateLimiter {
 	private readonly Duration interval;
 	private readonly uint maxBurstSize;
 	private readonly Func<Instant> timeGetter;
+	private readonly object actionLock = new();
 
 	private uint count;
 	private Instant lastDecrementTime;
@@ -28,26 +29,32 @@ public class RateLimiter {
 		lastDecrementTime = timeGetter();
 	}
 
+	/// <summary>
+	/// Executes one of the specified actions based on the state of this rate limiter. This method is thread safe, but the action executes after the lock is
+	/// released.
+	/// </summary>
 	public void RequestAction( Action actionMethod, Action atLimitMethod, Action limitExceededMethod ) {
-		// Decrement the count as time passes.
-		var currentTime = timeGetter();
-		if( currentTime > lastDecrementTime ) {
-			uint intervalsPassed;
-			checked {
-				intervalsPassed = (uint)Math.Floor( ( currentTime - lastDecrementTime ) / interval );
+		Action method;
+		lock( actionLock ) {
+			// Decrement the count as time passes.
+			var currentTime = timeGetter();
+			if( currentTime > lastDecrementTime ) {
+				uint intervalsPassed;
+				checked {
+					intervalsPassed = (uint)Math.Floor( ( currentTime - lastDecrementTime ) / interval );
+				}
+				count = intervalsPassed < count ? count - intervalsPassed : 0;
+				lastDecrementTime += interval * intervalsPassed;
 			}
-			count = intervalsPassed < count ? count - intervalsPassed : 0;
-			lastDecrementTime += interval * intervalsPassed;
+
+			if( count < maxBurstSize ) {
+				count += 1;
+				method = count < maxBurstSize ? actionMethod : atLimitMethod;
+			}
+			else
+				method = limitExceededMethod;
 		}
 
-		if( count < maxBurstSize ) {
-			count += 1;
-			if( count < maxBurstSize )
-				actionMethod();
-			else
-				atLimitMethod();
-		}
-		else
-			limitExceededMethod();
+		method();
 	}
 }
