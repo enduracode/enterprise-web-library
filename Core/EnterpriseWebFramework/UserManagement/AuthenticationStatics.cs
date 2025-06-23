@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Security.Principal;
@@ -26,13 +25,13 @@ public static class AuthenticationStatics {
 
 	private static readonly Duration defaultAuthenticationDuration = Duration.FromHours( 32 ); // persist across consecutive days of usage
 
-	private static AppAuthenticationProvider provider;
-	private static TicketDataFormat authenticationTicketProtector;
-	private static Func<string, ResourceBase> defaultLogInPageGetter;
-	private static LocalIdentityProvider.AutoLogInPageUrlGetterMethod autoLogInPageUrlGetter;
-	private static LocalIdentityProvider.ChangePasswordPageUrlGetterMethod changePasswordPageUrlGetter;
+	private static AppAuthenticationProvider? provider;
+	private static TicketDataFormat? authenticationTicketProtector;
+	private static Func<string, ResourceBase>? defaultLogInPageGetter;
+	private static LocalIdentityProvider.AutoLogInPageUrlGetterMethod? autoLogInPageUrlGetter;
+	private static LocalIdentityProvider.ChangePasswordPageUrlGetterMethod? changePasswordPageUrlGetter;
 
-	private static IReadOnlyCollection<SamlIdentityProvider> samlIdentityProviders;
+	private static IReadOnlyCollection<SamlIdentityProvider>? samlIdentityProviders;
 
 	public delegate SystemUser PasswordLoginModificationMethod( string emailAddress, DataValue<string> password, string errorMessage = "" );
 
@@ -59,7 +58,7 @@ public static class AuthenticationStatics {
 		AuthenticationStatics.changePasswordPageUrlGetter = changePasswordPageUrlGetter;
 	}
 
-	internal static AppAuthenticationProvider AppProvider => provider;
+	internal static AppAuthenticationProvider AppProvider => provider!;
 
 	internal static void InitAppSpecificLogicDependencies() {
 		// In the future we expect this to use logic from AppAuthenticationProvider to potentially filter the system’s identity providers.
@@ -68,7 +67,7 @@ public static class AuthenticationStatics {
 			                        : [ ];
 	}
 
-	internal static IReadOnlyCollection<SamlIdentityProvider> SamlIdentityProviders => samlIdentityProviders;
+	internal static IReadOnlyCollection<SamlIdentityProvider> SamlIdentityProviders => samlIdentityProviders!;
 
 	internal static IReadOnlyCollection<FlowComponent> GetUserInfoComponents() {
 		var customComponents = AppProvider.GetUserInfoComponents();
@@ -105,36 +104,36 @@ public static class AuthenticationStatics {
 	/// <summary>
 	/// Returns the default log-in page for the application. This is useful if you need a direct hyperlink to it.
 	/// </summary>
-	public static ResourceBase GetDefaultLogInPage( string returnUrl ) => defaultLogInPageGetter( returnUrl );
+	public static ResourceBase GetDefaultLogInPage( string returnUrl ) => defaultLogInPageGetter!( returnUrl );
 
 
 	/// <summary>
 	/// The second item in the returned tuple will be (1) null if impersonation is not taking place, (2) a value with a null user if impersonation is taking place
 	/// with an impersonator who doesn’t correspond to a user, or (3) a value containing the impersonator.
 	/// </summary>
-	internal static ( SystemUser, SpecifiedValue<SystemUser>, Instant? ) GetSessionDataFromCookies() {
+	internal static ( SystemUser?, SpecifiedValue<SystemUser?>?, Instant? ) GetSessionDataFromCookies() {
 		if( !UserManagementStatics.UserManagementEnabled )
 			return ( null, null, null );
 
 		var ticketData = getTicketData();
 		return UserCanImpersonate( ticketData.user ) &&
 		       CookieStatics.TryGetCookieValueFromResponseOrRequest( UserImpersonationStatics.CookieName, out var value ) && value is not null
-			       ? ( value.Length > 0 ? UserManagementStatics.GetUser( int.Parse( value ), false ) : null, new SpecifiedValue<SystemUser>( ticketData.user ),
+			       ? ( value.Length > 0 ? UserManagementStatics.GetUser( int.Parse( value ), false ) : null, new SpecifiedValue<SystemUser?>( ticketData.user ),
 				         ticketData.expirationTime )
 			       : ( ticketData.user, null, ticketData.expirationTime );
 
-		( SystemUser user, Instant? expirationTime ) getTicketData() {
+		( SystemUser? user, Instant? expirationTime ) getTicketData() {
 			if( !CookieStatics.TryGetCookieValueFromResponseOrRequest( userCookieName, out var cookieValue ) || cookieValue is null )
 				return ( null, null );
 			var ticket = GetFormsAuthTicket( cookieValue );
 			if( ticket is null )
 				return ( null, null );
-			return ( UserManagementStatics.GetUser( int.Parse( ticket.Principal.Identity.Name ), false ),
-				       Instant.FromDateTimeOffset( ticket.Properties.ExpiresUtc.Value ) );
+			return ( UserManagementStatics.GetUser( int.Parse( ticket.Principal.Identity!.Name! ), false ),
+				       Instant.FromDateTimeOffset( ticket.Properties.ExpiresUtc!.Value ) );
 		}
 	}
 
-	internal static bool UserCanImpersonate( SystemUser user ) => user is { Role.CanManageUsers: true } || !ConfigurationStatics.IsLiveInstallation;
+	internal static bool UserCanImpersonate( SystemUser? user ) => user is { Role.CanManageUsers: true } || !ConfigurationStatics.IsLiveInstallation;
 
 
 	// Adding a New User
@@ -146,7 +145,7 @@ public static class AuthenticationStatics {
 	/// <param name="firstLabel"></param>
 	/// <param name="secondLabel"></param>
 	public static IReadOnlyCollection<FormItem> GetPasswordModificationFormItems(
-		out Action<int> passwordUpdater, IEnumerable<PhrasingComponent> firstLabel = null, IEnumerable<PhrasingComponent> secondLabel = null ) {
+		out Action<int> passwordUpdater, IEnumerable<PhrasingComponent>? firstLabel = null, IEnumerable<PhrasingComponent>? secondLabel = null ) {
 		var password = new DataValue<string>( false );
 		var passwordAgainFormItem = password.ToTextControl( true, setup: TextControlSetup.CreateObscured( autoFillTokens: "new-password" ) )
 			.ToFormItem( label: secondLabel?.Materialize() ?? "Password again".ToComponents() );
@@ -181,7 +180,7 @@ public static class AuthenticationStatics {
 	/// Gets an email address form item for use on log-in pages.
 	/// </summary>
 	public static FormItem GetEmailAddressFormItem(
-		this AbstractDataValue<string> emailAddress, IReadOnlyCollection<PhrasingComponent> label, Action<Validator> additionalValidationMethod = null ) =>
+		this AbstractDataValue<string> emailAddress, IReadOnlyCollection<PhrasingComponent> label, Action<Validator>? additionalValidationMethod = null ) =>
 		// The username token probably works better for password managers; see https://stackoverflow.com/a/57902690/35349.
 		emailAddress.ToEmailAddressControl(
 				false,
@@ -214,7 +213,7 @@ public static class AuthenticationStatics {
 					                       () => new ConcurrentDictionary<string, RateLimiter>( StringComparer.Ordinal ) );
 				                       var normalizedEmail = emailAddress.ToUpperInvariant();
 				                       var rateLimiter = rateLimitersByEmailAndIp.GetOrAdd(
-					                       normalizedEmail + ( EwfRequest.Current.ClientIp?.ToString() ?? "NonTcp" ),
+					                       normalizedEmail + ( EwfRequest.Current!.ClientIp?.ToString() ?? "NonTcp" ),
 					                       createPasswordRateLimiter() );
 
 				                       rateLimiter.RequestAction(
@@ -226,40 +225,40 @@ public static class AuthenticationStatics {
 				                       errors.AddRange( verifyTestCookie() );
 				                       addStatusMessageIfClockNotSynchronized( clientTime );
 
-				                       Action unconditionalModMethod = null;
+				                       Action? unconditionalModMethod = null;
 				                       if( errors.Any() )
 					                       throw new DataModificationException( errors.ToArray(), modificationMethod: unconditionalModMethod );
 
-				                       SystemUser user = null;
+				                       SystemUser? user = null;
 				                       if( unconditionalModMethod is not null ) {
 					                       unconditionalModMethod();
 
 					                       // Re-retrieve the user in case unconditionalModMethod modified it.
-					                       user = UserManagementStatics.SystemProvider.GetUser( user.UserId );
+					                       user = UserManagementStatics.SystemProvider.GetUser( user!.UserId );
 				                       }
 
-				                       return user;
+				                       return user!;
 
 				                       void logInUser() {
-					                       errorMessage = UserManagementStatics.LocalIdentityProvider.LogInUserWithPassword(
+					                       var message = UserManagementStatics.LocalIdentityProvider.LogInUserWithPassword(
 						                       emailAddress,
 						                       password.Value,
 						                       out user,
 						                       out unconditionalModMethod,
 						                       errorMessage: errorMessage );
-					                       if( errorMessage == null )
+					                       if( message is null )
 						                       LogOutUser();
-					                       else if( errorMessage.Any() )
-						                       errors.Add( errorMessage );
+					                       else if( message.Length > 0 )
+						                       errors.Add( message );
 					                       else
-						                       SetFormsAuthCookieAndUser( user, identityProvider: UserManagementStatics.LocalIdentityProvider );
+						                       SetFormsAuthCookieAndUser( user!, identityProvider: UserManagementStatics.LocalIdentityProvider );
 				                       }
 			                       }, ( emailAddress, isPasswordReset, destinationUrl, newUserRoleId ) => {
 				                       if( UserManagementStatics.LocalIdentityProvider.SendLoginCode(
 					                           emailAddress,
 					                           isPasswordReset,
-					                           autoLogInPageUrlGetter,
-					                           changePasswordPageUrlGetter,
+					                           autoLogInPageUrlGetter!,
+					                           changePasswordPageUrlGetter!,
 					                           destinationUrl,
 					                           newUserRoleId: newUserRoleId ) is { Length: > 0 } errorMessage )
 					                       throw new DataModificationException( errorMessage );
@@ -271,19 +270,19 @@ public static class AuthenticationStatics {
 			                       }, ( emailAddress, code, errorMessage ) => {
 				                       var errors = new List<string>();
 
-				                       errorMessage = UserManagementStatics.LocalIdentityProvider.LogInUserWithCode(
+				                       var message = UserManagementStatics.LocalIdentityProvider.LogInUserWithCode(
 					                       emailAddress,
 					                       code,
 					                       out var user,
 					                       out var destinationUrl,
 					                       out var unconditionalModMethod,
 					                       errorMessage: errorMessage );
-				                       if( errorMessage == null )
+				                       if( message is null )
 					                       LogOutUser();
-				                       else if( errorMessage.Any() )
-					                       errors.Add( errorMessage );
+				                       else if( message.Length > 0 )
+					                       errors.Add( message );
 				                       else
-					                       SetFormsAuthCookieAndUser( user, identityProvider: UserManagementStatics.LocalIdentityProvider );
+					                       SetFormsAuthCookieAndUser( user!, identityProvider: UserManagementStatics.LocalIdentityProvider );
 
 				                       errors.AddRange( verifyTestCookie() );
 				                       addStatusMessageIfClockNotSynchronized( clientTime );
@@ -295,13 +294,13 @@ public static class AuthenticationStatics {
 					                       unconditionalModMethod();
 
 					                       // Re-retrieve the user in case unconditionalModMethod modified it.
-					                       user = UserManagementStatics.SystemProvider.GetUser( user.UserId );
+					                       user = UserManagementStatics.SystemProvider.GetUser( user!.UserId );
 				                       }
 
-				                       return ( user, destinationUrl );
+				                       return ( user!, destinationUrl );
 			                       }, ( userId, authenticationDuration ) => {
 				                       var user = UserManagementStatics.SystemProvider.GetUser( userId );
-				                       SetFormsAuthCookieAndUser( user, authenticationDuration: authenticationDuration );
+				                       SetFormsAuthCookieAndUser( user!, authenticationDuration: authenticationDuration );
 
 				                       var errors = new List<string>();
 				                       errors.AddRange( verifyTestCookie() );
@@ -314,7 +313,7 @@ public static class AuthenticationStatics {
 	/// <summary>
 	/// MVC and private use only.
 	/// </summary>
-	public static void SetFormsAuthCookieAndUser( SystemUser user, IdentityProvider identityProvider = null, Duration? authenticationDuration = null ) {
+	public static void SetFormsAuthCookieAndUser( SystemUser user, IdentityProvider? identityProvider = null, Duration? authenticationDuration = null ) {
 		if( RequestState.Instance.ImpersonatorExists )
 			UserImpersonationStatics.SetCookie( user );
 		else {
@@ -326,7 +325,7 @@ public static class AuthenticationStatics {
 				new ClaimsPrincipal( new GenericIdentity( user.UserId.ToString() ) ),
 				new AuthenticationProperties
 					{
-						IssuedUtc = EwfRequest.Current.RequestTime.ToDateTimeOffset(),
+						IssuedUtc = EwfRequest.Current!.RequestTime.ToDateTimeOffset(),
 						ExpiresUtc = EwfRequest.Current.RequestTime.Plus( authenticationDuration.Value ).ToDateTimeOffset()
 					},
 				EwlStatics.EwlInitialism );
@@ -342,7 +341,7 @@ public static class AuthenticationStatics {
 	}
 
 	private static void setFormsAuthCookie( AuthenticationTicket ticket ) {
-		setCookie( userCookieName, authenticationTicketProtector.Protect( ticket ) );
+		setCookie( userCookieName, authenticationTicketProtector!.Protect( ticket ) );
 	}
 
 	private static IEnumerable<string> verifyTestCookie() =>
@@ -366,18 +365,18 @@ public static class AuthenticationStatics {
 			() => new ConcurrentDictionary<int, RateLimiter>() );
 		var rateLimiter = rateLimitersByUserId.GetOrAdd( SystemUser.Current.UserId, createPasswordRateLimiter() );
 
-		string errorMessage = null;
+		string? errorMessage = null;
 		rateLimiter.RequestAction(
 			authenticate,
 			authenticate,
 			waitDuration => errorMessage =
 				                $"Too many current-password attempts. Please wait {waitDuration.ToTimeSpan().Humanize( minUnit: Humanizer.Localisation.TimeUnit.Second )} before trying again." );
 
-		return errorMessage;
+		return errorMessage!;
 
 		void authenticate() {
 			var user = UserManagementStatics.LocalIdentityProvider.AuthenticatePassword( emailAddress, password );
-			if( user is not null && user.UserId != SystemUser.Current.UserId )
+			if( user is not null && user.UserId != SystemUser.Current!.UserId )
 				throw new Exception( "specified user does not match authenticated user" );
 			errorMessage = user is null ? "Current password is incorrect." : "";
 		}
@@ -388,7 +387,7 @@ public static class AuthenticationStatics {
 
 	// Cookie Updating
 
-	internal static Action GetUserCookieUpdater() {
+	internal static Action? GetUserCookieUpdater() {
 		if( !CookieStatics.TryGetCookieValueFromRequestOnly( userCookieName, out var cookieValue ) )
 			return null;
 
@@ -400,8 +399,8 @@ public static class AuthenticationStatics {
 		if( ticket is null )
 			return clearFormsAuthCookie;
 
-		var passedDuration = EwfRequest.Current.RequestTime - Instant.FromDateTimeOffset( ticket.Properties.IssuedUtc.Value );
-		var totalDuration = Duration.FromTimeSpan( ticket.Properties.ExpiresUtc.Value - ticket.Properties.IssuedUtc.Value );
+		var passedDuration = EwfRequest.Current!.RequestTime - Instant.FromDateTimeOffset( ticket.Properties.IssuedUtc!.Value );
+		var totalDuration = Duration.FromTimeSpan( ticket.Properties.ExpiresUtc!.Value - ticket.Properties.IssuedUtc.Value );
 		if( passedDuration / totalDuration < .1 )
 			return null;
 
@@ -410,13 +409,13 @@ public static class AuthenticationStatics {
 		return () => setFormsAuthCookie( ticket );
 	}
 
-	internal static AuthenticationTicket GetFormsAuthTicket( string cookie ) {
-		AuthenticationTicket ticket = null;
+	internal static AuthenticationTicket? GetFormsAuthTicket( string cookie ) {
+		AuthenticationTicket? ticket = null;
 		try {
-			ticket = authenticationTicketProtector.Unprotect( cookie );
+			ticket = authenticationTicketProtector!.Unprotect( cookie );
 		}
 		catch( CryptographicException ) {}
-		return ticket is not null && EwfRequest.Current.RequestTime < Instant.FromDateTimeOffset( ticket.Properties.ExpiresUtc.Value ) ? ticket : null;
+		return ticket is not null && EwfRequest.Current!.RequestTime < Instant.FromDateTimeOffset( ticket.Properties.ExpiresUtc!.Value ) ? ticket : null;
 	}
 
 
@@ -443,7 +442,7 @@ public static class AuthenticationStatics {
 
 	// User’s last identity provider
 
-	internal static IdentityProvider GetUserLastIdentityProvider() =>
+	internal static IdentityProvider? GetUserLastIdentityProvider() =>
 		// Ignore the cookie if the existence of a user has changed since that could mean the user timed out.
 		CookieStatics.TryGetCookieValueFromResponseOrRequest( identityProviderCookieName, out var cookieValue ) && cookieValue is not null &&
 		cookieValue[ 0 ] == ( SystemUser.Current is not null ? '+' : '-' )
@@ -491,13 +490,13 @@ public static class AuthenticationStatics {
 		if( !clientParseResult.Success )
 			throw new DataModificationException( "Your browser did not submit the current time." );
 
-		var clockDifference = clientParseResult.GetValueOrThrow() - EwfRequest.Current.RequestTime;
+		var clockDifference = clientParseResult.GetValueOrThrow() - EwfRequest.Current!.RequestTime;
 		return Math.Abs( clockDifference.TotalMinutes ) > 5;
 	}
 
 	internal static string GetClockWrongMessage() {
 		var timeZone = DateTimeZoneProviders.Tzdb.GetSystemDefault();
-		return Translation.YourClockIsWrong + " " + EwfRequest.Current.RequestTime.InZone( timeZone ).ToDateTimeUnspecified().ToHourAndMinuteString() + " " +
+		return Translation.YourClockIsWrong + " " + EwfRequest.Current!.RequestTime.InZone( timeZone ).ToDateTimeUnspecified().ToHourAndMinuteString() + " " +
 		       timeZone.GetZoneInterval( EwfRequest.Current.RequestTime ).Name + ".";
 	}
 
