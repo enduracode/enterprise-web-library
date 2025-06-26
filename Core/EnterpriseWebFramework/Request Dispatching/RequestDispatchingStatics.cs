@@ -1,6 +1,9 @@
-﻿using System.Threading;
+﻿using System.Collections.Concurrent;
+using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+using EnterpriseWebLibrary.Caching;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ErrorPages;
@@ -109,6 +112,13 @@ public static class RequestDispatchingStatics {
 					return;
 				}
 
+				if( meterRequest( context ) is {} errorPage ) {
+					context.Response.StatusCode = 429;
+					allowSlowRequestIfNecessary( errorPage );
+					errorPage.HandleRequest( context, true );
+					return;
+				}
+
 				using( MiniProfiler.Current.Step( "EWF - Resolve URL" ) )
 					requestHandler = resolveUrl( context, appRelativeUrl! );
 
@@ -152,6 +162,63 @@ public static class RequestDispatchingStatics {
 		var requestProvider = EwfRequest.AppProvider;
 		var host = requestProvider.GetRequestHost( request );
 		return host.Any() ? BaseUrl.GetUrlString( requestProvider.RequestIsSecure( request ), host, requestProvider.GetRequestBasePath( request ) ) : "";
+	}
+
+	private static PageBase? meterRequest( HttpContext context ) {
+		RateLimiter rateLimiter;
+		string requestSource;
+
+		var user = !RequestState.UserAccessible ? null : RequestState.ImpersonatorExists ? RequestState.ImpersonatorUser : SystemUser.Current;
+		if( context.Request.Method.Equals( "GET", StringComparison.Ordinal ) || context.Request.Method.Equals( "HEAD", StringComparison.Ordinal ) ) {
+			if( user is not null ) {
+				var rateLimitersByUserId = AppMemoryCache.GetCacheValue(
+					"ewfAuthenticatedRetrievalRequestRateLimiters",
+					() => new ConcurrentDictionary<int, RateLimiter>() );
+				rateLimiter = rateLimitersByUserId.GetOrAdd( user.UserId, new RateLimiter( Duration.FromMilliseconds( 10 ), 1000, getTime ) );
+				requestSource = user.Email;
+			}
+			else if( EwfRequest.AppProvider.GetClientIp( context.Request ) is {} ip ) {
+				var rateLimitersByIp = AppMemoryCache.GetCacheValue(
+					"ewfAnonymousRetrievalRequestRateLimiters",
+					() => new ConcurrentDictionary<IPAddress, RateLimiter>() );
+				rateLimiter = rateLimitersByIp.GetOrAdd( ip, new RateLimiter( Duration.FromMilliseconds( 2 ), 5000, getTime ) );
+				requestSource = ip.ToString();
+			}
+			else {
+				rateLimiter = AppMemoryCache.GetCacheValue(
+					"ewfNonTcpAnonymousRetrievalRequestRateLimiter",
+					() => new RateLimiter( Duration.FromMilliseconds( 2 ), 5000, getTime ) );
+				requestSource = "non-TCP connections";
+			}
+		}
+		else {
+			if( user is not null ) {
+				var rateLimitersByUserId = AppMemoryCache.GetCacheValue(
+					"ewfAuthenticatedNonRetrievalRequestRateLimiters",
+					() => new ConcurrentDictionary<int, RateLimiter>() );
+				rateLimiter = rateLimitersByUserId.GetOrAdd( user.UserId, new RateLimiter( Duration.FromMilliseconds( 200 ), 5, getTime ) );
+				requestSource = user.Email;
+			}
+			else if( EwfRequest.AppProvider.GetClientIp( context.Request ) is {} ip ) {
+				var rateLimitersByIp = AppMemoryCache.GetCacheValue(
+					"ewfAnonymousNonRetrievalRequestRateLimiters",
+					() => new ConcurrentDictionary<IPAddress, RateLimiter>() );
+				rateLimiter = rateLimitersByIp.GetOrAdd( ip, new RateLimiter( Duration.FromMilliseconds( 100 ), 10, getTime ) );
+				requestSource = ip.ToString();
+			}
+			else {
+				rateLimiter = AppMemoryCache.GetCacheValue(
+					"ewfNonTcpAnonymousNonRetrievalRequestRateLimiter",
+					() => new RateLimiter( Duration.FromMilliseconds( 100 ), 10, getTime ) );
+				requestSource = "non-TCP connections";
+			}
+		}
+
+		PageBase? errorPage = null;
+		rateLimiter.RequestAction( () => {}, () => {}, _ => errorPage = new RateLimitExceeded( requestSource ) );
+		return errorPage;
+
+		Instant getTime() => RequestState.BeginInstant;
 	}
 
 	private static Action<HttpContext>? resolveUrl( HttpContext context, string appRelativeUrl ) {

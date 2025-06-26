@@ -49,6 +49,7 @@ partial class EntitySetup: UiEntitySetup {
 			.Append( EnterpriseWebFramework.OpenIdProvider.Resources.EntitySetup.UrlPatterns.Literal( "oauth" ) )
 			.Append( PreBuiltResponse.UrlPatterns.Literal( "pre-built-response" ) )
 			.Append( ContactSupport.UrlPatterns.Literal( "contact-support" ) )
+			.Append( ErrorPages.RateLimitExceeded.UrlPatterns.Literal( "rate-limit-exceeded" ) )
 			.Append( ErrorPages.ResourceNotAvailable.UrlPatterns.Literal( "resource-not-available" ) )
 			.Append( ErrorPages.AccessDenied.UrlPatterns.Literal( "access-denied" ) )
 			.Append( ErrorPages.ResourceDisabled.UrlPatterns.Literal( "resource-disabled" ) )
