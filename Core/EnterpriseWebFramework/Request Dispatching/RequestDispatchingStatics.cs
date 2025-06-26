@@ -112,7 +112,7 @@ public static class RequestDispatchingStatics {
 					return;
 				}
 
-				if( meterRequest( context ) is {} errorPage ) {
+				if( MiniProfiler.Current.Inline( () => meterRequest( context ), "EWF - Meter request" ) is {} errorPage ) {
 					context.Response.StatusCode = 429;
 					allowSlowRequestIfNecessary( errorPage );
 					errorPage.HandleRequest( context, true );
