@@ -216,6 +216,8 @@ public static class AuthenticationStatics {
 					                       normalizedEmail + ( EwfRequest.Current!.ClientIp?.ToString() ?? "NonTcp" ),
 					                       createPasswordRateLimiter() );
 
+				                       SystemUser? user = null;
+				                       Action? unconditionalModMethod = null;
 				                       rateLimiter.RequestAction(
 					                       logInUser,
 					                       logInUser,
@@ -225,11 +227,9 @@ public static class AuthenticationStatics {
 				                       errors.AddRange( verifyTestCookie() );
 				                       addStatusMessageIfClockNotSynchronized( clientTime );
 
-				                       Action? unconditionalModMethod = null;
 				                       if( errors.Any() )
 					                       throw new DataModificationException( errors.ToArray(), modificationMethod: unconditionalModMethod );
 
-				                       SystemUser? user = null;
 				                       if( unconditionalModMethod is not null ) {
 					                       unconditionalModMethod();
 
