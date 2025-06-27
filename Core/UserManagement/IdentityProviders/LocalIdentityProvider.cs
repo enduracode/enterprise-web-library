@@ -54,10 +54,10 @@ public class LocalIdentityProvider: IdentityProvider {
 	/// <param name="loginCodeUpdater">A method that takes a user ID and new login-code data and updates the corresponding user. You can also use this method to
 	/// log that a login code has been sent. Do not pass null.</param>
 	/// <param name="postAuthenticationMethod">Performs actions immediately after password or login-code authentication, which could include counting failed
-	/// authentication attempts or preventing a user from logging in. Takes a user object and whether built-in authentication was successful, and returns true if
-	/// authentication is successful, false if it failed for any reason, and null if it did not fail but is incomplete. Also has an out parameter for a
-	/// modification method that will unconditionally execute. Do not use unless the system absolutely requires micromanagement of authentication behavior.
-	/// </param>
+	/// authentication attempts or preventing a user from logging in. Takes a user object, whether built-in authentication was successful, and the authentication
+	/// type, and returns true if authentication is successful, false if it failed for any reason, and null if it did not fail but is incomplete. Also has an out
+	/// parameter for a modification method that will unconditionally execute. Do not use unless the system absolutely requires micromanagement of authentication
+	/// behavior.</param>
 	/// <param name="authenticationDuration">The duration of an authentication session. Pass null to use the default. Do not use unless the system absolutely
 	/// requires micromanagement of authentication behavior.</param>
 	/// <param name="passwordValidationMethod">Validates the specified password. Called when a user changes their password. Do not use unless the system
