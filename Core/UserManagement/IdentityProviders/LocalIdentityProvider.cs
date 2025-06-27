@@ -20,7 +20,7 @@ public class LocalIdentityProvider: IdentityProvider {
 		int userId );
 
 	public delegate bool? PostAuthenticationMethod(
-		SystemUser user, bool authenticationSuccessful, string? password, out Action? unconditionalModificationMethod );
+		SystemUser user, bool authenticationSuccessful, AuthenticationType authenticationType, out Action? unconditionalModificationMethod );
 
 	public delegate void LoginCodeUpdaterMethod(
 		int userId, byte[]? salt, byte[]? hashedCode, Instant? expirationTime, byte? remainingAttemptCount, string destinationUrl );
@@ -28,6 +28,11 @@ public class LocalIdentityProvider: IdentityProvider {
 	internal delegate string AutoLogInPageUrlGetterMethod( string user, string code );
 
 	internal delegate string ChangePasswordPageUrlGetterMethod( string destinationUrl );
+
+	public enum AuthenticationType {
+		Password,
+		LoginCode
+	}
 
 	internal readonly string AdministratingOrganizationName;
 	internal readonly string LogInHelpInstructions;
@@ -49,10 +54,9 @@ public class LocalIdentityProvider: IdentityProvider {
 	/// <param name="loginCodeUpdater">A method that takes a user ID and new login-code data and updates the corresponding user. You can also use this method to
 	/// log that a login code has been sent. Do not pass null.</param>
 	/// <param name="postAuthenticationMethod">Performs actions immediately after password or login-code authentication, which could include counting failed
-	/// authentication attempts or preventing a user from logging in. Takes a user object, whether built-in authentication was successful, and the password (null
-	/// for login-code authentication), and returns true if authentication is successful, false if it failed for any reason, and null if it did not fail but is
-	/// incomplete. Also has an out parameter for a modification method that will unconditionally execute. Do not use unless the system absolutely requires
-	/// micromanagement of authentication behavior.
+	/// authentication attempts or preventing a user from logging in. Takes a user object and whether built-in authentication was successful, and returns true if
+	/// authentication is successful, false if it failed for any reason, and null if it did not fail but is incomplete. Also has an out parameter for a
+	/// modification method that will unconditionally execute. Do not use unless the system absolutely requires micromanagement of authentication behavior.
 	/// </param>
 	/// <param name="authenticationDuration">The duration of an authentication session. Pass null to use the default. Do not use unless the system absolutely
 	/// requires micromanagement of authentication behavior.</param>
@@ -93,7 +97,7 @@ public class LocalIdentityProvider: IdentityProvider {
 			authenticationSuccessful = postAuthenticationMethod(
 				authenticationResult.user,
 				authenticationResult.passwordCorrect,
-				password,
+				AuthenticationType.Password,
 				out unconditionalModificationMethod );
 
 		if( !authenticationResult.passwordCorrect || authenticationSuccessful == false )
@@ -229,7 +233,7 @@ public class LocalIdentityProvider: IdentityProvider {
 
 		bool? authenticationSuccessful = codeValid;
 		if( postAuthenticationMethod != null ) {
-			authenticationSuccessful = postAuthenticationMethod( userLocal, codeValid, null, out var unconditionalModMethod );
+			authenticationSuccessful = postAuthenticationMethod( userLocal, codeValid, AuthenticationType.LoginCode, out var unconditionalModMethod );
 			if( unconditionalModMethod is not null )
 				unconditionalModMethods.Add( unconditionalModMethod );
 
