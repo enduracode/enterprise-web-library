@@ -257,11 +257,9 @@ public static class AuthenticationStatics {
 						                       out user,
 						                       out unconditionalModMethod,
 						                       errorMessage: errorMessage );
-					                       if( message is null )
-						                       LogOutUser();
-					                       else if( message.Length > 0 )
+					                       if( message is { Length: > 0 } )
 						                       errors.Add( message );
-					                       else
+					                       else if( message is not null )
 						                       SetFormsAuthCookieAndUser( user!, identityProvider: UserManagementStatics.LocalIdentityProvider );
 				                       }
 			                       }, ( emailAddress, isPasswordReset, destinationUrl, newUserRoleId ) => {
@@ -288,11 +286,9 @@ public static class AuthenticationStatics {
 					                       out var destinationUrl,
 					                       out var unconditionalModMethod,
 					                       errorMessage: errorMessage );
-				                       if( message is null )
-					                       LogOutUser();
-				                       else if( message.Length > 0 )
+				                       if( message is { Length: > 0 } )
 					                       errors.Add( message );
-				                       else
+				                       else if( message is not null )
 					                       SetFormsAuthCookieAndUser( user!, identityProvider: UserManagementStatics.LocalIdentityProvider );
 
 				                       errors.AddRange( verifyTestCookie() );
