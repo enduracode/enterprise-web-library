@@ -278,6 +278,11 @@ ewfStackFormItemList, ewfGridFormItemList {
 ewfGridFormItemList {
 	display: grid;
 }
+ewfUnorderedWrappingList > ewfComponentListItem,
+ewfWrappingFormItemList > ewfFormItemListItem > ewfFormItemListItemLabel, ewfWrappingFormItemList > ewfFormItemListItem > ewfFormItemListItemContent,
+ewfWrappingFormItemList > ewfFormItemListButtonItem > ewfFormItemListItemLabel, ewfWrappingFormItemList > ewfFormItemListButtonItem > ewfFormItemListItemContent {
+	max-width: 100%;
+}
 ewfUnorderedInlineList, ewfUnorderedInlineList > ewfComponentListItem, ewfInlineListItemContentContainer {
 	display: inline;
 }
@@ -314,7 +319,6 @@ ewfStackFormItemList > ewfFormItemListButtonItem > ewfFormItemListItemContent {
 ewfWrappingFormItemList > ewfFormItemListItem > ewfFormItemListItemLabel, ewfWrappingFormItemList > ewfFormItemListItem > ewfFormItemListItemContent,
 ewfWrappingFormItemList > ewfFormItemListButtonItem > ewfFormItemListItemLabel, ewfWrappingFormItemList > ewfFormItemListButtonItem > ewfFormItemListItemContent {
 	width: max-content;
-	max-width: 100%;
 }
 .ewfFaL {
 	justify-content: flex-start;
