@@ -374,7 +374,7 @@ public static class RequestDispatchingStatics {
 	}
 
 	private static void transferRequestToUnhandledExceptionPage( HttpContext context ) {
-		RequestState.StatusMessages = Array.Empty<( StatusMessageType, string )>();
+		RequestState.StatusMessages = [ ];
 
 		context.Response.StatusCode = 500;
 
