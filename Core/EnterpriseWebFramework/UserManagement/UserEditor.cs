@@ -57,7 +57,7 @@ public class UserEditor: FlowComponent {
 											return FormState.ExecuteWithValidationPredicate(
 												() => providePasswordSelected.Value,
 												() => FormItemList.CreateStack( generalSetup: new FormItemListSetup( classes: new ElementClass( "newPassword" ) ) )
-													.AddItems( AuthenticationStatics.GetPasswordModificationFormItems( out passwordUpdater ) )
+													.AddItems( AuthenticationStatics.GetPasswordModificationFormItems( userId, out passwordUpdater ) )
 													.ToCollection() );
 										} ) )
 								.ToFormItem()

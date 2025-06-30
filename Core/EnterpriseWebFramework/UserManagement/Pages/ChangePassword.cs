@@ -1,10 +1,9 @@
 ﻿using EnterpriseWebLibrary.UserManagement;
 
-// EwlPage
-// Parameter: string returnUrl
-
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages;
 
+// EwlPage
+// Parameter: string returnUrl
 partial class ChangePassword {
 	protected override bool userCanAccess => SystemUser.Current is not null;
 	protected override UrlHandler getUrlParent() => new Admin.EntitySetup();
@@ -28,6 +27,7 @@ partial class ChangePassword {
 				FormItemList.CreateStack()
 					.AddItems(
 						AuthenticationStatics.GetPasswordModificationFormItems(
+							SystemUser.Current!.UserId,
 							out passwordUpdater,
 							firstLabel: "New password".ToComponents(),
 							secondLabel: "Re-type new password".ToComponents() ) ) ) );

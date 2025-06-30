@@ -40,7 +40,7 @@ public class LocalIdentityProvider: IdentityProvider {
 	private readonly LoginCodeGetterMethod loginCodeGetter;
 	private readonly PostAuthenticationMethod? postAuthenticationMethod;
 	internal readonly Duration? AuthenticationDuration;
-	internal readonly Action<Validator, string>? PasswordValidationMethod;
+	internal readonly Action<int?, string, Validator>? PasswordValidationMethod;
 	private readonly LoginCodeUpdaterMethod loginCodeUpdater;
 
 	/// <summary>
@@ -65,7 +65,7 @@ public class LocalIdentityProvider: IdentityProvider {
 	public LocalIdentityProvider(
 		string administratingOrganizationName, string logInHelpInstructions, PasswordStorageSetup passwordStorageSetup, LoginCodeGetterMethod loginCodeGetter,
 		LoginCodeUpdaterMethod loginCodeUpdater, PostAuthenticationMethod? postAuthenticationMethod = null, Duration? authenticationDuration = null,
-		Action<Validator, string>? passwordValidationMethod = null ) {
+		Action<int?, string, Validator>? passwordValidationMethod = null ) {
 		AdministratingOrganizationName = administratingOrganizationName;
 		LogInHelpInstructions = logInHelpInstructions;
 		this.passwordStorageSetup = passwordStorageSetup;

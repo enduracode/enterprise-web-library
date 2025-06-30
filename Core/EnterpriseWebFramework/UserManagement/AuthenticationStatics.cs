@@ -139,38 +139,52 @@ public static class AuthenticationStatics {
 	// Adding a New User
 
 	/// <summary>
-	/// Gets password and "password again" form items. The validation ensures that the two form items contain identical, valid passwords.
+	/// Gets password and “password again” form items. The validation ensures that the two form items contain identical, valid passwords.
 	/// </summary>
-	/// <param name="passwordUpdater">A method that takes a user ID and updates the password data for the corresponding user. Do not pass null.</param>
-	/// <param name="firstLabel"></param>
-	/// <param name="secondLabel"></param>
+	/// <param name="userId">The user ID.</param>
+	/// <param name="passwordUpdater">A method that updates the password data for the user. Do not pass null.</param>
+	/// <param name="firstLabel">Do not pass an empty collection.</param>
+	/// <param name="secondLabel">Pass an empty collection to use a single, non-obscured text control.</param>
 	public static IReadOnlyCollection<FormItem> GetPasswordModificationFormItems(
-		out Action<int> passwordUpdater, IEnumerable<PhrasingComponent>? firstLabel = null, IEnumerable<PhrasingComponent>? secondLabel = null ) {
+		int? userId, out Action<int> passwordUpdater, IReadOnlyCollection<PhrasingComponent>? firstLabel = null,
+		IReadOnlyCollection<PhrasingComponent>? secondLabel = null ) {
+		if( firstLabel?.Count == 0 )
+			throw new ArgumentException( $"{nameof(firstLabel)} cannot be an empty collection.", nameof(firstLabel) );
+
+		var formItems = new List<FormItem>();
 		var password = new DataValue<string>( false );
-		var passwordAgainFormItem = password.ToTextControl( true, setup: TextControlSetup.CreateObscured( autoFillTokens: "new-password" ) )
-			.ToFormItem( label: secondLabel?.Materialize() ?? "Password again".ToComponents() );
 
-		var passwordFormItem = new TextControl(
-			"",
-			true,
-			setup: TextControlSetup.CreateObscured( autoFillTokens: "new-password" ),
-			validationMethod: ( postBackValue, validator ) => {
-				if( postBackValue != password.Value )
-					validator.NoteErrorAndAddMessage( "Passwords do not match." );
-				else {
-					if( UserManagementStatics.LocalIdentityProvider.PasswordValidationMethod != null )
-						UserManagementStatics.LocalIdentityProvider.PasswordValidationMethod( validator, password.Value );
-					else if( password.Value.Length < 7 )
-						validator.NoteErrorAndAddMessage( "Passwords must be at least 7 characters long." );
-				}
-			} ).ToFormItem( label: firstLabel?.Materialize() ?? "Password".ToComponents() );
+		var useSingleControl = secondLabel?.Count == 0;
+		if( useSingleControl )
+			formItems.Add(
+				password.ToTextControl( true, setup: TextControlSetup.CreateObscured( autoFillTokens: "new-password" ) )
+					.ToFormItem( label: secondLabel?.Materialize() ?? "Password again".ToComponents() ) );
 
-		passwordUpdater = userId => {
+		formItems.Add(
+			new TextControl(
+				"",
+				true,
+				setup: useSingleControl ? TextControlSetup.Create( autoFillTokens: "off" ) : TextControlSetup.CreateObscured( autoFillTokens: "new-password" ),
+				validationMethod: ( postBackValue, validator ) => {
+					if( useSingleControl )
+						password.Value = postBackValue;
+
+					if( !postBackValue.Equals( password.Value, StringComparison.Ordinal ) )
+						validator.NoteErrorAndAddMessage( "Passwords do not match." );
+					else {
+						if( UserManagementStatics.LocalIdentityProvider.PasswordValidationMethod is not null )
+							UserManagementStatics.LocalIdentityProvider.PasswordValidationMethod( userId, password.Value, validator );
+						else if( password.Value.Length < 7 )
+							validator.NoteErrorAndAddMessage( "Passwords must be at least 7 characters long." );
+					}
+				} ).ToFormItem( label: firstLabel?.Materialize() ?? "Password".ToComponents() ) );
+
+		passwordUpdater = userIdLocal => {
 			if( password.HasChanged )
-				UserManagementStatics.LocalIdentityProvider.UpdatePassword( userId, password.Value );
+				UserManagementStatics.LocalIdentityProvider.UpdatePassword( userIdLocal, password.Value );
 		};
 
-		return [ passwordFormItem, passwordAgainFormItem ];
+		return formItems;
 	}
 
 
