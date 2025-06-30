@@ -151,40 +151,37 @@ public static class AuthenticationStatics {
 		if( firstLabel?.Count == 0 )
 			throw new ArgumentException( $"{nameof(firstLabel)} cannot be an empty collection.", nameof(firstLabel) );
 
-		var formItems = new List<FormItem>();
 		var password = new DataValue<string>( false );
-
 		var useSingleControl = secondLabel?.Count == 0;
-		if( useSingleControl )
-			formItems.Add(
-				password.ToTextControl( true, setup: TextControlSetup.CreateObscured( autoFillTokens: "new-password" ) )
-					.ToFormItem( label: secondLabel?.Materialize() ?? "Password again".ToComponents() ) );
+		var passwordAgainFormItem = useSingleControl
+			                            ? null
+			                            : password.ToTextControl( true, setup: TextControlSetup.CreateObscured( autoFillTokens: "new-password" ) )
+				                            .ToFormItem( label: secondLabel?.Materialize() ?? "Password again".ToComponents() );
 
-		formItems.Add(
-			new TextControl(
-				"",
-				true,
-				setup: useSingleControl ? TextControlSetup.Create( autoFillTokens: "off" ) : TextControlSetup.CreateObscured( autoFillTokens: "new-password" ),
-				validationMethod: ( postBackValue, validator ) => {
-					if( useSingleControl )
-						password.Value = postBackValue;
+		var passwordFormItem = new TextControl(
+			"",
+			true,
+			setup: useSingleControl ? TextControlSetup.Create( autoFillTokens: "off" ) : TextControlSetup.CreateObscured( autoFillTokens: "new-password" ),
+			validationMethod: ( postBackValue, validator ) => {
+				if( useSingleControl )
+					password.Value = postBackValue;
 
-					if( !postBackValue.Equals( password.Value, StringComparison.Ordinal ) )
-						validator.NoteErrorAndAddMessage( "Passwords do not match." );
-					else {
-						if( UserManagementStatics.LocalIdentityProvider.PasswordValidationMethod is not null )
-							UserManagementStatics.LocalIdentityProvider.PasswordValidationMethod( userId, password.Value, validator );
-						else if( password.Value.Length < 7 )
-							validator.NoteErrorAndAddMessage( "Passwords must be at least 7 characters long." );
-					}
-				} ).ToFormItem( label: firstLabel?.Materialize() ?? "Password".ToComponents() ) );
+				if( !postBackValue.Equals( password.Value, StringComparison.Ordinal ) )
+					validator.NoteErrorAndAddMessage( "Passwords do not match." );
+				else {
+					if( UserManagementStatics.LocalIdentityProvider.PasswordValidationMethod is not null )
+						UserManagementStatics.LocalIdentityProvider.PasswordValidationMethod( userId, password.Value, validator );
+					else if( password.Value.Length < 7 )
+						validator.NoteErrorAndAddMessage( "Passwords must be at least 7 characters long." );
+				}
+			} ).ToFormItem( label: firstLabel?.Materialize() ?? "Password".ToComponents() );
 
 		passwordUpdater = userIdLocal => {
 			if( password.HasChanged )
 				UserManagementStatics.LocalIdentityProvider.UpdatePassword( userIdLocal, password.Value );
 		};
 
-		return formItems;
+		return passwordAgainFormItem is null ? [ passwordFormItem ] : [ passwordFormItem, passwordAgainFormItem ];
 	}
 
 
