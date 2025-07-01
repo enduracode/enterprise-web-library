@@ -1,6 +1,6 @@
 ﻿using Microsoft.Web.Administration;
 
-namespace EnterpriseWebLibrary;
+namespace EnterpriseWebLibrary.InstallationSupportUtility;
 
 internal static class IisConfigurationStatics {
 	internal static void ExecuteInServerManagerTransaction( Action<ServerManager> method ) {
