@@ -7,7 +7,6 @@ using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.SystemSpecificLogic;
 using EnterpriseWebLibrary.UserManagement;
 using EnterpriseWebLibrary.UserManagement.IdentityProviders;
-using Humanizer;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.DataProtection;
@@ -232,8 +231,7 @@ public static class AuthenticationStatics {
 				                       rateLimiter.RequestAction(
 					                       logInUser,
 					                       logInUser,
-					                       waitDuration => errors.Add(
-						                       $"Too many login attempts. Please wait {waitDuration.Plus( Duration.FromSeconds( 1 ) ).ToTimeSpan().Humanize( minUnit: Humanizer.Localisation.TimeUnit.Second )} before trying again." ) );
+					                       waitDuration => errors.Add( $"Too many login attempts. Please wait {waitDuration.ToSecondsPhrase()} before trying again." ) );
 
 				                       errors.AddRange( verifyTestCookie() );
 				                       addStatusMessageIfClockNotSynchronized( clientTime );
@@ -376,8 +374,7 @@ public static class AuthenticationStatics {
 		rateLimiter.RequestAction(
 			authenticate,
 			authenticate,
-			waitDuration => errorMessage =
-				                $"Too many current-password attempts. Please wait {waitDuration.Plus( Duration.FromSeconds( 1 ) ).ToTimeSpan().Humanize( minUnit: Humanizer.Localisation.TimeUnit.Second )} before trying again." );
+			waitDuration => errorMessage = $"Too many current-password attempts. Please wait {waitDuration.ToSecondsPhrase()} before trying again." );
 
 		return errorMessage!;
 
