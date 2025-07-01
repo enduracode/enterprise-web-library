@@ -61,7 +61,7 @@ public class RateLimiter {
 				method = count < maxBurstSize ? actionMethod : atLimitMethod;
 			}
 			else {
-				var remainingTime = currentTime - lastDecrementTime;
+				var remainingTime = lastDecrementTime + interval - currentTime;
 				method = () => limitExceededMethod( remainingTime );
 			}
 		}
