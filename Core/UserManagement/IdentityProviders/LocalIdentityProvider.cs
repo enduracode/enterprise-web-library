@@ -139,7 +139,7 @@ public class LocalIdentityProvider: IdentityProvider {
 						newUserRoleId.HasValue
 							? $"A login code has already been sent to {emailAddress}."
 							: $"A login code has already been sent to {emailAddress} if this address is registered with {AdministratingOrganizationName}.",
-						$"Please wait {waitDuration.ToTimeSpan().Humanize( minUnit: Humanizer.Localisation.TimeUnit.Second )} before sending yourself another code." );
+						$"Please wait {waitDuration.Plus( Duration.FromSeconds( 1 ) ).ToTimeSpan().Humanize( minUnit: Humanizer.Localisation.TimeUnit.Second )} before sending yourself another code." );
 			}
 
 			newNextSendTime = transactionTime + Duration.FromMinutes( 1 );

@@ -233,7 +233,7 @@ public static class AuthenticationStatics {
 					                       logInUser,
 					                       logInUser,
 					                       waitDuration => errors.Add(
-						                       $"Too many login attempts. Please wait {waitDuration.ToTimeSpan().Humanize( minUnit: Humanizer.Localisation.TimeUnit.Second )} before trying again." ) );
+						                       $"Too many login attempts. Please wait {waitDuration.Plus( Duration.FromSeconds( 1 ) ).ToTimeSpan().Humanize( minUnit: Humanizer.Localisation.TimeUnit.Second )} before trying again." ) );
 
 				                       errors.AddRange( verifyTestCookie() );
 				                       addStatusMessageIfClockNotSynchronized( clientTime );
@@ -377,7 +377,7 @@ public static class AuthenticationStatics {
 			authenticate,
 			authenticate,
 			waitDuration => errorMessage =
-				                $"Too many current-password attempts. Please wait {waitDuration.ToTimeSpan().Humanize( minUnit: Humanizer.Localisation.TimeUnit.Second )} before trying again." );
+				                $"Too many current-password attempts. Please wait {waitDuration.Plus( Duration.FromSeconds( 1 ) ).ToTimeSpan().Humanize( minUnit: Humanizer.Localisation.TimeUnit.Second )} before trying again." );
 
 		return errorMessage!;
 
