@@ -189,11 +189,6 @@ public abstract class PageBase: ResourceBase {
 	private readonly List<( StatusMessageType, string )> statusMessages = new();
 
 	/// <summary>
-	/// Initializes the parameters modification object for this page.
-	/// </summary>
-	protected abstract void initParametersModification();
-
-	/// <summary>
 	/// Gets whether the page takes more than about a second to handle a GET request.
 	/// </summary>
 	protected internal virtual bool IsSlow => false;
@@ -306,8 +301,8 @@ public abstract class PageBase: ResourceBase {
 		var postBackValueKeys = new HashSet<string>( activeFormValues.Select( i => i.GetPostBackValueKey() ) );
 		requestState.PostBackValues = new PostBackValueDictionary();
 		var extraPostBackValues = requestState.PostBackValues.AddFromRequest(
-				submission.Where(
-						i => !string.Equals( i.Key, HiddenFieldName, StringComparison.Ordinal ) && !string.Equals( i.Key, IgnoredFormFieldName, StringComparison.Ordinal ) )
+				submission.Where( i =>
+						!string.Equals( i.Key, HiddenFieldName, StringComparison.Ordinal ) && !string.Equals( i.Key, IgnoredFormFieldName, StringComparison.Ordinal ) )
 					.SelectMany( pair => pair.Value.Select( value => KeyValuePair.Create( pair.Key, (object)value ) ) ),
 				postBackValueKeys.Contains )
 			.Concat(
@@ -326,18 +321,17 @@ public abstract class PageBase: ResourceBase {
 		else if( invalidComponentStateValues.Any() )
 			Log.Debug(
 				"Form-submission validation failed due to invalid component-state values: {@Values}",
-				invalidComponentStateValues.Select(
-					i => new { Id = i, Value = requestState.ComponentStateValuesById.TryGetValue( i, out var value ) ? value : "missing" } ) );
+				invalidComponentStateValues.Select( i =>
+					new { Id = i, Value = requestState.ComponentStateValuesById.TryGetValue( i, out var value ) ? value : "missing" } ) );
 		else if( extraPostBackValues.Any() )
 			Log.Debug( "Form-submission validation failed due to extra post-back values: {Values}", extraPostBackValues );
 		else if( invalidPostBackValues.Any() )
 			Log.Debug(
 				"Form-submission validation failed due to invalid post-back values: {@Values}",
-				invalidPostBackValues.Select(
-					i => {
-						var value = requestState.PostBackValues.GetValue( i );
-						return new { Key = i, Value = value is not null ? "{0}".FormatWith( value ) : "missing" };
-					} ) );
+				invalidPostBackValues.Select( i => {
+					var value = requestState.PostBackValues.GetValue( i );
+					return new { Key = i, Value = value is not null ? "{0}".FormatWith( value ) : "missing" };
+				} ) );
 		else if( formValueHashesDisagree )
 			Log.Debug( "Form-submission validation failed due to disagreeing form-value hashes" );
 
@@ -378,11 +372,10 @@ public abstract class PageBase: ResourceBase {
 			if( invalidPostBackValues.Any() ) {
 				Log.Debug(
 					"Post-back execution failed after the data update due to post-back values that became invalid: {@Values}",
-					invalidPostBackValues.Select(
-						i => {
-							var value = requestState.PostBackValues.GetValue( i );
-							return new { Key = i, Value = value is not null ? "{0}".FormatWith( value ) : "missing" };
-						} ) );
+					invalidPostBackValues.Select( i => {
+						var value = requestState.PostBackValues.GetValue( i );
+						return new { Key = i, Value = value is not null ? "{0}".FormatWith( value ) : "missing" };
+					} ) );
 				return Translation.YouHaveModifiedPageAndWeCouldNotInterpretAction;
 			}
 
@@ -517,8 +510,8 @@ public abstract class PageBase: ResourceBase {
 	}
 
 	private bool changesExist( DataModificationAction dataModificationAction ) =>
-		componentStateItemsById.Values.Any(
-			i => i.IncludedInChangeDetection && i.DataModificationActions.Contains( dataModificationAction ) && i.ValueChanged() ) ||
+		componentStateItemsById.Values.Any( i =>
+			i.IncludedInChangeDetection && i.DataModificationActions.Contains( dataModificationAction ) && i.ValueChanged() ) ||
 		formValues.Any( i => i.DataModificationActions.Contains( dataModificationAction ) && i.ValueChangedOnPostBack() );
 
 	// Pass null for updateRegionKeysAndArguments when modification errors exist or during the validation stage of an intermediate post-back.
@@ -526,18 +519,17 @@ public abstract class PageBase: ResourceBase {
 		IReadOnlyCollection<( string key, string arg )> updateRegionKeysAndArguments, string previousStaticRegionContents ) {
 		var nodeUpdateRegionLinkersByKey = updateRegionLinkerNodes.SelectMany( i => i.KeyedUpdateRegionLinkers, ( node, keyedLinker ) => ( node, keyedLinker ) )
 			.ToImmutableDictionary( i => i.keyedLinker.key );
-		var updateRegions = updateRegionKeysAndArguments?.Select(
-			keyAndArg => {
-				if( !nodeUpdateRegionLinkersByKey.TryGetValue( keyAndArg.key, out var nodeLinker ) )
-					throw getDeveloperMistakeException(
-						"An update region linker with the key \"{0}\" does not exist. The post-back included {1}; the page contains {2}.".FormatWith(
-							keyAndArg.key,
-							StringTools.GetEnglishListPhrase( updateRegionKeysAndArguments.Select( i => $"\"{i.key}\"" ), true ),
-							nodeUpdateRegionLinkersByKey.Any()
-								? StringTools.GetEnglishListPhrase( nodeUpdateRegionLinkersByKey.Select( i => $"\"{i.Key}\"" ), true )
-								: "no linkers" ) );
-				return ( nodeLinker.node, nodeLinker.keyedLinker.linker.PostModificationRegionGetter( keyAndArg.arg ) );
-			} );
+		var updateRegions = updateRegionKeysAndArguments?.Select( keyAndArg => {
+			if( !nodeUpdateRegionLinkersByKey.TryGetValue( keyAndArg.key, out var nodeLinker ) )
+				throw getDeveloperMistakeException(
+					"An update region linker with the key \"{0}\" does not exist. The post-back included {1}; the page contains {2}.".FormatWith(
+						keyAndArg.key,
+						StringTools.GetEnglishListPhrase( updateRegionKeysAndArguments.Select( i => $"\"{i.key}\"" ), true ),
+						nodeUpdateRegionLinkersByKey.Any()
+							? StringTools.GetEnglishListPhrase( nodeUpdateRegionLinkersByKey.Select( i => $"\"{i.Key}\"" ), true )
+							: "no linkers" ) );
+			return ( nodeLinker.node, nodeLinker.keyedLinker.linker.PostModificationRegionGetter( keyAndArg.arg ) );
+		} );
 
 		var message = new StringBuilder();
 		var staticRegionContents = getStaticRegionContents( updateRegions );
@@ -623,11 +615,10 @@ public abstract class PageBase: ResourceBase {
 		if( !modMethods.Any() )
 			return this;
 
-		ExecuteDataModificationMethod(
-			() => {
-				foreach( var i in modMethods )
-					i();
-			} );
+		ExecuteDataModificationMethod( () => {
+			foreach( var i in modMethods )
+				i();
+		} );
 
 		commitDataModificationsToRequestState();
 		statusMessages.Clear();
@@ -677,18 +668,6 @@ public abstract class PageBase: ResourceBase {
 	}
 
 	private void buildPage( string failingActionId ) {
-		UrlHandler urlHandler = this;
-		do {
-			if( urlHandler is ResourceBase resource ) {
-				if( urlHandler is PageBase page )
-					page.initParametersModification();
-				resource.EsAsBaseType?.InitParametersModification();
-			}
-			else if( urlHandler is EntitySetupBase entitySetup )
-				entitySetup.InitParametersModification();
-		}
-		while( ( urlHandler = urlHandler.GetParent() ) != null );
-
 		formState = new FormState();
 		dataUpdate = new DataUpdateAction( new BasicDataModificationAction( dataUpdateIsSlow ) );
 		FormAction pageLoadAction = null;
@@ -819,26 +798,25 @@ public abstract class PageBase: ResourceBase {
 	protected virtual string javaScriptPageInitFunctionCall => "";
 
 	private ImmutableDictionary<EwfValidation, IReadOnlyCollection<string>> addModificationErrorDisplaysAndGetErrors( string id, ErrorSourceSet errorSources ) =>
-		errorSources.Validations.Select(
-				( validation, index ) => {
-					var displayKey = id + index;
-					if( modErrorDisplaysByValidation.TryGetValue( validation, out var displays ) )
-						displays.Add( displayKey );
-					else
-						modErrorDisplaysByValidation.Add( validation, displayKey.ToCollection().ToList() );
+		errorSources.Validations.Select( ( validation, index ) => {
+				var displayKey = id + index;
+				if( modErrorDisplaysByValidation.TryGetValue( validation, out var displays ) )
+					displays.Add( displayKey );
+				else
+					modErrorDisplaysByValidation.Add( validation, displayKey.ToCollection().ToList() );
 
-					// We want to ignore all the problems that could happen, such as the key not existing in the dictionary. This problem will be shown in a more helpful
-					// way when we compare form control hashes after a transfer.
-					//
-					// Avoid using exceptions here if possible. This method is sometimes called many times during a request, and we’ve seen exceptions take as long as
-					// 50 ms each when debugging.
-					var errors = requestState.InLineModificationErrorsByDisplay.TryGetValue( displayKey, out var value ) ? value.Materialize() : Array.Empty<string>();
+				// We want to ignore all the problems that could happen, such as the key not existing in the dictionary. This problem will be shown in a more helpful
+				// way when we compare form control hashes after a transfer.
+				//
+				// Avoid using exceptions here if possible. This method is sometimes called many times during a request, and we’ve seen exceptions take as long as
+				// 50 ms each when debugging.
+				var errors = requestState.InLineModificationErrorsByDisplay.TryGetValue( displayKey, out var value ) ? value.Materialize() : Array.Empty<string>();
 
-					if( errors.Any() )
-						validationsWithErrors.Add( validation );
+				if( errors.Any() )
+					validationsWithErrors.Add( validation );
 
-					return ( validation, errors );
-				} )
+				return ( validation, errors );
+			} )
 			.ToImmutableDictionary( i => i.validation, i => i.errors );
 
 	/// <summary>

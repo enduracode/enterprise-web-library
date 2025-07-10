@@ -101,11 +101,6 @@ public abstract class EntitySetupBase: ResourceParent {
 	protected virtual AlternativeResourceMode? createAlternativeMode() => null;
 
 	/// <summary>
-	/// Initializes the parameters modification object for this entity setup.
-	/// </summary>
-	protected internal abstract void InitParametersModification();
-
-	/// <summary>
 	/// Gets a resource that can serve as a destination for navigation to the entity as a whole. Often this should be the first of the listed resources. Never
 	/// returns null.
 	/// </summary>
