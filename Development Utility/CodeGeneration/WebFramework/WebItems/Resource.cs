@@ -48,17 +48,6 @@ internal class Resource {
 			entitySetup != null,
 			false );
 		writer.WriteLine( "public override EntitySetupBase? EsAsBaseType => {0};".FormatWith( entitySetup != null ? "Es" : "null" ) );
-		if( generalData.IsPage() ) {
-			if( generalData.RequiredParameters.Any() || generalData.OptionalParameters.Any() ) {
-				writer.WriteLine( "protected override void initParametersModification() {" );
-				writer.WriteLine( "parametersModification = new ParametersModification();" );
-				foreach( var i in generalData.RequiredParameters.Concat( generalData.OptionalParameters ) )
-					writer.WriteLine( "parametersModification.{0} = {0};".FormatWith( i.PropertyName ) );
-				writer.WriteLine( "}" );
-			}
-			else
-				writer.WriteLine( "protected override void initParametersModification() {}" );
-		}
 		UrlStatics.GenerateGetEncoderMethod(
 			writer,
 			entitySetup != null ? "Es" : "",

@@ -105,8 +105,7 @@ internal static class InfoStatics {
 		foreach( var requiredParameter in requiredParameters ) {
 			if( requiredParameter.IsString || requiredParameter.IsEnumerable )
 				writer.WriteLine(
-					"if( " + requiredParameter.Name +
-					" == null ) throw new ApplicationException( \"You cannot specify null for the value of a string or an IEnumerable.\" );" );
+					$"""if( {requiredParameter.Name} is null ) throw new Exception( "You cannot specify null for the value of a string or an IEnumerable." );""" );
 			writer.WriteLine( requiredParameter.FieldName + " = " + requiredParameter.Name + ";" );
 		}
 
@@ -215,10 +214,16 @@ internal static class InfoStatics {
 		if( !isEs )
 			writer.WriteLine( "base.uriFragmentIdentifier = uriFragmentIdentifier;" );
 
+		if( ( generalData.IsPage() || isEs ) && ( requiredParameters.Any() || optionalParameters.Any() ) ) {
+			writer.WriteLine( "parametersModification = new ParametersModification();" );
+			foreach( var i in requiredParameters.Concat( optionalParameters ) )
+				writer.WriteLine( "parametersModification.{0} = {0};".FormatWith( i.PropertyName ) );
+		}
+
 		if( optionalParameters.Any() )
 			writer.WriteLine( "this.optionalParameterSetter = optionalParameterSetter;" );
 
-		writer.WriteLine( "}" ); // initParameters method
+		writer.WriteLine( "}" );
 	}
 
 	private static string getHandlerMatchExpression(

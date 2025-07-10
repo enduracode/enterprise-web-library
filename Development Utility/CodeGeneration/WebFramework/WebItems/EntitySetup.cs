@@ -27,15 +27,6 @@ internal class EntitySetup {
 		if( generalData.OptionalParameters.Any() )
 			writer.WriteLine( "private Action<OptionalParameterSpecifier, Parameters>? optionalParameterSetter;" );
 		InfoStatics.WriteConstructorAndHelperMethods( writer, generalData, generalData.RequiredParameters, generalData.OptionalParameters, false, true );
-		if( generalData.RequiredParameters.Any() || generalData.OptionalParameters.Any() ) {
-			writer.WriteLine( "{0} override void InitParametersModification() {{".FormatWith( projectContainsFramework ? "protected internal" : "protected" ) );
-			writer.WriteLine( "parametersModification = new ParametersModification();" );
-			foreach( var i in generalData.RequiredParameters.Concat( generalData.OptionalParameters ) )
-				writer.WriteLine( "parametersModification.{0} = {0};".FormatWith( i.PropertyName ) );
-			writer.WriteLine( "}" );
-		}
-		else
-			writer.WriteLine( "{0} override void InitParametersModification() {{}}".FormatWith( projectContainsFramework ? "protected internal" : "protected" ) );
 		UrlStatics.GenerateGetEncoderMethod( writer, "", generalData.RequiredParameters, generalData.OptionalParameters, _ => "true", false );
 		writer.WriteLine(
 			"internal {0} ReCreate() => new {0}({1});".FormatWith(
