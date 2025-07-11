@@ -36,27 +36,23 @@ internal static class InfoStatics {
 		}
 	}
 
-	internal static void WriteConstructorAndHelperMethods(
-		TextWriter writer, WebItemGeneralData generalData, IReadOnlyCollection<WebItemParameter> requiredParameters,
-		IReadOnlyCollection<WebItemParameter> optionalParameters, bool includeEsParameter, bool isEs ) {
-		// It's important to force the cache to be enabled in the constructor since these objects are often created in post-back-action getters.
-
+	internal static void WriteConstructor( TextWriter writer, WebItemGeneralData generalData, bool includeEsParameter, bool isEs ) {
 		if( includeEsParameter )
 			CodeGenerationStatics.AddParamDocComment( writer, "es", "Not yet documented." );
-		foreach( var parameter in requiredParameters )
+		foreach( var parameter in generalData.RequiredParameters )
 			CodeGenerationStatics.AddParamDocComment(
 				writer,
 				parameter.Name,
 				parameter.Comment.ConcatenateWithSpace( parameter.IsString || parameter.IsEnumerable ? "Do not pass null." : "" ) );
-		if( optionalParameters.Count > 0 )
+		if( generalData.OptionalParameters.Count > 0 )
 			CodeGenerationStatics.AddParamDocComment( writer, "optionalParameterSetter", "Not yet documented." );
 		if( !isEs )
 			CodeGenerationStatics.AddParamDocComment( writer, "uriFragmentIdentifier", "Not yet documented." );
 		var constructorParameters = "( " + StringTools.ConcatenateWithDelimiter(
 			                            ", ",
 			                            includeEsParameter ? "EntitySetup es" : "",
-			                            WebFrameworkStatics.GetParameterDeclarations( requiredParameters ),
-			                            optionalParameters.Count > 0
+			                            WebFrameworkStatics.GetParameterDeclarations( generalData.RequiredParameters ),
+			                            generalData.OptionalParameters.Count > 0
 				                            ? "Action<{0}>? optionalParameterSetter = null".FormatWith(
 					                            StringTools.ConcatenateWithDelimiter(
 						                            ", ",
@@ -66,43 +62,23 @@ internal static class InfoStatics {
 				                            : "",
 			                            !isEs ? "string uriFragmentIdentifier = \"\"" : "" ) + " ) {";
 		writer.WriteLine( "public {0}".FormatWith( generalData.ClassName ) + constructorParameters );
+
+		// It’s important to force the cache to be enabled in the constructor since these objects are often created in post-back-action getters.
 		writer.WriteLine( "DataAccessState.Current.ExecuteWithCache( () => {" );
-
-		// Initialize parameter fields. We want to create and call this method even if there are no parameters so that non-generated constructors can still call
-		// it and remain resistant to changes.
-		writer.WriteLine(
-			"initParameters( " + StringTools.ConcatenateWithDelimiter(
-				", ",
-				includeEsParameter ? "es" : "",
-				GetInfoConstructorArgumentsForRequiredParameters( requiredParameters, p => p.Name ),
-				optionalParameters.Count > 0 ? "optionalParameterSetter: optionalParameterSetter" : "",
-				!isEs ? "uriFragmentIdentifier: uriFragmentIdentifier" : "" ) + " );" );
-
-		// Call init.
+		writeParameterInitStatements( writer, generalData, includeEsParameter, isEs );
 		writer.WriteLine( "init();" );
-
 		writer.WriteLine( "} );" );
-		if( generalData.IsResource() && optionalParameters.Any() )
+
+		if( generalData.IsResource() && generalData.OptionalParameters.Any() )
 			writer.WriteLine(
 				"segmentParameterSpecifier = new Lazy<SegmentParameterSpecifier>( () => { var specifier = new SegmentParameterSpecifier(); specifySegmentParameters( specifier ); return specifier; }, LazyThreadSafetyMode.None );" );
 		writer.WriteLine( "}" );
-
-		writeInitParametersMethod( writer, generalData, requiredParameters, optionalParameters, includeEsParameter, isEs, constructorParameters );
 	}
 
-	private static void writeInitParametersMethod(
-		TextWriter writer, WebItemGeneralData generalData, IReadOnlyCollection<WebItemParameter> requiredParameters,
-		IReadOnlyCollection<WebItemParameter> optionalParameters, bool includeEsParameter, bool isEs, string constructorParameters ) {
-		CodeGenerationStatics.AddSummaryDocComment(
-			writer,
-			"Initializes required and optional parameters. A call to this should be the first line of every non-generated constructor." );
-		if( includeEsParameter )
-			writer.WriteLine( "[ MemberNotNull( nameof(Es) ) ]" );
-		writer.WriteLine( "private void initParameters" + constructorParameters );
-
+	private static void writeParameterInitStatements( TextWriter writer, WebItemGeneralData generalData, bool includeEsParameter, bool isEs ) {
 		if( includeEsParameter )
 			writer.WriteLine( "Es = es;" );
-		foreach( var requiredParameter in requiredParameters ) {
+		foreach( var requiredParameter in generalData.RequiredParameters ) {
 			if( requiredParameter.IsString || requiredParameter.IsEnumerable )
 				writer.WriteLine(
 					$"""if( {requiredParameter.Name} is null ) throw new Exception( "You cannot specify null for the value of a string or an IEnumerable." );""" );
@@ -110,7 +86,7 @@ internal static class InfoStatics {
 		}
 
 		// Initialize optional parameter fields.
-		if( optionalParameters.Any() ) {
+		if( generalData.OptionalParameters.Any() ) {
 			writer.WriteLine( "var optionalParametersInitializedFromCurrent = false;" );
 			writer.WriteLine( "if( EwfRequest.Current != null ) {" );
 
@@ -118,19 +94,19 @@ internal static class InfoStatics {
 			writer.WriteLine( "foreach( var urlHandler in RequestDispatchingStatics.RequestState.UrlHandlers )" );
 			if( isEs ) {
 				writer.WriteLine( "if( urlHandler is ResourceBase r ) {" );
-				writer.WriteLine( "if( {0} ) {{".FormatWith( getHandlerMatchExpression( generalData, requiredParameters, true ) ) );
-				generateMatchingHandlerParameterInitStatements( writer, optionalParameters, false );
+				writer.WriteLine( "if( {0} ) {{".FormatWith( getHandlerMatchExpression( generalData, generalData.RequiredParameters, true ) ) );
+				generateMatchingHandlerParameterInitStatements( writer, generalData.OptionalParameters, false );
 				writer.WriteLine( "}" );
 				writer.WriteLine( "}" );
 				writer.WriteLine( "else {" );
-				writer.WriteLine( "if( {0} ) {{".FormatWith( getHandlerMatchExpression( generalData, requiredParameters, false ) ) );
-				generateMatchingHandlerParameterInitStatements( writer, optionalParameters, false );
+				writer.WriteLine( "if( {0} ) {{".FormatWith( getHandlerMatchExpression( generalData, generalData.RequiredParameters, false ) ) );
+				generateMatchingHandlerParameterInitStatements( writer, generalData.OptionalParameters, false );
 				writer.WriteLine( "}" );
 				writer.WriteLine( "}" );
 			}
 			else {
-				writer.WriteLine( "if( {0} ) {{".FormatWith( getHandlerMatchExpression( generalData, requiredParameters, false ) ) );
-				generateMatchingHandlerParameterInitStatements( writer, optionalParameters, false );
+				writer.WriteLine( "if( {0} ) {{".FormatWith( getHandlerMatchExpression( generalData, generalData.RequiredParameters, false ) ) );
+				generateMatchingHandlerParameterInitStatements( writer, generalData.OptionalParameters, false );
 				writer.WriteLine( "}" );
 			}
 
@@ -141,19 +117,19 @@ internal static class InfoStatics {
 				writer.WriteLine( "do" );
 				if( isEs ) {
 					writer.WriteLine( "if( urlHandler is ResourceBase r ) {" );
-					writer.WriteLine( "if( {0} ) {{".FormatWith( getHandlerMatchExpression( generalData, requiredParameters, true ) ) );
-					generateMatchingHandlerParameterInitStatements( writer, optionalParameters, true );
+					writer.WriteLine( "if( {0} ) {{".FormatWith( getHandlerMatchExpression( generalData, generalData.RequiredParameters, true ) ) );
+					generateMatchingHandlerParameterInitStatements( writer, generalData.OptionalParameters, true );
 					writer.WriteLine( "}" );
 					writer.WriteLine( "}" );
 					writer.WriteLine( "else {" );
-					writer.WriteLine( "if( {0} ) {{".FormatWith( getHandlerMatchExpression( generalData, requiredParameters, false ) ) );
-					generateMatchingHandlerParameterInitStatements( writer, optionalParameters, true );
+					writer.WriteLine( "if( {0} ) {{".FormatWith( getHandlerMatchExpression( generalData, generalData.RequiredParameters, false ) ) );
+					generateMatchingHandlerParameterInitStatements( writer, generalData.OptionalParameters, true );
 					writer.WriteLine( "}" );
 					writer.WriteLine( "}" );
 				}
 				else {
-					writer.WriteLine( "if( {0} ) {{".FormatWith( getHandlerMatchExpression( generalData, requiredParameters, false ) ) );
-					generateMatchingHandlerParameterInitStatements( writer, optionalParameters, true );
+					writer.WriteLine( "if( {0} ) {{".FormatWith( getHandlerMatchExpression( generalData, generalData.RequiredParameters, false ) ) );
+					generateMatchingHandlerParameterInitStatements( writer, generalData.OptionalParameters, true );
 					writer.WriteLine( "}" );
 				}
 				writer.WriteLine( "while( ( urlHandler = urlHandler.GetParent() ) != null );" );
@@ -173,11 +149,11 @@ internal static class InfoStatics {
 						"new Parameters( {0} )".FormatWith(
 							StringTools.ConcatenateWithDelimiter(
 								", ",
-								requiredParameters.Select( i => i.PropertyName )
+								generalData.RequiredParameters.Select( i => i.PropertyName )
 									.Append(
 										"optionalParametersInitializedFromCurrent ? new OptionalParameters( {0} ) : null".FormatWith(
-											StringTools.ConcatenateWithDelimiter( ", ", optionalParameters.Select( i => i.PropertyName ) ) ) ) ) ) ) ) );
-			foreach( var i in optionalParameters )
+											StringTools.ConcatenateWithDelimiter( ", ", generalData.OptionalParameters.Select( i => i.PropertyName ) ) ) ) ) ) ) ) );
+			foreach( var i in generalData.OptionalParameters )
 				writer.WriteLine(
 					"if( optionalParameterSpecifier.{0} ) {1} = optionalParameterSpecifier.{2};".FormatWith(
 						OptionalParameterPackageStatics.GetWasSpecifiedPropertyName( i ),
@@ -194,14 +170,14 @@ internal static class InfoStatics {
 						"new Parameters( {0} )".FormatWith(
 							StringTools.ConcatenateWithDelimiter(
 								", ",
-								requiredParameters.Select( i => i.PropertyName )
+								generalData.RequiredParameters.Select( i => i.PropertyName )
 									.Append(
 										"new OptionalParameters( {0} )".FormatWith(
-											StringTools.ConcatenateWithDelimiter( ", ", optionalParameters.Select( i => i.PropertyName ) ) ) ) ) ) ) ) );
+											StringTools.ConcatenateWithDelimiter( ", ", generalData.OptionalParameters.Select( i => i.PropertyName ) ) ) ) ) ) ) ) );
 
 			// Apply default values to parameters not yet initialized.
 			writer.WriteLine( "if( !optionalParametersInitializedFromCurrent ) {" );
-			foreach( var i in optionalParameters )
+			foreach( var i in generalData.OptionalParameters )
 				writer.WriteLine(
 					"if( !optionalParameterSpecifier.{0} && {1}.{0} ) {2} = {1}.{3};".FormatWith(
 						OptionalParameterPackageStatics.GetWasSpecifiedPropertyName( i ),
@@ -214,16 +190,14 @@ internal static class InfoStatics {
 		if( !isEs )
 			writer.WriteLine( "base.uriFragmentIdentifier = uriFragmentIdentifier;" );
 
-		if( ( generalData.IsPage() || isEs ) && ( requiredParameters.Any() || optionalParameters.Any() ) ) {
+		if( ( generalData.IsPage() || isEs ) && ( generalData.RequiredParameters.Any() || generalData.OptionalParameters.Any() ) ) {
 			writer.WriteLine( "parametersModification = new ParametersModification();" );
-			foreach( var i in requiredParameters.Concat( optionalParameters ) )
+			foreach( var i in generalData.RequiredParameters.Concat( generalData.OptionalParameters ) )
 				writer.WriteLine( "parametersModification.{0} = {0};".FormatWith( i.PropertyName ) );
 		}
 
-		if( optionalParameters.Any() )
+		if( generalData.OptionalParameters.Any() )
 			writer.WriteLine( "this.optionalParameterSetter = optionalParameterSetter;" );
-
-		writer.WriteLine( "}" );
 	}
 
 	private static string getHandlerMatchExpression(

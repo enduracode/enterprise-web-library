@@ -40,13 +40,7 @@ internal class Resource {
 				"private Action<{0}>? optionalParameterSetter;".FormatWith(
 					StringTools.ConcatenateWithDelimiter( ", ", "OptionalParameterSpecifier", entitySetup != null ? "EntitySetup" : "", "Parameters" ) ) );
 		}
-		InfoStatics.WriteConstructorAndHelperMethods(
-			writer,
-			generalData,
-			generalData.RequiredParameters,
-			generalData.OptionalParameters,
-			entitySetup != null,
-			false );
+		InfoStatics.WriteConstructor( writer, generalData, entitySetup != null, false );
 		writer.WriteLine( "public override EntitySetupBase? EsAsBaseType => {0};".FormatWith( entitySetup != null ? "Es" : "null" ) );
 		UrlStatics.GenerateGetEncoderMethod(
 			writer,

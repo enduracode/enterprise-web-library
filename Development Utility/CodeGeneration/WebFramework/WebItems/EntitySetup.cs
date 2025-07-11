@@ -26,7 +26,7 @@ internal class EntitySetup {
 			writer.WriteLine( "internal ParametersModification parametersModification = null!;" );
 		if( generalData.OptionalParameters.Any() )
 			writer.WriteLine( "private Action<OptionalParameterSpecifier, Parameters>? optionalParameterSetter;" );
-		InfoStatics.WriteConstructorAndHelperMethods( writer, generalData, generalData.RequiredParameters, generalData.OptionalParameters, false, true );
+		InfoStatics.WriteConstructor( writer, generalData, false, true );
 		UrlStatics.GenerateGetEncoderMethod( writer, "", generalData.RequiredParameters, generalData.OptionalParameters, _ => "true", false );
 		writer.WriteLine(
 			"internal {0} ReCreate() => new {0}({1});".FormatWith(
