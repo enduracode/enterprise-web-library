@@ -364,7 +364,7 @@ public static class AuthenticationStatics {
 	/// </summary>
 	public static string ReauthenticateUser( string emailAddress, string password ) {
 		if( SystemUser.Current is null )
-			throw new Exception( "no authenticated user" );
+			throw new InvalidOperationException( "no authenticated user" );
 
 		var rateLimitersByUserId = AppMemoryCache.GetCacheValue(
 			"ewfLocalIdentityProviderReauthenticationRateLimiters",
@@ -382,7 +382,7 @@ public static class AuthenticationStatics {
 		void authenticate() {
 			var user = UserManagementStatics.LocalIdentityProvider.AuthenticatePassword( emailAddress, password );
 			if( user is not null && user.UserId != SystemUser.Current!.UserId )
-				throw new Exception( "specified user does not match authenticated user" );
+				throw new ArgumentException( "specified user does not match authenticated user" );
 			errorMessage = user is null ? "Current password is incorrect." : "";
 		}
 	}
