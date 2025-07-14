@@ -277,7 +277,7 @@ internal class UpdateDependentLogic: Operation {
 			writer.WriteLine(
 				"""
 				<Project Sdk="Microsoft.NET.Sdk">
-				
+
 				  <PropertyGroup>
 				    <OutputType>Exe</OutputType>
 				  </PropertyGroup>
@@ -358,6 +358,7 @@ internal class UpdateDependentLogic: Operation {
 					writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.StandardModification;" );
 					writer.WriteLine( "using EnterpriseWebLibrary.Email;" );
 					writer.WriteLine( "using EnterpriseWebLibrary.EnterpriseWebFramework;" );
+					writer.WriteLine( "using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;" );
 					writer.WriteLine( "using Newtonsoft.Json;" );
 					writer.WriteLine( "using Newtonsoft.Json.Linq;" );
 					writer.WriteLine( "using NodaTime;" );
@@ -777,12 +778,22 @@ internal class UpdateDependentLogic: Operation {
 			if( !installation.SystemIsTewl() ) {
 				writer.WriteLine( """<Using Include="EnterpriseWebLibrary" />""" );
 				writer.WriteLine( """<Using Include="EnterpriseWebLibrary.DataValueManagement" />""" );
-				if( includeWebFrameworkUsingDirectives )
+				if( includeWebFrameworkUsingDirectives ) {
 					writer.WriteLine( """<Using Include="EnterpriseWebLibrary.EnterpriseWebFramework" />""" );
+					writer.WriteLine( """<Using Include="EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification" />""" );
+					writer.WriteLine( """<Using Include="EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Flow" />""" );
+					writer.WriteLine( """<Using Include="EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing" />""" );
+				}
 			}
 			writer.WriteLine( """<Using Include="Tewl" />""" );
 			writer.WriteLine( """<Using Include="Tewl.Tools" />""" );
 
+			if( includeWebFrameworkUsingDirectives ) {
+				writer.WriteLine(
+					"""<Using Include="EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay.DisplaySetupExtensionCreators"><Static>True</Static></Using>""" );
+				writer.WriteLine(
+					"""<Using Include="EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GenericPhrasingContainerExtensionCreators"><Static>True</Static></Using>""" );
+			}
 			writer.WriteLine( """<Using Include="Humanizer.StringExtensions"><Static>True</Static></Using>""" );
 
 			writer.WriteLine( "</ItemGroup>" );
