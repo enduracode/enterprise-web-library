@@ -1,0 +1,3 @@
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;
+
+public interface PhrasingComponent: FlowComponent;
