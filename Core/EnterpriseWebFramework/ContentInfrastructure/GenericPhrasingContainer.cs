@@ -1,4 +1,6 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
+
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
 
 /// <summary>
 /// An HTML span element.

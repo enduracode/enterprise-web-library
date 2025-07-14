@@ -1,4 +1,6 @@
 ﻿#nullable disable
+using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
+
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 /// <summary>
@@ -33,31 +35,30 @@ public class SubmitButton: PhrasingComponent {
 		var elementChildren = style.GetChildren();
 		var postBackAction = new PostBackFormAction( postBack ?? FormState.Current.PostBack );
 
-		children = new DisplayableElement(
-			context => {
-				FormAction action = postBackAction;
-				action.AddToPageIfNecessary();
+		children = new DisplayableElement( context => {
+			FormAction action = postBackAction;
+			action.AddToPageIfNecessary();
 
-				if( PageBase.Current.SubmitButtonPostBack != null )
-					throw new ApplicationException( "A submit button already exists on the page." );
-				PageBase.Current.SubmitButtonPostBack = postBackAction.PostBack;
+			if( PageBase.Current.SubmitButtonPostBack != null )
+				throw new ApplicationException( "A submit button already exists on the page." );
+			PageBase.Current.SubmitButtonPostBack = postBackAction.PostBack;
 
-				return new DisplayableElementData(
-					displaySetup,
-					() => new DisplayableElementLocalData(
-						"button",
-						new FocusabilityCondition( true ),
-						isFocused => {
-							var attributes = new List<ElementAttribute> { new( "name", PageBase.IgnoredFormFieldName ), new( "value", "v" ) };
-							attributes.AddRange( style.GetAttributes() );
-							if( isFocused )
-								attributes.Add( new ElementAttribute( "autofocus" ) );
+			return new DisplayableElementData(
+				displaySetup,
+				() => new DisplayableElementLocalData(
+					"button",
+					new FocusabilityCondition( true ),
+					isFocused => {
+						var attributes = new List<ElementAttribute> { new( "name", PageBase.IgnoredFormFieldName ), new( "value", "v" ) };
+						attributes.AddRange( style.GetAttributes() );
+						if( isFocused )
+							attributes.Add( new ElementAttribute( "autofocus" ) );
 
-							return new DisplayableElementFocusDependentData( attributes: attributes, jsInitStatements: style.GetJsInitStatements( context.Id ) );
-						} ),
-					classes: style.GetClasses().Add( classes ?? ElementClassSet.Empty ),
-					children: elementChildren );
-			} ).ToCollection();
+						return new DisplayableElementFocusDependentData( attributes: attributes, jsInitStatements: style.GetJsInitStatements( context.Id ) );
+					} ),
+				classes: style.GetClasses().Add( classes ?? ElementClassSet.Empty ),
+				children: elementChildren );
+		} ).ToCollection();
 	}
 
 	IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() => children;

@@ -1,4 +1,6 @@
 ﻿#nullable disable
+using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
+
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 /// <summary>
@@ -20,30 +22,29 @@ public sealed class EwfHyperlink: PhrasingComponent {
 	/// <param name="displaySetup"></param>
 	/// <param name="classes">The classes on the hyperlink.</param>
 	public EwfHyperlink( HyperlinkBehavior behavior, HyperlinkStyle style, DisplaySetup displaySetup = null, ElementClassSet classes = null ) {
-		children = new DisplayableElement(
-			context => {
-				behavior.PostBackAdder();
-				return new DisplayableElementData(
-					displaySetup,
-					() => {
-						DisplayableElementFocusDependentData getFocusDependentData( bool isFocused ) =>
-							new(
-								attributes: behavior.AttributeGetter( false ),
-								includeIdAttribute: behavior.IncludesIdAttribute( false ) || isFocused,
-								jsInitStatements: StringTools.ConcatenateWithDelimiter(
-									" ",
-									behavior.JsInitStatementGetter( context.Id, false ),
-									style.GetJsInitStatements( context.Id ),
-									isFocused ? "document.getElementById( '{0}' ).focus();".FormatWith( context.Id ) : "" ) );
+		children = new DisplayableElement( context => {
+			behavior.PostBackAdder();
+			return new DisplayableElementData(
+				displaySetup,
+				() => {
+					DisplayableElementFocusDependentData getFocusDependentData( bool isFocused ) =>
+						new(
+							attributes: behavior.AttributeGetter( false ),
+							includeIdAttribute: behavior.IncludesIdAttribute( false ) || isFocused,
+							jsInitStatements: StringTools.ConcatenateWithDelimiter(
+								" ",
+								behavior.JsInitStatementGetter( context.Id, false ),
+								style.GetJsInitStatements( context.Id ),
+								isFocused ? "document.getElementById( '{0}' ).focus();".FormatWith( context.Id ) : "" ) );
 
-						return behavior.IsFocusable
-							       ? new DisplayableElementLocalData( "a", new FocusabilityCondition( true ), getFocusDependentData )
-							       : new DisplayableElementLocalData( "a", focusDependentData: getFocusDependentData( false ) );
-					},
-					classes: behavior.Classes.Add( style.GetClasses() ).Add( classes ?? ElementClassSet.Empty ),
-					children: style.GetChildren( behavior.Url.Value ),
-					etherealChildren: behavior.EtherealChildren );
-			} ).ToCollection();
+					return behavior.IsFocusable
+						       ? new DisplayableElementLocalData( "a", new FocusabilityCondition( true ), getFocusDependentData )
+						       : new DisplayableElementLocalData( "a", focusDependentData: getFocusDependentData( false ) );
+				},
+				classes: behavior.Classes.Add( style.GetClasses() ).Add( classes ?? ElementClassSet.Empty ),
+				children: style.GetChildren( behavior.Url.Value ),
+				etherealChildren: behavior.EtherealChildren );
+		} ).ToCollection();
 	}
 
 	IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() {

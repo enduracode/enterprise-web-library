@@ -1,4 +1,5 @@
-﻿using JetBrains.Annotations;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
+using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
@@ -47,29 +48,27 @@ public class FormItemList: FlowComponent {
 			_ => ElementClassSet.Empty,
 			_ => "",
 			null,
-			i => new DisplayableElement(
-					_ => new DisplayableElementData(
+			i => new DisplayableElement( _ => new DisplayableElementData(
+					null,
+					() => new DisplayableElementLocalData(
+						"div",
+						focusDependentData:
+						new DisplayableElementFocusDependentData(
+							attributes: new ElementAttribute( "style", "flex-basis: {0}".FormatWith( ( (CssLength)minWidths.Value.label ).Value ) ).ToCollection() ) ),
+					classes: labelClass,
+					children: i.Label ) ).Append(
+					new DisplayableElement( _ => new DisplayableElementData(
 						null,
 						() => new DisplayableElementLocalData(
 							"div",
-							focusDependentData:
-							new DisplayableElementFocusDependentData(
-								attributes: new ElementAttribute( "style", "flex-basis: {0}".FormatWith( ( (CssLength)minWidths.Value.label ).Value ) ).ToCollection() ) ),
-						classes: labelClass,
-						children: i.Label ) ).Append(
-					new DisplayableElement(
-						_ => new DisplayableElementData(
-							null,
-							() => new DisplayableElementLocalData(
-								"div",
-								focusDependentData: new DisplayableElementFocusDependentData(
-									attributes: new ElementAttribute( "style", "flex-basis: {0}".FormatWith( ( (CssLength)minWidths.Value.content ).Value ) ).ToCollection() ) ),
-							classes: contentClass.Add( TextAlignmentStatics.Class( i.Setup.TextAlignment ) ),
-							children: i.Content.Concat(
-									i.ErrorSourceSet == null
-										? Enumerable.Empty<FlowComponent>()
-										: new FlowErrorContainer( i.ErrorSourceSet, new ListErrorDisplayStyle(), disableFocusabilityOnError: true ).ToCollection() )
-								.Materialize() ) ) )
+							focusDependentData: new DisplayableElementFocusDependentData(
+								attributes: new ElementAttribute( "style", "flex-basis: {0}".FormatWith( ( (CssLength)minWidths.Value.content ).Value ) ).ToCollection() ) ),
+						classes: contentClass.Add( TextAlignmentStatics.Class( i.Setup.TextAlignment ) ),
+						children: i.Content.Concat(
+								i.ErrorSourceSet == null
+									? Enumerable.Empty<FlowComponent>()
+									: new FlowErrorContainer( i.ErrorSourceSet, new ListErrorDisplayStyle(), disableFocusabilityOnError: true ).ToCollection() )
+							.Materialize() ) ) )
 				.Materialize() );
 	}
 
@@ -158,39 +157,35 @@ public class FormItemList: FlowComponent {
 		buttonItemSetupGetter ??= displaySetup => new FormItemSetup( displaySetup: displaySetup );
 
 		var buttonItem = setup.ButtonItemGetter( buttonItemSetupGetter );
-		children = new DisplayableElement(
-			_ => new DisplayableElementData(
-				setup.DisplaySetup,
-				() => new DisplayableElementLocalData(
-					"div",
-					focusDependentData: new DisplayableElementFocusDependentData(
-						attributes: listStyleAttribute.Any() ? new ElementAttribute( "style", listStyleAttribute ).ToCollection() : null ) ),
-				classes: allListsClass.Add( classes ).Add( setup.Classes ?? ElementClassSet.Empty ),
-				children: itemGroups.Select( i => ( i.autofocusCondition, i.items, elementClass: itemClass ) )
-					.Concat( buttonItem.Select( i => ( autofocusCondition: (AutofocusCondition?)null, items: i.ToCollection(), elementClass: buttonItemClass ) ) )
-					.SelectMany(
-						group => {
-							var itemComponents = group.items.Select(
-									item => (FlowComponent)new FlowIdContainer(
-										new DisplayableElement(
-											itemContext => new DisplayableElementData(
-												item.Setup.DisplaySetup,
-												() => {
-													var styleAttribute = itemStyleAttributeGetter( item );
-													return ListErrorDisplayStyle.GetErrorFocusableElementLocalData(
-														itemContext,
-														"div",
-														item.ErrorSourceSet,
-														styleAttribute.Any() ? new ElementAttribute( "style", styleAttribute ).ToCollection() : null );
-												},
-												classes: group.elementClass.Add( itemClassGetter( item ) ),
-												children: itemComponentGetter( item ) ) ).ToCollection(),
-										updateRegionSets: item.Setup.UpdateRegionSets ) )
-								.Materialize();
-							return group.autofocusCondition is null ? itemComponents : new FlowAutofocusRegion( group.autofocusCondition, itemComponents ).ToCollection();
-						} )
-					.Materialize(),
-				etherealChildren: setup.EtherealContent ) ).ToCollection();
+		children = new DisplayableElement( _ => new DisplayableElementData(
+			setup.DisplaySetup,
+			() => new DisplayableElementLocalData(
+				"div",
+				focusDependentData: new DisplayableElementFocusDependentData(
+					attributes: listStyleAttribute.Any() ? new ElementAttribute( "style", listStyleAttribute ).ToCollection() : null ) ),
+			classes: allListsClass.Add( classes ).Add( setup.Classes ?? ElementClassSet.Empty ),
+			children: itemGroups.Select( i => ( i.autofocusCondition, i.items, elementClass: itemClass ) )
+				.Concat( buttonItem.Select( i => ( autofocusCondition: (AutofocusCondition?)null, items: i.ToCollection(), elementClass: buttonItemClass ) ) )
+				.SelectMany( group => {
+					var itemComponents = group.items.Select( item => (FlowComponent)new FlowIdContainer(
+							new DisplayableElement( itemContext => new DisplayableElementData(
+								item.Setup.DisplaySetup,
+								() => {
+									var styleAttribute = itemStyleAttributeGetter( item );
+									return ListErrorDisplayStyle.GetErrorFocusableElementLocalData(
+										itemContext,
+										"div",
+										item.ErrorSourceSet,
+										styleAttribute.Any() ? new ElementAttribute( "style", styleAttribute ).ToCollection() : null );
+								},
+								classes: group.elementClass.Add( itemClassGetter( item ) ),
+								children: itemComponentGetter( item ) ) ).ToCollection(),
+							updateRegionSets: item.Setup.UpdateRegionSets ) )
+						.Materialize();
+					return group.autofocusCondition is null ? itemComponents : new FlowAutofocusRegion( group.autofocusCondition, itemComponents ).ToCollection();
+				} )
+				.Materialize(),
+			etherealChildren: setup.EtherealContent ) ).ToCollection();
 	}
 
 	/// <summary>

@@ -1,4 +1,5 @@
-﻿using JetBrains.Annotations;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
+using JetBrains.Annotations;
 using Tewl.InputValidation;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -117,23 +118,20 @@ public class NavFormControl {
 			return FormState.ExecuteWithActions(
 				PostBack.CreateFull( id: postBackId, actionGetter: () => new PostBackAction( destination.Value ) ),
 				() => {
-					var formControl = formControlGetter(
-						( result, validator ) => {
-							if( result.Destination != null )
-								destination.Value = result.Destination;
-							else
-								validator.NoteErrorAndAddMessage( result.ErrorMessage );
-						} );
-					return new DisplayableElement(
-						_ => new DisplayableElementData(
-							null,
-							() => new DisplayableElementLocalData(
-								"span",
-								focusDependentData: new DisplayableElementFocusDependentData(
-									attributes: new ElementAttribute(
-										"style",
-										"display: inline-block; width: {0}".FormatWith( ( (CssLength)setup.Width ).Value ) ).ToCollection() ) ),
-							children: formControl.PageComponent.ToCollection() ) ).ToFormItem( validation: formControl.Validation );
+					var formControl = formControlGetter( ( result, validator ) => {
+						if( result.Destination != null )
+							destination.Value = result.Destination;
+						else
+							validator.NoteErrorAndAddMessage( result.ErrorMessage );
+					} );
+					return new DisplayableElement( _ => new DisplayableElementData(
+						null,
+						() => new DisplayableElementLocalData(
+							"span",
+							focusDependentData: new DisplayableElementFocusDependentData(
+								attributes: new ElementAttribute( "style", "display: inline-block; width: {0}".FormatWith( ( (CssLength)setup.Width ).Value ) )
+									.ToCollection() ) ),
+						children: formControl.PageComponent.ToCollection() ) ).ToFormItem( validation: formControl.Validation );
 				} );
 		};
 	}

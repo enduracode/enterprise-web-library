@@ -1,4 +1,5 @@
-﻿using JetBrains.Annotations;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
+using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
@@ -56,18 +57,17 @@ public class FormItem {
 	public IReadOnlyCollection<FlowComponent>
 		ToComponentCollection( ElementClassSet? classes = null, bool omitLabel = false, IReadOnlyCollection<EtherealComponent>? etherealContent = null ) =>
 		new FlowIdContainer(
-			new DisplayableElement(
-				context => new DisplayableElementData(
-					Setup.DisplaySetup,
-					() => ListErrorDisplayStyle.GetErrorFocusableElementLocalData( context, "div", ErrorSourceSet, null ),
-					classes: itemClass.Add( classes ?? ElementClassSet.Empty ),
-					children: ( !label.Any() || omitLabel
-						            ? Enumerable.Empty<PhrasingComponent>()
-						            : new GenericPhrasingContainer( label, classes: labelClass ).ToCollection<PhrasingComponent>() )
-					.Append<FlowComponent>( new GenericFlowContainer( content, classes: contentClass ) )
-					.Concat( getErrorContainer() )
-					.Materialize(),
-					etherealChildren: etherealContent ) ).ToCollection(),
+			new DisplayableElement( context => new DisplayableElementData(
+				Setup.DisplaySetup,
+				() => ListErrorDisplayStyle.GetErrorFocusableElementLocalData( context, "div", ErrorSourceSet, null ),
+				classes: itemClass.Add( classes ?? ElementClassSet.Empty ),
+				children: ( !label.Any() || omitLabel
+					            ? Enumerable.Empty<PhrasingComponent>()
+					            : new GenericPhrasingContainer( label, classes: labelClass ).ToCollection<PhrasingComponent>() )
+				.Append<FlowComponent>( new GenericFlowContainer( content, classes: contentClass ) )
+				.Concat( getErrorContainer() )
+				.Materialize(),
+				etherealChildren: etherealContent ) ).ToCollection(),
 			updateRegionSets: Setup.UpdateRegionSets ).ToCollection();
 
 	/// <summary>

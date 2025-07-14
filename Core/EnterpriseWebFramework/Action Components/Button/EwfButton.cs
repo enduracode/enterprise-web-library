@@ -1,4 +1,6 @@
 ﻿#nullable disable
+using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
+
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 /// <summary>
@@ -20,29 +22,28 @@ public sealed class EwfButton: PhrasingComponent {
 		behavior ??= new FormActionBehavior( FormState.Current.DefaultAction );
 		var elementChildren = style.GetChildren();
 		var elementEtherealChildren = behavior.GetEtherealChildren();
-		children = new DisplayableElement(
-			context => {
-				behavior.AddPostBack();
-				return new DisplayableElementData(
-					displaySetup,
-					() => new DisplayableElementLocalData(
-						"button",
-						new FocusabilityCondition( true ),
-						isFocused => {
-							var attributes = new List<ElementAttribute> { new( "type", "button" ) };
-							attributes.AddRange( behavior.GetAttributes().Concat( style.GetAttributes() ) );
-							if( isFocused )
-								attributes.Add( new ElementAttribute( "autofocus" ) );
+		children = new DisplayableElement( context => {
+			behavior.AddPostBack();
+			return new DisplayableElementData(
+				displaySetup,
+				() => new DisplayableElementLocalData(
+					"button",
+					new FocusabilityCondition( true ),
+					isFocused => {
+						var attributes = new List<ElementAttribute> { new( "type", "button" ) };
+						attributes.AddRange( behavior.GetAttributes().Concat( style.GetAttributes() ) );
+						if( isFocused )
+							attributes.Add( new ElementAttribute( "autofocus" ) );
 
-							return new DisplayableElementFocusDependentData(
-								attributes: attributes,
-								includeIdAttribute: behavior.IncludesIdAttribute(),
-								jsInitStatements: behavior.GetJsInitStatements( context.Id ) + style.GetJsInitStatements( context.Id ) );
-						} ),
-					classes: style.GetClasses().Add( classes ?? ElementClassSet.Empty ),
-					children: elementChildren,
-					etherealChildren: elementEtherealChildren );
-			} ).ToCollection();
+						return new DisplayableElementFocusDependentData(
+							attributes: attributes,
+							includeIdAttribute: behavior.IncludesIdAttribute(),
+							jsInitStatements: behavior.GetJsInitStatements( context.Id ) + style.GetJsInitStatements( context.Id ) );
+					} ),
+				classes: style.GetClasses().Add( classes ?? ElementClassSet.Empty ),
+				children: elementChildren,
+				etherealChildren: elementEtherealChildren );
+		} ).ToCollection();
 	}
 
 	IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() => children;

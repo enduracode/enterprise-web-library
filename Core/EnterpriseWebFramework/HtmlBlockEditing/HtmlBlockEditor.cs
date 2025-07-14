@@ -1,4 +1,5 @@
-﻿using JetBrains.Annotations;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
+using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
@@ -40,14 +41,13 @@ public class HtmlBlockEditor: FormControl<FlowComponent> {
 			},
 			setup: setup.WysiwygSetup );
 
-		component = new DisplayableElement(
-			_ => {
-				return new DisplayableElementData(
-					setup.DisplaySetup,
-					() => new DisplayableElementLocalData( "div" ),
-					classes: new ElementClass( CssElementCreator.CssClass ),
-					children: wysiwygEditor.PageComponent.ToCollection() );
-			} );
+		component = new DisplayableElement( _ => {
+			return new DisplayableElementData(
+				setup.DisplaySetup,
+				() => new DisplayableElementLocalData( "div" ),
+				classes: new ElementClass( CssElementCreator.CssClass ),
+				children: wysiwygEditor.PageComponent.ToCollection() );
+		} );
 
 		validation = wysiwygEditor.Validation;
 	}

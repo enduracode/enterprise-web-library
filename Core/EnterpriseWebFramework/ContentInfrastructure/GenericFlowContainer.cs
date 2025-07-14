@@ -1,4 +1,6 @@
 ﻿#nullable disable
+using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
+
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
 
 /// <summary>

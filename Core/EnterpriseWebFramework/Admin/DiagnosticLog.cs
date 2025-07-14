@@ -1,4 +1,5 @@
-﻿using Humanizer;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
+using Humanizer;
 using Serilog.Core;
 using Serilog.Events;
 
@@ -37,11 +38,10 @@ partial class DiagnosticLog {
 						reloadBehaviorGetter:
 						() => new PageReloadBehavior(
 							secondaryResponse:
-							new SecondaryResponse(
-								() => EwfResponse.Create(
-									ContentTypes.PlainText,
-									new EwfResponseBodyCreator( () => logText ),
-									fileNameCreator: () => "Log" + FileExtensions.Txt ) ) ) ) ) ).Add(
+							new SecondaryResponse( () => EwfResponse.Create(
+								ContentTypes.PlainText,
+								new EwfResponseBodyCreator( () => logText ),
+								fileNameCreator: () => "Log" + FileExtensions.Txt ) ) ) ) ) ).Add(
 				new ButtonSetup(
 					"{0} Debug Logging".FormatWith( levelSwitch.MinimumLevel is debugEnabledLevel ? "Disable" : "Enable" ),
 					behavior: new PostBackBehavior(
@@ -52,22 +52,20 @@ partial class DiagnosticLog {
 							} ) ) ) ) ).Add(
 			new Section(
 				$"Tail of log (last {tailLength.ToWords()} characters)",
-				new DisplayableElement(
-					_ => new DisplayableElementData(
-						null,
-						() => new DisplayableElementLocalData( "pre" ),
-						children: new DisplayableElement(
-							_ => {
-								var minIndex = Math.Max( logText.Length - tailLength, 0 );
+				new DisplayableElement( _ => new DisplayableElementData(
+					null,
+					() => new DisplayableElementLocalData( "pre" ),
+					children: new DisplayableElement( _ => {
+						var minIndex = Math.Max( logText.Length - tailLength, 0 );
 
-								var newline = Environment.NewLine;
-								var index = logText.IndexOf( newline, minIndex, StringComparison.Ordinal );
-								if( index == -1 )
-									index = minIndex;
-								else
-									index += newline.Length;
+						var newline = Environment.NewLine;
+						var index = logText.IndexOf( newline, minIndex, StringComparison.Ordinal );
+						if( index == -1 )
+							index = minIndex;
+						else
+							index += newline.Length;
 
-								return new DisplayableElementData( null, () => new DisplayableElementLocalData( "samp" ), children: logText[ index.. ].ToComponents() );
-							} ).ToCollection() ) ).ToCollection() ) );
+						return new DisplayableElementData( null, () => new DisplayableElementLocalData( "samp" ), children: logText[ index.. ].ToComponents() );
+					} ).ToCollection() ) ).ToCollection() ) );
 	}
 }

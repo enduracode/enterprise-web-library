@@ -1,4 +1,5 @@
 ﻿using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 
 // EwlPage
 
@@ -23,13 +24,13 @@ partial class UnhandledException {
 			if( error.prefix.Length > 0 )
 				content.Add( new Paragraph( error.prefix.ToComponents() ) );
 			content.Add(
-				new DisplayableElement(
-					_ => new DisplayableElementData(
+				new DisplayableElement( _ => new DisplayableElementData(
+					null,
+					() => new DisplayableElementLocalData( "pre" ),
+					children: new DisplayableElement( _ => new DisplayableElementData(
 						null,
-						() => new DisplayableElementLocalData( "pre" ),
-						children: new DisplayableElement(
-								_ => new DisplayableElementData( null, () => new DisplayableElementLocalData( "samp" ), children: error.exception.ToString().ToComponents() ) )
-							.ToCollection() ) ) );
+						() => new DisplayableElementLocalData( "samp" ),
+						children: error.exception.ToString().ToComponents() ) ).ToCollection() ) ) );
 		}
 		else
 			content.Add( new Paragraph( Translation.AnErrorHasOccurred.ToComponents() ) );

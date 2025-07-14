@@ -1,4 +1,6 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
+
+namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 /// <summary>
 /// An item for a component list.
@@ -158,43 +160,40 @@ public static class ComponentListItemExtensionCreators {
 		return new ComponentListItem(
 			( includeContentContainer, itemTypeClasses, width ) => {
 				FlowComponentOrNode? component = null;
-				component = new IdentifiedFlowComponent(
-					() => new IdentifiedComponentData<FlowComponentOrNode>(
-						id,
-						new UpdateRegionLinker(
-							"",
-							new PreModificationUpdateRegion( updateRegionSets, component!.ToCollection, () => "" ).ToCollection(),
-							arg => component.ToCollection() ).ToCollection(),
-						new ErrorSourceSet(),
-						errorsBySource => new DisplayableElement(
-							context => {
-								var attributes = new List<ElementAttribute>();
-								if( visualOrderRank.HasValue || width != null )
-									attributes.Add(
-										new ElementAttribute(
-											"style",
-											StringTools.ConcatenateWithDelimiter(
-												", ",
-												visualOrderRank.HasValue ? "order: {0}".FormatWith( visualOrderRank.Value ) : "",
-												width != null ? "width: {0}".FormatWith( width.Value ) : "" ) ) );
+				component = new IdentifiedFlowComponent( () => new IdentifiedComponentData<FlowComponentOrNode>(
+					id,
+					new UpdateRegionLinker(
+						"",
+						new PreModificationUpdateRegion( updateRegionSets, component!.ToCollection, () => "" ).ToCollection(),
+						arg => component.ToCollection() ).ToCollection(),
+					new ErrorSourceSet(),
+					errorsBySource => new DisplayableElement( context => {
+						var attributes = new List<ElementAttribute>();
+						if( visualOrderRank.HasValue || width != null )
+							attributes.Add(
+								new ElementAttribute(
+									"style",
+									StringTools.ConcatenateWithDelimiter(
+										", ",
+										visualOrderRank.HasValue ? "order: {0}".FormatWith( visualOrderRank.Value ) : "",
+										width != null ? "width: {0}".FormatWith( width.Value ) : "" ) ) );
 
-								return new DisplayableElementData(
-									displaySetup,
-									() => !includeContentContainer && localDataGetter != null
-										      ? localDataGetter( context, "li", attributes )
-										      : new DisplayableElementLocalData( "li", focusDependentData: new DisplayableElementFocusDependentData( attributes: attributes ) ),
-									classes: CssElementCreator.ItemClass.Add( itemTypeClasses ).Add( classes ?? ElementClassSet.Empty ),
-									children: includeContentContainer
-										          ? new DisplayableElement(
-											          innerContext => new DisplayableElementData(
-												          null,
-												          () => localDataGetter != null ? localDataGetter( innerContext, "div", null ) : new DisplayableElementLocalData( "div" ),
-												          classes: CssElementCreator.ItemClass,
-												          children: content,
-												          etherealChildren: etherealContent ) ).ToCollection()
-										          : content,
-									etherealChildren: includeContentContainer ? null : etherealContent );
-							} ).ToCollection() ) );
+						return new DisplayableElementData(
+							displaySetup,
+							() => !includeContentContainer && localDataGetter != null
+								      ? localDataGetter( context, "li", attributes )
+								      : new DisplayableElementLocalData( "li", focusDependentData: new DisplayableElementFocusDependentData( attributes: attributes ) ),
+							classes: CssElementCreator.ItemClass.Add( itemTypeClasses ).Add( classes ?? ElementClassSet.Empty ),
+							children: includeContentContainer
+								          ? new DisplayableElement( innerContext => new DisplayableElementData(
+									          null,
+									          () => localDataGetter != null ? localDataGetter( innerContext, "div", null ) : new DisplayableElementLocalData( "div" ),
+									          classes: CssElementCreator.ItemClass,
+									          children: content,
+									          etherealChildren: etherealContent ) ).ToCollection()
+								          : content,
+							etherealChildren: includeContentContainer ? null : etherealContent );
+					} ).ToCollection() ) );
 				return component;
 			},
 			id,

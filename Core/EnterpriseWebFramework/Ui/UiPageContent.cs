@@ -1,4 +1,5 @@
 ﻿using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.SystemSpecificLogic;
 using JetBrains.Annotations;
@@ -175,12 +176,11 @@ public class UiPageContent: PageContent {
 				.Add( getPageActionListContainer( pageActions ) )
 				.Add(
 					new GenericFlowContainer(
-						new DisplayableElement(
-							_ => new DisplayableElementData(
-								null,
-								() => new DisplayableElementLocalData( "div" ),
-								classes: omitContentBox ? contentGridClass : contentBoxClass,
-								children: content ) ).ToCollection(),
+						new DisplayableElement( _ => new DisplayableElementData(
+							null,
+							() => new DisplayableElementLocalData( "div" ),
+							classes: omitContentBox ? contentGridClass : contentBoxClass,
+							children: content ) ).ToCollection(),
 						classes: contentContainerClass ) )
 				.Add(
 					getContentFootBlock(
@@ -226,22 +226,17 @@ public class UiPageContent: PageContent {
 		return new GenericFlowContainer(
 			new EwfButton(
 					new CustomButtonStyle( attributes: new ElementAttribute( "aria-label", "Menu" ).ToCollection(), children: null ),
-					behavior: new CustomButtonBehavior(
-						() => hiddenFieldId.GetJsValueModificationStatements(
-							"document.getElementById( '{0}' ).value === '{2}' ? '{1}' : '{2}'".FormatWith(
-								hiddenFieldId.ElementId.Id,
-								bool.FalseString,
-								bool.TrueString ) ) ) )
+					behavior: new CustomButtonBehavior( () => hiddenFieldId.GetJsValueModificationStatements(
+						"document.getElementById( '{0}' ).value === '{2}' ? '{1}' : '{2}'".FormatWith( hiddenFieldId.ElementId.Id, bool.FalseString, bool.TrueString ) ) ) )
 				.Append<FlowComponent>(
-					new DisplayableElement(
-						_ => new DisplayableElementData(
-							menuDisplayed.ToCondition( bool.TrueString.ToCollection() ).ToDisplaySetup(),
-							() => new DisplayableElementLocalData( "nav" ),
-							classes: mobileMenuClass,
-							children: getGlobalNavListContainer( true )
-								.Concat( getEntityNavAndActionContainer( true ) )
-								.Concat( getMobileMenuTabContainer() )
-								.Materialize() ) ) )
+					new DisplayableElement( _ => new DisplayableElementData(
+						menuDisplayed.ToCondition( bool.TrueString.ToCollection() ).ToDisplaySetup(),
+						() => new DisplayableElementLocalData( "nav" ),
+						classes: mobileMenuClass,
+						children: getGlobalNavListContainer( true )
+							.Concat( getEntityNavAndActionContainer( true ) )
+							.Concat( getMobileMenuTabContainer() )
+							.Materialize() ) ) )
 				.Materialize(),
 			classes: mobileMenuClass,
 			etherealContent: new EwfHiddenField( bool.FalseString, id: hiddenFieldId, pageModificationValue: menuDisplayed ).PageComponent.ToCollection() );
@@ -272,18 +267,17 @@ public class UiPageContent: PageContent {
 		if( entityUiSetup is null || !PageBase.Current.EntitySetupIsParent )
 			return [ ];
 
-		var components = PageBase.Current.EsAsBaseType!.ListedResources.SelectMany(
-				resourceGroup => {
-					var tabs = getTabHyperlinksForResources( resourceGroup );
-					return tabs.Any()
-						       ? new GenericFlowContainer(
-							       ( resourceGroup.Name.Any()
-								         ? new Paragraph( resourceGroup.Name.ToComponents(), classes: mobileMenuTabGroupClass ).ToCollection()
-								         : Enumerable.Empty<FlowComponent>() ).Append( new StackList( tabs.Select( i => i.ToComponentListItem() ) ) )
-							       .Materialize(),
-							       classes: mobileMenuTabGroupClass ).ToCollection()
-						       : Enumerable.Empty<FlowComponent>();
-				} )
+		var components = PageBase.Current.EsAsBaseType!.ListedResources.SelectMany( resourceGroup => {
+				var tabs = getTabHyperlinksForResources( resourceGroup );
+				return tabs.Any()
+					       ? new GenericFlowContainer(
+						       ( resourceGroup.Name.Any()
+							         ? new Paragraph( resourceGroup.Name.ToComponents(), classes: mobileMenuTabGroupClass ).ToCollection()
+							         : Enumerable.Empty<FlowComponent>() ).Append( new StackList( tabs.Select( i => i.ToComponentListItem() ) ) )
+						       .Materialize(),
+						       classes: mobileMenuTabGroupClass ).ToCollection()
+					       : Enumerable.Empty<FlowComponent>();
+			} )
 			.Materialize();
 		return components.Any() ? new GenericFlowContainer( components, classes: mobileMenuTabContainerClass ).ToCollection() : Enumerable.Empty<FlowComponent>();
 	}
@@ -326,8 +320,8 @@ public class UiPageContent: PageContent {
 			return null;
 
 		var postBackIdBase = inMobileMenu ? "mobileMenuEntity" : "entity";
-		var formItems = entityUiSetup.NavFormControls.Select(
-			( control, index ) => control.GetFormItem( PostBack.GetCompositeId( postBackIdBase, "nav", index.ToString() ) ) );
+		var formItems = entityUiSetup.NavFormControls.Select( ( control, index ) =>
+			control.GetFormItem( PostBack.GetCompositeId( postBackIdBase, "nav", index.ToString() ) ) );
 		var listItems = getActionListItems( entityUiSetup.NavActionGetter( postBackIdBase ) )
 			.Concat( formItems.Select( i => (WrappingListItem)i.ToListItem() ) )
 			.Materialize();
@@ -415,12 +409,11 @@ public class UiPageContent: PageContent {
 				components.Add(
 					new GenericFlowContainer(
 						new WrappingList(
-							contentFootActions.Select(
-								( action, index ) => (WrappingListItem)action.GetActionComponent(
-										null,
-										( text, icon ) => new StandardButtonStyle( text, buttonSize: ButtonSize.Large, icon: icon ),
-										enableSubmitButton: index == 0 )
-									.ToComponentListItem( displaySetup: action.DisplaySetup ) ) ).ToCollection(),
+							contentFootActions.Select( ( action, index ) => (WrappingListItem)action.GetActionComponent(
+									null,
+									( text, icon ) => new StandardButtonStyle( text, buttonSize: ButtonSize.Large, icon: icon ),
+									enableSubmitButton: index == 0 )
+								.ToComponentListItem( displaySetup: action.DisplaySetup ) ) ).ToCollection(),
 						classes: contentFootActionListContainerClass ) );
 			else if( isAutoDataUpdater )
 				components.Add( new SubmitButton( new StandardButtonStyle( "Update Now" ), postBack: PageBase.Current.DataUpdatePostBack ) );

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using EnterpriseWebLibrary.DataAccess.Ranking;
+using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase;
 using StackExchange.Profiling;
 using Tewl.IO;

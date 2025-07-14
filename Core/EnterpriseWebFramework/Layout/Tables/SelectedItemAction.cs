@@ -1,4 +1,5 @@
-﻿using JetBrains.Annotations;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
+using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
@@ -18,21 +19,20 @@ public static class SelectedItemAction {
 	public static SelectedItemAction<IdType> CreateWithFullPostBackBehavior<IdType>(
 		string text, Action<IReadOnlyCollection<IdType?>> modificationMethod, DisplaySetup? displaySetup = null, ActionComponentIcon? icon = null,
 		IReadOnlyCollection<FlowComponent>? confirmationDialogContent = null, Func<PostBackAction>? actionGetter = null ) =>
-		new(
-			( postBackIdBase, selectedItemIdGetter ) => {
-				var postBack = PostBack.CreateFull(
-					id: PostBack.GetCompositeId( postBackIdBase, text ),
-					modificationMethod: () => modificationMethod( selectedItemIdGetter() ),
-					actionGetter: actionGetter );
-				return ( postBack,
-					       new ButtonSetup(
-						       text,
-						       displaySetup: displaySetup,
-						       behavior: confirmationDialogContent != null
-							                 ? new ConfirmationButtonBehavior( confirmationDialogContent, postBack: postBack )
-							                 : new PostBackBehavior( postBack: postBack ),
-						       icon: icon ) );
-			} );
+		new( ( postBackIdBase, selectedItemIdGetter ) => {
+			var postBack = PostBack.CreateFull(
+				id: PostBack.GetCompositeId( postBackIdBase, text ),
+				modificationMethod: () => modificationMethod( selectedItemIdGetter() ),
+				actionGetter: actionGetter );
+			return ( postBack,
+				       new ButtonSetup(
+					       text,
+					       displaySetup: displaySetup,
+					       behavior: confirmationDialogContent != null
+						                 ? new ConfirmationButtonBehavior( confirmationDialogContent, postBack: postBack )
+						                 : new PostBackBehavior( postBack: postBack ),
+					       icon: icon ) );
+		} );
 
 	/// <summary>
 	/// Creates an action with intermediate-post-back behavior.
@@ -55,24 +55,23 @@ public static class SelectedItemAction {
 		ActionComponentIcon? icon = null, IReadOnlyCollection<FlowComponent>? confirmationDialogContent = null, bool forceFullPagePostBack = false,
 		Func<PageReloadBehavior>? reloadBehaviorGetter = null, DataModificationAction? validationAction = null ) {
 		validationAction ??= FormState.Current.DataModificationActions.Collection.Value.First();
-		return new SelectedItemAction<IdType>(
-			( postBackIdBase, selectedItemIdGetter ) => {
-				var postBack = PostBack.CreateIntermediate(
-					updateRegions,
-					forceFullPagePostBack: forceFullPagePostBack,
-					id: PostBack.GetCompositeId( postBackIdBase, text ),
-					modificationMethod: () => modificationMethod( selectedItemIdGetter() ),
-					reloadBehaviorGetter: reloadBehaviorGetter,
-					validationAction: validationAction );
-				return ( postBack,
-					       new ButtonSetup(
-						       text,
-						       displaySetup: displaySetup,
-						       behavior: confirmationDialogContent != null
-							                 ? new ConfirmationButtonBehavior( confirmationDialogContent, postBack: postBack )
-							                 : new PostBackBehavior( postBack: postBack ),
-						       icon: icon ) );
-			} );
+		return new SelectedItemAction<IdType>( ( postBackIdBase, selectedItemIdGetter ) => {
+			var postBack = PostBack.CreateIntermediate(
+				updateRegions,
+				forceFullPagePostBack: forceFullPagePostBack,
+				id: PostBack.GetCompositeId( postBackIdBase, text ),
+				modificationMethod: () => modificationMethod( selectedItemIdGetter() ),
+				reloadBehaviorGetter: reloadBehaviorGetter,
+				validationAction: validationAction );
+			return ( postBack,
+				       new ButtonSetup(
+					       text,
+					       displaySetup: displaySetup,
+					       behavior: confirmationDialogContent != null
+						                 ? new ConfirmationButtonBehavior( confirmationDialogContent, postBack: postBack )
+						                 : new PostBackBehavior( postBack: postBack ),
+					       icon: icon ) );
+		} );
 	}
 }
 

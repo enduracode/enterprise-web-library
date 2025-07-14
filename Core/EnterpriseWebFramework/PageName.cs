@@ -1,4 +1,6 @@
 ﻿#nullable disable
+using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
+
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 /// <summary>
@@ -16,8 +18,9 @@ public class PageName: FlowComponent {
 		var page = PageBase.Current;
 		pageName = useEntitySetupNameIfEntitySetupIsParent && page.EntitySetupIsParent ? page.EsAsBaseType.EntitySetupName : page.ResourceName;
 
-		children = new DisplayableElement(
-			_ => new DisplayableElementData( null, () => new DisplayableElementLocalData( "h1" ), children: pageName.ToComponents() ) ).ToCollection();
+		children =
+			new DisplayableElement( _ => new DisplayableElementData( null, () => new DisplayableElementLocalData( "h1" ), children: pageName.ToComponents() ) )
+				.ToCollection();
 	}
 
 	/// <summary>

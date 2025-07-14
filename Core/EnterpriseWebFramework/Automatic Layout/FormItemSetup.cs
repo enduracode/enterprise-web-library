@@ -1,4 +1,6 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
+
+namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 /// <summary>
 /// The configuration for a form item.

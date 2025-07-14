@@ -1,4 +1,5 @@
 ﻿#nullable disable
+using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -49,18 +50,17 @@ public class ListErrorDisplayStyle: ErrorDisplayStyle<FlowComponent> {
 			if( !errors.Any() )
 				return Enumerable.Empty<FlowComponent>().Materialize();
 
-			return new DisplayableElement(
-				context => new DisplayableElementData(
-					null,
-					() => GetErrorFocusableElementLocalData( context, "div", componentsFocusableOnError ? errorSources : null, null ),
-					classes: containerClass.Add( classes ?? ElementClassSet.Empty ),
-					children: new StackList(
-						from i in errors
-						select new FontAwesomeIcon( "fa-times-circle", "fa-lg" ).ToCollection<PhrasingComponent>()
-							.Concat( " ".ToComponents() )
-							.Append( i.ToComponent() )
-							.Materialize()
-							.ToComponentListItem() ).ToCollection() ) ).ToCollection();
+			return new DisplayableElement( context => new DisplayableElementData(
+				null,
+				() => GetErrorFocusableElementLocalData( context, "div", componentsFocusableOnError ? errorSources : null, null ),
+				classes: containerClass.Add( classes ?? ElementClassSet.Empty ),
+				children: new StackList(
+					from i in errors
+					select new FontAwesomeIcon( "fa-times-circle", "fa-lg" ).ToCollection<PhrasingComponent>()
+						.Concat( " ".ToComponents() )
+						.Append( i.ToComponent() )
+						.Materialize()
+						.ToComponentListItem() ).ToCollection() ) ).ToCollection();
 		};
 	}
 

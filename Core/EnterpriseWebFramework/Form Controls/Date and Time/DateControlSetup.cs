@@ -1,4 +1,5 @@
-﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
+using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.IdReferencing;
 using JetBrains.Annotations;
 using NodaTime;
