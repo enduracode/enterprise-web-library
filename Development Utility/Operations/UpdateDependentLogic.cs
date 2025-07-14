@@ -358,8 +358,6 @@ internal class UpdateDependentLogic: Operation {
 					writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.RevisionHistory;" );
 					writer.WriteLine( "using EnterpriseWebLibrary.DataAccess.StandardModification;" );
 					writer.WriteLine( "using EnterpriseWebLibrary.Email;" );
-					writer.WriteLine( "using EnterpriseWebLibrary.EnterpriseWebFramework;" );
-					writer.WriteLine( "using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;" );
 					writer.WriteLine( "using Newtonsoft.Json;" );
 					writer.WriteLine( "using Newtonsoft.Json.Linq;" );
 					writer.WriteLine( "using NodaTime;" );
@@ -431,7 +429,8 @@ internal class UpdateDependentLogic: Operation {
 
 				if( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemUsesLegacyEwl.HasValue )
 					writer.WriteLine( "#endif" );
-			} );
+			},
+			includeWebFrameworkUsingDirectives: !installation.SystemIsTewl() );
 	}
 
 	private void generateServerSideConsoleAppStatics( TextWriter writer, DevelopmentInstallation installation ) {
@@ -781,7 +780,11 @@ internal class UpdateDependentLogic: Operation {
 				writer.WriteLine( """<Using Include="EnterpriseWebLibrary.DataValueManagement" />""" );
 				if( includeWebFrameworkUsingDirectives ) {
 					writer.WriteLine( """<Using Include="EnterpriseWebLibrary.EnterpriseWebFramework" />""" );
+					writer.WriteLine( """<Using Include="EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure" />""" );
+					writer.WriteLine( """<Using Include="EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay" />""" );
+					writer.WriteLine( """<Using Include="EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase" />""" );
 					writer.WriteLine( """<Using Include="EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification" />""" );
+					writer.WriteLine( """<Using Include="EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Ethereal" />""" );
 					writer.WriteLine( """<Using Include="EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Flow" />""" );
 					writer.WriteLine( """<Using Include="EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing" />""" );
 				}
@@ -789,12 +792,6 @@ internal class UpdateDependentLogic: Operation {
 			writer.WriteLine( """<Using Include="Tewl" />""" );
 			writer.WriteLine( """<Using Include="Tewl.Tools" />""" );
 
-			if( includeWebFrameworkUsingDirectives ) {
-				writer.WriteLine(
-					"""<Using Include="EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay.DisplaySetupExtensionCreators"><Static>True</Static></Using>""" );
-				writer.WriteLine(
-					"""<Using Include="EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GenericPhrasingContainerExtensionCreators"><Static>True</Static></Using>""" );
-			}
 			writer.WriteLine( """<Using Include="Humanizer.StringExtensions"><Static>True</Static></Using>""" );
 
 			writer.WriteLine( "</ItemGroup>" );
