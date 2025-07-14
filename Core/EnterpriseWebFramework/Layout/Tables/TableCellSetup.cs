@@ -1,4 +1,6 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
+
+namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 /// <summary>
 /// The configuration for a table cell.

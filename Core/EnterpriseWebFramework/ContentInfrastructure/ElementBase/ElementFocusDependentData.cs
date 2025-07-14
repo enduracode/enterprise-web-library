@@ -1,5 +1,6 @@
 ﻿#nullable disable
 using System.Collections.Immutable;
+using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase;
 

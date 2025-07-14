@@ -1,4 +1,5 @@
-﻿using EnterpriseWebLibrary.UserManagement;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
+using EnterpriseWebLibrary.UserManagement;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 

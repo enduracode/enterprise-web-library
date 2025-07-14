@@ -1,4 +1,5 @@
 ﻿#nullable disable
+using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.IdReferencing;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase;

@@ -1,6 +1,7 @@
 ﻿#nullable disable
 using System.Web;
 using EnterpriseWebLibrary.Email;
+using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
@@ -31,8 +32,8 @@ public sealed class HyperlinkBehavior {
 		Classes = destinationAlternativeMode is NewContentResourceMode ? ActionComponentCssElementCreator.NewContentClass : ElementClassSet.Empty;
 
 		Url = new Lazy<string>( () => hasDestination ? destination.GetUrl( !disableAuthorizationCheck, false ) : "" );
-		var isPostBackHyperlink = new Lazy<bool>(
-			() => hasDestination && !( destinationAlternativeMode is DisabledResourceMode ) && !target.Any() && PageBase.Current.IsAutoDataUpdater.Value );
+		var isPostBackHyperlink = new Lazy<bool>( () =>
+			hasDestination && !( destinationAlternativeMode is DisabledResourceMode ) && !target.Any() && PageBase.Current.IsAutoDataUpdater.Value );
 		AttributeGetter = forNonHyperlinkElement =>
 			( hasDestination && !forNonHyperlinkElement ? new ElementAttribute( "href", Url.Value ).ToCollection() : Enumerable.Empty<ElementAttribute>() ).Concat(
 				hasDestination && target.Any() && !forNonHyperlinkElement

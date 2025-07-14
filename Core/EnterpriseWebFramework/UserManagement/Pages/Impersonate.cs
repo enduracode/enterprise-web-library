@@ -1,4 +1,5 @@
 ﻿using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 using EnterpriseWebLibrary.UserManagement;
 using JetBrains.Annotations;
 

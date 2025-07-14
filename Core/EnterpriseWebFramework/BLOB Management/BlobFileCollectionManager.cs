@@ -1,6 +1,7 @@
 ﻿#nullable disable
 using EnterpriseWebLibrary.DataAccess.BlobStorage;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
+using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 using EnterpriseWebLibrary.IO;
 using Tewl.InputValidation;
 
