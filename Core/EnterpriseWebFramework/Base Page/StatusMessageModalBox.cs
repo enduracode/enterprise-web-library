@@ -1,4 +1,6 @@
 ﻿#nullable disable
+using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Flow;
+
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 internal class StatusMessageModalBox: EtherealComponent {
