@@ -1,12 +1,12 @@
 ﻿#nullable disable
-using System.Collections.Generic;
+using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework {
-	internal class TableSelectedItemData<ItemIdType> {
-		internal IReadOnlyCollection<ButtonSetup> Buttons;
-		internal EwfValidation Validation;
+namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
-		internal IReadOnlyList<( IReadOnlyCollection<ButtonSetup> buttons, EwfValidation validation, IReadOnlyCollection<PhrasingComponent> checkboxes,
-			List<ItemIdType> selectedIds )?> ItemGroupData;
-	}
+internal class TableSelectedItemData<ItemIdType> {
+	internal IReadOnlyCollection<ButtonSetup> Buttons;
+	internal EwfValidation Validation;
+
+	internal IReadOnlyList<( IReadOnlyCollection<ButtonSetup> buttons, EwfValidation validation, IReadOnlyCollection<PhrasingComponent> checkboxes,
+		List<ItemIdType> selectedIds )?> ItemGroupData;
 }

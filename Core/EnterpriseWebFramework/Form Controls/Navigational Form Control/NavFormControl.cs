@@ -1,4 +1,5 @@
 ﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
+using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;
 using JetBrains.Annotations;
 using Tewl.InputValidation;
 

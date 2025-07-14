@@ -1,4 +1,6 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;
+
+namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 /// <summary>
 /// Text for a page.

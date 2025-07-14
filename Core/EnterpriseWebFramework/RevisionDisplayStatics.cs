@@ -1,6 +1,7 @@
 ﻿#nullable disable
 using System.Collections.Immutable;
 using EnterpriseWebLibrary.DataAccess.RevisionHistory;
+using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;
 using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -9,11 +10,10 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 public static class RevisionDisplayStatics {
 	public static IReadOnlyCollection<ComponentListItem> ToNewAndOldListItem<ValType>(
 		this ValueDelta<ValType> valueDelta, Func<ValType, string> valueSelector ) {
-		return valueDelta.ToNewAndOldListItem(
-			i => {
-				var value = valueSelector( i );
-				return value.Any() ? valueSelector( i ).ToComponents() : null;
-			} );
+		return valueDelta.ToNewAndOldListItem( i => {
+			var value = valueSelector( i );
+			return value.Any() ? valueSelector( i ).ToComponents() : null;
+		} );
 	}
 
 	public static IReadOnlyCollection<ComponentListItem> ToNewAndOldListItem<ValType>(
@@ -67,12 +67,11 @@ public static class RevisionDisplayStatics {
 		Func<IReadOnlyCollection<RevisionDataType>, IEnumerable<RevisionDataType>> orderer ) {
 		var listItems = from isNewRevision in new[] { true, false }
 		                let valueComponentCollectionsByRevision = deltas.Where( i => i.HasOld || isNewRevision )
-			                .Select(
-				                i => {
-					                var revision = isNewRevision ? i.New : i.Old;
-					                var valueComponents = valueSelector( revision );
-					                return new { revision, valueComponents };
-				                } )
+			                .Select( i => {
+				                var revision = isNewRevision ? i.New : i.Old;
+				                var valueComponents = valueSelector( revision );
+				                return new { revision, valueComponents };
+			                } )
 			                .Where( i => i.valueComponents != null )
 			                .ToImmutableDictionary( i => i.revision, i => i.valueComponents )
 		                from revision in orderer( valueComponentCollectionsByRevision.Keys.ToImmutableArray() )
@@ -106,12 +105,11 @@ public static class RevisionDisplayStatics {
 		Func<RevisionDataType, IReadOnlyCollection<PhrasingComponent>> valueSelector,
 		Func<IReadOnlyCollection<RevisionDataType>, IEnumerable<RevisionDataType>> orderer,
 		Func<RevisionDataType, IReadOnlyCollection<PhrasingComponent>> identifierSelector ) {
-		var newAndOldValueComponentCollectionsByRevision = deltas.Select(
-				delta => {
-					var newValueComponents = valueSelector( delta.New );
-					var oldValueComponents = delta.HasOld ? valueSelector( delta.Old ) : null;
-					return new { delta, newValueComponents, oldValueComponents };
-				} )
+		var newAndOldValueComponentCollectionsByRevision = deltas.Select( delta => {
+				var newValueComponents = valueSelector( delta.New );
+				var oldValueComponents = delta.HasOld ? valueSelector( delta.Old ) : null;
+				return new { delta, newValueComponents, oldValueComponents };
+			} )
 			.Where( i => i.newValueComponents != null || i.oldValueComponents != null )
 			.ToImmutableDictionary( i => i.newValueComponents != null ? i.delta.New : i.delta.Old, i => new { i.newValueComponents, i.oldValueComponents } );
 		var listItems = from revision in orderer( newAndOldValueComponentCollectionsByRevision.Keys.ToImmutableArray() )

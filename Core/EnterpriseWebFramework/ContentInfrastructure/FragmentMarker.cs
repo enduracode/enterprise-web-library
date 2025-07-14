@@ -1,4 +1,5 @@
 ﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase;
+using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;
 using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
