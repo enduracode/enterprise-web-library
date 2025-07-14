@@ -1,6 +1,7 @@
 ﻿#nullable disable
 using System.Collections.Immutable;
 using System.Web;
+using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase;
 using JetBrains.Annotations;
 using Tewl.InputValidation;
 
@@ -228,64 +229,61 @@ public class SelectList<ItemIdType>: FormControl<FlowComponent> {
 								                  : "" ) ),
 					classes: SelectList.DropDownClass.Add( classes ?? ElementClassSet.Empty ),
 					clientSideIdReferences: id.ToCollection(),
-					children: new DisplayableElement(
-						context => {
-							if( !isReadOnly ) {
-								action?.AddToPageIfNecessary();
-								selectionChangedAction?.AddToPageIfNecessary();
-							}
+					children: new DisplayableElement( context => {
+						if( !isReadOnly ) {
+							action?.AddToPageIfNecessary();
+							selectionChangedAction?.AddToPageIfNecessary();
+						}
 
-							return new DisplayableElementData(
-								null,
-								() => {
-									var attributes = new List<ElementAttribute>();
-									if( isReadOnly )
-										attributes.Add( new ElementAttribute( "disabled" ) );
-									else
-										attributes.Add( new ElementAttribute( "name", containerContext.Id ) );
-									if( autoFillTokens.Any() )
-										attributes.Add( new ElementAttribute( "autocomplete", autoFillTokens ) );
-									if( width != null )
-										attributes.Add( new ElementAttribute( "style", "width: {0}".FormatWith( ( (CssLength)width ).Value ) ) );
+						return new DisplayableElementData(
+							null,
+							() => {
+								var attributes = new List<ElementAttribute>();
+								if( isReadOnly )
+									attributes.Add( new ElementAttribute( "disabled" ) );
+								else
+									attributes.Add( new ElementAttribute( "name", containerContext.Id ) );
+								if( autoFillTokens.Any() )
+									attributes.Add( new ElementAttribute( "autocomplete", autoFillTokens ) );
+								if( width != null )
+									attributes.Add( new ElementAttribute( "style", "width: {0}".FormatWith( ( (CssLength)width ).Value ) ) );
 
-									return new DisplayableElementLocalData(
-										"select",
-										new FocusabilityCondition( !isReadOnly ),
-										isFocused => {
-											if( isFocused )
-												attributes.Add( new ElementAttribute( "autofocus" ) );
-											return new DisplayableElementFocusDependentData(
-												attributes: attributes,
-												includeIdAttribute: true,
-												jsInitStatements: StringTools.ConcatenateWithDelimiter(
-													" ",
-													selectionChangedAction != null
-														? "$( '#{0}' ).change( function() {{ {1} }} );".FormatWith( context.Id, selectionChangedAction.GetJsStatements() )
-														: "",
-													StringTools.ConcatenateWithDelimiter(
-															" ",
-															( itemIdPageModificationValue?.GetJsModificationStatements( "$( this ).val()" ) ?? "" ).ToCollection()
-															.Concat(
-																itemMatchPageModificationSetups.Select(
-																	setup => setup.PageModificationValue.GetJsModificationStatements(
-																		"[ {0} ].indexOf( $( this ).val() ) != -1".FormatWith(
-																			StringTools.ConcatenateWithDelimiter(
-																				", ",
-																				setup.ItemIds.Select( i => "'" + i.ObjectToString( true ) + "'" ).ToArray() ) ) ) ) )
-															.ToArray() )
-														.Surround( "$( '#{0}' ).change( function() {{ ".FormatWith( context.Id ), " } );" ),
-													getChosenLogic( useNativeDropDownControl.Value, width, items, isFocused ).Surround( "$( '#{0}' )".FormatWith( context.Id ), ";" ) ) );
-										} );
-								},
-								classes: SelectList.SelectCssClass,
-								clientSideIdReferences: Labeler.ControlId.ToCollection(),
-								children: items.Select(
-										i => getOption(
-											i.StringId,
-											i.IsPlaceholder ? "" : i.Item.Label,
-											() => EwlStatics.AreEqual( i.Item.Id, itemIdPageModificationValue.Value ) ) )
-									.Materialize() );
-						} ).ToCollection() ),
+								return new DisplayableElementLocalData(
+									"select",
+									new FocusabilityCondition( !isReadOnly ),
+									isFocused => {
+										if( isFocused )
+											attributes.Add( new ElementAttribute( "autofocus" ) );
+										return new DisplayableElementFocusDependentData(
+											attributes: attributes,
+											includeIdAttribute: true,
+											jsInitStatements: StringTools.ConcatenateWithDelimiter(
+												" ",
+												selectionChangedAction != null
+													? "$( '#{0}' ).change( function() {{ {1} }} );".FormatWith( context.Id, selectionChangedAction.GetJsStatements() )
+													: "",
+												StringTools.ConcatenateWithDelimiter(
+														" ",
+														( itemIdPageModificationValue?.GetJsModificationStatements( "$( this ).val()" ) ?? "" ).ToCollection()
+														.Concat(
+															itemMatchPageModificationSetups.Select( setup => setup.PageModificationValue.GetJsModificationStatements(
+																"[ {0} ].indexOf( $( this ).val() ) != -1".FormatWith(
+																	StringTools.ConcatenateWithDelimiter(
+																		", ",
+																		setup.ItemIds.Select( i => "'" + i.ObjectToString( true ) + "'" ).ToArray() ) ) ) ) )
+														.ToArray() )
+													.Surround( "$( '#{0}' ).change( function() {{ ".FormatWith( context.Id ), " } );" ),
+												getChosenLogic( useNativeDropDownControl.Value, width, items, isFocused ).Surround( "$( '#{0}' )".FormatWith( context.Id ), ";" ) ) );
+									} );
+							},
+							classes: SelectList.SelectCssClass,
+							clientSideIdReferences: Labeler.ControlId.ToCollection(),
+							children: items.Select( i => getOption(
+									i.StringId,
+									i.IsPlaceholder ? "" : i.Item.Label,
+									() => EwlStatics.AreEqual( i.Item.Id, itemIdPageModificationValue.Value ) ) )
+								.Materialize() );
+					} ).ToCollection() ),
 				formValue: formValue );
 
 			formValue.AddPageModificationValue( itemIdPageModificationValue, v => v );
@@ -293,19 +291,18 @@ public class SelectList<ItemIdType>: FormControl<FlowComponent> {
 				formValue.AddPageModificationValue( i.PageModificationValue, v => i.ItemIds.Contains( v ) );
 
 			if( validationMethod != null )
-				Validation = formValue.CreateValidation(
-					( postBackValue, validator ) => {
-						if( validationPredicate != null && !validationPredicate( postBackValue.ChangedOnPostBack ) )
-							return;
+				Validation = formValue.CreateValidation( ( postBackValue, validator ) => {
+					if( validationPredicate != null && !validationPredicate( postBackValue.ChangedOnPostBack ) )
+						return;
 
-						if( !items.Single( i => EwlStatics.AreEqual( i.Item.Id, postBackValue.Value ) ).IsValid ) {
-							validator.NoteErrorAndAddMessage( "Please make a selection." );
-							validationErrorNotifier?.Invoke();
-							return;
-						}
+					if( !items.Single( i => EwlStatics.AreEqual( i.Item.Id, postBackValue.Value ) ).IsValid ) {
+						validator.NoteErrorAndAddMessage( "Please make a selection." );
+						validationErrorNotifier?.Invoke();
+						return;
+					}
 
-						validationMethod( postBackValue.Value, validator );
-					} );
+					validationMethod( postBackValue.Value, validator );
+				} );
 		}
 	}
 
@@ -366,15 +363,14 @@ public class SelectList<ItemIdType>: FormControl<FlowComponent> {
 	}
 
 	private FlowComponent getOption( string value, string label, Func<bool> selectedGetter ) =>
-		new ElementComponent(
-			_ => new ElementData(
-				() => {
-					var attributes = new List<ElementAttribute>();
-					attributes.Add( new ElementAttribute( "value", value ) );
-					if( selectedGetter() )
-						attributes.Add( new ElementAttribute( "selected" ) );
+		new ElementComponent( _ => new ElementData(
+			() => {
+				var attributes = new List<ElementAttribute>();
+				attributes.Add( new ElementAttribute( "value", value ) );
+				if( selectedGetter() )
+					attributes.Add( new ElementAttribute( "selected" ) );
 
-					return new ElementLocalData( "option", focusDependentData: new ElementFocusDependentData( attributes: attributes ) );
-				},
-				children: label.ToComponents( disableNewlineReplacement: true ) ) );
+				return new ElementLocalData( "option", focusDependentData: new ElementFocusDependentData( attributes: attributes ) );
+			},
+			children: label.ToComponents( disableNewlineReplacement: true ) ) );
 }

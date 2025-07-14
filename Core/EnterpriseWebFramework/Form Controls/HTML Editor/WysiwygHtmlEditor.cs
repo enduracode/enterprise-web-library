@@ -1,4 +1,5 @@
 ﻿#nullable disable
+using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase;
 using Tewl.InputValidation;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -73,21 +74,20 @@ public class WysiwygHtmlEditor: FormControl<FlowComponent> {
 
 		formValue.AddPageModificationValue( modificationValue, v => v );
 
-		Validation = formValue.CreateValidation(
-			( postBackValue, validator ) => {
-				if( setup.ValidationPredicate != null && !setup.ValidationPredicate( postBackValue.ChangedOnPostBack ) )
-					return;
+		Validation = formValue.CreateValidation( ( postBackValue, validator ) => {
+			if( setup.ValidationPredicate != null && !setup.ValidationPredicate( postBackValue.ChangedOnPostBack ) )
+				return;
 
-				var errorHandler = new ValidationErrorHandler( "HTML" );
-				if( ( maxLength.HasValue
-					      ? validator.GetString( errorHandler, postBackValue.Value, allowEmpty, maxLength.Value )
-					      : validator.GetString( errorHandler, postBackValue.Value, allowEmpty ) ).Error( out var validatedValue ) is not null ) {
-					setup.ValidationErrorNotifier?.Invoke();
-					return;
-				}
+			var errorHandler = new ValidationErrorHandler( "HTML" );
+			if( ( maxLength.HasValue
+				      ? validator.GetString( errorHandler, postBackValue.Value, allowEmpty, maxLength.Value )
+				      : validator.GetString( errorHandler, postBackValue.Value, allowEmpty ) ).Error( out var validatedValue ) is not null ) {
+				setup.ValidationErrorNotifier?.Invoke();
+				return;
+			}
 
-				validationMethod( validatedValue, validator );
-			} );
+			validationMethod( validatedValue, validator );
+		} );
 	}
 
 	private string getJsShowStatements( string id, bool ckEditorIsFocused, string ckEditorConfiguration ) {

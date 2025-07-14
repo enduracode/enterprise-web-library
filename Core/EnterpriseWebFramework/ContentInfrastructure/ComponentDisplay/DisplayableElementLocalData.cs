@@ -1,4 +1,5 @@
-﻿#nullable disable
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase;
+
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 
 /// <summary>
@@ -10,7 +11,7 @@ public class DisplayableElementLocalData {
 	/// <summary>
 	/// Creates a local-data object for a nonfocusable displayable element.
 	/// </summary>
-	public DisplayableElementLocalData( string elementName, DisplayableElementFocusDependentData focusDependentData = null ) {
+	public DisplayableElementLocalData( string elementName, DisplayableElementFocusDependentData? focusDependentData = null ) {
 		BaseDataGetter = displaySetup => new ElementLocalData(
 			elementName,
 			( focusDependentData ?? new DisplayableElementFocusDependentData() ).BaseDataGetter( displaySetup ) );

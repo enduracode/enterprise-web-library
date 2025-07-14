@@ -1,4 +1,5 @@
-﻿#nullable disable
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase;
+
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 
 /// <summary>
@@ -20,9 +21,9 @@ public class DisplayableElementData {
 	/// <param name="children"></param>
 	/// <param name="etherealChildren"></param>
 	public DisplayableElementData(
-		DisplaySetup displaySetup, Func<DisplayableElementLocalData> localDataGetter, ElementClassSet classes = null,
-		IEnumerable<ElementIdReference> clientSideIdReferences = null, string clientSideIdOverride = "", IReadOnlyCollection<FlowComponentOrNode> children = null,
-		IReadOnlyCollection<EtherealComponentOrElement> etherealChildren = null ) {
+		DisplaySetup? displaySetup, Func<DisplayableElementLocalData> localDataGetter, ElementClassSet? classes = null,
+		IEnumerable<ElementIdReference>? clientSideIdReferences = null, string clientSideIdOverride = "", IReadOnlyCollection<FlowComponentOrNode>? children = null,
+		IReadOnlyCollection<EtherealComponentOrElement>? etherealChildren = null ) {
 		displaySetup = displaySetup ?? new DisplaySetup( true );
 		BaseDataGetter = context => {
 			var clientSideId = clientSideIdOverride.Any() ? clientSideIdOverride : context.Id;

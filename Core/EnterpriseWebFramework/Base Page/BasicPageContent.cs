@@ -1,6 +1,7 @@
 ﻿#nullable disable
 using System.Text;
 using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase;
 using EnterpriseWebLibrary.EnterpriseWebFramework.PageInfrastructure;
 using EnterpriseWebLibrary.SystemSpecificLogic;
 using JetBrains.Annotations;
@@ -91,14 +92,12 @@ public sealed class BasicPageContent: PageContent {
 		private readonly IReadOnlyCollection<FlowComponent> children;
 
 		public Spinner() {
-			children = new ElementComponent(
-				context => new ElementData(
-					() => new ElementLocalData(
-						"span",
-						focusDependentData: new ElementFocusDependentData(
-							attributes: new ElementAttribute( "style", "position: relative; margin-left: 25px; margin-right: 40px" ).ToCollection(),
-							includeIdAttribute: true,
-							jsInitStatements: @"new Spinner( {
+			children = new ElementComponent( context => new ElementData( () => new ElementLocalData(
+				"span",
+				focusDependentData: new ElementFocusDependentData(
+					attributes: new ElementAttribute( "style", "position: relative; margin-left: 25px; margin-right: 40px" ).ToCollection(),
+					includeIdAttribute: true,
+					jsInitStatements: @"new Spinner( {
 	lines: 13, // The number of lines to draw
 	length: 8, // The length of each line
 	width: 5, // The line thickness
@@ -152,18 +151,16 @@ public sealed class BasicPageContent: PageContent {
 	}
 
 	private static FlowComponent getJsInitElement( Func<string> jsInitStatementGetter ) =>
-		new ElementComponent(
-			_ => new ElementData(
-				() => new ElementLocalData(
-					"script",
-					focusDependentData: new ElementFocusDependentData(
-						attributes: new ElementAttribute(
-							"src",
-							"data:{0};charset=utf-8;base64,{1}".FormatWith(
-								ContentTypes.JavaScript,
-								Convert.ToBase64String(
-									Encoding.UTF8.GetBytes( "window.addEventListener( 'DOMContentLoaded', function() { " + jsInitStatementGetter() + " } );" ) ) ) ).Append(
-							new ElementAttribute( "defer" ) ) ) ) ) );
+		new ElementComponent( _ => new ElementData( () => new ElementLocalData(
+			"script",
+			focusDependentData: new ElementFocusDependentData(
+				attributes: new ElementAttribute(
+					"src",
+					"data:{0};charset=utf-8;base64,{1}".FormatWith(
+						ContentTypes.JavaScript,
+						Convert.ToBase64String(
+							Encoding.UTF8.GetBytes( "window.addEventListener( 'DOMContentLoaded', function() { " + jsInitStatementGetter() + " } );" ) ) ) ).Append(
+					new ElementAttribute( "defer" ) ) ) ) ) );
 
 	private readonly Func<IReadOnlyCollection<PageContent>, Func<string>, FlowComponent, FlowComponent> componentGetter;
 	internal bool IncludesStripeCheckout;
@@ -193,116 +190,110 @@ public sealed class BasicPageContent: PageContent {
 		var postContentComponents = new NotificationSectionContainer().ToCollection();
 		var etherealComponents = getEtherealComponents();
 
-		componentGetter = ( contentObjects, hiddenFieldValueGetter, jsInitElement ) => new ElementComponent(
-			_ => new ElementData(
-				() => new ElementLocalData(
-					"html",
-					focusDependentData: new ElementFocusDependentData( attributes: new ElementAttribute( "lang", "en-US" ).ToCollection() ) ),
-				children: new ElementComponent(
-						_ => new ElementData(
-							() => new ElementLocalData( "head" ),
-							children: new TrustedHtmlString( clientSideNewUrlGetter().Surround( "<script>history.replaceState( null, \"\", \"", "\" );</script>" ) )
-								.ToComponent()
-								.Append(
-									new ElementComponent(
-										_ => new ElementData(
-											() => new ElementLocalData( "title" ),
-											children: ( titleOverride.Any() ? titleOverride : getTitle() ).ToComponents() ) ) )
-								.Append(
-									getMeta(
-										"application-name",
-										BasePageStatics.AppProvider.AppDisplayName.Length > 0
-											? BasePageStatics.AppProvider.AppDisplayName
-											: SystemSpecificLogicStatics.SystemDisplayName ) )
-								.Append( getLink( "https://fonts.googleapis.com", "preconnect" ) )
-								.Append( getLink( "https://fonts.gstatic.com", "preconnect", attributes: new ElementAttribute( "crossorigin" ).ToCollection() ) )
-								.Concat( getTypekitLogicIfNecessary() )
-								.Concat( from i in cssInfoCreator( contentObjects ) select getStyleSheetLink( i.GetUrl() ) )
-								.Append( getModernizrLogic() )
-								.Concat( getGoogleAnalyticsLogicIfNecessary() )
-								.Append( getJavaScriptIncludes() )
-								.Concat(
-									from i in appIconGetter()
-									select getLink( i.resource.GetUrl(), i.rel, attributes: i.sizes.Any() ? new ElementAttribute( "sizes", i.sizes ).ToCollection() : null ) )
-								.Append( getMeta( "viewport", "initial-scale=1" ) )
-								.Append(
-									// Chrome start URL
-									getMeta(
-										"application-url",
-										EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString( EwfConfigurationStatics.AppSupportsSecureConnections ) ) )
-								.Append(
-									// IE9 start URL
-									getMeta(
-										"msapplication-starturl",
-										EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString( EwfConfigurationStatics.AppSupportsSecureConnections ) ) )
-								.Append( ( customHeadElements ?? new TrustedHtmlString( "" ) ).ToComponent() )
-								.Materialize() ) ).Append(
-						new ElementComponent(
-							_ => new ElementData(
+		componentGetter = ( contentObjects, hiddenFieldValueGetter, jsInitElement ) => new ElementComponent( _ => new ElementData(
+			() => new ElementLocalData(
+				"html",
+				focusDependentData: new ElementFocusDependentData( attributes: new ElementAttribute( "lang", "en-US" ).ToCollection() ) ),
+			children: new ElementComponent( _ => new ElementData(
+					() => new ElementLocalData( "head" ),
+					children: new TrustedHtmlString( clientSideNewUrlGetter().Surround( "<script>history.replaceState( null, \"\", \"", "\" );</script>" ) ).ToComponent()
+						.Append(
+							new ElementComponent( _ => new ElementData(
+								() => new ElementLocalData( "title" ),
+								children: ( titleOverride.Any() ? titleOverride : getTitle() ).ToComponents() ) ) )
+						.Append(
+							getMeta(
+								"application-name",
+								BasePageStatics.AppProvider.AppDisplayName.Length > 0
+									? BasePageStatics.AppProvider.AppDisplayName
+									: SystemSpecificLogicStatics.SystemDisplayName ) )
+						.Append( getLink( "https://fonts.googleapis.com", "preconnect" ) )
+						.Append( getLink( "https://fonts.gstatic.com", "preconnect", attributes: new ElementAttribute( "crossorigin" ).ToCollection() ) )
+						.Concat( getTypekitLogicIfNecessary() )
+						.Concat( from i in cssInfoCreator( contentObjects ) select getStyleSheetLink( i.GetUrl() ) )
+						.Append( getModernizrLogic() )
+						.Concat( getGoogleAnalyticsLogicIfNecessary() )
+						.Append( getJavaScriptIncludes() )
+						.Concat(
+							from i in appIconGetter()
+							select getLink( i.resource.GetUrl(), i.rel, attributes: i.sizes.Any() ? new ElementAttribute( "sizes", i.sizes ).ToCollection() : null ) )
+						.Append( getMeta( "viewport", "initial-scale=1" ) )
+						.Append(
+							// Chrome start URL
+							getMeta(
+								"application-url",
+								EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString( EwfConfigurationStatics.AppSupportsSecureConnections ) ) )
+						.Append(
+							// IE9 start URL
+							getMeta(
+								"msapplication-starturl",
+								EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString( EwfConfigurationStatics.AppSupportsSecureConnections ) ) )
+						.Append( ( customHeadElements ?? new TrustedHtmlString( "" ) ).ToComponent() )
+						.Materialize() ) ).Append(
+					new ElementComponent( _ => new ElementData(
+						() => {
+							var attributes = new List<ElementAttribute>();
+							attributes.Add( new ElementAttribute( "onpagehide", "deactivateProcessingDialog();" ) );
+							attributes.Add( new ElementAttribute( "data-instant-whitelist" ) ); // for https://instant.page/
+
+							return new ElementLocalData( "body", focusDependentData: new ElementFocusDependentData( attributes: attributes ) );
+						},
+						classes: bodyClasses,
+						children: new DisplayableElement( _ => new DisplayableElementData(
+								new DisplaySetup( pageLoadPostBack is null ),
 								() => {
 									var attributes = new List<ElementAttribute>();
-									attributes.Add( new ElementAttribute( "onpagehide", "deactivateProcessingDialog();" ) );
-									attributes.Add( new ElementAttribute( "data-instant-whitelist" ) ); // for https://instant.page/
+									attributes.Add(
+										new ElementAttribute(
+											"action",
+											pageLoadPostBack is null || PageBase.Current.ModificationErrorsOccurred
+												? PageBase.Current.GetUrl()
+												: RequestStateStatics.StoreRequestStateForContinuation(
+													PageBase.Current.GetUrl(),
+													"POST",
+													context => PageBase.Current.ProcessFormSubmissionAndGetResponse( true ).WriteToAspNetResponse( context.Response ) ) ) );
+									attributes.Add( new ElementAttribute( "method", "post" ) );
+									if( FormUsesMultipartEncoding )
+										attributes.Add( new ElementAttribute( "enctype", "multipart/form-data" ) );
+									attributes.Add( new ElementAttribute( "novalidate" ) );
 
-									return new ElementLocalData( "body", focusDependentData: new ElementFocusDependentData( attributes: attributes ) );
+									return new DisplayableElementLocalData(
+										"form",
+										focusDependentData: new DisplayableElementFocusDependentData( attributes: attributes, includeIdAttribute: true ) );
 								},
-								classes: bodyClasses,
-								children: new DisplayableElement(
-										_ => new DisplayableElementData(
-											new DisplaySetup( pageLoadPostBack is null ),
+								clientSideIdOverride: PageBase.FormId,
+								children: preContentComponents.Concat( bodyContent )
+									.Concat( postContentComponents )
+									.Append( etherealContainer )
+									.Append(
+										new ElementComponent( _ => new ElementData(
 											() => {
 												var attributes = new List<ElementAttribute>();
-												attributes.Add(
-													new ElementAttribute(
-														"action",
-														pageLoadPostBack is null || PageBase.Current.ModificationErrorsOccurred
-															? PageBase.Current.GetUrl()
-															: RequestStateStatics.StoreRequestStateForContinuation(
-																PageBase.Current.GetUrl(),
-																"POST",
-																context => PageBase.Current.ProcessFormSubmissionAndGetResponse( true ).WriteToAspNetResponse( context.Response ) ) ) );
-												attributes.Add( new ElementAttribute( "method", "post" ) );
-												if( FormUsesMultipartEncoding )
-													attributes.Add( new ElementAttribute( "enctype", "multipart/form-data" ) );
-												attributes.Add( new ElementAttribute( "novalidate" ) );
+												attributes.Add( new ElementAttribute( "type", "hidden" ) );
+												attributes.Add( new ElementAttribute( "name", PageBase.HiddenFieldName ) );
+												attributes.Add( new ElementAttribute( "value", hiddenFieldValueGetter() ) );
 
-												return new DisplayableElementLocalData(
-													"form",
-													focusDependentData: new DisplayableElementFocusDependentData( attributes: attributes, includeIdAttribute: true ) );
+												return new ElementLocalData(
+													"input",
+													focusDependentData: new ElementFocusDependentData( attributes: attributes, includeIdAttribute: true ) );
 											},
-											clientSideIdOverride: PageBase.FormId,
-											children: preContentComponents.Concat( bodyContent )
-												.Concat( postContentComponents )
-												.Append( etherealContainer )
-												.Append(
-													new ElementComponent(
-														_ => new ElementData(
-															() => {
-																var attributes = new List<ElementAttribute>();
-																attributes.Add( new ElementAttribute( "type", "hidden" ) );
-																attributes.Add( new ElementAttribute( "name", PageBase.HiddenFieldName ) );
-																attributes.Add( new ElementAttribute( "value", hiddenFieldValueGetter() ) );
-
-																return new ElementLocalData(
-																	"input",
-																	focusDependentData: new ElementFocusDependentData( attributes: attributes, includeIdAttribute: true ) );
-															},
-															clientSideIdOverride: PageBase.HiddenFieldName ) ) )
-												.Materialize(),
-											etherealChildren: etherealComponents.Concat( etherealContent ).Materialize() ) ).Concat(
-										pageLoadPostBack is null
-											? Enumerable.Empty<FlowComponent>()
-											: new GenericFlowContainer(
-												PageBase.Current.ModificationErrorsOccurred
-													? new FlowErrorContainer(
-														new ErrorSourceSet( includeGeneralErrors: true ),
-														new ListErrorDisplayStyle(),
-														disableFocusabilityOnError: true ).ToCollection()
-													: new EwfImage( new ImageSetup( "Loading icon" ), new StaticFiles.SpinnerSvg() ).ToCollection(),
-												classes: pageLoadPostBackContentContainerClass ).ToCollection() )
-									.Append( jsInitElement )
-									.Materialize() ) ) )
-					.Materialize() ) );
+											clientSideIdOverride: PageBase.HiddenFieldName ) ) )
+									.Materialize(),
+								etherealChildren: etherealComponents.Concat( etherealContent ).Materialize() ) ).Concat(
+								pageLoadPostBack is null
+									? Enumerable.Empty<FlowComponent>()
+									: new GenericFlowContainer(
+										PageBase.Current.ModificationErrorsOccurred
+											? new FlowErrorContainer(
+													new ErrorSourceSet( includeGeneralErrors: true ),
+													new ListErrorDisplayStyle(),
+													disableFocusabilityOnError: true )
+												.ToCollection()
+											: new EwfImage( new ImageSetup( "Loading icon" ), new StaticFiles.SpinnerSvg() ).ToCollection(),
+										classes: pageLoadPostBackContentContainerClass ).ToCollection() )
+							.Append( jsInitElement )
+							.Materialize() ) ) )
+				.Materialize() ) );
 
 		etherealContainer = new GenericFlowContainer( null );
 		this.dataUpdateModificationMethod = dataUpdateModificationMethod;
@@ -355,8 +346,8 @@ public sealed class BasicPageContent: PageContent {
 										true,
 										FormItemList.CreateFixedGrid( 1 )
 											.AddItems(
-												new[] { false, true }.Select(
-														hideWarnings => new GenericPhrasingContainer(
+												new[] { false, true }.Select( hideWarnings =>
+														new GenericPhrasingContainer(
 															intermediateUrlGetter( hideWarnings ).ToComponents(),
 															classes: new ElementClass( "ewfIntermediateUrl" /* This is used by EWF CSS files. */ ) ).ToFormItem(
 															label: hideWarnings ? "Non-live warnings hidden:".ToComponents() : "Standard:".ToComponents() ) )
@@ -372,11 +363,9 @@ public sealed class BasicPageContent: PageContent {
 				impersonationWarningLine.Value.message.ToComponents()
 					.Concat( " ".ToComponents() )
 					.Concat(
-						impersonationWarningLine.Value.actions.Collection.Value
-							.Select(
-								i => i.GetActionComponent(
-									( text, _ ) => new ButtonHyperlinkStyle( text, buttonSize: ButtonSize.ShrinkWrap ),
-									( text, _ ) => new StandardButtonStyle( text, buttonSize: ButtonSize.ShrinkWrap ) ) )
+						impersonationWarningLine.Value.actions.Collection.Value.Select( i => i.GetActionComponent(
+								( text, _ ) => new ButtonHyperlinkStyle( text, buttonSize: ButtonSize.ShrinkWrap ),
+								( text, _ ) => new StandardButtonStyle( text, buttonSize: ButtonSize.ShrinkWrap ) ) )
 							.Where( i => i != null )
 							.Select( i => i.ToCollection() )
 							.Aggregate( ( components, action ) => components.Concat( " ".ToComponents() ).Concat( action ).Materialize() ) )
@@ -464,31 +453,26 @@ public sealed class BasicPageContent: PageContent {
 	}
 
 	private FlowComponentOrNode getJavaScriptIncludes() =>
-		new MarkupBlockNode(
-			() => {
-				var markup = new StringBuilder();
-				javaScriptIncludeBuilder( markup, IncludesStripeCheckout );
-				return markup.ToString();
-			} );
+		new MarkupBlockNode( () => {
+			var markup = new StringBuilder();
+			javaScriptIncludeBuilder( markup, IncludesStripeCheckout );
+			return markup.ToString();
+		} );
 
 	private FlowComponent getLink( string href, string rel, IReadOnlyCollection<ElementAttribute> attributes = null ) =>
-		new ElementComponent(
-			_ => new ElementData(
-				() => new ElementLocalData(
-					"link",
-					focusDependentData: new ElementFocusDependentData(
-						attributes: new ElementAttribute( "href", href ).Append( new ElementAttribute( "rel", rel ) )
-							.Concat( attributes ?? Enumerable.Empty<ElementAttribute>() ) ) ) ) );
+		new ElementComponent( _ => new ElementData( () => new ElementLocalData(
+			"link",
+			focusDependentData: new ElementFocusDependentData(
+				attributes: new ElementAttribute( "href", href ).Append( new ElementAttribute( "rel", rel ) )
+					.Concat( attributes ?? Enumerable.Empty<ElementAttribute>() ) ) ) ) );
 
 	private FlowComponent getMeta( string name, string content ) =>
-		new ElementComponent(
-			_ => new ElementData(
-				() => {
-					var attributes = new List<ElementAttribute>();
-					attributes.Add( new ElementAttribute( "name", name ) );
-					attributes.Add( new ElementAttribute( "content", content ) );
-					return new ElementLocalData( "meta", focusDependentData: new ElementFocusDependentData( attributes: attributes ) );
-				} ) );
+		new ElementComponent( _ => new ElementData( () => {
+			var attributes = new List<ElementAttribute>();
+			attributes.Add( new ElementAttribute( "name", name ) );
+			attributes.Add( new ElementAttribute( "content", content ) );
+			return new ElementLocalData( "meta", focusDependentData: new ElementFocusDependentData( attributes: attributes ) );
+		} ) );
 
 	public BasicPageContent Add( IReadOnlyCollection<FlowComponent> components ) {
 		bodyContent.AddRange( components );

@@ -1,5 +1,6 @@
 ﻿#nullable disable
 using System.Collections.Immutable;
+using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase;
 using Humanizer;
 using JetBrains.Annotations;
 using StackExchange.Profiling;
@@ -176,293 +177,284 @@ public class EwfTable<ItemIdType>: FlowComponent {
 		var dataModifications = FormState.Current.DataModificationActions;
 
 		var excelRowAdders = new List<Action<ExcelWorksheet>>();
-		outerChildren = new DisplayableElement(
-			_ => {
-				if( selectedItemData.Buttons == null )
-					TableStatics.AddCheckboxes(
-						idBase,
-						selectedItemActions,
-						selectedItemData,
-						itemGroups.Select( group => ( group.SelectedItemActions, group.Items.Select( i => new Func<EwfTableItem<ItemIdType>>( () => i.Value ) ) ) ),
-						null,
-						Array.Empty<DataModificationAction>() );
+		outerChildren = new DisplayableElement( _ => {
+			if( selectedItemData.Buttons == null )
+				TableStatics.AddCheckboxes(
+					idBase,
+					selectedItemActions,
+					selectedItemData,
+					itemGroups.Select( group => ( group.SelectedItemActions, group.Items.Select( i => new Func<EwfTableItem<ItemIdType>>( () => i.Value ) ) ) ),
+					null,
+					Array.Empty<DataModificationAction>() );
 
-				var children = new List<FlowComponentOrNode>();
-				using( MiniProfiler.Current.Step( "EWF - Load table data" ) )
-					FormState.ExecuteWithActions(
-						dataModifications,
-						() => {
-							children.AddRange( TableStatics.GetCaption( caption, subCaption ) );
+			var children = new List<FlowComponentOrNode>();
+			using( MiniProfiler.Current.Step( "EWF - Load table data" ) )
+				FormState.ExecuteWithActions(
+					dataModifications,
+					() => {
+						children.AddRange( TableStatics.GetCaption( caption, subCaption ) );
 
-							var visibleItemGroupsAndItems = new List<( EwfTableItemGroup<ItemIdType>, IReadOnlyList<EwfTableItem<ItemIdType>> )>();
-							foreach( var itemGroup in itemGroups ) {
-								var limit = defaultItemLimit != DataRowLimit.Unlimited ? itemLimit.Value : (int)DataRowLimit.Unlimited;
-								var visibleItems = itemGroup.Items.Take( limit - visibleItemGroupsAndItems.Sum( i => i.Item2.Count ) ).Select( i => i.Value );
-								visibleItemGroupsAndItems.Add( ( itemGroup, visibleItems.ToImmutableArray() ) );
-								if( visibleItemGroupsAndItems.Sum( i => i.Item2.Count ) == limit )
-									break;
-							}
+						var visibleItemGroupsAndItems = new List<( EwfTableItemGroup<ItemIdType>, IReadOnlyList<EwfTableItem<ItemIdType>> )>();
+						foreach( var itemGroup in itemGroups ) {
+							var limit = defaultItemLimit != DataRowLimit.Unlimited ? itemLimit.Value : (int)DataRowLimit.Unlimited;
+							var visibleItems = itemGroup.Items.Take( limit - visibleItemGroupsAndItems.Sum( i => i.Item2.Count ) ).Select( i => i.Value );
+							visibleItemGroupsAndItems.Add( ( itemGroup, visibleItems.ToImmutableArray() ) );
+							if( visibleItemGroupsAndItems.Sum( i => i.Item2.Count ) == limit )
+								break;
+						}
 
-							TableStatics.AssertItemIdsUnique( visibleItemGroupsAndItems.SelectMany( i => i.Item2 ) );
+						TableStatics.AssertItemIdsUnique( visibleItemGroupsAndItems.SelectMany( i => i.Item2 ) );
 
-							fields = TableStatics.GetFields( fields, headItems, visibleItemGroupsAndItems.SelectMany( i => i.Item2 ) );
-							if( !fields.Any() )
-								fields = new EwfTableField().ToCollection();
-							else {
-								if( selectedItemData.ItemGroupData != null )
-									fields = fields.Prepend( new EwfTableField( size: 2.5m.ToEm() ) ).Materialize();
-								if( enableItemReordering )
-									fields = fields.Append( new EwfTableField( size: 5.ToEm(), textAlignment: TextAlignment.Center ) ).Materialize();
-							}
+						fields = TableStatics.GetFields( fields, headItems, visibleItemGroupsAndItems.SelectMany( i => i.Item2 ) );
+						if( !fields.Any() )
+							fields = new EwfTableField().ToCollection();
+						else {
+							if( selectedItemData.ItemGroupData != null )
+								fields = fields.Prepend( new EwfTableField( size: 2.5m.ToEm() ) ).Materialize();
+							if( enableItemReordering )
+								fields = fields.Append( new EwfTableField( size: 5.ToEm(), textAlignment: TextAlignment.Center ) ).Materialize();
+						}
 
-							// Fields, and therefore column specifications, change when a table goes from no items to having items or vice versa.
-							FlowComponentOrNode columnIdentifiedComponent = null;
-							children.Add(
-								columnIdentifiedComponent = new IdentifiedFlowComponent(
-									() => new IdentifiedComponentData<FlowComponentOrNode>(
-										"",
-										new UpdateRegionLinker(
-											"",
-											headItems.Any()
-												? Enumerable.Empty<PreModificationUpdateRegion>()
-												: new PreModificationUpdateRegion(
-													( this.tailUpdateRegions?.Collection.Value.Where( i => itemGroups.Count - i.UpdatingItemCount == 0 ) ?? [ ] )
-													.Concat( visibleItemGroupsAndItems.Select( i => i.Item1 ).SelectMany( i => i.GetTailUpdateRegionsIncludingAllItems() ) )
-													.SelectMany( i => i.Sets.Collection.Value )
-													.ToParameter(),
-													columnIdentifiedComponent.ToCollection,
-													() => "" ).ToCollection(),
-											_ => columnIdentifiedComponent.ToCollection() ).ToCollection(),
-										new ErrorSourceSet(),
-										_ => getColumnSpecifications( fields ) ) ) );
+						// Fields, and therefore column specifications, change when a table goes from no items to having items or vice versa.
+						FlowComponentOrNode columnIdentifiedComponent = null;
+						children.Add(
+							columnIdentifiedComponent = new IdentifiedFlowComponent( () => new IdentifiedComponentData<FlowComponentOrNode>(
+								"",
+								new UpdateRegionLinker(
+									"",
+									headItems.Any()
+										? Enumerable.Empty<PreModificationUpdateRegion>()
+										: new PreModificationUpdateRegion(
+											( this.tailUpdateRegions?.Collection.Value.Where( i => itemGroups.Count - i.UpdatingItemCount == 0 ) ?? [ ] )
+											.Concat( visibleItemGroupsAndItems.Select( i => i.Item1 ).SelectMany( i => i.GetTailUpdateRegionsIncludingAllItems() ) )
+											.SelectMany( i => i.Sets.Collection.Value )
+											.ToParameter(),
+											columnIdentifiedComponent.ToCollection,
+											() => "" ).ToCollection(),
+									_ => columnIdentifiedComponent.ToCollection() ).ToCollection(),
+								new ErrorSourceSet(),
+								_ => getColumnSpecifications( fields ) ) ) );
 
-							var allVisibleItems = new List<IReadOnlyCollection<EwfTableCell>>();
+						var allVisibleItems = new List<IReadOnlyCollection<EwfTableCell>>();
 
-							var itemLimitingUpdateRegionSet = new UpdateRegionSet();
-							var itemLimitingAndGeneralActionComponents =
-								( defaultItemLimit != DataRowLimit.Unlimited
-									  ? getItemLimitingControlContainer( idBase, itemLimit, itemLimitingUpdateRegionSet, this.tailUpdateRegions ).ToCollection()
-									  : Enumerable.Empty<FlowComponent>() )
-								.Concat( TableStatics.GetGeneralActionList( allowExportToExcel ? exportToExcelPostBack : null, tableActions ) )
-								.Materialize();
-							var headRows = buildRows(
-									( itemLimitingAndGeneralActionComponents.Any()
-										  ? EwfTableItem.Create(
-												  new GenericFlowContainer(
-													  itemLimitingAndGeneralActionComponents,
-													  classes: TableCssElementCreator.ItemLimitingAndGeneralActionContainerClass ).ToCell(
-													  new TableCellSetup( fieldSpan: fields.Count ) ) )
-											  .ToCollection()
-										  : Enumerable.Empty<EwfTableItem>() )
-									.Concat(
-										selectedItemData.ItemGroupData != null
-											? EwfTableItem.Create(
-													TableStatics.GetItemSelectionAndActionComponents(
-															"$( this ).closest( 'table' ).children( 'tbody' ).children().children( ':first-child' )",
-															selectedItemData.Buttons,
-															selectedItemData.Validation )
-														.ToCell( new TableCellSetup( fieldSpan: fields.Count ) ) )
-												.ToCollection()
-											: Enumerable.Empty<EwfTableItem>() )
-									.Materialize(),
-									Enumerable.Repeat( new EwfTableField(), fields.Count ).Materialize(),
-									null,
-									null,
-									null,
-									false,
-									null )
+						var itemLimitingUpdateRegionSet = new UpdateRegionSet();
+						var itemLimitingAndGeneralActionComponents =
+							( defaultItemLimit != DataRowLimit.Unlimited
+								  ? getItemLimitingControlContainer( idBase, itemLimit, itemLimitingUpdateRegionSet, this.tailUpdateRegions ).ToCollection()
+								  : Enumerable.Empty<FlowComponent>() )
+							.Concat( TableStatics.GetGeneralActionList( allowExportToExcel ? exportToExcelPostBack : null, tableActions ) )
+							.Materialize();
+						var headRows = buildRows(
+								( itemLimitingAndGeneralActionComponents.Any()
+									  ? EwfTableItem.Create(
+											  new GenericFlowContainer(
+												  itemLimitingAndGeneralActionComponents,
+												  classes: TableCssElementCreator.ItemLimitingAndGeneralActionContainerClass ).ToCell( new TableCellSetup( fieldSpan: fields.Count ) ) )
+										  .ToCollection()
+									  : Enumerable.Empty<EwfTableItem>() )
 								.Concat(
-									buildRows(
-										headItems,
-										fields,
-										selectedItemData.ItemGroupData == null ? null : Enumerable.Repeat( (PhrasingComponent)null, headItems.Count ),
-										!enableItemReordering ? null : Enumerable.Repeat( (IReadOnlyCollection<PhrasingComponent>)null, headItems.Count ),
+									selectedItemData.ItemGroupData != null
+										? EwfTableItem.Create(
+												TableStatics.GetItemSelectionAndActionComponents(
+														"$( this ).closest( 'table' ).children( 'tbody' ).children().children( ':first-child' )",
+														selectedItemData.Buttons,
+														selectedItemData.Validation )
+													.ToCell( new TableCellSetup( fieldSpan: fields.Count ) ) )
+											.ToCollection()
+										: Enumerable.Empty<EwfTableItem>() )
+								.Materialize(),
+								Enumerable.Repeat( new EwfTableField(), fields.Count ).Materialize(),
+								null,
+								null,
+								null,
+								false,
+								null )
+							.Concat(
+								buildRows(
+									headItems,
+									fields,
+									selectedItemData.ItemGroupData == null ? null : Enumerable.Repeat( (PhrasingComponent)null, headItems.Count ),
+									!enableItemReordering ? null : Enumerable.Repeat( (IReadOnlyCollection<PhrasingComponent>)null, headItems.Count ),
+									null,
+									true,
+									allVisibleItems ) )
+							.Materialize();
+						if( headRows.Any() )
+							children.Add( new ElementComponent( _ => new ElementData( () => new ElementLocalData( "thead" ), children: headRows ) ) );
+						excelRowAdders.AddRange( headItems.Select( i => TableStatics.GetExcelRowAdder( true, i.Cells ) ) );
+
+						var bodyRowGroupsAndRows = new List<Tuple<FlowComponent, IReadOnlyCollection<FlowComponent>>>();
+						var updateRegionSetListsAndStaticRowGroupCounts = new List<( UpdateRegionSetsParameter, int )>();
+						for( var visibleGroupIndex = 0; visibleGroupIndex < visibleItemGroupsAndItems.Count; visibleGroupIndex += 1 ) {
+							var groupAndItems = visibleItemGroupsAndItems[ visibleGroupIndex ];
+							var groupSelectedItemData = selectedItemData.ItemGroupData?[ visibleGroupIndex ];
+							var useContrastForFirstRow = visibleItemGroupsAndItems.Where( ( _, i ) => i < visibleGroupIndex ).Sum( i => i.Item2.Count ) % 2 == 1;
+							var groupBodyRows = buildRows(
+									groupAndItems.Item2,
+									fields,
+									selectedItemData.ItemGroupData == null ? null :
+									!groupSelectedItemData.HasValue ? Enumerable.Repeat( (PhrasingComponent)null, groupAndItems.Item2.Count ) :
+									groupSelectedItemData.Value.checkboxes.Take( groupAndItems.Item2.Count )
+										.EquiZip( groupAndItems.Item2, ( checkbox, item ) => item.Setup.Id != null ? checkbox : null ),
+									TableStatics.GetReorderingControls( idBase, false, enableItemReordering, hasExplicitItemGroups.Value, groupAndItems.Item2 ),
+									useContrastForFirstRow,
+									false,
+									allVisibleItems )
+								.Materialize();
+							var cachedVisibleGroupIndex = visibleGroupIndex;
+							FlowComponent rowGroup = new ElementComponent( _ => new ElementData(
+								() => new ElementLocalData( "tbody" ),
+								children:
+								buildRows(
+										groupAndItems.Item1.GetHeadItem( fields.Count ),
+										Enumerable.Repeat( new EwfTableField(), fields.Count ).Materialize(),
+										null,
+										null,
 										null,
 										true,
-										allVisibleItems ) )
-								.Materialize();
-							if( headRows.Any() )
-								children.Add( new ElementComponent( _ => new ElementData( () => new ElementLocalData( "thead" ), children: headRows ) ) );
-							excelRowAdders.AddRange( headItems.Select( i => TableStatics.GetExcelRowAdder( true, i.Cells ) ) );
-
-							var bodyRowGroupsAndRows = new List<Tuple<FlowComponent, IReadOnlyCollection<FlowComponent>>>();
-							var updateRegionSetListsAndStaticRowGroupCounts = new List<( UpdateRegionSetsParameter, int )>();
-							for( var visibleGroupIndex = 0; visibleGroupIndex < visibleItemGroupsAndItems.Count; visibleGroupIndex += 1 ) {
-								var groupAndItems = visibleItemGroupsAndItems[ visibleGroupIndex ];
-								var groupSelectedItemData = selectedItemData.ItemGroupData?[ visibleGroupIndex ];
-								var useContrastForFirstRow = visibleItemGroupsAndItems.Where( ( _, i ) => i < visibleGroupIndex ).Sum( i => i.Item2.Count ) % 2 == 1;
-								var groupBodyRows = buildRows(
-										groupAndItems.Item2,
-										fields,
-										selectedItemData.ItemGroupData == null ? null :
-										!groupSelectedItemData.HasValue ? Enumerable.Repeat( (PhrasingComponent)null, groupAndItems.Item2.Count ) :
-										groupSelectedItemData.Value.checkboxes.Take( groupAndItems.Item2.Count )
-											.EquiZip( groupAndItems.Item2, ( checkbox, item ) => item.Setup.Id != null ? checkbox : null ),
-										TableStatics.GetReorderingControls( idBase, false, enableItemReordering, hasExplicitItemGroups.Value, groupAndItems.Item2 ),
-										useContrastForFirstRow,
-										false,
-										allVisibleItems )
-									.Materialize();
-								var cachedVisibleGroupIndex = visibleGroupIndex;
-								FlowComponent rowGroup = new ElementComponent(
-									_ => new ElementData(
-										() => new ElementLocalData( "tbody" ),
-										children:
+										null )
+									.Concat(
 										buildRows(
-												groupAndItems.Item1.GetHeadItem( fields.Count ),
-												Enumerable.Repeat( new EwfTableField(), fields.Count ).Materialize(),
-												null,
-												null,
-												null,
-												true,
-												null )
-											.Concat(
-												buildRows(
-													hasExplicitItemGroups == true && groupSelectedItemData.HasValue
-														? EwfTableItem.Create(
-																TableStatics.GetItemSelectionAndActionComponents(
-																		"$( this ).closest( 'tbody' ).children().children( ':first-child' )",
-																		groupSelectedItemData.Value.buttons,
-																		groupSelectedItemData.Value.validation )
-																	.ToCell( new TableCellSetup( fieldSpan: fields.Count ) ) )
-															.ToCollection()
-														: Enumerable.Empty<EwfTableItem>().Materialize(),
-													Enumerable.Repeat( new EwfTableField(), fields.Count ).Materialize(),
-													null,
-													null,
-													null,
-													false,
-													null ) )
-											.Append<FlowComponentOrNode>(
-												new IdentifiedFlowComponent(
-													() => new IdentifiedComponentData<FlowComponentOrNode>(
-														"",
-														new UpdateRegionLinker(
-															"tail",
-															from region in hasExplicitItemGroups.Value
-																               ? groupAndItems.Item1.RemainingData.Value.TailUpdateRegions
-																               : groupAndItems.Item1.GetTailUpdateRegionsNotIncludingAllItems()
-															let staticRowCount = itemGroups[ cachedVisibleGroupIndex ].Items.Count - region.UpdatingItemCount
-															select new PreModificationUpdateRegion( region.Sets, () => groupBodyRows.Skip( staticRowCount ), staticRowCount.ToString ),
-															arg => groupBodyRows.Skip( int.Parse( arg ) ) ).ToCollection(),
-														new ErrorSourceSet(),
-														_ => groupBodyRows ) ) )
-											.Materialize() ) );
-								bodyRowGroupsAndRows.Add( Tuple.Create( rowGroup, groupBodyRows ) );
-								excelRowAdders.AddRange( groupAndItems.Item2.Select( i => TableStatics.GetExcelRowAdder( false, i.Cells ) ) );
+											hasExplicitItemGroups == true && groupSelectedItemData.HasValue
+												? EwfTableItem.Create(
+														TableStatics.GetItemSelectionAndActionComponents(
+																"$( this ).closest( 'tbody' ).children().children( ':first-child' )",
+																groupSelectedItemData.Value.buttons,
+																groupSelectedItemData.Value.validation )
+															.ToCell( new TableCellSetup( fieldSpan: fields.Count ) ) )
+													.ToCollection()
+												: Enumerable.Empty<EwfTableItem>().Materialize(),
+											Enumerable.Repeat( new EwfTableField(), fields.Count ).Materialize(),
+											null,
+											null,
+											null,
+											false,
+											null ) )
+									.Append<FlowComponentOrNode>(
+										new IdentifiedFlowComponent( () => new IdentifiedComponentData<FlowComponentOrNode>(
+											"",
+											new UpdateRegionLinker(
+												"tail",
+												from region in hasExplicitItemGroups.Value
+													               ? groupAndItems.Item1.RemainingData.Value.TailUpdateRegions
+													               : groupAndItems.Item1.GetTailUpdateRegionsNotIncludingAllItems()
+												let staticRowCount = itemGroups[ cachedVisibleGroupIndex ].Items.Count - region.UpdatingItemCount
+												select new PreModificationUpdateRegion( region.Sets, () => groupBodyRows.Skip( staticRowCount ), staticRowCount.ToString ),
+												arg => groupBodyRows.Skip( int.Parse( arg ) ) ).ToCollection(),
+											new ErrorSourceSet(),
+											_ => groupBodyRows ) ) )
+									.Materialize() ) );
+							bodyRowGroupsAndRows.Add( Tuple.Create( rowGroup, groupBodyRows ) );
+							excelRowAdders.AddRange( groupAndItems.Item2.Select( i => TableStatics.GetExcelRowAdder( false, i.Cells ) ) );
 
-								// If item limiting is enabled, include all subsequent item groups in tail update regions since any number of items could be appended.
-								if( defaultItemLimit != DataRowLimit.Unlimited )
-									updateRegionSetListsAndStaticRowGroupCounts.AddRange(
-										groupAndItems.Item1.RemainingData.Value.TailUpdateRegions.Select( i => ( i.Sets, visibleGroupIndex + 1 ) ) );
-							}
-							var linkers = new List<UpdateRegionLinker>();
-							children.Add(
-								new IdentifiedFlowComponent(
-									() => new IdentifiedComponentData<FlowComponentOrNode>(
-										"",
-										linkers,
-										new ErrorSourceSet(),
-										_ => bodyRowGroupsAndRows.Select( i => i.Item1 ) ) ) );
+							// If item limiting is enabled, include all subsequent item groups in tail update regions since any number of items could be appended.
+							if( defaultItemLimit != DataRowLimit.Unlimited )
+								updateRegionSetListsAndStaticRowGroupCounts.AddRange(
+									groupAndItems.Item1.RemainingData.Value.TailUpdateRegions.Select( i => ( i.Sets, visibleGroupIndex + 1 ) ) );
+						}
+						var linkers = new List<UpdateRegionLinker>();
+						children.Add(
+							new IdentifiedFlowComponent( () => new IdentifiedComponentData<FlowComponentOrNode>(
+								"",
+								linkers,
+								new ErrorSourceSet(),
+								_ => bodyRowGroupsAndRows.Select( i => i.Item1 ) ) ) );
 
-							if( defaultItemLimit != DataRowLimit.Unlimited ) {
-								var oldItemLimit = itemLimit.Value;
-								var lowerItemLimit = new Lazy<int>( () => Math.Min( oldItemLimit, itemLimit.Value ) );
+						if( defaultItemLimit != DataRowLimit.Unlimited ) {
+							var oldItemLimit = itemLimit.Value;
+							var lowerItemLimit = new Lazy<int>( () => Math.Min( oldItemLimit, itemLimit.Value ) );
 
-								var itemLimitingTailUpdateRegionComponentGetter = new Func<int, IEnumerable<FlowComponent>>(
-									staticItemCount => {
-										var rowCount = 0;
-										for( var groupIndex = 0; groupIndex < bodyRowGroupsAndRows.Count; groupIndex += 1 ) {
-											var rows = bodyRowGroupsAndRows[ groupIndex ].Item2;
-											rowCount += rows.Count;
-											if( rowCount < staticItemCount )
-												continue;
-											return rows.Skip( rows.Count - ( rowCount - staticItemCount ) )
-												.Concat( bodyRowGroupsAndRows.Skip( groupIndex + 1 ).Select( i => i.Item1 ) );
-										}
-										return Enumerable.Empty<FlowComponent>();
-									} );
-
-								linkers.Add(
-									new UpdateRegionLinker(
-										"itemLimitingTail",
-										new PreModificationUpdateRegion(
-											itemLimitingUpdateRegionSet,
-											() => itemLimitingTailUpdateRegionComponentGetter( lowerItemLimit.Value ),
-											() => lowerItemLimit.Value.ToString() ).ToCollection(),
-										arg => itemLimitingTailUpdateRegionComponentGetter( int.Parse( arg ) ) ) );
-							}
+							var itemLimitingTailUpdateRegionComponentGetter = new Func<int, IEnumerable<FlowComponent>>( staticItemCount => {
+								var rowCount = 0;
+								for( var groupIndex = 0; groupIndex < bodyRowGroupsAndRows.Count; groupIndex += 1 ) {
+									var rows = bodyRowGroupsAndRows[ groupIndex ].Item2;
+									rowCount += rows.Count;
+									if( rowCount < staticItemCount )
+										continue;
+									return rows.Skip( rows.Count - ( rowCount - staticItemCount ) ).Concat( bodyRowGroupsAndRows.Skip( groupIndex + 1 ).Select( i => i.Item1 ) );
+								}
+								return Enumerable.Empty<FlowComponent>();
+							} );
 
 							linkers.Add(
 								new UpdateRegionLinker(
-									"tail",
-									from region in hasExplicitItemGroups == false
-										               ? visibleItemGroupsAndItems.Single()
-											               .Item1.GetTailUpdateRegionsIncludingAllItems()
-											               .Select( i => new { sets = i.Sets, staticRowGroupCount = 0 } )
-										               : ( this.tailUpdateRegions?.Collection.Value.Select(
-											                   i => new { sets = i.Sets, staticRowGroupCount = itemGroups.Count - i.UpdatingItemCount } ) ?? [ ] ).Concat(
-											               updateRegionSetListsAndStaticRowGroupCounts.Select( i => new { sets = i.Item1, staticRowGroupCount = i.Item2 } ) )
-									select new PreModificationUpdateRegion(
-										region.sets,
-										() => bodyRowGroupsAndRows.Skip( region.staticRowGroupCount ).Select( i => i.Item1 ),
-										region.staticRowGroupCount.ToString ),
-									arg => bodyRowGroupsAndRows.Skip( int.Parse( arg ) ).Select( i => i.Item1 ) ) );
+									"itemLimitingTail",
+									new PreModificationUpdateRegion(
+										itemLimitingUpdateRegionSet,
+										() => itemLimitingTailUpdateRegionComponentGetter( lowerItemLimit.Value ),
+										() => lowerItemLimit.Value.ToString() ).ToCollection(),
+									arg => itemLimitingTailUpdateRegionComponentGetter( int.Parse( arg ) ) ) );
+						}
 
-							var itemCount = itemGroups.Sum( i => i.Items.Count );
-							var itemLimitingRowGroup = new List<FlowComponent>();
-							if( defaultItemLimit != DataRowLimit.Unlimited && itemLimit.Value < itemCount ) {
-								var nextLimit = EnumTools.GetValues<DataRowLimit>().First( i => i > (DataRowLimit)itemLimit.Value );
-								var itemIncrementCount = Math.Min( (int)nextLimit, itemCount ) - itemLimit.Value;
-								var button = new EwfButton(
-									new StandardButtonStyle( "Show " + itemIncrementCount + " more item" + ( itemIncrementCount != 1 ? "s" : "" ) ),
-									behavior: new PostBackBehavior(
-										postBack: PostBack.CreateIntermediate(
-											itemLimitingUpdateRegionSet,
-											id: PostBack.GetCompositeId( idBase, "showMore" ),
-											modificationMethod: () => itemLimit.Value = (int)nextLimit ) ) );
-								var item = EwfTableItem.Create( button.ToCollection().ToCell( new TableCellSetup( fieldSpan: fields.Count ) ) );
-								var useContrast = visibleItemGroupsAndItems.Sum( i => i.Item2.Count ) % 2 == 1;
-								itemLimitingRowGroup.Add(
-									new ElementComponent(
-										_ => new ElementData(
-											() => new ElementLocalData( "tbody" ),
-											children: buildRows(
-													item.ToCollection(),
-													Enumerable.Repeat( new EwfTableField(), fields.Count ).Materialize(),
-													null,
-													null,
-													useContrast,
-													false,
-													null )
-												.Materialize() ) ) );
-							}
-							children.Add(
-								new FlowIdContainer(
-									itemLimitingRowGroup,
-									updateRegionSets: itemLimitingUpdateRegionSet.Add(
-										itemGroups.SelectMany( i => i.RemainingData.Value.TailUpdateRegions )
-											.Materialize()
-											.Concat( this.tailUpdateRegions?.Collection.Value ?? [ ] )
-											.SelectMany( i => i.Sets.Collection.Value )
-											.ToParameter() ) ) );
+						linkers.Add(
+							new UpdateRegionLinker(
+								"tail",
+								from region in hasExplicitItemGroups == false
+									               ? visibleItemGroupsAndItems.Single()
+										               .Item1.GetTailUpdateRegionsIncludingAllItems()
+										               .Select( i => new { sets = i.Sets, staticRowGroupCount = 0 } )
+									               : ( this.tailUpdateRegions?.Collection.Value.Select( i =>
+										                   new { sets = i.Sets, staticRowGroupCount = itemGroups.Count - i.UpdatingItemCount } ) ?? [ ] ).Concat(
+										               updateRegionSetListsAndStaticRowGroupCounts.Select( i => new { sets = i.Item1, staticRowGroupCount = i.Item2 } ) )
+								select new PreModificationUpdateRegion(
+									region.sets,
+									() => bodyRowGroupsAndRows.Skip( region.staticRowGroupCount ).Select( i => i.Item1 ),
+									region.staticRowGroupCount.ToString ),
+								arg => bodyRowGroupsAndRows.Skip( int.Parse( arg ) ).Select( i => i.Item1 ) ) );
 
-							// Assert that every visible item in the table has the same number of cells and store a data structure for below.
-							var fieldCount = fields.Count - ( selectedItemData.ItemGroupData != null ? 1 : 0 ) - ( enableItemReordering ? 1 : 0 );
-							var cellPlaceholderListsForItems = TableStatics.BuildCellPlaceholderListsForItems( allVisibleItems, fieldCount );
+						var itemCount = itemGroups.Sum( i => i.Items.Count );
+						var itemLimitingRowGroup = new List<FlowComponent>();
+						if( defaultItemLimit != DataRowLimit.Unlimited && itemLimit.Value < itemCount ) {
+							var nextLimit = EnumTools.GetValues<DataRowLimit>().First( i => i > (DataRowLimit)itemLimit.Value );
+							var itemIncrementCount = Math.Min( (int)nextLimit, itemCount ) - itemLimit.Value;
+							var button = new EwfButton(
+								new StandardButtonStyle( "Show " + itemIncrementCount + " more item" + ( itemIncrementCount != 1 ? "s" : "" ) ),
+								behavior: new PostBackBehavior(
+									postBack: PostBack.CreateIntermediate(
+										itemLimitingUpdateRegionSet,
+										id: PostBack.GetCompositeId( idBase, "showMore" ),
+										modificationMethod: () => itemLimit.Value = (int)nextLimit ) ) );
+							var item = EwfTableItem.Create( button.ToCollection().ToCell( new TableCellSetup( fieldSpan: fields.Count ) ) );
+							var useContrast = visibleItemGroupsAndItems.Sum( i => i.Item2.Count ) % 2 == 1;
+							itemLimitingRowGroup.Add(
+								new ElementComponent( _ => new ElementData(
+									() => new ElementLocalData( "tbody" ),
+									children: buildRows(
+											item.ToCollection(),
+											Enumerable.Repeat( new EwfTableField(), fields.Count ).Materialize(),
+											null,
+											null,
+											useContrast,
+											false,
+											null )
+										.Materialize() ) ) );
+						}
+						children.Add(
+							new FlowIdContainer(
+								itemLimitingRowGroup,
+								updateRegionSets: itemLimitingUpdateRegionSet.Add(
+									itemGroups.SelectMany( i => i.RemainingData.Value.TailUpdateRegions )
+										.Materialize()
+										.Concat( this.tailUpdateRegions?.Collection.Value ?? [ ] )
+										.SelectMany( i => i.Sets.Collection.Value )
+										.ToParameter() ) ) );
 
-							if( !disableEmptyFieldDetection )
-								TableStatics.AssertAtLeastOneCellPerField( fieldCount, cellPlaceholderListsForItems );
-						} );
-				return new DisplayableElementData(
-					displaySetup,
-					() => new DisplayableElementLocalData( "table" ),
-					classes: TableStatics.GetClasses( style, classes ?? ElementClassSet.Empty ),
-					children: children,
-					etherealChildren: ( defaultItemLimit != DataRowLimit.Unlimited ? itemLimit.ToCollection() : Enumerable.Empty<EtherealComponent>() )
-					.Concat( etherealContent ?? Enumerable.Empty<EtherealComponent>() )
-					.Materialize() );
-			} ).ToCollection();
+						// Assert that every visible item in the table has the same number of cells and store a data structure for below.
+						var fieldCount = fields.Count - ( selectedItemData.ItemGroupData != null ? 1 : 0 ) - ( enableItemReordering ? 1 : 0 );
+						var cellPlaceholderListsForItems = TableStatics.BuildCellPlaceholderListsForItems( allVisibleItems, fieldCount );
+
+						if( !disableEmptyFieldDetection )
+							TableStatics.AssertAtLeastOneCellPerField( fieldCount, cellPlaceholderListsForItems );
+					} );
+			return new DisplayableElementData(
+				displaySetup,
+				() => new DisplayableElementLocalData( "table" ),
+				classes: TableStatics.GetClasses( style, classes ?? ElementClassSet.Empty ),
+				children: children,
+				etherealChildren: ( defaultItemLimit != DataRowLimit.Unlimited ? itemLimit.ToCollection() : Enumerable.Empty<EtherealComponent>() )
+				.Concat( etherealContent ?? Enumerable.Empty<EtherealComponent>() )
+				.Materialize() );
+		} ).ToCollection();
 
 		this.idBase = idBase;
 		exportToExcelPostBack = TableStatics.GetExportToExcelPostBack( idBase, caption, excelRowAdders );

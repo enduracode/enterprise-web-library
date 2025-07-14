@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using EnterpriseWebLibrary.DataAccess.Ranking;
+using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase;
 using StackExchange.Profiling;
 using Tewl.IO;
 
@@ -30,61 +31,57 @@ internal static class TableStatics {
 		string postBackIdBase, IReadOnlyCollection<SelectedItemAction<ItemIdType>>? selectedItemActions, TableSelectedItemData<ItemIdType> selectedItemData,
 		IEnumerable<( IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions, IEnumerable<Func<EwfTableItem<ItemIdType>>> itemGetters )>
 			itemGroups, DataValue<IReadOnlyCollection<ItemIdType>>? selectedItemIds, IReadOnlyCollection<DataModificationAction> externalActions ) {
-		var tablePostBackAndButtonPairs = ( selectedItemActions ?? Enumerable.Empty<SelectedItemAction<ItemIdType>>() ).Select(
-				action => action.GetPostBackAndButton( postBackIdBase, () => selectedItemData.ItemGroupData.SelectMany( i => i!.Value.selectedIds ).Materialize() ) )
+		var tablePostBackAndButtonPairs = ( selectedItemActions ?? Enumerable.Empty<SelectedItemAction<ItemIdType>>() ).Select( action =>
+				action.GetPostBackAndButton( postBackIdBase, () => selectedItemData.ItemGroupData.SelectMany( i => i!.Value.selectedIds ).Materialize() ) )
 			.Materialize();
 		selectedItemData.Buttons = tablePostBackAndButtonPairs.Select( i => i.button ).Materialize();
 
 		if( selectedItemActions == null && selectedItemIds == null )
 			return;
 
-		selectedItemData.ItemGroupData = itemGroups.Select(
-				group => {
-					var groupSelectedItemIds = new List<ItemIdType?>();
-					var groupPostBackAndButtonPairs = group.selectedItemActions.Select( i => i.GetPostBackAndButton( postBackIdBase, () => groupSelectedItemIds ) )
-						.Materialize();
+		selectedItemData.ItemGroupData = itemGroups.Select( group => {
+				var groupSelectedItemIds = new List<ItemIdType?>();
+				var groupPostBackAndButtonPairs = group.selectedItemActions.Select( i => i.GetPostBackAndButton( postBackIdBase, () => groupSelectedItemIds ) )
+					.Materialize();
 
-					var actions = externalActions.Concat( tablePostBackAndButtonPairs.Select( i => i.postBack ) )
-						.Concat( groupPostBackAndButtonPairs.Select( i => i.postBack ) )
-						.Materialize();
-					if( !actions.Any() )
-						return (( IReadOnlyCollection<ButtonSetup>, EwfValidation?, IReadOnlyCollection<PhrasingComponent>, List<ItemIdType?> )?)null;
+				var actions = externalActions.Concat( tablePostBackAndButtonPairs.Select( i => i.postBack ) )
+					.Concat( groupPostBackAndButtonPairs.Select( i => i.postBack ) )
+					.Materialize();
+				if( !actions.Any() )
+					return (( IReadOnlyCollection<ButtonSetup>, EwfValidation?, IReadOnlyCollection<PhrasingComponent>, List<ItemIdType?> )?)null;
 
-					var checkboxes = FormState.ExecuteWithActions(
-						actions.ToParameter(),
-						() => group.itemGetters.Select(
-								i => new Checkbox(
-									false,
-									Enumerable.Empty<PhrasingComponent>().Materialize(),
-									validationMethod: ( postBackValue, _ ) => {
-										if( postBackValue.Value )
-											groupSelectedItemIds.Add( i().Setup.Id!.Value );
-									} ).PageComponent )
-							.Materialize(),
-						formControlDefaultActionOverride: new SpecifiedValue<NonPostBackFormAction?>( null ) );
+				var checkboxes = FormState.ExecuteWithActions(
+					actions.ToParameter(),
+					() => group.itemGetters.Select( i => new Checkbox(
+							false,
+							Enumerable.Empty<PhrasingComponent>().Materialize(),
+							validationMethod: ( postBackValue, _ ) => {
+								if( postBackValue.Value )
+									groupSelectedItemIds.Add( i().Setup.Id!.Value );
+							} ).PageComponent )
+						.Materialize(),
+					formControlDefaultActionOverride: new SpecifiedValue<NonPostBackFormAction?>( null ) );
 
-					var validation = groupPostBackAndButtonPairs.Any()
-						                 ? FormState.ExecuteWithActions(
-							                 groupPostBackAndButtonPairs.Select( i => i.postBack ).ToParameter(),
-							                 () => new EwfValidation(
-								                 validator => {
-									                 if( !groupSelectedItemIds.Any() )
-										                 validator.NoteErrorAndAddMessage( "Please select at least one item." );
-								                 } ) )
-						                 : null;
+				var validation = groupPostBackAndButtonPairs.Any()
+					                 ? FormState.ExecuteWithActions(
+						                 groupPostBackAndButtonPairs.Select( i => i.postBack ).ToParameter(),
+						                 () => new EwfValidation( validator => {
+							                 if( !groupSelectedItemIds.Any() )
+								                 validator.NoteErrorAndAddMessage( "Please select at least one item." );
+						                 } ) )
+					                 : null;
 
-					return ( groupPostBackAndButtonPairs.Select( i => i.button ).Materialize(), validation, checkboxes, groupSelectedItemIds );
-				} )
+				return ( groupPostBackAndButtonPairs.Select( i => i.button ).Materialize(), validation, checkboxes, groupSelectedItemIds );
+			} )
 			.ToImmutableArray();
 
 		if( tablePostBackAndButtonPairs.Any() )
 			FormState.ExecuteWithActions(
 				tablePostBackAndButtonPairs.Select( i => i.postBack ).ToParameter(),
-				() => selectedItemData.Validation = new EwfValidation(
-					      validator => {
-						      if( !selectedItemData.ItemGroupData.SelectMany( i => i!.Value.selectedIds ).Any() )
-							      validator.NoteErrorAndAddMessage( "Please select at least one item." );
-					      } ) );
+				() => selectedItemData.Validation = new EwfValidation( validator => {
+					if( !selectedItemData.ItemGroupData.SelectMany( i => i!.Value.selectedIds ).Any() )
+						validator.NoteErrorAndAddMessage( "Please select at least one item." );
+				} ) );
 
 		if( selectedItemIds != null )
 			new EwfValidation( _ => selectedItemIds.Value = selectedItemData.ItemGroupData.SelectMany( i => i!.Value.selectedIds ).Materialize() );
@@ -116,11 +113,10 @@ internal static class TableStatics {
 		var subCaptionComponents = new List<PhrasingComponent>();
 		if( subCaption.Length > 0 )
 			subCaptionComponents.AddRange( new LineBreak().ToCollection().Concat( subCaption.ToComponents() ) );
-		return new DisplayableElement(
-			_ => new DisplayableElementData(
-				null,
-				() => new DisplayableElementLocalData( "caption" ),
-				children: caption.ToComponents().Concat( subCaptionComponents ).Materialize() ) ).ToCollection();
+		return new DisplayableElement( _ => new DisplayableElementData(
+			null,
+			() => new DisplayableElementLocalData( "caption" ),
+			children: caption.ToComponents().Concat( subCaptionComponents ).Materialize() ) ).ToCollection();
 	}
 
 	internal static IReadOnlyCollection<EwfTableField> GetFields<ItemIdType>(
@@ -151,19 +147,17 @@ internal static class TableStatics {
 
 	internal static FlowComponent GetColElement( EwfTableFieldOrItemSetup fieldOrItemSetup, decimal columnWidthFactor ) {
 		var width = fieldOrItemSetup.Size;
-		return new ElementComponent(
-			_ => new ElementData(
-				() => new ElementLocalData(
-					"col",
-					focusDependentData: new ElementFocusDependentData(
-						attributes: width != null
-							            ? new ElementAttribute(
-								            "style",
-								            "width: {0}".FormatWith(
-									            ( width is AncestorRelativeLength && width.Value.EndsWith( "%" )
-										              ? ( decimal.Parse( width.Value.Remove( width.Value.Length - 1 ) ) * columnWidthFactor ).ToPercentage()
-										              : width ).Value ) ).ToCollection()
-							            : null ) ) ) );
+		return new ElementComponent( _ => new ElementData( () => new ElementLocalData(
+			"col",
+			focusDependentData: new ElementFocusDependentData(
+				attributes: width != null
+					            ? new ElementAttribute(
+						            "style",
+						            "width: {0}".FormatWith(
+							            ( width is AncestorRelativeLength && width.Value.EndsWith( "%" )
+								              ? ( decimal.Parse( width.Value.Remove( width.Value.Length - 1 ) ) * columnWidthFactor ).ToPercentage()
+								              : width ).Value ) ).ToCollection()
+					            : null ) ) ) );
 	}
 
 	internal static PostBack GetExportToExcelPostBack( string postBackIdBase, string caption, IReadOnlyCollection<Action<ExcelWorksheet>> rowAdders ) =>
@@ -171,16 +165,15 @@ internal static class TableStatics {
 			null,
 			id: PostBack.GetCompositeId( postBackIdBase, "excel" ),
 			reloadBehaviorGetter: () => new PageReloadBehavior(
-				secondaryResponse: new SecondaryResponse(
-					() => EwfResponse.CreateExcelWorkbookResponse(
-						() => caption.Any() ? caption : "Excel export",
-						() => {
-							var workbook = new ExcelFileWriter();
-							using( MiniProfiler.Current.Step( "EWF - Add table rows to Excel worksheet" ) )
-								foreach( var i in rowAdders )
-									i( workbook.DefaultWorksheet );
-							return workbook;
-						} ) ) ) );
+				secondaryResponse: new SecondaryResponse( () => EwfResponse.CreateExcelWorkbookResponse(
+					() => caption.Any() ? caption : "Excel export",
+					() => {
+						var workbook = new ExcelFileWriter();
+						using( MiniProfiler.Current.Step( "EWF - Add table rows to Excel worksheet" ) )
+							foreach( var i in rowAdders )
+								i( workbook.DefaultWorksheet );
+						return workbook;
+					} ) ) ) );
 
 	internal static IEnumerable<FlowComponent> GetGeneralActionList( PostBack? exportToExcelPostBack, ActionComponentSetupsParameter? actions ) {
 		actions ??= new ActionComponentSetupsParameter( [ ] );
@@ -191,30 +184,29 @@ internal static class TableStatics {
 
 	internal static IReadOnlyCollection<FlowComponent>
 		GetItemSelectionAndActionComponents( string checkboxCellSelector, IReadOnlyCollection<ButtonSetup> buttons, EwfValidation? validation ) =>
-		new DisplayableElement(
-				context => new DisplayableElementData(
-					null,
-					() => ListErrorDisplayStyle.GetErrorFocusableElementLocalData( context, "div", new ErrorSourceSet( validations: validation?.ToCollection() ), null ),
-					classes: TableCssElementCreator.ItemSelectionAndActionContainerClass,
-					children: new GenericFlowContainer(
-							new GenericPhrasingContainer( "Select:".ToComponents(), classes: TableCssElementCreator.ItemSelectionLabelClass ).Append<FlowComponent>(
-									new GenericFlowContainer(
-										new WrappingList(
-											new EwfButton(
-													new StandardButtonStyle( "All", buttonSize: ButtonSize.ShrinkWrap ),
-													behavior: new CustomButtonBehavior(
-														() => "{0}.find( 'input[type=checkbox]:not(:checked)' ).click();".FormatWith( checkboxCellSelector ) ) )
-												.ToComponentListItem()
-												.AppendWrappingListItem(
-													new EwfButton(
-															new StandardButtonStyle( "None", buttonSize: ButtonSize.ShrinkWrap ),
-															behavior: new CustomButtonBehavior(
-																() => "{0}.find( 'input[type=checkbox]:checked' ).click();".FormatWith( checkboxCellSelector ) ) )
-														.ToComponentListItem() ) ).ToCollection(),
-										classes: TableCssElementCreator.ItemSelectionControlContainerClass ) )
-								.Materialize(),
-							classes: TableCssElementCreator.ItemSelectionLabelAndControlContainerClass ).Concat( GetActionList( buttons ) )
-						.Materialize() ) ).Append<FlowComponent>(
+		new DisplayableElement( context => new DisplayableElementData(
+				null,
+				() => ListErrorDisplayStyle.GetErrorFocusableElementLocalData( context, "div", new ErrorSourceSet( validations: validation?.ToCollection() ), null ),
+				classes: TableCssElementCreator.ItemSelectionAndActionContainerClass,
+				children: new GenericFlowContainer(
+						new GenericPhrasingContainer( "Select:".ToComponents(), classes: TableCssElementCreator.ItemSelectionLabelClass ).Append<FlowComponent>(
+								new GenericFlowContainer(
+									new WrappingList(
+										new EwfButton(
+												new StandardButtonStyle( "All", buttonSize: ButtonSize.ShrinkWrap ),
+												behavior: new CustomButtonBehavior( () =>
+													"{0}.find( 'input[type=checkbox]:not(:checked)' ).click();".FormatWith( checkboxCellSelector ) ) )
+											.ToComponentListItem()
+											.AppendWrappingListItem(
+												new EwfButton(
+														new StandardButtonStyle( "None", buttonSize: ButtonSize.ShrinkWrap ),
+														behavior: new CustomButtonBehavior( () =>
+															"{0}.find( 'input[type=checkbox]:checked' ).click();".FormatWith( checkboxCellSelector ) ) )
+													.ToComponentListItem() ) ).ToCollection(),
+									classes: TableCssElementCreator.ItemSelectionControlContainerClass ) )
+							.Materialize(),
+						classes: TableCssElementCreator.ItemSelectionLabelAndControlContainerClass ).Concat( GetActionList( buttons ) )
+					.Materialize() ) ).Append<FlowComponent>(
 				new FlowErrorContainer( new ErrorSourceSet( validations: validation?.ToCollection() ), new ListErrorDisplayStyle(), disableFocusabilityOnError: true ) )
 			.Materialize();
 
@@ -250,35 +242,34 @@ internal static class TableStatics {
 			throw new ApplicationException(
 				"When item reordering is enabled, every item in a group must have a rank ID unless none of the items in that group have a rank ID." );
 
-		return items.Select(
-			( item, index ) => {
-				var components = new List<PhrasingComponent>();
-				if( index != 0 )
-					components.Add(
-						new EwfButton(
-							new CustomButtonStyle(
-								classes: new ElementClass( "icon" ),
-								attributes: new ElementAttribute( "aria-label", "Move up" ).ToCollection(),
-								children: new FontAwesomeIcon( tableIsColumnPrimary ? "fa-chevron-circle-left" : "fa-chevron-circle-up", "fa-lg" ).ToCollection() ),
-							behavior: new PostBackBehavior(
-								postBack: PostBack.CreateFull(
-									id: PostBack.GetCompositeId( postBackIdBase, item.Setup.RankId!.Value.ToString(), "up" ),
-									modificationMethod: () => RankingMethods.SwapRanks( items[ index - 1 ].Setup.RankId!.Value, item.Setup.RankId.Value ) ) ) ) );
-				if( index != 0 && index != items.Count - 1 )
-					components.AddRange( " ".ToComponents() );
-				if( index != items.Count - 1 )
-					components.Add(
-						new EwfButton(
-							new CustomButtonStyle(
-								classes: new ElementClass( "icon" ),
-								attributes: new ElementAttribute( "aria-label", "Move down" ).ToCollection(),
-								children: new FontAwesomeIcon( tableIsColumnPrimary ? "fa-chevron-circle-right" : "fa-chevron-circle-down", "fa-lg" ).ToCollection() ),
-							behavior: new PostBackBehavior(
-								postBack: PostBack.CreateFull(
-									id: PostBack.GetCompositeId( postBackIdBase, item.Setup.RankId!.Value.ToString(), "down" ),
-									modificationMethod: () => RankingMethods.SwapRanks( item.Setup.RankId.Value, items[ index + 1 ].Setup.RankId!.Value ) ) ) ) );
-				return components;
-			} );
+		return items.Select( ( item, index ) => {
+			var components = new List<PhrasingComponent>();
+			if( index != 0 )
+				components.Add(
+					new EwfButton(
+						new CustomButtonStyle(
+							classes: new ElementClass( "icon" ),
+							attributes: new ElementAttribute( "aria-label", "Move up" ).ToCollection(),
+							children: new FontAwesomeIcon( tableIsColumnPrimary ? "fa-chevron-circle-left" : "fa-chevron-circle-up", "fa-lg" ).ToCollection() ),
+						behavior: new PostBackBehavior(
+							postBack: PostBack.CreateFull(
+								id: PostBack.GetCompositeId( postBackIdBase, item.Setup.RankId!.Value.ToString(), "up" ),
+								modificationMethod: () => RankingMethods.SwapRanks( items[ index - 1 ].Setup.RankId!.Value, item.Setup.RankId.Value ) ) ) ) );
+			if( index != 0 && index != items.Count - 1 )
+				components.AddRange( " ".ToComponents() );
+			if( index != items.Count - 1 )
+				components.Add(
+					new EwfButton(
+						new CustomButtonStyle(
+							classes: new ElementClass( "icon" ),
+							attributes: new ElementAttribute( "aria-label", "Move down" ).ToCollection(),
+							children: new FontAwesomeIcon( tableIsColumnPrimary ? "fa-chevron-circle-right" : "fa-chevron-circle-down", "fa-lg" ).ToCollection() ),
+						behavior: new PostBackBehavior(
+							postBack: PostBack.CreateFull(
+								id: PostBack.GetCompositeId( postBackIdBase, item.Setup.RankId!.Value.ToString(), "down" ),
+								modificationMethod: () => RankingMethods.SwapRanks( item.Setup.RankId.Value, items[ index + 1 ].Setup.RankId!.Value ) ) ) ) );
+			return components;
+		} );
 	}
 
 	internal static List<List<CellPlaceholder?>> BuildCellPlaceholderListsForItems(
@@ -340,56 +331,54 @@ internal static class TableStatics {
 	internal static IEnumerable<FlowComponent> BuildRows(
 		List<List<CellPlaceholder?>> cellPlaceholderListsForRows, IReadOnlyList<EwfTableFieldOrItemSetup> rowSetups, bool? useContrastForFirstRow,
 		IReadOnlyList<EwfTableFieldOrItemSetup> columns, int firstDataColumnIndex, bool tableIsColumnPrimary ) {
-		return cellPlaceholderListsForRows.Select(
-			( row, rowIndex ) => {
-				var rowSetup = rowSetups[ rowIndex ];
-				var rowActivationBehavior = rowSetup.ActivationBehavior;
-				return new FlowIdContainer(
-					ElementActivationBehavior.GetActivatableElement(
-							"tr",
-							( useContrastForFirstRow.HasValue && ( ( rowIndex % 2 == 1 ) ^ useContrastForFirstRow.Value )
-								  ? TableCssElementCreator.ContrastClass
-								  : ElementClassSet.Empty ).Add( rowSetup.Classes ),
-							rowSetup.Size != null
-								? new ElementAttribute( "style", "height: {0}".FormatWith( rowSetup.Size.Value ) ).ToCollection()
-								: Enumerable.Empty<ElementAttribute>().Materialize(),
-							rowActivationBehavior,
-							row.Select( ( cell, colIndex ) => new { Cell = cell as EwfTableCell, ColumnIndex = colIndex } )
-								.Where( cellAndIndex => cellAndIndex.Cell is not null )
-								.Select(
-									cellAndIndex => {
-										var columnSetup = columns[ cellAndIndex.ColumnIndex ];
-										var cellSetup = cellAndIndex.Cell!.Setup;
+		return cellPlaceholderListsForRows.Select( ( row, rowIndex ) => {
+			var rowSetup = rowSetups[ rowIndex ];
+			var rowActivationBehavior = rowSetup.ActivationBehavior;
+			return new FlowIdContainer(
+				ElementActivationBehavior.GetActivatableElement(
+						"tr",
+						( useContrastForFirstRow.HasValue && ( ( rowIndex % 2 == 1 ) ^ useContrastForFirstRow.Value )
+							  ? TableCssElementCreator.ContrastClass
+							  : ElementClassSet.Empty ).Add( rowSetup.Classes ),
+						rowSetup.Size != null
+							? new ElementAttribute( "style", "height: {0}".FormatWith( rowSetup.Size.Value ) ).ToCollection()
+							: Enumerable.Empty<ElementAttribute>().Materialize(),
+						rowActivationBehavior,
+						row.Select( ( cell, colIndex ) => new { Cell = cell as EwfTableCell, ColumnIndex = colIndex } )
+							.Where( cellAndIndex => cellAndIndex.Cell is not null )
+							.Select( cellAndIndex => {
+								var columnSetup = columns[ cellAndIndex.ColumnIndex ];
+								var cellSetup = cellAndIndex.Cell!.Setup;
 
-										var attributes = new List<ElementAttribute>();
-										var rowSpan = tableIsColumnPrimary ? cellSetup.FieldSpan : cellSetup.ItemSpan;
-										if( rowSpan != 1 )
-											attributes.Add( new ElementAttribute( "rowspan", rowSpan.ToString() ) );
-										var colSpan = tableIsColumnPrimary ? cellSetup.ItemSpan : cellSetup.FieldSpan;
-										if( colSpan != 1 )
-											attributes.Add( new ElementAttribute( "colspan", colSpan.ToString() ) );
+								var attributes = new List<ElementAttribute>();
+								var rowSpan = tableIsColumnPrimary ? cellSetup.FieldSpan : cellSetup.ItemSpan;
+								if( rowSpan != 1 )
+									attributes.Add( new ElementAttribute( "rowspan", rowSpan.ToString() ) );
+								var colSpan = tableIsColumnPrimary ? cellSetup.ItemSpan : cellSetup.FieldSpan;
+								if( colSpan != 1 )
+									attributes.Add( new ElementAttribute( "colspan", colSpan.ToString() ) );
 
-										var cellActivationBehavior = cellSetup.ActivationBehavior ??
-										                             ( tableIsColumnPrimary || rowActivationBehavior == null ? columnSetup.ActivationBehavior : null );
-										return new FlowIdContainer(
-											ElementActivationBehavior.GetActivatableElement(
-													cellAndIndex.ColumnIndex < firstDataColumnIndex ? "th" : "td",
-													TableCssElementCreator.AllCellAlignmentsClass.Add( textAlignmentClass( cellAndIndex.Cell, rowSetup, columnSetup ) )
-														.Add( verticalAlignmentClass( rowSetup, columnSetup ) )
-														.Add( cellSetup.ContainsActivatableElements ? activatableElementContainerClass : ElementClassSet.Empty )
-														.Add( columnSetup.Classes )
-														.Add( cellSetup.Classes ),
-													attributes,
-													cellActivationBehavior,
-													cellAndIndex.Cell.Content,
-													cellSetup.EtherealContent )
-												.ToCollection(),
-											updateRegionSets: cellSetup.UpdateRegionSets );
-									} )
-								.Materialize(),
-							Enumerable.Empty<EtherealComponent>().Materialize() )
-						.ToCollection() );
-			} );
+								var cellActivationBehavior = cellSetup.ActivationBehavior ??
+								                             ( tableIsColumnPrimary || rowActivationBehavior == null ? columnSetup.ActivationBehavior : null );
+								return new FlowIdContainer(
+									ElementActivationBehavior.GetActivatableElement(
+											cellAndIndex.ColumnIndex < firstDataColumnIndex ? "th" : "td",
+											TableCssElementCreator.AllCellAlignmentsClass.Add( textAlignmentClass( cellAndIndex.Cell, rowSetup, columnSetup ) )
+												.Add( verticalAlignmentClass( rowSetup, columnSetup ) )
+												.Add( cellSetup.ContainsActivatableElements ? activatableElementContainerClass : ElementClassSet.Empty )
+												.Add( columnSetup.Classes )
+												.Add( cellSetup.Classes ),
+											attributes,
+											cellActivationBehavior,
+											cellAndIndex.Cell.Content,
+											cellSetup.EtherealContent )
+										.ToCollection(),
+									updateRegionSets: cellSetup.UpdateRegionSets );
+							} )
+							.Materialize(),
+						Enumerable.Empty<EtherealComponent>().Materialize() )
+					.ToCollection() );
+		} );
 	}
 
 	private static ElementClassSet textAlignmentClass( EwfTableCell cell, EwfTableFieldOrItemSetup row, EwfTableFieldOrItemSetup column ) {

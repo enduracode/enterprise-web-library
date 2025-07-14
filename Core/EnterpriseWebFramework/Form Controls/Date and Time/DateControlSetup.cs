@@ -1,4 +1,5 @@
-﻿using JetBrains.Annotations;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase;
+using JetBrains.Annotations;
 using NodaTime;
 using NodaTime.Text;
 using Tewl.InputValidation;
@@ -177,31 +178,30 @@ picker.localization = {{
 								       },
 								       formValue: formValue ) ) ), validationMethod == null
 									                                   ? null
-									                                   : formValue.CreateValidation(
-										                                   ( postBackValue, validator ) => {
-											                                   if( validationPredicate != null && !validationPredicate( postBackValue.ChangedOnPostBack ) )
-												                                   return;
+									                                   : formValue.CreateValidation( ( postBackValue, validator ) => {
+										                                   if( validationPredicate != null && !validationPredicate( postBackValue.ChangedOnPostBack ) )
+											                                   return;
 
-											                                   if( validator.GetNullableDateTime(
-													                                       new ValidationErrorHandler( "date" ),
-													                                       postBackValue.Value,
-													                                       null,
-													                                       allowEmpty,
-													                                       minValue.Value.ToDateTimeUnspecified(),
-													                                       maxValue.Value.PlusDays( 1 ).ToDateTimeUnspecified() )
-												                                       .Error( out var validatedValue ) is not null ) {
-												                                   validationErrorNotifier?.Invoke();
-												                                   return;
-											                                   }
+										                                   if( validator.GetNullableDateTime(
+												                                       new ValidationErrorHandler( "date" ),
+												                                       postBackValue.Value,
+												                                       null,
+												                                       allowEmpty,
+												                                       minValue.Value.ToDateTimeUnspecified(),
+												                                       maxValue.Value.PlusDays( 1 ).ToDateTimeUnspecified() )
+											                                       .Error( out var validatedValue ) is not null ) {
+											                                   validationErrorNotifier?.Invoke();
+											                                   return;
+										                                   }
 
-											                                   if( validatedValue.HasTime() ) {
-												                                   validator.NoteErrorAndAddMessage( "Time information is not allowed." );
-												                                   validationErrorNotifier?.Invoke();
-												                                   return;
-											                                   }
+										                                   if( validatedValue.HasTime() ) {
+											                                   validator.NoteErrorAndAddMessage( "Time information is not allowed." );
+											                                   validationErrorNotifier?.Invoke();
+											                                   return;
+										                                   }
 
-											                                   validationMethod( validatedValue.ToNewUnderlyingValue( LocalDate.FromDateTime ), validator );
-										                                   } ) );
+										                                   validationMethod( validatedValue.ToNewUnderlyingValue( LocalDate.FromDateTime ), validator );
+									                                   } ) );
 		};
 	}
 
@@ -214,10 +214,8 @@ picker.localization = {{
 	}
 
 	private FlowComponent getIgnoredHiddenField() =>
-		new ElementComponent(
-			_ => new ElementData(
-				() => new ElementLocalData(
-					"input",
-					focusDependentData: new ElementFocusDependentData(
-						attributes: new ElementAttribute( "type", "hidden" ).Append( new ElementAttribute( "name", PageBase.IgnoredFormFieldName ) ) ) ) ) );
+		new ElementComponent( _ => new ElementData( () => new ElementLocalData(
+			"input",
+			focusDependentData: new ElementFocusDependentData(
+				attributes: new ElementAttribute( "type", "hidden" ).Append( new ElementAttribute( "name", PageBase.IgnoredFormFieldName ) ) ) ) ) );
 }

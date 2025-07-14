@@ -1,4 +1,5 @@
-﻿#nullable disable
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase;
+
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 
 /// <summary>
@@ -10,7 +11,7 @@ public class DisplayableElement: FlowComponent, EtherealComponent {
 	/// <summary>
 	/// Creates a displayable element.
 	/// </summary>
-	public DisplayableElement( Func<ElementContext, DisplayableElementData> elementDataGetter, FormValue formValue = null ) {
+	public DisplayableElement( Func<ElementContext, DisplayableElementData> elementDataGetter, FormValue? formValue = null ) {
 		children = new ElementComponent( context => elementDataGetter( context ).BaseDataGetter( context ), formValue: formValue ).ToCollection();
 	}
 

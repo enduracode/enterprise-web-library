@@ -1,4 +1,5 @@
 ﻿#nullable disable
+using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase;
 using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -70,28 +71,27 @@ public class ModalBox: EtherealComponent {
 	/// <param name="classes">The classes on the dialog element.</param>
 	/// <param name="open"></param>
 	public ModalBox( ModalBoxId id, bool includeCloseButton, IReadOnlyCollection<FlowComponent> content, ElementClassSet classes = null, bool open = false ) {
-		children = new ElementComponent(
-			context => new ElementData(
-				() => new ElementLocalData(
-					"dialog",
-					focusDependentData: new ElementFocusDependentData(
-						includeIdAttribute: true,
-						jsInitStatements: ( includeCloseButton
-							                    ? "$( '#{0}' ).click( function( e ) {{ if( e.target.id === '{0}' ) e.target.close(); }} );".FormatWith( context.Id )
-							                    : "" ).ConcatenateWithSpace( open ? "document.getElementById( '{0}' ).showModal();".FormatWith( context.Id ) : "" ) ) ),
-				classes: boxClass.Add( classes ?? ElementClassSet.Empty ),
-				clientSideIdReferences: id.ElementId.ToCollection(),
-				children: new GenericFlowContainer(
-					( includeCloseButton
-						  ? new GenericFlowContainer(
-							  new EwfButton(
-								  new StandardButtonStyle( "Close", icon: new ActionComponentIcon( new FontAwesomeIcon( "fa-times" ) ) ),
-								  behavior: new CustomButtonBehavior( () => "document.getElementById( '{0}' ).close();".FormatWith( context.Id ) ) ).ToCollection(),
-							  classes: closeButtonContainerClass ).ToCollection<FlowComponent>()
-						  : Enumerable.Empty<FlowComponent>() ).Concat(
-						id == browsingModalBoxIdGetter() ? content : new GenericFlowContainer( content, classes: contentContainerClass ).ToCollection() )
-					.Materialize(),
-					classes: boxClass ).ToCollection() ) ).ToCollection();
+		children = new ElementComponent( context => new ElementData(
+			() => new ElementLocalData(
+				"dialog",
+				focusDependentData: new ElementFocusDependentData(
+					includeIdAttribute: true,
+					jsInitStatements:
+					( includeCloseButton ? "$( '#{0}' ).click( function( e ) {{ if( e.target.id === '{0}' ) e.target.close(); }} );".FormatWith( context.Id ) : "" )
+					.ConcatenateWithSpace( open ? "document.getElementById( '{0}' ).showModal();".FormatWith( context.Id ) : "" ) ) ),
+			classes: boxClass.Add( classes ?? ElementClassSet.Empty ),
+			clientSideIdReferences: id.ElementId.ToCollection(),
+			children: new GenericFlowContainer(
+				( includeCloseButton
+					  ? new GenericFlowContainer(
+						  new EwfButton(
+							  new StandardButtonStyle( "Close", icon: new ActionComponentIcon( new FontAwesomeIcon( "fa-times" ) ) ),
+							  behavior: new CustomButtonBehavior( () => "document.getElementById( '{0}' ).close();".FormatWith( context.Id ) ) ).ToCollection(),
+						  classes: closeButtonContainerClass ).ToCollection<FlowComponent>()
+					  : Enumerable.Empty<FlowComponent>() ).Concat(
+					id == browsingModalBoxIdGetter() ? content : new GenericFlowContainer( content, classes: contentContainerClass ).ToCollection() )
+				.Materialize(),
+				classes: boxClass ).ToCollection() ) ).ToCollection();
 	}
 
 	IReadOnlyCollection<EtherealComponentOrElement> EtherealComponent.GetChildren() => children;
