@@ -127,6 +127,7 @@ internal class UpdateDependentLogic: Operation {
 					writer.WriteLine( "using System.Linq;" );
 					writer.WriteLine( "using System.Threading;" );
 					writer.WriteLine( "using EnterpriseWebLibrary.DataAccess;" );
+					writer.WriteLine( "using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;" );
 					writer.WriteLine( "using Newtonsoft.Json;" );
 					writer.WriteLine( "using Newtonsoft.Json.Linq;" );
 					writer.WriteLine( "using Tewl.InputValidation;" );
