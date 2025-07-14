@@ -2,6 +2,7 @@
 using System.Collections.Immutable;
 using System.Web;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase;
+using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.IdReferencing;
 using JetBrains.Annotations;
 using Tewl.InputValidation;
 

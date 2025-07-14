@@ -1,5 +1,6 @@
 ﻿#nullable disable
 using System.Globalization;
+using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.IdReferencing;
 using JetBrains.Annotations;
 using Tewl.InputValidation;
 
@@ -373,40 +374,39 @@ public class TextControlSetup {
 						       },
 						       formValue: formValue ).ToCollection() ), externalValidationMethod == null
 							                                                ? null
-							                                                : formValue.CreateValidation(
-								                                                ( postBackValue, validator ) => {
-									                                                if( validationPredicate != null && !validationPredicate( postBackValue.ChangedOnPostBack ) )
-										                                                return;
+							                                                : formValue.CreateValidation( ( postBackValue, validator ) => {
+								                                                if( validationPredicate != null && !validationPredicate( postBackValue.ChangedOnPostBack ) )
+									                                                return;
 
-									                                                string validatedValue;
-									                                                if( string.Equals( inputElementType, "password", StringComparison.Ordinal )
-										                                                    ? postBackValue.Value.Length == 0
-										                                                    : postBackValue.Value.IsWhitespace() ) {
-										                                                if( allowEmpty )
-											                                                validatedValue = "";
-										                                                else {
-											                                                validatedValue = null;
-											                                                validator.NoteErrorAndAddMessage( "Please enter a value." );
-										                                                }
-									                                                }
+								                                                string validatedValue;
+								                                                if( string.Equals( inputElementType, "password", StringComparison.Ordinal )
+									                                                    ? postBackValue.Value.Length == 0
+									                                                    : postBackValue.Value.IsWhitespace() ) {
+									                                                if( allowEmpty )
+										                                                validatedValue = "";
 									                                                else {
-										                                                var trimmedValue = disableTrimming ? postBackValue.Value : postBackValue.Value.Trim();
-										                                                if( minLength.HasValue && trimmedValue.Length < minLength.Value ) {
-											                                                validatedValue = null;
-											                                                validator.NoteErrorAndAddMessage(
-												                                                $"The value must have at least {minLength.Value} characters." );
-										                                                }
-										                                                else
-											                                                validatedValue = internalValidationMethod( trimmedValue, validator );
+										                                                validatedValue = null;
+										                                                validator.NoteErrorAndAddMessage( "Please enter a value." );
 									                                                }
-
-									                                                if( validatedValue == null ) {
-										                                                validationErrorNotifier?.Invoke();
-										                                                return;
+								                                                }
+								                                                else {
+									                                                var trimmedValue = disableTrimming ? postBackValue.Value : postBackValue.Value.Trim();
+									                                                if( minLength.HasValue && trimmedValue.Length < minLength.Value ) {
+										                                                validatedValue = null;
+										                                                validator.NoteErrorAndAddMessage(
+											                                                $"The value must have at least {minLength.Value} characters." );
 									                                                }
+									                                                else
+										                                                validatedValue = internalValidationMethod( trimmedValue, validator );
+								                                                }
 
-									                                                externalValidationMethod( validatedValue, validator );
-								                                                } ) );
+								                                                if( validatedValue == null ) {
+									                                                validationErrorNotifier?.Invoke();
+									                                                return;
+								                                                }
+
+								                                                externalValidationMethod( validatedValue, validator );
+							                                                } ) );
 		};
 	}
 }

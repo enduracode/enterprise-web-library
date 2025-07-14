@@ -1,5 +1,6 @@
 ﻿#nullable disable
 using System.Globalization;
+using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.IdReferencing;
 using Tewl.InputValidation;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -229,37 +230,36 @@ public class NumberControlSetup {
 						       },
 						       formValue: formValue ).ToCollection() ), validationMethod == null
 							                                                ? null
-							                                                : formValue.CreateValidation(
-								                                                ( postBackValue, validator ) => {
-									                                                if( validationPredicate != null && !validationPredicate( postBackValue.ChangedOnPostBack ) )
-										                                                return;
+							                                                : formValue.CreateValidation( ( postBackValue, validator ) => {
+								                                                if( validationPredicate != null && !validationPredicate( postBackValue.ChangedOnPostBack ) )
+									                                                return;
 
-									                                                if( postBackValue.Value.HasValue ) {
-										                                                if( minValue.HasValue && postBackValue.Value.Value < minValue.Value ) {
-											                                                validator.NoteErrorAndAddMessage( "The value is too small." );
-											                                                validationErrorNotifier?.Invoke();
-											                                                return;
-										                                                }
-										                                                if( maxValue.HasValue && postBackValue.Value.Value > maxValue.Value ) {
-											                                                validator.NoteErrorAndAddMessage( "The value is too large." );
-											                                                validationErrorNotifier?.Invoke();
-											                                                return;
-										                                                }
-										                                                if( valueStep.HasValue && ( postBackValue.Value.Value - ( minValue ?? value ?? 0 ) ) %
-										                                                    valueStep.Value != 0 ) {
-											                                                validator.NoteErrorAndAddMessage( "The value is not an allowed step." );
-											                                                validationErrorNotifier?.Invoke();
-											                                                return;
-										                                                }
-									                                                }
-									                                                else if( !allowEmpty ) {
-										                                                validator.NoteErrorAndAddMessage( "Please enter a value." );
+								                                                if( postBackValue.Value.HasValue ) {
+									                                                if( minValue.HasValue && postBackValue.Value.Value < minValue.Value ) {
+										                                                validator.NoteErrorAndAddMessage( "The value is too small." );
 										                                                validationErrorNotifier?.Invoke();
 										                                                return;
 									                                                }
+									                                                if( maxValue.HasValue && postBackValue.Value.Value > maxValue.Value ) {
+										                                                validator.NoteErrorAndAddMessage( "The value is too large." );
+										                                                validationErrorNotifier?.Invoke();
+										                                                return;
+									                                                }
+									                                                if( valueStep.HasValue && ( postBackValue.Value.Value - ( minValue ?? value ?? 0 ) ) %
+									                                                    valueStep.Value != 0 ) {
+										                                                validator.NoteErrorAndAddMessage( "The value is not an allowed step." );
+										                                                validationErrorNotifier?.Invoke();
+										                                                return;
+									                                                }
+								                                                }
+								                                                else if( !allowEmpty ) {
+									                                                validator.NoteErrorAndAddMessage( "Please enter a value." );
+									                                                validationErrorNotifier?.Invoke();
+									                                                return;
+								                                                }
 
-									                                                validationMethod( postBackValue.Value, validator );
-								                                                } ) );
+								                                                validationMethod( postBackValue.Value, validator );
+							                                                } ) );
 		};
 	}
 

@@ -1,4 +1,5 @@
 ﻿#nullable disable
+using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.IdReferencing;
 using JetBrains.Annotations;
 using MoreLinq;
 using Tewl.InputValidation;
@@ -65,27 +66,25 @@ public class FreeFormRadioList<ItemIdType> {
 			formValue.AddPageModificationValue( i.PageModificationValue, v => i.ItemIds.Contains( getItemIdFromButtonId( v ) ) );
 
 		if( validationMethod != null )
-			validation = formValue.CreateValidation(
-				( postBackValue, validator ) => {
-					if( setup.ValidationPredicate != null && !setup.ValidationPredicate( postBackValue.ChangedOnPostBack ) )
-						return;
+			validation = formValue.CreateValidation( ( postBackValue, validator ) => {
+				if( setup.ValidationPredicate != null && !setup.ValidationPredicate( postBackValue.ChangedOnPostBack ) )
+					return;
 
-					var postBackItemId = getItemIdFromButtonId( postBackValue.Value );
-					if( noSelectionIsValid == false && EwlStatics.AreEqual( postBackItemId, getNoSelectionItemId() ) ) {
-						validator.NoteErrorAndAddMessage( "Please make a selection." );
-						setup.ValidationErrorNotifier?.Invoke();
-						return;
-					}
+				var postBackItemId = getItemIdFromButtonId( postBackValue.Value );
+				if( noSelectionIsValid == false && EwlStatics.AreEqual( postBackItemId, getNoSelectionItemId() ) ) {
+					validator.NoteErrorAndAddMessage( "Please make a selection." );
+					setup.ValidationErrorNotifier?.Invoke();
+					return;
+				}
 
-					validationMethod( postBackItemId, validator );
-				} );
+				validationMethod( postBackItemId, validator );
+			} );
 
-		PageBase.Current.AddControlTreeValidation(
-			() => RadioButtonGroup.ValidateControls(
-				noSelectionIsValid.HasValue,
-				EwlStatics.AreEqual( getNoSelectionItemId(), selectedItemId ),
-				from i in itemIdAndButtonIdAndIsReadOnlyAndPmvQuadruples select ( i.buttonId, i.isReadOnly, EwlStatics.AreEqual( i.itemId, selectedItemId ) ),
-				setup.DisableSingleButtonDetection ) );
+		PageBase.Current.AddControlTreeValidation( () => RadioButtonGroup.ValidateControls(
+			noSelectionIsValid.HasValue,
+			EwlStatics.AreEqual( getNoSelectionItemId(), selectedItemId ),
+			from i in itemIdAndButtonIdAndIsReadOnlyAndPmvQuadruples select ( i.buttonId, i.isReadOnly, EwlStatics.AreEqual( i.itemId, selectedItemId ) ),
+			setup.DisableSingleButtonDetection ) );
 	}
 
 	private ItemIdType getItemIdFromButtonId( ElementId buttonId ) =>
@@ -119,8 +118,8 @@ public class FreeFormRadioList<ItemIdType> {
 				" ",
 				( listSetup.ItemIdPageModificationValue?.GetJsModificationStatements( "'{0}'".FormatWith( getStringId( listItemId ) ) ) ?? "" ).ToCollection()
 				.Concat(
-					listSetup.ItemMatchPageModificationSetups.Select(
-						i => i.PageModificationValue.GetJsModificationStatements( i.ItemIds.Contains( listItemId ) ? "true" : "false" ) ) )
+					listSetup.ItemMatchPageModificationSetups.Select( i =>
+						i.PageModificationValue.GetJsModificationStatements( i.ItemIds.Contains( listItemId ) ? "true" : "false" ) ) )
 				.Concat( itemIdAndButtonIdAndIsReadOnlyAndPmvQuadruples.Select( i => i.pmv.GetJsModificationStatements( i.buttonId == id ? "true" : "false" ) ) )
 				.ToArray() ),
 			null,

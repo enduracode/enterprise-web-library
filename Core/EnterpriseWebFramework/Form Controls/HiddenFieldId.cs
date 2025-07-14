@@ -1,4 +1,6 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.IdReferencing;
+
+namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 public sealed class HiddenFieldId {
 	internal readonly ElementId ElementId;

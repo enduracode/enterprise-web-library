@@ -1,4 +1,5 @@
 ﻿#nullable disable
+using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.IdReferencing;
 using JetBrains.Annotations;
 using Tewl.InputValidation;
 
@@ -89,57 +90,56 @@ public class Checkbox: FormControl<PhrasingComponent> {
 		PageModificationValue<bool> pageModificationValue, IReadOnlyCollection<PhrasingComponent> label, FormAction action, FormAction valueChangedAction,
 		Func<string> jsClickStatementGetter ) {
 		return new CustomPhrasingComponent(
-			new DisplayableElement(
-				labelContext => new DisplayableElementData(
-					displaySetup,
-					() => new DisplayableElementLocalData( "label" ),
-					classes: elementClass.Add( classes ?? ElementClassSet.Empty ),
-					children: new DisplayableElement(
-							context => {
-								if( !isReadOnly ) {
-									action?.AddToPageIfNecessary();
-									valueChangedAction?.AddToPageIfNecessary();
-								}
+			new DisplayableElement( labelContext => new DisplayableElementData(
+				displaySetup,
+				() => new DisplayableElementLocalData( "label" ),
+				classes: elementClass.Add( classes ?? ElementClassSet.Empty ),
+				children: new DisplayableElement(
+						context => {
+							if( !isReadOnly ) {
+								action?.AddToPageIfNecessary();
+								valueChangedAction?.AddToPageIfNecessary();
+							}
 
-								return new DisplayableElementData(
-									null,
-									() => {
-										var attributes = new List<ElementAttribute>();
-										var radioButtonFormValue = formValue as FormValue<ElementId>;
-										attributes.Add( new ElementAttribute( "type", radioButtonFormValue != null ? "radio" : "checkbox" ) );
-										if( radioButtonFormValue != null || !isReadOnly )
-											attributes.Add(
-												new ElementAttribute( "name", radioButtonFormValue != null ? ( (FormValue)radioButtonFormValue ).GetPostBackValueKey() : context.Id ) );
-										if( radioButtonFormValue != null )
-											attributes.Add( new ElementAttribute( "value", radioButtonListItemId ?? context.Id ) );
-										if( pageModificationValue.Value )
-											attributes.Add( new ElementAttribute( "checked" ) );
-										if( isReadOnly )
-											attributes.Add( new ElementAttribute( "disabled" ) );
+							return new DisplayableElementData(
+								null,
+								() => {
+									var attributes = new List<ElementAttribute>();
+									var radioButtonFormValue = formValue as FormValue<ElementId>;
+									attributes.Add( new ElementAttribute( "type", radioButtonFormValue != null ? "radio" : "checkbox" ) );
+									if( radioButtonFormValue != null || !isReadOnly )
+										attributes.Add(
+											new ElementAttribute( "name", radioButtonFormValue != null ? ( (FormValue)radioButtonFormValue ).GetPostBackValueKey() : context.Id ) );
+									if( radioButtonFormValue != null )
+										attributes.Add( new ElementAttribute( "value", radioButtonListItemId ?? context.Id ) );
+									if( pageModificationValue.Value )
+										attributes.Add( new ElementAttribute( "checked" ) );
+									if( isReadOnly )
+										attributes.Add( new ElementAttribute( "disabled" ) );
 
-										var jsInitStatements = StringTools.ConcatenateWithDelimiter(
-											" ",
-											!isReadOnly
-												? SubmitButton.GetImplicitSubmissionKeyPressStatements( action, false )
-													.Surround( "$( '#{0}' ).keypress( function( e ) {{ ".FormatWith( context.Id ), " } );" )
-												: "",
-											jsClickStatementGetter().Surround( "$( '#{0}' ).click( function() {{ ".FormatWith( context.Id ), " } );" ) );
+									var jsInitStatements = StringTools.ConcatenateWithDelimiter(
+										" ",
+										!isReadOnly
+											? SubmitButton.GetImplicitSubmissionKeyPressStatements( action, false )
+												.Surround( "$( '#{0}' ).keypress( function( e ) {{ ".FormatWith( context.Id ), " } );" )
+											: "",
+										jsClickStatementGetter().Surround( "$( '#{0}' ).click( function() {{ ".FormatWith( context.Id ), " } );" ) );
 
-										return new DisplayableElementLocalData(
-											"input",
-											new FocusabilityCondition( !isReadOnly ),
-											isFocused => {
-												if( isFocused )
-													attributes.Add( new ElementAttribute( "autofocus" ) );
-												return new DisplayableElementFocusDependentData( attributes: attributes, includeIdAttribute: true, jsInitStatements: jsInitStatements );
-											} );
-									},
-									classes: elementClass,
-									clientSideIdReferences: id.ToCollection() );
-							},
-							formValue: formValue ).ToCollection()
-						.Concat( label.Any() ? new GenericPhrasingContainer( label, classes: elementClass ).ToCollection() : Enumerable.Empty<FlowComponent>() )
-						.Materialize() ) ).ToCollection() );
+									return new DisplayableElementLocalData(
+										"input",
+										new FocusabilityCondition( !isReadOnly ),
+										isFocused => {
+											if( isFocused )
+												attributes.Add( new ElementAttribute( "autofocus" ) );
+											return new DisplayableElementFocusDependentData( attributes: attributes, includeIdAttribute: true, jsInitStatements: jsInitStatements );
+										} );
+								},
+								classes: elementClass,
+								clientSideIdReferences: id.ToCollection() );
+						},
+						formValue: formValue ).ToCollection()
+					.Concat( label.Any() ? new GenericPhrasingContainer( label, classes: elementClass ).ToCollection() : Enumerable.Empty<FlowComponent>() )
+					.Materialize() ) ).ToCollection() );
 	}
 
 	FormControlLabeler FormControl<PhrasingComponent>.Labeler => null;

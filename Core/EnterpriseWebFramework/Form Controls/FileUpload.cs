@@ -1,4 +1,5 @@
 ﻿#nullable disable
+using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.IdReferencing;
 using EnterpriseWebLibrary.IO;
 using Microsoft.AspNetCore.Http;
 using Tewl.InputValidation;
@@ -59,12 +60,11 @@ public class FileUpload: FormControl<PhrasingComponent> {
 				formValue: formValue ).ToCollection() );
 
 		if( validationMethod != null )
-			Validation = formValue.CreateValidation(
-				( postBackValue, validator ) => {
-					if( validationPredicate != null && !validationPredicate( postBackValue.ChangedOnPostBack ) )
-						return;
-					validationMethod( getRsFile( postBackValue.Value ), validator );
-				} );
+			Validation = formValue.CreateValidation( ( postBackValue, validator ) => {
+				if( validationPredicate != null && !validationPredicate( postBackValue.ChangedOnPostBack ) )
+					return;
+				validationMethod( getRsFile( postBackValue.Value ), validator );
+			} );
 	}
 
 	private RsFile getRsFile( IFormFile file ) {

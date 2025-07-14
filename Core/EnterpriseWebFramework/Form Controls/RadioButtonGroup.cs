@@ -1,4 +1,5 @@
 ﻿#nullable disable
+using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.IdReferencing;
 using Tewl.InputValidation;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -74,12 +75,11 @@ public class RadioButtonGroup {
 
 		this.selectionChangedAction = selectionChangedAction;
 
-		PageBase.Current.AddControlTreeValidation(
-			() => ValidateControls(
-				allowNoSelection,
-				buttonIdAndIsReadOnlyAndValueAndPmvQuadruples.All( i => !i.value ),
-				from i in buttonIdAndIsReadOnlyAndValueAndPmvQuadruples select ( i.id, i.isReadOnly, i.value ),
-				disableSingleButtonDetection ) );
+		PageBase.Current.AddControlTreeValidation( () => ValidateControls(
+			allowNoSelection,
+			buttonIdAndIsReadOnlyAndValueAndPmvQuadruples.All( i => !i.value ),
+			from i in buttonIdAndIsReadOnlyAndValueAndPmvQuadruples select ( i.id, i.isReadOnly, i.value ),
+			disableSingleButtonDetection ) );
 	}
 
 	/// <summary>
@@ -107,8 +107,9 @@ public class RadioButtonGroup {
 				" ",
 				buttonIdAndIsReadOnlyAndValueAndPmvQuadruples.Select( i => i.pmv.GetJsModificationStatements( i.id == id ? "true" : "false" ) ).ToArray() ),
 			validationMethod != null
-				? formValue.CreateValidation(
-					( postBackValue, validator ) => validationMethod( new PostBackValue<bool>( postBackValue.Value == id, postBackValue.ChangedOnPostBack ), validator ) )
+				? formValue.CreateValidation( ( postBackValue, validator ) => validationMethod(
+					new PostBackValue<bool>( postBackValue.Value == id, postBackValue.ChangedOnPostBack ),
+					validator ) )
 				: null );
 	}
 
