@@ -1,4 +1,5 @@
-﻿using JetBrains.Annotations;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
+using JetBrains.Annotations;
 using NodaTime;
 using Tewl.InputValidation;
 
@@ -81,11 +82,10 @@ public class DateAndTimeControl: FormControl<FlowComponent> {
 			classes: elementClass.Add( setup.Classes ?? ElementClassSet.Empty ) );
 
 		if( validationMethod is not null )
-			Validation = new EwfValidation(
-				validator => {
-					if( !date.Initialized || !time.Initialized )
-						return;
-					validationMethod( date.Value + time.Value, validator );
-				} );
+			Validation = new EwfValidation( validator => {
+				if( !date.Initialized || !time.Initialized )
+					return;
+				validationMethod( date.Value + time.Value, validator );
+			} );
 	}
 }

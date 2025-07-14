@@ -1,4 +1,5 @@
 ﻿#nullable disable
+using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
 using EnterpriseWebLibrary.MailMerging;
 using EnterpriseWebLibrary.MailMerging.RowTree;
 using JetBrains.Annotations;
@@ -76,46 +77,43 @@ public static class MailMergingStatics {
 	private static IReadOnlyCollection<FlowComponent> getRow( MergeRow row, MergeFieldNameTree fieldNameTree, bool useSubtractiveMode ) {
 		var valueFormItems = ( useSubtractiveMode
 			                       ? row.Values.Where( mergeValue => fieldNameTree?.FieldNames.All( i => i != mergeValue.Name ) ?? false )
-			                       : fieldNameTree?.FieldNames.Select( fieldName => row.Values.Single( i => i.Name == fieldName ) ) ?? row.Values ).Select(
-				mergeValue => {
-					IReadOnlyCollection<PhrasingComponent> value = null;
-					if( mergeValue is MergeValue<string> stringValue )
-						value = stringValue.Evaluate( false ).ToComponents();
+			                       : fieldNameTree?.FieldNames.Select( fieldName => row.Values.Single( i => i.Name == fieldName ) ) ?? row.Values )
+			.Select( mergeValue => {
+				IReadOnlyCollection<PhrasingComponent> value = null;
+				if( mergeValue is MergeValue<string> stringValue )
+					value = stringValue.Evaluate( false ).ToComponents();
 
-					// Use ApplicationException instead of MailMergingException because the field names can easily be validated before this method is called.
-					return value == null
-						       ? throw new ApplicationException( "Merge field {0} evaluates to an unsupported type.".FormatWith( mergeValue.Name ) )
-						       : value.ToFormItem( label: mergeValue.Name.ToComponents() );
-				} )
+				// Use ApplicationException instead of MailMergingException because the field names can easily be validated before this method is called.
+				return value == null
+					       ? throw new ApplicationException( "Merge field {0} evaluates to an unsupported type.".FormatWith( mergeValue.Name ) )
+					       : value.ToFormItem( label: mergeValue.Name.ToComponents() );
+			} )
 			.Materialize();
 		var valueList = valueFormItems.Any()
 			                ? FormItemList.CreateFixedGrid( 2 ).AddItems( valueFormItems ).ToCollection()
 			                : Enumerable.Empty<FlowComponent>().Materialize();
 
 		var children = ( useSubtractiveMode
-			                 ? row.Children.Select(
-					                 childRowTree => {
-						                 MergeFieldNameTree childFieldNameTree = null;
-						                 if( fieldNameTree != null ) {
-							                 var childNameAndFieldNameTree = fieldNameTree.ChildNamesAndChildren.SingleOrDefault( i => i.Item1 == childRowTree.NodeName );
-							                 childFieldNameTree = childNameAndFieldNameTree != null
-								                                      ? childNameAndFieldNameTree.Item2
-								                                      : new MergeFieldNameTree( Enumerable.Empty<string>() );
-						                 }
-						                 return new { rowTree = childRowTree, fieldNameTree = childFieldNameTree };
-					                 } )
+			                 ? row.Children.Select( childRowTree => {
+					                 MergeFieldNameTree childFieldNameTree = null;
+					                 if( fieldNameTree != null ) {
+						                 var childNameAndFieldNameTree = fieldNameTree.ChildNamesAndChildren.SingleOrDefault( i => i.Item1 == childRowTree.NodeName );
+						                 childFieldNameTree = childNameAndFieldNameTree != null
+							                                      ? childNameAndFieldNameTree.Item2
+							                                      : new MergeFieldNameTree( Enumerable.Empty<string>() );
+					                 }
+					                 return new { rowTree = childRowTree, fieldNameTree = childFieldNameTree };
+				                 } )
 				                 .Where( i => i.fieldNameTree != null )
-			                 : fieldNameTree?.ChildNamesAndChildren.Select(
-				                   childNameAndFieldNameTree => new
-					                   {
-						                   rowTree = row.Children.Single( i => i.NodeName == childNameAndFieldNameTree.Item1 ),
-						                   fieldNameTree = childNameAndFieldNameTree.Item2
-					                   } ) ?? row.Children.Select( childRowTree => new { rowTree = childRowTree, fieldNameTree = (MergeFieldNameTree)null } ) )
+			                 : fieldNameTree?.ChildNamesAndChildren.Select( childNameAndFieldNameTree => new
+				                 {
+					                 rowTree = row.Children.Single( i => i.NodeName == childNameAndFieldNameTree.Item1 ),
+					                 fieldNameTree = childNameAndFieldNameTree.Item2
+				                 } ) ?? row.Children.Select( childRowTree => new { rowTree = childRowTree, fieldNameTree = (MergeFieldNameTree)null } ) )
 			.Where( child => child.rowTree.Rows.Any() )
-			.Select(
-				child => new Section(
-					child.rowTree.NodeName,
-					new StackList( child.rowTree.Rows.Select( i => getRow( i, child.fieldNameTree, useSubtractiveMode ).ToComponentListItem() ) ).ToCollection() ) )
+			.Select( child => new Section(
+				child.rowTree.NodeName,
+				new StackList( child.rowTree.Rows.Select( i => getRow( i, child.fieldNameTree, useSubtractiveMode ).ToComponentListItem() ) ).ToCollection() ) )
 			.Materialize();
 
 		return children.Any() ? valueList.Append( new GenericFlowContainer( children, classes: rowTreeChildClass ) ).Materialize() : valueList;

@@ -1,4 +1,5 @@
 ﻿#nullable disable
+using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
 using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -49,11 +50,10 @@ public class PagePath: FlowComponent {
 			ancestors = ancestors.Skip( 1 );
 
 		hyperlinkItems = ancestors.Reverse()
-			.Select(
-				ancestor => (WrappingListItem)new EwfHyperlink(
-						ancestor is EntitySetupBase es ? es.DefaultResource : (ResourceBase)ancestor,
-						ancestor.Name.Length > 0 ? new StandardHyperlinkStyle( ancestor.Name ) : new ImageHyperlinkStyle( new StaticFiles.Ui.Home_iconSvg(), "Home" ) )
-					.ToComponentListItem() )
+			.Select( ancestor => (WrappingListItem)new EwfHyperlink(
+					ancestor is EntitySetupBase es ? es.DefaultResource : (ResourceBase)ancestor,
+					ancestor.Name.Length > 0 ? new StandardHyperlinkStyle( ancestor.Name ) : new ImageHyperlinkStyle( new StaticFiles.Ui.Home_iconSvg(), "Home" ) )
+				.ToComponentListItem() )
 			.Materialize();
 
 		if( currentPageBehavior != PagePathCurrentPageBehavior.ExcludeCurrentPage )

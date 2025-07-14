@@ -1,5 +1,6 @@
 ﻿#nullable disable
 using System.Drawing;
+using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase;
 using JetBrains.Annotations;
 using Newtonsoft.Json;

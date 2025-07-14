@@ -1,4 +1,5 @@
 ﻿#nullable disable
+using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
 using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -20,10 +21,9 @@ internal class StatusMessageList: FlowComponent {
 	// Status messages must be retrieved after PageBase.getContent in case that method adds them.
 	IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() =>
 		new StackList(
-			PageBase.Current.StatusMessages.Select(
-				i => new GenericFlowContainer(
-					new FontAwesomeIcon( i.Item1 == StatusMessageType.Info ? "fa-info-circle" : "fa-exclamation-triangle", "fa-lg", "fa-fw" )
-						.Append<PhrasingComponent>( new GenericPhrasingContainer( i.Item2.ToComponents(), classes: messageTextClass ) )
-						.Materialize(),
-					classes: i.Item1 == StatusMessageType.Info ? infoMessageContainerClass : warningMessageContainerClass ).ToComponentListItem() ) ).ToCollection();
+			PageBase.Current.StatusMessages.Select( i => new GenericFlowContainer(
+				new FontAwesomeIcon( i.Item1 == StatusMessageType.Info ? "fa-info-circle" : "fa-exclamation-triangle", "fa-lg", "fa-fw" )
+					.Append<PhrasingComponent>( new GenericPhrasingContainer( i.Item2.ToComponents(), classes: messageTextClass ) )
+					.Materialize(),
+				classes: i.Item1 == StatusMessageType.Info ? infoMessageContainerClass : warningMessageContainerClass ).ToComponentListItem() ) ).ToCollection();
 }
