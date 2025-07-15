@@ -12,7 +12,8 @@ public class FilterPageContent: PageContent {
 	/// Creates a page content object with two box-style sections, one for filters and the other for results.
 	/// </summary>
 	/// <param name="filterContentGetter">A method that returns the content for the filter section. Executes with an intermediate post-back that has the result
-	/// section as an update region. The current data-modification actions are also included in the execution.</param>
+	/// section as an update region. The current data-modification actions are also included in the execution. If you have a button, we recommend labeling it
+	/// “Update results”.</param>
 	/// <param name="resultContentGetter">A method that returns the content for the result section.</param>
 	/// <param name="bodyClasses"></param>
 	/// <param name="pageActions">The page actions. Any hyperlink with a destination to which the user cannot navigate (due to authorization logic) will be
