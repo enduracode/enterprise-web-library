@@ -1,6 +1,5 @@
-﻿#nullable disable
-namespace EnterpriseWebLibrary.EnterpriseWebFramework {
-	public abstract class PageContent {
-		protected internal abstract PageContent GetContent();
-	}
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework;
+
+public abstract class PageContent {
+	protected internal abstract PageContent GetContent();
 }
