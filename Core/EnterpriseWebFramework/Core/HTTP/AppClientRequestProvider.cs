@@ -30,8 +30,10 @@ public class AppClientRequestProvider {
 	protected internal virtual string GetRequestBasePath( HttpRequest request ) => request.PathBase.HasValue ? request.PathBase.ToUriComponent()[ 1.. ] : "";
 
 	/// <summary>
-	/// Returns the client IP address for the specified request. Override this if you are using a reverse proxy. Return null only if the request is not on a TCP
-	/// connection. Remember that your implementation should support not just live installations, but also development and intermediate installations.
+	/// Returns the client IP address for the specified request. Override this if you are using a reverse proxy. Return a value with a null address only if the
+	/// request is not on a TCP connection. If the client IP address is unavailable due to a missing header from the reverse proxy, return null, which will report
+	/// an error to the developers and cause a 400 status code to be returned. Remember that your implementation should support not just live installations, but
+	/// also development and intermediate installations.
 	/// </summary>
-	protected internal virtual IPAddress? GetClientIp( HttpRequest request ) => request.HttpContext.Connection.RemoteIpAddress;
+	protected internal virtual SpecifiedValue<IPAddress?>? GetClientIp( HttpRequest request ) => new( request.HttpContext.Connection.RemoteIpAddress );
 }

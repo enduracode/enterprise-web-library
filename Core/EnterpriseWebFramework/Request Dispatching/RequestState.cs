@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Net;
+using System.Text;
 using System.Threading;
 using EnterpriseWebLibrary.Caching;
 using EnterpriseWebLibrary.Configuration;
@@ -56,6 +57,7 @@ public class RequestState {
 	internal MiniProfiler? Profiler { get; set; }
 	internal string Url { get; private set; }
 	internal string BaseUrl { get; private set; }
+	internal IPAddress? ClientIp { get; private set; }
 
 	internal readonly List<( string, string, CookieOptions )> ResponseCookies;
 
@@ -91,7 +93,7 @@ public class RequestState {
 	internal Action<HttpContext>? RequestHandler { get; set; }
 	private IRequestCookieCollection? requestCookies;
 
-	internal RequestState( HttpContext context, string url, string baseUrl, SlowRequestThreshold slowRequestThreshold ) {
+	internal RequestState( HttpContext context, string url, string baseUrl, IPAddress? clientIp, SlowRequestThreshold slowRequestThreshold ) {
 		BeginInstant = Clock.GetCurrentTime();
 		var firstRequestCompletionTime = firstRequestCompletionTimeGetter!();
 		requestInWarmupPeriod = !firstRequestCompletionTime.HasValue || BeginInstant - firstRequestCompletionTime.Value < warmupPeriodDuration;
@@ -101,6 +103,7 @@ public class RequestState {
 
 		Url = url;
 		BaseUrl = baseUrl;
+		ClientIp = clientIp;
 
 		ResponseCookies = new List<( string, string, CookieOptions )>();
 
@@ -108,7 +111,7 @@ public class RequestState {
 		DatabaseConnectionManager.DataAccessState.ResetCache();
 
 		ClientSideNewUrl = "";
-		StatusMessages = Array.Empty<( StatusMessageType, string )>();
+		StatusMessages = [ ];
 
 		// Sometimes requests are slow when nightly operations are underway.
 		this.slowRequestThreshold = BeginInstant.InZone( DateTimeZoneProviders.Tzdb.GetSystemDefault() ).TimeOfDay.IsInNight()
@@ -125,7 +128,7 @@ public class RequestState {
 	/// <summary>
 	/// Framework use only.
 	/// </summary>
-	public IReadOnlyCollection<BasicUrlHandler> UrlHandlers => ( urlHandlerStateDisabled ? null : urlHandlers ) ?? Array.Empty<BasicUrlHandler>();
+	public IReadOnlyCollection<BasicUrlHandler> UrlHandlers => ( urlHandlerStateDisabled ? null : urlHandlers ) ?? [ ];
 
 	internal void SetResource( ResourceBase resource ) {
 		this.resource = resource;

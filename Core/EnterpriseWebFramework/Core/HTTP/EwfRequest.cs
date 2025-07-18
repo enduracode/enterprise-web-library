@@ -16,16 +16,18 @@ public class EwfRequest {
 	private static Func<Instant>? requestTimeGetter;
 	private static Func<string>? urlGetter;
 	private static Action<Duration>? networkWaitTimeAdder;
+	private static Func<IPAddress?>? clientIpGetter;
 
 	internal static void Init(
 		SystemProviderReference<AppClientRequestProvider> provider, Func<HttpRequest> currentRequestGetter, Func<Instant>? requestTimeGetter,
-		Func<string>? urlGetter, Action<Duration> networkWaitTimeAdder ) {
+		Func<string>? urlGetter, Action<Duration> networkWaitTimeAdder, Func<IPAddress?> clientIpGetter ) {
 		defaultProvider = new AppClientRequestProvider();
 		EwfRequest.provider = provider;
 		EwfRequest.currentRequestGetter = currentRequestGetter;
 		EwfRequest.requestTimeGetter = requestTimeGetter;
 		EwfRequest.urlGetter = urlGetter;
 		EwfRequest.networkWaitTimeAdder = networkWaitTimeAdder;
+		EwfRequest.clientIpGetter = clientIpGetter;
 	}
 
 	internal static AppClientRequestProvider AppProvider => provider!.GetProvider( returnNullIfNotFound: true ) ?? defaultProvider!;
@@ -100,7 +102,7 @@ public class EwfRequest {
 	/// <summary>
 	/// Gets the client IP address, or null if the request is not on a TCP connection.
 	/// </summary>
-	public IPAddress? ClientIp => AppProvider.GetClientIp( AspNetRequest );
+	public IPAddress? ClientIp => clientIpGetter!();
 
 	/// <summary>
 	/// Gets whether the request is from the local computer.

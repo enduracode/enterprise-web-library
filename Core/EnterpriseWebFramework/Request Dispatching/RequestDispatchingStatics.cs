@@ -82,13 +82,18 @@ public static class RequestDispatchingStatics {
 						          : baseUrl + appRelativeUrl;
 
 
-					context.Items.Add(
-						RequestStateKey,
-						await RequestContinuationDataStore.GetRequestState( url, baseUrl, context.Request.Method ) ?? new RequestState(
-							context,
-							url,
-							baseUrl,
-							GetAppProvider().GetSlowRequestThreshold() ) );
+					var requestState = await RequestContinuationDataStore.GetRequestState( url, baseUrl, context.Request.Method );
+					if( requestState is null ) {
+						if( EwfRequest.AppProvider.GetClientIp( context.Request ) is not {} clientIp ) {
+							TelemetryStatics.ReportError(
+								"The client IP address for a request was unavailable due to a missing header from the reverse proxy. The application is likely down for all users." );
+							EwfResponse.Create( "", new EwfResponseBodyCreator( () => "" ), statusCodeGetter: () => 400 )
+								.WriteToAspNetResponse( context.Response, skipTransactionCommit: true );
+							return;
+						}
+						requestState = new RequestState( context, url, baseUrl, clientIp.Value, GetAppProvider().GetSlowRequestThreshold() );
+					}
+					context.Items.Add( RequestStateKey, requestState );
 				},
 				false );
 			if( context.Response.StatusCode != 200 )
@@ -107,7 +112,7 @@ public static class RequestDispatchingStatics {
 				RequestState.EnableUser();
 
 				var ipAddresses = GetAppProvider().GetWhitelistedIpAddressesForMaintenance();
-				if( ipAddresses != null && !ipAddresses.Contains( EwfRequest.AppProvider.GetClientIp( context.Request )?.ToString()! ) ) {
+				if( ipAddresses != null && !ipAddresses.Contains( RequestState.ClientIp?.ToString()! ) ) {
 					EwfResponse.Create( "", new EwfResponseBodyCreator( () => "" ), statusCodeGetter: () => 503 ).WriteToAspNetResponse( context.Response );
 					return;
 				}
@@ -177,7 +182,7 @@ public static class RequestDispatchingStatics {
 				rateLimiter = rateLimitersByUserId.GetOrAdd( user.UserId, new RateLimiter( Duration.FromMilliseconds( 10 ), 1000, getTime ) );
 				requestSource = user.Email;
 			}
-			else if( EwfRequest.AppProvider.GetClientIp( context.Request ) is {} ip ) {
+			else if( RequestState.ClientIp is {} ip ) {
 				var rateLimitersByIp = AppMemoryCache.GetCacheValue(
 					"ewfAnonymousRetrievalRequestRateLimiters",
 					() => new ConcurrentDictionary<IPAddress, RateLimiter>() );
@@ -199,7 +204,7 @@ public static class RequestDispatchingStatics {
 				rateLimiter = rateLimitersByUserId.GetOrAdd( user.UserId, new RateLimiter( Duration.FromMilliseconds( 200 ), 5, getTime ) );
 				requestSource = user.Email;
 			}
-			else if( EwfRequest.AppProvider.GetClientIp( context.Request ) is {} ip ) {
+			else if( RequestState.ClientIp is {} ip ) {
 				var rateLimitersByIp = AppMemoryCache.GetCacheValue(
 					"ewfAnonymousNonRetrievalRequestRateLimiters",
 					() => new ConcurrentDictionary<IPAddress, RateLimiter>() );

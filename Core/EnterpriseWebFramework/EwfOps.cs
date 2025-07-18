@@ -248,7 +248,8 @@ public static class EwfOps {
 							},
 							() => RequestDispatchingStatics.RequestState.BeginInstant,
 							() => RequestDispatchingStatics.RequestState.Url,
-							networkWaitTime => RequestDispatchingStatics.RequestState.AddNetworkWaitTime( networkWaitTime ) );
+							networkWaitTime => RequestDispatchingStatics.RequestState.AddNetworkWaitTime( networkWaitTime ),
+							() => RequestDispatchingStatics.RequestState.ClientIp );
 						EwfResponse.Init(
 							() => contextAccessor.HttpContext,
 							() => {
