@@ -39,15 +39,7 @@ public static class TelemetryStatics {
 			sw.WriteLine();
 		}
 
-		sw.WriteLine( "Application: {0}".FormatWith( ConfigurationStatics.AppName ) );
-		sw.WriteLine( "Version: {0}".FormatWith( ConfigurationStatics.AppAssembly.GetName().Version ) );
-
-		if( !ConfigurationStatics.IsDevelopmentInstallation ) {
-			sw.WriteLine();
-			sw.WriteLine( "Installation: {0}".FormatWith( ConfigurationStatics.InstallationConfiguration.InstallationName ) );
-			sw.WriteLine( "Machine: {0}".FormatWith( Tewl.Tools.NetTools.GetLocalHostName() ) );
-		}
-
+		writeDeveloperNotificationContext( sw );
 		appErrorContextWriter?.Invoke( sw );
 
 		ExceptionHandlingTools.CallEveryMethod(
@@ -86,14 +78,38 @@ public static class TelemetryStatics {
 	/// Reports a fault (a problem that could later cause errors) to the developers.
 	/// </summary>
 	public static void ReportFault( string message ) {
-		EmailStatics.SendDeveloperNotificationEmail( getFaultEmailMessage( message ) );
+		using var writer = new StringWriter();
+
+		writer.WriteLine( message );
+		writer.WriteLine();
+		writeDeveloperNotificationContext( writer );
+
+		EmailStatics.SendDeveloperNotificationEmail( getFaultEmailMessage( writer.ToString() ) );
 	}
 
 	/// <summary>
 	/// Sends a notification to the developers. Do not use for anything that requires corrective action.
 	/// </summary>
 	public static void SendDeveloperNotification( string message ) {
-		EmailStatics.SendDeveloperNotificationEmail( getNotificationEmailMessage( message ) );
+		using var writer = new StringWriter();
+
+		writer.WriteLine( message );
+		writer.WriteLine();
+		writeDeveloperNotificationContext( writer );
+
+		EmailStatics.SendDeveloperNotificationEmail( getNotificationEmailMessage( writer.ToString() ) );
+	}
+
+	private static void writeDeveloperNotificationContext( TextWriter writer ) {
+		writer.WriteLine( "Application: {0}".FormatWith( ConfigurationStatics.AppName ) );
+		writer.WriteLine( "Version: {0}".FormatWith( ConfigurationStatics.AppAssembly.GetName().Version ) );
+
+		if( ConfigurationStatics.IsDevelopmentInstallation )
+			return;
+
+		writer.WriteLine();
+		writer.WriteLine( "Installation: {0}".FormatWith( ConfigurationStatics.InstallationConfiguration.InstallationName ) );
+		writer.WriteLine( "Machine: {0}".FormatWith( Tewl.Tools.NetTools.GetLocalHostName() ) );
 	}
 
 	/// <summary>
