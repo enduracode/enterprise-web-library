@@ -292,6 +292,7 @@ public static class EwfOps {
 							( baseUrlString, appRelativeUrl ) =>
 								RequestState.ExecuteWithUrlHandlerStateDisabled( () => UrlHandlingStatics.ResolveUrl( baseUrlString, appRelativeUrl )?.Last() ) );
 						CookieStatics.Init(
+							() => RequestDispatchingStatics.RequestState.BaseUrl,
 							() => RequestDispatchingStatics.RequestState.RequestCookies,
 							() => RequestDispatchingStatics.RequestState.ResponseCookies,
 							( name, value, options ) => {

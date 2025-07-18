@@ -10,13 +10,15 @@ public static class CookieStatics {
 	// Remove after https://github.com/dotnet/aspnetcore/issues/52580 is resolved.
 	internal const string EmptyValue = "EwlEmpty";
 
+	private static Func<string> baseUrlGetter = null!;
 	private static Func<IRequestCookieCollection> requestCookieGetter = null!;
 	private static Func<List<( string, string?, CookieOptions )>> responseCookieGetter = null!;
 	private static Action<string, string?, CookieOptions> responseCookieAdder = null!;
 
 	internal static void Init(
-		Func<IRequestCookieCollection> requestCookieGetter, Func<List<( string, string?, CookieOptions )>> responseCookieGetter,
+		Func<string> baseUrlGetter, Func<IRequestCookieCollection> requestCookieGetter, Func<List<( string, string?, CookieOptions )>> responseCookieGetter,
 		Action<string, string?, CookieOptions> responseCookieAdder ) {
+		CookieStatics.baseUrlGetter = baseUrlGetter;
 		CookieStatics.requestCookieGetter = requestCookieGetter;
 		CookieStatics.responseCookieGetter = responseCookieGetter;
 		CookieStatics.responseCookieAdder = responseCookieAdder;
@@ -40,8 +42,10 @@ public static class CookieStatics {
 	/// </summary>
 	public static bool TryGetCookieValueFromResponseOrRequest( string name, out string? value, bool omitNamePrefix = false ) {
 		var defaultAttributes = EwfConfigurationStatics.AppConfiguration.DefaultCookieAttributes;
-		var responseCookies = ResponseCookies
-			.Where( i => string.Equals( i.name, ( omitNamePrefix ? "" : defaultAttributes.NamePrefix ?? "" ) + name, StringComparison.Ordinal ) )
+		var responseCookies = ResponseCookies.Where( i => string.Equals(
+				i.name,
+				( omitNamePrefix ? "" : defaultAttributes.NamePrefix ?? "" ) + name,
+				StringComparison.Ordinal ) )
 			.Materialize();
 		if( responseCookies.Any() ) {
 			value = responseCookies.Single().value;
@@ -80,7 +84,7 @@ public static class CookieStatics {
 
 	private static Tuple<string, string, string> getNameAndDomainAndPath( string name, string? domain, string? path, bool omitNamePrefix ) {
 		var defaultAttributes = EwfConfigurationStatics.AppConfiguration.DefaultCookieAttributes;
-		var defaultBaseUrl = new Uri( RequestState.Instance.BaseUrl );
+		var defaultBaseUrl = new Uri( baseUrlGetter() );
 
 		domain ??= defaultAttributes.Domain ?? "";
 
