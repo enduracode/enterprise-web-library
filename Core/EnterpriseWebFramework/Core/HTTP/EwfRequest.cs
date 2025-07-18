@@ -19,8 +19,8 @@ public class EwfRequest {
 	private static Func<IPAddress?>? clientIpGetter;
 
 	internal static void Init(
-		SystemProviderReference<AppClientRequestProvider> provider, Func<HttpRequest> currentRequestGetter, Func<Instant>? requestTimeGetter,
-		Func<string>? urlGetter, Action<Duration> networkWaitTimeAdder, Func<IPAddress?> clientIpGetter ) {
+		SystemProviderReference<AppClientRequestProvider> provider, Func<HttpRequest> currentRequestGetter, Func<Instant> requestTimeGetter, Func<string> urlGetter,
+		Action<Duration> networkWaitTimeAdder, Func<IPAddress?> clientIpGetter ) {
 		defaultProvider = new AppClientRequestProvider();
 		EwfRequest.provider = provider;
 		EwfRequest.currentRequestGetter = currentRequestGetter;
