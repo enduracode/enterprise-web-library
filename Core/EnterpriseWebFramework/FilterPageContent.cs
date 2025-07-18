@@ -52,9 +52,10 @@ public class FilterPageContent: PageContent {
 					AutofocusCondition.InitialRequest().Or( AutofocusCondition.PostBack( focusKey ) ),
 					new Section( "Filters", filterContentGetter(), style: SectionStyle.Box ).ToCollection() ) ) );
 
+		var resultContent = resultContentGetter();
 		content.Add(
 			new FlowIdContainer(
-				loadResults.Value ? new Section( "Results", resultContentGetter(), style: SectionStyle.Box ).ToCollection() : [ ],
+				loadResults.Value ? new Section( resultContent.Any() ? resultContent : "No results".ToComponents(), style: SectionStyle.Box ).ToCollection() : [ ],
 				updateRegionSets: updateRegionSet ) );
 	}
 
