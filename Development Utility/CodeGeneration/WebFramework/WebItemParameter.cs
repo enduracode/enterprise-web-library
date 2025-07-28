@@ -5,6 +5,7 @@ using EnterpriseWebLibrary.InstallationSupportUtility;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CSharp;
+using NodaTime;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.WebFramework;
 
@@ -46,6 +47,17 @@ internal class WebItemParameter {
 	}
 
 	private static IEnumerable<DataType> getSupportedTypes( string name ) {
+		yield return new DataType(
+			typeof( LocalDate ),
+			false,
+			() => hasSuffix( "Date" ),
+			"suffix the name with “Date”",
+			"",
+			"",
+			"",
+			valueExpression => $"LocalDatePattern.Iso.Format( {valueExpression} )",
+			valueExpression => $"LocalDatePattern.Iso.Parse( {valueExpression} ).GetValueOrThrow()" );
+
 		yield return new DataType(
 			typeof( PatternString ),
 			false,

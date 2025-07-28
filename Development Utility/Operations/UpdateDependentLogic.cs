@@ -487,6 +487,7 @@ internal class UpdateDependentLogic: Operation {
 				writer.WriteLine( "using Newtonsoft.Json;" );
 				writer.WriteLine( "using Newtonsoft.Json.Linq;" );
 				writer.WriteLine( "using NodaTime;" );
+				writer.WriteLine( "using NodaTime.Text;" );
 				writer.WriteLine( "using Tewl.InputValidation;" );
 				writer.WriteLine( "using Tewl.Tools;" );
 				writer.WriteLine();
