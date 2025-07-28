@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;
+using EnterpriseWebLibrary.TewlContrib;
 using JetBrains.Annotations;
 using NodaTime;
 using Tewl.InputValidation;
@@ -1249,4 +1250,18 @@ public static class FormControlExtensionCreators {
 				additionalValidationMethod?.Invoke( validator );
 			} );
 	}
+
+	public static TextControl ToControl(
+		this AbstractDataValue<PatternString> dataValue, bool allowEmpty, TextControlSetup? setup = null, PatternString? value = null, int? minLength = null,
+		int? maxLength = null, Action<Validator>? additionalValidationMethod = null ) =>
+		new(
+			value?.Pattern ?? ( dataValue.DataExists ? dataValue.Value.Pattern : "" ),
+			allowEmpty,
+			setup: setup,
+			minLength: minLength,
+			maxLength: maxLength,
+			validationMethod: ( postBackValue, validator ) => {
+				dataValue.Value = new PatternString( postBackValue );
+				additionalValidationMethod?.Invoke( validator );
+			} );
 }

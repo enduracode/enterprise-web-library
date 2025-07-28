@@ -8,7 +8,7 @@ internal class ModificationFormItemMethodWriter {
 	private readonly List<string> controls = new();
 	private readonly Dictionary<string, Action<TextWriter, bool, IReadOnlyCollection<( string, Func<string, string> )>>> writersByControl = new();
 
-	private string mainControl = "";
+	private readonly string mainControl = "";
 	private readonly Dictionary<string, Func<string, string>> inclusionInstructionsByExcludedControl = new( StringComparer.Ordinal );
 
 	public ModificationFormItemMethodWriter( ModificationField field ) {
@@ -23,6 +23,7 @@ internal class ModificationFormItemMethodWriter {
 		addCheckboxControls();
 		addListControls();
 		addDateAndTimeControls();
+		addSearchPatternControls();
 
 		if( field.TypeIs( typeof( string ) ) ) {
 			addExclusion( "EmailAddressControl", fieldSource => $"suffix the {fieldSource} name with “Email”, or include “Email” and end with “Address”" );
@@ -48,6 +49,8 @@ internal class ModificationFormItemMethodWriter {
 			mainControl = "NumberControl";
 		else if( field.TypeIs( typeof( LocalDate ) ) || field.TypeIs( typeof( LocalDate? ) ) )
 			mainControl = "DateControl";
+		else if( field.TypeIs( typeof( PatternString ) ) )
+			mainControl = "SearchPattern";
 	}
 
 	private void addTextControls() {
@@ -476,6 +479,21 @@ internal class ModificationFormItemMethodWriter {
 					      ? "{0}.ToDurationControl( setup: controlSetup, value: value, allowEmpty: allowEmpty, additionalValidationMethod: additionalValidationMethod )"
 						      .FormatWith( dv )
 					      : "{0}.ToDurationControl( setup: controlSetup, value: value, additionalValidationMethod: additionalValidationMethod )".FormatWith( dv ) );
+	}
+
+	private void addSearchPatternControls() {
+		if( field.TypeIs( typeof( PatternString ) ) )
+			addControl(
+				"SearchPattern",
+				getAllowEmptyParameter( false ).ToCollection(),
+				false,
+				new CSharpParameter( "TextControlSetup?", "controlSetup", defaultValue: "null" ).ToCollection(),
+				"PatternString?",
+				new CSharpParameter( "int?", "minLength", defaultValue: "null" ).ToCollection(),
+				true,
+				dv =>
+					"{0}.ToControl( allowEmpty, setup: controlSetup, value: value, minLength: minLength, maxLength: {1}, additionalValidationMethod: additionalValidationMethod )"
+						.FormatWith( dv, field.Size?.ToString() ?? "null" ) );
 	}
 
 	private void addControl(
