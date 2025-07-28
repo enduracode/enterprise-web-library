@@ -87,19 +87,22 @@ internal class WebItemParameter {
 							options: new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary ) )
 						.Emit( stream );
 					if( !result.Success || result.Diagnostics.Any( i => string.Equals( i.Id, "CS8632", StringComparison.Ordinal ) ) )
-						throw new UserCorrectableException( "The type name \"" + typeName + "\" is invalid." );
+						throw getException();
 					compilationType = ( (FieldInfo)Assembly.Load( stream.ToArray() ).GetType( "A" )!.GetMember( "B" ).Single() ).FieldType;
 				}
 
 				if( !isSupportedValueType( compilationType ) && !isSupportedNullableType( compilationType, isSupportedValueType ) &&
 				    compilationType != typeof( string ) && !isSupportedEnumerable( compilationType ) )
-					throw new UserCorrectableException(
+					throw getException();
+
+				rawTypeNamesToTypes.Add( typeName, compilationType );
+
+				Exception getException() =>
+					new UserCorrectableException(
 						$"The parameter type {typeName} is not supported. Please use one of the types below (implicitly via naming convention if possible):" +
 						Environment.NewLine + Environment.NewLine + StringTools.ConcatenateWithDelimiter(
 							Environment.NewLine,
 							supportedTypes.Select( i => $"{i.Type.Name}: {i.NamingConventionInstructions}" ) ) );
-
-				rawTypeNamesToTypes.Add( typeName, compilationType );
 			}
 
 			type = new DataType(
