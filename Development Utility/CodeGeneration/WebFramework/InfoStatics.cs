@@ -29,8 +29,8 @@ internal static class InfoStatics {
 		foreach( var parameter in parameters ) {
 			CodeGenerationStatics.AddGeneratedCodeUseOnlyComment( writer );
 			writer.WriteLine(
-				"private " + parameter.TypeName + " " + parameter.FieldName +
-				( parameter.IsString ? " = \"\"" : parameter.IsEnumerable ? " = " + parameter.EnumerableInitExpression : "" ) + ";" );
+				"private " + parameter.TypeName + " " + parameter.FieldName + ( parameter.InitExpression is { Length: > 0 } expression ? $" = {expression}" : "" ) +
+				";" );
 			CodeGenerationStatics.AddSummaryDocComment( writer, parameter.Comment );
 			writer.WriteLine( "public " + parameter.TypeName + " " + parameter.PropertyName + " { get { return " + parameter.FieldName + "; } }" );
 		}
@@ -43,7 +43,7 @@ internal static class InfoStatics {
 			CodeGenerationStatics.AddParamDocComment(
 				writer,
 				parameter.Name,
-				parameter.Comment.ConcatenateWithSpace( parameter.IsString || parameter.IsEnumerable ? "Do not pass null." : "" ) );
+				parameter.Comment.ConcatenateWithSpace( parameter.TypeIsNullable ? "" : "Do not pass null." ) );
 		if( generalData.OptionalParameters.Count > 0 )
 			CodeGenerationStatics.AddParamDocComment( writer, "optionalParameterSetter", "Not yet documented." );
 		if( !isEs )
@@ -78,12 +78,8 @@ internal static class InfoStatics {
 	private static void writeParameterInitStatements( TextWriter writer, WebItemGeneralData generalData, bool includeEsParameter, bool isEs ) {
 		if( includeEsParameter )
 			writer.WriteLine( "Es = es;" );
-		foreach( var requiredParameter in generalData.RequiredParameters ) {
-			if( requiredParameter.IsString || requiredParameter.IsEnumerable )
-				writer.WriteLine(
-					$"""if( {requiredParameter.Name} is null ) throw new Exception( "You cannot specify null for the value of a string or an IEnumerable." );""" );
+		foreach( var requiredParameter in generalData.RequiredParameters )
 			writer.WriteLine( requiredParameter.FieldName + " = " + requiredParameter.Name + ";" );
-		}
 
 		// Initialize optional parameter fields.
 		if( generalData.OptionalParameters.Any() ) {

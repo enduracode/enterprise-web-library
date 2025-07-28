@@ -26,7 +26,7 @@ internal static class UrlStatics {
 			writer.WriteLine( "private bool {0}Accessed;".FormatWith( i.Name ) );
 		}
 		foreach( var i in optionalParameters ) {
-			writer.WriteLine( "private readonly {0} {1};".FormatWith( getSpecifiableParameterType( i ), i.Name ) );
+			writer.WriteLine( "private readonly {0} {1};".FormatWith( i.SpecifiableTypeName, i.Name ) );
 			writer.WriteLine( "private readonly bool {0}IsSegmentParameter;".FormatWith( i.Name ) );
 			writer.WriteLine( "private bool {0}Accessed;".FormatWith( i.Name ) );
 		}
@@ -41,9 +41,7 @@ internal static class UrlStatics {
 						", ",
 						( entitySetup != null ? "{0} entitySetup".FormatWith( entitySetup.GeneralData.ClassName ).ToCollection() : Enumerable.Empty<string>() )
 						.Concat( requiredParameters.Select( i => i.TypeName + " " + i.Name ) )
-						.Concat(
-							optionalParameters.SelectMany(
-								i => new[] { getSpecifiableParameterType( i ) + " " + i.Name, "bool {0}IsSegmentParameter".FormatWith( i.Name ) } ) )
+						.Concat( optionalParameters.SelectMany( i => new[] { i.SpecifiableTypeName + " " + i.Name, "bool {0}IsSegmentParameter".FormatWith( i.Name ) } ) )
 						.Concat( includeVersionString ? "string versionString".ToCollection() : Enumerable.Empty<string>() ) )
 					.Surround( " ", " " ) ) );
 		if( entitySetup != null ) {
@@ -90,7 +88,7 @@ internal static class UrlStatics {
 			writer.WriteLine( "public ( {0} value, bool isSegmentParameter ) Get{1}() {{".FormatWith( i.TypeName, i.PropertyName ) );
 			writer.WriteLine( "if( !{0}IsPresent ) throw new ApplicationException( \"The parameter is not present.\" );".FormatWith( i.PropertyName ) );
 			writer.WriteLine( "{0}Accessed = true;".FormatWith( i.Name ) );
-			writer.WriteLine( "return ( {0}!{1}, {0}IsSegmentParameter );".FormatWith( i.Name, getSpecifiableParameterValueSelector( i ) ) );
+			writer.WriteLine( "return ( {0}!{1}, {0}IsSegmentParameter );".FormatWith( i.Name, i.SpecifiedValueSelector ) );
 			writer.WriteLine( "}" );
 		}
 		if( includeVersionString ) {
@@ -115,7 +113,7 @@ internal static class UrlStatics {
 				"if( {0}IsPresent && !{1}Accessed ) parameters.Add( ( \"{1}\", {2}, {1}IsSegmentParameter ) );".FormatWith(
 					i.PropertyName,
 					i.Name,
-					i.GetUrlSerializationExpression( "{0}!{1}".FormatWith( i.Name, getSpecifiableParameterValueSelector( i ) ) ) ) );
+					i.GetUrlSerializationExpression( "{0}!{1}".FormatWith( i.Name, i.SpecifiedValueSelector ) ) ) );
 		if( includeVersionString )
 			writer.WriteLine( "if( versionString.Any() && !versionStringAccessed ) parameters.Add( ( \"version\", versionString, false ) );" );
 		writer.WriteLine( "return parameters;" );
@@ -144,7 +142,7 @@ internal static class UrlStatics {
 		if( entitySetup != null )
 			writer.WriteLine( "private readonly Func<DecodingUrlParameterCollection, {0}> entitySetupGetter;".FormatWith( entitySetup.GeneralData.ClassName ) );
 		foreach( var i in requiredParameters.Concat( optionalParameters ) )
-			writer.WriteLine( "private readonly {0} {1};".FormatWith( getSpecifiableParameterType( i ), i.Name ) );
+			writer.WriteLine( "private readonly {0} {1};".FormatWith( i.SpecifiableTypeName, i.Name ) );
 		if( includeVersionString )
 			writer.WriteLine( "private readonly string? versionString;" );
 
@@ -154,7 +152,7 @@ internal static class UrlStatics {
 					StringTools.ConcatenateWithDelimiter(
 							", ",
 							requiredParameters.Concat( optionalParameters )
-								.Select( i => getSpecifiableParameterType( i ) + " " + i.Name )
+								.Select( i => i.SpecifiableTypeName + " " + i.Name )
 								.Concat( includeVersionString ? "string? versionString".ToCollection() : Enumerable.Empty<string>() )
 								.Select( i => "{0} = null".FormatWith( i ) ) )
 						.Surround( " ", " " ) ) );
@@ -167,7 +165,7 @@ internal static class UrlStatics {
 							.ToCollection()
 							.Concat(
 								requiredParameters.Concat( optionalParameters )
-									.Select( i => getSpecifiableParameterType( i ) + " " + i.Name )
+									.Select( i => i.SpecifiableTypeName + " " + i.Name )
 									.Concat( includeVersionString ? "string? versionString".ToCollection() : Enumerable.Empty<string>() )
 									.Select( i => "{0} = null".FormatWith( i ) ) ) ),
 					StringTools.ConcatenateWithDelimiter(
@@ -180,7 +178,7 @@ internal static class UrlStatics {
 							entitySetup.RequiredParameters.Concat( entitySetup.OptionalParameters )
 								.Concat( requiredParameters )
 								.Concat( optionalParameters )
-								.Select( i => getSpecifiableParameterType( i ) + " " + i.Name )
+								.Select( i => i.SpecifiableTypeName + " " + i.Name )
 								.Concat( includeVersionString ? "string? versionString".ToCollection() : Enumerable.Empty<string>() )
 								.Select( i => "{0} = null".FormatWith( i ) ) )
 						.Surround( " ", " " ),
@@ -201,7 +199,7 @@ internal static class UrlStatics {
 						", ",
 						"Func<DecodingUrlParameterCollection, {0}> entitySetupGetter".FormatWith( entitySetup.GeneralData.ClassName )
 							.ToCollection()
-							.Concat( requiredParameters.Concat( optionalParameters ).Select( i => getSpecifiableParameterType( i ) + " " + i.Name ) )
+							.Concat( requiredParameters.Concat( optionalParameters ).Select( i => i.SpecifiableTypeName + " " + i.Name ) )
 							.Concat( includeVersionString ? "string? versionString".ToCollection() : Enumerable.Empty<string>() ) ) ) );
 		}
 		if( entitySetup != null )
@@ -219,7 +217,7 @@ internal static class UrlStatics {
 
 		foreach( var i in requiredParameters ) {
 			writer.WriteLine( "{0} {1}Argument;".FormatWith( i.TypeName, i.Name ) );
-			writer.WriteLine( "if( {0} != null ) {0}Argument = {0}{1};".FormatWith( i.Name, getSpecifiableParameterValueSelector( i ) ) );
+			writer.WriteLine( "if( {0} != null ) {0}Argument = {0}{1};".FormatWith( i.Name, i.SpecifiedValueSelector ) );
 			writer.WriteLine( "else {" );
 			writer.WriteLine( "var {0}String = parameters.GetRemainingParameter( \"{0}\" );".FormatWith( i.Name ) );
 			writer.WriteLine( "if( {0}String == null ) throw new UnresolvableUrlException( \"The {0} parameter is not present.\", null );".FormatWith( i.Name ) );
@@ -233,17 +231,14 @@ internal static class UrlStatics {
 		}
 
 		foreach( var i in optionalParameters ) {
-			writer.WriteLine( "{0} {1}Argument = null;".FormatWith( getSpecifiableParameterType( i ), i.Name ) );
+			writer.WriteLine( "{0} {1}Argument = null;".FormatWith( i.SpecifiableTypeName, i.Name ) );
 			writer.WriteLine( "if( {0} != null ) {0}Argument = {0};".FormatWith( i.Name ) );
 			writer.WriteLine( "else {" );
 			writer.WriteLine( "var {0}String = parameters.GetRemainingParameter( \"{0}\" );".FormatWith( i.Name ) );
 			writer.WriteLine( "if( {0}String != null )".FormatWith( i.Name ) );
 			writer.WriteLine( "try {" );
 			var deserializationExpression = i.GetUrlDeserializationExpression( "{0}String".FormatWith( i.Name ) );
-			writer.WriteLine(
-				"{0}Argument = {1};".FormatWith(
-					i.Name,
-					i.IsString || i.IsEnumerable ? deserializationExpression : "new SpecifiedValue<{0}>( {1} )".FormatWith( i.TypeName, deserializationExpression ) ) );
+			writer.WriteLine( "{0}Argument = {1};".FormatWith( i.Name, i.GetSpecifiableValueExpression( deserializationExpression ) ) );
 			writer.WriteLine( "}" );
 			writer.WriteLine( "catch( Exception e ) {" );
 			writer.WriteLine( "throw new UnresolvableUrlException( \"Failed to deserialize the {0} parameter.\", e );".FormatWith( i.Name ) );
@@ -271,11 +266,8 @@ internal static class UrlStatics {
 											.ToCollection()
 											.Append( "if( p.OptionalParameters != null ) return;" )
 											.Concat(
-												optionalParameters.Select(
-													i => "if( {0}Argument != null ) s.{1} = {0}Argument{2};".FormatWith(
-														i.Name,
-														i.PropertyName,
-														getSpecifiableParameterValueSelector( i ) ) ) )
+												optionalParameters.Select( i =>
+													"if( {0}Argument != null ) s.{1} = {0}Argument{2};".FormatWith( i.Name, i.PropertyName, i.SpecifiedValueSelector ) ) )
 											.Append( "}" ) )
 									.ToCollection()
 								: Enumerable.Empty<string>() )
@@ -291,11 +283,6 @@ internal static class UrlStatics {
 
 		writer.WriteLine( "}" );
 	}
-
-	private static string getSpecifiableParameterType( WebItemParameter p ) =>
-		( p.IsString || p.IsEnumerable ? p.TypeName : "SpecifiedValue<{0}>".FormatWith( p.TypeName ) ) + "?";
-
-	private static string getSpecifiableParameterValueSelector( WebItemParameter p ) => p.IsString || p.IsEnumerable ? "" : ".Value";
 
 	private static void generatePatterns(
 		TextWriter writer, string className, EntitySetup? entitySetup, IReadOnlyCollection<WebItemParameter> requiredParameters,
@@ -374,7 +361,7 @@ internal static class UrlStatics {
 									parameter.Name,
 									getOldParameterNameDecoderArguments( optionalParameters ).PrependDelimiter( ", " ) ) ) );
 			}
-			if( parameter.IsString ) {
+			if( parameter.TypeName.Equals( "string", StringComparison.Ordinal ) ) {
 				CodeGenerationStatics.AddSummaryDocComment( writer, "Creates a string URL pattern." );
 				writer.WriteLine(
 					"public static UrlPattern {0}({1}) => new UrlPattern( encoder => {2}, url => {3} );".FormatWith(
@@ -416,14 +403,9 @@ internal static class UrlStatics {
 	private static string getOldParameterNameDecoderArguments( IEnumerable<WebItemParameter> parameters ) =>
 		StringTools.ConcatenateWithDelimiter(
 			", ",
-			parameters.Select(
-				i =>
-					"{0}: {0}OldNames != null ? {0}OldNames.Select( i => url.Parameters.Get( i ) ).Where( i => i != null ).Select( value => {{ try {{ return {1}; }} catch( Exception e ) {{ throw new UnresolvableUrlException( \"Failed to deserialize the {0} parameter.\", e ); }} }} ).FirstOrDefault() : null"
-						.FormatWith(
-							i.Name,
-							i.IsString || i.IsEnumerable
-								? i.GetUrlDeserializationExpression( "value" )
-								: "new SpecifiedValue<{0}>( {1} )".FormatWith( i.TypeName, i.GetUrlDeserializationExpression( "value" ) ) ) ) );
+			parameters.Select( i =>
+				"{0}: {0}OldNames != null ? {0}OldNames.Select( i => url.Parameters.Get( i ) ).Where( i => i != null ).Select( value => {{ try {{ return {1}; }} catch( Exception e ) {{ throw new UnresolvableUrlException( \"Failed to deserialize the {0} parameter.\", e ); }} }} ).FirstOrDefault() : null"
+					.FormatWith( i.Name, i.GetSpecifiableValueExpression( i.GetUrlDeserializationExpression( "value" ) ) ) ) );
 
 	internal static void GenerateGetEncoderMethod(
 		TextWriter writer, string entitySetupFieldName, IReadOnlyCollection<WebItemParameter> requiredParameters,
@@ -435,21 +417,22 @@ internal static class UrlStatics {
 						( entitySetupFieldName.Any() ? entitySetupFieldName.ToCollection() : Enumerable.Empty<string>() )
 						.Concat( requiredParameters.Select( i => i.PropertyName ) )
 						.Concat(
-							optionalParameters.SelectMany(
-								i => {
-									// If a default was specified for the parameter and the default matches the value of our parameter, don't include it.
-									// If a default was not specified and the value of our parameter is the default value of the type, don't include it.
-									var defaultParameterReference = WebItemGeneralData.ParameterDefaultsFieldName + "." + i.PropertyName;
-									var value = "( {0} && {1} ) || ( !{0} && {2} ) ? null : {3}".FormatWith(
-										WebItemGeneralData.ParameterDefaultsFieldName + "." + OptionalParameterPackageStatics.GetWasSpecifiedPropertyName( i ),
-										i.IsEnumerable
-											? defaultParameterReference + ".SequenceEqual( " + i.PropertyName + " )"
-											: defaultParameterReference + " == " + i.PropertyName,
-										i.IsEnumerable ? "!" + i.PropertyName + ".Any()" : i.PropertyName + " == " + ( i.IsString ? "\"\"" : "default(" + i.TypeName + ")" ),
-										i.IsString || i.IsEnumerable ? i.PropertyName : "new SpecifiedValue<{0}>( {1} )".FormatWith( i.TypeName, i.PropertyName ) );
+							optionalParameters.SelectMany( i => {
+								// If a default was specified for the parameter and the default matches the value of our parameter, don’t include it.
+								// If a default was not specified and the value of our parameter is the default value of the type, don’t include it.
+								var defaultParameterReference = WebItemGeneralData.ParameterDefaultsFieldName + "." + i.PropertyName;
+								var value = "( {0} ? {1} : {2} ) ? null : {3}".FormatWith(
+									WebItemGeneralData.ParameterDefaultsFieldName + "." + OptionalParameterPackageStatics.GetWasSpecifiedPropertyName( i ),
+									i.IsEnumerable
+										? $"{i.PropertyName}.SequenceEqual( {defaultParameterReference} )"
+										: $"EwlStatics.AreEqual( {i.PropertyName}, {defaultParameterReference} )",
+									i.IsEnumerable
+										? $"!{i.PropertyName}.Any()"
+										: $"EwlStatics.AreEqual( {i.PropertyName}, {( i.InitExpression is { Length: > 0 } expression ? expression : $"default( {i.TypeName} )" )} )",
+									i.GetSpecifiableValueExpression( i.PropertyName ) );
 
-									return new[] { value, isSegmentParameterExpressionGetter( i ) };
-								} ) )
+								return new[] { value, isSegmentParameterExpressionGetter( i ) };
+							} ) )
 						.Concat( includeVersionString ? "getUrlVersionString()".ToCollection() : Enumerable.Empty<string>() ) )
 					.Surround( " ", " " ) ) );
 	}

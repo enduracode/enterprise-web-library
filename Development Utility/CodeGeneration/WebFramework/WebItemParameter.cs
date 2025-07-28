@@ -9,44 +9,138 @@ using Microsoft.CSharp;
 namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.WebFramework;
 
 /// <summary>
-/// The specification for a parameter or a page state variable.
+/// The specification for a parameter.
 /// </summary>
 internal class WebItemParameter {
 	private static readonly CSharpCodeProvider provider = new();
 	private static readonly Dictionary<string, Type> rawTypeNamesToTypes = new();
 	private static readonly Dictionary<Type, string> typesToNormalizedTypeNames = new();
 
-	private readonly Type type;
-	private readonly string normalizedTypeName;
-	private readonly string normalizedElementTypeName;
+	private sealed class DataType {
+		public Type Type { get; }
+		public bool AllowsNull { get; }
+		public Func<bool> NamingConventionPredicate { get; }
+		public string NamingConventionInstructions { get; }
+		public string TypeName { get; }
+		public string ElementTypeName { get; }
+		public string InitExpression { get; }
+		public Func<string, string> UrlSerializationExpressionGetter { get; }
+		public Func<string, string> UrlDeserializationExpressionGetter { get; }
+
+		public DataType(
+			Type type, bool allowsNull, Func<bool> namingConventionPredicate, string namingConventionInstructions, string typeName, string elementTypeName,
+			string initExpression, Func<string, string> urlSerializationExpressionGetter, Func<string, string> urlDeserializationExpressionGetter ) {
+			Type = type;
+			AllowsNull = allowsNull;
+
+			NamingConventionPredicate = namingConventionPredicate;
+			NamingConventionInstructions = namingConventionInstructions;
+
+			TypeName = typeName.Length > 0 ? typeName : Type.Name;
+			ElementTypeName = elementTypeName;
+			InitExpression = initExpression;
+
+			UrlSerializationExpressionGetter = urlSerializationExpressionGetter;
+			UrlDeserializationExpressionGetter = urlDeserializationExpressionGetter;
+		}
+	}
+
+	private static IEnumerable<DataType> getSupportedTypes( string name ) {
+		yield return new DataType(
+			typeof( PatternString ),
+			false,
+			() => hasSuffix( "Contains" ) || nameIs( "searchTerm" ),
+			"suffix the name with “Contains” or make the name “searchTerm”",
+			"",
+			"",
+			"""new PatternString( "" )""",
+			valueExpression => $"{valueExpression}.Pattern",
+			valueExpression => $"new PatternString( {valueExpression} )" );
+
+		yield break;
+		bool hasSuffix( string suffix, string contains = "" ) => ModificationField.NameHasSuffix( name, suffix, contains );
+		bool nameIs( string value ) => value.Equals( name, StringComparison.Ordinal );
+	}
+
+	private readonly DataType type;
 	private readonly string name;
 	private readonly string comment;
 
 	public WebItemParameter( string typeName, string name, string comment ) {
-		if( !rawTypeNamesToTypes.TryGetValue( typeName, out type! ) ) {
-			// We need to compile some fake code because it’s the only way to evaluate C# type alias such as “string” and “int?”.
-			using( var stream = new MemoryStream() ) {
-				var result = CSharpCompilation.Create(
-						null,
-						syntaxTrees: CSharpSyntaxTree.ParseText( "using System; using System.Collections.Generic; public class A { public " + typeName + " B; }" )
-							.ToCollection(),
-						references: MetadataReference.CreateFromFile( typeof( object ).Assembly.Location ).ToCollection(),
-						options: new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary ) )
-					.Emit( stream );
-				if( !result.Success || result.Diagnostics.Any( i => string.Equals( i.Id, "CS8632", StringComparison.Ordinal ) ) )
-					throw new UserCorrectableException( "The type name \"" + typeName + "\" is invalid." );
-				type = ( (FieldInfo)Assembly.Load( stream.ToArray() ).GetType( "A" )!.GetMember( "B" ).Single() ).FieldType;
+		var supportedTypes = getSupportedTypes( name ).Materialize();
+		foreach( var supportedType in supportedTypes )
+			if( typeName.Length > 0 ? supportedType.Type.Name.Equals( typeName, StringComparison.Ordinal ) : supportedType.NamingConventionPredicate() ) {
+				type = supportedType;
+				break;
 			}
-			rawTypeNamesToTypes.Add( typeName, type );
+
+		// Legacy logic; we’re moving toward supporting all types via the list above.
+		if( type is null ) {
+			if( !rawTypeNamesToTypes.TryGetValue( typeName, out var compilationType ) ) {
+				// We need to compile some fake code because it’s the only way to evaluate C# type alias such as “string” and “int?”.
+				using( var stream = new MemoryStream() ) {
+					var result = CSharpCompilation.Create(
+							null,
+							syntaxTrees: CSharpSyntaxTree.ParseText( "using System; using System.Collections.Generic; public class A { public " + typeName + " B; }" )
+								.ToCollection(),
+							references: MetadataReference.CreateFromFile( typeof( object ).Assembly.Location ).ToCollection(),
+							options: new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary ) )
+						.Emit( stream );
+					if( !result.Success || result.Diagnostics.Any( i => string.Equals( i.Id, "CS8632", StringComparison.Ordinal ) ) )
+						throw new UserCorrectableException( "The type name \"" + typeName + "\" is invalid." );
+					compilationType = ( (FieldInfo)Assembly.Load( stream.ToArray() ).GetType( "A" )!.GetMember( "B" ).Single() ).FieldType;
+				}
+
+				if( !isSupportedValueType( compilationType ) && !isSupportedNullableType( compilationType, isSupportedValueType ) &&
+				    compilationType != typeof( string ) && !isSupportedEnumerable( compilationType ) )
+					throw new UserCorrectableException(
+						$"The parameter type {typeName} is not supported. Please use one of the types below (implicitly via naming convention if possible):" +
+						Environment.NewLine + Environment.NewLine + StringTools.ConcatenateWithDelimiter(
+							Environment.NewLine,
+							supportedTypes.Select( i => $"{i.Type.Name}: {i.NamingConventionInstructions}" ) ) );
+
+				rawTypeNamesToTypes.Add( typeName, compilationType );
+			}
+
+			type = new DataType(
+				compilationType,
+				compilationType.IsValueType && Nullable.GetUnderlyingType( compilationType ) is not null,
+				() => throw new NotSupportedException(),
+				"",
+				getNormalizedTypeName( compilationType ),
+				compilationType.IsGenericType && compilationType.GetGenericTypeDefinition() == typeof( IReadOnlyCollection<> )
+					? getNormalizedTypeName( compilationType.GetGenericArguments().Single() )
+					: "",
+				compilationType == typeof( string ) ? "\"\"" :
+				compilationType.IsGenericType && compilationType.GetGenericTypeDefinition() == typeof( IReadOnlyCollection<> ) ? "[]" : "",
+				valueExpression => {
+					if( compilationType == typeof( string ) )
+						return valueExpression;
+
+					if( IsEnumerable )
+						return "StringTools.ConcatenateWithDelimiter( \",\", " + valueExpression + ".Select( i => i.ToString() ).Materialize() )";
+
+					return TypeIsNullable
+						       ? $"""
+						          {valueExpression}.HasValue ? {valueExpression}.Value.ToString()! : ""
+						          """
+						       : valueExpression + ".ToString()!";
+				},
+				valueExpression => {
+					// For strings, we don't need to do a conversion at all.
+					if( compilationType == typeof( string ) )
+						return valueExpression;
+
+					if( IsEnumerable )
+						return valueExpression + ".Separate( \",\", true ).Select( i => (" + type!.ElementTypeName + ")EwlStatics.ChangeType( i, typeof( " +
+						       type.ElementTypeName + " ) ) ).Materialize()";
+
+					// For non-strings, coalesce empty string into null, because things like int? need to be null to change their type from string properly.
+					var expressionToConvert = valueExpression + " == \"\" ? null : " + valueExpression;
+					return "(" + TypeName + ")EwlStatics.ChangeType( " + expressionToConvert + ", typeof( " + TypeName + " ) )";
+				} );
 		}
 
-		if( !isSupportedValueType( type ) && !isSupportedNullableType( type, isSupportedValueType ) && type != typeof( string ) && !isSupportedEnumerable( type ) )
-			throw new UserCorrectableException( "The type \"" + typeName + "\" is not supported." );
-
-		normalizedTypeName = getNormalizedTypeName( type );
-		normalizedElementTypeName = type.IsGenericType && type.GetGenericTypeDefinition() == typeof( IReadOnlyCollection<> )
-			                            ? getNormalizedTypeName( type.GetGenericArguments().Single() )
-			                            : "";
 		this.name = name;
 		this.comment = comment.Trim();
 	}
@@ -95,11 +189,20 @@ internal class WebItemParameter {
 		return name;
 	}
 
-	public string TypeName => normalizedTypeName;
-	public bool TypeIsNullable => type.IsValueType && Nullable.GetUnderlyingType( type ) is not null;
-	public bool IsString => type == typeof( string );
-	internal bool IsEnumerable => normalizedElementTypeName.Any();
-	internal string EnumerableInitExpression => IsEnumerable ? "[]" : "";
+	public string TypeName => type.TypeName;
+
+	public bool TypeIsNullable => type.AllowsNull;
+
+	public string InitExpression => type.InitExpression;
+
+	public string SpecifiableTypeName => ( type.AllowsNull ? $"SpecifiedValue<{type.TypeName}>" : type.TypeName ) + "?";
+
+	public string GetSpecifiableValueExpression( string valueExpression ) =>
+		type.AllowsNull ? $"new SpecifiedValue<{type.TypeName}>( {valueExpression} )" : valueExpression;
+
+	public string SpecifiedValueSelector => type.Type.IsValueType || type.AllowsNull ? ".Value" : "";
+
+	internal bool IsEnumerable => type.ElementTypeName.Any();
 
 	public string Name => name;
 	public string PropertyName => name.Capitalize();
@@ -107,33 +210,8 @@ internal class WebItemParameter {
 
 	public string Comment => comment;
 
-	internal string GetUrlSerializationExpression( string valueExpression ) {
-		if( IsString )
-			return valueExpression;
-
-		if( IsEnumerable )
-			return "StringTools.ConcatenateWithDelimiter( \",\", " + valueExpression + ".Select( i => i.ToString() ).Materialize() )";
-
-		return TypeIsNullable
-			       ? $"""
-			          {valueExpression}.HasValue ? {valueExpression}.Value.ToString()! : ""
-			          """
-			       : valueExpression + ".ToString()!";
-	}
-
-	internal string GetUrlDeserializationExpression( string valueExpression ) {
-		// For strings, we don't need to do a conversion at all.
-		if( IsString )
-			return valueExpression;
-
-		if( IsEnumerable )
-			return valueExpression + ".Separate( \",\", true ).Select( i => (" + normalizedElementTypeName + ")EwlStatics.ChangeType( i, typeof( " +
-			       normalizedElementTypeName + " ) ) ).Materialize()";
-
-		// For non-strings, coalesce empty string into null, because things like int? need to be null to change their type from string properly.
-		var expressionToConvert = valueExpression + " == \"\" ? null : " + valueExpression;
-		return "(" + TypeName + ")EwlStatics.ChangeType( " + expressionToConvert + ", typeof( " + TypeName + " ) )";
-	}
+	internal string GetUrlSerializationExpression( string valueExpression ) => type.UrlSerializationExpressionGetter( valueExpression );
+	internal string GetUrlDeserializationExpression( string valueExpression ) => type.UrlDeserializationExpressionGetter( valueExpression );
 
 	internal ModificationField GetModificationField() =>
 		new(
@@ -141,10 +219,10 @@ internal class WebItemParameter {
 			PropertyName,
 			PropertyName,
 			name,
-			type,
-			normalizedTypeName,
-			normalizedTypeName + ( TypeIsNullable || IsString ? "" : "?" ),
-			normalizedElementTypeName,
+			type.Type,
+			type.TypeName,
+			type.TypeName + ( type.AllowsNull || type.Type == typeof( string ) ? "" : "?" ),
+			type.ElementTypeName,
 			null,
 			null );
 

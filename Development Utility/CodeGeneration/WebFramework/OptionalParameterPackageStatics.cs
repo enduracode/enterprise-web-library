@@ -40,11 +40,8 @@ internal static class OptionalParameterPackageStatics {
 				">();" );
 
 			var warning = "";
-			var setCheck = "";
-			if( parameter.IsString || parameter.IsEnumerable ) {
+			if( !parameter.TypeIsNullable )
 				warning = " The value cannot be null.";
-				setCheck = "if( value == null ) throw new ApplicationException( \"You cannot specify null for the value of a string or an IEnumerable.\" );";
-			}
 
 			// Uninitialized parameters are meaningless since their values will be replaced with current page values or defaults when the Info object is created.
 			CodeGenerationStatics.AddSummaryDocComment(
@@ -53,7 +50,7 @@ internal static class OptionalParameterPackageStatics {
 				warning );
 
 			writer.WriteLine(
-				"public " + parameter.TypeName + " " + parameter.PropertyName + " { get { return " + parameter.Name + ".Value; } set { " + setCheck + parameter.Name +
+				"public " + parameter.TypeName + " " + parameter.PropertyName + " { get { return " + parameter.Name + ".Value; } set { " + parameter.Name +
 				".Value = value; } }" );
 			writer.WriteLine( "public bool " + GetWasSpecifiedPropertyName( parameter ) + " { get { return " + parameter.Name + ".Initialized; } }" );
 		}
