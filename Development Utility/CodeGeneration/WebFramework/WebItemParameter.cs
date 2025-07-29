@@ -188,11 +188,7 @@ internal class WebItemParameter {
 					if( IsEnumerable )
 						return "StringTools.ConcatenateWithDelimiter( \",\", " + valueExpression + ".Select( i => i.ToString() ).Materialize() )";
 
-					return AllowsNull
-						       ? $"""
-						          {valueExpression}.HasValue ? {valueExpression}.Value.ToString()! : ""
-						          """
-						       : valueExpression + ".ToString()!";
+					return valueExpression + ".ToString()!";
 				},
 				valueExpression => {
 					// For strings, we don't need to do a conversion at all.
@@ -203,9 +199,7 @@ internal class WebItemParameter {
 						return valueExpression + ".Separate( \",\", true ).Select( i => (" + type!.ElementTypeName + ")EwlStatics.ChangeType( i, typeof( " +
 						       type.ElementTypeName + " ) ) ).Materialize()";
 
-					// For non-strings, coalesce empty string into null, because things like int? need to be null to change their type from string properly.
-					var expressionToConvert = valueExpression + " == \"\" ? null : " + valueExpression;
-					return "(" + TypeName + ")EwlStatics.ChangeType( " + expressionToConvert + ", typeof( " + TypeName + " ) )";
+					return $"({type!.TypeName})EwlStatics.ChangeType( {valueExpression}, typeof( {type.TypeName} ) )";
 				} );
 		}
 
@@ -232,8 +226,19 @@ internal class WebItemParameter {
 
 	public string Comment => comment;
 
-	internal string GetUrlSerializationExpression( string valueExpression ) => type.UrlSerializationExpressionGetter( valueExpression );
-	internal string GetUrlDeserializationExpression( string valueExpression ) => type.UrlDeserializationExpressionGetter( valueExpression );
+	internal string GetUrlSerializationExpression( string valueExpression ) =>
+		AllowsNull
+			? $$"""
+			    {{valueExpression}} is {} __nonnullable ? {{type.UrlSerializationExpressionGetter( "__nonnullable" )}} : ""
+			    """
+			: type.UrlSerializationExpressionGetter( valueExpression );
+
+	internal string GetUrlDeserializationExpression( string valueExpression ) =>
+		AllowsNull
+			? $$"""
+			    {{valueExpression}} is { Length: > 0 } __nonempty ? {{type.UrlDeserializationExpressionGetter( "__nonempty" )}} : null
+			    """
+			: type.UrlDeserializationExpressionGetter( valueExpression );
 
 	internal ModificationField GetModificationField() =>
 		new(
