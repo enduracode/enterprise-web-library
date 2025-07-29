@@ -77,6 +77,50 @@ internal class WebItemParameter {
 		bool nameIs( string value ) => value.Equals( name, StringComparison.Ordinal );
 	}
 
+	private static bool isSupportedEnumerable( Type type ) {
+		if( !type.IsGenericType || type.GetGenericTypeDefinition() != typeof( IReadOnlyCollection<> ) )
+			return false;
+		var elementType = type.GetGenericArguments().Single();
+
+		// Decimal support is helpful in systems that use Oracle.
+		return isSupportedIntegralType( elementType ) || elementType == typeof( decimal );
+	}
+
+	private static bool isSupportedValueType( Type type ) {
+		return isSupportedIntegralType( type ) || new[]
+			{
+				typeof( float ), typeof( double ), typeof( decimal ), typeof( bool ), typeof( DateTime ), typeof( DateTimeOffset ), typeof( TimeSpan )
+			}.Contains( type ) || type.IsEnum;
+	}
+
+	private static bool isSupportedIntegralType( Type type ) {
+		return new[]
+			{
+				typeof( sbyte ), typeof( byte ), typeof( char ), typeof( short ), typeof( ushort ), typeof( int ), typeof( uint ), typeof( long ), typeof( ulong )
+			}.Contains( type );
+	}
+
+	private static bool isSupportedNullableType( Type type, Func<Type, bool> underlyingTypePredicate ) {
+		var underlyingType = Nullable.GetUnderlyingType( type );
+		return underlyingType != null && underlyingTypePredicate( underlyingType );
+	}
+
+	private static string getNormalizedTypeName( Type type ) {
+		if( !typesToNormalizedTypeNames.TryGetValue( type, out var name ) ) {
+			// We need to do this or int? ends up being "System.Nullable`1", which is useless.
+			name = provider.GetTypeOutput( new CodeTypeReference( type ) );
+
+			// Do this to take the qualifies off type names (System.Collections.Generic.List<System.DateTime> => List<DateTime>).
+			name = Regex.Replace( name, @"(\w+)\.", "" );
+
+			// Do this to turn Nullable<int> into int?, etc.
+			name = Regex.Replace( name, "Nullable<(.+?)>", "$+?" );
+
+			typesToNormalizedTypeNames.Add( type, name );
+		}
+		return name;
+	}
+
 	private readonly DataType type;
 	public bool AllowsNull { get; }
 	private readonly string name;
@@ -167,50 +211,6 @@ internal class WebItemParameter {
 
 		this.name = name;
 		this.comment = comment.Trim();
-	}
-
-	private static bool isSupportedEnumerable( Type type ) {
-		if( !type.IsGenericType || type.GetGenericTypeDefinition() != typeof( IReadOnlyCollection<> ) )
-			return false;
-		var elementType = type.GetGenericArguments().Single();
-
-		// Decimal support is helpful in systems that use Oracle.
-		return isSupportedIntegralType( elementType ) || elementType == typeof( decimal );
-	}
-
-	private static bool isSupportedValueType( Type type ) {
-		return isSupportedIntegralType( type ) || new[]
-			{
-				typeof( float ), typeof( double ), typeof( decimal ), typeof( bool ), typeof( DateTime ), typeof( DateTimeOffset ), typeof( TimeSpan )
-			}.Contains( type ) || type.IsEnum;
-	}
-
-	private static bool isSupportedIntegralType( Type type ) {
-		return new[]
-			{
-				typeof( sbyte ), typeof( byte ), typeof( char ), typeof( short ), typeof( ushort ), typeof( int ), typeof( uint ), typeof( long ), typeof( ulong )
-			}.Contains( type );
-	}
-
-	private static bool isSupportedNullableType( Type type, Func<Type, bool> underlyingTypePredicate ) {
-		var underlyingType = Nullable.GetUnderlyingType( type );
-		return underlyingType != null && underlyingTypePredicate( underlyingType );
-	}
-
-	private static string getNormalizedTypeName( Type type ) {
-		if( !typesToNormalizedTypeNames.TryGetValue( type, out var name ) ) {
-			// We need to do this or int? ends up being "System.Nullable`1", which is useless.
-			name = provider.GetTypeOutput( new CodeTypeReference( type ) );
-
-			// Do this to take the qualifies off type names (System.Collections.Generic.List<System.DateTime> => List<DateTime>).
-			name = Regex.Replace( name, @"(\w+)\.", "" );
-
-			// Do this to turn Nullable<int> into int?, etc.
-			name = Regex.Replace( name, "Nullable<(.+?)>", "$+?" );
-
-			typesToNormalizedTypeNames.Add( type, name );
-		}
-		return name;
 	}
 
 	public string TypeName => type.TypeName + ( AllowsNull ? "?" : "" );
