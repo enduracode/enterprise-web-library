@@ -1,14 +1,13 @@
 ﻿using Tewl.InputValidation;
 
-// EwlPage
-// OptionalParameter: string field1
-// OptionalParameter: string field2
-// OptionalParameter: int? field3
-
 namespace EnterpriseWebLibrary.Website.WebFrameworkDemo {
+	// EwlPage
+	// OptionalParameter: nameContains
+	// OptionalParameter: string field2
+	// OptionalParameter: int? field3
 	partial class OptionalParametersDemo {
 		static partial void specifyParameterDefaults( OptionalParameterSpecifier specifier, EntitySetup entitySetup, Parameters parameters ) {
-			specifier.Field1 = "Default value";
+			specifier.NameContains = new PatternString( "Default value" );
 		}
 
 		protected override string getResourceName() => "Optional Parameters";
@@ -17,7 +16,9 @@ namespace EnterpriseWebLibrary.Website.WebFrameworkDemo {
 			var content = new UiPageContent( isAutoDataUpdater: true );
 
 			content.Add(
-				FormItemList.CreateStack().AddItem( parametersModification.GetField1FormItem( true ) ).AddItem( parametersModification.GetField2FormItem( true ) ) );
+				FormItemList.CreateStack()
+					.AddItem( parametersModification.GetNameContainsFormItem( true ) )
+					.AddItem( parametersModification.GetField2FormItem( true ) ) );
 
 			content.Add(
 				new EwfButton(
