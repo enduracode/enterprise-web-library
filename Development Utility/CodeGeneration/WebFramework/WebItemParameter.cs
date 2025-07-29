@@ -19,7 +19,7 @@ internal class WebItemParameter {
 
 	private sealed class DataType {
 		public Type Type { get; }
-		public bool AllowsNull { get; }
+		public bool SupportsNull { get; }
 		public Func<bool> NamingConventionPredicate { get; }
 		public string NamingConventionInstructions { get; }
 		public string TypeName { get; }
@@ -28,16 +28,19 @@ internal class WebItemParameter {
 		public Func<string, string> UrlSerializationExpressionGetter { get; }
 		public Func<string, string> UrlDeserializationExpressionGetter { get; }
 
+		/// <summary>
+		/// Do not support null for string or IEnumerable types because it cannot easily be represented in a URL.
+		/// </summary>
 		public DataType(
-			Type type, bool allowsNull, Func<bool> namingConventionPredicate, string namingConventionInstructions, string typeName, string elementTypeName,
+			Type type, bool supportsNull, Func<bool> namingConventionPredicate, string namingConventionInstructions, string typeName, string elementTypeName,
 			string initExpression, Func<string, string> urlSerializationExpressionGetter, Func<string, string> urlDeserializationExpressionGetter ) {
 			Type = type;
-			AllowsNull = allowsNull;
+			SupportsNull = supportsNull;
 
 			NamingConventionPredicate = namingConventionPredicate;
 			NamingConventionInstructions = namingConventionInstructions;
 
-			TypeName = typeName.Length > 0 ? typeName : Type.Name;
+			TypeName = typeName.Length > 0 ? typeName : type.Name;
 			ElementTypeName = elementTypeName;
 			InitExpression = initExpression;
 
@@ -49,7 +52,7 @@ internal class WebItemParameter {
 	private static IEnumerable<DataType> getSupportedTypes( string name ) {
 		yield return new DataType(
 			typeof( LocalDate ),
-			false,
+			true,
 			() => hasSuffix( "Date" ),
 			"suffix the name with “Date”",
 			"",
@@ -75,13 +78,19 @@ internal class WebItemParameter {
 	}
 
 	private readonly DataType type;
+	private readonly bool allowsNull;
 	private readonly string name;
 	private readonly string comment;
 
 	public WebItemParameter( string typeName, string name, string comment ) {
 		var supportedTypes = getSupportedTypes( name ).Materialize();
+		allowsNull = typeName.EndsWith( '?' );
+		var nnTypeName = allowsNull ? typeName[ ..^1 ] : typeName;
 		foreach( var supportedType in supportedTypes )
-			if( typeName.Length > 0 ? supportedType.Type.Name.Equals( typeName, StringComparison.Ordinal ) : supportedType.NamingConventionPredicate() ) {
+			if( nnTypeName.Length > 0 ? supportedType.Type.Name.Equals( nnTypeName, StringComparison.Ordinal ) : supportedType.NamingConventionPredicate() ) {
+				if( !supportedType.SupportsNull && allowsNull )
+					throw new UserCorrectableException( $"The parameter type {supportedType.TypeName} does not support null." );
+
 				type = supportedType;
 				break;
 			}
@@ -122,7 +131,7 @@ internal class WebItemParameter {
 				compilationType.IsValueType && Nullable.GetUnderlyingType( compilationType ) is not null,
 				() => throw new NotSupportedException(),
 				"",
-				getNormalizedTypeName( compilationType ),
+				getNormalizedTypeName( compilationType )[ ..^( allowsNull ? 1 : 0 ) ],
 				compilationType.IsGenericType && compilationType.GetGenericTypeDefinition() == typeof( IReadOnlyCollection<> )
 					? getNormalizedTypeName( compilationType.GetGenericArguments().Single() )
 					: "",
@@ -204,18 +213,18 @@ internal class WebItemParameter {
 		return name;
 	}
 
-	public string TypeName => type.TypeName;
+	public string TypeName => type.TypeName + ( allowsNull ? "?" : "" );
 
-	public bool TypeIsNullable => type.AllowsNull;
+	public bool TypeIsNullable => allowsNull;
 
 	public string InitExpression => type.InitExpression;
 
-	public string SpecifiableTypeName => ( type.AllowsNull ? $"SpecifiedValue<{type.TypeName}>" : type.TypeName ) + "?";
+	public string SpecifiableTypeName => ( allowsNull ? $"SpecifiedValue<{TypeName}>" : TypeName ) + "?";
 
 	public string GetSpecifiableValueExpression( string valueExpression ) =>
-		type.AllowsNull ? $"new SpecifiedValue<{type.TypeName}>( {valueExpression} )" : valueExpression;
+		allowsNull ? $"new SpecifiedValue<{TypeName}>( {valueExpression} )" : valueExpression;
 
-	public string SpecifiedValueSelector => type.Type.IsValueType || type.AllowsNull ? ".Value" : "";
+	public string SpecifiedValueSelector => type.Type.IsValueType || allowsNull ? ".Value" : "";
 
 	internal bool IsEnumerable => type.ElementTypeName.Any();
 
@@ -235,8 +244,8 @@ internal class WebItemParameter {
 			PropertyName,
 			name,
 			type.Type,
-			type.TypeName,
-			type.TypeName + ( type.AllowsNull || type.Type == typeof( string ) ? "" : "?" ),
+			TypeName,
+			TypeName + ( allowsNull || type.Type == typeof( string ) ? "" : "?" ),
 			type.ElementTypeName,
 			null,
 			null );
