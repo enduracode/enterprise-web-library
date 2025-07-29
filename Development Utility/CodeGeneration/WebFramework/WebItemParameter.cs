@@ -53,8 +53,8 @@ internal class WebItemParameter {
 		yield return new DataType(
 			typeof( LocalDate ),
 			true,
-			() => hasSuffix( "Date" ),
-			"suffix the name with “Date”",
+			() => hasSuffix( "Date" ) || nameIs( "date" ),
+			"suffix the name with “Date” or make the name “date”",
 			"",
 			"",
 			"",
