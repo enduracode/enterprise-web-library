@@ -164,7 +164,7 @@ internal class WebItemParameter {
 
 				Exception getException() =>
 					new UserCorrectableException(
-						$"The parameter type {typeName} is not supported. Please use one of the types below (implicitly via naming convention if possible):" +
+						$"The parameter {( nnTypeName.Length > 0 ? $"type {nnTypeName}" : $"\"{name}\"" )} is not supported. Please use one of the types below (implicitly via naming convention if possible):" +
 						Environment.NewLine + Environment.NewLine + StringTools.ConcatenateWithDelimiter(
 							Environment.NewLine,
 							supportedTypes.Select( i => $"{i.Type.Name}: {i.NamingConventionInstructions}" ) ) );
