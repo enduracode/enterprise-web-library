@@ -2,7 +2,7 @@
 
   <ItemGroup>
     <PackageReference Include="FluentMigrator.Runner.Oracle" Version="7.1.0" />
-    <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="23.8.0" />
+    <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="23.9.1" />
   </ItemGroup>
 
   <ItemGroup>
