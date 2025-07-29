@@ -351,13 +351,13 @@ internal static class UrlStatics {
 							parameterIsNullable
 								? "url.IsPositiveInt( out var segmentInt ) ? new UrlDecoder( entitySetup, {0}: new SpecifiedValue<int?>( segmentInt ){1} ) : string.Equals( url.Segment, nullSegment, StringComparison.OrdinalIgnoreCase ) ? new UrlDecoder( entitySetup, {0}: new SpecifiedValue<int?>( null ){1} ) : null"
 									.FormatWith( parameter.Name, getOldParameterNameDecoderArguments( optionalParameters ).PrependDelimiter( ", " ) )
-								: "url.IsPositiveInt( out var segmentInt ) ? new UrlDecoder( entitySetup, {0}: new SpecifiedValue<int>( segmentInt ){1} ) : null".FormatWith(
+								: "url.IsPositiveInt( out var segmentInt ) ? new UrlDecoder( entitySetup, {0}: segmentInt{1} ) : null".FormatWith(
 									parameter.Name,
 									getOldParameterNameDecoderArguments( optionalParameters ).PrependDelimiter( ", " ) )
 							: parameterIsNullable
 								? "url.IsPositiveInt( out var segmentInt ) ? new UrlDecoder( {0}: new SpecifiedValue<int?>( segmentInt ){1} ) : string.Equals( url.Segment, nullSegment, StringComparison.OrdinalIgnoreCase ) ? new UrlDecoder( {0}: new SpecifiedValue<int?>( null ){1} ) : null"
 									.FormatWith( parameter.Name, getOldParameterNameDecoderArguments( optionalParameters ).PrependDelimiter( ", " ) )
-								: "url.IsPositiveInt( out var segmentInt ) ? new UrlDecoder( {0}: new SpecifiedValue<int>( segmentInt ){1} ) : null".FormatWith(
+								: "url.IsPositiveInt( out var segmentInt ) ? new UrlDecoder( {0}: segmentInt{1} ) : null".FormatWith(
 									parameter.Name,
 									getOldParameterNameDecoderArguments( optionalParameters ).PrependDelimiter( ", " ) ) ) );
 			}
