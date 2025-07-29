@@ -43,7 +43,7 @@ internal static class InfoStatics {
 			CodeGenerationStatics.AddParamDocComment(
 				writer,
 				parameter.Name,
-				parameter.Comment.ConcatenateWithSpace( parameter.TypeIsNullable ? "" : "Do not pass null." ) );
+				parameter.Comment.ConcatenateWithSpace( parameter.AllowsNull ? "" : "Do not pass null." ) );
 		if( generalData.OptionalParameters.Count > 0 )
 			CodeGenerationStatics.AddParamDocComment( writer, "optionalParameterSetter", "Not yet documented." );
 		if( !isEs )

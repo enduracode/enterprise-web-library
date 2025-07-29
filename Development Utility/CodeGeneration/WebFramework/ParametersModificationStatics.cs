@@ -23,7 +23,7 @@ internal static class ParametersModificationStatics {
 	private static void writePropertyDocComment( TextWriter writer, WebItemParameter parameter ) {
 		CodeGenerationStatics.AddSummaryDocComment(
 			writer,
-			"Gets or sets the new value for the " + parameter.Name + " parameter." + ( parameter.TypeIsNullable ? "" : " The value cannot be null." ) );
+			"Gets or sets the new value for the " + parameter.Name + " parameter." + ( parameter.AllowsNull ? "" : " The value cannot be null." ) );
 	}
 
 	private static string getParameterDataValueName( WebItemParameter parameter ) => parameter.Name + "DataValue";

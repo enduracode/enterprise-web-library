@@ -79,7 +79,7 @@ internal static class WebFrameworkStatics {
 				writer.WriteLine( "{0} ResourceBase deserialize_{1}( string parameters ) {{".FormatWith( methodPrefix, getIdentifier( resource ) ) );
 
 				string getParameter( WebItemParameter parameter ) =>
-					"jsonObject[ \"{0}\" ]!.ToObject<{1}>(){2}".FormatWith( parameter.Name, parameter.TypeName, parameter.TypeIsNullable ? "" : "!" );
+					"jsonObject[ \"{0}\" ]!.ToObject<{1}>(){2}".FormatWith( parameter.Name, parameter.TypeName, parameter.AllowsNull ? "" : "!" );
 				var arguments = StringTools.ConcatenateWithDelimiter(
 						", ",
 						( entitySetup != null ? entitySetup.RequiredParameters : Enumerable.Empty<WebItemParameter>() ).Concat( resource.RequiredParameters )
@@ -87,8 +87,8 @@ internal static class WebFrameworkStatics {
 						.Append(
 							StringTools.ConcatenateWithDelimiter(
 									" ",
-									( entitySetup != null ? entitySetup.OptionalParameters : Enumerable.Empty<WebItemParameter>() ).Select(
-										i => "s.{0} = {1};".FormatWith( i.PropertyName, getParameter( i ) ) ) )
+									( entitySetup != null ? entitySetup.OptionalParameters : Enumerable.Empty<WebItemParameter>() ).Select( i =>
+										"s.{0} = {1};".FormatWith( i.PropertyName, getParameter( i ) ) ) )
 								.Surround( "entitySetupOptionalParameterSetter: ( s, _ ) => { ", " }" ) )
 						.Append(
 							StringTools.ConcatenateWithDelimiter(
@@ -200,13 +200,12 @@ internal static class WebFrameworkStatics {
 			folderParentExpression,
 			files.Select( i => "{0}.UrlPatterns.Literal( \"{1}\" )".FormatWith( i.ClassName, i.FileName ) )
 				.Concat(
-					subfolderNames.Select(
-						subfolderName => "{0}.{1}.UrlPatterns.Literal( \"{2}\" )".FormatWith(
-							WebItemGeneralData.GetNamespaceFromPath( projectNamespace, EwlStatics.CombinePaths( folderPathRelativeToProject, subfolderName ), false )
-								.Separate( ".", false )
-								.Last(),
-							folderSetupClassName,
-							subfolderName ) ) )
+					subfolderNames.Select( subfolderName => "{0}.{1}.UrlPatterns.Literal( \"{2}\" )".FormatWith(
+						WebItemGeneralData.GetNamespaceFromPath( projectNamespace, EwlStatics.CombinePaths( folderPathRelativeToProject, subfolderName ), false )
+							.Separate( ".", false )
+							.Last(),
+						folderSetupClassName,
+						subfolderName ) ) )
 				.Materialize() );
 
 		foreach( var file in files ) {

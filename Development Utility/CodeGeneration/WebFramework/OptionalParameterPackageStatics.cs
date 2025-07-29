@@ -40,7 +40,7 @@ internal static class OptionalParameterPackageStatics {
 				">();" );
 
 			var warning = "";
-			if( !parameter.TypeIsNullable )
+			if( !parameter.AllowsNull )
 				warning = " The value cannot be null.";
 
 			// Uninitialized parameters are meaningless since their values will be replaced with current page values or defaults when the Info object is created.
