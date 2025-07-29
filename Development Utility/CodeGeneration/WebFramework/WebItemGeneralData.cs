@@ -51,7 +51,7 @@ internal class WebItemGeneralData {
 	}
 
 	private IEnumerable<WebItemParameter> getVariablesFromCode( string code, string keyword ) {
-		var pattern = @"^[\t ]*// " + keyword + @": (?:(?<type>[a-zA-Z_0-9<>]*\??) )?(?<name>\w*)( *//(?<comment>[^\n]*))?";
+		var pattern = @"^[\t ]*// " + keyword + @": (?:(?<type>[a-zA-Z_0-9<>]*\??) )?(?<name>\w+)( *//(?<comment>[^\n]*))?";
 		return from Match match in Regex.Matches( code, pattern, RegexOptions.Multiline )
 		       select new WebItemParameter( match.Groups[ "type" ].Value, match.Groups[ "name" ].Value, match.Groups[ "comment" ].Value );
 	}
