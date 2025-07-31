@@ -312,14 +312,14 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 
 	( UrlHandler parent, UrlHandler child ) UrlHandler.GetCanonicalHandlerPair( UrlHandler child ) => ( this, child );
 
-	IEnumerable<UrlHandler> UrlHandler.GetRequestHandlingDescendants() => Enumerable.Empty<UrlHandler>();
+	IEnumerable<UrlHandler> UrlHandler.GetRequestHandlingDescendants() => [ ];
 
 	IEnumerable<UrlPattern> UrlHandler.GetChildPatterns() => getChildUrlPatterns();
 
 	/// <summary>
 	/// Returns this resource’s child URL patterns. Must not depend on the authenticated user.
 	/// </summary>
-	protected virtual IEnumerable<UrlPattern> getChildUrlPatterns() => Enumerable.Empty<UrlPattern>();
+	protected virtual IEnumerable<UrlPattern> getChildUrlPatterns() => [ ];
 
 	void BasicUrlHandler.HandleRequest( HttpContext context ) => HandleRequest( context, false );
 

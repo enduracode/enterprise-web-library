@@ -109,7 +109,7 @@ internal static class InfoStatics {
 			// If new parameter values are effective, and the current resource or an ancestor matches this object, apply its new parameter values.
 			if( generalData.IsPage() || isEs ) {
 				writer.WriteLine( "if( RequestDispatchingStatics.RequestState.NewUrlParameterValuesEffective ) {" );
-				writer.WriteLine( "UrlHandler urlHandler = {0}Current;".FormatWith( generalData.IsPage() ? "" : "PageBase." ) );
+				writer.WriteLine( "UrlHandler? urlHandler = {0}Current;".FormatWith( generalData.IsPage() ? "" : "PageBase." ) );
 				writer.WriteLine( "do" );
 				if( isEs ) {
 					writer.WriteLine( "if( urlHandler is ResourceBase r ) {" );

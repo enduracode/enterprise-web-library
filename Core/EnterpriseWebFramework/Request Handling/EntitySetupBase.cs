@@ -136,7 +136,7 @@ public abstract class EntitySetupBase: ResourceParent {
 	/// </summary>
 	public virtual ConnectionSecurity ConnectionSecurity => Parent?.ConnectionSecurity ?? ConnectionSecurity.SecureIfPossible;
 
-	( UrlHandler parent, UrlHandler child ) UrlHandler.GetCanonicalHandlerPair( UrlHandler child ) {
+	( UrlHandler? parent, UrlHandler child ) UrlHandler.GetCanonicalHandlerPair( UrlHandler child ) {
 		var requestHandler = urlHandlerStateDisabledMethodExecutor!( getRequestHandler );
 		return EwlStatics.AreEqual( child, requestHandler ) && canRepresentRequestHandler()
 			       ? ( (UrlHandler)this ).GetParent()?.GetCanonicalHandlerPair( this ) ?? ( null, this )
@@ -154,7 +154,7 @@ public abstract class EntitySetupBase: ResourceParent {
 			throw new UnresolvableUrlException( "Failed to get the request handler.", e );
 		}
 
-		return requestHandler != null ? requestHandler.ToCollection().Concat( requestHandler.GetRequestHandlingDescendants() ) : Enumerable.Empty<UrlHandler>();
+		return requestHandler != null ? requestHandler.ToCollection().Concat( requestHandler.GetRequestHandlingDescendants() ) : [ ];
 	}
 
 	/// <summary>
@@ -174,7 +174,7 @@ public abstract class EntitySetupBase: ResourceParent {
 	/// <summary>
 	/// Returns this entity setup’s child URL patterns. Must not depend on the authenticated user.
 	/// </summary>
-	protected virtual IEnumerable<UrlPattern> getChildUrlPatterns() => Enumerable.Empty<UrlPattern>();
+	protected virtual IEnumerable<UrlPattern> getChildUrlPatterns() => [ ];
 
 	void BasicUrlHandler.HandleRequest( HttpContext context ) {
 		throw new ResourceNotAvailableException( "An entity setup cannot handle a request.", null );
