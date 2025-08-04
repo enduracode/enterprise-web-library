@@ -1,4 +1,1 @@
-﻿using EnterpriseWebLibrary;
-using EnterpriseWebLibrary.EnterpriseWebFramework;
-
-EwfOps.RunApplication( new GlobalInitializer() );
+﻿EwfOps.RunApplication( new GlobalInitializer() );
