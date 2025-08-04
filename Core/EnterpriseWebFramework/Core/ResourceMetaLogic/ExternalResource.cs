@@ -1,5 +1,4 @@
-﻿#nullable disable
-namespace EnterpriseWebLibrary.EnterpriseWebFramework;
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 
 /// <summary>
 /// A web resource outside of the system.
@@ -15,6 +14,6 @@ public sealed class ExternalResource: ResourceInfo {
 	}
 
 	public override bool UserCanAccess => true;
-	public override AlternativeResourceMode AlternativeMode => null;
+	public override AlternativeResourceMode? AlternativeMode => null;
 	internal override string GetUrl( bool ensureUserCanAccessResource, bool ensureResourceNotDisabled ) => url;
 }

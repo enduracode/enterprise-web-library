@@ -1,5 +1,4 @@
-﻿#nullable disable
-namespace EnterpriseWebLibrary.EnterpriseWebFramework;
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 
 /// <summary>
 /// A base set of functionality that can be used to discover information about a resource before actually requesting it.
@@ -14,7 +13,7 @@ public abstract class ResourceInfo {
 	/// Gets the alternative mode for this resource or null if it is in normal mode. Do not call this from the createAlternativeMode method of an ancestor;
 	/// doing so will result in a stack overflow.
 	/// </summary>
-	public abstract AlternativeResourceMode AlternativeMode { get; }
+	public abstract AlternativeResourceMode? AlternativeMode { get; }
 
 	/// <summary>
 	/// Returns an absolute URL that can be used to request the resource.
