@@ -6,6 +6,7 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.Componen
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 using EnterpriseWebLibrary.EnterpriseWebFramework.PageInfrastructure;
 using EnterpriseWebLibrary.SystemSpecificLogic;
 using JetBrains.Annotations;

@@ -1,6 +1,7 @@
 ﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 using EnterpriseWebLibrary.UserManagement;
 using Tewl.InputValidation;
 
@@ -45,7 +46,7 @@ partial class LogIn {
 						                          errorMessage:
 						                          "The login link you just used has expired. Please return to the page you were on and send yourself another login email." )
 					                          .destinationUrl,
-				actionGetter: () => new PostBackAction( new ExternalResource( destinationUrl ) ) );
+				actionGetter: () => new PostBackAction( new ExternalResource( destinationUrl! ) ) );
 			return FormState.ExecuteWithActions(
 				postBack,
 				() => {
@@ -92,7 +93,7 @@ partial class LogIn {
 				else
 					passwordLoginMethod!( emailAddress.Value, password );
 			},
-			actionGetter: () => new PostBackAction( new ExternalResource( codeEntryIsForPasswordReset.Value.HasValue ? destinationUrl : ReturnUrl ) ) );
+			actionGetter: () => new PostBackAction( new ExternalResource( codeEntryIsForPasswordReset.Value.HasValue ? destinationUrl! : ReturnUrl ) ) );
 
 		var authenticationModeUpdateRegion = new UpdateRegionSet();
 		const string passwordOrCodeFocusKey = "code";

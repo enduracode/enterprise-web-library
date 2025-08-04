@@ -1,4 +1,6 @@
 ﻿#nullable disable
+using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
+
 // EwlPage
 // Parameter: bool showHomeLink
 

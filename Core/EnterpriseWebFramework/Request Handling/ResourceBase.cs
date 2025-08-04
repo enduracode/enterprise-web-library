@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic.AlternativeResourceModes;
 using EnterpriseWebLibrary.SystemSpecificLogic;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;

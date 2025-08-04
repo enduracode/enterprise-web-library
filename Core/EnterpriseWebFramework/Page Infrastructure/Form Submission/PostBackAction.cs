@@ -1,4 +1,6 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
+
+namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 public class PostBackAction {
 	internal ( ResourceInfo?, Func<ResourceInfo, bool>? )? NavigationBehavior { get; }

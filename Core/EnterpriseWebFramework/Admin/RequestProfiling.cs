@@ -2,6 +2,8 @@
 using EnterpriseWebLibrary.Caching;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic.AlternativeResourceModes;
 using EnterpriseWebLibrary.UserManagement;
 
 // EwlPage
@@ -27,8 +29,8 @@ partial class RequestProfiling {
 								behavior: new PostBackBehavior(
 									postBack: PostBack.CreateFull(
 										id: "userToggle",
-										modificationMethod: () => AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod(
-											() => AppMemoryCache.SetRequestProfilingForUser(
+										modificationMethod: () => AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod( () =>
+											AppMemoryCache.SetRequestProfilingForUser(
 												RequestState.Instance.ProfilingUserId,
 												userIsProfiling ? TimeSpan.Zero : TimeSpan.FromHours( 1 ) ) ) ) ) ).ToCollection() ) )
 					.Materialize() );
@@ -47,8 +49,8 @@ partial class RequestProfiling {
 									behavior: new PostBackBehavior(
 										postBack: PostBack.CreateFull(
 											id: "unconditionalToggle",
-											modificationMethod: () => AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod(
-												() => AppMemoryCache.SetUnconditionalRequestProfilingDisabled( profilingDisabled ? TimeSpan.Zero : TimeSpan.FromHours( 1 ) ) ) ) ) )
+											modificationMethod: () => AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod( () =>
+												AppMemoryCache.SetUnconditionalRequestProfilingDisabled( profilingDisabled ? TimeSpan.Zero : TimeSpan.FromHours( 1 ) ) ) ) ) )
 								.ToCollection() ) )
 					.Materialize() );
 		}

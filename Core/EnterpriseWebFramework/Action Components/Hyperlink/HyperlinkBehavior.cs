@@ -2,6 +2,8 @@
 using System.Web;
 using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic.AlternativeResourceModes;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 

@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 using Ical.Net;
 using Ical.Net.CalendarComponents;
 using NodaTime;

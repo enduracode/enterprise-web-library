@@ -1,4 +1,6 @@
-﻿using EnterpriseWebLibrary.EnterpriseWebFramework.PageInfrastructure;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic.AlternativeResourceModes;
+using EnterpriseWebLibrary.EnterpriseWebFramework.PageInfrastructure;
 
 // EwlResource
 // Parameter: uint responseId

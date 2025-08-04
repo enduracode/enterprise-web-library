@@ -3,6 +3,8 @@ using System.Collections.Immutable;
 using System.Security.Cryptography;
 using System.Text;
 using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic.AlternativeResourceModes;
 using EnterpriseWebLibrary.EnterpriseWebFramework.PageInfrastructure;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;

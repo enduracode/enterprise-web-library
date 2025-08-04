@@ -1,5 +1,6 @@
 ﻿#nullable disable
 using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 using EnterpriseWebLibrary.UserManagement;
 using ServiceStack.Stripe;
 using ServiceStack.Stripe.Types;
@@ -91,15 +92,14 @@ public sealed class CreditCardCollector: EtherealComponent {
 		childGetter = () => {
 			stripeCheckoutIncludeSetter();
 			action.AddToPageIfNecessary();
-			jsOpenStatements.AddStatementGetter(
-				() => {
-					var jsTokenHandler = "function( token, args ) { " + hiddenFieldId.GetJsValueModificationStatements( "token.id" ) + " " + action.GetJsStatements() +
-					                     " }";
-					return "StripeCheckout.open( { key: '" + ( ConfigurationStatics.IsLiveInstallation ? livePublishableKey : testPublishableKey ) + "', token: " +
-					       jsTokenHandler + ", name: '" + name + "', description: '" + description + "', " +
-					       ( amountInDollars.HasValue ? "amount: " + amountInDollars.Value * 100 + ", " : "" ) + "email: '" +
-					       ( prefilledEmailAddressOverride ?? ( SystemUser.Current == null ? "" : SystemUser.Current.Email ) ) + "' } );";
-				} );
+			jsOpenStatements.AddStatementGetter( () => {
+				var jsTokenHandler = "function( token, args ) { " + hiddenFieldId.GetJsValueModificationStatements( "token.id" ) + " " + action.GetJsStatements() +
+				                     " }";
+				return "StripeCheckout.open( { key: '" + ( ConfigurationStatics.IsLiveInstallation ? livePublishableKey : testPublishableKey ) + "', token: " +
+				       jsTokenHandler + ", name: '" + name + "', description: '" + description + "', " +
+				       ( amountInDollars.HasValue ? "amount: " + amountInDollars.Value * 100 + ", " : "" ) + "email: '" +
+				       ( prefilledEmailAddressOverride ?? ( SystemUser.Current == null ? "" : SystemUser.Current.Email ) ) + "' } );";
+			} );
 			return hiddenFields;
 		};
 	}

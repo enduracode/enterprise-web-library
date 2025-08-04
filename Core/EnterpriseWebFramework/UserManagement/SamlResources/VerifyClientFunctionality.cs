@@ -3,6 +3,8 @@
 // OptionalParameter: bool cookiesDisabled
 // OptionalParameter: bool clockWrong
 
+using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
+
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.SamlResources;
 
 partial class VerifyClientFunctionality {
