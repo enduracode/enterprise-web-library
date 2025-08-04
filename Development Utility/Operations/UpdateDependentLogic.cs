@@ -788,6 +788,8 @@ internal class UpdateDependentLogic: Operation {
 					writer.WriteLine( """<Using Include="EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Ethereal" />""" );
 					writer.WriteLine( """<Using Include="EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Flow" />""" );
 					writer.WriteLine( """<Using Include="EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing" />""" );
+					writer.WriteLine( """<Using Include="EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic" />""" );
+					writer.WriteLine( """<Using Include="EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic.AlternativeResourceModes" />""" );
 				}
 			}
 			writer.WriteLine( """<Using Include="Tewl" />""" );
