@@ -14,7 +14,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 /// A base set of functionality that can be used to discover information about a resource before actually requesting it.
 /// </summary>
 [ PublicAPI ]
-public abstract class ResourceBase: ResourceInfo, ResourceParent {
+public abstract class ResourceBase: TrustedResourceInfo, ResourceParent {
 	private static readonly List<SystemProviderReference<AppResourceSerializationProvider>> appSerializationProviderRefs = [ ];
 
 	private static Func<ResourceBase, ( string name, string parameters )?>? frameworkResourceSerializer;
