@@ -98,7 +98,7 @@ public static class CookieStatics {
 		// transfer to the log-in page, etc.
 		var requestUrls = new List<string> { EwfRequest.Current!.Url };
 		if( PageBase.Current != null )
-			requestUrls.Add( PageBase.Current.GetUrl( false, false ) );
+			requestUrls.Add( PageBase.Current.GetEwfUrl( false, false ).Url );
 		foreach( var url in requestUrls ) {
 			var uri = new Uri( url );
 			if( domain.Any() && !( "." + uri.Host ).EndsWith( "." + domain ) )

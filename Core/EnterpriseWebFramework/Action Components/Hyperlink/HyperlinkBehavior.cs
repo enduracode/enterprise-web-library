@@ -33,7 +33,7 @@ public sealed class HyperlinkBehavior {
 		var destinationAlternativeMode = hasDestination && !disableAuthorizationCheck ? destination.AlternativeMode : null;
 		Classes = destinationAlternativeMode is NewContentResourceMode ? ActionComponentCssElementCreator.NewContentClass : ElementClassSet.Empty;
 
-		Url = new Lazy<string>( () => hasDestination ? destination.GetUrl( !disableAuthorizationCheck, false ) : "" );
+		Url = new Lazy<string>( () => hasDestination ? destination.GetEwfUrl( !disableAuthorizationCheck, false ).Url : "" );
 		var isPostBackHyperlink = new Lazy<bool>( () =>
 			hasDestination && !( destinationAlternativeMode is DisabledResourceMode ) && !target.Any() && PageBase.Current.IsAutoDataUpdater.Value );
 		AttributeGetter = forNonHyperlinkElement =>

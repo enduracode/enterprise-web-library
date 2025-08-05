@@ -3,7 +3,6 @@ using System.Net;
 using System.Reflection;
 using System.Web;
 using EnterpriseWebLibrary.Configuration;
-using EnterpriseWebLibrary.TewlContrib;
 using Microsoft.AspNetCore.Http;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -27,7 +26,7 @@ internal static class UrlHandlingStatics {
 		appsByAssembly.Add( assembly, ( configuration, baseUrlPatternGetter, urlResolver ) );
 	}
 
-	internal static string GetCanonicalUrl( BasicUrlHandler basicHandler, bool secure ) {
+	internal static EwfUrl GetCanonicalUrl( BasicUrlHandler basicHandler, bool secure ) {
 		UrlHandler parent = null;
 		var canonicalHandler = basicHandler;
 		if( basicHandler is UrlHandler handler ) {
@@ -89,7 +88,7 @@ internal static class UrlHandlingStatics {
 		if( !EwlStatics.AreEqual( resolvedHandler, basicHandler ) )
 			throw new ApplicationException( "The handler’s canonical URL does not resolve back to the same handler." );
 
-		return baseUrlString + ( path.Length > 0 ? "/" : "" ) + appRelativeUrl;
+		return new EwfUrl( baseUrlString, ( path.Length > 0 ? "/" : "" ) + appRelativeUrl );
 	}
 
 	internal static IReadOnlyCollection<BasicUrlHandler> ResolveUrl( string baseUrlString, string appRelativeUrl, Assembly appAssembly = null ) {

@@ -15,5 +15,5 @@ public sealed class ExternalResource: ResourceInfo {
 
 	public override bool UserCanAccess => true;
 	public override AlternativeResourceMode? AlternativeMode => null;
-	internal override string GetUrl( bool ensureUserCanAccessResource, bool ensureResourceNotDisabled ) => url;
+	internal override EwfUrl GetEwfUrl( bool ensureUserCanAccessResource, bool ensureResourceNotDisabled ) => new( url );
 }

@@ -21,7 +21,7 @@ public abstract class ResourceInfo {
 	/// <param name="disableAuthorizationCheck">Pass true to allow a URL to be returned that the authenticated user cannot access. Use with caution. Might be
 	/// useful if you are adding the URL to an email message or otherwise displaying it outside the application.</param>
 	/// <returns></returns>
-	public string GetUrl( bool disableAuthorizationCheck = false ) => GetUrl( !disableAuthorizationCheck, true );
+	public string GetUrl( bool disableAuthorizationCheck = false ) => GetEwfUrl( !disableAuthorizationCheck, true ).Url;
 
-	internal abstract string GetUrl( bool ensureUserCanAccessResource, bool ensureResourceNotDisabled );
+	internal abstract EwfUrl GetEwfUrl( bool ensureUserCanAccessResource, bool ensureResourceNotDisabled );
 }

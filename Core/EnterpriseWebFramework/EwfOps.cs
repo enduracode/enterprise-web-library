@@ -587,7 +587,7 @@ public static class EwfOps {
 		if( resource is ResourceBase { IsIntermediateInstallationPublicResource: false } )
 			throw new Exception(
 				"You must specify resource {0} as an intermediate-installation public resource because it is used on an intermediate-installation public page."
-					.FormatWith( resource.GetUrl( false, false ) ) );
+					.FormatWith( resource.GetEwfUrl( false, false ).Url ) );
 	}
 
 	private static async Task ensureUrlResolved( HttpContext context, RequestDelegate next ) {

@@ -632,7 +632,7 @@ public abstract class PageBase: ResourceBase {
 			newPageObject = (PageBase)ReCreate();
 		bool urlChanged;
 		using( MiniProfiler.Current.Step( "EWF - Check URL after page-view data modifications" ) )
-			urlChanged = newPageObject.GetUrl( false, false ) != GetUrl( false, false );
+			urlChanged = newPageObject.GetEwfUrl( false, false ).Url != GetEwfUrl( false, false ).Url;
 		if( urlChanged )
 			throw getDeveloperMistakeException( "The URL of the page changed after page-view data modifications." );
 		bool userAuthorized;
@@ -919,7 +919,7 @@ public abstract class PageBase: ResourceBase {
 			// We want to force developers to get an error email if a page modifies data to make itself unauthorized/disabled without specifying a different page as
 			// the redirect destination. The resulting transfer would lead the user to an error page.
 			authorizationCheckDisabled = navigationBehavior?.authorizationCheckDisabledPredicate?.Invoke( destination ) == true;
-			destinationUrl = destination.GetUrl( !authorizationCheckDisabled, !authorizationCheckDisabled );
+			destinationUrl = destination.GetEwfUrl( !authorizationCheckDisabled, !authorizationCheckDisabled ).Url;
 		}
 		catch( Exception e ) {
 			throw getDeveloperMistakeException( "The post-modification destination page became invalid.", innerException: e );

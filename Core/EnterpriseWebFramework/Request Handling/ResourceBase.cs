@@ -257,16 +257,16 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 	/// </summary>
 	protected virtual AlternativeResourceMode? createAlternativeMode() => null;
 
-	internal sealed override string GetUrl( bool ensureUserCanAccessResource, bool ensureResourceNotDisabled ) {
+	internal sealed override EwfUrl GetEwfUrl( bool ensureUserCanAccessResource, bool ensureResourceNotDisabled ) {
 		try {
 			if( ensureUserCanAccessResource && !UserCanAccess )
 				throw new ApplicationException( "The authenticated user cannot access the resource." );
 			if( ensureResourceNotDisabled && AlternativeMode is DisabledResourceMode )
 				throw new ApplicationException( "The resource is disabled." );
 
-			string getCanonicalUrl() => UrlHandlingStatics.GetCanonicalUrl( this, ShouldBeSecureGivenCurrentRequest );
-			return ( EwfRequest.Current != null ? RequestDispatchingStatics.RequestState.ExecuteWithUserDisabled( getCanonicalUrl ) : getCanonicalUrl() ) +
-			       uriFragmentIdentifier.PrependDelimiter( "#" );
+			EwfUrl getCanonicalUrl() => UrlHandlingStatics.GetCanonicalUrl( this, ShouldBeSecureGivenCurrentRequest );
+			return ( EwfRequest.Current != null ? RequestDispatchingStatics.RequestState.ExecuteWithUserDisabled( getCanonicalUrl ) : getCanonicalUrl() )
+				.AddFragmentIdentifier( uriFragmentIdentifier );
 		}
 		catch( Exception e ) {
 			var serializedResource =
@@ -326,7 +326,7 @@ public abstract class ResourceBase: ResourceInfo, ResourceParent {
 	void BasicUrlHandler.HandleRequest( HttpContext context ) => HandleRequest( context, false );
 
 	internal void HandleRequest( HttpContext context, bool requestTransferred ) {
-		var canonicalUrl = GetUrl( false, false );
+		var canonicalUrl = GetEwfUrl( false, false ).Url;
 		if( requestTransferred ) {
 			if( ShouldBeSecureGivenCurrentRequest != EwfRequest.AppProvider.RequestIsSecure( context.Request ) )
 				throw new ApplicationException( "{0} has a connection security setting that is incompatible with the current request.".FormatWith( canonicalUrl ) );
