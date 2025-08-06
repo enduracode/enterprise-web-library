@@ -240,4 +240,6 @@ internal static class UrlHandlingStatics {
 		var parameters = HttpUtility.ParseQueryString( query );
 		return from i in Enumerable.Range( 0, parameters.Count ) select ( parameters.GetKey( i ), parameters.Get( i ) );
 	}
+
+	public static Func<string, string, BasicUrlHandler> GetUrlResolver() => urlResolver;
 }

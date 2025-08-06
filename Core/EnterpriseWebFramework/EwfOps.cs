@@ -293,6 +293,8 @@ public static class EwfOps {
 							urlGetter => EwfRequest.Current is null ? urlGetter() : RequestDispatchingStatics.RequestState.ExecuteWithUserDisabled( urlGetter ),
 							( baseUrlString, appRelativeUrl ) =>
 								RequestState.ExecuteWithUrlHandlerStateDisabled( () => UrlHandlingStatics.ResolveUrl( baseUrlString, appRelativeUrl )?.Last() ) );
+						TrustedUrl.Init( urlResolver =>
+							EwfRequest.Current is null ? urlResolver() : RequestDispatchingStatics.RequestState.ExecuteWithUserDisabled( urlResolver ) );
 						CookieStatics.Init(
 							() => RequestDispatchingStatics.RequestState.BaseUrl,
 							() => RequestDispatchingStatics.RequestState.RequestCookies,
