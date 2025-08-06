@@ -3,12 +3,12 @@
 internal sealed class EwfUrl {
 	private const char separator = '|';
 
-	public static string Serialize( EwfUrl url, string additionalData ) =>
-		( url.externalUrl ?? url.baseUrlString + separator + url.appRelativeUrl ) + separator + additionalData;
+	public static string Serialize( EwfUrl? url, string additionalData ) =>
+		( url is null ? "" : ( url.externalUrl ?? url.baseUrlString + separator + url.appRelativeUrl ) + separator ) + additionalData;
 
-	public static string Deserialize( string serializedUrl, out EwfUrl url ) {
+	public static string Deserialize( string serializedUrl, out EwfUrl? url ) {
 		var components = serializedUrl.Separate( separator.ToString(), false );
-		url = components.Count == 2 ? new EwfUrl( components[ 0 ] ) : new EwfUrl( components[ 0 ], components[ 1 ] );
+		url = components.Count switch { 1 => null, 2 => new EwfUrl( components[ 0 ] ), _ => new EwfUrl( components[ 0 ], components[ 1 ] ) };
 		return components[ ^1 ];
 	}
 
