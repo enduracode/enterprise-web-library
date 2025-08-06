@@ -13,85 +13,89 @@ internal static class UrlHandlingStatics {
 			urlResolver )> appsByAssembly = new();
 
 	private static Func<IEnumerable<BaseUrlPattern>> baseUrlPatternGetter;
+	private static Func<Func<EwfUrl>, EwfUrl> urlGetterExecutor;
 	private static Func<string, string, BasicUrlHandler> urlResolver;
 
-	internal static void Init( Func<IEnumerable<BaseUrlPattern>> baseUrlPatternGetter, Func<string, string, BasicUrlHandler> urlResolver ) {
+	public static void Init(
+		Func<IEnumerable<BaseUrlPattern>> baseUrlPatternGetter, Func<Func<EwfUrl>, EwfUrl> urlGetterExecutor, Func<string, string, BasicUrlHandler> urlResolver ) {
 		UrlHandlingStatics.baseUrlPatternGetter = baseUrlPatternGetter;
+		UrlHandlingStatics.urlGetterExecutor = urlGetterExecutor;
 		UrlHandlingStatics.urlResolver = urlResolver;
 	}
 
-	internal static void AddApplication(
+	public static void AddApplication(
 		Assembly assembly, WebApplication configuration, Func<IEnumerable<BaseUrlPattern>> baseUrlPatternGetter,
 		Func<string, string, BasicUrlHandler> urlResolver ) {
 		appsByAssembly.Add( assembly, ( configuration, baseUrlPatternGetter, urlResolver ) );
 	}
 
-	internal static EwfUrl GetCanonicalUrl( BasicUrlHandler basicHandler, bool secure ) {
-		UrlHandler parent = null;
-		var canonicalHandler = basicHandler;
-		if( basicHandler is UrlHandler handler ) {
-			parent = handler.GetParent();
-			if( parent != null ) {
-				var pair = parent.GetCanonicalHandlerPair( handler );
-				parent = pair.parent;
-				canonicalHandler = pair.child;
+	public static EwfUrl GetCanonicalUrl( BasicUrlHandler basicHandler, bool secure ) =>
+		urlGetterExecutor( () => {
+			UrlHandler parent = null;
+			var canonicalHandler = basicHandler;
+			if( basicHandler is UrlHandler handler ) {
+				parent = handler.GetParent();
+				if( parent != null ) {
+					var pair = parent.GetCanonicalHandlerPair( handler );
+					parent = pair.parent;
+					canonicalHandler = pair.child;
+				}
 			}
-		}
-		var encoder = canonicalHandler.GetEncoder();
+			var encoder = canonicalHandler.GetEncoder();
 
-		var segments = new List<string>();
-		string query = null;
-		( IEnumerable<( string name, string value )> segmentParameters, IEnumerable<( string name, string value )> queryParameters ) parameters;
-		while( parent != null ) {
-			EncodingUrlSegment segment = null;
-			foreach( var i in parent.GetChildPatterns() ) {
-				segment = i.Generator( encoder );
-				if( segment != null )
+			var segments = new List<string>();
+			string query = null;
+			( IEnumerable<( string name, string value )> segmentParameters, IEnumerable<( string name, string value )> queryParameters ) parameters;
+			while( parent != null ) {
+				EncodingUrlSegment segment = null;
+				foreach( var i in parent.GetChildPatterns() ) {
+					segment = i.Generator( encoder );
+					if( segment != null )
+						break;
+					encoder.ResetState();
+				}
+				if( segment == null )
+					throw new ApplicationException( "The handler does not match any of the parent’s child URL patterns." );
+				if( segment.Segment.Length == 0 )
+					throw new ApplicationException( "The segment must not be the empty string." );
+				parameters = segment.Parameters.Get( encoder );
+				segments.Add( generateSegment( segment.Segment, generateSegmentParameters( parameters.segmentParameters ) ) );
+				query ??= generateQuery( parameters.queryParameters );
+
+				encoder = parent.GetEncoder();
+				parent = parent.GetParent();
+			}
+
+			var appAssembly = encoder.GetType().Assembly;
+			var app = appAssembly == ConfigurationStatics.AppAssembly
+				          ? ( configuration: EwfConfigurationStatics.AppConfiguration, baseUrlPatternGetter, urlResolver )
+				          : appsByAssembly[ appAssembly ];
+
+			EncodingBaseUrl baseUrl = null;
+			foreach( var i in app.baseUrlPatternGetter() ) {
+				baseUrl = i.Generator( encoder );
+				if( baseUrl != null )
 					break;
 				encoder.ResetState();
 			}
-			if( segment == null )
-				throw new ApplicationException( "The handler does not match any of the parent’s child URL patterns." );
-			if( segment.Segment.Length == 0 )
-				throw new ApplicationException( "The segment must not be the empty string." );
-			parameters = segment.Parameters.Get( encoder );
-			segments.Add( generateSegment( segment.Segment, generateSegmentParameters( parameters.segmentParameters ) ) );
+			if( baseUrl == null )
+				throw new ApplicationException( "The handler does not match any of the base URL patterns for the application." );
+			parameters = baseUrl.Parameters.Get( encoder );
+			var baseUrlParameters = generateSegmentParameters( parameters.segmentParameters );
 			query ??= generateQuery( parameters.queryParameters );
 
-			encoder = parent.GetEncoder();
-			parent = parent.GetParent();
-		}
+			var baseUrlString = baseUrl.BaseUrl.CompleteWithDefaults( app.configuration.DefaultBaseUrl ).GetUrlString( secure );
+			var path = generatePath( baseUrlParameters, segments.AsEnumerable().Reverse() );
+			var appRelativeUrl = generateAppRelativeUrl( path, query );
 
-		var appAssembly = encoder.GetType().Assembly;
-		var app = appAssembly == ConfigurationStatics.AppAssembly
-			          ? ( configuration: EwfConfigurationStatics.AppConfiguration, baseUrlPatternGetter, urlResolver )
-			          : appsByAssembly[ appAssembly ];
+			var resolvedHandler = app.urlResolver( baseUrlString, appRelativeUrl );
+			if( !EwlStatics.AreEqual( resolvedHandler, basicHandler ) )
+				throw new ApplicationException( "The handler’s canonical URL does not resolve back to the same handler." );
 
-		EncodingBaseUrl baseUrl = null;
-		foreach( var i in app.baseUrlPatternGetter() ) {
-			baseUrl = i.Generator( encoder );
-			if( baseUrl != null )
-				break;
-			encoder.ResetState();
-		}
-		if( baseUrl == null )
-			throw new ApplicationException( "The handler does not match any of the base URL patterns for the application." );
-		parameters = baseUrl.Parameters.Get( encoder );
-		var baseUrlParameters = generateSegmentParameters( parameters.segmentParameters );
-		query ??= generateQuery( parameters.queryParameters );
+			return new EwfUrl( baseUrlString, ( path.Length > 0 ? "/" : "" ) + appRelativeUrl );
+		} );
 
-		var baseUrlString = baseUrl.BaseUrl.CompleteWithDefaults( app.configuration.DefaultBaseUrl ).GetUrlString( secure );
-		var path = generatePath( baseUrlParameters, segments.AsEnumerable().Reverse() );
-		var appRelativeUrl = generateAppRelativeUrl( path, query );
-
-		var resolvedHandler = app.urlResolver( baseUrlString, appRelativeUrl );
-		if( !EwlStatics.AreEqual( resolvedHandler, basicHandler ) )
-			throw new ApplicationException( "The handler’s canonical URL does not resolve back to the same handler." );
-
-		return new EwfUrl( baseUrlString, ( path.Length > 0 ? "/" : "" ) + appRelativeUrl );
-	}
-
-	internal static IReadOnlyCollection<BasicUrlHandler> ResolveUrl( string baseUrlString, string appRelativeUrl, Assembly appAssembly = null ) {
+	public static IReadOnlyCollection<BasicUrlHandler> ResolveUrl( string baseUrlString, string appRelativeUrl, Assembly appAssembly = null ) {
 		var handlers = new List<BasicUrlHandler>();
 
 		var urlComponents = parseAppRelativeUrl( appRelativeUrl );
@@ -176,7 +180,7 @@ internal static class UrlHandlingStatics {
 	/// <see cref="PathString.FromUriComponent(string)"/>, etc. entirely predictable. They will all decode the encoded percent signs but be prevented from
 	/// potentially decoding any other characters such as the semicolons that we use to separate segment parameters.
 	/// </summary>
-	internal static string EncodePathForPredictableNormalization( string path ) => path.Replace( "%", "%25" );
+	public static string EncodePathForPredictableNormalization( string path ) => path.Replace( "%", "%25" );
 
 	private static string decodePathWithPredictableNormalization( string path ) => path.Replace( "%25", "%" );
 

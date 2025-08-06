@@ -264,9 +264,7 @@ public abstract class ResourceBase: TrustedResourceInfo, ResourceParent {
 			if( ensureResourceNotDisabled && AlternativeMode is DisabledResourceMode )
 				throw new ApplicationException( "The resource is disabled." );
 
-			EwfUrl getCanonicalUrl() => UrlHandlingStatics.GetCanonicalUrl( this, ShouldBeSecureGivenCurrentRequest );
-			return ( EwfRequest.Current != null ? RequestDispatchingStatics.RequestState.ExecuteWithUserDisabled( getCanonicalUrl ) : getCanonicalUrl() )
-				.AddFragmentIdentifier( uriFragmentIdentifier );
+			return UrlHandlingStatics.GetCanonicalUrl( this, ShouldBeSecureGivenCurrentRequest ).AddFragmentIdentifier( uriFragmentIdentifier );
 		}
 		catch( Exception e ) {
 			var serializedResource =
