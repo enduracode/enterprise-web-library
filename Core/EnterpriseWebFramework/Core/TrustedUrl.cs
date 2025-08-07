@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
-using NodaTime;
+using EnterpriseWebLibrary.SystemSpecificLogic;
 using NodaTime.Text;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Core;
@@ -21,10 +21,8 @@ public sealed class TrustedUrl {
 	}
 
 	public static TrustedUrl Deserialize( string serializedTrustedUrl ) {
-		var bestEffortCutoffDate = Clock.TransactionTime.Minus( Duration.FromDays( 14 ) ).InUtc().Date;
-
 		var date = datePattern.Parse( EwfUrl.Deserialize( serializedTrustedUrl, out var url ) );
-		if( date.GetValueOrThrow() < bestEffortCutoffDate || url is null )
+		if( date.GetValueOrThrow() < SystemSpecificLogicStatics.BestEffortCutoffDate || url is null )
 			return new TrustedUrl( null, null );
 
 		if( url.IsExternal )

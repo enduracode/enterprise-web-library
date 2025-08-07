@@ -1,4 +1,5 @@
 ﻿using EnterpriseWebLibrary.Configuration;
+using NodaTime;
 
 namespace EnterpriseWebLibrary.SystemSpecificLogic;
 
@@ -18,6 +19,9 @@ public static class SystemSpecificLogicStatics {
 	/// </summary>
 	public static string SystemDisplayName =>
 		GeneralProvider.SystemDisplayName.Length > 0 ? GeneralProvider.SystemDisplayName : ConfigurationStatics.InstallationConfiguration.SystemName;
+
+	// The duration here should probably come from the provider.
+	internal static LocalDate BestEffortCutoffDate => Clock.TransactionTime.Minus( Duration.FromDays( 14 ) ).InUtc().Date;
 
 	internal static SystemProviderReference<ProviderType> GetLibraryProvider<ProviderType>( string providerName ) where ProviderType: class =>
 		new SystemProviderGetter(
