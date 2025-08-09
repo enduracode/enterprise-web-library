@@ -14,21 +14,27 @@ public sealed class TrustedUrl {
 		TrustedUrl.urlResolverExecutor = urlResolverExecutor;
 	}
 
-	public static string Serialize( TrustedUrl trustedUrl ) {
+	public static string Serialize( TrustedUrl trustedUrl, string serializationAppId ) {
 		var url = trustedUrl.invalidUrl ?? trustedUrl.resource?.GetEwfUrl( false, false );
 		var date = datePattern.Format( EwfRequest.Current!.RequestTime.InUtc().Date );
-		return EwfUrl.Serialize( url, date );
+		return EwfUrl.Serialize(
+			url,
+			appId => appId.Equals( serializationAppId, StringComparison.Ordinal ) ? "" :
+			         serializationAppId.Length == 0 ? appId :
+			         throw new Exception(
+				         "The application that is serializing the trusted URL has not initialized the URL-generation functionality of the application containing the resource." ),
+			date );
 	}
 
-	public static TrustedUrl Deserialize( string serializedTrustedUrl ) {
-		var date = datePattern.Parse( EwfUrl.Deserialize( serializedTrustedUrl, out var url ) );
+	public static TrustedUrl Deserialize( string serializedTrustedUrl, string serializationAppId ) {
+		var date = datePattern.Parse( EwfUrl.Deserialize( serializedTrustedUrl, appId => appId.Length == 0 ? serializationAppId : appId, out var url ) );
 		if( date.GetValueOrThrow() < SystemSpecificLogicStatics.BestEffortCutoffDate || url is null )
 			return new TrustedUrl( null, null );
 
 		if( url.IsExternal )
 			return new TrustedUrl( new TrustedExternalResource( new ExternalResource( url.Url ) ), null );
 
-		var resolvedHandler = urlResolverExecutor!( () => UrlHandlingStatics.GetUrlResolver()( url.BaseUrlString, url.AppRelativeUrl ) );
+		var resolvedHandler = urlResolverExecutor!( () => UrlHandlingStatics.GetUrlResolver( url.AppId )( url.BaseUrlString, url.AppRelativeUrl ) );
 		return resolvedHandler is TrustedResourceInfo resource ? new TrustedUrl( resource, null ) : new TrustedUrl( null, url );
 	}
 

@@ -2,23 +2,40 @@
 
 internal sealed class EwfUrl {
 	private const char separator = '|';
+	internal const char AdditionalDataSeparator = '-';
 
-	public static string Serialize( EwfUrl? url, string additionalData ) =>
-		( url is null ? "" : ( url.externalUrl ?? url.baseUrlString + separator + url.appRelativeUrl ) + separator ) + additionalData;
+	public static string Serialize( EwfUrl? url, Func<string, string> appIdSelector, string additionalData ) =>
+		url is null ? additionalData :
+		url.externalUrl is not null ? url.externalUrl + separator + additionalData :
+		url.baseUrlString + separator + url.appRelativeUrl + separator + appIdSelector( url.appId! ).AppendDelimiter( AdditionalDataSeparator.ToString() ) +
+		additionalData;
 
-	public static string Deserialize( string serializedUrl, out EwfUrl? url ) {
+	public static string Deserialize( string serializedUrl, Func<string, string> appIdSelector, out EwfUrl? url ) {
 		var components = serializedUrl.Separate( separator.ToString(), false );
-		url = components.Count switch { 1 => null, 2 => new EwfUrl( components[ 0 ] ), _ => new EwfUrl( components[ 0 ], components[ 1 ] ) };
-		return components[ ^1 ];
+		if( components.Count == 1 ) {
+			url = null;
+			return serializedUrl;
+		}
+
+		if( components.Count == 2 ) {
+			url = new EwfUrl( components[ 0 ] );
+			return components[ 1 ];
+		}
+
+		var dataIndex = components[ ^1 ].IndexOf( AdditionalDataSeparator ) + 1;
+		url = new EwfUrl( components[ 0 ], components[ 1 ], appIdSelector( dataIndex > 0 ? components[ 2 ][ ..( dataIndex - 1 ) ] : "" ) );
+		return components[ 2 ][ dataIndex.. ];
 	}
 
 	private readonly string? baseUrlString;
 	private readonly string? appRelativeUrl;
+	private readonly string? appId;
 	private readonly string? externalUrl;
 
-	public EwfUrl( string baseUrlString, string appRelativeUrl ) {
+	public EwfUrl( string baseUrlString, string appRelativeUrl, string appId ) {
 		this.baseUrlString = baseUrlString;
 		this.appRelativeUrl = appRelativeUrl;
+		this.appId = appId;
 	}
 
 	public EwfUrl( string externalUrl ) {
@@ -33,8 +50,10 @@ internal sealed class EwfUrl {
 
 	public string AppRelativeUrl => appRelativeUrl!.StartsWith( '/' ) ? appRelativeUrl[ 1.. ] : appRelativeUrl;
 
+	public string AppId => appId!;
+
 	public EwfUrl AddFragmentIdentifier( string fragmentIdentifier ) {
 		fragmentIdentifier = fragmentIdentifier.PrependDelimiter( "#" );
-		return IsExternal ? new EwfUrl( externalUrl + fragmentIdentifier ) : new EwfUrl( baseUrlString!, appRelativeUrl + fragmentIdentifier );
+		return IsExternal ? new EwfUrl( externalUrl + fragmentIdentifier ) : new EwfUrl( baseUrlString!, appRelativeUrl + fragmentIdentifier, appId! );
 	}
 }

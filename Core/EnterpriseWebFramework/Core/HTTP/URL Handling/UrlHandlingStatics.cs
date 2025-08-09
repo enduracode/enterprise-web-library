@@ -92,7 +92,10 @@ internal static class UrlHandlingStatics {
 			if( !EwlStatics.AreEqual( resolvedHandler, basicHandler ) )
 				throw new ApplicationException( "The handler’s canonical URL does not resolve back to the same handler." );
 
-			return new EwfUrl( baseUrlString, ( path.Length > 0 ? "/" : "" ) + appRelativeUrl );
+			return new EwfUrl(
+				baseUrlString,
+				( path.Length > 0 ? "/" : "" ) + appRelativeUrl,
+				appAssembly == ConfigurationStatics.AppAssembly ? "" : app.configuration.Name );
 		} );
 
 	public static IReadOnlyCollection<BasicUrlHandler> ResolveUrl( string baseUrlString, string appRelativeUrl, Assembly appAssembly = null ) {
@@ -241,5 +244,9 @@ internal static class UrlHandlingStatics {
 		return from i in Enumerable.Range( 0, parameters.Count ) select ( parameters.GetKey( i ), parameters.Get( i ) );
 	}
 
-	public static Func<string, string, BasicUrlHandler> GetUrlResolver() => urlResolver;
+	public static Func<string, string, BasicUrlHandler?> GetUrlResolver( string appId ) =>
+		appId.Length == 0
+			? urlResolver
+			: appsByAssembly.Values.Where( i => i.configuration.Name.Equals( appId, StringComparison.Ordinal ) ).Select( i => i.urlResolver ).SingleOrDefault() ??
+			  ( ( _, _ ) => null );
 }
