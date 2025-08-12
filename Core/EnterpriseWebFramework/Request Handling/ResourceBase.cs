@@ -285,12 +285,12 @@ public abstract class ResourceBase: TrustedResourceInfo, ResourceParent {
 	/// </summary>
 	protected virtual UrlHandler? getUrlParent() => Parent;
 
-	UrlEncoder BasicUrlHandler.GetEncoder() => getUrlEncoder();
+	UrlEncoder BasicUrlHandler.GetEncoder( string appId ) => getUrlEncoder( appId );
 
 	/// <summary>
 	/// Returns a URL encoder for this resource. Framework use only.
 	/// </summary>
-	protected abstract UrlEncoder getUrlEncoder();
+	protected abstract UrlEncoder getUrlEncoder( string appId );
 
 	internal bool ShouldBeSecureGivenCurrentRequest {
 		get {

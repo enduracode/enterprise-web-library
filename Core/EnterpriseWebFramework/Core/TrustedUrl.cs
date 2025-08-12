@@ -8,9 +8,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Core;
 public sealed class TrustedUrl {
 	private static readonly LocalDatePattern datePattern = LocalDatePattern.CreateWithInvariantCulture( "uuuuMMdd" );
 
-	private static Func<Func<BasicUrlHandler>, BasicUrlHandler>? urlResolverExecutor;
+	private static Func<Func<BasicUrlHandler?>, BasicUrlHandler?>? urlResolverExecutor;
 
-	public static void Init( Func<Func<BasicUrlHandler>, BasicUrlHandler> urlResolverExecutor ) {
+	public static void Init( Func<Func<BasicUrlHandler?>, BasicUrlHandler?> urlResolverExecutor ) {
 		TrustedUrl.urlResolverExecutor = urlResolverExecutor;
 	}
 
@@ -20,7 +20,7 @@ public sealed class TrustedUrl {
 		return EwfUrl.Serialize(
 			url,
 			appId => appId.Equals( serializationAppId, StringComparison.Ordinal ) ? "" :
-			         serializationAppId.Length == 0 ? appId :
+			         serializationAppId.Equals( EwfConfigurationStatics.AppConfiguration.PublicId, StringComparison.Ordinal ) ? appId :
 			         throw new Exception(
 				         "The application that is serializing the trusted URL has not initialized the URL-generation functionality of the application containing the resource." ),
 			date );

@@ -1,46 +1,49 @@
-﻿#nullable disable
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Humanizer;
-using Tewl.Tools;
+﻿using System.ComponentModel;
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework {
-	public sealed class DecodingUrlParameterCollection {
-		private readonly ILookup<string, string> parameters;
-		private readonly HashSet<string> accessedParameters;
+namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
-		internal DecodingUrlParameterCollection(
-			IEnumerable<( string name, string value )> segmentParameters, IEnumerable<( string name, string value )> queryParameters ) {
-			parameters = segmentParameters.Concat( queryParameters ).ToLookup( i => i.name, i => i.value, StringComparer.OrdinalIgnoreCase );
-			accessedParameters = new HashSet<string>( parameters.Count );
-		}
+public sealed class DecodingUrlParameterCollection {
+	private readonly ILookup<string, string> parameters;
+	private readonly HashSet<string> accessedParameters;
 
-		/// <summary>
-		/// Returns the value of the parameter with the specified name, or null if the parameter is not present.
-		/// </summary>
-		/// <param name="name">Do not pass null or the empty string.</param>
-		public string Get( string name ) {
-			accessedParameters.Add( name );
-			return get( name );
-		}
+	/// <summary>
+	/// Generated code use only.
+	/// </summary>
+	[ EditorBrowsable( EditorBrowsableState.Never ) ]
+	public string AppId { get; }
 
-		/// <summary>
-		/// Framework use only.
-		/// </summary>
-		public string GetRemainingParameter( string name ) {
-			if( accessedParameters.Contains( name ) )
-				throw new ApplicationException( "The {0} parameter was already accessed by the parser.".FormatWith( name ) );
-			return get( name );
-		}
+	internal DecodingUrlParameterCollection(
+		IEnumerable<( string name, string value )> segmentParameters, IEnumerable<( string name, string value )> queryParameters, string appId ) {
+		parameters = segmentParameters.Concat( queryParameters ).ToLookup( i => i.name, i => i.value, StringComparer.OrdinalIgnoreCase );
+		accessedParameters = new HashSet<string>( parameters.Count );
+		AppId = appId;
+	}
 
-		private string get( string name ) {
-			var matches = parameters[ name ].Materialize();
-			return matches.Count > 1 ? throw new UnresolvableUrlException( "Multiple {0} parameters exist.".FormatWith( name ), null ) : matches.SingleOrDefault();
-		}
+	/// <summary>
+	/// Returns the value of the parameter with the specified name, or null if the parameter is not present.
+	/// </summary>
+	/// <param name="name">Do not pass null or the empty string.</param>
+	public string? Get( string name ) {
+		accessedParameters.Add( name );
+		return get( name );
+	}
 
-		internal void ResetState() {
-			accessedParameters.Clear();
-		}
+	/// <summary>
+	/// Generated code use only.
+	/// </summary>
+	[ EditorBrowsable( EditorBrowsableState.Never ) ]
+	public string? GetRemainingParameter( string name ) {
+		if( accessedParameters.Contains( name ) )
+			throw new Exception( $"The {name} parameter was already accessed by the parser." );
+		return get( name );
+	}
+
+	private string? get( string name ) {
+		var matches = parameters[ name ].Materialize();
+		return matches.Count > 1 ? throw new UnresolvableUrlException( $"Multiple {name} parameters exist.", null ) : matches.SingleOrDefault();
+	}
+
+	internal void ResetState() {
+		accessedParameters.Clear();
 	}
 }

@@ -12,6 +12,8 @@ public class WebApplication {
 	/// </summary>
 	public readonly string Name;
 
+	internal string PublicId { get; }
+
 	/// <summary>
 	/// Development Utility and internal use only.
 	/// </summary>
@@ -28,6 +30,8 @@ public class WebApplication {
 		string name, string installationPath, bool supportsSecureConnections, int index, string systemShortName, bool systemHasMultipleWebApplications,
 		WebProject configuration ) {
 		Name = name;
+		PublicId = name;
+
 		Path = EwlStatics.CombinePaths( installationPath, name );
 		SupportsSecureConnections = supportsSecureConnections;
 
@@ -51,6 +55,8 @@ public class WebApplication {
 		string name, string installationPath, bool supportsSecureConnections, InstallationStandardWebApplication configuration, string installationFullShortName,
 		bool systemHasMultipleWebApplications ) {
 		Name = name;
+		PublicId = name;
+
 		Path = EwlStatics.CombinePaths( installationPath, name );
 		SupportsSecureConnections = supportsSecureConnections;
 		IisAppPoolAndSiteName = configuration.IisApplication is null ? "" : $"{installationFullShortName} - {name}";

@@ -1,43 +1,46 @@
-﻿#nullable disable
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text.RegularExpressions;
+using JetBrains.Annotations;
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework {
-	public sealed class DecodingUrlSegment {
-		private readonly string segment;
-		private readonly DecodingUrlParameterCollection parameters;
+namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
-		internal DecodingUrlSegment( string segment, DecodingUrlParameterCollection parameters ) {
-			this.segment = segment;
-			this.parameters = parameters;
-		}
+[ PublicAPI ]
+public sealed class DecodingUrlSegment {
+	/// <summary>
+	/// Gets this segment.
+	/// </summary>
+	public string Segment { get; }
 
-		/// <summary>
-		/// Gets this segment.
-		/// </summary>
-		public string Segment => segment;
+	/// <summary>
+	/// Gets this segment’s parameters.
+	/// </summary>
+	public DecodingUrlParameterCollection Parameters { get; }
 
-		/// <summary>
-		/// Returns whether the segment has a version string.
-		/// </summary>
-		public bool HasVersionString( out ( string segment, string versionString ) components ) {
-			var match = Regex.Match( segment, @"^(?<segment>.*)--v(?<version>[A-Za-z0-9]+)\z" );
-			if( !match.Success ) {
-				components = default( ( string, string ) );
-				return false;
-			}
-			components = ( match.Groups[ "segment" ].Value, match.Groups[ "version" ].Value );
-			return true;
-		}
-
-		/// <summary>
-		/// Returns whether the segment is a positive int.
-		/// </summary>
-		public bool IsPositiveInt( out int value ) => int.TryParse( segment, NumberStyles.None, CultureInfo.InvariantCulture, out value ) && value >= 1;
-
-		/// <summary>
-		/// Gets this segment’s parameters.
-		/// </summary>
-		public DecodingUrlParameterCollection Parameters => parameters;
+	internal DecodingUrlSegment( string segment, DecodingUrlParameterCollection parameters ) {
+		Segment = segment;
+		Parameters = parameters;
 	}
+
+	/// <summary>
+	/// Returns whether the segment has a version string.
+	/// </summary>
+	public bool HasVersionString( out ( string segment, string versionString ) components ) {
+		var match = Regex.Match( Segment, @"^(?<segment>.*)--v(?<version>[A-Za-z0-9]+)\z" );
+		if( !match.Success ) {
+			components = default( ( string, string ) );
+			return false;
+		}
+		components = ( match.Groups[ "segment" ].Value, match.Groups[ "version" ].Value );
+		return true;
+	}
+
+	/// <summary>
+	/// Returns whether the segment is a positive int.
+	/// </summary>
+	public bool IsPositiveInt( out int value ) => int.TryParse( Segment, NumberStyles.None, CultureInfo.InvariantCulture, out value ) && value >= 1;
+
+	/// <summary>
+	/// Gets the ID of the web application that is resolving the URL.
+	/// </summary>
+	public string AppId => Parameters.AppId;
 }

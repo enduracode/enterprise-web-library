@@ -1,16 +1,26 @@
-﻿#nullable disable
-using System.Collections.Generic;
+﻿using System.ComponentModel;
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework {
-	public interface UrlEncoder {
-		/// <summary>
-		/// Framework use only.
-		/// </summary>
-		IReadOnlyCollection<( string name, string value, bool isSegmentParameter )> GetRemainingParameters();
+namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
-		/// <summary>
-		/// Framework use only.
-		/// </summary>
-		void ResetState();
+public abstract class UrlEncoder {
+	/// <summary>
+	/// Gets the ID of the web application that is generating the URL.
+	/// </summary>
+	public string AppId { get; }
+
+	protected UrlEncoder( string appId ) {
+		AppId = appId;
 	}
+
+	/// <summary>
+	/// Generated code and internal use only.
+	/// </summary>
+	[ EditorBrowsable( EditorBrowsableState.Never ) ]
+	public abstract IReadOnlyCollection<( string name, string value, bool isSegmentParameter )> GetRemainingParameters();
+
+	/// <summary>
+	/// Generated code and internal use only.
+	/// </summary>
+	[ EditorBrowsable( EditorBrowsableState.Never ) ]
+	public abstract void ResetState();
 }

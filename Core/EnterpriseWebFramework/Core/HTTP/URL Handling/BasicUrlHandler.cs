@@ -9,7 +9,7 @@ public interface BasicUrlHandler: IEquatable<BasicUrlHandler> {
 	/// <summary>
 	/// Returns this handler’s URL encoder.
 	/// </summary>
-	UrlEncoder GetEncoder();
+	UrlEncoder GetEncoder( string appId );
 
 	/// <summary>
 	/// Handles an HTTP request.

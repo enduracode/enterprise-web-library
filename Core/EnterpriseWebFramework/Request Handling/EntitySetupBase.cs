@@ -126,12 +126,12 @@ public abstract class EntitySetupBase: ResourceParent {
 	/// </summary>
 	protected virtual UrlHandler? getUrlParent() => Parent;
 
-	UrlEncoder BasicUrlHandler.GetEncoder() => getUrlEncoder();
+	UrlEncoder BasicUrlHandler.GetEncoder( string appId ) => getUrlEncoder( appId );
 
 	/// <summary>
 	/// Returns a URL encoder for this entity setup. Framework use only.
 	/// </summary>
-	protected abstract UrlEncoder getUrlEncoder();
+	protected abstract UrlEncoder getUrlEncoder( string appId );
 
 	/// <summary>
 	/// Gets the desired security setting for requests to resources that are part of this entity setup.
