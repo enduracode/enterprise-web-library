@@ -36,18 +36,18 @@ internal static class UrlStatics {
 		}
 
 		writer.WriteLine(
-			"internal UrlEncoder({0}) {{".FormatWith(
+			"internal UrlEncoder( {0} ): base( appId ) {{".FormatWith(
 				StringTools.ConcatenateWithDelimiter(
-						", ",
-						( entitySetup != null ? "{0} entitySetup".FormatWith( entitySetup.GeneralData.ClassName ).ToCollection() : Enumerable.Empty<string>() )
-						.Concat( requiredParameters.Select( i => i.TypeName + " " + i.Name ) )
-						.Concat( optionalParameters.SelectMany( i => new[] { i.SpecifiableTypeName + " " + i.Name, "bool {0}IsSegmentParameter".FormatWith( i.Name ) } ) )
-						.Concat( includeVersionString ? "string versionString".ToCollection() : Enumerable.Empty<string>() ) )
-					.Surround( " ", " " ) ) );
+					", ",
+					( entitySetup != null ? "{0} entitySetup".FormatWith( entitySetup.GeneralData.ClassName ).ToCollection() : Enumerable.Empty<string>() )
+					.Concat( requiredParameters.Select( i => i.TypeName + " " + i.Name ) )
+					.Concat( optionalParameters.SelectMany( i => new[] { i.SpecifiableTypeName + " " + i.Name, "bool {0}IsSegmentParameter".FormatWith( i.Name ) } ) )
+					.Concat( includeVersionString ? "string versionString".ToCollection() : Enumerable.Empty<string>() )
+					.Append( "string appId" ) ) ) );
 		if( entitySetup != null ) {
 			writer.WriteLine( "this.entitySetup = entitySetup;" );
 			writer.WriteLine(
-				"entitySetupEncoder = new Lazy<{0}.UrlEncoder>( () => ({0}.UrlEncoder)( (UrlHandler)entitySetup ).GetEncoder(), LazyThreadSafetyMode.None );"
+				"entitySetupEncoder = new Lazy<{0}.UrlEncoder>( () => ({0}.UrlEncoder)( (UrlHandler)entitySetup ).GetEncoder( base.AppId ), LazyThreadSafetyMode.None );"
 					.FormatWith( entitySetup.GeneralData.ClassName ) );
 		}
 		foreach( var i in requiredParameters )
@@ -98,8 +98,7 @@ internal static class UrlStatics {
 			writer.WriteLine( "}" );
 		}
 
-		writer.WriteLine(
-			"IReadOnlyCollection<( string, string, bool )> global::EnterpriseWebLibrary.EnterpriseWebFramework.UrlEncoder.GetRemainingParameters() {" );
+		writer.WriteLine( "public override IReadOnlyCollection<( string, string, bool )> GetRemainingParameters() {" );
 		writer.WriteLine(
 			"var parameters = new List<( string, string, bool )>( {0} );".FormatWith(
 				( entitySetup?.RequiredParameters.Concat( entitySetup.OptionalParameters ).Count() ?? 0 ) + requiredParameters.Concat( optionalParameters ).Count() ) );
@@ -119,7 +118,7 @@ internal static class UrlStatics {
 		writer.WriteLine( "return parameters;" );
 		writer.WriteLine( "}" );
 
-		writer.WriteLine( "void global::EnterpriseWebLibrary.EnterpriseWebFramework.UrlEncoder.ResetState() {" );
+		writer.WriteLine( "public override void ResetState() {" );
 		if( entitySetup != null ) {
 			writer.WriteLine( "entitySetupMatched = false;" );
 			writer.WriteLine(
@@ -404,36 +403,36 @@ internal static class UrlStatics {
 		StringTools.ConcatenateWithDelimiter(
 			", ",
 			parameters.Select( i =>
-				"{0}: {0}OldNames != null ? {0}OldNames.Select( i => url.Parameters.Get( i ) ).Where( i => i != null ).Select( value => {{ try {{ return {1}; }} catch( Exception e ) {{ throw new UnresolvableUrlException( \"Failed to deserialize the {0} parameter.\", e ); }} }} ).FirstOrDefault() : null"
+				"{0}: {0}OldNames != null ? {0}OldNames.Select( i => url.Parameters.Get( i ) ).Where( i => i is not null ).Select( i => i! ).Select( value => {{ try {{ return {1}; }} catch( Exception e ) {{ throw new UnresolvableUrlException( \"Failed to deserialize the {0} parameter.\", e ); }} }} ).FirstOrDefault() : null"
 					.FormatWith( i.Name, i.GetSpecifiableValueExpression( i.GetUrlDeserializationExpression( "value" ) ) ) ) );
 
 	internal static void GenerateGetEncoderMethod(
 		TextWriter writer, string entitySetupFieldName, IReadOnlyCollection<WebItemParameter> requiredParameters,
 		IReadOnlyCollection<WebItemParameter> optionalParameters, Func<WebItemParameter, string> isSegmentParameterExpressionGetter, bool includeVersionString ) {
 		writer.WriteLine(
-			"protected override global::EnterpriseWebLibrary.EnterpriseWebFramework.UrlEncoder getUrlEncoder() => new UrlEncoder({0});".FormatWith(
+			"protected override global::EnterpriseWebLibrary.EnterpriseWebFramework.UrlEncoder getUrlEncoder( string appId ) => new UrlEncoder( {0} );".FormatWith(
 				StringTools.ConcatenateWithDelimiter(
-						", ",
-						( entitySetupFieldName.Any() ? entitySetupFieldName.ToCollection() : Enumerable.Empty<string>() )
-						.Concat( requiredParameters.Select( i => i.PropertyName ) )
-						.Concat(
-							optionalParameters.SelectMany( i => {
-								// If a default was specified for the parameter and the default matches the value of our parameter, don’t include it.
-								// If a default was not specified and the value of our parameter is the default value of the type, don’t include it.
-								var defaultParameterReference = WebItemGeneralData.ParameterDefaultsFieldName + "." + i.PropertyName;
-								var value = "( {0} ? {1} : {2} ) ? null : {3}".FormatWith(
-									WebItemGeneralData.ParameterDefaultsFieldName + "." + OptionalParameterPackageStatics.GetWasSpecifiedPropertyName( i ),
-									i.IsEnumerable
-										? $"{i.PropertyName}.SequenceEqual( {defaultParameterReference} )"
-										: $"EwlStatics.AreEqual( {i.PropertyName}, {defaultParameterReference} )",
-									i.IsEnumerable
-										? $"!{i.PropertyName}.Any()"
-										: $"EwlStatics.AreEqual( {i.PropertyName}, {( i.InitExpression is { Length: > 0 } expression ? expression : $"default( {i.TypeName} )" )} )",
-									i.GetSpecifiableValueExpression( i.PropertyName ) );
+					", ",
+					( entitySetupFieldName.Any() ? entitySetupFieldName.ToCollection() : Enumerable.Empty<string>() )
+					.Concat( requiredParameters.Select( i => i.PropertyName ) )
+					.Concat(
+						optionalParameters.SelectMany( i => {
+							// If a default was specified for the parameter and the default matches the value of our parameter, don’t include it.
+							// If a default was not specified and the value of our parameter is the default value of the type, don’t include it.
+							var defaultParameterReference = WebItemGeneralData.ParameterDefaultsFieldName + "." + i.PropertyName;
+							var value = "( {0} ? {1} : {2} ) ? null : {3}".FormatWith(
+								WebItemGeneralData.ParameterDefaultsFieldName + "." + OptionalParameterPackageStatics.GetWasSpecifiedPropertyName( i ),
+								i.IsEnumerable
+									? $"{i.PropertyName}.SequenceEqual( {defaultParameterReference} )"
+									: $"EwlStatics.AreEqual( {i.PropertyName}, {defaultParameterReference} )",
+								i.IsEnumerable
+									? $"!{i.PropertyName}.Any()"
+									: $"EwlStatics.AreEqual( {i.PropertyName}, {( i.InitExpression is { Length: > 0 } expression ? expression : $"default( {i.TypeName} )" )} )",
+								i.GetSpecifiableValueExpression( i.PropertyName ) );
 
-								return new[] { value, isSegmentParameterExpressionGetter( i ) };
-							} ) )
-						.Concat( includeVersionString ? "getUrlVersionString()".ToCollection() : Enumerable.Empty<string>() ) )
-					.Surround( " ", " " ) ) );
+							return new[] { value, isSegmentParameterExpressionGetter( i ) };
+						} ) )
+					.Concat( includeVersionString ? "getUrlVersionString()".ToCollection() : Enumerable.Empty<string>() )
+					.Append( "appId" ) ) ) );
 	}
 }
