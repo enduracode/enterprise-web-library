@@ -40,7 +40,7 @@ public class RequestState {
 	}
 
 	internal static T ExecuteWithUrlHandlerStateDisabled<T>( Func<T> method ) {
-		if( EwfRequest.Current == null )
+		if( EwfRequest.Current is null || Instance.urlHandlerStateDisabled )
 			return method();
 
 		Instance.urlHandlerStateDisabled = true;
@@ -163,6 +163,9 @@ public class RequestState {
 	}
 
 	internal T ExecuteWithUserDisabled<T>( Func<T> method ) {
+		if( userDisabled )
+			return method();
+
 		userDisabled = true;
 		try {
 			return method();
