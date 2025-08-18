@@ -128,6 +128,7 @@ internal class UpdateDependentLogic: Operation {
 					writer.WriteLine( "using System.Threading;" );
 					writer.WriteLine( "using EnterpriseWebLibrary.DataAccess;" );
 					writer.WriteLine( "using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;" );
+					writer.WriteLine( "using EnterpriseWebLibrary.EnterpriseWebFramework.Core;" );
 					writer.WriteLine( "using Newtonsoft.Json;" );
 					writer.WriteLine( "using Newtonsoft.Json.Linq;" );
 					writer.WriteLine( "using Tewl.InputValidation;" );
@@ -483,7 +484,6 @@ internal class UpdateDependentLogic: Operation {
 				writer.WriteLine( "using System.Threading;" );
 				writer.WriteLine( "using EnterpriseWebLibrary;" );
 				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess;" );
-				writer.WriteLine( "using EnterpriseWebLibrary.EnterpriseWebFramework;" );
 				writer.WriteLine( "using Newtonsoft.Json;" );
 				writer.WriteLine( "using Newtonsoft.Json.Linq;" );
 				writer.WriteLine( "using NodaTime;" );
@@ -788,6 +788,7 @@ internal class UpdateDependentLogic: Operation {
 					writer.WriteLine( """<Using Include="EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Ethereal" />""" );
 					writer.WriteLine( """<Using Include="EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Flow" />""" );
 					writer.WriteLine( """<Using Include="EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing" />""" );
+					writer.WriteLine( """<Using Include="EnterpriseWebLibrary.EnterpriseWebFramework.Core" />""" );
 					writer.WriteLine( """<Using Include="EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic" />""" );
 					writer.WriteLine( """<Using Include="EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic.AlternativeResourceModes" />""" );
 				}

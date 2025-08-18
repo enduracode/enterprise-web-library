@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 using EnterpriseWebLibrary.SystemSpecificLogic;
 using NodaTime.Text;
@@ -6,6 +7,12 @@ using NodaTime.Text;
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Core;
 
 public sealed class TrustedUrl {
+	/// <summary>
+	/// Generated code use only.
+	/// </summary>
+	[ EditorBrowsable( EditorBrowsableState.Never ) ]
+	public static readonly TrustedUrl Invalid = new( null, null );
+
 	private static readonly LocalDatePattern datePattern = LocalDatePattern.CreateWithInvariantCulture( "uuuuMMdd" );
 
 	private static Func<Func<BasicUrlHandler?>, BasicUrlHandler?>? urlResolverExecutor;
@@ -29,7 +36,7 @@ public sealed class TrustedUrl {
 	public static TrustedUrl Deserialize( string serializedTrustedUrl, string serializationAppId ) {
 		var date = datePattern.Parse( EwfUrl.Deserialize( serializedTrustedUrl, appId => appId.Length == 0 ? serializationAppId : appId, out var url ) );
 		if( date.GetValueOrThrow() < SystemSpecificLogicStatics.BestEffortCutoffDate || url is null )
-			return new TrustedUrl( null, null );
+			return Invalid;
 
 		if( url.IsExternal )
 			return new TrustedUrl( new TrustedExternalResource( new ExternalResource( url.Url ) ), null );

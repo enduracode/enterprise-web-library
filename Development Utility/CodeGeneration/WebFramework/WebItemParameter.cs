@@ -1,6 +1,7 @@
 ﻿using System.CodeDom;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Core;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -26,14 +27,14 @@ internal class WebItemParameter {
 		public string ElementTypeName { get; }
 		public string InitExpression { get; }
 		public Func<string, string> UrlSerializationExpressionGetter { get; }
-		public Func<string, string> UrlDeserializationExpressionGetter { get; }
+		public Func<string, string, string> UrlDeserializationExpressionGetter { get; }
 
 		/// <summary>
 		/// Do not support null for string or IEnumerable types because it cannot easily be represented in a URL.
 		/// </summary>
 		public DataType(
 			Type type, bool supportsNull, Func<bool> namingConventionPredicate, string namingConventionInstructions, string typeName, string elementTypeName,
-			string initExpression, Func<string, string> urlSerializationExpressionGetter, Func<string, string> urlDeserializationExpressionGetter ) {
+			string initExpression, Func<string, string> urlSerializationExpressionGetter, Func<string, string, string> urlDeserializationExpressionGetter ) {
 			Type = type;
 			SupportsNull = supportsNull;
 
@@ -59,7 +60,7 @@ internal class WebItemParameter {
 			"",
 			"",
 			valueExpression => $"LocalDatePattern.Iso.Format( {valueExpression} )",
-			valueExpression => $"LocalDatePattern.Iso.Parse( {valueExpression} ).GetValueOrThrow()" );
+			( valueExpression, _ ) => $"LocalDatePattern.Iso.Parse( {valueExpression} ).GetValueOrThrow()" );
 
 		yield return new DataType(
 			typeof( PatternString ),
@@ -70,7 +71,18 @@ internal class WebItemParameter {
 			"",
 			"""new PatternString( "" )""",
 			valueExpression => $"{valueExpression}.Pattern",
-			valueExpression => $"new PatternString( {valueExpression} )" );
+			( valueExpression, _ ) => $"new PatternString( {valueExpression} )" );
+
+		yield return new DataType(
+			typeof( TrustedUrl ),
+			true,
+			() => hasSuffix( "Resource" ),
+			"suffix the name with “Resource”",
+			"",
+			"",
+			"TrustedUrl.Invalid",
+			valueExpression => $"TrustedUrl.Serialize( {valueExpression}, base.AppId )",
+			( valueExpression, appIdExpression ) => $"TrustedUrl.Deserialize( {valueExpression}, {appIdExpression} )" );
 
 		yield break;
 		bool hasSuffix( string suffix, string contains = "" ) => ModificationField.NameHasSuffix( name, suffix, contains );
@@ -190,7 +202,7 @@ internal class WebItemParameter {
 
 					return valueExpression + ".ToString()!";
 				},
-				valueExpression => {
+				( valueExpression, _ ) => {
 					// For strings, we don't need to do a conversion at all.
 					if( compilationType == typeof( string ) )
 						return valueExpression;
@@ -209,7 +221,7 @@ internal class WebItemParameter {
 
 	public string TypeName => type.TypeName + ( AllowsNull ? "?" : "" );
 
-	public string InitExpression => type.InitExpression;
+	public string InitExpression => AllowsNull ? "" : type.InitExpression;
 
 	public string SpecifiableTypeName => ( AllowsNull ? $"SpecifiedValue<{TypeName}>" : TypeName ) + "?";
 
@@ -233,12 +245,12 @@ internal class WebItemParameter {
 			    """
 			: type.UrlSerializationExpressionGetter( valueExpression );
 
-	internal string GetUrlDeserializationExpression( string valueExpression ) =>
+	internal string GetUrlDeserializationExpression( string valueExpression, string appIdExpression ) =>
 		AllowsNull
 			? $$"""
-			    {{valueExpression}} is { Length: > 0 } __nonempty ? {{type.UrlDeserializationExpressionGetter( "__nonempty" )}} : null
+			    {{valueExpression}} is { Length: > 0 } __nonempty ? {{type.UrlDeserializationExpressionGetter( "__nonempty", appIdExpression )}} : null
 			    """
-			: type.UrlDeserializationExpressionGetter( valueExpression );
+			: type.UrlDeserializationExpressionGetter( valueExpression, appIdExpression );
 
 	internal ModificationField GetModificationField() =>
 		new(

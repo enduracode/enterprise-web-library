@@ -221,7 +221,7 @@ internal static class UrlStatics {
 			writer.WriteLine( "var {0}String = parameters.GetRemainingParameter( \"{0}\" );".FormatWith( i.Name ) );
 			writer.WriteLine( "if( {0}String == null ) throw new UnresolvableUrlException( \"The {0} parameter is not present.\", null );".FormatWith( i.Name ) );
 			writer.WriteLine( "try {" );
-			writer.WriteLine( "{0}Argument = {1};".FormatWith( i.Name, i.GetUrlDeserializationExpression( "{0}String".FormatWith( i.Name ) ) ) );
+			writer.WriteLine( "{0}Argument = {1};".FormatWith( i.Name, i.GetUrlDeserializationExpression( "{0}String".FormatWith( i.Name ), "parameters.AppId" ) ) );
 			writer.WriteLine( "}" );
 			writer.WriteLine( "catch( Exception e ) {" );
 			writer.WriteLine( "throw new UnresolvableUrlException( \"Failed to deserialize the {0} parameter.\", e );".FormatWith( i.Name ) );
@@ -236,7 +236,7 @@ internal static class UrlStatics {
 			writer.WriteLine( "var {0}String = parameters.GetRemainingParameter( \"{0}\" );".FormatWith( i.Name ) );
 			writer.WriteLine( "if( {0}String != null )".FormatWith( i.Name ) );
 			writer.WriteLine( "try {" );
-			var deserializationExpression = i.GetUrlDeserializationExpression( "{0}String".FormatWith( i.Name ) );
+			var deserializationExpression = i.GetUrlDeserializationExpression( "{0}String".FormatWith( i.Name ), "parameters.AppId" );
 			writer.WriteLine( "{0}Argument = {1};".FormatWith( i.Name, i.GetSpecifiableValueExpression( deserializationExpression ) ) );
 			writer.WriteLine( "}" );
 			writer.WriteLine( "catch( Exception e ) {" );
@@ -404,7 +404,7 @@ internal static class UrlStatics {
 			", ",
 			parameters.Select( i =>
 				"{0}: {0}OldNames != null ? {0}OldNames.Select( i => url.Parameters.Get( i ) ).Where( i => i is not null ).Select( i => i! ).Select( value => {{ try {{ return {1}; }} catch( Exception e ) {{ throw new UnresolvableUrlException( \"Failed to deserialize the {0} parameter.\", e ); }} }} ).FirstOrDefault() : null"
-					.FormatWith( i.Name, i.GetSpecifiableValueExpression( i.GetUrlDeserializationExpression( "value" ) ) ) ) );
+					.FormatWith( i.Name, i.GetSpecifiableValueExpression( i.GetUrlDeserializationExpression( "value", "url.AppId" ) ) ) ) );
 
 	internal static void GenerateGetEncoderMethod(
 		TextWriter writer, string entitySetupFieldName, IReadOnlyCollection<WebItemParameter> requiredParameters,
