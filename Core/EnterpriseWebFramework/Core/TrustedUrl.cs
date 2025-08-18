@@ -51,6 +51,8 @@ public sealed class TrustedUrl: IEquatable<TrustedUrl> {
 		this.invalidUrl = invalidUrl;
 	}
 
+	public TrustedResourceInfo GetResourceOrThrow() => resource ?? throw new InvalidOperationException( "invalid URL" );
+
 	public bool TryGetResource( [ NotNullWhen( true ) ] out TrustedResourceInfo? resource ) {
 		resource = this.resource;
 		return resource is not null;
