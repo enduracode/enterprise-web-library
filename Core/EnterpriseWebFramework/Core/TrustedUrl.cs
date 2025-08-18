@@ -2,11 +2,12 @@
 using System.Diagnostics.CodeAnalysis;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 using EnterpriseWebLibrary.SystemSpecificLogic;
+using Newtonsoft.Json;
 using NodaTime.Text;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Core;
 
-public sealed class TrustedUrl {
+public sealed class TrustedUrl: IEquatable<TrustedUrl> {
 	/// <summary>
 	/// Generated code use only.
 	/// </summary>
@@ -21,17 +22,14 @@ public sealed class TrustedUrl {
 		TrustedUrl.urlResolverExecutor = urlResolverExecutor;
 	}
 
-	public static string Serialize( TrustedUrl trustedUrl, string serializationAppId ) {
-		var url = trustedUrl.invalidUrl ?? trustedUrl.resource?.GetEwfUrl( false, false );
-		var date = datePattern.Format( EwfRequest.Current!.RequestTime.InUtc().Date );
-		return EwfUrl.Serialize(
-			url,
+	public static string Serialize( TrustedUrl trustedUrl, string serializationAppId ) =>
+		EwfUrl.Serialize(
+			trustedUrl.url,
 			appId => appId.Equals( serializationAppId, StringComparison.Ordinal ) ? "" :
 			         serializationAppId.Equals( EwfConfigurationStatics.AppConfiguration.PublicId, StringComparison.Ordinal ) ? appId :
 			         throw new Exception(
 				         "The application that is serializing the trusted URL has not initialized the URL-generation functionality of the application containing the resource." ),
-			date );
-	}
+			datePattern.Format( EwfRequest.Current!.RequestTime.InUtc().Date ) );
 
 	public static TrustedUrl Deserialize( string serializedTrustedUrl, string serializationAppId ) {
 		var date = datePattern.Parse( EwfUrl.Deserialize( serializedTrustedUrl, appId => appId.Length == 0 ? serializationAppId : appId, out var url ) );
@@ -57,6 +55,13 @@ public sealed class TrustedUrl {
 		resource = this.resource;
 		return resource is not null;
 	}
+
+	[ JsonProperty ]
+	private EwfUrl? url => invalidUrl ?? resource?.GetEwfUrl( false, false );
+
+	public override bool Equals( object? obj ) => Equals( obj as TrustedUrl );
+	public bool Equals( TrustedUrl? other ) => other is not null && EwlStatics.AreEqual( url, other.url );
+	public override int GetHashCode() => ( resource, invalidUrl ).GetHashCode();
 }
 
 public static class TrustedUrlExtensionCreators {

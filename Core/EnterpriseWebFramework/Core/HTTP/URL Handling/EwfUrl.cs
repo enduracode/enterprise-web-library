@@ -1,6 +1,9 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework;
+﻿using Newtonsoft.Json;
 
-internal sealed class EwfUrl {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework;
+
+[ JsonObject( MemberSerialization = MemberSerialization.Fields ) ]
+internal sealed class EwfUrl: IEquatable<EwfUrl> {
 	private const char separator = '|';
 	internal const char AdditionalDataSeparator = '-';
 
@@ -56,4 +59,13 @@ internal sealed class EwfUrl {
 		fragmentIdentifier = fragmentIdentifier.PrependDelimiter( "#" );
 		return IsExternal ? new EwfUrl( externalUrl + fragmentIdentifier ) : new EwfUrl( baseUrlString!, appRelativeUrl + fragmentIdentifier, appId! );
 	}
+
+	public override bool Equals( object? obj ) => Equals( obj as EwfUrl );
+
+	public bool Equals( EwfUrl? other ) =>
+		other is not null && string.Equals( baseUrlString, other.baseUrlString, StringComparison.Ordinal ) &&
+		string.Equals( appRelativeUrl, other.appRelativeUrl, StringComparison.Ordinal ) && string.Equals( appId, other.appId, StringComparison.Ordinal ) &&
+		string.Equals( externalUrl, other.externalUrl, StringComparison.Ordinal );
+
+	public override int GetHashCode() => ( baseUrlString, appRelativeUrl, appId, externalUrl ).GetHashCode();
 }
