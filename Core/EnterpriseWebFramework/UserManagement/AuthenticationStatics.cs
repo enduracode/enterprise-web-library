@@ -6,6 +6,7 @@ using EnterpriseWebLibrary.Caching;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 using EnterpriseWebLibrary.SystemSpecificLogic;
 using EnterpriseWebLibrary.UserManagement;
 using EnterpriseWebLibrary.UserManagement.IdentityProviders;
@@ -28,7 +29,7 @@ public static class AuthenticationStatics {
 
 	private static AppAuthenticationProvider? provider;
 	private static TicketDataFormat? authenticationTicketProtector;
-	private static Func<string, ResourceBase>? defaultLogInPageGetter;
+	private static Func<TrustedUrl?, ResourceBase>? defaultLogInPageGetter;
 	private static LocalIdentityProvider.AutoLogInPageUrlGetterMethod? autoLogInPageUrlGetter;
 	private static LocalIdentityProvider.ChangePasswordPageUrlGetterMethod? changePasswordPageUrlGetter;
 
@@ -36,9 +37,10 @@ public static class AuthenticationStatics {
 
 	public delegate SystemUser PasswordLoginModificationMethod( string emailAddress, DataValue<string> password, string errorMessage = "" );
 
-	public delegate void LoginCodeSenderMethod( string emailAddress, bool isPasswordReset, string destinationUrl, int? newUserRoleId = null );
+	public delegate void LoginCodeSenderMethod( string emailAddress, bool isPasswordReset, TrustedUrl? destinationUrl, int? newUserRoleId = null );
 
-	public delegate ( SystemUser user, string destinationUrl ) CodeLoginModificationMethod( string emailAddress, string code, string errorMessage = "" );
+	public delegate ( SystemUser user, TrustedResourceInfo? destinationResource ) CodeLoginModificationMethod(
+		string emailAddress, string code, string errorMessage = "" );
 
 	/// <summary>
 	/// Logs in the user with the specified ID.
@@ -50,7 +52,7 @@ public static class AuthenticationStatics {
 
 	internal static void Init(
 		SystemProviderReference<AppAuthenticationProvider> provider, IDataProtectionProvider dataProtectionProvider,
-		Func<string, ResourceBase> defaultLogInPageGetter, LocalIdentityProvider.AutoLogInPageUrlGetterMethod autoLogInPageUrlGetter,
+		Func<TrustedUrl?, ResourceBase> defaultLogInPageGetter, LocalIdentityProvider.AutoLogInPageUrlGetterMethod autoLogInPageUrlGetter,
 		LocalIdentityProvider.ChangePasswordPageUrlGetterMethod changePasswordPageUrlGetter ) {
 		AuthenticationStatics.provider = provider.GetProvider( returnNullIfNotFound: true ) ?? new AppAuthenticationProvider();
 		authenticationTicketProtector = new TicketDataFormat( dataProtectionProvider.CreateProtector( "EnterpriseWebLibrary.WebFramework.UserManagement" ) );
@@ -105,7 +107,7 @@ public static class AuthenticationStatics {
 	/// <summary>
 	/// Returns the default log-in page for the application. This is useful if you need a direct hyperlink to it.
 	/// </summary>
-	public static ResourceBase GetDefaultLogInPage( string returnUrl ) => defaultLogInPageGetter!( returnUrl );
+	public static ResourceBase GetDefaultLogInPage( TrustedUrl? returnUrl ) => defaultLogInPageGetter!( returnUrl );
 
 
 	/// <summary>
@@ -268,7 +270,7 @@ public static class AuthenticationStatics {
 					                           isPasswordReset,
 					                           autoLogInPageUrlGetter!,
 					                           changePasswordPageUrlGetter!,
-					                           destinationUrl,
+					                           destinationUrl?.GetUrl()?.Url ?? "",
 					                           newUserRoleId: newUserRoleId ) is { Length: > 0 } errorMessage )
 					                       throw new DataModificationException( errorMessage );
 				                       PageBase.AddStatusMessage(
@@ -304,7 +306,7 @@ public static class AuthenticationStatics {
 					                       user = UserManagementStatics.SystemProvider.GetUser( user!.UserId );
 				                       }
 
-				                       return ( user!, destinationUrl );
+				                       return ( user!, destinationUrl.Length > 0 ? new TrustedExternalResource( new ExternalResource( destinationUrl ) ) : null );
 			                       }, ( userId, authenticationDuration ) => {
 				                       var user = UserManagementStatics.SystemProvider.GetUser( userId );
 				                       SetFormsAuthCookieAndUser( user!, authenticationDuration: authenticationDuration );

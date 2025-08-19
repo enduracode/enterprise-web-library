@@ -8,7 +8,7 @@ using Tewl.InputValidation;
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages;
 
 // EwlPage
-// Parameter: string returnUrl
+// Parameter: ? returnUrl
 // OptionalParameter: string user
 // OptionalParameter: string code
 partial class LogIn {
@@ -38,15 +38,15 @@ partial class LogIn {
 
 		if( User.Length > 0 && Code.Length > 0 ) {
 			AuthenticationStatics.CodeLoginModificationMethod? codeLoginMethod = null;
-			string? destinationUrl = null;
+			TrustedResourceInfo? destinationResource = null;
 			var postBack = PostBack.CreateFull(
-				modificationMethod: () => destinationUrl = codeLoginMethod!(
+				modificationMethod: () => destinationResource = codeLoginMethod!(
 						                          User,
 						                          Code,
 						                          errorMessage:
 						                          "The login link you just used has expired. Please return to the page you were on and send yourself another login email." )
-					                          .destinationUrl,
-				actionGetter: () => new PostBackAction( new ExternalResource( destinationUrl! ) ) );
+					                          .destinationResource,
+				actionGetter: () => new PostBackAction( destinationResource ) );
 			return FormState.ExecuteWithActions(
 				postBack,
 				() => {
@@ -85,15 +85,19 @@ partial class LogIn {
 		AuthenticationStatics.LoginCodeSenderMethod? loginCodeSender = null;
 		AuthenticationStatics.CodeLoginModificationMethod? codeLoginMethod = null;
 
-		string? destinationUrl = null;
+		TrustedResourceInfo? destinationResource = null;
 		var logInPb = PostBack.CreateFull(
 			modificationMethod: () => {
 				if( codeEntryIsForPasswordReset.Value.HasValue )
-					destinationUrl = codeLoginMethod!( emailAddress.Value, loginCode.Value ).destinationUrl;
+					destinationResource = codeLoginMethod!( emailAddress.Value, loginCode.Value ).destinationResource;
 				else
 					passwordLoginMethod!( emailAddress.Value, password );
 			},
-			actionGetter: () => new PostBackAction( new ExternalResource( codeEntryIsForPasswordReset.Value.HasValue ? destinationUrl! : ReturnUrl ) ) );
+			actionGetter: () => {
+				if( !codeEntryIsForPasswordReset.Value.HasValue )
+					ReturnUrl?.TryGetResource( out destinationResource );
+				return new PostBackAction( destinationResource );
+			} );
 
 		var authenticationModeUpdateRegion = new UpdateRegionSet();
 		const string passwordOrCodeFocusKey = "code";

@@ -58,6 +58,8 @@ public sealed class TrustedUrl: IEquatable<TrustedUrl> {
 		return resource is not null;
 	}
 
+	internal EwfUrl? GetUrl() => url;
+
 	[ JsonProperty ]
 	private EwfUrl? url => invalidUrl ?? resource?.GetEwfUrl( false, false );
 

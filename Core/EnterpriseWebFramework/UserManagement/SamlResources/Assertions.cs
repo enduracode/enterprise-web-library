@@ -1,10 +1,10 @@
 ﻿using System.Threading.Tasks;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Core;
 using EnterpriseWebLibrary.ExternalFunctionality;
-
-// EwlResource
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.SamlResources;
 
+// EwlResource
 partial class Assertions {
 	protected override void init() {
 		if( !AuthenticationStatics.SamlIdentityProviders.Any() )
@@ -22,20 +22,22 @@ partial class Assertions {
 		if( !assertion.HasValue )
 			throw new LogInException();
 
-		var identityProvider =
-			AuthenticationStatics.SamlIdentityProviders.Single( i => string.Equals( i.EntityId, assertion.Value.identityProvider, StringComparison.Ordinal ) );
-		ExecuteDataModificationMethod(
-			() => {
-				var user = identityProvider.LogInUser( assertion.Value.userName, assertion.Value.attributes );
-				if( user is not null )
-					AuthenticationStatics.SetFormsAuthCookieAndUser( user, identityProvider: identityProvider );
-				else
-					AuthenticationStatics.SetUserLastIdentityProvider( identityProvider );
+		var identityProvider = AuthenticationStatics.SamlIdentityProviders.Single( i => string.Equals(
+			i.EntityId,
+			assertion.Value.identityProvider,
+			StringComparison.Ordinal ) );
+		ExecuteDataModificationMethod( () => {
+			var user = identityProvider.LogInUser( assertion.Value.userName, assertion.Value.attributes );
+			if( user is not null )
+				AuthenticationStatics.SetFormsAuthCookieAndUser( user, identityProvider: identityProvider );
+			else
+				AuthenticationStatics.SetUserLastIdentityProvider( identityProvider );
 
-				AuthenticationStatics.SetTestCookie();
-			} );
+			AuthenticationStatics.SetTestCookie();
+		} );
 
-		var destinationUrl = new VerifyClientFunctionality( assertion.Value.returnUrl ).GetUrl();
+		var destinationUrl = new VerifyClientFunctionality( TrustedUrl.Deserialize( assertion.Value.returnUrl, EwfConfigurationStatics.AppConfiguration.PublicId ) )
+			.GetUrl();
 		return EwfResponse.Create(
 			ContentTypes.PlainText,
 			new EwfResponseBodyCreator( writer => writer.Write( "See Other: {0}".FormatWith( destinationUrl ) ) ),

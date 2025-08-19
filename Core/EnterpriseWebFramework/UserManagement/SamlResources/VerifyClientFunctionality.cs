@@ -1,13 +1,18 @@
-﻿// EwlPage
-// Parameter: string returnUrl
-// OptionalParameter: bool cookiesDisabled
-// OptionalParameter: bool clockWrong
-
-using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.SamlResources;
 
+// EwlPage
+// Parameter: returnUrl
+// OptionalParameter: bool cookiesDisabled
+// OptionalParameter: bool clockWrong
 partial class VerifyClientFunctionality {
+	private TrustedResourceInfo returnResource = null!;
+
+	protected override void init() {
+		returnResource = ReturnUrl.GetResourceOrThrow();
+	}
+
 	protected override string getResourceName() => "Browser Functionality Verification";
 
 	protected override UrlHandler getUrlParent() => new Metadata();
@@ -24,7 +29,7 @@ partial class VerifyClientFunctionality {
 				if( AuthenticationStatics.ClockNotSynchronized( clientTime ) )
 					parametersModification.ClockWrong = true;
 			},
-			actionGetter: () => new PostBackAction( verificationFailed() ? null : new ExternalResource( ReturnUrl ) ) );
+			actionGetter: () => new PostBackAction( verificationFailed() ? null : returnResource ) );
 		return FormState.ExecuteWithActions(
 			postBack,
 			() => new UiPageContent( pageLoadPostBack: postBack ).Add( AuthenticationStatics.GetLogInHiddenFields( clientTime ) ) );
@@ -34,7 +39,7 @@ partial class VerifyClientFunctionality {
 		var content = new UiPageContent(
 			contentFootActions: new ButtonSetup(
 				"Proceed Anyway",
-				behavior: new PostBackBehavior( postBack: PostBack.CreateFull( actionGetter: () => new PostBackAction( new ExternalResource( ReturnUrl ) ) ) ) ) );
+				behavior: new PostBackBehavior( postBack: PostBack.CreateFull( actionGetter: () => new PostBackAction( returnResource ) ) ) ) );
 		if( CookiesDisabled )
 			content.Add( new Paragraph( Translation.YourBrowserHasCookiesDisabled.ToComponents() ) );
 		if( ClockWrong )

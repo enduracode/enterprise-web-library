@@ -1,4 +1,5 @@
-﻿using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.Core;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 
@@ -15,7 +16,7 @@ public class AppAuthenticationProvider {
 	/// <summary>
 	/// Returns the default log-in page for the application, or null for the framework’s built-in page.
 	/// </summary>
-	protected internal virtual PageContent? GetLogInPageContent( string returnUrl, string user, string code, bool authenticatedUserDeniedAccess ) => null;
+	protected internal virtual PageContent? GetLogInPageContent( TrustedUrl? returnUrl, string user, string code, bool authenticatedUserDeniedAccess ) => null;
 
 	/// <summary>
 	/// Returns the configuration for automatic user registration via the local identity provider on the default log-in page for the application. Only the

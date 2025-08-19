@@ -301,12 +301,12 @@ public static class RequestDispatchingStatics {
 						else if( RequestState.UserAccessible && ( UserManagementStatics.LocalIdentityProviderEnabled ||
 						                                          AuthenticationStatics.SamlIdentityProviders.Count > 1 ||
 						                                          ( AuthenticationStatics.SamlIdentityProviders.Any() && SystemUser.Current is not null ) ) )
-							transferRequest( context, 403, new UserManagement.Pages.LogIn( EwfRequest.Current!.Url ) );
+							transferRequest( context, 403, new UserManagement.Pages.LogIn( getReturnUrl() ) );
 						else if( RequestState.UserAccessible && AuthenticationStatics.SamlIdentityProviders.Any() )
 							transferRequest(
 								context,
 								403,
-								new UserManagement.SamlResources.LogIn( AuthenticationStatics.SamlIdentityProviders.Single().EntityId, EwfRequest.Current!.Url ) );
+								new UserManagement.SamlResources.LogIn( AuthenticationStatics.SamlIdentityProviders.Single().EntityId, getReturnUrl() ) );
 						else
 							transferRequest( context, 403, getErrorPage( new AccessDenied( !baseUrlRequest.Value ) ) );
 
