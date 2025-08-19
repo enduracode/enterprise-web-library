@@ -473,12 +473,12 @@ public static class EwfOps {
 								return icons;
 							},
 							hideWarnings => {
-								var url = EwfRequest.Current.Url;
+								var url = new TrustedExternalResource( new ExternalResource( EwfRequest.Current.Url ) ).ToTrustedUrl();
 								if( RequestDispatchingStatics.RequestState.UserAccessible && RequestDispatchingStatics.RequestState.ImpersonatorExists )
 									url = new UserManagement.Pages.Impersonate(
 										url,
 										optionalParameterSetter: ( specifier, _ ) =>
-											specifier.User = SystemUser.Current != null ? SystemUser.Current.Email : UserManagement.Pages.Impersonate.AnonymousUser ).GetUrl();
+											specifier.User = SystemUser.Current != null ? SystemUser.Current.Email : UserManagement.Pages.Impersonate.AnonymousUser ).ToTrustedUrl();
 								return new NonLiveLogIn(
 									url,
 									optionalParameterSetter: ( specifier, _ ) => {
@@ -491,17 +491,16 @@ public static class EwfOps {
 								    ( ConfigurationStatics.IsIntermediateInstallation && !RequestDispatchingStatics.RequestState.IntermediateUserExists ) )
 									return null;
 								return ( "User impersonation is in effect.",
-									       new HyperlinkSetup( new UserManagement.Pages.Impersonate( EwfRequest.Current.Url ), "Change user" ).Add(
+									       new HyperlinkSetup(
+										       new UserManagement.Pages.Impersonate( new TrustedExternalResource( new ExternalResource( EwfRequest.Current.Url ) ).ToTrustedUrl() ),
+										       "Change user" ).Add(
 										       new ButtonSetup(
 											       "End impersonation",
 											       behavior: new PostBackBehavior(
 												       postBack: PostBack.CreateFull(
 													       id: "ewfEndImpersonation",
 													       modificationMethod: UserImpersonationStatics.EndImpersonation,
-													       actionGetter: () => new PostBackAction(
-														       new ExternalResource(
-															       EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString(
-																       EwfConfigurationStatics.AppSupportsSecureConnections ) ) ) ) ) ) ) );
+													       actionGetter: () => new PostBackAction( EwfConfigurationStatics.GetDefaultBaseResource() ) ) ) ) ) );
 							} );
 						EwfUiStatics.Init( providerGetter.GetProvider<AppEwfUiProvider>( "EwfUi" ), AuthenticationStatics.GetUserInfoComponents );
 						AuthenticationStatics.Init(

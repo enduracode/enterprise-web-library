@@ -1,4 +1,5 @@
-﻿using EnterpriseWebLibrary.UserManagement;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.Core;
+using EnterpriseWebLibrary.UserManagement;
 using Serilog.Core;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin;
@@ -72,7 +73,7 @@ partial class EntitySetup: UiEntitySetup {
 			actionGetter: _ =>
 				UserManagementStatics.UserManagementEnabled
 					? new HyperlinkSetup(
-						new EnterpriseWebFramework.UserManagement.Pages.Impersonate( PageBase.Current.GetUrl() ),
+						new EnterpriseWebFramework.UserManagement.Pages.Impersonate( PageBase.Current.ToTrustedUrl() ),
 						"Impersonate user",
 						icon: new ActionComponentIcon( new FontAwesomeIcon( "fa-key" ) ) )
 					: null );

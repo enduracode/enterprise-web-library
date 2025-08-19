@@ -6,6 +6,8 @@ using System.Web;
 using EnterpriseWebLibrary.Caching;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Core;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ErrorPages;
 using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.SystemSpecificLogic;
@@ -290,10 +292,10 @@ public static class RequestDispatchingStatics {
 						transferRequest( context, 404, getErrorPage( new ResourceNotAvailable( !baseUrlRequest.Value ) ) );
 					else if( exception is AccessDeniedException accessDeniedException ) {
 						if( accessDeniedException.CausedByIntermediateUser )
-							transferRequest( context, 403, new NonLiveLogIn( EwfRequest.Current!.Url ) );
+							transferRequest( context, 403, new NonLiveLogIn( getReturnUrl() ) );
 						else if( UserManagementStatics.UserManagementEnabled && !ConfigurationStatics.IsLiveInstallation && RequestState.UserAccessible &&
 						         !RequestState.ImpersonatorExists )
-							transferRequest( context, 403, new UserManagement.Pages.Impersonate( EwfRequest.Current!.Url ) );
+							transferRequest( context, 403, new UserManagement.Pages.Impersonate( getReturnUrl() ) );
 						else if( accessDeniedException.LogInPage != null )
 							transferRequest( context, 403, accessDeniedException.LogInPage );
 						else if( RequestState.UserAccessible && ( UserManagementStatics.LocalIdentityProviderEnabled ||
@@ -307,6 +309,8 @@ public static class RequestDispatchingStatics {
 								new UserManagement.SamlResources.LogIn( AuthenticationStatics.SamlIdentityProviders.Single().EntityId, EwfRequest.Current!.Url ) );
 						else
 							transferRequest( context, 403, getErrorPage( new AccessDenied( !baseUrlRequest.Value ) ) );
+
+						static TrustedUrl getReturnUrl() => new TrustedExternalResource( new ExternalResource( EwfRequest.Current!.Url ) ).ToTrustedUrl();
 					}
 					else if( exception is PageDisabledException pageDisabledException )
 						transferRequest( context, null, new ResourceDisabled( pageDisabledException.Message ) );

@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.Email;
+﻿using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 using EnterpriseWebLibrary.SystemSpecificLogic;
 using EnterpriseWebLibrary.UserManagement;
@@ -8,9 +7,15 @@ using Humanizer;
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 // EwlPage
-// Parameter: string returnUrl
+// Parameter: returnUrl
 partial class ContactSupport {
-	protected override bool userCanAccess => SystemUser.Current != null;
+	private TrustedResourceInfo returnResource = null!;
+
+	protected override void init() {
+		returnResource = ReturnUrl.GetResourceOrThrow();
+	}
+
+	protected override bool userCanAccess => SystemUser.Current is not null;
 	protected override UrlHandler getUrlParent() => new Admin.EntitySetup();
 
 	protected override PageContent getContent() {
@@ -21,7 +26,7 @@ partial class ContactSupport {
 					var message = new EmailMessage
 						{
 							Subject = "Support request from {0} in {1}".FormatWith(
-								SystemUser.Current.FriendlyName.Any() ? SystemUser.Current.FriendlyName : SystemUser.Current.Email,
+								SystemUser.Current!.FriendlyName.Any() ? SystemUser.Current.FriendlyName : SystemUser.Current.Email,
 								SystemSpecificLogicStatics.SystemDisplayName ),
 							BodyHtml = body.Value.GetTextAsEncodedHtml()
 						};
@@ -30,13 +35,13 @@ partial class ContactSupport {
 					EmailStatics.SendEmailWithDefaultFromAddress( message );
 					AddStatusMessage( StatusMessageType.Info, "Your message has been sent." );
 				},
-				actionGetter: () => new PostBackAction( new ExternalResource( ReturnUrl ) ) ),
+				actionGetter: () => new PostBackAction( returnResource ) ),
 			() => new UiPageContent( contentFootActions: new ButtonSetup( "Send Message" ) )
 				.Add( new Paragraph( "You may report any problems, make suggestions, or ask for help here.".ToComponents() ) )
 				.Add(
 					FormItemList.CreateStack()
 						.AddItems(
-							new EmailAddress( SystemUser.Current.Email, SystemUser.Current.FriendlyName ).ToMailAddress()
+							new EmailAddress( SystemUser.Current!.Email, SystemUser.Current.FriendlyName ).ToMailAddress()
 								.ToString()
 								.ToComponents()
 								.ToFormItem( label: "From".ToComponents() )

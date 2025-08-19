@@ -4,13 +4,11 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 using EnterpriseWebLibrary.UserManagement;
 using JetBrains.Annotations;
 
-// EwlPage
-// Parameter: string returnUrl
-// OptionalParameter: string user
-
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages;
 
-// This page does not use the EWF UI because displaying authenticated user information would be misleading.
+// EwlPage
+// Parameter: ? returnUrl
+// OptionalParameter: string user
 partial class Impersonate {
 	internal const string AnonymousUser = "anonymous";
 	private static readonly ElementClass elementClass = new( "ewfSelectUser" );
@@ -21,14 +19,21 @@ partial class Impersonate {
 			new CssElement( "SelectUserPageBody", "body.{0}".FormatWith( elementClass.ClassName ) ).ToCollection();
 	}
 
-	internal SystemUser? UserObject { get; private set; }
+	private TrustedResourceInfo? returnResource;
+	private SystemUser? userObject;
 
 	protected override void init() {
 		if( !UserManagementStatics.UserManagementEnabled )
-			throw new ApplicationException( "User management not enabled" );
+			throw new Exception( "User management not enabled" );
 
-		if( User.Any() && User != AnonymousUser && ( UserObject = UserManagementStatics.SystemProvider.GetUser( User ) ) == null )
-			throw new ApplicationException( "user" );
+		ReturnUrl.TryGetResource( out returnResource );
+
+		if( User.Any() ) {
+			if( returnResource is null )
+				throw new Exception( "no return URL with user" );
+			if( User != AnonymousUser && ( userObject = UserManagementStatics.SystemProvider.GetUser( User ) ) == null )
+				throw new Exception( "user" );
+		}
 	}
 
 	protected override string getResourceName() => ConfigurationStatics.IsLiveInstallation ? "Impersonate User" : "Select User";
@@ -42,13 +47,14 @@ partial class Impersonate {
 
 	protected override UrlHandler getUrlParent() => new Admin.EntitySetup();
 
+	// This page does not use the EWF UI because displaying authenticated user information would be misleading.
 	protected override PageContent getContent() {
 		if( User.Any() )
 			return new BasicPageContent(
 				bodyClasses: elementClass,
 				pageLoadPostBack: PostBack.CreateFull(
-					modificationMethod: () => UserImpersonationStatics.BeginImpersonation( UserObject ),
-					actionGetter: () => new PostBackAction( new ExternalResource( ReturnUrl ) ) ) );
+					modificationMethod: () => UserImpersonationStatics.BeginImpersonation( userObject ),
+					actionGetter: () => new PostBackAction( returnResource ) ) );
 
 		var content = new BasicPageContent( bodyClasses: elementClass );
 		content.Add( new PageName() );
@@ -64,11 +70,7 @@ partial class Impersonate {
 		var user = new DataValue<SystemUser?>( false );
 		var pb = PostBack.CreateFull(
 			modificationMethod: () => UserImpersonationStatics.BeginImpersonation( user.Value ),
-			actionGetter: () => new PostBackAction(
-				new ExternalResource(
-					ReturnUrl.Any()
-						? ReturnUrl
-						: EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString( EwfConfigurationStatics.AppSupportsSecureConnections ) ) ) );
+			actionGetter: () => new PostBackAction( returnResource ?? EwfConfigurationStatics.GetDefaultBaseResource() ) );
 		FormState.ExecuteWithActions(
 			pb,
 			() => {

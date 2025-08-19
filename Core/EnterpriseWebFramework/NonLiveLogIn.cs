@@ -5,11 +5,15 @@ using EnterpriseWebLibrary.SystemSpecificLogic;
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 // EwlPage
-// Parameter: string returnUrl
+// Parameter: returnUrl
 // OptionalParameter: string password
 // OptionalParameter: bool hideWarnings
 partial class NonLiveLogIn {
+	private TrustedResourceInfo returnResource = null!;
+
 	protected override void init() {
+		returnResource = ReturnUrl.GetResourceOrThrow();
+
 		if( !ConfigurationStatics.IsIntermediateInstallation )
 			throw new ApplicationException( "installation type" );
 
@@ -24,12 +28,10 @@ partial class NonLiveLogIn {
 	protected override PageContent getContent() {
 		if( Password.Any() )
 			return new UiPageContent(
-				pageLoadPostBack: PostBack.CreateFull(
-					modificationMethod: () => logIn( HideWarnings ),
-					actionGetter: () => new PostBackAction( new ExternalResource( ReturnUrl ) ) ) );
+				pageLoadPostBack: PostBack.CreateFull( modificationMethod: () => logIn( HideWarnings ), actionGetter: () => new PostBackAction( returnResource ) ) );
 
 		return FormState.ExecuteWithActions(
-			PostBack.CreateFull( modificationMethod: () => logIn( false ), actionGetter: () => new PostBackAction( new ExternalResource( ReturnUrl ) ) ),
+			PostBack.CreateFull( modificationMethod: () => logIn( false ), actionGetter: () => new PostBackAction( returnResource ) ),
 			() => new UiPageContent( contentFootActions: new ButtonSetup( "Log In" ) ).Add(
 				FormItemList.CreateStack()
 					.AddItem(
