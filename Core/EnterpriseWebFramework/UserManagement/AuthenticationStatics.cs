@@ -5,6 +5,7 @@ using System.Security.Principal;
 using EnterpriseWebLibrary.Caching;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Core;
 using EnterpriseWebLibrary.SystemSpecificLogic;
 using EnterpriseWebLibrary.UserManagement;
 using EnterpriseWebLibrary.UserManagement.IdentityProviders;
@@ -76,7 +77,7 @@ public static class AuthenticationStatics {
 
 		var components = new List<FlowComponent>();
 
-		var changePasswordPage = new Pages.ChangePassword( PageBase.Current.GetUrl() );
+		var changePasswordPage = new Pages.ChangePassword( PageBase.Current.ToTrustedUrl() );
 		if( !changePasswordPage.UserCanAccess || SystemUser.Current is null )
 			return components;
 

@@ -515,7 +515,9 @@ public static class EwfOps {
 									specifier.User = user;
 									specifier.Code = code;
 								} ).GetUrl(),
-							destinationUrl => new UserManagement.Pages.ChangePassword( destinationUrl ).GetUrl( disableAuthorizationCheck: true ) );
+							destinationUrl =>
+								new UserManagement.Pages.ChangePassword( new TrustedExternalResource( new ExternalResource( destinationUrl ) ).ToTrustedUrl() ).GetUrl(
+									disableAuthorizationCheck: true ) );
 						OpenIdProviderStatics.Init( providerGetter.GetProvider<AppOpenIdProviderProvider>( "OpenIdProvider" ) );
 						Admin.EntitySetup.Init( () => RequestDispatchingStatics.GetAppProvider().GetFrameworkUrlParent(), diagnosticLogLevelSwitch );
 						RequestDispatchingStatics.Init( getAppRequestDispatchingProvider( providerGetter ), () => contextAccessor.HttpContext );

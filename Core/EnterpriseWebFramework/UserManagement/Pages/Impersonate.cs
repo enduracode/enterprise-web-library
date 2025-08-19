@@ -26,7 +26,7 @@ partial class Impersonate {
 		if( !UserManagementStatics.UserManagementEnabled )
 			throw new Exception( "User management not enabled" );
 
-		ReturnUrl.TryGetResource( out returnResource );
+		ReturnUrl?.TryGetResource( out returnResource );
 
 		if( User.Any() ) {
 			if( returnResource is null )

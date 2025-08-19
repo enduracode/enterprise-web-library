@@ -1,4 +1,6 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
+
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 
 /// <summary>
 /// Application-specific authentication logic.
@@ -29,5 +31,5 @@ public class AppAuthenticationProvider {
 	/// <summary>
 	/// Returns the change-password page for the application, or null for the framework’s built-in page.
 	/// </summary>
-	protected internal virtual PageContent? GetChangePasswordPageContent( string returnUrl ) => null;
+	protected internal virtual PageContent? GetChangePasswordPageContent( TrustedResourceInfo returnResource ) => null;
 }
