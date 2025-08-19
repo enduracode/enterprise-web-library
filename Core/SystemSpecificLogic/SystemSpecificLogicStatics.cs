@@ -1,4 +1,5 @@
-﻿using EnterpriseWebLibrary.Configuration;
+﻿using System.Security.Cryptography;
+using EnterpriseWebLibrary.Configuration;
 using NodaTime;
 
 namespace EnterpriseWebLibrary.SystemSpecificLogic;
@@ -21,7 +22,17 @@ public static class SystemSpecificLogicStatics {
 		GeneralProvider.SystemDisplayName.Length > 0 ? GeneralProvider.SystemDisplayName : ConfigurationStatics.InstallationConfiguration.SystemName;
 
 	// The duration here should probably come from the provider.
-	internal static LocalDate BestEffortCutoffDate => Clock.TransactionTime.Minus( Duration.FromDays( 14 ) ).InUtc().Date;
+	private static LocalDate bestEffortCutoffDate => Clock.TransactionTime.Minus( Duration.FromDays( 14 ) ).InUtc().Date;
+
+	internal static bool BestEffortDateIsValid( LocalDate date ) => date.IsBetween( bestEffortCutoffDate, Clock.TransactionTime.InUtc().Date );
+
+	internal static HMAC GetBestEffortDataHasher( LocalDate date ) {
+		var hasher = GeneralProvider.GetBestEffortDataHasher( date );
+		if( hasher is not null )
+			return hasher;
+
+		return new HMACSHA256( [ 0 ] );
+	}
 
 	internal static SystemProviderReference<ProviderType> GetLibraryProvider<ProviderType>( string providerName ) where ProviderType: class =>
 		new SystemProviderGetter(

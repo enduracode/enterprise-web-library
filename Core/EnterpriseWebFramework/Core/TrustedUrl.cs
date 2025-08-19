@@ -1,8 +1,10 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 using EnterpriseWebLibrary.SystemSpecificLogic;
 using Newtonsoft.Json;
+using NodaTime;
 using NodaTime.Text;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Core;
@@ -22,18 +24,27 @@ public sealed class TrustedUrl: IEquatable<TrustedUrl> {
 		TrustedUrl.urlResolverExecutor = urlResolverExecutor;
 	}
 
-	public static string Serialize( TrustedUrl trustedUrl, string serializationAppId ) =>
-		EwfUrl.Serialize(
+	public static string Serialize( TrustedUrl trustedUrl, string serializationAppId ) {
+		var date = EwfRequest.Current!.RequestTime.InUtc().Date;
+		var serializedUrl = EwfUrl.Serialize(
 			trustedUrl.url,
 			appId => appId.Equals( serializationAppId, StringComparison.Ordinal ) ? "" :
 			         serializationAppId.Equals( EwfConfigurationStatics.AppConfiguration.PublicId, StringComparison.Ordinal ) ? appId :
 			         throw new Exception(
 				         "The application that is serializing the trusted URL has not initialized the URL-generation functionality of the application containing the resource." ),
-			datePattern.Format( EwfRequest.Current!.RequestTime.InUtc().Date ) );
+			datePattern.Format( date ) );
+		return serializedUrl + EwfUrl.AdditionalDataSeparator + getHmac( serializedUrl + serializationAppId, date );
+	}
 
 	public static TrustedUrl Deserialize( string serializedTrustedUrl, string serializationAppId ) {
-		var date = datePattern.Parse( EwfUrl.Deserialize( serializedTrustedUrl, appId => appId.Length == 0 ? serializationAppId : appId, out var url ) );
-		if( date.GetValueOrThrow() < SystemSpecificLogicStatics.BestEffortCutoffDate || url is null )
+		var hashIndex = serializedTrustedUrl.LastIndexOf( EwfUrl.AdditionalDataSeparator );
+		if( hashIndex < 0 )
+			throw new ArgumentException();
+		var serializedUrl = serializedTrustedUrl[ ..hashIndex ];
+
+		var date = datePattern.Parse( EwfUrl.Deserialize( serializedUrl, appId => appId.Length == 0 ? serializationAppId : appId, out var url ) ).GetValueOrThrow();
+		if( !SystemSpecificLogicStatics.BestEffortDateIsValid( date ) ||
+		    !getHmac( serializedUrl + serializationAppId, date ).Equals( serializedTrustedUrl[ ( hashIndex + 1 ).. ], StringComparison.Ordinal ) || url is null )
 			return Invalid;
 
 		if( url.IsExternal )
@@ -42,6 +53,12 @@ public sealed class TrustedUrl: IEquatable<TrustedUrl> {
 		var resolvedHandler = urlResolverExecutor!( () => UrlHandlingStatics.GetUrlResolver( url.AppId )( url.BaseUrlString, url.AppRelativeUrl ) );
 		return resolvedHandler is TrustedResourceInfo resource ? new TrustedUrl( resource, null ) : new TrustedUrl( null, url );
 	}
+
+	private static string getHmac( string data, LocalDate date ) =>
+		Convert.ToBase64String( SystemSpecificLogicStatics.GetBestEffortDataHasher( date ).ComputeHash( new UTF8Encoding( false ).GetBytes( data ) ) )
+			.TrimEnd( '=' )
+			.Replace( '+', '.' )
+			.Replace( '/', '_' );
 
 	private readonly TrustedResourceInfo? resource;
 	private readonly EwfUrl? invalidUrl;
