@@ -76,8 +76,8 @@ internal class WebItemParameter {
 		yield return new DataType(
 			typeof( TrustedUrl ),
 			true,
-			() => hasSuffix( "Resource" ),
-			"suffix the name with “Resource”",
+			() => hasSuffix( "Url" ),
+			"suffix the name with “Url”",
 			"",
 			"",
 			"TrustedUrl.Invalid",
