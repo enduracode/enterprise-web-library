@@ -301,16 +301,17 @@ public static class RequestDispatchingStatics {
 						else if( RequestState.UserAccessible && ( UserManagementStatics.LocalIdentityProviderEnabled ||
 						                                          AuthenticationStatics.SamlIdentityProviders.Count > 1 ||
 						                                          ( AuthenticationStatics.SamlIdentityProviders.Any() && SystemUser.Current is not null ) ) )
-							transferRequest( context, 403, new UserManagement.Pages.LogIn( getReturnUrl() ) );
+							transferRequest( context, 403, new UserManagement.Pages.LogIn( getTrustedReturnUrl() ) );
 						else if( RequestState.UserAccessible && AuthenticationStatics.SamlIdentityProviders.Any() )
 							transferRequest(
 								context,
 								403,
-								new UserManagement.SamlResources.LogIn( AuthenticationStatics.SamlIdentityProviders.Single().EntityId, getReturnUrl() ) );
+								new UserManagement.SamlResources.LogIn( AuthenticationStatics.SamlIdentityProviders.Single().EntityId, getTrustedReturnUrl() ) );
 						else
 							transferRequest( context, 403, getErrorPage( new AccessDenied( !baseUrlRequest.Value ) ) );
 
-						static TrustedUrl getReturnUrl() => new TrustedExternalResource( new ExternalResource( EwfRequest.Current!.Url ) ).ToTrustedUrl();
+						static TrustedUrl getTrustedReturnUrl() => new TrustedExternalResource( new ExternalResource( getReturnUrl() ) ).ToTrustedUrl();
+						static string getReturnUrl() => EwfRequest.Current!.Url;
 					}
 					else if( exception is PageDisabledException pageDisabledException )
 						transferRequest( context, null, new ResourceDisabled( pageDisabledException.Message ) );

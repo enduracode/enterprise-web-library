@@ -7,7 +7,7 @@ using JetBrains.Annotations;
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages;
 
 // EwlPage
-// Parameter: ? returnUrl
+// Parameter: string returnUrl
 // OptionalParameter: string user
 partial class Impersonate {
 	internal const string AnonymousUser = "anonymous";
@@ -19,14 +19,15 @@ partial class Impersonate {
 			new CssElement( "SelectUserPageBody", "body.{0}".FormatWith( elementClass.ClassName ) ).ToCollection();
 	}
 
-	private TrustedResourceInfo? returnResource;
+	private ResourceInfo? returnResource;
 	private SystemUser? userObject;
 
 	protected override void init() {
 		if( !UserManagementStatics.UserManagementEnabled )
 			throw new Exception( "User management not enabled" );
 
-		ReturnUrl?.TryGetResource( out returnResource );
+		if( ReturnUrl.Length > 0 )
+			returnResource = new ExternalResource( ReturnUrl );
 
 		if( User.Any() ) {
 			if( returnResource is null )

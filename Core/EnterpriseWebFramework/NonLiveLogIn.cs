@@ -5,20 +5,19 @@ using EnterpriseWebLibrary.SystemSpecificLogic;
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 // EwlPage
-// Parameter: returnUrl
+// Parameter: string returnUrl
 // OptionalParameter: string password
 // OptionalParameter: bool hideWarnings
 partial class NonLiveLogIn {
-	private TrustedResourceInfo returnResource = null!;
+	private ResourceInfo returnResource = null!;
 
 	protected override void init() {
-		returnResource = ReturnUrl.GetResourceOrThrow();
-
 		if( !ConfigurationStatics.IsIntermediateInstallation )
-			throw new ApplicationException( "installation type" );
+			throw new Exception( "installation type" );
 
+		returnResource = ReturnUrl.Length > 0 ? new ExternalResource( ReturnUrl ) : throw new Exception( "return URL" );
 		if( Password.Any() && Password != SystemSpecificLogicStatics.GeneralProvider.IntermediateLogInPassword )
-			throw new ApplicationException( "password" );
+			throw new Exception( "password" );
 	}
 
 	protected override string getResourceName() => "Non-Live Installation Log In";

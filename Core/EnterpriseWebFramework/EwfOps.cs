@@ -473,12 +473,12 @@ public static class EwfOps {
 								return icons;
 							},
 							hideWarnings => {
-								var url = new TrustedExternalResource( new ExternalResource( EwfRequest.Current.Url ) ).ToTrustedUrl();
+								var url = EwfRequest.Current.Url;
 								if( RequestDispatchingStatics.RequestState.UserAccessible && RequestDispatchingStatics.RequestState.ImpersonatorExists )
 									url = new UserManagement.Pages.Impersonate(
 										url,
 										optionalParameterSetter: ( specifier, _ ) =>
-											specifier.User = SystemUser.Current != null ? SystemUser.Current.Email : UserManagement.Pages.Impersonate.AnonymousUser ).ToTrustedUrl();
+											specifier.User = SystemUser.Current != null ? SystemUser.Current.Email : UserManagement.Pages.Impersonate.AnonymousUser ).GetUrl();
 								return new NonLiveLogIn(
 									url,
 									optionalParameterSetter: ( specifier, _ ) => {
@@ -491,9 +491,7 @@ public static class EwfOps {
 								    ( ConfigurationStatics.IsIntermediateInstallation && !RequestDispatchingStatics.RequestState.IntermediateUserExists ) )
 									return null;
 								return ( "User impersonation is in effect.",
-									       new HyperlinkSetup(
-										       new UserManagement.Pages.Impersonate( new TrustedExternalResource( new ExternalResource( EwfRequest.Current.Url ) ).ToTrustedUrl() ),
-										       "Change user" ).Add(
+									       new HyperlinkSetup( new UserManagement.Pages.Impersonate( EwfRequest.Current.Url ), "Change user" ).Add(
 										       new ButtonSetup(
 											       "End impersonation",
 											       behavior: new PostBackBehavior(
