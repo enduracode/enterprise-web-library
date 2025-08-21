@@ -64,8 +64,8 @@ public class NumberControlSetup {
 	/// <param name="validationPredicate"></param>
 	/// <param name="validationErrorNotifier"></param>
 	public static NumberControlSetup CreateAutoComplete(
-		ResourceInfo autoCompleteResource, DisplaySetup displaySetup = null, ElementClassSet classes = null, string placeholder = "", string autoFillTokens = "",
-		SpecifiedValue<FormAction> action = null, bool triggersActionWhenItemSelected = false, FormAction valueChangedAction = null,
+		TrustedResourceInfo autoCompleteResource, DisplaySetup displaySetup = null, ElementClassSet classes = null, string placeholder = "",
+		string autoFillTokens = "", SpecifiedValue<FormAction> action = null, bool triggersActionWhenItemSelected = false, FormAction valueChangedAction = null,
 		PageModificationValue<decimal?> pageModificationValue = null, Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
 		return new NumberControlSetup(
 			displaySetup,
@@ -113,7 +113,7 @@ public class NumberControlSetup {
 
 	internal NumberControlSetup(
 		DisplaySetup displaySetup, bool isImprecise, bool isReadOnly, ElementClassSet classes, string placeholder, string autoFillTokens,
-		ResourceInfo autoCompleteResource, SpecifiedValue<FormAction> specifiedAction, bool? triggersActionWhenItemSelected, FormAction valueChangedAction,
+		TrustedResourceInfo autoCompleteResource, SpecifiedValue<FormAction> specifiedAction, bool? triggersActionWhenItemSelected, FormAction valueChangedAction,
 		object pageModificationValueParameter, Func<bool, bool> validationPredicate, Action validationErrorNotifier ) {
 		var action = specifiedAction != null ? specifiedAction.Value : FormState.Current.FormControlDefaultAction;
 

@@ -317,15 +317,12 @@ public sealed class BasicPageContent: PageContent {
 			if( ConfigurationStatics.IsIntermediateInstallation && RequestState.Instance.IntermediateUserExists )
 				components.AddRange(
 					new EwfButton(
-							new StandardButtonStyle( "Log out", buttonSize: ButtonSize.ShrinkWrap ),
-							behavior: new PostBackBehavior(
-								postBack: PostBack.CreateFull(
-									id: "ewfIntermediateLogOut",
-									modificationMethod: NonLiveInstallationStatics.ClearIntermediateAuthenticationCookie,
-									actionGetter: () => new PostBackAction(
-										new ExternalResource(
-											EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString( EwfConfigurationStatics.AppSupportsSecureConnections ) ) ) ) ) )
-						.Concat( " ".ToComponents() ) );
+						new StandardButtonStyle( "Log out", buttonSize: ButtonSize.ShrinkWrap ),
+						behavior: new PostBackBehavior(
+							postBack: PostBack.CreateFull(
+								id: "ewfIntermediateLogOut",
+								modificationMethod: NonLiveInstallationStatics.ClearIntermediateAuthenticationCookie,
+								actionGetter: () => new PostBackAction( EwfConfigurationStatics.GetDefaultBaseResource() ) ) ) ).Concat( " ".ToComponents() ) );
 			components.Add(
 				new EwfButton(
 					new StandardButtonStyle(

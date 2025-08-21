@@ -9,13 +9,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 // OptionalParameter: string password
 // OptionalParameter: bool hideWarnings
 partial class NonLiveLogIn {
-	private ResourceInfo returnResource = null!;
+	private TrustedResourceInfo returnResource = null!;
 
 	protected override void init() {
 		if( !ConfigurationStatics.IsIntermediateInstallation )
 			throw new Exception( "installation type" );
 
-		returnResource = ReturnUrl.Length > 0 ? new ExternalResource( ReturnUrl ) : throw new Exception( "return URL" );
+		returnResource = ReturnUrl.Length > 0 ? new TrustedExternalResource( new ExternalResource( ReturnUrl ) ) : throw new Exception( "return URL" );
 		if( Password.Any() && Password != SystemSpecificLogicStatics.GeneralProvider.IntermediateLogInPassword )
 			throw new Exception( "password" );
 	}

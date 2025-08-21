@@ -116,15 +116,15 @@ public class NavFormControl {
 	private NavFormControl(
 		NavFormControlSetup setup, Func<Action<NavFormControlValidationResult, Validator>, FormControl<PhrasingComponent>> formControlGetter ) {
 		formItemGetter = postBackId => {
-			var destination = new DataValue<ResourceInfo>( false );
+			var destination = new DataValue<TrustedResourceInfo>( false );
 			return FormState.ExecuteWithActions(
 				PostBack.CreateFull( id: postBackId, actionGetter: () => new PostBackAction( destination.Value ) ),
 				() => {
 					var formControl = formControlGetter( ( result, validator ) => {
-						if( result.Destination != null )
+						if( result.Destination is not null )
 							destination.Value = result.Destination;
 						else
-							validator.NoteErrorAndAddMessage( result.ErrorMessage );
+							validator.NoteErrorAndAddMessage( result.ErrorMessage! );
 					} );
 					return new DisplayableElement( _ => new DisplayableElementData(
 						null,

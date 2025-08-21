@@ -24,10 +24,7 @@ public class ElementActivationBehavior {
 					new FocusabilityCondition( activationBehavior?.IsFocusable == true ),
 					isFocused => new ElementFocusDependentData(
 						attributes: attributes.Concat( activationBehavior != null ? activationBehavior.AttributeGetter() : Enumerable.Empty<ElementAttribute>() )
-							.Concat(
-								activationBehavior?.IsFocusable == true
-									? new[] { new ElementAttribute( "tabindex", "0" ), new ElementAttribute( "role", "button" ) }
-									: Enumerable.Empty<ElementAttribute>() ),
+							.Concat( activationBehavior?.IsFocusable == true ? [ new ElementAttribute( "tabindex", "0" ), new ElementAttribute( "role", "button" ) ] : [ ] ),
 						includeIdAttribute: activationBehavior?.IncludesIdAttribute() == true || isFocused,
 						jsInitStatements: ( activationBehavior != null ? activationBehavior.JsInitStatementGetter( context.Id ) : "" ).AppendDelimiter(
 							// This list of keys is duplicated in the JavaScript file.
@@ -55,21 +52,6 @@ public class ElementActivationBehavior {
 	public static ElementActivationBehavior CreateButton( ButtonBehavior buttonBehavior = null ) =>
 		new( buttonBehavior ?? new FormActionBehavior( FormState.Current.DefaultAction ) );
 
-	[ Obsolete( "Guaranteed through 15 April 2021." ) ]
-	public static ElementActivationBehavior CreateRedirectScript( ResourceInfo resource ) {
-		return new ElementActivationBehavior( resource: resource );
-	}
-
-	[ Obsolete( "Guaranteed through 15 April 2021." ) ]
-	public static ElementActivationBehavior CreatePostBackScript( PostBack postBack = null ) {
-		return new ElementActivationBehavior( action: new PostBackFormAction( postBack ?? FormState.Current.PostBack ) );
-	}
-
-	[ Obsolete( "Guaranteed through 15 April 2021." ) ]
-	public static ElementActivationBehavior CreateCustomScript( string script ) {
-		return new ElementActivationBehavior( script: script );
-	}
-
 	internal readonly ElementClassSet Classes;
 	internal readonly Func<IReadOnlyCollection<ElementAttribute>> AttributeGetter;
 	internal readonly Func<bool> IncludesIdAttribute;
@@ -96,31 +78,5 @@ public class ElementActivationBehavior {
 		JsInitStatementGetter = buttonBehavior.GetJsInitStatements;
 		IsFocusable = true;
 		PostBackAdder = buttonBehavior.AddPostBack;
-	}
-
-	[ Obsolete( "Guaranteed through 15 April 2021." ) ]
-	private ElementActivationBehavior( ResourceInfo resource = null, FormAction action = null, string script = "" ) {
-		if( action == null && !script.Any() ) {
-			HyperlinkBehavior hyperlinkBehavior = resource;
-
-			Classes = hyperlinkBehavior.HasDestination ? ActivatableClass : ElementClassSet.Empty;
-			AttributeGetter = () => hyperlinkBehavior.AttributeGetter( true );
-			IncludesIdAttribute = () => hyperlinkBehavior.IncludesIdAttribute( true );
-			EtherealChildren = hyperlinkBehavior.EtherealChildren;
-			JsInitStatementGetter = id => hyperlinkBehavior.JsInitStatementGetter( id, true );
-			IsFocusable = hyperlinkBehavior.IsFocusable;
-			PostBackAdder = hyperlinkBehavior.PostBackAdder;
-		}
-		else {
-			var buttonBehavior = action != null ? (ButtonBehavior)new FormActionBehavior( action ) : new CustomButtonBehavior( () => script + ";" );
-
-			Classes = ActivatableClass;
-			AttributeGetter = () => buttonBehavior.GetAttributes().Materialize();
-			IncludesIdAttribute = buttonBehavior.IncludesIdAttribute;
-			EtherealChildren = buttonBehavior.GetEtherealChildren();
-			JsInitStatementGetter = buttonBehavior.GetJsInitStatements;
-			IsFocusable = true;
-			PostBackAdder = buttonBehavior.AddPostBack;
-		}
 	}
 }

@@ -1,17 +1,16 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 public class NavFormControlValidationResult {
-	internal ResourceInfo Destination { get; }
-	internal string ErrorMessage { get; }
+	internal TrustedResourceInfo? Destination { get; }
+	internal string? ErrorMessage { get; }
 
 	/// <summary>
 	/// Creates a successful-validation result.
 	/// </summary>
 	/// <param name="destination">Do not pass null.</param>
-	public NavFormControlValidationResult( ResourceInfo destination ) {
+	public NavFormControlValidationResult( TrustedResourceInfo destination ) {
 		Destination = destination;
 	}
 

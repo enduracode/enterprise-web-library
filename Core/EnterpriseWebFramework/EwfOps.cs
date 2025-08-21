@@ -414,23 +414,21 @@ public static class EwfOps {
 								return cssInfos;
 							},
 							( markup, includeStripeCheckout ) => {
-								string getElement( ResourceInfo resource ) => "<script src=\"{0}\" defer></script>".FormatWith( resource.GetUrl() );
-
-								markup.Append( getElement( new ExternalResource( "https://cdn.jsdelivr.net/npm/luxon@3.3.0/build/global/luxon.min.js" ) ) );
-								markup.Append( getElement( new ExternalResource( "//code.jquery.com/jquery-3.6.3.min.js" ) ) );
+								markup.Append( getElement( getTrustedResource( "https://cdn.jsdelivr.net/npm/luxon@3.3.0/build/global/luxon.min.js" ) ) );
+								markup.Append( getElement( getTrustedResource( "//code.jquery.com/jquery-3.6.3.min.js" ) ) );
 								markup.Append( getElement( new StaticFiles.Versioned.Third_party.Jquery_ui.Jquery_ui_1132custom_v2.Jquery_uiminJs() ) );
-								markup.Append( getElement( new ExternalResource( "https://cdn.datatables.net/2.1.2/js/dataTables.min.js" ) ) );
-								markup.Append( getElement( new ExternalResource( "https://cdn.datatables.net/responsive/3.0.2/js/dataTables.responsive.min.js" ) ) );
+								markup.Append( getElement( getTrustedResource( "https://cdn.datatables.net/2.1.2/js/dataTables.min.js" ) ) );
+								markup.Append( getElement( getTrustedResource( "https://cdn.datatables.net/responsive/3.0.2/js/dataTables.responsive.min.js" ) ) );
 								markup.Append( getElement( new StaticFiles.Versioned.Third_party.Chosen.Chosen_v187.ChosenjqueryminJs() ) );
 								markup.Append( "<script type=\"module\" src=\"https://cdn.jsdelivr.net/npm/@duetds/date-picker@1.4.0/dist/duet/duet.esm.js\"></script>" );
 								markup.Append( "<script nomodule src=\"https://cdn.jsdelivr.net/npm/@duetds/date-picker@1.4.0/dist/duet/duet.js\"></script>" );
 								markup.Append( getElement( new StaticFiles.Third_party.Qtip2.JqueryqtipminJs() ) );
 								markup.Append( getElement( new StaticFiles.Third_party.Spin_js.SpinminJs() ) );
-								markup.Append( getElement( new ExternalResource( "https://cdn.ckeditor.com/4.22.1/full/ckeditor.js" ) ) );
-								markup.Append( getElement( new ExternalResource( "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js" ) ) );
+								markup.Append( getElement( getTrustedResource( "https://cdn.ckeditor.com/4.22.1/full/ckeditor.js" ) ) );
+								markup.Append( getElement( getTrustedResource( "https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js" ) ) );
 								markup.Append( getElement( new StaticFiles.Instant_pageJs() ) );
 								if( includeStripeCheckout )
-									markup.Append( getElement( new ExternalResource( "https://checkout.stripe.com/checkout.js" ) ) );
+									markup.Append( getElement( getTrustedResource( "https://checkout.stripe.com/checkout.js" ) ) );
 								markup.Append( getElement( new StaticFiles.CodeJs() ) );
 								if( MiniProfiler.Current != null ) {
 									var profiler = MiniProfiler.Current;
@@ -450,7 +448,11 @@ public static class EwfOps {
 								}
 
 								if( contextAccessor.HttpContext.Items.TryGetValue( aspNetScriptKey, out var aspNetScriptGetter ) )
-									markup.Append( getElement( new ExternalResource( ( (Func<string>)aspNetScriptGetter )() ) ) );
+									markup.Append( getElement( getTrustedResource( ( (Func<string>)aspNetScriptGetter )() ) ) );
+
+								return;
+								static string getElement( TrustedResourceInfo resource ) => "<script src=\"{0}\" defer></script>".FormatWith( resource.GetUrl() );
+								static TrustedResourceInfo getTrustedResource( string trustedUrl ) => new TrustedExternalResource( new ExternalResource( trustedUrl ) );
 							},
 							() => {
 								var icons = new List<( ResourceInfo, string, string )>();

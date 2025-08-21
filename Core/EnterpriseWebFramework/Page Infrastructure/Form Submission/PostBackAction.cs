@@ -25,7 +25,7 @@ public sealed class PostBackAction {
 		ReloadBehavior = reloadBehavior;
 	}
 
-	internal PostBackAction( ResourceInfo? resource ) {
+	internal PostBackAction( ExternalResource? resource ) {
 		NavigationBehavior = ( resource, null );
 	}
 }

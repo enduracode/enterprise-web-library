@@ -36,12 +36,12 @@ public abstract class AppStandardPageLogicProvider {
 	/// <summary>
 	/// Creates and returns a list of custom style sheets that should be used on all EWF pages, including those not using the EWF user interface.
 	/// </summary>
-	protected internal virtual List<ResourceInfo> GetStyleSheets() => new();
+	protected internal virtual List<ResourceInfo> GetStyleSheets() => [ ];
 
 	/// <summary>
 	/// Creates and returns a list of custom style sheets that should be used on pages not using the EWF user interface.
 	/// </summary>
-	protected internal virtual List<ResourceInfo> GetCustomUiStyleSheets() => new();
+	protected internal virtual List<ResourceInfo> GetCustomUiStyleSheets() => [ ];
 
 	/// <summary>
 	/// Gets the Google Analytics Measurement ID, which should always start with "G-". Never returns null.
@@ -56,7 +56,7 @@ public abstract class AppStandardPageLogicProvider {
 	/// <summary>
 	/// Creates and returns a list of JavaScript files that should be included on all EWF pages, including those not using the EWF user interface.
 	/// </summary>
-	protected internal virtual List<ResourceInfo> GetJavaScriptFiles() => new();
+	protected internal virtual List<TrustedResourceInfo> GetJavaScriptFiles() => [ ];
 
 	/// <summary>
 	/// Gets the favicon to be used for Chrome Application shortcuts.

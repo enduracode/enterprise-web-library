@@ -71,8 +71,8 @@ public class NumericTextControlSetup {
 	/// <param name="validationPredicate"></param>
 	/// <param name="validationErrorNotifier"></param>
 	public static NumericTextControlSetup CreateAutoComplete(
-		ResourceInfo autoCompleteResource, DisplaySetup displaySetup = null, ElementClassSet classes = null, string placeholder = "", string autoFillTokens = "",
-		SpecifiedValue<FormAction> action = null, bool triggersActionWhenItemSelected = false, FormAction valueChangedAction = null,
+		TrustedResourceInfo autoCompleteResource, DisplaySetup displaySetup = null, ElementClassSet classes = null, string placeholder = "",
+		string autoFillTokens = "", SpecifiedValue<FormAction> action = null, bool triggersActionWhenItemSelected = false, FormAction valueChangedAction = null,
 		PageModificationValue<string> pageModificationValue = null, PageModificationValue<long?> numericPageModificationValue = null,
 		Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
 		return new NumericTextControlSetup(

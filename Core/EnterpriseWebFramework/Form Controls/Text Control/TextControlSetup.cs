@@ -123,7 +123,7 @@ public class TextControlSetup {
 	/// <param name="validationPredicate"></param>
 	/// <param name="validationErrorNotifier"></param>
 	public static TextControlSetup CreateAutoComplete(
-		ResourceInfo autoCompleteResource, DisplaySetup displaySetup = null, ContentBasedLength widthOverride = null, int numberOfRows = 1,
+		TrustedResourceInfo autoCompleteResource, DisplaySetup displaySetup = null, ContentBasedLength widthOverride = null, int numberOfRows = 1,
 		ElementClassSet classes = null, bool disableTrimming = false, string placeholder = "", string autoFillTokens = "", bool? checksSpellingAndGrammar = null,
 		Func<string, string> formattedValueExpressionGetter = null, SpecifiedValue<FormAction> action = null, bool triggersActionWhenItemSelected = false,
 		FormAction valueChangedAction = null, PageModificationValue<string> pageModificationValue = null, Func<bool, bool> validationPredicate = null,
@@ -237,7 +237,7 @@ public class TextControlSetup {
 
 	internal TextControlSetup(
 		DisplaySetup displaySetup, string inputElementType, ContentBasedLength widthOverride, int? numberOfRows, bool isReadOnly, ElementClassSet classes,
-		bool disableTrimming, bool requiresNumericValue, string placeholder, string autoFillTokens, ResourceInfo autoCompleteResource,
+		bool disableTrimming, bool requiresNumericValue, string placeholder, string autoFillTokens, TrustedResourceInfo autoCompleteResource,
 		bool? checksSpellingAndGrammar, Func<string, string> formattedValueExpressionGetter, SpecifiedValue<FormAction> specifiedAction,
 		bool? triggersActionWhenItemSelected, FormAction valueChangedAction, PageModificationValue<string> pageModificationValueParameter,
 		PageModificationValue<long?> numericPageModificationValue, Func<bool, bool> validationPredicate, Action validationErrorNotifier ) {

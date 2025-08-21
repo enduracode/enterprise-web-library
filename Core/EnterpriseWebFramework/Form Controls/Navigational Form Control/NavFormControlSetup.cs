@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
@@ -9,7 +8,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 public class NavFormControlSetup {
 	public ContentBasedLength Width { get; }
 	public string Placeholder { get; }
-	public ResourceInfo AutoCompleteResource { get; }
+	public TrustedResourceInfo? AutoCompleteResource { get; }
 
 	/// <summary>
 	/// Creates a navigational-form-control setup object.
@@ -17,7 +16,7 @@ public class NavFormControlSetup {
 	/// <param name="width">The width of the control. Do not pass null.</param>
 	/// <param name="placeholder">The hint word or phrase that will appear when the control has an empty value. Do not pass null or the empty string.</param>
 	/// <param name="autoCompleteResource">The resource containing the auto-complete items. Do not pass null.</param>
-	public NavFormControlSetup( ContentBasedLength width, string placeholder, ResourceInfo autoCompleteResource = null ) {
+	public NavFormControlSetup( ContentBasedLength width, string placeholder, TrustedResourceInfo? autoCompleteResource = null ) {
 		Width = width;
 		Placeholder = placeholder;
 		AutoCompleteResource = autoCompleteResource;

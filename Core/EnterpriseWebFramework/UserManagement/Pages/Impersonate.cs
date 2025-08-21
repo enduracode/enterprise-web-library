@@ -19,7 +19,7 @@ partial class Impersonate {
 			new CssElement( "SelectUserPageBody", "body.{0}".FormatWith( elementClass.ClassName ) ).ToCollection();
 	}
 
-	private ResourceInfo? returnResource;
+	private TrustedResourceInfo? returnResource;
 	private SystemUser? userObject;
 
 	protected override void init() {
@@ -27,7 +27,7 @@ partial class Impersonate {
 			throw new Exception( "User management not enabled" );
 
 		if( ReturnUrl.Length > 0 )
-			returnResource = new ExternalResource( ReturnUrl );
+			returnResource = new TrustedExternalResource( new ExternalResource( ReturnUrl ) );
 
 		if( User.Any() ) {
 			if( returnResource is null )
