@@ -7,7 +7,7 @@ using JetBrains.Annotations;
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages;
 
 // EwlPage
-// Parameter: string returnUrl
+// Parameter: string returnUrl // Not a TrustedUrl because that would cause intermediate-installation links to expire, making automated testing more difficult.
 // OptionalParameter: string user
 partial class Impersonate {
 	internal const string AnonymousUser = "anonymous";

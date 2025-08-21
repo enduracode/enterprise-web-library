@@ -5,7 +5,7 @@ using EnterpriseWebLibrary.SystemSpecificLogic;
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 // EwlPage
-// Parameter: string returnUrl
+// Parameter: string returnUrl // Not a TrustedUrl because that would cause intermediate-installation links to expire, making automated testing more difficult.
 // OptionalParameter: string password
 // OptionalParameter: bool hideWarnings
 partial class NonLiveLogIn {
