@@ -90,12 +90,15 @@ public sealed class HyperlinkBehavior {
 		PostBackAdder = () => {
 			if( !isPostBackHyperlink.Value )
 				return;
-			var postBackId = PostBack.GetCompositeId( "hyperlink", Url.Value, disableAuthorizationCheck.ToString() );
+			var postBackId = PostBack.GetCompositeId( "hyperlink", ( destination is ExternalResource ).ToString(), Url.Value, disableAuthorizationCheck.ToString() );
 			postBackAction = new PostBackFormAction(
 				PageBase.Current.GetPostBack( postBackId ) ?? PostBack.CreateFull(
 					id: postBackId,
 					isSlow: destination is PageBase { IsSlow: true },
-					actionGetter: () => new PostBackAction( destination, authorizationCheckDisabledPredicate: _ => disableAuthorizationCheck ) ) );
+					actionGetter: () =>
+						destination is ExternalResource externalDestination
+							? externalDestination.ToPostBackAction()
+							: new PostBackAction( (TrustedResourceInfo)destination, authorizationCheckDisabledPredicate: _ => disableAuthorizationCheck ) ) );
 			postBackAction.AddToPageIfNecessary();
 		};
 	}

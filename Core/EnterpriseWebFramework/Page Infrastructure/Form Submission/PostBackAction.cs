@@ -1,8 +1,9 @@
 ﻿using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
+using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
-public class PostBackAction {
+public sealed class PostBackAction {
 	internal ( ResourceInfo?, Func<ResourceInfo, bool>? )? NavigationBehavior { get; }
 	internal PageReloadBehavior? ReloadBehavior { get; }
 
@@ -12,7 +13,7 @@ public class PostBackAction {
 	/// <param name="resource">Pass null for no navigation.</param>
 	/// <param name="authorizationCheckDisabledPredicate">A function that takes the effective destination resource and returns whether navigation is allowed if
 	/// the authenticated user cannot access it. Use with caution.</param>
-	public PostBackAction( ResourceInfo? resource, Func<ResourceInfo, bool>? authorizationCheckDisabledPredicate = null ) {
+	public PostBackAction( TrustedResourceInfo? resource, Func<ResourceInfo, bool>? authorizationCheckDisabledPredicate = null ) {
 		NavigationBehavior = ( resource, authorizationCheckDisabledPredicate );
 	}
 
@@ -23,4 +24,16 @@ public class PostBackAction {
 	public PostBackAction( PageReloadBehavior reloadBehavior ) {
 		ReloadBehavior = reloadBehavior;
 	}
+
+	internal PostBackAction( ResourceInfo? resource ) {
+		NavigationBehavior = ( resource, null );
+	}
+}
+
+[ PublicAPI ]
+public static class PostBackActionExtensionCreators {
+	/// <summary>
+	/// Creates an action that will navigate to this external resource. Call on null for no navigation.
+	/// </summary>
+	public static PostBackAction ToPostBackAction( this ExternalResource? resource ) => new( resource );
 }
