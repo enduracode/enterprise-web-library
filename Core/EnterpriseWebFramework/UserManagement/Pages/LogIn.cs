@@ -46,7 +46,7 @@ partial class LogIn {
 						                          errorMessage:
 						                          "The login link you just used has expired. Please return to the page you were on and send yourself another login email." )
 					                          .destinationResource,
-				actionGetter: () => new PostBackAction( destinationResource ) );
+				actionGetter: () => new PostBackAction( destinationResource ?? AuthenticationStatics.AppProvider.GetAuthenticatedUserHomeResource() ) );
 			return FormState.ExecuteWithActions(
 				postBack,
 				() => {
@@ -96,7 +96,7 @@ partial class LogIn {
 			actionGetter: () => {
 				if( !codeEntryIsForPasswordReset.Value.HasValue )
 					ReturnUrl?.TryGetResource( out destinationResource );
-				return new PostBackAction( destinationResource );
+				return new PostBackAction( destinationResource ?? AuthenticationStatics.AppProvider.GetAuthenticatedUserHomeResource() );
 			} );
 
 		var authenticationModeUpdateRegion = new UpdateRegionSet();

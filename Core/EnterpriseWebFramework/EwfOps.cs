@@ -508,9 +508,7 @@ public static class EwfOps {
 							app.Services.GetRequiredService<IDataProtectionProvider>(),
 							returnUrl => UserManagementStatics.LocalIdentityProviderEnabled || AuthenticationStatics.SamlIdentityProviders.Count > 1
 								             ? new UserManagement.Pages.LogIn( returnUrl )
-								             : new UserManagement.SamlResources.LogIn(
-									             AuthenticationStatics.SamlIdentityProviders.Single().EntityId,
-									             returnUrl ?? TrustedUrl.Invalid ),
+								             : new UserManagement.SamlResources.LogIn( AuthenticationStatics.SamlIdentityProviders.Single().EntityId, returnUrl ),
 							( user, code ) => new UserManagement.Pages.LogIn(
 								null,
 								optionalParameterSetter: ( specifier, _ ) => {

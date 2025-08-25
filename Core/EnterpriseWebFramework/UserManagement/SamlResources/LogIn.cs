@@ -7,7 +7,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.SamlResourc
 
 // EwlResource
 // Parameter: string provider
-// Parameter: returnUrl
+// Parameter: ? returnUrl
 partial class LogIn {
 	private SamlIdentityProvider identityProvider = null!;
 
@@ -22,8 +22,10 @@ partial class LogIn {
 			EwfResponse.CreateFromAspNetResponse( _ => Task.Run( async () => await ExternalFunctionalityStatics.ExternalSamlProvider.WriteLogInResponse(
 				                                                                 identityProvider.EntityId,
 				                                                                 identityProvider == AuthenticationStatics.GetUserLastIdentityProvider(),
-				                                                                 TrustedUrl.Serialize(
-					                                                                 ReturnUrl,
-					                                                                 EwfConfigurationStatics.AppConfiguration.PublicId ) ) )
+				                                                                 ReturnUrl is null
+					                                                                 ? ""
+					                                                                 : TrustedUrl.Serialize(
+						                                                                 ReturnUrl,
+						                                                                 EwfConfigurationStatics.AppConfiguration.PublicId ) ) )
 				.Wait() ) );
 }

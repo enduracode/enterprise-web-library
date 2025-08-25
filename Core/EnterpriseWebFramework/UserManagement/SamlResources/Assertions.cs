@@ -22,22 +22,31 @@ partial class Assertions {
 		if( !assertion.HasValue )
 			throw new LogInException();
 
+		bool? authenticationSuccessful = null;
 		var identityProvider = AuthenticationStatics.SamlIdentityProviders.Single( i => string.Equals(
 			i.EntityId,
 			assertion.Value.identityProvider,
 			StringComparison.Ordinal ) );
 		ExecuteDataModificationMethod( () => {
 			var user = identityProvider.LogInUser( assertion.Value.userName, assertion.Value.attributes );
-			if( user is not null )
-				AuthenticationStatics.SetFormsAuthCookieAndUser( user, identityProvider: identityProvider );
+			authenticationSuccessful = user is not null;
+			if( authenticationSuccessful.Value )
+				AuthenticationStatics.SetFormsAuthCookieAndUser( user!, identityProvider: identityProvider );
 			else
 				AuthenticationStatics.SetUserLastIdentityProvider( identityProvider );
 
 			AuthenticationStatics.SetTestCookie();
 		} );
 
-		var destinationUrl = new VerifyClientFunctionality( TrustedUrl.Deserialize( assertion.Value.returnUrl, EwfConfigurationStatics.AppConfiguration.PublicId ) )
-			.GetUrl();
+		var returnUrl = assertion.Value.returnUrl is { Length: > 0 } nonempty
+			                ? TrustedUrl.Deserialize( nonempty, EwfConfigurationStatics.AppConfiguration.PublicId )
+			                : null;
+		if( returnUrl?.TryGetResource( out _ ) != true )
+			returnUrl = ( authenticationSuccessful!.Value
+				              ? AuthenticationStatics.AppProvider.GetAuthenticatedUserHomeResource()
+				              : AuthenticationStatics.GetDefaultLogInPage( null ) ).ToTrustedUrl();
+
+		var destinationUrl = new VerifyClientFunctionality( returnUrl ).GetUrl();
 		return EwfResponse.Create(
 			ContentTypes.PlainText,
 			new EwfResponseBodyCreator( writer => writer.Write( "See Other: {0}".FormatWith( destinationUrl ) ) ),

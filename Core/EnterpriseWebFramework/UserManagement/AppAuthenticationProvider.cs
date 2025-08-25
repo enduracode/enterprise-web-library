@@ -11,7 +11,12 @@ public class AppAuthenticationProvider {
 	/// Returns the components that identify the authenticated user and let them log out, change their password, etc. Returns null for the framework’s built-in
 	/// components.
 	/// </summary>
-	public virtual IReadOnlyCollection<FlowComponent>? GetUserInfoComponents() => null;
+	protected internal virtual IReadOnlyCollection<FlowComponent>? GetUserInfoComponents() => null;
+
+	/// <summary>
+	/// Returns the home resource for the authenticated user, which the framework uses as the destination after log-in if there is no return URL.
+	/// </summary>
+	protected internal virtual TrustedResourceInfo GetAuthenticatedUserHomeResource() => EwfConfigurationStatics.GetDefaultBaseResource();
 
 	/// <summary>
 	/// Returns the default log-in page for the application, or null for the framework’s built-in page.
