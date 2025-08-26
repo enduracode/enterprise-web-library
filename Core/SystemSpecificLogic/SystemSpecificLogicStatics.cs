@@ -1,5 +1,7 @@
 ﻿using System.Security.Cryptography;
+using System.Threading;
 using EnterpriseWebLibrary.Configuration;
+using Newtonsoft.Json;
 using NodaTime;
 
 namespace EnterpriseWebLibrary.SystemSpecificLogic;
@@ -9,11 +11,13 @@ public static class SystemSpecificLogicStatics {
 
 	private static Type globalInitializerType { get; set; } = null!;
 	internal static SystemGeneralProvider GeneralProvider { get; private set; } = null!;
+	private static IReadOnlyDictionary<LocalDate, byte[]> bestEffortDataHasherKeys = new Dictionary<LocalDate, byte[]>();
 
 	internal static void Init( Type globalInitializerType ) {
 		SystemSpecificLogicStatics.globalInitializerType = globalInitializerType;
 		GeneralProvider = GetLibraryProvider<SystemGeneralProvider>( "General" ).GetProvider()!;
 	}
+
 
 	/// <summary>
 	/// Gets the display name of the system.
@@ -26,12 +30,47 @@ public static class SystemSpecificLogicStatics {
 
 	internal static bool BestEffortDateIsValid( LocalDate date ) => date.IsBetween( bestEffortCutoffDate, Clock.TransactionTime.InUtc().Date );
 
+	/// <summary>
+	/// Assumes <see cref="BestEffortDateIsValid"/> returns true and <see cref="Clock.TransactionTime"/> remains constant across both calls.
+	/// </summary>
 	internal static HMAC GetBestEffortDataHasher( LocalDate date ) {
 		var hasher = GeneralProvider.GetBestEffortDataHasher( date );
 		if( hasher is not null )
 			return hasher;
 
-		return new HMACSHA256( [ 0 ] );
+		if( !bestEffortDataHasherKeys.TryGetValue( date, out var key ) )
+			SynchronizationTools.ExecuteWithMachineExclusiveAccess(
+				$"{EwlStatics.EwlInitialism.EnglishToPascal()}{ConfigurationStatics.InstallationConfiguration.FullShortName}HmacKeys",
+				null,
+				_ => {
+					var filePath = EwlStatics.CombinePaths(
+						ConfigurationStatics.EwlFolderPath,
+						"Secrets",
+						ConfigurationStatics.InstallationConfiguration.FullName,
+						"HMAC Keys.json" );
+
+					if( File.Exists( filePath ) ) {
+						reloadKeys();
+						if( bestEffortDataHasherKeys.TryGetValue( date, out key ) )
+							return;
+					}
+					else
+						Directory.CreateDirectory( Path.GetDirectoryName( filePath )! );
+
+					var newKeys = new SortedList<LocalDate, byte[]>();
+					for( var d = bestEffortCutoffDate; d <= Clock.TransactionTime.InUtc().Date; d = d.PlusDays( 1 ) )
+						newKeys.Add( d, bestEffortDataHasherKeys.TryGetValue( d, out var k ) ? k : RandomNumberGenerator.GetBytes( 64 ) );
+					File.WriteAllText( filePath, JsonConvert.SerializeObject( newKeys, Formatting.Indented ) );
+
+					reloadKeys();
+					key = bestEffortDataHasherKeys[ date ];
+					return;
+
+					void reloadKeys() =>
+						Interlocked.Exchange( ref bestEffortDataHasherKeys, JsonConvert.DeserializeObject<Dictionary<LocalDate, byte[]>>( File.ReadAllText( filePath ) )! );
+				} );
+
+		return new HMACSHA256( key! );
 	}
 
 	internal static SystemProviderReference<ProviderType> GetLibraryProvider<ProviderType>( string providerName ) where ProviderType: class =>
