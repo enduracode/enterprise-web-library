@@ -216,10 +216,10 @@ public class IsuStatics {
 
 	private static void executeInIisServerManagerTransaction( Action method ) {
 		// Overlapping commitment of changes to server manager do not end well.
-		EwlStatics.ExecuteAsCriticalRegion(
+		SynchronizationTools.ExecuteWithMachineExclusiveAccess(
 			"{1BC5B312-F0F0-11DF-B6B9-118ADFD72085}",
-			false,
-			delegate {
+			null,
+			_ => {
 				try {
 					method();
 				}
