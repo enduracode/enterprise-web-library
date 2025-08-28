@@ -3,7 +3,6 @@ using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic.AlternativeResourceModes;
-using EnterpriseWebLibrary.SystemSpecificLogic;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
 using StackExchange.Profiling;
@@ -15,10 +14,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 /// </summary>
 [ PublicAPI ]
 public abstract class ResourceBase: TrustedResourceInfo, ResourceParent {
-	private static readonly List<SystemProviderReference<AppResourceSerializationProvider>> appSerializationProviderRefs = [ ];
-
-	private static Func<ResourceBase, ( string name, string parameters )?>? frameworkResourceSerializer;
-	private static SystemProviderReference<SystemResourceSerializationProvider>? systemSerializationProviderRef;
 	private static Action<bool, ResourceBase>? urlHandlerStateUpdater;
 	private static Func<ResourceBase?>? currentResourceGetter;
 	private static Action? requestStateRefresher;
@@ -39,25 +34,11 @@ public abstract class ResourceBase: TrustedResourceInfo, ResourceParent {
 			.WriteToAspNetResponse( context.Response, omitBody: context.Request.Method == "HEAD" );
 	}
 
-	internal static void Init(
-		Func<ResourceBase, ( string, string )?> frameworkResourceSerializer,
-		SystemProviderReference<SystemResourceSerializationProvider> systemSerializationProvider,
-		SystemProviderReference<AppResourceSerializationProvider> appSerializationProvider, Action<bool, ResourceBase> urlHandlerStateUpdater,
-		Func<ResourceBase?> currentResourceGetter, Action requestStateRefresher ) {
-		ResourceBase.frameworkResourceSerializer = frameworkResourceSerializer;
-		systemSerializationProviderRef = systemSerializationProvider;
-		appSerializationProviderRefs.Add( appSerializationProvider );
+	internal static void Init( Action<bool, ResourceBase> urlHandlerStateUpdater, Func<ResourceBase?> currentResourceGetter, Action requestStateRefresher ) {
 		ResourceBase.urlHandlerStateUpdater = urlHandlerStateUpdater;
 		ResourceBase.currentResourceGetter = currentResourceGetter;
 		ResourceBase.requestStateRefresher = requestStateRefresher;
 	}
-
-	internal static void AddApplication( SystemProviderReference<AppResourceSerializationProvider> provider ) {
-		appSerializationProviderRefs.Add( provider );
-	}
-
-	private static SystemResourceSerializationProvider systemSerializationProvider => systemSerializationProviderRef!.GetProvider()!;
-	private static IEnumerable<AppResourceSerializationProvider> appSerializationProviders => appSerializationProviderRefs.Select( i => i.GetProvider()! );
 
 	/// <summary>
 	/// Gets the currently executing resource, or null if the URL has not yet been resolved.
@@ -221,6 +202,8 @@ public abstract class ResourceBase: TrustedResourceInfo, ResourceParent {
 		}
 	}
 
+	bool ResourceParent.IsIntermediateInstallationPublicParent => IsIntermediateInstallationPublicResource;
+
 	/// <summary>
 	/// Gets whether the resource is public in intermediate installations, regardless of other authorization logic that may exist.
 	/// </summary>
@@ -257,25 +240,8 @@ public abstract class ResourceBase: TrustedResourceInfo, ResourceParent {
 	/// </summary>
 	protected virtual AlternativeResourceMode? createAlternativeMode() => null;
 
-	internal sealed override EwfUrl GetEwfUrl( bool ensureUserCanAccessResource, bool ensureResourceNotDisabled ) {
-		try {
-			if( ensureUserCanAccessResource && !UserCanAccess )
-				throw new ApplicationException( "The authenticated user cannot access the resource." );
-			if( ensureResourceNotDisabled && AlternativeMode is DisabledResourceMode )
-				throw new ApplicationException( "The resource is disabled." );
-
-			return UrlHandlingStatics.GetCanonicalUrl( this, ShouldBeSecureGivenCurrentRequest ).AddFragmentIdentifier( uriFragmentIdentifier );
-		}
-		catch( Exception e ) {
-			var serializedResource =
-				( frameworkResourceSerializer is null ? null : frameworkResourceSerializer( this ) ?? systemSerializationProvider.SerializeResource( this ) ) ??
-				appSerializationProviders.Select( i => i.SerializeResource( this ) ).FirstOrDefault( i => i.HasValue ) ??
-				throw new UnexpectedValueException( "resource", this );
-			throw new Exception(
-				"Failed to get a URL for {0}.".FormatWith( serializedResource.name + serializedResource.parameters.PrependDelimiter( " with parameters " ) ),
-				e );
-		}
-	}
+	internal sealed override EwfUrl GetEwfUrl( bool ensureUserCanAccessResource, bool ensureResourceNotDisabled ) =>
+		( (ResourceParent)this ).GetEwfUrl( ensureUserCanAccessResource, ensureResourceNotDisabled, uriFragmentIdentifier );
 
 	UrlHandler? UrlHandler.GetParent() => urlParent.Value;
 
@@ -291,19 +257,6 @@ public abstract class ResourceBase: TrustedResourceInfo, ResourceParent {
 	/// Returns a URL encoder for this resource. Framework use only.
 	/// </summary>
 	protected abstract UrlEncoder getUrlEncoder( string appId );
-
-	internal bool ShouldBeSecureGivenCurrentRequest {
-		get {
-			// Intermediate installations must be secure because the intermediate user cookie is secure.
-			if( ConfigurationStatics.IsIntermediateInstallation && !IsIntermediateInstallationPublicResource )
-				return true;
-
-			var connectionSecurity = ConnectionSecurity;
-			return connectionSecurity == ConnectionSecurity.MatchingCurrentRequest
-				       ? EwfRequest.Current != null && EwfRequest.AppProvider.RequestIsSecure( EwfRequest.Current.AspNetRequest )
-				       : connectionSecurity == ConnectionSecurity.SecureIfPossible && EwfConfigurationStatics.AppSupportsSecureConnections;
-		}
-	}
 
 	/// <summary>
 	/// Gets the desired security setting for requests to the resource.
@@ -325,18 +278,19 @@ public abstract class ResourceBase: TrustedResourceInfo, ResourceParent {
 
 	internal void HandleRequest( HttpContext context, bool requestTransferred ) {
 		var canonicalUrl = GetEwfUrl( false, false ).Url;
+		var shouldBeSecure = ( (ResourceParent)this ).ShouldBeSecure();
 		if( requestTransferred ) {
-			if( ShouldBeSecureGivenCurrentRequest != EwfRequest.AppProvider.RequestIsSecure( context.Request ) )
+			if( shouldBeSecure != EwfRequest.AppProvider.RequestIsSecure( context.Request ) )
 				throw new ApplicationException( "{0} has a connection security setting that is incompatible with the current request.".FormatWith( canonicalUrl ) );
 		}
 		else {
 			if( disablesUrlNormalization ) {
-				if( ShouldBeSecureGivenCurrentRequest != EwfRequest.AppProvider.RequestIsSecure( context.Request ) )
+				if( shouldBeSecure != EwfRequest.AppProvider.RequestIsSecure( context.Request ) )
 					throw new ResourceNotAvailableException( "The resource has a connection security setting that is incompatible with the current request.", null );
 			}
 			else {
 				if( !string.Equals( canonicalUrl, EwfRequest.Current!.Url, StringComparison.Ordinal ) ) {
-					if( !ShouldBeSecureGivenCurrentRequest && EwfRequest.AppProvider.RequestIsSecure( context.Request ) && Uri.Compare(
+					if( !shouldBeSecure && EwfRequest.AppProvider.RequestIsSecure( context.Request ) && Uri.Compare(
 						    new Uri( canonicalUrl ),
 						    new Uri( EwfRequest.Current.Url ),
 						    UriComponents.Host,

@@ -314,10 +314,11 @@ public static class EwfOps {
 						Translation.Init( () => "en-US" );
 						CssPreprocessingStatics.Init( globalInitializer.GetType().Assembly, ConfigurationStatics.AppAssembly );
 						EwfSafeRequestHandler.Init( ResourceBase.ExecuteDataModificationMethod );
-						ResourceBase.Init(
+						ResourceParent.Init(
 							ResourceSerializationStatics.SerializeResource,
 							SystemSpecificLogicStatics.GetLibraryProvider<SystemResourceSerializationProvider>( "ResourceSerialization" ),
-							getAppResourceSerializationProvider( providerGetter ),
+							getAppResourceSerializationProvider( providerGetter ) );
+						ResourceBase.Init(
 							( requestTransferred, resource ) => {
 								if( requestTransferred ) {
 									var urlHandlers = new List<BasicUrlHandler>();
@@ -617,7 +618,7 @@ public static class EwfOps {
 			( baseUrlString, appRelativeUrl ) =>
 				RequestState.ExecuteWithUrlHandlerStateDisabled( () =>
 					UrlHandlingStatics.ResolveUrl( baseUrlString, appRelativeUrl, appAssembly: appAssembly )?.Last() ) );
-		ResourceBase.AddApplication( getAppResourceSerializationProvider( providerGetter ) );
+		ResourceParent.AddApplication( getAppResourceSerializationProvider( providerGetter ) );
 		RequestDispatchingStatics.AddApplication( applicationName, getAppRequestDispatchingProvider( providerGetter ) );
 	}
 

@@ -72,6 +72,8 @@ public abstract class EntitySetupBase: ResourceParent {
 	/// </summary>
 	public bool UserCanAccess => ( Parent is null || Parent.UserCanAccess ) && userCanAccess;
 
+	bool ResourceParent.IsIntermediateInstallationPublicParent => false;
+
 	/// <summary>
 	/// Gets whether the authenticated user passes entity setup authorization checks.
 	/// </summary>
@@ -117,6 +119,9 @@ public abstract class EntitySetupBase: ResourceParent {
 	/// Creates a list of groups containing this entity setup’s listed resources.
 	/// </summary>
 	protected abstract IEnumerable<ResourceGroup> createListedResources();
+
+	EwfUrl WebItem.GetEwfUrl( bool ensureUserCanAccessItem, bool ensureItemNotDisabled ) =>
+		( (ResourceParent)this ).GetEwfUrl( ensureUserCanAccessItem, ensureItemNotDisabled, null );
 
 	UrlHandler? UrlHandler.GetParent() => urlParent.Value;
 
