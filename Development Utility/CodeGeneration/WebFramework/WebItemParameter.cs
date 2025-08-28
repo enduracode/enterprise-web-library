@@ -1,6 +1,7 @@
 ﻿using System.CodeDom;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using Microsoft.CodeAnalysis;
@@ -76,13 +77,24 @@ internal class WebItemParameter {
 		yield return new DataType(
 			typeof( TrustedUrl ),
 			true,
-			() => hasSuffix( "Url" ),
+			() => hasSuffix( "Url" ) && !nameIs( "parentUrl" ),
 			"suffix the name with “Url”",
 			"",
 			"",
 			"TrustedUrl.Invalid",
 			valueExpression => $"TrustedUrl.Serialize( {valueExpression}, base.AppId )",
 			( valueExpression, appIdExpression ) => $"TrustedUrl.Deserialize( {valueExpression}, {appIdExpression} )" );
+
+		yield return new DataType(
+			typeof( TrustedParentUrl ),
+			true,
+			() => nameIs( "parentUrl" ),
+			"make the name “parentUrl”",
+			"",
+			"",
+			"TrustedParentUrl.Invalid",
+			valueExpression => $"TrustedParentUrl.Serialize( {valueExpression}, base.AppId )",
+			( valueExpression, appIdExpression ) => $"TrustedParentUrl.Deserialize( {valueExpression}, {appIdExpression} )" );
 
 		yield break;
 		bool hasSuffix( string suffix, string contains = "" ) => ModificationField.NameHasSuffix( name, suffix, contains );
