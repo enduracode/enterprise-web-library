@@ -57,6 +57,7 @@ partial class EntitySetup: UiEntitySetup {
 			.Append( Charts.UrlPatterns.Literal( this, "chart" ) )
 			.Append( CalendarIntegration.UrlPatterns.Literal( this, "calendar-integration" ) )
 			.Append( UnauthorizedPage.UrlPatterns.Literal( this, "unauthorized-page" ) )
+			.Append( ParentParameters.UrlPatterns.Literal( this, "parent-parameters" ) )
 			.Append( CreateSystem.UrlPatterns.Literal( "create-system" ) )
 			.Append( ConfigurationSchemas.EntitySetup.UrlPatterns.Literal( "ConfigurationSchemas" ) )
 			.Concat( LegacyUrlStatics.GetPatterns() );
@@ -67,6 +68,7 @@ partial class EntitySetup: UiEntitySetup {
 				var one = new ModalBoxId();
 				var two = new ModalBoxId();
 				var unauthorizedPage = new UnauthorizedPage( this );
+				var parentParameters = new ParentParameters( this, PageBase.Current.ToTrustedParentUrl() );
 				return new HyperlinkSetup( new ExternalResource( "http://www.microsoft.com" ), "Go to Microsoft" )
 					.Add( new ButtonSetup( "Custom script", behavior: new CustomButtonBehavior( () => "alert('test');" ) ) )
 					.Add(
@@ -101,7 +103,8 @@ partial class EntitySetup: UiEntitySetup {
 									true,
 									new EwfImage( new ImageSetup( "Houses in the mountains" ), new ExternalResource( "https://www.leveragere.com/assets/1440.jpg" ) )
 										.ToCollection() ).ToCollection() ) ) )
-					.Add( new HyperlinkSetup( unauthorizedPage.ToHyperlinkDefaultBehavior( disableAuthorizationCheck: true ), unauthorizedPage.ResourceName ) );
+					.Add( new HyperlinkSetup( unauthorizedPage.ToHyperlinkDefaultBehavior( disableAuthorizationCheck: true ), unauthorizedPage.ResourceName ) )
+					.Add( new HyperlinkSetup( parentParameters, parentParameters.ResourceName ) );
 			},
 			navFormControls:
 			NavFormControl.CreateText(
