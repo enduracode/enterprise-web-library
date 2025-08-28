@@ -60,29 +60,29 @@ public sealed class TrustedUrl: IEquatable<TrustedUrl> {
 			.Replace( '+', '.' )
 			.Replace( '/', '_' );
 
-	private readonly TrustedResourceInfo? resource;
+	internal readonly WebItem? WebItem;
 	private readonly EwfUrl? invalidUrl;
 
-	internal TrustedUrl( TrustedResourceInfo? resource, EwfUrl? invalidUrl ) {
-		this.resource = resource;
+	internal TrustedUrl( WebItem? webItem, EwfUrl? invalidUrl ) {
+		WebItem = webItem;
 		this.invalidUrl = invalidUrl;
 	}
 
-	public TrustedResourceInfo GetResourceOrThrow() => resource ?? throw new InvalidOperationException( "invalid URL" );
+	public TrustedResourceInfo GetResourceOrThrow() => TryGetResource( out var resource ) ? resource : throw new InvalidOperationException( "invalid URL" );
 
 	public bool TryGetResource( [ NotNullWhen( true ) ] out TrustedResourceInfo? resource ) {
-		resource = this.resource;
+		resource = WebItem as TrustedResourceInfo;
 		return resource is not null;
 	}
 
 	internal EwfUrl? GetUrl() => url;
 
 	[ JsonProperty ]
-	private EwfUrl? url => invalidUrl ?? resource?.GetEwfUrl( false, false );
+	private EwfUrl? url => invalidUrl ?? WebItem?.GetEwfUrl( false, false );
 
 	public override bool Equals( object? obj ) => Equals( obj as TrustedUrl );
 	public bool Equals( TrustedUrl? other ) => other is not null && EwlStatics.AreEqual( url, other.url );
-	public override int GetHashCode() => ( resource, invalidUrl ).GetHashCode();
+	public override int GetHashCode() => ( WebItem, invalidUrl ).GetHashCode();
 }
 
 public static class TrustedUrlExtensionCreators {
