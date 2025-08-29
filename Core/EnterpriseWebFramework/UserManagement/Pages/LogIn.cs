@@ -29,10 +29,21 @@ partial class LogIn {
 	protected override UrlHandler getUrlParent() => new Admin.EntitySetup();
 
 	protected override PageContent getContent() {
+		var authenticatedUserDeniedAccessStateItem = ComponentStateItem.Create( "authenticatedUserDeniedAccess", authenticatedUserDeniedAccess, _ => true, false );
+		if( authenticatedUserDeniedAccessStateItem.Value )
+			return new UiPageContent().Add( authenticatedUserDeniedAccessStateItem )
+				.Add(
+					new Paragraph(
+						"You’re already logged in, but do not have access to this page. It’s possible that you had access in the past and that it was revoked."
+							.ToComponents() ) )
+				.Add(
+					new Paragraph(
+						new EwfHyperlink( AuthenticationStatics.GetDefaultLogInPage( ReturnUrl ), new ButtonHyperlinkStyle( "Log In as Another User" ) ).ToCollection() ) );
+
 		parametersModification.User = "";
 		parametersModification.Code = "";
 
-		var customContent = AuthenticationStatics.AppProvider.GetLogInPageContent( ReturnUrl, User, Code, authenticatedUserDeniedAccess );
+		var customContent = AuthenticationStatics.AppProvider.GetLogInPageContent( ReturnUrl, User, Code );
 		if( customContent != null )
 			return customContent;
 
@@ -58,21 +69,10 @@ partial class LogIn {
 				} );
 		}
 
-		return new UiPageContent( omitContentBox: true ).Add( authenticatedUserDeniedAccess ? getAuthenticatedUserDeniedAccessComponents() : getLogInComponents() );
+		return new UiPageContent( omitContentBox: true ).Add( getLogInComponents() );
 	}
 
 	private bool authenticatedUserDeniedAccess => SystemUser.Current is not null && !string.Equals( GetUrl(), EwfRequest.Current!.Url, StringComparison.Ordinal );
-
-	private IReadOnlyCollection<FlowComponent> getAuthenticatedUserDeniedAccessComponents() =>
-		new Section(
-			new Paragraph(
-					"You’re already logged in, but do not have access to this page. It’s possible that you had access in the past and that it was revoked."
-						.ToComponents() )
-				.Append(
-					new Paragraph(
-						new EwfHyperlink( AuthenticationStatics.GetDefaultLogInPage( ReturnUrl ), new ButtonHyperlinkStyle( "Log In as Another User" ) ).ToCollection() ) )
-				.Materialize(),
-			style: SectionStyle.Box ).ToCollection();
 
 	private IReadOnlyCollection<FlowComponent> getLogInComponents() {
 		var components = new List<FlowComponent>();
