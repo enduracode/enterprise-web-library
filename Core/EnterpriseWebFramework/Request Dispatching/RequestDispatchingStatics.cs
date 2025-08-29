@@ -292,26 +292,26 @@ public static class RequestDispatchingStatics {
 						transferRequest( context, 404, getErrorPage( new ResourceNotAvailable( !baseUrlRequest.Value ) ) );
 					else if( exception is AccessDeniedException accessDeniedException ) {
 						if( accessDeniedException.CausedByIntermediateUser )
-							transferRequest( context, 403, new NonLiveLogIn( getReturnUrl() ) );
+							transferRequest( context, 403, new NonLiveLogIn( getReturnResource().GetEwfUrl( false, false ).Url ) );
 						else if( UserManagementStatics.UserManagementEnabled && !ConfigurationStatics.IsLiveInstallation && RequestState.UserAccessible &&
 						         !RequestState.ImpersonatorExists )
-							transferRequest( context, 403, new UserManagement.Pages.Impersonate( getReturnUrl() ) );
+							transferRequest( context, 403, new UserManagement.Pages.Impersonate( getReturnResource().GetEwfUrl( false, false ).Url ) );
 						else if( accessDeniedException.LogInPage != null )
 							transferRequest( context, 403, accessDeniedException.LogInPage );
 						else if( RequestState.UserAccessible && ( UserManagementStatics.LocalIdentityProviderEnabled ||
 						                                          AuthenticationStatics.SamlIdentityProviders.Count > 1 ||
 						                                          ( AuthenticationStatics.SamlIdentityProviders.Any() && SystemUser.Current is not null ) ) )
-							transferRequest( context, 403, new UserManagement.Pages.LogIn( getTrustedReturnUrl() ) );
+							transferRequest( context, 403, new UserManagement.Pages.LogIn( getReturnResource().ToTrustedUrl() ) );
 						else if( RequestState.UserAccessible && AuthenticationStatics.SamlIdentityProviders.Any() )
 							transferRequest(
 								context,
 								403,
-								new UserManagement.SamlResources.LogIn( AuthenticationStatics.SamlIdentityProviders.Single().EntityId, getTrustedReturnUrl() ) );
+								new UserManagement.SamlResources.LogIn( AuthenticationStatics.SamlIdentityProviders.Single().EntityId, getReturnResource().ToTrustedUrl() ) );
 						else
 							transferRequest( context, 403, getErrorPage( new AccessDenied( !baseUrlRequest.Value ) ) );
 
-						static TrustedUrl getTrustedReturnUrl() => new TrustedExternalResource( new ExternalResource( getReturnUrl() ) ).ToTrustedUrl();
-						static string getReturnUrl() => EwfRequest.Current!.Url;
+						static TrustedResourceInfo getReturnResource() =>
+							PageBase.Current ?? ResourceBase.Current ?? (TrustedResourceInfo)new TrustedExternalResource( new ExternalResource( EwfRequest.Current!.Url ) );
 					}
 					else if( exception is PageDisabledException pageDisabledException )
 						transferRequest( context, null, new ResourceDisabled( pageDisabledException.Message ) );

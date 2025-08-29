@@ -277,6 +277,8 @@ public abstract class ResourceBase: TrustedResourceInfo, ResourceParent {
 	void BasicUrlHandler.HandleRequest( HttpContext context ) => HandleRequest( context, false );
 
 	internal void HandleRequest( HttpContext context, bool requestTransferred ) {
+		urlHandlerStateUpdater!( requestTransferred, this );
+
 		var canonicalUrl = GetEwfUrl( false, false ).Url;
 		var shouldBeSecure = ( (ResourceParent)this ).ShouldBeSecure();
 		if( requestTransferred ) {
@@ -316,8 +318,6 @@ public abstract class ResourceBase: TrustedResourceInfo, ResourceParent {
 			disabledMode = AlternativeMode as DisabledResourceMode;
 		if( disabledMode != null )
 			throw new PageDisabledException( disabledMode.Message );
-
-		urlHandlerStateUpdater!( requestTransferred, this );
 
 		var redirect = getRedirect();
 		if( redirect != null ) {
