@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -243,6 +244,7 @@ internal class WebItemParameter {
 	public string SpecifiedValueSelector => type.Type.IsValueType || AllowsNull ? ".Value" : "";
 
 	internal bool IsEnumerable => type.ElementTypeName.Any();
+	internal bool IsNestedUrl => type.Type.IsAssignableTo( typeof( NestedUrl ) );
 
 	public string Name => name;
 	public string PropertyName => name.Capitalize();

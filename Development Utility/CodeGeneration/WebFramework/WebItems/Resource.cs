@@ -42,6 +42,7 @@ internal class Resource {
 		}
 		InfoStatics.WriteConstructor( writer, generalData, entitySetup != null, false );
 		writer.WriteLine( "public override EntitySetupBase? EsAsBaseType => {0};".FormatWith( entitySetup != null ? "Es" : "null" ) );
+		writer.WriteLine( $"protected override IReadOnlyCollection<NestedUrl?> getNestedUrls() => {generalData.GetNestedUrlCollectionExpression()};" );
 		UrlStatics.GenerateGetEncoderMethod(
 			writer,
 			entitySetup != null ? "Es" : "",
