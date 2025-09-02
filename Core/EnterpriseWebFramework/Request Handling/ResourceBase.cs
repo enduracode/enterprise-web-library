@@ -243,6 +243,13 @@ public abstract class ResourceBase: TrustedResourceInfo, ResourceParent {
 	internal sealed override EwfUrl GetEwfUrl( bool ensureUserCanAccessResource, bool ensureResourceNotDisabled ) =>
 		( (ResourceParent)this ).GetEwfUrl( ensureUserCanAccessResource, ensureResourceNotDisabled, uriFragmentIdentifier );
 
+	protected internal sealed override IEnumerable<NestedUrl?> GetNestedUrls() => ( (ResourceParent)this ).GetAllNestedUrls();
+
+	IEnumerable<NestedUrl?> ResourceParent.GetLocalNestedUrls() =>
+		EsAsBaseType is null ? getNestedUrls() : ( (ResourceParent)EsAsBaseType ).GetLocalNestedUrls().Concat( getNestedUrls() );
+
+	protected abstract IReadOnlyCollection<NestedUrl?> getNestedUrls();
+
 	UrlHandler? UrlHandler.GetParent() => urlParent.Value;
 
 	/// <summary>

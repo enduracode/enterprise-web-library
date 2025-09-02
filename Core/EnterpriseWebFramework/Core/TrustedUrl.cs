@@ -9,7 +9,7 @@ using NodaTime.Text;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Core;
 
-public sealed class TrustedUrl: IEquatable<TrustedUrl> {
+public sealed class TrustedUrl: NestedUrl, IEquatable<TrustedUrl> {
 	/// <summary>
 	/// Generated code use only.
 	/// </summary>
@@ -60,10 +60,18 @@ public sealed class TrustedUrl: IEquatable<TrustedUrl> {
 			.Replace( '+', '.' )
 			.Replace( '/', '_' );
 
+	private static int getNestedUrlDepth( WebItem? webItem ) =>
+		webItem?.GetNestedUrls().Where( i => i is not null ).Select( i => i! ) is {} nestedUrls && nestedUrls.Any()
+			? nestedUrls.Max( i => i.GetNestedUrlDepth() ) + 1
+			: 0;
+
 	internal readonly WebItem? WebItem;
 	private readonly EwfUrl? invalidUrl;
 
 	internal TrustedUrl( WebItem? webItem, EwfUrl? invalidUrl ) {
+		if( getNestedUrlDepth( webItem ) > 2 )
+			webItem = EwfConfigurationStatics.GetDefaultBaseResource();
+
 		WebItem = webItem;
 		this.invalidUrl = invalidUrl;
 	}
@@ -79,6 +87,8 @@ public sealed class TrustedUrl: IEquatable<TrustedUrl> {
 
 	[ JsonProperty ]
 	private EwfUrl? url => invalidUrl ?? WebItem?.GetEwfUrl( false, false );
+
+	int NestedUrl.GetNestedUrlDepth() => getNestedUrlDepth( WebItem );
 
 	public override bool Equals( object? obj ) => Equals( obj as TrustedUrl );
 	public bool Equals( TrustedUrl? other ) => other is not null && EwlStatics.AreEqual( url, other.url );

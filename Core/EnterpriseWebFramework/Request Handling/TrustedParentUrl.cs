@@ -1,11 +1,12 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 using Newtonsoft.Json;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
-public sealed class TrustedParentUrl: IEquatable<TrustedParentUrl> {
+public sealed class TrustedParentUrl: NestedUrl, IEquatable<TrustedParentUrl> {
 	/// <summary>
 	/// Generated code use only.
 	/// </summary>
@@ -33,6 +34,8 @@ public sealed class TrustedParentUrl: IEquatable<TrustedParentUrl> {
 
 	[ JsonProperty ]
 	private EwfUrl? url => trustedUrl.GetUrl();
+
+	int NestedUrl.GetNestedUrlDepth() => ( (NestedUrl)trustedUrl ).GetNestedUrlDepth();
 
 	public override bool Equals( object? obj ) => Equals( obj as TrustedParentUrl );
 	public bool Equals( TrustedParentUrl? other ) => other is not null && EwlStatics.AreEqual( trustedUrl, other.trustedUrl );

@@ -18,4 +18,6 @@ public sealed class TrustedExternalResource: TrustedResourceInfo {
 
 	internal override EwfUrl GetEwfUrl( bool ensureUserCanAccessResource, bool ensureResourceNotDisabled ) =>
 		resource.GetEwfUrl( ensureUserCanAccessResource, ensureResourceNotDisabled );
+
+	protected internal override IEnumerable<NestedUrl?> GetNestedUrls() => resource.GetNestedUrls();
 }

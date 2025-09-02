@@ -123,6 +123,12 @@ public abstract class EntitySetupBase: ResourceParent {
 	EwfUrl WebItem.GetEwfUrl( bool ensureUserCanAccessItem, bool ensureItemNotDisabled ) =>
 		( (ResourceParent)this ).GetEwfUrl( ensureUserCanAccessItem, ensureItemNotDisabled, null );
 
+	IEnumerable<NestedUrl?> WebItem.GetNestedUrls() => ( (ResourceParent)this ).GetAllNestedUrls();
+
+	IEnumerable<NestedUrl?> ResourceParent.GetLocalNestedUrls() => getNestedUrls();
+
+	protected abstract IReadOnlyCollection<NestedUrl?> getNestedUrls();
+
 	UrlHandler? UrlHandler.GetParent() => urlParent.Value;
 
 	/// <summary>

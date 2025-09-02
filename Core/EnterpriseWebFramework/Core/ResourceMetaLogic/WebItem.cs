@@ -12,4 +12,6 @@ public interface WebItem {
 	AlternativeResourceMode? AlternativeMode { get; }
 
 	internal EwfUrl GetEwfUrl( bool ensureUserCanAccessItem, bool ensureItemNotDisabled );
+
+	internal IEnumerable<NestedUrl?> GetNestedUrls();
 }

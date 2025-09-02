@@ -1,5 +1,6 @@
 ﻿#nullable disable
 using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 using EnterpriseWebLibrary.SystemSpecificLogic;
 using MimeTypes;
 
@@ -42,6 +43,8 @@ public abstract class StaticFile: ResourceBase {
 	protected override string getResourceName() => "";
 
 	protected internal override bool IsIntermediateInstallationPublicResource => isFrameworkFile;
+
+	protected override IReadOnlyCollection<NestedUrl> getNestedUrls() => [ ];
 
 	protected sealed override UrlHandler getUrlParent() => EsAsBaseType;
 
@@ -106,25 +109,24 @@ public abstract class StaticFile: ResourceBase {
 		string getCacheKey() => "staticFile-{0}-{1}".FormatWith( isFrameworkFile, relativeFilePath );
 		EwfSafeResponseWriter responseWriter;
 		if( contentType == ContentTypes.Css ) {
-			Func<string> cssGetter = () => File.ReadAllText( filePath );
 			responseWriter = urlVersionString.Any()
 				                 ? new EwfSafeResponseWriter(
-					                 cssGetter,
+					                 getCss,
 					                 urlVersionString,
 					                 () => new ResponseMemoryCachingSetup( getCacheKey(), GetResourceLastModificationDateAndTime() ) )
 				                 : new EwfSafeResponseWriter(
-					                 () => EwfResponse.Create( ContentTypes.Css, new EwfResponseBodyCreator( () => CssPreprocessor.TransformCssFile( cssGetter() ) ) ),
+					                 () => EwfResponse.Create( ContentTypes.Css, new EwfResponseBodyCreator( () => CssPreprocessor.TransformCssFile( getCss() ) ) ),
 					                 GetResourceLastModificationDateAndTime(),
 					                 memoryCacheKeyGetter: getCacheKey );
+			string getCss() => File.ReadAllText( filePath );
 		}
 		else {
-			Func<EwfResponse> responseCreator = () => EwfResponse.Create(
+			var responseCreator = () => EwfResponse.Create(
 				contentType,
-				new EwfResponseBodyCreator(
-					responseStream => {
-						using( var fileStream = File.OpenRead( filePath ) )
-							fileStream.CopyTo( responseStream );
-					} ) );
+				new EwfResponseBodyCreator( responseStream => {
+					using var fileStream = File.OpenRead( filePath );
+					fileStream.CopyTo( responseStream );
+				} ) );
 			responseWriter = urlVersionString.Any()
 				                 ? new EwfSafeResponseWriter(
 					                 responseCreator,

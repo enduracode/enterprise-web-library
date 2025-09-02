@@ -25,4 +25,8 @@ public abstract class ResourceInfo: WebItem {
 	EwfUrl WebItem.GetEwfUrl( bool ensureUserCanAccessItem, bool ensureItemNotDisabled ) => GetEwfUrl( ensureUserCanAccessItem, ensureItemNotDisabled );
 
 	internal abstract EwfUrl GetEwfUrl( bool ensureUserCanAccessResource, bool ensureResourceNotDisabled );
+
+	IEnumerable<NestedUrl?> WebItem.GetNestedUrls() => GetNestedUrls();
+
+	protected internal abstract IEnumerable<NestedUrl?> GetNestedUrls();
 }

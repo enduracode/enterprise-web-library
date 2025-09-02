@@ -74,6 +74,19 @@ public interface ResourceParent: UrlHandler, WebItem {
 		}
 	}
 
+	internal sealed IEnumerable<NestedUrl?> GetAllNestedUrls() {
+		UrlHandler? urlHandler = this;
+		do {
+			if( urlHandler is not ResourceParent parent )
+				continue;
+			foreach( var i in parent.GetLocalNestedUrls() )
+				yield return i;
+		}
+		while( ( urlHandler = urlHandler!.GetParent() ) is not null );
+	}
+
+	IEnumerable<NestedUrl?> GetLocalNestedUrls();
+
 	internal bool ShouldBeSecure() {
 		// Intermediate installations must be secure because the intermediate user cookie is secure.
 		if( ConfigurationStatics.IsIntermediateInstallation && !IsIntermediateInstallationPublicParent )

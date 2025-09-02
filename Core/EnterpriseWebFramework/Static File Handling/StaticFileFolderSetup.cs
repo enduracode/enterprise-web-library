@@ -1,4 +1,6 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
+
+namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 public abstract class StaticFileFolderSetup: EntitySetupBase {
 	protected sealed override void init() => base.init();
@@ -8,6 +10,8 @@ public abstract class StaticFileFolderSetup: EntitySetupBase {
 	public sealed override ResourceBase DefaultResource => throw new NotSupportedException();
 
 	protected sealed override IEnumerable<ResourceGroup> createListedResources() => [ ];
+
+	protected override IReadOnlyCollection<NestedUrl?> getNestedUrls() => [ ];
 
 	public override ConnectionSecurity ConnectionSecurity => Parent?.ConnectionSecurity ?? ConnectionSecurity.MatchingCurrentRequest;
 

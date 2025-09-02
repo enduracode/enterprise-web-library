@@ -16,4 +16,5 @@ public sealed class ExternalResource: ResourceInfo {
 	public override bool UserCanAccess => true;
 	public override AlternativeResourceMode? AlternativeMode => null;
 	internal override EwfUrl GetEwfUrl( bool ensureUserCanAccessResource, bool ensureResourceNotDisabled ) => new( url );
+	protected internal override IEnumerable<NestedUrl?> GetNestedUrls() => [ ];
 }
