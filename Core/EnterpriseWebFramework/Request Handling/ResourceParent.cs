@@ -1,4 +1,5 @@
 ﻿using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Core;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic.AlternativeResourceModes;
 using EnterpriseWebLibrary.SystemSpecificLogic;
@@ -46,9 +47,9 @@ public interface ResourceParent: UrlHandler, WebItem {
 	internal bool IsIntermediateInstallationPublicParent { get; }
 
 	/// <summary>
-	/// Gets the log-in page to use for this parent, or null for default behavior.
+	/// Returns the log-in page to use for this parent, or null for default behavior.
 	/// </summary>
-	ResourceBase? LogInPage { get; }
+	ResourceBase? GetLogInPage( TrustedUrl returnUrl );
 
 	internal sealed EwfUrl GetEwfUrl( bool ensureUserCanAccess, bool ensureNotDisabled, string? fragmentIdentifier ) {
 		try {

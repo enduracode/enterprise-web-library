@@ -296,8 +296,8 @@ public static class RequestDispatchingStatics {
 						else if( UserManagementStatics.UserManagementEnabled && !ConfigurationStatics.IsLiveInstallation && RequestState.UserAccessible &&
 						         !RequestState.ImpersonatorExists )
 							transferRequest( context, 403, new UserManagement.Pages.Impersonate( getReturnResource().GetEwfUrl( false, false ).Url ) );
-						else if( accessDeniedException.LogInPage != null )
-							transferRequest( context, 403, accessDeniedException.LogInPage );
+						else if( accessDeniedException.LogInPageGetter( getReturnResource().ToTrustedUrl() ) is {} logInPage )
+							transferRequest( context, 403, logInPage );
 						else if( RequestState.UserAccessible && ( UserManagementStatics.LocalIdentityProviderEnabled ||
 						                                          AuthenticationStatics.SamlIdentityProviders.Count > 1 ||
 						                                          ( AuthenticationStatics.SamlIdentityProviders.Any() && SystemUser.Current is not null ) ) )

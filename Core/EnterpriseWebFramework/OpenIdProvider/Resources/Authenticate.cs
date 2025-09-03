@@ -1,23 +1,23 @@
-﻿using EnterpriseWebLibrary.ExternalFunctionality;
-
-// EwlResource
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.Core;
+using EnterpriseWebLibrary.ExternalFunctionality;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.OpenIdProvider.Resources;
 
+// EwlResource
 partial class Authenticate {
 	private string clientIdentifier = null!;
 	private Lazy<OpenIdAuthenticationResult?> result = null!;
 
 	protected override void init() {
-		result = new Lazy<OpenIdAuthenticationResult?>(
-			() => ExternalFunctionalityStatics.ExternalOpenIdConnectProvider.ReadAuthenticationRequest( out clientIdentifier )
-				      ? OpenIdProviderStatics.AppProvider.AuthenticateUser( clientIdentifier )
-				      : null );
+		result = new Lazy<OpenIdAuthenticationResult?>( () =>
+			ExternalFunctionalityStatics.ExternalOpenIdConnectProvider.ReadAuthenticationRequest( out clientIdentifier )
+				? OpenIdProviderStatics.AppProvider.AuthenticateUser( clientIdentifier )
+				: null );
 	}
 
 	protected override bool userCanAccess => result.Value is null || result.Value.ResponseWriter is not null;
 
-	public override ResourceBase? LogInPage => result.Value?.LogInPage;
+	public override ResourceBase? GetLogInPage( TrustedUrl returnUrl ) => result.Value?.LogInPage;
 
 	protected override bool disablesUrlNormalization => true;
 

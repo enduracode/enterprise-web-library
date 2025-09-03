@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Core;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic.AlternativeResourceModes;
 using JetBrains.Annotations;
@@ -215,9 +216,9 @@ public abstract class ResourceBase: TrustedResourceInfo, ResourceParent {
 	protected virtual bool userCanAccess => true;
 
 	/// <summary>
-	/// Gets the log-in page to use for this resource, or null for default behavior.
+	/// Returns the log-in page to use for this resource, or null for default behavior.
 	/// </summary>
-	public virtual ResourceBase? LogInPage => Parent?.LogInPage;
+	public virtual ResourceBase? GetLogInPage( TrustedUrl returnUrl ) => Parent?.GetLogInPage( returnUrl );
 
 	/// <summary>
 	/// Gets the alternative mode for this resource or null if it is in normal mode. Do not call this from the createAlternativeMode method of an ancestor;
@@ -318,7 +319,7 @@ public abstract class ResourceBase: TrustedResourceInfo, ResourceParent {
 		if( !userAuthorized )
 			throw new AccessDeniedException(
 				ConfigurationStatics.IsIntermediateInstallation && !IsIntermediateInstallationPublicResource && !RequestState.Instance.IntermediateUserExists,
-				LogInPage );
+				GetLogInPage );
 
 		DisabledResourceMode? disabledMode;
 		using( MiniProfiler.Current.Step( "EWF - Check alternative resource mode" ) )

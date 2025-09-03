@@ -1,4 +1,5 @@
-﻿using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.Core;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic.AlternativeResourceModes;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
@@ -80,9 +81,9 @@ public abstract class EntitySetupBase: ResourceParent {
 	protected virtual bool userCanAccess => true;
 
 	/// <summary>
-	/// Gets the log-in page to use for resources that are part of this entity setup, or null for default behavior.
+	/// Returns the log-in page to use for resources that are part of this entity setup, or null for default behavior.
 	/// </summary>
-	public virtual ResourceBase? LogInPage => Parent?.LogInPage;
+	public virtual ResourceBase? GetLogInPage( TrustedUrl returnUrl ) => Parent?.GetLogInPage( returnUrl );
 
 	/// <summary>
 	/// Gets the alternative mode for this entity setup or null if it is in normal mode. Do not call this from the createAlternativeMode method of an ancestor;
