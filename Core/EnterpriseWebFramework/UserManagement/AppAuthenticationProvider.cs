@@ -21,7 +21,7 @@ public class AppAuthenticationProvider {
 	/// <summary>
 	/// Returns the default log-in page for the application, or null for the framework’s built-in page.
 	/// </summary>
-	protected internal virtual PageContent? GetLogInPageContent( TrustedUrl? returnUrl, string user, string code ) => null;
+	protected internal virtual PageContent? GetLogInPageContent( TrustedUrl? returnUrl, Action<TrustedUrl> returnUrlUpdater, string user, string code ) => null;
 
 	/// <summary>
 	/// Returns the configuration for automatic user registration via the local identity provider on the default log-in page for the application. Only the

@@ -43,7 +43,7 @@ partial class LogIn {
 		parametersModification.User = "";
 		parametersModification.Code = "";
 
-		var customContent = AuthenticationStatics.AppProvider.GetLogInPageContent( ReturnUrl, User, Code );
+		var customContent = AuthenticationStatics.AppProvider.GetLogInPageContent( ReturnUrl, url => parametersModification.ReturnUrl = url, User, Code );
 		if( customContent != null )
 			return customContent;
 
