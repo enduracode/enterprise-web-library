@@ -87,11 +87,13 @@ internal static class UrlHandlingStatics {
 			var path = generatePath( baseUrlParameters, segments.AsEnumerable().Reverse() );
 			var appRelativeUrl = generateAppRelativeUrl( path, query );
 
+			var url = new EwfUrl( baseUrlString, ( path.Length > 0 ? "/" : "" ) + appRelativeUrl, app.configuration.PublicId );
+
 			var resolvedHandler = app.urlResolver( baseUrlString, appRelativeUrl );
 			if( !EwlStatics.AreEqual( resolvedHandler, basicHandler ) )
-				throw new ApplicationException( "The handler’s canonical URL does not resolve back to the same handler." );
+				throw new Exception( $"The handler’s canonical URL of {url.Url} does not resolve back to the same handler." );
 
-			return new EwfUrl( baseUrlString, ( path.Length > 0 ? "/" : "" ) + appRelativeUrl, app.configuration.PublicId );
+			return url;
 		} );
 
 	public static IReadOnlyCollection<BasicUrlHandler>? ResolveUrl( string baseUrlString, string appRelativeUrl, Assembly? appAssembly = null ) {
