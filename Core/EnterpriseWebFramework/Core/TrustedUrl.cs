@@ -18,10 +18,14 @@ public sealed class TrustedUrl: NestedUrl, IEquatable<TrustedUrl> {
 
 	private static readonly LocalDatePattern datePattern = LocalDatePattern.CreateWithInvariantCulture( "uuuuMMdd" );
 
-	private static Func<Func<BasicUrlHandler?>, BasicUrlHandler?>? urlResolverExecutor;
+	private static Func<Func<IReadOnlyCollection<BasicUrlHandler>?>, IReadOnlyCollection<BasicUrlHandler>?>? urlResolverExecutor;
+	private static Func<IReadOnlyCollection<BasicUrlHandler>, Func<TrustedUrl>, TrustedUrl>? urlHandlerOverrideMethodExecutor;
 
-	public static void Init( Func<Func<BasicUrlHandler?>, BasicUrlHandler?> urlResolverExecutor ) {
+	public static void Init(
+		Func<Func<IReadOnlyCollection<BasicUrlHandler>?>, IReadOnlyCollection<BasicUrlHandler>?> urlResolverExecutor,
+		Func<IReadOnlyCollection<BasicUrlHandler>, Func<TrustedUrl>, TrustedUrl> urlHandlerOverrideMethodExecutor ) {
 		TrustedUrl.urlResolverExecutor = urlResolverExecutor;
+		TrustedUrl.urlHandlerOverrideMethodExecutor = urlHandlerOverrideMethodExecutor;
 	}
 
 	public static string Serialize( TrustedUrl trustedUrl, string serializationAppId ) {
@@ -50,8 +54,10 @@ public sealed class TrustedUrl: NestedUrl, IEquatable<TrustedUrl> {
 		if( url.IsExternal )
 			return new TrustedUrl( new TrustedExternalResource( new ExternalResource( url.Url ) ), null );
 
-		var resolvedHandler = urlResolverExecutor!( () => UrlHandlingStatics.GetUrlResolver( url.AppId )( url.BaseUrlString, url.AppRelativeUrl ) );
-		return resolvedHandler is TrustedResourceInfo resource ? new TrustedUrl( resource, null ) : new TrustedUrl( null, url );
+		var handlers = urlResolverExecutor!( () => UrlHandlingStatics.GetUrlResolver( url.AppId )( url.BaseUrlString, url.AppRelativeUrl ) );
+		return handlers?.Last() is TrustedResourceInfo resource
+			       ? urlHandlerOverrideMethodExecutor!( handlers, () => new TrustedUrl( resource, null ) )
+			       : new TrustedUrl( null, url );
 	}
 
 	private static string getHmac( string data, LocalDate date ) =>
@@ -66,14 +72,16 @@ public sealed class TrustedUrl: NestedUrl, IEquatable<TrustedUrl> {
 			: 0;
 
 	internal readonly WebItem? WebItem;
-	private readonly EwfUrl? invalidUrl;
+
+	[ JsonProperty ]
+	private readonly EwfUrl? url;
 
 	internal TrustedUrl( WebItem? webItem, EwfUrl? invalidUrl ) {
 		if( getNestedUrlDepth( webItem ) > 2 )
 			webItem = EwfConfigurationStatics.GetDefaultBaseResource();
 
 		WebItem = webItem;
-		this.invalidUrl = invalidUrl;
+		url = invalidUrl ?? WebItem?.GetEwfUrl( false, false );
 	}
 
 	public TrustedResourceInfo GetResourceOrThrow() => TryGetResource( out var resource ) ? resource : throw new InvalidOperationException( "invalid URL" );
@@ -85,14 +93,11 @@ public sealed class TrustedUrl: NestedUrl, IEquatable<TrustedUrl> {
 
 	internal EwfUrl? GetUrl() => url;
 
-	[ JsonProperty ]
-	private EwfUrl? url => invalidUrl ?? WebItem?.GetEwfUrl( false, false );
-
 	int NestedUrl.GetNestedUrlDepth() => getNestedUrlDepth( WebItem );
 
 	public override bool Equals( object? obj ) => Equals( obj as TrustedUrl );
 	public bool Equals( TrustedUrl? other ) => other is not null && EwlStatics.AreEqual( url, other.url );
-	public override int GetHashCode() => ( WebItem, invalidUrl ).GetHashCode();
+	public override int GetHashCode() => ( WebItem, url ).GetHashCode();
 }
 
 public static class TrustedUrlExtensionCreators {

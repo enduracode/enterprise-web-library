@@ -247,9 +247,7 @@ public static class RequestDispatchingStatics {
 			}
 		} );
 		if( handlers != null ) {
-			// Before URL normalization, multiple copies of the same handler can exist in the list. When a new handler object is created and it matches more than
-			// one handler in the list, we want parameters to be taken from the lowest-level segment. That’s why we reverse the handlers here.
-			RequestState.SetUrlHandlers( handlers.Reverse().Materialize() );
+			RequestState.SetUrlHandlers( handlers );
 
 			var handler = handlers.Last();
 			allowSlowRequestIfNecessary( handler );

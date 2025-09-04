@@ -8,15 +8,16 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 internal static class UrlHandlingStatics {
 	private static readonly
-		Dictionary<Assembly, ( WebApplication configuration, Func<IEnumerable<BaseUrlPattern>> baseUrlPatternGetter, Func<string, string, BasicUrlHandler?>
-			urlResolver )> appsByAssembly = new();
+		Dictionary<Assembly, ( WebApplication configuration, Func<IEnumerable<BaseUrlPattern>> baseUrlPatternGetter,
+			Func<string, string, IReadOnlyCollection<BasicUrlHandler>?> urlResolver )> appsByAssembly = new();
 
 	private static Func<IEnumerable<BaseUrlPattern>> baseUrlPatternGetter = null!;
 	private static Func<Func<EwfUrl>, EwfUrl> urlGetterExecutor = null!;
-	private static Func<string, string, BasicUrlHandler?> urlResolver = null!;
+	private static Func<string, string, IReadOnlyCollection<BasicUrlHandler>?> urlResolver = null!;
 
 	public static void Init(
-		Func<IEnumerable<BaseUrlPattern>> baseUrlPatternGetter, Func<Func<EwfUrl>, EwfUrl> urlGetterExecutor, Func<string, string, BasicUrlHandler?> urlResolver ) {
+		Func<IEnumerable<BaseUrlPattern>> baseUrlPatternGetter, Func<Func<EwfUrl>, EwfUrl> urlGetterExecutor,
+		Func<string, string, IReadOnlyCollection<BasicUrlHandler>?> urlResolver ) {
 		UrlHandlingStatics.baseUrlPatternGetter = baseUrlPatternGetter;
 		UrlHandlingStatics.urlGetterExecutor = urlGetterExecutor;
 		UrlHandlingStatics.urlResolver = urlResolver;
@@ -24,7 +25,7 @@ internal static class UrlHandlingStatics {
 
 	public static void AddApplication(
 		Assembly assembly, WebApplication configuration, Func<IEnumerable<BaseUrlPattern>> baseUrlPatternGetter,
-		Func<string, string, BasicUrlHandler?> urlResolver ) {
+		Func<string, string, IReadOnlyCollection<BasicUrlHandler>?> urlResolver ) {
 		appsByAssembly.Add( assembly, ( configuration, baseUrlPatternGetter, urlResolver ) );
 	}
 
@@ -90,7 +91,7 @@ internal static class UrlHandlingStatics {
 			var url = new EwfUrl( baseUrlString, ( path.Length > 0 ? "/" : "" ) + appRelativeUrl, app.configuration.PublicId );
 
 			var resolvedHandler = app.urlResolver( baseUrlString, appRelativeUrl );
-			if( !EwlStatics.AreEqual( resolvedHandler, basicHandler ) )
+			if( !EwlStatics.AreEqual( resolvedHandler?.Last(), basicHandler ) )
 				throw new Exception( $"The handler’s canonical URL of {url.Url} does not resolve back to the same handler." );
 
 			return url;
@@ -245,7 +246,7 @@ internal static class UrlHandlingStatics {
 		return from i in Enumerable.Range( 0, parameters.Count ) select ( parameters.GetKey( i ), parameters.Get( i ) );
 	}
 
-	public static Func<string, string, BasicUrlHandler?> GetUrlResolver( string appId ) =>
+	public static Func<string, string, IReadOnlyCollection<BasicUrlHandler>?> GetUrlResolver( string appId ) =>
 		appId.Equals( EwfConfigurationStatics.AppConfiguration.PublicId, StringComparison.Ordinal )
 			? urlResolver
 			: appsByAssembly.Values.Where( i => i.configuration.PublicId.Equals( appId, StringComparison.Ordinal ) ).Select( i => i.urlResolver ).SingleOrDefault() ??

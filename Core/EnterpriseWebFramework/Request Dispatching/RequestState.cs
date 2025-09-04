@@ -20,6 +20,12 @@ public class RequestState {
 
 	private static Func<Instant?>? firstRequestCompletionTimeGetter;
 
+	private class UrlHandlerState {
+		public IReadOnlyCollection<BasicUrlHandler>? UrlHandlers;
+		public ResourceBase? Resource;
+		public bool NewUrlParameterValuesEffective;
+	}
+
 	internal static void Init( Func<Instant?> firstRequestCompletionTimeGetter ) {
 		RequestState.firstRequestCompletionTimeGetter = firstRequestCompletionTimeGetter;
 	}
@@ -29,26 +35,26 @@ public class RequestState {
 	/// </summary>
 	internal static RequestState Instance => RequestDispatchingStatics.RequestState;
 
-	internal static void ExecuteWithUrlHandlerStateDisabled( Action method ) {
-		Instance.urlHandlerStateDisabled = true;
+	internal static void ExecuteWithUrlHandlerStateOverride( Action method ) {
+		Instance.urlHandlerStateStack.Push( new UrlHandlerState() );
 		try {
 			method();
 		}
 		finally {
-			Instance.urlHandlerStateDisabled = false;
+			Instance.urlHandlerStateStack.Pop();
 		}
 	}
 
-	internal static T ExecuteWithUrlHandlerStateDisabled<T>( Func<T> method ) {
-		if( EwfRequest.Current is null || Instance.urlHandlerStateDisabled )
+	internal static T ExecuteWithUrlHandlerStateOverride<T>( Func<T> method ) {
+		if( EwfRequest.Current is null )
 			return method();
 
-		Instance.urlHandlerStateDisabled = true;
+		Instance.urlHandlerStateStack.Push( new UrlHandlerState() );
 		try {
 			return method();
 		}
 		finally {
-			Instance.urlHandlerStateDisabled = false;
+			Instance.urlHandlerStateStack.Pop();
 		}
 	}
 
@@ -66,10 +72,7 @@ public class RequestState {
 	/// </summary>
 	internal AutomaticDatabaseConnectionManager DatabaseConnectionManager { get; }
 
-	private bool urlHandlerStateDisabled;
-	private IReadOnlyCollection<BasicUrlHandler>? urlHandlers;
-	private ResourceBase? resource;
-	private bool newUrlParameterValuesEffective;
+	private readonly Stack<UrlHandlerState> urlHandlerStateStack = new();
 
 	internal bool IntermediateUserExists { get; set; }
 
@@ -110,6 +113,8 @@ public class RequestState {
 		DatabaseConnectionManager = new AutomaticDatabaseConnectionManager();
 		DatabaseConnectionManager.DataAccessState.ResetCache();
 
+		urlHandlerStateStack.Push( new UrlHandlerState() );
+
 		ClientSideNewUrl = "";
 		StatusMessages = [ ];
 
@@ -122,28 +127,39 @@ public class RequestState {
 	internal IRequestCookieCollection RequestCookies => requestCookies ?? EwfRequest.Current!.AspNetRequest.Cookies;
 
 	internal void SetUrlHandlers( IReadOnlyCollection<BasicUrlHandler> handlers ) {
-		urlHandlers = handlers;
+		// Before URL normalization, multiple copies of the same handler can exist in the list. When a new handler object is created and it matches more than one
+		// handler in the list, we want parameters to be taken from the lowest-level segment. That’s why we reverse the handlers here.
+		urlHandlerStateStack.Peek().UrlHandlers = handlers.Reverse().Materialize();
+	}
+
+	internal void SetUrlHandlers( UrlHandler newHandler ) {
+		var handlers = new List<BasicUrlHandler>();
+		var handler = newHandler;
+		do
+			handlers.Add( handler );
+		while( ( handler = handler.GetParent() ) is not null );
+		urlHandlerStateStack.Peek().UrlHandlers = handlers;
 	}
 
 	/// <summary>
 	/// Framework use only.
 	/// </summary>
-	public IReadOnlyCollection<BasicUrlHandler> UrlHandlers => ( urlHandlerStateDisabled ? null : urlHandlers ) ?? [ ];
+	public IReadOnlyCollection<BasicUrlHandler> UrlHandlers => urlHandlerStateStack.Peek().UrlHandlers ?? [ ];
 
 	internal void SetResource( ResourceBase resource ) {
-		this.resource = resource;
+		urlHandlerStateStack.Peek().Resource = resource;
 	}
 
-	internal ResourceBase? Resource => urlHandlerStateDisabled ? null : resource;
+	internal ResourceBase? Resource => urlHandlerStateStack.Peek().Resource;
 
 	internal void SetNewUrlParameterValuesEffective( bool effective ) {
-		newUrlParameterValuesEffective = effective;
+		urlHandlerStateStack.Peek().NewUrlParameterValuesEffective = effective;
 	}
 
 	/// <summary>
 	/// Framework use only.
 	/// </summary>
-	public bool NewUrlParameterValuesEffective => newUrlParameterValuesEffective && !urlHandlerStateDisabled;
+	public bool NewUrlParameterValuesEffective => urlHandlerStateStack.Peek().NewUrlParameterValuesEffective;
 
 	/// <summary>
 	/// RequestDispatchingStatics use only.

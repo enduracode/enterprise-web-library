@@ -937,7 +937,7 @@ public abstract class PageBase: ResourceBase {
 				    UriComponents.SchemeAndServer,
 				    UriFormat.UriEscaped,
 				    StringComparison.Ordinal ) == 0 ) {
-				page.replaceUrlHandlers();
+				RequestState.Instance.SetUrlHandlers( page );
 				RequestState.Instance.SetNewUrlParameterValuesEffective( false );
 
 				page.requestState = requestState;
@@ -949,7 +949,7 @@ public abstract class PageBase: ResourceBase {
 				destinationUrl,
 				"GET",
 				context => {
-					page.replaceUrlHandlers();
+					RequestState.Instance.SetUrlHandlers( page );
 					RequestState.Instance.SetNewUrlParameterValuesEffective( false );
 
 					if( authorizationCheckDisabled )
@@ -979,15 +979,6 @@ public abstract class PageBase: ResourceBase {
 				? firstSentence + messageSentence + lastSentence
 				: StringTools.ConcatenateWithDelimiter( " ", firstSentence, messageSentence, lastSentence ),
 			innerException );
-	}
-
-	private void replaceUrlHandlers() {
-		var urlHandlers = new List<BasicUrlHandler>();
-		UrlHandler urlHandler = this;
-		do
-			urlHandlers.Add( urlHandler );
-		while( ( urlHandler = urlHandler.GetParent() ) != null );
-		RequestState.Instance.SetUrlHandlers( urlHandlers );
 	}
 
 	public sealed override bool MatchesCurrent() => Equals( Current );
