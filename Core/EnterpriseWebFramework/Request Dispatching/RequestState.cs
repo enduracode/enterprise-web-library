@@ -23,7 +23,6 @@ public class RequestState {
 	private class UrlHandlerState {
 		public IReadOnlyCollection<BasicUrlHandler>? UrlHandlers;
 		public ResourceBase? Resource;
-		public bool NewUrlParameterValuesEffective;
 	}
 
 	internal static void Init( Func<Instant?> firstRequestCompletionTimeGetter ) {
@@ -73,6 +72,7 @@ public class RequestState {
 	internal AutomaticDatabaseConnectionManager DatabaseConnectionManager { get; }
 
 	private readonly Stack<UrlHandlerState> urlHandlerStateStack = new();
+	private bool newUrlParameterValuesEffective;
 
 	internal bool IntermediateUserExists { get; set; }
 
@@ -153,13 +153,13 @@ public class RequestState {
 	internal ResourceBase? Resource => urlHandlerStateStack.Peek().Resource;
 
 	internal void SetNewUrlParameterValuesEffective( bool effective ) {
-		urlHandlerStateStack.Peek().NewUrlParameterValuesEffective = effective;
+		newUrlParameterValuesEffective = effective;
 	}
 
 	/// <summary>
 	/// Framework use only.
 	/// </summary>
-	public bool NewUrlParameterValuesEffective => urlHandlerStateStack.Peek().NewUrlParameterValuesEffective;
+	public bool NewUrlParameterValuesEffective => newUrlParameterValuesEffective && urlHandlerStateStack.Peek().UrlHandlers is not null;
 
 	/// <summary>
 	/// RequestDispatchingStatics use only.
