@@ -235,23 +235,31 @@ public static class RequestDispatchingStatics {
 		if( context.Request.Path.HasValue )
 			appRelativeUrl = appRelativeUrl[ 1.. ];
 
-		var handlers = RequestState.ExecuteWithUserDisabled( () => {
-			try {
-				return UrlHandlingStatics.ResolveUrl( RequestState.BaseUrl, appRelativeUrl );
-			}
-			catch( UnresolvableUrlException e ) {
-				// An init method could take a long time to run, and then throw an exception, and there’d be no way for the resource to prevent slow-request errors.
-				RequestState.AllowSlowRequest( allowUnlimitedTime: true );
+		var handler = RequestState.ExecuteWithUrlHandlerStateOverride(
+			null,
+			() => {
+				var handlers = RequestState.ExecuteWithUserDisabled( () => {
+					try {
+						return UrlHandlingStatics.ResolveUrl( RequestState.BaseUrl, appRelativeUrl );
+					}
+					catch( UnresolvableUrlException e ) {
+						// An init method could take a long time to run, and then throw an exception, and there’d be no way for the resource to prevent slow-request errors.
+						RequestState.AllowSlowRequest( allowUnlimitedTime: true );
 
-				throw new ResourceNotAvailableException( "Failed to resolve the URL.", e );
-			}
-		} );
-		if( handlers != null ) {
-			RequestState.SetUrlHandlers( handlers );
+						throw new ResourceNotAvailableException( "Failed to resolve the URL.", e );
+					}
+				} );
+				if( handlers?.Last() is not {} handler )
+					return null;
 
-			var handler = handlers.Last();
+				if( handler is ResourceBase resource )
+					RequestState.UrlHandlerStateOverride!.Set( handlers, resource );
+
+				return handler;
+			} );
+
+		if( handler is not null ) {
 			allowSlowRequestIfNecessary( handler );
-
 			return handler.HandleRequest;
 		}
 
@@ -477,5 +485,5 @@ public static class RequestDispatchingStatics {
 	/// <summary>
 	/// Gets the request-state object for the current request. Throws an exception if called outside a request or from a non-web application. Framework use only.
 	/// </summary>
-	public static RequestState RequestState => (RequestState)currentContextGetter!().Items[ RequestStateKey ]!;
+	internal static RequestState RequestState => (RequestState)currentContextGetter!().Items[ RequestStateKey ]!;
 }

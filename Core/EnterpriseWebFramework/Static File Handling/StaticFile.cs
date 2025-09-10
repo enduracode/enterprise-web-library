@@ -145,7 +145,7 @@ public abstract class StaticFile: ResourceBase {
 
 	public sealed override bool MatchesCurrent() => base.MatchesCurrent();
 
-	protected internal sealed override ResourceBase ReCreate() => this;
+	protected sealed override ResourceBase reCreate() => this;
 
 	public sealed override bool Equals( BasicUrlHandler other ) =>
 		other is StaticFile otherFile && otherFile.isFrameworkFile == isFrameworkFile && otherFile.relativeFilePath == relativeFilePath &&

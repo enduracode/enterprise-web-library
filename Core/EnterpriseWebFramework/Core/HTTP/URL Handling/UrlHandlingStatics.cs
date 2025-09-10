@@ -13,13 +13,16 @@ internal static class UrlHandlingStatics {
 
 	private static Func<IEnumerable<BaseUrlPattern>> baseUrlPatternGetter = null!;
 	private static Func<Func<EwfUrl>, EwfUrl> urlGetterExecutor = null!;
+	private static Func<Func<IReadOnlyCollection<BasicUrlHandler>?>, IReadOnlyCollection<BasicUrlHandler>?> urlResolverExecutor = null!;
 	private static Func<string, string, IReadOnlyCollection<BasicUrlHandler>?> urlResolver = null!;
 
 	public static void Init(
 		Func<IEnumerable<BaseUrlPattern>> baseUrlPatternGetter, Func<Func<EwfUrl>, EwfUrl> urlGetterExecutor,
+		Func<Func<IReadOnlyCollection<BasicUrlHandler>?>, IReadOnlyCollection<BasicUrlHandler>?> urlResolverExecutor,
 		Func<string, string, IReadOnlyCollection<BasicUrlHandler>?> urlResolver ) {
 		UrlHandlingStatics.baseUrlPatternGetter = baseUrlPatternGetter;
 		UrlHandlingStatics.urlGetterExecutor = urlGetterExecutor;
+		UrlHandlingStatics.urlResolverExecutor = urlResolverExecutor;
 		UrlHandlingStatics.urlResolver = urlResolver;
 	}
 
@@ -90,8 +93,8 @@ internal static class UrlHandlingStatics {
 
 			var url = new EwfUrl( baseUrlString, ( path.Length > 0 ? "/" : "" ) + appRelativeUrl, app.configuration.PublicId );
 
-			var resolvedHandler = app.urlResolver( baseUrlString, appRelativeUrl );
-			if( !EwlStatics.AreEqual( resolvedHandler?.Last(), basicHandler ) )
+			var resolvedHandlers = urlResolverExecutor( () => app.urlResolver( baseUrlString, appRelativeUrl ) );
+			if( !EwlStatics.AreEqual( resolvedHandlers?.Last(), basicHandler ) )
 				throw new Exception( $"The handler’s canonical URL of {url.Url} does not resolve back to the same handler." );
 
 			return url;

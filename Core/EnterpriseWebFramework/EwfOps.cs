@@ -269,14 +269,16 @@ public static class EwfOps {
 											i();
 									} );
 
-								RequestState.ExecuteWithUrlHandlerStateOverride( () => {
-									try {
-										AutomaticDatabaseConnectionManager.Current.CommitTransactionsAndExecuteNonTransactionalModificationMethods( true );
-									}
-									finally {
-										DataAccessState.Current.ResetCache();
-									}
-								} );
+								RequestState.ExecuteWithUrlHandlerStateOverride(
+									new SpecifiedValue<UrlHandlerStateOverride>( null ),
+									() => {
+										try {
+											AutomaticDatabaseConnectionManager.Current.CommitTransactionsAndExecuteNonTransactionalModificationMethods( true );
+										}
+										finally {
+											DataAccessState.Current.ResetCache();
+										}
+									} );
 							},
 							() => {
 								if( EwfRequest.Current is null )
@@ -291,14 +293,23 @@ public static class EwfOps {
 						UrlHandlingStatics.Init(
 							() => RequestDispatchingStatics.GetAppProvider().GetBaseUrlPatterns(),
 							urlGetter => EwfRequest.Current is null ? urlGetter() : RequestDispatchingStatics.RequestState.ExecuteWithUserDisabled( urlGetter ),
-							( baseUrlString, appRelativeUrl ) =>
-								RequestState.ExecuteWithUrlHandlerStateOverride( () => UrlHandlingStatics.ResolveUrl( baseUrlString, appRelativeUrl ) ) );
-						TrustedUrl.Init(
-							urlResolver => EwfRequest.Current is null ? urlResolver() : RequestDispatchingStatics.RequestState.ExecuteWithUserDisabled( urlResolver ),
-							( urlHandlers, method ) => RequestState.ExecuteWithUrlHandlerStateOverride( () => {
-								RequestState.Instance.SetUrlHandlers( urlHandlers );
-								return method();
-							} ) );
+							method => RequestState.ExecuteWithUrlHandlerStateOverride( new SpecifiedValue<UrlHandlerStateOverride>( null ), method ),
+							( baseUrlString, appRelativeUrl ) => UrlHandlingStatics.ResolveUrl( baseUrlString, appRelativeUrl ) );
+						TrustedUrl.Init( urlResolver => {
+							return RequestState.ExecuteWithUrlHandlerStateOverride(
+								null,
+								() => {
+									if( EwfRequest.Current is null )
+										return urlResolver()?.Last();
+
+									var handlers = RequestDispatchingStatics.RequestState.ExecuteWithUserDisabled( urlResolver );
+									if( handlers?.Last() is not ResourceParent webItem )
+										return null;
+
+									RequestDispatchingStatics.RequestState.UrlHandlerStateOverride!.Set( handlers, webItem );
+									return webItem;
+								} );
+						} );
 						CookieStatics.Init(
 							() => RequestDispatchingStatics.RequestState.BaseUrl,
 							() => RequestDispatchingStatics.RequestState.RequestCookies,
@@ -319,20 +330,30 @@ public static class EwfOps {
 						CssPreprocessingStatics.Init( globalInitializer.GetType().Assembly, ConfigurationStatics.AppAssembly );
 						EwfSafeRequestHandler.Init( ResourceBase.ExecuteDataModificationMethod );
 						ResourceParent.Init(
+							() => {
+								var requestState = RequestDispatchingStatics.RequestState;
+								return new ResourceParent.UrlHandlerState(
+									requestState.UrlHandlers,
+									requestState.UrlHandlerStateOverridden ? requestState.WebItem : PageBase.Current,
+									requestState.NewUrlParameterValuesEffective );
+							},
 							ResourceSerializationStatics.SerializeResource,
 							SystemSpecificLogicStatics.GetLibraryProvider<SystemResourceSerializationProvider>( "ResourceSerialization" ),
 							getAppResourceSerializationProvider( providerGetter ) );
+						UrlHandlerStateOverride.Init(
+							() => RequestDispatchingStatics.RequestState.UrlHandlerStateOverride,
+							new RequestState.UrlHandlerStateOverrideMethodExecutor() );
 						ResourceBase.Init(
 							( requestTransferred, resource ) => {
-								if( requestTransferred ) {
-									RequestDispatchingStatics.RequestState.SetUrlHandlers( resource );
+								RequestDispatchingStatics.RequestState.SetUrlHandlerState( resource );
+								if( requestTransferred )
 									RequestDispatchingStatics.RequestState.SetNewUrlParameterValuesEffective( false );
-								}
-								RequestDispatchingStatics.RequestState.SetResource( resource );
 							},
-							() => RequestDispatchingStatics.RequestState.Resource,
+							() => RequestDispatchingStatics.RequestState.UrlHandlerStateOverridden
+								      ? throw new InvalidOperationException()
+								      : (ResourceBase)RequestDispatchingStatics.RequestState.WebItem,
 							RequestDispatchingStatics.RefreshRequestState );
-						EntitySetupBase.Init( RequestState.ExecuteWithUrlHandlerStateOverride );
+						EntitySetupBase.Init( method => RequestState.ExecuteWithUrlHandlerStateOverride( new SpecifiedValue<UrlHandlerStateOverride>( null ), method ) );
 						WellKnownResource.Init(
 							() => RequestDispatchingStatics.GetAppProvider().GetFrameworkUrlParent(),
 							() => OpenIdProviderStatics.GetWellKnownUrls().Concat( RequestDispatchingStatics.GetAppProvider().GetWellKnownUrls() ) );
@@ -611,8 +632,7 @@ public static class EwfOps {
 			appAssembly,
 			ConfigurationStatics.InstallationConfiguration.WebApplications.Single( i => string.Equals( i.Name, applicationName, StringComparison.Ordinal ) ),
 			() => RequestDispatchingStatics.GetAppProvider( applicationName: applicationName ).GetBaseUrlPatterns(),
-			( baseUrlString, appRelativeUrl ) =>
-				RequestState.ExecuteWithUrlHandlerStateOverride( () => UrlHandlingStatics.ResolveUrl( baseUrlString, appRelativeUrl, appAssembly: appAssembly ) ) );
+			( baseUrlString, appRelativeUrl ) => UrlHandlingStatics.ResolveUrl( baseUrlString, appRelativeUrl, appAssembly: appAssembly ) );
 		ResourceParent.AddApplication( getAppResourceSerializationProvider( providerGetter ) );
 		RequestDispatchingStatics.AddApplication( applicationName, getAppRequestDispatchingProvider( providerGetter ) );
 	}

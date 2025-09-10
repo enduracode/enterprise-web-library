@@ -69,16 +69,25 @@ public abstract class ResourceBase: TrustedResourceInfo, ResourceParent {
 	private readonly Lazy<string> name;
 	private readonly Lazy<AlternativeResourceMode?> alternativeMode;
 	private readonly Lazy<UrlHandler?> urlParent;
+	internal readonly UrlHandlerStateOverride? UrlHandlerStateOverride;
 
 	/// <summary>
 	/// Creates a resource object.
 	/// </summary>
 	protected ResourceBase() {
-		parent = new Lazy<ResourceParent?>( createParent );
+		UrlHandlerStateOverride = UrlHandlerStateOverride.Current;
+
+		parent = new Lazy<ResourceParent?>( () => UrlHandlerStateOverride is null ? createParent() : UrlHandlerStateOverride.ExecuteWithThis( createParent ) );
 		name = new Lazy<string>( getResourceName );
 		alternativeMode = new Lazy<AlternativeResourceMode?>( createAlternativeMode );
-		urlParent = new Lazy<UrlHandler?>( getUrlParent );
+		urlParent = new Lazy<UrlHandler?>( () => UrlHandlerStateOverride is null ? getUrlParent() : UrlHandlerStateOverride.ExecuteWithThis( getUrlParent ) );
 	}
+
+	/// <summary>
+	/// Generated code use only.
+	/// </summary>
+	[ EditorBrowsable( EditorBrowsableState.Never ) ]
+	protected ResourceParent.UrlHandlerState getUrlHandlerState() => ( (ResourceParent)this ).GetUrlHandlerState();
 
 	/// <summary>
 	/// Throws an exception if the parameter values or any non URL elements of the current request make the resource invalid.
@@ -285,8 +294,6 @@ public abstract class ResourceBase: TrustedResourceInfo, ResourceParent {
 	void BasicUrlHandler.HandleRequest( HttpContext context ) => HandleRequest( context, false );
 
 	internal void HandleRequest( HttpContext context, bool requestTransferred ) {
-		urlHandlerStateUpdater!( requestTransferred, this );
-
 		var canonicalUrl = GetEwfUrl( false, false ).Url;
 		var shouldBeSecure = ( (ResourceParent)this ).ShouldBeSecure();
 		if( requestTransferred ) {
@@ -312,6 +319,8 @@ public abstract class ResourceBase: TrustedResourceInfo, ResourceParent {
 				}
 			}
 		}
+
+		urlHandlerStateUpdater!( requestTransferred, this );
 
 		bool userAuthorized;
 		using( MiniProfiler.Current.Step( "EWF - Check resource authorization" ) )
@@ -405,10 +414,19 @@ public abstract class ResourceBase: TrustedResourceInfo, ResourceParent {
 	/// </summary>
 	public virtual bool MatchesCurrent() => Equals( Current );
 
+	internal ResourceBase ReCreate() =>
+		UrlHandlerStateOverride is null
+			? reCreate()
+			: UrlHandlerStateOverride.ExecuteWithOverride( () => {
+				UrlHandlerStateOverride.Current!.Set( this );
+				return reCreate();
+			} );
+
 	/// <summary>
-	/// Framework use only.
+	/// Generated code and private use only.
 	/// </summary>
-	protected internal abstract ResourceBase ReCreate();
+	[ EditorBrowsable( EditorBrowsableState.Never ) ]
+	protected abstract ResourceBase reCreate();
 
 	public sealed override bool Equals( object? obj ) => Equals( obj as BasicUrlHandler );
 	public abstract bool Equals( BasicUrlHandler? other );

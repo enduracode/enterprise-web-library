@@ -1,4 +1,5 @@
-﻿using EnterpriseWebLibrary.EnterpriseWebFramework.Core;
+﻿using System.ComponentModel;
+using EnterpriseWebLibrary.EnterpriseWebFramework.Core;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic.AlternativeResourceModes;
 using JetBrains.Annotations;
@@ -27,12 +28,20 @@ public abstract class EntitySetupBase: ResourceParent {
 	/// Creates an entity setup object.
 	/// </summary>
 	protected EntitySetupBase() {
-		parent = new Lazy<ResourceParent?>( createParent );
+		var urlHandlerStateOverride = UrlHandlerStateOverride.Current;
+
+		parent = new Lazy<ResourceParent?>( () => urlHandlerStateOverride is null ? createParent() : urlHandlerStateOverride.ExecuteWithThis( createParent ) );
 		name = new Lazy<string>( getEntitySetupName );
 		alternativeMode = new Lazy<AlternativeResourceMode?>( createAlternativeMode );
 		listedResources = new Lazy<IReadOnlyCollection<ResourceGroup>>( () => createListedResources().Materialize() );
-		urlParent = new Lazy<UrlHandler?>( getUrlParent );
+		urlParent = new Lazy<UrlHandler?>( () => urlHandlerStateOverride is null ? getUrlParent() : urlHandlerStateOverride.ExecuteWithThis( getUrlParent ) );
 	}
+
+	/// <summary>
+	/// Generated code use only.
+	/// </summary>
+	[ EditorBrowsable( EditorBrowsableState.Never ) ]
+	protected ResourceParent.UrlHandlerState getUrlHandlerState() => ( (ResourceParent)this ).GetUrlHandlerState();
 
 	/// <summary>
 	/// Throws an exception if the parameter values or any non URL elements of the current request make the entity setup invalid.

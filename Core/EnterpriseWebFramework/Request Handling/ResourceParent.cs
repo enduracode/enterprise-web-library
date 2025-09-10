@@ -12,13 +12,17 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 public interface ResourceParent: UrlHandler, WebItem {
 	private static readonly List<SystemProviderReference<AppResourceSerializationProvider>> appSerializationProviderRefs = [ ];
 
+	private static Func<UrlHandlerState>? urlHandlerStateGetter;
 	private static Func<ResourceParent, ( string name, string parameters )?>? frameworkResourceSerializer;
 	private static SystemProviderReference<SystemResourceSerializationProvider>? systemSerializationProviderRef;
 
+	protected internal record UrlHandlerState( IReadOnlyCollection<BasicUrlHandler> Handlers, ResourceParent? WebItem, bool NewUrlParameterValuesEffective );
+
 	internal static void Init(
-		Func<ResourceParent, ( string, string )?> frameworkResourceSerializer,
+		Func<UrlHandlerState> urlHandlerStateGetter, Func<ResourceParent, ( string, string )?> frameworkResourceSerializer,
 		SystemProviderReference<SystemResourceSerializationProvider> systemSerializationProvider,
 		SystemProviderReference<AppResourceSerializationProvider> appSerializationProvider ) {
+		ResourceParent.urlHandlerStateGetter = urlHandlerStateGetter;
 		ResourceParent.frameworkResourceSerializer = frameworkResourceSerializer;
 		systemSerializationProviderRef = systemSerializationProvider;
 		appSerializationProviderRefs.Add( appSerializationProvider );
@@ -30,6 +34,8 @@ public interface ResourceParent: UrlHandler, WebItem {
 
 	private static SystemResourceSerializationProvider systemSerializationProvider => systemSerializationProviderRef!.GetProvider()!;
 	private static IEnumerable<AppResourceSerializationProvider> appSerializationProviders => appSerializationProviderRefs.Select( i => i.GetProvider()! );
+
+	internal sealed UrlHandlerState GetUrlHandlerState() => urlHandlerStateGetter!();
 
 	/// <summary>
 	/// Gets the parent of this parent, or null if there isn’t one.

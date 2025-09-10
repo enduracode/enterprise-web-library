@@ -12,17 +12,45 @@ using StackExchange.Profiling;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
-/// <summary>
-/// The state for a request in an EWF application.
-/// </summary>
-public class RequestState {
+internal class RequestState {
 	private static readonly Duration warmupPeriodDuration = Duration.FromSeconds( 5 );
 
 	private static Func<Instant?>? firstRequestCompletionTimeGetter;
 
-	private class UrlHandlerState {
-		public IReadOnlyCollection<BasicUrlHandler>? UrlHandlers;
-		public ResourceBase? Resource;
+	private class UrlHandlerState: UrlHandlerStateOverride {
+		public IReadOnlyCollection<BasicUrlHandler>? Handlers { get; private set; }
+		public ResourceParent? WebItem { get; private set; }
+
+		public UrlHandlerState( bool disabled ) {
+			if( !disabled )
+				Handlers = [ ];
+		}
+
+		void UrlHandlerStateOverride.Set( IReadOnlyCollection<BasicUrlHandler> handlers, ResourceParent webItem ) {
+			// Multiple copies of the same handler can exist in a list from UrlHandlingStatics.ResolveUrl. When a new handler object is created and it matches more
+			// than one handler in the list, we want parameters to be taken from the lowest-level segment. That’s why we reverse the handlers here.
+			Set( handlers.Reverse().Materialize(), webItem );
+		}
+
+		void UrlHandlerStateOverride.Set( ResourceBase resource ) {
+			var handlers = new List<BasicUrlHandler>();
+			UrlHandler? handler = resource;
+			do
+				handlers.Add( handler );
+			while( ( handler = handler!.GetParent() ) is not null );
+
+			Set( handlers, resource );
+		}
+
+		public void Set( IReadOnlyCollection<BasicUrlHandler> handlers, ResourceParent webItem ) {
+			Handlers = handlers;
+			WebItem = webItem;
+		}
+	}
+
+	internal class UrlHandlerStateOverrideMethodExecutor: UrlHandlerStateOverride.OverrideMethodExecutor {
+		T UrlHandlerStateOverride.OverrideMethodExecutor.ExecuteWithUrlHandlerStateOverride<T>( SpecifiedValue<UrlHandlerStateOverride?>? state, Func<T> method ) =>
+			RequestState.ExecuteWithUrlHandlerStateOverride( state, method );
 	}
 
 	internal static void Init( Func<Instant?> firstRequestCompletionTimeGetter ) {
@@ -34,8 +62,8 @@ public class RequestState {
 	/// </summary>
 	internal static RequestState Instance => RequestDispatchingStatics.RequestState;
 
-	internal static void ExecuteWithUrlHandlerStateOverride( Action method ) {
-		Instance.urlHandlerStateStack.Push( new UrlHandlerState() );
+	internal static void ExecuteWithUrlHandlerStateOverride( SpecifiedValue<UrlHandlerStateOverride?>? state, Action method ) {
+		Instance.urlHandlerStateStack.Push( state?.Value is {} value ? (UrlHandlerState)value : new UrlHandlerState( state is not null ) );
 		try {
 			method();
 		}
@@ -44,11 +72,11 @@ public class RequestState {
 		}
 	}
 
-	internal static T ExecuteWithUrlHandlerStateOverride<T>( Func<T> method ) {
+	internal static T ExecuteWithUrlHandlerStateOverride<T>( SpecifiedValue<UrlHandlerStateOverride?>? state, Func<T> method ) {
 		if( EwfRequest.Current is null )
 			return method();
 
-		Instance.urlHandlerStateStack.Push( new UrlHandlerState() );
+		Instance.urlHandlerStateStack.Push( state?.Value is {} value ? (UrlHandlerState)value : new UrlHandlerState( state is not null ) );
 		try {
 			return method();
 		}
@@ -113,7 +141,7 @@ public class RequestState {
 		DatabaseConnectionManager = new AutomaticDatabaseConnectionManager();
 		DatabaseConnectionManager.DataAccessState.ResetCache();
 
-		urlHandlerStateStack.Push( new UrlHandlerState() );
+		urlHandlerStateStack.Push( new UrlHandlerState( false ) );
 
 		ClientSideNewUrl = "";
 		StatusMessages = [ ];
@@ -126,40 +154,33 @@ public class RequestState {
 
 	internal IRequestCookieCollection RequestCookies => requestCookies ?? EwfRequest.Current!.AspNetRequest.Cookies;
 
-	internal void SetUrlHandlers( IReadOnlyCollection<BasicUrlHandler> handlers ) {
-		// Before URL normalization, multiple copies of the same handler can exist in the list. When a new handler object is created and it matches more than one
-		// handler in the list, we want parameters to be taken from the lowest-level segment. That’s why we reverse the handlers here.
-		urlHandlerStateStack.Peek().UrlHandlers = handlers.Reverse().Materialize();
-	}
+	internal IReadOnlyCollection<BasicUrlHandler> UrlHandlers => urlHandlerStateStack.Peek().Handlers ?? [ ];
 
-	internal void SetUrlHandlers( UrlHandler newHandler ) {
+	internal ResourceParent? WebItem => urlHandlerStateStack.Peek().WebItem;
+
+	internal void SetUrlHandlerState( ResourceBase resource ) {
+		if( UrlHandlerStateOverridden )
+			throw new InvalidOperationException();
+
 		var handlers = new List<BasicUrlHandler>();
-		var handler = newHandler;
+		ResourceParent? parent = resource;
 		do
-			handlers.Add( handler );
-		while( ( handler = handler.GetParent() ) is not null );
-		urlHandlerStateStack.Peek().UrlHandlers = handlers;
+			handlers.Add( parent );
+		while( ( parent = parent!.Parent ) is not null );
+
+		urlHandlerStateStack.Peek().Set( handlers, resource );
 	}
 
-	/// <summary>
-	/// Framework use only.
-	/// </summary>
-	public IReadOnlyCollection<BasicUrlHandler> UrlHandlers => urlHandlerStateStack.Peek().UrlHandlers ?? [ ];
+	internal bool UrlHandlerStateOverridden => urlHandlerStateStack.Count > 1;
 
-	internal void SetResource( ResourceBase resource ) {
-		urlHandlerStateStack.Peek().Resource = resource;
-	}
+	internal UrlHandlerStateOverride? UrlHandlerStateOverride =>
+		UrlHandlerStateOverridden && urlHandlerStateStack.Peek() is { Handlers: not null } state ? state : null;
 
-	internal ResourceBase? Resource => urlHandlerStateStack.Peek().Resource;
+	internal bool NewUrlParameterValuesEffective => newUrlParameterValuesEffective && urlHandlerStateStack.Peek().Handlers is { Count: > 0 };
 
 	internal void SetNewUrlParameterValuesEffective( bool effective ) {
 		newUrlParameterValuesEffective = effective;
 	}
-
-	/// <summary>
-	/// Framework use only.
-	/// </summary>
-	public bool NewUrlParameterValuesEffective => newUrlParameterValuesEffective && urlHandlerStateStack.Peek().UrlHandlers is not null;
 
 	/// <summary>
 	/// RequestDispatchingStatics use only.

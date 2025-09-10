@@ -18,14 +18,10 @@ public sealed class TrustedUrl: NestedUrl, IEquatable<TrustedUrl> {
 
 	private static readonly LocalDatePattern datePattern = LocalDatePattern.CreateWithInvariantCulture( "uuuuMMdd" );
 
-	private static Func<Func<IReadOnlyCollection<BasicUrlHandler>?>, IReadOnlyCollection<BasicUrlHandler>?>? urlResolverExecutor;
-	private static Func<IReadOnlyCollection<BasicUrlHandler>, Func<TrustedUrl>, TrustedUrl>? urlHandlerOverrideMethodExecutor;
+	private static Func<Func<IReadOnlyCollection<BasicUrlHandler>?>, BasicUrlHandler?>? urlResolverExecutor;
 
-	public static void Init(
-		Func<Func<IReadOnlyCollection<BasicUrlHandler>?>, IReadOnlyCollection<BasicUrlHandler>?> urlResolverExecutor,
-		Func<IReadOnlyCollection<BasicUrlHandler>, Func<TrustedUrl>, TrustedUrl> urlHandlerOverrideMethodExecutor ) {
+	public static void Init( Func<Func<IReadOnlyCollection<BasicUrlHandler>?>, BasicUrlHandler?> urlResolverExecutor ) {
 		TrustedUrl.urlResolverExecutor = urlResolverExecutor;
-		TrustedUrl.urlHandlerOverrideMethodExecutor = urlHandlerOverrideMethodExecutor;
 	}
 
 	public static string Serialize( TrustedUrl trustedUrl, string serializationAppId ) {
@@ -54,10 +50,8 @@ public sealed class TrustedUrl: NestedUrl, IEquatable<TrustedUrl> {
 		if( url.IsExternal )
 			return new TrustedUrl( new TrustedExternalResource( new ExternalResource( url.Url ) ), null );
 
-		var handlers = urlResolverExecutor!( () => UrlHandlingStatics.GetUrlResolver( url.AppId )( url.BaseUrlString, url.AppRelativeUrl ) );
-		return handlers?.Last() is TrustedResourceInfo resource
-			       ? urlHandlerOverrideMethodExecutor!( handlers, () => new TrustedUrl( resource, null ) )
-			       : new TrustedUrl( null, url );
+		var handler = urlResolverExecutor!( () => UrlHandlingStatics.GetUrlResolver( url.AppId )( url.BaseUrlString, url.AppRelativeUrl ) );
+		return handler is TrustedResourceInfo resource ? new TrustedUrl( resource, null ) : new TrustedUrl( null, url );
 	}
 
 	private static string getHmac( string data, LocalDate date ) =>

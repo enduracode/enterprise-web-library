@@ -632,7 +632,7 @@ public abstract class PageBase: ResourceBase {
 			newPageObject = (PageBase)ReCreate();
 		bool urlChanged;
 		using( MiniProfiler.Current.Step( "EWF - Check URL after page-view data modifications" ) )
-			urlChanged = newPageObject.GetEwfUrl( false, false ).Url != GetEwfUrl( false, false ).Url;
+			urlChanged = !newPageObject.GetEwfUrl( false, false ).Url.Equals( GetEwfUrl( false, false ).Url, StringComparison.Ordinal );
 		if( urlChanged )
 			throw getDeveloperMistakeException( "The URL of the page changed after page-view data modifications." );
 		bool userAuthorized;
@@ -641,7 +641,7 @@ public abstract class PageBase: ResourceBase {
 		DisabledResourceMode disabledMode;
 		using( MiniProfiler.Current.Step( "EWF - Check alternative page mode after page-view data modifications" ) )
 			disabledMode = newPageObject.AlternativeMode as DisabledResourceMode;
-		if( !userAuthorized || disabledMode != null )
+		if( !userAuthorized || disabledMode is not null )
 			throw getDeveloperMistakeException( "The user lost access to the page or the page became disabled after page-view data modifications." );
 		newPageObject.requestState = requestState;
 		return nextPageObject = newPageObject;
@@ -908,7 +908,12 @@ public abstract class PageBase: ResourceBase {
 			else {
 				RequestState.Instance.SetNewUrlParameterValuesEffective( true );
 				if( navigationBehavior.Value.destination is null )
-					destination = reCreateFromNewParameterValues();
+					destination = UrlHandlerStateOverride is null
+						              ? reCreateFromNewParameterValues()
+						              : UrlHandlerStateOverride.ExecuteWithOverride( () => {
+							              UrlHandlerStateOverride.Current!.Set( this );
+							              return reCreateFromNewParameterValues();
+						              } );
 				else if( navigationBehavior.Value.destination is ResourceBase r )
 					destination = r.ReCreate();
 				else
@@ -926,6 +931,7 @@ public abstract class PageBase: ResourceBase {
 		}
 
 		if( destination is PageBase page ) {
+			RequestState.Instance.SetNewUrlParameterValuesEffective( false );
 			RequestStateStatics.SetClientSideNewUrl( destinationUrl );
 
 			// If the destination page has the same origin as the current page, do a transfer instead of a redirect. Don’t do this if the authorization check was
@@ -937,8 +943,7 @@ public abstract class PageBase: ResourceBase {
 				    UriComponents.SchemeAndServer,
 				    UriFormat.UriEscaped,
 				    StringComparison.Ordinal ) == 0 ) {
-				RequestState.Instance.SetUrlHandlers( page );
-				RequestState.Instance.SetNewUrlParameterValuesEffective( false );
+				RequestState.Instance.SetUrlHandlerState( page );
 
 				page.requestState = requestState;
 				nextPageObject = page;
@@ -949,13 +954,10 @@ public abstract class PageBase: ResourceBase {
 				destinationUrl,
 				"GET",
 				context => {
-					RequestState.Instance.SetUrlHandlers( page );
-					RequestState.Instance.SetNewUrlParameterValuesEffective( false );
-
 					if( authorizationCheckDisabled )
 						page.HandleRequest( context, false );
 					else {
-						RequestState.Instance.SetResource( page );
+						RequestState.Instance.SetUrlHandlerState( page );
 
 						page.requestState = requestState;
 						actionProcessor( page ).WriteToAspNetResponse( context.Response );
