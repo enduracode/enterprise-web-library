@@ -147,7 +147,7 @@ internal static class WebFrameworkStatics {
 			var generalData = new WebItemGeneralData( projectPath, projectNamespace, EwlStatics.CombinePaths( folderPathRelativeToProject, fileName ), false );
 			if( !generalData.IsResource() )
 				continue;
-			new Resource( projectContainsFramework, generalData, entitySetup ).GenerateCode( writer );
+			new Resource( generalData, entitySetup ).GenerateCode( writer );
 			allItems.Add( ( entitySetup?.GeneralData, generalData ) );
 		}
 

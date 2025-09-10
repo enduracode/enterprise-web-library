@@ -1,12 +1,10 @@
 ﻿namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.WebFramework.WebItems;
 
 internal class Resource {
-	private readonly bool projectContainsFramework;
 	private readonly WebItemGeneralData generalData;
 	private readonly EntitySetup? entitySetup;
 
-	internal Resource( bool projectContainsFramework, WebItemGeneralData generalData, EntitySetup? entitySetup ) {
-		this.projectContainsFramework = projectContainsFramework;
+	internal Resource( WebItemGeneralData generalData, EntitySetup? entitySetup ) {
 		this.generalData = generalData;
 		this.entitySetup = entitySetup;
 
@@ -55,8 +53,7 @@ internal class Resource {
 		if( !generalData.IsPage() )
 			writer.WriteLine( "public override bool MatchesCurrent() => base.MatchesCurrent();" );
 		writer.WriteLine(
-			"{0} override ResourceBase ReCreate() => new {1}( {2} );".FormatWith(
-				projectContainsFramework ? "protected internal" : "protected",
+			"protected override ResourceBase reCreate() => new {0}( {1} );".FormatWith(
 				generalData.ClassName,
 				StringTools.ConcatenateWithDelimiter(
 					", ",

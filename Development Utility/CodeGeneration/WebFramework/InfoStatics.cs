@@ -84,10 +84,11 @@ internal static class InfoStatics {
 		// Initialize optional parameter fields.
 		if( generalData.OptionalParameters.Any() ) {
 			writer.WriteLine( "var optionalParametersInitializedFromCurrent = false;" );
-			writer.WriteLine( "if( EwfRequest.Current != null ) {" );
+			writer.WriteLine( "if( EwfRequest.Current is not null ) {" );
+			writer.WriteLine( "var urlHandlerState = getUrlHandlerState();" );
 
 			// If the list of current URL handlers has a matching object, apply its parameter values.
-			writer.WriteLine( "foreach( var urlHandler in RequestDispatchingStatics.RequestState.UrlHandlers )" );
+			writer.WriteLine( "foreach( var urlHandler in urlHandlerState.Handlers )" );
 			if( isEs ) {
 				writer.WriteLine( "if( urlHandler is ResourceBase r ) {" );
 				writer.WriteLine( "if( {0} ) {{".FormatWith( getHandlerMatchExpression( generalData, generalData.RequiredParameters, true ) ) );
@@ -108,8 +109,8 @@ internal static class InfoStatics {
 
 			// If new parameter values are effective, and the current resource or an ancestor matches this object, apply its new parameter values.
 			if( generalData.IsPage() || isEs ) {
-				writer.WriteLine( "if( RequestDispatchingStatics.RequestState.NewUrlParameterValuesEffective ) {" );
-				writer.WriteLine( "UrlHandler? urlHandler = {0}Current;".FormatWith( generalData.IsPage() ? "" : "PageBase." ) );
+				writer.WriteLine( "if( urlHandlerState.NewUrlParameterValuesEffective ) {" );
+				writer.WriteLine( "ResourceParent? urlHandler = urlHandlerState.WebItem!;" );
 				writer.WriteLine( "do" );
 				if( isEs ) {
 					writer.WriteLine( "if( urlHandler is ResourceBase r ) {" );
@@ -128,7 +129,7 @@ internal static class InfoStatics {
 					generateMatchingHandlerParameterInitStatements( writer, generalData.OptionalParameters, true );
 					writer.WriteLine( "}" );
 				}
-				writer.WriteLine( "while( ( urlHandler = urlHandler.GetParent() ) != null );" );
+				writer.WriteLine( "while( ( urlHandler = urlHandler!.Parent ) is not null );" );
 				writer.WriteLine( "}" );
 			}
 
