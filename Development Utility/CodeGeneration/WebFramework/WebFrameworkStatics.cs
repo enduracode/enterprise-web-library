@@ -303,8 +303,9 @@ internal static class WebFrameworkStatics {
 			"return new {0}( ".FormatWith( className ) + StringTools.ConcatenateWithDelimiter(
 				", ",
 				infoConstructorArgPrefix,
-				InfoStatics.GetInfoConstructorArgumentsForRequiredParameters( requiredParameters, parameter => "parametersModification!." + parameter.PropertyName ) ) +
-			" );" );
+				InfoStatics.GetInfoConstructorArgumentsForRequiredParameters(
+					requiredParameters,
+					parameter => "parametersModification!." + parameter.GetReCreationExpression( parameter.PropertyName ) ) ) + " );" );
 		writer.WriteLine( "}" );
 	}
 }

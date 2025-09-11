@@ -29,12 +29,15 @@ internal class EntitySetup {
 		InfoStatics.WriteConstructor( writer, generalData, false, true );
 		writer.WriteLine( $"protected override IReadOnlyCollection<NestedUrl?> getNestedUrls() => {generalData.GetNestedUrlCollectionExpression()};" );
 		UrlStatics.GenerateGetEncoderMethod( writer, "", generalData.RequiredParameters, generalData.OptionalParameters, _ => "true", false );
+		writer.WriteLine( "protected override EntitySetupBase reCreate() => ReCreate();" );
 		writer.WriteLine(
 			"internal {0} ReCreate() => new {0}({1});".FormatWith(
 				generalData.ClassName,
 				StringTools.ConcatenateWithDelimiter(
 						", ",
-						InfoStatics.GetInfoConstructorArgumentsForRequiredParameters( generalData.RequiredParameters, parameter => parameter.PropertyName ),
+						InfoStatics.GetInfoConstructorArgumentsForRequiredParameters(
+							generalData.RequiredParameters,
+							parameter => parameter.GetReCreationExpression( parameter.PropertyName ) ),
 						generalData.OptionalParameters.Any() ? "optionalParameterSetter: optionalParameterSetter" : "" )
 					.Surround( " ", " " ) ) );
 		WebFrameworkStatics.WriteReCreateFromNewParameterValuesMethod(

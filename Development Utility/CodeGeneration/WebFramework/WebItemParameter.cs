@@ -30,13 +30,15 @@ internal class WebItemParameter {
 		public string InitExpression { get; }
 		public Func<string, string> UrlSerializationExpressionGetter { get; }
 		public Func<string, string, string> UrlDeserializationExpressionGetter { get; }
+		public Func<string, string>? ReCreationExpressionGetter { get; }
 
 		/// <summary>
 		/// Do not support null for string or IEnumerable types because it cannot easily be represented in a URL.
 		/// </summary>
 		public DataType(
 			Type type, bool supportsNull, Func<bool> namingConventionPredicate, string namingConventionInstructions, string typeName, string elementTypeName,
-			string initExpression, Func<string, string> urlSerializationExpressionGetter, Func<string, string, string> urlDeserializationExpressionGetter ) {
+			string initExpression, Func<string, string> urlSerializationExpressionGetter, Func<string, string, string> urlDeserializationExpressionGetter,
+			Func<string, string>? reCreationExpressionGetter = null ) {
 			Type = type;
 			SupportsNull = supportsNull;
 
@@ -49,6 +51,8 @@ internal class WebItemParameter {
 
 			UrlSerializationExpressionGetter = urlSerializationExpressionGetter;
 			UrlDeserializationExpressionGetter = urlDeserializationExpressionGetter;
+
+			ReCreationExpressionGetter = reCreationExpressionGetter;
 		}
 	}
 
@@ -84,7 +88,8 @@ internal class WebItemParameter {
 			"",
 			"TrustedUrl.Invalid",
 			valueExpression => $"TrustedUrl.Serialize( {valueExpression}, base.AppId )",
-			( valueExpression, appIdExpression ) => $"TrustedUrl.Deserialize( {valueExpression}, {appIdExpression} )" );
+			( valueExpression, appIdExpression ) => $"TrustedUrl.Deserialize( {valueExpression}, {appIdExpression} )",
+			reCreationExpressionGetter: valueExpression => $"{valueExpression}.ReCreate()" );
 
 		yield return new DataType(
 			typeof( TrustedParentUrl ),
@@ -95,7 +100,8 @@ internal class WebItemParameter {
 			"",
 			"TrustedParentUrl.Invalid",
 			valueExpression => $"TrustedParentUrl.Serialize( {valueExpression}, base.AppId )",
-			( valueExpression, appIdExpression ) => $"TrustedParentUrl.Deserialize( {valueExpression}, {appIdExpression} )" );
+			( valueExpression, appIdExpression ) => $"TrustedParentUrl.Deserialize( {valueExpression}, {appIdExpression} )",
+			reCreationExpressionGetter: valueExpression => $"{valueExpression}.ReCreate()" );
 
 		yield break;
 		bool hasSuffix( string suffix, string contains = "" ) => ModificationField.NameHasSuffix( name, suffix, contains );
@@ -278,6 +284,12 @@ internal class WebItemParameter {
 			type.ElementTypeName,
 			null,
 			null );
+
+	internal string GetReCreationExpression( string valueExpression ) =>
+		type.ReCreationExpressionGetter is null ? valueExpression :
+		AllowsNull ? $$"""
+		               {{valueExpression}} is {} __nonnullable ? {{type.ReCreationExpressionGetter( "__nonnullable" )}} : null
+		               """ : type.ReCreationExpressionGetter( valueExpression );
 
 	internal string GetEqualityExpression( string x, string y ) =>
 		IsEnumerable ? "{0}.SequenceEqual( {1} )".FormatWith( x, y ) : "EwlStatics.AreEqual( {0}, {1} )".FormatWith( x, y );

@@ -207,11 +207,10 @@ internal static class InfoStatics {
 
 	private static void generateMatchingHandlerParameterInitStatements(
 		TextWriter writer, IReadOnlyCollection<WebItemParameter> optionalParameters, bool useNewParameterValues ) {
-		foreach( var i in optionalParameters )
-			writer.WriteLine(
-				useNewParameterValues
-					? "{0} = match.parametersModification!.{1};".FormatWith( i.FieldName, i.PropertyName )
-					: "{0} = match.{1};".FormatWith( i.FieldName, i.PropertyName ) );
+		foreach( var i in optionalParameters ) {
+			var valueExpression = useNewParameterValues ? $"match.parametersModification!.{i.PropertyName}" : $"match.{i.PropertyName}";
+			writer.WriteLine( $"{i.FieldName} = {i.GetReCreationExpression( valueExpression )};" );
+		}
 		writer.WriteLine( "optionalParametersInitializedFromCurrent = true;" );
 		writer.WriteLine( "break;" );
 	}

@@ -58,7 +58,9 @@ internal class Resource {
 				StringTools.ConcatenateWithDelimiter(
 					", ",
 					entitySetup != null ? "Es.ReCreate()" : "",
-					InfoStatics.GetInfoConstructorArgumentsForRequiredParameters( generalData.RequiredParameters, parameter => parameter.PropertyName ),
+					InfoStatics.GetInfoConstructorArgumentsForRequiredParameters(
+						generalData.RequiredParameters,
+						parameter => parameter.GetReCreationExpression( parameter.PropertyName ) ),
 					generalData.OptionalParameters.Any() ? "optionalParameterSetter: optionalParameterSetter" : "",
 					"uriFragmentIdentifier: uriFragmentIdentifier" ) ) );
 		if( generalData.IsPage() )
