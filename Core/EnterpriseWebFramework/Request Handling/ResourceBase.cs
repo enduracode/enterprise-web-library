@@ -414,7 +414,7 @@ public abstract class ResourceBase: TrustedResourceInfo, ResourceParent {
 	/// </summary>
 	public virtual bool MatchesCurrent() => Equals( Current );
 
-	internal ResourceBase ReCreate() =>
+	internal override ResourceBase ReCreate() =>
 		UrlHandlerStateOverride is null
 			? reCreate()
 			: UrlHandlerStateOverride.ExecuteWithOverride( () => {
@@ -426,7 +426,7 @@ public abstract class ResourceBase: TrustedResourceInfo, ResourceParent {
 	/// Generated code and private use only.
 	/// </summary>
 	[ EditorBrowsable( EditorBrowsableState.Never ) ]
-	protected abstract override ResourceBase reCreate();
+	protected abstract ResourceBase reCreate();
 
 	public sealed override bool Equals( object? obj ) => Equals( obj as BasicUrlHandler );
 	public abstract bool Equals( BasicUrlHandler? other );

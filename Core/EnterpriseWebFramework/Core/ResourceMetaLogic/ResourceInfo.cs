@@ -30,7 +30,7 @@ public abstract class ResourceInfo: WebItem {
 
 	protected internal abstract IEnumerable<NestedUrl?> GetNestedUrls();
 
-	WebItem WebItem.ReCreate() => reCreate();
+	WebItem WebItem.ReCreate() => ReCreate();
 
-	protected virtual ResourceInfo reCreate() => this;
+	internal virtual ResourceInfo ReCreate() => this;
 }
