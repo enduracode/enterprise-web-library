@@ -27,7 +27,7 @@ public sealed class TrustedUrl: NestedUrl, IEquatable<TrustedUrl> {
 	public static string Serialize( TrustedUrl trustedUrl, string serializationAppId ) {
 		var date = EwfRequest.Current!.RequestTime.InUtc().Date;
 		var serializedUrl = EwfUrl.Serialize(
-			trustedUrl.url,
+			trustedUrl.Url,
 			appId => appId.Equals( serializationAppId, StringComparison.Ordinal ) ? "" :
 			         serializationAppId.Equals( EwfConfigurationStatics.AppConfiguration.PublicId, StringComparison.Ordinal ) ? appId :
 			         throw new Exception(
@@ -67,15 +67,15 @@ public sealed class TrustedUrl: NestedUrl, IEquatable<TrustedUrl> {
 
 	internal readonly WebItem? WebItem;
 
-	[ JsonProperty ]
-	private readonly EwfUrl? url;
+	[ JsonProperty( PropertyName = "url" ) ]
+	internal readonly EwfUrl? Url;
 
 	internal TrustedUrl( WebItem? webItem, EwfUrl? invalidUrl ) {
 		if( getNestedUrlDepth( webItem ) > 2 )
 			webItem = EwfConfigurationStatics.GetDefaultBaseResource();
 
 		WebItem = webItem;
-		url = invalidUrl ?? WebItem?.GetEwfUrl( false, false );
+		Url = invalidUrl ?? WebItem?.GetEwfUrl( false, false );
 	}
 
 	public TrustedResourceInfo GetResourceOrThrow() => TryGetResource( out var resource ) ? resource : throw new InvalidOperationException( "invalid URL" );
@@ -85,13 +85,17 @@ public sealed class TrustedUrl: NestedUrl, IEquatable<TrustedUrl> {
 		return resource is not null;
 	}
 
-	internal EwfUrl? GetUrl() => url;
-
 	int NestedUrl.GetNestedUrlDepth() => getNestedUrlDepth( WebItem );
 
+	/// <summary>
+	/// Generated code and internal use only.
+	/// </summary>
+	[ EditorBrowsable( EditorBrowsableState.Never ) ]
+	public TrustedUrl ReCreate() => new( WebItem?.ReCreate(), WebItem is null ? Url : null );
+
 	public override bool Equals( object? obj ) => Equals( obj as TrustedUrl );
-	public bool Equals( TrustedUrl? other ) => other is not null && EwlStatics.AreEqual( url, other.url );
-	public override int GetHashCode() => ( WebItem, url ).GetHashCode();
+	public bool Equals( TrustedUrl? other ) => other is not null && EwlStatics.AreEqual( Url, other.Url );
+	public override int GetHashCode() => ( WebItem, Url ).GetHashCode();
 }
 
 public static class TrustedUrlExtensionCreators {

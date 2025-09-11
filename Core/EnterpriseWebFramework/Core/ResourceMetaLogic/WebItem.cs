@@ -14,4 +14,6 @@ public interface WebItem {
 	internal EwfUrl GetEwfUrl( bool ensureUserCanAccessItem, bool ensureItemNotDisabled );
 
 	internal IEnumerable<NestedUrl?> GetNestedUrls();
+
+	internal WebItem ReCreate();
 }

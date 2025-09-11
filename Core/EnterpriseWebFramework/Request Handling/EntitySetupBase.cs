@@ -205,6 +205,14 @@ public abstract class EntitySetupBase: ResourceParent {
 
 	public virtual bool AllowsSearchEngineIndexing => Parent?.AllowsSearchEngineIndexing ?? true;
 
+	WebItem WebItem.ReCreate() => reCreate();
+
+	/// <summary>
+	/// Generated code and private use only.
+	/// </summary>
+	[ EditorBrowsable( EditorBrowsableState.Never ) ]
+	protected abstract EntitySetupBase reCreate();
+
 	public sealed override bool Equals( object? obj ) => Equals( obj as BasicUrlHandler );
 	public abstract bool Equals( BasicUrlHandler? other );
 	public abstract override int GetHashCode();

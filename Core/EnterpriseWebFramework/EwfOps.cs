@@ -341,7 +341,7 @@ public static class EwfOps {
 							SystemSpecificLogicStatics.GetLibraryProvider<SystemResourceSerializationProvider>( "ResourceSerialization" ),
 							getAppResourceSerializationProvider( providerGetter ) );
 						UrlHandlerStateOverride.Init(
-							() => RequestDispatchingStatics.RequestState.UrlHandlerStateOverride,
+							() => EwfRequest.Current is null ? null : RequestDispatchingStatics.RequestState.UrlHandlerStateOverride,
 							new RequestState.UrlHandlerStateOverrideMethodExecutor() );
 						ResourceBase.Init(
 							( requestTransferred, resource ) => {

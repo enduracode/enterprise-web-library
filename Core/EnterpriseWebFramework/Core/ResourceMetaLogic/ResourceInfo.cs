@@ -29,4 +29,8 @@ public abstract class ResourceInfo: WebItem {
 	IEnumerable<NestedUrl?> WebItem.GetNestedUrls() => GetNestedUrls();
 
 	protected internal abstract IEnumerable<NestedUrl?> GetNestedUrls();
+
+	WebItem WebItem.ReCreate() => reCreate();
+
+	protected virtual ResourceInfo reCreate() => this;
 }

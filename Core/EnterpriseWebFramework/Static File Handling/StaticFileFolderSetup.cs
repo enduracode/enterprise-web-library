@@ -23,6 +23,8 @@ public abstract class StaticFileFolderSetup: EntitySetupBase {
 
 	protected abstract string folderPath { get; }
 
+	protected sealed override EntitySetupBase reCreate() => this;
+
 	public sealed override bool Equals( BasicUrlHandler? other ) =>
 		other is StaticFileFolderSetup otherFs && otherFs.isFrameworkFolder == isFrameworkFolder && otherFs.folderPath == folderPath;
 

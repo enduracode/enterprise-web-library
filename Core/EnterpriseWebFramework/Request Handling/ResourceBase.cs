@@ -426,7 +426,7 @@ public abstract class ResourceBase: TrustedResourceInfo, ResourceParent {
 	/// Generated code and private use only.
 	/// </summary>
 	[ EditorBrowsable( EditorBrowsableState.Never ) ]
-	protected abstract ResourceBase reCreate();
+	protected abstract override ResourceBase reCreate();
 
 	public sealed override bool Equals( object? obj ) => Equals( obj as BasicUrlHandler );
 	public abstract bool Equals( BasicUrlHandler? other );

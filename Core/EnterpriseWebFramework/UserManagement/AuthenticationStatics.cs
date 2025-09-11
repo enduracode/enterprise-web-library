@@ -270,7 +270,7 @@ public static class AuthenticationStatics {
 					                           isPasswordReset,
 					                           autoLogInPageUrlGetter!,
 					                           changePasswordPageUrlGetter!,
-					                           destinationUrl?.GetUrl()?.Url ?? "",
+					                           destinationUrl?.Url?.Url ?? "",
 					                           newUserRoleId: newUserRoleId ) is { Length: > 0 } errorMessage )
 					                       throw new DataModificationException( errorMessage );
 				                       PageBase.AddStatusMessage(

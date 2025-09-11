@@ -33,9 +33,15 @@ public sealed class TrustedParentUrl: NestedUrl, IEquatable<TrustedParentUrl> {
 	}
 
 	[ JsonProperty ]
-	private EwfUrl? url => trustedUrl.GetUrl();
+	private EwfUrl? url => trustedUrl.Url;
 
 	int NestedUrl.GetNestedUrlDepth() => ( (NestedUrl)trustedUrl ).GetNestedUrlDepth();
+
+	/// <summary>
+	/// Generated code use only.
+	/// </summary>
+	[ EditorBrowsable( EditorBrowsableState.Never ) ]
+	public TrustedParentUrl ReCreate() => new( trustedUrl.ReCreate() );
 
 	public override bool Equals( object? obj ) => Equals( obj as TrustedParentUrl );
 	public bool Equals( TrustedParentUrl? other ) => other is not null && EwlStatics.AreEqual( trustedUrl, other.trustedUrl );
