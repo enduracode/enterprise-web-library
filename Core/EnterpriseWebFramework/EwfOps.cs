@@ -151,7 +151,15 @@ public static class EwfOps {
 		try {
 			return GlobalInitializationOps.ExecuteAppWithStandardExceptionHandling( () => {
 				try {
-					EwfConfigurationStatics.Init();
+					EwfConfigurationStatics.Init( () => {
+						var handler = RequestState.ExecuteWithUrlHandlerStateOverride(
+								new SpecifiedValue<UrlHandlerStateOverride>( null ),
+								() => RequestDispatchingStatics.RequestState.ExecuteWithUserDisabled( () => UrlHandlingStatics.ResolveUrl(
+									EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString( EwfConfigurationStatics.AppSupportsSecureConnections ),
+									"" ) ) )
+							?.Last();
+						return handler is EntitySetupBase entitySetup ? entitySetup.DefaultResource : (ResourceBase)handler;
+					} );
 
 					var diagnosticLogLevelSwitch = new LoggingLevelSwitch( initialMinimumLevel: LogEventLevel.Information );
 					var loggerConfiguration = new LoggerConfiguration().Destructure.JsonNetTypes()
