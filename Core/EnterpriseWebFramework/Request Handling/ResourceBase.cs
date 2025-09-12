@@ -310,8 +310,15 @@ public abstract class ResourceBase: TrustedResourceInfo, ResourceParent {
 	void BasicUrlHandler.HandleRequest( HttpContext context ) => HandleRequest( context, false );
 
 	internal void HandleRequest( HttpContext context, bool requestTransferred ) {
-		var canonicalUrl = GetEwfUrl( false, false ).Url;
+		string canonicalUrl;
+		try {
+			canonicalUrl = GetEwfUrl( false, false ).Url;
+		}
+		catch( Exception e ) when( !requestTransferred && e.InnerException is ResourceAncestorException ) {
+			throw new ResourceNotAvailableException( null, e );
+		}
 		var shouldBeSecure = ( (ResourceParent)this ).ShouldBeSecure();
+
 		if( requestTransferred ) {
 			if( shouldBeSecure != EwfRequest.AppProvider.RequestIsSecure( context.Request ) )
 				throw new ApplicationException( "{0} has a connection security setting that is incompatible with the current request.".FormatWith( canonicalUrl ) );
