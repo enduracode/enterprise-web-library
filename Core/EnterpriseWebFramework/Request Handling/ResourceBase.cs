@@ -15,7 +15,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 /// </summary>
 [ PublicAPI ]
 public abstract class ResourceBase: TrustedResourceInfo, ResourceParent {
-	private static Action<bool, ResourceBase>? urlHandlerStateUpdater;
+	private static Action<ResourceBase>? urlHandlerStateSetter;
 	private static Func<ResourceBase?>? currentResourceGetter;
 	private static Action? requestStateRefresher;
 
@@ -35,8 +35,8 @@ public abstract class ResourceBase: TrustedResourceInfo, ResourceParent {
 			.WriteToAspNetResponse( context.Response, omitBody: context.Request.Method == "HEAD" );
 	}
 
-	internal static void Init( Action<bool, ResourceBase> urlHandlerStateUpdater, Func<ResourceBase?> currentResourceGetter, Action requestStateRefresher ) {
-		ResourceBase.urlHandlerStateUpdater = urlHandlerStateUpdater;
+	internal static void Init( Action<ResourceBase> urlHandlerStateSetter, Func<ResourceBase?> currentResourceGetter, Action requestStateRefresher ) {
+		ResourceBase.urlHandlerStateSetter = urlHandlerStateSetter;
 		ResourceBase.currentResourceGetter = currentResourceGetter;
 		ResourceBase.requestStateRefresher = requestStateRefresher;
 	}
@@ -77,10 +77,26 @@ public abstract class ResourceBase: TrustedResourceInfo, ResourceParent {
 	protected ResourceBase() {
 		UrlHandlerStateOverride = UrlHandlerStateOverride.Current;
 
-		parent = new Lazy<ResourceParent?>( () => UrlHandlerStateOverride is null ? createParent() : UrlHandlerStateOverride.ExecuteWithThis( createParent ) );
+		parent = new Lazy<ResourceParent?>( () =>
+			UrlHandlerStateOverride is null
+				? handleParentException( createParent )
+				: UrlHandlerStateOverride.ExecuteWithThis( () => handleParentException( createParent ) ) );
 		name = new Lazy<string>( getResourceName );
 		alternativeMode = new Lazy<AlternativeResourceMode?>( createAlternativeMode );
-		urlParent = new Lazy<UrlHandler?>( () => UrlHandlerStateOverride is null ? getUrlParent() : UrlHandlerStateOverride.ExecuteWithThis( getUrlParent ) );
+		urlParent = new Lazy<UrlHandler?>( () =>
+			UrlHandlerStateOverride is null
+				? handleParentException( getUrlParent )
+				: UrlHandlerStateOverride.ExecuteWithThis( () => handleParentException( getUrlParent ) ) );
+
+		return;
+		static T handleParentException<T>( Func<T> method ) {
+			try {
+				return method();
+			}
+			catch( Exception e ) {
+				throw new ResourceAncestorException( e );
+			}
+		}
 	}
 
 	/// <summary>
@@ -320,7 +336,12 @@ public abstract class ResourceBase: TrustedResourceInfo, ResourceParent {
 			}
 		}
 
-		urlHandlerStateUpdater!( requestTransferred, this );
+		try {
+			urlHandlerStateSetter!( this );
+		}
+		catch( ResourceAncestorException e ) when( !requestTransferred ) {
+			throw new ResourceNotAvailableException( null, e );
+		}
 
 		bool userAuthorized;
 		using( MiniProfiler.Current.Step( "EWF - Check resource authorization" ) )

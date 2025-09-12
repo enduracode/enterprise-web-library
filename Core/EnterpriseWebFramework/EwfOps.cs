@@ -344,11 +344,7 @@ public static class EwfOps {
 							() => EwfRequest.Current is null ? null : RequestDispatchingStatics.RequestState.UrlHandlerStateOverride,
 							new RequestState.UrlHandlerStateOverrideMethodExecutor() );
 						ResourceBase.Init(
-							( requestTransferred, resource ) => {
-								RequestDispatchingStatics.RequestState.SetUrlHandlerState( resource );
-								if( requestTransferred )
-									RequestDispatchingStatics.RequestState.SetNewUrlParameterValuesEffective( false );
-							},
+							resource => RequestDispatchingStatics.RequestState.ForceAncestorCreationAndSetUrlHandlerState( resource ),
 							() => RequestDispatchingStatics.RequestState.UrlHandlerStateOverridden
 								      ? throw new InvalidOperationException()
 								      : (ResourceBase)RequestDispatchingStatics.RequestState.WebItem,

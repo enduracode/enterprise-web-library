@@ -158,7 +158,8 @@ internal class RequestState {
 
 	internal ResourceParent? WebItem => urlHandlerStateStack.Peek().WebItem;
 
-	internal void SetUrlHandlerState( ResourceBase resource ) {
+	// This should only be called if the resource has a connection security setting that is compatible with the current request.
+	internal void ForceAncestorCreationAndSetUrlHandlerState( ResourceBase resource ) {
 		if( UrlHandlerStateOverridden )
 			throw new InvalidOperationException();
 
@@ -169,6 +170,9 @@ internal class RequestState {
 		while( ( parent = parent!.Parent ) is not null );
 
 		urlHandlerStateStack.Peek().Set( handlers, resource );
+
+		// New parameter values, if effective, should be applied to the ancestors we create above.
+		newUrlParameterValuesEffective = false;
 	}
 
 	internal bool UrlHandlerStateOverridden => urlHandlerStateStack.Count > 1;
@@ -178,8 +182,8 @@ internal class RequestState {
 
 	internal bool NewUrlParameterValuesEffective => newUrlParameterValuesEffective && urlHandlerStateStack.Peek().Handlers is { Count: > 0 };
 
-	internal void SetNewUrlParameterValuesEffective( bool effective ) {
-		newUrlParameterValuesEffective = effective;
+	internal void SetNewUrlParameterValuesEffective() {
+		newUrlParameterValuesEffective = true;
 	}
 
 	/// <summary>

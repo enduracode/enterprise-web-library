@@ -906,7 +906,7 @@ public abstract class PageBase: ResourceBase {
 			if( !navigationBehavior.HasValue )
 				destination = ReCreate();
 			else {
-				RequestState.Instance.SetNewUrlParameterValuesEffective( true );
+				RequestState.Instance.SetNewUrlParameterValuesEffective();
 				if( navigationBehavior.Value.destination is null )
 					destination = UrlHandlerStateOverride is null
 						              ? reCreateFromNewParameterValues()
@@ -931,7 +931,6 @@ public abstract class PageBase: ResourceBase {
 		}
 
 		if( destination is PageBase page ) {
-			RequestState.Instance.SetNewUrlParameterValuesEffective( false );
 			RequestStateStatics.SetClientSideNewUrl( destinationUrl );
 
 			// If the destination page has the same origin as the current page, do a transfer instead of a redirect. Don’t do this if the authorization check was
@@ -943,7 +942,12 @@ public abstract class PageBase: ResourceBase {
 				    UriComponents.SchemeAndServer,
 				    UriFormat.UriEscaped,
 				    StringComparison.Ordinal ) == 0 ) {
-				RequestState.Instance.SetUrlHandlerState( page );
+				try {
+					RequestState.Instance.ForceAncestorCreationAndSetUrlHandlerState( page );
+				}
+				catch( ResourceAncestorException e ) {
+					throw getDeveloperMistakeException( "Initialization failed for an ancestor of the post-modification destination page.", innerException: e );
+				}
 
 				page.requestState = requestState;
 				nextPageObject = page;
@@ -957,7 +961,12 @@ public abstract class PageBase: ResourceBase {
 					if( authorizationCheckDisabled )
 						page.HandleRequest( context, false );
 					else {
-						RequestState.Instance.SetUrlHandlerState( page );
+						try {
+							RequestState.Instance.ForceAncestorCreationAndSetUrlHandlerState( page );
+						}
+						catch( ResourceAncestorException e ) {
+							throw getDeveloperMistakeException( "Initialization failed for an ancestor of the post-modification destination page.", innerException: e );
+						}
 
 						page.requestState = requestState;
 						actionProcessor( page ).WriteToAspNetResponse( context.Response );
@@ -972,7 +981,7 @@ public abstract class PageBase: ResourceBase {
 			additionalHeaderFieldGetter: () => ( "Location", destinationUrl ).ToCollection() );
 	}
 
-	private ApplicationException getDeveloperMistakeException( string messageSentence, Exception innerException = null ) {
+	private Exception getDeveloperMistakeException( string messageSentence, Exception innerException = null ) {
 		const string firstSentence = "Developer mistake.";
 		const string lastSentence =
 			"There is a chance that this was caused by non-transactional data changing outside of the request, but it’s more likely that a developer incorrectly modified something.";

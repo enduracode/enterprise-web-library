@@ -30,11 +30,27 @@ public abstract class EntitySetupBase: ResourceParent {
 	protected EntitySetupBase() {
 		var urlHandlerStateOverride = UrlHandlerStateOverride.Current;
 
-		parent = new Lazy<ResourceParent?>( () => urlHandlerStateOverride is null ? createParent() : urlHandlerStateOverride.ExecuteWithThis( createParent ) );
+		parent = new Lazy<ResourceParent?>( () =>
+			urlHandlerStateOverride is null
+				? handleParentException( createParent )
+				: urlHandlerStateOverride.ExecuteWithThis( () => handleParentException( createParent ) ) );
 		name = new Lazy<string>( getEntitySetupName );
 		alternativeMode = new Lazy<AlternativeResourceMode?>( createAlternativeMode );
 		listedResources = new Lazy<IReadOnlyCollection<ResourceGroup>>( () => createListedResources().Materialize() );
-		urlParent = new Lazy<UrlHandler?>( () => urlHandlerStateOverride is null ? getUrlParent() : urlHandlerStateOverride.ExecuteWithThis( getUrlParent ) );
+		urlParent = new Lazy<UrlHandler?>( () =>
+			urlHandlerStateOverride is null
+				? handleParentException( getUrlParent )
+				: urlHandlerStateOverride.ExecuteWithThis( () => handleParentException( getUrlParent ) ) );
+
+		return;
+		static T handleParentException<T>( Func<T> method ) {
+			try {
+				return method();
+			}
+			catch( Exception e ) {
+				throw new ResourceAncestorException( e );
+			}
+		}
 	}
 
 	/// <summary>
