@@ -51,7 +51,7 @@ public sealed class TrustedUrl: NestedUrl, IEquatable<TrustedUrl> {
 			return new TrustedUrl( new TrustedExternalResource( new ExternalResource( url.Url ) ), null );
 
 		var handler = urlResolverExecutor!( () => UrlHandlingStatics.GetUrlResolver( url.AppId )( url.BaseUrlString, url.AppRelativeUrl ) );
-		return handler is TrustedResourceInfo resource ? new TrustedUrl( resource, null ) : new TrustedUrl( null, url );
+		return handler is WebItem webItem ? new TrustedUrl( webItem, null ) : new TrustedUrl( null, url );
 	}
 
 	private static string getHmac( string data, LocalDate date ) =>
