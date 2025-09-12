@@ -71,7 +71,9 @@ partial class Impersonate {
 		var user = new DataValue<SystemUser?>( false );
 		var pb = PostBack.CreateFull(
 			modificationMethod: () => UserImpersonationStatics.BeginImpersonation( user.Value ),
-			actionGetter: () => new PostBackAction( returnResource ?? EwfConfigurationStatics.GetDefaultBaseResource() ) );
+			actionGetter: () => new PostBackAction(
+				returnResource ?? EwfConfigurationStatics.GetDefaultBaseResource(),
+				authorizationCheckDisabledPredicate: _ => true ) );
 		FormState.ExecuteWithActions(
 			pb,
 			() => {

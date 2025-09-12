@@ -29,7 +29,9 @@ partial class VerifyClientFunctionality {
 				if( AuthenticationStatics.ClockNotSynchronized( clientTime ) )
 					parametersModification.ClockWrong = true;
 			},
-			actionGetter: () => new PostBackAction( verificationFailed() ? null : returnResource ) );
+			actionGetter: () => new PostBackAction(
+				verificationFailed() ? null : returnResource,
+				authorizationCheckDisabledPredicate: verificationFailed() ? null : _ => true ) );
 		return FormState.ExecuteWithActions(
 			postBack,
 			() => new UiPageContent( pageLoadPostBack: postBack ).Add( AuthenticationStatics.GetLogInHiddenFields( clientTime ) ) );
@@ -39,7 +41,8 @@ partial class VerifyClientFunctionality {
 		var content = new UiPageContent(
 			contentFootActions: new ButtonSetup(
 				"Proceed Anyway",
-				behavior: new PostBackBehavior( postBack: PostBack.CreateFull( actionGetter: () => new PostBackAction( returnResource ) ) ) ) );
+				behavior: new PostBackBehavior(
+					postBack: PostBack.CreateFull( actionGetter: () => new PostBackAction( returnResource, authorizationCheckDisabledPredicate: _ => true ) ) ) ) );
 		if( CookiesDisabled )
 			content.Add( new Paragraph( Translation.YourBrowserHasCookiesDisabled.ToComponents() ) );
 		if( ClockWrong )

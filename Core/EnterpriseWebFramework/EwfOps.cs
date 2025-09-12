@@ -522,7 +522,9 @@ public static class EwfOps {
 												       postBack: PostBack.CreateFull(
 													       id: "ewfEndImpersonation",
 													       modificationMethod: UserImpersonationStatics.EndImpersonation,
-													       actionGetter: () => new PostBackAction( EwfConfigurationStatics.GetDefaultBaseResource() ) ) ) ) ) );
+													       actionGetter: () => new PostBackAction(
+														       EwfConfigurationStatics.GetDefaultBaseResource(),
+														       authorizationCheckDisabledPredicate: _ => true ) ) ) ) ) );
 							} );
 						EwfUiStatics.Init( providerGetter.GetProvider<AppEwfUiProvider>( "EwfUi" ), AuthenticationStatics.GetUserInfoComponents );
 						AuthenticationStatics.Init(

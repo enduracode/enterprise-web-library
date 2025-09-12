@@ -13,7 +13,7 @@ partial class AccessDenied {
 					ShowHomeLink
 						? new Paragraph(
 							new EwfHyperlink(
-								EwfConfigurationStatics.GetDefaultBaseResource(),
+								EwfConfigurationStatics.GetDefaultBaseResource().ToHyperlinkDefaultBehavior( disableAuthorizationCheck: true ),
 								new StandardHyperlinkStyle( Translation.ClickHereToGoToHomePage ) ).ToCollection() ).ToCollection()
 						: Enumerable.Empty<FlowComponent>() )
 				.Materialize() );
