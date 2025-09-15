@@ -23,7 +23,7 @@ public sealed class BasicPageContent: PageContent {
 	private static readonly ElementClass processingDialogTimeOutParagraphClass = new( "ewfTimeOutP" );
 	private static readonly ElementClass pageLoadPostBackContentContainerClass = new( "ewfPlpb" );
 
-	private static Func<string> clientSideNewUrlGetter;
+	internal static Func<string> ClientSideNewUrlGetter;
 	private static Func<IReadOnlyCollection<PageContent>, IEnumerable<ResourceInfo>> cssInfoCreator;
 	private static Action<StringBuilder, bool> javaScriptIncludeBuilder;
 	private static Func<IEnumerable<( ResourceInfo resource, string rel, string sizes )>> appIconGetter;
@@ -131,7 +131,7 @@ public sealed class BasicPageContent: PageContent {
 		Func<string> clientSideNewUrlGetter, Func<IReadOnlyCollection<PageContent>, IEnumerable<ResourceInfo>> cssInfoCreator,
 		Action<StringBuilder, bool> javaScriptIncludeBuilder, Func<IEnumerable<( ResourceInfo, string, string )>> appIconGetter,
 		Func<bool, string> intermediateUrlGetter, Func<( string, ActionComponentSetupsParameter )?> impersonationWarningLineGetter ) {
-		BasicPageContent.clientSideNewUrlGetter = clientSideNewUrlGetter;
+		ClientSideNewUrlGetter = clientSideNewUrlGetter;
 		BasicPageContent.cssInfoCreator = cssInfoCreator;
 		BasicPageContent.javaScriptIncludeBuilder = javaScriptIncludeBuilder;
 		BasicPageContent.appIconGetter = appIconGetter;
@@ -201,7 +201,7 @@ public sealed class BasicPageContent: PageContent {
 				focusDependentData: new ElementFocusDependentData( attributes: new ElementAttribute( "lang", "en-US" ).ToCollection() ) ),
 			children: new ElementComponent( _ => new ElementData(
 					() => new ElementLocalData( "head" ),
-					children: new TrustedHtmlString( clientSideNewUrlGetter().Surround( "<script>history.replaceState( null, \"\", \"", "\" );</script>" ) ).ToComponent()
+					children: new TrustedHtmlString( ClientSideNewUrlGetter().Surround( "<script>history.replaceState( null, \"\", \"", "\" );</script>" ) ).ToComponent()
 						.Append(
 							new ElementComponent( _ => new ElementData(
 								() => new ElementLocalData( "title" ),

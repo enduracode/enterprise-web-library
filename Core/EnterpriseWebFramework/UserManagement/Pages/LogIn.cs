@@ -72,7 +72,11 @@ partial class LogIn {
 		return new UiPageContent( omitContentBox: true ).Add( getLogInComponents() );
 	}
 
-	private bool authenticatedUserDeniedAccess => SystemUser.Current is not null && !string.Equals( GetUrl(), EwfRequest.Current!.Url, StringComparison.Ordinal );
+	private bool authenticatedUserDeniedAccess =>
+		SystemUser.Current is not null && !string.Equals(
+			GetUrl(),
+			BasicPageContent.ClientSideNewUrlGetter() is { Length: > 0 } url ? url : EwfRequest.Current!.Url,
+			StringComparison.Ordinal );
 
 	private IReadOnlyCollection<FlowComponent> getLogInComponents() {
 		var components = new List<FlowComponent>();
