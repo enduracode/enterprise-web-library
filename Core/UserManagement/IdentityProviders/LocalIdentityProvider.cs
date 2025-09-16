@@ -15,6 +15,8 @@ namespace EnterpriseWebLibrary.UserManagement.IdentityProviders;
 /// </summary>
 [ PublicAPI ]
 public class LocalIdentityProvider: IdentityProvider {
+	public delegate void LoginCodeSentNotifierMethod( int userId );
+
 	public delegate ( byte[]? salt, byte[]? hashedCode, Instant? expirationTime, byte? remainingAttemptCount, string destinationUrl ) LoginCodeGetterMethod(
 		int userId );
 
@@ -36,6 +38,7 @@ public class LocalIdentityProvider: IdentityProvider {
 	internal readonly string AdministratingOrganizationName;
 	internal readonly string LogInHelpInstructions;
 	private readonly PasswordStorageSetup passwordStorageSetup;
+	private readonly LoginCodeSentNotifierMethod? loginCodeSentNotifier;
 	private readonly LoginCodeGetterMethod loginCodeGetter;
 	private readonly PostAuthenticationMethod? postAuthenticationMethod;
 	internal readonly Duration? AuthenticationDuration;
@@ -50,8 +53,8 @@ public class LocalIdentityProvider: IdentityProvider {
 	/// XXX." Do not pass null.</param>
 	/// <param name="passwordStorageSetup">The setup object for password storage.</param>
 	/// <param name="loginCodeGetter">A function that takes a user ID and returns the corresponding user’s login-code data.</param>
-	/// <param name="loginCodeUpdater">A method that takes a user ID and new login-code data and updates the corresponding user. You can also use this method to
-	/// log that a login code has been sent. Do not pass null.</param>
+	/// <param name="loginCodeUpdater">A method that takes a user ID and new login-code data and updates the corresponding user.</param>
+	/// <param name="loginCodeSentNotifier">A method that is called when a login code has been sent. You can use this to perform logging.</param>
 	/// <param name="postAuthenticationMethod">Performs actions immediately after password or login-code authentication, which could include counting failed
 	/// authentication attempts or preventing a user from logging in. Takes a user object, whether built-in authentication was successful, and the authentication
 	/// type, and returns true if authentication is successful, false if it failed for any reason, and null if it did not fail but is incomplete. Also has an out
@@ -63,11 +66,13 @@ public class LocalIdentityProvider: IdentityProvider {
 	/// absolutely requires micromanagement of authentication behavior.</param>
 	public LocalIdentityProvider(
 		string administratingOrganizationName, string logInHelpInstructions, PasswordStorageSetup passwordStorageSetup, LoginCodeGetterMethod loginCodeGetter,
-		LoginCodeUpdaterMethod loginCodeUpdater, PostAuthenticationMethod? postAuthenticationMethod = null, Duration? authenticationDuration = null,
+		LoginCodeUpdaterMethod loginCodeUpdater, LoginCodeSentNotifierMethod? loginCodeSentNotifier = null,
+		PostAuthenticationMethod? postAuthenticationMethod = null, Duration? authenticationDuration = null,
 		Action<int?, string, Validator>? passwordValidationMethod = null ) {
 		AdministratingOrganizationName = administratingOrganizationName;
 		LogInHelpInstructions = logInHelpInstructions;
 		this.passwordStorageSetup = passwordStorageSetup;
+		this.loginCodeSentNotifier = loginCodeSentNotifier;
 		this.loginCodeGetter = loginCodeGetter;
 		this.postAuthenticationMethod = postAuthenticationMethod;
 		AuthenticationDuration = authenticationDuration;
@@ -192,6 +197,8 @@ public class LocalIdentityProvider: IdentityProvider {
 			};
 		message.ToAddresses.Add( new EmailAddress( emailAddress ) );
 		EmailStatics.SendEmailWithDefaultFromAddress( message );
+
+		loginCodeSentNotifier?.Invoke( user.UserId );
 
 		return "";
 	}
