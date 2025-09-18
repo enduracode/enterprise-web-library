@@ -138,9 +138,8 @@ public class EwfResponse {
 		Func<string> extensionlessFileNameCreator, MergeRowTree rowTree, bool ensureAllFieldsHaveValues, Action<Action<Stream>> inputStreamProvider ) =>
 		Create(
 			ContentTypes.WordDoc,
-			new EwfResponseBodyCreator(
-				destinationStream =>
-					inputStreamProvider( inputStream => MergeOps.CreateMsWordDoc( rowTree, ensureAllFieldsHaveValues, inputStream, destinationStream ) ) ),
+			new EwfResponseBodyCreator( destinationStream =>
+				inputStreamProvider( inputStream => MergeOps.CreateMsWordDoc( rowTree, ensureAllFieldsHaveValues, inputStream, destinationStream ) ) ),
 			fileNameCreator: () => extensionlessFileNameCreator() + FileExtensions.WordDoc );
 
 	/// <summary>
@@ -162,8 +161,12 @@ public class EwfResponse {
 		Func<string> extensionlessFileNameCreator, MergeRowTree rowTree, IEnumerable<string> fieldNames, bool omitHeaderRow = false ) =>
 		Create(
 			ContentTypes.TabSeparatedValues,
-			new EwfResponseBodyCreator(
-				writer => MergeOps.CreateTabularTextFile( rowTree, fieldNames, writer, useTabAsSeparator: true, omitHeaderRow: omitHeaderRow ) ),
+			new EwfResponseBodyCreator( writer => MergeOps.CreateTabularTextFile(
+				rowTree,
+				fieldNames,
+				writer,
+				useTabAsSeparator: true,
+				omitHeaderRow: omitHeaderRow ) ),
 			fileNameCreator: () => extensionlessFileNameCreator() + FileExtensions.Txt );
 
 	/// <summary>
@@ -235,9 +238,8 @@ public class EwfResponse {
 	/// <param name="method">A function that executes an MVC action and returns the result. Do not pass or return null.</param>
 	public static EwfResponse CreateFromAspNetMvcAction( Func<Task<IActionResult>> method ) {
 		var context = currentContextGetter();
-		return CreateFromAspNetResponse(
-			_ => Task.Run( async () => await ( await method() ).ExecuteResultAsync( new ActionContext( context, new RouteData(), new ActionDescriptor() ) ) )
-				.Wait() );
+		return CreateFromAspNetResponse( _ =>
+			Task.Run( async () => await ( await method() ).ExecuteResultAsync( new ActionContext( context, new RouteData(), new ActionDescriptor() ) ) ).Wait() );
 	}
 
 	internal readonly string ContentType;
