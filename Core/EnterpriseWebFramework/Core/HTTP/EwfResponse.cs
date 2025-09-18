@@ -69,7 +69,7 @@ public class EwfResponse {
 		}
 
 		public override long? ContentLength { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-		public override string ContentType { get => Headers.ContentType; set => Headers.ContentType = value.IsNullOrEmpty() ? value : default( StringValues ); }
+		public override string ContentType { get => Headers.ContentType; set => Headers.ContentType = value.IsNullOrEmpty() ? default( StringValues ) : value; }
 		public override bool HasStarted => throw new NotImplementedException();
 		public override void OnStarting( Func<object, Task> callback, object state ) => throw new NotImplementedException();
 		public override void OnCompleted( Func<object, Task> callback, object state ) => throw new NotImplementedException();
