@@ -99,9 +99,41 @@ public class EwfSafeResponseWriter {
 			}
 
 			var memoryCacheKey = memoryCacheKeyGetter();
-			if( memoryCacheKey.Any() ) {
+			if( memoryCacheKey.Length > 0 ) {
 				var fullResponse = FullResponse.GetFromCache( memoryCacheKey, lastModificationDateAndTime!.Value, () => response.Value.CreateFullResponse() );
 				response = new Lazy<EwfResponse>( () => new EwfResponse( fullResponse ) );
+			}
+
+			if( response.Value.BodyCreator is { SupportsStreaming: false, BodyIsText: false } ) {
+				const string rangeUnit = "bytes";
+				aspNetResponse.Headers.AcceptRanges = rangeUnit;
+
+				var typedRequestHeaders = aspNetRequest.GetTypedHeaders();
+				var specifier = typedRequestHeaders.Range;
+				var condition = typedRequestHeaders.IfRange;
+				if( specifier is not null && ( condition?.EntityTag is not {} et || et.Tag.Equals( eTag, StringComparison.Ordinal ) ) &&
+				    specifier.Unit.Equals( rangeUnit, StringComparison.Ordinal ) && specifier.Ranges.Count > 0 ) {
+					var body = response.Value.BodyCreator.BinaryBodyCreator!();
+
+					var range = specifier.Ranges.First();
+					if( specifier.Ranges.Count > 1 || range.From >= body.Length || range.To >= body.Length ) {
+						aspNetResponse.StatusCode = 416;
+						typedHeaders.ContentRange = new ContentRangeHeaderValue( body.LongLength );
+						return;
+					}
+
+					var from = range.From ?? ( range.To!.Value > body.Length ? 0 : body.Length - range.To.Value );
+					var to = range is { From: not null, To: not null } ? range.To.Value : body.Length - 1;
+					typedHeaders.ContentRange = new ContentRangeHeaderValue( from, to, body.LongLength );
+
+					var rangeResponse = EwfResponse.Create(
+						condition is null ? response.Value.ContentType : "",
+						new EwfResponseBodyCreator( () => body[ (int)from..(int)( to + 1 ) ] ),
+						statusCodeGetter: () => 206,
+						fileNameCreator: condition is null ? response.Value.FileNameCreator : null,
+						additionalHeaderFieldGetter: condition is null ? response.Value.AdditionalHeaderFieldGetter : null );
+					response = new Lazy<EwfResponse>( () => rangeResponse );
+				}
 			}
 
 			response.Value.WriteToAspNetResponse( aspNetResponse, omitBody: aspNetRequest.Method == "HEAD" );
@@ -160,27 +192,27 @@ public class EwfSafeResponseWriter {
 
 	/// <summary>
 	/// Creates a response writer with a generic response, a last-modification date/time (which enables conditional requests), and an optional memory-cache key.
-	/// Do not use this overload if the response will vary based on non-URL elements of the request, such as the authenticated user, since a parameter doesn't
+	/// Do not use this overload if the response will vary based on non-URL elements of the request, such as the authenticated user, since a parameter doesn’t
 	/// exist yet to incorporate those elements into the ETag.
 	/// </summary>
 	/// <param name="responseCreator">The response creator.</param>
 	/// <param name="lastModificationDateAndTime">The last-modification date/time of the resource.</param>
 	/// <param name="memoryCacheKeyGetter">A function that gets the memory-cache key for this response. Pass null or return the empty string if you do not want
-	/// to use EWL's memory cache. Do not return null.</param>
+	/// to use EWL’s memory cache, which will also disable HTTP range requests if the response body is streamed. Do not return null.</param>
 	public EwfSafeResponseWriter( Func<EwfResponse> responseCreator, DateTimeOffset lastModificationDateAndTime, Func<string>? memoryCacheKeyGetter = null ) {
 		writer = createWriter( responseCreator, "", "", () => lastModificationDateAndTime, memoryCacheKeyGetter ?? ( () => "" ) );
 	}
 
 	/// <summary>
 	/// Creates a response writer with a generic response, a resource-version string from the request URL, and optional memory caching information. Including a
-	/// version string in a resource's URL greatly improves the cacheability of the resource, so you should use this technique whenever you have the ability to
+	/// version string in a resource’s URL greatly improves the cacheability of the resource, so you should use this technique whenever you have the ability to
 	/// change the URL when the resource changes. Do not use a version string if the response will vary based on non-URL elements of the request, such as the
 	/// authenticated user.
 	/// </summary>
 	/// <param name="responseCreator">The response creator.</param>
 	/// <param name="urlVersionString">The resource-version string from the request URL. Do not pass null or the empty string.</param>
-	/// <param name="memoryCachingSetupGetter">A function that gets the memory-caching setup object for the response. Pass null or return null if you do not
-	/// want to use EWL's memory cache.</param>
+	/// <param name="memoryCachingSetupGetter">A function that gets the memory-caching setup object for the response. Pass null or return null if you do not want
+	/// to use EWL’s memory cache, which will also disable HTTP range requests if the response body is streamed.</param>
 	public EwfSafeResponseWriter(
 		Func<EwfResponse> responseCreator, string urlVersionString, Func<ResponseMemoryCachingSetup?>? memoryCachingSetupGetter = null ) {
 		var memoryCachingSetup = new Lazy<ResponseMemoryCachingSetup?>( memoryCachingSetupGetter ?? ( () => null ) );

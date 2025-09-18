@@ -14,6 +14,7 @@ public class EwfResponseBodyCreator {
 	internal readonly Func<byte[]>? BinaryBodyCreator;
 	internal readonly Action<TextWriter>? TextBodyWriter;
 	internal readonly Action<Stream>? BinaryBodyWriter;
+	internal readonly bool SupportsStreaming;
 
 	/// <summary>
 	/// Creates a response-body creator with a method that returns a text body.
@@ -52,6 +53,7 @@ public class EwfResponseBodyCreator {
 			return writer.ToString();
 		};
 		TextBodyWriter = textBodyWriter;
+		SupportsStreaming = true;
 	}
 
 	/// <summary>
@@ -64,9 +66,10 @@ public class EwfResponseBodyCreator {
 			return stream.ToArray();
 		};
 		BinaryBodyWriter = binaryBodyWriter;
+		SupportsStreaming = true;
 	}
 
-	internal bool BodyIsText => TextBodyCreator != null;
+	internal bool BodyIsText => TextBodyCreator is not null;
 
 	internal EwfResponseBodyCreator GetBufferedBodyCreator() {
 		if( BodyIsText ) {
