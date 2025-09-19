@@ -22,8 +22,8 @@ public static class DataCleanupOps {
 	public static void CleanUpData() {
 		if( UserManagementStatics.UserManagementEnabled )
 			if( ConfigurationStatics.DatabaseExists )
-				DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen(
-					() => DataAccessState.Current.PrimaryDatabaseConnection.ExecuteInTransaction( cleanUpUserRequests ) );
+				DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( () =>
+					DataAccessState.Current.PrimaryDatabaseConnection.ExecuteInTransaction( cleanUpUserRequests ) );
 			else
 				cleanUpUserRequests();
 
@@ -33,11 +33,11 @@ public static class DataCleanupOps {
 			if( !File.Exists( filePath ) )
 				continue;
 			var timeStampPattern = OffsetDateTimePattern.CreateWithInvariantCulture( "uuuu'-'MM'-'dd HH:mm:ss.FFFFFFFFF o<m>" );
-			File.WriteAllLines(
-				filePath,
-				File.ReadAllLines( filePath )
-					.SkipWhile(
-						line => {
+			try {
+				File.WriteAllLines(
+					filePath,
+					File.ReadAllLines( filePath )
+						.SkipWhile( line => {
 							var endIndex = line.IndexOf( " [", StringComparison.Ordinal );
 							if( endIndex < 0 )
 								return true;
@@ -49,8 +49,13 @@ public static class DataCleanupOps {
 
 							return time.ToInstant() < cutoffTime;
 						} )
-					.Materialize(),
-				Encoding.UTF8 );
+						.Materialize(),
+					Encoding.UTF8 );
+			}
+			catch( IOException ) {
+				TelemetryStatics.ReportFault(
+					$"Failed to clean up the diagnostic log for {app.Name} because the application is running. The file size is {FormattingMethods.GetFormattedBytes( new FileInfo( filePath ).Length )}." );
+			}
 		}
 	}
 
