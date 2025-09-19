@@ -1,5 +1,4 @@
-﻿#nullable disable
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using Tewl.InputValidation;
 
 namespace EnterpriseWebLibrary.Tests.Validation;
@@ -32,6 +31,12 @@ internal class UrlValidatorTester {
 	}
 
 	[ Test ]
+	public void TestSchemelessUrl() {
+		var result = getValidationResult( "google.com" );
+		Assert.That( validator.ErrorsOccurred, Is.False );
+	}
+
+	[ Test ]
 	public void TestValidUppercaseUrl() {
 		var result = getValidationResult( "HTTP://EN.EXAMPLE.ORG/" );
 		Assert.That( validator.ErrorsOccurred, Is.False );
@@ -40,6 +45,12 @@ internal class UrlValidatorTester {
 	[ Test ]
 	public void TestUrlWithPort() {
 		var result = getValidationResult( "http://vnc.example.com:5800" );
+		Assert.That( validator.ErrorsOccurred, Is.False );
+	}
+
+	[ Test ]
+	public void TestLocalhostUrl() {
+		var result = getValidationResult( "https://localhost:44310" );
 		Assert.That( validator.ErrorsOccurred, Is.False );
 	}
 
