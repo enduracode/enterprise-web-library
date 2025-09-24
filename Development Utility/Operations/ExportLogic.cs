@@ -403,7 +403,8 @@ internal class ExportLogic: Operation {
 			}
 			catch( Exception e ) {
 				if( string.Equals( Environment.GetEnvironmentVariable( "TF_BUILD" ), bool.TrueString, StringComparison.Ordinal ) /* in Azure DevOps pipeline */ )
-					output = "##vso[task.logissue type=error]Unit tests failed." + Environment.NewLine + e.Message;
+					output = "##vso[task.logissue type=error]Unit tests failed." + Environment.NewLine + "##vso[task.complete result=SucceededWithIssues]" +
+					         Environment.NewLine + e.Message;
 				else
 					throw new UserCorrectableException( "Unit tests failed.", e );
 			}
