@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using EnterpriseWebLibrary.Collections;
 using EnterpriseWebLibrary.Encryption;
+using EnterpriseWebLibrary.IO;
 using EnterpriseWebLibrary.MailMerging;
 using NUnit.Framework;
-using Tewl;
 using Tewl.InputValidation;
 using Tewl.IO;
-using Tewl.Tools;
-using static Humanizer.StringExtensions;
 
 namespace EnterpriseWebLibrary.Tests;
 
@@ -18,7 +13,8 @@ namespace EnterpriseWebLibrary.Tests;
 internal class RsLibraryTester {
 	[ Test ]
 	public void OldMain() {
-		EwlStatics.RunStandardLibraryTests();
+		ZipOps.Test();
+		PdfOps.Test();
 		testMailMerging();
 
 		Console.WriteLine( new TimeSpan( 0, 0, 0, 0, 4861000 ).ToHourMinuteSecondString() );
@@ -103,8 +99,8 @@ internal class RsLibraryTester {
 			Console.WriteLine( item );
 
 		var validator = new Validator();
-		var vp = new ValidationErrorHandler(
-			validationErrorType => Console.WriteLine( "\nThe following validation resulted in an error: " + validationErrorType ) );
+		var vp = new ValidationErrorHandler( validationErrorType =>
+			Console.WriteLine( "\nThe following validation resulted in an error: " + validationErrorType ) );
 
 		Console.WriteLine( validator.GetUrl( vp, "hTTp://RedStapler.biZ/fRed", false ).Value( out var errorType ) );
 		Assert.That( errorType is not null, Is.False );

@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using EnterpriseWebLibrary.IO;
 
 namespace EnterpriseWebLibrary;
 
@@ -15,11 +14,6 @@ public static class TestStatics {
 		"..",
 		"..",
 		"TestFiles" );
-
-	public static void RunTests() {
-		ZipOps.Test();
-		PdfOps.Test();
-	}
 
 	/// <summary>
 	/// This will tell people what to look for in the tests.

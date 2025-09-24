@@ -117,13 +117,6 @@ public static partial class EwlStatics {
 	}
 
 	/// <summary>
-	/// Runs tests of EWL functionality.
-	/// </summary>
-	public static void RunStandardLibraryTests() {
-		TestStatics.RunTests();
-	}
-
-	/// <summary>
 	/// Gets a valid C# identifier from the specified string.
 	/// </summary>
 	// See https://stackoverflow.com/a/950651/35349.

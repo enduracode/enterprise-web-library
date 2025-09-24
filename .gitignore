@@ -39,6 +39,8 @@ Website/Properties/launchSettings.json
 
 Tests/bin/
 Tests/obj/
+Tests/Directory.Build.props
+Tests/Generated Code/
 
 Providers/MySQL/bin/
 Providers/MySQL/obj/
