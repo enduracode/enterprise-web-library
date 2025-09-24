@@ -32,7 +32,7 @@ public static class GlobalInitializationOps {
 	/// To debug this method, create a folder called C:\AnyoneFullControl and give Everyone full control. A file will appear in that folder explaining how far
 	/// it got in init.
 	/// </summary>
-	/// <param name="globalInitializer">The system's global initializer. Do not pass null.</param>
+	/// <param name="globalInitializer">The system’s global initializer. Do not pass null.</param>
 	/// <param name="appName"></param>
 	/// <param name="isClientSideApp"></param>
 	/// <param name="timeGetters">Methods that return the current time and transaction time.</param>

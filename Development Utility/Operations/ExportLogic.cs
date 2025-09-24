@@ -39,102 +39,100 @@ internal class ExportLogic: Operation {
 
 		var mainId = packagingConfiguration.SystemShortName;
 		var mainProjectPath = installation.SystemIsTewl() ? AppStatics.TewlProjectPath : EwlStatics.CoreProjectName;
-		var mainPackages = prereleaseValues.Select(
-				prerelease => {
-					var localExportDateAndTime = prerelease.HasValue ? (DateTime?)null : now;
+		var mainPackages = prereleaseValues.Select( prerelease => {
+				var localExportDateAndTime = prerelease.HasValue ? (DateTime?)null : now;
 
-					IoMethods.ExecuteWithTempFolder(
-						folderPath => {
-							TewlContrib.ProcessTools.RunProgram(
-								"dotnet",
-								"build \"{0}\" --configuration {1} --no-restore".FormatWith(
-									EwlStatics.CombinePaths( installation.GeneralLogic.Path, mainProjectPath ),
-									useDebugAssembly ? "Debug" : "Release" ),
-								"",
-								true );
-							foreach( var fileName in new[] { "dll", "pdb", "xml" }.Select( i => ( installation.SystemIsTewl() ? "Tewl." : "EnterpriseWebLibrary." ) + i ) )
-								IoMethods.CopyFile(
-									EwlStatics.CombinePaths(
-										installation.GeneralLogic.Path,
-										mainProjectPath,
-										ConfigurationStatics.GetProjectOutputFolderPath( useDebugAssembly ),
-										fileName ),
-									EwlStatics.CombinePaths( folderPath, @"lib\{0}".FormatWith( nuGetTargetFramework ), fileName ) );
+				IoMethods.ExecuteWithTempFolder( folderPath => {
+					TewlContrib.ProcessTools.RunProgram(
+						"dotnet",
+						"build \"{0}\" --configuration {1} --no-restore".FormatWith(
+							EwlStatics.CombinePaths( installation.GeneralLogic.Path, mainProjectPath ),
+							useDebugAssembly ? "Debug" : "Release" ),
+						"",
+						true );
+					foreach( var fileName in new[] { "dll", "pdb", "xml" }.Select( i => ( installation.SystemIsTewl() ? "Tewl." : "EnterpriseWebLibrary." ) + i ) )
+						IoMethods.CopyFile(
+							EwlStatics.CombinePaths(
+								installation.GeneralLogic.Path,
+								mainProjectPath,
+								ConfigurationStatics.GetProjectOutputFolderPath( useDebugAssembly ),
+								fileName ),
+							EwlStatics.CombinePaths( folderPath, @"lib\{0}".FormatWith( nuGetTargetFramework ), fileName ) );
 
-							if( !installation.SystemIsTewl() ) {
-								var toolsFolderPath = EwlStatics.CombinePaths( folderPath, "tools" );
-								IoMethods.CopyFile(
-									EwlStatics.CombinePaths( installation.GeneralLogic.Path, @"Development Utility\Package Manager Console Commands.ps1" ),
-									EwlStatics.CombinePaths( toolsFolderPath, "init.ps1" ) );
+					if( !installation.SystemIsTewl() ) {
+						var toolsFolderPath = EwlStatics.CombinePaths( folderPath, "tools" );
+						IoMethods.CopyFile(
+							EwlStatics.CombinePaths( installation.GeneralLogic.Path, @"Development Utility\Package Manager Console Commands.ps1" ),
+							EwlStatics.CombinePaths( toolsFolderPath, "init.ps1" ) );
 
-								const string duProjectAndFolderName = "Development Utility";
-								publishApp(
-									EwlStatics.CombinePaths( installation.GeneralLogic.Path, duProjectAndFolderName ),
-									EwlStatics.CombinePaths( toolsFolderPath, duProjectAndFolderName ) );
+						const string duProjectAndFolderName = "Development Utility";
+						publishApp(
+							EwlStatics.CombinePaths( installation.GeneralLogic.Path, duProjectAndFolderName ),
+							EwlStatics.CombinePaths( toolsFolderPath, duProjectAndFolderName ) );
 
-								// Delete these unused large files to keep the NuGet package smaller. Remove this code when EnduraCode Goal 2573 is done.
-								IoMethods.DeleteFile( EwlStatics.CombinePaths( toolsFolderPath, duProjectAndFolderName, "Aspose.PDF.dll" ) );
-								IoMethods.DeleteFile( EwlStatics.CombinePaths( toolsFolderPath, duProjectAndFolderName, "Aspose.Words.dll" ) );
-								IoMethods.DeleteFile( EwlStatics.CombinePaths( toolsFolderPath, duProjectAndFolderName, "Aspose.Words.Pdf2Word.dll" ) );
+						// Delete these unused large files to keep the NuGet package smaller. Remove this code when EnduraCode Goal 2573 is done.
+						IoMethods.DeleteFile( EwlStatics.CombinePaths( toolsFolderPath, duProjectAndFolderName, "Aspose.PDF.dll" ) );
+						IoMethods.DeleteFile( EwlStatics.CombinePaths( toolsFolderPath, duProjectAndFolderName, "Aspose.Words.dll" ) );
+						IoMethods.DeleteFile( EwlStatics.CombinePaths( toolsFolderPath, duProjectAndFolderName, "Aspose.Words.Pdf2Word.dll" ) );
 
-								packageGeneralFiles( installation, toolsFolderPath, false );
-								IoMethods.CopyFolder(
-									EwlStatics.CombinePaths(
-										installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath,
-										InstallationConfiguration.InstallationConfigurationFolderName,
-										InstallationConfiguration.InstallationsFolderName,
-										!prerelease.HasValue || prerelease.Value ? "Testing" : "Live" ),
-									EwlStatics.CombinePaths(
-										toolsFolderPath,
-										InstallationConfiguration.ConfigurationFolderName,
-										InstallationConfiguration.InstallationConfigurationFolderName ),
-									false );
-								if( File.Exists( installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationSharedConfigurationFilePath ) )
-									IoMethods.CopyFile(
-										installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationSharedConfigurationFilePath,
-										EwlStatics.CombinePaths(
-											toolsFolderPath,
-											InstallationConfiguration.ConfigurationFolderName,
-											InstallationConfiguration.InstallationConfigurationFolderName,
-											InstallationConfiguration.InstallationSharedConfigurationFileName ) );
+						packageGeneralFiles( installation, toolsFolderPath, false );
+						IoMethods.CopyFolder(
+							EwlStatics.CombinePaths(
+								installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath,
+								InstallationConfiguration.InstallationConfigurationFolderName,
+								InstallationConfiguration.InstallationsFolderName,
+								!prerelease.HasValue || prerelease.Value ? "Testing" : "Live" ),
+							EwlStatics.CombinePaths(
+								toolsFolderPath,
+								InstallationConfiguration.ConfigurationFolderName,
+								InstallationConfiguration.InstallationConfigurationFolderName ),
+							false );
+						if( File.Exists( installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationSharedConfigurationFilePath ) )
+							IoMethods.CopyFile(
+								installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationSharedConfigurationFilePath,
+								EwlStatics.CombinePaths(
+									toolsFolderPath,
+									InstallationConfiguration.ConfigurationFolderName,
+									InstallationConfiguration.InstallationConfigurationFolderName,
+									InstallationConfiguration.InstallationSharedConfigurationFileName ) );
 
-								IoMethods.CopyFolder(
-									StaticFile.GetFrameworkStaticFilesFolderPath( installation.ExistingInstallationLogic.RuntimeConfiguration ),
-									EwlStatics.CombinePaths( toolsFolderPath, InstallationFileStatics.WebFrameworkStaticFilesFolderName ),
-									false );
-								IoMethods.DeleteFolder(
-									EwlStatics.CombinePaths( toolsFolderPath, InstallationFileStatics.WebFrameworkStaticFilesFolderName, AppStatics.StaticFileLogicFolderName ) );
-							}
+						IoMethods.CopyFolder(
+							StaticFile.GetFrameworkStaticFilesFolderPath( installation.ExistingInstallationLogic.RuntimeConfiguration ),
+							EwlStatics.CombinePaths( toolsFolderPath, InstallationFileStatics.WebFrameworkStaticFilesFolderName ),
+							false );
+						IoMethods.DeleteFolder(
+							EwlStatics.CombinePaths( toolsFolderPath, InstallationFileStatics.WebFrameworkStaticFilesFolderName, AppStatics.StaticFileLogicFolderName ) );
+					}
 
-							var manifestPath = EwlStatics.CombinePaths( folderPath, "Package.nuspec" );
-							using( var writer = IoMethods.GetTextWriterForWrite( manifestPath, false ) )
-								writeNuGetPackageManifest(
-									writer,
-									installation,
-									mainId,
-									mainId,
-									"",
-									EwlStatics.CombinePaths( installation.GeneralLogic.Path, mainProjectPath, Path.GetFileName( mainProjectPath ) + ".csproj" ),
-									prerelease,
-									localExportDateAndTime );
+					var manifestPath = EwlStatics.CombinePaths( folderPath, "Package.nuspec" );
+					using( var writer = IoMethods.GetTextWriterForWrite( manifestPath, false ) )
+						writeNuGetPackageManifest(
+							writer,
+							installation,
+							mainId,
+							mainId,
+							"",
+							EwlStatics.CombinePaths( installation.GeneralLogic.Path, mainProjectPath, Path.GetFileName( mainProjectPath ) + ".csproj" ),
+							prerelease,
+							localExportDateAndTime );
 
-							StatusStatics.SetStatus(
-								TewlContrib.ProcessTools.RunProgram(
-									EwlStatics.CombinePaths( installation.GeneralLogic.Path, @"Solution Files\nuget" ),
-									"pack \"" + manifestPath + "\" -OutputDirectory \"" + outputFolderPath + "\"",
-									"",
-									true ) );
-						} );
+					StatusStatics.SetStatus(
+						TewlContrib.ProcessTools.RunProgram(
+							EwlStatics.CombinePaths( installation.GeneralLogic.Path, @"Solution Files\nuget" ),
+							"pack \"" + manifestPath + "\" -OutputDirectory \"" + outputFolderPath + "\"",
+							"",
+							true ) );
+				} );
 
-					return File.ReadAllBytes(
-						EwlStatics.CombinePaths(
-							outputFolderPath,
-							EwlNuGetPackageSpecificationStatics.GetNuGetPackageFileName(
-								mainId,
-								installation.CurrentMajorVersion,
-								!prerelease.HasValue || prerelease.Value ? installation.NextBuildNumber : null,
-								localExportDateAndTime: localExportDateAndTime ) ) );
-				} )
+				return File.ReadAllBytes(
+					EwlStatics.CombinePaths(
+						outputFolderPath,
+						EwlNuGetPackageSpecificationStatics.GetNuGetPackageFileName(
+							mainId,
+							installation.CurrentMajorVersion,
+							!prerelease.HasValue || prerelease.Value ? installation.NextBuildNumber : null,
+							localExportDateAndTime: localExportDateAndTime ) ) );
+			} )
 			.MaterializeAsList();
 		packages.Add( ( mainId, mainPackages ) );
 
@@ -238,58 +236,56 @@ internal class ExportLogic: Operation {
 	private static IReadOnlyList<byte[]> createProviderNuGetPackages(
 		DevelopmentInstallation installation, string mainPackageId, string projectName, string assemblyName, string packageId, DateTime now, bool useDebugAssembly,
 		string outputFolderPath, IEnumerable<bool?> prereleaseValues ) =>
-		prereleaseValues.Select(
-				prerelease => {
-					var localExportDateAndTime = prerelease.HasValue ? (DateTime?)null : now;
+		prereleaseValues.Select( prerelease => {
+				var localExportDateAndTime = prerelease.HasValue ? (DateTime?)null : now;
 
-					IoMethods.ExecuteWithTempFolder(
-						folderPath => {
-							TewlContrib.ProcessTools.RunProgram(
-								"dotnet",
-								"build \"{0}\" --configuration {1} --no-restore".FormatWith(
-									EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.ProviderProjectFolderName, projectName ),
-									useDebugAssembly ? "Debug" : "Release" ),
-								"",
-								true );
-							foreach( var fileName in new[] { "dll", "pdb" }.Select( i => "{0}.{1}".FormatWith( assemblyName, i ) ) )
-								IoMethods.CopyFile(
-									EwlStatics.CombinePaths(
-										installation.GeneralLogic.Path,
-										AppStatics.ProviderProjectFolderName,
-										projectName,
-										ConfigurationStatics.GetProjectOutputFolderPath( useDebugAssembly ),
-										fileName ),
-									EwlStatics.CombinePaths( folderPath, @"lib\{0}".FormatWith( nuGetTargetFramework ), fileName ) );
+				IoMethods.ExecuteWithTempFolder( folderPath => {
+					TewlContrib.ProcessTools.RunProgram(
+						"dotnet",
+						"build \"{0}\" --configuration {1} --no-restore".FormatWith(
+							EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.ProviderProjectFolderName, projectName ),
+							useDebugAssembly ? "Debug" : "Release" ),
+						"",
+						true );
+					foreach( var fileName in new[] { "dll", "pdb" }.Select( i => "{0}.{1}".FormatWith( assemblyName, i ) ) )
+						IoMethods.CopyFile(
+							EwlStatics.CombinePaths(
+								installation.GeneralLogic.Path,
+								AppStatics.ProviderProjectFolderName,
+								projectName,
+								ConfigurationStatics.GetProjectOutputFolderPath( useDebugAssembly ),
+								fileName ),
+							EwlStatics.CombinePaths( folderPath, @"lib\{0}".FormatWith( nuGetTargetFramework ), fileName ) );
 
-							var manifestPath = EwlStatics.CombinePaths( folderPath, "Package.nuspec" );
-							using( var writer = IoMethods.GetTextWriterForWrite( manifestPath, false ) )
-								writeNuGetPackageManifest(
-									writer,
-									installation,
-									mainPackageId,
-									packageId,
-									"{0} Provider".FormatWith( projectName ),
-									EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.ProviderProjectFolderName, projectName, projectName + ".csproj" ),
-									prerelease,
-									localExportDateAndTime );
+					var manifestPath = EwlStatics.CombinePaths( folderPath, "Package.nuspec" );
+					using( var writer = IoMethods.GetTextWriterForWrite( manifestPath, false ) )
+						writeNuGetPackageManifest(
+							writer,
+							installation,
+							mainPackageId,
+							packageId,
+							"{0} Provider".FormatWith( projectName ),
+							EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.ProviderProjectFolderName, projectName, projectName + ".csproj" ),
+							prerelease,
+							localExportDateAndTime );
 
-							StatusStatics.SetStatus(
-								TewlContrib.ProcessTools.RunProgram(
-									EwlStatics.CombinePaths( installation.GeneralLogic.Path, @"Solution Files\nuget" ),
-									"pack \"" + manifestPath + "\" -OutputDirectory \"" + outputFolderPath + "\"",
-									"",
-									true ) );
-						} );
+					StatusStatics.SetStatus(
+						TewlContrib.ProcessTools.RunProgram(
+							EwlStatics.CombinePaths( installation.GeneralLogic.Path, @"Solution Files\nuget" ),
+							"pack \"" + manifestPath + "\" -OutputDirectory \"" + outputFolderPath + "\"",
+							"",
+							true ) );
+				} );
 
-					return File.ReadAllBytes(
-						EwlStatics.CombinePaths(
-							outputFolderPath,
-							EwlNuGetPackageSpecificationStatics.GetNuGetPackageFileName(
-								packageId,
-								installation.CurrentMajorVersion,
-								!prerelease.HasValue || prerelease.Value ? installation.NextBuildNumber : null,
-								localExportDateAndTime: localExportDateAndTime ) ) );
-				} )
+				return File.ReadAllBytes(
+					EwlStatics.CombinePaths(
+						outputFolderPath,
+						EwlNuGetPackageSpecificationStatics.GetNuGetPackageFileName(
+							packageId,
+							installation.CurrentMajorVersion,
+							!prerelease.HasValue || prerelease.Value ? installation.NextBuildNumber : null,
+							localExportDateAndTime: localExportDateAndTime ) ) );
+			} )
 			.MaterializeAsList();
 
 	private static void packageGeneralFiles( DevelopmentInstallation installation, string folderPath, bool includeDatabaseUpdates ) {
@@ -398,6 +394,24 @@ internal class ExportLogic: Operation {
 		else
 			build.ChangesetId = "";
 
+		const string testProject = UnitTestingInitializationOps.UnitTestProjectName;
+		if( File.Exists( EwlStatics.CombinePaths( installation.GeneralLogic.Path, testProject, $"{testProject}.csproj" ) ) ) {
+			StatusStatics.SetStatus( "Running unit tests." );
+			string output;
+			try {
+				output = TewlContrib.ProcessTools.RunProgram( "dotnet", $"""test "{installation.GeneralLogic.Path}" --no-restore""", "", true );
+			}
+			catch( Exception e ) {
+				if( string.Equals( Environment.GetEnvironmentVariable( "TF_BUILD" ), bool.TrueString, StringComparison.Ordinal ) /* in Azure DevOps pipeline */ )
+					output = "##vso[task.logissue type=error]Unit tests failed." + Environment.NewLine + e.Message;
+				else
+					throw new UserCorrectableException( "Unit tests failed.", e );
+			}
+
+			Console.WriteLine( Environment.NewLine + Environment.NewLine + output.TrimEnd() + Environment.NewLine + Environment.NewLine );
+			StatusStatics.SetStatus( "Ran unit tests." );
+		}
+
 		var serverSideLogicFolderPath = EwlStatics.CombinePaths( logicPackagesFolderPath, "Server Side Logic" );
 		packageWebApps( installation, serverSideLogicFolderPath );
 		packageWindowsServices( installation, serverSideLogicFolderPath );
@@ -467,17 +481,15 @@ internal class ExportLogic: Operation {
 
 		build.SystemId = recognizedInstallation.KnownSystemLogic.RsisSystem.Id;
 
-		operationResult.TimeSpentWaitingForNetwork = EwlStatics.ExecuteTimedRegion(
-			() => SystemManagerConnectionStatics.ExecuteActionWithSystemManagerClient(
-				"build upload",
-				client => Task.Run(
-						async () => {
-							using var content = HttpClientTools.GetRequestContentFromWriter( stream => XmlOps.SerializeIntoStream( build, stream ) );
-							using var response = await client.PostAsync( SystemManagerConnectionStatics.BuildsUrlSegment, content );
-							response.EnsureSuccessStatusCode();
-						} )
-					.Wait(),
-				supportLargePayload: true ) );
+		operationResult.TimeSpentWaitingForNetwork = EwlStatics.ExecuteTimedRegion( () => SystemManagerConnectionStatics.ExecuteActionWithSystemManagerClient(
+			"build upload",
+			client => Task.Run( async () => {
+					using var content = HttpClientTools.GetRequestContentFromWriter( stream => XmlOps.SerializeIntoStream( build, stream ) );
+					using var response = await client.PostAsync( SystemManagerConnectionStatics.BuildsUrlSegment, content );
+					response.EnsureSuccessStatusCode();
+				} )
+				.Wait(),
+			supportLargePayload: true ) );
 	}
 
 	private void packageWebApps( DevelopmentInstallation installation, string serverSideLogicFolderPath ) {
@@ -557,12 +569,11 @@ internal class ExportLogic: Operation {
 	private IEnumerable<InstallationSupportUtility.SystemManagerInterface.Messages.BuildMessage.NuGetPackage> packageEwl(
 		DevelopmentInstallation installation, PackagingConfiguration packagingConfiguration, string logicPackagesFolderPath ) =>
 		CreateEwlNuGetPackages( installation, packagingConfiguration, false, logicPackagesFolderPath, new bool?[] { true, false } )
-			.Select(
-				i => {
-					var package = new InstallationSupportUtility.SystemManagerInterface.Messages.BuildMessage.NuGetPackage();
-					package.Id = i.id;
-					package.Prerelease = i.packages[ 0 ];
-					package.Stable = i.packages[ 1 ];
-					return package;
-				} );
+			.Select( i => {
+				var package = new InstallationSupportUtility.SystemManagerInterface.Messages.BuildMessage.NuGetPackage();
+				package.Id = i.id;
+				package.Prerelease = i.packages[ 0 ];
+				package.Stable = i.packages[ 1 ];
+				return package;
+			} );
 }

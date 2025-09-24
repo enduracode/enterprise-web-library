@@ -3,16 +3,21 @@
 namespace EnterpriseWebLibrary;
 
 public static class UnitTestingInitializationOps {
+	/// <summary>
+	/// Development Utility and private use only.
+	/// </summary>
+	public const string UnitTestProjectName = "Tests";
+
 	private static SystemInitializer? appInitializer;
 
 	/// <summary>
 	/// Call this from the OneTimeSetUp method in your NUnit initializer. Besides this call, there should be no other code in the method.
 	/// </summary>
-	/// <param name="globalInitializer">The system's global initializer. Do not pass null.</param>
+	/// <param name="globalInitializer">The system’s global initializer. Do not pass null.</param>
 	/// <param name="appInitializer">The application initializer, which performs unit-testing-specific initialization and cleanup. If you have one of these you
 	/// should name the class AppInitializer.</param>
 	public static void InitStatics( SystemInitializer globalInitializer, SystemInitializer? appInitializer = null ) {
-		GlobalInitializationOps.InitStatics( globalInitializer, "Tests", false, assemblyFolderPath: TestContext.CurrentContext.TestDirectory );
+		GlobalInitializationOps.InitStatics( globalInitializer, UnitTestProjectName, false, assemblyFolderPath: TestContext.CurrentContext.TestDirectory );
 		try {
 			if( GlobalInitializationOps.SecondaryInitFailed )
 				throw new ApplicationException(

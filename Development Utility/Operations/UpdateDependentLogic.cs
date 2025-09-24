@@ -16,6 +16,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations;
 internal class UpdateDependentLogic: Operation {
 	private const string generatedCodeFolderName = "Generated Code";
 	private static readonly string serverSideConsoleAppJsonArgument = "{0}UseJsonArguments".FormatWith( EwlStatics.EwlInitialism.ToLowerInvariant() );
+	private const string unitTestNamespaceAndAssemblyName = "Tests";
 
 	private static readonly Operation instance = new UpdateDependentLogic();
 	public static Operation Instance => instance;
@@ -238,6 +239,8 @@ internal class UpdateDependentLogic: Operation {
 				_ => {},
 				runtimeIdentifier: "win-x64",
 				selfContained: true );
+		if( !installation.SystemIsTewl() )
+			generateUnitTestProjectCode( installation );
 
 		generateXmlSchemaLogicForInstallationConfigurationFile( installation, "Custom" );
 		generateXmlSchemaLogicForInstallationConfigurationFile( installation, "Shared" );
@@ -678,6 +681,49 @@ internal class UpdateDependentLogic: Operation {
 			runtimeIdentifier: "win-x64" );
 	}
 
+	private void generateUnitTestProjectCode( DevelopmentInstallation installation ) {
+		var projectPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, UnitTestingInitializationOps.UnitTestProjectName );
+
+		if( !File.Exists( EwlStatics.CombinePaths( projectPath, $"{UnitTestingInitializationOps.UnitTestProjectName}.csproj" ) ) ) {
+			IoMethods.DeleteFolder( projectPath );
+			Directory.CreateDirectory( projectPath );
+			using var writer = new StreamWriter(
+				EwlStatics.CombinePaths( projectPath, $"{UnitTestingInitializationOps.UnitTestProjectName}.ewlt.csproj" ),
+				false,
+				Encoding.UTF8 );
+			writer.WriteLine(
+				$"""
+				 <Project Sdk="Microsoft.NET.Sdk">
+
+				   <ItemGroup>
+				     <ProjectReference Include="..\Library\{( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemUsesLegacyEwl.HasValue ? "Library New" : "Library" )}.csproj" />
+				   </ItemGroup>
+
+				 </Project>
+				 """ );
+		}
+
+		// Use a runtime identifier because this project ends up compiling like a console app (due to the Microsoft.NET.Test.Sdk dependency above) rather than a class library.
+		generateCodeForProject(
+			installation,
+			UnitTestingInitializationOps.UnitTestProjectName,
+			projectPath,
+			unitTestNamespaceAndAssemblyName,
+			writer => {
+				writer.WriteLine( "using NUnit.Framework;" );
+				writer.WriteLine( $"using {installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName};" );
+				writer.WriteLine();
+				writer.WriteLine( "[ SetUpFixture ]" );
+				writer.WriteLine( "public class NUnitInitializer {" );
+				writer.WriteLine( "[ OneTimeSetUp ]" );
+				writer.WriteLine( "public void InitStatics() { UnitTestingInitializationOps.InitStatics( new GlobalInitializer() ); }" );
+				writer.WriteLine( "[ OneTimeTearDown ]" );
+				writer.WriteLine( "public void CleanUpStatics() { UnitTestingInitializationOps.CleanUpStatics(); }" );
+				writer.WriteLine( "}" );
+			},
+			runtimeIdentifier: "win-x64" );
+	}
+
 	private void generateCodeForProject(
 		DevelopmentInstallation installation, string projectName, string projectPath, string assemblyNameAndRootNamespace, Action<TextWriter> codeWriter,
 		string runtimeIdentifier = "", bool selfContained = false, bool includeWebFrameworkUsingDirectives = false ) {
@@ -766,11 +812,28 @@ internal class UpdateDependentLogic: Operation {
 			writeMsBuildProperty( "<IsTransformWebConfigDisabled>true</IsTransformWebConfigDisabled>" );
 
 			writer.WriteLine( "</PropertyGroup>" );
+
+
+			// items; see https://learn.microsoft.com/en-us/dotnet/core/project-sdk/msbuild-props#items
+
 			if( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemUsesLegacyEwl.HasValue &&
 			    projectName.Equals( "Library", StringComparison.Ordinal ) )
 				writer.WriteLine( """<ItemGroup Condition="'$(MSBuildProjectName)'=='Library New'">""" );
 			else
 				writer.WriteLine( "<ItemGroup>" );
+
+			if( projectName.Equals( UnitTestingInitializationOps.UnitTestProjectName, StringComparison.Ordinal ) ) {
+				writer.WriteLine( """<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />""" );
+
+				writer.WriteLine( """<PackageReference Include="NUnit.Analyzers" Version="4.10.0">""" );
+				writer.WriteLine( "<PrivateAssets>all</PrivateAssets>" );
+				writer.WriteLine( "<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>" );
+				writer.WriteLine( "</PackageReference>" );
+
+				writer.WriteLine( """<PackageReference Include="NUnit3TestAdapter" Version="5.1.0" />""" );
+			}
+			else if( !installation.DevelopmentInstallationLogic.SystemIsEwl || !projectName.EndsWith( " Provider", StringComparison.Ordinal ) )
+				writer.WriteLine( $"""<InternalsVisibleTo Include="{unitTestNamespaceAndAssemblyName}" />""" );
 
 			writer.WriteLine( """<Using Include="System" />""" );
 			writer.WriteLine( """<Using Include="System.Collections.Generic" />""" );
@@ -800,6 +863,8 @@ internal class UpdateDependentLogic: Operation {
 			writer.WriteLine( """<Using Include="Humanizer.StringExtensions"><Static>True</Static></Using>""" );
 
 			writer.WriteLine( "</ItemGroup>" );
+
+
 			writer.WriteLine( "</Project>" );
 		}
 
@@ -926,6 +991,9 @@ internal class UpdateDependentLogic: Operation {
 		var dataMigratorProjectExists = File.Exists(
 			EwlStatics.CombinePaths( installation.GeneralLogic.Path, IsuStatics.DataMigratorProjectName, $"{IsuStatics.DataMigratorProjectName}.csproj" ) );
 
+		const string unitTestProject = UnitTestingInitializationOps.UnitTestProjectName;
+		var unitTestProjectExists = File.Exists( EwlStatics.CombinePaths( installation.GeneralLogic.Path, unitTestProject, $"{unitTestProject}.csproj" ) );
+
 		writer.WriteLine( regionBegin );
 		if( !forGit )
 			writer.WriteLine( "syntax: glob" );
@@ -937,6 +1005,8 @@ internal class UpdateDependentLogic: Operation {
 		if( !dataMigratorProjectExists )
 			writer.WriteLine( $"{IsuStatics.DataMigratorProjectName}/" );
 		writer.WriteLine( $"{IsuStatics.DataCleanerProjectName}/" );
+		if( !unitTestProjectExists )
+			writer.WriteLine( $"{unitTestProject}/" );
 		writer.WriteLine( "Error Log.txt" );
 		writer.WriteLine( "*.csproj.user" );
 		writer.WriteLine( "*" + CodeGeneration.DataAccess.DataAccessStatics.CSharpTemplateFileExtension );
@@ -980,6 +1050,14 @@ internal class UpdateDependentLogic: Operation {
 			writer.WriteLine( project.Name + "/Generated Code/" );
 		}
 
+		if( dataMigratorProjectExists ) {
+			writer.WriteLine();
+			writer.WriteLine( IsuStatics.DataMigratorProjectName + "/bin/" );
+			writer.WriteLine( IsuStatics.DataMigratorProjectName + "/obj/" );
+			writer.WriteLine( IsuStatics.DataMigratorProjectName + "/Directory.Build.props" );
+			writer.WriteLine( IsuStatics.DataMigratorProjectName + "/Generated Code/" );
+		}
+
 		if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject != null ) {
 			writer.WriteLine();
 			writer.WriteLine( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.Name + "/bin/" );
@@ -988,12 +1066,12 @@ internal class UpdateDependentLogic: Operation {
 			writer.WriteLine( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.Name + "/Generated Code/" );
 		}
 
-		if( dataMigratorProjectExists ) {
+		if( unitTestProjectExists ) {
 			writer.WriteLine();
-			writer.WriteLine( IsuStatics.DataMigratorProjectName + "/bin/" );
-			writer.WriteLine( IsuStatics.DataMigratorProjectName + "/obj/" );
-			writer.WriteLine( IsuStatics.DataMigratorProjectName + "/Directory.Build.props" );
-			writer.WriteLine( IsuStatics.DataMigratorProjectName + "/Generated Code/" );
+			writer.WriteLine( unitTestProject + "/bin/" );
+			writer.WriteLine( unitTestProject + "/obj/" );
+			writer.WriteLine( unitTestProject + "/Directory.Build.props" );
+			writer.WriteLine( unitTestProject + "/Generated Code/" );
 		}
 
 		writer.WriteLine();

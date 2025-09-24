@@ -78,7 +78,7 @@ public static class EwfOps {
 	/// <summary>
 	/// Call this from your Program.cs file. Besides this call, there should be no other code in the file.
 	/// </summary>
-	/// <param name="globalInitializer">The system's global initializer. Do not pass null.</param>
+	/// <param name="globalInitializer">The system’s global initializer. Do not pass null.</param>
 	/// <param name="dependencyInjectionServicesRegistrationMethod">A method that registers the dependency-injection services needed by the web application.
 	/// </param>
 	/// <param name="appInitializer">The application initializer, which performs web-site specific initialization and cleanup. If you have one of these you
