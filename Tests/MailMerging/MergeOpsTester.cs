@@ -1,24 +1,16 @@
 ﻿#nullable disable
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using EnterpriseWebLibrary.MailMerging;
 using EnterpriseWebLibrary.MailMerging.DataTree;
 using EnterpriseWebLibrary.MailMerging.Fields;
-using EnterpriseWebLibrary.Tests.MailMerging.DataStructure.PracticeDocumentDataStructure;
-using EnterpriseWebLibrary.Tests.MailMerging.DataStructure.PracticeDocumentDataStructure.PhysicianDataStructure;
-using EnterpriseWebLibrary.Tests.MailMerging.DataStructure.PracticeDocumentDataStructure.PracticeManagerDataStructure;
-using EnterpriseWebLibrary.Tests.MailMerging.DataStructure.TestFileDataStructure;
-using EnterpriseWebLibrary.Tests.MailMerging.MergeFields.PhysicianMergeFields;
-using EnterpriseWebLibrary.Tests.MailMerging.MergeFields.PracticeDocumentMergeFields;
-using EnterpriseWebLibrary.Tests.MailMerging.MergeFields.TestFileMergeFields;
-using Humanizer;
 using NUnit.Framework;
-using Tewl;
-using Tewl.Tools;
+using Tests.MailMerging.DataStructure.PracticeDocumentDataStructure;
+using Tests.MailMerging.DataStructure.PracticeDocumentDataStructure.PhysicianDataStructure;
+using Tests.MailMerging.DataStructure.PracticeDocumentDataStructure.PracticeManagerDataStructure;
+using Tests.MailMerging.DataStructure.TestFileDataStructure;
+using Tests.MailMerging.MergeFields.PracticeDocumentMergeFields;
+using Tests.MailMerging.MergeFields.TestFileMergeFields;
 
-namespace EnterpriseWebLibrary.Tests.MailMerging;
+namespace Tests.MailMerging;
 
 [ TestFixture ]
 internal class MergeOpsTester {
@@ -102,8 +94,9 @@ internal class MergeOpsTester {
 		var physicianFields = new List<MergeField<PhysicianMockData>>(
 			new[]
 				{
-					MergeFieldOps.CreateBasicField( new MergeFields.PhysicianMergeFields.Email() ), MergeFieldOps.CreateBasicField( new FirstName() ),
-					MergeFieldOps.CreateBasicField( new LastName() )
+					MergeFieldOps.CreateBasicField( new MergeFields.PhysicianMergeFields.Email() ),
+					MergeFieldOps.CreateBasicField( new MergeFields.PhysicianMergeFields.FirstName() ),
+					MergeFieldOps.CreateBasicField( new MergeFields.PhysicianMergeFields.LastName() )
 				} );
 
 		var managersChild = new MergeDataTreeChild<PracticeMockData, PracticeManagerMockData>( "PracticeManagers", managerFields, data => data.Managers );

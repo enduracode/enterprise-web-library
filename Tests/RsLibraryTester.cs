@@ -7,7 +7,7 @@ using NUnit.Framework;
 using Tewl.InputValidation;
 using Tewl.IO;
 
-namespace EnterpriseWebLibrary.Tests;
+namespace Tests;
 
 [ TestFixture ]
 internal class RsLibraryTester {

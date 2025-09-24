@@ -1,7 +1,6 @@
 ﻿using NUnit.Framework;
-using Tewl.Tools;
 
-namespace EnterpriseWebLibrary.Tests.DoubleTools;
+namespace Tests.DoubleTools;
 
 [ TestFixture ]
 public class ToMoneyString {

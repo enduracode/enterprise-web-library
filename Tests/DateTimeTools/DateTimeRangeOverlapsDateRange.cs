@@ -1,7 +1,6 @@
-﻿using System;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 
-namespace EnterpriseWebLibrary.Tests.DateTimeTools;
+namespace Tests.DateTimeTools;
 
 [ TestFixture ]
 public class DateTimeRangeOverlapsDateRange {

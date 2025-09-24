@@ -1,14 +1,14 @@
 ﻿using EnterpriseWebLibrary.MailMerging.FieldImplementation;
-using EnterpriseWebLibrary.Tests.MailMerging.DataStructure.PracticeDocumentDataStructure.PracticeManagerDataStructure;
+using Tests.MailMerging.DataStructure.PracticeDocumentDataStructure.PracticeManagerDataStructure;
 
-namespace EnterpriseWebLibrary.Tests.MailMerging.MergeFields.PracticeManagerMergeFields {
-	public class Email: BasicMergeFieldImplementation<PracticeManagerMockData, string> {
-		public string GetDescription() {
-			return "The practice manager's email";
-		}
+namespace Tests.MailMerging.MergeFields.PracticeManagerMergeFields;
 
-		public string Evaluate( PracticeManagerMockData row ) {
-			return row.EmailAddress;
-		}
+public class Email: BasicMergeFieldImplementation<PracticeManagerMockData, string> {
+	public string GetDescription() {
+		return "The practice manager's email";
+	}
+
+	public string Evaluate( PracticeManagerMockData row ) {
+		return row.EmailAddress;
 	}
 }

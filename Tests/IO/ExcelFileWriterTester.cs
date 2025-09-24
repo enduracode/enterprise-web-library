@@ -1,13 +1,8 @@
 ﻿#nullable disable
-using System;
-using System.IO;
-using System.Linq;
-using Humanizer;
 using NUnit.Framework;
 using Tewl.IO;
-using Tewl.Tools;
 
-namespace EnterpriseWebLibrary.Tests.IO;
+namespace Tests.IO;
 
 [ TestFixture ]
 internal class ExcelFileWriterTester {
@@ -25,20 +20,18 @@ internal class ExcelFileWriterTester {
 
 	[ Test ]
 	public void TestAutofitOnSave() {
-		runTest(
-			writer => {
-				Console.WriteLine( "Making sure autofit works." );
-				writer.AutofitOnSave = true;
-				addAutofitTestRows( writer, "autofitted" );
-				return "autofit_yes_testing";
-			} );
-		runTest(
-			writer => {
-				Console.WriteLine( "Making sure not autofitting works." );
-				writer.AutofitOnSave = false;
-				addAutofitTestRows( writer, "not autofit" );
-				return "autofit_no_testing";
-			} );
+		runTest( writer => {
+			Console.WriteLine( "Making sure autofit works." );
+			writer.AutofitOnSave = true;
+			addAutofitTestRows( writer, "autofitted" );
+			return "autofit_yes_testing";
+		} );
+		runTest( writer => {
+			Console.WriteLine( "Making sure not autofitting works." );
+			writer.AutofitOnSave = false;
+			addAutofitTestRows( writer, "not autofit" );
+			return "autofit_no_testing";
+		} );
 	}
 
 	private void addAutofitTestRows( ExcelFileWriter writer, string fitOrNot ) {
@@ -71,138 +64,131 @@ internal class ExcelFileWriterTester {
 
 	[ Test ]
 	public void TestDefaultWorksheet() {
-		runTest(
-			writer => {
-				Console.WriteLine( "Making sure default worksheet works." );
+		runTest( writer => {
+			Console.WriteLine( "Making sure default worksheet works." );
 
-				writer.DefaultWorksheet.AddHeaderToWorksheet( "This is the default worksheet" );
-				writer.DefaultWorksheet.AddRowToWorksheet( "500", "5000", "5", "50" );
-				writer.DefaultWorksheet.AddRowToWorksheet( "500", "5000", "5", "50" );
-				writer.DefaultWorksheet.AddRowToWorksheet( "500", "5000", "5", "50" );
+			writer.DefaultWorksheet.AddHeaderToWorksheet( "This is the default worksheet" );
+			writer.DefaultWorksheet.AddRowToWorksheet( "500", "5000", "5", "50" );
+			writer.DefaultWorksheet.AddRowToWorksheet( "500", "5000", "5", "50" );
+			writer.DefaultWorksheet.AddRowToWorksheet( "500", "5000", "5", "50" );
 
-				Assert.That( writer.DefaultWorksheet, Is.Not.Null );
+			Assert.That( writer.DefaultWorksheet, Is.Not.Null );
 
-				return "default_worksheet_testing";
-			} );
+			return "default_worksheet_testing";
+		} );
 	}
 
 	[ Test ]
 	public void TestRenameDefaultWorksheet() {
-		runTest(
-			writer => {
-				Console.WriteLine( "Making sure renaming the default worksheet works." );
+		runTest( writer => {
+			Console.WriteLine( "Making sure renaming the default worksheet works." );
 
-				writer.DefaultWorksheet.AddHeaderToWorksheet( "This is the default worksheet" );
-				writer.DefaultWorksheet.AddRowToWorksheet( "500", "5000", "5", "50" );
-				writer.DefaultWorksheet.AddRowToWorksheet( "500", "5000", "5", "50" );
-				writer.DefaultWorksheet.AddRowToWorksheet( "500", "5000", "5", "50" );
-				writer.DefaultWorksheet.Name = "I'm not Sheet1.";
+			writer.DefaultWorksheet.AddHeaderToWorksheet( "This is the default worksheet" );
+			writer.DefaultWorksheet.AddRowToWorksheet( "500", "5000", "5", "50" );
+			writer.DefaultWorksheet.AddRowToWorksheet( "500", "5000", "5", "50" );
+			writer.DefaultWorksheet.AddRowToWorksheet( "500", "5000", "5", "50" );
+			writer.DefaultWorksheet.Name = "I'm not Sheet1.";
 
-				return "default_worksheet_renamed_testing";
-			} );
+			return "default_worksheet_renamed_testing";
+		} );
 	}
 
 	[ Test ]
 	public void TestNamedWorksheet() {
-		runTest(
-			writer => {
-				Console.WriteLine( "Making sure named worksheets work." );
+		runTest( writer => {
+			Console.WriteLine( "Making sure named worksheets work." );
 
-				const string worksheetName = "Worksheet Name Test";
+			const string worksheetName = "Worksheet Name Test";
 
-				writer.AddWorksheet( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
-				writer.GetWorksheetByName( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
-				writer.GetWorksheetByName( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
-				writer.GetWorksheetByName( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
-				writer.GetWorksheetByName( worksheetName ).AddRowToWorksheet();
-				writer.GetWorksheetByName( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
-				writer.GetWorksheetByName( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
-				writer.GetWorksheetByName( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
-				writer.GetWorksheetByName( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
-				writer.GetWorksheetByName( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
-				writer.GetWorksheetByName( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
+			writer.AddWorksheet( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
+			writer.GetWorksheetByName( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
+			writer.GetWorksheetByName( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
+			writer.GetWorksheetByName( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
+			writer.GetWorksheetByName( worksheetName ).AddRowToWorksheet();
+			writer.GetWorksheetByName( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
+			writer.GetWorksheetByName( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
+			writer.GetWorksheetByName( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
+			writer.GetWorksheetByName( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
+			writer.GetWorksheetByName( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
+			writer.GetWorksheetByName( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
 
-				return "named_worksheet_testing";
-			} );
+			return "named_worksheet_testing";
+		} );
 	}
 
 	[ Test ]
 	public void TestReAddingSameWorksheet() {
-		runTest(
-			writer => {
-				Console.WriteLine( "Making sure adding the same worksheet name doesn't create multiples." );
+		runTest( writer => {
+			Console.WriteLine( "Making sure adding the same worksheet name doesn't create multiples." );
 
-				const string worksheetName = "Worksheet";
+			const string worksheetName = "Worksheet";
 
-				writer.AddWorksheet( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
-				Assert.That( () => writer.AddWorksheet( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" ), Throws.Exception );
+			writer.AddWorksheet( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
+			Assert.That( () => writer.AddWorksheet( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" ), Throws.Exception );
 
-				return "same_sheet_name_testing";
-			} );
+			return "same_sheet_name_testing";
+		} );
 	}
 
 	[ Test ]
 	public void TestReAddingSameWorksheetMinusSpaces() {
-		runTest(
-			writer => {
-				Console.WriteLine( "Making sure adding the same worksheet name without spaces doesn't create multiples." );
+		runTest( writer => {
+			Console.WriteLine( "Making sure adding the same worksheet name without spaces doesn't create multiples." );
 
-				const string worksheetName = "Worksheet Name With Spaces";
+			const string worksheetName = "Worksheet Name With Spaces";
 
-				writer.AddWorksheet( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
-				writer.AddWorksheet( worksheetName.RemoveNonAlphanumericCharacters() ).AddRowToWorksheet( "500", "5000", "5", "50" );
+			writer.AddWorksheet( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
+			writer.AddWorksheet( worksheetName.RemoveNonAlphanumericCharacters() ).AddRowToWorksheet( "500", "5000", "5", "50" );
 
-				return "same_sheet_name_testing";
-			} );
+			return "same_sheet_name_testing";
+		} );
 	}
 
 	[ Test ]
 	public void TestMultipleNamedWorksheet() {
-		runTest(
-			writer => {
-				Console.WriteLine( "Making sure multiple named worksheets and default worksheets work." );
+		runTest( writer => {
+			Console.WriteLine( "Making sure multiple named worksheets and default worksheets work." );
 
-				const string worksheetName = "Worksheet Name Test";
-				const string otherWorksheetName = "Other";
-				const string blankWorksheetName = "Blank";
+			const string worksheetName = "Worksheet Name Test";
+			const string otherWorksheetName = "Other";
+			const string blankWorksheetName = "Blank";
 
-				writer.AddWorksheet( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
-				writer.GetWorksheetByName( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
-				writer.GetWorksheetByName( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
+			writer.AddWorksheet( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
+			writer.GetWorksheetByName( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
+			writer.GetWorksheetByName( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
 
-				writer.DefaultWorksheet.AddHeaderToWorksheet( "This is the default worksheet" );
+			writer.DefaultWorksheet.AddHeaderToWorksheet( "This is the default worksheet" );
 
-				writer.AddWorksheet( otherWorksheetName ).AddHeaderToWorksheet( "Another worksheet" );
-				writer.AddWorksheet( blankWorksheetName );
+			writer.AddWorksheet( otherWorksheetName ).AddHeaderToWorksheet( "Another worksheet" );
+			writer.AddWorksheet( blankWorksheetName );
 
-				return "multiple_named_worksheets_testing";
-			} );
+			return "multiple_named_worksheets_testing";
+		} );
 	}
 
 	[ Test ]
 	public void TestNamedCells() {
-		runTest(
-			writer => {
-				Console.WriteLine( "Making sure naming cells works." );
+		runTest( writer => {
+			Console.WriteLine( "Making sure naming cells works." );
 
-				const string worksheetName = "Cells";
+			const string worksheetName = "Cells";
 
-				writer.AddWorksheet( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
-				writer.GetWorksheetByName( worksheetName ).AddRowToWorksheet();
+			writer.AddWorksheet( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
+			writer.GetWorksheetByName( worksheetName ).AddRowToWorksheet();
 
-				writer.GetWorksheetByName( worksheetName ).PutCellValue( "A4", "Cell A4" );
-				writer.GetWorksheetByName( worksheetName ).PutCellValue( "B4", "Cell B4" );
+			writer.GetWorksheetByName( worksheetName ).PutCellValue( "A4", "Cell A4" );
+			writer.GetWorksheetByName( worksheetName ).PutCellValue( "B4", "Cell B4" );
 
-				writer.GetWorksheetByName( worksheetName ).PutCellValue( "A5", "Cell A5" );
-				writer.GetWorksheetByName( worksheetName ).PutCellValue( "B5", "Cell B5" );
+			writer.GetWorksheetByName( worksheetName ).PutCellValue( "A5", "Cell A5" );
+			writer.GetWorksheetByName( worksheetName ).PutCellValue( "B5", "Cell B5" );
 
-				writer.GetWorksheetByName( worksheetName ).PutCellValue( "A6", "Cell A6" );
-				writer.GetWorksheetByName( worksheetName ).PutCellValue( "B6", "Cell B6" );
+			writer.GetWorksheetByName( worksheetName ).PutCellValue( "A6", "Cell A6" );
+			writer.GetWorksheetByName( worksheetName ).PutCellValue( "B6", "Cell B6" );
 
-				writer.GetWorksheetByName( worksheetName ).PutCellValue( "J16", "Cell J16" );
+			writer.GetWorksheetByName( worksheetName ).PutCellValue( "J16", "Cell J16" );
 
-				return "named_cell_testing";
-			} );
+			return "named_cell_testing";
+		} );
 	}
 
 	[ Test ]
@@ -220,146 +206,137 @@ internal class ExcelFileWriterTester {
 
 	[ Test ]
 	public void TestLockedHeader() {
-		runTest(
-			writer => {
-				const string worksheetName = "Locker";
+		runTest( writer => {
+			const string worksheetName = "Locker";
 
-				var oneToTen = Enumerable.Range( 1, 10 ).ToArray();
-				var oneToOneOhOh = Enumerable.Range( 1, 100 ).ToArray();
-				writer.AddWorksheet( worksheetName ).AddHeaderToWorksheet( oneToTen.Select( i => "This is the header for column " + i ).ToArray() );
-				foreach( var row in oneToOneOhOh ) {
-					var rowText = "The row " + row + " lines above is the {0} column's header row.";
-					writer.GetWorksheetByName( worksheetName ).AddRowToWorksheet( oneToTen.Select( i => rowText.FormatWith( i + ordinalEnding( i ) ) ).ToArray() );
-				}
-				writer.GetWorksheetByName( worksheetName ).FreezeHeaderRow();
+			var oneToTen = Enumerable.Range( 1, 10 ).ToArray();
+			var oneToOneOhOh = Enumerable.Range( 1, 100 ).ToArray();
+			writer.AddWorksheet( worksheetName ).AddHeaderToWorksheet( oneToTen.Select( i => "This is the header for column " + i ).ToArray() );
+			foreach( var row in oneToOneOhOh ) {
+				var rowText = "The row " + row + " lines above is the {0} column's header row.";
+				writer.GetWorksheetByName( worksheetName ).AddRowToWorksheet( oneToTen.Select( i => rowText.FormatWith( i + ordinalEnding( i ) ) ).ToArray() );
+			}
+			writer.GetWorksheetByName( worksheetName ).FreezeHeaderRow();
 
-				return "locked_header_testing";
-			} );
+			return "locked_header_testing";
+		} );
 	}
 
 	[ Test ]
 	public void TestFormulae() {
-		runTest(
-			writer => {
-				Console.WriteLine( "Making sure a formula works." );
+		runTest( writer => {
+			Console.WriteLine( "Making sure a formula works." );
 
-				const string worksheetName = "Formula";
+			const string worksheetName = "Formula";
 
-				writer.AddWorksheet( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
-				writer.GetWorksheetByName( worksheetName ).AddRowToWorksheet();
+			writer.AddWorksheet( worksheetName ).AddRowToWorksheet( "500", "5000", "5", "50" );
+			writer.GetWorksheetByName( worksheetName ).AddRowToWorksheet();
 
-				writer.GetWorksheetByName( worksheetName ).PutCellValue( "A4", "Sum (Should be 5555):" );
-				writer.GetWorksheetByName( worksheetName ).PutFormula( "B4", "=SUM(A1:D1)" );
+			writer.GetWorksheetByName( worksheetName ).PutCellValue( "A4", "Sum (Should be 5555):" );
+			writer.GetWorksheetByName( worksheetName ).PutFormula( "B4", "=SUM(A1:D1)" );
 
-				writer.GetWorksheetByName( worksheetName ).PutCellValue( "A5", "Average (Should be 1388.75):" );
-				writer.GetWorksheetByName( worksheetName ).PutFormula( "B5", "=AVERAGE(A1:D1)" );
+			writer.GetWorksheetByName( worksheetName ).PutCellValue( "A5", "Average (Should be 1388.75):" );
+			writer.GetWorksheetByName( worksheetName ).PutFormula( "B5", "=AVERAGE(A1:D1)" );
 
-				writer.GetWorksheetByName( worksheetName ).PutCellValue( "A6", "Average Including 6 Blanks (Should be 1388.75 (and not 555.5)):" );
-				writer.GetWorksheetByName( worksheetName ).PutFormula( "B6", "=AVERAGE(A1:J1)" );
+			writer.GetWorksheetByName( worksheetName ).PutCellValue( "A6", "Average Including 6 Blanks (Should be 1388.75 (and not 555.5)):" );
+			writer.GetWorksheetByName( worksheetName ).PutFormula( "B6", "=AVERAGE(A1:J1)" );
 
-				return "formula_testing";
-			} );
+			return "formula_testing";
+		} );
 	}
 
 	[ Test ]
 	public void TestSupportedDataTypes() {
-		runTest(
-			writer => {
-				const string str = "This is a test string";
-				const string url = "http://www.google.com";
-				const string email = "bob@bob.bob";
-				const double @double = 1.23;
-				var dateTime = DateTime.Now.ToString();
+		runTest( writer => {
+			const string str = "This is a test string";
+			const string url = "http://www.google.com";
+			const string email = "bob@bob.bob";
+			const double @double = 1.23;
+			var dateTime = DateTime.Now.ToString();
 
-				Console.WriteLine( "Writing supported data types to the worksheet." );
+			Console.WriteLine( "Writing supported data types to the worksheet." );
 
-				writer.DefaultWorksheet.AddHeaderToWorksheet(
-					"string '{0}', url '{3}', email '{4}', double '{1}', DateTime '{2}' to the worksheet.".FormatWith( str, @double, dateTime, url, email ) );
-				writer.DefaultWorksheet.AddRowToWorksheet( str );
-				writer.DefaultWorksheet.AddRowToWorksheet( url );
-				writer.DefaultWorksheet.AddRowToWorksheet( email );
-				writer.DefaultWorksheet.AddRowToWorksheet( @double.ToString() );
-				writer.DefaultWorksheet.AddRowToWorksheet( dateTime );
+			writer.DefaultWorksheet.AddHeaderToWorksheet(
+				"string '{0}', url '{3}', email '{4}', double '{1}', DateTime '{2}' to the worksheet.".FormatWith( str, @double, dateTime, url, email ) );
+			writer.DefaultWorksheet.AddRowToWorksheet( str );
+			writer.DefaultWorksheet.AddRowToWorksheet( url );
+			writer.DefaultWorksheet.AddRowToWorksheet( email );
+			writer.DefaultWorksheet.AddRowToWorksheet( @double.ToString() );
+			writer.DefaultWorksheet.AddRowToWorksheet( dateTime );
 
-				return "supported_data_types";
-			} );
+			return "supported_data_types";
+		} );
 	}
 
 	[ Test ]
 	public void TestWritingManyRows() {
-		runTest(
-			writer => {
-				Console.WriteLine( "Inserting counter value from the first 20 columns (A - T), for 1000 columns." );
+		runTest( writer => {
+			Console.WriteLine( "Inserting counter value from the first 20 columns (A - T), for 1000 columns." );
 
-				for( var counter = 0; counter < 1000; counter++ )
-					writer.DefaultWorksheet.AddRowToWorksheet( Enumerable.Range( 0, 20 ).Select( i => counter++.ToString() ).ToArray() );
-				return "writing_many_rows";
-			} );
+			for( var counter = 0; counter < 1000; counter++ )
+				writer.DefaultWorksheet.AddRowToWorksheet( Enumerable.Range( 0, 20 ).Select( i => counter++.ToString() ).ToArray() );
+			return "writing_many_rows";
+		} );
 	}
 
 	[ Test ]
 	public void TestWritingManyColumns() {
-		runTest(
-			writer => {
-				Console.WriteLine( "Writing a sheet with 20 rows and 1000 columns (excel's max is theoretically 255)." );
+		runTest( writer => {
+			Console.WriteLine( "Writing a sheet with 20 rows and 1000 columns (excel's max is theoretically 255)." );
 
-				var columns = Enumerable.Range( 0, 1000 ).ToList();
-				for( var row = 0; row < 20; row++ )
-					writer.DefaultWorksheet.AddRowToWorksheet( columns.Select( i => ( row * columns.Max() ) + i.ToString() ).ToArray() );
-				return "writing_many_columns";
-			} );
+			var columns = Enumerable.Range( 0, 1000 ).ToList();
+			for( var row = 0; row < 20; row++ )
+				writer.DefaultWorksheet.AddRowToWorksheet( columns.Select( i => ( row * columns.Max() ) + i.ToString() ).ToArray() );
+			return "writing_many_columns";
+		} );
 	}
 
 	[ Test ]
 	[ Ignore( "Long-Running Test" ) ]
 	public void TestWritingManyRowsAndColumns() {
-		runTest(
-			writer => {
-				Console.WriteLine( "Writing a sheet with 1000 rows and 1000 columns." );
+		runTest( writer => {
+			Console.WriteLine( "Writing a sheet with 1000 rows and 1000 columns." );
 
-				var columns = Enumerable.Range( 0, 1000 ).ToList();
-				for( var row = 0; row < 1000; row++ )
-					writer.DefaultWorksheet.AddRowToWorksheet( columns.Select( i => ( row * columns.Max() ) + i.ToString() ).ToArray() );
-				return "writing_many_rows_and_columns";
-			} );
+			var columns = Enumerable.Range( 0, 1000 ).ToList();
+			for( var row = 0; row < 1000; row++ )
+				writer.DefaultWorksheet.AddRowToWorksheet( columns.Select( i => ( row * columns.Max() ) + i.ToString() ).ToArray() );
+			return "writing_many_rows_and_columns";
+		} );
 	}
 
 	[ Test ]
 	public void TestHeaderRow() {
-		runTest(
-			writer => {
-				Console.WriteLine( "Making sure basic header rows work." );
+		runTest( writer => {
+			Console.WriteLine( "Making sure basic header rows work." );
 
-				var oneToTen = Enumerable.Range( 1, 10 ).ToArray();
-				writer.DefaultWorksheet.AddHeaderToWorksheet( oneToTen.Select( i => "This is the header for column " + i ).ToArray() );
-				writer.DefaultWorksheet.AddRowToWorksheet(
-					oneToTen.Select( i => "The row above is the " + i + ordinalEnding( i ) + " column's header row." ).ToArray() );
-				writer.DefaultWorksheet.AddRowToWorksheet(
-					oneToTen.Select( i => "The row 2 lines above is the " + i + ordinalEnding( i ) + " column's header row." ).ToArray() );
+			var oneToTen = Enumerable.Range( 1, 10 ).ToArray();
+			writer.DefaultWorksheet.AddHeaderToWorksheet( oneToTen.Select( i => "This is the header for column " + i ).ToArray() );
+			writer.DefaultWorksheet.AddRowToWorksheet( oneToTen.Select( i => "The row above is the " + i + ordinalEnding( i ) + " column's header row." ).ToArray() );
+			writer.DefaultWorksheet.AddRowToWorksheet(
+				oneToTen.Select( i => "The row 2 lines above is the " + i + ordinalEnding( i ) + " column's header row." ).ToArray() );
 
-				return "header_row";
-			} );
+			return "header_row";
+		} );
 	}
 
 	[ Test ]
 	public void TestTooManyHeaderRows() {
-		runTest(
-			writer => {
-				Console.WriteLine( "Writing a sheet with header rows in the middle of data rows." );
+		runTest( writer => {
+			Console.WriteLine( "Writing a sheet with header rows in the middle of data rows." );
 
-				var oneToTen = Enumerable.Range( 1, 10 ).ToList();
-				writer.DefaultWorksheet.AddHeaderToWorksheet( oneToTen.Select( i => "This is the header for column " + i ).ToArray() );
-				writer.DefaultWorksheet.AddRowToWorksheet(
-					oneToTen.Select( i => "The row above is the header row for the " + i + ordinalEnding( i ) + " column." ).ToArray() );
-				writer.DefaultWorksheet.AddRowToWorksheet( oneToTen.Select( i => "The row 2 lines above is the " + i + ordinalEnding( i ) + " column." ).ToArray() );
-				writer.DefaultWorksheet.AddHeaderToWorksheet( oneToTen.Select( i => "This is the second header row column " + i ).ToArray() );
-				writer.DefaultWorksheet.AddHeaderToWorksheet( oneToTen.Select( i => "This is the third header row column " + i ).ToArray() );
-				writer.DefaultWorksheet.AddHeaderToWorksheet( oneToTen.Select( i => "This is the fourth header row column " + i ).ToArray() );
-				writer.DefaultWorksheet.AddRowToWorksheet(
-					oneToTen.Select( i => "The row above is the fourth header for the " + i + ordinalEnding( i ) + " column." ).ToArray() );
+			var oneToTen = Enumerable.Range( 1, 10 ).ToList();
+			writer.DefaultWorksheet.AddHeaderToWorksheet( oneToTen.Select( i => "This is the header for column " + i ).ToArray() );
+			writer.DefaultWorksheet.AddRowToWorksheet(
+				oneToTen.Select( i => "The row above is the header row for the " + i + ordinalEnding( i ) + " column." ).ToArray() );
+			writer.DefaultWorksheet.AddRowToWorksheet( oneToTen.Select( i => "The row 2 lines above is the " + i + ordinalEnding( i ) + " column." ).ToArray() );
+			writer.DefaultWorksheet.AddHeaderToWorksheet( oneToTen.Select( i => "This is the second header row column " + i ).ToArray() );
+			writer.DefaultWorksheet.AddHeaderToWorksheet( oneToTen.Select( i => "This is the third header row column " + i ).ToArray() );
+			writer.DefaultWorksheet.AddHeaderToWorksheet( oneToTen.Select( i => "This is the fourth header row column " + i ).ToArray() );
+			writer.DefaultWorksheet.AddRowToWorksheet(
+				oneToTen.Select( i => "The row above is the fourth header for the " + i + ordinalEnding( i ) + " column." ).ToArray() );
 
-				return "too_many_header_rows";
-			} );
+			return "too_many_header_rows";
+		} );
 	}
 
 	private void runTest( Func<ExcelFileWriter, string> code, bool includeDefaultWorksheet = true ) {

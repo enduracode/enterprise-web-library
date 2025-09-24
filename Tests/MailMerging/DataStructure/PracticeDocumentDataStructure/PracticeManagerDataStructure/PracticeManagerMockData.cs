@@ -1,9 +1,9 @@
-﻿namespace EnterpriseWebLibrary.Tests.MailMerging.DataStructure.PracticeDocumentDataStructure.PracticeManagerDataStructure {
-	public class PracticeManagerMockData {
-		public readonly string EmailAddress;
+﻿namespace Tests.MailMerging.DataStructure.PracticeDocumentDataStructure.PracticeManagerDataStructure;
 
-		public PracticeManagerMockData( string emailAddress ) {
-			EmailAddress = emailAddress;
-		}
+public class PracticeManagerMockData {
+	public readonly string EmailAddress;
+
+	public PracticeManagerMockData( string emailAddress ) {
+		EmailAddress = emailAddress;
 	}
 }

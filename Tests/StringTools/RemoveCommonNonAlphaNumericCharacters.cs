@@ -1,7 +1,6 @@
 ﻿using NUnit.Framework;
-using Tewl.Tools;
 
-namespace EnterpriseWebLibrary.Tests.StringTools;
+namespace Tests.StringTools;
 
 [ TestFixture ]
 internal class RemoveCommonNonAlphaNumericCharacters {

@@ -1,7 +1,7 @@
 ﻿using NUnit.Framework;
 using Tewl.InputValidation;
 
-namespace EnterpriseWebLibrary.Tests.Validation;
+namespace Tests.Validation;
 
 [ TestFixture ]
 internal class UrlValidatorTester {
