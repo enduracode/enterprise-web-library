@@ -30,16 +30,27 @@ public class DateControlSetup {
 	/// <param name="autoFillTokens">A list of auto-fill detail tokens (see
 	/// https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#autofill-detail-tokens), or "off" to instruct the browser to disable auto-fill
 	/// (see https://stackoverflow.com/a/23234498/35349 for an explanation of why this could be ignored). Do not pass null.</param>
+	/// <param name="calendarFirstDayOfWeek">The first day of the week in the calendar. Pass <see cref="IsoDayOfWeek.None"/> for the default.</param>
 	/// <param name="action">The action that will occur when the user hits Enter on the control. Pass null to use the current default action.</param>
 	/// <param name="valueChangedAction">The action that will occur when the value is changed. Pass null for no action.</param>
 	/// <param name="pageModificationValue"></param>
 	/// <param name="validationPredicate"></param>
 	/// <param name="validationErrorNotifier"></param>
 	public static DateControlSetup Create(
-		DisplaySetup? displaySetup = null, ElementClassSet? classes = null, string autoFillTokens = "", SpecifiedValue<FormAction>? action = null,
-		FormAction? valueChangedAction = null, PageModificationValue<LocalDate?>? pageModificationValue = null, Func<bool, bool>? validationPredicate = null,
-		Action? validationErrorNotifier = null ) =>
-		new( displaySetup, false, classes, autoFillTokens, action, valueChangedAction, pageModificationValue, validationPredicate, validationErrorNotifier );
+		DisplaySetup? displaySetup = null, ElementClassSet? classes = null, string autoFillTokens = "", IsoDayOfWeek calendarFirstDayOfWeek = IsoDayOfWeek.None,
+		SpecifiedValue<FormAction>? action = null, FormAction? valueChangedAction = null, PageModificationValue<LocalDate?>? pageModificationValue = null,
+		Func<bool, bool>? validationPredicate = null, Action? validationErrorNotifier = null ) =>
+		new(
+			displaySetup,
+			false,
+			classes,
+			autoFillTokens,
+			calendarFirstDayOfWeek,
+			action,
+			valueChangedAction,
+			pageModificationValue,
+			validationPredicate,
+			validationErrorNotifier );
 
 	/// <summary>
 	/// Creates a setup object for a read-only date control.
@@ -51,15 +62,15 @@ public class DateControlSetup {
 	public static DateControlSetup CreateReadOnly(
 		DisplaySetup? displaySetup = null, ElementClassSet? classes = null, Func<bool, bool>? validationPredicate = null,
 		Action? validationErrorNotifier = null ) =>
-		new( displaySetup, true, classes, "", null, null, null, validationPredicate, validationErrorNotifier );
+		new( displaySetup, true, classes, "", IsoDayOfWeek.None, null, null, null, validationPredicate, validationErrorNotifier );
 
 	internal readonly Func<LocalDate?, bool, LocalDate?, LocalDate?, Action<LocalDate?, Validator>?, ( FormControlLabeler, PhrasingComponent, EwfValidation? )>
 		LabelerAndComponentAndValidationGetter;
 
 	internal DateControlSetup(
-		DisplaySetup? displaySetup, bool isReadOnly, ElementClassSet? classes, string autoFillTokens, SpecifiedValue<FormAction>? specifiedAction,
-		FormAction? valueChangedAction, PageModificationValue<LocalDate?>? datePageModificationValueParameter, Func<bool, bool>? validationPredicate,
-		Action? validationErrorNotifier ) {
+		DisplaySetup? displaySetup, bool isReadOnly, ElementClassSet? classes, string autoFillTokens, IsoDayOfWeek calendarFirstDayOfWeek,
+		SpecifiedValue<FormAction>? specifiedAction, FormAction? valueChangedAction, PageModificationValue<LocalDate?>? datePageModificationValueParameter,
+		Func<bool, bool>? validationPredicate, Action? validationErrorNotifier ) {
 		var action = specifiedAction != null ? specifiedAction.Value : FormState.Current.FormControlDefaultAction;
 
 		LabelerAndComponentAndValidationGetter = ( value, allowEmpty, minValue, maxValue, validationMethod ) => {
@@ -106,7 +117,10 @@ public class DateControlSetup {
 											       var attributes = new List<ElementAttribute>();
 											       if( isReadOnly )
 												       attributes.Add( new ElementAttribute( "disabled" ) );
-											       attributes.Add( new ElementAttribute( "first-day-of-week", "0" ) );
+											       attributes.Add(
+												       new ElementAttribute(
+													       "first-day-of-week",
+													       ( (int)( calendarFirstDayOfWeek == IsoDayOfWeek.None ? IsoDayOfWeek.Sunday : calendarFirstDayOfWeek ) % 7 ).ToString() ) );
 											       attributes.Add( new ElementAttribute( "identifier", textControlId ) );
 											       attributes.Add( new ElementAttribute( "max", LocalDatePattern.Iso.Format( maxValue.Value ) ) );
 											       attributes.Add( new ElementAttribute( "min", LocalDatePattern.Iso.Format( minValue.Value ) ) );
