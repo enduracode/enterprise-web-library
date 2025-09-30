@@ -4,6 +4,7 @@ using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
+using EnterpriseWebLibrary.ExternalFunctionality;
 using FluentMigrator.Runner;
 using FluentMigrator.Runner.VersionTableInfo;
 using JetBrains.Annotations;
@@ -28,7 +29,7 @@ public static class DataMigrationOps {
 
 		private bool isOracle => ConfigurationStatics.InstallationConfiguration.PrimaryDatabaseInfo is OracleInfo;
 
-		// As of April 2015, returning true causes exceptions because FluentMigrator tries to create both a PK and index with the same name.
+		// As of April 2025, returning true causes exceptions because FluentMigrator tries to create both a PK and index with the same name.
 		bool IVersionTableMetaData.CreateWithPrimaryKey => false;
 	}
 
@@ -36,17 +37,20 @@ public static class DataMigrationOps {
 	/// Generated code use only.
 	/// </summary>
 	[ EditorBrowsable( EditorBrowsableState.Never ) ]
-	public static int MigrateData() {
+	public static int MigrateData( SystemExternalFunctionalityProvider? externalFunctionalityProvider ) {
 		var initializationLog = "";
 		ConfigurationStatics.Init( "", "Data Migrator", false, ref initializationLog );
 
+		ExternalFunctionalityStatics.Init( new SpecifiedValue<SystemExternalFunctionalityProvider?>( externalFunctionalityProvider ) );
+		MySqlInfo.Init( () => ExternalFunctionalityStatics.ExternalMySqlProvider );
+		OracleInfo.Init( () => ExternalFunctionalityStatics.ExternalOracleDatabaseProvider );
+
 		var appAssembly = Assembly.GetCallingAssembly();
 		using var serviceProvider = new ServiceCollection().AddFluentMigratorCore()
-			.ConfigureRunner(
-				builder => builder.addDatabaseServices( ConfigurationStatics.InstallationConfiguration.PrimaryDatabaseInfo! )
-					.WithGlobalConnectionString( ConfigurationStatics.InstallationConfiguration.PrimaryDatabaseInfo!.GetConnectionString( 60 ) )
-					.ScanIn( appAssembly )
-					.For.Migrations() )
+			.ConfigureRunner( builder => builder.addDatabaseServices( ConfigurationStatics.InstallationConfiguration.PrimaryDatabaseInfo! )
+				.WithGlobalConnectionString( ConfigurationStatics.InstallationConfiguration.PrimaryDatabaseInfo!.GetConnectionString( 60 ) )
+				.ScanIn( appAssembly )
+				.For.Migrations() )
 			.AddScoped( typeof( IVersionTableMetaData ), typeof( TableConfiguration ) )
 			.AddLogging( builder => builder.AddFluentMigratorConsole() )
 			.BuildServiceProvider();

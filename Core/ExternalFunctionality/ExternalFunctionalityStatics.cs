@@ -4,8 +4,12 @@ using EnterpriseWebLibrary.UserManagement;
 
 namespace EnterpriseWebLibrary.ExternalFunctionality;
 
-internal static class ExternalFunctionalityStatics {
-	internal const string ProviderName = "ExternalFunctionality";
+public static class ExternalFunctionalityStatics {
+	/// <summary>
+	/// Development Utility and private use only.
+	/// </summary>
+	public const string ProviderName = "ExternalFunctionality";
+
 	private static SystemProviderReference<SystemExternalFunctionalityProvider>? provider;
 
 	private static ExternalMySqlProvider? mySqlProvider;
@@ -15,8 +19,8 @@ internal static class ExternalFunctionalityStatics {
 	private static ExternalPdfProvider? pdfProvider;
 	private static ExternalWordProvider? wordProvider;
 
-	internal static void Init() {
-		provider = SystemSpecificLogicStatics.GetLibraryProvider<SystemExternalFunctionalityProvider>( ProviderName );
+	internal static void Init( SpecifiedValue<SystemExternalFunctionalityProvider?>? specifiedProvider ) {
+		provider = SystemSpecificLogicStatics.GetLibraryProvider( ProviderName, specifiedProvider: specifiedProvider );
 
 		mySqlProvider = provider.GetProvider( returnNullIfNotFound: true )?.GetMySqlProvider();
 

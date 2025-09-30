@@ -5,8 +5,10 @@ using EnterpriseWebLibrary.Configuration.SystemGeneral;
 using EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration;
 using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary.ExternalFunctionality;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
+using EnterpriseWebLibrary.SystemSpecificLogic;
 using NodaTime.Text;
 using Tewl.IO;
 using static MoreLinq.Extensions.AtLeastExtension;
@@ -299,7 +301,18 @@ internal class UpdateDependentLogic: Operation {
 			IsuStatics.DataMigratorProjectName,
 			projectPath,
 			IsuStatics.DataMigratorNamespaceAndAssemblyName,
-			writer => { writer.Write( "return DataMigrationOps.MigrateData();" ); },
+			writer => {
+				var providerName = StringTools.ConcatenateWithDelimiter(
+					".",
+					installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName,
+					SystemSpecificLogicStatics.ProvidersFolderAndNamespaceName,
+					ExternalFunctionalityStatics.ProviderName );
+				var providerExpression =
+					File.Exists( EwlStatics.CombinePaths( installation.DevelopmentInstallationLogic.LibraryPath, externalFunctionalityProviderPath ) )
+						? $"new {providerName}()"
+						: "null";
+				writer.Write( $"return DataMigrationOps.MigrateData( {providerExpression} );" );
+			},
 			runtimeIdentifier: "win-x64" );
 	}
 
@@ -822,6 +835,10 @@ internal class UpdateDependentLogic: Operation {
 			else
 				writer.WriteLine( "<ItemGroup>" );
 
+			if( projectName.Equals( IsuStatics.DataMigratorProjectName, StringComparison.Ordinal ) && File.Exists(
+				    EwlStatics.CombinePaths( installation.DevelopmentInstallationLogic.LibraryPath, externalFunctionalityProviderPath ) ) )
+				writer.WriteLine( $"""<Compile Include="..\Library\{externalFunctionalityProviderPath}" Visible="false" />""" );
+
 			if( projectName.Equals( UnitTestingInitializationOps.UnitTestProjectName, StringComparison.Ordinal ) ) {
 				writer.WriteLine( """<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />""" );
 
@@ -877,6 +894,9 @@ internal class UpdateDependentLogic: Operation {
 			codeWriter( writer );
 		}
 	}
+
+	private string externalFunctionalityProviderPath =>
+		EwlStatics.CombinePaths( SystemSpecificLogicStatics.ProvidersFolderAndNamespaceName, ExternalFunctionalityStatics.ProviderName + ".cs" );
 
 	private void generateXmlSchemaLogicForInstallationConfigurationFile( DevelopmentInstallation installation, string schemaFileName ) {
 		var schemaPathInProject = EwlStatics.CombinePaths(

@@ -62,13 +62,12 @@ public static class GlobalInitializationOps {
 			Clock.Init( timeGetters ?? ( SystemClock.Instance.GetCurrentInstant, SystemClock.Instance.GetCurrentInstant ) );
 			ConfigurationStatics.Init( assemblyFolderPath, appName, isClientSideApp, ref initializationLog );
 			SystemSpecificLogicStatics.Init( globalInitializer.GetType() );
-			EmailStatics.Init(
-				( forceImmediateExecution, method ) => {
-					if( !AutomaticDatabaseConnectionManager.HasCurrent || forceImmediateExecution )
-						method();
-					else
-						AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod( method );
-				} );
+			EmailStatics.Init( ( forceImmediateExecution, method ) => {
+				if( !AutomaticDatabaseConnectionManager.HasCurrent || forceImmediateExecution )
+					method();
+				else
+					AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod( method );
+			} );
 			TelemetryStatics.Init( telemetryAppErrorContextWriter );
 
 			// Setting the initialized flag to true must be done before executing the secondary init block below so that exception handling works.
@@ -100,7 +99,7 @@ public static class GlobalInitializationOps {
 			AppMemoryCache.Init();
 			EncryptionOps.Init();
 
-			ExternalFunctionalityStatics.Init();
+			ExternalFunctionalityStatics.Init( null );
 
 			// data access
 			MySqlInfo.Init( () => ExternalFunctionalityStatics.ExternalMySqlProvider );
