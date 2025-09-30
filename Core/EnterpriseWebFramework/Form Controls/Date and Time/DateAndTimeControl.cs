@@ -46,7 +46,8 @@ public class DateAndTimeControl: FormControl<FlowComponent> {
 				       ? DateControlSetup.CreateReadOnly( validationPredicate: setup.ValidationPredicate, validationErrorNotifier: setup.ValidationErrorNotifier )
 				       : DateControlSetup.Create(
 					       autoFillTokens: setup.AutoFillTokens,
-					       action: new SpecifiedValue<FormAction>( setup.Action ),
+					       calendarFirstDayOfWeek: setup.CalendarFirstDayOfWeek,
+					       action: new SpecifiedValue<FormAction?>( setup.Action ),
 					       valueChangedAction: setup.ValueChangedAction,
 					       pageModificationValue: setup.DatePageModificationValue,
 					       validationPredicate: setup.ValidationPredicate,
@@ -63,7 +64,7 @@ public class DateAndTimeControl: FormControl<FlowComponent> {
 				       ? TimeControlSetup.CreateReadOnly( validationPredicate: setup.ValidationPredicate, validationErrorNotifier: setup.ValidationErrorNotifier )
 				       : TimeControlSetup.Create(
 					       autoFillTokens: setup.AutoFillTokens,
-					       action: new SpecifiedValue<FormAction>( setup.Action ),
+					       action: new SpecifiedValue<FormAction?>( setup.Action ),
 					       valueChangedAction: setup.ValueChangedAction,
 					       pageModificationValue: setup.TimePageModificationValue,
 					       validationPredicate: setup.ValidationPredicate,

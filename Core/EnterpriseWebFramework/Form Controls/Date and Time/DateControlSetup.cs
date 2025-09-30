@@ -38,7 +38,7 @@ public class DateControlSetup {
 	/// <param name="validationErrorNotifier"></param>
 	public static DateControlSetup Create(
 		DisplaySetup? displaySetup = null, ElementClassSet? classes = null, string autoFillTokens = "", IsoDayOfWeek calendarFirstDayOfWeek = IsoDayOfWeek.None,
-		SpecifiedValue<FormAction>? action = null, FormAction? valueChangedAction = null, PageModificationValue<LocalDate?>? pageModificationValue = null,
+		SpecifiedValue<FormAction?>? action = null, FormAction? valueChangedAction = null, PageModificationValue<LocalDate?>? pageModificationValue = null,
 		Func<bool, bool>? validationPredicate = null, Action? validationErrorNotifier = null ) =>
 		new(
 			displaySetup,
@@ -69,7 +69,7 @@ public class DateControlSetup {
 
 	internal DateControlSetup(
 		DisplaySetup? displaySetup, bool isReadOnly, ElementClassSet? classes, string autoFillTokens, IsoDayOfWeek calendarFirstDayOfWeek,
-		SpecifiedValue<FormAction>? specifiedAction, FormAction? valueChangedAction, PageModificationValue<LocalDate?>? datePageModificationValueParameter,
+		SpecifiedValue<FormAction?>? specifiedAction, FormAction? valueChangedAction, PageModificationValue<LocalDate?>? datePageModificationValueParameter,
 		Func<bool, bool>? validationPredicate, Action? validationErrorNotifier ) {
 		var action = specifiedAction != null ? specifiedAction.Value : FormState.Current.FormControlDefaultAction;
 
