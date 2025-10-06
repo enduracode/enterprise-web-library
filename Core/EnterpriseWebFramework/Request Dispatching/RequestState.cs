@@ -63,12 +63,13 @@ internal class RequestState {
 	internal static RequestState Instance => RequestDispatchingStatics.RequestState;
 
 	internal static void ExecuteWithUrlHandlerStateOverride( SpecifiedValue<UrlHandlerStateOverride?>? state, Action method ) {
-		Instance.urlHandlerStateStack.Push( state?.Value is {} value ? (UrlHandlerState)value : new UrlHandlerState( state is not null ) );
+		var stack = Instance.urlHandlerStateStack;
+		stack.Push( state?.Value is {} value ? (UrlHandlerState)value : new UrlHandlerState( state is not null ) );
 		try {
 			method();
 		}
 		finally {
-			Instance.urlHandlerStateStack.Pop();
+			stack.Pop();
 		}
 	}
 
@@ -76,12 +77,13 @@ internal class RequestState {
 		if( EwfRequest.Current is null )
 			return method();
 
-		Instance.urlHandlerStateStack.Push( state?.Value is {} value ? (UrlHandlerState)value : new UrlHandlerState( state is not null ) );
+		var stack = Instance.urlHandlerStateStack;
+		stack.Push( state?.Value is {} value ? (UrlHandlerState)value : new UrlHandlerState( state is not null ) );
 		try {
 			return method();
 		}
 		finally {
-			Instance.urlHandlerStateStack.Pop();
+			stack.Pop();
 		}
 	}
 
