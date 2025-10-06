@@ -16,6 +16,46 @@ public interface ResourceParent: UrlHandler, WebItem {
 	private static Func<ResourceParent, ( string name, string parameters )?>? frameworkResourceSerializer;
 	private static SystemProviderReference<SystemResourceSerializationProvider>? systemSerializationProviderRef;
 
+	internal class UrlHandlerCreator<WebItemType> where WebItemType: ResourceParent {
+		private readonly Lazy<ResourceParent?> parent;
+		private readonly Lazy<UrlHandler?> urlParent;
+		public readonly Func<WebItemType> ReCreator;
+		public readonly UrlHandlerStateOverride? StateOverride;
+
+		public UrlHandlerCreator( WebItemType webItem, Func<WebItemType> reCreator ) {
+			parent = new Lazy<ResourceParent?>( () =>
+				StateOverride is null
+					? handleParentException( webItem.CreateParent )
+					: StateOverride.ExecuteWithThis( () => handleParentException( webItem.CreateParent ) ) );
+			urlParent = new Lazy<UrlHandler?>( () =>
+				StateOverride is null
+					? handleParentException( webItem.GetUrlParent )
+					: StateOverride.ExecuteWithThis( () => handleParentException( webItem.GetUrlParent ) ) );
+
+			ReCreator = () => StateOverride is null
+				                  ? reCreator()
+				                  : UrlHandlerStateOverride.ExecuteWithOverride( () => {
+					                  UrlHandlerStateOverride.Current!.Set( webItem );
+					                  return reCreator();
+				                  } );
+
+			StateOverride = UrlHandlerStateOverride.Current;
+
+			return;
+			static T handleParentException<T>( Func<T> method ) {
+				try {
+					return method();
+				}
+				catch( Exception e ) {
+					throw new ResourceAncestorException( e );
+				}
+			}
+		}
+
+		public ResourceParent? Parent => parent.Value;
+		public UrlHandler? UrlParent => urlParent.Value;
+	}
+
 	protected internal record UrlHandlerState( IReadOnlyCollection<BasicUrlHandler> Handlers, ResourceParent? WebItem, bool NewUrlParameterValuesEffective );
 
 	internal static void Init(
@@ -41,6 +81,8 @@ public interface ResourceParent: UrlHandler, WebItem {
 	/// Gets the parent of this parent, or null if there isn’t one.
 	/// </summary>
 	ResourceParent? Parent { get; }
+
+	internal ResourceParent? CreateParent();
 
 	/// <summary>
 	/// Gets the name of this parent.
@@ -93,6 +135,8 @@ public interface ResourceParent: UrlHandler, WebItem {
 	}
 
 	internal IEnumerable<NestedUrl?> GetLocalNestedUrls();
+
+	internal UrlHandler? GetUrlParent();
 
 	internal sealed bool ShouldBeSecure() {
 		// Intermediate installations must be secure because the intermediate user cookie is secure.

@@ -908,7 +908,7 @@ public abstract class PageBase: ResourceBase {
 			else {
 				RequestState.Instance.SetNewUrlParameterValuesEffective();
 				if( navigationBehavior.Value.destination is null )
-					destination = UrlHandlerStateOverride is null
+					destination = UrlHandlerCreator.StateOverride is null
 						              ? reCreateFromNewParameterValues()
 						              : UrlHandlerStateOverride.ExecuteWithOverride( () => {
 							              UrlHandlerStateOverride.Current!.Set( this );

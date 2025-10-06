@@ -18,39 +18,19 @@ public abstract class EntitySetupBase: ResourceParent {
 		EntitySetupBase.urlHandlerStateDisabledMethodExecutor = urlHandlerStateDisabledMethodExecutor;
 	}
 
-	private readonly Lazy<ResourceParent?> parent;
+	private readonly ResourceParent.UrlHandlerCreator<EntitySetupBase> urlHandlerCreator;
 	private readonly Lazy<string> name;
 	private readonly Lazy<AlternativeResourceMode?> alternativeMode;
 	private readonly Lazy<IReadOnlyCollection<ResourceGroup>> listedResources;
-	private readonly Lazy<UrlHandler?> urlParent;
 
 	/// <summary>
 	/// Creates an entity setup object.
 	/// </summary>
 	protected EntitySetupBase() {
-		var urlHandlerStateOverride = UrlHandlerStateOverride.Current;
-
-		parent = new Lazy<ResourceParent?>( () =>
-			urlHandlerStateOverride is null
-				? handleParentException( createParent )
-				: urlHandlerStateOverride.ExecuteWithThis( () => handleParentException( createParent ) ) );
+		urlHandlerCreator = new ResourceParent.UrlHandlerCreator<EntitySetupBase>( this, reCreate );
 		name = new Lazy<string>( getEntitySetupName );
 		alternativeMode = new Lazy<AlternativeResourceMode?>( createAlternativeMode );
 		listedResources = new Lazy<IReadOnlyCollection<ResourceGroup>>( () => createListedResources().Materialize() );
-		urlParent = new Lazy<UrlHandler?>( () =>
-			urlHandlerStateOverride is null
-				? handleParentException( getUrlParent )
-				: urlHandlerStateOverride.ExecuteWithThis( () => handleParentException( getUrlParent ) ) );
-
-		return;
-		static T handleParentException<T>( Func<T> method ) {
-			try {
-				return method();
-			}
-			catch( Exception e ) {
-				throw new ResourceAncestorException( e );
-			}
-		}
 	}
 
 	/// <summary>
@@ -67,13 +47,15 @@ public abstract class EntitySetupBase: ResourceParent {
 	/// <summary>
 	/// Gets the parent of this entity setup, or null if there isn’t one.
 	/// </summary>
-	public ResourceParent? Parent => parent.Value;
+	public ResourceParent? Parent => urlHandlerCreator.Parent;
 
 	/// <summary>
 	/// Gets the parent resource of this entity setup. Throws an exception if there is no parent or the parent is an entity setup.
 	/// </summary>
 	public ResourceBase ParentResource =>
 		Parent as ResourceBase ?? throw new Exception( "The entity setup either doesn’t have a parent or the parent is an entity setup." );
+
+	ResourceParent? ResourceParent.CreateParent() => createParent();
 
 	/// <summary>
 	/// Creates the parent of this entity setup. Returns null if there is no parent.
@@ -155,7 +137,9 @@ public abstract class EntitySetupBase: ResourceParent {
 
 	protected abstract IReadOnlyCollection<NestedUrl?> getNestedUrls();
 
-	UrlHandler? UrlHandler.GetParent() => urlParent.Value;
+	UrlHandler? UrlHandler.GetParent() => urlHandlerCreator.UrlParent;
+
+	UrlHandler? ResourceParent.GetUrlParent() => getUrlParent();
 
 	/// <summary>
 	/// Returns the resource or entity setup that will determine this entity setup’s canonical URL. One reason to override is if
@@ -221,7 +205,7 @@ public abstract class EntitySetupBase: ResourceParent {
 
 	public virtual bool AllowsSearchEngineIndexing => Parent?.AllowsSearchEngineIndexing ?? true;
 
-	WebItem WebItem.ReCreate() => reCreate();
+	WebItem WebItem.ReCreate() => urlHandlerCreator.ReCreator();
 
 	/// <summary>
 	/// Generated code and private use only.

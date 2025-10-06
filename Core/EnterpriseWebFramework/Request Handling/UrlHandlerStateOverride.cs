@@ -19,7 +19,7 @@ internal interface UrlHandlerStateOverride {
 
 	void Set( IReadOnlyCollection<BasicUrlHandler> handlers, ResourceParent webItem );
 
-	void Set( ResourceBase resource );
+	void Set( ResourceParent webItem );
 
 	public T ExecuteWithThis<T>( Func<T> method ) =>
 		overrideMethodExecutor.ExecuteWithUrlHandlerStateOverride( new SpecifiedValue<UrlHandlerStateOverride?>( this ), method );

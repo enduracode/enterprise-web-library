@@ -65,38 +65,17 @@ public abstract class ResourceBase: TrustedResourceInfo, ResourceParent {
 	internal static void RefreshRequestState() => requestStateRefresher!();
 
 	private string uriFragmentIdentifierField = "";
-	private readonly Lazy<ResourceParent?> parent;
+	internal readonly ResourceParent.UrlHandlerCreator<ResourceBase> UrlHandlerCreator;
 	private readonly Lazy<string> name;
 	private readonly Lazy<AlternativeResourceMode?> alternativeMode;
-	private readonly Lazy<UrlHandler?> urlParent;
-	internal readonly UrlHandlerStateOverride? UrlHandlerStateOverride;
 
 	/// <summary>
 	/// Creates a resource object.
 	/// </summary>
 	protected ResourceBase() {
-		UrlHandlerStateOverride = UrlHandlerStateOverride.Current;
-
-		parent = new Lazy<ResourceParent?>( () =>
-			UrlHandlerStateOverride is null
-				? handleParentException( createParent )
-				: UrlHandlerStateOverride.ExecuteWithThis( () => handleParentException( createParent ) ) );
+		UrlHandlerCreator = new ResourceParent.UrlHandlerCreator<ResourceBase>( this, reCreate );
 		name = new Lazy<string>( getResourceName );
 		alternativeMode = new Lazy<AlternativeResourceMode?>( createAlternativeMode );
-		urlParent = new Lazy<UrlHandler?>( () =>
-			UrlHandlerStateOverride is null
-				? handleParentException( getUrlParent )
-				: UrlHandlerStateOverride.ExecuteWithThis( () => handleParentException( getUrlParent ) ) );
-
-		return;
-		static T handleParentException<T>( Func<T> method ) {
-			try {
-				return method();
-			}
-			catch( Exception e ) {
-				throw new ResourceAncestorException( e );
-			}
-		}
 	}
 
 	/// <summary>
@@ -150,7 +129,7 @@ public abstract class ResourceBase: TrustedResourceInfo, ResourceParent {
 	/// <summary>
 	/// Gets the parent of this resource, or null if there isn’t one.
 	/// </summary>
-	public ResourceParent? Parent => parent.Value;
+	public ResourceParent? Parent => UrlHandlerCreator.Parent;
 
 	/// <summary>
 	/// Gets the parent resource of this resource. Throws an exception if there is no parent or the parent is an entity setup.
@@ -162,6 +141,8 @@ public abstract class ResourceBase: TrustedResourceInfo, ResourceParent {
 	/// Gets whether an entity setup exists and is also the parent.
 	/// </summary>
 	internal bool EntitySetupIsParent => EsAsBaseType is not null && ReferenceEquals( Parent, EsAsBaseType );
+
+	ResourceParent? ResourceParent.CreateParent() => createParent();
 
 	/// <summary>
 	/// Creates the parent of this resource. Returns null if there is no parent.
@@ -276,7 +257,9 @@ public abstract class ResourceBase: TrustedResourceInfo, ResourceParent {
 
 	protected abstract IReadOnlyCollection<NestedUrl?> getNestedUrls();
 
-	UrlHandler? UrlHandler.GetParent() => urlParent.Value;
+	UrlHandler? UrlHandler.GetParent() => UrlHandlerCreator.UrlParent;
+
+	UrlHandler? ResourceParent.GetUrlParent() => getUrlParent();
 
 	/// <summary>
 	/// Returns the resource or entity setup that will determine this resource’s canonical URL. One reason to override is if <see cref="createParent"/> depends on
@@ -442,13 +425,7 @@ public abstract class ResourceBase: TrustedResourceInfo, ResourceParent {
 	/// </summary>
 	public virtual bool MatchesCurrent() => Equals( Current );
 
-	internal override ResourceBase ReCreate() =>
-		UrlHandlerStateOverride is null
-			? reCreate()
-			: UrlHandlerStateOverride.ExecuteWithOverride( () => {
-				UrlHandlerStateOverride.Current!.Set( this );
-				return reCreate();
-			} );
+	internal override ResourceBase ReCreate() => UrlHandlerCreator.ReCreator();
 
 	/// <summary>
 	/// Generated code and private use only.

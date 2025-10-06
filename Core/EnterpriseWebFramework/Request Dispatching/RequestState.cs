@@ -32,14 +32,14 @@ internal class RequestState {
 			Set( handlers.Reverse().Materialize(), webItem );
 		}
 
-		void UrlHandlerStateOverride.Set( ResourceBase resource ) {
+		void UrlHandlerStateOverride.Set( ResourceParent webItem ) {
 			var handlers = new List<BasicUrlHandler>();
-			UrlHandler? handler = resource;
+			UrlHandler? handler = webItem;
 			do
 				handlers.Add( handler );
 			while( ( handler = handler!.GetParent() ) is not null );
 
-			Set( handlers, resource );
+			Set( handlers, webItem );
 		}
 
 		public void Set( IReadOnlyCollection<BasicUrlHandler> handlers, ResourceParent webItem ) {
