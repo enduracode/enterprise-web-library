@@ -15,7 +15,7 @@ internal interface UrlHandlerStateOverride {
 
 	static UrlHandlerStateOverride? Current => currentOverrideGetter();
 
-	static T ExecuteWithOverride<T>( Func<T> method ) => overrideMethodExecutor.ExecuteWithUrlHandlerStateOverride( null, method );
+	static T ExecuteWithOverride<T>( bool stateDisabled, Func<T> method ) => overrideMethodExecutor.ExecuteWithUrlHandlerStateOverride( null, method );
 
 	void Set( IReadOnlyCollection<BasicUrlHandler> handlers, ResourceParent webItem );
 

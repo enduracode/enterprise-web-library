@@ -16,28 +16,52 @@ public interface ResourceParent: UrlHandler, WebItem {
 	private static Func<ResourceParent, ( string name, string parameters )?>? frameworkResourceSerializer;
 	private static SystemProviderReference<SystemResourceSerializationProvider>? systemSerializationProviderRef;
 
+	// Much of the logic in this class exists to prevent *logical* parents (not URL parents) from being created with state from the current URL since that state
+	// may not be represented in this item’s URL and therefore behavior could change after a user navigates to this item with a hyperlink. To this end, we force
+	// GetUrlParent to be called before CreateParent to ensure that state is available during the former even if called by the latter.
 	internal class UrlHandlerCreator<WebItemType> where WebItemType: ResourceParent {
 		private readonly Lazy<ResourceParent?> parent;
 		private readonly Lazy<UrlHandler?> urlParent;
+		private bool creatingUrlParent;
+
 		public readonly Func<WebItemType> ReCreator;
 		public readonly UrlHandlerStateOverride? StateOverride;
 
 		public UrlHandlerCreator( WebItemType webItem, Func<WebItemType> reCreator ) {
 			parent = new Lazy<ResourceParent?>( () =>
-				StateOverride is null
-					? handleParentException( webItem.CreateParent )
-					: StateOverride.ExecuteWithThis( () => handleParentException( webItem.CreateParent ) ) );
-			urlParent = new Lazy<UrlHandler?>( () =>
-				StateOverride is null
-					? handleParentException( webItem.GetUrlParent )
-					: StateOverride.ExecuteWithThis( () => handleParentException( webItem.GetUrlParent ) ) );
+				urlParent!.IsValueCreated
+					? UrlHandlerStateOverride.ExecuteWithOverride( true, () => handleParentException( webItem.CreateParent ) )
+					: webItem.CreateParent() );
+
+			urlParent = new Lazy<UrlHandler?>( () => {
+				UrlHandler? result;
+
+				creatingUrlParent = true;
+				try {
+					result = StateOverride is null
+						         ? handleParentException( webItem.GetUrlParent )
+						         : StateOverride.ExecuteWithThis( () => handleParentException( webItem.GetUrlParent ) );
+				}
+				finally {
+					creatingUrlParent = false;
+				}
+
+				if( parent.IsValueCreated && !ReferenceEquals( parent.Value, result ) )
+					// This means URL state was not disabled during parent creation as it should have been.
+					throw new Exception(
+						"You cannot call Parent on a resource or entity setup from getUrlParent on the same object unless you return it as the result." );
+
+				return result;
+			} );
 
 			ReCreator = () => StateOverride is null
 				                  ? reCreator()
-				                  : UrlHandlerStateOverride.ExecuteWithOverride( () => {
-					                  UrlHandlerStateOverride.Current!.Set( webItem );
-					                  return reCreator();
-				                  } );
+				                  : UrlHandlerStateOverride.ExecuteWithOverride(
+					                  false,
+					                  () => {
+						                  UrlHandlerStateOverride.Current!.Set( webItem );
+						                  return reCreator();
+					                  } );
 
 			StateOverride = UrlHandlerStateOverride.Current;
 
@@ -52,7 +76,15 @@ public interface ResourceParent: UrlHandler, WebItem {
 			}
 		}
 
-		public ResourceParent? Parent => parent.Value;
+		public ResourceParent? Parent {
+			get {
+				if( !creatingUrlParent )
+					_ = urlParent.Value;
+
+				return parent.Value;
+			}
+		}
+
 		public UrlHandler? UrlParent => urlParent.Value;
 	}
 

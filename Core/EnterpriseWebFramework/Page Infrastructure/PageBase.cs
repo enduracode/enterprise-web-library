@@ -910,10 +910,12 @@ public abstract class PageBase: ResourceBase {
 				if( navigationBehavior.Value.destination is null )
 					destination = UrlHandlerCreator.StateOverride is null
 						              ? reCreateFromNewParameterValues()
-						              : UrlHandlerStateOverride.ExecuteWithOverride( () => {
-							              UrlHandlerStateOverride.Current!.Set( this );
-							              return reCreateFromNewParameterValues();
-						              } );
+						              : UrlHandlerStateOverride.ExecuteWithOverride(
+							              false,
+							              () => {
+								              UrlHandlerStateOverride.Current!.Set( this );
+								              return reCreateFromNewParameterValues();
+							              } );
 				else if( navigationBehavior.Value.destination is ResourceBase r )
 					destination = r.ReCreate();
 				else
