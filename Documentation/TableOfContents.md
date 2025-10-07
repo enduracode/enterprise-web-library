@@ -12,6 +12,7 @@
 	*	[Making an EWF-UI web site](Procedures/MakingEwfUiSite.md)
 	*	[Adding re-ordering to a table](Procedures/AddingReordering.md)
 * Reference
+	* [Web-item parameter copying](Reference/WebItemParameterCopying.md)
 	* [Configuration files](Reference/ConfigurationFiles.md)
 *	[FAQ](Faq.md)
 *	[Deliberate Omissions](DeliberateOmissions.md)
