@@ -342,8 +342,9 @@ public static class EwfOps {
 								var requestState = RequestDispatchingStatics.RequestState;
 								return new ResourceParent.UrlHandlerState(
 									requestState.UrlHandlers,
-									requestState.UrlHandlerStateOverridden ? requestState.WebItem : PageBase.Current,
-									requestState.NewUrlParameterValuesEffective );
+									requestState.NewUrlParameterValuesEffective
+										? new SpecifiedValue<ResourceParent>( requestState.UrlHandlerStateOverridden ? requestState.WebItem! : PageBase.Current! )
+										: null );
 							},
 							ResourceSerializationStatics.SerializeResource,
 							SystemSpecificLogicStatics.GetLibraryProvider<SystemResourceSerializationProvider>( "ResourceSerialization" ),

@@ -49,6 +49,8 @@ public abstract class EntitySetupBase: ResourceParent {
 	/// </summary>
 	public ResourceParent? Parent => urlHandlerCreator.Parent;
 
+	ResourceParent? ResourceParent.CreatedParent => urlHandlerCreator.CreatedParent;
+
 	/// <summary>
 	/// Gets the parent resource of this entity setup. Throws an exception if there is no parent or the parent is an entity setup.
 	/// </summary>

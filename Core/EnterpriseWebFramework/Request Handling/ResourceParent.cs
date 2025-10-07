@@ -85,10 +85,26 @@ public interface ResourceParent: UrlHandler, WebItem {
 			}
 		}
 
+		public ResourceParent? CreatedParent => parent.IsValueCreated ? parent.Value : null;
+
 		public UrlHandler? UrlParent => urlParent.Value;
 	}
 
-	protected internal record UrlHandlerState( IReadOnlyCollection<BasicUrlHandler> Handlers, ResourceParent? WebItem, bool NewUrlParameterValuesEffective );
+	protected internal class UrlHandlerState {
+		private static IEnumerable<ResourceParent> getNewParameterValueWebItems( ResourceParent? webItem ) {
+			do
+				yield return webItem!;
+			while( ( webItem = webItem!.CreatedParent ) is not null );
+		}
+
+		public readonly IReadOnlyCollection<BasicUrlHandler> Handlers;
+		public readonly IEnumerable<ResourceParent> NewParameterValueWebItems;
+
+		public UrlHandlerState( IReadOnlyCollection<BasicUrlHandler> handlers, SpecifiedValue<ResourceParent>? newParameterValueWebItem ) {
+			Handlers = handlers;
+			NewParameterValueWebItems = newParameterValueWebItem is null ? [ ] : getNewParameterValueWebItems( newParameterValueWebItem.Value );
+		}
+	}
 
 	internal static void Init(
 		Func<UrlHandlerState> urlHandlerStateGetter, Func<ResourceParent, ( string, string )?> frameworkResourceSerializer,
@@ -113,6 +129,8 @@ public interface ResourceParent: UrlHandler, WebItem {
 	/// Gets the parent of this parent, or null if there isn’t one.
 	/// </summary>
 	ResourceParent? Parent { get; }
+
+	internal ResourceParent? CreatedParent { get; }
 
 	internal ResourceParent? CreateParent();
 

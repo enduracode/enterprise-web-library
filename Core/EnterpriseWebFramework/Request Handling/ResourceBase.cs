@@ -131,6 +131,8 @@ public abstract class ResourceBase: TrustedResourceInfo, ResourceParent {
 	/// </summary>
 	public ResourceParent? Parent => UrlHandlerCreator.Parent;
 
+	ResourceParent? ResourceParent.CreatedParent => UrlHandlerCreator.CreatedParent;
+
 	/// <summary>
 	/// Gets the parent resource of this resource. Throws an exception if there is no parent or the parent is an entity setup.
 	/// </summary>
