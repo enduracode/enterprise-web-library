@@ -107,11 +107,9 @@ internal static class InfoStatics {
 				writer.WriteLine( "}" );
 			}
 
-			// If new parameter values are effective, and the current resource or an ancestor matches this object, apply its new parameter values.
+			// If new parameter values are effective, and the current resource or an already-created ancestor matches this object, apply its new parameter values.
 			if( generalData.IsPage() || isEs ) {
-				writer.WriteLine( "if( urlHandlerState.NewUrlParameterValuesEffective ) {" );
-				writer.WriteLine( "ResourceParent? urlHandler = urlHandlerState.WebItem!;" );
-				writer.WriteLine( "do" );
+				writer.WriteLine( "foreach( var urlHandler in urlHandlerState.NewParameterValueWebItems )" );
 				if( isEs ) {
 					writer.WriteLine( "if( urlHandler is ResourceBase r ) {" );
 					writer.WriteLine( "if( {0} ) {{".FormatWith( getHandlerMatchExpression( generalData, generalData.RequiredParameters, true ) ) );
@@ -129,8 +127,6 @@ internal static class InfoStatics {
 					generateMatchingHandlerParameterInitStatements( writer, generalData.OptionalParameters, true );
 					writer.WriteLine( "}" );
 				}
-				writer.WriteLine( "while( ( urlHandler = urlHandler!.Parent ) is not null );" );
-				writer.WriteLine( "}" );
 			}
 
 			writer.WriteLine( "}" );
