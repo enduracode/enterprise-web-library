@@ -618,7 +618,7 @@ ewfUiPageActionListContainer ewfHyperlinkAllStylesStatesWithHover {
 }
 ewfUiContentGrid {
 	display: grid;
-	grid-template-columns: 1fr;
+	grid-template-columns: minmax(0, 1fr);
 }
 ewfUiContentGrid > ewfSectionBoxStyleBothStates {
 	margin: 0;
