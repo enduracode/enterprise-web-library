@@ -13,6 +13,7 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.SystemSpecificLogic;
 using EnterpriseWebLibrary.UserManagement;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.DependencyInjection;
 using NodaTime;
 using StackExchange.Profiling;
@@ -132,12 +133,19 @@ public static class RequestDispatchingStatics {
 				if( requestHandler is not null )
 					requestHandler( context );
 				else {
+					var responseBodyFeature = new EwfResponse.ResponseBodyFeature( context.Features.GetRequiredFeature<IHttpResponseBodyFeature>() );
+					context.Features.Set<IHttpResponseBodyFeature>( responseBodyFeature );
+
 					contextAccessor.UseFrameworkContext = false;
 					try {
 						await next( context );
 					}
 					finally {
 						contextAccessor.UseFrameworkContext = true;
+
+						if( context.Features.GetRequiredFeature<IHttpResponseBodyFeature>() != responseBodyFeature )
+							throw new Exception( "The framework’s response-body feature cannot be overridden." );
+						context.Features.Set( responseBodyFeature.AspNetFeature );
 					}
 				}
 			}

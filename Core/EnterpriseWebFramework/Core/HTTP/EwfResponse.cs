@@ -1,4 +1,6 @@
 ﻿#nullable disable
+using System.IO.Pipelines;
+using System.Threading;
 using System.Threading.Tasks;
 using EnterpriseWebLibrary.MailMerging;
 using EnterpriseWebLibrary.MailMerging.RowTree;
@@ -6,6 +8,7 @@ using Ical.Net;
 using Ical.Net.Serialization;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Routing;
@@ -85,6 +88,59 @@ public class EwfResponse {
 		private void assertEnabled() {
 			if( body is null )
 				throw new Exception( "The response is disabled." );
+		}
+	}
+
+	// This exists so that in requests not handled by the framework, we can commit transactions and execute non-transactional modifications while error handling
+	// still has the ability to send a 500-level response if needed. We need to front-run anything that could start the ASP.NET response. We’ve tried using
+	// OnStarting callbacks but exceptions from them don’t seem to flow cleanly into the main error handler.
+	internal sealed class ResponseBodyFeature: IHttpResponseBodyFeature {
+		public readonly IHttpResponseBodyFeature AspNetFeature;
+		private bool transactionsCommitted;
+
+		public ResponseBodyFeature( IHttpResponseBodyFeature aspNetFeature ) {
+			AspNetFeature = aspNetFeature;
+		}
+
+		Stream IHttpResponseBodyFeature.Stream {
+			get {
+				if( !transactionsCommitted )
+					commitTransactions();
+				return AspNetFeature.Stream;
+			}
+		}
+
+		PipeWriter IHttpResponseBodyFeature.Writer {
+			get {
+				if( !transactionsCommitted )
+					commitTransactions();
+				return AspNetFeature.Writer;
+			}
+		}
+
+		void IHttpResponseBodyFeature.DisableBuffering() {
+			AspNetFeature.DisableBuffering();
+		}
+
+		async Task IHttpResponseBodyFeature.StartAsync( CancellationToken cancellationToken ) {
+			if( !transactionsCommitted )
+				commitTransactions();
+			await AspNetFeature.StartAsync( cancellationToken );
+		}
+
+		async Task IHttpResponseBodyFeature.SendFileAsync( string path, long offset, long? count, CancellationToken cancellationToken ) {
+			if( !transactionsCommitted )
+				commitTransactions();
+			await AspNetFeature.SendFileAsync( path, offset, count, cancellationToken );
+		}
+
+		Task IHttpResponseBodyFeature.CompleteAsync() {
+			return AspNetFeature.CompleteAsync();
+		}
+
+		private void commitTransactions() {
+			transactionCommitter();
+			transactionsCommitted = true;
 		}
 	}
 
