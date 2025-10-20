@@ -727,11 +727,22 @@ internal class UpdateDependentLogic: Operation {
 				writer.WriteLine( $"using {installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName};" );
 				writer.WriteLine();
 				writer.WriteLine( "[ SetUpFixture ]" );
-				writer.WriteLine( "public class NUnitInitializer {" );
+				writer.WriteLine( "public partial class NUnitInitializer {" );
+				writer.WriteLine( "private class AppInitializer: SystemInitializer {" );
+				writer.WriteLine( "void SystemInitializer.InitStatics() => initStatics();" );
+				writer.WriteLine( "void SystemInitializer.CleanUpStatics() => cleanUpStatics();" );
+				writer.WriteLine( "}" );
+				writer.WriteLine();
+				CodeGenerationStatics.AddSummaryDocComment( writer, "Performs unit-testing-specific initialization." );
+				writer.WriteLine( "static partial void initStatics();" );
+				CodeGenerationStatics.AddSummaryDocComment( writer, "Performs unit-testing-specific cleanup." );
+				writer.WriteLine( "static partial void cleanUpStatics();" );
+				writer.WriteLine();
 				writer.WriteLine( "[ OneTimeSetUp ]" );
-				writer.WriteLine( "public void InitStatics() { UnitTestingInitializationOps.InitStatics( new GlobalInitializer() ); }" );
+				writer.WriteLine(
+					"public void InitStatics() => UnitTestingInitializationOps.InitStatics( new GlobalInitializer(), appInitializer: new AppInitializer() );" );
 				writer.WriteLine( "[ OneTimeTearDown ]" );
-				writer.WriteLine( "public void CleanUpStatics() { UnitTestingInitializationOps.CleanUpStatics(); }" );
+				writer.WriteLine( "public void CleanUpStatics() => UnitTestingInitializationOps.CleanUpStatics();" );
 				writer.WriteLine( "}" );
 			},
 			runtimeIdentifier: "win-x64" );
