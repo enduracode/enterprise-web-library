@@ -36,4 +36,9 @@ public abstract class SystemGeneralProvider {
 	/// Gets whether Imageflow, used for image resizing, is licensed.
 	/// </summary>
 	protected internal virtual bool ImageflowLicensed => false;
+
+	/// <summary>
+	/// Cleans up system-specific data. This method is only called during data cleanup.
+	/// </summary>
+	protected internal virtual void CleanUpData() {}
 }

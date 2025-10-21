@@ -2,6 +2,7 @@
 using System.Text;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.SystemSpecificLogic;
 using EnterpriseWebLibrary.UserManagement;
 using JetBrains.Annotations;
 using NodaTime;
@@ -57,6 +58,8 @@ public static class DataCleanupOps {
 					$"Failed to clean up the diagnostic log for {app.Name} because the application is running. The file size is {FormattingMethods.GetFormattedBytes( new FileInfo( filePath ).Length )}." );
 			}
 		}
+
+		SystemSpecificLogicStatics.GeneralProvider.CleanUpData();
 	}
 
 	private static void cleanUpUserRequests() {
