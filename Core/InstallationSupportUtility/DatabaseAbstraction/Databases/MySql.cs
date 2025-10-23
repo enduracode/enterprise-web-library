@@ -49,7 +49,7 @@ public class MySql: Database {
 			delegate( DatabaseConnection cn ) {
 				var command = cn.DatabaseInfo.CreateCommand();
 				command.CommandText = "SELECT ParameterValue FROM global_ints WHERE ParameterName = 'LineMarker'";
-				value = (int)cn.ExecuteScalarCommand( command );
+				value = (int)cn.ExecuteScalarCommand( command )!;
 			} );
 		return value;
 	}
@@ -112,30 +112,29 @@ public class MySql: Database {
 		}
 
 		if( !filePath.Any() )
-			ExecuteDbMethod(
-				cn => {
-					var globalIntsCreate = cn.DatabaseInfo.CreateCommand();
-					globalIntsCreate.CommandText = @"CREATE TABLE global_ints(
+			ExecuteDbMethod( cn => {
+				var globalIntsCreate = cn.DatabaseInfo.CreateCommand();
+				globalIntsCreate.CommandText = @"CREATE TABLE global_ints(
 	ParameterName VARCHAR( 50 )
 		PRIMARY KEY,
 	ParameterValue INT
 		NOT NULL
 )";
-					cn.ExecuteNonQueryCommand( globalIntsCreate );
+				cn.ExecuteNonQueryCommand( globalIntsCreate );
 
-					var lineMarkerInsert = new InlineInsert( "global_ints" );
-					lineMarkerInsert.AddColumnModifications( new InlineDbCommandColumnValue( "ParameterName", new DbParameterValue( "LineMarker" ) ).ToCollection() );
-					lineMarkerInsert.AddColumnModifications( new InlineDbCommandColumnValue( "ParameterValue", new DbParameterValue( 0 ) ).ToCollection() );
-					lineMarkerInsert.Execute( cn );
+				var lineMarkerInsert = new InlineInsert( "global_ints" );
+				lineMarkerInsert.AddColumnModifications( new InlineDbCommandColumnValue( "ParameterName", new DbParameterValue( "LineMarker" ) ).ToCollection() );
+				lineMarkerInsert.AddColumnModifications( new InlineDbCommandColumnValue( "ParameterValue", new DbParameterValue( 0 ) ).ToCollection() );
+				lineMarkerInsert.Execute( cn );
 
-					var mainSequenceCreate = cn.DatabaseInfo.CreateCommand();
-					mainSequenceCreate.CommandText = @"CREATE TABLE main_sequence(
+				var mainSequenceCreate = cn.DatabaseInfo.CreateCommand();
+				mainSequenceCreate.CommandText = @"CREATE TABLE main_sequence(
 	MainSequenceId INT
 		AUTO_INCREMENT
 		PRIMARY KEY
 )";
-					cn.ExecuteNonQueryCommand( mainSequenceCreate );
-				} );
+				cn.ExecuteNonQueryCommand( mainSequenceCreate );
+			} );
 	}
 
 	private string binFolderPath {
@@ -180,11 +179,10 @@ public class MySql: Database {
 	void Database.ShrinkAfterPostUpdateDataCommands() {}
 
 	public void ExecuteDbMethod( Action<DatabaseConnection> method ) {
-		executeMethodWithDbExceptionHandling(
-			() => {
-				var connection = new DatabaseConnection( new MySqlInfo( ( info as DatabaseInfo ).SecondaryDatabaseName, info.Database, false ) );
-				connection.ExecuteWithConnectionOpen( () => method( connection ) );
-			} );
+		executeMethodWithDbExceptionHandling( () => {
+			var connection = new DatabaseConnection( new MySqlInfo( ( info as DatabaseInfo ).SecondaryDatabaseName, info.Database, false ) );
+			connection.ExecuteWithConnectionOpen( () => method( connection ) );
+		} );
 	}
 
 	private void executeMethodWithDbExceptionHandling( Action method ) {

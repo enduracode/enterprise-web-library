@@ -46,7 +46,7 @@ public class SprocExecution {
 	/// <summary>
 	/// Executes this sproc against the specified database connection and returns a single value.
 	/// </summary>
-	public object ExecuteScalar( DatabaseConnection cn ) {
+	public object? ExecuteScalar( DatabaseConnection cn ) {
 		var cmd = cn.DatabaseInfo.CreateCommand();
 		setupDbCommand( cmd, cn.DatabaseInfo );
 		return cn.ExecuteScalarCommand( cmd );

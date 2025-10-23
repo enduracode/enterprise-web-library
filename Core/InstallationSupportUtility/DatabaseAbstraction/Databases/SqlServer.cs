@@ -49,7 +49,7 @@ public class SqlServer: Database {
 			delegate( DatabaseConnection cn ) {
 				var cmd = cn.DatabaseInfo.CreateCommand();
 				cmd.CommandText = "SELECT ParameterValue FROM GlobalInts WHERE ParameterName = 'LineMarker'";
-				value = (int)cn.ExecuteScalarCommand( cmd );
+				value = (int)cn.ExecuteScalarCommand( cmd )!;
 			} );
 		return value;
 	}
@@ -78,34 +78,33 @@ public class SqlServer: Database {
 	void Database.DeleteAndReCreateFromFile( string filePath ) {
 		executeDbMethodAgainstMaster( cn => deleteAndReCreateFromFile( cn, filePath ) );
 		if( !filePath.Any() )
-			ExecuteDbMethod(
-				cn => {
-					executeLongRunningCommand( cn, "ALTER DATABASE {0} SET PAGE_VERIFY CHECKSUM".FormatWith( info.Database ) );
-					executeLongRunningCommand( cn, "ALTER DATABASE {0} SET AUTO_UPDATE_STATISTICS_ASYNC ON".FormatWith( info.Database ) );
-					executeLongRunningCommand( cn, "ALTER DATABASE {0} SET ALLOW_SNAPSHOT_ISOLATION ON".FormatWith( info.Database ) );
-					executeLongRunningCommand( cn, "ALTER DATABASE {0} SET READ_COMMITTED_SNAPSHOT ON WITH ROLLBACK IMMEDIATE".FormatWith( info.Database ) );
+			ExecuteDbMethod( cn => {
+				executeLongRunningCommand( cn, "ALTER DATABASE {0} SET PAGE_VERIFY CHECKSUM".FormatWith( info.Database ) );
+				executeLongRunningCommand( cn, "ALTER DATABASE {0} SET AUTO_UPDATE_STATISTICS_ASYNC ON".FormatWith( info.Database ) );
+				executeLongRunningCommand( cn, "ALTER DATABASE {0} SET ALLOW_SNAPSHOT_ISOLATION ON".FormatWith( info.Database ) );
+				executeLongRunningCommand( cn, "ALTER DATABASE {0} SET READ_COMMITTED_SNAPSHOT ON WITH ROLLBACK IMMEDIATE".FormatWith( info.Database ) );
 
-					executeLongRunningCommand(
-						cn,
-						@"CREATE TABLE GlobalInts(
+				executeLongRunningCommand(
+					cn,
+					@"CREATE TABLE GlobalInts(
 	ParameterName varchar( 50 )
 		NOT NULL
 		CONSTRAINT GlobalIntsPk PRIMARY KEY,
 	ParameterValue int
 		NOT NULL
 )" );
-					var lineMarkerInsert = new InlineInsert( "GlobalInts" );
-					lineMarkerInsert.AddColumnModifications( new InlineDbCommandColumnValue( "ParameterName", new DbParameterValue( "LineMarker" ) ).ToCollection() );
-					lineMarkerInsert.AddColumnModifications( new InlineDbCommandColumnValue( "ParameterValue", new DbParameterValue( 0 ) ).ToCollection() );
-					lineMarkerInsert.Execute( cn );
+				var lineMarkerInsert = new InlineInsert( "GlobalInts" );
+				lineMarkerInsert.AddColumnModifications( new InlineDbCommandColumnValue( "ParameterName", new DbParameterValue( "LineMarker" ) ).ToCollection() );
+				lineMarkerInsert.AddColumnModifications( new InlineDbCommandColumnValue( "ParameterValue", new DbParameterValue( 0 ) ).ToCollection() );
+				lineMarkerInsert.Execute( cn );
 
-					executeLongRunningCommand( cn, "CREATE SEQUENCE MainSequence AS int MINVALUE 1" );
+				executeLongRunningCommand( cn, "CREATE SEQUENCE MainSequence AS int MINVALUE 1" );
 
-					const string userName = @"NT AUTHORITY\NETWORK SERVICE";
-					executeLongRunningCommand( cn, "CREATE USER [{0}]".FormatWith( userName ) );
-					executeLongRunningCommand( cn, "ALTER ROLE db_datareader ADD MEMBER [{0}]".FormatWith( userName ) );
-					executeLongRunningCommand( cn, "ALTER ROLE db_datawriter ADD MEMBER [{0}]".FormatWith( userName ) );
-				} );
+				const string userName = @"NT AUTHORITY\NETWORK SERVICE";
+				executeLongRunningCommand( cn, "CREATE USER [{0}]".FormatWith( userName ) );
+				executeLongRunningCommand( cn, "ALTER ROLE db_datareader ADD MEMBER [{0}]".FormatWith( userName ) );
+				executeLongRunningCommand( cn, "ALTER ROLE db_datawriter ADD MEMBER [{0}]".FormatWith( userName ) );
+			} );
 	}
 
 	private void deleteAndReCreateFromFile( DatabaseConnection cn, string filePath ) {
@@ -206,21 +205,20 @@ LOG ON (
 		StatusStatics.SetStatus( "Waiting for ghost record cleanup." );
 		Thread.Sleep( TimeSpan.FromMinutes( 5 ) );
 
-		ExecuteDbMethod(
-			cn => {
-				executeLongRunningCommand( cn, "ALTER DATABASE {0} SET AUTO_UPDATE_STATISTICS_ASYNC OFF".FormatWith( info.Database ) );
-				executeLongRunningCommand( cn, "ALTER DATABASE {0} SET SINGLE_USER WITH ROLLBACK IMMEDIATE".FormatWith( info.Database ) );
-				ExceptionHandlingTools.Retry(
-					() => {
-						// This sometimes fails with "A severe error occurred on the current command."
-						executeLongRunningCommand( cn, "DBCC SHRINKDATABASE( {0}, 10 )".FormatWith( info.Database ) );
-					},
-					"Failed to shrink database.",
-					maxAttempts: 10,
-					retryIntervalMs: 30000 );
-				executeLongRunningCommand( cn, "ALTER DATABASE {0} SET MULTI_USER".FormatWith( info.Database ) );
-				executeLongRunningCommand( cn, "ALTER DATABASE {0} SET AUTO_UPDATE_STATISTICS_ASYNC ON".FormatWith( info.Database ) );
-			} );
+		ExecuteDbMethod( cn => {
+			executeLongRunningCommand( cn, "ALTER DATABASE {0} SET AUTO_UPDATE_STATISTICS_ASYNC OFF".FormatWith( info.Database ) );
+			executeLongRunningCommand( cn, "ALTER DATABASE {0} SET SINGLE_USER WITH ROLLBACK IMMEDIATE".FormatWith( info.Database ) );
+			ExceptionHandlingTools.Retry(
+				() => {
+					// This sometimes fails with "A severe error occurred on the current command."
+					executeLongRunningCommand( cn, "DBCC SHRINKDATABASE( {0}, 10 )".FormatWith( info.Database ) );
+				},
+				"Failed to shrink database.",
+				maxAttempts: 10,
+				retryIntervalMs: 30000 );
+			executeLongRunningCommand( cn, "ALTER DATABASE {0} SET MULTI_USER".FormatWith( info.Database ) );
+			executeLongRunningCommand( cn, "ALTER DATABASE {0} SET AUTO_UPDATE_STATISTICS_ASYNC ON".FormatWith( info.Database ) );
+		} );
 	}
 
 	private void executeLongRunningCommand( DatabaseConnection cn, string commandText ) {
@@ -247,19 +245,18 @@ LOG ON (
 	}
 
 	private void executeDbMethodWithSpecifiedDatabaseInfo( SqlServerInfo info, Action<DatabaseConnection> method ) {
-		executeMethodWithDbExceptionHandling(
-			() => {
-				var connection = new DatabaseConnection(
-					new SqlServerInfo(
-						( info as DatabaseInfo ).SecondaryDatabaseName,
-						info.Server,
-						info.LoginName,
-						info.Password,
-						info.Database,
-						false,
-						info.FullTextCatalog ) );
-				connection.ExecuteWithConnectionOpen( () => method( connection ) );
-			} );
+		executeMethodWithDbExceptionHandling( () => {
+			var connection = new DatabaseConnection(
+				new SqlServerInfo(
+					( info as DatabaseInfo ).SecondaryDatabaseName,
+					info.Server,
+					info.LoginName,
+					info.Password,
+					info.Database,
+					false,
+					info.FullTextCatalog ) );
+			connection.ExecuteWithConnectionOpen( () => method( connection ) );
+		} );
 	}
 
 	private void executeMethodWithDbExceptionHandling( Action method ) {
