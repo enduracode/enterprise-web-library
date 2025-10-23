@@ -4,10 +4,9 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic.AlternativeResourceModes;
 using EnterpriseWebLibrary.EnterpriseWebFramework.OpenIdProvider;
 
-// EwlPage
-
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin;
 
+// EwlPage
 partial class OpenIdProvider {
 	protected override string getResourceName() => "OpenID Provider";
 
@@ -19,8 +18,8 @@ partial class OpenIdProvider {
 		return new UiPageContent().Add(
 			( certificate.Any()
 				  ? "Certificate valid until {0}.".FormatWith(
-						  new X509Certificate2( Convert.FromBase64String( certificate ), OpenIdProviderStatics.CertificatePassword ).NotAfter
-							  .ToDayMonthYearString( false ) )
+						  X509CertificateLoader.LoadPkcs12( Convert.FromBase64String( certificate ), OpenIdProviderStatics.CertificatePassword )
+							  .NotAfter.ToDayMonthYearString( false ) )
 					  .ToComponents()
 				  : "No certificate.".ToComponents() ).Concat( " ".ToComponents() )
 			.Append(

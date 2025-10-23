@@ -8,10 +8,9 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 using EnterpriseWebLibrary.UserManagement;
 using EnterpriseWebLibrary.UserManagement.IdentityProviders;
 
-// EwlPage
-
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin;
 
+// EwlPage
 partial class UserManagement {
 	internal static string GenerateCertificate( DateTimeOffset currentTime, string password ) {
 		using var algorithm = new RSACryptoServiceProvider(
@@ -44,8 +43,8 @@ partial class UserManagement {
 						.AddItems(
 							( certificate.Any()
 								  ? "Certificate valid until {0}.".FormatWith(
-										  new X509Certificate2( Convert.FromBase64String( certificate ), UserManagementStatics.CertificatePassword ).NotAfter.ToDayMonthYearString(
-											  false ) )
+										  X509CertificateLoader.LoadPkcs12( Convert.FromBase64String( certificate ), UserManagementStatics.CertificatePassword )
+											  .NotAfter.ToDayMonthYearString( false ) )
 									  .ToComponents()
 								  : "No certificate.".ToComponents() ).Concat( " ".ToComponents() )
 							.Append(
