@@ -858,7 +858,7 @@ internal class UpdateDependentLogic: Operation {
 				writer.WriteLine( "<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>" );
 				writer.WriteLine( "</PackageReference>" );
 
-				writer.WriteLine( """<PackageReference Include="NUnit3TestAdapter" Version="5.1.0" />""" );
+				writer.WriteLine( """<PackageReference Include="NUnit3TestAdapter" Version="5.2.0" />""" );
 			}
 			else if( !installation.DevelopmentInstallationLogic.SystemIsEwl || !projectName.EndsWith( " Provider", StringComparison.Ordinal ) )
 				writer.WriteLine( $"""<InternalsVisibleTo Include="{unitTestNamespaceAndAssemblyName}" />""" );
