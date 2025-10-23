@@ -11,7 +11,7 @@ public static class ConfigurationStatics {
 	/// <summary>
 	/// Development Utility and private use only.
 	/// </summary>
-	public const string TargetFramework = "net8.0-windows";
+	public const string TargetFramework = "net9.0-windows";
 
 	/// <summary>
 	/// Gets the path of the EWL folder on the machine.
