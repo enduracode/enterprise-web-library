@@ -18,7 +18,7 @@ For servers, the only requirement is Windows Server 2019 or later with IIS enabl
 
 1.	Visit http://ewl.enterpriseweblibrary.org/create-system to download a ZIP file containing your new starter system. Extract the files into a location of your choice.
 
-2.	Open the solution file in Visual Studio. In the Package Manager Console, run `Get-Project -All | Install-Package Ewl`.
+2.	Open the solution file in Visual Studio. In the Package Manager Console, run `Install-Package Ewl -ProjectName Library`.
 
 3.	Again in the Package Manager Console, run `Update-DependentLogic`. This will copy some web-framework files into the solution, and generate a few pieces of code in both projects. It will also apply some IIS configuration (if installed) in case you wish to use this as a local web server instead of Kestrel.
 
