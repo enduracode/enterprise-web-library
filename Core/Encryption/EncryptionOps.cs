@@ -20,7 +20,7 @@ public static class EncryptionOps {
 	/// Generates a random initialization vector, which should be 16 bytes long since that is the block size of the encryption algorithm.
 	/// </summary>
 	public static byte[] GenerateInitVector() {
-		SymmetricAlgorithm algorithm = Rijndael.Create();
+		SymmetricAlgorithm algorithm = Aes.Create();
 		return algorithm.IV;
 	}
 
@@ -47,7 +47,7 @@ public static class EncryptionOps {
 	/// Decrypts the specified byte array and returns a string representing the decrypted value.
 	/// </summary>
 	public static string DecryptString( byte[] initVector, byte[] value ) {
-		SymmetricAlgorithm algorithm = Rijndael.Create();
+		SymmetricAlgorithm algorithm = Aes.Create();
 		algorithm.Key = SystemProvider.Key;
 		algorithm.IV = initVector;
 		string decryptedValue;

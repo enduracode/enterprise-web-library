@@ -188,7 +188,7 @@ internal class RsLibraryTester {
 		Console.WriteLine( validator.GetByte( vp, "234987234" ).Value( out errorType ) );
 		Assert.That( errorType is null, Is.False );
 
-		var key = Rijndael.Create().Key;
+		var key = Aes.Create().Key;
 		Console.Write( "Encryption Key: { " );
 		foreach( var b in key )
 			Console.Write( b + ", " );

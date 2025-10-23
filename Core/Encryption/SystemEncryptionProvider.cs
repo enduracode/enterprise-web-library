@@ -1,12 +1,12 @@
-﻿namespace EnterpriseWebLibrary.Encryption {
+﻿namespace EnterpriseWebLibrary.Encryption;
+
+/// <summary>
+/// System-specific encryption logic.
+/// </summary>
+public interface SystemEncryptionProvider {
 	/// <summary>
-	/// System-specific encryption logic.
+	/// To generate a key for a new system, use Aes.Create() and then retrieve the key from the resulting object. It should be 32 bytes (256 bits) long since that
+	/// is the default key length for the encryption algorithm.
 	/// </summary>
-	public interface SystemEncryptionProvider {
-		/// <summary>
-		/// To generate a key for a new system, use Rijndael.Create() and then retrieve the key from the resulting object. It should be 32 bytes (256 bits) long
-		/// since that is the default key length for the encryption algorithm.
-		/// </summary>
-		byte[] Key { get; }
-	}
+	byte[] Key { get; }
 }
