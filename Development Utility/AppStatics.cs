@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Runtime.Loader;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
 using Tewl.IO;
@@ -20,23 +21,39 @@ internal static class AppStatics {
 
 	internal static bool NDependIsPresent;
 
+	private class NDependLoadContext: AssemblyLoadContext {
+		private readonly HashSet<string> conflictingAssemblies = new( [ "Microsoft.CodeAnalysis", "Microsoft.CodeAnalysis.CSharp" ], StringComparer.Ordinal );
+
+		public NDependLoadContext(): base( "NDepend" ) {
+			Resolving += ( _, assemblyName ) => LoadAssembly( assemblyName.Name! );
+		}
+
+		protected override Assembly? Load( AssemblyName assemblyName ) {
+			var name = assemblyName.Name!;
+			return conflictingAssemblies.Contains( name ) ? LoadAssembly( name ) : base.Load( assemblyName );
+		}
+
+		public Assembly LoadAssembly( string name ) =>
+			LoadFromAssemblyPath(
+				EwlStatics.CombinePaths(
+					Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ),
+					ConfigurationStatics.MachineConfiguration!.NDependFolderPathInUserProfileFolderEffective,
+					"Lib",
+					$"{name}.dll" ) );
+	}
+
 	internal static void Init() {
 		NDependIsPresent = ConfigurationStatics.MachineConfiguration is not null && Directory.Exists(
 			                   EwlStatics.CombinePaths(
 				                   Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ),
 				                   ConfigurationStatics.MachineConfiguration.NDependFolderPathInUserProfileFolderEffective ) );
-		if( NDependIsPresent )
-			AppDomain.CurrentDomain.AssemblyResolve += ( _, args ) => {
-				var assemblyName = new AssemblyName( args.Name ).Name;
-				if( !new[] { "NDepend.API", "NDepend.Core" }.Contains( assemblyName ) )
-					return null;
-				return Assembly.LoadFrom(
-					EwlStatics.CombinePaths(
-						Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ),
-						ConfigurationStatics.MachineConfiguration!.NDependFolderPathInUserProfileFolderEffective,
-						"Lib",
-						assemblyName + ".dll" ) );
+		if( NDependIsPresent ) {
+			var loadContext = new NDependLoadContext();
+			AssemblyLoadContext.Default.Resolving += ( _, assemblyName ) => {
+				var name = assemblyName.Name;
+				return string.Equals( name, "NDepend.API", StringComparison.Ordinal ) ? loadContext.LoadAssembly( name! ) : null;
 			};
+		}
 	}
 
 	internal static bool SystemIsTewl( this DevelopmentInstallation installation ) =>
