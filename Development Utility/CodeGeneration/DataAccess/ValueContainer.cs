@@ -55,6 +55,14 @@ internal class ValueContainer {
 			incomingValueConverter = value => LocalDateTime.FromDateTime( (DateTime)value ).InUtc().ToInstant();
 			outgoingValueConversionExpressionGetter = valueExpression => $"{valueExpression}.ToDateTimeUtc()";
 		}
+		else if( databaseInfo is SqlServerInfo ? dataType == typeof( DateTime ) :
+		         databaseInfo is MySqlInfo ? dbTypeString.Equals( "DateTime", StringComparison.Ordinal ) :
+		         databaseInfo is OracleInfo && dbTypeString.Equals( "Date", StringComparison.Ordinal ) ) {
+			this.dataType = typeof( LocalDateTime );
+			incomingValueConversionExpressionGetter = valueExpression => $"LocalDateTime.FromDateTime( (DateTime){valueExpression} )";
+			incomingValueConverter = value => LocalDateTime.FromDateTime( (DateTime)value );
+			outgoingValueConversionExpressionGetter = valueExpression => $"{valueExpression}.ToDateTimeUnspecified()";
+		}
 		else {
 			this.dataType = unconvertedDataType;
 			incomingValueConversionExpressionGetter = valueExpression => "({0}){1}".FormatWith( dataType, valueExpression );
