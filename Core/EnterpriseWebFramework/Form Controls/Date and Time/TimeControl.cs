@@ -60,7 +60,7 @@ public class TimeControl: FormControl<FlowComponent> {
 						                  var validationResult = validator.GetNullableTimeOfDayTimeSpan(
 							                  new ValidationErrorHandler( "time" ),
 							                  postBackValue.ToUpper(),
-							                  DateTimeTools.HourAndMinuteFormat.ToCollection().ToArray(),
+							                  LocalTimeTools.HourAndMinuteFormat.ToCollection().ToArray(),
 							                  allowEmpty );
 						                  if( validationResult.Error( out _ ) is not null ) {
 							                  setup.ValidationErrorNotifier?.Invoke();
