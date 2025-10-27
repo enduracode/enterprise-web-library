@@ -38,7 +38,7 @@ internal class ValueContainer {
 			incomingValueConverter = value => Convert.ToBoolean( value );
 			outgoingValueConversionExpressionGetter = valueExpression => "Convert.ToUInt64( {0} )".FormatWith( valueExpression );
 		}
-		else if( databaseInfo is SqlServerInfo && string.Equals( dbTypeString, "Date", StringComparison.Ordinal ) ) {
+		else if( databaseInfo is SqlServerInfo or MySqlInfo && string.Equals( dbTypeString, "Date", StringComparison.Ordinal ) ) {
 			if( unconvertedDataType != typeof( DateTime ) )
 				throw new Exception( $"The unconverted data type was not {nameof(DateTime)}." );
 
