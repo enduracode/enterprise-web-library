@@ -10,7 +10,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 [ JsonObject( MemberSerialization = MemberSerialization.Fields ) ]
 public class FullResponse {
 	internal static FullResponse GetFromCache( string key, Instant lastModificationTime, Func<FullResponse> valueCreator ) {
-		var cache = AppMemoryCache.GetCacheValue( "ewfResponse-" + key, () => new DateAndTimeVersionedCache<FullResponse>() );
+		var cache = AppMemoryCache.GetCacheValue( "ewfResponse-" + key, () => new TimeVersionedCache<FullResponse>() );
 		return cache.ValuesByTime.GetOrAdd( lastModificationTime, valueCreator );
 	}
 

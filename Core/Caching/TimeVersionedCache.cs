@@ -3,7 +3,7 @@ using NodaTime;
 
 namespace EnterpriseWebLibrary.Caching;
 
-internal class DateAndTimeVersionedCache<T>: PeriodicEvictionCompositeCacheEntry {
+internal class TimeVersionedCache<T>: PeriodicEvictionCompositeCacheEntry {
 	public readonly Cache<Instant, T> ValuesByTime = new( true );
 
 	void PeriodicEvictionCompositeCacheEntry.EvictOldEntries() {
