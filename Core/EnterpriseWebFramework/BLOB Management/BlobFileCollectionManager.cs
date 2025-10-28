@@ -62,7 +62,7 @@ public sealed class BlobFileCollectionManager: FlowComponent {
 			fields: columnSetups );
 
 		IReadOnlyCollection<BlobFile> files = BlobStorageStatics.SystemProvider.GetFilesLinkedToFileCollection( fileCollectionId );
-		files = ( sortByName ? files.OrderByName() : files.OrderByUploadedDateDescending() ).Materialize();
+		files = ( sortByName ? files.OrderByName() : files.OrderByUploadTimeDescending() ).Materialize();
 
 		foreach( var file in files )
 			addFileRow( postBackIdBase, thumbnailResourceGetter, openedFileIds, unopenedFileOpenedNotifier, table, file );

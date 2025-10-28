@@ -73,6 +73,6 @@ public static class BlobStorageStatics {
 
 	internal static IEnumerable<BlobFile> OrderByName( this IEnumerable<BlobFile> rows ) => rows.OrderBy( i => i.FileName ).ThenBy( i => i.FileId );
 
-	internal static IEnumerable<BlobFile> OrderByUploadedDateDescending( this IEnumerable<BlobFile> rows ) =>
+	internal static IEnumerable<BlobFile> OrderByUploadTimeDescending( this IEnumerable<BlobFile> rows ) =>
 		rows.OrderByDescending( i => i.UploadTime ).ThenByDescending( i => i.FileId );
 }
