@@ -1,8 +1,9 @@
-﻿using System.Globalization;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Net.Http.Headers;
+using NodaTime;
+using NodaTime.Text;
 using StackExchange.Profiling;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -11,10 +12,12 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 /// An object that writes a response to a safe HTTP request (e.g. GET, HEAD).
 /// </summary>
 public class EwfSafeResponseWriter {
+	private static readonly InstantPattern urlVersionStringPattern = InstantPattern.CreateWithInvariantCulture( "yyyyMMddHHmmssfff" );
+
 	/// <summary>
-	/// Returns the URL resource-version string for the specified date/time.
+	/// Returns the URL resource-version string for the specified time.
 	/// </summary>
-	public static string GetUrlVersionString( DateTimeOffset dateAndTime ) => dateAndTime.ToString( "yyyyMMddHHmmssfff", DateTimeFormatInfo.InvariantInfo );
+	public static string GetUrlVersionString( Instant time ) => urlVersionStringPattern.Format( time );
 
 	internal static void AddCacheControlHeader( HttpResponse aspNetResponse, bool requestIsSecure, bool responseHasCachingInfo, bool? responseNeverExpires ) {
 		var headerValue = new CacheControlHeaderValue();
@@ -40,7 +43,7 @@ public class EwfSafeResponseWriter {
 	}
 
 	private static Action<HttpResponse, HttpRequest, bool> createWriter(
-		Func<EwfResponse> responseCreator, string urlVersionString, string eTagBase, Func<DateTimeOffset>? lastModificationDateAndTimeGetter,
+		Func<EwfResponse> responseCreator, string urlVersionString, string eTagBase, Func<Instant>? lastModificationTimeGetter,
 		Func<string> memoryCacheKeyGetter ) {
 		return ( aspNetResponse, aspNetRequest, forceImmediateResponseExpiration ) => {
 			var response = new Lazy<EwfResponse>( responseCreator );
@@ -54,15 +57,15 @@ public class EwfSafeResponseWriter {
 			AddCacheControlHeader(
 				aspNetResponse,
 				EwfRequest.AppProvider.RequestIsSecure( aspNetRequest ),
-				urlVersionString.Any() || eTagBase.Any() || lastModificationDateAndTimeGetter is not null,
+				urlVersionString.Any() || eTagBase.Any() || lastModificationTimeGetter is not null,
 				urlVersionString.Any() && !forceImmediateResponseExpiration );
 
-			var lastModificationDateAndTime = lastModificationDateAndTimeGetter is not null ? new Lazy<DateTimeOffset>( lastModificationDateAndTimeGetter ) : null;
+			var lastModificationTime = lastModificationTimeGetter is not null ? new Lazy<Instant>( lastModificationTimeGetter ) : null;
 			string eTag;
 			if( urlVersionString.Any() )
 				eTag = urlVersionString;
-			else if( eTagBase.Any() || lastModificationDateAndTimeGetter is not null )
-				eTag = eTagBase + ( lastModificationDateAndTimeGetter is not null ? GetUrlVersionString( lastModificationDateAndTime!.Value ) : "" );
+			else if( eTagBase.Any() || lastModificationTimeGetter is not null )
+				eTag = eTagBase + ( lastModificationTimeGetter is not null ? GetUrlVersionString( lastModificationTime!.Value ) : "" );
 			else {
 				// Buffer the response body.
 				var responseWithBufferedBody = EwfResponse.Create(
@@ -89,9 +92,9 @@ public class EwfSafeResponseWriter {
 			eTag = "\"{0}\"".FormatWith( eTag );
 			typedHeaders.ETag = new EntityTagHeaderValue( eTag );
 
-			// Sending a Last-Modified header isn't a good enough reason to force evaluation of lastModificationDateAndTimeGetter, which could be expensive.
-			if( lastModificationDateAndTimeGetter is not null && lastModificationDateAndTime!.IsValueCreated )
-				typedHeaders.LastModified = lastModificationDateAndTime.Value.UtcDateTime;
+			// Sending a Last-Modified header isn't a good enough reason to force evaluation of lastModificationTimeGetter, which could be expensive.
+			if( lastModificationTimeGetter is not null && lastModificationTime!.IsValueCreated )
+				typedHeaders.LastModified = lastModificationTime.Value.ToDateTimeOffset();
 
 			if( aspNetRequest.Headers.IfNoneMatch.Contains( eTag ) ) {
 				aspNetResponse.StatusCode = 304;
@@ -100,7 +103,7 @@ public class EwfSafeResponseWriter {
 
 			var memoryCacheKey = memoryCacheKeyGetter();
 			if( memoryCacheKey.Length > 0 ) {
-				var fullResponse = FullResponse.GetFromCache( memoryCacheKey, lastModificationDateAndTime!.Value, () => response.Value.CreateFullResponse() );
+				var fullResponse = FullResponse.GetFromCache( memoryCacheKey, lastModificationTime!.Value, () => response.Value.CreateFullResponse() );
 				response = new Lazy<EwfResponse>( () => new EwfResponse( fullResponse ) );
 			}
 
@@ -157,7 +160,7 @@ public class EwfSafeResponseWriter {
 			() => EwfResponse.Create( ContentTypes.Css, new EwfResponseBodyCreator( () => CssPreprocessor.TransformCssFile( cssGetter() ) ) ),
 			urlVersionString,
 			"",
-			() => memoryCachingSetup.Value.LastModificationDateAndTime,
+			() => memoryCachingSetup.Value.LastModificationTime,
 			() => memoryCachingSetup.Value.CacheKey );
 	}
 
@@ -178,7 +181,7 @@ public class EwfSafeResponseWriter {
 			() => response.Value.GetResponse(),
 			urlVersionString,
 			urlVersionString.Any() ? "" : response.Value.ETagBase,
-			() => response.Value.FileLastModificationDateAndTime,
+			() => response.Value.FileLastModificationTime,
 			() => useMemoryCacheGetter() ? response.Value.MemoryCacheKey : "" );
 	}
 
@@ -191,16 +194,16 @@ public class EwfSafeResponseWriter {
 	}
 
 	/// <summary>
-	/// Creates a response writer with a generic response, a last-modification date/time (which enables conditional requests), and an optional memory-cache key.
-	/// Do not use this overload if the response will vary based on non-URL elements of the request, such as the authenticated user, since a parameter doesn’t
-	/// exist yet to incorporate those elements into the ETag.
+	/// Creates a response writer with a generic response, a last-modification time (which enables conditional requests), and an optional memory-cache key. Do not
+	/// use this overload if the response will vary based on non-URL elements of the request, such as the authenticated user, since a parameter doesn’t exist yet
+	/// to incorporate those elements into the ETag.
 	/// </summary>
 	/// <param name="responseCreator">The response creator.</param>
-	/// <param name="lastModificationDateAndTime">The last-modification date/time of the resource.</param>
+	/// <param name="lastModificationTime">The last-modification time of the resource.</param>
 	/// <param name="memoryCacheKeyGetter">A function that gets the memory-cache key for this response. Pass null or return the empty string if you do not want
 	/// to use EWL’s memory cache, which will also disable HTTP range requests if the response body is streamed. Do not return null.</param>
-	public EwfSafeResponseWriter( Func<EwfResponse> responseCreator, DateTimeOffset lastModificationDateAndTime, Func<string>? memoryCacheKeyGetter = null ) {
-		writer = createWriter( responseCreator, "", "", () => lastModificationDateAndTime, memoryCacheKeyGetter ?? ( () => "" ) );
+	public EwfSafeResponseWriter( Func<EwfResponse> responseCreator, Instant lastModificationTime, Func<string>? memoryCacheKeyGetter = null ) {
+		writer = createWriter( responseCreator, "", "", () => lastModificationTime, memoryCacheKeyGetter ?? ( () => "" ) );
 	}
 
 	/// <summary>
@@ -220,7 +223,7 @@ public class EwfSafeResponseWriter {
 			responseCreator,
 			urlVersionString,
 			"",
-			() => memoryCachingSetup.Value!.LastModificationDateAndTime,
+			() => memoryCachingSetup.Value!.LastModificationTime,
 			() => memoryCachingSetup.Value != null ? memoryCachingSetup.Value.CacheKey : "" );
 	}
 

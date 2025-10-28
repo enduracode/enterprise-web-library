@@ -1,10 +1,10 @@
 ﻿using EnterpriseWebLibrary.Configuration;
-
-// EwlResource
-// Parameter: string fileName
+using NodaTime.Extensions;
 
 namespace EnterpriseWebLibrary.Website.ConfigurationSchemas;
 
+// EwlResource
+// Parameter: string fileName
 partial class GetSchema {
 	private string filePath = null!;
 
@@ -17,6 +17,6 @@ partial class GetSchema {
 	protected override EwfSafeRequestHandler getOrHead() =>
 		new EwfSafeResponseWriter(
 			() => EwfResponse.Create( ContentTypes.Xml, new EwfResponseBodyCreator( () => File.ReadAllText( filePath ) ) ),
-			EwlStatics.EwlBuildDateTime,
+			EwlStatics.EwlBuildDateTime.ToInstant(),
 			() => "getSchema" + FileName );
 }

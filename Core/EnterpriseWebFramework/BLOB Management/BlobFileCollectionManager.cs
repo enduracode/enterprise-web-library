@@ -4,6 +4,7 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.Componen
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 using EnterpriseWebLibrary.IO;
+using NodaTime;
 using Tewl.InputValidation;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -101,7 +102,7 @@ public sealed class BlobFileCollectionManager: FlowComponent {
 				.ToCollection()
 				.ToCell() );
 
-		cells.Add( file.UploadedDate.ToDayMonthYearString( false ).ToCell() );
+		cells.Add( file.UploadTime.InZone( DateTimeZoneProviders.Tzdb.GetSystemDefault() ).Date.ToDayMonthYearString( false ).ToCell() );
 		cells.Add( ( fileIsUnopened ? "New!" : "" ).ToCell() );
 
 		table.AddItem( EwfTableItem.Create( cells, setup: EwfTableItemSetup.Create( id: new SpecifiedValue<int>( file.FileId ) ) ) );

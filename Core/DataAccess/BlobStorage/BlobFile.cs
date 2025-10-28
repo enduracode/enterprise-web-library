@@ -1,32 +1,12 @@
-﻿using System;
+﻿using NodaTime;
 
-namespace EnterpriseWebLibrary.DataAccess.BlobStorage {
-	/// <summary>
-	/// Contains basic attributes of a file stored in a database, including the ID and the name.
-	/// </summary>
-	public class BlobFile {
-		private readonly int fileId;
-		private readonly string fileName;
-		private readonly string contentType;
-		private readonly DateTime uploadedDate;
+namespace EnterpriseWebLibrary.DataAccess.BlobStorage;
 
-		/// <summary>
-		/// Creates a new BlobFile with the specified ID, file name, content type, and upload date. Do NOT pass null for the content type if you don't have it;
-		/// instead pass the empty string.
-		/// </summary>
-		public BlobFile( int fileId, string fileName, string contentType, DateTime uploadedDate ) {
-			this.fileId = fileId;
-			this.fileName = fileName;
-			this.contentType = contentType;
-			this.uploadedDate = uploadedDate;
-		}
-
-		internal int FileId { get { return fileId; } }
-
-		internal string FileName { get { return fileName; } }
-
-		internal string ContentType { get { return contentType; } }
-
-		internal DateTime UploadedDate { get { return uploadedDate; } }
-	}
-}
+/// <summary>
+/// The basic attributes of a file stored in a database, including the ID and the name.
+/// </summary>
+/// <param name="FileId"></param>
+/// <param name="FileName"></param>
+/// <param name="ContentType">The media type of the file, or the empty string if unknown.</param>
+/// <param name="UploadTime"></param>
+public record BlobFile( int FileId, string FileName, string ContentType, Instant UploadTime );

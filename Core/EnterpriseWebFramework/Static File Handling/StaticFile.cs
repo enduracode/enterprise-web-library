@@ -3,6 +3,8 @@ using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 using EnterpriseWebLibrary.SystemSpecificLogic;
 using MimeTypes;
+using NodaTime;
+using NodaTime.Extensions;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
@@ -51,18 +53,18 @@ public abstract class StaticFile: ResourceBase {
 	protected sealed override IEnumerable<UrlPattern> getChildUrlPatterns() => base.getChildUrlPatterns();
 
 	/// <summary>
-	/// Gets the last-modification date/time of the resource.
+	/// Gets the last-modification time of the resource.
 	/// </summary>
-	public DateTimeOffset GetResourceLastModificationDateAndTime() {
+	public Instant GetResourceLastModificationTime() {
 		// The build date/time is an important factor here. Exclusively using the last write time of the file would prevent re-downloading when we change the
 		// expansion of a CSS element without changing the source file. And for non-development installations, we don't use the last write time at all because
 		// it's probably much slower (the build date/time is just a literal) and also because we don't expect files to be modified on servers.
 		if( ConfigurationStatics.IsDevelopmentInstallation ) {
 			var lastWriteTime = File.GetLastWriteTimeUtc( filePath );
 			if( lastWriteTime > getBuildDateAndTime() )
-				return lastWriteTime;
+				return lastWriteTime.ToInstant();
 		}
-		return getBuildDateAndTime();
+		return getBuildDateAndTime().ToInstant();
 	}
 
 	protected abstract DateTimeOffset getBuildDateAndTime();
@@ -90,7 +92,7 @@ public abstract class StaticFile: ResourceBase {
 	/// <summary>
 	/// Framework use only.
 	/// </summary>
-	protected string getUrlVersionString() => isVersioned ? EwfSafeResponseWriter.GetUrlVersionString( GetResourceLastModificationDateAndTime() ) : "";
+	protected string getUrlVersionString() => isVersioned ? EwfSafeResponseWriter.GetUrlVersionString( GetResourceLastModificationTime() ) : "";
 
 	protected sealed override bool disablesUrlNormalization => base.disablesUrlNormalization;
 
@@ -113,10 +115,10 @@ public abstract class StaticFile: ResourceBase {
 				                 ? new EwfSafeResponseWriter(
 					                 getCss,
 					                 urlVersionString,
-					                 () => new ResponseMemoryCachingSetup( getCacheKey(), GetResourceLastModificationDateAndTime() ) )
+					                 () => new ResponseMemoryCachingSetup( getCacheKey(), GetResourceLastModificationTime() ) )
 				                 : new EwfSafeResponseWriter(
 					                 () => EwfResponse.Create( ContentTypes.Css, new EwfResponseBodyCreator( () => CssPreprocessor.TransformCssFile( getCss() ) ) ),
-					                 GetResourceLastModificationDateAndTime(),
+					                 GetResourceLastModificationTime(),
 					                 memoryCacheKeyGetter: getCacheKey );
 			string getCss() => File.ReadAllText( filePath );
 		}
@@ -131,8 +133,8 @@ public abstract class StaticFile: ResourceBase {
 				                 ? new EwfSafeResponseWriter(
 					                 responseCreator,
 					                 urlVersionString,
-					                 memoryCachingSetupGetter: () => new ResponseMemoryCachingSetup( getCacheKey(), GetResourceLastModificationDateAndTime() ) )
-				                 : new EwfSafeResponseWriter( responseCreator, GetResourceLastModificationDateAndTime(), memoryCacheKeyGetter: getCacheKey );
+					                 memoryCachingSetupGetter: () => new ResponseMemoryCachingSetup( getCacheKey(), GetResourceLastModificationTime() ) )
+				                 : new EwfSafeResponseWriter( responseCreator, GetResourceLastModificationTime(), memoryCacheKeyGetter: getCacheKey );
 		}
 		return responseWriter;
 	}
