@@ -49,6 +49,8 @@ internal class ModificationFormItemMethodWriter {
 			mainControl = "NumberControl";
 		else if( field.TypeIs( typeof( LocalDate ) ) || field.TypeIs( typeof( LocalDate? ) ) )
 			mainControl = "DateControl";
+		else if( field.TypeIs( typeof( LocalTime ) ) || field.TypeIs( typeof( LocalTime? ) ) )
+			mainControl = "TimeControl";
 		else if( field.TypeIs( typeof( PatternString ) ) )
 			mainControl = "SearchPattern";
 	}
@@ -420,7 +422,8 @@ internal class ModificationFormItemMethodWriter {
 					"{0}.ToDateControl( setup: controlSetup, value: value, allowEmpty: allowEmpty, minValue: minValue, maxValue: maxValue, additionalValidationMethod: additionalValidationMethod )"
 						.FormatWith( dv ) );
 
-		if( field.TypeIs( typeof( TimeSpan ) ) || field.TypeIs( typeof( TimeSpan? ) ) )
+		if( field.TypeIs( typeof( LocalTime ) ) || field.TypeIs( typeof( LocalTime? ) ) || field.TypeIs( typeof( TimeSpan ) ) ||
+		    field.TypeIs( typeof( TimeSpan? ) ) )
 			addControl(
 				"TimeControl",
 					[ ],
