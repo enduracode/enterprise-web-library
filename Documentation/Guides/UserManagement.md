@@ -82,9 +82,7 @@ internal class UserManagement: SystemUserManagementProvider {
 			},
 			userId => {
 				var user = UsersTableRetrieval.GetRowMatchingId( userId );
-				return ( user.LoginCodeSalt, user.HashedLoginCode,
-					       user.LoginCodeExpirationDateAndTime.ToNewUnderlyingValue( v => LocalDateTime.FromDateTime( v ).InUtc().ToInstant() ),
-					       user.LoginCodeRemainingAttemptCount, user.LoginCodeDestinationUrl );
+				return ( user.LoginCodeSalt, user.HashedLoginCode, user.LoginCodeExpirationTime, user.LoginCodeRemainingAttemptCount, user.LoginCodeDestinationUrl );
 			},
 			( userId, salt, saltedPassword ) => {
 				var mod = UsersModification.CreateForUpdate( new UsersTableEqualityConditions.UserId( userId ) );
@@ -96,7 +94,7 @@ internal class UserManagement: SystemUserManagementProvider {
 				var mod = UsersModification.CreateForUpdate( new UsersTableEqualityConditions.UserId( userId ) );
 				mod.LoginCodeSalt = salt;
 				mod.HashedLoginCode = hashedCode;
-				mod.LoginCodeExpirationDateAndTime = expirationTime?.InUtc().ToDateTimeUnspecified();
+				mod.LoginCodeExpirationTime = expirationTime;
 				mod.LoginCodeRemainingAttemptCount = remainingAttemptCount;
 				mod.LoginCodeDestinationUrl = destinationUrl;
 				mod.Execute();

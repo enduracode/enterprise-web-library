@@ -34,7 +34,7 @@ create table Users(
 		null,
 	HashedLoginCode varbinary( 20 )
 		null,
-	LoginCodeExpirationDateAndTime datetime2
+	LoginCodeExpirationTime datetime2
 		null,
 	LoginCodeRemainingAttemptCount tinyint
 		null,
