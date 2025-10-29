@@ -58,6 +58,9 @@ internal class ValueContainer {
 		else if( databaseInfo is SqlServerInfo ? dataType == typeof( DateTime ) :
 		         databaseInfo is MySqlInfo ? dbTypeString.Equals( "DateTime", StringComparison.Ordinal ) :
 		         databaseInfo is OracleInfo && dbTypeString.Equals( "Date", StringComparison.Ordinal ) ) {
+			if( unconvertedDataType != typeof( DateTime ) )
+				throw new Exception( $"The unconverted data type was not {nameof(DateTime)}." );
+
 			this.dataType = typeof( LocalDateTime );
 			incomingValueConversionExpressionGetter = valueExpression => $"LocalDateTime.FromDateTime( (DateTime){valueExpression} )";
 			incomingValueConverter = value => LocalDateTime.FromDateTime( (DateTime)value );
