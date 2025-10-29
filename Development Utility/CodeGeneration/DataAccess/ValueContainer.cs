@@ -49,8 +49,17 @@ internal class ValueContainer {
 			incomingValueConverter = value => LocalDate.FromDateTime( (DateTime)value );
 			outgoingValueConversionExpressionGetter = valueExpression => $"{valueExpression}.ToDateTimeUnspecified()";
 		}
+		else if( databaseInfo is SqlServerInfo or MySqlInfo && dbTypeString.Equals( "Time", StringComparison.Ordinal ) ) {
+			if( unconvertedDataType != typeof( TimeSpan ) )
+				throw new Exception( $"The unconverted data type was not {nameof(TimeSpan)}." );
+
+			this.dataType = typeof( LocalTime );
+			incomingValueConversionExpressionGetter = valueExpression => $"LocalTime.FromTicksSinceMidnight( ( (TimeSpan){valueExpression} ).Ticks )";
+			incomingValueConverter = value => LocalTime.FromTicksSinceMidnight( ( (TimeSpan)value ).Ticks );
+			outgoingValueConversionExpressionGetter = valueExpression => $"new TimeSpan( {valueExpression}.TickOfDay )";
+		}
 		else if( dataType == typeof( DateTime ) && ( ( databaseInfo is OracleInfo && dbTypeString.Equals( "TimeStamp", StringComparison.Ordinal ) ) ||
-		                                             hasSuffix( "Time" ) && !hasSuffix( "DateAndTime" ) && !hasSuffix( "DateTime" ) ) ) {
+		                                             ( hasSuffix( "Time" ) && !hasSuffix( "DateAndTime" ) && !hasSuffix( "DateTime" ) ) ) ) {
 			this.dataType = typeof( Instant );
 			incomingValueConversionExpressionGetter = valueExpression => $"LocalDateTime.FromDateTime( (DateTime){valueExpression} ).InUtc().ToInstant()";
 			incomingValueConverter = value => LocalDateTime.FromDateTime( (DateTime)value ).InUtc().ToInstant();
