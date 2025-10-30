@@ -51,6 +51,8 @@ internal class ModificationFormItemMethodWriter {
 			mainControl = "DateControl";
 		else if( field.TypeIs( typeof( LocalTime ) ) || field.TypeIs( typeof( LocalTime? ) ) )
 			mainControl = "TimeControl";
+		else if( field.TypeIs( typeof( LocalDateTime ) ) || field.TypeIs( typeof( LocalDateTime? ) ) )
+			mainControl = "DateAndTimeControl";
 		else if( field.TypeIs( typeof( PatternString ) ) )
 			mainControl = "SearchPattern";
 	}
@@ -441,7 +443,7 @@ internal class ModificationFormItemMethodWriter {
 					      : "{0}.ToTimeControl( setup: controlSetup, value: value, minValue: minValue, maxValue: maxValue, minuteInterval: minuteInterval, additionalValidationMethod: additionalValidationMethod )"
 						      .FormatWith( dv ) );
 
-		if( field.TypeIs( typeof( DateTime ) ) )
+		if( field.TypeIs( typeof( LocalDateTime ) ) || field.TypeIs( typeof( DateTime ) ) )
 			addControl(
 				"DateAndTimeControl",
 					[ ],
@@ -453,7 +455,7 @@ internal class ModificationFormItemMethodWriter {
 				dv =>
 					"{0}.ToDateAndTimeControl( setup: controlSetup, value: value, minValue: minValue, maxValue: maxValue, additionalValidationMethod: additionalValidationMethod )"
 						.FormatWith( dv ) );
-		if( field.TypeIs( typeof( DateTime? ) ) )
+		if( field.TypeIs( typeof( LocalDateTime? ) ) || field.TypeIs( typeof( DateTime? ) ) )
 			addControl(
 				"DateAndTimeControl",
 					[ ],
