@@ -69,6 +69,17 @@ internal class WebItemParameter {
 			( valueExpression, _ ) => $"LocalDatePattern.Iso.Parse( {valueExpression} ).GetValueOrThrow()" );
 
 		yield return new DataType(
+			typeof( LocalDateTime ),
+			true,
+			() => hasSuffix( "DateAndTime" ) || nameIs( "dateAndTime" ) || hasSuffix( "DateTime" ) || nameIs( "dateTime" ),
+			"suffix the name with “DateAndTime” or make the name “dateAndTime”",
+			"",
+			"",
+			"",
+			valueExpression => $"LocalDateTimePattern.VariablePrecisionIso.Format( {valueExpression} )",
+			( valueExpression, _ ) => $"LocalDateTimePattern.VariablePrecisionIso.Parse( {valueExpression} ).GetValueOrThrow()" );
+
+		yield return new DataType(
 			typeof( PatternString ),
 			false,
 			() => hasSuffix( "Contains" ) || nameIs( "searchTerm" ),
