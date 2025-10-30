@@ -202,8 +202,8 @@ internal class WebItemParameter {
 			}
 
 			type = new DataType(
-				compilationType,
-				compilationType.IsValueType && Nullable.GetUnderlyingType( compilationType ) is not null,
+				Nullable.GetUnderlyingType( compilationType ) ?? compilationType,
+				Nullable.GetUnderlyingType( compilationType ) is not null,
 				() => throw new NotSupportedException(),
 				"",
 				getNormalizedTypeName( compilationType )[ ..^( AllowsNull ? 1 : 0 ) ],
@@ -278,7 +278,7 @@ internal class WebItemParameter {
 			PropertyName,
 			PropertyName,
 			name,
-			type.Type,
+			type.Type.IsValueType && AllowsNull ? typeof( Nullable<> ).MakeGenericType( type.Type ) : type.Type,
 			TypeName,
 			TypeName + ( AllowsNull || type.Type == typeof( string ) ? "" : "?" ),
 			type.ElementTypeName,
