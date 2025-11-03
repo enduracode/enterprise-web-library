@@ -20,7 +20,7 @@ internal static class RowConstantStatics {
 			var orderIsSpecified = !table.orderByColumn.IsNullOrWhiteSpace();
 			var values = new List<string>();
 			var names = new List<string>();
-			var identifierNames = new List<string>();
+			var identifiers = new List<string>();
 			try {
 				var columns = new TableColumns( cn, table.tableName, false );
 				valueColumn = columns.AllColumnsExceptRowVersion.Single( column => column.Name.ToLower() == table.valueColumn.ToLower() );
@@ -33,7 +33,9 @@ internal static class RowConstantStatics {
 						while( reader.Read() ) {
 							values.Add( valueColumn.GetDataReaderValue( reader ) );
 							names.Add( nameColumn.GetDataReaderValue( reader ) );
-							identifierNames.Add( nameColumn.GetDataReaderValue( reader, forIdentifier: true ) );
+
+							var identifierName = nameColumn.GetDataReaderValue( reader, forIdentifier: true );
+							identifiers.Add( EwlStatics.GetCSharpIdentifier( isPascalCase( identifierName ) ? identifierName : identifierName.EnglishToPascal() ) );
 						}
 					} );
 			}
@@ -50,18 +52,18 @@ internal static class RowConstantStatics {
 
 			// constants
 			for( var i = 0; i < values.Count; i++ ) {
-				CodeGenerationStatics.AddSummaryDocComment( writer, "Constant generated from row in database table." );
-				var identifier = EwlStatics.GetCSharpIdentifier( isPascalCase( identifierNames[ i ] ) ? identifierNames[ i ] : identifierNames[ i ].EnglishToPascal() );
+				// It’s important that row constants actually *be* constants when possible (instead of static readonly) so they can be used in switch statements.
+				var prefix = values[ i ].StartsWith( "new ", StringComparison.Ordinal ) ? "static readonly" : "const";
 
-				// It’s important that row constants actually *be* constants (instead of static readonly) so they can be used in switch statements.
-				writer.WriteLine( $"public const {valueColumn.DataTypeName} {identifier} = {values[ i ]};" );
+				CodeGenerationStatics.AddSummaryDocComment( writer, "Constant generated from row in database table." );
+				writer.WriteLine( $"public {prefix} {valueColumn.DataTypeName} {identifiers[ i ]} = {values[ i ]};" );
 			}
 
 			// one to one map
 			var dictionaryType = "OneToOneMap<" + valueColumn.DataTypeName + ", string>";
 			writer.WriteLine( "private static readonly " + dictionaryType + " " + dictionaryName + " = new " + dictionaryType + "();" );
 
-			writeStaticConstructor( writer, className, names, values, valueColumn.DataTypeName );
+			writeStaticConstructor( writer, className, identifiers, names );
 
 			// methods
 			writeGetNameFromValueMethod( writer, valueColumn.DataTypeName );
@@ -79,11 +81,11 @@ internal static class RowConstantStatics {
 	private static bool isPascalCase( string text ) =>
 		text.Any( char.IsLower ) && text.RemoveNonAlphanumericCharacters( preserveWhiteSpace: false ).Equals( text, StringComparison.Ordinal );
 
-	private static void writeStaticConstructor( TextWriter writer, string className, List<string> names, List<string> values, string valueTypeName ) {
+	private static void writeStaticConstructor( TextWriter writer, string className, List<string> identifiers, List<string> names ) {
 		writer.WriteLine( "static " + className + "() {" );
 
 		for( var i = 0; i < names.Count; i++ )
-			writer.WriteLine( "{0}.Add( ({1}){2}, {3} );".FormatWith( dictionaryName, valueTypeName, values[ i ], names[ i ] ) );
+			writer.WriteLine( $"{dictionaryName}.Add( {identifiers[ i ]}, {names[ i ]} );" );
 
 		writer.WriteLine( "}" ); // constructor
 	}
