@@ -4,7 +4,6 @@ using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using EnterpriseWebLibrary.InstallationSupportUtility;
-using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess;
 
@@ -18,11 +17,10 @@ internal class Column {
 
 		var cmd = DataAccessStatics.GetCommandFromRawQueryText( cn, commandText );
 		var validationMethods = new List<Action>();
-		var readerMethod = new Action<DbDataReader>(
-			r => {
-				foreach( DataRow row in r.GetSchemaTable()!.Rows )
-					columns.Add( new Column( row, includeKeyInfo, validateStringColumns, validationMethods, cn.DatabaseInfo ) );
-			} );
+		var readerMethod = new Action<DbDataReader>( r => {
+			foreach( DataRow row in r.GetSchemaTable()!.Rows )
+				columns.Add( new Column( row, includeKeyInfo, validateStringColumns, validationMethods, cn.DatabaseInfo ) );
+		} );
 		if( includeKeyInfo )
 			cn.ExecuteReaderCommandWithKeyInfoBehavior( cmd, readerMethod );
 		else
@@ -63,12 +61,11 @@ internal class Column {
 		if( includeKeyInfo )
 			isKey = (bool)schemaTableRow[ "IsKey" ];
 
-		validationMethods.Add(
-			() => {
-				if( validateIfString && !( databaseInfo is OracleInfo ) && valueContainer.DataType == typeof( string ) &&
-				    ( !( databaseInfo is MySqlInfo ) || dbTypeString != "JSON" ) && valueContainer.AllowsNull )
-					throw new UserCorrectableException( "String column {0} allows null, which is not allowed.".FormatWith( valueContainer.Name ) );
-			} );
+		validationMethods.Add( () => {
+			if( validateIfString && !( databaseInfo is OracleInfo ) && valueContainer.DataType == typeof( string ) &&
+			    ( !( databaseInfo is MySqlInfo ) || dbTypeString != "JSON" ) && valueContainer.AllowsNull )
+				throw new UserCorrectableException( "String column {0} allows null, which is not allowed.".FormatWith( valueContainer.Name ) );
+		} );
 	}
 
 	internal string Name => valueContainer.Name;
@@ -126,7 +123,9 @@ internal class Column {
 			return forIdentifier ? throw new Exception( "null" ) : valueContainer.DataType == typeof( string ) ? "\"\"" : "null";
 
 		var valueString = valueContainer.ConvertIncomingValue( reader.GetValue( ordinal ) ).ToString()!;
-		return valueContainer.DataType == typeof( string ) && !forIdentifier ? $"\"{valueString}\"" : valueString;
+		return forIdentifier ? valueString :
+		       valueContainer.DataType == typeof( string ) ? $"\"{valueString}\"" :
+		       valueContainer.DataType == typeof( Guid ) ? $"""new Guid( "{valueString}" )""" : valueString;
 	}
 
 	internal ModificationField GetModificationField() {

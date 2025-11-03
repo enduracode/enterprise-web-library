@@ -93,32 +93,29 @@ internal static class RowConstantStatics {
 	private static void writeGetNameFromValueMethod( TextWriter writer, string valueTypeName ) {
 		CodeGenerationStatics.AddSummaryDocComment( writer, "Returns the name of the constant given the constant's value." );
 		const string parameterName = "constantValue";
-		writer.WriteLine( "public static string GetNameFromValue( " + valueTypeName + " " + parameterName + " ) {" );
-		writer.WriteLine( "return " + dictionaryName + ".GetRightFromLeft( " + parameterName + " );" );
-		writer.WriteLine( "}" ); // method
+		writer.WriteLine(
+			"public static string GetNameFromValue( " + valueTypeName + " " + parameterName + " ) => " + dictionaryName + ".GetRightFromLeft( " + parameterName +
+			" );" );
 	}
 
 	private static void writeGetValueFromNameMethod( TextWriter writer, string valueTypeName ) {
 		CodeGenerationStatics.AddSummaryDocComment( writer, "Returns the value of the constant given the constant's name." );
 		const string parameterName = "constantName";
-		writer.WriteLine( "public static " + valueTypeName + " GetValueFromName( string " + parameterName + " ) {" );
-		writer.WriteLine( "return " + dictionaryName + ".GetLeftFromRight( " + parameterName + " );" );
-		writer.WriteLine( "}" ); // method
+		writer.WriteLine(
+			"public static " + valueTypeName + " GetValueFromName( string " + parameterName + " ) => " + dictionaryName + ".GetLeftFromRight( " + parameterName +
+			" );" );
 	}
 
 	private static void writeGetValuesToNamesMethod( TextWriter writer, string valueTypeName ) {
 		CodeGenerationStatics.AddSummaryDocComment(
 			writer,
 			"Returns a list of key value pairs where the key is the value of the row constant and the value is the name of the row constant." );
-		writer.WriteLine( "public static ICollection<KeyValuePair<" + valueTypeName + ", string>> GetValuesToNames() {" );
-		writer.WriteLine( "return valuesAndNames.GetAllPairs();" );
-		writer.WriteLine( "}" ); // method
+		writer.WriteLine( "public static ICollection<KeyValuePair<" + valueTypeName + ", string>> GetValuesToNames() => valuesAndNames.GetAllPairs();" );
 	}
 
 	private static void writeFillListControlMethod( TextWriter writer, Column valueColumn ) {
-		writer.WriteLine( "public static IEnumerable<SelectListItem<" + valueColumn.NullableDataTypeName + ">> GetListItems() {" );
 		writer.WriteLine(
-			"return from i in valuesAndNames.GetAllPairs() select SelectListItem.Create<" + valueColumn.NullableDataTypeName + ">( i.Key, i.Value );" );
-		writer.WriteLine( "}" );
+			"public static IEnumerable<SelectListItem<" + valueColumn.NullableDataTypeName +
+			">> GetListItems() => from i in valuesAndNames.GetAllPairs() select SelectListItem.Create<" + valueColumn.NullableDataTypeName + ">( i.Key, i.Value );" );
 	}
 }
