@@ -2,11 +2,14 @@
 using EnterpriseWebLibrary.DataAccess.CommandWriting.Commands;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
+using Humanizer;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess.Subsystems;
 
 internal static class RowConstantStatics {
 	private const string dictionaryName = "valuesAndNames";
+
+	private record Row( string Value, string Name, string Identifier );
 
 	internal static void Generate(
 		DatabaseConnection cn, TextWriter writer, string baseNamespace, Database database,
@@ -18,9 +21,8 @@ internal static class RowConstantStatics {
 		foreach( var table in configuration.rowConstantTables ) {
 			Column valueColumn;
 			var orderIsSpecified = !table.orderByColumn.IsNullOrWhiteSpace();
-			var values = new List<string>();
-			var names = new List<string>();
-			var identifiers = new List<string>();
+			var rows = new List<Row>();
+			var duplicatesExist = false;
 			try {
 				var columns = new TableColumns( cn, table.tableName, false );
 				valueColumn = columns.AllColumnsExceptRowVersion.Single( column => column.Name.ToLower() == table.valueColumn.ToLower() );
@@ -31,11 +33,18 @@ internal static class RowConstantStatics {
 					cn,
 					reader => {
 						while( reader.Read() ) {
-							values.Add( valueColumn.GetDataReaderValue( reader ) );
-							names.Add( nameColumn.GetDataReaderValue( reader ) );
-
 							var identifierName = nameColumn.GetDataReaderValue( reader, forIdentifier: true );
-							identifiers.Add( EwlStatics.GetCSharpIdentifier( isPascalCase( identifierName ) ? identifierName : identifierName.EnglishToPascal() ) );
+							var row = new Row(
+								valueColumn.GetDataReaderValue( reader ),
+								nameColumn.GetDataReaderValue( reader ),
+								EwlStatics.GetCSharpIdentifier( isPascalCase( identifierName ) ? identifierName : identifierName.EnglishToPascal() ) );
+
+							if( rows.Any( i =>
+								   i.Value.Equals( row.Value, StringComparison.Ordinal ) && i.Name.Equals( row.Name, StringComparison.Ordinal ) &&
+								   i.Identifier.Equals( row.Identifier, StringComparison.Ordinal ) ) )
+								duplicatesExist = true;
+							else
+								rows.Add( row );
 						}
 					} );
 			}
@@ -46,24 +55,44 @@ internal static class RowConstantStatics {
 					e );
 			}
 
+			var pascalTableName = table.tableName.TableNameToPascal( cn );
+			string className;
+			if( duplicatesExist ) {
+				var singularTableName = pascalTableName.Singularize( inputIsKnownToBePlural: false );
+
+				className = pascalTableName;
+				var valueColumnName = valueColumn.PascalCasedName;
+				for( var duplicateSubstringLength = valueColumnName.Length; duplicateSubstringLength > 0; duplicateSubstringLength -= 1 ) {
+					if( !singularTableName.EndsWith( valueColumnName[ ..duplicateSubstringLength ], StringComparison.Ordinal ) )
+						continue;
+
+					className += valueColumnName[ duplicateSubstringLength.. ];
+					break;
+				}
+
+				className = className.Pluralize( inputIsKnownToBeSingular: false );
+			}
+			else
+				// Consider singularizing the table name here, too.
+				className = pascalTableName + "Rows";
+
 			CodeGenerationStatics.AddSummaryDocComment( writer, "Provides constants copied from the " + table.tableName + " table." );
-			var className = table.tableName.TableNameToPascal( cn ) + "Rows";
 			writer.WriteLine( "public class " + className + " {" );
 
 			// constants
-			for( var i = 0; i < values.Count; i++ ) {
+			foreach( var row in rows ) {
 				// It’s important that row constants actually *be* constants when possible (instead of static readonly) so they can be used in switch statements.
-				var prefix = values[ i ].StartsWith( "new ", StringComparison.Ordinal ) ? "static readonly" : "const";
+				var prefix = row.Value.StartsWith( "new ", StringComparison.Ordinal ) ? "static readonly" : "const";
 
 				CodeGenerationStatics.AddSummaryDocComment( writer, "Constant generated from row in database table." );
-				writer.WriteLine( $"public {prefix} {valueColumn.DataTypeName} {identifiers[ i ]} = {values[ i ]};" );
+				writer.WriteLine( $"public {prefix} {valueColumn.DataTypeName} {row.Identifier} = {row.Value};" );
 			}
 
 			// one to one map
 			var dictionaryType = "OneToOneMap<" + valueColumn.DataTypeName + ", string>";
 			writer.WriteLine( "private static readonly " + dictionaryType + " " + dictionaryName + " = new " + dictionaryType + "();" );
 
-			writeStaticConstructor( writer, className, identifiers, names );
+			writeStaticConstructor( writer, className, rows );
 
 			// methods
 			writeGetNameFromValueMethod( writer, valueColumn.DataTypeName );
@@ -81,11 +110,11 @@ internal static class RowConstantStatics {
 	private static bool isPascalCase( string text ) =>
 		text.Any( char.IsLower ) && text.RemoveNonAlphanumericCharacters( preserveWhiteSpace: false ).Equals( text, StringComparison.Ordinal );
 
-	private static void writeStaticConstructor( TextWriter writer, string className, List<string> identifiers, List<string> names ) {
+	private static void writeStaticConstructor( TextWriter writer, string className, IEnumerable<Row> rows ) {
 		writer.WriteLine( "static " + className + "() {" );
 
-		for( var i = 0; i < names.Count; i++ )
-			writer.WriteLine( $"{dictionaryName}.Add( {identifiers[ i ]}, {names[ i ]} );" );
+		foreach( var row in rows )
+			writer.WriteLine( $"{dictionaryName}.Add( {row.Identifier}, {row.Name} );" );
 
 		writer.WriteLine( "}" ); // constructor
 	}
