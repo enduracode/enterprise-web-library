@@ -34,10 +34,12 @@ internal static class RowConstantStatics {
 					reader => {
 						while( reader.Read() ) {
 							var identifierName = nameColumn.GetDataReaderValue( reader, forIdentifier: true );
+							var underscorelessIdentifierName = string.Concat( identifierName.Separate( "_", false ).Select( i => i.Capitalize() ) );
 							var row = new Row(
 								valueColumn.GetDataReaderValue( reader ),
 								nameColumn.GetDataReaderValue( reader ),
-								EwlStatics.GetCSharpIdentifier( isPascalCase( identifierName ) ? identifierName : identifierName.EnglishToPascal() ) );
+								EwlStatics.GetCSharpIdentifier(
+									isPascalCase( underscorelessIdentifierName ) ? underscorelessIdentifierName : identifierName.EnglishToPascal() ) );
 
 							if( rows.Any( i =>
 								   i.Value.Equals( row.Value, StringComparison.Ordinal ) && i.Name.Equals( row.Name, StringComparison.Ordinal ) &&
