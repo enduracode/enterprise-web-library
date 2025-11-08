@@ -4,6 +4,18 @@ New-Module -Name 'EWL Development Utility' -ScriptBlock {
 $installPath = $args[0]
 $installationPath = Split-Path -Path $dte.Solution.FileName -Parent
 
+function Update-EwlPackages {
+	[CmdletBinding()]
+	Param()
+	Process {
+		Write-Host
+		Write-Host 'Please copy and run this command, removing the -pre switch if you want the latest stable version:'
+		Write-Host
+		Write-Host 'foreach( $p in Get-Package | where Id -Like ''Ewl*'' | select -ExpandProperty Id | sort -Unique ) { Update-Package $p -pre }' -ForegroundColor DarkGreen
+		Write-Host
+	}
+}
+
 function Initialize-InstallationConfiguration {
 	[CmdletBinding()]
 	Param()
