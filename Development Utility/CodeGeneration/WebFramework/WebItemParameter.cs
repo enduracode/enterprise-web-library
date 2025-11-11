@@ -80,6 +80,17 @@ internal class WebItemParameter {
 			( valueExpression, _ ) => $"LocalDateTimePattern.VariablePrecisionIso.Parse( {valueExpression} ).GetValueOrThrow()" );
 
 		yield return new DataType(
+			typeof( Duration ),
+			true,
+			() => false,
+			"",
+			"",
+			"",
+			"",
+			valueExpression => $"DurationPattern.Roundtrip.Format( {valueExpression} )",
+			( valueExpression, _ ) => $"DurationPattern.Roundtrip.Parse( {valueExpression} ).GetValueOrThrow()" );
+
+		yield return new DataType(
 			typeof( PatternString ),
 			false,
 			() => hasSuffix( "Contains" ) || nameIs( "searchTerm" ),
