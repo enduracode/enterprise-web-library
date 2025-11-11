@@ -9,6 +9,7 @@
     <ProjectReference Include="..\Core\Core.csproj" />
     <ProjectReference Include="..\Providers\MySQL\MySQL.csproj" />
     <ProjectReference Include="..\Providers\Oracle Database\Oracle Database.csproj" />
+    <ProjectReference Include="..\Providers\PDF\PDF.csproj" />
   </ItemGroup>
 
   <ItemGroup>
