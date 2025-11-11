@@ -58,20 +58,21 @@ public static class TelemetryStatics {
 		ReportError( message, null );
 	}
 
-	private static readonly object key = new();
-
 	private static void logError( string errorText ) {
 		var currentTime = Clock.GetCurrentTime().InZone( DateTimeZoneProviders.Tzdb.GetSystemDefault() );
 		var timePattern = ZonedDateTimePattern.CreateWithInvariantCulture( "d MMM uuuu',' H:mm:ss '(UTC'o<+H>')'", null );
 
-		lock( key ) {
-			using var writer = new StreamWriter( File.Open( ConfigurationStatics.InstallationConfiguration.ErrorLogFilePath, FileMode.Append ) );
-			writer.WriteLine( timePattern.Format( currentTime ) + ":" );
-			writer.WriteLine();
-			writer.Write( errorText );
-			writer.WriteLine();
-			writer.WriteLine();
-		}
+		SynchronizationTools.ExecuteWithMachineExclusiveAccess(
+			$"{EwlStatics.EwlInitialism.EnglishToPascal()}{ConfigurationStatics.InstallationConfiguration.FullShortName}ErrorLog",
+			null,
+			_ => {
+				using var writer = new StreamWriter( File.Open( ConfigurationStatics.InstallationConfiguration.ErrorLogFilePath, FileMode.Append ) );
+				writer.WriteLine( timePattern.Format( currentTime ) + ":" );
+				writer.WriteLine();
+				writer.Write( errorText );
+				writer.WriteLine();
+				writer.WriteLine();
+			} );
 	}
 
 	/// <summary>
