@@ -1,4 +1,4 @@
-﻿using Aspose.Pdf.Facades;
+﻿using EnterpriseWebLibrary.ExternalFunctionality;
 using EnterpriseWebLibrary.IO;
 using EnterpriseWebLibrary.SystemSpecificLogic;
 using JetBrains.Annotations;
@@ -54,15 +54,7 @@ public static class BlobStorageStatics {
 	/// Returns true if the file is a valid PDF file. Caller is responsible for opening and cleaning up the stream.
 	/// You should check other meta information about the file (such as the extension) before calling this expensive method.
 	/// </summary>
-	public static bool IsValidPdfFile( Stream sourceStream ) {
-		try {
-			return new PdfFileInfo( sourceStream ).IsPdfFile;
-		}
-		catch {
-			// We catch all exceptions here because we don't trust Aspose to consistently throw a particular type of exception when the PDF is invalid.
-			return false;
-		}
-	}
+	public static bool IsValidPdfFile( Stream sourceStream ) => ExternalFunctionalityStatics.ExternalPdfProvider.FileIsValidPdf( sourceStream );
 
 	/// <summary>
 	/// Returns the content type of the given HttpPostedFile.

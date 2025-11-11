@@ -45,14 +45,14 @@ public static class ExternalFunctionalityStatics {
 	internal static ExternalMySqlProvider ExternalMySqlProvider {
 		get {
 			ensureProviderExists();
-			return mySqlProvider ?? throw new ApplicationException( "External MySQL provider not available." );
+			return mySqlProvider ?? throw new Exception( "External MySQL provider not available." );
 		}
 	}
 
 	internal static ExternalOracleDatabaseProvider ExternalOracleDatabaseProvider {
 		get {
 			ensureProviderExists();
-			return oracleDatabaseProvider ?? throw new ApplicationException( "External Oracle Database provider not available." );
+			return oracleDatabaseProvider ?? throw new Exception( "External Oracle Database provider not available." );
 		}
 	}
 
@@ -61,7 +61,7 @@ public static class ExternalFunctionalityStatics {
 	internal static ExternalOpenIdConnectProvider ExternalOpenIdConnectProvider {
 		get {
 			ensureProviderExists();
-			return openIdConnectProvider ?? throw new ApplicationException( "External OpenID Connect provider not available." );
+			return openIdConnectProvider ?? throw new Exception( "External OpenID Connect provider not available." );
 		}
 	}
 
@@ -70,7 +70,14 @@ public static class ExternalFunctionalityStatics {
 	internal static ExternalSamlProvider ExternalSamlProvider {
 		get {
 			ensureProviderExists();
-			return samlProvider ?? throw new ApplicationException( "External SAML provider not available." );
+			return samlProvider ?? throw new Exception( "External SAML provider not available." );
+		}
+	}
+
+	internal static ExternalPdfProvider ExternalPdfProvider {
+		get {
+			ensureProviderExists();
+			return pdfProvider ?? throw new Exception( "External PDF provider not available." );
 		}
 	}
 

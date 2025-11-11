@@ -1,4 +1,4 @@
-﻿using Aspose.Pdf.Facades;
+﻿using EnterpriseWebLibrary.ExternalFunctionality;
 using Tewl.IO;
 
 namespace EnterpriseWebLibrary.IO;
@@ -11,7 +11,7 @@ public static class PdfOps {
 	/// Concatenates the specified PDF documents and writes the result to the specified output stream.
 	/// </summary>
 	public static void ConcatPdfs( IEnumerable<Stream> inputStreams, Stream outputStream ) {
-		new PdfFileEditor().Concatenate( inputStreams.ToArray(), outputStream );
+		ExternalFunctionalityStatics.ExternalPdfProvider.ConcatPdfs( inputStreams, outputStream );
 	}
 
 	/// <summary>
@@ -21,61 +21,7 @@ public static class PdfOps {
 	/// <param name="outputStream">Stream in which to write</param>
 	/// <param name="bookmarkNamesAndPdfStreams">Title to write in the bookmark, PDF MemoryStream</param>
 	public static void CreateBookmarkedPdf( IEnumerable<Tuple<string, MemoryStream>> bookmarkNamesAndPdfStreams, Stream outputStream ) {
-		var concatPdfsStream = new MemoryStream();
-		using( concatPdfsStream )
-			// Paste all of the PDFs together
-			ConcatPdfs( bookmarkNamesAndPdfStreams.Select( p => p.Item2 ), concatPdfsStream );
-
-		// Add bookmarks to PDF
-		var bookMarkedPdf = addBookmarksToPdf( concatPdfsStream.ToArray(), bookmarkNamesAndPdfStreams.Select( t => Tuple.Create( t.Item1, t.Item2.ToArray() ) ) );
-
-		// Have the bookmarks displayed on PDF open
-		bookMarkedPdf = setShowBookmarksPaneOnOpen( bookMarkedPdf );
-
-		// Save the PDf to the output stream
-		using( var bookMarksDisplayedPdf = new MemoryStream( bookMarkedPdf ) )
-			bookMarksDisplayedPdf.CopyTo( outputStream );
-	}
-
-	/// <summary>
-	/// Adds a bookmark to the first page of each of the given PDFs in the Tuple's byte array, using the string in that Tuple for the
-	/// title of the bookmark.
-	/// </summary>
-	/// <param name="pdf">PDF byte array</param>
-	/// <param name="titleAndPdfs">Tuples of &lt;Bookmark title, PDF byte array&gt;</param>
-	/// <returns>PDF byte array</returns>
-	private static byte[] addBookmarksToPdf( byte[] pdf, IEnumerable<Tuple<string, byte[]>> titleAndPdfs ) {
-		using( var tmpPdf = new MemoryStream( pdf ) ) {
-			var bookmarkEditor = new PdfBookmarkEditor();
-			bookmarkEditor.BindPdf( tmpPdf );
-			var count = 1;
-			foreach( var titleAndPdf in titleAndPdfs ) {
-				bookmarkEditor.CreateBookmarkOfPage( titleAndPdf.Item1, count );
-				count += new PdfFileInfo( new MemoryStream( titleAndPdf.Item2 ) ).NumberOfPages;
-			}
-
-			using( var addBookmarksStream = new MemoryStream() ) {
-				bookmarkEditor.Save( addBookmarksStream );
-				return addBookmarksStream.ToArray();
-			}
-		}
-	}
-
-	/// <summary>
-	/// Sets the PDF to be showing the Bookmarks pane (document outline) on document open.
-	/// </summary>
-	/// <param name="pdf">PDF byte array</param>
-	/// <returns>PDF byte array</returns>
-	private static byte[] setShowBookmarksPaneOnOpen( byte[] pdf ) {
-		using( var tmpPdf = new MemoryStream( pdf ) ) {
-			var pce = new PdfContentEditor();
-			pce.BindPdf( tmpPdf );
-			pce.ChangeViewerPreference( ViewerPreference.PageModeUseOutlines );
-			using( var saveStream = new MemoryStream() ) {
-				pce.Save( saveStream );
-				return saveStream.ToArray();
-			}
-		}
+		ExternalFunctionalityStatics.ExternalPdfProvider.CreateBookmarkedPdf( bookmarkNamesAndPdfStreams, outputStream );
 	}
 
 	internal static void Test() {

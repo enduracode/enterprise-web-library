@@ -71,7 +71,6 @@ internal class ExportLogic: Operation {
 							EwlStatics.CombinePaths( toolsFolderPath, duProjectAndFolderName ) );
 
 						// Delete these unused large files to keep the NuGet package smaller. Remove this code when EnduraCode Goal 2573 is done.
-						IoMethods.DeleteFile( EwlStatics.CombinePaths( toolsFolderPath, duProjectAndFolderName, "Aspose.PDF.dll" ) );
 						IoMethods.DeleteFile( EwlStatics.CombinePaths( toolsFolderPath, duProjectAndFolderName, "Aspose.Words.dll" ) );
 						IoMethods.DeleteFile( EwlStatics.CombinePaths( toolsFolderPath, duProjectAndFolderName, "Aspose.Words.Pdf2Word.dll" ) );
 

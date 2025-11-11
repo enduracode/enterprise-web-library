@@ -6,7 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspose.PDF" Version="23.8.0" />
     <PackageReference Include="Aspose.Words" Version="23.8.0" />
     <PackageReference Include="Destructurama.JsonNet" Version="4.0.2" />
     <PackageReference Include="Ewl.Tools" Version="26.0.0" />

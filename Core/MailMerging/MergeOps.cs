@@ -1,6 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using System.Xml;
 using Aspose.Words.MailMerging;
+using EnterpriseWebLibrary.ExternalFunctionality;
 using EnterpriseWebLibrary.IO;
 using EnterpriseWebLibrary.MailMerging.RowTree;
 using Tewl.IO;
@@ -166,31 +167,28 @@ public static class MergeOps {
 				var stream = new MemoryStream();
 				streams.Add( stream );
 
-				using( var sourcePdfMemoryStreamCopy = new MemoryStream() ) {
-					// Aspose has decided that in the new Facades PDF library, they will close your source stream for you when you call doc.Save.
-					sourcePdfStream.Reset();
-					sourcePdfStream.CopyTo( sourcePdfMemoryStreamCopy );
+				ExternalFunctionalityStatics.ExternalPdfProvider.FillFormFields(
+					sourcePdfStream,
+					mergeField => {
+						if( mergeField.StartsWith( "noMerge" ) )
+							return null;
 
-					var doc = new Aspose.Pdf.Facades.Form( sourcePdfMemoryStreamCopy );
-					foreach( var mergeField in doc.FieldNames.Where( mergeField => !mergeField.StartsWith( "noMerge" ) ) ) {
 						var mergeValue = row.Values.SingleOrDefault( v => v.Name == mergeField );
-						if( mergeValue == null ) {
-							if( useLegacyBehaviorOfIgnoringInvalidFields )
-								continue;
-							throw new MailMergingException( "PDF document contains a merge field ({0}) that does not exist.".FormatWith( mergeField ) );
-						}
+						if( mergeValue is null )
+							return useLegacyBehaviorOfIgnoringInvalidFields
+								       ? null
+								       : throw new MailMergingException( "PDF document contains a merge field ({0}) that does not exist.".FormatWith( mergeField ) );
 
 						var mergeValueAsString = mergeValue as MergeValue<string>;
 						string? value = null;
 						if( mergeValueAsString != null )
 							value = mergeValueAsString.Evaluate( ensureAllFieldsHaveValues );
-						if( value == null )
+						if( value is null )
 							throw new MailMergingException( "Merge field " + mergeValue.Name + " evaluates to an unsupported type." );
 
-						doc.FillField( mergeValue.Name, value );
-					}
-					doc.Save( stream );
-				}
+						return value;
+					},
+					stream );
 			}
 
 			if( streams.Any() )
