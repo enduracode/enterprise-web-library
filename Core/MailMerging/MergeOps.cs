@@ -229,15 +229,14 @@ public static class MergeOps {
 		foreach( var row in rowTree.Rows ) {
 			writer.AddValuesToLine(
 				fieldNames.Select( fieldName => row.Values.Single( i => i.Name == fieldName ) )
-					.Select(
-						mergeValue => {
-							var mergeValueAsString = mergeValue as MergeValue<string>;
-							if( mergeValueAsString != null )
-								return mergeValueAsString.Evaluate( false );
+					.Select( mergeValue => {
+						var mergeValueAsString = mergeValue as MergeValue<string>;
+						if( mergeValueAsString != null )
+							return mergeValueAsString.Evaluate( false );
 
-							// Use ApplicationException instead of MailMergingException because the field names can easily be validated before this method is called.
-							throw new ApplicationException( "Merge field " + mergeValue.Name + " evaluates to an unsupported type." );
-						} )
+						// Use ApplicationException instead of MailMergingException because the field names can easily be validated before this method is called.
+						throw new ApplicationException( "Merge field " + mergeValue.Name + " evaluates to an unsupported type." );
+					} )
 					.Cast<object>()
 					.ToArray() );
 
@@ -283,18 +282,17 @@ public static class MergeOps {
 			foreach( var row in rowTree.Rows )
 				sheet.AddRowToWorksheet(
 					fieldNames.Select( fieldName => row.Values.Single( i => i.Name == fieldName ) )
-						.Select(
-							mergeValue => {
-								var mergeValueAsString = mergeValue as MergeValue<string>;
-								string? value = null;
-								if( mergeValueAsString != null )
-									value = mergeValueAsString.Evaluate( false );
-								if( value == null )
-									// Use ApplicationException instead of MailMergingException because the field names can easily be validated before this method is called.
-									throw new ApplicationException( "Merge field " + mergeValue.Name + " evaluates to an unsupported type." );
+						.Select( mergeValue => {
+							var mergeValueAsString = mergeValue as MergeValue<string>;
+							string? value = null;
+							if( mergeValueAsString != null )
+								value = mergeValueAsString.Evaluate( false );
+							if( value == null )
+								// Use ApplicationException instead of MailMergingException because the field names can easily be validated before this method is called.
+								throw new ApplicationException( "Merge field " + mergeValue.Name + " evaluates to an unsupported type." );
 
-								return value;
-							} )
+							return value;
+						} )
 						.ToArray() );
 		}
 		return excelFile;
