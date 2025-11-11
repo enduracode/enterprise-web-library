@@ -62,12 +62,12 @@ internal static class Translation {
 	/// <summary>
 	/// "Your computer's clock is significantly off. This may prevent you from logging in or cause you to be logged out prematurely. The correct time is"
 	/// </summary>
-	internal static string YourClockIsWrong {
-		get {
-			return getCorrectTranslation(
-				"Your computer's clock is significantly off. This may prevent you from logging in or cause you to be logged out prematurely. The correct time is",
-				"El reloj de su ordenador está muy retrasada. Esto puede impedir que se puedan conectar o hacer que se cierre la sesión antes de tiempo. La hora exacta es" );
-		}
+	internal static string GetYourClockIsWrong( int errorMinutes ) {
+		var directionEnglish = errorMinutes > 0 ? "fast" : "slow";
+		var directionSpanish = errorMinutes > 0 ? "adelantado" : "atrasado";
+		return getCorrectTranslation(
+			$"Your computer’s clock is {Math.Abs( errorMinutes )} minutes {directionEnglish}. This may prevent you from logging in or cause you to be logged out prematurely.",
+			$"El reloj de tu ordenador está {directionSpanish} {Math.Abs( errorMinutes )} minutos. Esto puede impedir que se puedan conectar o hacer que se cierre la sesión antes de tiempo." );
 	}
 
 	internal static string ClickHereToReplaceExistingFile {

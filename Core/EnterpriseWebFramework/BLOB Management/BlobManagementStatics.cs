@@ -87,14 +87,11 @@ public static class BlobManagementStatics {
 
 	/// <summary>
 	/// Returns a link to download a file with the given file ID.
-	/// If no file is associated with the given file collection ID, returns a literal control with textIfNoFile text.
 	/// The file name is used as the label unless labelOverride is specified.
 	/// SystemBlobFileManagementProvider must be implemented.
 	/// </summary>
-	public static IReadOnlyCollection<PhrasingComponent> GetFileButtonFromFileId( int fileId, string labelOverride = null, string textIfNoFile = "" ) {
+	public static IReadOnlyCollection<PhrasingComponent> GetFileButtonFromFileId( int fileId, string labelOverride = null ) {
 		var file = BlobStorageStatics.SystemProvider.GetFile( fileId );
-		if( file == null )
-			return textIfNoFile.ToComponents();
 		return new EwfButton(
 			new StandardButtonStyle( labelOverride ?? file.FileName, buttonSize: ButtonSize.ShrinkWrap ),
 			behavior: new PostBackBehavior(

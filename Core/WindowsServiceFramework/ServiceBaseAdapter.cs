@@ -53,43 +53,41 @@ public sealed class ServiceBaseAdapter: ServiceBase {
 	/// Private use only.
 	/// </summary>
 	protected override void OnStop() {
-		TelemetryStatics.ExecuteBlockWithStandardExceptionHandling(
-			() => {
-				if( timer != null ) {
-					var waitHandle = new ManualResetEvent( false );
-					timer.Dispose( waitHandle );
-					waitHandle.WaitOne();
-				}
+		TelemetryStatics.ExecuteBlockWithStandardExceptionHandling( () => {
+			if( timer != null ) {
+				var waitHandle = new ManualResetEvent( false );
+				timer.Dispose( waitHandle );
+				waitHandle.WaitOne();
+			}
 
-				service.CleanUp();
-			} );
+			service.CleanUp();
+		} );
 	}
 
 	private void tick( object? state ) {
-		TelemetryStatics.ExecuteBlockWithStandardExceptionHandling(
-			() => {
-				// Use try-finally because we need to schedule the next tick even if there is an exception thrown in this one.
+		TelemetryStatics.ExecuteBlockWithStandardExceptionHandling( () => {
+			// Use try-finally because we need to schedule the next tick even if there is an exception thrown in this one.
+			try {
+				WindowsServiceStatics.TickTime = Clock.GetCurrentTime();
+
+				// If the clock has run ahead by more than tickInterval, and then happens be synced, we cannot create an Interval.
+				if( WindowsServiceStatics.TickTime < lastTickInstant )
+					return;
+
+				var interval = new TickInterval( new Interval( lastTickInstant, WindowsServiceStatics.TickTime ) );
+				lastTickInstant = WindowsServiceStatics.TickTime;
+
+				if( interval.EndsWithinNormalUseHours( DateTimeZoneProviders.Tzdb.GetSystemDefault() ) || !ConfigurationStatics.IsIntermediateInstallation )
+					service.Tick( interval );
+			}
+			finally {
 				try {
-					WindowsServiceStatics.TickTime = Clock.GetCurrentTime();
-
-					// If the clock has run ahead by more than tickInterval, and then happens be synced, we cannot create an Interval.
-					if( WindowsServiceStatics.TickTime < lastTickInstant )
-						return;
-
-					var interval = new TickInterval( new Interval( lastTickInstant, WindowsServiceStatics.TickTime ) );
-					lastTickInstant = WindowsServiceStatics.TickTime;
-
-					if( interval.EndsWithinNormalUseHours() || !ConfigurationStatics.IsIntermediateInstallation )
-						service.Tick( interval );
+					timer!.Change( tickInterval, Timeout.Infinite );
 				}
-				finally {
-					try {
-						timer!.Change( tickInterval, Timeout.Infinite );
-					}
-					catch( ObjectDisposedException ) {
-						// This should not be necessary with the Timer.Dispose overload we are using, but see http://stackoverflow.com/q/12354883/35349.
-					}
+				catch( ObjectDisposedException ) {
+					// This should not be necessary with the Timer.Dispose overload we are using, but see http://stackoverflow.com/q/12354883/35349.
 				}
-			} );
+			}
+		} );
 	}
 }

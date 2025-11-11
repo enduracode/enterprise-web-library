@@ -19,6 +19,7 @@ public sealed class BlobFileCollectionManager: FlowComponent {
 	/// Creates a file collection manager.
 	/// </summary>
 	/// <param name="fileCollectionId"></param>
+	/// <param name="timeZone"></param>
 	/// <param name="displaySetup"></param>
 	/// <param name="postBackIdBase">Do not pass null.</param>
 	/// <param name="sortByName"></param>
@@ -32,7 +33,7 @@ public sealed class BlobFileCollectionManager: FlowComponent {
 	/// <param name="fileCreatedOrReplacedNotifier">A method that executes after a file is created or replaced.</param>
 	/// <param name="filesDeletedNotifier">A method that executes after one or more files are deleted.</param>
 	public BlobFileCollectionManager(
-		int fileCollectionId, DisplaySetup displaySetup = null, string postBackIdBase = "", bool sortByName = false,
+		int fileCollectionId, DateTimeZone timeZone, DisplaySetup displaySetup = null, string postBackIdBase = "", bool sortByName = false,
 		Func<int, ResourceInfo> thumbnailResourceGetter = null, IEnumerable<int> openedFileIds = null, MarkFileAsReadMethod unopenedFileOpenedNotifier = null,
 		bool disableModifications = false, Action<RsFile, Validator> uploadValidationMethod = null, NewFileNotificationMethod fileCreatedOrReplacedNotifier = null,
 		Action filesDeletedNotifier = null ) {
@@ -64,8 +65,7 @@ public sealed class BlobFileCollectionManager: FlowComponent {
 		IReadOnlyCollection<BlobFile> files = BlobStorageStatics.SystemProvider.GetFilesLinkedToFileCollection( fileCollectionId );
 		files = ( sortByName ? files.OrderByName() : files.OrderByUploadTimeDescending() ).Materialize();
 
-		foreach( var file in files )
-			addFileRow( postBackIdBase, thumbnailResourceGetter, openedFileIds, unopenedFileOpenedNotifier, table, file );
+		table.AddData( files, file => getFileItem( file, postBackIdBase, thumbnailResourceGetter, timeZone, openedFileIds, unopenedFileOpenedNotifier ) );
 
 		children = files.Any() || !disableModifications
 			           ? table.Concat(
@@ -76,9 +76,9 @@ public sealed class BlobFileCollectionManager: FlowComponent {
 			           : Enumerable.Empty<FlowComponent>().Materialize();
 	}
 
-	private void addFileRow(
-		string postBackIdBase, Func<int, ResourceInfo> thumbnailResourceGetter, IEnumerable<int> openedFileIds, MarkFileAsReadMethod unopenedFileOpenedNotifier,
-		EwfTable table, BlobFile file ) {
+	private EwfTableItem getFileItem(
+		BlobFile file, string postBackIdBase, Func<int, ResourceInfo> thumbnailResourceGetter, DateTimeZone timeZone, IEnumerable<int> openedFileIds,
+		MarkFileAsReadMethod unopenedFileOpenedNotifier ) {
 		var cells = new List<EwfTableCell>();
 
 		var thumbnailControl = BlobManagementStatics.GetThumbnailControl( file, thumbnailResourceGetter );
@@ -102,10 +102,10 @@ public sealed class BlobFileCollectionManager: FlowComponent {
 				.ToCollection()
 				.ToCell() );
 
-		cells.Add( file.UploadTime.InZone( DateTimeZoneProviders.Tzdb.GetSystemDefault() ).Date.ToDayMonthYearString( false ).ToCell() );
+		cells.Add( file.UploadTime.InZone( timeZone ).Date.ToDayMonthYearString( false ).ToCell() );
 		cells.Add( ( fileIsUnopened ? "New!" : "" ).ToCell() );
 
-		table.AddItem( EwfTableItem.Create( cells, setup: EwfTableItemSetup.Create( id: new SpecifiedValue<int>( file.FileId ) ) ) );
+		return EwfTableItem.Create( cells, setup: EwfTableItemSetup.Create( id: new SpecifiedValue<int>( file.FileId ) ) );
 	}
 
 	private IReadOnlyCollection<FlowComponent> getUploadComponents(

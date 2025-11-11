@@ -357,8 +357,8 @@ public static class AuthenticationStatics {
 		TestCookieMissing() ? Translation.YourBrowserHasCookiesDisabled.ToCollection() : Enumerable.Empty<string>();
 
 	private static void addStatusMessageIfClockNotSynchronized( DataValue<string> clientTime ) {
-		if( ClockNotSynchronized( clientTime ) )
-			PageBase.AddStatusMessage( StatusMessageType.Warning, GetClockWrongMessage() );
+		if( GetClockError( clientTime ) is {} error )
+			PageBase.AddStatusMessage( StatusMessageType.Warning, GetClockWrongMessage( error ) );
 	}
 
 	/// <summary>
@@ -493,20 +493,17 @@ public static class AuthenticationStatics {
 				timeHiddenFieldId.GetJsValueModificationStatements( "new Date().toISOString()" ) ) ).PageComponent.ToCollection();
 	}
 
-	internal static bool ClockNotSynchronized( DataValue<string> clientTime ) {
+	internal static Duration? GetClockError( DataValue<string> clientTime ) {
 		var clientParseResult = InstantPattern.ExtendedIso.Parse( clientTime.Value );
 		if( !clientParseResult.Success )
 			throw new DataModificationException( "Your browser did not submit the current time." );
 
 		var clockDifference = clientParseResult.GetValueOrThrow() - EwfRequest.Current!.RequestTime;
-		return Math.Abs( clockDifference.TotalMinutes ) > 5;
+		return Math.Abs( clockDifference.TotalMinutes ) > 5 ? clockDifference : null;
 	}
 
-	internal static string GetClockWrongMessage() {
-		var timeZone = DateTimeZoneProviders.Tzdb.GetSystemDefault();
-		return Translation.YourClockIsWrong + " " + EwfRequest.Current!.RequestTime.InZone( timeZone ).ToDateTimeUnspecified().ToHourAndMinuteString() + " " +
-		       timeZone.GetZoneInterval( EwfRequest.Current.RequestTime ).Name + ".";
-	}
+	internal static string GetClockWrongMessage( Duration error ) =>
+		Translation.GetYourClockIsWrong( (int)Math.Round( error.TotalMinutes, MidpointRounding.AwayFromZero ) );
 
 
 	// Cookie setting

@@ -1,4 +1,5 @@
 ﻿using EnterpriseWebLibrary.Providers;
+using NodaTime;
 
 namespace EnterpriseWebLibrary.Website.WebFrameworkDemo;
 
@@ -14,6 +15,6 @@ partial class FileManagers {
 			.Add(
 				new Section(
 					"File-collection manager",
-					new BlobFileCollectionManager( BlobStorage.FileCollectionManagerCollectionId ).ToCollection(),
+					new BlobFileCollectionManager( BlobStorage.FileCollectionManagerCollectionId, DateTimeZoneProviders.Tzdb.GetSystemDefault() ).ToCollection(),
 					style: SectionStyle.Box ) );
 }

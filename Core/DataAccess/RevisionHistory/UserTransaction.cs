@@ -36,10 +36,8 @@ public class UserTransaction {
 	/// </summary>
 	public Instant TransactionTime => transactionTime;
 
-	public string LocalTransactionDateAndTimeString {
-		get {
-			var localDateAndTime = transactionTime.InZone( DateTimeZoneProviders.Tzdb.GetSystemDefault() ).ToDateTimeUnspecified();
-			return "{0}, {1}".FormatWith( localDateAndTime.ToDayMonthYearString( false ), localDateAndTime.ToHourAndMinuteString() );
-		}
+	public string GetLocalTransactionDateAndTimeString( DateTimeZone timeZone ) {
+		var localDateAndTime = transactionTime.InZone( timeZone ).ToDateTimeUnspecified();
+		return "{0}, {1}".FormatWith( localDateAndTime.ToDayMonthYearString( false ), localDateAndTime.ToHourAndMinuteString() );
 	}
 }

@@ -5,7 +5,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.SamlResourc
 // EwlPage
 // Parameter: returnUrl
 // OptionalParameter: bool cookiesDisabled
-// OptionalParameter: bool clockWrong
+// OptionalParameter: Duration? clockError
 partial class VerifyClientFunctionality {
 	private TrustedResourceInfo returnResource = null!;
 
@@ -26,8 +26,7 @@ partial class VerifyClientFunctionality {
 			modificationMethod: () => {
 				if( AuthenticationStatics.TestCookieMissing() )
 					parametersModification.CookiesDisabled = true;
-				if( AuthenticationStatics.ClockNotSynchronized( clientTime ) )
-					parametersModification.ClockWrong = true;
+				parametersModification.ClockError = AuthenticationStatics.GetClockError( clientTime );
 			},
 			actionGetter: () => new PostBackAction(
 				verificationFailed() ? null : returnResource,
@@ -45,10 +44,10 @@ partial class VerifyClientFunctionality {
 					postBack: PostBack.CreateFull( actionGetter: () => new PostBackAction( returnResource, authorizationCheckDisabledPredicate: _ => true ) ) ) ) );
 		if( CookiesDisabled )
 			content.Add( new Paragraph( Translation.YourBrowserHasCookiesDisabled.ToComponents() ) );
-		if( ClockWrong )
-			content.Add( new Paragraph( AuthenticationStatics.GetClockWrongMessage().ToComponents() ) );
+		if( ClockError.HasValue )
+			content.Add( new Paragraph( AuthenticationStatics.GetClockWrongMessage( ClockError.Value ).ToComponents() ) );
 		return content;
 	}
 
-	private bool verificationFailed() => parametersModification.CookiesDisabled || parametersModification.ClockWrong;
+	private bool verificationFailed() => parametersModification.CookiesDisabled || parametersModification.ClockError is not null;
 }

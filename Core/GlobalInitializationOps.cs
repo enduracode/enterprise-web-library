@@ -83,7 +83,7 @@ public static class GlobalInitializationOps {
 					var currentTime = SystemClock.Instance.GetCurrentInstant(); // Don’t use Clock since it may not have been initialized.
 					File.WriteAllText(
 						EwlStatics.CombinePaths( destinationPath, "Initialization log" + FileExtensions.Txt ),
-						currentTime.InZone( DateTimeZoneProviders.Tzdb.GetSystemDefault() ).ToDateTimeUnspecified().ToHourAndMinuteString() + ":" + initializationLog );
+						currentTime.InZone( DateTimeZoneProviders.Tzdb.GetSystemDefault() ).TimeOfDay.ToHourAndMinuteString() + ":" + initializationLog );
 				}
 			}
 			catch {}
