@@ -51,7 +51,8 @@ internal class ModificationFormItemMethodWriter {
 			mainControl = "DateControl";
 		else if( field.TypeIs( typeof( LocalTime ) ) || field.TypeIs( typeof( LocalTime? ) ) )
 			mainControl = "TimeControl";
-		else if( field.TypeIs( typeof( LocalDateTime ) ) || field.TypeIs( typeof( LocalDateTime? ) ) )
+		else if( field.TypeIs( typeof( LocalDateTime ) ) || field.TypeIs( typeof( LocalDateTime? ) ) || field.TypeIs( typeof( Instant ) ) ||
+		         field.TypeIs( typeof( Instant? ) ) )
 			mainControl = "DateAndTimeControl";
 		else if( field.TypeIs( typeof( PatternString ) ) )
 			mainControl = "SearchPattern";
@@ -444,10 +445,10 @@ internal class ModificationFormItemMethodWriter {
 						      .FormatWith( dv ) );
 
 		if( field.TypeIs( typeof( LocalDateTime ) ) || field.TypeIs( typeof( LocalDateTime? ) ) || field.TypeIs( typeof( DateTime ) ) ||
-		    field.TypeIs( typeof( DateTime? ) ) )
+		    field.TypeIs( typeof( DateTime? ) ) || field.TypeIs( typeof( Instant ) ) || field.TypeIs( typeof( Instant? ) ) )
 			addControl(
 				"DateAndTimeControl",
-					[ ],
+				field.TypeIs( typeof( Instant ) ) || field.TypeIs( typeof( Instant? ) ) ? new CSharpParameter( "DateTimeZone", "timeZone" ).ToCollection() : [ ],
 				false,
 				new CSharpParameter( "DateAndTimeControlSetup?", "controlSetup", defaultValue: "null" ).ToCollection(),
 				"SpecifiedValue<{0}>?".FormatWith( field.NullableTypeName ),
@@ -455,9 +456,18 @@ internal class ModificationFormItemMethodWriter {
 				.Append( new CSharpParameter( "LocalDate?", "minValue", "null" ) )
 				.Append( new CSharpParameter( "LocalDate?", "maxValue", "null" ) ),
 				true,
-				dv => field.TypeName.Equals( field.NullableTypeName, StringComparison.Ordinal )
-					      ? $"{dv}.ToDateAndTimeControl( setup: controlSetup, value: value, allowEmpty: allowEmpty, minValue: minValue, maxValue: maxValue, additionalValidationMethod: additionalValidationMethod )"
-					      : $"{dv}.ToDateAndTimeControl( setup: controlSetup, value: value, minValue: minValue, maxValue: maxValue, additionalValidationMethod: additionalValidationMethod )" );
+				dv => {
+					var arguments = StringTools.ConcatenateWithDelimiter(
+						", ",
+						( field.TypeIs( typeof( Instant ) ) || field.TypeIs( typeof( Instant? ) ) ? "timeZone: timeZone".ToCollection() : [ ] )
+						.Append( "setup: controlSetup" )
+						.Append( "value: value" )
+						.Concat( field.TypeName.Equals( field.NullableTypeName, StringComparison.Ordinal ) ? "allowEmpty: allowEmpty".ToCollection() : [ ] )
+						.Append( "minValue: minValue" )
+						.Append( "maxValue: maxValue" )
+						.Append( "additionalValidationMethod: additionalValidationMethod" ) );
+					return $"{dv}.ToDateAndTimeControl( {arguments} )";
+				} );
 
 		if( field.TypeIs( typeof( int ) ) || field.TypeIs( typeof( int? ) ) || field.TypeIs( typeof( decimal ) ) || field.TypeIs( typeof( decimal? ) ) )
 			addControl(

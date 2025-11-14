@@ -1,6 +1,5 @@
 ﻿using System.Globalization;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;
-using EnterpriseWebLibrary.TewlContrib;
 using JetBrains.Annotations;
 using NodaTime;
 using Tewl.InputValidation;
@@ -1165,6 +1164,55 @@ public static class FormControlExtensionCreators {
 			maxValue: maxValue,
 			additionalValidationMethod: validator => {
 				dataValue.Value = localDateTimeValue.Value.ToNewUnderlyingValue( i => i.ToDateTimeUnspecified() );
+				additionalValidationMethod?.Invoke( validator );
+			} );
+	}
+
+	public static DateAndTimeControl ToDateAndTimeControl(
+		this AbstractDataValue<Instant> dataValue, DateTimeZone timeZone, DateAndTimeControlSetup? setup = null, SpecifiedValue<Instant?>? value = null,
+		LocalDate? minValue = null, LocalDate? maxValue = null, Action<Validator>? additionalValidationMethod = null ) {
+		var nullableValue = dataValue.CreateNewValue( v => (Instant?)v );
+		return nullableValue.ToDateAndTimeControl(
+			timeZone,
+			setup: setup,
+			value: value,
+			allowEmpty: false,
+			minValue: minValue,
+			maxValue: maxValue,
+			additionalValidationMethod: validator => {
+				dataValue.Value = nullableValue.Value!.Value;
+				additionalValidationMethod?.Invoke( validator );
+			} );
+	}
+
+	public static DateAndTimeControl ToDateAndTimeControl(
+		this AbstractDataValue<Instant?> dataValue, DateTimeZone timeZone, DateAndTimeControlSetup? setup = null, SpecifiedValue<Instant?>? value = null,
+		bool allowEmpty = true, LocalDate? minValue = null, LocalDate? maxValue = null, Action<Validator>? additionalValidationMethod = null ) {
+		var localDateTimeValue = dataValue.CreateNewValue( v => v?.InZone( timeZone ).LocalDateTime );
+		return localDateTimeValue.ToDateAndTimeControl(
+			setup: setup,
+			value: value is not null
+				       ? new SpecifiedValue<LocalDateTime?>( value.Value?.InZone( DateTimeZoneProviders.Tzdb.GetSystemDefault() ).LocalDateTime )
+				       : null,
+			allowEmpty: allowEmpty,
+			minValue: minValue,
+			maxValue: maxValue,
+			additionalValidationMethod: validator => {
+				if( localDateTimeValue.Value is {} v ) {
+					var mapping = timeZone.MapLocal( v );
+					if( mapping.Count != 1 ) {
+						validator.NoteErrorAndAddMessage(
+							mapping.Count > 1
+								? "This time occurs twice, probably due to a daylight-saving transition."
+								: "This time does not occur, probably due to a daylight-saving transition." );
+						setup?.ValidationErrorNotifier?.Invoke();
+						return;
+					}
+
+					dataValue.Value = mapping.Single().ToInstant();
+				}
+				else
+					dataValue.Value = null;
 				additionalValidationMethod?.Invoke( validator );
 			} );
 	}
