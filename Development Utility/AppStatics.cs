@@ -14,6 +14,7 @@ internal static class AppStatics {
 	internal const string ProviderProjectFolderName = "Providers";
 	internal const string MySqlProviderProjectName = "MySQL";
 	internal const string OracleDatabaseProviderProjectName = "Oracle Database";
+	internal const string SqliteProviderProjectName = "SQLite";
 	internal const string OpenIdConnectProviderProjectName = "OpenID Connect";
 	internal const string SamlProviderProjectName = "SAML";
 	internal const string PdfProviderProjectName = "PDF";

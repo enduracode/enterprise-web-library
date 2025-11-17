@@ -185,6 +185,12 @@ internal class UpdateDependentLogic: Operation {
 				_ => {} );
 			generateCodeForProject(
 				installation,
+				"SQLite Provider",
+				EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.ProviderProjectFolderName, AppStatics.SqliteProviderProjectName ),
+				"EnterpriseWebLibrary.Sqlite",
+				_ => {} );
+			generateCodeForProject(
+				installation,
 				"OpenID Connect Provider",
 				EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.ProviderProjectFolderName, AppStatics.OpenIdConnectProviderProjectName ),
 				"EnterpriseWebLibrary.OpenIdConnect",

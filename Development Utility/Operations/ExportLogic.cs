@@ -165,6 +165,20 @@ internal class ExportLogic: Operation {
 						outputFolderPath,
 						prereleaseValues ) ) );
 
+			var sqliteId = mainId + ".Sqlite";
+			packages.Add(
+				( sqliteId,
+					createProviderNuGetPackages(
+						installation,
+						mainId,
+						AppStatics.SqliteProviderProjectName,
+						"EnterpriseWebLibrary.Sqlite",
+						sqliteId,
+						now,
+						useDebugAssembly,
+						outputFolderPath,
+						prereleaseValues ) ) );
+
 			var openIdConnectId = mainId + ".OpenIdConnect";
 			packages.Add(
 				( openIdConnectId,
