@@ -44,6 +44,7 @@ public static class DataMigrationOps {
 		ExternalFunctionalityStatics.Init( new SpecifiedValue<SystemExternalFunctionalityProvider?>( externalFunctionalityProvider ) );
 		MySqlInfo.Init( () => ExternalFunctionalityStatics.ExternalMySqlProvider );
 		OracleInfo.Init( () => ExternalFunctionalityStatics.ExternalOracleDatabaseProvider );
+		SqliteInfo.Init( () => ExternalFunctionalityStatics.ExternalSqliteProvider );
 
 		var appAssembly = Assembly.GetCallingAssembly();
 		using var serviceProvider = new ServiceCollection().AddFluentMigratorCore()

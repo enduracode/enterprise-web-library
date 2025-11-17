@@ -163,15 +163,20 @@ public static class EwfOps {
 
 					var diagnosticLogLevelSwitch = new LoggingLevelSwitch( initialMinimumLevel: LogEventLevel.Information );
 					var loggerConfiguration = new LoggerConfiguration().Destructure.JsonNetTypes()
-						.MinimumLevel.ControlledBy( diagnosticLogLevelSwitch )
+						.MinimumLevel.Debug()
 						.MinimumLevel.Override( "Microsoft.AspNetCore", LogEventLevel.Warning );
 					loggerConfiguration = ConfigurationStatics.IsDevelopmentInstallation
-						                      ? loggerConfiguration.WriteTo.Console()
+						                      ? loggerConfiguration.WriteTo.Console( levelSwitch: diagnosticLogLevelSwitch )
 						                      : loggerConfiguration.WriteTo.Async( c => c.File(
 							                      EwfConfigurationStatics.AppConfiguration.DiagnosticLogFilePath,
+							                      levelSwitch: diagnosticLogLevelSwitch,
 							                      rollingInterval: RollingInterval.Infinite,
 							                      rollOnFileSizeLimit: false,
 							                      encoding: Encoding.UTF8 ) );
+					if( ExternalFunctionalityStatics.SqliteFunctionalityEnabled )
+						loggerConfiguration = ExternalFunctionalityStatics.ExternalSqliteProvider.AddDatabaseAsLogSink(
+							loggerConfiguration,
+							EwfConfigurationStatics.AppConfiguration.DebugLogFilePath );
 					Log.Logger = loggerConfiguration.CreateLogger();
 
 					var builder = Microsoft.AspNetCore.Builder.WebApplication.CreateBuilder(

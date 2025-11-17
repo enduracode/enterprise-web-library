@@ -15,6 +15,11 @@ public abstract class SystemExternalFunctionalityProvider {
 	protected internal virtual ExternalOracleDatabaseProvider? GetOracleDatabaseProvider() => null;
 
 	/// <summary>
+	/// Returns the external SQLite provider for the system. This should be a simple constructor expression with no other logic.
+	/// </summary>
+	protected internal virtual ExternalSqliteProvider? GetSqliteProvider() => null;
+
+	/// <summary>
 	/// Returns the external OpenID Connect provider for the system. This should be a simple constructor expression with no other logic.
 	/// </summary>
 	protected internal virtual ExternalOpenIdConnectProvider? GetOpenIdConnectProvider() => null;

@@ -52,6 +52,11 @@ Providers/Oracle Database/obj/
 Providers/Oracle Database/Directory.Build.props
 Providers/Oracle Database/Generated Code/
 
+Providers/SQLite/bin/
+Providers/SQLite/obj/
+Providers/SQLite/Directory.Build.props
+Providers/SQLite/Generated Code/
+
 Providers/OpenID Connect/bin/
 Providers/OpenID Connect/obj/
 Providers/OpenID Connect/Directory.Build.props

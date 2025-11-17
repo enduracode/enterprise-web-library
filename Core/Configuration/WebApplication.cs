@@ -99,4 +99,5 @@ public class WebApplication {
 	public string WebConfigFilePath => EwlStatics.CombinePaths( Path, "web.config" );
 
 	internal string DiagnosticLogFilePath => EwlStatics.CombinePaths( Path, "Diagnostic Log" + FileExtensions.Txt );
+	internal string DebugLogFilePath => EwlStatics.CombinePaths( Path, "Debug Log.db" );
 }

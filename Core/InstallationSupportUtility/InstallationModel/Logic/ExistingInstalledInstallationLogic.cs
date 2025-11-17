@@ -2,6 +2,7 @@
 using System.Security.AccessControl;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Configuration.InstallationStandard;
+using EnterpriseWebLibrary.ExternalFunctionality;
 using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
@@ -9,9 +10,9 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
 [ PublicAPI ]
 public class ExistingInstalledInstallationLogic {
 	public static void UpdateIisApplications( ExistingInstalledInstallationLogic? newLogic, ExistingInstalledInstallationLogic? oldLogic ) {
-		var appGetter = new Func<ExistingInstalledInstallationLogic?, IEnumerable<WebApplication>>(
-			logic => logic?.existingInstallationLogic.RuntimeConfiguration.WebApplications.Where( i => i.IisAppPoolAndSiteName!.Length > 0 ).Materialize() ??
-			         Enumerable.Empty<WebApplication>() );
+		var appGetter = new Func<ExistingInstalledInstallationLogic?, IEnumerable<WebApplication>>( logic =>
+			logic?.existingInstallationLogic.RuntimeConfiguration.WebApplications.Where( i => i.IisAppPoolAndSiteName!.Length > 0 ).Materialize() ??
+			Enumerable.Empty<WebApplication>() );
 		var newAppPoolNames = new HashSet<string>();
 		var newSiteNames = new HashSet<string>();
 		var newVirtualDirectoryNames = new HashSet<string>();
@@ -71,14 +72,22 @@ public class ExistingInstalledInstallationLogic {
 	/// </summary>
 	public void CreateFreshLogFiles() {
 		createFreshLogFile( existingInstallationLogic.RuntimeConfiguration.ErrorLogFilePath );
-		foreach( var i in existingInstallationLogic.RuntimeConfiguration.WebApplications )
+		foreach( var i in existingInstallationLogic.RuntimeConfiguration.WebApplications ) {
 			createFreshLogFile( i.DiagnosticLogFilePath );
+
+			ExternalFunctionalityStatics.ExternalSqliteProvider.DeleteDatabaseAndReCreateFile( i.DebugLogFilePath );
+			modifyLogFilePermissions( i.DebugLogFilePath );
+		}
 	}
 
 	private void createFreshLogFile( string filePath ) {
 		File.WriteAllText( filePath, "" );
 
 		// We need to modify permissions after creating the file so we can inherit instead of wiping out parent settings.
+		modifyLogFilePermissions( filePath );
+	}
+
+	private void modifyLogFilePermissions( string filePath ) {
 		var info = new FileInfo( filePath );
 		var security = info.GetAccessControl();
 		security.AddAccessRule( new FileSystemAccessRule( "NETWORK SERVICE", FileSystemRights.FullControl, AccessControlType.Allow ) );

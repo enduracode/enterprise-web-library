@@ -14,6 +14,7 @@ public static class ExternalFunctionalityStatics {
 
 	private static ExternalMySqlProvider? mySqlProvider;
 	private static ExternalOracleDatabaseProvider? oracleDatabaseProvider;
+	private static ExternalSqliteProvider? sqliteProvider;
 	private static ExternalOpenIdConnectProvider? openIdConnectProvider;
 	private static ExternalSamlProvider? samlProvider;
 	private static ExternalPdfProvider? pdfProvider;
@@ -25,6 +26,8 @@ public static class ExternalFunctionalityStatics {
 		mySqlProvider = provider.GetProvider( returnNullIfNotFound: true )?.GetMySqlProvider();
 
 		oracleDatabaseProvider = provider.GetProvider( returnNullIfNotFound: true )?.GetOracleDatabaseProvider();
+
+		sqliteProvider = provider.GetProvider( returnNullIfNotFound: true )?.GetSqliteProvider();
 
 		openIdConnectProvider = provider.GetProvider( returnNullIfNotFound: true )?.GetOpenIdConnectProvider();
 
@@ -56,7 +59,16 @@ public static class ExternalFunctionalityStatics {
 		}
 	}
 
-	internal static bool OpenIdConnectFunctionalityEnabled => openIdConnectProvider != null;
+	internal static bool SqliteFunctionalityEnabled => sqliteProvider is not null;
+
+	internal static ExternalSqliteProvider ExternalSqliteProvider {
+		get {
+			ensureProviderExists();
+			return sqliteProvider ?? throw new Exception( "External SQLite provider not available." );
+		}
+	}
+
+	internal static bool OpenIdConnectFunctionalityEnabled => openIdConnectProvider is not null;
 
 	internal static ExternalOpenIdConnectProvider ExternalOpenIdConnectProvider {
 		get {
@@ -65,7 +77,7 @@ public static class ExternalFunctionalityStatics {
 		}
 	}
 
-	internal static bool SamlFunctionalityEnabled => samlProvider != null;
+	internal static bool SamlFunctionalityEnabled => samlProvider is not null;
 
 	internal static ExternalSamlProvider ExternalSamlProvider {
 		get {
