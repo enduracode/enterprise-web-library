@@ -87,7 +87,7 @@ internal class Sink: BatchProvider, ILogEventSink {
 	}
 
 	private SqliteConnection GetSqLiteConnection() {
-		var builder = new SqliteConnectionStringBuilder { DataSource = _databasePath, };
+		var builder = new SqliteConnectionStringBuilder { DataSource = _databasePath, Pooling = false };
 
 		var sqLiteConnection = new SqliteConnection( builder.ConnectionString );
 		sqLiteConnection.Open();
