@@ -111,7 +111,7 @@ internal class Sink: BatchProvider, ILogEventSink {
 	}
 
 	private void CreateSqlTable( SqliteConnection sqlConnection ) {
-		var colDefs = "id INTEGER PRIMARY KEY AUTOINCREMENT,";
+		var colDefs = "Id INTEGER PRIMARY KEY AUTOINCREMENT,";
 		colDefs += "Timestamp TEXT,";
 		colDefs += "Level VARCHAR(10),";
 		colDefs += "Exception TEXT,";

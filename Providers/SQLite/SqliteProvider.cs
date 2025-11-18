@@ -43,7 +43,7 @@ public class SqliteProvider: ExternalSqliteProvider {
 	}
 
 	LoggerConfiguration ExternalSqliteProvider.AddDatabaseAsLogSink( LoggerConfiguration loggerConfiguration, string filePath ) =>
-		loggerConfiguration.WriteTo.SQLite( filePath, storeTimestampInUtc: true );
+		loggerConfiguration.WriteTo.SQLite( filePath, tableName: "Events", storeTimestampInUtc: true );
 
 	void ExternalSqliteProvider.RegisterDependencyInjectionServicesForMigration( IMigrationRunnerBuilder builder ) {
 		builder.AddSQLite();

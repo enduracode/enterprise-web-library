@@ -24,7 +24,7 @@ partial class DebugLog {
 
 		var connection = new DatabaseConnection( new SqliteInfo( "Debug Log", EwfConfigurationStatics.AppConfiguration.DebugLogFilePath ) );
 		connection.ExecuteWithConnectionOpen( () => {
-			var command = new InlineSelect( [ "*" ], "FROM Logs", false, orderByClause: "ORDER BY id DESC" );
+			var command = new InlineSelect( [ "*" ], "FROM Events", false, orderByClause: "ORDER BY Id DESC" );
 			command.Execute(
 				connection,
 				reader => {
