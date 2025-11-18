@@ -64,6 +64,12 @@ public class ButtonSetupsParameter {
 	/// Returns a new parameter with this parameter’s button setups plus the specified setups.
 	/// </summary>
 	public ButtonSetupsParameter Add( ButtonSetupsParameter buttonSetups ) => new( sequence.Concat( buttonSetups.sequence ) );
+
+	/// <summary>
+	/// Returns a new parameter with this parameter’s button setups plus the specified action-component setups.
+	/// </summary>
+	public ActionComponentSetupsParameter Add( ActionComponentSetupsParameter actionComponentSetups ) =>
+		new ActionComponentSetupsParameter( sequence ).Add( actionComponentSetups );
 }
 
 [ PublicAPI ]

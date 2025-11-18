@@ -18,6 +18,8 @@ partial class DiagnosticLog {
 		debugDisabledLevel = levelSwitch.MinimumLevel;
 	}
 
+	protected override IEnumerable<UrlPattern> getChildUrlPatterns() => DebugLog.UrlPatterns.Literal( Es, "debug" ).ToCollection();
+
 	protected internal override bool IsSlow => true;
 
 	protected override PageContent getContent() {
@@ -27,30 +29,32 @@ partial class DiagnosticLog {
 				      File.Open( EwfConfigurationStatics.AppConfiguration.DiagnosticLogFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite ) ) )
 				logText = reader.ReadToEnd();
 
+		var debugLogPage = new DebugLog( Es );
 		const int tailLength = 10000;
 		return new UiPageContent(
 			bodyClasses: new ElementClass( "ewfDiagnosticLog" /* This is used by EWF CSS files. */ ),
 			pageActions: new ButtonSetup(
-				"Download Full Log",
-				behavior: new PostBackBehavior(
-					postBack: PostBack.CreateIntermediate(
-						null,
-						id: "download",
-						reloadBehaviorGetter:
-						() => new PageReloadBehavior(
-							secondaryResponse:
-							new SecondaryResponse( () => EwfResponse.Create(
-								ContentTypes.PlainText,
-								new EwfResponseBodyCreator( () => logText ),
-								fileNameCreator: () => "Log" + FileExtensions.Txt ) ) ) ) ) ).Add(
-				new ButtonSetup(
-					"{0} Debug Logging".FormatWith( levelSwitch.MinimumLevel is debugEnabledLevel ? "Disable" : "Enable" ),
+					"Download Full Log",
 					behavior: new PostBackBehavior(
-						postBack: PostBack.CreateFull(
-							id: "debug",
-							modificationMethod: () => {
-								levelSwitch.MinimumLevel = levelSwitch.MinimumLevel is debugEnabledLevel ? debugDisabledLevel : debugEnabledLevel;
-							} ) ) ) ) ).Add(
+						postBack: PostBack.CreateIntermediate(
+							null,
+							id: "download",
+							reloadBehaviorGetter:
+							() => new PageReloadBehavior(
+								secondaryResponse:
+								new SecondaryResponse( () => EwfResponse.Create(
+									ContentTypes.PlainText,
+									new EwfResponseBodyCreator( () => logText ),
+									fileNameCreator: () => "Log" + FileExtensions.Txt ) ) ) ) ) ).Add(
+					new ButtonSetup(
+						"{0} Debug Logging".FormatWith( levelSwitch.MinimumLevel is debugEnabledLevel ? "Disable" : "Enable" ),
+						behavior: new PostBackBehavior(
+							postBack: PostBack.CreateFull(
+								id: "debug",
+								modificationMethod: () => {
+									levelSwitch.MinimumLevel = levelSwitch.MinimumLevel is debugEnabledLevel ? debugDisabledLevel : debugEnabledLevel;
+								} ) ) ) )
+				.Add( new HyperlinkSetup( debugLogPage, $"View {debugLogPage.ResourceName}" ) ) ).Add(
 			new Section(
 				$"Tail of log (last {tailLength.ToWords()} characters)",
 				new DisplayableElement( _ => new DisplayableElementData(

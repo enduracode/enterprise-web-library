@@ -1,4 +1,5 @@
-﻿using FluentMigrator.Runner;
+﻿using System.Data.Common;
+using FluentMigrator.Runner;
 using Serilog;
 
 namespace EnterpriseWebLibrary.ExternalFunctionality;
@@ -7,6 +8,14 @@ namespace EnterpriseWebLibrary.ExternalFunctionality;
 /// External SQLite logic.
 /// </summary>
 public interface ExternalSqliteProvider {
+	string GetConnectionString( string filePath, int timeout );
+
+	DbConnection CreateConnection( string connectionString );
+
+	DbCommand CreateCommand();
+
+	DbParameter CreateParameter();
+
 	void DeleteDatabaseAndReCreateFile( string filePath );
 
 	LoggerConfiguration AddDatabaseAsLogSink( LoggerConfiguration loggerConfiguration, string filePath );

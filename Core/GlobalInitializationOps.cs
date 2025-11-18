@@ -104,6 +104,7 @@ public static class GlobalInitializationOps {
 			// data access
 			MySqlInfo.Init( () => ExternalFunctionalityStatics.ExternalMySqlProvider );
 			OracleInfo.Init( () => ExternalFunctionalityStatics.ExternalOracleDatabaseProvider );
+			SqliteInfo.Init( () => ExternalFunctionalityStatics.ExternalSqliteProvider );
 			DataAccessStatics.Init();
 			DataAccessState.Init( mainDataAccessStateGetter, useLongDatabaseTimeouts );
 			AutomaticDatabaseConnectionManager.Init( currentDatabaseConnectionManagerGetter );

@@ -1,6 +1,8 @@
 ﻿using System.Data.Common;
 using EnterpriseWebLibrary.ExternalFunctionality;
 using FluentMigrator.Runner;
+using StackExchange.Profiling;
+using StackExchange.Profiling.Data;
 
 namespace EnterpriseWebLibrary.DatabaseSpecification.Databases;
 
@@ -8,13 +10,24 @@ namespace EnterpriseWebLibrary.DatabaseSpecification.Databases;
 /// Contains information about a SQLite database.
 /// </summary>
 public class SqliteInfo: DatabaseInfo {
-	private static Lazy<ExternalSqliteProvider>? provider;
+	private static Lazy<ExternalSqliteProvider> provider = null!;
 
 	internal static void Init( Func<ExternalSqliteProvider> providerGetter ) {
 		provider = new Lazy<ExternalSqliteProvider>( providerGetter );
 	}
 
-	string DatabaseInfo.SecondaryDatabaseName => throw new NotImplementedException();
+	private readonly string databaseName;
+	private readonly string filePath;
+
+	/// <summary>
+	/// Creates a new SQLite information object.
+	/// </summary>
+	public SqliteInfo( string databaseName, string filePath ) {
+		this.databaseName = databaseName;
+		this.filePath = filePath;
+	}
+
+	string DatabaseInfo.SecondaryDatabaseName => databaseName;
 
 	string DatabaseInfo.GetDelimitedIdentifier( string databaseObject ) {
 		throw new NotImplementedException();
@@ -24,21 +37,13 @@ public class SqliteInfo: DatabaseInfo {
 	string DatabaseInfo.LastAutoIncrementValueExpression => throw new NotImplementedException();
 	string DatabaseInfo.QueryCacheHint => throw new NotImplementedException();
 
-	string DatabaseInfo.GetConnectionString( int timeout ) {
-		throw new NotImplementedException();
-	}
+	string DatabaseInfo.GetConnectionString( int timeout ) => provider.Value.GetConnectionString( filePath, timeout );
 
-	DbConnection DatabaseInfo.CreateConnection( string connectionString ) {
-		throw new NotImplementedException();
-	}
+	DbConnection DatabaseInfo.CreateConnection( string connectionString ) => provider.Value.CreateConnection( connectionString );
 
-	DbCommand DatabaseInfo.CreateCommand() {
-		throw new NotImplementedException();
-	}
+	DbCommand DatabaseInfo.CreateCommand() => new ProfiledDbCommand( provider.Value.CreateCommand(), null, MiniProfiler.Current );
 
-	DbParameter DatabaseInfo.CreateParameter() {
-		throw new NotImplementedException();
-	}
+	DbParameter DatabaseInfo.CreateParameter() => provider.Value.CreateParameter();
 
 	string DatabaseInfo.GetDbTypeString( object databaseSpecificType ) {
 		throw new NotImplementedException();
@@ -49,6 +54,6 @@ public class SqliteInfo: DatabaseInfo {
 	}
 
 	void DatabaseInfo.RegisterDependencyInjectionServicesForMigration( IMigrationRunnerBuilder builder ) {
-		provider!.Value.RegisterDependencyInjectionServicesForMigration( builder );
+		provider.Value.RegisterDependencyInjectionServicesForMigration( builder );
 	}
 }

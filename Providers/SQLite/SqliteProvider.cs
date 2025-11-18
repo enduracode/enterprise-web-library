@@ -1,4 +1,5 @@
-﻿using EnterpriseWebLibrary.ExternalFunctionality;
+﻿using System.Data.Common;
+using EnterpriseWebLibrary.ExternalFunctionality;
 using EnterpriseWebLibrary.Sqlite.Serilog;
 using FluentMigrator.Runner;
 using Microsoft.Data.Sqlite;
@@ -8,6 +9,23 @@ using Tewl.IO;
 namespace EnterpriseWebLibrary.Sqlite;
 
 public class SqliteProvider: ExternalSqliteProvider {
+	string ExternalSqliteProvider.GetConnectionString( string filePath, int timeout ) {
+		var builder = new SqliteConnectionStringBuilder();
+
+		builder.DataSource = filePath;
+		builder.Mode = SqliteOpenMode.ReadOnly;
+		builder.DefaultTimeout = timeout;
+		builder.Pooling = false;
+
+		return builder.ConnectionString;
+	}
+
+	DbConnection ExternalSqliteProvider.CreateConnection( string connectionString ) => new SqliteConnection( connectionString );
+
+	DbCommand ExternalSqliteProvider.CreateCommand() => new SqliteCommand();
+
+	DbParameter ExternalSqliteProvider.CreateParameter() => new SqliteParameter();
+
 	void ExternalSqliteProvider.DeleteDatabaseAndReCreateFile( string filePath ) {
 		IoMethods.DeleteFile( filePath );
 
@@ -25,7 +43,7 @@ public class SqliteProvider: ExternalSqliteProvider {
 	}
 
 	LoggerConfiguration ExternalSqliteProvider.AddDatabaseAsLogSink( LoggerConfiguration loggerConfiguration, string filePath ) =>
-		loggerConfiguration.WriteTo.SQLite( filePath );
+		loggerConfiguration.WriteTo.SQLite( filePath, storeTimestampInUtc: true );
 
 	void ExternalSqliteProvider.RegisterDependencyInjectionServicesForMigration( IMigrationRunnerBuilder builder ) {
 		builder.AddSQLite();
