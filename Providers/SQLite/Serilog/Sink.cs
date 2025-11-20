@@ -20,6 +20,7 @@ using Microsoft.Data.Sqlite;
 using Serilog.Core;
 using Serilog.Debugging;
 using Serilog.Events;
+using Serilog.Templates;
 
 namespace EnterpriseWebLibrary.Sqlite.Serilog;
 
@@ -223,24 +224,28 @@ internal class Sink: BatchProvider, ILogEventSink {
 	}
 
 	private async Task WriteToDatabaseAsync( ICollection<LogEvent> logEventsBatch, SqliteConnection sqlConnection ) {
-		using( var tr = sqlConnection.BeginTransaction() ) {
-			using( var sqlCommand = CreateSqlInsertCommand( sqlConnection ) ) {
-				sqlCommand.Transaction = tr;
+		await using var tr = sqlConnection.BeginTransaction();
+		await using var sqlCommand = CreateSqlInsertCommand( sqlConnection );
+		sqlCommand.Transaction = tr;
 
-				foreach( var logEvent in logEventsBatch ) {
-					sqlCommand.Parameters[ "@timeStamp" ].Value = _storeTimestampInUtc
-						                                              ? logEvent.Timestamp.ToUniversalTime().ToString( TimestampFormat )
-						                                              : logEvent.Timestamp.ToString( TimestampFormat );
-					sqlCommand.Parameters[ "@level" ].Value = logEvent.Level.ToString();
-					sqlCommand.Parameters[ "@exception" ].Value = logEvent.Exception?.ToString() ?? string.Empty;
-					sqlCommand.Parameters[ "@renderedMessage" ].Value = logEvent.MessageTemplate.Render( logEvent.Properties, _formatProvider );
+		var messageBuilder = new StringBuilder( 1000 );
+		foreach( var logEvent in logEventsBatch ) {
+			sqlCommand.Parameters[ "@timeStamp" ].Value = _storeTimestampInUtc
+				                                              ? logEvent.Timestamp.ToUniversalTime().ToString( TimestampFormat )
+				                                              : logEvent.Timestamp.ToString( TimestampFormat );
+			sqlCommand.Parameters[ "@level" ].Value = logEvent.Level.ToString();
+			sqlCommand.Parameters[ "@exception" ].Value = logEvent.Exception?.ToString() ?? string.Empty;
 
-					sqlCommand.Parameters[ "@properties" ].Value = logEvent.Properties.Count > 0 ? logEvent.Properties.Json() : string.Empty;
-
-					await sqlCommand.ExecuteNonQueryAsync().ConfigureAwait( false );
-				}
-				tr.Commit();
+			await using( var messageWriter = new StringWriter( messageBuilder ) ) {
+				new ExpressionTemplate( "{@m}", formatProvider: _formatProvider ).Format( logEvent, messageWriter );
+				sqlCommand.Parameters[ "@renderedMessage" ].Value = messageWriter.ToString();
 			}
+			messageBuilder.Clear();
+
+			sqlCommand.Parameters[ "@properties" ].Value = logEvent.Properties.Count > 0 ? logEvent.Properties.Json() : string.Empty;
+
+			await sqlCommand.ExecuteNonQueryAsync().ConfigureAwait( false );
 		}
+		tr.Commit();
 	}
 }
