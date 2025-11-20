@@ -752,11 +752,15 @@ ewfUiPoweredByEwlFooterContainer {
 	margin-right: .5em;
 }
 
-/* diagnostic log page */
+/* diagnostic log pages */
 body.ewfDiagnosticLog ewfSectionBoxStyleBothStates, body.ewfDiagnosticLog ewfUiContentBox, body.ewfDiagnosticLog ewfUiContentFootActionListContainer {
 	max-width: revert;
 }
-body.ewfDiagnosticLog pre {
+body.ewfDiagnosticLog pre,
+body.ewfDiagnosticLog ewfTableStandardAndStandardExceptLayoutStyles > tbody {
 	font-size: min(2.5vw, 1rem);
+}
+body.ewfDiagnosticLog pre {
+	margin: 0;
 	white-space: pre-wrap;
 }
