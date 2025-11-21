@@ -753,8 +753,8 @@ ewfUiPoweredByEwlFooterContainer {
 }
 
 /* diagnostic log pages */
-body.ewfDiagnosticLog ewfSectionBoxStyleBothStates, body.ewfDiagnosticLog ewfUiContentBox, body.ewfDiagnosticLog ewfUiContentFootActionListContainer {
-	max-width: revert;
+body.ewfDiagnosticLog {
+	--ewf-column-width: 100vw;
 }
 body.ewfDiagnosticLog pre {
 	font-size: min(2.5vw, 1rem);
@@ -763,6 +763,14 @@ body.ewfDiagnosticLog pre {
 }
 body.ewfDiagnosticLog ewfTableStandardAndStandardExceptLayoutStyles > tbody pre {
 	font-size: inherit;
+}
+body.ewfDiagnosticLog .propertyFilter {
+	display: flex;
+	align-items: baseline;
+	gap: var(--ewf-ui-minor-navigation-spacing);
+}
+body.ewfDiagnosticLog .propertyFilter ewfFormItem {
+	margin-top: 0;
 }
 body.ewfDiagnosticLog ewfTableStandardAndStandardExceptLayoutStyles > tbody:first-of-type > ewfTrAllStates > ewfTd:nth-child(3) {
 	display: flex;

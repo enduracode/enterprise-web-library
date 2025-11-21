@@ -15,6 +15,9 @@ using NodaTime.Text;
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin;
 
 // EwlPage
+// OptionalParameter: eventContains
+// OptionalParameter: string propertyName
+// OptionalParameter: string propertyValue
 partial class DebugLog {
 	private static readonly InstantPattern dbTimePattern = InstantPattern.CreateWithInvariantCulture( "uuuu'-'MM'-'dd'T'HH':'mm':'ss;FFFFFFFFF" );
 
@@ -40,67 +43,83 @@ partial class DebugLog {
 
 	protected internal override bool IsSlow => true;
 
-	protected override PageContent getContent() {
-		var events = new List<( string time, string level, string message, string properties )>( 1000 );
+	protected override PageContent getContent() =>
+		new FilterPageContent(
+			() => FormItemList.CreateStack( generalSetup: new FormItemListSetup( buttonSetup: new ButtonSetup( "Update results" ) ) )
+				.AddItem( parametersModification.GetEventContainsFormItem( true ) )
+				.AddItem( getPropertyFilterItem() )
+				.ToCollection(),
+			() => {
+				var events = new List<( string time, string level, string message, string properties )>( 1000 );
 
-		var connection = new DatabaseConnection( new SqliteInfo( "Debug Log", EwfConfigurationStatics.AppConfiguration.DebugLogFilePath ) );
-		connection.ExecuteWithConnectionOpen( () => {
-			var command = new InlineSelect( [ "*" ], "FROM Events", false, orderByClause: "ORDER BY Id DESC" );
-			command.Execute(
-				connection,
-				reader => {
-					while( reader.Read() )
-						events.Add( ( (string)reader.GetValue( 1 ), (string)reader.GetValue( 2 ), (string)reader.GetValue( 4 ), (string)reader.GetValue( 5 ) ) );
+				var connection = new DatabaseConnection( new SqliteInfo( "Debug Log", EwfConfigurationStatics.AppConfiguration.DebugLogFilePath ) );
+				connection.ExecuteWithConnectionOpen( () => {
+					var command = new InlineSelect( [ "*" ], "FROM Events", false, orderByClause: "ORDER BY Id DESC" );
+					command.Execute(
+						connection,
+						reader => {
+							while( reader.Read() )
+								events.Add( ( (string)reader.GetValue( 1 ), (string)reader.GetValue( 2 ), (string)reader.GetValue( 4 ), (string)reader.GetValue( 5 ) ) );
+						} );
 				} );
-		} );
 
-		var table = EwfTable.Create(
-			fields: new EwfTableField( size: 18.ToEm() ).Append( new EwfTableField( size: 12.ToEm() ) ).Append( new EwfTableField() ).Materialize(),
-			headItems: EwfTableItem.Create( "Date/time".ToCell().Append( "Level".ToCell() ).Append( "Details".ToCell() ).Materialize() ).ToCollection(),
-			defaultItemLimit: DataRowLimit.Fifty );
+				return EwfTable.Create(
+						fields: new EwfTableField( size: 18.ToEm() ).Append( new EwfTableField( size: 12.ToEm() ) ).Append( new EwfTableField() ).Materialize(),
+						headItems: EwfTableItem.Create( "Date/time".ToCell().Append( "Level".ToCell() ).Append( "Details".ToCell() ).Materialize() ).ToCollection(),
+						defaultItemLimit: DataRowLimit.Fifty )
+					.AddData(
+						events,
+						logEvent => {
+							var detailsExpandedPmv = new PageModificationValue<string>();
+							var detailsExpanded = detailsExpandedPmv.ToCondition( bool.TrueString.ToCollection() );
+							var detailsExpandedFieldId = new HiddenFieldId();
+							return EwfTableItem.Create(
+								getTimeCell( logEvent.time )
+									.Append( logEvent.level.ToCell() )
+									.Append(
+										new EwfButton(
+												new CustomButtonStyle(
+													classes: new ElementClass( "icon" ),
+													attributes: new ElementAttribute( "aria-label", "Expand" ).ToCollection(),
+													children:
+													new FontAwesomeIcon(
+														detailsExpandedPmv.ToCondition( bool.FalseString.ToCollection() )
+															.ToElementClassSet( new ElementClass( "fa-plus-square" ) )
+															.Add( detailsExpanded.ToElementClassSet( new ElementClass( "fa-minus-square" ) ) )
+															.Add( new ElementClass( "fa-lg" ) ) ).ToCollection() ),
+												behavior: new CustomButtonBehavior( () => detailsExpandedFieldId.GetJsValueModificationStatements(
+													"document.getElementById( '{0}' ).value === '{2}' ? '{1}' : '{2}'".FormatWith(
+														detailsExpandedFieldId.ElementId.Id,
+														bool.FalseString,
+														bool.TrueString ) ) ) )
+											.Append<FlowComponent>(
+												new GenericFlowContainer(
+													new DisplayableElement( _ => new DisplayableElementData(
+															null,
+															() => new DisplayableElementLocalData( "pre" ),
+															children: getMessageContent( logEvent.message, detailsExpanded ) ) )
+														.Append( getPropertiesComponent( logEvent.properties, detailsExpanded ) )
+														.Materialize() ) )
+											.Materialize()
+											.ToCell(
+												setup: new TableCellSetup(
+													etherealContent: new EwfHiddenField( bool.FalseString, id: detailsExpandedFieldId, pageModificationValue: detailsExpandedPmv )
+														.PageComponent.ToCollection() ) ) )
+									.Materialize() );
+						} )
+					.ToCollection();
+			},
+			bodyClasses: new ElementClass( "ewfDiagnosticLog" /* This is used by EWF CSS files. */ ),
+			disableInitialResultLoading: true );
 
-		table.AddData(
-			events,
-			logEvent => {
-				var detailsExpandedPmv = new PageModificationValue<string>();
-				var detailsExpanded = detailsExpandedPmv.ToCondition( bool.TrueString.ToCollection() );
-				var detailsExpandedFieldId = new HiddenFieldId();
-				return EwfTableItem.Create(
-					getTimeCell( logEvent.time )
-						.Append( logEvent.level.ToCell() )
-						.Append(
-							new EwfButton(
-									new CustomButtonStyle(
-										classes: new ElementClass( "icon" ),
-										attributes: new ElementAttribute( "aria-label", "Expand" ).ToCollection(),
-										children:
-										new FontAwesomeIcon(
-											detailsExpandedPmv.ToCondition( bool.FalseString.ToCollection() )
-												.ToElementClassSet( new ElementClass( "fa-plus-square" ) )
-												.Add( detailsExpanded.ToElementClassSet( new ElementClass( "fa-minus-square" ) ) )
-												.Add( new ElementClass( "fa-lg" ) ) ).ToCollection() ),
-									behavior: new CustomButtonBehavior( () => detailsExpandedFieldId.GetJsValueModificationStatements(
-										"document.getElementById( '{0}' ).value === '{2}' ? '{1}' : '{2}'".FormatWith(
-											detailsExpandedFieldId.ElementId.Id,
-											bool.FalseString,
-											bool.TrueString ) ) ) )
-								.Append<FlowComponent>(
-									new GenericFlowContainer(
-										new DisplayableElement( _ => new DisplayableElementData(
-												null,
-												() => new DisplayableElementLocalData( "pre" ),
-												children: getMessageContent( logEvent.message, detailsExpanded ) ) )
-											.Append( getPropertiesComponent( logEvent.properties, detailsExpanded ) )
-											.Materialize() ) )
-								.Materialize()
-								.ToCell(
-									setup: new TableCellSetup(
-										etherealContent: new EwfHiddenField( bool.FalseString, id: detailsExpandedFieldId, pageModificationValue: detailsExpandedPmv ).PageComponent
-											.ToCollection() ) ) )
-						.Materialize() );
-			} );
-
-		return new UiPageContent( bodyClasses: new ElementClass( "ewfDiagnosticLog" /* This is used by EWF CSS files. */ ) ).Add( table );
+	private FormItem getPropertyFilterItem() {
+		var name = parametersModification.GetPropertyNameFormItem( true, controlSetup: TextControlSetup.Create( widthOverride: 15.ToEm(), placeholder: "name" ) )
+			.ToComponentCollection( omitLabel: true );
+		var value = parametersModification.GetPropertyValueFormItem( true, controlSetup: TextControlSetup.Create( widthOverride: 25.ToEm(), placeholder: "value" ) )
+			.ToComponentCollection( omitLabel: true );
+		return new GenericFlowContainer(
+			name.Append( new GenericPhrasingContainer( "is".ToComponents() ) ).Concat( value ).Materialize(),
+			classes: new ElementClass( "propertyFilter" /* This is used by EWF CSS files. */ ) ).ToFormItem( label: "Property".ToComponents() );
 	}
 
 	private EwfTableCell getTimeCell( string dbTime ) {
