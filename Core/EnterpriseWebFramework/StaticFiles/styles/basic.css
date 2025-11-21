@@ -84,6 +84,7 @@ ewfUnorderedLineList,
 ewfUnorderedStackList,
 ewfUnorderedWrappingList,
 ewfHtmlBlock ul,
+ewfFigure,
 ewfFormItemList,
 ewfFormItem,
 ewfTableStandardAndStandardLayoutOnlyStyles,
@@ -105,6 +106,7 @@ ewfUnorderedLineList:first-child,
 ewfUnorderedStackList:first-child,
 ewfUnorderedWrappingList:first-child,
 ewfHtmlBlock ul:first-child,
+ewfFigure:first-child,
 ewfFormItemList:first-child,
 ewfFormItem:first-child,
 ewfTableStandardAndStandardLayoutOnlyStyles:first-child,
@@ -126,7 +128,7 @@ ewfWrappingFormItemList:first-child {
 }
 
 /* bottom */
-p, ewfUnorderedLineList, ewfUnorderedStackList, ewfUnorderedWrappingList, ewfHtmlBlock ul {
+p, ewfUnorderedLineList, ewfUnorderedStackList, ewfUnorderedWrappingList, ewfHtmlBlock ul, ewfFigure {
 	margin-bottom: 0;
 }
 ewfFlowCheckboxAllStates > ewfFlowCheckboxNestedContentContainer {

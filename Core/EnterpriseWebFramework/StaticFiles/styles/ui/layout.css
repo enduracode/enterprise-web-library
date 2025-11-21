@@ -769,3 +769,11 @@ body.ewfDiagnosticLog ewfTableStandardAndStandardExceptLayoutStyles > tbody:firs
 	align-items: baseline;
 	gap: var(--ewf-ui-minor-navigation-spacing);
 }
+body.ewfDiagnosticLog ewfTableStandardAndStandardExceptLayoutStyles > tbody:first-of-type > ewfTrAllStates > ewfTd:nth-child(3) ewfFigure {
+	margin-left: 0;
+	margin-right: 0;
+}
+body.ewfDiagnosticLog ewfTableStandardAndStandardExceptLayoutStyles > tbody:first-of-type > ewfTrAllStates > ewfTd:nth-child(3) ewfFigureCaption {
+	font-size: 1.1em;
+	font-weight: 600;
+}
