@@ -1,4 +1,6 @@
-﻿using EnterpriseWebLibrary.DataAccess;
+﻿using System.Text.Json;
+using System.Text.Json.Nodes;
+using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.DataAccess.CommandWriting.Commands;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
@@ -21,6 +23,14 @@ partial class DebugLog {
 	private static readonly ZonedDateTimePattern timePatternWithOffset =
 		ZonedDateTimePattern.CreateWithInvariantCulture( "MMM'-'dd HH:mm:ss.fff '(UTC'o<+H>')'", null );
 
+	private DateTimeZone timeZone;
+	private Offset currentOffset;
+
+	protected override void init() {
+		timeZone = DateTimeZoneProviders.Tzdb.GetSystemDefault();
+		currentOffset = timeZone.GetUtcOffset( EwfRequest.Current!.RequestTime );
+	}
+
 	protected override ResourceParent? createParent() => new DiagnosticLog( Es );
 
 	protected override string getResourceName() => "Two-Day Debug Log";
@@ -31,7 +41,7 @@ partial class DebugLog {
 	protected internal override bool IsSlow => true;
 
 	protected override PageContent getContent() {
-		var events = new List<( string time, string level, string message, string properties )>();
+		var events = new List<( string time, string level, string message, string properties )>( 1000 );
 
 		var connection = new DatabaseConnection( new SqliteInfo( "Debug Log", EwfConfigurationStatics.AppConfiguration.DebugLogFilePath ) );
 		connection.ExecuteWithConnectionOpen( () => {
@@ -49,16 +59,14 @@ partial class DebugLog {
 			headItems: EwfTableItem.Create( "Date/time".ToCell().Append( "Level".ToCell() ).Append( "Details".ToCell() ).Materialize() ).ToCollection(),
 			defaultItemLimit: DataRowLimit.Fifty );
 
-		var timeZone = DateTimeZoneProviders.Tzdb.GetSystemDefault();
-		var currentOffset = timeZone.GetUtcOffset( EwfRequest.Current!.RequestTime );
 		table.AddData(
 			events,
 			logEvent => {
-				var detailsExpanded = new PageModificationValue<string>();
+				var detailsExpandedPmv = new PageModificationValue<string>();
+				var detailsExpanded = detailsExpandedPmv.ToCondition( bool.TrueString.ToCollection() );
 				var detailsExpandedFieldId = new HiddenFieldId();
 				return EwfTableItem.Create(
-					getTime( logEvent.time, timeZone, currentOffset )
-						.ToCell()
+					getTimeCell( logEvent.time )
 						.Append( logEvent.level.ToCell() )
 						.Append(
 							new EwfButton(
@@ -67,9 +75,9 @@ partial class DebugLog {
 										attributes: new ElementAttribute( "aria-label", "Expand" ).ToCollection(),
 										children:
 										new FontAwesomeIcon(
-											detailsExpanded.ToCondition( bool.FalseString.ToCollection() )
+											detailsExpandedPmv.ToCondition( bool.FalseString.ToCollection() )
 												.ToElementClassSet( new ElementClass( "fa-plus-square" ) )
-												.Add( detailsExpanded.ToCondition( bool.TrueString.ToCollection() ).ToElementClassSet( new ElementClass( "fa-minus-square" ) ) )
+												.Add( detailsExpanded.ToElementClassSet( new ElementClass( "fa-minus-square" ) ) )
 												.Add( new ElementClass( "fa-lg" ) ) ).ToCollection() ),
 									behavior: new CustomButtonBehavior( () => detailsExpandedFieldId.GetJsValueModificationStatements(
 										"document.getElementById( '{0}' ).value === '{2}' ? '{1}' : '{2}'".FormatWith(
@@ -81,16 +89,13 @@ partial class DebugLog {
 										new DisplayableElement( _ => new DisplayableElementData(
 												null,
 												() => new DisplayableElementLocalData( "pre" ),
-												children: getMessageContent( logEvent.message, detailsExpanded.ToCondition( bool.TrueString.ToCollection() ) ) ) )
-											.Append<FlowComponent>(
-												new Paragraph(
-													logEvent.properties.ToComponents(),
-													displaySetup: detailsExpanded.ToCondition( bool.TrueString.ToCollection() ).ToDisplaySetup() ) )
+												children: getMessageContent( logEvent.message, detailsExpanded ) ) )
+											.Append( getPropertiesComponent( logEvent.properties, detailsExpanded ) )
 											.Materialize() ) )
 								.Materialize()
 								.ToCell(
 									setup: new TableCellSetup(
-										etherealContent: new EwfHiddenField( bool.FalseString, id: detailsExpandedFieldId, pageModificationValue: detailsExpanded ).PageComponent
+										etherealContent: new EwfHiddenField( bool.FalseString, id: detailsExpandedFieldId, pageModificationValue: detailsExpandedPmv ).PageComponent
 											.ToCollection() ) ) )
 						.Materialize() );
 			} );
@@ -98,9 +103,9 @@ partial class DebugLog {
 		return new UiPageContent( bodyClasses: new ElementClass( "ewfDiagnosticLog" /* This is used by EWF CSS files. */ ) ).Add( table );
 	}
 
-	private string getTime( string dbTime, DateTimeZone timeZone, Offset currentOffset ) {
+	private EwfTableCell getTimeCell( string dbTime ) {
 		var time = dbTimePattern.Parse( dbTime ).GetValueOrThrow().InZone( timeZone );
-		return ( time.Offset.Equals( currentOffset ) ? timePattern : timePatternWithOffset ).Format( time );
+		return ( time.Offset.Equals( currentOffset ) ? timePattern : timePatternWithOffset ).Format( time ).ToCell();
 	}
 
 	private IReadOnlyCollection<FlowComponent> getMessageContent( string message, PageModificationValueCondition expanded ) {
@@ -115,4 +120,14 @@ partial class DebugLog {
 			.Append<FlowComponent>( new GenericFlowContainer( remaining.ToComponents( disableNewlineReplacement: true ), displaySetup: expanded.ToDisplaySetup() ) )
 			.Materialize();
 	}
+
+	private FlowComponent getPropertiesComponent( string properties, PageModificationValueCondition expanded ) =>
+		new EwfFigure(
+			new DisplayableElement( _ => new DisplayableElementData(
+				null,
+				() => new DisplayableElementLocalData( "pre" ),
+				children: JsonNode.Parse( properties )!.ToJsonString( options: new JsonSerializerOptions { WriteIndented = true } )
+					.ToComponents( disableNewlineReplacement: true ) ) ).ToCollection(),
+			displaySetup: expanded.ToDisplaySetup(),
+			caption: new FigureCaption( "Properties".ToComponents(), figureIsTextual: true ) );
 }
