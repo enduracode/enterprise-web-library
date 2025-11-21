@@ -764,3 +764,8 @@ body.ewfDiagnosticLog pre {
 body.ewfDiagnosticLog ewfTableStandardAndStandardExceptLayoutStyles > tbody pre {
 	font-size: inherit;
 }
+body.ewfDiagnosticLog ewfTableStandardAndStandardExceptLayoutStyles > tbody:first-of-type > ewfTrAllStates > ewfTd:nth-child(3) {
+	display: flex;
+	align-items: baseline;
+	gap: var(--ewf-ui-minor-navigation-spacing);
+}

@@ -12,11 +12,9 @@ ewfTableStandardAndStandardExceptLayoutStyles > ewfTheadAndTfootAndTbody > ewfTr
 }
 
 body.ewfDiagnosticLog samp,
-body.ewfDiagnosticLog ewfTableStandardAndStandardExceptLayoutStyles > tbody {
+body.ewfDiagnosticLog ewfTableStandardAndStandardExceptLayoutStyles > tbody:first-of-type > ewfTrAllStates > ewfTd:nth-child(-n+2),
+body.ewfDiagnosticLog ewfTableStandardAndStandardExceptLayoutStyles > tbody:first-of-type > ewfTrAllStates > ewfTd:nth-child(3) pre {
 	font-family: 'Roboto Mono', monospace;
-}
-body.ewfDiagnosticLog ewfTableStandardAndStandardExceptLayoutStyles > tbody pre {
-	font-family: inherit;
 }
 
 ewfTopWarningContainer ewfActionComponentAllStylesAllStates {
