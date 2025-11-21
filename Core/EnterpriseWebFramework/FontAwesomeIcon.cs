@@ -19,12 +19,13 @@ public class FontAwesomeIcon: PhrasingComponent {
 	/// </summary>
 	/// <param name="iconName">The name of the icon. Do not pass null or the empty string.</param>
 	/// <param name="additionalClasses">Additional classes that will be added to the icon element.</param>
-	public FontAwesomeIcon( string iconName, params string[] additionalClasses ) {
-		children = new GenericPhrasingContainer(
-			null,
-			classes: additionalClasses.Aggregate(
-				new ElementClass( "fa" ).Add( new ElementClass( iconName ) ),
-				( set, additionalClass ) => set.Add( new ElementClass( additionalClass ) ) ) ).ToCollection();
+	public FontAwesomeIcon( string iconName, params string[] additionalClasses ): this(
+		additionalClasses.Aggregate(
+			(ElementClassSet)new ElementClass( iconName ),
+			( set, additionalClass ) => set.Add( new ElementClass( additionalClass ) ) ) ) {}
+
+	internal FontAwesomeIcon( ElementClassSet classes ) {
+		children = new GenericPhrasingContainer( null, classes: new ElementClass( "fa" ).Add( classes ) ).ToCollection();
 	}
 
 	IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() {
