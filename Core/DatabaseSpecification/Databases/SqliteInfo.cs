@@ -29,11 +29,12 @@ public class SqliteInfo: DatabaseInfo {
 
 	string DatabaseInfo.SecondaryDatabaseName => databaseName;
 
-	string DatabaseInfo.GetDelimitedIdentifier( string databaseObject ) {
-		throw new NotImplementedException();
-	}
+	string DatabaseInfo.GetDelimitedIdentifier( string databaseObject ) =>
+		$"""
+		 "{databaseObject}"
+		 """;
 
-	string DatabaseInfo.ParameterPrefix => throw new NotImplementedException();
+	string DatabaseInfo.ParameterPrefix => ":";
 	string DatabaseInfo.LastAutoIncrementValueExpression => throw new NotImplementedException();
 	string DatabaseInfo.QueryCacheHint => throw new NotImplementedException();
 
