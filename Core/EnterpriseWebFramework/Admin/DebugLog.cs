@@ -46,7 +46,7 @@ partial class DebugLog {
 	protected override PageContent getContent() =>
 		new FilterPageContent(
 			() => FormItemList.CreateStack( generalSetup: new FormItemListSetup( buttonSetup: new ButtonSetup( "Update results" ) ) )
-				.AddItem( parametersModification.GetEventContainsFormItem( true ) )
+				.AddItem( parametersModification.GetEventContainsFormItem( true, label: "Event message or any property contains".ToComponents() ) )
 				.AddItem( getPropertyFilterItem() )
 				.ToCollection(),
 			() => {
@@ -119,7 +119,7 @@ partial class DebugLog {
 			.ToComponentCollection( omitLabel: true );
 		return new GenericFlowContainer(
 			name.Append( new GenericPhrasingContainer( "is".ToComponents() ) ).Concat( value ).Materialize(),
-			classes: new ElementClass( "propertyFilter" /* This is used by EWF CSS files. */ ) ).ToFormItem( label: "Property".ToComponents() );
+			classes: new ElementClass( "propertyFilter" /* This is used by EWF CSS files. */ ) ).ToFormItem( label: "Single property".ToComponents() );
 	}
 
 	private EwfTableCell getTimeCell( string dbTime ) {
