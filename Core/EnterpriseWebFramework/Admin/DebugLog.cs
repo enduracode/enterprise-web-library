@@ -51,7 +51,11 @@ partial class DebugLog {
 	protected override PageContent getContent() =>
 		new FilterPageContent(
 			() => FormItemList.CreateStack( generalSetup: new FormItemListSetup( buttonSetup: new ButtonSetup( "Update results" ) ) )
-				.AddItem( parametersModification.GetEventContainsFormItem( true, label: "Event message or any property contains".ToComponents() ) )
+				.AddItem(
+					parametersModification.GetEventContainsFormItem(
+						true,
+						label: "Event message or any property contains".ToComponents(),
+						controlSetup: TextControlSetup.Create( placeholder: "term1 term2 term3" ) ) )
 				.AddItem( getPropertyFilterItem() )
 				.ToCollection(),
 			() => {
@@ -84,7 +88,7 @@ partial class DebugLog {
 
 					if( PropertyValue.Length > 0 ) {
 						var valueParameter = new DbCommandParameter( "propertyValue", new DbParameterValue( PropertyValue ) );
-						command.CommandText += $"= {valueParameter.GetNameForCommandText( dbInfo )}";
+						command.CommandText += $"= json( {valueParameter.GetNameForCommandText( dbInfo )} )";
 						command.Parameters.Add( valueParameter.GetAdoDotNetParameter( dbInfo ) );
 					}
 					else
@@ -179,7 +183,20 @@ partial class DebugLog {
 	private FormItem getPropertyFilterItem() {
 		var name = parametersModification.GetPropertyNameFormItem( true, controlSetup: TextControlSetup.Create( widthOverride: 15.ToEm(), placeholder: "name" ) )
 			.ToComponentCollection( omitLabel: true );
-		var value = parametersModification.GetPropertyValueFormItem( true, controlSetup: TextControlSetup.Create( widthOverride: 25.ToEm(), placeholder: "value" ) )
+		var value = parametersModification.GetPropertyValueFormItem(
+				true,
+				controlSetup: TextControlSetup.Create( widthOverride: 25.ToEm(), placeholder: """e.g. value, "stringValue", {"json":"value"}""" ),
+				additionalValidationMethod: validator => {
+					if( parametersModification.PropertyValue.Length == 0 )
+						return;
+
+					try {
+						JsonNode.Parse( parametersModification.PropertyValue );
+					}
+					catch( JsonException ) {
+						validator.NoteErrorAndAddMessage( "The value must be valid JSON." );
+					}
+				} )
 			.ToComponentCollection( omitLabel: true );
 		return new GenericFlowContainer(
 			name.Append( new GenericPhrasingContainer( "is".ToComponents() ) ).Concat( value ).Materialize(),
