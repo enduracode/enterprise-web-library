@@ -6,6 +6,8 @@ using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
+using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Ethereal;
+using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Flow;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic.AlternativeResourceModes;
 using EnterpriseWebLibrary.ExternalFunctionality;
@@ -50,7 +52,7 @@ partial class DebugLog {
 				.AddItem( getPropertyFilterItem() )
 				.ToCollection(),
 			() => {
-				var events = new List<( string time, string level, string message, string properties )>( 1000 );
+				var events = new List<( long id, string time, string level, string message, string properties )>( 1000 );
 
 				var connection = new DatabaseConnection( new SqliteInfo( "Debug Log", EwfConfigurationStatics.AppConfiguration.DebugLogFilePath ) );
 				connection.ExecuteWithConnectionOpen( () => {
@@ -59,55 +61,78 @@ partial class DebugLog {
 						connection,
 						reader => {
 							while( reader.Read() )
-								events.Add( ( (string)reader.GetValue( 1 ), (string)reader.GetValue( 2 ), (string)reader.GetValue( 4 ), (string)reader.GetValue( 5 ) ) );
+								events.Add( ( get<long>( 0 ), get<string>( 1 ), get<string>( 2 ), get<string>( 4 ), get<string>( 5 ) ) );
+
+							return;
+							T get<T>( int ordinal ) => (T)reader.GetValue( ordinal );
 						} );
 				} );
 
-				return EwfTable.Create(
-						fields: new EwfTableField( size: 18.ToEm() ).Append( new EwfTableField( size: 12.ToEm() ) ).Append( new EwfTableField() ).Materialize(),
-						headItems: EwfTableItem.Create( "Date/time".ToCell().Append( "Level".ToCell() ).Append( "Details".ToCell() ).Materialize() ).ToCollection(),
-						defaultItemLimit: DataRowLimit.Fifty )
-					.AddData(
-						events,
-						logEvent => {
-							var detailsExpandedPmv = new PageModificationValue<string>();
-							var detailsExpanded = detailsExpandedPmv.ToCondition( bool.TrueString.ToCollection() );
-							var detailsExpandedFieldId = new HiddenFieldId();
-							return EwfTableItem.Create(
-								getTimeCell( logEvent.time )
-									.Append( logEvent.level.ToCell() )
-									.Append(
-										new EwfButton(
-												new CustomButtonStyle(
-													classes: new ElementClass( "icon" ),
-													attributes: new ElementAttribute( "aria-label", "Expand" ).ToCollection(),
-													children:
-													new FontAwesomeIcon(
-														detailsExpandedPmv.ToCondition( bool.FalseString.ToCollection() )
-															.ToElementClassSet( new ElementClass( "fa-plus-square" ) )
-															.Add( detailsExpanded.ToElementClassSet( new ElementClass( "fa-minus-square" ) ) )
-															.Add( new ElementClass( "fa-lg" ) ) ).ToCollection() ),
-												behavior: new CustomButtonBehavior( () => detailsExpandedFieldId.GetJsValueModificationStatements(
-													"document.getElementById( '{0}' ).value === '{2}' ? '{1}' : '{2}'".FormatWith(
-														detailsExpandedFieldId.ElementId.Id,
-														bool.FalseString,
-														bool.TrueString ) ) ) )
-											.Append<FlowComponent>(
-												new GenericFlowContainer(
-													new DisplayableElement( _ => new DisplayableElementData(
-															null,
-															() => new DisplayableElementLocalData( "pre" ),
-															children: getMessageContent( logEvent.message, detailsExpanded ) ) )
-														.Append( getPropertiesComponent( logEvent.properties, detailsExpanded ) )
-														.Materialize() ) )
-											.Materialize()
-											.ToCell(
-												setup: new TableCellSetup(
-													etherealContent: new EwfHiddenField( bool.FalseString, id: detailsExpandedFieldId, pageModificationValue: detailsExpandedPmv )
-														.PageComponent.ToCollection() ) ) )
-									.Materialize() );
-						} )
-					.ToCollection();
+				var latestEventId = ComponentStateItem.Create( "latestEventId", events.Select( i => (long?)i.id ).FirstOrDefault(), _ => true, false );
+				var latestEventIndex = latestEventId.Value.HasValue ? events.FindIndex( i => i.id == latestEventId.Value.Value ) : -1;
+				if( latestEventIndex == -1 )
+					latestEventIndex = 0;
+
+				var components = new List<FlowComponent>();
+				var newEventRegion = new UpdateRegionSet();
+				components.Add(
+					new FlowIdContainer(
+						latestEventIndex == 0
+							? [ ]
+							: new EwfButton(
+								new StandardButtonStyle( $"Show {latestEventIndex} new events" ),
+								behavior: new PostBackBehavior( postBack: PostBack.CreateIntermediate( newEventRegion, id: "showNewEvents" ) ) ).ToCollection(),
+						updateRegionSets: newEventRegion ) );
+
+				components.Add(
+					EwfTable.Create(
+							fields: new EwfTableField( size: 18.ToEm() ).Append( new EwfTableField( size: 12.ToEm() ) ).Append( new EwfTableField() ).Materialize(),
+							headItems: EwfTableItem.Create( "Date/time".ToCell().Append( "Level".ToCell() ).Append( "Details".ToCell() ).Materialize() ).ToCollection(),
+							defaultItemLimit: DataRowLimit.Fifty,
+							tailUpdateRegions: new TailUpdateRegion( newEventRegion, events.Count - latestEventIndex ),
+							etherealContent: new EtherealIdContainer( latestEventId.ToCollection(), updateRegionSets: newEventRegion ).ToCollection() )
+						.AddData(
+							events[ latestEventIndex.. ],
+							logEvent => {
+								var detailsExpandedPmv = new PageModificationValue<string>();
+								var detailsExpanded = detailsExpandedPmv.ToCondition( bool.TrueString.ToCollection() );
+								var detailsExpandedFieldId = new HiddenFieldId();
+								return EwfTableItem.Create(
+									getTimeCell( logEvent.time )
+										.Append( logEvent.level.ToCell() )
+										.Append(
+											new EwfButton(
+													new CustomButtonStyle(
+														classes: new ElementClass( "icon" ),
+														attributes: new ElementAttribute( "aria-label", "Expand" ).ToCollection(),
+														children:
+														new FontAwesomeIcon(
+															detailsExpandedPmv.ToCondition( bool.FalseString.ToCollection() )
+																.ToElementClassSet( new ElementClass( "fa-plus-square" ) )
+																.Add( detailsExpanded.ToElementClassSet( new ElementClass( "fa-minus-square" ) ) )
+																.Add( new ElementClass( "fa-lg" ) ) ).ToCollection() ),
+													behavior: new CustomButtonBehavior( () => detailsExpandedFieldId.GetJsValueModificationStatements(
+														"document.getElementById( '{0}' ).value === '{2}' ? '{1}' : '{2}'".FormatWith(
+															detailsExpandedFieldId.ElementId.Id,
+															bool.FalseString,
+															bool.TrueString ) ) ) )
+												.Append<FlowComponent>(
+													new GenericFlowContainer(
+														new DisplayableElement( _ => new DisplayableElementData(
+																null,
+																() => new DisplayableElementLocalData( "pre" ),
+																children: getMessageContent( logEvent.message, detailsExpanded ) ) )
+															.Append( getPropertiesComponent( logEvent.properties, detailsExpanded ) )
+															.Materialize() ) )
+												.Materialize()
+												.ToCell(
+													setup: new TableCellSetup(
+														etherealContent: new EwfHiddenField( bool.FalseString, id: detailsExpandedFieldId, pageModificationValue: detailsExpandedPmv )
+															.PageComponent.ToCollection() ) ) )
+										.Materialize() );
+							} ) );
+
+				return components;
 			},
 			bodyClasses: new ElementClass( "ewfDiagnosticLog" /* This is used by EWF CSS files. */ ),
 			disableInitialResultLoading: true );
