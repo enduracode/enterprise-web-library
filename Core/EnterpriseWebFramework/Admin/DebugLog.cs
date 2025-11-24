@@ -1,7 +1,10 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Nodes;
 using EnterpriseWebLibrary.DataAccess;
-using EnterpriseWebLibrary.DataAccess.CommandWriting.Commands;
+using EnterpriseWebLibrary.DataAccess.CommandWriting;
+using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction;
+using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction.Conditions;
+using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
@@ -52,13 +55,49 @@ partial class DebugLog {
 				.AddItem( getPropertyFilterItem() )
 				.ToCollection(),
 			() => {
-				var events = new List<( long id, string time, string level, string message, string properties )>( 1000 );
+				DatabaseInfo dbInfo = new SqliteInfo( "Debug Log", EwfConfigurationStatics.AppConfiguration.DebugLogFilePath );
+				var command = dbInfo.CreateCommand();
+				command.CommandText = "SELECT * FROM Events";
 
-				var connection = new DatabaseConnection( new SqliteInfo( "Debug Log", EwfConfigurationStatics.AppConfiguration.DebugLogFilePath ) );
+				// simple contains filter
+				if( EventContains.Pattern.Length > 0 ) {
+					command.CommandText += " WHERE ( ( ";
+					( (InlineDbCommandCondition)new LikeCondition( LikeCondition.Behavior.AndedTokens, "RenderedMessage", EventContains.Pattern ) ).AddToCommand(
+						command,
+						dbInfo,
+						"messageContains" );
+					command.CommandText += " ) OR ( ";
+					( (InlineDbCommandCondition)new LikeCondition( LikeCondition.Behavior.AndedTokens, "Properties", EventContains.Pattern ) ).AddToCommand(
+						command,
+						dbInfo,
+						"propertiesContains" );
+					command.CommandText += " ) )";
+				}
+
+				// single property filter
+				if( PropertyName.Length > 0 ) {
+					command.CommandText += EventContains.Pattern.Length > 0 ? " AND " : " WHERE ";
+
+					var nameParameter = new DbCommandParameter( "propertyName", new DbParameterValue( "$." + PropertyName ) );
+					command.CommandText += $"Properties -> {nameParameter.GetNameForCommandText( dbInfo )} ";
+					command.Parameters.Add( nameParameter.GetAdoDotNetParameter( dbInfo ) );
+
+					if( PropertyValue.Length > 0 ) {
+						var valueParameter = new DbCommandParameter( "propertyValue", new DbParameterValue( PropertyValue ) );
+						command.CommandText += $"= {valueParameter.GetNameForCommandText( dbInfo )}";
+						command.Parameters.Add( valueParameter.GetAdoDotNetParameter( dbInfo ) );
+					}
+					else
+						command.CommandText += "NOTNULL";
+				}
+
+				command.CommandText += " ORDER BY Id DESC";
+
+				var events = new List<( long id, string time, string level, string message, string properties )>( 1000 );
+				var connection = new DatabaseConnection( dbInfo );
 				connection.ExecuteWithConnectionOpen( () => {
-					var command = new InlineSelect( [ "*" ], "FROM Events", false, orderByClause: "ORDER BY Id DESC" );
-					command.Execute(
-						connection,
+					connection.ExecuteReaderCommand(
+						command,
 						reader => {
 							while( reader.Read() )
 								events.Add( ( get<long>( 0 ), get<string>( 1 ), get<string>( 2 ), get<string>( 4 ), get<string>( 5 ) ) );
@@ -80,7 +119,7 @@ partial class DebugLog {
 						latestEventIndex == 0
 							? [ ]
 							: new EwfButton(
-								new StandardButtonStyle( $"Show {latestEventIndex} new events" ),
+								new StandardButtonStyle( $"Show {latestEventIndex} new events", icon: new ActionComponentIcon( new FontAwesomeIcon( "fa-refresh" ) ) ),
 								behavior: new PostBackBehavior( postBack: PostBack.CreateIntermediate( newEventRegion, id: "showNewEvents" ) ) ).ToCollection(),
 						updateRegionSets: newEventRegion ) );
 
@@ -144,7 +183,12 @@ partial class DebugLog {
 			.ToComponentCollection( omitLabel: true );
 		return new GenericFlowContainer(
 			name.Append( new GenericPhrasingContainer( "is".ToComponents() ) ).Concat( value ).Materialize(),
-			classes: new ElementClass( "propertyFilter" /* This is used by EWF CSS files. */ ) ).ToFormItem( label: "Single property".ToComponents() );
+			classes: new ElementClass( "propertyFilter" /* This is used by EWF CSS files. */ ) ).ToFormItem(
+			label: "Single property".ToComponents(),
+			validation: new EwfValidation( validator => {
+				if( parametersModification.PropertyValue.Length > 0 && parametersModification.PropertyName.Length == 0 )
+					validator.NoteErrorAndAddMessage( "Please enter a property name for the value." );
+			} ) );
 	}
 
 	private EwfTableCell getTimeCell( string dbTime ) {
