@@ -20,9 +20,8 @@ internal static class CssPreprocessor {
 		var knownCustomElements = CssPreprocessingStatics.Elements.Select( ce => reservedCustomElementPrefix + ce.Name );
 		var unknownCustomElements = customElementsDetected.Except( knownCustomElements ).ToList();
 		if( unknownCustomElements.Any() )
-			throw new MultiMessageApplicationException(
-				unknownCustomElements.Select( e => "\"{0}\" begins with the reserved custom element prefix but is not a known custom element.".FormatWith( e ) )
-					.ToArray() );
+			throw new MultiMessageException(
+				unknownCustomElements.Select( e => "\"{0}\" begins with the reserved custom element prefix but is not a known custom element.".FormatWith( e ) ) );
 
 		using var writer = new StringWriter();
 		var buffer = new StringBuilder();

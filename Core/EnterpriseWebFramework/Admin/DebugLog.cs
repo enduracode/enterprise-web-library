@@ -34,14 +34,14 @@ partial class DebugLog {
 		ZonedDateTimePattern.CreateWithInvariantCulture( "MMM'-'dd HH:mm:ss.fff '(UTC'o<+H>')'", null );
 
 	private JsonArray? propertyValueArray;
-	private DateTimeZone timeZone;
+	private DateTimeZone timeZone = null!;
 	private Offset currentOffset;
 
 	protected override void init() {
 		var validator = new Validator();
 		propertyValueArray = validatePropertyValue( PropertyValue, validator );
 		if( validator.ErrorsOccurred )
-			throw new MultiMessageApplicationException( validator.ErrorMessages.ToArray() );
+			throw new MultiMessageException( validator.ErrorMessages );
 
 		timeZone = DateTimeZoneProviders.Tzdb.GetSystemDefault();
 		currentOffset = timeZone.GetUtcOffset( EwfRequest.Current!.RequestTime );
