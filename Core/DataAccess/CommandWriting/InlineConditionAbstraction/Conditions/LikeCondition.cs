@@ -42,9 +42,12 @@ public class LikeCondition: InlineDbCommandCondition {
 		var tokens = new List<string>();
 		if( behavior == Behavior.SingleTerm )
 			tokens.Add( searchTerm.Trim() );
-		else
+		else {
 			// NOTE: We want to improve the separation logic here to deal with odd characters in a good way, and to escape certain characters (per-database). See Task 1913.
 			tokens.AddRange( searchTerm.Separate() );
+			if( tokens.Count == 0 )
+				tokens.Add( "" );
+		}
 
 		// NOTE: We may have to do some casing stuff for Oracle because existing queries seem to do UPPER on everything.
 		var concatCharacter = databaseInfo is SqlServerInfo ? "+" : "||";
