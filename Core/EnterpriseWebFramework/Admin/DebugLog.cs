@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Text.Encodings.Web;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.DataAccess.CommandWriting;
@@ -96,7 +97,8 @@ partial class DebugLog {
 					if( propertyValueArray is not null ) {
 						var parameters = propertyValueArray.Select( ( value, index ) => new DbCommandParameter(
 								$"propertyValue{index}",
-								new DbParameterValue( value?.ToJsonString() ?? "null" ) ) )
+								new DbParameterValue(
+									value?.ToJsonString( options: new JsonSerializerOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping } ) ?? "null" ) ) )
 							.Materialize();
 						command.CommandText += $"IN( {StringTools.ConcatenateWithDelimiter( ", ", parameters.Select( i => i.GetNameForCommandText( dbInfo ) ) )} )";
 						foreach( var i in parameters )
@@ -232,7 +234,8 @@ partial class DebugLog {
 			new DisplayableElement( _ => new DisplayableElementData(
 				null,
 				() => new DisplayableElementLocalData( "pre" ),
-				children: JsonNode.Parse( properties )!.ToJsonString( options: new JsonSerializerOptions { WriteIndented = true } )
+				children: JsonNode.Parse( properties )!
+					.ToJsonString( options: new JsonSerializerOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping, WriteIndented = true } )
 					.ToComponents( disableNewlineReplacement: true ) ) ).ToCollection(),
 			displaySetup: expanded.ToDisplaySetup(),
 			caption: new FigureCaption( "Properties".ToComponents(), figureIsTextual: true ) );
