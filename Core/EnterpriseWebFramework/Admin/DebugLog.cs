@@ -32,12 +32,13 @@ partial class DebugLog {
 	private static readonly ZonedDateTimePattern timePatternWithOffset =
 		ZonedDateTimePattern.CreateWithInvariantCulture( "MMM'-'dd HH:mm:ss.fff '(UTC'o<+H>')'", null );
 
+	private JsonArray? propertyValueArray;
 	private DateTimeZone timeZone;
 	private Offset currentOffset;
 
 	protected override void init() {
 		var validator = new Validator();
-		validatePropertyValue( PropertyValue, validator );
+		propertyValueArray = validatePropertyValue( PropertyValue, validator );
 		if( validator.ErrorsOccurred )
 			throw new MultiMessageApplicationException( validator.ErrorMessages.ToArray() );
 
@@ -92,10 +93,14 @@ partial class DebugLog {
 					command.CommandText += $"Properties -> {nameParameter.GetNameForCommandText( dbInfo )} ";
 					command.Parameters.Add( nameParameter.GetAdoDotNetParameter( dbInfo ) );
 
-					if( PropertyValue.Length > 0 ) {
-						var valueParameter = new DbCommandParameter( "propertyValue", new DbParameterValue( PropertyValue ) );
-						command.CommandText += $"= json( {valueParameter.GetNameForCommandText( dbInfo )} )";
-						command.Parameters.Add( valueParameter.GetAdoDotNetParameter( dbInfo ) );
+					if( propertyValueArray is not null ) {
+						var parameters = propertyValueArray.Select( ( value, index ) => new DbCommandParameter(
+								$"propertyValue{index}",
+								new DbParameterValue( value?.ToJsonString() ?? "null" ) ) )
+							.Materialize();
+						command.CommandText += $"IN( {StringTools.ConcatenateWithDelimiter( ", ", parameters.Select( i => i.GetNameForCommandText( dbInfo ) ) )} )";
+						foreach( var i in parameters )
+							command.Parameters.Add( i.GetAdoDotNetParameter( dbInfo ) );
 					}
 					else
 						command.CommandText += "NOTNULL";
@@ -232,15 +237,16 @@ partial class DebugLog {
 			displaySetup: expanded.ToDisplaySetup(),
 			caption: new FigureCaption( "Properties".ToComponents(), figureIsTextual: true ) );
 
-	private void validatePropertyValue( string value, Validator validator ) {
+	private JsonArray? validatePropertyValue( string value, Validator validator ) {
 		if( value.Length == 0 )
-			return;
+			return null;
 
 		try {
-			JsonNode.Parse( value );
+			return (JsonArray)JsonNode.Parse( $"[{value}]" )!;
 		}
 		catch( JsonException ) {
-			validator.NoteErrorAndAddMessage( "The value must be valid JSON." );
+			validator.NoteErrorAndAddMessage( "The value(s) must be valid JSON." );
+			return null;
 		}
 	}
 }
