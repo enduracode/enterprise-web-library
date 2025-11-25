@@ -58,6 +58,17 @@ internal class WebItemParameter {
 
 	private static IEnumerable<DataType> getSupportedTypes( string name ) {
 		yield return new DataType(
+			typeof( string ),
+			false,
+			() => false,
+			"",
+			"string",
+			"",
+			"\"\"",
+			valueExpression => valueExpression,
+			( valueExpression, _ ) => valueExpression );
+
+		yield return new DataType(
 			typeof( LocalDate ),
 			true,
 			() => hasSuffix( "Date" ) || nameIs( "date" ),
@@ -210,7 +221,7 @@ internal class WebItemParameter {
 				}
 
 				if( !isSupportedValueType( compilationType ) && !isSupportedNullableType( compilationType, isSupportedValueType ) &&
-				    compilationType != typeof( string ) && !isSupportedEnumerable( compilationType ) )
+				    !isSupportedEnumerable( compilationType ) )
 					throw getException();
 
 				rawTypeNamesToTypes.Add( typeName, compilationType );
@@ -232,22 +243,14 @@ internal class WebItemParameter {
 				compilationType.IsGenericType && compilationType.GetGenericTypeDefinition() == typeof( IReadOnlyCollection<> )
 					? getNormalizedTypeName( compilationType.GetGenericArguments().Single() )
 					: "",
-				compilationType == typeof( string ) ? "\"\"" :
 				compilationType.IsGenericType && compilationType.GetGenericTypeDefinition() == typeof( IReadOnlyCollection<> ) ? "[]" : "",
 				valueExpression => {
-					if( compilationType == typeof( string ) )
-						return valueExpression;
-
 					if( IsEnumerable )
 						return "StringTools.ConcatenateWithDelimiter( \",\", " + valueExpression + ".Select( i => i.ToString() ).Materialize() )";
 
 					return valueExpression + ".ToString()!";
 				},
 				( valueExpression, _ ) => {
-					// For strings, we don't need to do a conversion at all.
-					if( compilationType == typeof( string ) )
-						return valueExpression;
-
 					if( IsEnumerable )
 						return valueExpression + ".Separate( \",\", true ).Select( i => (" + type!.ElementTypeName + ")EwlStatics.ChangeType( i, typeof( " +
 						       type.ElementTypeName + " ) ) ).Materialize()";
