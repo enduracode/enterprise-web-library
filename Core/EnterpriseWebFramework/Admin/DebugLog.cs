@@ -16,6 +16,7 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic.Alterna
 using EnterpriseWebLibrary.ExternalFunctionality;
 using NodaTime;
 using NodaTime.Text;
+using Tewl.InputValidation;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin;
 
@@ -35,6 +36,11 @@ partial class DebugLog {
 	private Offset currentOffset;
 
 	protected override void init() {
+		var validator = new Validator();
+		validatePropertyValue( PropertyValue, validator );
+		if( validator.ErrorsOccurred )
+			throw new MultiMessageApplicationException( validator.ErrorMessages.ToArray() );
+
 		timeZone = DateTimeZoneProviders.Tzdb.GetSystemDefault();
 		currentOffset = timeZone.GetUtcOffset( EwfRequest.Current!.RequestTime );
 	}
@@ -185,18 +191,8 @@ partial class DebugLog {
 			.ToComponentCollection( omitLabel: true );
 		var value = parametersModification.GetPropertyValueFormItem(
 				true,
-				controlSetup: TextControlSetup.Create( widthOverride: 25.ToEm(), placeholder: """e.g. value, "stringValue", {"json":"value"}""" ),
-				additionalValidationMethod: validator => {
-					if( parametersModification.PropertyValue.Length == 0 )
-						return;
-
-					try {
-						JsonNode.Parse( parametersModification.PropertyValue );
-					}
-					catch( JsonException ) {
-						validator.NoteErrorAndAddMessage( "The value must be valid JSON." );
-					}
-				} )
+				controlSetup: TextControlSetup.Create( widthOverride: 25.ToEm(), placeholder: """value1, "stringValue2", {"json":"value3"}""" ),
+				additionalValidationMethod: validator => validatePropertyValue( parametersModification.PropertyValue, validator ) )
 			.ToComponentCollection( omitLabel: true );
 		return new GenericFlowContainer(
 			name.Append( new GenericPhrasingContainer( "is".ToComponents() ) ).Concat( value ).Materialize(),
@@ -235,4 +231,16 @@ partial class DebugLog {
 					.ToComponents( disableNewlineReplacement: true ) ) ).ToCollection(),
 			displaySetup: expanded.ToDisplaySetup(),
 			caption: new FigureCaption( "Properties".ToComponents(), figureIsTextual: true ) );
+
+	private void validatePropertyValue( string value, Validator validator ) {
+		if( value.Length == 0 )
+			return;
+
+		try {
+			JsonNode.Parse( value );
+		}
+		catch( JsonException ) {
+			validator.NoteErrorAndAddMessage( "The value must be valid JSON." );
+		}
+	}
 }
