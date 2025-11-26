@@ -23,8 +23,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin;
 
 // EwlPage
 // OptionalParameter: eventContains
-// OptionalParameter: string propertyName
-// OptionalParameter: string propertyValue
+// OptionalParameter: text propertyName
+// OptionalParameter: text propertyValue
 partial class DebugLog {
 	private static readonly InstantPattern dbTimePattern = InstantPattern.CreateWithInvariantCulture( "uuuu'-'MM'-'dd'T'HH':'mm':'ss;FFFFFFFFF" );
 
