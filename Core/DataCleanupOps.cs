@@ -2,6 +2,9 @@
 using System.Text;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.DataAccess.CommandWriting;
+using EnterpriseWebLibrary.DatabaseSpecification;
+using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using EnterpriseWebLibrary.SystemSpecificLogic;
 using EnterpriseWebLibrary.UserManagement;
 using JetBrains.Annotations;
@@ -29,33 +32,47 @@ public static class DataCleanupOps {
 				cleanUpUserRequests();
 
 		var cutoffTime = Clock.TransactionTime - Duration.FromDays( 14 );
+		var debugCutoffTime = InstantPattern.CreateWithInvariantCulture( TelemetryStatics.DebugLogTimeFormat )
+			.Format( Clock.TransactionTime - Duration.FromDays( 1 ) );
 		foreach( var app in ConfigurationStatics.InstallationConfiguration.WebApplications ) {
 			var filePath = app.DiagnosticLogFilePath;
-			if( !File.Exists( filePath ) )
-				continue;
-			var timeStampPattern = OffsetDateTimePattern.CreateWithInvariantCulture( "uuuu'-'MM'-'dd HH:mm:ss.FFFFFFFFF o<m>" );
-			try {
-				File.WriteAllLines(
-					filePath,
-					File.ReadAllLines( filePath )
-						.SkipWhile( line => {
-							var endIndex = line.IndexOf( " [", StringComparison.Ordinal );
-							if( endIndex < 0 )
-								return true;
+			if( File.Exists( filePath ) ) {
+				var timeStampPattern = OffsetDateTimePattern.CreateWithInvariantCulture( "uuuu'-'MM'-'dd HH:mm:ss.FFFFFFFFF o<m>" );
+				try {
+					File.WriteAllLines(
+						filePath,
+						File.ReadAllLines( filePath )
+							.SkipWhile( line => {
+								var endIndex = line.IndexOf( " [", StringComparison.Ordinal );
+								if( endIndex < 0 )
+									return true;
 
-							var timeStamp = line[ ..endIndex ];
-							var parseResult = timeStampPattern.Parse( timeStamp );
-							if( !parseResult.TryGetValue( default, out var time ) )
-								return true;
+								var timeStamp = line[ ..endIndex ];
+								var parseResult = timeStampPattern.Parse( timeStamp );
+								if( !parseResult.TryGetValue( default, out var time ) )
+									return true;
 
-							return time.ToInstant() < cutoffTime;
-						} )
-						.Materialize(),
-					Encoding.UTF8 );
+								return time.ToInstant() < cutoffTime;
+							} )
+							.Materialize(),
+						Encoding.UTF8 );
+				}
+				catch( IOException ) {
+					TelemetryStatics.ReportFault(
+						$"Failed to clean up the diagnostic log for {app.Name} because the application is running. The file size is {FormattingMethods.GetFormattedBytes( new FileInfo( filePath ).Length )}." );
+				}
 			}
-			catch( IOException ) {
-				TelemetryStatics.ReportFault(
-					$"Failed to clean up the diagnostic log for {app.Name} because the application is running. The file size is {FormattingMethods.GetFormattedBytes( new FileInfo( filePath ).Length )}." );
+
+			if( File.Exists( app.DebugLogFilePath ) ) {
+				DatabaseInfo dbInfo = new SqliteInfo( "Debug Log", app.DebugLogFilePath, false );
+
+				var command = dbInfo.CreateCommand();
+				var parameter = new DbCommandParameter( "cutoff", new DbParameterValue( debugCutoffTime ) );
+				command.CommandText = $"DELETE FROM Events WHERE Timestamp < {parameter.GetNameForCommandText( dbInfo )}";
+				command.Parameters.Add( parameter.GetAdoDotNetParameter( dbInfo ) );
+
+				var connection = new DatabaseConnection( dbInfo );
+				connection.ExecuteWithConnectionOpen( () => connection.ExecuteNonQueryCommand( command ) );
 			}
 		}
 

@@ -9,11 +9,15 @@ using Tewl.IO;
 namespace EnterpriseWebLibrary.Sqlite;
 
 public class SqliteProvider: ExternalSqliteProvider {
-	string ExternalSqliteProvider.GetConnectionString( string filePath, int timeout ) {
+	void ExternalSqliteProvider.InitStatics( string debugLogTimeFormat ) {
+		Sink.Init( debugLogTimeFormat );
+	}
+
+	string ExternalSqliteProvider.GetConnectionString( string filePath, bool useReadOnlyMode, int timeout ) {
 		var builder = new SqliteConnectionStringBuilder();
 
 		builder.DataSource = filePath;
-		builder.Mode = SqliteOpenMode.ReadOnly;
+		builder.Mode = useReadOnlyMode ? SqliteOpenMode.ReadOnly : SqliteOpenMode.ReadWrite;
 		builder.DefaultTimeout = timeout;
 		builder.Pooling = false;
 

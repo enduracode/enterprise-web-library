@@ -28,6 +28,7 @@ public static class ExternalFunctionalityStatics {
 		oracleDatabaseProvider = provider.GetProvider( returnNullIfNotFound: true )?.GetOracleDatabaseProvider();
 
 		sqliteProvider = provider.GetProvider( returnNullIfNotFound: true )?.GetSqliteProvider();
+		sqliteProvider?.InitStatics( TelemetryStatics.DebugLogTimeFormat );
 
 		openIdConnectProvider = provider.GetProvider( returnNullIfNotFound: true )?.GetOpenIdConnectProvider();
 

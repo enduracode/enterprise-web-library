@@ -9,6 +9,8 @@ namespace EnterpriseWebLibrary;
 
 [ PublicAPI ]
 public static class TelemetryStatics {
+	internal const string DebugLogTimeFormat = "yyyy-MM-ddTHH:mm:ss.fff";
+
 	private static Action<TextWriter>? appErrorContextWriter;
 	private static RateLimiter? errorEmailLimiter;
 

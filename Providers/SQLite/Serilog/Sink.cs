@@ -25,6 +25,12 @@ using Serilog.Templates;
 namespace EnterpriseWebLibrary.Sqlite.Serilog;
 
 internal class Sink: BatchProvider, ILogEventSink {
+	private static string timeFormat;
+
+	internal static void Init( string timeFormat ) {
+		Sink.timeFormat = timeFormat;
+	}
+
 	private readonly string _databasePath;
 	private readonly IFormatProvider _formatProvider;
 	private readonly bool _storeTimestampInUtc;
@@ -33,7 +39,6 @@ internal class Sink: BatchProvider, ILogEventSink {
 	private readonly string _tableName;
 	private readonly TimeSpan? _retentionPeriod;
 	private readonly Timer _retentionTimer;
-	private const string TimestampFormat = "yyyy-MM-ddTHH:mm:ss.fff";
 	private const long BytesPerMb = 1_048_576;
 	private const long MaxSupportedPages = 5_242_880;
 	private const long MaxSupportedPageSize = 4096;
@@ -172,7 +177,7 @@ internal class Sink: BatchProvider, ILogEventSink {
 		var cmd = sqlConnection.CreateCommand();
 		cmd.CommandText = $"DELETE FROM {_tableName} WHERE Timestamp < @epoch";
 		cmd.Parameters.Add(
-			new SqliteParameter( "@epoch", DbType.DateTime2 ) { Value = ( _storeTimestampInUtc ? epoch.ToUniversalTime() : epoch ).ToString( TimestampFormat ) } );
+			new SqliteParameter( "@epoch", DbType.DateTime2 ) { Value = ( _storeTimestampInUtc ? epoch.ToUniversalTime() : epoch ).ToString( timeFormat ) } );
 
 		return cmd;
 	}
@@ -231,8 +236,8 @@ internal class Sink: BatchProvider, ILogEventSink {
 		var messageBuilder = new StringBuilder( 1000 );
 		foreach( var logEvent in logEventsBatch ) {
 			sqlCommand.Parameters[ "@timeStamp" ].Value = _storeTimestampInUtc
-				                                              ? logEvent.Timestamp.ToUniversalTime().ToString( TimestampFormat )
-				                                              : logEvent.Timestamp.ToString( TimestampFormat );
+				                                              ? logEvent.Timestamp.ToUniversalTime().ToString( timeFormat )
+				                                              : logEvent.Timestamp.ToString( timeFormat );
 			sqlCommand.Parameters[ "@level" ].Value = logEvent.Level.ToString();
 			sqlCommand.Parameters[ "@exception" ].Value = logEvent.Exception?.ToString() ?? string.Empty;
 

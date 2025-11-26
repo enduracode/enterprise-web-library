@@ -67,7 +67,7 @@ partial class DebugLog {
 				.AddItem( getPropertyFilterItem() )
 				.ToCollection(),
 			() => {
-				DatabaseInfo dbInfo = new SqliteInfo( "Debug Log", EwfConfigurationStatics.AppConfiguration.DebugLogFilePath );
+				DatabaseInfo dbInfo = new SqliteInfo( "Debug Log", EwfConfigurationStatics.AppConfiguration.DebugLogFilePath, true );
 				var command = dbInfo.CreateCommand();
 				command.CommandText = "SELECT * FROM Events";
 

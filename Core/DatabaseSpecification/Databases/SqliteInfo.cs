@@ -18,13 +18,15 @@ public class SqliteInfo: DatabaseInfo {
 
 	private readonly string databaseName;
 	private readonly string filePath;
+	private readonly bool useReadOnlyMode;
 
 	/// <summary>
 	/// Creates a new SQLite information object.
 	/// </summary>
-	public SqliteInfo( string databaseName, string filePath ) {
+	public SqliteInfo( string databaseName, string filePath, bool useReadOnlyMode ) {
 		this.databaseName = databaseName;
 		this.filePath = filePath;
+		this.useReadOnlyMode = useReadOnlyMode;
 	}
 
 	string DatabaseInfo.SecondaryDatabaseName => databaseName;
@@ -38,7 +40,7 @@ public class SqliteInfo: DatabaseInfo {
 	string DatabaseInfo.LastAutoIncrementValueExpression => throw new NotImplementedException();
 	string DatabaseInfo.QueryCacheHint => throw new NotImplementedException();
 
-	string DatabaseInfo.GetConnectionString( int timeout ) => provider.Value.GetConnectionString( filePath, timeout );
+	string DatabaseInfo.GetConnectionString( int timeout ) => provider.Value.GetConnectionString( filePath, useReadOnlyMode, timeout );
 
 	DbConnection DatabaseInfo.CreateConnection( string connectionString ) => provider.Value.CreateConnection( connectionString );
 

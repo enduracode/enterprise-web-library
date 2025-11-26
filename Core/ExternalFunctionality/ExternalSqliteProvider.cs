@@ -8,7 +8,12 @@ namespace EnterpriseWebLibrary.ExternalFunctionality;
 /// External SQLite logic.
 /// </summary>
 public interface ExternalSqliteProvider {
-	string GetConnectionString( string filePath, int timeout );
+	/// <summary>
+	/// Initializes the provider.
+	/// </summary>
+	void InitStatics( string debugLogTimeFormat );
+
+	string GetConnectionString( string filePath, bool useReadOnlyMode, int timeout );
 
 	DbConnection CreateConnection( string connectionString );
 
