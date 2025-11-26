@@ -1,5 +1,4 @@
-﻿using System.Text.Encodings.Web;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Nodes;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.DataAccess.CommandWriting;
@@ -15,6 +14,7 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralC
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic.AlternativeResourceModes;
 using EnterpriseWebLibrary.ExternalFunctionality;
+using EnterpriseWebLibrary.TewlContrib;
 using NodaTime;
 using NodaTime.Text;
 using Tewl.InputValidation;
@@ -97,8 +97,7 @@ partial class DebugLog {
 					if( propertyValueArray is not null ) {
 						var parameters = propertyValueArray.Select( ( value, index ) => new DbCommandParameter(
 								$"propertyValue{index}",
-								new DbParameterValue(
-									value?.ToJsonString( options: new JsonSerializerOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping } ) ?? "null" ) ) )
+								new DbParameterValue( value?.ToJsonStringWithSimpleEscaping() ?? "null" ) ) )
 							.Materialize();
 						command.CommandText += $"IN( {StringTools.ConcatenateWithDelimiter( ", ", parameters.Select( i => i.GetNameForCommandText( dbInfo ) ) )} )";
 						foreach( var i in parameters )
@@ -232,11 +231,10 @@ partial class DebugLog {
 	private FlowComponent getPropertiesComponent( string properties, PageModificationValueCondition expanded ) =>
 		new EwfFigure(
 			new DisplayableElement( _ => new DisplayableElementData(
-				null,
-				() => new DisplayableElementLocalData( "pre" ),
-				children: JsonNode.Parse( properties )!
-					.ToJsonString( options: new JsonSerializerOptions { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping, WriteIndented = true } )
-					.ToComponents( disableNewlineReplacement: true ) ) ).ToCollection(),
+					null,
+					() => new DisplayableElementLocalData( "pre" ),
+					children: JsonNode.Parse( properties )!.ToJsonStringWithSimpleEscaping( writeIndented: true ).ToComponents( disableNewlineReplacement: true ) ) )
+				.ToCollection(),
 			displaySetup: expanded.ToDisplaySetup(),
 			caption: new FigureCaption( "Properties".ToComponents(), figureIsTextual: true ) );
 
