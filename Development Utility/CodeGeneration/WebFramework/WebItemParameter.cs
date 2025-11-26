@@ -22,10 +22,10 @@ internal class WebItemParameter {
 
 	private sealed class DataType {
 		public Type Type { get; }
+		public string TypeName { get; }
 		public bool SupportsNull { get; }
 		public Func<bool> NamingConventionPredicate { get; }
 		public string NamingConventionInstructions { get; }
-		public string TypeName { get; }
 		public string ElementTypeName { get; }
 		public string InitExpression { get; }
 		public Func<string, string> UrlSerializationExpressionGetter { get; }
@@ -36,8 +36,8 @@ internal class WebItemParameter {
 		/// Do not support null for string or IEnumerable types because it cannot easily be represented in a URL.
 		/// </summary>
 		public DataType(
-			Type type, bool supportsNull, Func<bool> namingConventionPredicate, string namingConventionInstructions, string typeName, string elementTypeName,
-			string initExpression, Func<string, string> urlSerializationExpressionGetter, Func<string, string, string> urlDeserializationExpressionGetter,
+			Type type, bool supportsNull, Func<bool> namingConventionPredicate, string namingConventionInstructions, string elementTypeName, string initExpression,
+			Func<string, string> urlSerializationExpressionGetter, Func<string, string, string> urlDeserializationExpressionGetter, string typeName = "",
 			Func<string, string>? reCreationExpressionGetter = null ) {
 			Type = type;
 			SupportsNull = supportsNull;
@@ -62,18 +62,28 @@ internal class WebItemParameter {
 			false,
 			() => false,
 			"",
-			"string",
 			"",
 			"\"\"",
 			valueExpression => valueExpression,
-			( valueExpression, _ ) => valueExpression );
+			( valueExpression, _ ) => $"{valueExpression}.EnsureTrimmed()",
+			typeName: "text" );
+
+		yield return new DataType(
+			typeof( string ),
+			false,
+			() => false,
+			"",
+			"",
+			"\"\"",
+			valueExpression => valueExpression,
+			( valueExpression, _ ) => valueExpression,
+			typeName: "string" );
 
 		yield return new DataType(
 			typeof( LocalDate ),
 			true,
 			() => hasSuffix( "Date" ) || nameIs( "date" ),
 			"suffix the name with “Date” or make the name “date”",
-			"",
 			"",
 			"",
 			valueExpression => $"LocalDatePattern.Iso.Format( {valueExpression} )",
@@ -86,7 +96,6 @@ internal class WebItemParameter {
 			"suffix the name with “DateAndTime” or make the name “dateAndTime”",
 			"",
 			"",
-			"",
 			valueExpression => $"LocalDateTimePattern.VariablePrecisionIso.Format( {valueExpression} )",
 			( valueExpression, _ ) => $"LocalDateTimePattern.VariablePrecisionIso.Parse( {valueExpression} ).GetValueOrThrow()" );
 
@@ -94,7 +103,6 @@ internal class WebItemParameter {
 			typeof( Duration ),
 			true,
 			() => false,
-			"",
 			"",
 			"",
 			"",
@@ -107,7 +115,6 @@ internal class WebItemParameter {
 			() => hasSuffix( "Contains" ) || nameIs( "searchTerm" ),
 			"suffix the name with “Contains” or make the name “searchTerm”",
 			"",
-			"",
 			"""new PatternString( "" )""",
 			valueExpression => $"{valueExpression}.Pattern",
 			( valueExpression, _ ) => $"new PatternString( {valueExpression} )" );
@@ -117,7 +124,6 @@ internal class WebItemParameter {
 			true,
 			() => hasSuffix( "Url" ) && !nameIs( "parentUrl" ),
 			"suffix the name with “Url”",
-			"",
 			"",
 			"TrustedUrl.Invalid",
 			valueExpression => $"TrustedUrl.Serialize( {valueExpression}, base.AppId )",
@@ -129,7 +135,6 @@ internal class WebItemParameter {
 			true,
 			() => nameIs( "parentUrl" ),
 			"make the name “parentUrl”",
-			"",
 			"",
 			"TrustedParentUrl.Invalid",
 			valueExpression => $"TrustedParentUrl.Serialize( {valueExpression}, base.AppId )",
@@ -195,7 +200,7 @@ internal class WebItemParameter {
 		AllowsNull = typeName.EndsWith( '?' );
 		var nnTypeName = AllowsNull ? typeName[ ..^1 ] : typeName;
 		foreach( var supportedType in supportedTypes )
-			if( nnTypeName.Length > 0 ? supportedType.Type.Name.Equals( nnTypeName, StringComparison.Ordinal ) : supportedType.NamingConventionPredicate() ) {
+			if( nnTypeName.Length > 0 ? supportedType.TypeName.Equals( nnTypeName, StringComparison.Ordinal ) : supportedType.NamingConventionPredicate() ) {
 				if( !supportedType.SupportsNull && AllowsNull )
 					throw new UserCorrectableException( $"The parameter type {supportedType.TypeName} does not support null." );
 
@@ -231,7 +236,7 @@ internal class WebItemParameter {
 						$"The parameter {( nnTypeName.Length > 0 ? $"type {nnTypeName}" : $"\"{name}\"" )} is not supported. Please use one of the types below (implicitly via naming convention if possible):" +
 						Environment.NewLine + Environment.NewLine + StringTools.ConcatenateWithDelimiter(
 							Environment.NewLine,
-							supportedTypes.Select( i => $"{i.Type.Name}: {i.NamingConventionInstructions}" ) ) );
+							supportedTypes.Select( i => $"{i.TypeName}: {i.NamingConventionInstructions}" ) ) );
 			}
 
 			type = new DataType(
@@ -239,7 +244,6 @@ internal class WebItemParameter {
 				Nullable.GetUnderlyingType( compilationType ) is not null,
 				() => throw new NotSupportedException(),
 				"",
-				getNormalizedTypeName( compilationType )[ ..^( AllowsNull ? 1 : 0 ) ],
 				compilationType.IsGenericType && compilationType.GetGenericTypeDefinition() == typeof( IReadOnlyCollection<> )
 					? getNormalizedTypeName( compilationType.GetGenericArguments().Single() )
 					: "",
@@ -256,14 +260,15 @@ internal class WebItemParameter {
 						       type.ElementTypeName + " ) ) ).Materialize()";
 
 					return $"({type!.TypeName})EwlStatics.ChangeType( {valueExpression}, typeof( {type.TypeName} ) )";
-				} );
+				},
+				typeName: getNormalizedTypeName( compilationType )[ ..^( AllowsNull ? 1 : 0 ) ] );
 		}
 
 		this.name = name;
 		this.comment = comment.Trim();
 	}
 
-	public string TypeName => type.TypeName + ( AllowsNull ? "?" : "" );
+	public string TypeName => ( type.TypeName.Equals( "text", StringComparison.Ordinal ) ? "string" : type.TypeName ) + ( AllowsNull ? "?" : "" );
 
 	public string InitExpression => AllowsNull ? "" : type.InitExpression;
 
