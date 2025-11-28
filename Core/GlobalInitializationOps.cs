@@ -1,5 +1,4 @@
 ﻿using System.Globalization;
-using System.Runtime.InteropServices;
 using System.Threading;
 using EnterpriseWebLibrary.Caching;
 using EnterpriseWebLibrary.Configuration;
@@ -177,11 +176,8 @@ public static class GlobalInitializationOps {
 	/// Installation Support Utility and internal use only.
 	/// </summary>
 	public static void DelayIfMachineWasRecentlyStarted() {
-		var timeSinceStartup = Duration.FromMilliseconds( GetTickCount64() );
+		var timeSinceStartup = Duration.FromMilliseconds( Clock.GetTickCount64() );
 		if( timeSinceStartup < MachineStartupDelay )
 			Thread.Sleep( ( MachineStartupDelay - timeSinceStartup ).ToTimeSpan() );
 	}
-
-	[ DllImport( "kernel32" ) ]
-	private static extern ulong GetTickCount64();
 }
