@@ -15,6 +15,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 internal class RequestState {
 	private static readonly Duration warmupPeriodDuration = Duration.FromSeconds( 5 );
 
+	private static ulong initSecondsFromStartup;
+	private static uint requestCount;
 	private static Func<Instant?>? firstRequestCompletionTimeGetter;
 
 	private class UrlHandlerState: UrlHandlerStateOverride {
@@ -54,6 +56,7 @@ internal class RequestState {
 	}
 
 	internal static void Init( Func<Instant?> firstRequestCompletionTimeGetter ) {
+		initSecondsFromStartup = (ulong)Duration.FromMilliseconds( Clock.GetTickCount64() ).TotalSeconds;
 		RequestState.firstRequestCompletionTimeGetter = firstRequestCompletionTimeGetter;
 	}
 
@@ -87,6 +90,7 @@ internal class RequestState {
 		}
 	}
 
+	internal string RequestId { get; private set; }
 	internal readonly Instant BeginInstant;
 	private readonly bool requestInWarmupPeriod;
 	internal MiniProfiler? Profiler { get; set; }
@@ -128,6 +132,8 @@ internal class RequestState {
 
 	internal RequestState( HttpContext context, string url, string baseUrl, IPAddress? clientIp, SlowRequestThreshold slowRequestThreshold ) {
 		BeginInstant = Clock.GetCurrentTime();
+		RequestId = getRequestId( (ulong)BeginInstant.ToUnixTimeSeconds() );
+
 		var firstRequestCompletionTime = firstRequestCompletionTimeGetter!();
 		requestInWarmupPeriod = !firstRequestCompletionTime.HasValue || BeginInstant - firstRequestCompletionTime.Value < warmupPeriodDuration;
 
@@ -152,6 +158,30 @@ internal class RequestState {
 		this.slowRequestThreshold = BeginInstant.InZone( DateTimeZoneProviders.Tzdb.GetSystemDefault() ).TimeOfDay.IsInNight()
 			                            ? Duration.FromMinutes( 5 )
 			                            : Duration.FromMilliseconds( (long)slowRequestThreshold );
+	}
+
+	private string getRequestId( ulong unixTime ) {
+		// 3 bytes for current time, in seconds; wraps approximately every six months
+		var time = new byte[ 3 ];
+		unchecked {
+			time[ 0 ] = (byte)( unixTime >> 16 );
+			time[ 1 ] = (byte)( unixTime >> 8 );
+			time[ 2 ] = (byte)unixTime;
+		}
+
+		var differentiator = new byte [ 3 ];
+
+		// 1 byte for app initialization second; prevents overlapping processes or an app restart after a clock sync from generating duplicate IDs
+		var secondsSinceInit = (ulong)Duration.FromMilliseconds( Clock.GetTickCount64() ).TotalSeconds - initSecondsFromStartup;
+		differentiator[ 0 ] = secondsSinceInit < byte.MaxValue ? (byte)( initSecondsFromStartup % byte.MaxValue ) : byte.MaxValue; // 255 for apps not newly-started
+
+		// 2 bytes for request number; handles up to 65,536 requests per second without duplicating IDs
+		var requestNumber = Interlocked.Increment( ref requestCount );
+		differentiator[ 1 ] = (byte)( requestNumber >> 8 );
+		differentiator[ 2 ] = (byte)requestNumber;
+
+		// Add a character between these strings to handle multiple servers. See EnduraCode goal 2582. The load balancer can likely provide this in a header.
+		return Convert.ToBase64String( time ) + Convert.ToBase64String( differentiator );
 	}
 
 	internal IRequestCookieCollection RequestCookies => requestCookies ?? EwfRequest.Current!.AspNetRequest.Cookies;

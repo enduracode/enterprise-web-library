@@ -46,6 +46,14 @@ public static class EwfOps {
 	/// </summary>
 	public static readonly Duration InitializationTimeout = GlobalInitializationOps.MachineStartupDelay + Duration.FromSeconds( 150 );
 
+	private class SerilogEnricher: ILogEventEnricher {
+		void ILogEventEnricher.Enrich( LogEvent logEvent, ILogEventPropertyFactory propertyFactory ) {
+			if( EwfRequest.Current is not null )
+				logEvent.AddPropertyIfAbsent(
+					propertyFactory.CreateProperty( EwlStatics.EwlInitialism.EnglishToPascal() + "RequestId", RequestDispatchingStatics.RequestState.RequestId ) );
+		}
+	}
+
 	private class MiniProfilerConfigureOptions: IConfigureOptions<MiniProfilerOptions> {
 		private class ProfilerProvider: DefaultProfilerProvider {
 			public override MiniProfiler CurrentProfiler {
@@ -163,6 +171,7 @@ public static class EwfOps {
 
 					var diagnosticLogLevelSwitch = new LoggingLevelSwitch( initialMinimumLevel: LogEventLevel.Information );
 					var loggerConfiguration = new LoggerConfiguration().Destructure.JsonNetTypes()
+						.Enrich.With( new SerilogEnricher() )
 						.MinimumLevel.Debug()
 						.MinimumLevel.Override( "Microsoft.AspNetCore", LogEventLevel.Warning );
 					loggerConfiguration = ConfigurationStatics.IsDevelopmentInstallation
@@ -260,6 +269,7 @@ public static class EwfOps {
 								var context = contextAccessor.HttpContext;
 								return context is not null && context.Items.ContainsKey( RequestDispatchingStatics.RequestStateKey ) ? context.Request : null;
 							},
+							() => RequestDispatchingStatics.RequestState.RequestId,
 							() => RequestDispatchingStatics.RequestState.BeginInstant,
 							() => RequestDispatchingStatics.RequestState.Url,
 							networkWaitTime => RequestDispatchingStatics.RequestState.AddNetworkWaitTime( networkWaitTime ),

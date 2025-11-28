@@ -13,17 +13,19 @@ public class EwfRequest {
 	private static AppClientRequestProvider? defaultProvider;
 	private static SystemProviderReference<AppClientRequestProvider>? provider;
 	private static Func<HttpRequest>? currentRequestGetter;
+	private static Func<string>? requestIdGetter;
 	private static Func<Instant>? requestTimeGetter;
 	private static Func<string>? urlGetter;
 	private static Action<Duration>? networkWaitTimeAdder;
 	private static Func<IPAddress?>? clientIpGetter;
 
 	internal static void Init(
-		SystemProviderReference<AppClientRequestProvider> provider, Func<HttpRequest> currentRequestGetter, Func<Instant> requestTimeGetter, Func<string> urlGetter,
-		Action<Duration> networkWaitTimeAdder, Func<IPAddress?> clientIpGetter ) {
+		SystemProviderReference<AppClientRequestProvider> provider, Func<HttpRequest> currentRequestGetter, Func<string> requestIdGetter,
+		Func<Instant> requestTimeGetter, Func<string> urlGetter, Action<Duration> networkWaitTimeAdder, Func<IPAddress?> clientIpGetter ) {
 		defaultProvider = new AppClientRequestProvider();
 		EwfRequest.provider = provider;
 		EwfRequest.currentRequestGetter = currentRequestGetter;
+		EwfRequest.requestIdGetter = requestIdGetter;
 		EwfRequest.requestTimeGetter = requestTimeGetter;
 		EwfRequest.urlGetter = urlGetter;
 		EwfRequest.networkWaitTimeAdder = networkWaitTimeAdder;
@@ -47,6 +49,11 @@ public class EwfRequest {
 	private EwfRequest( HttpRequest aspNetRequest ) {
 		AspNetRequest = aspNetRequest;
 	}
+
+	/// <summary>
+	/// Gets a short request identifier that is useful for logging. These should remain unique for about six months.
+	/// </summary>
+	public string RequestId => requestIdGetter!();
 
 	/// <summary>
 	/// Gets the time instant for the current request.
