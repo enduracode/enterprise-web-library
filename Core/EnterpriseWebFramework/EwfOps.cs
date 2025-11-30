@@ -587,7 +587,7 @@ public static class EwfOps {
 								context.Items.Add(
 									aspNetScriptKey,
 									() => {
-										stream.GetType().GetProperty( "ScriptInjectionPerformed" ).SetValue( stream, true );
+										stream.GetType().GetField( "_isHtmlResponse", BindingFlags.Instance | BindingFlags.NonPublic ).SetValue( stream, false );
 										return "/_framework/aspnetcore-browser-refresh.js";
 									} );
 							}
