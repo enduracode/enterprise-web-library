@@ -32,21 +32,21 @@ namespace EnterpriseWebLibrary.Sqlite.Serilog
 
         private static dynamic ConvertToDictionary(IReadOnlyDictionary<string, LogEventPropertyValue> properties)
         {
-            var expObject = new ExpandoObject() as IDictionary<string, object>;
+            var expObject = new ExpandoObject() as IDictionary<string, object?>;
             foreach (var property in properties)
                 expObject.Add(property.Key, Simplify(property.Value));
 
             return expObject;
         }
 
-        private static object Simplify(LogEventPropertyValue data)
+        private static object? Simplify(LogEventPropertyValue data)
         {
             if (data is ScalarValue value)
                 return value.Value;
 
             // ReSharper disable once SuspiciousTypeConversion.Global
             if (data is DictionaryValue dictValue) {
-                var expObject = new ExpandoObject() as IDictionary<string, object>;
+                var expObject = new ExpandoObject() as IDictionary<string, object?>;
                 foreach (var item in dictValue.Elements) {
                     if (item.Key.Value is string key)
                         expObject.Add(key, Simplify(item.Value));
@@ -74,8 +74,8 @@ namespace EnterpriseWebLibrary.Sqlite.Serilog
                     if (key == null)
                         return null;
 
-                    var expObject = new ExpandoObject() as IDictionary<string, object>;
-                    expObject.Add(key.ToString(), Simplify(str.Properties[1].Value));
+                    var expObject = new ExpandoObject() as IDictionary<string, object?>;
+                    expObject.Add(key.ToString()!, Simplify(str.Properties[1].Value));
 
                     return expObject;
                 }

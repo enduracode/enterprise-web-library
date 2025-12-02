@@ -25,20 +25,20 @@ using Serilog.Templates;
 namespace EnterpriseWebLibrary.Sqlite.Serilog;
 
 internal class Sink: BatchProvider, ILogEventSink {
-	private static string timeFormat;
+	private static string timeFormat = null!;
 
 	internal static void Init( string timeFormat ) {
 		Sink.timeFormat = timeFormat;
 	}
 
 	private readonly string _databasePath;
-	private readonly IFormatProvider _formatProvider;
+	private readonly IFormatProvider? _formatProvider;
 	private readonly bool _storeTimestampInUtc;
 	private readonly string _tableName;
 	private const int SQLITE_FULL = SQLitePCL.raw.SQLITE_FULL;
 	private static readonly SemaphoreSlim semaphoreSlim = new SemaphoreSlim( 1, 1 );
 
-	public Sink( string sqlLiteDbPath, string tableName, IFormatProvider formatProvider, bool storeTimestampInUtc, uint batchSize = 100 ): base(
+	public Sink( string sqlLiteDbPath, string tableName, IFormatProvider? formatProvider, bool storeTimestampInUtc, uint batchSize = 100 ): base(
 		batchSize: (int)batchSize,
 		maxBufferSize: 100_000 ) {
 		_databasePath = sqlLiteDbPath;
@@ -111,29 +111,6 @@ internal class Sink: BatchProvider, ILogEventSink {
 		sqlCommand.Parameters.Add( new SqliteParameter( "@properties", DbType.String ) );
 
 		return sqlCommand;
-	}
-
-	private void TruncateLog( SqliteConnection sqlConnection ) {
-		var cmd = sqlConnection.CreateCommand();
-		cmd.CommandText = $"DELETE FROM {_tableName}";
-		cmd.ExecuteNonQuery();
-
-		VacuumDatabase( sqlConnection );
-	}
-
-	private void VacuumDatabase( SqliteConnection sqlConnection ) {
-		var cmd = sqlConnection.CreateCommand();
-		cmd.CommandText = $"vacuum";
-		cmd.ExecuteNonQuery();
-	}
-
-	private SqliteCommand CreateSqlDeleteCommand( SqliteConnection sqlConnection, DateTimeOffset epoch ) {
-		var cmd = sqlConnection.CreateCommand();
-		cmd.CommandText = $"DELETE FROM {_tableName} WHERE Timestamp < @epoch";
-		cmd.Parameters.Add(
-			new SqliteParameter( "@epoch", DbType.DateTime2 ) { Value = ( _storeTimestampInUtc ? epoch.ToUniversalTime() : epoch ).ToString( timeFormat ) } );
-
-		return cmd;
 	}
 
 	protected override async Task<bool> WriteLogEventAsync( ICollection<LogEvent> logEventsBatch ) {

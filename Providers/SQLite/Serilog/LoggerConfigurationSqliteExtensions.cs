@@ -51,20 +51,15 @@ namespace EnterpriseWebLibrary.Sqlite.Serilog
             string sqliteDbPath,
             string tableName = "Logs",
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
-            IFormatProvider formatProvider = null,
+            IFormatProvider? formatProvider = null,
             bool storeTimestampInUtc = false,
             TimeSpan? retentionPeriod = null,
             TimeSpan? retentionCheckInterval = null,
-            LoggingLevelSwitch levelSwitch = null,
+            LoggingLevelSwitch? levelSwitch = null,
             uint batchSize = 100,
             uint maxDatabaseSize = 10,
             bool rollOver = true)
         {
-            if (loggerConfiguration == null) {
-                SelfLog.WriteLine("Logger configuration is null");
-
-                throw new ArgumentNullException(nameof(loggerConfiguration));
-            }
 
             if (string.IsNullOrEmpty(sqliteDbPath)) {
                 SelfLog.WriteLine("Invalid sqliteDbPath");

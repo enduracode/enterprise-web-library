@@ -131,7 +131,7 @@ namespace EnterpriseWebLibrary.Sqlite.Serilog
                 var logEventList = new List<LogEvent>();
 
                 for (var i = 0; i < logEventBatchSize; i++) {
-                    if (_logEventBatch.TryDequeue(out LogEvent logEvent)) {
+                    if (_logEventBatch.TryDequeue(out var logEvent)) {
                         logEventList.Add(logEvent);
                     }
                 }
