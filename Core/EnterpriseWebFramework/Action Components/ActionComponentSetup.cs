@@ -41,8 +41,8 @@ public static class ActionComponentSetupsParameterExtensionCreators {
 	/// <summary>
 	/// Returns a parameter with this action-component setup plus the specified setups.
 	/// </summary>
-	public static ActionComponentSetupsParameter Add( this ActionComponentSetup actionComponentSetup, ActionComponentSetupsParameter actionComponentSetups ) =>
-		new ActionComponentSetupsParameter( [ actionComponentSetup ] ).Add( actionComponentSetups );
+	public static ActionComponentSetupsParameter Add( this ActionComponentSetup? actionComponentSetup, ActionComponentSetupsParameter actionComponentSetups ) =>
+		new ActionComponentSetupsParameter( actionComponentSetup is null ? [ ] : [ actionComponentSetup ] ).Add( actionComponentSetups );
 
 	/// <summary>
 	/// Returns a parameter with the action-component setups in this sequence.

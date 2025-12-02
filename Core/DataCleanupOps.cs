@@ -25,7 +25,7 @@ public static class DataCleanupOps {
 	[ EditorBrowsable( EditorBrowsableState.Never ) ]
 	public static void CleanUpData() {
 		if( UserManagementStatics.UserManagementEnabled )
-			if( ConfigurationStatics.DatabaseExists )
+			if( ConfigurationStatics.DatabaseExists && !AutomaticDatabaseConnectionManager.HasCurrent )
 				DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( () =>
 					DataAccessState.Current.PrimaryDatabaseConnection.ExecuteInTransaction( cleanUpUserRequests ) );
 			else
@@ -66,13 +66,19 @@ public static class DataCleanupOps {
 			if( File.Exists( app.DebugLogFilePath ) ) {
 				DatabaseInfo dbInfo = new SqliteInfo( "Debug Log", app.DebugLogFilePath, false );
 
-				var command = dbInfo.CreateCommand();
+				var deleteCommand = dbInfo.CreateCommand();
 				var parameter = new DbCommandParameter( "cutoff", new DbParameterValue( debugCutoffTime ) );
-				command.CommandText = $"DELETE FROM Events WHERE Timestamp < {parameter.GetNameForCommandText( dbInfo )}";
-				command.Parameters.Add( parameter.GetAdoDotNetParameter( dbInfo ) );
+				deleteCommand.CommandText = $"DELETE FROM Events WHERE Timestamp < {parameter.GetNameForCommandText( dbInfo )}";
+				deleteCommand.Parameters.Add( parameter.GetAdoDotNetParameter( dbInfo ) );
+
+				var vacuumCommand = dbInfo.CreateCommand();
+				deleteCommand.CommandText = "VACUUM";
 
 				var connection = new DatabaseConnection( dbInfo );
-				connection.ExecuteWithConnectionOpen( () => connection.ExecuteNonQueryCommand( command ) );
+				connection.ExecuteWithConnectionOpen( () => {
+					connection.ExecuteNonQueryCommand( deleteCommand );
+					connection.ExecuteNonQueryCommand( vacuumCommand );
+				} );
 			}
 		}
 

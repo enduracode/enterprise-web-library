@@ -1,4 +1,5 @@
-﻿using EnterpriseWebLibrary.UserManagement;
+﻿using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.UserManagement;
 using Serilog.Core;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin;
@@ -65,15 +66,21 @@ partial class EntitySetup: UiEntitySetup {
 
 	EntityUiSetup UiEntitySetup.GetUiSetup() =>
 		new(
-			navActionGetter: _ => new HyperlinkSetup(
-				new ErrorLog( this ),
-				"System error log",
-				icon: new ActionComponentIcon( new FontAwesomeIcon( "fa-exclamation-triangle" ) ) ),
-			actionGetter: _ =>
-				UserManagementStatics.UserManagementEnabled
-					? new HyperlinkSetup(
-						new EnterpriseWebFramework.UserManagement.Pages.Impersonate( PageBase.Current.GetUrl() ),
-						"Impersonate user",
-						icon: new ActionComponentIcon( new FontAwesomeIcon( "fa-key" ) ) )
-					: null );
+			navActionGetter:
+			_ => new HyperlinkSetup( new ErrorLog( this ), "System error log", icon: new ActionComponentIcon( new FontAwesomeIcon( "fa-exclamation-triangle" ) ) ),
+			actionGetter: postBackIdBase =>
+				( UserManagementStatics.UserManagementEnabled
+					  ? new HyperlinkSetup(
+						  new EnterpriseWebFramework.UserManagement.Pages.Impersonate( PageBase.Current.GetUrl() ),
+						  "Impersonate user",
+						  icon: new ActionComponentIcon( new FontAwesomeIcon( "fa-key" ) ) )
+					  : null ).Add(
+					ConfigurationStatics.IsDevelopmentInstallation
+						? new ButtonSetup(
+							"Clean up data",
+							behavior: new ConfirmationButtonBehavior(
+								"Are you sure?".ToComponents(),
+								postBack: PostBack.CreateFull( id: PostBack.GetCompositeId( postBackIdBase, "cleanUpData" ), modificationMethod: DataCleanupOps.CleanUpData ) ),
+							icon: new ActionComponentIcon( new FontAwesomeIcon( "fa-bath" ) ) )
+						: null ) );
 }
