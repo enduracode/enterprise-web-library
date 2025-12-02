@@ -82,7 +82,7 @@ public static class DataCleanupOps {
 			}
 		}
 
-		SystemSpecificLogicStatics.GeneralProvider.CleanUpData();
+		SystemSpecificLogicStatics.GeneralProvider.CleanUpData( AutomaticDatabaseConnectionManager.HasCurrent );
 	}
 
 	private static void cleanUpUserRequests() {

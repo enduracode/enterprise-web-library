@@ -40,5 +40,5 @@ public abstract class SystemGeneralProvider {
 	/// <summary>
 	/// Cleans up system-specific data. This method is only called during data cleanup.
 	/// </summary>
-	protected internal virtual void CleanUpData() {}
+	protected internal virtual void CleanUpData( bool currentConnectionManagerExists ) {}
 }
