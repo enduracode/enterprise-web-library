@@ -87,18 +87,9 @@ namespace EnterpriseWebLibrary.Sqlite.Serilog
                 sqliteDbFile.Directory?.Create();
 
                 return loggerConfiguration.Sink(
-                    new Sink(
-                        sqliteDbFile.FullName,
-                        tableName,
-                        formatProvider,
-                        storeTimestampInUtc,
-                        retentionPeriod,
-                        retentionCheckInterval,
-                        batchSize,
-                        maxDatabaseSize,
-                        rollOver),
-                    restrictedToMinimumLevel,
-                    levelSwitch);
+	                new Sink( sqliteDbFile.FullName, tableName, formatProvider, storeTimestampInUtc, batchSize ),
+	                restrictedToMinimumLevel,
+	                levelSwitch );
             }
             catch (Exception ex) {
                 SelfLog.WriteLine(ex.Message);

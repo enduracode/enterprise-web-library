@@ -34,49 +34,19 @@ internal class Sink: BatchProvider, ILogEventSink {
 	private readonly string _databasePath;
 	private readonly IFormatProvider _formatProvider;
 	private readonly bool _storeTimestampInUtc;
-	private readonly uint _maxDatabaseSize;
-	private readonly bool _rollOver;
 	private readonly string _tableName;
-	private readonly TimeSpan? _retentionPeriod;
-	private readonly Timer _retentionTimer;
-	private const long BytesPerMb = 1_048_576;
-	private const long MaxSupportedPages = 5_242_880;
-	private const long MaxSupportedPageSize = 4096;
-	private const long MaxSupportedDatabaseSize = unchecked(MaxSupportedPageSize * MaxSupportedPages) / 1048576;
 	private const int SQLITE_FULL = SQLitePCL.raw.SQLITE_FULL;
 	private static readonly SemaphoreSlim semaphoreSlim = new SemaphoreSlim( 1, 1 );
 
-	public Sink(
-		string sqlLiteDbPath, string tableName, IFormatProvider formatProvider, bool storeTimestampInUtc, TimeSpan? retentionPeriod,
-		TimeSpan? retentionCheckInterval, uint batchSize = 100, uint maxDatabaseSize = 10, bool rollOver = true ): base(
+	public Sink( string sqlLiteDbPath, string tableName, IFormatProvider formatProvider, bool storeTimestampInUtc, uint batchSize = 100 ): base(
 		batchSize: (int)batchSize,
 		maxBufferSize: 100_000 ) {
 		_databasePath = sqlLiteDbPath;
 		_tableName = tableName;
 		_formatProvider = formatProvider;
 		_storeTimestampInUtc = storeTimestampInUtc;
-		_maxDatabaseSize = maxDatabaseSize;
-		_rollOver = rollOver;
-
-		if( maxDatabaseSize > MaxSupportedDatabaseSize )
-			throw new SqliteException( $"Database size greater than {MaxSupportedDatabaseSize} MB is not supported", SQLITE_FULL );
 
 		InitializeDatabase();
-
-		if( retentionPeriod.HasValue ) {
-			// impose a min retention period of 15 minute
-			var retentionCheckMinutes = 15;
-			if( retentionCheckInterval.HasValue )
-				retentionCheckMinutes = Math.Max( retentionCheckMinutes, retentionCheckInterval.Value.Minutes );
-
-			// impose multiple of 15 minute interval
-			retentionCheckMinutes = ( retentionCheckMinutes / 15 ) * 15;
-
-			_retentionPeriod = new[] { retentionPeriod, TimeSpan.FromMinutes( 30 ) }.Max();
-
-			// check for retention at this interval - or use retentionPeriod if not specified
-			_retentionTimer = new Timer( ( x ) => { ApplyRetentionPolicy(); }, null, TimeSpan.FromMinutes( 0 ), TimeSpan.FromMinutes( retentionCheckMinutes ) );
-		}
 	}
 
 	#region ILogEvent implementation
@@ -104,11 +74,6 @@ internal class Sink: BatchProvider, ILogEventSink {
 		sb.Append( "PRAGMA journal_mode = Memory;" );
 		sb.Append( "PRAGMA synchronous = Normal;" );
 		sb.Append( "PRAGMA cache_size = 500;" );
-		sb.Append( "PRAGMA page_size = " );
-		sb.Append( (int)MaxSupportedPageSize );
-		sb.Append( ";" );
-		sb.Append( "PRAGMA max_page_count = " );
-		sb.Append( (int)( _maxDatabaseSize * BytesPerMb / MaxSupportedPageSize ) );
 
 		var pragmaCommand = new SqliteCommand( sb.ToString(), sqLiteConnection );
 		pragmaCommand.ExecuteNonQuery();
@@ -148,17 +113,6 @@ internal class Sink: BatchProvider, ILogEventSink {
 		return sqlCommand;
 	}
 
-	private void ApplyRetentionPolicy() {
-		var epoch = DateTimeOffset.Now.Subtract( _retentionPeriod.Value );
-		using( var sqlConnection = GetSqLiteConnection() ) {
-			using( var cmd = CreateSqlDeleteCommand( sqlConnection, epoch ) ) {
-				SelfLog.WriteLine( "Deleting log entries older than {0}", epoch );
-				var ret = cmd.ExecuteNonQuery();
-				SelfLog.WriteLine( $"{ret} records deleted" );
-			}
-		}
-	}
-
 	private void TruncateLog( SqliteConnection sqlConnection ) {
 		var cmd = sqlConnection.CreateCommand();
 		cmd.CommandText = $"DELETE FROM {_tableName}";
@@ -194,29 +148,7 @@ internal class Sink: BatchProvider, ILogEventSink {
 				}
 				catch( SqliteException e ) {
 					SelfLog.WriteLine( e.Message );
-
-					if( e.SqliteErrorCode != SQLITE_FULL )
-						return false;
-
-					if( _rollOver == false ) {
-						SelfLog.WriteLine( "Discarding log excessive of max database" );
-
-						return true;
-					}
-
-					var dbExtension = Path.GetExtension( _databasePath );
-
-					var newFilePath = Path.Combine(
-						Path.GetDirectoryName( _databasePath ) ?? "Logs",
-						$"{Path.GetFileNameWithoutExtension( _databasePath )}-{DateTime.Now:yyyyMMdd_HHmmss.ff}{dbExtension}" );
-
-					File.Copy( _databasePath, newFilePath, true );
-
-					TruncateLog( sqlConnection );
-					await WriteToDatabaseAsync( logEventsBatch, sqlConnection ).ConfigureAwait( false );
-
-					SelfLog.WriteLine( $"Rolling database to {newFilePath}" );
-					return true;
+					return false;
 				}
 				catch( Exception e ) {
 					SelfLog.WriteLine( e.Message );
