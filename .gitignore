@@ -36,6 +36,7 @@ Website/Directory.Build.props
 Website/Directory.Build.targets
 Website/Generated Code/
 Website/Properties/launchSettings.json
+Website/Debug Log.db
 
 Tests/bin/
 Tests/obj/

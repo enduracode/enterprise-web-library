@@ -518,8 +518,8 @@ internal class ExportLogic: Operation {
 			IoMethods.DeleteFolder(
 				EwlStatics.CombinePaths( serverSideLogicFolderPath, app.Name, StaticFile.AppStaticFilesFolderName, AppStatics.StaticFileLogicFolderName ) );
 			File.WriteAllText(
-				EwlStatics.CombinePaths( serverSideLogicFolderPath, app.Name, "web.config" ),
-				File.ReadAllText( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "Web Project Configuration", "web.config" ) )
+				EwlStatics.CombinePaths( serverSideLogicFolderPath, app.Name, WebApplication.WebConfigFileName ),
+				File.ReadAllText( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "Web Project Configuration", WebApplication.WebConfigFileName ) )
 					.Replace( "@@AssemblyPath", @".\{0}.exe".FormatWith( project.NamespaceAndAssemblyName ) )
 					.Replace( "@@InitializationTimeoutSeconds", DurationPattern.CreateWithInvariantCulture( "%S" ).Format( EwfOps.InitializationTimeout ) ),
 				Encoding.UTF8 );

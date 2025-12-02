@@ -546,7 +546,7 @@ internal class UpdateDependentLogic: Operation {
 		try {
 			File.WriteAllText(
 				application.WebConfigFilePath,
-				File.ReadAllText( EwlStatics.CombinePaths( configurationFilesFolderPath, "web.config" ) )
+				File.ReadAllText( EwlStatics.CombinePaths( configurationFilesFolderPath, WebApplication.WebConfigFileName ) )
 					.Replace( "@@InitializationTimeoutSeconds", DurationPattern.CreateWithInvariantCulture( "%S" ).Format( EwfOps.InitializationTimeout ) ),
 				Encoding.UTF8 );
 		}
@@ -558,8 +558,8 @@ internal class UpdateDependentLogic: Operation {
 		}
 		using( var writer = new StreamWriter( EwlStatics.CombinePaths( application.Path, "Directory.Build.targets" ), false, Encoding.UTF8 ) ) {
 			writer.WriteLine( "<Project>" );
-			writer.WriteLine( """<ItemGroup><Content Remove="web.config" /></ItemGroup>""" );
-			writer.WriteLine( """<ItemGroup><None Include="web.config" /></ItemGroup>""" );
+			writer.WriteLine( $"""<ItemGroup><Content Remove="{WebApplication.WebConfigFileName}" /></ItemGroup>""" );
+			writer.WriteLine( $"""<ItemGroup><None Include="{WebApplication.WebConfigFileName}" /></ItemGroup>""" );
 			writer.WriteLine( "</Project>" );
 		}
 
@@ -1066,11 +1066,12 @@ internal class UpdateDependentLogic: Operation {
 			writer.WriteLine();
 			writer.WriteLine( app.Name + "/bin/" );
 			writer.WriteLine( app.Name + "/obj/" );
-			writer.WriteLine( app.Name + "/web.config" );
+			writer.WriteLine( app.Name + $"/{WebApplication.WebConfigFileName}" );
 			writer.WriteLine( app.Name + "/Directory.Build.props" );
 			writer.WriteLine( app.Name + "/Directory.Build.targets" );
 			writer.WriteLine( app.Name + "/Generated Code/" );
 			writer.WriteLine( app.Name + "/Properties/launchSettings.json" );
+			writer.WriteLine( app.Name + $"/{WebApplication.DebugLogFileName}" );
 		}
 
 		foreach( var service in installation.ExistingInstallationLogic.RuntimeConfiguration.WindowsServices ) {

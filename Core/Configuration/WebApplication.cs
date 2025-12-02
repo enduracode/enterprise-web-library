@@ -10,6 +10,16 @@ public class WebApplication {
 	/// <summary>
 	/// Development Utility and internal use only.
 	/// </summary>
+	public const string WebConfigFileName = "web.config";
+
+	/// <summary>
+	/// Development Utility and internal use only.
+	/// </summary>
+	public const string DebugLogFileName = "Debug Log.db";
+
+	/// <summary>
+	/// Development Utility and internal use only.
+	/// </summary>
 	public readonly string Name;
 
 	internal string PublicId { get; }
@@ -94,10 +104,10 @@ public class WebApplication {
 	}
 
 	/// <summary>
-	/// Internal and Development Utility use only.
+	/// Development Utility and internal use only.
 	/// </summary>
-	public string WebConfigFilePath => EwlStatics.CombinePaths( Path, "web.config" );
+	public string WebConfigFilePath => EwlStatics.CombinePaths( Path, WebConfigFileName );
 
 	internal string DiagnosticLogFilePath => EwlStatics.CombinePaths( Path, "Diagnostic Log" + FileExtensions.Txt );
-	internal string DebugLogFilePath => EwlStatics.CombinePaths( Path, "Debug Log.db" );
+	internal string DebugLogFilePath => EwlStatics.CombinePaths( Path, DebugLogFileName );
 }
