@@ -33,6 +33,8 @@ public abstract class PageBase: ResourceBase {
 			etherealContainer, FlowComponent jsInitElement, Action dataUpdateModificationMethod, bool isAutoDataUpdater, ActionPostBack pageLoadPostBack )>
 		contentGetter;
 
+	private static ILogger log;
+
 	[ JsonObject( ItemRequired = Required.Always, MemberSerialization = MemberSerialization.Fields ) ]
 	private class HiddenFieldData {
 		[ JsonProperty( PropertyName = "firstRequestTime" ) ]
@@ -131,6 +133,8 @@ public abstract class PageBase: ResourceBase {
 
 		PageBase.appProvider = appProvider;
 		PageBase.contentGetter = contentGetter;
+
+		log = Log.ForContext<PageBase>();
 	}
 
 	/// <summary>
@@ -319,23 +323,23 @@ public abstract class PageBase: ResourceBase {
 			return null;
 
 		if( extraComponentStateValues.Any() )
-			Log.Debug( "Form-submission validation failed due to extra component-state values: {Values}", extraComponentStateValues );
+			log.Debug( "Form-submission validation failed due to extra component-state values: {Values}", extraComponentStateValues );
 		else if( invalidComponentStateValues.Any() )
-			Log.Debug(
+			log.Debug(
 				"Form-submission validation failed due to invalid component-state values: {@Values}",
 				invalidComponentStateValues.Select( i =>
 					new { Id = i, Value = requestState.ComponentStateValuesById.TryGetValue( i, out var value ) ? value : "missing" } ) );
 		else if( extraPostBackValues.Any() )
-			Log.Debug( "Form-submission validation failed due to extra post-back values: {Values}", extraPostBackValues );
+			log.Debug( "Form-submission validation failed due to extra post-back values: {Values}", extraPostBackValues );
 		else if( invalidPostBackValues.Any() )
-			Log.Debug(
+			log.Debug(
 				"Form-submission validation failed due to invalid post-back values: {@Values}",
 				invalidPostBackValues.Select( i => {
 					var value = requestState.PostBackValues.GetValue( i );
 					return new { Key = i, Value = value is not null ? "{0}".FormatWith( value ) : "missing" };
 				} ) );
 		else if( formValueHashesDisagree )
-			Log.Debug( "Form-submission validation failed due to disagreeing form-value hashes" );
+			log.Debug( "Form-submission validation failed due to disagreeing form-value hashes" );
 
 		removeInvalidComponentStateAndPostBackValues();
 
@@ -348,12 +352,12 @@ public abstract class PageBase: ResourceBase {
 		var postBack = (ActionPostBack)GetPostBack( postBackId );
 		TrustedHtmlString validatePage() {
 			if( postBack is null ) {
-				Log.Debug( "Post-back execution failed after the data update because the post-back was missing" );
+				log.Debug( "Post-back execution failed after the data update because the post-back was missing" );
 				return Translation.YouHaveModifiedPageAndWeCouldNotInterpretAction;
 			}
 
 			if( !string.Equals( getPostBackStateItemsAndFormValues( postBack ), stateItemsAndFormValues, StringComparison.Ordinal ) ) {
-				Log.Debug( "Post-back execution failed after the data update because component-state items and/or form values changed" );
+				log.Debug( "Post-back execution failed after the data update because component-state items and/or form values changed" );
 				return Translation.YouHaveModifiedPageAndWeCouldNotInterpretAction;
 			}
 			var invalidComponentStateValues = componentStateItemsById.Where( i => i.Value.ValueIsInvalid() && i.Value.DataModificationActions.Contains( postBack ) )
@@ -361,7 +365,7 @@ public abstract class PageBase: ResourceBase {
 				.OrderBy( i => i )
 				.Materialize();
 			if( invalidComponentStateValues.Any() ) {
-				Log.Debug(
+				log.Debug(
 					"Post-back execution failed after the data update due to component-state values that became invalid: {@Values}",
 					invalidComponentStateValues.Select( i => new { Id = i, Value = requestState.ComponentStateValuesById[ i ] } ) );
 				return Translation.YouHaveModifiedPageAndWeCouldNotInterpretAction;
@@ -372,7 +376,7 @@ public abstract class PageBase: ResourceBase {
 				.OrderBy( i => i )
 				.Materialize();
 			if( invalidPostBackValues.Any() ) {
-				Log.Debug(
+				log.Debug(
 					"Post-back execution failed after the data update due to post-back values that became invalid: {@Values}",
 					invalidPostBackValues.Select( i => {
 						var value = requestState.PostBackValues.GetValue( i );
@@ -405,7 +409,7 @@ public abstract class PageBase: ResourceBase {
 			builder.AppendLine( "\t" + key );
 
 		var s = builder.ToString();
-		Log.Debug( "Post-back component-state items and form values represented as {Values}", Environment.NewLine + s );
+		log.ForContext( "Values", s ).Debug( "Created representation of post-back component-state items and form values" );
 		return s;
 	}
 
@@ -751,7 +755,7 @@ public abstract class PageBase: ResourceBase {
 		foreach( var b in hash )
 			hashString += b.ToString( "x2" );
 
-		Log.Debug( "Form-value hash generated from {Values}", Environment.NewLine + formValueString );
+		log.ForContext( "Values", formValueString ).Debug( "Generated form-value hash" );
 
 		return hashString;
 	}
