@@ -772,6 +772,9 @@ body.ewfDiagnosticLog .propertyFilter {
 body.ewfDiagnosticLog .propertyFilter ewfFormItem {
 	margin-top: 0;
 }
+body.ewfDiagnosticLog .propertyFilter ewfFormItem:nth-child(3) {
+	min-width: 0;
+}
 body.ewfDiagnosticLog ewfTableStandardAndStandardExceptLayoutStyles > tbody:first-of-type > ewfTrAllStates > ewfTd:nth-child(3) {
 	display: flex;
 	align-items: baseline;

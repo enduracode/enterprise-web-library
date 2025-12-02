@@ -15,6 +15,7 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic.AlternativeResourceModes;
 using EnterpriseWebLibrary.ExternalFunctionality;
 using EnterpriseWebLibrary.TewlContrib;
+using Humanizer;
 using NodaTime;
 using NodaTime.Text;
 using Tewl.InputValidation;
@@ -124,30 +125,65 @@ partial class DebugLog {
 				} );
 
 				var latestEventId = ComponentStateItem.Create( "latestEventId", events.Select( i => (long?)i.id ).FirstOrDefault(), _ => true, false );
-				var latestEventIndex = latestEventId.Value.HasValue ? events.FindIndex( i => i.id == latestEventId.Value.Value ) : -1;
-				if( latestEventIndex == -1 )
-					latestEventIndex = 0;
+				var latestEventIndex = latestEventId.Value.HasValue ? events.FindIndex( i => i.id == latestEventId.Value.Value ) : events.Count;
+				var visibleEvents = latestEventIndex == -1 ? events : events[ latestEventIndex.. ];
 
 				var components = new List<FlowComponent>();
 				var newEventRegion = new UpdateRegionSet();
+				var refilterRegion = new UpdateRegionSet();
 				components.Add(
 					new FlowIdContainer(
-						latestEventIndex == 0
+						latestEventIndex < 1
 							? [ ]
 							: new EwfButton(
-								new StandardButtonStyle( $"Show {latestEventIndex} new events", icon: new ActionComponentIcon( new FontAwesomeIcon( "fa-refresh" ) ) ),
-								behavior: new PostBackBehavior( postBack: PostBack.CreateIntermediate( newEventRegion, id: "showNewEvents" ) ) ).ToCollection(),
+									new StandardButtonStyle(
+										"Show " + "new event".ToQuantity( latestEventIndex ),
+										icon: new ActionComponentIcon( new FontAwesomeIcon( "fa-refresh" ) ) ),
+									behavior: new PostBackBehavior(
+										postBack: PostBack.CreateIntermediate( newEventRegion.Add( visibleEvents.Any() ? null : refilterRegion ), id: "showNewEvents" ) ) )
+								.ToCollection(),
 						updateRegionSets: newEventRegion ) );
+
+				components.Add(
+					new FlowIdContainer(
+						!visibleEvents.Any()
+							? [ ]
+							: FormState.ExecuteWithActions(
+								PostBack.CreateFull( id: "refilter" ),
+								() => FormItemList.CreateWrapping( setup: new FormItemListSetup( buttonSetup: new ButtonSetup( "Refilter" ) ) )
+									.AddItem(
+										parametersModification.GetPropertyNameFormItem(
+											false,
+											label: [ ],
+											controlSetup: TextControlSetup.Create( widthOverride: 15.ToEm(), placeholder: "property name" ),
+											value: "",
+											additionalValidationMethod: validator => {
+												parametersModification.EventContains = new PatternString( "" );
+
+												var values = visibleEvents
+													.SelectMany( i =>
+														( (JsonObject)JsonNode.Parse( i.properties )! ).TryGetPropertyValue( parametersModification.PropertyName, out var node )
+															? ( node?.ToJsonStringWithSimpleEscaping() ?? "null" ).ToCollection()
+															: [ ] )
+													.Distinct( StringComparer.Ordinal )
+													.Materialize();
+												if( values.Any() )
+													parametersModification.PropertyValue = StringTools.ConcatenateWithDelimiter( ",", values );
+												else
+													validator.NoteErrorAndAddMessage( "The property does not appear in these results." );
+											} ) )
+									.ToCollection() ),
+						updateRegionSets: refilterRegion ) );
 
 				components.Add(
 					EwfTable.Create(
 							fields: new EwfTableField( size: 18.ToEm() ).Append( new EwfTableField( size: 12.ToEm() ) ).Append( new EwfTableField() ).Materialize(),
 							headItems: EwfTableItem.Create( "Date/time".ToCell().Append( "Level".ToCell() ).Append( "Details".ToCell() ).Materialize() ).ToCollection(),
 							defaultItemLimit: DataRowLimit.Fifty,
-							tailUpdateRegions: new TailUpdateRegion( newEventRegion, events.Count - latestEventIndex ),
+							tailUpdateRegions: new TailUpdateRegion( newEventRegion, visibleEvents.Count ),
 							etherealContent: new EtherealIdContainer( latestEventId.ToCollection(), updateRegionSets: newEventRegion ).ToCollection() )
 						.AddData(
-							events[ latestEventIndex.. ],
+							visibleEvents,
 							logEvent => {
 								var detailsExpandedPmv = new PageModificationValue<string>();
 								var detailsExpanded = detailsExpandedPmv.ToCondition( bool.TrueString.ToCollection() );
@@ -197,7 +233,7 @@ partial class DebugLog {
 			.ToComponentCollection( omitLabel: true );
 		var value = parametersModification.GetPropertyValueFormItem(
 				true,
-				controlSetup: TextControlSetup.Create( widthOverride: 25.ToEm(), placeholder: """value1, "stringValue2", {"json":"value3"}""" ),
+				controlSetup: TextControlSetup.Create( placeholder: """value1, "stringValue2", {"json":"value3"}""" ),
 				additionalValidationMethod: validator => validatePropertyValue( parametersModification.PropertyValue, validator ) )
 			.ToComponentCollection( omitLabel: true );
 		return new GenericFlowContainer(
