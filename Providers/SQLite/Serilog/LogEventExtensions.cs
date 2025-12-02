@@ -23,28 +23,9 @@ namespace EnterpriseWebLibrary.Sqlite.Serilog
 {
     internal static class LogEventExtensions
     {
-        internal static string Json(this LogEvent logEvent, bool storeTimestampInUtc = false)
-        {
-            return JsonConvert.SerializeObject(ConvertToDictionary(logEvent, storeTimestampInUtc));
-        }
-
-        internal static IDictionary<string, object> Dictionary(
-            this LogEvent logEvent,
-            bool storeTimestampInUtc = false,
-            IFormatProvider formatProvider = null)
-        {
-            return ConvertToDictionary(logEvent, storeTimestampInUtc, formatProvider);
-        }
-
         internal static string Json(this IReadOnlyDictionary<string, LogEventPropertyValue> properties)
         {
             return JsonConvert.SerializeObject(ConvertToDictionary(properties));
-        }
-
-        internal static IDictionary<string, object> Dictionary(
-            this IReadOnlyDictionary<string, LogEventPropertyValue> properties)
-        {
-            return ConvertToDictionary(properties);
         }
 
         #region Private implementation
@@ -56,27 +37,6 @@ namespace EnterpriseWebLibrary.Sqlite.Serilog
                 expObject.Add(property.Key, Simplify(property.Value));
 
             return expObject;
-        }
-
-        private static dynamic ConvertToDictionary(
-            LogEvent logEvent,
-            bool storeTimestampInUtc,
-            IFormatProvider formatProvider = null)
-        {
-            var eventObject = new ExpandoObject() as IDictionary<string, object>;
-            eventObject.Add(
-                "Timestamp",
-                storeTimestampInUtc
-                    ? logEvent.Timestamp.ToUniversalTime().ToString("o")
-                    : logEvent.Timestamp.ToString("o"));
-
-            eventObject.Add("LogLevel", logEvent.Level.ToString());
-            eventObject.Add("LogMessageTemplate", logEvent.MessageTemplate.Text);
-            eventObject.Add("LogMessage", logEvent.RenderMessage(formatProvider));
-            eventObject.Add("LogException", logEvent.Exception);
-            eventObject.Add("LogProperties", logEvent.Properties.Dictionary());
-
-            return eventObject;
         }
 
         private static object Simplify(LogEventPropertyValue data)
