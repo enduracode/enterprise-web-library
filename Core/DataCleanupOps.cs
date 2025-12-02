@@ -72,7 +72,7 @@ public static class DataCleanupOps {
 				deleteCommand.Parameters.Add( parameter.GetAdoDotNetParameter( dbInfo ) );
 
 				var vacuumCommand = dbInfo.CreateCommand();
-				deleteCommand.CommandText = "VACUUM";
+				vacuumCommand.CommandText = "VACUUM";
 
 				var connection = new DatabaseConnection( dbInfo );
 				connection.ExecuteWithConnectionOpen( () => {
