@@ -20,6 +20,7 @@ using Microsoft.Data.Sqlite;
 using Serilog.Core;
 using Serilog.Debugging;
 using Serilog.Events;
+using Serilog.Formatting.Json;
 using Serilog.Templates;
 
 namespace EnterpriseWebLibrary.Sqlite.Serilog;
@@ -142,7 +143,7 @@ internal class Sink: BatchProvider, ILogEventSink {
 		await using var sqlCommand = CreateSqlInsertCommand( sqlConnection );
 		sqlCommand.Transaction = tr;
 
-		var messageBuilder = new StringBuilder( 1000 );
+		var stringBuilder = new StringBuilder( 1000 );
 		foreach( var logEvent in logEventsBatch ) {
 			sqlCommand.Parameters[ "@timeStamp" ].Value = _storeTimestampInUtc
 				                                              ? logEvent.Timestamp.ToUniversalTime().ToString( timeFormat )
@@ -150,13 +151,25 @@ internal class Sink: BatchProvider, ILogEventSink {
 			sqlCommand.Parameters[ "@level" ].Value = logEvent.Level.ToString();
 			sqlCommand.Parameters[ "@exception" ].Value = logEvent.Exception?.ToString() ?? string.Empty;
 
-			await using( var messageWriter = new StringWriter( messageBuilder ) ) {
+			await using( var messageWriter = new StringWriter( stringBuilder ) ) {
 				new ExpressionTemplate( "{@m}", formatProvider: _formatProvider ).Format( logEvent, messageWriter );
 				sqlCommand.Parameters[ "@renderedMessage" ].Value = messageWriter.ToString();
 			}
-			messageBuilder.Clear();
+			stringBuilder.Clear();
 
-			sqlCommand.Parameters[ "@properties" ].Value = logEvent.Properties.Count > 0 ? logEvent.Properties.Json() : string.Empty;
+			await using( var propertyWriter = new StringWriter( stringBuilder ) ) {
+				var formatter = new JsonValueFormatter();
+				foreach( var property in logEvent.Properties ) {
+					JsonValueFormatter.WriteQuotedJsonString( property.Key, propertyWriter );
+					await propertyWriter.WriteAsync( ':' );
+					formatter.Format( property.Value, propertyWriter );
+					await propertyWriter.WriteAsync( ',' );
+				}
+			}
+			if( stringBuilder.Length > 0 )
+				stringBuilder.Length -= 1;
+			sqlCommand.Parameters[ "@properties" ].Value = stringBuilder.ToString().Surround( "{", "}" );
+			stringBuilder.Clear();
 
 			await sqlCommand.ExecuteNonQueryAsync().ConfigureAwait( false );
 		}
