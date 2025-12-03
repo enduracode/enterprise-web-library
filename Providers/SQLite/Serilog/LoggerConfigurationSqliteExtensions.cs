@@ -35,15 +35,10 @@ namespace EnterpriseWebLibrary.Sqlite.Serilog
         /// <param name="tableName">The name of the SQLite table to store log.</param>
         /// <param name="restrictedToMinimumLevel">The minimum log event level required in order to write an event to the sink.</param>
         /// <param name="formatProvider">Supplies culture-specific formatting information, or null.</param>
-        /// <param name="storeTimestampInUtc">Store timestamp in UTC format</param>
-        /// <param name="retentionPeriod">The maximum time that a log entry will be kept in the database, or null to disable automatic deletion of old log entries. Non-null values smaller than 30 minute will be replaced with 30 minute.</param>
-        /// <param name="retentionCheckInterval">Time period to execute TTL process. Time span should be in 15 minutes increment</param>
         /// <param name="batchSize">Number of messages to save as batch to database. Default is 10, max 1000</param>
         /// <param name="levelSwitch">
         /// A switch allowing the pass-through minimum level to be changed at runtime.
         /// </param>
-        /// <param name="maxDatabaseSize">Maximum database file size can grow in MB. Default 10 MB, maximum 20 GB</param>
-        /// <param name="rollOver">If file size grows past max database size, creating rolling backup</param>
         /// <exception cref="ArgumentException"></exception>
         /// <exception cref="ArgumentNullException">A required parameter is null.</exception>
         public static LoggerConfiguration SQLite(
@@ -52,13 +47,8 @@ namespace EnterpriseWebLibrary.Sqlite.Serilog
             string tableName = "Logs",
             LogEventLevel restrictedToMinimumLevel = LevelAlias.Minimum,
             IFormatProvider? formatProvider = null,
-            bool storeTimestampInUtc = false,
-            TimeSpan? retentionPeriod = null,
-            TimeSpan? retentionCheckInterval = null,
             LoggingLevelSwitch? levelSwitch = null,
-            uint batchSize = 100,
-            uint maxDatabaseSize = 10,
-            bool rollOver = true)
+            uint batchSize = 100)
         {
 
             if (string.IsNullOrEmpty(sqliteDbPath)) {
@@ -82,7 +72,7 @@ namespace EnterpriseWebLibrary.Sqlite.Serilog
                 sqliteDbFile.Directory?.Create();
 
                 return loggerConfiguration.Sink(
-	                new Sink( sqliteDbFile.FullName, tableName, formatProvider, storeTimestampInUtc, batchSize ),
+	                new Sink( sqliteDbFile.FullName, tableName, formatProvider, batchSize ),
 	                restrictedToMinimumLevel,
 	                levelSwitch );
             }

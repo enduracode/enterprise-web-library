@@ -75,7 +75,7 @@ partial class DebugLog {
 				// simple contains filter
 				if( EventContains.Pattern.Length > 0 ) {
 					command.CommandText += " WHERE ( ( ";
-					( (InlineDbCommandCondition)new LikeCondition( LikeCondition.Behavior.AndedTokens, "RenderedMessage", EventContains.Pattern ) ).AddToCommand(
+					( (InlineDbCommandCondition)new LikeCondition( LikeCondition.Behavior.AndedTokens, "Message", EventContains.Pattern ) ).AddToCommand(
 						command,
 						dbInfo,
 						"messageContains" );
@@ -117,7 +117,7 @@ partial class DebugLog {
 						command,
 						reader => {
 							while( reader.Read() )
-								events.Add( ( get<long>( 0 ), get<string>( 1 ), get<string>( 2 ), get<string>( 4 ), get<string>( 5 ) ) );
+								events.Add( ( get<long>( 0 ), get<string>( 1 ), get<string>( 2 ), get<string>( 3 ), get<string>( 5 ) ) );
 
 							return;
 							T get<T>( int ordinal ) => (T)reader.GetValue( ordinal );

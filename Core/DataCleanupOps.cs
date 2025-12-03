@@ -68,7 +68,7 @@ public static class DataCleanupOps {
 
 				var deleteCommand = dbInfo.CreateCommand();
 				var parameter = new DbCommandParameter( "cutoff", new DbParameterValue( debugCutoffTime ) );
-				deleteCommand.CommandText = $"DELETE FROM Events WHERE Timestamp < {parameter.GetNameForCommandText( dbInfo )}";
+				deleteCommand.CommandText = $"DELETE FROM Events WHERE Time < {parameter.GetNameForCommandText( dbInfo )}";
 				deleteCommand.Parameters.Add( parameter.GetAdoDotNetParameter( dbInfo ) );
 
 				var vacuumCommand = dbInfo.CreateCommand();

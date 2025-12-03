@@ -34,18 +34,15 @@ internal class Sink: BatchProvider, ILogEventSink {
 
 	private readonly string _databasePath;
 	private readonly IFormatProvider? _formatProvider;
-	private readonly bool _storeTimestampInUtc;
 	private readonly string _tableName;
-	private const int SQLITE_FULL = SQLitePCL.raw.SQLITE_FULL;
 	private static readonly SemaphoreSlim semaphoreSlim = new SemaphoreSlim( 1, 1 );
 
-	public Sink( string sqlLiteDbPath, string tableName, IFormatProvider? formatProvider, bool storeTimestampInUtc, uint batchSize = 100 ): base(
+	public Sink( string sqlLiteDbPath, string tableName, IFormatProvider? formatProvider, uint batchSize = 100 ): base(
 		batchSize: (int)batchSize,
 		maxBufferSize: 100_000 ) {
 		_databasePath = sqlLiteDbPath;
 		_tableName = tableName;
 		_formatProvider = formatProvider;
-		_storeTimestampInUtc = storeTimestampInUtc;
 
 		InitializeDatabase();
 	}
@@ -84,10 +81,10 @@ internal class Sink: BatchProvider, ILogEventSink {
 
 	private void CreateSqlTable( SqliteConnection sqlConnection ) {
 		var colDefs = "Id INTEGER PRIMARY KEY AUTOINCREMENT,";
-		colDefs += "Timestamp TEXT,";
-		colDefs += "Level VARCHAR(10),";
+		colDefs += "Time TEXT,";
+		colDefs += "Level TEXT,";
+		colDefs += "Message TEXT,";
 		colDefs += "Exception TEXT,";
-		colDefs += "RenderedMessage TEXT,";
 		colDefs += "Properties TEXT";
 
 		var sqlCreateText = $"CREATE TABLE IF NOT EXISTS {_tableName} ({colDefs})";
@@ -97,18 +94,17 @@ internal class Sink: BatchProvider, ILogEventSink {
 	}
 
 	private SqliteCommand CreateSqlInsertCommand( SqliteConnection connection ) {
-		var sqlInsertText = "INSERT INTO {0} (Timestamp, Level, Exception, RenderedMessage, Properties)";
-		sqlInsertText += " VALUES (@timeStamp, @level, @exception, @renderedMessage, @properties)";
-		sqlInsertText = string.Format( sqlInsertText, _tableName );
+		var sqlInsertText = $"INSERT INTO {_tableName} ( Time, Level, Message, Exception, Properties )";
+		sqlInsertText += " VALUES ( @time, @level, @message, @exception, @properties )";
 
 		var sqlCommand = connection.CreateCommand();
 		sqlCommand.CommandText = sqlInsertText;
 		sqlCommand.CommandType = CommandType.Text;
 
-		sqlCommand.Parameters.Add( new SqliteParameter( "@timeStamp", DbType.DateTime2 ) );
+		sqlCommand.Parameters.Add( new SqliteParameter( "@time", DbType.DateTime2 ) );
 		sqlCommand.Parameters.Add( new SqliteParameter( "@level", DbType.String ) );
+		sqlCommand.Parameters.Add( new SqliteParameter( "@message", DbType.String ) );
 		sqlCommand.Parameters.Add( new SqliteParameter( "@exception", DbType.String ) );
-		sqlCommand.Parameters.Add( new SqliteParameter( "@renderedMessage", DbType.String ) );
 		sqlCommand.Parameters.Add( new SqliteParameter( "@properties", DbType.String ) );
 
 		return sqlCommand;
@@ -145,17 +141,16 @@ internal class Sink: BatchProvider, ILogEventSink {
 
 		var stringBuilder = new StringBuilder( 1000 );
 		foreach( var logEvent in logEventsBatch ) {
-			sqlCommand.Parameters[ "@timeStamp" ].Value = _storeTimestampInUtc
-				                                              ? logEvent.Timestamp.ToUniversalTime().ToString( timeFormat )
-				                                              : logEvent.Timestamp.ToString( timeFormat );
+			sqlCommand.Parameters[ "@time" ].Value = logEvent.Timestamp.ToUniversalTime().ToString( timeFormat );
 			sqlCommand.Parameters[ "@level" ].Value = logEvent.Level.ToString();
-			sqlCommand.Parameters[ "@exception" ].Value = logEvent.Exception?.ToString() ?? string.Empty;
 
 			await using( var messageWriter = new StringWriter( stringBuilder ) ) {
 				new ExpressionTemplate( "{@m}", formatProvider: _formatProvider ).Format( logEvent, messageWriter );
-				sqlCommand.Parameters[ "@renderedMessage" ].Value = messageWriter.ToString();
+				sqlCommand.Parameters[ "@message" ].Value = messageWriter.ToString();
 			}
 			stringBuilder.Clear();
+
+			sqlCommand.Parameters[ "@exception" ].Value = logEvent.Exception?.ToString() ?? string.Empty;
 
 			await using( var propertyWriter = new StringWriter( stringBuilder ) ) {
 				var formatter = new JsonValueFormatter();
