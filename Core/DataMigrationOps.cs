@@ -46,6 +46,8 @@ public static class DataMigrationOps {
 		OracleInfo.Init( () => ExternalFunctionalityStatics.ExternalOracleDatabaseProvider );
 		SqliteInfo.Init( () => ExternalFunctionalityStatics.ExternalSqliteProvider );
 
+		Console.WriteLine( $"{EwlStatics.EwlInitialism} {ConfigurationStatics.AppName} for {ConfigurationStatics.InstallationConfiguration.SystemName}" );
+
 		var appAssembly = Assembly.GetCallingAssembly();
 		using var serviceProvider = new ServiceCollection().AddFluentMigratorCore()
 			.ConfigureRunner( builder => builder.addDatabaseServices( ConfigurationStatics.InstallationConfiguration.PrimaryDatabaseInfo! )
