@@ -169,7 +169,7 @@ internal class RequestState {
 			time[ 2 ] = (byte)unixTime;
 		}
 
-		var differentiator = new byte [ 3 ];
+		var differentiator = new byte[ 3 ];
 
 		// 1 byte for app initialization second; prevents overlapping processes or an app restart after a clock sync from generating duplicate IDs
 		var secondsSinceInit = (ulong)Duration.FromMilliseconds( Clock.GetTickCount64() ).TotalSeconds - initSecondsFromStartup;
@@ -177,8 +177,10 @@ internal class RequestState {
 
 		// 2 bytes for request number; handles up to 65,536 requests per second without duplicating IDs
 		var requestNumber = Interlocked.Increment( ref requestCount );
-		differentiator[ 1 ] = (byte)( requestNumber >> 8 );
-		differentiator[ 2 ] = (byte)requestNumber;
+		unchecked {
+			differentiator[ 1 ] = (byte)( requestNumber >> 8 );
+			differentiator[ 2 ] = (byte)requestNumber;
+		}
 
 		// Add a character between these strings to handle multiple servers. See EnduraCode goal 2582. The load balancer can likely provide this in a header.
 		return Convert.ToBase64String( time ) + Convert.ToBase64String( differentiator );
