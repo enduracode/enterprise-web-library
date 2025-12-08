@@ -25,11 +25,11 @@ partial class EntitySetup: UiEntitySetup {
 		}
 	}
 
-	public override ResourceBase DefaultResource => new BasicTests( this );
+	public override ResourceBase DefaultResource => new General( this );
 
 	protected override IEnumerable<ResourceGroup> createListedResources() =>
 		new ResourceGroup(
-			new BasicTests( this ),
+			new General( this ),
 			new RequestProfiling( this ),
 			new DiagnosticLog( this ),
 			new UserManagement( this ),
@@ -38,7 +38,8 @@ partial class EntitySetup: UiEntitySetup {
 
 	protected override UrlHandler getUrlParent() => frameworkUrlParentGetter!();
 
-	protected override UrlHandler getRequestHandler() => new BasicTests( this );
+	protected override UrlHandler getRequestHandler() => new General( this );
+	protected override bool canRepresentRequestHandler() => true;
 
 	protected override IEnumerable<UrlPattern> getChildUrlPatterns() =>
 		StaticFiles.FolderSetup.UrlPatterns.Literal( "static" )
@@ -56,7 +57,6 @@ partial class EntitySetup: UiEntitySetup {
 			.Append( ErrorPages.ResourceDisabled.UrlPatterns.Literal( "resource-disabled" ) )
 			.Append( ErrorPages.LogInSessionExpired.UrlPatterns.Literal( "log-in-session-expired" ) )
 			.Append( ErrorPages.UnhandledException.UrlPatterns.Literal( "unhandled-exception" ) )
-			.Append( BasicTests.UrlPatterns.Literal( this, "tests" ) )
 			.Append( RequestProfiling.UrlPatterns.Literal( this, "profiling" ) )
 			.Append( DiagnosticLog.UrlPatterns.Literal( this, "log" ) )
 			.Append( UserManagement.UrlPatterns.Literal( this, "users" ) )

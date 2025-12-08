@@ -752,7 +752,12 @@ ewfUiPoweredByEwlFooterContainer {
 	margin-right: .5em;
 }
 
-/* diagnostic log pages */
+/* admin general page */
+ewfGridFormItemList.ewfValueFocused ewfFormItemListItemLabel {
+	font-size: .8em;
+}
+
+/* admin diagnostic log pages */
 body.ewfDiagnosticLog {
 	--ewf-column-width: 100vw;
 }

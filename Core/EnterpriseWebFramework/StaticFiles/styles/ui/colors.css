@@ -363,3 +363,8 @@ ewfNotificationSectionContainer > ewfSectionBoxStyleBothStates > ewfSectionHeadi
 		background-color: var(--ewf-ui-activation-color);
 	}
 }
+
+/* admin general page */
+ewfGridFormItemList.ewfValueFocused ewfFormItemListItemLabel {
+	color: hsla(215, 11%, 50%, 1);
+}
