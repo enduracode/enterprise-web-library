@@ -3,6 +3,7 @@ using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Databases;
 using JetBrains.Annotations;
+using Serilog;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 
@@ -42,8 +43,7 @@ public static class DatabaseOps {
 				"Failed to re-create the {0} because the data package did not exist, or did not contain a file.".FormatWith( GetDatabaseNounPhrase( database ) ) );
 		database.DeleteAndReCreateFromFile( filePath );
 		if( !filePath.Any() )
-			StatusStatics.SetStatus(
-				"Created a new {0} because the data package did not exist, or did not contain a file.".FormatWith( GetDatabaseNounPhrase( database ) ) );
+			Log.Information( "Created a new {0} because the data package did not exist, or did not contain a file.".FormatWith( GetDatabaseNounPhrase( database ) ) );
 	}
 
 	private static string getDatabaseFilePath( string dataPackageFolderPath, Database database ) =>
@@ -55,9 +55,9 @@ public static class DatabaseOps {
 	internal static void WaitForDatabaseRecovery( Database database ) {
 		if( database is NoDatabase )
 			return;
-		StatusStatics.SetStatus( "Waiting for database to be ready..." );
+		Log.Information( "Waiting for database to be ready..." );
 		ExceptionHandlingTools.Retry( () => database.GetLineMarker(), "Database failed to be ready." );
-		StatusStatics.SetStatus( "Database is ready." );
+		Log.Information( "Database is ready." );
 	}
 
 	/// <summary>
@@ -83,11 +83,10 @@ public static class DatabaseOps {
 
 	public static void ClearModificationTables( Database database ) {
 		foreach( var table in GetDatabaseTables( database ).Where( i => i.hasModTable ).Select( i => i.name ) )
-			database.ExecuteDbMethod(
-				connection => {
-					var command = connection.DatabaseInfo.CreateCommand();
-					command.CommandText = "DELETE FROM {0}".FormatWith( table + GetModificationTableSuffix( database ) );
-					connection.ExecuteNonQueryCommand( command );
-				} );
+			database.ExecuteDbMethod( connection => {
+				var command = connection.DatabaseInfo.CreateCommand();
+				command.CommandText = "DELETE FROM {0}".FormatWith( table + GetModificationTableSuffix( database ) );
+				connection.ExecuteNonQueryCommand( command );
+			} );
 	}
 }

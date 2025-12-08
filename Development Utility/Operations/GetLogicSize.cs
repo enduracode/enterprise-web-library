@@ -6,6 +6,7 @@ using NDepend.Analysis;
 using NDepend.CodeModel;
 using NDepend.Path;
 using NDepend.Project;
+using Serilog;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations;
 
@@ -19,9 +20,9 @@ internal class GetLogicSize: Operation {
 			getAssemblyPaths( installation, debug ).Select( i => Path.GetFullPath( i ).ToAbsoluteFilePath() ).ToArray(),
 			TemporaryProjectMode.Temporary );
 
-		StatusStatics.SetStatus( "Performing NDepend analysis." );
+		Log.Information( "Performing NDepend analysis." );
 		var analysisResult = project.RunAnalysis();
-		StatusStatics.SetStatus( "Performed NDepend analysis." );
+		Log.Information( "Performed NDepend analysis." );
 
 		var codeBase = analysisResult.CodeBase;
 		var generatedCodeAttribute = codeBase.Types.WithFullName( "System.CodeDom.Compiler.GeneratedCodeAttribute" ).SingleOrDefault();

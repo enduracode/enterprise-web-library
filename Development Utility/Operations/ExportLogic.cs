@@ -8,6 +8,7 @@ using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
 using EnterpriseWebLibrary.IO;
 using NodaTime.Text;
+using Serilog;
 using Tewl.IO;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations;
@@ -116,7 +117,7 @@ internal class ExportLogic: Operation {
 							prerelease,
 							localExportDateAndTime );
 
-					StatusStatics.SetStatus(
+					Log.Information(
 						TewlContrib.ProcessTools.RunProgram(
 							EwlStatics.CombinePaths( installation.GeneralLogic.Path, @"Solution Files\nuget" ),
 							"pack \"" + manifestPath + "\" -OutputDirectory \"" + outputFolderPath + "\"",
@@ -283,7 +284,7 @@ internal class ExportLogic: Operation {
 							prerelease,
 							localExportDateAndTime );
 
-					StatusStatics.SetStatus(
+					Log.Information(
 						TewlContrib.ProcessTools.RunProgram(
 							EwlStatics.CombinePaths( installation.GeneralLogic.Path, @"Solution Files\nuget" ),
 							"pack \"" + manifestPath + "\" -OutputDirectory \"" + outputFolderPath + "\"",
@@ -410,7 +411,7 @@ internal class ExportLogic: Operation {
 
 		const string testProject = UnitTestingInitializationOps.UnitTestProjectName;
 		if( File.Exists( EwlStatics.CombinePaths( installation.GeneralLogic.Path, testProject, $"{testProject}.csproj" ) ) ) {
-			StatusStatics.SetStatus( "Running unit tests." );
+			Log.Information( "Running unit tests." );
 			string output;
 			try {
 				output = TewlContrib.ProcessTools.RunProgram( "dotnet", $"""test "{installation.GeneralLogic.Path}" --no-restore""", "", true );
@@ -424,7 +425,7 @@ internal class ExportLogic: Operation {
 			}
 
 			Console.WriteLine( Environment.NewLine + Environment.NewLine + output.TrimEnd() + Environment.NewLine + Environment.NewLine );
-			StatusStatics.SetStatus( "Ran unit tests." );
+			Log.Information( "Ran unit tests." );
 		}
 
 		var serverSideLogicFolderPath = EwlStatics.CombinePaths( logicPackagesFolderPath, "Server Side Logic" );

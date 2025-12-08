@@ -2,6 +2,7 @@
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
 using EnterpriseWebLibrary.InstallationSupportUtility.SystemManagerInterface.Messages.SystemListMessage;
+using Serilog;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations;
 
@@ -44,17 +45,16 @@ internal class UpdateData: Operation {
 		var databases = installation.ExistingInstallationLogic.Database.ToCollection()
 			.Concat( recognizedInstallation?.RecognizedInstallationLogic.SecondaryDatabasesIncludedInDataPackages ?? Enumerable.Empty<Database>() )
 			.Materialize();
-		if( databases.SelectMany(
-			   i => {
-				   try {
-					   return DatabaseOps.GetDatabaseTables( i );
-				   }
-				   catch {
-					   return Enumerable.Empty<( string name, bool hasModTable )>();
-				   }
-			   } )
+		if( databases.SelectMany( i => {
+			   try {
+				   return DatabaseOps.GetDatabaseTables( i );
+			   }
+			   catch {
+				   return Enumerable.Empty<( string name, bool hasModTable )>();
+			   }
+		   } )
 		   .Any( i => i.hasModTable ) )
-			StatusStatics.SetStatus( "Cached tables exist. Please restart any running applications to prevent them from using stale data." );
+			Log.Information( "Cached tables exist. Please restart any running applications to prevent them from using stale data." );
 
 		DataUpdateStatics.DownloadDataPackageAndGetDataUpdateMethod( installation, false, sourceInstallation, forceNewPackageDownload, operationResult )();
 

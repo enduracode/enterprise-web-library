@@ -4,6 +4,7 @@ using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.InstallationSupportUtility.SystemManagerInterface.Messages.SystemListMessage;
 using JetBrains.Annotations;
+using Serilog;
 using Tewl.IO;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility;
@@ -38,24 +39,22 @@ public static class SystemManagerConnectionStatics {
 		var systemListFilePath = EwlStatics.CombinePaths( ConfigurationStatics.EwlFolderPath, "System List" + FileExtensions.Xml );
 		var cacheUsed = false;
 		try {
-			ExecuteWithSystemManagerClient(
-				client => {
-					Task.Run(
-							async () => {
-								if( !forProgramRunner ) {
-									using var response = await client.GetAsync( "email-interface", HttpCompletionOption.ResponseHeadersRead );
-									response.EnsureSuccessStatusCode();
-									emailInterface = await response.Content.ReadAsByteArrayAsync();
-								}
+			ExecuteWithSystemManagerClient( client => {
+				Task.Run( async () => {
+						if( !forProgramRunner ) {
+							using var response = await client.GetAsync( "email-interface", HttpCompletionOption.ResponseHeadersRead );
+							response.EnsureSuccessStatusCode();
+							emailInterface = await response.Content.ReadAsByteArrayAsync();
+						}
 
-								using( var response = await client.GetAsync( "system-list", HttpCompletionOption.ResponseHeadersRead ) ) {
-									response.EnsureSuccessStatusCode();
-									await using( var stream = await response.Content.ReadAsStreamAsync() )
-										systemList = XmlOps.DeserializeFromStream<SystemList>( stream, false );
-								}
-							} )
-						.Wait();
-				} );
+						using( var response = await client.GetAsync( "system-list", HttpCompletionOption.ResponseHeadersRead ) ) {
+							response.EnsureSuccessStatusCode();
+							await using( var stream = await response.Content.ReadAsStreamAsync() )
+								systemList = XmlOps.DeserializeFromStream<SystemList>( stream, false );
+						}
+					} )
+					.Wait();
+			} );
 		}
 		catch( Exception e ) {
 			// Use the cached version of the data if available.
@@ -69,7 +68,7 @@ public static class SystemManagerConnectionStatics {
 				throw new UserCorrectableException( "Failed to download System Manager data and a cached version is not available.", e );
 		}
 
-		StatusStatics.SetStatus(
+		Log.Information(
 			cacheUsed
 				? "Failed to download System Manager data; loaded a cached version from \"{0}\".".FormatWith( ConfigurationStatics.EwlFolderPath )
 				: "Downloaded System Manager data." );
@@ -111,14 +110,14 @@ public static class SystemManagerConnectionStatics {
 		client.BaseAddress = new Uri( Configuration.HttpBaseUrl + "/" );
 		client.DefaultRequestHeaders.TryAddWithoutValidation( "Authorization", Configuration.AccessToken );
 
-		StatusStatics.SetStatus( "Performing {0}.".FormatWith( action ) );
+		Log.Information( "Performing {0}.".FormatWith( action ) );
 		try {
 			method( client );
 		}
 		catch( Exception e ) {
 			throw createWebServiceException( action, e );
 		}
-		StatusStatics.SetStatus( "Performed {0}.".FormatWith( action ) );
+		Log.Information( "Performed {0}.".FormatWith( action ) );
 	}
 
 	private static Exception createWebServiceException( string action, Exception innerException ) {

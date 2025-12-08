@@ -5,6 +5,7 @@ using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
 using EnterpriseWebLibrary.InstallationSupportUtility.SystemManagerInterface.Messages.SystemListMessage;
 using EnterpriseWebLibrary.IO;
+using Serilog;
 using Tewl.IO;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility;
@@ -28,26 +29,25 @@ public class DataUpdateStatics {
 		}
 
 		return () => {
-			IoMethods.ExecuteWithTempFolder(
-				tempFolderPath => {
-					var packageFolderPath = EwlStatics.CombinePaths( tempFolderPath, "Package" );
-					if( packageZipFilePath.Any() )
-						ZipOps.UnZipFileAsFolder( packageZipFilePath, packageFolderPath );
+			IoMethods.ExecuteWithTempFolder( tempFolderPath => {
+				var packageFolderPath = EwlStatics.CombinePaths( tempFolderPath, "Package" );
+				if( packageZipFilePath.Any() )
+					ZipOps.UnZipFileAsFolder( packageZipFilePath, packageFolderPath );
 
-					// Delete and re-create databases.
-					DatabaseOps.DeleteAndReCreateDatabaseFromFile(
-						installation.ExistingInstallationLogic.Database,
-						databaseHasMinimumDataRevision( installation.ExistingInstallationLogic.RuntimeConfiguration.PrimaryDatabaseSystemConfiguration ),
-						packageFolderPath );
-					if( recognizedInstallation != null )
-						foreach( var secondaryDatabase in recognizedInstallation.RecognizedInstallationLogic.SecondaryDatabasesIncludedInDataPackages )
-							DatabaseOps.DeleteAndReCreateDatabaseFromFile(
-								secondaryDatabase,
-								databaseHasMinimumDataRevision(
-									installation.ExistingInstallationLogic.RuntimeConfiguration.GetSecondaryDatabaseSystemConfiguration(
-										secondaryDatabase.SecondaryDatabaseName ) ),
-								packageFolderPath );
-				} );
+				// Delete and re-create databases.
+				DatabaseOps.DeleteAndReCreateDatabaseFromFile(
+					installation.ExistingInstallationLogic.Database,
+					databaseHasMinimumDataRevision( installation.ExistingInstallationLogic.RuntimeConfiguration.PrimaryDatabaseSystemConfiguration ),
+					packageFolderPath );
+				if( recognizedInstallation != null )
+					foreach( var secondaryDatabase in recognizedInstallation.RecognizedInstallationLogic.SecondaryDatabasesIncludedInDataPackages )
+						DatabaseOps.DeleteAndReCreateDatabaseFromFile(
+							secondaryDatabase,
+							databaseHasMinimumDataRevision(
+								installation.ExistingInstallationLogic.RuntimeConfiguration.GetSecondaryDatabaseSystemConfiguration(
+									secondaryDatabase.SecondaryDatabaseName ) ),
+							packageFolderPath );
+			} );
 
 			DatabaseOps.WaitForDatabaseRecovery( installation.ExistingInstallationLogic.Database );
 			if( recognizedInstallation != null )
@@ -55,7 +55,7 @@ public class DataUpdateStatics {
 
 			if( !installationIsStandbyDb ) {
 				// Bring database logic up to date with the rest of the logic in this installation. In other words, reapply changes lost when we deleted the database.
-				StatusStatics.SetStatus( "Migrating data." );
+				Log.Information( "Migrating data." );
 				var message = "Migrated data.";
 				try {
 					installation.ExistingInstallationLogic.MigrateData();
@@ -63,7 +63,7 @@ public class DataUpdateStatics {
 				catch when( installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationType == InstallationType.Development ) {
 					message = "Did not migrate data, likely because the system’s Migrator application was not yet available. Please update dependent logic.";
 				}
-				StatusStatics.SetStatus( message );
+				Log.Information( message );
 			}
 
 			// If we’re an intermediate installation and we are getting data from a live installation, sanitize the data and do other conversion commands.
@@ -71,7 +71,7 @@ public class DataUpdateStatics {
 				   {
 					   KnownInstallationLogic.RsisInstallation.InstallationTypeElements: IntermediateInstallationElements
 				   } && source!.InstallationTypeElements is LiveInstallationElements ) {
-				StatusStatics.SetStatus( "Executing live -> intermediate conversion commands..." );
+				Log.Information( "Executing live -> intermediate conversion commands..." );
 				doDatabaseLiveToIntermediateConversionIfCommandsExist(
 					installation.ExistingInstallationLogic.Database,
 					installation.ExistingInstallationLogic.RuntimeConfiguration.PrimaryDatabaseSystemConfiguration );
@@ -113,8 +113,8 @@ public class DataUpdateStatics {
 			if( dataExportToRsisWebSiteNotPermitted )
 				IoMethods.CopyFile( IsuStatics.GetDataPackageZipFilePath( installation.FullName ), packageZipFilePath );
 			else
-				operationResult.TimeSpentWaitingForNetwork = EwlStatics.ExecuteTimedRegion(
-					() => operationResult.NumberOfBytesTransferred = downloadDataPackage( installation, packageZipFilePath ) );
+				operationResult.TimeSpentWaitingForNetwork =
+					EwlStatics.ExecuteTimedRegion( () => operationResult.NumberOfBytesTransferred = downloadDataPackage( installation, packageZipFilePath ) );
 		}
 
 		deleteOldFiles( downloadedPackagesFolder, installation.InstallationTypeElements is LiveInstallationElements );
@@ -128,14 +128,13 @@ public class DataUpdateStatics {
 
 		SystemManagerConnectionStatics.ExecuteActionWithSystemManagerClient(
 			"data package download",
-			client => Task.Run(
-					async () => {
-						using var response = await client.GetAsync(
-							                     $"{SystemManagerConnectionStatics.InstallationsUrlSegment}/{installation.Id}/{SystemManagerConnectionStatics.DataPackageUrlSegment}",
-							                     HttpCompletionOption.ResponseHeadersRead );
-						response.EnsureSuccessStatusCode();
-						await ( await response.Content.ReadAsStreamAsync() ).CopyToAsync( fileWriteStream );
-					} )
+			client => Task.Run( async () => {
+					using var response = await client.GetAsync(
+						                     $"{SystemManagerConnectionStatics.InstallationsUrlSegment}/{installation.Id}/{SystemManagerConnectionStatics.DataPackageUrlSegment}",
+						                     HttpCompletionOption.ResponseHeadersRead );
+					response.EnsureSuccessStatusCode();
+					await ( await response.Content.ReadAsStreamAsync() ).CopyToAsync( fileWriteStream );
+				} )
 				.Wait(),
 			supportLargePayload: true );
 
@@ -169,28 +168,26 @@ public class DataUpdateStatics {
 	private static void recompileProceduresInSecondaryOracleDatabases( RecognizedInstallation installation ) {
 		foreach( var secondaryDatabase in installation.RecognizedInstallationLogic.SecondaryDatabasesIncludedInDataPackages )
 			if( secondaryDatabase is DatabaseAbstraction.Databases.Oracle )
-				secondaryDatabase.ExecuteDbMethod(
-					cn => {
-						foreach( var procedure in secondaryDatabase.GetProcedures() ) {
-							var command = cn.DatabaseInfo.CreateCommand();
-							command.CommandText = "ALTER PROCEDURE " + procedure + " COMPILE";
-							cn.ExecuteNonQueryCommand( command );
-						}
-					} );
+				secondaryDatabase.ExecuteDbMethod( cn => {
+					foreach( var procedure in secondaryDatabase.GetProcedures() ) {
+						var command = cn.DatabaseInfo.CreateCommand();
+						command.CommandText = "ALTER PROCEDURE " + procedure + " COMPILE";
+						cn.ExecuteNonQueryCommand( command );
+					}
+				} );
 	}
 
 	private static void doDatabaseLiveToIntermediateConversionIfCommandsExist( Database database, Configuration.SystemGeneral.Database? configuration ) {
 		if( !( configuration?.LiveToIntermediateConversionCommands ?? Enumerable.Empty<string>() ).Any() )
 			return;
 
-		database.ExecuteDbMethod(
-			cn => {
-				foreach( var commandText in configuration!.LiveToIntermediateConversionCommands ) {
-					var cmd = cn.DatabaseInfo.CreateCommand();
-					cmd.CommandText = commandText;
-					cn.ExecuteNonQueryCommand( cmd, isLongRunning: true );
-				}
-			} );
+		database.ExecuteDbMethod( cn => {
+			foreach( var commandText in configuration!.LiveToIntermediateConversionCommands ) {
+				var cmd = cn.DatabaseInfo.CreateCommand();
+				cmd.CommandText = commandText;
+				cn.ExecuteNonQueryCommand( cmd, isLongRunning: true );
+			}
+		} );
 		database.ShrinkAfterPostUpdateDataCommands();
 	}
 }

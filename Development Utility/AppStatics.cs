@@ -2,6 +2,7 @@
 using System.Runtime.Loader;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
+using Serilog;
 using Tewl.IO;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility;
@@ -44,6 +45,11 @@ internal static class AppStatics {
 	}
 
 	internal static void Init() {
+		var loggerConfiguration = new LoggerConfiguration();
+		loggerConfiguration = loggerConfiguration.MinimumLevel.Debug();
+		Log.Logger = loggerConfiguration.WriteTo.Console( outputTemplate: "{Timestamp:MMM'-'dd HH:mm:ss} {Level:u3}  {Message:lj}{NewLine}{Exception}" )
+			.CreateLogger();
+
 		NDependIsPresent = ConfigurationStatics.MachineConfiguration is not null && Directory.Exists(
 			                   EwlStatics.CombinePaths(
 				                   Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ),
@@ -62,14 +68,13 @@ internal static class AppStatics {
 
 	internal static string DotNetToolsFolderPath =>
 		IoMethods.GetFirstExistingFolderPath(
-			new[]
-				{
+				[
 					// Ordered by preferred path.
 					@"C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8.1 Tools",
 					@"C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools",
 					@"C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.7.2 Tools",
 					@"C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.6.2 Tools"
-				},
+				],
 			".NET Tools" );
 
 	internal static string GetLiteralDateTimeExpression( DateTimeOffset dateTime ) =>

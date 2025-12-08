@@ -10,6 +10,7 @@ using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
 using EnterpriseWebLibrary.SystemSpecificLogic;
 using NodaTime.Text;
+using Serilog;
 using Tewl.IO;
 using static MoreLinq.Extensions.AtLeastExtension;
 
@@ -30,7 +31,7 @@ internal class UpdateDependentLogic: Operation {
 		var installation = (DevelopmentInstallation)genericInstallation;
 
 		if( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemUsesLegacyEwl == true ) {
-			StatusStatics.SetStatus( "Running legacy Update-DependentLogic command." );
+			Log.Information( "Running legacy Update-DependentLogic command." );
 			var referenceSubstrings = File.ReadAllLines( EwlStatics.CombinePaths( installation.DevelopmentInstallationLogic.LibraryPath, "Library.csproj" ) )
 				.Select( i => i.Trim() )
 				.First( i => i.StartsWith( """<PackageReference Include="Ewl""", StringComparison.Ordinal ) )
@@ -52,20 +53,20 @@ internal class UpdateDependentLogic: Operation {
 						"",
 						true )
 					.TrimEnd() );
-			StatusStatics.SetStatus( "Ran legacy Update-DependentLogic command." );
+			Log.Information( "Ran legacy Update-DependentLogic command." );
 		}
 
 		// This block exists because of https://enduracode.kilnhg.com/Review/K164316.
 		try {
 			IsuStatics.ConfigureIis( false );
-			StatusStatics.SetStatus( "Configured IIS." );
+			Log.Information( "Configured IIS." );
 		}
 		catch {
-			StatusStatics.SetStatus( "Did not configure IIS." );
+			Log.Information( "Did not configure IIS." );
 		}
 
 		if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.UpdateFileEncodingsSpecified )
-			StatusStatics.SetStatus(
+			Log.Information(
 				$"Warning: {nameof(installation.DevelopmentInstallationLogic.DevelopmentConfiguration.UpdateFileEncodings)} is present in configuration; please remove it when updates are complete." );
 
 		var bomlessEncoding = new UTF8Encoding( false );
@@ -86,7 +87,7 @@ internal class UpdateDependentLogic: Operation {
 
 			var config = installation.DevelopmentInstallationLogic.DevelopmentConfiguration;
 			if( !config.UpdateFileEncodingsSpecified || !config.UpdateFileEncodings ) {
-				StatusStatics.SetStatus( $"Warning: {filePath} does not have a byte-order mark (BOM); please update its encoding." );
+				Log.Information( $"Warning: {filePath} does not have a byte-order mark (BOM); please update its encoding." );
 				continue;
 			}
 
@@ -99,10 +100,10 @@ internal class UpdateDependentLogic: Operation {
 		if( !installation.SystemIsTewl() )
 			generateDataMigratorProjectCode( installation );
 
-		StatusStatics.SetStatus( "Migrating data." );
+		Log.Information( "Migrating data." );
 		if( installation.ExistingInstallationLogic.MigrateData() is { Length: > 0 } output )
 			Console.WriteLine( output );
-		StatusStatics.SetStatus( "Migrated data." );
+		Log.Information( "Migrated data." );
 
 		if( !installation.SystemIsTewl() )
 			try {
@@ -778,14 +779,14 @@ internal class UpdateDependentLogic: Operation {
 					? File.ReadAllText( EwlStatics.CombinePaths( projectPath, "Library New.csproj" ) )
 					: projectFilePaths.Where( File.Exists ).Select( File.ReadAllText ).FirstOrDefault();
 			if( projectFile is null ) {
-				StatusStatics.SetStatus( "Warning: Failed to locate the project file for {0}.".FormatWith( projectName ) );
+				Log.Warning( "Warning: Failed to locate the project file for {0}.".FormatWith( projectName ) );
 				projectFile = "";
 			}
 
 			void writeMsBuildProperty( string property ) {
 				writer.WriteLine( property );
 				if( projectFile.Contains( property, StringComparison.OrdinalIgnoreCase ) )
-					StatusStatics.SetStatus(
+					Log.Warning(
 						"Warning: The project file for {0} contains {1}, which is generated automatically by {2}.".FormatWith(
 							projectName,
 							property,
