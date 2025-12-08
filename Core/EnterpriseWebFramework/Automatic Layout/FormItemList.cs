@@ -87,16 +87,19 @@ public class FormItemList: FlowComponent {
 	/// </summary>
 	// To support items with ColumnSpan > 1, we could use the technique described by https://stackoverflow.com/a/55243400/35349 when the viewport width changes.
 	public static FormItemList CreateResponsiveGrid(
-		FormItemListSetup? generalSetup = null, ContentBasedLength? columnMinWidth = null,
-		GridVerticalAlignment verticalAlignment = GridVerticalAlignment.NotSpecified ) =>
-		new(
+		FormItemListSetup? generalSetup = null, ContentBasedLength? columnMinWidth = null, ContentBasedLength? columnMaxWidth = null,
+		GridVerticalAlignment verticalAlignment = GridVerticalAlignment.NotSpecified ) {
+		var minWidth = (CssLength?)columnMinWidth ?? 24.ToEm();
+		var maxWidth = (CssLength?)columnMaxWidth ?? new AncestorRelativeLength( "1fr" );
+		return new FormItemList(
 			generalSetup,
 			gridClass.Add( GridVerticalAlignmentStatics.Class( verticalAlignment ) ),
-			"grid-template-columns: repeat( auto-fit, minmax( min( {0}, 100% ), 1fr ) )".FormatWith( ( (CssLength)( columnMinWidth ?? 24.ToEm() ) ).Value ),
+			$"grid-template-columns: repeat( auto-fit, minmax( min( {minWidth.Value}, 100% ), {maxWidth.Value} ) )",
 			i => TextAlignmentStatics.Class( i.Setup.TextAlignment ),
 			_ => "",
 			null,
 			getItemComponents );
+	}
 
 	/// <summary>
 	/// Creates a list with the specified number of columns where each form item’s label is placed directly on top of it.
