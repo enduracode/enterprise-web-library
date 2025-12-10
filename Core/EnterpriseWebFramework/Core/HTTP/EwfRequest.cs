@@ -114,20 +114,11 @@ public class EwfRequest {
 	/// <summary>
 	/// Gets whether the request is from the local computer.
 	/// </summary>
-	internal bool IsLocal {
-		get {
-			// From https://www.strathweb.com/2016/04/request-islocal-in-asp-net-core/
-
-			var clientIp = ClientIp;
-			var connection = AspNetRequest.HttpContext.Connection;
-			if( clientIp is not null )
-				return connection.LocalIpAddress is not null ? clientIp.Equals( connection.LocalIpAddress ) : IPAddress.IsLoopback( clientIp );
+	internal bool IsLocal =>
+		ClientIp is {} ip
+			? HttpRequestExtensions.IsLocal( ip )
 
 			// for in memory TestServer or when dealing with default connection info
-			if( clientIp is null && connection.LocalIpAddress is null )
-				return true;
-
-			return false;
-		}
-	}
+			// from https://www.strathweb.com/2016/04/request-islocal-in-asp-net-core/ and https://stackoverflow.com/a/78609181/35349
+			: AspNetRequest.HttpContext.Connection.LocalIpAddress is null;
 }
