@@ -102,7 +102,9 @@ internal class UpdateDependentLogic: Operation {
 
 		Log.Information( "Migrating data." );
 		if( installation.ExistingInstallationLogic.MigrateData() is { Length: > 0 } output )
-			Console.WriteLine( output );
+			using( var reader = new StringReader( output ) )
+				for( string? line; ( line = reader.ReadLine() ) is not null; )
+					Console.WriteLine( $"  {line}" );
 		Log.Information( "Migrated data." );
 
 		if( !installation.SystemIsTewl() )
