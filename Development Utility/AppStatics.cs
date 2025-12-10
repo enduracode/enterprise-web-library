@@ -46,7 +46,10 @@ internal static class AppStatics {
 
 	internal static void Init() {
 		var loggerConfiguration = new LoggerConfiguration();
-		loggerConfiguration = loggerConfiguration.MinimumLevel.Debug();
+		loggerConfiguration =
+			string.Equals( Environment.GetEnvironmentVariable( "SYSTEM_DEBUG" ), bool.TrueString, StringComparison.Ordinal ) /* Azure DevOps pipeline debug mode */
+				? loggerConfiguration.MinimumLevel.Debug()
+				: loggerConfiguration.MinimumLevel.Information();
 		Log.Logger = loggerConfiguration.WriteTo.Console( outputTemplate: "{Timestamp:MMM'-'dd HH:mm:ss} {Level:u3}  {Message:lj}{NewLine}{Exception}" )
 			.CreateLogger();
 
