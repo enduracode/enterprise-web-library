@@ -3,6 +3,7 @@ using System.ServiceProcess;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 using JetBrains.Annotations;
+using Serilog;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
 
@@ -148,6 +149,8 @@ public class ExistingInstallationLogic {
 
 		// We don't want to ask the database for the line number if there is no script.
 		if( linesInScriptOnHd is not null ) {
+			Log.Debug( "Detected script at {ScriptPath}", databaseUpdateFilePath );
+
 			int lineMarker;
 			try {
 				lineMarker = database.GetLineMarker();
