@@ -9,30 +9,42 @@ partial class General {
 
 	protected override PageContent getContent() =>
 		new UiPageContent(
-			pageActions:
-			new ButtonSetup(
-					"Send Health Check",
-					behavior: new PostBackBehavior( postBack: PostBack.CreateFull( id: "sendHealthCheck", modificationMethod: TelemetryStatics.SendHealthCheck ) ) )
-				.Add(
-					new ButtonSetup(
-						"Throw Unhandled Exception",
-						behavior: new PostBackBehavior( postBack: PostBack.CreateFull( id: "throwException", modificationMethod: throwException ) ) ) ),
-			omitContentBox: true ).Add(
-			new Section(
+				pageActions:
+				new ButtonSetup(
+						"Send Health Check",
+						behavior: new PostBackBehavior( postBack: PostBack.CreateFull( id: "sendHealthCheck", modificationMethod: TelemetryStatics.SendHealthCheck ) ) )
+					.Add(
+						new ButtonSetup(
+							"Throw Unhandled Exception",
+							behavior: new PostBackBehavior( postBack: PostBack.CreateFull( id: "throwException", modificationMethod: throwException ) ) ) ),
+				omitContentBox: true )
+			.Add(
 				new Section(
-						"Logic",
-						getList()
-							.AddItem( ConfigurationStatics.AppName.ToFormItem( label: "Application".ToComponents() ) )
-							.AddItem( ConfigurationStatics.AppAssembly.GetName().Version!.ToString().ToFormItem( label: "Version".ToComponents() ) )
-							.ToCollection() ).Append(
-						new Section(
-							"Installation",
+					"Information",
+					new Section(
+							"Logic",
 							getList()
-								.AddItem( ConfigurationStatics.InstallationConfiguration.InstallationName.ToFormItem( label: "Installation".ToComponents() ) )
-								.AddItem( Tewl.Tools.NetTools.GetLocalHostName().ToFormItem( label: "Machine".ToComponents() ) )
-								.ToCollection() ) )
-					.Materialize(),
-				style: SectionStyle.Box ) );
+								.AddItem( ConfigurationStatics.AppName.ToFormItem( label: "Application".ToComponents() ) )
+								.AddItem( ConfigurationStatics.AppAssembly.GetName().Version!.ToString().ToFormItem( label: "Version".ToComponents() ) )
+								.ToCollection() )
+						.Append(
+							new Section(
+								"Installation",
+								getList()
+									.AddItem( ConfigurationStatics.InstallationConfiguration.InstallationName.ToFormItem( label: "Installation".ToComponents() ) )
+									.AddItem( Tewl.Tools.NetTools.GetLocalHostName().ToFormItem( label: "Machine".ToComponents() ) )
+									.ToCollection() ) )
+						.Materialize(),
+					style: SectionStyle.Box ) )
+			.Add(
+				new Section(
+					"Health monitoring",
+					new StackList(
+							new EwfHyperlink( new HealthMonitoring.SystemHealth(), new StandardHyperlinkStyle( "System health endpoint" ) ).ToComponentListItem()
+								.Append(
+									new EwfHyperlink( new HealthMonitoring.AppHealth(), new StandardHyperlinkStyle( "Application health endpoint" ) ).ToComponentListItem() ) )
+						.ToCollection(),
+					style: SectionStyle.Box ) );
 
 	private void throwException() => throw new ApplicationException( $"This is a test from the {ResourceFullName} page." );
 
