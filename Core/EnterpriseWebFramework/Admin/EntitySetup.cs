@@ -57,6 +57,8 @@ partial class EntitySetup: UiEntitySetup {
 			.Append( ErrorPages.ResourceDisabled.UrlPatterns.Literal( "resource-disabled" ) )
 			.Append( ErrorPages.LogInSessionExpired.UrlPatterns.Literal( "log-in-session-expired" ) )
 			.Append( ErrorPages.UnhandledException.UrlPatterns.Literal( "unhandled-exception" ) )
+			.Append( HealthMonitoring.SystemHealth.UrlPatterns.Literal( "system-health" ) )
+			.Append( HealthMonitoring.AppHealth.UrlPatterns.Literal( "app-health" ) )
 			.Append( RequestProfiling.UrlPatterns.Literal( this, "profiling" ) )
 			.Append( DiagnosticLog.UrlPatterns.Literal( this, "log" ) )
 			.Append( UserManagement.UrlPatterns.Literal( this, "users" ) )
