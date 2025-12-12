@@ -59,7 +59,8 @@ internal class ValueContainer {
 			outgoingValueConversionExpressionGetter = valueExpression => $"new TimeSpan( {valueExpression}.TickOfDay )";
 		}
 		else if( dataType == typeof( DateTime ) && ( ( databaseInfo is OracleInfo && dbTypeString.Equals( "TimeStamp", StringComparison.Ordinal ) ) ||
-		                                             ( hasSuffix( "Time" ) && !hasSuffix( "DateAndTime" ) && !hasSuffix( "DateTime" ) ) ) ) {
+		                                             ( hasSuffix( "Time" ) && !hasSuffix( "DateAndTime" ) && !hasSuffix( "DateTime" ) ) ||
+		                                             hasSuffix( "Instant" ) ) ) {
 			this.dataType = typeof( Instant );
 			incomingValueConversionExpressionGetter = valueExpression => $"LocalDateTime.FromDateTime( (DateTime){valueExpression} ).InUtc().ToInstant()";
 			incomingValueConverter = value => LocalDateTime.FromDateTime( (DateTime)value ).InUtc().ToInstant();
