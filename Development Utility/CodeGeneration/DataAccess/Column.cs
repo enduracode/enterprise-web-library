@@ -124,7 +124,7 @@ internal class Column {
 
 		var valueString = valueContainer.ConvertIncomingValue( reader.GetValue( ordinal ) ).ToString()!;
 		return forIdentifier ? valueString :
-		       valueContainer.DataType == typeof( string ) ? $"\"{valueString}\"" :
+		       valueContainer.DataType == typeof( string ) ? $"\"{valueString.EscapeForLiteral()}\"" :
 		       valueContainer.DataType == typeof( Guid ) ? $"""new Guid( "{valueString}" )""" : valueString;
 	}
 
