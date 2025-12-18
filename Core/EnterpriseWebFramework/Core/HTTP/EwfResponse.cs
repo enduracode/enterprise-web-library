@@ -31,6 +31,7 @@ public class EwfResponse {
 		internal int? StatusCodeNullable;
 		private readonly HeaderDictionary headers = new();
 		private Stream body;
+		private PipeWriter bodyWriter;
 		public override IResponseCookies Cookies { get; }
 		internal string RedirectUrl = "";
 
@@ -40,10 +41,12 @@ public class EwfResponse {
 
 		internal void Enable( Stream body ) {
 			this.body = body;
+			bodyWriter = PipeWriter.Create( body );
 		}
 
 		internal void Disable() {
 			body = null;
+			bodyWriter = null;
 		}
 
 		public override HttpContext HttpContext => throw new NotImplementedException();
@@ -69,6 +72,13 @@ public class EwfResponse {
 				return body;
 			}
 			set => throw new NotImplementedException();
+		}
+
+		public override PipeWriter BodyWriter {
+			get {
+				assertEnabled();
+				return bodyWriter;
+			}
 		}
 
 		public override long? ContentLength { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
