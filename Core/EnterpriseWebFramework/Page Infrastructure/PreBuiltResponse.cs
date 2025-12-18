@@ -2,12 +2,11 @@
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic.AlternativeResourceModes;
 using EnterpriseWebLibrary.EnterpriseWebFramework.PageInfrastructure;
 
+namespace EnterpriseWebLibrary.EnterpriseWebFramework;
+
 // EwlResource
 // Parameter: uint responseId
 // Parameter: string secret
-
-namespace EnterpriseWebLibrary.EnterpriseWebFramework;
-
 partial class PreBuiltResponse {
 	private FullResponse? response;
 
@@ -21,5 +20,5 @@ partial class PreBuiltResponse {
 
 	public override ConnectionSecurity ConnectionSecurity => ConnectionSecurity.MatchingCurrentRequest;
 
-	protected override EwfSafeRequestHandler getOrHead() => new EwfSafeResponseWriter( new EwfResponse( response ) );
+	protected override EwfSafeRequestHandler getOrHead() => new EwfSafeResponseWriter( new EwfResponse( response! ) );
 }

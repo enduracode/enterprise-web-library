@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System.IO.Pipelines;
+﻿using System.IO.Pipelines;
 using System.Threading;
 using System.Threading.Tasks;
 using EnterpriseWebLibrary.MailMerging;
@@ -23,15 +22,15 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 /// </summary>
 [ PublicAPI ]
 public class EwfResponse {
-	private static Func<HttpContext> currentContextGetter;
-	private static Action transactionCommitter;
-	private static Func<string> serverTimingGetter;
+	private static Func<HttpContext> currentContextGetter = null!;
+	private static Action transactionCommitter = null!;
+	private static Func<string> serverTimingGetter = null!;
 
 	internal sealed class AspNetAdapter: HttpResponse {
 		internal int? StatusCodeNullable;
 		private readonly HeaderDictionary headers = new();
-		private Stream body;
-		private PipeWriter bodyWriter;
+		private Stream? body;
+		private PipeWriter? bodyWriter;
 		public override IResponseCookies Cookies { get; }
 		internal string RedirectUrl = "";
 
@@ -69,7 +68,7 @@ public class EwfResponse {
 		public override Stream Body {
 			get {
 				assertEnabled();
-				return body;
+				return body!;
 			}
 			set => throw new NotImplementedException();
 		}
@@ -77,12 +76,12 @@ public class EwfResponse {
 		public override PipeWriter BodyWriter {
 			get {
 				assertEnabled();
-				return bodyWriter;
+				return bodyWriter!;
 			}
 		}
 
 		public override long? ContentLength { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-		public override string ContentType { get => Headers.ContentType; set => Headers.ContentType = value.IsNullOrEmpty() ? default( StringValues ) : value; }
+		public override string? ContentType { get => Headers.ContentType; set => Headers.ContentType = value.IsNullOrEmpty() ? default( StringValues ) : value; }
 		public override bool HasStarted => throw new NotImplementedException();
 		public override void OnStarting( Func<object, Task> callback, object state ) => throw new NotImplementedException();
 		public override void OnCompleted( Func<object, Task> callback, object state ) => throw new NotImplementedException();
@@ -175,7 +174,7 @@ public class EwfResponse {
 	/// <param name="calendarGetter">A function that gets the iCalendar object.</param>
 	/// <param name="extensionlessFileNameCreator">A function that creates the file name for saving the response. If you return a nonempty string, the response
 	/// will be processed as an attachment with the specified file name. Do not return null from the function.</param>
-	public static EwfResponse CreateICalendarResponse( Func<Calendar> calendarGetter, Func<string> extensionlessFileNameCreator = null ) =>
+	public static EwfResponse CreateICalendarResponse( Func<Calendar> calendarGetter, Func<string>? extensionlessFileNameCreator = null ) =>
 		Create(
 			"text/calendar",
 			new EwfResponseBodyCreator( () => new CalendarSerializer().SerializeToString( calendarGetter() ) ),
@@ -255,8 +254,8 @@ public class EwfResponse {
 	/// processed as an attachment with the specified file name. Do not return null from the function.</param>
 	/// <param name="additionalHeaderFieldGetter">A function that gets additional HTTP header fields for the response.</param>
 	public static EwfResponse Create(
-		string contentType, EwfResponseBodyCreator bodyCreator, Func<int?> statusCodeGetter = null, Func<string> fileNameCreator = null,
-		Func<IReadOnlyCollection<( string, string )>> additionalHeaderFieldGetter = null ) =>
+		string contentType, EwfResponseBodyCreator bodyCreator, Func<int?>? statusCodeGetter = null, Func<string>? fileNameCreator = null,
+		Func<IReadOnlyCollection<( string, string )>>? additionalHeaderFieldGetter = null ) =>
 		new(
 			contentType,
 			statusCodeGetter ?? ( () => null ),
@@ -329,15 +328,15 @@ public class EwfResponse {
 		StatusCodeGetter = () => fullResponse.StatusCode;
 		FileNameCreator = () => fullResponse.FileName;
 		AdditionalHeaderFieldGetter = () => fullResponse.AdditionalHeaderFields;
-		BodyCreator = fullResponse.TextBody != null
+		BodyCreator = fullResponse.TextBody is not null
 			              ? new EwfResponseBodyCreator( () => fullResponse.TextBody )
-			              : new EwfResponseBodyCreator( () => fullResponse.BinaryBody );
+			              : new EwfResponseBodyCreator( () => fullResponse.BinaryBody! );
 	}
 
 	internal FullResponse CreateFullResponse() =>
 		BodyCreator.BodyIsText
-			? new FullResponse( StatusCodeGetter(), ContentType, FileNameCreator(), AdditionalHeaderFieldGetter(), BodyCreator.TextBodyCreator() )
-			: new FullResponse( StatusCodeGetter(), ContentType, FileNameCreator(), AdditionalHeaderFieldGetter(), BodyCreator.BinaryBodyCreator() );
+			? new FullResponse( StatusCodeGetter(), ContentType, FileNameCreator(), AdditionalHeaderFieldGetter(), BodyCreator.TextBodyCreator!() )
+			: new FullResponse( StatusCodeGetter(), ContentType, FileNameCreator(), AdditionalHeaderFieldGetter(), BodyCreator.BinaryBodyCreator!() );
 
 	internal void WriteToAspNetResponse( HttpResponse aspNetResponse, bool skipTransactionCommit = false, bool omitBody = false ) {
 		// Commit transactions and execute non-transactional modifications while error handling still has the ability to send a 500-level response if needed.
