@@ -35,7 +35,7 @@ internal class Sink: BatchProvider, ILogEventSink {
 	private readonly string _databasePath;
 	private readonly IFormatProvider? _formatProvider;
 	private readonly string _tableName;
-	private static readonly SemaphoreSlim semaphoreSlim = new SemaphoreSlim( 1, 1 );
+	private static readonly SemaphoreSlim semaphoreSlim = new( 1, 1 );
 
 	public Sink( string sqlLiteDbPath, string tableName, IFormatProvider? formatProvider, uint batchSize = 100 ): base(
 		batchSize: (int)batchSize,
@@ -56,8 +56,8 @@ internal class Sink: BatchProvider, ILogEventSink {
 	#endregion
 
 	private void InitializeDatabase() {
-		using( var conn = GetSqLiteConnection() )
-			CreateSqlTable( conn );
+		using var conn = GetSqLiteConnection();
+		CreateSqlTable( conn );
 	}
 
 	private SqliteConnection GetSqLiteConnection() {
@@ -110,24 +110,24 @@ internal class Sink: BatchProvider, ILogEventSink {
 		return sqlCommand;
 	}
 
-	protected override async Task<bool> WriteLogEventAsync( ICollection<LogEvent> logEventsBatch ) {
-		if( ( logEventsBatch == null ) || ( logEventsBatch.Count == 0 ) )
+	protected override async Task<bool> WriteLogEventAsync( ICollection<LogEvent>? logEventsBatch ) {
+		if( logEventsBatch == null || logEventsBatch.Count == 0 )
 			return true;
 		await semaphoreSlim.WaitAsync().ConfigureAwait( false );
 		try {
-			using( var sqlConnection = GetSqLiteConnection() )
-				try {
-					await WriteToDatabaseAsync( logEventsBatch, sqlConnection ).ConfigureAwait( false );
-					return true;
-				}
-				catch( SqliteException e ) {
-					SelfLog.WriteLine( e.Message );
-					return false;
-				}
-				catch( Exception e ) {
-					SelfLog.WriteLine( e.Message );
-					return false;
-				}
+			await using var sqlConnection = GetSqLiteConnection();
+			try {
+				await WriteToDatabaseAsync( logEventsBatch, sqlConnection ).ConfigureAwait( false );
+				return true;
+			}
+			catch( SqliteException e ) {
+				SelfLog.WriteLine( e.Message );
+				return false;
+			}
+			catch( Exception e ) {
+				SelfLog.WriteLine( e.Message );
+				return false;
+			}
 		}
 		finally {
 			semaphoreSlim.Release();
