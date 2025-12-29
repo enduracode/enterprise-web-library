@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Runtime.InteropServices;
+using System.Threading;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Configuration.InstallationStandard;
 using Microsoft.Web.Administration;
@@ -50,6 +51,11 @@ public class IsuStatics {
 			// https://learn.microsoft.com/en-us/aspnet/core/host-and-deploy/iis/advanced?view=aspnetcore-6.0#data-protection
 			poolDefaults.ProcessModel.LoadUserProfile = true;
 
+			// Recycle if process consumes more than half of installed memory.
+			if( !GetPhysicallyInstalledSystemMemory( out var installedMemoryKibibytes ) )
+				throw new Exception( "failed to retrieve installed memory" );
+			poolDefaults.Recycling.PeriodicRestart.PrivateMemory = (long)( installedMemoryKibibytes / 2 );
+
 			// Disable regular time interval recycling and recycling at specific times.
 			poolDefaults.Recycling.PeriodicRestart.Time = TimeSpan.Zero;
 			poolDefaults.Recycling.PeriodicRestart.Schedule.Clear();
@@ -65,6 +71,9 @@ public class IsuStatics {
 			serverRuntimeSection.OverrideMode = OverrideMode.Allow;
 		} ) );
 	}
+
+	[ DllImport( "kernel32" ) ]
+	internal static extern bool GetPhysicallyInstalledSystemMemory( out ulong TotalMemoryInKilobytes );
 
 	/// <summary>
 	/// ISU and internal use only.
