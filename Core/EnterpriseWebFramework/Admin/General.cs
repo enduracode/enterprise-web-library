@@ -32,6 +32,7 @@ partial class General {
 								"Installation",
 								getList()
 									.AddItem( ConfigurationStatics.InstallationConfiguration.InstallationName.ToFormItem( label: "Installation".ToComponents() ) )
+									.AddItems( getLogItems().Materialize() )
 									.AddItem( Tewl.Tools.NetTools.GetLocalHostName().ToFormItem( label: "Machine".ToComponents() ) )
 									.ToCollection() ) )
 						.Materialize(),
@@ -47,6 +48,15 @@ partial class General {
 					style: SectionStyle.Box ) );
 
 	private void throwException() => throw new ApplicationException( $"This is a test from the {ResourceFullName} page." );
+
+	private IEnumerable<FormItem> getLogItems() {
+		yield return ( File.Exists( EwfConfigurationStatics.AppConfiguration.DiagnosticLogFilePath )
+			               ? FormattingMethods.GetFormattedBytes( new FileInfo( EwfConfigurationStatics.AppConfiguration.DiagnosticLogFilePath ).Length )
+			               : "–" ).ToFormItem( label: "Diagnostic log size".ToComponents() );
+		yield return ( File.Exists( EwfConfigurationStatics.AppConfiguration.DebugLogFilePath )
+			               ? FormattingMethods.GetFormattedBytes( new FileInfo( EwfConfigurationStatics.AppConfiguration.DebugLogFilePath ).Length )
+			               : "–" ).ToFormItem( label: "Two-day debug log size".ToComponents() );
+	}
 
 	private FormItemList getList() =>
 		FormItemList.CreateResponsiveGrid(
