@@ -36,7 +36,7 @@ public class AppClientRequestProvider {
 	/// request is not on a TCP connection. If the client IP address is unavailable due to a missing header from the reverse proxy, return null, which will report
 	/// an error to the developers and cause a 400 status code to be returned. Remember that your implementation should support not just live installations, but
 	/// also development and intermediate installations. Use <see cref="HttpRequestExtensions.IsLocal(HttpRequest)"/> if you need different behavior for local
-	/// requests.
+	/// requests, and <see cref="HttpRequestExtensions.GetForwardedClientIp"/> to get the trusted client IP from the reverse proxy.
 	/// </summary>
 	protected internal virtual SpecifiedValue<IPAddress?>? GetClientIp( HttpRequest request ) => new( request.HttpContext.Connection.RemoteIpAddress );
 }
@@ -48,4 +48,18 @@ public static class HttpRequestExtensions {
 		request.HttpContext.Connection.RemoteIpAddress is {} ipAddress && IsLocal( ipAddress );
 
 	internal static bool IsLocal( IPAddress clientIp ) => IPAddress.IsLoopback( clientIp );
+
+	/// <summary>
+	/// Returns the trusted client IP address that was forwarded by a reverse proxy for this request, or null if one is not available.
+	/// </summary>
+	/// <param name="request"></param>
+	/// <param name="trustedProxyCount">The number of trusted reverse proxies in the network infrastructure for this installation. Must be at least one.</param>
+	public static IPAddress? GetForwardedClientIp( this HttpRequest request, int trustedProxyCount ) {
+		if( trustedProxyCount < 1 )
+			throw new ArgumentOutOfRangeException( nameof(trustedProxyCount) );
+
+		return request.Headers[ "X-Forwarded-For" ].SingleOrDefault() is {} header
+			       ? IPAddress.TryParse( header.Separate( ",", true ).ElementAtOrDefault( ^trustedProxyCount ), out var ip ) ? ip : null
+			       : null;
+	}
 }
