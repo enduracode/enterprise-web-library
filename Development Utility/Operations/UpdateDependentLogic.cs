@@ -730,6 +730,8 @@ internal class UpdateDependentLogic: Operation {
 				 """ );
 		}
 
+		generateEditorConfig( projectPath, writer => { writer.WriteLine( "csharp_default_internal_modifier = implicit" ); } );
+
 		// Use a runtime identifier because this project ends up compiling like a console app (due to the Microsoft.NET.Test.Sdk dependency above) rather than a class library.
 		generateCodeForProject(
 			installation,
@@ -737,7 +739,6 @@ internal class UpdateDependentLogic: Operation {
 			projectPath,
 			unitTestNamespaceAndAssemblyName,
 			writer => {
-				writer.WriteLine( "using NUnit.Framework;" );
 				writer.WriteLine( $"using {installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName};" );
 				writer.WriteLine();
 				writer.WriteLine( "[ SetUpFixture ]" );
@@ -900,6 +901,8 @@ internal class UpdateDependentLogic: Operation {
 					writer.WriteLine( """<Using Include="EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic.AlternativeResourceModes" />""" );
 				}
 			}
+			if( projectName.Equals( UnitTestingInitializationOps.UnitTestProjectName, StringComparison.Ordinal ) )
+				writer.WriteLine( """<Using Include="NUnit.Framework" />""" );
 			writer.WriteLine( """<Using Include="Tewl" />""" );
 			writer.WriteLine( """<Using Include="Tewl.Tools" />""" );
 
