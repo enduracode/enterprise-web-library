@@ -140,36 +140,35 @@ public class InstallationConfiguration {
 
 
 		var systemWebApplicationElements = systemGeneralConfiguration.WebApplications ?? Enumerable.Empty<SystemGeneralConfigurationApplication>();
-		WebApplications = systemWebApplicationElements.Select(
-				( element, index ) => {
-					var name = element.Name;
-					var supportsSecureConnections = element.SupportsSecureConnections;
-					return isDevelopmentInstallation
-						       ?
-						       new WebApplication(
+		WebApplications = systemWebApplicationElements.Select( ( element, index ) => {
+				var name = element.Name;
+				var supportsSecureConnections = element.SupportsSecureConnections;
+				return isDevelopmentInstallation
+					       ?
+					       new WebApplication(
+						       name,
+						       installationPath,
+						       supportsSecureConnections,
+						       index,
+						       SystemShortName,
+						       systemWebApplicationElements.AtLeast( 2 ),
+						       SystemDevelopmentConfiguration!.GetWebProject( name ) )
+					       : InstallationType == InstallationType.Live
+						       ? new WebApplication(
 							       name,
 							       installationPath,
 							       supportsSecureConnections,
-							       index,
-							       SystemShortName,
-							       systemWebApplicationElements.AtLeast( 2 ),
-							       SystemDevelopmentConfiguration!.GetWebProject( name ) )
-						       : InstallationType == InstallationType.Live
-							       ? new WebApplication(
-								       name,
-								       installationPath,
-								       supportsSecureConnections,
-								       LiveInstallationConfiguration.WebApplications.Single( i => i.Name == name ),
-								       FullShortName,
-								       systemWebApplicationElements.AtLeast( 2 ) )
-							       : new WebApplication(
-								       name,
-								       installationPath,
-								       true,
-								       IntermediateInstallationConfiguration.WebApplications.Single( i => i.Name == name ),
-								       FullShortName,
-								       systemWebApplicationElements.AtLeast( 2 ) );
-				} )
+							       LiveInstallationConfiguration.WebApplications.Single( i => i.Name == name ),
+							       FullShortName,
+							       systemWebApplicationElements.AtLeast( 2 ) )
+						       : new WebApplication(
+							       name,
+							       installationPath,
+							       true,
+							       IntermediateInstallationConfiguration.WebApplications.Single( i => i.Name == name ),
+							       FullShortName,
+							       systemWebApplicationElements.AtLeast( 2 ) );
+			} )
 			.Materialize();
 
 		// installation custom configuration
@@ -299,6 +298,15 @@ public class InstallationConfiguration {
 	private bool isDevelopmentInstallation => SystemDevelopmentConfiguration is not null;
 
 	internal string DeveloperNotificationEmailFromAddress => installationStandardConfiguration.installedInstallation.DeveloperNotificationEmailFromAddress;
+
+	internal ulong DebugLogMaxSizeBytes {
+		get {
+			const ulong bytesPerGb = 1_000_000_000;
+			return installationStandardConfiguration.installedInstallation.DebugLogMaxSizeGbSpecified
+				       ? installationStandardConfiguration.installedInstallation.DebugLogMaxSizeGb * bytesPerGb
+				       : 10 * bytesPerGb;
+		}
+	}
 
 	internal LiveInstallationConfiguration LiveInstallationConfiguration =>
 		(LiveInstallationConfiguration)installationStandardConfiguration.installedInstallation.InstallationTypeConfiguration;

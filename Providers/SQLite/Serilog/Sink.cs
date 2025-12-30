@@ -35,10 +35,13 @@ internal class Sink: BatchProvider, ILogEventSink {
 	}
 
 	private readonly string filePath;
+	private readonly ulong fileMaxSizeBytes;
 	private readonly SemaphoreSlim semaphoreSlim = new( 1, 1 );
+	private bool fileTooLarge;
 
-	public Sink( string filePath, uint batchSize = 100 ): base( batchSize: (int)batchSize, maxBufferSize: 100_000 ) {
+	public Sink( string filePath, ulong fileMaxSizeBytes, uint batchSize = 100 ): base( batchSize: (int)batchSize, maxBufferSize: 100_000 ) {
 		this.filePath = filePath;
+		this.fileMaxSizeBytes = fileMaxSizeBytes;
 
 		InitializeDatabase();
 	}
@@ -107,6 +110,26 @@ internal class Sink: BatchProvider, ILogEventSink {
 			return true;
 		await semaphoreSlim.WaitAsync().ConfigureAwait( false );
 		try {
+			if( fileTooLarge )
+				return true;
+
+			long size;
+			try {
+				size = new FileInfo( filePath ).Length;
+			}
+			catch( Exception e ) {
+				fileTooLarge = true;
+				TelemetryStatics.ReportError( "Failed to retrieve the size of the two-day debug log:", e );
+				return true;
+			}
+
+			if( (ulong)size > fileMaxSizeBytes ) {
+				fileTooLarge = true;
+				TelemetryStatics.ReportFault(
+					$"Stopped writing events to the two-day debug log as it has exceeded the maximum allowed size of {FormattingMethods.GetFormattedBytes( (long)fileMaxSizeBytes )}." );
+				return true;
+			}
+
 			await using var sqlConnection = GetSqLiteConnection();
 			try {
 				await WriteToDatabaseAsync( logEventsBatch, sqlConnection ).ConfigureAwait( false );

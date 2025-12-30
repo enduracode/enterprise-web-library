@@ -185,7 +185,10 @@ public static class EwfOps {
 					if( ExternalFunctionalityStatics.SqliteFunctionalityEnabled )
 						loggerConfiguration = ExternalFunctionalityStatics.ExternalSqliteProvider.AddDatabaseAsLogSink(
 							loggerConfiguration,
-							EwfConfigurationStatics.AppConfiguration.DebugLogFilePath );
+							EwfConfigurationStatics.AppConfiguration.DebugLogFilePath,
+							ConfigurationStatics.IsDevelopmentInstallation
+								? 100 * 1_000_000 /* bytes per MB */
+								: ConfigurationStatics.InstallationConfiguration.DebugLogMaxSizeBytes );
 					Log.Logger = loggerConfiguration.CreateLogger();
 
 					var builder = Microsoft.AspNetCore.Builder.WebApplication.CreateBuilder(

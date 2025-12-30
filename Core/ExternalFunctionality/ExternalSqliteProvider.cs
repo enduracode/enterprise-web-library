@@ -23,7 +23,7 @@ public interface ExternalSqliteProvider {
 
 	void DeleteDatabaseAndReCreateFile( string filePath );
 
-	LoggerConfiguration AddDatabaseAsLogSink( LoggerConfiguration loggerConfiguration, string filePath );
+	LoggerConfiguration AddDatabaseAsLogSink( LoggerConfiguration loggerConfiguration, string filePath, ulong fileMaxSizeBytes );
 
 	void RegisterDependencyInjectionServicesForMigration( IMigrationRunnerBuilder builder );
 }

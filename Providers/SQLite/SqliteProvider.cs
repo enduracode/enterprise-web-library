@@ -47,8 +47,8 @@ public class SqliteProvider: ExternalSqliteProvider {
 		}
 	}
 
-	LoggerConfiguration ExternalSqliteProvider.AddDatabaseAsLogSink( LoggerConfiguration loggerConfiguration, string filePath ) =>
-		loggerConfiguration.WriteTo.Sink( new Sink( filePath ), LevelAlias.Minimum );
+	LoggerConfiguration ExternalSqliteProvider.AddDatabaseAsLogSink( LoggerConfiguration loggerConfiguration, string filePath, ulong fileMaxSizeBytes ) =>
+		loggerConfiguration.WriteTo.Sink( new Sink( filePath, fileMaxSizeBytes ), LevelAlias.Minimum );
 
 	void ExternalSqliteProvider.RegisterDependencyInjectionServicesForMigration( IMigrationRunnerBuilder builder ) {
 		builder.AddSQLite();
