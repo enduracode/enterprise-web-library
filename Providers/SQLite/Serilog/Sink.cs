@@ -35,7 +35,7 @@ internal class Sink: BatchProvider, ILogEventSink {
 	private readonly string _databasePath;
 	private readonly IFormatProvider? _formatProvider;
 	private readonly string _tableName;
-	private static readonly SemaphoreSlim semaphoreSlim = new( 1, 1 );
+	private readonly SemaphoreSlim semaphoreSlim = new( 1, 1 );
 
 	public Sink( string sqlLiteDbPath, string tableName, IFormatProvider? formatProvider, uint batchSize = 100 ): base(
 		batchSize: (int)batchSize,
