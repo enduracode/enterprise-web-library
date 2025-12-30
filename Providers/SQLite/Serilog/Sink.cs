@@ -26,30 +26,26 @@ using Serilog.Templates;
 namespace EnterpriseWebLibrary.Sqlite.Serilog;
 
 internal class Sink: BatchProvider, ILogEventSink {
+	private const string tableName = "Events";
+
 	private static string timeFormat = null!;
 
 	internal static void Init( string timeFormat ) {
 		Sink.timeFormat = timeFormat;
 	}
 
-	private readonly string _databasePath;
-	private readonly string _tableName;
+	private readonly string filePath;
 	private readonly SemaphoreSlim semaphoreSlim = new( 1, 1 );
 
-	public Sink( string sqlLiteDbPath, string tableName, uint batchSize = 100 ): base( batchSize: (int)batchSize, maxBufferSize: 100_000 ) {
-		_databasePath = sqlLiteDbPath;
-		_tableName = tableName;
+	public Sink( string filePath, uint batchSize = 100 ): base( batchSize: (int)batchSize, maxBufferSize: 100_000 ) {
+		this.filePath = filePath;
 
 		InitializeDatabase();
 	}
 
-	#region ILogEvent implementation
-
-	public void Emit( LogEvent logEvent ) {
+	void ILogEventSink.Emit( LogEvent logEvent ) {
 		PushEvent( logEvent );
 	}
-
-	#endregion
 
 	private void InitializeDatabase() {
 		using var conn = GetSqLiteConnection();
@@ -57,7 +53,7 @@ internal class Sink: BatchProvider, ILogEventSink {
 	}
 
 	private SqliteConnection GetSqLiteConnection() {
-		var builder = new SqliteConnectionStringBuilder { DataSource = _databasePath, Pooling = false };
+		var builder = new SqliteConnectionStringBuilder { DataSource = filePath, Pooling = false };
 
 		var sqLiteConnection = new SqliteConnection( builder.ConnectionString );
 		sqLiteConnection.Open();
@@ -83,14 +79,14 @@ internal class Sink: BatchProvider, ILogEventSink {
 		colDefs += "Exception TEXT,";
 		colDefs += "Properties TEXT";
 
-		var sqlCreateText = $"CREATE TABLE IF NOT EXISTS {_tableName} ({colDefs})";
+		var sqlCreateText = $"CREATE TABLE IF NOT EXISTS {tableName} ({colDefs})";
 
 		var sqlCommand = new SqliteCommand( sqlCreateText, sqlConnection );
 		sqlCommand.ExecuteNonQuery();
 	}
 
 	private SqliteCommand CreateSqlInsertCommand( SqliteConnection connection ) {
-		var sqlInsertText = $"INSERT INTO {_tableName} ( Time, Level, Message, Exception, Properties )";
+		var sqlInsertText = $"INSERT INTO {tableName} ( Time, Level, Message, Exception, Properties )";
 		sqlInsertText += " VALUES ( @time, @level, @message, @exception, @properties )";
 
 		var sqlCommand = connection.CreateCommand();
