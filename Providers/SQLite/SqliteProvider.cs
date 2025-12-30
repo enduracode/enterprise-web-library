@@ -4,6 +4,7 @@ using EnterpriseWebLibrary.Sqlite.Serilog;
 using FluentMigrator.Runner;
 using Microsoft.Data.Sqlite;
 using Serilog;
+using Serilog.Events;
 using Tewl.IO;
 
 namespace EnterpriseWebLibrary.Sqlite;
@@ -47,7 +48,7 @@ public class SqliteProvider: ExternalSqliteProvider {
 	}
 
 	LoggerConfiguration ExternalSqliteProvider.AddDatabaseAsLogSink( LoggerConfiguration loggerConfiguration, string filePath ) =>
-		loggerConfiguration.WriteTo.SQLite( filePath, tableName: "Events" );
+		loggerConfiguration.WriteTo.Sink( new Sink( filePath, "Events" ), LevelAlias.Minimum );
 
 	void ExternalSqliteProvider.RegisterDependencyInjectionServicesForMigration( IMigrationRunnerBuilder builder ) {
 		builder.AddSQLite();

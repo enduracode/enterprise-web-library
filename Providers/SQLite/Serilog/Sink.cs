@@ -33,16 +33,12 @@ internal class Sink: BatchProvider, ILogEventSink {
 	}
 
 	private readonly string _databasePath;
-	private readonly IFormatProvider? _formatProvider;
 	private readonly string _tableName;
 	private readonly SemaphoreSlim semaphoreSlim = new( 1, 1 );
 
-	public Sink( string sqlLiteDbPath, string tableName, IFormatProvider? formatProvider, uint batchSize = 100 ): base(
-		batchSize: (int)batchSize,
-		maxBufferSize: 100_000 ) {
+	public Sink( string sqlLiteDbPath, string tableName, uint batchSize = 100 ): base( batchSize: (int)batchSize, maxBufferSize: 100_000 ) {
 		_databasePath = sqlLiteDbPath;
 		_tableName = tableName;
-		_formatProvider = formatProvider;
 
 		InitializeDatabase();
 	}
@@ -145,7 +141,7 @@ internal class Sink: BatchProvider, ILogEventSink {
 			sqlCommand.Parameters[ "@level" ].Value = logEvent.Level.ToString();
 
 			await using( var messageWriter = new StringWriter( stringBuilder ) ) {
-				new ExpressionTemplate( "{@m}", formatProvider: _formatProvider ).Format( logEvent, messageWriter );
+				new ExpressionTemplate( "{@m}" ).Format( logEvent, messageWriter );
 				sqlCommand.Parameters[ "@message" ].Value = messageWriter.ToString();
 			}
 			stringBuilder.Clear();
