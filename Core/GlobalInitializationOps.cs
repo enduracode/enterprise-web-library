@@ -57,7 +57,7 @@ public static class GlobalInitializationOps {
 			if( globalInitializer is null )
 				throw new ApplicationException( "The system must have a global initializer." );
 
-			// Initialize these before the exception handling block below because it's reasonable for the exception handling to depend on them.
+			// Initialize these before the exception handling block below because it’s reasonable for the exception handling to depend on them.
 			Clock.Init( timeGetters ?? ( SystemClock.Instance.GetCurrentInstant, SystemClock.Instance.GetCurrentInstant ) );
 			ConfigurationStatics.Init( assemblyFolderPath, appName, isClientSideApp, ref initializationLog );
 			SystemSpecificLogicStatics.Init( globalInitializer.GetType() );
