@@ -54,7 +54,10 @@ partial class General {
 			               ? FormattingMethods.GetFormattedBytes( new FileInfo( EwfConfigurationStatics.AppConfiguration.DiagnosticLogFilePath ).Length )
 			               : "–" ).ToFormItem( label: "Diagnostic log size".ToComponents() );
 		yield return ( File.Exists( EwfConfigurationStatics.AppConfiguration.DebugLogFilePath )
-			               ? FormattingMethods.GetFormattedBytes( new FileInfo( EwfConfigurationStatics.AppConfiguration.DebugLogFilePath ).Length )
+			               ? FormattingMethods.GetFormattedBytes( new FileInfo( EwfConfigurationStatics.AppConfiguration.DebugLogFilePath ).Length ) +
+			                 ( ConfigurationStatics.IsDevelopmentInstallation
+				                   ? ""
+				                   : $" (allows up to {FormattingMethods.GetFormattedBytes( (long)ConfigurationStatics.InstallationConfiguration.DebugLogMaxSizeBytes )})" )
 			               : "–" ).ToFormItem( label: "Two-day debug log size".ToComponents() );
 	}
 
