@@ -252,8 +252,7 @@ internal class UpdateDependentLogic: Operation {
 				_ => {},
 				runtimeIdentifier: "win-x64",
 				selfContained: true );
-		if( !installation.SystemIsTewl() )
-			generateUnitTestProjectCode( installation );
+		generateUnitTestProjectCode( installation );
 
 		generateXmlSchemaLogicForInstallationConfigurationFile( installation, "Custom" );
 		generateXmlSchemaLogicForInstallationConfigurationFile( installation, "Shared" );
@@ -709,7 +708,9 @@ internal class UpdateDependentLogic: Operation {
 	}
 
 	private void generateUnitTestProjectCode( DevelopmentInstallation installation ) {
-		var projectPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, UnitTestingInitializationOps.UnitTestProjectName );
+		var projectPath = EwlStatics.CombinePaths(
+			installation.GeneralLogic.Path,
+			installation.SystemIsTewl() ? $"""Shared\{UnitTestingInitializationOps.UnitTestProjectName}""" : UnitTestingInitializationOps.UnitTestProjectName );
 
 		if( !File.Exists( EwlStatics.CombinePaths( projectPath, $"{UnitTestingInitializationOps.UnitTestProjectName}.csproj" ) ) ) {
 			IoMethods.DeleteFolder( projectPath );
@@ -739,6 +740,9 @@ internal class UpdateDependentLogic: Operation {
 			projectPath,
 			unitTestNamespaceAndAssemblyName,
 			writer => {
+				if( installation.SystemIsTewl() )
+					return;
+
 				writer.WriteLine( $"using {installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName};" );
 				writer.WriteLine();
 				writer.WriteLine( "[ SetUpFixture ]" );
