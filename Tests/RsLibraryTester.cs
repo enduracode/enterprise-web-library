@@ -3,14 +3,13 @@ using EnterpriseWebLibrary.Collections;
 using EnterpriseWebLibrary.Encryption;
 using EnterpriseWebLibrary.IO;
 using EnterpriseWebLibrary.MailMerging;
-using NUnit.Framework;
 using Tewl.InputValidation;
 using Tewl.IO;
 
 namespace Tests;
 
 [ TestFixture ]
-internal class RsLibraryTester {
+class RsLibraryTester {
 	[ Test ]
 	public void OldMain() {
 		ZipOps.Test();
@@ -24,11 +23,6 @@ internal class RsLibraryTester {
 		Console.WriteLine( new TimeSpan( 1, 2, 3, 4, 0 ).ToHourMinuteSecondString() );
 		Console.WriteLine( new TimeSpan( 1, 2, 3, 4, 0 ).ToHourMinuteString() );
 		Console.WriteLine( new TimeSpan( 0, 1, 32 ).ToHourMinuteSecondString() );
-
-		Console.WriteLine( FormattingMethods.GetFormattedBytes( 64 ) );
-		Console.WriteLine( FormattingMethods.GetFormattedBytes( 64000 ) );
-		Console.WriteLine( FormattingMethods.GetFormattedBytes( 64000000 ) );
-		Console.WriteLine( FormattingMethods.GetFormattedBytes( 64500000000 ) );
 
 		Console.WriteLine( "fred".Capitalize() );
 		Console.WriteLine( "".Capitalize() );
@@ -281,7 +275,7 @@ internal class RsLibraryTester {
 	}
 }
 
-internal static class ValidationResultExtensions {
+static class ValidationResultExtensions {
 	public static T Value<T>( this ValidationResult<T> result, out ValidationErrorType? errorType ) {
 		errorType = result.Error( out var value )?.Type;
 		return value;
