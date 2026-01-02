@@ -56,7 +56,9 @@ internal class ExportLogic: Operation {
 							EwlStatics.CombinePaths(
 								installation.GeneralLogic.Path,
 								mainProjectPath,
-								ConfigurationStatics.GetProjectOutputFolderPath( useDebugAssembly ),
+								installation.SystemIsTewl()
+									? EwlStatics.CombinePaths( "bin", useDebugAssembly ? "Debug" : "Release", "net9.0" )
+									: ConfigurationStatics.GetProjectOutputFolderPath( useDebugAssembly ),
 								fileName ),
 							EwlStatics.CombinePaths( folderPath, @"lib\{0}".FormatWith( nuGetTargetFramework ), fileName ) );
 
