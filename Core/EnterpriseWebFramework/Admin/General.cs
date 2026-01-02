@@ -51,13 +51,13 @@ partial class General {
 
 	private IEnumerable<FormItem> getLogItems() {
 		yield return ( File.Exists( EwfConfigurationStatics.AppConfiguration.DiagnosticLogFilePath )
-			               ? FormattingMethods.GetFormattedBytes( new FileInfo( EwfConfigurationStatics.AppConfiguration.DiagnosticLogFilePath ).Length )
+			               ? FormattingMethods.GetFormattedBytes( new FileInfo( EwfConfigurationStatics.AppConfiguration.DiagnosticLogFilePath ).Length, false )
 			               : "–" ).ToFormItem( label: "Diagnostic log size".ToComponents() );
 		yield return ( File.Exists( EwfConfigurationStatics.AppConfiguration.DebugLogFilePath )
-			               ? FormattingMethods.GetFormattedBytes( new FileInfo( EwfConfigurationStatics.AppConfiguration.DebugLogFilePath ).Length ) +
+			               ? FormattingMethods.GetFormattedBytes( new FileInfo( EwfConfigurationStatics.AppConfiguration.DebugLogFilePath ).Length, false ) +
 			                 ( ConfigurationStatics.IsDevelopmentInstallation
 				                   ? ""
-				                   : $" (allows up to {FormattingMethods.GetFormattedBytes( (long)ConfigurationStatics.InstallationConfiguration.DebugLogMaxSizeBytes )})" )
+				                   : $" (allows up to {FormattingMethods.GetFormattedBytes( ConfigurationStatics.InstallationConfiguration.DebugLogMaxSizeBytes, false )})" )
 			               : "–" ).ToFormItem( label: "Two-day debug log size".ToComponents() );
 	}
 

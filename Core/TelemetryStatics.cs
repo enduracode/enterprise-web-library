@@ -202,7 +202,7 @@ public static class TelemetryStatics {
 		foreach( var driveInfo in DriveInfo.GetDrives().Where( d => d.DriveType == DriveType.Fixed ) ) {
 			var bytesFree = driveInfo.TotalFreeSpace;
 			freeSpaceIsLow = freeSpaceIsLow || bytesFree < tenGibibytes;
-			body.AppendLine( "{0} free on {1} drive.".FormatWith( FormattingMethods.GetFormattedBytes( bytesFree ), driveInfo.Name ) );
+			body.AppendLine( "{0} free on {1} drive.".FormatWith( FormattingMethods.GetFormattedBytes( bytesFree, true ), driveInfo.Name ) );
 		}
 
 		message.Subject = StringTools.ConcatenateWithDelimiter(

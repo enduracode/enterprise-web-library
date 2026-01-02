@@ -126,7 +126,7 @@ internal class Sink: BatchProvider, ILogEventSink {
 			if( (ulong)size > fileMaxSizeBytes ) {
 				fileTooLarge = true;
 				TelemetryStatics.ReportFault(
-					$"Stopped writing events to the two-day debug log as it has exceeded the maximum allowed size of {FormattingMethods.GetFormattedBytes( (long)fileMaxSizeBytes )}." );
+					$"Stopped writing events to the two-day debug log as it has exceeded the maximum allowed size of {FormattingMethods.GetFormattedBytes( fileMaxSizeBytes, false )}." );
 				return true;
 			}
 

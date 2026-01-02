@@ -59,7 +59,7 @@ public static class DataCleanupOps {
 				}
 				catch( IOException ) {
 					TelemetryStatics.ReportFault(
-						$"Failed to clean up the diagnostic log for {app.Name} because the application is running. The file size is {FormattingMethods.GetFormattedBytes( new FileInfo( filePath ).Length )}." );
+						$"Failed to clean up the diagnostic log for {app.Name} because the application is running. The file size is {FormattingMethods.GetFormattedBytes( new FileInfo( filePath ).Length, false )}." );
 				}
 			}
 
