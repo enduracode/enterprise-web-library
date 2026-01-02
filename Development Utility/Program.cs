@@ -66,7 +66,7 @@ internal static class Program {
 					operation.Execute( installation, args.Skip( 2 ).MaterializeAsList(), new OperationResult() );
 				}
 				catch( Exception e ) {
-					Output.WriteTimeStampedError( e.ToString() );
+					Log.Error( e.ToString() );
 					if( e is UserCorrectableException )
 						throw new DoNotEmailOrLogException();
 					throw;
