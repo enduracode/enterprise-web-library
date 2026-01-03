@@ -124,7 +124,8 @@ partial class DebugLog {
 						} );
 				} );
 
-				var latestEventId = ComponentStateItem.Create( "latestEventId", events.Select( i => (long?)i.id ).FirstOrDefault(), _ => true, false );
+				var latestEventId = ComponentStateItem.Create( "latestEventId", (long?)null, _ => true, false );
+				latestEventId.Value ??= events.Select( i => (long?)i.id ).FirstOrDefault();
 				var latestEventIndex = latestEventId.Value.HasValue ? events.FindIndex( i => i.id == latestEventId.Value.Value ) : events.Count;
 				var visibleEvents = latestEventIndex == -1 ? events : events[ latestEventIndex.. ];
 
