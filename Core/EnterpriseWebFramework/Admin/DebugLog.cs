@@ -1,5 +1,4 @@
 ﻿using System.Data.Common;
-using System.Text.Json;
 using System.Text.Json.Nodes;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.DataAccess.CommandWriting;
@@ -40,7 +39,7 @@ partial class DebugLog {
 
 	protected override void init() {
 		var validator = new Validator();
-		propertyValueArray = validatePropertyValue( PropertyValue, validator );
+		validator.GetJsonArray( null, PropertyValue ).Error( out propertyValueArray );
 		if( validator.ErrorsOccurred )
 			throw new MultiMessageException( validator.ErrorMessages );
 
@@ -208,7 +207,7 @@ partial class DebugLog {
 		var value = parametersModification.GetPropertyValueFormItem(
 				true,
 				controlSetup: TextControlSetup.Create( placeholder: """value1, "stringValue2", {"json":"value3"}""" ),
-				additionalValidationMethod: validator => validatePropertyValue( parametersModification.PropertyValue, validator ) )
+				additionalValidationMethod: validator => validator.GetJsonArray( null, parametersModification.PropertyValue ) )
 			.ToComponentCollection( omitLabel: true );
 		return new GenericFlowContainer(
 			name.Append( new GenericPhrasingContainer( "is".ToComponents() ) ).Concat( value ).Materialize(),
@@ -305,17 +304,4 @@ partial class DebugLog {
 				.ToCollection(),
 			displaySetup: expanded.ToDisplaySetup(),
 			caption: new FigureCaption( "Properties".ToComponents(), figureIsTextual: true ) );
-
-	private JsonArray? validatePropertyValue( string value, Validator validator ) {
-		if( value.Length == 0 )
-			return null;
-
-		try {
-			return (JsonArray)JsonNode.Parse( $"[{value}]" )!;
-		}
-		catch( JsonException ) {
-			validator.NoteErrorAndAddMessage( "The value(s) must be valid JSON." );
-			return null;
-		}
-	}
 }
