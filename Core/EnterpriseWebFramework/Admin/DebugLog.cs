@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Data.Common;
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.DataAccess.CommandWriting;
@@ -9,7 +10,6 @@ using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Ethereal;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Flow;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic.AlternativeResourceModes;
@@ -68,86 +68,105 @@ partial class DebugLog {
 				.AddItem( getPropertyFilterItem() )
 				.ToCollection(),
 			() => {
+				var latestEventId = ComponentStateItem.Create( "latestEventId", (long?)null, _ => true, false );
+
+				var eventTable = EwfTable.Create(
+					fields: new EwfTableField( size: 18.ToEm() ).Append( new EwfTableField( size: 12.ToEm() ) ).Append( new EwfTableField() ).Materialize(),
+					headItems: EwfTableItem.Create( "Date/time".ToCell().Append( "Level".ToCell() ).Append( "Details".ToCell() ).Materialize() ).ToCollection(),
+					defaultItemLimit: DataRowLimit.Fifty,
+					etherealContent: latestEventId.ToCollection() );
+
+				List<( long id, string time, string level, string message, string properties )>? visibleEvents = null;
+				long newEventCount = 0;
 				DatabaseInfo dbInfo = new SqliteInfo( "Debug Log", EwfConfigurationStatics.AppConfiguration.DebugLogFilePath, true );
-				var command = dbInfo.CreateCommand();
-				command.CommandText = "SELECT * FROM Events";
-
-				// simple contains filter
-				if( EventContains.Pattern.Length > 0 ) {
-					command.CommandText += " WHERE ( ( ";
-					( (InlineDbCommandCondition)new LikeCondition( LikeCondition.Behavior.AndedTokens, "Message", EventContains.Pattern ) ).AddToCommand(
-						command,
-						dbInfo,
-						"messageContains" );
-					command.CommandText += " ) OR ( ";
-					( (InlineDbCommandCondition)new LikeCondition( LikeCondition.Behavior.AndedTokens, "Properties", EventContains.Pattern ) ).AddToCommand(
-						command,
-						dbInfo,
-						"propertiesContains" );
-					command.CommandText += " ) )";
-				}
-
-				// single property filter
-				if( PropertyName.Length > 0 ) {
-					command.CommandText += EventContains.Pattern.Length > 0 ? " AND " : " WHERE ";
-
-					var nameParameter = new DbCommandParameter( "propertyName", new DbParameterValue( "$." + PropertyName ) );
-					command.CommandText += $"Properties -> {nameParameter.GetNameForCommandText( dbInfo )} ";
-					command.Parameters.Add( nameParameter.GetAdoDotNetParameter( dbInfo ) );
-
-					if( propertyValueArray is not null ) {
-						var parameters = propertyValueArray.Select( ( value, index ) => new DbCommandParameter(
-								$"propertyValue{index}",
-								new DbParameterValue( value?.ToJsonStringWithSimpleEscaping() ?? "null" ) ) )
-							.Materialize();
-						command.CommandText += $"IN( {StringTools.ConcatenateWithDelimiter( ", ", parameters.Select( i => i.GetNameForCommandText( dbInfo ) ) )} )";
-						foreach( var i in parameters )
-							command.Parameters.Add( i.GetAdoDotNetParameter( dbInfo ) );
-					}
-					else
-						command.CommandText += "NOTNULL";
-				}
-
-				command.CommandText += " ORDER BY Id DESC";
-
-				var events = new List<( long id, string time, string level, string message, string properties )>( 1000 );
 				var connection = new DatabaseConnection( dbInfo );
 				connection.ExecuteWithConnectionOpen( () => {
-					connection.ExecuteReaderCommand(
-						command,
-						reader => {
-							while( reader.Read() )
-								events.Add( ( get<long>( 0 ), get<string>( 1 ), get<string>( 2 ), get<string>( 3 ), get<string>( 5 ) ) );
+					eventTable.AddLimitedItems( limit => {
+						var rowCount = 0;
+						connection.ExecuteReaderCommand(
+							getQueryCommand( dbInfo, latestEventId.Value, limit ),
+							reader => {
+								while( reader.Read() ) {
+									// init with correct capacity based on row count
+									if( visibleEvents is null ) {
+										rowCount = (int)get<long>( 6 );
+										visibleEvents = new List<( long, string, string, string, string )>( Math.Min( rowCount, limit ) );
+									}
 
-							return;
-							T get<T>( int ordinal ) => (T)reader.GetValue( ordinal );
+									visibleEvents.Add( ( get<long>( 0 ), get<string>( 1 ), get<string>( 2 ), get<string>( 3 ), get<string>( 5 ) ) );
+								}
+
+								return;
+								T get<T>( int ordinal ) => (T)reader.GetValue( ordinal );
+							} );
+						visibleEvents ??= [ ]; // init as empty if no rows
+
+						latestEventId.Value ??= visibleEvents.Any() ? visibleEvents.First().id : 0 /* assumes IDs are always positive */;
+
+						var items = visibleEvents.Select( logEvent => {
+							var detailsExpandedPmv = new PageModificationValue<string>();
+							var detailsExpanded = detailsExpandedPmv.ToCondition( bool.TrueString.ToCollection() );
+							var detailsExpandedFieldId = new HiddenFieldId();
+							return EwfTableItem.Create(
+								getTimeCell( logEvent.time )
+									.Append( logEvent.level.ToCell() )
+									.Append(
+										new EwfButton(
+												new CustomButtonStyle(
+													classes: new ElementClass( "icon" ),
+													attributes: new ElementAttribute( "aria-label", "Expand" ).ToCollection(),
+													children:
+													new FontAwesomeIcon(
+														detailsExpandedPmv.ToCondition( bool.FalseString.ToCollection() )
+															.ToElementClassSet( new ElementClass( "fa-plus-square" ) )
+															.Add( detailsExpanded.ToElementClassSet( new ElementClass( "fa-minus-square" ) ) )
+															.Add( new ElementClass( "fa-lg" ) ) ).ToCollection() ),
+												behavior: new CustomButtonBehavior( () => detailsExpandedFieldId.GetJsValueModificationStatements(
+													"document.getElementById( '{0}' ).value === '{2}' ? '{1}' : '{2}'".FormatWith(
+														detailsExpandedFieldId.ElementId.Id,
+														bool.FalseString,
+														bool.TrueString ) ) ) )
+											.Append<FlowComponent>(
+												new GenericFlowContainer(
+													new DisplayableElement( _ => new DisplayableElementData(
+															null,
+															() => new DisplayableElementLocalData( "pre" ),
+															children: getMessageContent( logEvent.message, detailsExpanded ) ) )
+														.Append( getPropertiesComponent( logEvent.properties, detailsExpanded ) )
+														.Materialize() ) )
+											.Materialize()
+											.ToCell(
+												setup: new TableCellSetup(
+													etherealContent: new EwfHiddenField( bool.FalseString, id: detailsExpandedFieldId, pageModificationValue: detailsExpandedPmv )
+														.PageComponent.ToCollection() ) ) )
+									.Materialize() );
 						} );
-				} );
 
-				var latestEventId = ComponentStateItem.Create( "latestEventId", (long?)null, _ => true, false );
-				latestEventId.Value ??= events.Select( i => (long?)i.id ).FirstOrDefault();
-				var latestEventIndex = latestEventId.Value.HasValue ? events.FindIndex( i => i.id == latestEventId.Value.Value ) : events.Count;
-				var visibleEvents = latestEventIndex == -1 ? events : events[ latestEventIndex.. ];
+						return ( items, rowCount );
+					} );
+
+					newEventCount = (long)connection.ExecuteScalarCommand( getQueryCommand( dbInfo, latestEventId.Value, null ) )!;
+				} );
 
 				var components = new List<FlowComponent>();
 				var newEventRegion = new UpdateRegionSet();
 				var refilterRegion = new UpdateRegionSet();
 				components.Add(
 					new FlowIdContainer(
-						latestEventIndex < 1
+						newEventCount < 1
 							? [ ]
 							: new EwfButton(
 									new StandardButtonStyle(
-										"Show " + "new event".ToQuantity( latestEventIndex ),
+										"Show " + "new event".ToQuantity( newEventCount ),
 										icon: new ActionComponentIcon( new FontAwesomeIcon( "fa-refresh" ) ) ),
 									behavior: new PostBackBehavior(
-										postBack: PostBack.CreateIntermediate( newEventRegion.Add( visibleEvents.Any() ? null : refilterRegion ), id: "showNewEvents" ) ) )
+										postBack: PostBack.CreateIntermediate( newEventRegion.Add( visibleEvents!.Any() ? null : refilterRegion ), id: "showNewEvents" ) ) )
 								.ToCollection(),
 						updateRegionSets: newEventRegion ) );
 
 				components.Add(
 					new FlowIdContainer(
-						!visibleEvents.Any()
+						!visibleEvents!.Any()
 							? [ ]
 							: FormState.ExecuteWithActions(
 								PostBack.CreateFull( id: "refilter" ),
@@ -161,7 +180,7 @@ partial class DebugLog {
 											additionalValidationMethod: validator => {
 												parametersModification.EventContains = new PatternString( "" );
 
-												var values = visibleEvents
+												var values = visibleEvents!
 													.SelectMany( i =>
 														( (JsonObject)JsonNode.Parse( i.properties )! ).TryGetPropertyValue( parametersModification.PropertyName, out var node )
 															? ( node?.ToJsonStringWithSimpleEscaping() ?? "null" ).ToCollection()
@@ -176,53 +195,7 @@ partial class DebugLog {
 									.ToCollection() ),
 						updateRegionSets: refilterRegion ) );
 
-				components.Add(
-					EwfTable.Create(
-							fields: new EwfTableField( size: 18.ToEm() ).Append( new EwfTableField( size: 12.ToEm() ) ).Append( new EwfTableField() ).Materialize(),
-							headItems: EwfTableItem.Create( "Date/time".ToCell().Append( "Level".ToCell() ).Append( "Details".ToCell() ).Materialize() ).ToCollection(),
-							defaultItemLimit: DataRowLimit.Fifty,
-							tailUpdateRegions: new TailUpdateRegion( newEventRegion, visibleEvents.Count ),
-							etherealContent: new EtherealIdContainer( latestEventId.ToCollection(), updateRegionSets: newEventRegion ).ToCollection() )
-						.AddData(
-							visibleEvents,
-							logEvent => {
-								var detailsExpandedPmv = new PageModificationValue<string>();
-								var detailsExpanded = detailsExpandedPmv.ToCondition( bool.TrueString.ToCollection() );
-								var detailsExpandedFieldId = new HiddenFieldId();
-								return EwfTableItem.Create(
-									getTimeCell( logEvent.time )
-										.Append( logEvent.level.ToCell() )
-										.Append(
-											new EwfButton(
-													new CustomButtonStyle(
-														classes: new ElementClass( "icon" ),
-														attributes: new ElementAttribute( "aria-label", "Expand" ).ToCollection(),
-														children:
-														new FontAwesomeIcon(
-															detailsExpandedPmv.ToCondition( bool.FalseString.ToCollection() )
-																.ToElementClassSet( new ElementClass( "fa-plus-square" ) )
-																.Add( detailsExpanded.ToElementClassSet( new ElementClass( "fa-minus-square" ) ) )
-																.Add( new ElementClass( "fa-lg" ) ) ).ToCollection() ),
-													behavior: new CustomButtonBehavior( () => detailsExpandedFieldId.GetJsValueModificationStatements(
-														"document.getElementById( '{0}' ).value === '{2}' ? '{1}' : '{2}'".FormatWith(
-															detailsExpandedFieldId.ElementId.Id,
-															bool.FalseString,
-															bool.TrueString ) ) ) )
-												.Append<FlowComponent>(
-													new GenericFlowContainer(
-														new DisplayableElement( _ => new DisplayableElementData(
-																null,
-																() => new DisplayableElementLocalData( "pre" ),
-																children: getMessageContent( logEvent.message, detailsExpanded ) ) )
-															.Append( getPropertiesComponent( logEvent.properties, detailsExpanded ) )
-															.Materialize() ) )
-												.Materialize()
-												.ToCell(
-													setup: new TableCellSetup(
-														etherealContent: new EwfHiddenField( bool.FalseString, id: detailsExpandedFieldId, pageModificationValue: detailsExpandedPmv )
-															.PageComponent.ToCollection() ) ) )
-										.Materialize() );
-							} ) );
+				components.Add( new FlowIdContainer( eventTable.ToCollection(), updateRegionSets: newEventRegion ) );
 
 				return components;
 			},
@@ -245,6 +218,64 @@ partial class DebugLog {
 				if( parametersModification.PropertyValue.Length > 0 && parametersModification.PropertyName.Length == 0 )
 					validator.NoteErrorAndAddMessage( "Please enter a property name for the value." );
 			} ) );
+	}
+
+	private DbCommand getQueryCommand( DatabaseInfo dbInfo, long? latestId, int? rowLimit ) {
+		var command = dbInfo.CreateCommand();
+
+		DbCommandParameter? latestIdParameter = null;
+		if( latestId.HasValue ) {
+			latestIdParameter = new DbCommandParameter( "latestId", new DbParameterValue( latestId.Value ) );
+			command.Parameters.Add( latestIdParameter.GetAdoDotNetParameter( dbInfo ) );
+		}
+
+		command.CommandText = rowLimit.HasValue ? "SELECT *, COUNT(*) OVER() FROM Events" : "SELECT COUNT(*) FROM Events";
+
+		// simple contains filter
+		if( EventContains.Pattern.Length > 0 ) {
+			command.CommandText += " WHERE ( ( ";
+			( (InlineDbCommandCondition)new LikeCondition( LikeCondition.Behavior.AndedTokens, "Message", EventContains.Pattern ) ).AddToCommand(
+				command,
+				dbInfo,
+				"messageContains" );
+			command.CommandText += " ) OR ( ";
+			( (InlineDbCommandCondition)new LikeCondition( LikeCondition.Behavior.AndedTokens, "Properties", EventContains.Pattern ) ).AddToCommand(
+				command,
+				dbInfo,
+				"propertiesContains" );
+			command.CommandText += " ) )";
+		}
+
+		// single property filter
+		if( PropertyName.Length > 0 ) {
+			command.CommandText += EventContains.Pattern.Length > 0 ? " AND " : " WHERE ";
+
+			var nameParameter = new DbCommandParameter( "propertyName", new DbParameterValue( "$." + PropertyName ) );
+			command.CommandText += $"Properties -> {nameParameter.GetNameForCommandText( dbInfo )} ";
+			command.Parameters.Add( nameParameter.GetAdoDotNetParameter( dbInfo ) );
+
+			if( propertyValueArray is not null ) {
+				var parameters = propertyValueArray.Select( ( value, index ) => new DbCommandParameter(
+						$"propertyValue{index}",
+						new DbParameterValue( value?.ToJsonStringWithSimpleEscaping() ?? "null" ) ) )
+					.Materialize();
+				command.CommandText += $"IN( {StringTools.ConcatenateWithDelimiter( ", ", parameters.Select( i => i.GetNameForCommandText( dbInfo ) ) )} )";
+				foreach( var i in parameters )
+					command.Parameters.Add( i.GetAdoDotNetParameter( dbInfo ) );
+			}
+			else
+				command.CommandText += "NOTNULL";
+		}
+
+		if( latestIdParameter is not null ) {
+			command.CommandText += EventContains.Pattern.Length > 0 || PropertyName.Length > 0 ? " AND " : " WHERE ";
+			command.CommandText += $"Id {( rowLimit.HasValue ? "<=" : ">" )} {latestIdParameter.GetNameForCommandText( dbInfo )}";
+		}
+
+		if( rowLimit.HasValue )
+			command.CommandText += $" ORDER BY Id DESC LIMIT {rowLimit.Value}";
+
+		return command;
 	}
 
 	private EwfTableCell getTimeCell( string dbTime ) {
