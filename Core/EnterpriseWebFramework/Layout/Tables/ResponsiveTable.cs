@@ -482,12 +482,11 @@ public class ResponsiveTable<ItemIdType>: FlowComponent {
 	}
 
 	/// <summary>
-	/// Adds items to the table based on the current item limit.
-	/// 
-	/// You can pass EwfTableItem wherever EwfTableItem&lt;int&gt; is expected.
+	/// Adds items to the table based on the current item limit. The items are always created during this call: their creation is never deferred.
+	/// <para>You can pass EwfTableItem wherever EwfTableItem&lt;int&gt; is expected.</para>
 	/// </summary>
 	/// <param name="itemGetter">A function that takes the remaining number of items that can be shown based on the current limit and returns the items to add
-	/// along with the total number of items that could be added if there was no limit.</param>
+	/// along with the total number of items that could be added if there was no limit. We recommend naming the parameter “limit”.</param>
 	public ResponsiveTable<ItemIdType> AddLimitedItems( Func<int, ( IEnumerable<EwfTableItem<ItemIdType>> items, int totalItemCount )> itemGetter ) {
 		var itemsAndCount = itemGetter( ( itemLimit?.Value ?? (int)DataRowLimit.Unlimited ) - itemGroups.Sum( i => i.Items.Count ) );
 
