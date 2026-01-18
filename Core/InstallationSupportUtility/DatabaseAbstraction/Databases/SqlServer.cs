@@ -193,8 +193,8 @@ LOG ON (
 		ExecuteDbMethod(
 			delegate( DatabaseConnection cn ) {
 				foreach( var i in DatabaseOps.GetDatabaseTables( this ) ) {
-					executeLongRunningCommand( cn, "ALTER INDEX ALL ON " + i.table.QualifiedName + " REBUILD" );
-					executeLongRunningCommand( cn, "UPDATE STATISTICS " + i.table.QualifiedName );
+					executeLongRunningCommand( cn, "ALTER INDEX ALL ON " + i.tableName.QualifiedName + " REBUILD" );
+					executeLongRunningCommand( cn, "UPDATE STATISTICS " + i.tableName.QualifiedName );
 				}
 			} );
 	}

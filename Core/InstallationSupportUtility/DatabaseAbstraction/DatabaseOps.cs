@@ -63,14 +63,17 @@ public static class DatabaseOps {
 	/// <summary>
 	/// Gets the tables in the specified database, ordered by name.
 	/// </summary>
-	public static IEnumerable<( string name, bool hasModTable )> GetDatabaseTables( Database database ) {
-		var tableNames = database.GetTables().Materialize();
+	public static IEnumerable<( DatabaseTable tableName, bool hasModTable )> GetDatabaseTables( Database database ) {
+		var tables = database.GetTables().Materialize();
 
 		var modTableSuffix = GetModificationTableSuffix( database );
-		bool isModTable( string table ) => table.EndsWithIgnoreCase( modTableSuffix );
-		var modTables = tableNames.Where( isModTable ).ToImmutableHashSet( StringComparer.Ordinal );
+		bool isModTable( DatabaseTable table ) => table.Name.EndsWithIgnoreCase( modTableSuffix );
+		var modTables = tables.Where( isModTable ).Select( i => i.QualifiedName ).ToImmutableHashSet( StringComparer.Ordinal );
 
-		return database.GetTables().Where( i => !isModTable( i ) ).OrderBy( i => i ).Select( i => ( i, modTables.Contains( i + modTableSuffix ) ) );
+		return tables.Where( i => !isModTable( i ) )
+			.OrderBy( i => i.Schema )
+			.ThenBy( i => i.Name )
+			.Select( i => ( i, modTables.Contains( i.QualifiedName + modTableSuffix ) ) );
 	}
 
 	public static string GetModificationTableSuffix( Database database ) =>
@@ -82,10 +85,10 @@ public static class DatabaseOps {
 			};
 
 	public static void ClearModificationTables( Database database ) {
-		foreach( var table in GetDatabaseTables( database ).Where( i => i.hasModTable ).Select( i => i.name ) )
+		foreach( var table in GetDatabaseTables( database ).Where( i => i.hasModTable ).Select( i => i.tableName ) )
 			database.ExecuteDbMethod( connection => {
 				var command = connection.DatabaseInfo.CreateCommand();
-				command.CommandText = "DELETE FROM {0}".FormatWith( table + GetModificationTableSuffix( database ) );
+				command.CommandText = "DELETE FROM {0}".FormatWith( table.QualifiedName + GetModificationTableSuffix( database ) );
 				connection.ExecuteNonQueryCommand( command );
 			} );
 	}
