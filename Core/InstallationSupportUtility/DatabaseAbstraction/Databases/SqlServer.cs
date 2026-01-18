@@ -169,17 +169,17 @@ LOG ON (
 
 	IEnumerable<DataRow> Database.GetDataTypes() => throw new NotSupportedException();
 
-	IEnumerable<string> Database.GetTables() {
-		var tables = new List<string>();
+	IEnumerable<DatabaseTable> Database.GetTables() {
+		var tables = new List<DatabaseTable>();
 		ExecuteDbMethod(
 			delegate( DatabaseConnection cn ) {
 				var command = cn.DatabaseInfo.CreateCommand();
-				command.CommandText = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE Table_Type = 'Base Table'";
+				command.CommandText = "SELECT TABLE_SCHEMA, TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE Table_Type = 'Base Table'";
 				cn.ExecuteReaderCommand(
 					command,
 					reader => {
 						while( reader.Read() )
-							tables.Add( reader.GetString( 0 ) );
+							tables.Add( new DatabaseTable( reader.GetString( 0 ), reader.GetString( 1 ) ) );
 					} );
 			} );
 		return tables;
@@ -192,9 +192,9 @@ LOG ON (
 	void Database.PerformMaintenance() {
 		ExecuteDbMethod(
 			delegate( DatabaseConnection cn ) {
-				foreach( var table in DatabaseOps.GetDatabaseTables( this ) ) {
-					executeLongRunningCommand( cn, "ALTER INDEX ALL ON " + table.name + " REBUILD" );
-					executeLongRunningCommand( cn, "UPDATE STATISTICS " + table.name );
+				foreach( var i in DatabaseOps.GetDatabaseTables( this ) ) {
+					executeLongRunningCommand( cn, "ALTER INDEX ALL ON " + i.table.QualifiedName + " REBUILD" );
+					executeLongRunningCommand( cn, "UPDATE STATISTICS " + i.table.QualifiedName );
 				}
 			} );
 	}

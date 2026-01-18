@@ -153,8 +153,8 @@ public class MySql: Database {
 
 	IEnumerable<DataRow> Database.GetDataTypes() => throw new NotSupportedException();
 
-	IEnumerable<string> Database.GetTables() {
-		var tables = new List<string>();
+	IEnumerable<DatabaseTable> Database.GetTables() {
+		var tables = new List<DatabaseTable>();
 		ExecuteDbMethod(
 			delegate( DatabaseConnection cn ) {
 				var command = cn.DatabaseInfo.CreateCommand();
@@ -164,7 +164,7 @@ public class MySql: Database {
 					command,
 					reader => {
 						while( reader.Read() )
-							tables.Add( reader.GetString( 0 ) );
+							tables.Add( new DatabaseTable( "", reader.GetString( 0 ) ) );
 					} );
 			} );
 		return tables;

@@ -36,7 +36,7 @@ public interface Database {
 
 	// Other
 	IEnumerable<DataRow> GetDataTypes();
-	IEnumerable<string> GetTables();
+	IEnumerable<DatabaseTable> GetTables();
 	IEnumerable<string> GetProcedures();
 	IEnumerable<DataRow> GetProcedureParameters( string procedure );
 	void PerformMaintenance();

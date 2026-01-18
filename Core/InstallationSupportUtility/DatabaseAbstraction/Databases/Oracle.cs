@@ -87,12 +87,11 @@ public class Oracle: Database {
 					}
 				} );
 
-			IoMethods.ExecuteWithTempFolder(
-				folderPath => {
-					IoMethods.CopyFile( getDumpFilePath(), EwlStatics.CombinePaths( folderPath, databaseFileDumpFileName ) );
-					File.WriteAllText( EwlStatics.CombinePaths( folderPath, databaseFileSchemaNameFileName ), info.UserAndSchema );
-					ZipOps.ZipFolderAsFile( folderPath, filePath );
-				} );
+			IoMethods.ExecuteWithTempFolder( folderPath => {
+				IoMethods.CopyFile( getDumpFilePath(), EwlStatics.CombinePaths( folderPath, databaseFileDumpFileName ) );
+				File.WriteAllText( EwlStatics.CombinePaths( folderPath, databaseFileSchemaNameFileName ), info.UserAndSchema );
+				ZipOps.ZipFolderAsFile( folderPath, filePath );
+			} );
 		}
 		finally {
 			IoMethods.DeleteFile( getDumpFilePath() );
@@ -115,41 +114,40 @@ public class Oracle: Database {
 
 		if( filePath.Any() )
 			try {
-				IoMethods.ExecuteWithTempFolder(
-					tempFolderPath => {
-						var folderPath = EwlStatics.CombinePaths( tempFolderPath, "Database File" );
-						ZipOps.UnZipFileAsFolder( filePath, folderPath );
-						try {
-							IoMethods.CopyFile( EwlStatics.CombinePaths( folderPath, databaseFileDumpFileName ), getDumpFilePath() );
+				IoMethods.ExecuteWithTempFolder( tempFolderPath => {
+					var folderPath = EwlStatics.CombinePaths( tempFolderPath, "Database File" );
+					ZipOps.UnZipFileAsFolder( filePath, folderPath );
+					try {
+						IoMethods.CopyFile( EwlStatics.CombinePaths( folderPath, databaseFileDumpFileName ), getDumpFilePath() );
 
-							executeMethodWithDbExceptionHandling(
-								delegate {
-									try {
-										var fileSchema = File.ReadAllText( EwlStatics.CombinePaths( folderPath, databaseFileSchemaNameFileName ) );
-										TewlContrib.ProcessTools.RunProgram(
-											"impdp",
-											$""""{getLogonString()} REMAP_SCHEMA={fileSchema}:{info.UserAndSchema} DIRECTORY={dataPumpDirectoryObject} DUMPFILE="""{getDumpFileName()}""" NOLOGFILE=y"""",
-											"",
-											true );
-									}
-									catch( Exception e ) {
-										throwUserCorrectableExceptionIfNecessary( e );
-										if( e is FileNotFoundException )
-											throw new UserCorrectableException(
-												"The schema name file was not found, probably because of a corrupt database file in the data package.",
-												e );
+						executeMethodWithDbExceptionHandling(
+							delegate {
+								try {
+									var fileSchema = File.ReadAllText( EwlStatics.CombinePaths( folderPath, databaseFileSchemaNameFileName ) );
+									TewlContrib.ProcessTools.RunProgram(
+										"impdp",
+										$""""{getLogonString()} REMAP_SCHEMA={fileSchema}:{info.UserAndSchema} DIRECTORY={dataPumpDirectoryObject} DUMPFILE="""{getDumpFileName()}""" NOLOGFILE=y"""",
+										"",
+										true );
+								}
+								catch( Exception e ) {
+									throwUserCorrectableExceptionIfNecessary( e );
+									if( e is FileNotFoundException )
+										throw new UserCorrectableException(
+											"The schema name file was not found, probably because of a corrupt database file in the data package.",
+											e );
 
-										// Secondary databases such as RLE cause procedure compilation errors when imported, and since we have no way of
-										// distinguishing these from legitimate import problems, we have no choice but to ignore all exceptions.
-										if( ( info as DatabaseInfo ).SecondaryDatabaseName.Length == 0 )
-											throw DataAccessMethods.CreateDbConnectionException( info, "re-creating (from file)", e );
-									}
-								} );
-						}
-						finally {
-							IoMethods.DeleteFile( getDumpFilePath() );
-						}
-					} );
+									// Secondary databases such as RLE cause procedure compilation errors when imported, and since we have no way of
+									// distinguishing these from legitimate import problems, we have no choice but to ignore all exceptions.
+									if( ( info as DatabaseInfo ).SecondaryDatabaseName.Length == 0 )
+										throw DataAccessMethods.CreateDbConnectionException( info, "re-creating (from file)", e );
+								}
+							} );
+					}
+					finally {
+						IoMethods.DeleteFile( getDumpFilePath() );
+					}
+				} );
 			}
 			catch {
 				// We don't want to leave a partial user/schema on the machine since it may confuse future ISU operations.
@@ -166,22 +164,21 @@ public class Oracle: Database {
 				throw;
 			}
 		else
-			ExecuteDbMethod(
-				cn => {
-					executeLongRunningCommand(
-						cn,
-						@"CREATE TABLE global_numbers (
+			ExecuteDbMethod( cn => {
+				executeLongRunningCommand(
+					cn,
+					@"CREATE TABLE global_numbers (
 	k VARCHAR2( 100 )
 		CONSTRAINT global_numbers_pk PRIMARY KEY,
 	v NUMBER
 )" );
-					var lineMarkerInsert = new InlineInsert( "global_numbers" );
-					lineMarkerInsert.AddColumnModifications( new InlineDbCommandColumnValue( "k", new DbParameterValue( "LineMarker" ) ).ToCollection() );
-					lineMarkerInsert.AddColumnModifications( new InlineDbCommandColumnValue( "v", new DbParameterValue( 0 ) ).ToCollection() );
-					lineMarkerInsert.Execute( cn );
+				var lineMarkerInsert = new InlineInsert( "global_numbers" );
+				lineMarkerInsert.AddColumnModifications( new InlineDbCommandColumnValue( "k", new DbParameterValue( "LineMarker" ) ).ToCollection() );
+				lineMarkerInsert.AddColumnModifications( new InlineDbCommandColumnValue( "v", new DbParameterValue( 0 ) ).ToCollection() );
+				lineMarkerInsert.Execute( cn );
 
-					executeLongRunningCommand( cn, "CREATE SEQUENCE main_sequence" );
-				} );
+				executeLongRunningCommand( cn, "CREATE SEQUENCE main_sequence" );
+			} );
 	}
 
 	private void deleteAndReCreateUser( DatabaseConnection cn ) {
@@ -250,8 +247,8 @@ public class Oracle: Database {
 		return rows!;
 	}
 
-	IEnumerable<string> Database.GetTables() {
-		var tables = new List<string>();
+	IEnumerable<DatabaseTable> Database.GetTables() {
+		var tables = new List<DatabaseTable>();
 		ExecuteDbMethod(
 			delegate( DatabaseConnection cn ) {
 				var command = cn.DatabaseInfo.CreateCommand();
@@ -260,7 +257,7 @@ public class Oracle: Database {
 					command,
 					reader => {
 						while( reader.Read() )
-							tables.Add( reader.GetString( 0 ) );
+							tables.Add( new DatabaseTable( "", reader.GetString( 0 ) ) );
 					} );
 			} );
 		return tables;
@@ -278,29 +275,27 @@ public class Oracle: Database {
 
 	IEnumerable<DataRow> Database.GetProcedureParameters( string procedure ) {
 		List<DataRow>? rows = null;
-		ExecuteDbMethod(
-			cn => {
-				rows = cn.GetSchema( "ProcedureParameters", null, procedure ).Rows.Cast<DataRow>().ToList();
-				rows.Sort( ( x, y ) => (int)( (decimal)x[ "POSITION" ] - (decimal)y[ "POSITION" ] ) );
-			} );
+		ExecuteDbMethod( cn => {
+			rows = cn.GetSchema( "ProcedureParameters", null, procedure ).Rows.Cast<DataRow>().ToList();
+			rows.Sort( ( x, y ) => (int)( (decimal)x[ "POSITION" ] - (decimal)y[ "POSITION" ] ) );
+		} );
 		return rows!;
 	}
 
 	void Database.PerformMaintenance() {
-		ExecuteDbMethod(
-			cn => {
-				var command = cn.DatabaseInfo.CreateCommand();
-				command.CommandText = "SELECT index_name FROM user_indexes WHERE index_type != 'LOB'";
-				var indexes = new List<string>();
-				cn.ExecuteReaderCommand(
-					command,
-					reader => {
-						while( reader.Read() )
-							indexes.Add( reader.GetString( 0 ) );
-					} );
-				foreach( var index in indexes )
-					executeLongRunningCommand( cn, "ALTER INDEX {0} REBUILD ONLINE".FormatWith( index ) );
-			} );
+		ExecuteDbMethod( cn => {
+			var command = cn.DatabaseInfo.CreateCommand();
+			command.CommandText = "SELECT index_name FROM user_indexes WHERE index_type != 'LOB'";
+			var indexes = new List<string>();
+			cn.ExecuteReaderCommand(
+				command,
+				reader => {
+					while( reader.Read() )
+						indexes.Add( reader.GetString( 0 ) );
+				} );
+			foreach( var index in indexes )
+				executeLongRunningCommand( cn, "ALTER INDEX {0} REBUILD ONLINE".FormatWith( index ) );
+		} );
 	}
 
 	private void executeLongRunningCommand( DatabaseConnection cn, string commandText ) {

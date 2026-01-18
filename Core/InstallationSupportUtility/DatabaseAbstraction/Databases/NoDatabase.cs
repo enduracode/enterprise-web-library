@@ -25,7 +25,7 @@ internal class NoDatabase: Database {
 	void Database.DeleteAndReCreateFromFile( string filePath ) {}
 
 	IEnumerable<DataRow> Database.GetDataTypes() => throw new NotSupportedException();
-	IEnumerable<string> Database.GetTables() => [ ];
+	IEnumerable<DatabaseTable> Database.GetTables() => [ ];
 	IEnumerable<string> Database.GetProcedures() => throw new NotSupportedException();
 	IEnumerable<DataRow> Database.GetProcedureParameters( string procedure ) => throw new NotSupportedException();
 	void Database.PerformMaintenance() {}
