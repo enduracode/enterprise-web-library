@@ -29,7 +29,11 @@ internal static class RowConstantStatics {
 				valueColumn = columns.AllColumnsExceptRowVersion.Single( column => column.Name.ToLower() == rowConstantTable.valueColumn.ToLower() );
 				var nameColumn = columns.AllColumnsExceptRowVersion.Single( column => column.Name.ToLower() == rowConstantTable.nameColumn.ToLower() );
 
-				var cmd = new InlineSelect( [ "*" ], $"FROM {table.Name}", false, orderByClause: orderIsSpecified ? $"ORDER BY {rowConstantTable.orderByColumn}" : "" );
+				var cmd = new InlineSelect(
+						[ "*" ],
+					$"FROM {table.QualifiedName}",
+					false,
+					orderByClause: orderIsSpecified ? $"ORDER BY {rowConstantTable.orderByColumn}" : "" );
 				cmd.Execute(
 					cn,
 					reader => {
