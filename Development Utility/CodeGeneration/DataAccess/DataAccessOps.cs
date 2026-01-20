@@ -126,7 +126,13 @@ internal static class DataAccessOps {
 
 				// database logic access - custom
 				writer.WriteLine();
-				RowConstantStatics.Generate( cn, writer, baseNamespace, database, configuration );
+				RowConstantStatics.Generate(
+					cn,
+					writer,
+					baseNamespace,
+					database,
+					configuration,
+					specifiedName => tableNames.Single( i => tableMatchesSpecifiedName( database, i, specifiedName ) ) );
 
 				// retrieval and modification commands - standard
 				writer.WriteLine();

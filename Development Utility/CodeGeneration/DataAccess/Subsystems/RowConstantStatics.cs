@@ -13,22 +13,23 @@ internal static class RowConstantStatics {
 
 	internal static void Generate(
 		DatabaseConnection cn, TextWriter writer, string baseNamespace, Database database,
-		EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
+		EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration, Func<string, DatabaseTable> tableGetter ) {
 		if( configuration.rowConstantTables == null )
 			return;
 
-		writer.WriteLine( "namespace " + baseNamespace + "." + database.SecondaryDatabaseName + "RowConstants {" );
-		foreach( var table in configuration.rowConstantTables ) {
+		foreach( var rowConstantTable in configuration.rowConstantTables ) {
+			DatabaseTable table;
 			Column valueColumn;
-			var orderIsSpecified = !table.orderByColumn.IsNullOrWhiteSpace();
+			var orderIsSpecified = !rowConstantTable.orderByColumn.IsNullOrWhiteSpace();
 			var rows = new List<Row>();
 			var duplicatesExist = false;
 			try {
-				var columns = new TableColumns( cn, table.tableName, false );
-				valueColumn = columns.AllColumnsExceptRowVersion.Single( column => column.Name.ToLower() == table.valueColumn.ToLower() );
-				var nameColumn = columns.AllColumnsExceptRowVersion.Single( column => column.Name.ToLower() == table.nameColumn.ToLower() );
+				table = tableGetter( rowConstantTable.tableName );
+				var columns = new TableColumns( cn, table, false );
+				valueColumn = columns.AllColumnsExceptRowVersion.Single( column => column.Name.ToLower() == rowConstantTable.valueColumn.ToLower() );
+				var nameColumn = columns.AllColumnsExceptRowVersion.Single( column => column.Name.ToLower() == rowConstantTable.nameColumn.ToLower() );
 
-				var cmd = new InlineSelect( [ "*" ], $"FROM {table.tableName}", false, orderByClause: orderIsSpecified ? $"ORDER BY {table.orderByColumn}" : "" );
+				var cmd = new InlineSelect( [ "*" ], $"FROM {table.Name}", false, orderByClause: orderIsSpecified ? $"ORDER BY {rowConstantTable.orderByColumn}" : "" );
 				cmd.Execute(
 					cn,
 					reader => {
@@ -52,12 +53,15 @@ internal static class RowConstantStatics {
 			}
 			catch( Exception e ) {
 				throw new UserCorrectableException(
-					"Column or data retrieval failed for the " + table.tableName +
+					"Column or data retrieval failed for the " + rowConstantTable.tableName +
 					" row constant table. Make sure the table and the value, name, and order by columns exist.",
 					e );
 			}
 
-			var pascalTableName = table.tableName.TableNameToPascal( cn );
+			writer.WriteLine(
+				$$"""namespace {{baseNamespace}}.{{database.SecondaryDatabaseName}}RowConstants{{DataAccessStatics.GetSchemaNamespaceSuffix( database, table )}} {""" );
+
+			var pascalTableName = table.Name.TableNameToPascal( cn );
 			string className;
 			if( duplicatesExist ) {
 				var singularTableName = pascalTableName.Singularize( inputIsKnownToBePlural: false );
@@ -78,7 +82,7 @@ internal static class RowConstantStatics {
 				// Consider singularizing the table name here, too.
 				className = pascalTableName + "Rows";
 
-			CodeGenerationStatics.AddSummaryDocComment( writer, "Provides constants copied from the " + table.tableName + " table." );
+			CodeGenerationStatics.AddSummaryDocComment( writer, "Provides constants copied from the " + table.Name + " table." );
 			writer.WriteLine( "public class " + className + " {" );
 
 			// constants
@@ -105,8 +109,9 @@ internal static class RowConstantStatics {
 			}
 
 			writer.WriteLine( "}" ); // class
+
+			writer.WriteLine( "}" ); // namespace
 		}
-		writer.WriteLine( "}" ); // namespace
 	}
 
 	private static bool isPascalCase( string text ) =>
