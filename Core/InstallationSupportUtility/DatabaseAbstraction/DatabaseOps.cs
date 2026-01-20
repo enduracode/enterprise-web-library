@@ -66,7 +66,7 @@ public static class DatabaseOps {
 	public static IEnumerable<( DatabaseTable tableName, bool hasModTable )> GetDatabaseTables( Database database ) {
 		var tables = database.GetTables().Materialize();
 
-		var modTableSuffix = GetModificationTableSuffix( database );
+		var modTableSuffix = getModificationTableSuffix( database );
 		bool isModTable( DatabaseTable table ) => table.Name.EndsWithIgnoreCase( modTableSuffix );
 		var modTables = tables.Where( isModTable ).Select( i => i.QualifiedName ).ToImmutableHashSet( StringComparer.Ordinal );
 
@@ -76,7 +76,10 @@ public static class DatabaseOps {
 			.Select( i => ( i, modTables.Contains( ( i with { Name = i.Name + modTableSuffix } ).QualifiedName ) ) );
 	}
 
-	public static string GetModificationTableSuffix( Database database ) =>
+	public static string GetModificationTableQualifiedName( Database database, DatabaseTable table ) =>
+		( table with { Name = table.Name + getModificationTableSuffix( database ) } ).QualifiedName;
+
+	private static string getModificationTableSuffix( Database database ) =>
 		database switch
 			{
 				MySql => "_table_{0}_modifications".FormatWith( EwlStatics.EwlInitialism.ToLowerInvariant() ),
@@ -88,7 +91,7 @@ public static class DatabaseOps {
 		foreach( var table in GetDatabaseTables( database ).Where( i => i.hasModTable ).Select( i => i.tableName ) )
 			database.ExecuteDbMethod( connection => {
 				var command = connection.DatabaseInfo.CreateCommand();
-				command.CommandText = "DELETE FROM {0}".FormatWith( ( table with { Name = table.Name + GetModificationTableSuffix( database ) } ).QualifiedName );
+				command.CommandText = "DELETE FROM {0}".FormatWith( GetModificationTableQualifiedName( database, table ) );
 				connection.ExecuteNonQueryCommand( command );
 			} );
 	}

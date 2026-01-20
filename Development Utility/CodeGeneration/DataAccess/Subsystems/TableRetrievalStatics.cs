@@ -27,7 +27,7 @@ internal static class TableRetrievalStatics {
 			writer.WriteLine( $$"""{{subsystemNamespace}} {""" );
 
 			CodeGenerationStatics.AddSummaryDocComment( writer, "Contains logic that retrieves rows from the " + table.tableName.QualifiedName + " table." );
-			writer.WriteLine( "public static partial class " + GetClassName( cn, table.tableName ) + " {" );
+			writer.WriteLine( "public static partial class " + GetClassName( cn, table.tableName.Name ) + " {" );
 
 			var isRevisionHistoryTable = table.isRevisionHistoryTable;
 			var columns = new TableColumns( cn, table.tableName, isRevisionHistoryTable );
@@ -49,7 +49,7 @@ internal static class TableRetrievalStatics {
 						return;
 
 					var modClass =
-						$"{database.SecondaryDatabaseName}Modification{DataAccessStatics.GetSchemaNamespaceSuffix( database, table.tableName )}.{StandardModificationStatics.GetClassName( cn, table.tableName, isRevisionHistoryTable, isRevisionHistoryTable )}";
+						$"{database.SecondaryDatabaseName}Modification{DataAccessStatics.GetSchemaNamespaceSuffix( database, table.tableName )}.{StandardModificationStatics.GetClassName( cn, table.tableName.Name, isRevisionHistoryTable, isRevisionHistoryTable )}";
 					var revisionHistorySuffix = StandardModificationStatics.GetRevisionHistorySuffix( isRevisionHistoryTable );
 					writer.WriteLine( "public " + modClass + " ToModification" + revisionHistorySuffix + "() {" );
 					writer.WriteLine(
@@ -150,7 +150,7 @@ internal static class TableRetrievalStatics {
 				writeToIdDictionaryMethod( writer, columns );
 
 			if( isRevisionHistoryTable )
-				DataAccessStatics.WriteRevisionDeltaExtensionMethods( writer, GetClassName( cn, table.tableName ), columns.DataColumns );
+				DataAccessStatics.WriteRevisionDeltaExtensionMethods( writer, GetClassName( cn, table.tableName.Name ), columns.DataColumns );
 
 			writer.WriteLine( "}" ); // class
 
@@ -158,9 +158,9 @@ internal static class TableRetrievalStatics {
 
 			if( table.hasModTable )
 				initStatements.Add(
-					$"{baseNamespace}.{subsystemName}{DataAccessStatics.GetSchemaNamespaceSuffix( database, table.tableName )}.{GetClassName( cn, table.tableName )}.__Init();" );
+					$"{baseNamespace}.{subsystemName}{DataAccessStatics.GetSchemaNamespaceSuffix( database, table.tableName )}.{GetClassName( cn, table.tableName.Name )}.__Init();" );
 
-			var templateClassName = GetClassName( cn, table.tableName, omitAtSignPrefixIfNotRequired: true );
+			var templateClassName = GetClassName( cn, table.tableName.Name, omitAtSignPrefixIfNotRequired: true );
 			var templateFilePath = EwlStatics.CombinePaths(
 				templateBasePath,
 				subsystemName,
@@ -274,7 +274,7 @@ internal static class TableRetrievalStatics {
 			"command.CommandText = \"SELECT {0}, {1} FROM {2}\";".FormatWith(
 				StringTools.ConcatenateWithDelimiter( ", ", tableColumns.KeyColumns.Select( i => i.DelimitedIdentifier.EscapeForLiteral() ) ),
 				cn.DatabaseInfo is SqlServerInfo ? "COUNT_BIG(*)" : "COUNT(*)",
-				( table with { Name = table.Name + DatabaseOps.GetModificationTableSuffix( database ) } ).QualifiedName ) );
+				DatabaseOps.GetModificationTableQualifiedName( database, table ) ) );
 		if( excludePreviousRevisions ) {
 			writer.WriteLine( "command.CommandText += \" WHERE \";" );
 			writer.WriteLine(
@@ -607,8 +607,8 @@ internal static class TableRetrievalStatics {
 		writer.WriteLine( "}" );
 	}
 
-	internal static string GetClassName( DatabaseConnection cn, DatabaseTable table, bool omitAtSignPrefixIfNotRequired = false ) =>
+	internal static string GetClassName( DatabaseConnection cn, string table, bool omitAtSignPrefixIfNotRequired = false ) =>
 		EwlStatics.GetCSharpIdentifier(
-			"{0}TableRetrieval".FormatWith( table.Name.TableNameToPascal( cn ) ),
+			"{0}TableRetrieval".FormatWith( table.TableNameToPascal( cn ) ),
 			omitAtSignPrefixIfNotRequired: omitAtSignPrefixIfNotRequired );
 }

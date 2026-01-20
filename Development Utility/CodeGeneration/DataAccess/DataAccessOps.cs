@@ -105,7 +105,7 @@ internal static class DataAccessOps {
 
 					var modTableColumns = Column.GetColumnsInQueryResults(
 						cn,
-						"SELECT * FROM {0}".FormatWith( ( table with { Name = table.Name + DatabaseOps.GetModificationTableSuffix( database ) } ).QualifiedName ),
+						"SELECT * FROM {0}".FormatWith( DatabaseOps.GetModificationTableQualifiedName( database, table ) ),
 						false,
 						false );
 
@@ -155,7 +155,16 @@ internal static class DataAccessOps {
 					initStatements );
 
 				writer.WriteLine();
-				StandardModificationStatics.Generate( cn, writer, baseNamespace, templateBasePath, database, tables, configuration );
+				StandardModificationStatics.Generate(
+					cn,
+					writer,
+					baseNamespace,
+					templateBasePath,
+					database,
+					tables.Select( table => ( table.tableName, table.hasModTable,
+						                        configuration.revisionHistoryTables is {} rhTables &&
+						                        rhTables.Any( i => tableMatchesSpecifiedName( database, table.tableName, i ) ) ) ),
+					configuration );
 
 				// retrieval and modification commands - custom
 				writer.WriteLine();
