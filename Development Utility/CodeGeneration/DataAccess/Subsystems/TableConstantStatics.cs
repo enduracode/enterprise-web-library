@@ -4,14 +4,16 @@ using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess.Subsystems;
 
 internal static class TableConstantStatics {
-	internal static void Generate( DatabaseConnection cn, TextWriter writer, string baseNamespace, Database database, IEnumerable<string> tableNames ) {
-		writer.WriteLine( "namespace " + baseNamespace + "." + database.SecondaryDatabaseName + "TableConstants {" );
-		foreach( var table in tableNames ) {
-			CodeGenerationStatics.AddSummaryDocComment( writer, "This object represents the constants of the " + table + " table." );
-			writer.WriteLine( "public class " + EwlStatics.GetCSharpIdentifier( table.TableNameToPascal( cn ) + "Table" ) + " {" );
+	internal static void Generate( DatabaseConnection cn, TextWriter writer, string baseNamespace, Database database, IEnumerable<DatabaseTable> tables ) {
+		foreach( var table in tables ) {
+			writer.WriteLine(
+				$$"""namespace {{baseNamespace}}.{{database.SecondaryDatabaseName}}TableConstants{{DataAccessStatics.GetSchemaNamespaceSuffix( database, table )}} {""" );
+
+			CodeGenerationStatics.AddSummaryDocComment( writer, "This object represents the constants of the " + table.QualifiedName + " table." );
+			writer.WriteLine( "public class " + EwlStatics.GetCSharpIdentifier( table.Name.TableNameToPascal( cn ) + "Table" ) + " {" );
 
 			CodeGenerationStatics.AddSummaryDocComment( writer, "The name of this table." );
-			writer.WriteLine( "public const string Name = \"" + table + "\";" );
+			writer.WriteLine( "public const string Name = \"" + table.QualifiedName + "\";" );
 
 			foreach( var column in new TableColumns( cn, table, false ).AllColumnsExceptRowVersion ) {
 				CodeGenerationStatics.AddSummaryDocComment( writer, "Contains schema information about this column." );
@@ -29,7 +31,8 @@ internal static class TableConstantStatics {
 			}
 
 			writer.WriteLine( "}" );
+
+			writer.WriteLine( "}" );
 		}
-		writer.WriteLine( "}" );
 	}
 }
