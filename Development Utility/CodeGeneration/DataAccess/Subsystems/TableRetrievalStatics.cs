@@ -12,23 +12,25 @@ internal static class TableRetrievalStatics {
 
 	internal static void Generate(
 		DatabaseConnection cn, TextWriter writer, string baseNamespace, string templateBasePath, Database database,
-		IEnumerable<( string name, bool hasModTable )> tables, EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration,
+		IEnumerable<( DatabaseTable tableName, bool isSmallTable, bool hasModTable, bool tableUsesRowVersionedCaching, bool isRevisionHistoryTable )> tables,
 		List<string> initStatements ) {
 		var subsystemName = "{0}TableRetrieval".FormatWith( database.SecondaryDatabaseName );
-		var subsystemNamespace = "namespace {0}.{1}".FormatWith( baseNamespace, subsystemName );
 
 		foreach( var filePath in IoMethods.GetFilePathsInFolder(
 			        EwlStatics.CombinePaths( templateBasePath, subsystemName ),
-			        searchPattern: "*" + DataAccessStatics.CSharpTemplateFileExtension ) )
+			        searchPattern: "*" + DataAccessStatics.CSharpTemplateFileExtension,
+			        searchOption: SearchOption.AllDirectories ) )
 			IoMethods.DeleteFile( filePath );
 
-		writer.WriteLine( "{0} {{".FormatWith( subsystemNamespace ) );
 		foreach( var table in tables ) {
-			CodeGenerationStatics.AddSummaryDocComment( writer, "Contains logic that retrieves rows from the " + table.name + " table." );
-			writer.WriteLine( "public static partial class " + GetClassName( cn, table.name ) + " {" );
+			var subsystemNamespace = $"namespace {baseNamespace}.{subsystemName}{DataAccessStatics.GetSchemaNamespaceSuffix( database, table.tableName )}";
+			writer.WriteLine( $$"""{{subsystemNamespace}} {""" );
 
-			var isRevisionHistoryTable = DataAccessStatics.IsRevisionHistoryTable( table.name, configuration );
-			var columns = new TableColumns( cn, table.name, isRevisionHistoryTable );
+			CodeGenerationStatics.AddSummaryDocComment( writer, "Contains logic that retrieves rows from the " + table.tableName.QualifiedName + " table." );
+			writer.WriteLine( "public static partial class " + GetClassName( cn, table.tableName ) + " {" );
+
+			var isRevisionHistoryTable = table.isRevisionHistoryTable;
+			var columns = new TableColumns( cn, table.tableName, isRevisionHistoryTable );
 
 			// Write nested classes.
 			RetrievalStatics.WriteRowClasses(
@@ -46,8 +48,8 @@ internal static class TableRetrievalStatics {
 					if( !columns.HasKeyColumns || !columns.DataColumns.Any() )
 						return;
 
-					var modClass = database.SecondaryDatabaseName + "Modification." +
-					               StandardModificationStatics.GetClassName( cn, table.name, isRevisionHistoryTable, isRevisionHistoryTable );
+					var modClass =
+						$"{database.SecondaryDatabaseName}Modification{DataAccessStatics.GetSchemaNamespaceSuffix( database, table.tableName )}.{StandardModificationStatics.GetClassName( cn, table.tableName, isRevisionHistoryTable, isRevisionHistoryTable )}";
 					var revisionHistorySuffix = StandardModificationStatics.GetRevisionHistorySuffix( isRevisionHistoryTable );
 					writer.WriteLine( "public " + modClass + " ToModification" + revisionHistorySuffix + "() {" );
 					writer.WriteLine(
@@ -56,7 +58,7 @@ internal static class TableRetrievalStatics {
 							columns.AllColumnsExceptRowVersion.Select( i => EwlStatics.GetCSharpIdentifier( i.PascalCasedName ) ).ToArray() ) + " );" );
 					writer.WriteLine( "}" );
 				} );
-			writeCacheClass( cn, writer, database, table.name, columns, table.hasModTable, isRevisionHistoryTable );
+			writeCacheClass( cn, writer, database, table.tableName, columns, table.hasModTable, isRevisionHistoryTable );
 
 			if( table.hasModTable ) {
 				CodeGenerationStatics.AddGeneratedCodeUseOnlyComment( writer );
@@ -66,20 +68,23 @@ internal static class TableRetrievalStatics {
 					writer.WriteLine( "__get{0}();".FormatWith( getTableCacheName( true ) ) );
 				writer.WriteLine( "}" );
 				writer.WriteLine();
-				writeTableCacheMethods( cn, writer, database, table.name, columns, false );
+				writeTableCacheMethods( cn, writer, database, table.tableName, columns, false );
 				if( isRevisionHistoryTable )
-					writeTableCacheMethods( cn, writer, database, table.name, columns, true );
+					writeTableCacheMethods( cn, writer, database, table.tableName, columns, true );
 			}
 
-			var isSmallTable = configuration.SmallTables != null && configuration.SmallTables.Any( i => i.EqualsIgnoreCase( table.name ) );
+			var isSmallTable = table.isSmallTable;
 
-			var tableUsesRowVersionedCaching = configuration.TablesUsingRowVersionedDataCaching != null &&
-			                                   configuration.TablesUsingRowVersionedDataCaching.Any( i => i.EqualsIgnoreCase( table.name ) );
+			var tableUsesRowVersionedCaching = table.tableUsesRowVersionedCaching;
 			if( tableUsesRowVersionedCaching && ( !columns.HasKeyColumns || ( columns.RowVersionColumn is null && cn.DatabaseInfo is not OracleInfo ) ) )
 				throw new UserCorrectableException(
-					cn.DatabaseInfo is MySqlInfo ? "Row-versioned data caching cannot currently be used with MySQL databases." :
-					cn.DatabaseInfo is OracleInfo ? "Row-versioned data caching can only be used with the {0} table if it has a primary key.".FormatWith( table.name ) :
-					"Row-versioned data caching can only be used with the {0} table if it has a primary key and a rowversion column.".FormatWith( table.name ) );
+					cn.DatabaseInfo switch
+						{
+							MySqlInfo => "Row-versioned data caching cannot currently be used with MySQL databases.",
+							OracleInfo => $"Row-versioned data caching can only be used with the {table.tableName.QualifiedName} table if it has a primary key.",
+							_ =>
+								$"Row-versioned data caching can only be used with the {table.tableName.QualifiedName} table if it has a primary key and a rowversion column."
+						} );
 
 			if( isSmallTable || table.hasModTable )
 				writeGetAllRowsMethod( writer, database, isSmallTable, table.hasModTable, isRevisionHistoryTable, false );
@@ -87,7 +92,7 @@ internal static class TableRetrievalStatics {
 				cn,
 				writer,
 				database,
-				table.name,
+				table.tableName,
 				columns,
 				isSmallTable,
 				table.hasModTable,
@@ -101,7 +106,7 @@ internal static class TableRetrievalStatics {
 					cn,
 					writer,
 					database,
-					table.name,
+					table.tableName,
 					columns,
 					isSmallTable,
 					table.hasModTable,
@@ -115,7 +120,7 @@ internal static class TableRetrievalStatics {
 					cn,
 					writer,
 					database,
-					table.name,
+					table.tableName,
 					columns,
 					isSmallTable,
 					table.hasModTable,
@@ -132,7 +137,7 @@ internal static class TableRetrievalStatics {
 				writer.WriteLine(
 					"return AppMemoryCache.GetCacheValue<{0}>( \"{1}\", () => new {0}( i => System.Tuple.Create( {2} ) ) ).RowsByPkAndVersion;".FormatWith(
 						"VersionedRowDataCache<System.Tuple<{0}>, System.Tuple<{1}>, BasicRow>".FormatWith( getPkTupleTypeArguments( columns ), keyTupleTypeArguments ),
-						database.SecondaryDatabaseName + table.name.TableNameToPascal( cn ) + "TableRetrievalRowsByPkAndVersion",
+						database.SecondaryDatabaseName + table.tableName.QualifiedName + "TableRetrievalRowsByPkAndVersion",
 						StringTools.ConcatenateWithDelimiter(
 							", ",
 							Enumerable.Range( 1, columns.KeyColumns.Count ).Select( i => "i.Item{0}".FormatWith( i ) ).ToArray() ) ) );
@@ -145,15 +150,22 @@ internal static class TableRetrievalStatics {
 				writeToIdDictionaryMethod( writer, columns );
 
 			if( isRevisionHistoryTable )
-				DataAccessStatics.WriteRevisionDeltaExtensionMethods( writer, GetClassName( cn, table.name ), columns.DataColumns );
+				DataAccessStatics.WriteRevisionDeltaExtensionMethods( writer, GetClassName( cn, table.tableName ), columns.DataColumns );
 
 			writer.WriteLine( "}" ); // class
 
-			if( table.hasModTable )
-				initStatements.Add( "{0}.{1}.{2}.__Init();".FormatWith( baseNamespace, subsystemName, GetClassName( cn, table.name ) ) );
+			writer.WriteLine( "}" ); // namespace
 
-			var templateClassName = GetClassName( cn, table.name, omitAtSignPrefixIfNotRequired: true );
-			var templateFilePath = EwlStatics.CombinePaths( templateBasePath, subsystemName, templateClassName );
+			if( table.hasModTable )
+				initStatements.Add(
+					$"{baseNamespace}.{subsystemName}{DataAccessStatics.GetSchemaNamespaceSuffix( database, table.tableName )}.{GetClassName( cn, table.tableName )}.__Init();" );
+
+			var templateClassName = GetClassName( cn, table.tableName, omitAtSignPrefixIfNotRequired: true );
+			var templateFilePath = EwlStatics.CombinePaths(
+				templateBasePath,
+				subsystemName,
+				DataAccessStatics.GetSchemaFolderName( database, table.tableName ),
+				templateClassName );
 
 			// If a real file exists, don’t create a template.
 			if( File.Exists( templateFilePath + ".cs" ) )
@@ -167,15 +179,15 @@ internal static class TableRetrievalStatics {
 				"	// IMPORTANT: Change extension from \"{0}\" to \".cs\" before editing.".FormatWith( DataAccessStatics.CSharpTemplateFileExtension ) );
 			templateWriter.WriteLine( "}" );
 		}
-		writer.WriteLine( "}" ); // namespace
 	}
 
 	private static void writeCacheClass(
-		DatabaseConnection cn, TextWriter writer, Database database, string table, TableColumns tableColumns, bool hasModTable, bool isRevisionHistoryTable ) {
+		DatabaseConnection cn, TextWriter writer, Database database, DatabaseTable table, TableColumns tableColumns, bool hasModTable,
+		bool isRevisionHistoryTable ) {
 		writer.WriteLine( "private partial class Cache {" );
 		writer.WriteLine(
 			"internal static Cache Current => DataAccessState.Current.GetCacheValue( \"{0}\", () => new Cache() );".FormatWith(
-				database.SecondaryDatabaseName + table.TableNameToPascal( cn ) + "TableRetrieval" ) );
+				database.SecondaryDatabaseName + table.QualifiedName + "TableRetrieval" ) );
 		if( hasModTable ) {
 			writer.WriteLine(
 				"public readonly Lazy<{0}.DataRetriever> {1}DataRetriever = new( () => __get{1}().GetDataRetriever( __get{1}RowModificationCounts(), __get{1}Rows ), LazyThreadSafetyMode.None );"
@@ -198,12 +210,12 @@ internal static class TableRetrievalStatics {
 	}
 
 	private static void writeTableCacheMethods(
-		DatabaseConnection cn, TextWriter writer, Database database, string table, TableColumns tableColumns, bool excludePreviousRevisions ) {
+		DatabaseConnection cn, TextWriter writer, Database database, DatabaseTable table, TableColumns tableColumns, bool excludePreviousRevisions ) {
 		CodeGenerationStatics.AddGeneratedCodeUseOnlyComment( writer );
 		writer.WriteLine( "private static {0} __get{1}() =>".FormatWith( getTableCacheType( tableColumns ), getTableCacheName( excludePreviousRevisions ) ) );
 		writer.WriteLine(
 			"AppMemoryCache.GetCacheValue( \"dataAccess-{0}\", () => {1} );".FormatWith(
-				database.SecondaryDatabaseName + table.TableNameToPascal( cn ) + getTableCacheName( excludePreviousRevisions ),
+				database.SecondaryDatabaseName + table.QualifiedName + getTableCacheName( excludePreviousRevisions ),
 				"new DataAccessState().ExecuteWithThis( () => {0}.ExecuteWithConnectionOpen( () => {0}.ExecuteInTransaction( () => new {1}( __get{2}Rows( null ), __get{2}RowModificationCounts(), cacheRecreator => new DataAccessState().ExecuteWithThis( () => {0}.ExecuteWithConnectionOpen( () => {0}.ExecuteInTransaction( () => cacheRecreator( __get{2}RowModificationCounts(), __get{2}Rows ) ) ) ) ) ) ) )"
 					.FormatWith(
 						DataAccessStatics.GetConnectionExpression( database ),
@@ -219,7 +231,7 @@ internal static class TableRetrievalStatics {
 		writer.WriteLine( "if( primaryKeys is null ) {" );
 		writer.WriteLine( "var countCommand = {0}.DatabaseInfo.CreateCommand();".FormatWith( DataAccessStatics.GetConnectionExpression( database ) ) );
 		writer.WriteLine(
-			"countCommand.CommandText = \"SELECT {0} FROM {1}\";".FormatWith( cn.DatabaseInfo is SqlServerInfo ? "COUNT_BIG(*)" : "COUNT(*)", table ) );
+			"countCommand.CommandText = \"SELECT {0} FROM {1}\";".FormatWith( cn.DatabaseInfo is SqlServerInfo ? "COUNT_BIG(*)" : "COUNT(*)", table.QualifiedName ) );
 		writer.WriteLine(
 			"results = new List<BasicRow>( (int)({0}){1}.ExecuteScalarCommand( countCommand )! );".FormatWith(
 				cn.DatabaseInfo is OracleInfo ? "decimal" : "long",
@@ -237,13 +249,14 @@ internal static class TableRetrievalStatics {
 		writer.WriteLine(
 			"command.CommandText = \"SELECT * FROM {0} WHERE \" + StringTools.ConcatenateWithDelimiter( \" OR \", primaryKeys.Select( i => $\"( {1} )\" ) );"
 				.FormatWith(
-					table,
+					table.QualifiedName,
 					tableColumns.KeyColumns.Count < 2
 						? "{0} = {{i}}".FormatWith( tableColumns.KeyColumns.Single().DelimitedIdentifier.EscapeForLiteral() )
 						: StringTools.ConcatenateWithDelimiter(
 							" AND ",
-							tableColumns.KeyColumns.Select(
-								i => "{0} = {{i.{1}}}".FormatWith( i.DelimitedIdentifier.EscapeForLiteral(), EwlStatics.GetCSharpIdentifier( i.CamelCasedName ) ) ) ) ) );
+							tableColumns.KeyColumns.Select( i => "{0} = {{i.{1}}}".FormatWith(
+								i.DelimitedIdentifier.EscapeForLiteral(),
+								EwlStatics.GetCSharpIdentifier( i.CamelCasedName ) ) ) ) ) );
 		writer.WriteLine(
 			"{0}.ExecuteReaderCommand( command, r => {{ while( r.Read() ) results.Add( new BasicRow( r ) ); }} );".FormatWith(
 				DataAccessStatics.GetConnectionExpression( database ) ) );
@@ -261,7 +274,7 @@ internal static class TableRetrievalStatics {
 			"command.CommandText = \"SELECT {0}, {1} FROM {2}\";".FormatWith(
 				StringTools.ConcatenateWithDelimiter( ", ", tableColumns.KeyColumns.Select( i => i.DelimitedIdentifier.EscapeForLiteral() ) ),
 				cn.DatabaseInfo is SqlServerInfo ? "COUNT_BIG(*)" : "COUNT(*)",
-				table + DatabaseOps.GetModificationTableSuffix( database ) ) );
+				( table with { Name = table.Name + DatabaseOps.GetModificationTableSuffix( database ) } ).QualifiedName ) );
 		if( excludePreviousRevisions ) {
 			writer.WriteLine( "command.CommandText += \" WHERE \";" );
 			writer.WriteLine(
@@ -320,7 +333,7 @@ internal static class TableRetrievalStatics {
 	}
 
 	private static void writeGetRowsMatchingConditionsMethod(
-		DatabaseConnection cn, TextWriter writer, Database database, string table, TableColumns tableColumns, bool isSmallTable, bool hasModTable,
+		DatabaseConnection cn, TextWriter writer, Database database, DatabaseTable table, TableColumns tableColumns, bool isSmallTable, bool hasModTable,
 		bool tableUsesRowVersionedCaching, bool isRevisionHistoryTable, bool excludePreviousRevisions ) {
 		// header
 		var methodName = "GetRows" + ( isSmallTable || hasModTable ? "MatchingConditions" : "" ) +
@@ -395,7 +408,7 @@ internal static class TableRetrievalStatics {
 	}
 
 	private static void writeGetRowMatchingPkMethods(
-		DatabaseConnection cn, TextWriter writer, Database database, string table, TableColumns tableColumns, bool isSmallTable, bool hasModTable,
+		DatabaseConnection cn, TextWriter writer, Database database, DatabaseTable table, TableColumns tableColumns, bool isSmallTable, bool hasModTable,
 		bool tableUsesRowVersionedCaching, bool isRevisionHistoryTable ) {
 		var pkIsId = tableColumns.KeyColumns.Count == 1 && tableColumns.KeyColumns.Single().Name.ToLower().EndsWith( "id" );
 		var methodName = pkIsId ? "GetRowMatchingId" : "GetRowMatchingPk";
@@ -433,8 +446,9 @@ internal static class TableRetrievalStatics {
 							? "new {0}( id )".FormatWith( DataAccessStatics.GetEqualityConditionClassName( cn, database, table, tableColumns.KeyColumns.Single() ) )
 							: StringTools.ConcatenateWithDelimiter(
 								", ",
-								tableColumns.KeyColumns.Select(
-										i => "new {0}( {1} )".FormatWith( DataAccessStatics.GetEqualityConditionClassName( cn, database, table, i ), i.CamelCasedName ) )
+								tableColumns.KeyColumns.Select( i => "new {0}( {1} )".FormatWith(
+										DataAccessStatics.GetEqualityConditionClassName( cn, database, table, i ),
+										i.CamelCasedName ) )
 									.ToArray() ) ) );
 				if( isTry ) {
 					writer.WriteLine( "row = rows.SingleOrDefault();" );
@@ -448,8 +462,8 @@ internal static class TableRetrievalStatics {
 	}
 
 	private static void writeResultSetCreatorBody(
-		DatabaseConnection cn, TextWriter writer, Database database, string table, TableColumns tableColumns, bool hasModTable, bool tableUsesRowVersionedCaching,
-		bool excludesPreviousRevisions, string cacheQueryInDbExpression ) {
+		DatabaseConnection cn, TextWriter writer, Database database, DatabaseTable table, TableColumns tableColumns, bool hasModTable,
+		bool tableUsesRowVersionedCaching, bool excludesPreviousRevisions, string cacheQueryInDbExpression ) {
 		writer.WriteLine( "List<Row>? results = null;" );
 		if( tableUsesRowVersionedCaching ) {
 			writer.WriteLine( DataAccessStatics.GetConnectionExpression( database ) + ".ExecuteInTransaction( () => {" );
@@ -491,11 +505,10 @@ internal static class TableRetrievalStatics {
 				"singleRowCommand.AddConditions( new[] {{ {0} }} );".FormatWith(
 					StringTools.ConcatenateWithDelimiter(
 						", ",
-						tableColumns.KeyColumns.Select(
-							( column, index ) => "( ({0})new {1}( key.Item{2} ) ).CommandCondition".FormatWith(
-								DataAccessStatics.GetTableConditionInterfaceName( cn, database, table ),
-								DataAccessStatics.GetEqualityConditionClassName( cn, database, table, column ),
-								index + 1 ) ) ) ) );
+						tableColumns.KeyColumns.Select( ( column, index ) => "( ({0})new {1}( key.Item{2} ) ).CommandCondition".FormatWith(
+							DataAccessStatics.GetTableConditionInterfaceName( cn, database, table ),
+							DataAccessStatics.GetEqualityConditionClassName( cn, database, table, column ),
+							index + 1 ) ) ) ) );
 			writer.WriteLine( "var singleRowResults = new List<BasicRow>();" );
 			writer.WriteLine(
 				"singleRowCommand.Execute( " + DataAccessStatics.GetConnectionExpression( database ) +
@@ -512,7 +525,7 @@ internal static class TableRetrievalStatics {
 					getInlineSelectExpression(
 						table,
 						tableColumns,
-						cn.DatabaseInfo is OracleInfo ? "\"{0}.*\", \"ORA_ROWSCN\"".FormatWith( table ) : "\"*\"",
+						cn.DatabaseInfo is OracleInfo ? "\"{0}.*\", \"ORA_ROWSCN\"".FormatWith( table.QualifiedName ) : "\"*\"",
 						cacheQueryInDbExpression ) ) );
 			writer.WriteLine( getCommandConditionAddingStatement( "command" ) );
 			writer.WriteLine( "command.Execute( " + DataAccessStatics.GetConnectionExpression( database ) + ", r => {" );
@@ -568,10 +581,11 @@ internal static class TableRetrievalStatics {
 
 	private static string getTableCacheName( bool excludePreviousRevisions ) => excludePreviousRevisions ? "LatestRevisionTableCache" : "TableCache";
 
-	private static string getInlineSelectExpression( string table, TableColumns tableColumns, string selectExpressions, string cacheQueryInDbExpression ) =>
+	private static string
+		getInlineSelectExpression( DatabaseTable table, TableColumns tableColumns, string selectExpressions, string cacheQueryInDbExpression ) =>
 		"new InlineSelect( {0}, \"FROM {1}\", {2}, orderByClause: \"{3}\" )".FormatWith(
 			"new[] { " + selectExpressions + " }",
-			table,
+			table.QualifiedName,
 			cacheQueryInDbExpression,
 			tableColumns.HasKeyColumns
 				? $"ORDER BY {StringTools.ConcatenateWithDelimiter( ", ", tableColumns.KeyColumns.Select( i => i.DelimitedIdentifier.EscapeForLiteral() ) )}"
@@ -593,8 +607,8 @@ internal static class TableRetrievalStatics {
 		writer.WriteLine( "}" );
 	}
 
-	internal static string GetClassName( DatabaseConnection cn, string table, bool omitAtSignPrefixIfNotRequired = false ) =>
+	internal static string GetClassName( DatabaseConnection cn, DatabaseTable table, bool omitAtSignPrefixIfNotRequired = false ) =>
 		EwlStatics.GetCSharpIdentifier(
-			"{0}TableRetrieval".FormatWith( table.TableNameToPascal( cn ) ),
+			"{0}TableRetrieval".FormatWith( table.Name.TableNameToPascal( cn ) ),
 			omitAtSignPrefixIfNotRequired: omitAtSignPrefixIfNotRequired );
 }

@@ -139,7 +139,20 @@ internal static class DataAccessOps {
 				CommandConditionStatics.Generate( cn, writer, baseNamespace, database, tableNames );
 
 				writer.WriteLine();
-				TableRetrievalStatics.Generate( cn, writer, baseNamespace, templateBasePath, database, tables, configuration, initStatements );
+				TableRetrievalStatics.Generate(
+					cn,
+					writer,
+					baseNamespace,
+					templateBasePath,
+					database,
+					tables.Select( table => ( table.tableName,
+						                        configuration.SmallTables is {} smallTables &&
+						                        smallTables.Any( i => tableMatchesSpecifiedName( database, table.tableName, i ) ), table.hasModTable,
+						                        configuration.TablesUsingRowVersionedDataCaching is {} rvdcTables &&
+						                        rvdcTables.Any( i => tableMatchesSpecifiedName( database, table.tableName, i ) ),
+						                        configuration.revisionHistoryTables is {} rhTables &&
+						                        rhTables.Any( i => tableMatchesSpecifiedName( database, table.tableName, i ) ) ) ),
+					initStatements );
 
 				writer.WriteLine();
 				StandardModificationStatics.Generate( cn, writer, baseNamespace, templateBasePath, database, tables, configuration );

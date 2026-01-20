@@ -49,6 +49,11 @@ internal static class DataAccessStatics {
 		return cmd;
 	}
 
+	internal static string GetSchemaFolderName( Database database, DatabaseTable table ) =>
+		database.GetDefaultSchema() is { Length: > 0 } defaultSchema && !table.Schema.Equals( defaultSchema, StringComparison.Ordinal )
+			? table.Schema.Capitalize()
+			: "";
+
 	internal static string GetSchemaNamespaceSuffix( Database database, DatabaseTable table, bool omitAtSignPrefixIfNotRequired = false ) =>
 		database.GetDefaultSchema() is { Length: > 0 } defaultSchema && !table.Schema.Equals( defaultSchema, StringComparison.Ordinal )
 			? '.' + EwlStatics.GetCSharpIdentifier( table.Schema.Capitalize(), omitAtSignPrefixIfNotRequired: omitAtSignPrefixIfNotRequired )
@@ -65,11 +70,6 @@ internal static class DataAccessStatics {
 				commandVariable + ".Parameters.Add( new DbCommandParameter( \"" + param + "\", new DbParameterValue( " + param + " ) ).GetAdoDotNetParameter( " +
 				GetConnectionExpression( database ) + ".DatabaseInfo ) );" );
 	}
-
-	internal static bool IsRevisionHistoryTable(
-		Database database, DatabaseTable table, EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) =>
-		configuration.revisionHistoryTables != null &&
-		configuration.revisionHistoryTables.Any( revisionHistoryTable => tableMatchesSpecifiedName( database, table, revisionHistoryTable ) );
 
 	internal static string GetTableConditionInterfaceName( DatabaseConnection cn, Database database, DatabaseTable table ) =>
 		$"{database.SecondaryDatabaseName}CommandConditions{GetSchemaNamespaceSuffix( database, table )}.{CommandConditionStatics.GetTableConditionInterfaceName( cn, table.Name )}";
