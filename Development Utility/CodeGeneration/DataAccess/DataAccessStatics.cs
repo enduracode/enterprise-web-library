@@ -72,10 +72,10 @@ internal static class DataAccessStatics {
 		configuration.revisionHistoryTables.Any( revisionHistoryTable => tableMatchesSpecifiedName( database, table, revisionHistoryTable ) );
 
 	internal static string GetTableConditionInterfaceName( DatabaseConnection cn, Database database, DatabaseTable table ) =>
-		$"{database.SecondaryDatabaseName}CommandConditions{GetSchemaNamespaceSuffix( database, table )}.{CommandConditionStatics.GetTableConditionInterfaceName( cn, table )}";
+		$"{database.SecondaryDatabaseName}CommandConditions{GetSchemaNamespaceSuffix( database, table )}.{CommandConditionStatics.GetTableConditionInterfaceName( cn, table.Name )}";
 
 	internal static string GetEqualityConditionClassName( DatabaseConnection cn, Database database, DatabaseTable table, Column column ) =>
-		$"{database.SecondaryDatabaseName}CommandConditions{GetSchemaNamespaceSuffix( database, table )}.{CommandConditionStatics.GetTableEqualityConditionsClassName( cn, table )}.{CommandConditionStatics.GetConditionClassName( column )}";
+		$"{database.SecondaryDatabaseName}CommandConditions{GetSchemaNamespaceSuffix( database, table )}.{CommandConditionStatics.GetTableEqualityConditionsClassName( cn, table.Name )}.{CommandConditionStatics.GetConditionClassName( column )}";
 
 	internal static void WriteGetLatestRevisionsConditionMethod( TextWriter writer, string revisionIdColumn ) {
 		writer.WriteLine( "private static InlineDbCommandCondition getLatestRevisionsCondition() {" );
