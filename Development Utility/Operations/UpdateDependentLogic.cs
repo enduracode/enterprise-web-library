@@ -413,7 +413,7 @@ internal class UpdateDependentLogic: Operation {
 					writer );
 				writer.WriteLine();
 				generateServerSideConsoleAppStatics( writer, installation );
-				CodeGeneration.DataAccess.DataAccessStatics.GenerateDataAccessCode( writer, installation );
+				CodeGeneration.DataAccess.DataAccessOps.GenerateDataAccessCode( writer, installation );
 
 				var emailTemplateFolderPath = EwlStatics.CombinePaths(
 					InstallationFileStatics.GetGeneralFilesFolderPath( installation.GeneralLogic.Path, true ),
