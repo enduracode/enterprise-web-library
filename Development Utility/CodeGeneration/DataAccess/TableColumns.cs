@@ -1,5 +1,6 @@
 ﻿using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.InstallationSupportUtility;
+using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess;
 
@@ -33,13 +34,13 @@ internal class TableColumns {
 	/// </summary>
 	internal IEnumerable<Column> DataColumns => dataColumns;
 
-	internal TableColumns( DatabaseConnection cn, string table, bool forRevisionHistoryLogic ) {
+	internal TableColumns( DatabaseConnection cn, DatabaseTable table, bool forRevisionHistoryLogic ) {
 		try {
 			// This hack allows code to be generated against a database that is configured for ASP.NET Application Services.
-			var isAspNetApplicationServicesTable = table.StartsWith( "aspnet_" );
+			var isAspNetApplicationServicesTable = table.Name.StartsWith( "aspnet_" );
 
 			// NOTE: Cache this result.
-			AllColumns = Column.GetColumnsInQueryResults( cn, "SELECT * FROM " + table, true, !isAspNetApplicationServicesTable );
+			AllColumns = Column.GetColumnsInQueryResults( cn, "SELECT * FROM " + table.QualifiedName, true, !isAspNetApplicationServicesTable );
 
 			// Identify key, identity, and non identity columns.
 			var nonIdentityColumns = new List<Column>();
@@ -77,7 +78,7 @@ internal class TableColumns {
 			dataColumns = AllColumns.Where( col => col is { IsIdentity: false, IsRowVersion: false } && col != primaryKeyAndRevisionIdColumn ).ToArray();
 		}
 		catch( Exception e ) {
-			throw UserCorrectableException.CreateSecondaryException( "An exception occurred while getting columns for table " + table + ".", e );
+			throw UserCorrectableException.CreateSecondaryException( "An exception occurred while getting columns for table " + table.QualifiedName + ".", e );
 		}
 	}
 }
