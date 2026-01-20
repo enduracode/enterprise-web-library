@@ -50,7 +50,7 @@ internal class UpdateData: Operation {
 				   return DatabaseOps.GetDatabaseTables( i );
 			   }
 			   catch {
-				   return Enumerable.Empty<( string name, bool hasModTable )>();
+				   return [ ];
 			   }
 		   } )
 		   .Any( i => i.hasModTable ) )
