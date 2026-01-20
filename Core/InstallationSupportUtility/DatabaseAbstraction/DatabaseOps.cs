@@ -73,7 +73,7 @@ public static class DatabaseOps {
 		return tables.Where( i => !isModTable( i ) )
 			.OrderBy( i => i.Schema )
 			.ThenBy( i => i.Name )
-			.Select( i => ( i, modTables.Contains( i.QualifiedName + modTableSuffix ) ) );
+			.Select( i => ( i, modTables.Contains( ( i with { Name = i.Name + modTableSuffix } ).QualifiedName ) ) );
 	}
 
 	public static string GetModificationTableSuffix( Database database ) =>
@@ -88,7 +88,7 @@ public static class DatabaseOps {
 		foreach( var table in GetDatabaseTables( database ).Where( i => i.hasModTable ).Select( i => i.tableName ) )
 			database.ExecuteDbMethod( connection => {
 				var command = connection.DatabaseInfo.CreateCommand();
-				command.CommandText = "DELETE FROM {0}".FormatWith( table.QualifiedName + GetModificationTableSuffix( database ) );
+				command.CommandText = "DELETE FROM {0}".FormatWith( ( table with { Name = table.Name + GetModificationTableSuffix( database ) } ).QualifiedName );
 				connection.ExecuteNonQueryCommand( command );
 			} );
 	}
