@@ -169,6 +169,8 @@ LOG ON (
 
 	IEnumerable<DataRow> Database.GetDataTypes() => throw new NotSupportedException();
 
+	string Database.GetDefaultSchema() => "dbo";
+
 	IEnumerable<DatabaseTable> Database.GetTables() {
 		var tables = new List<DatabaseTable>();
 		ExecuteDbMethod(
