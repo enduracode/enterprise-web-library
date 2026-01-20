@@ -70,31 +70,34 @@ internal static class DataAccessStatics {
 		EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration, List<string> initStatements ) {
 		var migrationTable = database.Info is null ? null : DataMigrationOps.GetMigrationTableName( database.Info );
 		var tables = DatabaseOps.GetDatabaseTables( database )
-			.Where( i => migrationTable is null || !i.name.Equals( migrationTable, StringComparison.Ordinal ) )
+			.Where( i => migrationTable is null || !i.tableName.Name.Equals( migrationTable, StringComparison.Ordinal ) )
 			.Materialize();
-		var tableNames = tables.Select( i => i.name ).Materialize();
+		var tableNames = tables.Select( i => i.tableName ).Materialize();
 
-		ensureTablesExist( tableNames, configuration.SmallTables, "small" );
+		ensureTablesExist( database, tableNames, configuration.SmallTables, "small" );
 
-		ensureTablesExist( tableNames, configuration.TablesUsingRowVersionedDataCaching, "row-versioned data caching" );
-		foreach( var table in tables.Where( i => i.hasModTable ).Select( i => i.name ) )
-			if( configuration.TablesUsingRowVersionedDataCaching is {} specifiedTables && specifiedTables.Any( i => i.EqualsIgnoreCase( table ) ) )
+		ensureTablesExist( database, tableNames, configuration.TablesUsingRowVersionedDataCaching, "row-versioned data caching" );
+		foreach( var table in tables.Where( i => i.hasModTable ).Select( i => i.tableName ) )
+			if( configuration.TablesUsingRowVersionedDataCaching is {} specifiedTables &&
+			    specifiedTables.Any( i => tableMatchesSpecifiedName( database, table, i ) ) )
 				throw new UserCorrectableException(
-					"Table {0} is cached using a modification table and therefore cannot also use row-versioned data caching.".FormatWith( table ) );
+					"Table {0} is cached using a modification table and therefore cannot also use row-versioned data caching.".FormatWith( table.QualifiedName ) );
 
-		ensureTablesExist( tableNames, configuration.revisionHistoryTables, "revision history" );
+		ensureTablesExist( database, tableNames, configuration.revisionHistoryTables, "revision history" );
 
-		ensureTablesExist( tableNames, configuration.WhitelistedTables, "whitelisted" );
-		tableNames = tableNames.Where( table => configuration.WhitelistedTables == null || configuration.WhitelistedTables.Any( i => i.EqualsIgnoreCase( table ) ) )
+		ensureTablesExist( database, tableNames, configuration.WhitelistedTables, "whitelisted" );
+		tables = tables.Where( table =>
+				configuration.WhitelistedTables == null || configuration.WhitelistedTables.Any( i => tableMatchesSpecifiedName( database, table.tableName, i ) ) )
 			.Materialize();
+		tableNames = tables.Select( i => i.tableName ).Materialize();
 
 		database.ExecuteDbMethod(
 			delegate( DatabaseConnection cn ) {
-				foreach( var table in tables.Where( i => i.hasModTable ).Select( i => i.name ) ) {
+				foreach( var table in tables.Where( i => i.hasModTable ).Select( i => i.tableName ) ) {
 					var columns = new TableColumns( cn, table, false );
 
 					if( !columns.HasKeyColumns )
-						throw new UserCorrectableException( $"Table {table} is cached using a modification table but does not have a primary key." );
+						throw new UserCorrectableException( $"Table {table.QualifiedName} is cached using a modification table but does not have a primary key." );
 
 					// This check ensures safety in the table-retrieval method that gets modified rows given a list of primary keys. This method uses inline SQL in order
 					// to support a potentially large number of keys in a single query.
@@ -103,21 +106,24 @@ internal static class DataAccessStatics {
 					foreach( var column in columns.KeyColumns )
 						if( !types.Contains( column.DataTypeName ) )
 							throw new UserCorrectableException(
-								"Table {0} is cached using a modification table but the {1} primary-key column is not numeric.".FormatWith( table, column.Name ) );
+								"Table {0} is cached using a modification table but the {1} primary-key column is not numeric.".FormatWith(
+									table.QualifiedName,
+									column.Name ) );
 
 					var modTableColumns = Column.GetColumnsInQueryResults(
 						cn,
-						"SELECT * FROM {0}".FormatWith( table + DatabaseOps.GetModificationTableSuffix( database ) ),
+						"SELECT * FROM {0}".FormatWith( ( table with { Name = table.Name + DatabaseOps.GetModificationTableSuffix( database ) } ).QualifiedName ),
 						false,
 						false );
 
 					if( modTableColumns.Count != columns.KeyColumns.Count )
-						throw new UserCorrectableException( "The modification table for {0} must have columns that match the primary key.".FormatWith( table ) );
+						throw new UserCorrectableException(
+							"The modification table for {0} must have columns that match the primary key.".FormatWith( table.QualifiedName ) );
 
 					foreach( var column in columns.KeyColumns ) {
 						var modTableColumn = modTableColumns.SingleOrDefault( i => string.Equals( i.Name, column.Name, StringComparison.OrdinalIgnoreCase ) );
 						if( modTableColumn is null )
-							throw new UserCorrectableException( "The modification table for {0} must have a {1} column.".FormatWith( table, column.Name ) );
+							throw new UserCorrectableException( "The modification table for {0} must have a {1} column.".FormatWith( table.QualifiedName, column.Name ) );
 					}
 				}
 
@@ -167,16 +173,23 @@ internal static class DataAccessStatics {
 			} );
 	}
 
-	private static void ensureTablesExist( IReadOnlyCollection<string> databaseTables, IEnumerable<string>? specifiedTables, string tableAdjective ) {
+	private static void ensureTablesExist(
+		Database database, IReadOnlyCollection<DatabaseTable> databaseTables, IEnumerable<string>? specifiedTables, string tableAdjective ) {
 		if( specifiedTables == null )
 			return;
-		var nonexistentTables = specifiedTables.Where( specifiedTable => databaseTables.All( i => !i.EqualsIgnoreCase( specifiedTable ) ) ).ToArray();
+		var nonexistentTables = specifiedTables.Where( specifiedTable => databaseTables.All( i => !tableMatchesSpecifiedName( database, i, specifiedTable ) ) )
+			.Materialize();
 		if( nonexistentTables.Any() )
 			throw new UserCorrectableException(
-				tableAdjective.Capitalize() + " " + ( nonexistentTables.Length > 1 ? "tables" : "table" ) + " " +
-				StringTools.GetEnglishListPhrase( nonexistentTables.Select( i => "'" + i + "'" ), true ) + " " + ( nonexistentTables.Length > 1 ? "do" : "does" ) +
+				tableAdjective.Capitalize() + " " + ( nonexistentTables.Count > 1 ? "tables" : "table" ) + " " +
+				StringTools.GetEnglishListPhrase( nonexistentTables.Select( i => "'" + i + "'" ), true ) + " " + ( nonexistentTables.Count > 1 ? "do" : "does" ) +
 				" not exist." );
 	}
+
+	private static bool tableMatchesSpecifiedName( Database database, DatabaseTable table, string specifiedName ) =>
+		database.GetDefaultSchema() is { Length: > 0 } defaultSchema && !specifiedName.Contains( '.', StringComparison.Ordinal )
+			? table.Schema.EqualsIgnoreCase( defaultSchema ) && table.Name.EqualsIgnoreCase( specifiedName )
+			: table.QualifiedName.EqualsIgnoreCase( specifiedName );
 
 	/// <summary>
 	/// Given a string, returns all instances of @abc in an ordered set containing abc (the token without the @ sign). If a token is used more than once, it
@@ -214,6 +227,11 @@ internal static class DataAccessStatics {
 		return cmd;
 	}
 
+	internal static string GetSchemaNamespaceSuffix( Database database, DatabaseTable table, bool omitAtSignPrefixIfNotRequired = false ) =>
+		database.GetDefaultSchema() is { Length: > 0 } defaultSchema && !table.Schema.Equals( defaultSchema, StringComparison.Ordinal )
+			? '.' + EwlStatics.GetCSharpIdentifier( table.Schema.Capitalize(), omitAtSignPrefixIfNotRequired: omitAtSignPrefixIfNotRequired )
+			: "";
+
 	internal static string GetMethodParamsFromCommandText( DatabaseInfo info, string commandText ) {
 		return StringTools.ConcatenateWithDelimiter( ", ", GetNamedParamList( info, commandText ).Select( i => "object " + i ).ToArray() );
 	}
@@ -226,19 +244,16 @@ internal static class DataAccessStatics {
 				GetConnectionExpression( database ) + ".DatabaseInfo ) );" );
 	}
 
-	internal static bool IsRevisionHistoryTable( string table, EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
-		return configuration.revisionHistoryTables != null &&
-		       configuration.revisionHistoryTables.Any( revisionHistoryTable => revisionHistoryTable.EqualsIgnoreCase( table ) );
-	}
+	internal static bool IsRevisionHistoryTable(
+		Database database, DatabaseTable table, EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) =>
+		configuration.revisionHistoryTables != null &&
+		configuration.revisionHistoryTables.Any( revisionHistoryTable => tableMatchesSpecifiedName( database, table, revisionHistoryTable ) );
 
-	internal static string GetTableConditionInterfaceName( DatabaseConnection cn, Database database, string table ) {
-		return database.SecondaryDatabaseName + "CommandConditions." + CommandConditionStatics.GetTableConditionInterfaceName( cn, table );
-	}
+	internal static string GetTableConditionInterfaceName( DatabaseConnection cn, Database database, DatabaseTable table ) =>
+		$"{database.SecondaryDatabaseName}CommandConditions{GetSchemaNamespaceSuffix( database, table )}.{CommandConditionStatics.GetTableConditionInterfaceName( cn, table )}";
 
-	internal static string GetEqualityConditionClassName( DatabaseConnection cn, Database database, string tableName, Column column ) {
-		return database.SecondaryDatabaseName + "CommandConditions." + CommandConditionStatics.GetTableEqualityConditionsClassName( cn, tableName ) + "." +
-		       CommandConditionStatics.GetConditionClassName( column );
-	}
+	internal static string GetEqualityConditionClassName( DatabaseConnection cn, Database database, DatabaseTable table, Column column ) =>
+		$"{database.SecondaryDatabaseName}CommandConditions{GetSchemaNamespaceSuffix( database, table )}.{CommandConditionStatics.GetTableEqualityConditionsClassName( cn, table )}.{CommandConditionStatics.GetConditionClassName( column )}";
 
 	internal static void WriteGetLatestRevisionsConditionMethod( TextWriter writer, string revisionIdColumn ) {
 		writer.WriteLine( "private static InlineDbCommandCondition getLatestRevisionsCondition() {" );
