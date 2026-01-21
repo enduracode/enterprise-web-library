@@ -87,7 +87,7 @@ internal class UpdateDependentLogic: Operation {
 
 			var config = installation.DevelopmentInstallationLogic.DevelopmentConfiguration;
 			if( !config.UpdateFileEncodingsSpecified || !config.UpdateFileEncodings ) {
-				Log.Information( $"Warning: {filePath} does not have a byte-order mark (BOM); please update its encoding." );
+				Log.Information( "Warning: {FilePath} does not have a byte-order mark (BOM); please update its encoding.", filePath );
 				continue;
 			}
 
@@ -95,6 +95,29 @@ internal class UpdateDependentLogic: Operation {
 			if( win1252Encoding is null )
 				throw new Exception();
 			File.WriteAllText( filePath, File.ReadAllText( filePath, win1252Encoding ), Encoding.UTF8 );
+		}
+		foreach( var filePath in IoMethods
+			        .GetFilePathsInFolder( installation.GeneralLogic.Path, searchPattern: "*" + FileExtensions.Xml, searchOption: SearchOption.AllDirectories )
+			        .Concat(
+				        IoMethods.GetFilePathsInFolder(
+					        installation.GeneralLogic.Path,
+					        searchPattern: "*" + FileExtensions.Xsd,
+					        searchOption: SearchOption.AllDirectories ) )
+			        .OrderBy( i => i ) ) {
+			// see https://stackoverflow.com/a/27976558/35349
+			using( var reader = new StreamReader( filePath, bomlessEncoding ) ) {
+				reader.Peek();
+				if( reader.CurrentEncoding.Equals( bomlessEncoding ) )
+					continue;
+			}
+
+			var config = installation.DevelopmentInstallationLogic.DevelopmentConfiguration;
+			if( !config.UpdateFileEncodingsSpecified || !config.UpdateFileEncodings ) {
+				Log.Information( "Warning: {FilePath} has an unnecessary byte-order mark (BOM); please update its encoding.", filePath );
+				continue;
+			}
+
+			File.WriteAllText( filePath, File.ReadAllText( filePath, Encoding.UTF8 ), bomlessEncoding );
 		}
 
 		if( !installation.SystemIsTewl() )
