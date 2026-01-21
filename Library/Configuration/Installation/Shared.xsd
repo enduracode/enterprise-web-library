@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <schema targetNamespace="http://enterpriseweblibrary.org" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:ewl="http://enterpriseweblibrary.org"
         elementFormDefault="qualified">
 	<element name="InstallationSharedConfiguration" type="ewl:InstallationSharedConfiguration" />
