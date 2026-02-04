@@ -17,9 +17,9 @@ public class InstallationConfiguration {
 	public const string ConfigurationFolderName = "Configuration";
 
 	/// <summary>
-	/// Development Utility use only.
+	/// Development Utility and private use only.
 	/// </summary>
-	public const string SystemDevelopmentConfigurationFileName = "Development.xml";
+	public const string SystemGeneralConfigurationFileName = "General.xml";
 
 	/// <summary>
 	/// Installation Support Utility and private use only.
@@ -117,13 +117,13 @@ public class InstallationConfiguration {
 		// run a system using an unreleased version of the library that contains schema changes.
 
 		// system general configuration
-		var systemGeneralConfigurationFilePath = EwlStatics.CombinePaths( ConfigurationFolderPath, "General.xml" );
+		var systemGeneralConfigurationFilePath = EwlStatics.CombinePaths( ConfigurationFolderPath, SystemGeneralConfigurationFileName );
 		systemGeneralConfiguration = XmlOps.DeserializeFromFile<SystemGeneralConfiguration>( systemGeneralConfigurationFilePath, false );
 
 		// system development configuration
 		if( isDevelopmentInstallation )
 			SystemDevelopmentConfiguration = XmlOps.DeserializeFromFile<SystemDevelopment.SystemDevelopmentConfiguration>(
-				EwlStatics.CombinePaths( configurationFolderPath, SystemDevelopmentConfigurationFileName ),
+				EwlStatics.CombinePaths( configurationFolderPath, "Development.xml" ),
 				false );
 
 		var installationConfigurationFolderPath = isDevelopmentInstallation

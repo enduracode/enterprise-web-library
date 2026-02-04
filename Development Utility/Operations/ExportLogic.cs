@@ -307,21 +307,23 @@ internal class ExportLogic: Operation {
 
 	private static void packageGeneralFiles( DevelopmentInstallation installation, string folderPath, bool includeDatabaseUpdates ) {
 		// configuration files
-		var configurationFolderPath = EwlStatics.CombinePaths( folderPath, InstallationConfiguration.ConfigurationFolderName );
-		IoMethods.CopyFolder( installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath, configurationFolderPath, false );
-		IoMethods.RecursivelyRemoveReadOnlyAttributeFromItem( configurationFolderPath );
-		IoMethods.DeleteFolder( EwlStatics.CombinePaths( configurationFolderPath, InstallationConfiguration.AsposeLicenseFolderName ) );
-		IoMethods.DeleteFolder( EwlStatics.CombinePaths( configurationFolderPath, InstallationConfiguration.InstallationConfigurationFolderName ) );
-		if( !includeDatabaseUpdates )
-			IoMethods.DeleteFile( EwlStatics.CombinePaths( configurationFolderPath, ExistingInstallationLogic.SystemDatabaseUpdatesFileName ) );
-		IoMethods.DeleteFile( EwlStatics.CombinePaths( configurationFolderPath, InstallationConfiguration.SystemDevelopmentConfigurationFileName ) );
+		var configurationFolderSourcePath = installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath;
+		var configurationFolderDestinationPath = EwlStatics.CombinePaths( folderPath, InstallationConfiguration.ConfigurationFolderName );
+		IoMethods.CopyFile(
+			EwlStatics.CombinePaths( configurationFolderSourcePath, InstallationConfiguration.SystemGeneralConfigurationFileName ),
+			EwlStatics.CombinePaths( configurationFolderDestinationPath, InstallationConfiguration.SystemGeneralConfigurationFileName ) );
+		var databaseUpdatesFilePath = EwlStatics.CombinePaths( configurationFolderSourcePath, ExistingInstallationLogic.SystemDatabaseUpdatesFileName );
+		if( File.Exists( databaseUpdatesFilePath ) && includeDatabaseUpdates )
+			IoMethods.CopyFile(
+				databaseUpdatesFilePath,
+				EwlStatics.CombinePaths( configurationFolderDestinationPath, ExistingInstallationLogic.SystemDatabaseUpdatesFileName ) );
 
 		// other files
-		var filesFolderInInstallationPath = EwlStatics.CombinePaths(
+		var filesFolderSourcePath = EwlStatics.CombinePaths(
 			InstallationFileStatics.GetGeneralFilesFolderPath( installation.GeneralLogic.Path, true ),
 			InstallationFileStatics.FilesFolderName );
-		if( Directory.Exists( filesFolderInInstallationPath ) )
-			IoMethods.CopyFolder( filesFolderInInstallationPath, EwlStatics.CombinePaths( folderPath, InstallationFileStatics.FilesFolderName ), false );
+		if( Directory.Exists( filesFolderSourcePath ) )
+			IoMethods.CopyFolder( filesFolderSourcePath, EwlStatics.CombinePaths( folderPath, InstallationFileStatics.FilesFolderName ), false );
 	}
 
 	private static void writeNuGetPackageManifest(
