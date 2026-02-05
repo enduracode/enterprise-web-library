@@ -303,6 +303,17 @@ internal class UpdateDependentLogic: Operation {
 			} );
 		updateReSharperSettings( installation );
 
+		var azureBuildPipelinePath = EwlStatics.CombinePaths(
+			installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath,
+			"Azure Build Pipeline.yml" );
+		if( File.Exists( azureBuildPipelinePath ) ) {
+			var systemPathInRepository = getSystemPathInRepository( installation );
+			File.WriteAllText(
+				azureBuildPipelinePath,
+				File.ReadAllText( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "Azure Pipeline Templates", "Build.yml" ) )
+					.Replace( "@@TriggerPath", systemPathInRepository.AppendDelimiter( Path.AltDirectorySeparatorChar.ToString() ) + "**" ) );
+		}
+
 		if( !installation.DevelopmentInstallationLogic.SystemIsEwl && !installation.SystemIsTewl() ) {
 			if( Directory.Exists( EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.MercurialRepositoryFolderName ) ) )
 				updateIgnoreFile( installation, false );
@@ -1053,6 +1064,16 @@ internal class UpdateDependentLogic: Operation {
 					? EwlStatics.CombinePaths( installation.GeneralLogic.Path, "Shared" )
 					: EwlStatics.CombinePaths( installation.DevelopmentInstallationLogic.LibraryPath, generatedCodeFolderName ),
 				defaultSettingsFileName ) );
+	}
+
+	private string getSystemPathInRepository( DevelopmentInstallation installation ) {
+		var folder = new DirectoryInfo( installation.GeneralLogic.Path );
+		while( folder is not null ) {
+			if( Directory.Exists( EwlStatics.CombinePaths( folder.FullName, ".hg" ) ) || Directory.Exists( EwlStatics.CombinePaths( folder.FullName, ".git" ) ) )
+				return Path.GetRelativePath( folder.FullName, installation.GeneralLogic.Path ).Replace( Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar );
+			folder = folder.Parent;
+		}
+		return "";
 	}
 
 	private void updateIgnoreFile( DevelopmentInstallation installation, bool forGit ) {

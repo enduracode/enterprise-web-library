@@ -1,0 +1,8 @@
+trigger:
+  branches:
+    include:
+    - master
+    - Integration
+  paths:
+    include:
+    - '@@TriggerPath'
