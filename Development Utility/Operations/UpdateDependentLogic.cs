@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Text.RegularExpressions;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Configuration.SystemDevelopment;
 using EnterpriseWebLibrary.Configuration.SystemGeneral;
@@ -311,7 +312,12 @@ internal class UpdateDependentLogic: Operation {
 			File.WriteAllText(
 				azureBuildPipelinePath,
 				File.ReadAllText( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "Azure Pipeline Templates", "Build.yml" ) )
-					.Replace( "@@TriggerPath", systemPathInRepository.AppendDelimiter( Path.AltDirectorySeparatorChar.ToString() ) + "**" ) );
+					.Replace( "@@TriggerPath", systemPathInRepository.AppendDelimiter( Path.AltDirectorySeparatorChar.ToString() ) + "**" )
+					.Replace(
+						"@@DotNetVersion",
+						Regex.Match( ConfigurationStatics.TargetFramework, @"^net(\d+\.\d+)-windows$" ) is { Success: true } match
+							? match.Groups[ 1 ].Value
+							: throw new Exception( "Failed to extract .NET version" ) ) );
 		}
 
 		if( !installation.DevelopmentInstallationLogic.SystemIsEwl && !installation.SystemIsTewl() ) {

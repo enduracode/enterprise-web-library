@@ -6,3 +6,10 @@ trigger:
   paths:
     include:
     - '@@TriggerPath'
+
+pool: EwlBuild
+
+steps:
+- task: UseDotNet@2
+  inputs:
+    version: '@@DotNetVersion'
