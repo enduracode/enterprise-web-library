@@ -10,6 +10,7 @@ trigger:
 pool: EwlBuild
 
 steps:
+
 - task: UseDotNet@2
   inputs:
     version: '@@DotNetVersion'
@@ -20,3 +21,62 @@ steps:
     projects: '@@WorkingFolderPath'
     custom: 'restore'
   displayName: 'Restore NuGet dependencies'
+
+- task: PowerShell@2
+  inputs:
+    targetType: 'inline'
+    script: |
+      [xml]$projectXml = Get-Content -Path "@@WorkingFolderPath/Library/Library.csproj"
+      $ewlReference = $projectXml.Project.ItemGroup.PackageReference | Where-Object {$_.Include -match '^Ewl[A-Za-z0-9]+$'}
+      $name = $ewlReference.Include
+      $version = $ewlReference.Version
+
+      $nuGetPackageFolderPath = ((dotnet nuget locals global-packages --list) -split ' ', 2)[1].TrimEnd()
+      $duPath = Get-ChildItem "$nuGetPackageFolderPath\$name\$version\tools\Development Utility\EnterpriseWebLibrary.DevelopmentUtility"
+      Write-Host "##vso[task.setvariable variable=DuPath]$duPath"
+
+      $duInstallationPath = "@@WorkingFolderPath" -replace '/', '\'
+      Write-Host "##vso[task.setvariable variable=DuInstallationPath]$duInstallationPath"
+  displayName: 'Find EWL Development Utility'
+
+- task: PowerShell@2
+  inputs:
+    targetType: 'inline'
+    script: |
+      & "$(DuPath)" "$(DuInstallationPath)" UpdateData Default True
+  displayName: 'EWL - Update data'
+
+- task: PowerShell@2
+  inputs:
+    targetType: 'inline'
+    script: |
+      & "$(DuPath)" "$(DuInstallationPath)" UpdateDependentLogic
+  displayName: 'EWL - Update dependent logic'
+
+# Restore again to take into account the Directory.Build.props files that we generated.
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'custom'
+    projects: '@@WorkingFolderPath'
+    custom: 'restore'
+  displayName: 'Restore again after code generation'
+
+- task: PowerShell@2
+  inputs:
+    targetType: 'inline'
+    script: |
+      & "$(DuPath)" "$(DuInstallationPath)" ExportLogic
+  displayName: 'EWL - Export logic'
+
+- task: PowerShell@2
+  inputs:
+    targetType: 'inline'
+    script: |
+      $logicPackagesPath = "$(DuInstallationPath)\Logic Packages"
+      if (Test-Path $logicPackagesPath) {
+        $folders = Get-ChildItem -Path $logicPackagesPath -Directory
+        foreach ($folder in $folders) {
+          Write-Host "##vso[artifact.upload containerfolder=$($folder.Name);artifactname=$($folder.Name)]$($folder.FullName)"
+        }
+      }
+  displayName: 'Publish artifacts'
