@@ -317,7 +317,10 @@ internal class UpdateDependentLogic: Operation {
 						"@@DotNetVersion",
 						Regex.Match( ConfigurationStatics.TargetFramework, @"^net(\d+\.\d+)-windows$" ) is { Success: true } match
 							? match.Groups[ 1 ].Value
-							: throw new Exception( "Failed to extract .NET version" ) ) );
+							: throw new Exception( "Failed to extract .NET version" ) )
+					.Replace(
+						"@@WorkingFolderPath",
+						"$(Build.SourcesDirectory)" + systemPathInRepository.PrependDelimiter( Path.AltDirectorySeparatorChar.ToString() ) ) );
 		}
 
 		if( !installation.DevelopmentInstallationLogic.SystemIsEwl && !installation.SystemIsTewl() ) {
