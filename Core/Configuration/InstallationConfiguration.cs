@@ -32,14 +32,19 @@ public class InstallationConfiguration {
 	public const string InstallationsFolderName = "Installations";
 
 	/// <summary>
-	/// Red Stapler Information System use only.
+	/// Development Utility and private use only.
 	/// </summary>
 	public const string DevelopmentInstallationFolderName = "Development";
 
 	/// <summary>
-	/// Red Stapler Information System use only.
+	/// Development Utility and private use only.
 	/// </summary>
-	public const string InstallationStandardConfigurationFileName = "Standard.xml";
+	public const string InstallationStandardConfigurationFileName = "Standard" + FileExtensions.Xml;
+
+	/// <summary>
+	/// Development Utility and private use only.
+	/// </summary>
+	public const string InstallationCustomConfigurationFileName = "Custom" + FileExtensions.Xml;
 
 	/// <summary>
 	/// Development Utility and private use only.
@@ -172,7 +177,7 @@ public class InstallationConfiguration {
 			.Materialize();
 
 		// installation custom configuration
-		installationCustomConfigurationFilePath = EwlStatics.CombinePaths( installationConfigurationFolderPath, "Custom" + FileExtensions.Xml );
+		installationCustomConfigurationFilePath = EwlStatics.CombinePaths( installationConfigurationFolderPath, InstallationCustomConfigurationFileName );
 
 		// installation shared configuration
 		installationSharedConfigurationFilePath = EwlStatics.CombinePaths(

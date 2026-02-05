@@ -458,7 +458,7 @@ internal class ExportLogic: Operation {
 			                  : null;
 
 		// Set up the list of installation objects in the build message.
-		build.Installations = new InstallationSupportUtility.SystemManagerInterface.Messages.BuildMessage.Build.InstallationsType();
+		build.Installations = [ ];
 		foreach( var installationConfigurationFolderPath in Directory.GetDirectories(
 			        EwlStatics.CombinePaths(
 				        installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath,
@@ -480,7 +480,13 @@ internal class ExportLogic: Operation {
 					installationConfigurationFile.installedInstallation.InstallationTypeConfiguration is LiveInstallationConfiguration;
 
 				var packageFolderPath = EwlStatics.CombinePaths( logicPackagesFolderPath, $"{installationConfigurationFile.installedInstallation.name} Configuration" );
-				IoMethods.CopyFolder( installationConfigurationFolderPath, packageFolderPath, false );
+				IoMethods.CopyFile(
+					EwlStatics.CombinePaths( installationConfigurationFolderPath, InstallationConfiguration.InstallationStandardConfigurationFileName ),
+					EwlStatics.CombinePaths( packageFolderPath, InstallationConfiguration.InstallationStandardConfigurationFileName ) );
+				if( File.Exists( EwlStatics.CombinePaths( installationConfigurationFolderPath, InstallationConfiguration.InstallationCustomConfigurationFileName ) ) )
+					IoMethods.CopyFile(
+						EwlStatics.CombinePaths( installationConfigurationFolderPath, InstallationConfiguration.InstallationCustomConfigurationFileName ),
+						EwlStatics.CombinePaths( packageFolderPath, InstallationConfiguration.InstallationCustomConfigurationFileName ) );
 				if( File.Exists( installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationSharedConfigurationFilePath ) )
 					IoMethods.CopyFile(
 						installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationSharedConfigurationFilePath,
@@ -491,12 +497,11 @@ internal class ExportLogic: Operation {
 				operationResult.NumberOfBytesTransferred += buildMessageInstallation.ConfigurationPackage.LongLength;
 			}
 
-		build.NuGetPackages = new InstallationSupportUtility.SystemManagerInterface.Messages.BuildMessage.Build.NuGetPackagesType();
+		build.NuGetPackages = [ ];
 		if( installation.DevelopmentInstallationLogic.SystemIsEwl || installation.SystemIsTewl() )
 			build.NuGetPackages.AddRange( packageEwl( installation, packagingConfiguration, logicPackagesFolderPath ) );
 
-		var recognizedInstallation = installation as RecognizedDevelopmentInstallation;
-		if( recognizedInstallation == null )
+		if( installation is not RecognizedDevelopmentInstallation recognizedInstallation )
 			return;
 
 		build.SystemId = recognizedInstallation.KnownSystemLogic.RsisSystem.Id;
