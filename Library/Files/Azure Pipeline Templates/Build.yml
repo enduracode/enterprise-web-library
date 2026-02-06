@@ -34,7 +34,7 @@ steps:
       $version = $ewlReference.Version
 
       $nuGetPackageFolderPath = ((dotnet nuget locals global-packages --list) -split ' ', 2)[1].TrimEnd()
-      $duPath = Get-ChildItem "$nuGetPackageFolderPath\$name\$version\tools\Development Utility\EnterpriseWebLibrary.DevelopmentUtility"
+      $duPath = Get-ChildItem "$nuGetPackageFolderPath\$name\$version\tools\Development Utility\EnterpriseWebLibrary.DevelopmentUtility.exe"
       Write-Host "##vso[task.setvariable variable=DuPath]$duPath"
 
       $duInstallationPath = "@@WorkingFolderPath" -replace '/', '\'
