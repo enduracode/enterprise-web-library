@@ -11,6 +11,8 @@ Error Log.txt
 *.csproj.user
 *.ewlt.cs
 
+.opencode/plugins/ewl
+
 Core/bin/
 Core/obj/
 Core/Directory.Build.props

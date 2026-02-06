@@ -303,6 +303,7 @@ internal class UpdateDependentLogic: Operation {
 				writer.WriteLine( "dotnet_diagnostic.IDE1006.severity = none" );
 			} );
 		updateReSharperSettings( installation );
+		updateOpenCodeConfig( installation );
 
 		var azureBuildPipelinePath = EwlStatics.CombinePaths(
 			installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath,
@@ -1075,6 +1076,12 @@ internal class UpdateDependentLogic: Operation {
 				defaultSettingsFileName ) );
 	}
 
+	private void updateOpenCodeConfig( DevelopmentInstallation installation ) {
+		var pluginFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".opencode", "plugins", EwlStatics.EwlInitialism.ToLowerInvariant() );
+		IoMethods.DeleteFolder( pluginFolderPath );
+		IoMethods.CopyFolder( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "OpenCode Plugins" ), pluginFolderPath, true );
+	}
+
 	private string getSystemPathInRepository( DevelopmentInstallation installation ) {
 		var folder = new DirectoryInfo( installation.GeneralLogic.Path );
 		while( folder is not null ) {
@@ -1116,6 +1123,10 @@ internal class UpdateDependentLogic: Operation {
 		writer.WriteLine( "Error Log.txt" );
 		writer.WriteLine( "*.csproj.user" );
 		writer.WriteLine( "*" + CodeGeneration.DataAccess.DataAccessStatics.CSharpTemplateFileExtension );
+		writer.WriteLine();
+		if( !forGit )
+			writer.WriteLine( "subinclude:.opencode/.gitignore" );
+		writer.WriteLine( ".opencode/plugins/ewl" );
 		writer.WriteLine();
 		writer.WriteLine( "Solution Files/bin/" );
 		writer.WriteLine( "Solution Files/obj/" );

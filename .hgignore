@@ -13,6 +13,9 @@ Error Log.txt
 *.csproj.user
 *.ewlt.cs
 
+subinclude:.opencode/.gitignore
+.opencode/plugins/ewl
+
 Core/bin/
 Core/obj/
 Core/Directory.Build.props
