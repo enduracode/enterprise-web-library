@@ -317,8 +317,8 @@ internal class UpdateDependentLogic: Operation {
 					.Replace( "@@TriggerPath", systemPathInRepository.AppendDelimiter( Path.AltDirectorySeparatorChar.ToString() ) + "**" )
 					.Replace(
 						"@@DotNetVersion",
-						Regex.Match( ConfigurationStatics.TargetFramework, @"^net(\d+\.\d+)-windows$" ) is { Success: true } match
-							? match.Groups[ 1 ].Value
+						Regex.Match( ConfigurationStatics.TargetFramework, @"^net(\d+)\.\d+-windows$" ) is { Success: true } match
+							? match.Groups[ 1 ].Value + ".x"
 							: throw new Exception( "Failed to extract .NET version" ) )
 					.Replace(
 						"@@WorkingFolderPath",
