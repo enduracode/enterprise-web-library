@@ -15,6 +15,7 @@ Error Log.txt
 
 subinclude:.opencode/.gitignore
 .opencode/plugins/ewl
+.opencode/plugins/ewl.js
 
 Core/bin/
 Core/obj/

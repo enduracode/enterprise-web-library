@@ -1077,9 +1077,20 @@ internal class UpdateDependentLogic: Operation {
 	}
 
 	private void updateOpenCodeConfig( DevelopmentInstallation installation ) {
-		var pluginFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".opencode", "plugins", EwlStatics.EwlInitialism.ToLowerInvariant() );
+		var pluginFolderName = EwlStatics.EwlInitialism.ToLowerInvariant();
+		var pluginFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".opencode", "plugins", pluginFolderName );
 		IoMethods.DeleteFolder( pluginFolderPath );
-		IoMethods.CopyFolder( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "OpenCode Plugins" ), pluginFolderPath, true );
+		IoMethods.CopyFolder( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "OpenCode Plugins" ), pluginFolderPath, false );
+
+		File.WriteAllText(
+			EwlStatics.CombinePaths(
+				installation.GeneralLogic.Path,
+				".opencode",
+				"plugins",
+				EwlStatics.EwlInitialism.ToLowerInvariant() + FileExtensions.JavaScript ),
+			StringTools.ConcatenateWithDelimiter(
+				Environment.NewLine,
+				IoMethods.GetFileNamesInFolder( pluginFolderPath, '*' + FileExtensions.JavaScript ).Select( i => $"""export * from "./{pluginFolderName}/{i}";""" ) ) );
 	}
 
 	private string getSystemPathInRepository( DevelopmentInstallation installation ) {
@@ -1126,7 +1137,8 @@ internal class UpdateDependentLogic: Operation {
 		writer.WriteLine();
 		if( !forGit )
 			writer.WriteLine( "subinclude:.opencode/.gitignore" );
-		writer.WriteLine( ".opencode/plugins/ewl" );
+		writer.WriteLine( $".opencode/plugins/{EwlStatics.EwlInitialism.ToLowerInvariant()}" );
+		writer.WriteLine( $".opencode/plugins/{EwlStatics.EwlInitialism.ToLowerInvariant()}{FileExtensions.JavaScript}" );
 		writer.WriteLine();
 		writer.WriteLine( "Solution Files/bin/" );
 		writer.WriteLine( "Solution Files/obj/" );

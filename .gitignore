@@ -12,6 +12,7 @@ Error Log.txt
 *.ewlt.cs
 
 .opencode/plugins/ewl
+.opencode/plugins/ewl.js
 
 Core/bin/
 Core/obj/
