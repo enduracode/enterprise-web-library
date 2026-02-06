@@ -313,6 +313,7 @@ internal class UpdateDependentLogic: Operation {
 			File.WriteAllText(
 				azureBuildPipelinePath,
 				File.ReadAllText( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "Azure Pipeline Templates", "Build.yml" ) )
+					.Replace( "@@EwlInitialism", EwlStatics.EwlInitialism )
 					.Replace( "@@TriggerPath", systemPathInRepository.AppendDelimiter( Path.AltDirectorySeparatorChar.ToString() ) + "**" )
 					.Replace(
 						"@@DotNetVersion",
