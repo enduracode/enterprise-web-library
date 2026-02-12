@@ -246,3 +246,9 @@ Common extension methods: `.ToComponents()`, `.ToCollection()`, `.Materialize()`
 Dependencies are defined in `Library\Library.csproj`. EWL is referenced as a
 NuGet package (e.g. `EwlBill`), with optional provider packages for MySQL,
 SQLite, SAML, etc.
+
+---
+
+## Further Reference
+
+EWL source and documentation: https://github.com/enduracode/enterprise-web-library
