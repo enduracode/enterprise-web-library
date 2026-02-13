@@ -13,6 +13,7 @@ Error Log.txt
 
 .opencode/plugins/ewl
 .opencode/plugins/ewl.js
+.opencode/skills/ewl-*
 
 Core/bin/
 Core/obj/
