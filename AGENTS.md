@@ -150,3 +150,7 @@ UTF-8 BOM and CRLF line endings on every file creation or update.
 
 Dependencies are defined in `Core\Core.csproj` (for the main library) and in
 each of the `Providers\` projects.
+
+The **Ewl.Tools** NuGet package (assembly name `Tewl`) provides low-level
+utilities used throughout EWL such as `IoMethods` and
+`StringTools`. Its source is at https://github.com/enduracode/tewl (integration branch).
