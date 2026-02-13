@@ -5,7 +5,7 @@ export const Utf8BomPlugin = async ({ $ }) => {
         input.tool === "write" ? output.metadata?.filepath :
         input.tool === "edit" ? output.metadata?.filediff?.file :
         null
-      const extensions = [".cs", ".csproj"]
+      const extensions = [".cs", ".csproj", ".cshtml"]
       if (!filePath || !extensions.some(ext => filePath.endsWith(ext))) return
 
       try {
