@@ -77,7 +77,7 @@ public static class GlobalInitializationOps {
 			initializationLog += Environment.NewLine + e;
 
 			try {
-				const string destinationPath = @"c:\AnyoneFullControl\";
+				var destinationPath = Environment.OSVersion.Platform == PlatformID.Win32NT ? @"c:\AnyoneFullControl\" : "/tmp/ewl-debug/";
 				if( Directory.Exists( destinationPath ) ) {
 					var currentTime = SystemClock.Instance.GetCurrentInstant(); // Don’t use Clock since it may not have been initialized.
 					File.WriteAllText(

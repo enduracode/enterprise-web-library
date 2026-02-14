@@ -91,14 +91,14 @@ public static partial class EwlStatics {
 		foreach( var path in pathList )
 			combinedPath += getTrimmedPath( path );
 
-		return combinedPath.TrimEnd( '\\' );
+		return combinedPath.TrimEnd( Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar );
 	}
 
 	private static string getTrimmedPath( string path ) {
-		path = path.Trim( '\\' );
+		path = path.Trim( Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar );
 		path = path.Trim();
 		if( path.Length > 0 )
-			return path + "\\";
+			return path + Path.DirectorySeparatorChar;
 		return "";
 	}
 

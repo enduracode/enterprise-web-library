@@ -42,11 +42,11 @@ internal class UpdateDependentLogic: Operation {
 				TewlContrib.ProcessTools.RunProgram(
 						EwlStatics.CombinePaths(
 							ConfigurationStatics.InstallationConfiguration.InstallationType == InstallationType.Development
-								? EwlStatics.CombinePaths( Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ), @".nuget\packages" )
-								: EwlStatics.CombinePaths( ConfigurationStatics.InstallationConfiguration.InstallationPath, @"..\..\.." ),
+								? EwlStatics.CombinePaths( Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ), ".nuget/packages" )
+								: EwlStatics.CombinePaths( ConfigurationStatics.InstallationConfiguration.InstallationPath, "../../.." ),
 							id,
 							version,
-							@"Development Utility\EnterpriseWebLibrary.DevelopmentUtility" ),
+							"Development Utility/EnterpriseWebLibrary.DevelopmentUtility" ),
 						$"""
 						 "{genericInstallation.GeneralLogic.Path}" UpdateAllDependentLogic
 						 """,
@@ -593,7 +593,7 @@ internal class UpdateDependentLogic: Operation {
 
 		Directory.CreateDirectory( EwlStatics.CombinePaths( application.Path, "Properties" ) );
 		File.WriteAllText(
-			EwlStatics.CombinePaths( application.Path, @"Properties\launchSettings.json" ),
+			EwlStatics.CombinePaths( application.Path, "Properties/launchSettings.json" ),
 			File.ReadAllText( EwlStatics.CombinePaths( configurationFilesFolderPath, "launchSettings.json" ) )
 				.Replace( "@@NonsecurePort", ( 44311 + index * 2 ).ToString() )
 				.Replace( "@@SecurePort", ( 44310 + index * 2 ).ToString() )
