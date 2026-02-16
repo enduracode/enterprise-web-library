@@ -21,9 +21,6 @@ parameters:
 - name: appServiceOverride
   type: string
   default: ''
-- name: deploymentSlotOverride
-  type: string
-  default: ''
 
 trigger: none
 
@@ -42,7 +39,7 @@ jobs:
   - pwsh: |
       $resourceGroup = if ("${{ parameters.resourceGroupOverride }}") { "${{ parameters.resourceGroupOverride }}" } else { "${{ parameters.resourceGroup }}" }
       $appService = if ("${{ parameters.appServiceOverride }}") { "${{ parameters.appServiceOverride }}" } else { "${{ parameters.appService }}" }
-      $deploymentSlot = if ("${{ parameters.deploymentSlotOverride }}") { "${{ parameters.deploymentSlotOverride }}" } else { "${{ parameters.deploymentSlot }}" }
+      $deploymentSlot = "${{ parameters.deploymentSlot }}"
 
       if ($deploymentSlot) {
         $slotArgs = "--slot $deploymentSlot"
