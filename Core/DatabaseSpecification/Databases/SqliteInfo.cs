@@ -40,7 +40,7 @@ public class SqliteInfo: DatabaseInfo {
 	string DatabaseInfo.LastAutoIncrementValueExpression => throw new NotImplementedException();
 	string DatabaseInfo.QueryCacheHint => throw new NotImplementedException();
 
-	string DatabaseInfo.GetConnectionString( int timeout ) => provider.Value.GetConnectionString( filePath, useReadOnlyMode, timeout );
+	string DatabaseInfo.GetConnectionString( int timeout, string clientIdOverride ) => provider.Value.GetConnectionString( filePath, useReadOnlyMode, timeout );
 
 	DbConnection DatabaseInfo.CreateConnection( string connectionString ) => provider.Value.CreateConnection( connectionString );
 

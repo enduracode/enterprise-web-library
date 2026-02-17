@@ -50,7 +50,7 @@ public class MySqlInfo: DatabaseInfo {
 	/// </summary>
 	public bool SupportsConnectionPooling => supportsConnectionPooling;
 
-	string DatabaseInfo.GetConnectionString( int timeout ) {
+	string DatabaseInfo.GetConnectionString( int timeout, string clientIdOverride ) {
 		var connectionString = "Server=localhost; User ID=root; Password=password; Database=" + database;
 		if( !supportsConnectionPooling )
 			connectionString += "; Pooling=false";
