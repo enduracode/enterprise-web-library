@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
 using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.Configuration.InstallationStandard;
 using EnterpriseWebLibrary.Configuration.SystemDevelopment;
 using EnterpriseWebLibrary.Configuration.SystemGeneral;
 using EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration;
@@ -324,6 +325,54 @@ internal class UpdateDependentLogic: Operation {
 						"@@WorkingFolderPath",
 						"$(Build.SourcesDirectory)" + systemPathInRepository.PrependDelimiter( Path.AltDirectorySeparatorChar.ToString() ) ) );
 		}
+
+		var azureDeployPipelinesExist = false;
+		var systemShortNameSlug = installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName.ToUrlSlug();
+		foreach( var installationConfigurationFolderPath in Directory.GetDirectories(
+			        EwlStatics.CombinePaths(
+				        installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath,
+				        InstallationConfiguration.InstallationConfigurationFolderName,
+				        InstallationConfiguration.InstallationsFolderName ) ) ) {
+			if( new[] { InstallationConfiguration.DevelopmentInstallationFolderName, AppStatics.MercurialRepositoryFolderName, AppStatics.GitRepositoryFolderName }
+			   .Contains( Path.GetFileName( installationConfigurationFolderPath ) ) )
+				continue;
+
+			var azureDeployPipelinePath = EwlStatics.CombinePaths( installationConfigurationFolderPath, "Azure Deploy Pipeline.yml" );
+			if( !File.Exists( azureDeployPipelinePath ) )
+				continue;
+
+			const string regionEnd = "# END-EWL-REGION";
+
+			// names follow Cloud Adoption Framework; see https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-naming
+			var installationConfigurationFile = XmlOps.DeserializeFromFile<InstallationStandardConfiguration>(
+				EwlStatics.CombinePaths( installationConfigurationFolderPath, InstallationConfiguration.InstallationStandardConfigurationFileName ),
+				false );
+			var installationType = installationConfigurationFile.installedInstallation.InstallationTypeConfiguration is LiveInstallationConfiguration
+				                       ? "prod"
+				                       : "intermediate";
+			var generatedRegion = $"""
+			                       extends:
+			                         template: ../../../Azure Deploy Job.yml
+			                         parameters:
+			                           installationName: '{installationConfigurationFile.installedInstallation.name}'
+			                           resourceGroup: 'rg-{systemShortNameSlug}-{installationType}'
+			                           appService: 'app-{systemShortNameSlug}-{installationConfigurationFile.installedInstallation.shortName.ToUrlSlug()}'
+			                           triggerAfterBuild: true
+			                           {regionEnd}
+			                       """;
+
+			var existingText = File.ReadAllText( azureDeployPipelinePath );
+			var markerIndex = existingText.IndexOf( regionEnd, StringComparison.Ordinal );
+			File.WriteAllText( azureDeployPipelinePath, generatedRegion + ( markerIndex == -1 ? "" : existingText[ ( markerIndex + regionEnd.Length ).. ] ) );
+
+			azureDeployPipelinesExist = true;
+		}
+		if( azureDeployPipelinesExist )
+			File.WriteAllText(
+				EwlStatics.CombinePaths( installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath, "Azure Deploy Job.yml" ),
+				File.ReadAllText( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "Azure Pipeline Templates", "Deploy.yml" ) )
+					.Replace( "@@EwlInitialism", EwlStatics.EwlInitialism )
+					.Replace( "@@DataMigratorPath", $"{IsuStatics.DataMigratorProjectName}/{IsuStatics.DataMigratorNamespaceAndAssemblyName}.exe" ) );
 
 		if( !installation.DevelopmentInstallationLogic.SystemIsEwl && !installation.SystemIsTewl() ) {
 			if( Directory.Exists( EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.MercurialRepositoryFolderName ) ) )
