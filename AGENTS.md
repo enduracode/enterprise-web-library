@@ -137,6 +137,9 @@ UTF-8 BOM and CRLF line endings on every file creation or update.
 ### Type Patterns
 
 - **Nullable reference types** enabled: `string?`, `Func<Instant>?`
+- **Strings should not be nullable** unless `null` represents something distinct
+  from the empty string. Use `string` with `""` as the default/empty value.
+  Parameters that are optional strings should default to `""`, not `null`.
 - **`var`** used liberally for local variables
 - **`partial class`** used extensively for code-gen integration
 - **`IReadOnlyCollection<T>`** preferred over `List<T>` for return types
