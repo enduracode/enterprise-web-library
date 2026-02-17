@@ -51,7 +51,11 @@ public static class DataMigrationOps {
 		var appAssembly = Assembly.GetCallingAssembly();
 		using var serviceProvider = new ServiceCollection().AddFluentMigratorCore()
 			.ConfigureRunner( builder => builder.addDatabaseServices( ConfigurationStatics.InstallationConfiguration.PrimaryDatabaseInfo! )
-				.WithGlobalConnectionString( ConfigurationStatics.InstallationConfiguration.PrimaryDatabaseInfo!.GetConnectionString( 60 ) )
+				.WithGlobalConnectionString(
+					ConfigurationStatics.InstallationConfiguration.PrimaryDatabaseInfo!.GetConnectionString(
+						60,
+						clientIdOverride:
+						Environment.GetEnvironmentVariable( "{0}DataMigratorManagedIdentityClientId".FormatWith( EwlStatics.EwlInitialism.EnglishToPascal() ) ) ?? "" ) )
 				.ScanIn( appAssembly )
 				.For.Migrations() )
 			.AddScoped( typeof( IVersionTableMetaData ), typeof( TableConfiguration ) )
