@@ -83,12 +83,14 @@ public class SqlServerInfo: DatabaseInfo {
 			builder.Authentication = SqlAuthenticationMethod.ActiveDirectoryManagedIdentity;
 			builder.UserID = clientIdOverride;
 		}
-		else if( loginName is null )
-			builder.IntegratedSecurity = true;
-		else {
+		else if( loginName is not null ) {
 			builder.UserID = loginName;
 			builder.Password = password;
 		}
+		else if( Environment.GetEnvironmentVariable( "WEBSITE_SITE_NAME" ) is not null /* Azure App Service */ )
+			builder.Authentication = SqlAuthenticationMethod.ActiveDirectoryManagedIdentity;
+		else
+			builder.IntegratedSecurity = true;
 		builder.TrustServerCertificate = true;
 		builder.InitialCatalog = database;
 		if( !supportsConnectionPooling )
