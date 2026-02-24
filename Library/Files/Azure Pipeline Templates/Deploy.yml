@@ -28,7 +28,8 @@ resources:
   pipelines:
   - pipeline: build
     source: Build
-    trigger: ${{ parameters.triggerAfterBuild }}
+    trigger:
+      enabled: ${{ parameters.triggerAfterBuild }}
 
 jobs:
 - job: Deploy
