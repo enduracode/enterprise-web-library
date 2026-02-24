@@ -253,8 +253,19 @@ Dependencies are defined in `Library\Library.csproj`. EWL is referenced as a
 NuGet package (e.g. `EwlBill`), with optional provider packages for MySQL,
 SQLite, SAML, etc.
 
+### TEWL (Ewl.Tools)
+
+The **Ewl.Tools** NuGet package (assembly name `Tewl`, namespace `Tewl.Tools`)
+is a transitive dependency of every EWL system. It provides low-level utility
+and extension methods used throughout EWL and client code. Source:
+https://github.com/enduracode/tewl (integration branch).
+
+Always check TEWL for existing utility methods before writing manual null checks,
+collection operations, or string manipulations.
+
 ---
 
 ## Further Reference
 
 EWL source and documentation: https://github.com/enduracode/enterprise-web-library
+TEWL source: https://github.com/enduracode/tewl
