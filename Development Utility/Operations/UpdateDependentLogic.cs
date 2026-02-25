@@ -351,13 +351,20 @@ internal class UpdateDependentLogic: Operation {
 				                       ? "prod"
 				                       : "intermediate";
 			var generatedRegion = $"""
+			                       trigger: none
+
+			                       resources:
+			                         pipelines:
+			                         - pipeline: build
+			                           source: Build
+			                           trigger: {( installationConfigurationFile.installedInstallation.InstallationTypeConfiguration is IntermediateInstallationConfiguration ? "true" : "none" )}
+
 			                       extends:
 			                         template: ../../../Azure Deploy Job.yml
 			                         parameters:
 			                           installationName: '{installationConfigurationFile.installedInstallation.name}'
 			                           resourceGroup: 'rg-{systemShortNameSlug}-{installationType}'
 			                           appService: 'app-{systemShortNameSlug}-{installationConfigurationFile.installedInstallation.shortName.ToUrlSlug()}'
-			                           triggerAfterBuild: true
 			                           {regionEnd}
 			                       """;
 

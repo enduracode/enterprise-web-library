@@ -13,23 +13,12 @@ parameters:
 - name: deploymentSlot
   type: string
   default: ''
-- name: triggerAfterBuild
-  type: boolean
 - name: resourceGroupOverride
   type: string
   default: ''
 - name: appServiceOverride
   type: string
   default: ''
-
-trigger: none
-
-resources:
-  pipelines:
-  - pipeline: build
-    source: Build
-    trigger:
-      enabled: ${{ parameters.triggerAfterBuild }}
 
 jobs:
 - job: Deploy
@@ -110,7 +99,7 @@ jobs:
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
         $body = @{
-          command = "site/wwwroot/@@DataMigratorPath"
+          command = "`"site/wwwroot/@@DataMigratorPath`""
         } | ConvertTo-Json
 
         $response = Invoke-RestMethod -Uri "https://$(KuduHostName)/api/command" `
