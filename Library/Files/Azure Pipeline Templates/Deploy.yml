@@ -90,6 +90,7 @@ jobs:
       deploymentMethod: 'zipDeploy'
     displayName: 'Upload logic to app service'
 
+  # derived from IsuStatics.ConfigureIis to do the same for Azure App Service
   - task: AzureCLI@2
     inputs:
       azureSubscription: '${{ parameters.serviceConnection }}'
