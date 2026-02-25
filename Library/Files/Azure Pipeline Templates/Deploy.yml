@@ -99,6 +99,37 @@ jobs:
         $token = az account get-access-token --query accessToken -o tsv
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
+        $xdtLines = @(
+          '<?xml version="1.0"?>',
+          '<configuration xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">',
+          '  <configSections>',
+          '    <sectionGroup name="system.webServer">',
+          '      <section name="modules" xdt:Locator="Match(name)" xdt:Transform="SetAttributes(overrideModeDefault)" overrideModeDefault="Allow" />',
+          '      <section name="serverRuntime" xdt:Locator="Match(name)" xdt:Transform="SetAttributes(overrideModeDefault)" overrideModeDefault="Allow" />',
+          '    </sectionGroup>',
+          '  </configSections>',
+          '</configuration>'
+        )
+        $xdtBytes = [System.Text.Encoding]::UTF8.GetBytes($xdtLines -join "`n")
+
+        Invoke-RestMethod -Uri "https://$(KuduHostName)/api/vfs/site/applicationHost.xdt" `
+          -Method Put `
+          -Headers @{Authorization="Bearer $token"; "If-Match"="*"} `
+          -Body $xdtBytes `
+          -ContentType "application/xml"
+
+        Write-Host "applicationHost.xdt uploaded successfully"
+    displayName: 'Upload IIS configuration transform'
+
+  - task: AzureCLI@2
+    inputs:
+      azureSubscription: '${{ parameters.serviceConnection }}'
+      scriptType: 'pscore'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        $token = az account get-access-token --query accessToken -o tsv
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
         $body = @{
           command = "`"site/wwwroot/@@DataMigratorPath`""
         } | ConvertTo-Json
