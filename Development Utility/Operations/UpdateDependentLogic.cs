@@ -344,12 +344,16 @@ internal class UpdateDependentLogic: Operation {
 			const string regionEnd = "# END-EWL-REGION";
 
 			// names follow Cloud Adoption Framework; see https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-naming
-			var installationConfigurationFile = XmlOps.DeserializeFromFile<InstallationStandardConfiguration>(
-				EwlStatics.CombinePaths( installationConfigurationFolderPath, InstallationConfiguration.InstallationStandardConfigurationFileName ),
-				false );
-			var installationType = installationConfigurationFile.installedInstallation.InstallationTypeConfiguration is LiveInstallationConfiguration
-				                       ? "prod"
-				                       : "intermediate";
+			var installedInstallation = XmlOps.DeserializeFromFile<InstallationStandardConfiguration>(
+					EwlStatics.CombinePaths( installationConfigurationFolderPath, InstallationConfiguration.InstallationStandardConfigurationFileName ),
+					false )
+				.installedInstallation;
+			var triggerBranch =
+				installedInstallation.InstallationTypeConfiguration is IntermediateInstallationConfiguration &&
+				!installedInstallation.name.Contains( "Staging", StringComparison.Ordinal )
+					? "Integration"
+					: "master";
+			var installationType = installedInstallation.InstallationTypeConfiguration is LiveInstallationConfiguration ? "prod" : "intermediate";
 			var generatedRegion = $"""
 			                       trigger: none
 
@@ -357,14 +361,18 @@ internal class UpdateDependentLogic: Operation {
 			                         pipelines:
 			                         - pipeline: build
 			                           source: Build
-			                           trigger: {( installationConfigurationFile.installedInstallation.InstallationTypeConfiguration is IntermediateInstallationConfiguration ? "true" : "none" )}
+			                           trigger:
+			                             enabled: {( installedInstallation.InstallationTypeConfiguration is IntermediateInstallationConfiguration ? "true" : "false" )}
+			                             branches:
+			                               include:
+			                               - {triggerBranch}
 
 			                       extends:
 			                         template: ../../../Azure Deploy Job.yml
 			                         parameters:
-			                           installationName: '{installationConfigurationFile.installedInstallation.name}'
+			                           installationName: '{installedInstallation.name}'
 			                           resourceGroup: 'rg-{systemShortNameSlug}-{installationType}'
-			                           appService: 'app-{systemShortNameSlug}-{installationConfigurationFile.installedInstallation.shortName.ToUrlSlug()}'
+			                           appService: 'app-{systemShortNameSlug}-{installedInstallation.shortName.ToUrlSlug()}'
 			                           {regionEnd}
 			                       """;
 
