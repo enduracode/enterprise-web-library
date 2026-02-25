@@ -87,6 +87,7 @@ jobs:
       package: '$(Pipeline.Workspace)/ServerSideLogic'
       deployToSlotOrASE: '$(DeployToSlot)'
       slotName: '$(DeploymentSlot)'
+      deploymentMethod: 'zipDeploy'
     displayName: 'Upload logic to app service'
 
   - task: AzureCLI@2
