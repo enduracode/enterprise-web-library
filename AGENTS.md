@@ -5,7 +5,8 @@
 EWL is an opinionated .NET framework for building web-based enterprise software.
 The solution is C# targeting **net9.0-windows**, using ASP.NET Core with EWL's own
 component-based web framework layered on top (no Razor views). Source control is
-Mercurial with a Git mirror.
+Mercurial. If a `.hg` directory is present, load the `ewl-mercurial` skill
+before running any version control commands.
 
 ### Key Projects
 

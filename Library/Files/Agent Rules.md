@@ -2,7 +2,9 @@
 
 This system uses the Enterprise Web Library (EWL), an opinionated .NET framework
 for building web-based enterprise software. The solution is C# targeting
-`net9.0-windows`.
+`net9.0-windows`. If a `.hg` directory is present, this repository uses
+Mercurial for version control; load the `ewl-mercurial` skill before running
+any version control commands.
 
 ## Build Commands
 
