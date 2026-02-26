@@ -61,6 +61,22 @@ To exclude files, use the `-X` flag:
 hg commit -X "*.generated.cs" -m "Manual changes only"
 ```
 
+### Two separate shelve mechanisms
+
+TortoiseHg and Mercurial have independent shelve implementations that are
+**not interoperable**:
+
+| | TortoiseHg (GUI) | Mercurial CLI |
+|---|---|---|
+| Storage | `.hg/shelves/` | `.hg/shelved/` |
+| Names | Timestamp-based | User-chosen (`--name`) |
+| List | Shelve tool in GUI | `hg shelve --list` |
+
+TortoiseHg's shelve predates Mercurial's (added in Hg 2.8, 2013). Each tool
+only sees its own shelves. When working from the command line, always use
+`hg shelve` / `hg unshelve` and be aware that these shelves will not appear
+in TortoiseHg's Shelve dialog, and vice versa.
+
 ### Topics instead of branches
 
 EWL repositories use **topics** (a Heptapod/Evolve feature) for feature work
