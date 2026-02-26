@@ -140,6 +140,11 @@ hg --debug identify --id
 This is invoked automatically during the export/build process. The TortoiseHg
 installation is expected at `C:\Program Files\TortoiseHg\hg`.
 
+### Commit messages
+
+Keep all lines in commit messages to **80 characters or fewer** (the
+TortoiseHg default `summarylen`).
+
 ### Ignore file
 
 The `.hgignore` file is **auto-generated** by the Development Utility. Do not
