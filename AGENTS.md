@@ -123,6 +123,9 @@ UTF-8 BOM and CRLF line endings on every file creation or update.
 
 ### Formatting
 
+- **Preserve non-ASCII characters** like curly quotes -- do not convert to
+  straight quotes. LLMs may not be able to output some Unicode characters;
+  use PowerShell (e.g. `[char]0x201C`) when needed.
 - **Tabs** for indentation
 - **Spaces inside parentheses**: `( value )`, `( "text" )`, `( state )`
 - **Spaces inside attribute brackets**: `[ Test ]`, `[ TestFixture ]`, `[ DllImport( "kernel32" ) ]`
