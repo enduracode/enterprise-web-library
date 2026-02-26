@@ -156,7 +156,11 @@ UTF-8 BOM and CRLF line endings on every file creation or update.
 - Custom exceptions: `UserCorrectableException`, `UnexpectedValueException`, `DoNotEmailOrLogException`
 - Cleanup-on-failure pattern: `try { ... } catch { CleanUpStatics(); throw; }`
 - Null-forgiving operator (`!`) used when internal state is guaranteed post-init:
-  `currentTimeGetter!()`
+  `currentTimeGetter!()`. Also used on fields captured in lambdas before
+  assignment to avoid nullable type inference: `field!.ToCollection()`
+- **Do not replace calls to EWL/TEWL helper methods** such as `.ToCollection()`,
+  `.Materialize()`, `.Any()` with raw language constructs like `new T[]` or
+  LINQ equivalents. Prefer fixing nullability with `!` or `?` on the receiver.
 
 ### Comments
 
