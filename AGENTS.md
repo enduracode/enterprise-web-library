@@ -171,3 +171,14 @@ each of the `Providers\` projects.
 The **Ewl.Tools** NuGet package (assembly name `Tewl`) provides low-level
 utilities used throughout EWL such as `IoMethods` and
 `StringTools`. Its source is at https://github.com/enduracode/tewl (integration branch).
+
+### Local TEWL Development
+
+TEWL source: `C:\Users\willi\Revision Control\EWL Dependencies\EnduraCode's TEWL\`.
+The outer directory is Mercurial; `Shared\` is a git repo. The curly apostrophe
+(U+2019) in the path breaks some tools; use wildcards like `EnduraCode*TEWL`.
+
+- Export to local feed: run `"Solution Files/Export Package to Local Feed.bat"`
+  in the outer TEWL directory
+- Local feed: `C:\Enterprise Web Library\Local NuGet Feed`
+- After exporting, update the `Ewl.Tools` version in `Core\Core.csproj`
