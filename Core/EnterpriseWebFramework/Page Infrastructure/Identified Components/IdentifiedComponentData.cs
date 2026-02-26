@@ -1,10 +1,9 @@
-﻿#nullable disable
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	internal class IdentifiedComponentData<ChildType> where ChildType: PageComponent {
-		internal readonly string Id;
+		internal readonly string? Id;
 		internal readonly IReadOnlyCollection<UpdateRegionLinker> UpdateRegionLinkers;
 		internal readonly ErrorSourceSet ErrorSources;
 		internal readonly Func<ModificationErrorDictionary, IEnumerable<ChildType>> ChildGetter;
@@ -22,7 +21,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// container is important so that when the components differ before and after a transfer, other parts of the page such as form controls do not get
 		/// affected.</param>
 		internal IdentifiedComponentData(
-			string id, IReadOnlyCollection<UpdateRegionLinker> updateRegionLinkers, ErrorSourceSet errorSources,
+			string? id, IReadOnlyCollection<UpdateRegionLinker> updateRegionLinkers, ErrorSourceSet errorSources,
 			Func<ModificationErrorDictionary, IEnumerable<ChildType>> childGetter ) {
 			Id = id;
 			UpdateRegionLinkers = updateRegionLinkers;

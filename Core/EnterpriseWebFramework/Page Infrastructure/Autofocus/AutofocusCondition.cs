@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Tewl.Tools;
@@ -13,7 +12,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Creates a condition that will be true if this is an initial request for the page.
 		/// </summary>
 		/// <param name="pageCondition"></param>
-		public static AutofocusCondition InitialRequest( PageModificationValueCondition pageCondition = null ) {
+		public static AutofocusCondition InitialRequest( PageModificationValueCondition? pageCondition = null ) {
 			return new AutofocusCondition( ( "", pageCondition ).ToCollection() );
 		}
 
@@ -22,13 +21,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		/// <param name="focusKey">Do not pass null or the empty string.</param>
 		/// <param name="pageCondition"></param>
-		public static AutofocusCondition PostBack( string focusKey, PageModificationValueCondition pageCondition = null ) {
+		public static AutofocusCondition PostBack( string focusKey, PageModificationValueCondition? pageCondition = null ) {
 			return new AutofocusCondition( ( focusKey, pageCondition ).ToCollection() );
 		}
 
-		private readonly IReadOnlyCollection<( string focusKey, PageModificationValueCondition pageCondition )> focusKeyAndPageConditionPairs;
+		private readonly IReadOnlyCollection<( string focusKey, PageModificationValueCondition? pageCondition )> focusKeyAndPageConditionPairs;
 
-		private AutofocusCondition( IReadOnlyCollection<( string focusKey, PageModificationValueCondition pageCondition )> focusKeyAndPageConditionPairs ) {
+		private AutofocusCondition( IReadOnlyCollection<( string focusKey, PageModificationValueCondition? pageCondition )> focusKeyAndPageConditionPairs ) {
 			this.focusKeyAndPageConditionPairs = focusKeyAndPageConditionPairs;
 		}
 
