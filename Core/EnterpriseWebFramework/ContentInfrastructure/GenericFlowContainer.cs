@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
@@ -20,8 +19,8 @@ public class GenericFlowContainer: FlowComponent {
 	/// you can reference from CSS or JavaScript files. The ID you specify should be unique on the page. Do not pass null. Use with caution.</param>
 	/// <param name="etherealContent"></param>
 	public GenericFlowContainer(
-		IReadOnlyCollection<FlowComponent> content, DisplaySetup displaySetup = null, ElementClassSet classes = null, string clientSideIdOverride = "",
-		IReadOnlyCollection<EtherealComponent> etherealContent = null ) {
+		IReadOnlyCollection<FlowComponent> content, DisplaySetup? displaySetup = null, ElementClassSet? classes = null, string clientSideIdOverride = "",
+		IReadOnlyCollection<EtherealComponent>? etherealContent = null ) {
 		children = new DisplayableElement( context => new DisplayableElementData(
 			displaySetup,
 			() => new DisplayableElementLocalData(

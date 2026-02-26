@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System;
+﻿using System;
 using System.Globalization;
 using Humanizer;
 using Tewl.Tools;
@@ -11,7 +10,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		/// <param name="segment">Do not pass null.</param>
 		/// <param name="parameters"></param>
-		public static EncodingUrlSegment Create( string segment, EncodingUrlParameterCollection parameters = null ) =>
+		public static EncodingUrlSegment Create( string segment, EncodingUrlParameterCollection? parameters = null ) =>
 			new EncodingUrlSegment( segment, parameters );
 
 		/// <summary>
@@ -20,7 +19,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="segment">Do not pass null.</param>
 		/// <param name="versionString">Do not pass null or the empty string. Must contain only alphanumeric characters.</param>
 		/// <param name="parameters"></param>
-		public static EncodingUrlSegment CreateWithVersionString( string segment, string versionString, EncodingUrlParameterCollection parameters = null ) =>
+		public static EncodingUrlSegment CreateWithVersionString( string segment, string versionString, EncodingUrlParameterCollection? parameters = null ) =>
 			versionString.Length > 0 && versionString == versionString.RemoveNonAlphanumericCharacters()
 				? new EncodingUrlSegment( "{0}--v{1}".FormatWith( segment, versionString ), parameters )
 				: throw new ArgumentOutOfRangeException( nameof(versionString) );
@@ -30,7 +29,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		/// <param name="value"></param>
 		/// <param name="parameters"></param>
-		public static EncodingUrlSegment CreatePositiveInt( int value, EncodingUrlParameterCollection parameters = null ) =>
+		public static EncodingUrlSegment CreatePositiveInt( int value, EncodingUrlParameterCollection? parameters = null ) =>
 			value >= 1
 				? new EncodingUrlSegment( value.ToString( "D", CultureInfo.InvariantCulture ), parameters )
 				: throw new ArgumentOutOfRangeException( nameof(value) );
@@ -38,7 +37,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		internal readonly string Segment;
 		internal readonly EncodingUrlParameterCollection Parameters;
 
-		private EncodingUrlSegment( string segment, EncodingUrlParameterCollection parameters ) {
+		private EncodingUrlSegment( string segment, EncodingUrlParameterCollection? parameters ) {
 			Segment = segment;
 			Parameters = parameters ?? new EncodingUrlParameterCollection();
 		}

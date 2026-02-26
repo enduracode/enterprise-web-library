@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Tewl.Tools;
@@ -46,7 +45,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="verticalAlignment">The vertical alignment of the item.</param>
 		/// <param name="width">The width of the item.</param>
 		public static WrappingListItem ToWrappingListItem(
-			this ComponentListItem item, FlexboxVerticalAlignment verticalAlignment = FlexboxVerticalAlignment.NotSpecified, ContentBasedLength width = null ) =>
+			this ComponentListItem item, FlexboxVerticalAlignment verticalAlignment = FlexboxVerticalAlignment.NotSpecified, ContentBasedLength? width = null ) =>
 			new WrappingListItem( () => item.GetItemAndComponent( FlexboxVerticalAlignmentStatics.Class( verticalAlignment ), width ) );
 
 		/// <summary>

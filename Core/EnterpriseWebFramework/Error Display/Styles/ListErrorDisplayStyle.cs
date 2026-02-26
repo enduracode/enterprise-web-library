@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;
@@ -26,7 +25,7 @@ public class ListErrorDisplayStyle: ErrorDisplayStyle<FlowComponent> {
 	}
 
 	internal static DisplayableElementLocalData GetErrorFocusableElementLocalData(
-		ElementContext context, string elementName, ErrorSourceSet errorSources, IReadOnlyCollection<ElementAttribute> attributes ) =>
+		ElementContext context, string elementName, ErrorSourceSet? errorSources, IReadOnlyCollection<ElementAttribute>? attributes ) =>
 		new(
 			elementName,
 			new FocusabilityCondition( false, errorFocusabilitySources: errorSources ),
@@ -48,7 +47,7 @@ public class ListErrorDisplayStyle: ErrorDisplayStyle<FlowComponent> {
 	/// Creates a list error-display style.
 	/// </summary>
 	/// <param name="classes">The classes on the list container.</param>
-	public ListErrorDisplayStyle( ElementClassSet classes = null ) {
+	public ListErrorDisplayStyle( ElementClassSet? classes = null ) {
 		componentGetter = ( errorSources, errors, componentsFocusableOnError ) => {
 			if( !errors.Any() )
 				return Enumerable.Empty<FlowComponent>().Materialize();

@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Tewl.Tools;
@@ -18,8 +17,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// Creates an element-node-data object.
 		/// </summary>
 		public ElementNodeData(
-			string clientSideIdOverride, Func<ElementNodeLocalData> localDataGetter, IReadOnlyCollection<FlowComponentOrNode> children = null,
-			IReadOnlyCollection<EtherealComponentOrElement> etherealChildren = null ) {
+			string clientSideIdOverride, Func<ElementNodeLocalData> localDataGetter, IReadOnlyCollection<FlowComponentOrNode>? children = null,
+			IReadOnlyCollection<EtherealComponentOrElement>? etherealChildren = null ) {
 			ClientSideIdOverride = clientSideIdOverride;
 			Children = children ?? Enumerable.Empty<FlowComponentOrNode>().Materialize();
 			EtherealChildren = etherealChildren ?? Enumerable.Empty<EtherealComponentOrElement>().Materialize();

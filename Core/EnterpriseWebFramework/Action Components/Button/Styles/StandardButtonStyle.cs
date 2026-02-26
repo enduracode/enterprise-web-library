@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
@@ -8,7 +7,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 /// </summary>
 public class StandardButtonStyle: ButtonStyle {
 	private readonly ButtonSize buttonSize;
-	private readonly ActionComponentIcon icon;
+	private readonly ActionComponentIcon? icon;
 	private readonly string text;
 
 	/// <summary>
@@ -17,7 +16,7 @@ public class StandardButtonStyle: ButtonStyle {
 	/// <param name="text">Do not pass null or the empty string.</param>
 	/// <param name="buttonSize"></param>
 	/// <param name="icon">The icon.</param>
-	public StandardButtonStyle( string text, ButtonSize buttonSize = ButtonSize.Normal, ActionComponentIcon icon = null ) {
+	public StandardButtonStyle( string text, ButtonSize buttonSize = ButtonSize.Normal, ActionComponentIcon? icon = null ) {
 		this.buttonSize = buttonSize;
 		this.icon = icon;
 		this.text = text;

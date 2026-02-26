@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
@@ -13,7 +12,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Creates an error-source set.
 		/// </summary>
-		public ErrorSourceSet( IEnumerable<EwfValidation> validations = null, bool includeGeneralErrors = false ) {
+		public ErrorSourceSet( IEnumerable<EwfValidation>? validations = null, bool includeGeneralErrors = false ) {
 			Validations = validations?.ToImmutableArray() ?? ImmutableArray<EwfValidation>.Empty;
 			IncludeGeneralErrors = includeGeneralErrors;
 		}

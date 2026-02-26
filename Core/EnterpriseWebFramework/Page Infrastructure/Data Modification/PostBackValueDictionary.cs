@@ -1,12 +1,11 @@
-﻿#nullable disable
-namespace EnterpriseWebLibrary.EnterpriseWebFramework;
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 /// <summary>
 /// A dictionary of form control values from a post back.
 /// </summary>
 internal class PostBackValueDictionary {
 	private readonly Dictionary<string, object> dictionary = new();
-	private HashSet<string> nonRemovedKeys;
+	private HashSet<string>? nonRemovedKeys;
 
 	/// <summary>
 	/// Returns the keys of the extra post-back values.
@@ -32,7 +31,7 @@ internal class PostBackValueDictionary {
 	/// <summary>
 	/// Returns null if there is no value for the specified key.
 	/// </summary>
-	internal object GetValue( string key ) {
+	internal object? GetValue( string key ) {
 		return dictionary.TryGetValue( key, out var value ) ? value : null;
 	}
 

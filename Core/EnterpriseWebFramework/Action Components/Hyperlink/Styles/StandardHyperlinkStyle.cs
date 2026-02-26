@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
@@ -7,7 +6,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 /// A style that displays a hyperlink as text.
 /// </summary>
 public class StandardHyperlinkStyle: HyperlinkStyle {
-	private readonly ActionComponentIcon icon;
+	private readonly ActionComponentIcon? icon;
 	private readonly string text;
 
 	/// <summary>
@@ -15,7 +14,7 @@ public class StandardHyperlinkStyle: HyperlinkStyle {
 	/// </summary>
 	/// <param name="text">Do not pass null. Pass the empty string to use the destination URL.</param>
 	/// <param name="icon">The icon.</param>
-	public StandardHyperlinkStyle( string text, ActionComponentIcon icon = null ) {
+	public StandardHyperlinkStyle( string text, ActionComponentIcon? icon = null ) {
 		this.icon = icon;
 		this.text = text;
 	}

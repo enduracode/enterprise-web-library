@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase;
 
@@ -12,7 +11,7 @@ public class ElementLocalData {
 	/// <summary>
 	/// Creates a local-data object for a nonfocusable element.
 	/// </summary>
-	public ElementLocalData( string elementName, ElementFocusDependentData focusDependentData = null ) {
+	public ElementLocalData( string elementName, ElementFocusDependentData? focusDependentData = null ) {
 		NodeDataGetter = classSet => new ElementNodeLocalData( elementName, ( focusDependentData ?? new ElementFocusDependentData() ).NodeDataGetter( classSet ) );
 	}
 

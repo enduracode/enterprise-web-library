@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -17,7 +16,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="segmentParameters">The parameters that will be included in the handler’s own URL as well as the URLs of its descendants.</param>
 		/// <param name="queryParameters">The parameters that will be included in the handler’s own URL but not the URLs of its descendants.</param>
 		public EncodingUrlParameterCollection(
-			IEnumerable<( string name, string value )> segmentParameters = null, IEnumerable<( string name, string value )> queryParameters = null ) {
+			IEnumerable<( string name, string value )>? segmentParameters = null, IEnumerable<( string name, string value )>? queryParameters = null ) {
 			this.segmentParameters = ( segmentParameters ?? Enumerable.Empty<( string, string )>() ).Materialize();
 			this.queryParameters = ( queryParameters ?? Enumerable.Empty<( string, string )>() ).Materialize();
 		}

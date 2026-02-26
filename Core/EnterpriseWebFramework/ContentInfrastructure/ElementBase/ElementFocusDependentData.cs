@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase;
@@ -13,7 +12,7 @@ public class ElementFocusDependentData {
 	/// <summary>
 	/// Creates an element focus-dependent-data object.
 	/// </summary>
-	public ElementFocusDependentData( IEnumerable<ElementAttribute> attributes = null, bool includeIdAttribute = false, string jsInitStatements = "" ) {
+	public ElementFocusDependentData( IEnumerable<ElementAttribute>? attributes = null, bool includeIdAttribute = false, string jsInitStatements = "" ) {
 		NodeDataGetter = classSet => {
 			var classValue = StringTools.ConcatenateWithDelimiter( " ", classSet.GetClassNames().ToArray() );
 			return new ElementNodeFocusDependentData(

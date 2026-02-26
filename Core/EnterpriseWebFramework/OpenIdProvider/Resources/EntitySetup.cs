@@ -1,5 +1,4 @@
-﻿#nullable disable
-namespace EnterpriseWebLibrary.EnterpriseWebFramework.OpenIdProvider.Resources;
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework.OpenIdProvider.Resources;
 
 partial class EntitySetup {
 	protected override void init() {
@@ -7,7 +6,7 @@ partial class EntitySetup {
 			throw new Exception( "The OpenID Provider is not enabled in this system." );
 	}
 
-	protected override ResourceParent createParent() => null;
+	protected override ResourceParent? createParent() => null;
 
 	protected override string getEntitySetupName() => "OpenID Provider";
 
@@ -17,7 +16,7 @@ partial class EntitySetup {
 
 	protected override UrlHandler getUrlParent() => new Admin.EntitySetup();
 
-	protected override UrlHandler getRequestHandler() => null;
+	protected override UrlHandler? getRequestHandler() => null;
 
 	protected override IEnumerable<UrlPattern> getChildUrlPatterns() =>
 		Keys.UrlPatterns.Literal( this, "jwks" )

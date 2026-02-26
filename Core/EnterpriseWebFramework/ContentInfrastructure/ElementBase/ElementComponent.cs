@@ -1,5 +1,4 @@
-﻿#nullable disable
-namespace EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase;
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase;
 
 /// <summary>
 /// A page element.
@@ -10,7 +9,7 @@ public class ElementComponent: FlowComponent, EtherealComponent {
 	/// <summary>
 	/// Creates an element.
 	/// </summary>
-	public ElementComponent( Func<ElementContext, ElementData> elementDataGetter, FormValue formValue = null ) {
+	public ElementComponent( Func<ElementContext, ElementData> elementDataGetter, FormValue? formValue = null ) {
 		children = new ElementNode( context => elementDataGetter( context ).NodeDataGetter( context ), formValue: formValue ).ToCollection();
 	}
 

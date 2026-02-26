@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.ErrorPages;
@@ -15,7 +14,7 @@ public class ErrorPageContent: PageContent {
 
 	private readonly BasicPageContent basicContent;
 
-	public ErrorPageContent( IReadOnlyCollection<FlowComponent> content, ElementClassSet bodyClasses = null ) {
+	public ErrorPageContent( IReadOnlyCollection<FlowComponent> content, ElementClassSet? bodyClasses = null ) {
 		basicContent = new BasicPageContent( bodyClasses: elementClass.Add( bodyClasses ?? ElementClassSet.Empty ) ).Add( content );
 	}
 

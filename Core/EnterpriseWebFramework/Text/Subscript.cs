@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;
 
@@ -17,7 +16,7 @@ public class Subscript: PhrasingComponent {
 	/// <param name="content"></param>
 	/// <param name="displaySetup"></param>
 	/// <param name="classes">The classes on the element.</param>
-	public Subscript( IReadOnlyCollection<PhrasingComponent> content, DisplaySetup displaySetup = null, ElementClassSet classes = null ) {
+	public Subscript( IReadOnlyCollection<PhrasingComponent> content, DisplaySetup? displaySetup = null, ElementClassSet? classes = null ) {
 		children = new DisplayableElement( context => new DisplayableElementData(
 			displaySetup,
 			() => new DisplayableElementLocalData( "sub" ),

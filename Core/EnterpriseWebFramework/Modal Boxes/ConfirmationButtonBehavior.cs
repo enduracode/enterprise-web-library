@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Humanizer;
 using Tewl.Tools;
@@ -18,7 +17,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// </summary>
 		/// <param name="dialogContent"></param>
 		/// <param name="postBack">Pass null to use the post-back corresponding to the first of the current data modifications.</param>
-		public ConfirmationButtonBehavior( IReadOnlyCollection<FlowComponent> dialogContent, PostBack postBack = null ) {
+		public ConfirmationButtonBehavior( IReadOnlyCollection<FlowComponent> dialogContent, PostBack? postBack = null ) {
 			var id = new ConfirmationDialogId();
 			dialog = new ConfirmationDialog( id, dialogContent, postBack: postBack );
 			confirmationAction = new ConfirmationFormAction( id );

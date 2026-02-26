@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using JetBrains.Annotations;
 using Newtonsoft.Json.Linq;
 
@@ -20,7 +19,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 
 		internal readonly int MaxXValues;
 		internal readonly string YAxisTitle;
-		internal readonly JObject YAxisLabelFormatOptions;
+		internal readonly JObject? YAxisLabelFormatOptions;
 		internal readonly bool OmitTable;
 
 		/// <summary>
@@ -40,7 +39,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <param name="omitTable">Pass true to omit the table containing the chart’s underlying data.</param>
 		public ChartSetup(
 			ChartType chartType, double aspectRatio, IEnumerable<string> labels, string postBackIdBase = "", string xAxisTitle = "", int maxXValues = 16,
-			string yAxisTitle = "", JObject yAxisLabelFormatOptions = null, bool omitTable = false ) {
+			string yAxisTitle = "", JObject? yAxisLabelFormatOptions = null, bool omitTable = false ) {
 			PostBackIdBase = PostBack.GetCompositeId( "ewfChart", postBackIdBase );
 			ChartType = chartType;
 			AspectRatio = aspectRatio;

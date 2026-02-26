@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
@@ -20,8 +19,8 @@ public class EwfTableField {
 	/// <param name="verticalAlignment">The vertical alignment of the cells in this field.</param>
 	/// <param name="activationBehavior">The activation behavior.</param>
 	public EwfTableField(
-		ElementClassSet classes = null, CssLength size = null, TextAlignment textAlignment = TextAlignment.NotSpecified,
-		TableCellVerticalAlignment verticalAlignment = TableCellVerticalAlignment.NotSpecified, ElementActivationBehavior activationBehavior = null ) {
+		ElementClassSet? classes = null, CssLength? size = null, TextAlignment textAlignment = TextAlignment.NotSpecified,
+		TableCellVerticalAlignment verticalAlignment = TableCellVerticalAlignment.NotSpecified, ElementActivationBehavior? activationBehavior = null ) {
 		FieldOrItemSetup = new EwfTableFieldOrItemSetup( classes, size, textAlignment, verticalAlignment, activationBehavior );
 	}
 }
