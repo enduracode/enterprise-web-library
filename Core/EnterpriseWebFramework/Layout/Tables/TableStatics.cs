@@ -405,9 +405,9 @@ internal static class TableStatics {
 				throw new ApplicationException( "Export to Excel does not currently support cells that span multiple columns or rows." );
 
 			if( rowIsHeader )
-				worksheet.AddHeaderToWorksheet( cells.Select( i => ( (CellPlaceholder)i ).SimpleText ).ToArray() );
+				worksheet.AddHeaderToWorksheet( cells.Select( i => ( (CellPlaceholder)i ).SimpleText ?? "" ).ToArray() );
 			else
-				worksheet.AddRowToWorksheet( cells.Select( i => ( (CellPlaceholder)i ).SimpleText ).ToArray() );
+				worksheet.AddRowToWorksheet( cells.Select( i => ( (CellPlaceholder)i ).SimpleText ?? "" ).ToArray() );
 		};
 
 	internal static void AssertAtLeastOneCellPerField( int fieldCount, List<List<CellPlaceholder>> cellPlaceholderListsForItems ) {
