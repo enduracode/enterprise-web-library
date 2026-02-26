@@ -314,7 +314,7 @@ public class UiPageContent: PageContent {
 	}
 
 	private IReadOnlyCollection<FlowComponent> getEntityNavAndActionContainer( bool inMobileMenu ) {
-		var items = new[] { getEntityNavListContainer( inMobileMenu ), getEntityActionListContainer( inMobileMenu ) }.Where( i => i is not null ).Materialize();
+		var items = new[] { getEntityNavListContainer( inMobileMenu ), getEntityActionListContainer( inMobileMenu ) }.OfType<FlowComponent>().Materialize();
 		return items.Any()
 			       ? new GenericFlowContainer( items, classes: inMobileMenu ? mobileMenuEntityNavAndActionContainerClass : entityNavAndActionContainerClass )
 				       .ToCollection()

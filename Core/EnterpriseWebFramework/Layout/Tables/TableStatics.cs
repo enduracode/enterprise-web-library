@@ -37,7 +37,7 @@ internal static class TableStatics {
 		IEnumerable<( IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions, IEnumerable<Func<EwfTableItem<ItemIdType>>> itemGetters )>
 			itemGroups, DataValue<IReadOnlyCollection<ItemIdType>>? selectedItemIds, IReadOnlyCollection<DataModificationAction> externalActions ) {
 		var tablePostBackAndButtonPairs = ( selectedItemActions ?? Enumerable.Empty<SelectedItemAction<ItemIdType>>() ).Select( action =>
-				action.GetPostBackAndButton( postBackIdBase, () => selectedItemData.ItemGroupData.SelectMany( i => i!.Value.selectedIds ).Materialize() ) )
+				action.GetPostBackAndButton( postBackIdBase, () => selectedItemData.ItemGroupData!.SelectMany( i => i!.Value.selectedIds ).Materialize() ) )
 			.Materialize();
 		selectedItemData.Buttons = tablePostBackAndButtonPairs.Select( i => i.button ).Materialize();
 
@@ -142,8 +142,8 @@ internal static class TableStatics {
 		if( fieldOrItemSetups.Any( f => f.Size is null ) )
 			return 1;
 
-		var percentageSum = fieldOrItemSetups.Where( f => f.Size is AncestorRelativeLength && f.Size.Value.EndsWith( "%" ) )
-			.Sum( f => decimal.Parse( f.Size.Value.Remove( f.Size.Value.Length - 1 ) ) );
+		var percentageSum = fieldOrItemSetups.Where( f => f.Size is AncestorRelativeLength && f.Size!.Value.EndsWith( "%" ) )
+			.Sum( f => decimal.Parse( f.Size!.Value.Remove( f.Size.Value.Length - 1 ) ) );
 		if( percentageSum == 0 )
 			return 1;
 
