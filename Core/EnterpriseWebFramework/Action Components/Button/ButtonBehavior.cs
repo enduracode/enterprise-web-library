@@ -1,7 +1,4 @@
-﻿#nullable disable
-using System.Collections.Generic;
-
-namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// The behavior for a button.
 	/// </summary>

@@ -1,7 +1,4 @@
-﻿#nullable disable
-using System.Collections.Generic;
-
-namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A display style for modification errors.
 	/// </summary>

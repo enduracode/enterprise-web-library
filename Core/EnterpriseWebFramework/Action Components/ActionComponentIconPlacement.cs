@@ -1,5 +1,4 @@
-﻿#nullable disable
-namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public enum ActionComponentIconPlacement {
 		Left,
 		Right

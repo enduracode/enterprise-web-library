@@ -1,5 +1,4 @@
-﻿#nullable disable
-namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// Represents either a cell or the space taken up be a spanning cell.
 	/// </summary>
@@ -7,6 +6,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 		/// <summary>
 		/// Returns null if the cell does not contain simple text (such as a Control).
 		/// </summary>
-		string SimpleText { get; }
+		string? SimpleText { get; }
 	}
 }

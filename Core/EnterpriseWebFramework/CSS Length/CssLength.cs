@@ -1,5 +1,4 @@
-﻿#nullable disable
-namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// A CSS length value. See https://www.w3.org/TR/css-values-3/#lengths.
 	/// </summary>

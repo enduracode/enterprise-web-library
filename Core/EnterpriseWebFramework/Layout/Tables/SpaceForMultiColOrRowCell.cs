@@ -1,5 +1,4 @@
-﻿#nullable disable
-namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	internal class SpaceForMultiColOrRowCell: CellPlaceholder {
 		string CellPlaceholder.SimpleText => "";
 	}

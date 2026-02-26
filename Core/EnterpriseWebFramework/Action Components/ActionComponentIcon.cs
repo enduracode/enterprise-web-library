@@ -1,11 +1,10 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 public class ActionComponentIcon {
-	internal static IReadOnlyCollection<PhrasingComponent> GetIconAndTextComponents( ActionComponentIcon icon, string text ) {
+	internal static IReadOnlyCollection<PhrasingComponent> GetIconAndTextComponents( ActionComponentIcon? icon, string text ) {
 		// Use a container because our CSS selectors for icons include first-child and last-child and these do not take into account "text nodes", i.e. text that
 		// is interspersed with elements.
 		var textComponent = new GenericPhrasingContainer( text.ToComponents() );
