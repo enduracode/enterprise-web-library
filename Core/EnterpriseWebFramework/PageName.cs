@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
@@ -16,7 +15,7 @@ public class PageName: FlowComponent {
 	/// <param name="useEntitySetupNameIfEntitySetupIsParent">Pass true to use the entity-setup name if an entity setup exists and is also the parent.</param>
 	public PageName( bool useEntitySetupNameIfEntitySetupIsParent = false ) {
 		var page = PageBase.Current;
-		pageName = useEntitySetupNameIfEntitySetupIsParent && page.EntitySetupIsParent ? page.EsAsBaseType.EntitySetupName : page.ResourceName;
+		pageName = useEntitySetupNameIfEntitySetupIsParent && page.EntitySetupIsParent ? page.EsAsBaseType!.EntitySetupName : page.ResourceName;
 
 		children =
 			new DisplayableElement( _ => new DisplayableElementData( null, () => new DisplayableElementLocalData( "h1" ), children: pageName.ToComponents() ) )

@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using System.Threading;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
@@ -20,7 +19,7 @@ internal sealed class EwfHttpContext: HttpContext {
 	public override ConnectionInfo Connection => throw new NotImplementedException();
 	public override WebSocketManager WebSockets => throw new NotImplementedException();
 	public override ClaimsPrincipal User { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-	public override IDictionary<object, object> Items { get => aspNetContext.Items; set => throw new NotImplementedException(); }
+	public override IDictionary<object, object?> Items { get => aspNetContext.Items; set => throw new NotImplementedException(); }
 	public override IServiceProvider RequestServices { get => aspNetContext.RequestServices; set => throw new NotImplementedException(); }
 	public override CancellationToken RequestAborted { get => aspNetContext.RequestAborted; set => throw new NotImplementedException(); }
 	public override string TraceIdentifier { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
