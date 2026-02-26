@@ -1,5 +1,4 @@
-﻿#nullable disable
-namespace EnterpriseWebLibrary.EnterpriseWebFramework;
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 /// <summary>
 /// Data for a particular element node, not including its children.

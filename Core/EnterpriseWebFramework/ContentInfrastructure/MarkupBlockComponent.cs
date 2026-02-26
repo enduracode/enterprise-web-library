@@ -1,5 +1,4 @@
-﻿#nullable disable
-namespace EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
 
 /// <summary>
 /// A block of markup.

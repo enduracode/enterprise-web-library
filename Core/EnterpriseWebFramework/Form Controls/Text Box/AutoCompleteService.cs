@@ -1,5 +1,4 @@
-﻿#nullable disable
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public abstract class AutoCompleteService: ResourceBase {

@@ -1,5 +1,4 @@
-﻿#nullable disable
-namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	/// <summary>
 	/// Defines how HTML block editing operations will be carried out against a database.
 	/// The reason that we use a separate HTML block table rather than having everyone have their own CLOB field is to make it easy

@@ -1,5 +1,4 @@
-﻿#nullable disable
-// EwlPage
+﻿// EwlPage
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin;
 

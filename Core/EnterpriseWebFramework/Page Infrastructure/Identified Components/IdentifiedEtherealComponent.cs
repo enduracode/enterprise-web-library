@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System;
+﻿using System;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	internal class IdentifiedEtherealComponent: EtherealComponentOrElement {

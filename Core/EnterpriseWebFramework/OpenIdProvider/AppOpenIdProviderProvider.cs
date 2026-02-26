@@ -1,5 +1,4 @@
-﻿#nullable disable
-namespace EnterpriseWebLibrary.EnterpriseWebFramework.OpenIdProvider;
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework.OpenIdProvider;
 
 /// <summary>
 /// Application-specific OpenID Provider logic.

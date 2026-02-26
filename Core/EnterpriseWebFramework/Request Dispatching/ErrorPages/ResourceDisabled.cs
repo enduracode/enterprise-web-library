@@ -1,5 +1,4 @@
-﻿#nullable disable
-// EwlPage
+﻿// EwlPage
 // Parameter: string message
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.ErrorPages;

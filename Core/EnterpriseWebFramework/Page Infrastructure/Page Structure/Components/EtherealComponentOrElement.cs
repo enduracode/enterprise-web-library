@@ -1,4 +1,3 @@
-﻿#nullable disable
-namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework {
 	public interface EtherealComponentOrElement: PageComponent {}
 }
