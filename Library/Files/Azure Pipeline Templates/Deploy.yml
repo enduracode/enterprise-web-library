@@ -69,6 +69,15 @@ jobs:
       targetPath: '$(Pipeline.Workspace)/ServerSideLogic/Configuration/Installation'
     displayName: 'Download installation configuration'
 
+  # Azure App Service does not support configuring modules in web.config
+  - pwsh: |
+      $webConfigPath = "$(Pipeline.Workspace)/ServerSideLogic/Website/web.config"
+      [xml]$webConfig = Get-Content $webConfigPath
+      $sysWebServer = $webConfig.configuration.location.'system.webServer'
+      $sysWebServer.RemoveChild($sysWebServer.modules) | Out-Null
+      $webConfig.Save($webConfigPath)
+    displayName: 'Remove modules element from web.config'
+
   - task: AzureCLI@2
     inputs:
       azureSubscription: '${{ parameters.serviceConnection }}'
@@ -90,7 +99,7 @@ jobs:
       deploymentMethod: 'zipDeploy'
     displayName: 'Upload logic to app service'
 
-  # derived from IsuStatics.ConfigureIis to do the same for Azure App Service
+  # remove IIS modules
   - task: AzureCLI@2
     inputs:
       azureSubscription: '${{ parameters.serviceConnection }}'
@@ -103,12 +112,33 @@ jobs:
         $xdtLines = @(
           '<?xml version="1.0"?>',
           '<configuration xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">',
-          '  <configSections>',
-          '    <sectionGroup name="system.webServer">',
-          '      <section name="modules" xdt:Locator="Match(name)" xdt:Transform="SetAttributes(overrideModeDefault)" overrideModeDefault="Allow" />',
-          '      <section name="serverRuntime" xdt:Locator="Match(name)" xdt:Transform="SetAttributes(overrideModeDefault)" overrideModeDefault="Allow" />',
-          '    </sectionGroup>',
-          '  </configSections>',
+          '  <location path="%XDT_SITENAME%" xdt:Locator="Match(path)" xdt:Transform="InsertIfMissing">',
+          '    <system.webServer xdt:Transform="InsertIfMissing">',
+          '      <modules xdt:Transform="InsertIfMissing">',
+          '        <remove name="OutputCache" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+          '        <remove name="Session" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+          '        <remove name="WindowsAuthentication" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+          '        <remove name="FormsAuthentication" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+          '        <remove name="DefaultAuthentication" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+          '        <remove name="RoleManager" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+          '        <remove name="UrlAuthorization" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+          '        <remove name="FileAuthorization" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+          '        <remove name="AnonymousIdentification" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+          '        <remove name="Profile" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+          '        <remove name="UrlMappingsModule" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+          '        <remove name="UrlRoutingModule-4.0" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+          '        <remove name="ScriptModule-4.0" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+          '        <remove name="ServiceModel" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+          '        <remove name="ServiceModel-4.0" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+          '        <remove name="RewriteModule" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+          '        <remove name="AspNetCoreModule" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+          '        <remove name="ModSecurity IIS (32bits)" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+          '        <remove name="ModSecurity IIS (64bits)" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+          '        <remove name="iisnode" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+          '        <remove name="ApplicationRequestRouting" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+          '      </modules>',
+          '    </system.webServer>',
+          '  </location>',
           '</configuration>'
         )
         $xdtBytes = [System.Text.Encoding]::UTF8.GetBytes($xdtLines -join "`n")
