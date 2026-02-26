@@ -166,7 +166,7 @@ public static class ComponentListItemExtensionCreators {
 					new UpdateRegionLinker(
 						"",
 						new PreModificationUpdateRegion( updateRegionSets, component!.ToCollection, () => "" ).ToCollection(),
-						arg => component.ToCollection() ).ToCollection(),
+						arg => component!.ToCollection() ).ToCollection(),
 					new ErrorSourceSet(),
 					errorsBySource => new DisplayableElement( context => {
 						var attributes = new List<ElementAttribute>();

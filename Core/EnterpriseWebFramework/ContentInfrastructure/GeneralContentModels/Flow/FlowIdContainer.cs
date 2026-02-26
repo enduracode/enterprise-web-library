@@ -17,7 +17,7 @@ public class FlowIdContainer: FlowComponent {
 			new UpdateRegionLinker(
 				"",
 				new PreModificationUpdateRegion( updateRegionSets, identifiedComponent!.ToCollection, () => "" ).ToCollection(),
-				arg => identifiedComponent.ToCollection() ).ToCollection(),
+				arg => identifiedComponent!.ToCollection() ).ToCollection(),
 			new ErrorSourceSet(),
 			errorsBySource => children ) );
 	}
