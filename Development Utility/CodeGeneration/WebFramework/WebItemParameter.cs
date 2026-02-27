@@ -257,9 +257,9 @@ internal class WebItemParameter {
 				( valueExpression, _ ) => {
 					if( IsEnumerable )
 						return valueExpression + ".Separate( \",\", true ).Select( i => (" + type!.ElementTypeName + ")EwlStatics.ChangeType( i, typeof( " +
-						       type.ElementTypeName + " ) ) ).Materialize()";
+						       type.ElementTypeName + " ) )! ).Materialize()";
 
-					return $"({type!.TypeName})EwlStatics.ChangeType( {valueExpression}, typeof( {type.TypeName} ) )";
+					return $"({type!.TypeName})EwlStatics.ChangeType( {valueExpression}, typeof( {type.TypeName} ) )!";
 				},
 				typeName: getNormalizedTypeName( compilationType )[ ..^( AllowsNull ? 1 : 0 ) ] );
 		}
