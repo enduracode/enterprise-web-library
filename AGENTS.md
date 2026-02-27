@@ -74,6 +74,23 @@ UTF-8 BOM and CRLF line endings on every file creation or update.
 
 ---
 
+## Shell and Path Handling
+
+The Bash tool runs **Git Bash (MSYS2)**, not `cmd.exe`. Key implications:
+
+- **Use `rm`, not `del`**, for file deletion. `del` is a CMD builtin that does
+  not exist in bash and fails silently when stderr is suppressed.
+- **Many paths in this environment contain spaces and non-ASCII characters**
+  (e.g. `Revision Control\EwlBill`, `Enterprise Web Library.sln`,
+  `EnduraCode's TEWL`). Always double-quote paths in shell commands. Be aware
+  that some Windows tools (e.g. `findstr`) misparse arguments when the working
+  directory path contains spaces, even for piped input. Prefer Unix-style tools
+  (`grep`, `sed`, `awk`) over Windows equivalents (`findstr`, `find`).
+- The curly apostrophe (U+2019) in paths like `EnduraCode's TEWL` breaks some
+  tools. Use wildcards (e.g. `EnduraCode*TEWL`) to avoid encoding issues.
+
+---
+
 ## Critical Development Rules
 
 1. **Never edit files in any `Generated Code\` folder or the `.opencode\` folder.** They
@@ -182,8 +199,7 @@ utilities used throughout EWL such as `IoMethods` and
 ### Local TEWL Development
 
 TEWL source: `C:\Users\willi\Revision Control\EWL Dependencies\EnduraCode's TEWL\`.
-The outer directory is Mercurial; `Shared\` is a git repo. The curly apostrophe
-(U+2019) in the path breaks some tools; use wildcards like `EnduraCode*TEWL`.
+The outer directory is Mercurial; `Shared\` is a git repo.
 
 - Export to local feed: run `"Solution Files/Export Package to Local Feed.bat"`
   in the outer TEWL directory

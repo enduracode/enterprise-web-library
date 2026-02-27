@@ -44,6 +44,28 @@ If only `.git` is present, use Git. Never mix the two in the same working copy.
 | Rebase | `git rebase <base>` | `hg rebase -d <dest>` (requires rebase extension) |
 | Blame/annotate | `git blame file` | `hg annotate file` |
 
+## Piping hg output
+
+When piping `hg` output through filters, always use `grep` instead of
+`findstr`. On Windows, `findstr` misparses arguments when the working directory
+path contains spaces, which closes stdin prematurely and triggers a
+`BrokenPipeError` cascade in Mercurial. For example:
+
+```shell
+# BROKEN -- findstr misparses the path and kills the pipe
+hg annotate -u -d -c file.cs | findstr /N "."
+
+# WORKS -- grep handles paths with spaces correctly
+hg annotate -u -d -c file.cs | grep -n "pattern"
+```
+
+For large output (e.g. `hg annotate` on a big file), redirecting to a file and
+using the Read tool is also reliable:
+
+```shell
+hg annotate -u -d -c file.cs > annotate_out.txt
+```
+
 ## Key differences from Git
 
 ### No staging area
