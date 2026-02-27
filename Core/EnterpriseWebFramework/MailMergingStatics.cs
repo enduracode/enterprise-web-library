@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;
 using EnterpriseWebLibrary.MailMerging;
@@ -69,21 +68,21 @@ public static class MailMergingStatics {
 	/// <param name="omitListIfSingleRow">Pass true to omit the root ordered-list component if the tree has exactly one row.</param>
 	/// <param name="useSubtractiveMode">Pass true if you want the field-name tree to represent excluded fields, rather than included fields.</param>
 	public static FlowComponent ToRowTreeDisplay(
-		this MergeRowTree rowTree, MergeFieldNameTree fieldNameTree, bool omitListIfSingleRow = false, bool useSubtractiveMode = false ) =>
+		this MergeRowTree rowTree, MergeFieldNameTree? fieldNameTree, bool omitListIfSingleRow = false, bool useSubtractiveMode = false ) =>
 		new GenericFlowContainer(
 			omitListIfSingleRow && rowTree.Rows.Count() == 1
 				? getRow( rowTree.Rows.Single(), fieldNameTree, useSubtractiveMode )
 				: new StackList( from i in rowTree.Rows select getRow( i, fieldNameTree, useSubtractiveMode ).ToComponentListItem() ).ToCollection(),
 			classes: rowTreeClass );
 
-	private static IReadOnlyCollection<FlowComponent> getRow( MergeRow row, MergeFieldNameTree fieldNameTree, bool useSubtractiveMode ) {
+	private static IReadOnlyCollection<FlowComponent> getRow( MergeRow row, MergeFieldNameTree? fieldNameTree, bool useSubtractiveMode ) {
 		var valueFormItems = ( useSubtractiveMode
 			                       ? row.Values.Where( mergeValue => fieldNameTree?.FieldNames.All( i => i != mergeValue.Name ) ?? false )
 			                       : fieldNameTree?.FieldNames.Select( fieldName => row.Values.Single( i => i.Name == fieldName ) ) ?? row.Values )
 			.Select( mergeValue => {
-				IReadOnlyCollection<PhrasingComponent> value = null;
+				IReadOnlyCollection<PhrasingComponent>? value = null;
 				if( mergeValue is MergeValue<string> stringValue )
-					value = stringValue.Evaluate( false ).ToComponents();
+					value = stringValue.Evaluate( false )!.ToComponents();
 
 				// Use ApplicationException instead of MailMergingException because the field names can easily be validated before this method is called.
 				return value == null
@@ -97,7 +96,7 @@ public static class MailMergingStatics {
 
 		var children = ( useSubtractiveMode
 			                 ? row.Children.Select( childRowTree => {
-					                 MergeFieldNameTree childFieldNameTree = null;
+					                 MergeFieldNameTree? childFieldNameTree = null;
 					                 if( fieldNameTree != null ) {
 						                 var childNameAndFieldNameTree = fieldNameTree.ChildNamesAndChildren.SingleOrDefault( i => i.Item1 == childRowTree.NodeName );
 						                 childFieldNameTree = childNameAndFieldNameTree != null
@@ -110,8 +109,8 @@ public static class MailMergingStatics {
 			                 : fieldNameTree?.ChildNamesAndChildren.Select( childNameAndFieldNameTree => new
 				                 {
 					                 rowTree = row.Children.Single( i => i.NodeName == childNameAndFieldNameTree.Item1 ),
-					                 fieldNameTree = childNameAndFieldNameTree.Item2
-				                 } ) ?? row.Children.Select( childRowTree => new { rowTree = childRowTree, fieldNameTree = (MergeFieldNameTree)null } ) )
+					                 fieldNameTree = (MergeFieldNameTree?)childNameAndFieldNameTree.Item2
+				                 } ) ?? row.Children.Select( childRowTree => new { rowTree = childRowTree, fieldNameTree = (MergeFieldNameTree?)null } ) )
 			.Where( child => child.rowTree.Rows.Any() )
 			.Select( child => new Section(
 				child.rowTree.NodeName,
