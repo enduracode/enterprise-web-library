@@ -165,7 +165,7 @@ public static class EwfOps {
 									EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString( EwfConfigurationStatics.AppSupportsSecureConnections ),
 									"" ) ) )
 							?.Last();
-						return handler is EntitySetupBase entitySetup ? entitySetup.DefaultResource : (ResourceBase?)handler;
+						return handler is EntitySetupBase entitySetup ? entitySetup.DefaultResource : (ResourceBase)handler!;
 					} );
 
 					var diagnosticLogLevelSwitch = new LoggingLevelSwitch( initialMinimumLevel: LogEventLevel.Information );
