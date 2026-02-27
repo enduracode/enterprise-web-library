@@ -1,24 +1,23 @@
-﻿#nullable disable
-using System.Web;
+﻿using System.Web;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 internal class PageNode {
 	private static readonly IReadOnlyCollection<PageNode> noChildren = Enumerable.Empty<PageNode>().Materialize();
 
-	public readonly PageComponent SourceComponent;
-	public readonly FormValue FormValue;
-	public readonly ComponentStateItem StateItem;
-	public readonly IReadOnlyCollection<( string key, UpdateRegionLinker linker )> KeyedUpdateRegionLinkers;
-	public readonly AutofocusCondition AutofocusCondition;
+	public readonly PageComponent? SourceComponent;
+	public readonly FormValue? FormValue;
+	public readonly ComponentStateItem? StateItem;
+	public readonly IReadOnlyCollection<( string key, UpdateRegionLinker linker )>? KeyedUpdateRegionLinkers;
+	public readonly AutofocusCondition? AutofocusCondition;
 	public IReadOnlyCollection<PageNode> Children;
 	public readonly IReadOnlyCollection<PageNode> EtherealChildren;
-	public readonly Func<FocusabilityCondition> FocusabilityConditionGetter;
-	public readonly Action<bool, TextWriter> JsInitStatementWriter;
+	public readonly Func<FocusabilityCondition>? FocusabilityConditionGetter;
+	public readonly Action<bool, TextWriter>? JsInitStatementWriter;
 	public readonly Action<TextWriter> MarkupWriter;
 
 	public PageNode(
-		ElementNode elementNode, FormValue formValue, IReadOnlyCollection<PageNode> children, IReadOnlyCollection<PageNode> etherealChildren,
+		ElementNode elementNode, FormValue? formValue, IReadOnlyCollection<PageNode> children, IReadOnlyCollection<PageNode> etherealChildren,
 		Func<FocusabilityCondition> focusabilityConditionGetter, Action<bool, TextWriter> jsInitStatementWriter,
 		Func<( string name, IEnumerable<ElementAttribute> attributes )> tagGetter ) {
 		SourceComponent = elementNode;
@@ -109,7 +108,7 @@ internal class PageNode {
 	}
 
 	public PageNode(
-		PageComponent sourceComponent, string id, IReadOnlyCollection<UpdateRegionLinker> updateRegionLinkers, IReadOnlyCollection<PageNode> children = null ) {
+		PageComponent sourceComponent, string id, IReadOnlyCollection<UpdateRegionLinker> updateRegionLinkers, IReadOnlyCollection<PageNode> children ) {
 		SourceComponent = sourceComponent;
 		KeyedUpdateRegionLinkers = updateRegionLinkers.Select( i => ( id + i.KeySuffix, i ) ).Materialize();
 		Children = children;
