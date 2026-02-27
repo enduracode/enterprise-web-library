@@ -73,7 +73,7 @@ partial class EntitySetup: UiEntitySetup {
 			actionGetter: postBackIdBase =>
 				( UserManagementStatics.UserManagementEnabled
 					  ? new HyperlinkSetup(
-						  new EnterpriseWebFramework.UserManagement.Pages.Impersonate( PageBase.Current.GetUrl() ),
+						  new EnterpriseWebFramework.UserManagement.Pages.Impersonate( PageBase.Current!.GetUrl() ),
 						  "Impersonate user",
 						  icon: new ActionComponentIcon( new FontAwesomeIcon( "fa-key" ) ) )
 					  : null ).Add(

@@ -174,7 +174,7 @@ internal class PageTree {
 			.ToLookup( i => i.node, i => i.component );
 		void addNodes( PageNode node, ImmutableHashSet<PageComponent> updateRegionComponents ) {
 			updateRegionComponents = updateRegionComponents.Union( updateRegionComponentsByNode[ node ] );
-			if( updateRegionComponents.Contains( node.SourceComponent ) )
+			if( updateRegionComponents.Contains( node.SourceComponent! ) )
 				return;
 
 			nodes.Add( node );
@@ -186,7 +186,7 @@ internal class PageTree {
 		return nodes;
 	}
 
-	public void PrepareForRendering( SpecifiedValue<string>? focusKey, Func<FocusabilityCondition, bool> isFocusablePredicate ) {
+	public void PrepareForRendering( SpecifiedValue<string?>? focusKey, Func<FocusabilityCondition, bool> isFocusablePredicate ) {
 		RenderingPreparationStarted = true;
 
 		var etherealChildren = new List<PageNode>( etherealComponentCount );

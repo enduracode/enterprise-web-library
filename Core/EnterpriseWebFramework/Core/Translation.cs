@@ -7,19 +7,16 @@ internal static class Translation {
 		Translation.requestLanguageGetter = requestLanguageGetter;
 	}
 
-	internal static string DownloadExisting { get { return getCorrectTranslation( "Download existing", "Descargar archivo existente" ); } }
-	internal static string NoExistingFile { get { return getCorrectTranslation( "No existing file", "No existe el archivo" ); } }
+	internal static string DownloadExisting => getCorrectTranslation( "Download existing", "Descargar archivo existente" );
+	internal static string NoExistingFile => getCorrectTranslation( "No existing file", "No existe el archivo" );
 
 	internal static string PleaseUploadAFile => getCorrectTranslation( "Please upload a file.", "Por favor, cargue un archivo." );
 
 	/// <summary>
 	/// "Unacceptable file extension. Acceptable file extensions are:".
 	/// </summary>
-	internal static string UnacceptableFileExtension {
-		get {
-			return getCorrectTranslation( "Unacceptable file extension. Acceptable file extensions are:", "Extensión de archivo no válida. La extensión válida es:" );
-		}
-	}
+	internal static string UnacceptableFileExtension =>
+		getCorrectTranslation( "Unacceptable file extension. Acceptable file extensions are:", "Extensión de archivo no válida. La extensión válida es:" );
 
 	internal static TrustedHtmlString ApplicationHasBeenUpdatedAndWeCouldNotInterpretAction =>
 		new(
@@ -32,7 +29,7 @@ internal static class Translation {
 			getCorrectTranslation(
 				"Another user has modified this page since the last time you saw it.",
 				"Otro usuario ha modificado esta página desde la última vez que usted lo vio." ) + " " + getCorrectTranslation(
-				"Please either " + Tewl.Tools.NetTools.BuildBasicLink( "load the latest version", PageBase.Current.GetUrl(), false ) +
+				"Please either " + Tewl.Tools.NetTools.BuildBasicLink( "load the latest version", PageBase.Current!.GetUrl(), false ) +
 				" or repeat your last action to save this version.",
 				"Por favor, " + Tewl.Tools.NetTools.BuildBasicLink( "carga la última versión", PageBase.Current.GetUrl(), false ) +
 				" o repita la última acción para guardar a esta versión." ) + " " + getCorrectTranslation(
@@ -51,13 +48,10 @@ internal static class Translation {
 				"You have modified this page and we couldn’t interpret your last action. Please repeat it.",
 				"Has modificado esta página y no hemos podido interpretar tu última acción. Por favor, repítelo." ) );
 
-	internal static string YourBrowserHasCookiesDisabled {
-		get {
-			return getCorrectTranslation(
-				"Your browser has cookies disabled. Cookies must be enabled in order for you to successfully log on.",
-				"Su navegador tiene deshabilitadas las cookies. Las cookies deben estar habilitadas para que usted pueda iniciar la sesión." );
-		}
-	}
+	internal static string YourBrowserHasCookiesDisabled =>
+		getCorrectTranslation(
+			"Your browser has cookies disabled. Cookies must be enabled in order for you to successfully log on.",
+			"Su navegador tiene deshabilitadas las cookies. Las cookies deben estar habilitadas para que usted pueda iniciar la sesión." );
 
 	/// <summary>
 	/// "Your computer's clock is significantly off. This may prevent you from logging in or cause you to be logged out prematurely. The correct time is"
@@ -70,9 +64,8 @@ internal static class Translation {
 			$"El reloj de tu ordenador está {directionSpanish} {Math.Abs( errorMinutes )} minutos. Esto puede impedir que se puedan conectar o hacer que se cierre la sesión antes de tiempo." );
 	}
 
-	internal static string ClickHereToReplaceExistingFile {
-		get { return getCorrectTranslation( "Click here to replace the existing file.", "Chasque aquí para substituir el archivo existente." ); }
-	}
+	internal static string ClickHereToReplaceExistingFile =>
+		getCorrectTranslation( "Click here to replace the existing file.", "Chasque aquí para substituir el archivo existente." );
 
 	internal static string Processing => getCorrectTranslation( "Processing", "Procesando" );
 
@@ -84,32 +77,26 @@ internal static class Translation {
 	/// <summary>
 	/// AccessDenied.aspx use only.
 	/// </summary>
-	public static string AccessIsDenied { get { return getCorrectTranslation( "Access is denied.", "Acceso denegado." ); } }
+	public static string AccessIsDenied => getCorrectTranslation( "Access is denied.", "Acceso denegado." );
 
-	public static string ClickHereToGoToHomePage {
-		get { return getCorrectTranslation( "Click here to go to the home page.", "Haga clic aquí para ir a la página principal." ); }
-	}
+	public static string ClickHereToGoToHomePage =>
+		getCorrectTranslation( "Click here to go to the home page.", "Haga clic aquí para ir a la página principal." );
 
 	/// <summary>
 	/// PageNotAvailable.aspx use only.
 	/// </summary>
-	public static string ThePageYouRequestedIsNotAvailable {
-		get { return getCorrectTranslation( "The page you requested is no longer available.", "La página solicitada ya no está disponible." ); }
-	}
+	public static string ThePageYouRequestedIsNotAvailable =>
+		getCorrectTranslation( "The page you requested is no longer available.", "La página solicitada ya no está disponible." );
 
 	/// <summary>
 	/// UnhandledException.aspx use only.
 	/// </summary>
-	public static string AnErrorHasOccurred {
-		get { return getCorrectTranslation( "An error has occurred in the system.", "Se ha producido un error en el sistema." ); }
-	}
+	public static string AnErrorHasOccurred => getCorrectTranslation( "An error has occurred in the system.", "Se ha producido un error en el sistema." );
 
 	/// <summary>
 	/// PageDisabled.aspx use only.
 	/// </summary>
-	public static string ThePageYouRequestedIsDisabled {
-		get { return getCorrectTranslation( "The page you requested is disabled.", "La página que usted pidió es lisiada." ); }
-	}
+	public static string ThePageYouRequestedIsDisabled => getCorrectTranslation( "The page you requested is disabled.", "La página que usted pidió es lisiada." );
 
 	/// <summary>
 	/// Key must be a string constant defined in this class.

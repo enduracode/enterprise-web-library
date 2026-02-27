@@ -68,7 +68,7 @@ partial class EntitySetup: UiEntitySetup {
 				var one = new ModalBoxId();
 				var two = new ModalBoxId();
 				var unauthorizedPage = new UnauthorizedPage( this );
-				var parentParameters = new ParentParameters( this, PageBase.Current.ToTrustedParentUrl() );
+				var parentParameters = new ParentParameters( this, PageBase.Current!.ToTrustedParentUrl() );
 				return new HyperlinkSetup( new ExternalResource( "http://www.microsoft.com" ), "Go to Microsoft" )
 					.Add( new ButtonSetup( "Custom script", behavior: new CustomButtonBehavior( () => "alert('test');" ) ) )
 					.Add(

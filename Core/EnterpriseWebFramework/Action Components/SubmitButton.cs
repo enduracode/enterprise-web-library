@@ -18,7 +18,7 @@ public class SubmitButton: PhrasingComponent {
 		// behavior of HTML’s implicit submission appears to be somewhat arbitrary when there is no submit button; see
 		// https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#implicit-submission. Second, we don’t want the implicit submission behavior of
 		// form controls to unpredictably change if a submit button is added or removed.
-		return action is PostBackFormAction postBackAction && postBackAction.PostBack == PageBase.Current.SubmitButtonPostBack && !forceJsHandling
+		return action is PostBackFormAction postBackAction && postBackAction.PostBack == PageBase.Current!.SubmitButtonPostBack && !forceJsHandling
 			       ? ""
 			       : "if( e.which == 13 ) {{ {0} }}".FormatWith( "e.preventDefault();".ConcatenateWithSpace( action?.GetJsStatements() ?? "" ) );
 	}
@@ -40,7 +40,7 @@ public class SubmitButton: PhrasingComponent {
 			FormAction action = postBackAction;
 			action.AddToPageIfNecessary();
 
-			if( PageBase.Current.SubmitButtonPostBack != null )
+			if( PageBase.Current!.SubmitButtonPostBack != null )
 				throw new ApplicationException( "A submit button already exists on the page." );
 			PageBase.Current.SubmitButtonPostBack = postBackAction.PostBack;
 

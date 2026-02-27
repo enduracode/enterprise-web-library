@@ -79,7 +79,7 @@ public static class AuthenticationStatics {
 
 		var components = new List<FlowComponent>();
 
-		var changePasswordPage = new Pages.ChangePassword( PageBase.Current.ToTrustedUrl() );
+		var changePasswordPage = new Pages.ChangePassword( PageBase.Current!.ToTrustedUrl() );
 		if( !changePasswordPage.UserCanAccess || SystemUser.Current is null )
 			return components;
 

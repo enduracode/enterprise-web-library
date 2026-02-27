@@ -14,7 +14,7 @@ public class PageName: FlowComponent {
 	/// </summary>
 	/// <param name="useEntitySetupNameIfEntitySetupIsParent">Pass true to use the entity-setup name if an entity setup exists and is also the parent.</param>
 	public PageName( bool useEntitySetupNameIfEntitySetupIsParent = false ) {
-		var page = PageBase.Current;
+		var page = PageBase.Current!;
 		pageName = useEntitySetupNameIfEntitySetupIsParent && page.EntitySetupIsParent ? page.EsAsBaseType!.EntitySetupName : page.ResourceName;
 
 		children =

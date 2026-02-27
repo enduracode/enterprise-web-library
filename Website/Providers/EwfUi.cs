@@ -8,7 +8,7 @@ internal class EwfUi: AppEwfUiProvider {
 		var navButtonSetups = new List<ActionComponentSetup>();
 
 		// This will hide itself because Contact Us requires a logged-in user, and this website has no users.
-		var contactPage = ContactSupport.GetInfo( PageBase.Current.ToTrustedUrl() );
+		var contactPage = ContactSupport.GetInfo( PageBase.Current!.ToTrustedUrl() );
 		navButtonSetups.Add( new HyperlinkSetup( contactPage, contactPage.ResourceName ) );
 
 		navButtonSetups.Add(

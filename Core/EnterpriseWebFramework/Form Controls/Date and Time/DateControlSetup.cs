@@ -76,7 +76,7 @@ public class DateControlSetup {
 		LabelerAndComponentAndValidationGetter = ( value, allowEmpty, minValue, maxValue, validationMethod ) => {
 			var datePageModificationValue = datePageModificationValueParameter ?? new PageModificationValue<LocalDate?>();
 
-			var currentDate = PageBase.Current.FirstRequestTime.InUtc().Date;
+			var currentDate = PageBase.Current!.FirstRequestTime.InUtc().Date;
 			minValue ??= currentDate.PlusYears( -120 );
 			maxValue ??= currentDate.PlusYears( 5 );
 

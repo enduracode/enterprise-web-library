@@ -170,7 +170,7 @@ public class UiPageContent: PageContent {
 		if( contentFootActions?.Collection.Value.Any() == true && contentFootComponents != null )
 			throw new ApplicationException( "Either contentFootActions or contentFootComponents may be specified, but not both." );
 
-		entityUiSetup = ( PageBase.Current.EsAsBaseType as UiEntitySetup )?.GetUiSetup();
+		entityUiSetup = ( PageBase.Current!.EsAsBaseType as UiEntitySetup )?.GetUiSetup();
 		basicContent =
 			new BasicPageContent(
 					bodyClasses: bodyClasses,
@@ -270,7 +270,7 @@ public class UiPageContent: PageContent {
 	}
 
 	private IEnumerable<FlowComponent> getMobileMenuTabContainer() {
-		if( entityUiSetup is null || !PageBase.Current.EntitySetupIsParent )
+		if( entityUiSetup is null || !PageBase.Current!.EntitySetupIsParent )
 			return [ ];
 
 		var components = PageBase.Current.EsAsBaseType!.ListedResources.SelectMany( resourceGroup => {
@@ -292,7 +292,7 @@ public class UiPageContent: PageContent {
 		var components = new List<FlowComponent>();
 		components.AddRange( getEntityContainer() );
 		if( entityUsesTabMode( TabMode.Horizontal ) ) {
-			var resourceGroups = PageBase.Current.EsAsBaseType!.ListedResources;
+			var resourceGroups = PageBase.Current!.EsAsBaseType!.ListedResources;
 			if( resourceGroups.Count > 1 )
 				throw new ApplicationException( "Top tabs are not supported with multiple resource groups." );
 			components.Add( getTopTabListContainer( resourceGroups.Single() ) );
@@ -307,7 +307,7 @@ public class UiPageContent: PageContent {
 
 	private IReadOnlyCollection<FlowComponent> getPagePath() {
 		var pagePath = new PagePath(
-			currentPageBehavior: PageBase.Current.EsAsBaseType?.ListedResources.Any() == true
+			currentPageBehavior: PageBase.Current!.EsAsBaseType?.ListedResources.Any() == true
 				                     ? PagePathCurrentPageBehavior.IncludeCurrentPageAndUseEntitySetupNameIfEntitySetupIsParent
 				                     : PagePathCurrentPageBehavior.IncludeCurrentPage );
 		return pagePath.IsEmpty ? Enumerable.Empty<FlowComponent>().Materialize() : pagePath.ToCollection();
@@ -340,7 +340,7 @@ public class UiPageContent: PageContent {
 	}
 
 	private FlowComponent? getEntityActionListContainer( bool inMobileMenu ) {
-		if( entityUiSetup == null || !PageBase.Current.EntitySetupIsParent )
+		if( entityUiSetup == null || !PageBase.Current!.EntitySetupIsParent )
 			return null;
 		var listItems = getActionListItems( entityUiSetup.ActionGetter( inMobileMenu ? "mobileMenuEntity" : "entity" ) ).Materialize();
 		if( !listItems.Any() )
@@ -364,11 +364,11 @@ public class UiPageContent: PageContent {
 			classes: topTabListContainerClass );
 
 	private bool entityUsesTabMode( TabMode tabMode ) =>
-		entityUiSetup is not null && PageBase.Current.EntitySetupIsParent && entityUiSetup.GetTabMode( PageBase.Current.EsAsBaseType! ) == tabMode;
+		entityUiSetup is not null && PageBase.Current!.EntitySetupIsParent && entityUiSetup.GetTabMode( PageBase.Current.EsAsBaseType! ) == tabMode;
 
 	private FlowComponent getSideTabContainer() {
 		var components = new List<FlowComponent>();
-		foreach( var resourceGroup in PageBase.Current.EsAsBaseType!.ListedResources ) {
+		foreach( var resourceGroup in PageBase.Current!.EsAsBaseType!.ListedResources ) {
 			var tabs = getTabHyperlinksForResources( resourceGroup );
 			if( tabs.Any() && resourceGroup.Name.Any() )
 				components.Add( new GenericFlowContainer( resourceGroup.Name.ToComponents(), classes: sideTabGroupHeadClass ) );
@@ -422,7 +422,7 @@ public class UiPageContent: PageContent {
 								.ToComponentListItem( displaySetup: action.DisplaySetup ) ) ).ToCollection(),
 						classes: contentFootActionListContainerClass ) );
 			else if( isAutoDataUpdater )
-				components.Add( new SubmitButton( new StandardButtonStyle( "Update Now" ), postBack: PageBase.Current.DataUpdatePostBack ) );
+				components.Add( new SubmitButton( new StandardButtonStyle( "Update Now" ), postBack: PageBase.Current!.DataUpdatePostBack ) );
 		}
 		else {
 			if( isAutoDataUpdater )

@@ -44,7 +44,7 @@ public class PagePath: FlowComponent {
 	/// Creates a page-path component.
 	/// </summary>
 	public PagePath( PagePathCurrentPageBehavior currentPageBehavior = PagePathCurrentPageBehavior.IncludeCurrentPage ) {
-		var ancestors = PageBase.Current.Ancestors;
+		var ancestors = PageBase.Current!.Ancestors;
 		if( currentPageBehavior == PagePathCurrentPageBehavior.IncludeCurrentPageAndUseEntitySetupNameIfEntitySetupIsParent &&
 		    PageBase.Current.EntitySetupIsParent )
 			ancestors = ancestors.Skip( 1 );
@@ -62,8 +62,7 @@ public class PagePath: FlowComponent {
 				currentPageBehavior == PagePathCurrentPageBehavior.IncludeCurrentPageAndUseEntitySetupNameIfEntitySetupIsParent );
 
 		children = new GenericFlowContainer(
-			( hyperlinkItems.Any() ? new WrappingList( hyperlinkItems ).ToCollection() : Enumerable.Empty<FlowComponent>() )
-			.Concat( pageName is not null ? pageName.ToCollection() : Enumerable.Empty<FlowComponent>() )
+			( hyperlinkItems.Any() ? new WrappingList( hyperlinkItems ).ToCollection() : Enumerable.Empty<FlowComponent>() ).Concat( pageName?.ToCollection() ?? [ ] )
 			.Materialize(),
 			classes: elementClass ).ToCollection();
 	}
