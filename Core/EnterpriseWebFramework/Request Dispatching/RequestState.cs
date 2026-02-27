@@ -98,7 +98,7 @@ internal class RequestState {
 	internal string BaseUrl { get; private set; }
 	internal IPAddress? ClientIp { get; private set; }
 
-	internal readonly List<( string, string, CookieOptions )> ResponseCookies;
+	internal readonly List<( string, string?, CookieOptions )> ResponseCookies;
 
 	/// <summary>
 	/// EwfOps.RunApplication and private use only.
@@ -144,7 +144,7 @@ internal class RequestState {
 		BaseUrl = baseUrl;
 		ClientIp = clientIp;
 
-		ResponseCookies = new List<( string, string, CookieOptions )>();
+		ResponseCookies = new List<( string, string?, CookieOptions )>();
 
 		DatabaseConnectionManager = new AutomaticDatabaseConnectionManager();
 		DatabaseConnectionManager.DataAccessState.ResetCache();

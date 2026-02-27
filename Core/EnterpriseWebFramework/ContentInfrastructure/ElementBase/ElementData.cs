@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.IdReferencing;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase;
@@ -22,10 +21,10 @@ public class ElementData {
 	/// <param name="children"></param>
 	/// <param name="etherealChildren"></param>
 	public ElementData(
-		Func<ElementLocalData> localDataGetter, ElementClassSet classes = null, IEnumerable<ElementIdReference> clientSideIdReferences = null,
-		string clientSideIdOverride = "", IReadOnlyCollection<FlowComponentOrNode> children = null,
-		IReadOnlyCollection<EtherealComponentOrElement> etherealChildren = null ) {
-		classes = classes ?? ElementClassSet.Empty;
+		Func<ElementLocalData> localDataGetter, ElementClassSet? classes = null, IEnumerable<ElementIdReference>? clientSideIdReferences = null,
+		string clientSideIdOverride = "", IReadOnlyCollection<FlowComponentOrNode>? children = null,
+		IReadOnlyCollection<EtherealComponentOrElement>? etherealChildren = null ) {
+		classes ??= ElementClassSet.Empty;
 		NodeDataGetter = context => {
 			var clientSideId = clientSideIdOverride.Any() ? clientSideIdOverride : context.Id;
 			classes.AddElementId( clientSideId );

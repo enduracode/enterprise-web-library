@@ -12,7 +12,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 public class EwfRequest {
 	private static AppClientRequestProvider? defaultProvider;
 	private static SystemProviderReference<AppClientRequestProvider>? provider;
-	private static Func<HttpRequest>? currentRequestGetter;
+	private static Func<HttpRequest?>? currentRequestGetter;
 	private static Func<string>? requestIdGetter;
 	private static Func<Instant>? requestTimeGetter;
 	private static Func<string>? urlGetter;
@@ -20,7 +20,7 @@ public class EwfRequest {
 	private static Func<IPAddress?>? clientIpGetter;
 
 	internal static void Init(
-		SystemProviderReference<AppClientRequestProvider> provider, Func<HttpRequest> currentRequestGetter, Func<string> requestIdGetter,
+		SystemProviderReference<AppClientRequestProvider> provider, Func<HttpRequest?> currentRequestGetter, Func<string> requestIdGetter,
 		Func<Instant> requestTimeGetter, Func<string> urlGetter, Action<Duration> networkWaitTimeAdder, Func<IPAddress?> clientIpGetter ) {
 		defaultProvider = new AppClientRequestProvider();
 		EwfRequest.provider = provider;

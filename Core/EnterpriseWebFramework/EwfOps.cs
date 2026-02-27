@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Reflection;
 using System.Text;
 using System.Threading;
@@ -56,12 +55,12 @@ public static class EwfOps {
 
 	private class MiniProfilerConfigureOptions: IConfigureOptions<MiniProfilerOptions> {
 		private class ProfilerProvider: DefaultProfilerProvider {
-			public override MiniProfiler CurrentProfiler {
+			public override MiniProfiler? CurrentProfiler {
 				get => EwfRequest.Current is not null ? RequestDispatchingStatics.RequestState.Profiler : null;
 				protected set => RequestDispatchingStatics.RequestState.Profiler = value;
 			}
 
-			public override MiniProfiler Start( string profilerName, MiniProfilerBaseOptions options ) => new( profilerName ?? nameof(MiniProfiler), options );
+			public override MiniProfiler Start( string? profilerName, MiniProfilerBaseOptions options ) => new( profilerName ?? nameof(MiniProfiler), options );
 		}
 
 		private readonly IMemoryCache cache;
@@ -92,8 +91,8 @@ public static class EwfOps {
 	/// <param name="appInitializer">The application initializer, which performs web-site specific initialization and cleanup. If you have one of these you
 	/// should name the class AppInitializer.</param>
 	public static int RunApplication(
-		SystemInitializer globalInitializer, Action<IServiceCollection> dependencyInjectionServicesRegistrationMethod = null,
-		SystemInitializer appInitializer = null ) {
+		SystemInitializer globalInitializer, Action<IServiceCollection>? dependencyInjectionServicesRegistrationMethod = null,
+		SystemInitializer? appInitializer = null ) {
 		// If the machine was recently started, delay initialization to give database services time to warm up. This avoids errors during data access.
 		GlobalInitializationOps.DelayIfMachineWasRecentlyStarted();
 
@@ -135,8 +134,8 @@ public static class EwfOps {
 				writer.WriteLine( "Referrer: " + EwfRequest.Current.Headers.Referer );
 				writer.WriteLine( "Continued request: " + RequestDispatchingStatics.RequestState.ContinuedRequest.ToYesOrNo() );
 
-				SystemUser user = null;
-				SystemUser impersonator = null;
+				SystemUser? user = null;
+				SystemUser? impersonator = null;
 
 				// exception-prone code
 				try {
@@ -161,12 +160,12 @@ public static class EwfOps {
 				try {
 					EwfConfigurationStatics.Init( () => {
 						var handler = RequestState.ExecuteWithUrlHandlerStateOverride(
-								new SpecifiedValue<UrlHandlerStateOverride>( null ),
+								new SpecifiedValue<UrlHandlerStateOverride?>( null ),
 								() => RequestDispatchingStatics.RequestState.ExecuteWithUserDisabled( () => UrlHandlingStatics.ResolveUrl(
 									EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.GetUrlString( EwfConfigurationStatics.AppSupportsSecureConnections ),
 									"" ) ) )
 							?.Last();
-						return handler is EntitySetupBase entitySetup ? entitySetup.DefaultResource : (ResourceBase)handler;
+						return handler is EntitySetupBase entitySetup ? entitySetup.DefaultResource : (ResourceBase?)handler;
 					} );
 
 					var diagnosticLogLevelSwitch = new LoggingLevelSwitch( initialMinimumLevel: LogEventLevel.Information );
@@ -201,7 +200,7 @@ public static class EwfOps {
 						options.AllowSynchronousIO = true;
 						options.AddServerHeader = false;
 					} );
-					if( ConfigurationStatics.IsDevelopmentInstallation && EwfConfigurationStatics.AppConfiguration.UsesKestrel.Value )
+					if( ConfigurationStatics.IsDevelopmentInstallation && EwfConfigurationStatics.AppConfiguration.UsesKestrel!.Value )
 						builder.Services.AddResponseCompression( options => { options.EnableForHttps = true; } );
 
 					builder.Services.Configure<IISServerOptions>( options => { options.AllowSynchronousIO = true; } );
@@ -255,7 +254,7 @@ public static class EwfOps {
 												await using( var stream = await response.Content.ReadAsStreamAsync() )
 													using( var reader = XmlReader.Create( stream ) )
 														document.Load( reader );
-												return document.DocumentElement;
+												return document.DocumentElement!;
 											} )
 											.Result;
 										return ( metadata, identityProvider.EntityId );
@@ -276,7 +275,7 @@ public static class EwfOps {
 							networkWaitTime => RequestDispatchingStatics.RequestState.AddNetworkWaitTime( networkWaitTime ),
 							() => RequestDispatchingStatics.RequestState.ClientIp );
 						EwfResponse.Init(
-							() => contextAccessor.HttpContext,
+							() => contextAccessor.HttpContext!,
 							() => {
 								var requestState = RequestDispatchingStatics.RequestState;
 								if( requestState.RequestHandler is not null )
@@ -290,11 +289,11 @@ public static class EwfOps {
 								if( modMethods.Any() )
 									ResourceBase.ExecuteDataModificationMethod( () => {
 										foreach( var i in modMethods )
-											i();
+											i!();
 									} );
 
 								RequestState.ExecuteWithUrlHandlerStateOverride(
-									new SpecifiedValue<UrlHandlerStateOverride>( null ),
+									new SpecifiedValue<UrlHandlerStateOverride?>( null ),
 									() => {
 										try {
 											AutomaticDatabaseConnectionManager.Current.CommitTransactionsAndExecuteNonTransactionalModificationMethods( true );
@@ -317,7 +316,7 @@ public static class EwfOps {
 						UrlHandlingStatics.Init(
 							() => RequestDispatchingStatics.GetAppProvider().GetBaseUrlPatterns(),
 							urlGetter => EwfRequest.Current is null ? urlGetter() : RequestDispatchingStatics.RequestState.ExecuteWithUserDisabled( urlGetter ),
-							method => RequestState.ExecuteWithUrlHandlerStateOverride( new SpecifiedValue<UrlHandlerStateOverride>( null ), method ),
+							method => RequestState.ExecuteWithUrlHandlerStateOverride( new SpecifiedValue<UrlHandlerStateOverride?>( null ), method ),
 							( baseUrlString, appRelativeUrl ) => UrlHandlingStatics.ResolveUrl( baseUrlString, appRelativeUrl ) );
 						TrustedUrl.Init( urlResolver => {
 							return RequestState.ExecuteWithUrlHandlerStateOverride(
@@ -340,7 +339,7 @@ public static class EwfOps {
 							() => RequestDispatchingStatics.RequestState.ResponseCookies,
 							( name, value, options ) => {
 								AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod( () => {
-									var cookies = contextAccessor.HttpContext.Response.Cookies;
+									var cookies = contextAccessor.HttpContext!.Response.Cookies;
 									if( value is not null )
 										cookies.Append( name, value.Length == 0 ? CookieStatics.EmptyValue : value, options );
 									else
@@ -372,9 +371,9 @@ public static class EwfOps {
 							resource => RequestDispatchingStatics.RequestState.ForceAncestorCreationAndSetUrlHandlerState( resource ),
 							() => RequestDispatchingStatics.RequestState.UrlHandlerStateOverridden
 								      ? throw new InvalidOperationException()
-								      : (ResourceBase)RequestDispatchingStatics.RequestState.WebItem,
+								      : (ResourceBase?)RequestDispatchingStatics.RequestState.WebItem,
 							RequestDispatchingStatics.RefreshRequestState );
-						EntitySetupBase.Init( method => RequestState.ExecuteWithUrlHandlerStateOverride( new SpecifiedValue<UrlHandlerStateOverride>( null ), method ) );
+						EntitySetupBase.Init( method => RequestState.ExecuteWithUrlHandlerStateOverride( new SpecifiedValue<UrlHandlerStateOverride?>( null ), method ) );
 						WellKnownResource.Init(
 							() => RequestDispatchingStatics.GetAppProvider().GetFrameworkUrlParent(),
 							() => OpenIdProviderStatics.GetWellKnownUrls().Concat( RequestDispatchingStatics.GetAppProvider().GetWellKnownUrls() ) );
@@ -399,10 +398,10 @@ public static class EwfOps {
 							( () => BasePageStatics.AppProvider.GetPageViewDataModificationMethod(), () => BasePageStatics.AppProvider.JavaScriptPageInitFunctionCall ),
 							BasicPageContent.GetContent );
 						HyperlinkBehaviorExtensionCreators.Init( ModalBox.GetBrowsingModalBoxOpenStatements );
-						FileUpload.Init( () => ( (BasicPageContent)PageBase.Current.BasicContent ).FormUsesMultipartEncoding = true );
-						ModalBox.Init( () => ( (BasicPageContent)PageBase.Current.BasicContent ).BrowsingModalBoxId );
+						FileUpload.Init( () => ( (BasicPageContent)PageBase.Current!.BasicContent! ).FormUsesMultipartEncoding = true );
+						ModalBox.Init( () => ( (BasicPageContent)PageBase.Current!.BasicContent! ).BrowsingModalBoxId );
 						TableStatics.Init( () => RequestDispatchingStatics.RequestState.AllowSlowRequest() );
-						CreditCardCollector.Init( () => ( (BasicPageContent)PageBase.Current.BasicContent ).IncludesStripeCheckout = true );
+						CreditCardCollector.Init( () => ( (BasicPageContent)PageBase.Current!.BasicContent! ).IncludesStripeCheckout = true );
 						BasePageStatics.Init( providerGetter.GetProvider<AppStandardPageLogicProvider>( "StandardPageLogic" ) );
 						BasicPageContent.Init(
 							() => RequestDispatchingStatics.RequestState.ClientSideNewUrl,
@@ -431,11 +430,10 @@ public static class EwfOps {
 								cssInfos.Add( new StaticFiles.Styles.BasicCss() );
 								if( contentUsesUi )
 									cssInfos.AddRange(
-										new ResourceInfo[]
-											{
-												new StaticFiles.Styles.Ui.ColorsCss(), new StaticFiles.Styles.Ui.FontsCss(), new StaticFiles.Styles.Ui.LayoutCss(),
-												new StaticFiles.Styles.Ui.TransitionsCss(), new StaticFiles.Styles.Ui.NewUICss()
-											} );
+										[
+											new StaticFiles.Styles.Ui.ColorsCss(), new StaticFiles.Styles.Ui.FontsCss(), new StaticFiles.Styles.Ui.LayoutCss(),
+											new StaticFiles.Styles.Ui.TransitionsCss(), new StaticFiles.Styles.Ui.NewUICss()
+										] );
 								foreach( var resource in BasePageStatics.AppProvider.GetStyleSheets() ) {
 									assertResourceIsIntermediateInstallationPublicResourceWhenNecessary( resource );
 									cssInfos.Add( resource );
@@ -476,7 +474,7 @@ public static class EwfOps {
 									markup.Append(
 										Render.Includes(
 											profiler,
-											path: contextAccessor.HttpContext.Request.PathBase + ( (MiniProfilerOptions)profiler.Options ).RouteBasePath + "/",
+											path: contextAccessor.HttpContext!.Request.PathBase + ( (MiniProfilerOptions)profiler.Options ).RouteBasePath + "/",
 											isAuthorized: true,
 											null,
 											requestIDs: ids ) );
@@ -486,8 +484,8 @@ public static class EwfOps {
 									markup.Append( getElement( resource ) );
 								}
 
-								if( contextAccessor.HttpContext.Items.TryGetValue( aspNetScriptKey, out var aspNetScriptGetter ) )
-									markup.Append( getElement( getTrustedResource( ( (Func<string>)aspNetScriptGetter )() ) ) );
+								if( contextAccessor.HttpContext!.Items.TryGetValue( aspNetScriptKey, out var aspNetScriptGetter ) )
+									markup.Append( getElement( getTrustedResource( ( (Func<string>)aspNetScriptGetter! )() ) ) );
 
 								return;
 								static string getElement( TrustedResourceInfo resource ) => "<script src=\"{0}\" defer></script>".FormatWith( resource.GetUrl() );
@@ -514,7 +512,7 @@ public static class EwfOps {
 								return icons;
 							},
 							hideWarnings => {
-								var url = EwfRequest.Current.Url;
+								var url = EwfRequest.Current!.Url;
 								if( RequestDispatchingStatics.RequestState.UserAccessible && RequestDispatchingStatics.RequestState.ImpersonatorExists )
 									url = new UserManagement.Pages.Impersonate(
 										url,
@@ -532,7 +530,7 @@ public static class EwfOps {
 								    ( ConfigurationStatics.IsIntermediateInstallation && !RequestDispatchingStatics.RequestState.IntermediateUserExists ) )
 									return null;
 								return ( "User impersonation is in effect.",
-									       new HyperlinkSetup( new UserManagement.Pages.Impersonate( EwfRequest.Current.Url ), "Change user" ).Add(
+									       new HyperlinkSetup( new UserManagement.Pages.Impersonate( EwfRequest.Current!.Url ), "Change user" ).Add(
 										       new ButtonSetup(
 											       "End impersonation",
 											       behavior: new PostBackBehavior(
@@ -561,7 +559,7 @@ public static class EwfOps {
 									disableAuthorizationCheck: true ) );
 						OpenIdProviderStatics.Init( providerGetter.GetProvider<AppOpenIdProviderProvider>( "OpenIdProvider" ) );
 						Admin.EntitySetup.Init( () => RequestDispatchingStatics.GetAppProvider().GetFrameworkUrlParent(), diagnosticLogLevelSwitch );
-						RequestDispatchingStatics.Init( getAppRequestDispatchingProvider( providerGetter ), () => contextAccessor.HttpContext );
+						RequestDispatchingStatics.Init( getAppRequestDispatchingProvider( providerGetter ), () => contextAccessor.HttpContext! );
 
 						appInitializer?.InitStatics();
 
@@ -588,7 +586,7 @@ public static class EwfOps {
 								context.Items.Add(
 									aspNetScriptKey,
 									() => {
-										stream.GetType().GetField( "_isHtmlResponse", BindingFlags.Instance | BindingFlags.NonPublic ).SetValue( stream, false );
+										stream.GetType().GetField( "_isHtmlResponse", BindingFlags.Instance | BindingFlags.NonPublic )!.SetValue( stream, false );
 										return "/_framework/aspnetcore-browser-refresh.js";
 									} );
 							}
@@ -596,9 +594,9 @@ public static class EwfOps {
 							await next( context );
 						} );
 
-					if( ConfigurationStatics.IsDevelopmentInstallation && EwfConfigurationStatics.AppConfiguration.UsesKestrel.Value )
+					if( ConfigurationStatics.IsDevelopmentInstallation && EwfConfigurationStatics.AppConfiguration.UsesKestrel!.Value )
 						app.UsePathBase( "/{0}".FormatWith( EwfConfigurationStatics.AppConfiguration.DefaultBaseUrl.Path ) );
-					if( ConfigurationStatics.IsDevelopmentInstallation && EwfConfigurationStatics.AppConfiguration.UsesKestrel.Value )
+					if( ConfigurationStatics.IsDevelopmentInstallation && EwfConfigurationStatics.AppConfiguration.UsesKestrel!.Value )
 						app.UseResponseCompression();
 					app.UseMiniProfiler(); // only used to handle MiniProfiler requests, and placed before Serilog middleware to exclude these requests from logging
 					app.UseSerilogRequestLogging( options => { options.IncludeQueryInRequestPath = true; } );
@@ -627,7 +625,7 @@ public static class EwfOps {
 	}
 
 	private static void assertResourceIsIntermediateInstallationPublicResourceWhenNecessary( ResourceInfo resource ) {
-		if( !PageBase.Current.IsIntermediateInstallationPublicResource )
+		if( !PageBase.Current!.IsIntermediateInstallationPublicResource )
 			return;
 		if( resource is ResourceBase { IsIntermediateInstallationPublicResource: false } )
 			throw new Exception(
@@ -663,7 +661,7 @@ public static class EwfOps {
 	private static SystemProviderGetter getProviderGetter( Assembly appAssembly ) =>
 		new(
 			appAssembly,
-			appAssembly.GetTypes().Single( i => typeof( AppRequestDispatchingProvider ).IsAssignableFrom( i ) && !i.IsInterface ).Namespace,
+			appAssembly.GetTypes().Single( i => typeof( AppRequestDispatchingProvider ).IsAssignableFrom( i ) && !i.IsInterface ).Namespace!,
 			providerName =>
 				@"{0} provider not found in application. To implement, create a class named {0} in ""Your Website\Providers"" that derives from App{0}Provider."
 					.FormatWith( providerName ) );

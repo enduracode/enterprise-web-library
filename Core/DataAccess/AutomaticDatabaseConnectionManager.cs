@@ -13,7 +13,7 @@ public class AutomaticDatabaseConnectionManager {
 	private static Func<AutomaticDatabaseConnectionManager?>? currentManagerGetter;
 	private static AsyncLocal<AutomaticDatabaseConnectionManager?> currentManagerOverride = null!;
 
-	internal static void Init( Func<AutomaticDatabaseConnectionManager>? currentManagerGetter ) {
+	internal static void Init( Func<AutomaticDatabaseConnectionManager?>? currentManagerGetter ) {
 		AutomaticDatabaseConnectionManager.currentManagerGetter = currentManagerGetter;
 		currentManagerOverride = new AsyncLocal<AutomaticDatabaseConnectionManager?>();
 	}
@@ -72,11 +72,10 @@ public class AutomaticDatabaseConnectionManager {
 		try {
 			currentManagerOverride.Value = manager;
 			try {
-				manager.DataAccessState.ExecuteWithThis(
-					() => {
-						method();
-						manager.CommitTransactionsAndExecuteNonTransactionalModificationMethods( true );
-					} );
+				manager.DataAccessState.ExecuteWithThis( () => {
+					method();
+					manager.CommitTransactionsAndExecuteNonTransactionalModificationMethods( true );
+				} );
 			}
 			finally {
 				currentManagerOverride.Value = null;
@@ -244,48 +243,46 @@ public class AutomaticDatabaseConnectionManager {
 		foreach( var databaseName in secondaryDatabasesWithInitializedConnections )
 			methods.Add( () => cleanUpConnection( dataAccessState.GetSecondaryDatabaseConnection( databaseName ) ) );
 
-		methods.Add(
-			() => {
-				if( !nonTransactionalModificationMethods.Any() )
+		methods.Add( () => {
+			if( !nonTransactionalModificationMethods.Any() )
+				return;
+
+			try {
+				if( transactionsMarkedForRollback )
 					return;
 
+				if( ensureAllResourcesCleanedUp )
+					throw new Exception(
+						"Non-transactional modification methods exist, but their execution is forbidden during connection cleanup because this could cause connections to be reinitialized." );
+
+				modTransactionSecondaryDatabaseCount = 0;
 				try {
-					if( transactionsMarkedForRollback )
-						return;
-
-					if( ensureAllResourcesCleanedUp )
-						throw new Exception(
-							"Non-transactional modification methods exist, but their execution is forbidden during connection cleanup because this could cause connections to be reinitialized." );
-
-					modTransactionSecondaryDatabaseCount = 0;
-					try {
-						if( cacheEnabled ) {
-							dataAccessState.DisableCache();
-							try {
-								executeNonTransactionalModificationMethods();
-							}
-							finally {
-								dataAccessState.ResetCache();
-							}
-						}
-						else
+					if( cacheEnabled ) {
+						dataAccessState.DisableCache();
+						try {
 							executeNonTransactionalModificationMethods();
+						}
+						finally {
+							dataAccessState.ResetCache();
+						}
 					}
-					finally {
-						modTransactionSecondaryDatabaseCount = null;
-					}
+					else
+						executeNonTransactionalModificationMethods();
 				}
 				finally {
-					nonTransactionalModificationMethods.Clear();
+					modTransactionSecondaryDatabaseCount = null;
 				}
-			} );
+			}
+			finally {
+				nonTransactionalModificationMethods.Clear();
+			}
+		} );
 
 		if( ensureAllResourcesCleanedUp )
-			methods.Add(
-				() => {
-					if( tempFolderPath.IsValueCreated )
-						IoMethods.DeleteFolder( tempFolderPath.Value );
-				} );
+			methods.Add( () => {
+				if( tempFolderPath.IsValueCreated )
+					IoMethods.DeleteFolder( tempFolderPath.Value );
+			} );
 
 		ExceptionHandlingTools.CallEveryMethod( methods.ToArray() );
 		transactionsMarkedForRollback = false;

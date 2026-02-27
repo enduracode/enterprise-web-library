@@ -26,7 +26,7 @@ public abstract class PageBase: ResourceBase {
 
 	internal const string IgnoredFormFieldName = "ewfIgnored";
 
-	private static ( Func<Action> pageViewDataModificationMethodGetter, Func<string> javaScriptPageInitFunctionCallGetter ) appProvider;
+	private static ( Func<Action?> pageViewDataModificationMethodGetter, Func<string> javaScriptPageInitFunctionCallGetter ) appProvider;
 
 	private static Func<Func<Func<PageContent>, PageContent>, Func<string>, Func<string>, ( PageContent basicContent, FlowComponent component, FlowComponent
 			etherealContainer, FlowComponent jsInitElement, Action? dataUpdateModificationMethod, bool isAutoDataUpdater, ActionPostBack? pageLoadPostBack )>
@@ -74,7 +74,7 @@ public abstract class PageBase: ResourceBase {
 	}
 
 	internal static void Init(
-		( Func<Action>, Func<string> ) appProvider,
+		( Func<Action?>, Func<string> ) appProvider,
 		Func<Func<Func<PageContent>, PageContent>, Func<string>, Func<string>, ( PageContent, FlowComponent, FlowComponent, FlowComponent, Action?, bool,
 			ActionPostBack? )> contentGetter ) {
 		EwfValidation.Init( () => FormState.Current.ValidationPredicate, validation => FormState.Current.AddValidationToDataModificationActions( validation ) );

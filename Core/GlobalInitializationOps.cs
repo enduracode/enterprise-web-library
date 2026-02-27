@@ -47,7 +47,7 @@ public static class GlobalInitializationOps {
 	public static void InitStatics(
 		SystemInitializer globalInitializer, string appName, bool isClientSideApp, ( Func<Instant> current, Func<Instant> transaction )? timeGetters = null,
 		string assemblyFolderPath = "", Action<TextWriter>? telemetryAppErrorContextWriter = null, Func<DataAccessState>? mainDataAccessStateGetter = null,
-		bool useLongDatabaseTimeouts = false, Func<AutomaticDatabaseConnectionManager>? currentDatabaseConnectionManagerGetter = null,
+		bool useLongDatabaseTimeouts = false, Func<AutomaticDatabaseConnectionManager?>? currentDatabaseConnectionManagerGetter = null,
 		Func<SystemUser?>? currentUserGetter = null ) {
 		var initializationLog = "Starting init";
 		try {
