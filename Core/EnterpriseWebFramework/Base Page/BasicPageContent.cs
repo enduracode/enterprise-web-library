@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System.Text;
+﻿using System.Text;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
@@ -23,12 +22,12 @@ public sealed class BasicPageContent: PageContent {
 	private static readonly ElementClass processingDialogTimeOutParagraphClass = new( "ewfTimeOutP" );
 	private static readonly ElementClass pageLoadPostBackContentContainerClass = new( "ewfPlpb" );
 
-	internal static Func<string> ClientSideNewUrlGetter;
-	private static Func<IReadOnlyCollection<PageContent>, IEnumerable<ResourceInfo>> cssInfoCreator;
-	private static Action<StringBuilder, bool> javaScriptIncludeBuilder;
-	private static Func<IEnumerable<( ResourceInfo resource, string rel, string sizes )>> appIconGetter;
-	private static Func<bool, string> intermediateUrlGetter;
-	private static Func<( string message, ActionComponentSetupsParameter actions )?> impersonationWarningLineGetter;
+	internal static Func<string> ClientSideNewUrlGetter = null!;
+	private static Func<IReadOnlyCollection<PageContent>, IEnumerable<ResourceInfo>> cssInfoCreator = null!;
+	private static Action<StringBuilder, bool> javaScriptIncludeBuilder = null!;
+	private static Func<IEnumerable<( ResourceInfo resource, string rel, string sizes )>> appIconGetter = null!;
+	private static Func<bool, string> intermediateUrlGetter = null!;
+	private static Func<( string message, ActionComponentSetupsParameter actions )?> impersonationWarningLineGetter = null!;
 
 	[ UsedImplicitly ]
 	private class CssElementCreator: ControlCssElementCreator {
@@ -54,12 +53,11 @@ public sealed class BasicPageContent: PageContent {
 				.Select( i => formSelector + i )
 				.ToArray();
 			elements.AddRange(
-				new[]
-					{
-						new CssElement( "ProcessingDialogModalBoxContainerAllStates", dialogAllStatesSelectors ),
-						new CssElement( "ProcessingDialogModalBoxContainerNormalState", dialogNormalStateSelectors ),
-						new CssElement( "ProcessingDialogModalBoxContainerTimeOutState", dialogTimeOutStateSelectors )
-					} );
+				[
+					new CssElement( "ProcessingDialogModalBoxContainerAllStates", dialogAllStatesSelectors ),
+					new CssElement( "ProcessingDialogModalBoxContainerNormalState", dialogNormalStateSelectors ),
+					new CssElement( "ProcessingDialogModalBoxContainerTimeOutState", dialogTimeOutStateSelectors )
+				] );
 
 			elements.Add(
 				new CssElement(
@@ -68,18 +66,17 @@ public sealed class BasicPageContent: PageContent {
 
 			var timeOutParagraphSelector = "p." + processingDialogTimeOutParagraphClass.ClassName;
 			elements.AddRange(
-				new[]
-					{
-						new CssElement(
-							"ProcessingDialogTimeOutParagraphBothStates",
-							dialogAllStatesSelectors.Select( i => "{0} {1}".FormatWith( i, timeOutParagraphSelector ) ).ToArray() ),
-						new CssElement(
-							"ProcessingDialogTimeOutParagraphInactiveState",
-							dialogNormalStateSelectors.Select( i => "{0} {1}".FormatWith( i, timeOutParagraphSelector ) ).ToArray() ),
-						new CssElement(
-							"ProcessingDialogTimeOutParagraphActiveState",
-							dialogTimeOutStateSelectors.Select( i => "{0} {1}".FormatWith( i, timeOutParagraphSelector ) ).ToArray() )
-					} );
+				[
+					new CssElement(
+						"ProcessingDialogTimeOutParagraphBothStates",
+						dialogAllStatesSelectors.Select( i => "{0} {1}".FormatWith( i, timeOutParagraphSelector ) ).ToArray() ),
+					new CssElement(
+						"ProcessingDialogTimeOutParagraphInactiveState",
+						dialogNormalStateSelectors.Select( i => "{0} {1}".FormatWith( i, timeOutParagraphSelector ) ).ToArray() ),
+					new CssElement(
+						"ProcessingDialogTimeOutParagraphActiveState",
+						dialogTimeOutStateSelectors.Select( i => "{0} {1}".FormatWith( i, timeOutParagraphSelector ) ).ToArray() )
+				] );
 
 			elements.Add(
 				new CssElement(
@@ -139,7 +136,7 @@ public sealed class BasicPageContent: PageContent {
 		BasicPageContent.impersonationWarningLineGetter = impersonationWarningLineGetter;
 	}
 
-	internal static ( PageContent, FlowComponent, FlowComponent, FlowComponent, Action, bool, ActionPostBack ) GetContent(
+	internal static ( PageContent, FlowComponent, FlowComponent, FlowComponent, Action?, bool, ActionPostBack? ) GetContent(
 		Func<Func<PageContent>, PageContent> contentGetter, Func<string> hiddenFieldValueGetter, Func<string> jsInitStatementGetter ) {
 		var content = contentGetter( () => new BasicPageContent() );
 
@@ -170,13 +167,13 @@ public sealed class BasicPageContent: PageContent {
 	private readonly Func<IReadOnlyCollection<PageContent>, Func<string>, FlowComponent, FlowComponent> componentGetter;
 	internal bool IncludesStripeCheckout;
 	internal bool FormUsesMultipartEncoding;
-	private readonly List<FlowComponent> bodyContent = new();
+	private readonly List<FlowComponent> bodyContent = [ ];
 	private readonly FlowComponent etherealContainer;
 	internal readonly ModalBoxId BrowsingModalBoxId = new();
-	private readonly List<EtherealComponent> etherealContent = new();
-	private readonly Action dataUpdateModificationMethod;
+	private readonly List<EtherealComponent> etherealContent = [ ];
+	private readonly Action? dataUpdateModificationMethod;
 	private readonly bool isAutoDataUpdater;
-	private readonly ActionPostBack pageLoadPostBack;
+	private readonly ActionPostBack? pageLoadPostBack;
 
 	/// <summary>
 	/// Creates a basic page content object.
@@ -189,8 +186,8 @@ public sealed class BasicPageContent: PageContent {
 	/// <param name="pageLoadPostBack">A post-back that will be triggered automatically by the browser when the page is finished loading. If this is not null, the
 	/// framework will hide all content on the page and show a loading icon instead.</param>
 	public BasicPageContent(
-		string titleOverride = "", TrustedHtmlString customHeadElements = null, ElementClassSet bodyClasses = null, Action dataUpdateModificationMethod = null,
-		bool isAutoDataUpdater = false, ActionPostBack pageLoadPostBack = null ) {
+		string titleOverride = "", TrustedHtmlString? customHeadElements = null, ElementClassSet? bodyClasses = null, Action? dataUpdateModificationMethod = null,
+		bool isAutoDataUpdater = false, ActionPostBack? pageLoadPostBack = null ) {
 		var preContentComponents = getPreContentComponents();
 		var postContentComponents = new NotificationSectionContainer().ToCollection();
 		var etherealComponents = getEtherealComponents();
@@ -251,8 +248,8 @@ public sealed class BasicPageContent: PageContent {
 									attributes.Add(
 										new ElementAttribute(
 											"action",
-											pageLoadPostBack is null || PageBase.Current.ModificationErrorsOccurred
-												? PageBase.Current.GetUrl()
+											pageLoadPostBack is null || PageBase.Current!.ModificationErrorsOccurred
+												? PageBase.Current!.GetUrl()
 												: RequestStateStatics.StoreRequestStateForContinuation(
 													PageBase.Current.GetUrl(),
 													"POST",
@@ -269,7 +266,7 @@ public sealed class BasicPageContent: PageContent {
 								clientSideIdOverride: PageBase.FormId,
 								children: preContentComponents.Concat( bodyContent )
 									.Concat( postContentComponents )
-									.Append( etherealContainer )
+									.Append( etherealContainer! )
 									.Append(
 										new ElementComponent( _ => new ElementData(
 											() => {
@@ -288,7 +285,7 @@ public sealed class BasicPageContent: PageContent {
 								pageLoadPostBack is null
 									? Enumerable.Empty<FlowComponent>()
 									: new GenericFlowContainer(
-										PageBase.Current.ModificationErrorsOccurred
+										PageBase.Current!.ModificationErrorsOccurred
 											? new FlowErrorContainer(
 													new ErrorSourceSet( includeGeneralErrors: true ),
 													new ListErrorDisplayStyle(),
@@ -372,7 +369,7 @@ public sealed class BasicPageContent: PageContent {
 								( text, _ ) => new ButtonHyperlinkStyle( text, buttonSize: ButtonSize.ShrinkWrap ),
 								( text, _ ) => new StandardButtonStyle( text, buttonSize: ButtonSize.ShrinkWrap ) ) )
 							.Where( i => i != null )
-							.Select( i => i.ToCollection() )
+							.Select( i => i!.ToCollection() )
 							.Aggregate( ( components, action ) => components.Concat( " ".ToComponents() ).Concat( action ).Materialize() ) )
 					.Materialize() );
 
@@ -422,12 +419,12 @@ public sealed class BasicPageContent: PageContent {
 		StringTools.ConcatenateWithDelimiter(
 			" - ",
 			BasePageStatics.AppProvider.AppDisplayName.Length > 0 ? BasePageStatics.AppProvider.AppDisplayName : SystemSpecificLogicStatics.SystemDisplayName,
-			PageBase.Current.ResourceFullName );
+			PageBase.Current!.ResourceFullName );
 
 	private IEnumerable<FlowComponent> getTypekitLogicIfNecessary() {
 		if( BasePageStatics.AppProvider.TypekitId.Any() ) {
 			yield return new TrustedHtmlString(
-				"<script type=\"text/javascript\" src=\"http" + ( EwfRequest.Current.IsSecure ? "s" : "" ) + "://use.typekit.com/" +
+				"<script type=\"text/javascript\" src=\"http" + ( EwfRequest.Current!.IsSecure ? "s" : "" ) + "://use.typekit.com/" +
 				BasePageStatics.AppProvider.TypekitId + ".js\"></script>" ).ToComponent();
 			yield return new TrustedHtmlString( "<script type=\"text/javascript\">try{Typekit.load();}catch(e){}</script>" ).ToComponent();
 		}
@@ -464,12 +461,11 @@ public sealed class BasicPageContent: PageContent {
 			return markup.ToString();
 		} );
 
-	private FlowComponent getLink( string href, string rel, IReadOnlyCollection<ElementAttribute> attributes = null ) =>
+	private FlowComponent getLink( string href, string rel, IReadOnlyCollection<ElementAttribute>? attributes = null ) =>
 		new ElementComponent( _ => new ElementData( () => new ElementLocalData(
 			"link",
 			focusDependentData: new ElementFocusDependentData(
-				attributes: new ElementAttribute( "href", href ).Append( new ElementAttribute( "rel", rel ) )
-					.Concat( attributes ?? Enumerable.Empty<ElementAttribute>() ) ) ) ) );
+				attributes: new ElementAttribute( "href", href ).Append( new ElementAttribute( "rel", rel ) ).Concat( attributes ?? [ ] ) ) ) ) );
 
 	private FlowComponent getMeta( string name, string content ) =>
 		new ElementComponent( _ => new ElementData( () => {

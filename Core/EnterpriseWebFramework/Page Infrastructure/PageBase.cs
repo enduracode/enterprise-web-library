@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Security.Cryptography;
 using System.Text;
 using EnterpriseWebLibrary.Configuration;
@@ -30,10 +29,10 @@ public abstract class PageBase: ResourceBase {
 	private static ( Func<Action> pageViewDataModificationMethodGetter, Func<string> javaScriptPageInitFunctionCallGetter ) appProvider;
 
 	private static Func<Func<Func<PageContent>, PageContent>, Func<string>, Func<string>, ( PageContent basicContent, FlowComponent component, FlowComponent
-			etherealContainer, FlowComponent jsInitElement, Action dataUpdateModificationMethod, bool isAutoDataUpdater, ActionPostBack pageLoadPostBack )>
-		contentGetter;
+			etherealContainer, FlowComponent jsInitElement, Action? dataUpdateModificationMethod, bool isAutoDataUpdater, ActionPostBack? pageLoadPostBack )>
+		contentGetter = null!;
 
-	private static ILogger log;
+	private static ILogger log = null!;
 
 	[ JsonObject( ItemRequired = Required.Always, MemberSerialization = MemberSerialization.Fields ) ]
 	private class HiddenFieldData {
@@ -47,7 +46,7 @@ public abstract class PageBase: ResourceBase {
 		public readonly string FormValueHash;
 
 		[ JsonProperty( PropertyName = "failingDm", Required = Required.AllowNull ) ]
-		public readonly string LastPostBackFailingActionId;
+		public readonly string? LastPostBackFailingActionId;
 
 		// This property name is duplicated in the JavaScript file.
 		[ JsonProperty( PropertyName = "postBack" ) ]
@@ -62,7 +61,7 @@ public abstract class PageBase: ResourceBase {
 		public readonly string ScrollPositionY;
 
 		public HiddenFieldData(
-			Instant firstRequestTime, ImmutableDictionary<string, JToken> componentStateValuesById, string formValueHash, string lastPostBackFailingActionId,
+			Instant firstRequestTime, ImmutableDictionary<string, JToken> componentStateValuesById, string formValueHash, string? lastPostBackFailingActionId,
 			string postBackId, string scrollPositionX, string scrollPositionY ) {
 			FirstRequestTime = firstRequestTime;
 			ComponentStateValuesById = componentStateValuesById;
@@ -76,8 +75,8 @@ public abstract class PageBase: ResourceBase {
 
 	internal static void Init(
 		( Func<Action>, Func<string> ) appProvider,
-		Func<Func<Func<PageContent>, PageContent>, Func<string>, Func<string>, ( PageContent, FlowComponent, FlowComponent, FlowComponent, Action, bool,
-			ActionPostBack )> contentGetter ) {
+		Func<Func<Func<PageContent>, PageContent>, Func<string>, Func<string>, ( PageContent, FlowComponent, FlowComponent, FlowComponent, Action?, bool,
+			ActionPostBack? )> contentGetter ) {
 		EwfValidation.Init( () => FormState.Current.ValidationPredicate, validation => FormState.Current.AddValidationToDataModificationActions( validation ) );
 		BasicDataModificationAction.Init(
 			RequestStateStatics.NotifyOfSlowDataModification,
@@ -85,51 +84,52 @@ public abstract class PageBase: ResourceBase {
 				if( !errorMessages.Any() )
 					return;
 
-				var current = Current;
+				var current = Current!;
 				if( !current.modErrorDisplaysByValidation.TryGetValue( validation, out var displays ) )
 					throw new ApplicationException( "An undisplayed validation produced errors." );
 
-				var errorsByDisplay = current.requestState.InLineModificationErrorsByDisplay;
+				var errorsByDisplay = current.requestState!.InLineModificationErrorsByDisplay;
 				foreach( var displayKey in displays )
 					errorsByDisplay[ displayKey ] = errorsByDisplay.TryGetValue( displayKey, out var errors ) ? errors.Concat( errorMessages ) : errorMessages;
 			},
-			errors => Current.requestState.GeneralModificationErrors = errors );
+			errors => Current!.requestState!.GeneralModificationErrors = errors );
 		FormValueStatics.Init(
-			formValue => Current.formValues.Add( formValue ),
+			formValue => Current!.formValues.Add( formValue ),
 			() => FormState.Current.DataModificationActions.Collection.Value,
-			() => Current.requestState.PostBackValues );
+			() => Current!.requestState!.PostBackValues );
 		ComponentStateItem.Init(
 			AssertPageTreeNotBuilt,
-			() => Current.elementOrIdentifiedComponentIdGetter(),
+			() => Current!.elementOrIdentifiedComponentIdGetter(),
 			id => {
-				var valuesById = Current.requestState.ComponentStateValuesById;
+				var valuesById = Current!.requestState!.ComponentStateValuesById;
 				return valuesById != null && valuesById.TryGetValue( id, out var value ) ? value : null;
 			},
 			() => FormState.Current.DataModificationActions.Collection.Value,
-			( id, item ) => Current.componentStateItemsById.Add( id, item ) );
+			( id, item ) => Current!.componentStateItemsById.Add( id, item ) );
 		PostBack.Init( () => FormState.Current.DataModificationActions.Collection.Value );
 		PostBackFormAction.Init(
 			postBack => {
-				if( !Current.postBacksById.TryGetValue( postBack.Id, out var existingPostBack ) )
+				if( !Current!.postBacksById.TryGetValue( postBack.Id, out var existingPostBack ) )
 					Current.postBacksById.Add( postBack.Id, postBack );
 				else if( existingPostBack != postBack )
 					throw new ApplicationException( "A post-back with an ID of \"{0}\" already exists in the page.".FormatWith( existingPostBack.Id ) );
 			},
 			postBack => {
-				if( Current.GetPostBack( postBack.Id ) != postBack )
+				if( Current!.GetPostBack( postBack.Id ) != postBack )
 					throw new ApplicationException( "The post-back must have been added to the page." );
 				if( ( postBack as ActionPostBack )?.ValidationAction is PostBack validationPostBack &&
 				    Current.GetPostBack( validationPostBack.Id ) != validationPostBack )
 					throw new ApplicationException( "The post-back's validation action, if it is a post-back, must have been added to the page." );
 			} );
 		FormState.Init(
-			() => Current.formState,
+			() => Current!.formState!,
 			dataModifications => {
-				if( dataModifications.Contains( Current.dataUpdate ) && dataModifications.Any( i => i != Current.dataUpdate && !( (ActionPostBack)i ).IsIntermediate ) )
+				if( dataModifications.Contains( Current!.dataUpdate ) &&
+				    dataModifications.Any( i => i != Current.dataUpdate && !( (ActionPostBack)i ).IsIntermediate ) )
 					throw new ApplicationException(
 						"If the data-update action is included, it is meaningless to include any full post-backs since these inherently update the page's data." );
 			},
-			dataModification => dataModification == Current.dataUpdate ? Current.dataUpdatePostBack : (ActionPostBack)dataModification );
+			dataModification => dataModification == Current!.dataUpdate ? Current.dataUpdatePostBack : (ActionPostBack)dataModification );
 
 		PageBase.appProvider = appProvider;
 		PageBase.contentGetter = contentGetter;
@@ -140,7 +140,7 @@ public abstract class PageBase: ResourceBase {
 	/// <summary>
 	/// Gets the currently executing page, or null if the currently executing resource is not a page.
 	/// </summary>
-	public new static PageBase Current {
+	public new static PageBase? Current {
 		get {
 			if( ResourceBase.Current is not PageBase pageObject )
 				return null;
@@ -154,44 +154,44 @@ public abstract class PageBase: ResourceBase {
 	/// Add a status message of the given type to the status message collection.
 	/// </summary>
 	public static void AddStatusMessage( StatusMessageType type, string message ) {
-		Current.statusMessages.Add( ( type, message ) );
+		Current!.statusMessages.Add( ( type, message ) );
 	}
 
 	internal static void AssertPageTreeNotBuilt() {
-		if( Current.formState == null )
+		if( Current!.formState == null )
 			throw new Exception( "The page tree has already been built." );
 	}
 
 	internal static void AssertPageTreeBuilt() {
-		if( Current.formState != null )
+		if( Current!.formState != null )
 			throw new Exception( "The page tree has not yet been built." );
 	}
 
 	internal static void AssertRenderingPreparationStarted() {
-		if( Current.pageTree?.RenderingPreparationStarted != true )
+		if( Current!.pageTree?.RenderingPreparationStarted != true )
 			throw new Exception( "Rendering preparation has not yet started." );
 	}
 
-	private PageBase nextPageObject;
+	private PageBase? nextPageObject;
 
-	private PageRequestState requestState;
+	private PageRequestState? requestState;
 	private bool postBackValidationDmExecuted;
 
-	private FormState formState;
-	internal PageContent BasicContent;
-	private PageTree pageTree;
+	private FormState? formState;
+	internal PageContent? BasicContent;
+	private PageTree? pageTree;
 	private Func<string> elementOrIdentifiedComponentIdGetter = () => "";
-	private DataUpdateAction dataUpdate;
+	private DataUpdateAction? dataUpdate;
 	private readonly PostBack dataUpdatePostBack = PostBack.CreateDataUpdate();
 	internal bool? IsAutoDataUpdater;
 	private readonly Dictionary<string, PostBack> postBacksById = new();
 	private readonly List<FormValue> formValues = new();
 	private readonly Dictionary<string, ComponentStateItem> componentStateItemsById = new();
-	private IReadOnlyCollection<PageNode> updateRegionLinkerNodes;
+	private IReadOnlyCollection<PageNode>? updateRegionLinkerNodes;
 	private readonly Dictionary<EwfValidation, List<string>> modErrorDisplaysByValidation = new();
 	private readonly HashSet<EwfValidation> validationsWithErrors = new();
 	private readonly List<Action> controlTreeValidations = new();
-	internal PostBack SubmitButtonPostBack;
+	internal PostBack? SubmitButtonPostBack;
 	private readonly List<( StatusMessageType, string )> statusMessages = new();
 
 	/// <summary>
@@ -201,18 +201,18 @@ public abstract class PageBase: ResourceBase {
 
 	protected sealed override bool disablesUrlNormalization => base.disablesUrlNormalization;
 
-	protected sealed override ExternalRedirect getRedirect() => base.getRedirect();
+	protected sealed override ExternalRedirect? getRedirect() => base.getRedirect();
 
 	protected sealed override EwfSafeRequestHandler getOrHead() {
 		requestState = new PageRequestState();
-		return new EwfSafeResponseWriter( executePageViewDataModifications().buildPageAndGetResponse( new SpecifiedValue<string>( null ) ) );
+		return new EwfSafeResponseWriter( executePageViewDataModifications().buildPageAndGetResponse( new SpecifiedValue<string?>( null ) ) );
 	}
 
 	protected sealed override bool managesDataModificationsInUnsafeRequestMethods => true;
 
-	protected sealed override EwfResponse put() => base.put();
-	protected sealed override EwfResponse patch() => base.patch();
-	protected sealed override EwfResponse delete() => base.delete();
+	protected sealed override EwfResponse? put() => base.put();
+	protected sealed override EwfResponse? patch() => base.patch();
+	protected sealed override EwfResponse? delete() => base.delete();
 
 	protected sealed override EwfResponse post() => ProcessFormSubmissionAndGetResponse( false );
 
@@ -221,19 +221,19 @@ public abstract class PageBase: ResourceBase {
 		HiddenFieldData hiddenFieldData;
 		try {
 			using( MiniProfiler.Current.Step( "EWF - Wait for request body to be received" ) )
-				formSubmission = EwfRequest.Current.GetFormSubmission();
+				formSubmission = EwfRequest.Current!.GetFormSubmission();
 
 			// throws exception if field missing, because Request.Form returns null
 			hiddenFieldData = JsonConvert.DeserializeObject<HiddenFieldData>(
-				formSubmission[ HiddenFieldName ],
-				new JsonSerializerSettings { MissingMemberHandling = MissingMemberHandling.Error } );
+				formSubmission[ HiddenFieldName ]!,
+				new JsonSerializerSettings { MissingMemberHandling = MissingMemberHandling.Error } )!;
 
 			requestState = new PageRequestState(
-				pageBuilt ? requestState.FirstRequestTime : hiddenFieldData.FirstRequestTime,
+				pageBuilt ? requestState!.FirstRequestTime : hiddenFieldData.FirstRequestTime,
 				hiddenFieldData.ScrollPositionX,
 				hiddenFieldData.ScrollPositionY )
 				{
-					ComponentStateValuesById = pageBuilt ? requestState.ComponentStateValuesById : hiddenFieldData.ComponentStateValuesById
+					ComponentStateValuesById = pageBuilt ? requestState!.ComponentStateValuesById : hiddenFieldData.ComponentStateValuesById
 				};
 		}
 		catch {
@@ -277,7 +277,7 @@ public abstract class PageBase: ResourceBase {
 			return executePostBackAndGetResponse( (ActionPostBack)postBack, lastPostBackFailingAction );
 
 		// Execute the page’s data update.
-		var dataUpdateExecuted = dataUpdate.Action.Execute( !postBack.ForcePageDataUpdate, changesExist( dataUpdate ) );
+		var dataUpdateExecuted = dataUpdate!.Action.Execute( !postBack.ForcePageDataUpdate, changesExist( dataUpdate ) );
 		if( modificationErrorsExist )
 			return navigateToCurrent( "" );
 
@@ -286,7 +286,7 @@ public abstract class PageBase: ResourceBase {
 
 		if( postBack is not ActionPostBack actionPostBack ) {
 			requestState = new PageRequestState();
-			return navigate( ( null, null ), page => page.executePageViewDataModifications().buildPageAndGetResponse( new SpecifiedValue<string>( null ) ) );
+			return navigate( ( null, null ), page => page.executePageViewDataModifications().buildPageAndGetResponse( new SpecifiedValue<string?>( null ) ) );
 		}
 
 		if( !dataUpdateExecuted )
@@ -296,8 +296,8 @@ public abstract class PageBase: ResourceBase {
 		return navigate( ( null, null ), page => page.processPostBackAfterDataUpdate( actionPostBack.Id, stateItemsAndFormValues ) );
 	}
 
-	private IReadOnlyCollection<TrustedHtmlString> validateFormSubmission( IFormCollection submission, string formValueHash ) {
-		var extraComponentStateValues = requestState.ComponentStateValuesById.Keys.Where( i => !componentStateItemsById.ContainsKey( i ) ).Materialize();
+	private IReadOnlyCollection<TrustedHtmlString>? validateFormSubmission( IFormCollection submission, string formValueHash ) {
+		var extraComponentStateValues = requestState!.ComponentStateValuesById!.Keys.Where( i => !componentStateItemsById.ContainsKey( i ) ).Materialize();
 		var invalidComponentStateValues = componentStateItemsById
 			.Where( i => !requestState.ComponentStateValuesById.ContainsKey( i.Key ) || i.Value.ValueIsInvalid() )
 			.Select( i => i.Key )
@@ -309,7 +309,7 @@ public abstract class PageBase: ResourceBase {
 		var extraPostBackValues = requestState.PostBackValues.AddFromRequest(
 				submission.Where( i =>
 						!string.Equals( i.Key, HiddenFieldName, StringComparison.Ordinal ) && !string.Equals( i.Key, IgnoredFormFieldName, StringComparison.Ordinal ) )
-					.SelectMany( pair => pair.Value.Select( value => KeyValuePair.Create( pair.Key, (object)value ) ) ),
+					.SelectMany( pair => pair.Value.Select( value => KeyValuePair.Create( pair.Key, (object)value! ) ) ),
 				postBackValueKeys.Contains )
 			.Concat(
 				requestState.PostBackValues.AddFromRequest( submission.Files.Select( i => KeyValuePair.Create( i.Name, (object)i ) ), postBackValueKeys.Contains ) )
@@ -328,7 +328,7 @@ public abstract class PageBase: ResourceBase {
 			log.Debug(
 				"Form-submission validation failed due to invalid component-state values: {@Values}",
 				invalidComponentStateValues.Select( i =>
-					new { Id = i, Value = requestState.ComponentStateValuesById.TryGetValue( i, out var value ) ? value : "missing" } ) );
+					new { Id = i, Value = requestState!.ComponentStateValuesById.TryGetValue( i, out var value ) ? value : "missing" } ) );
 		else if( extraPostBackValues.Any() )
 			log.Debug( "Form-submission validation failed due to extra post-back values: {Values}", extraPostBackValues );
 		else if( invalidPostBackValues.Any() )
@@ -349,8 +349,8 @@ public abstract class PageBase: ResourceBase {
 	private EwfResponse processPostBackAfterDataUpdate( string postBackId, string stateItemsAndFormValues ) {
 		buildPage( null );
 
-		var postBack = (ActionPostBack)GetPostBack( postBackId );
-		TrustedHtmlString validatePage() {
+		var postBack = (ActionPostBack?)GetPostBack( postBackId );
+		TrustedHtmlString? validatePage() {
 			if( postBack is null ) {
 				log.Debug( "Post-back execution failed after the data update because the post-back was missing" );
 				return Translation.YouHaveModifiedPageAndWeCouldNotInterpretAction;
@@ -367,7 +367,7 @@ public abstract class PageBase: ResourceBase {
 			if( invalidComponentStateValues.Any() ) {
 				log.Debug(
 					"Post-back execution failed after the data update due to component-state values that became invalid: {@Values}",
-					invalidComponentStateValues.Select( i => new { Id = i, Value = requestState.ComponentStateValuesById[ i ] } ) );
+					invalidComponentStateValues.Select( i => new { Id = i, Value = requestState!.ComponentStateValuesById![ i ] } ) );
 				return Translation.YouHaveModifiedPageAndWeCouldNotInterpretAction;
 			}
 			var invalidPostBackValues = formValues
@@ -379,7 +379,7 @@ public abstract class PageBase: ResourceBase {
 				log.Debug(
 					"Post-back execution failed after the data update due to post-back values that became invalid: {@Values}",
 					invalidPostBackValues.Select( i => {
-						var value = requestState.PostBackValues.GetValue( i );
+						var value = requestState!.PostBackValues!.GetValue( i );
 						return new { Key = i, Value = value is not null ? "{0}".FormatWith( value ) : "missing" };
 					} ) );
 				return Translation.YouHaveModifiedPageAndWeCouldNotInterpretAction;
@@ -389,12 +389,12 @@ public abstract class PageBase: ResourceBase {
 		}
 		var error = validatePage();
 		if( error is not null ) {
-			requestState.GeneralModificationErrors = error.ToCollection();
+			requestState!.GeneralModificationErrors = error.ToCollection();
 			removeInvalidComponentStateAndPostBackValues();
 			return navigateToCurrent( null );
 		}
 
-		return executePostBackAndGetResponse( postBack, null );
+		return executePostBackAndGetResponse( postBack!, null );
 	}
 
 	private string getPostBackStateItemsAndFormValues( ActionPostBack postBack ) {
@@ -417,16 +417,16 @@ public abstract class PageBase: ResourceBase {
 	/// Removes invalid component-state and post-back values so they don't cause a false developer-mistake exception after the page is rebuilt.
 	/// </summary>
 	private void removeInvalidComponentStateAndPostBackValues() {
-		requestState.ComponentStateValuesById = requestState.ComponentStateValuesById.RemoveRange(
+		requestState!.ComponentStateValuesById = requestState.ComponentStateValuesById!.RemoveRange(
 			from i in componentStateItemsById where i.Value.ValueIsInvalid() select i.Key );
 		var validPostBackValueKeys = from i in formValues where i.GetPostBackValueKey().Length > 0 && !i.PostBackValueIsInvalid() select i.GetPostBackValueKey();
-		requestState.PostBackValues.RemoveExcept( validPostBackValueKeys );
+		requestState.PostBackValues!.RemoveExcept( validPostBackValueKeys );
 	}
 
-	private EwfResponse executePostBackAndGetResponse( ActionPostBack postBack, DataModificationAction lastPostBackFailingAction ) {
-		( ResourceInfo destination, Func<ResourceInfo, bool> authorizationCheckDisabledPredicate )? navigationBehavior = null;
-		var focusKey = "";
-		FullResponse fullSecondaryResponse = null;
+	private EwfResponse executePostBackAndGetResponse( ActionPostBack postBack, DataModificationAction? lastPostBackFailingAction ) {
+		( ResourceInfo? destination, Func<ResourceInfo, bool>? authorizationCheckDisabledPredicate )? navigationBehavior = null;
+		string? focusKey = "";
+		FullResponse? fullSecondaryResponse = null;
 		var postBackExecuted = postBack.Execute(
 			changesExist( postBack ),
 			postBackAction => {
@@ -443,16 +443,16 @@ public abstract class PageBase: ResourceBase {
 		Func<PageBase, EwfResponse> actionProcessor;
 		if( postBack.IsIntermediate ) {
 			var regionSets = postBack.UpdateRegions?.Collection.Value.ToHashSet() ?? [ ];
-			var updateRegions = updateRegionLinkerNodes.SelectMany( i => i.KeyedUpdateRegionLinkers, ( node, keyedLinker ) => ( node, keyedLinker ) )
+			var updateRegions = updateRegionLinkerNodes!.SelectMany( i => i.KeyedUpdateRegionLinkers!, ( node, keyedLinker ) => ( node, keyedLinker ) )
 				.SelectMany(
 					nodeLinker => nodeLinker.keyedLinker.linker.PreModificationRegions.Where( i => i.Sets is not null && regionSets.Overlaps( i.Sets.Collection.Value ) ),
 					( nodeLinker, region ) => ( nodeLinker.node, nodeLinker.keyedLinker.key, region ) )
 				.Materialize();
 			var staticRegionContents = getStaticRegionContents( updateRegions.Select( i => ( i.node, i.region.ComponentGetter() ) ) );
 
-			requestState.ComponentStateValuesById = componentStateItemsById.Where( i => staticRegionContents.stateItems.Contains( i.Value ) )
+			requestState!.ComponentStateValuesById = componentStateItemsById.Where( i => staticRegionContents.stateItems.Contains( i.Value ) )
 				.ToImmutableDictionary( i => i.Key, i => i.Value.ValueAsJson );
-			requestState.PostBackValues.RemoveExcept( staticRegionContents.formValues.Select( i => i.GetPostBackValueKey() ) );
+			requestState.PostBackValues!.RemoveExcept( staticRegionContents.formValues.Select( i => i.GetPostBackValueKey() ) );
 
 			var updateRegionKeysAndArguments = updateRegions.Select( i => ( i.key, i.region.ArgumentGetter() ) ).Materialize();
 			actionProcessor = page => {
@@ -460,14 +460,14 @@ public abstract class PageBase: ResourceBase {
 				page.buildPage( null );
 				page.assertStaticRegionsUnchanged( updateRegionKeysAndArguments, staticRegionContents.contents );
 				return page.processValidationActionAfterIntermediatePostBack(
-					postBack.ValidationAction == dataUpdate ? "" : ( (ActionPostBack)postBack.ValidationAction ).Id,
+					postBack.ValidationAction == dataUpdate ? "" : ( (ActionPostBack)postBack.ValidationAction! ).Id,
 					postBack.ValidationAction != lastPostBackFailingAction,
 					focusKey );
 			};
 		}
 		else {
 			requestState = new PageRequestState();
-			actionProcessor = page => page.executePageViewDataModifications().buildPageAndGetResponse( new SpecifiedValue<string>( focusKey ) );
+			actionProcessor = page => page.executePageViewDataModifications().buildPageAndGetResponse( new SpecifiedValue<string?>( focusKey ) );
 		}
 
 		return navigate(
@@ -481,7 +481,7 @@ public abstract class PageBase: ResourceBase {
 			} );
 	}
 
-	private EwfResponse navigateToCurrent( string failingActionId, int? statusCode = null ) =>
+	private EwfResponse navigateToCurrent( string? failingActionId, int? statusCode = null ) =>
 		navigate(
 			null,
 			page => {
@@ -490,12 +490,12 @@ public abstract class PageBase: ResourceBase {
 				return page.getResponse( null, statusCode: statusCode );
 			} );
 
-	private EwfResponse processValidationActionAfterIntermediatePostBack( string actionId, bool validateChangesOnly, string focusKey ) {
+	private EwfResponse processValidationActionAfterIntermediatePostBack( string actionId, bool validateChangesOnly, string? focusKey ) {
 		// Remove this trivial exit when we implement EnduraCode goal 1138.
 		if( validateChangesOnly )
-			return getResponse( new SpecifiedValue<string>( focusKey ) );
+			return getResponse( new SpecifiedValue<string?>( focusKey ) );
 
-		var action = actionId.Length > 0 ? (DataModificationAction)GetPostBack( actionId ) : dataUpdate;
+		var action = actionId.Length > 0 ? (DataModificationAction?)GetPostBack( actionId ) : dataUpdate;
 		if( action is null )
 			throw getDeveloperMistakeException( "A data modification action with an ID of \"{0}\" does not exist.".FormatWith( actionId ) );
 
@@ -510,9 +510,9 @@ public abstract class PageBase: ResourceBase {
 					       page.postBackValidationDmExecuted = true;
 					       page.buildPage( modificationErrorsExist && !validateChangesOnly ? actionId : null );
 					       page.assertStaticRegionsUnchanged( null, getStaticRegionContents( null ).contents );
-					       return page.getResponse( new SpecifiedValue<string>( focusKey ) );
+					       return page.getResponse( new SpecifiedValue<string?>( focusKey ) );
 				       } )
-			       : getResponse( new SpecifiedValue<string>( focusKey ) );
+			       : getResponse( new SpecifiedValue<string?>( focusKey ) );
 	}
 
 	private bool changesExist( DataModificationAction dataModificationAction ) =>
@@ -522,8 +522,8 @@ public abstract class PageBase: ResourceBase {
 
 	// Pass null for updateRegionKeysAndArguments when modification errors exist or during the validation stage of an intermediate post-back.
 	private void assertStaticRegionsUnchanged(
-		IReadOnlyCollection<( string key, string arg )> updateRegionKeysAndArguments, string previousStaticRegionContents ) {
-		var nodeUpdateRegionLinkersByKey = updateRegionLinkerNodes.SelectMany( i => i.KeyedUpdateRegionLinkers, ( node, keyedLinker ) => ( node, keyedLinker ) )
+		IReadOnlyCollection<( string key, string arg )>? updateRegionKeysAndArguments, string previousStaticRegionContents ) {
+		var nodeUpdateRegionLinkersByKey = updateRegionLinkerNodes!.SelectMany( i => i.KeyedUpdateRegionLinkers!, ( node, keyedLinker ) => ( node, keyedLinker ) )
 			.ToImmutableDictionary( i => i.keyedLinker.key );
 		var updateRegions = updateRegionKeysAndArguments?.Select( keyAndArg => {
 			if( !nodeUpdateRegionLinkersByKey.TryGetValue( keyAndArg.key, out var nodeLinker ) )
@@ -570,7 +570,7 @@ public abstract class PageBase: ResourceBase {
 
 	// Pass null for updateRegions when modification errors exist or during the validation stage of an intermediate post-back.
 	private ( string contents, ImmutableHashSet<ComponentStateItem> stateItems, IReadOnlyCollection<FormValue> formValues ) getStaticRegionContents(
-		IEnumerable<( PageNode node, IEnumerable<PageComponent> components )> updateRegions ) {
+		IEnumerable<( PageNode node, IEnumerable<PageComponent> components )>? updateRegions ) {
 		var contents = new StringBuilder();
 
 		if( updateRegions is null ) {
@@ -581,9 +581,9 @@ public abstract class PageBase: ResourceBase {
 				contents.AppendLine( "\t" + postBack.Id );
 		}
 
-		var staticNodes = pageTree.GetStaticRegionNodes( updateRegions );
-		var staticStateItems = staticNodes.Select( i => i.StateItem ).Where( i => i != null ).ToImmutableHashSet();
-		var staticFormValues = staticNodes.Select( i => i.FormValue ).Where( i => i != null ).Distinct().OrderBy( i => i.GetPostBackValueKey() ).Materialize();
+		var staticNodes = pageTree!.GetStaticRegionNodes( updateRegions );
+		var staticStateItems = staticNodes.Select( i => i.StateItem ).OfType<ComponentStateItem>().ToImmutableHashSet();
+		var staticFormValues = staticNodes.Select( i => i.FormValue ).OfType<FormValue>().Distinct().OrderBy( i => i.GetPostBackValueKey() ).Materialize();
 
 		// Intermediate post-backs sometimes have good reason to change durable values outside of update regions, e.g. when updating filters on a search page. We
 		// allow this (by omitting durable values here) under the assumption that all durable values are retrieved using a technique such as snapshot isolation to
@@ -609,7 +609,7 @@ public abstract class PageBase: ResourceBase {
 	// Page-view data modifications. All data modifications that happen simply because of a request and require no other action by the user should happen once per
 	// page view, and prior to getContent so that the modified data can be used in the page if necessary.
 	private PageBase executePageViewDataModifications() {
-		var modMethods = new List<Action>();
+		var modMethods = new List<Action?>();
 
 		// Skip application-level modifications on the unhandled-exception page to decrease the probability of getting another exception.
 		if( RequestStateStatics.GetLastError() is null )
@@ -623,7 +623,7 @@ public abstract class PageBase: ResourceBase {
 
 		ExecuteDataModificationMethod( () => {
 			foreach( var i in modMethods )
-				i();
+				i!();
 		} );
 
 		commitDataModificationsToRequestState();
@@ -642,7 +642,7 @@ public abstract class PageBase: ResourceBase {
 		bool userAuthorized;
 		using( MiniProfiler.Current.Step( "EWF - Check page authorization after page-view data modifications" ) )
 			userAuthorized = newPageObject.UserCanAccess;
-		DisabledResourceMode disabledMode;
+		DisabledResourceMode? disabledMode;
 		using( MiniProfiler.Current.Step( "EWF - Check alternative page mode after page-view data modifications" ) )
 			disabledMode = newPageObject.AlternativeMode as DisabledResourceMode;
 		if( !userAuthorized || disabledMode is not null )
@@ -661,22 +661,22 @@ public abstract class PageBase: ResourceBase {
 	/// getContent call on post-back requests, and we provide no mechanism to do this because it would allow developers to accidentally cause false user
 	/// concurrency errors by modifying data that affects the rendering of the page.
 	/// </summary>
-	protected virtual Action getPageViewDataModificationMethod() => null;
+	protected virtual Action? getPageViewDataModificationMethod() => null;
 
 	private void commitDataModificationsToRequestState() {
 		RequestStateStatics.AppendStatusMessages( statusMessages );
 		RefreshRequestState();
 	}
 
-	private EwfResponse buildPageAndGetResponse( SpecifiedValue<string> focusKey, int? statusCode = null ) {
+	private EwfResponse buildPageAndGetResponse( SpecifiedValue<string?> focusKey, int? statusCode = null ) {
 		buildPage( null );
 		return getResponse( focusKey, statusCode: statusCode );
 	}
 
-	private void buildPage( string failingActionId ) {
+	private void buildPage( string? failingActionId ) {
 		formState = new FormState();
 		dataUpdate = new DataUpdateAction( new BasicDataModificationAction( dataUpdateIsSlow ) );
-		FormAction pageLoadAction = null;
+		FormAction? pageLoadAction = null;
 		var content = contentGetter(
 			defaultContentGetter => FormState.ExecuteWithActions(
 				DataUpdate,
@@ -686,7 +686,7 @@ public abstract class PageBase: ResourceBase {
 				} ),
 			() => JsonConvert.SerializeObject(
 				new HiddenFieldData(
-					requestState.FirstRequestTime,
+					requestState!.FirstRequestTime,
 					/* Put the values in request state so they’re available if the request is continued for a page-load post-back. */
 					requestState.ComponentStateValuesById = componentStateItemsById.ToImmutableDictionary( i => i.Key, i => i.Value.ValueAsJson ),
 					generateFormValueHash(),
@@ -707,12 +707,12 @@ public abstract class PageBase: ResourceBase {
 				content.component,
 				id => elementOrIdentifiedComponentIdGetter = () => id,
 				addModificationErrorDisplaysAndGetErrors,
-				requestState.GeneralModificationErrors,
+				requestState!.GeneralModificationErrors,
 				content.etherealContainer,
 				content.jsInitElement );
 		formState = null;
 
-		var activeStateItems = pageTree.AllNodes.Select( i => i.StateItem ).Where( i => i != null ).ToImmutableHashSet();
+		var activeStateItems = pageTree.AllNodes.Select( i => i.StateItem ).OfType<ComponentStateItem>().ToImmutableHashSet();
 		foreach( var i in componentStateItemsById.Where( i => !activeStateItems.Contains( i.Value ) ).Select( i => i.Key ).Materialize() )
 			componentStateItemsById.Remove( i );
 
@@ -738,7 +738,7 @@ public abstract class PageBase: ResourceBase {
 	/// <summary>
 	/// Returns the page content.
 	/// </summary>
-	protected virtual PageContent getContent() => null;
+	protected virtual PageContent? getContent() => null;
 
 	private string generateFormValueHash() {
 		var formValueString = new StringBuilder();
@@ -761,9 +761,9 @@ public abstract class PageBase: ResourceBase {
 	}
 
 	private string getJsInitStatements( string pageLoadActionStatements ) {
-		var scroll = !pageTree.AutofocusActivated.Value;
+		var scroll = !pageTree!.AutofocusActivated!.Value;
 		var scrollStatement = "";
-		if( scroll && requestState.ScrollPositionX != null && requestState.ScrollPositionY != null )
+		if( scroll && requestState!.ScrollPositionX != null && requestState.ScrollPositionY != null )
 			scrollStatement = "window.scroll(" + requestState.ScrollPositionX + "," + requestState.ScrollPositionY + ");";
 
 		// If the request has a secondary response, configure it now. The JavaScript solution is preferred over a meta tag since apparently it doesn’t cause reload
@@ -788,7 +788,7 @@ public abstract class PageBase: ResourceBase {
 				SubmitButtonPostBack != null
 					? SubmitButtonPostBack.Id
 					: "" /* This empty string we're using when no submit button exists is arbitrary and meaningless; it should never actually be submitted. */ ),
-			pageTree.ElementJsInitStatements.ToString(),
+			pageTree.ElementJsInitStatements!.ToString(),
 			"initPage();",
 			appProvider.javaScriptPageInitFunctionCallGetter().AppendDelimiter( ";" ),
 			javaScriptPageInitFunctionCall.AppendDelimiter( ";" ),
@@ -816,7 +816,7 @@ public abstract class PageBase: ResourceBase {
 				//
 				// Avoid using exceptions here if possible. This method is sometimes called many times during a request, and we’ve seen exceptions take as long as
 				// 50 ms each when debugging.
-				var errors = requestState.InLineModificationErrorsByDisplay.TryGetValue( displayKey, out var value ) ? value.Materialize() : Array.Empty<string>();
+				var errors = requestState!.InLineModificationErrorsByDisplay.TryGetValue( displayKey, out var value ) ? value.Materialize() : Array.Empty<string>();
 
 				if( errors.Any() )
 					validationsWithErrors.Add( validation );
@@ -828,7 +828,7 @@ public abstract class PageBase: ResourceBase {
 	/// <summary>
 	/// Gets the time instant at which the page was first requested. This remains constant across intermediate post-backs, but is reset after a full post-back.
 	/// </summary>
-	public Instant FirstRequestTime => requestState.FirstRequestTime;
+	public Instant FirstRequestTime => requestState!.FirstRequestTime;
 
 	/// <summary>
 	/// Gets the page’s data-update action, which executes on every full post-back prior to the post-back’s own actions. WARNING: Do *not* use this for
@@ -837,18 +837,18 @@ public abstract class PageBase: ResourceBase {
 	/// execute. Second, by default the update only runs if form values were modified, which would not be the case if a user clicks the button on an add-item page
 	/// before entering any data.
 	/// </summary>
-	public DataUpdateAction DataUpdate => dataUpdate;
+	public DataUpdateAction DataUpdate => dataUpdate!;
 
 	/// <summary>
 	/// Gets a post-back that updates the page’s data without performing any other actions.
 	/// </summary>
 	public PostBack DataUpdatePostBack => dataUpdatePostBack;
 
-	internal PostBack GetPostBack( string id ) => postBacksById.TryGetValue( id, out var value ) ? value : null;
+	internal PostBack? GetPostBack( string id ) => postBacksById.TryGetValue( id, out var value ) ? value : null;
 
 	internal bool ModificationErrorsOccurred => modificationErrorsExist && !postBackValidationDmExecuted;
 
-	private bool modificationErrorsExist => requestState.InLineModificationErrorsByDisplay.Any() || requestState.GeneralModificationErrors.Any();
+	private bool modificationErrorsExist => requestState!.InLineModificationErrorsByDisplay.Any() || requestState.GeneralModificationErrors.Any();
 
 	internal void AddControlTreeValidation( Action validation ) {
 		controlTreeValidations.Add( validation );
@@ -860,15 +860,15 @@ public abstract class PageBase: ResourceBase {
 	internal IEnumerable<( StatusMessageType, string )> StatusMessages => RequestStateStatics.GetStatusMessages().Concat( statusMessages );
 
 	// Null for focusKey means modification errors occurred.
-	private EwfResponse getResponse( SpecifiedValue<string> focusKey, int? statusCode = null ) {
+	private EwfResponse getResponse( SpecifiedValue<string?>? focusKey, int? statusCode = null ) {
 		foreach( var i in formValues )
 			i.SetPageModificationValues();
 
-		pageTree.PrepareForRendering(
+		pageTree!.PrepareForRendering(
 			focusKey,
 			focusKey is null
 				? condition => condition.ErrorFocusabilitySources.Validations.Any( i => validationsWithErrors.Contains( i ) ) ||
-				               ( condition.ErrorFocusabilitySources.IncludeGeneralErrors && requestState.GeneralModificationErrors.Any() )
+				               ( condition.ErrorFocusabilitySources.IncludeGeneralErrors && requestState!.GeneralModificationErrors.Any() )
 				: condition => condition.IsNormallyFocusable );
 
 		return EwfResponse.Create(
@@ -891,7 +891,7 @@ public abstract class PageBase: ResourceBase {
 	}
 
 	private EwfResponse navigate(
-		( ResourceInfo destination, Func<ResourceInfo, bool> authorizationCheckDisabledPredicate )? navigationBehavior,
+		( ResourceInfo? destination, Func<ResourceInfo, bool>? authorizationCheckDisabledPredicate )? navigationBehavior,
 		Func<PageBase, EwfResponse> actionProcessor ) {
 		ResourceInfo destination;
 		bool authorizationCheckDisabled;
@@ -944,7 +944,7 @@ public abstract class PageBase: ResourceBase {
 			// client knows the POST worked.
 			if( !authorizationCheckDisabled && Uri.Compare(
 				    new Uri( destinationUrl ),
-				    new Uri( EwfRequest.Current.Url ),
+				    new Uri( EwfRequest.Current!.Url ),
 				    UriComponents.SchemeAndServer,
 				    UriFormat.UriEscaped,
 				    StringComparison.Ordinal ) == 0 ) {
@@ -987,7 +987,7 @@ public abstract class PageBase: ResourceBase {
 			additionalHeaderFieldGetter: () => ( "Location", destinationUrl ).ToCollection() );
 	}
 
-	private Exception getDeveloperMistakeException( string messageSentence, Exception innerException = null ) {
+	private Exception getDeveloperMistakeException( string messageSentence, Exception? innerException = null ) {
 		const string firstSentence = "Developer mistake.";
 		const string lastSentence =
 			"There is a chance that this was caused by non-transactional data changing outside of the request, but it’s more likely that a developer incorrectly modified something.";
