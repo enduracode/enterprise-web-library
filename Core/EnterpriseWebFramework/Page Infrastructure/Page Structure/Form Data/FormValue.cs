@@ -1,5 +1,4 @@
-﻿#nullable disable
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Tewl.InputValidation;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -25,10 +24,10 @@ internal class FormValue<T>: FormValue {
 	private readonly Func<string> postBackValueKeyGetter;
 
 	private readonly Func<T, string> stringValueSelector;
-	private readonly Func<string, PostBackValueValidationResult<T>> stringPostBackValueValidator;
-	private readonly Func<IFormFile, PostBackValueValidationResult<T>> filePostBackValueValidator;
-	private readonly List<Action<T>> pageModificationValueAdders = new();
-	private readonly HashSet<DataModificationAction> dataModificationActions = new();
+	private readonly Func<string?, PostBackValueValidationResult<T>>? stringPostBackValueValidator;
+	private readonly Func<IFormFile, PostBackValueValidationResult<T>>? filePostBackValueValidator;
+	private readonly List<Action<T>> pageModificationValueAdders = [ ];
+	private readonly HashSet<DataModificationAction> dataModificationActions = [ ];
 
 	/// <summary>
 	/// Creates a form value.
@@ -40,7 +39,7 @@ internal class FormValue<T>: FormValue {
 	/// and we've seen exceptions take as long as 50 ms each when debugging.</param>
 	public FormValue(
 		Func<T> durableValueGetter, Func<string> postBackValueKeyGetter, Func<T, string> stringValueSelector,
-		Func<string, PostBackValueValidationResult<T>> stringPostBackValueValidator ) {
+		Func<string?, PostBackValueValidationResult<T>> stringPostBackValueValidator ) {
 		this.durableValueGetter = durableValueGetter;
 		this.postBackValueKeyGetter = postBackValueKeyGetter;
 		this.stringValueSelector = stringValueSelector;
@@ -100,7 +99,7 @@ internal class FormValue<T>: FormValue {
 	bool FormValue.PostBackValueIsInvalid() {
 		var postBackValues = FormValueStatics.PostBackValueDictionaryGetter();
 		var key = postBackValueKeyGetter();
-		return !postBackValues.KeyRemoved( key ) && !validatePostBackValue( postBackValues.GetValue( key ) ).IsValid;
+		return !postBackValues!.KeyRemoved( key ) && !validatePostBackValue( postBackValues.GetValue( key ) ).IsValid;
 	}
 
 	IReadOnlyCollection<DataModificationAction> FormValue.DataModificationActions => dataModificationActions;
@@ -125,23 +124,23 @@ internal class FormValue<T>: FormValue {
 		return result.IsValid ? result.Value : durableValueGetter();
 	}
 
-	private PostBackValueValidationResult<T> validatePostBackValue( object value ) {
+	private PostBackValueValidationResult<T> validatePostBackValue( object? value ) {
 		if( filePostBackValueValidator != null )
-			return value != null ? filePostBackValueValidator( value as IFormFile ) : PostBackValueValidationResult<T>.CreateInvalid();
+			return value != null ? filePostBackValueValidator( (IFormFile)value ) : PostBackValueValidationResult<T>.CreateInvalid();
 
 		var stringValue = value as string;
-		return value == null || stringValue != null ? stringPostBackValueValidator( stringValue ) : PostBackValueValidationResult<T>.CreateInvalid();
+		return value == null || stringValue != null ? stringPostBackValueValidator!( stringValue ) : PostBackValueValidationResult<T>.CreateInvalid();
 	}
 }
 
 internal static class FormValueStatics {
-	internal static Action<FormValue> FormValueAdder;
-	internal static Func<IReadOnlyCollection<DataModificationAction>> DataModificationActionGetter;
-	internal static Func<PostBackValueDictionary> PostBackValueDictionaryGetter;
+	internal static Action<FormValue> FormValueAdder = null!;
+	internal static Func<IReadOnlyCollection<DataModificationAction>> DataModificationActionGetter = null!;
+	internal static Func<PostBackValueDictionary?> PostBackValueDictionaryGetter = null!;
 
 	internal static void Init(
 		Action<FormValue> formValueAdder, Func<IReadOnlyCollection<DataModificationAction>> dataModificationActionGetter,
-		Func<PostBackValueDictionary> postBackValueDictionaryGetter ) {
+		Func<PostBackValueDictionary?> postBackValueDictionaryGetter ) {
 		FormValueAdder = formValueAdder;
 		DataModificationActionGetter = dataModificationActionGetter;
 		PostBackValueDictionaryGetter = postBackValueDictionaryGetter;

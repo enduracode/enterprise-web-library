@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Threading;
 using EnterpriseWebLibrary.Collections;
 using EnterpriseWebLibrary.Configuration;
@@ -9,11 +8,11 @@ namespace EnterpriseWebLibrary.DataAccess;
 
 [ PublicAPI ]
 public class DataAccessState {
-	private static Func<DataAccessState> mainStateGetter;
-	private static AsyncLocal<ImmutableStack<DataAccessState>> mainStateOverrideStack;
+	private static Func<DataAccessState>? mainStateGetter;
+	private static AsyncLocal<ImmutableStack<DataAccessState>> mainStateOverrideStack = null!;
 	private static bool useLongTimeouts;
 
-	internal static void Init( Func<DataAccessState> mainDataAccessStateGetter, bool useLongTimeouts ) {
+	internal static void Init( Func<DataAccessState>? mainDataAccessStateGetter, bool useLongTimeouts ) {
 		mainStateGetter = mainDataAccessStateGetter;
 		mainStateOverrideStack = new AsyncLocal<ImmutableStack<DataAccessState>>();
 		DataAccessState.useLongTimeouts = useLongTimeouts;
@@ -35,12 +34,12 @@ public class DataAccessState {
 		}
 	}
 
-	private DatabaseConnection primaryConnection;
+	private DatabaseConnection? primaryConnection;
 	private readonly Dictionary<string, DatabaseConnection> secondaryConnectionsByName = new();
 	private readonly Action<DatabaseConnection> connectionInitializer;
 
 	private bool cacheEnabled;
-	private Cache<string, object> cache;
+	private Cache<string, object>? cache;
 
 	/// <summary>
 	/// This should only be used for two purposes. First, to create objects that will be returned by the mainDataAccessStateGetter argument of
@@ -49,8 +48,8 @@ public class DataAccessState {
 	/// </summary>
 	/// <param name="databaseConnectionInitializer">A method that is called whenever a database connection is requested. Can be used to initialize the
 	/// connection.</param>
-	public DataAccessState( Action<DatabaseConnection> databaseConnectionInitializer = null ) {
-		connectionInitializer = databaseConnectionInitializer ?? ( connection => {} );
+	public DataAccessState( Action<DatabaseConnection>? databaseConnectionInitializer = null ) {
+		connectionInitializer = databaseConnectionInitializer ?? ( _ => {} );
 	}
 
 	/// <summary>
@@ -58,9 +57,7 @@ public class DataAccessState {
 	/// </summary>
 	public DatabaseConnection PrimaryDatabaseConnection =>
 		initConnection(
-			primaryConnection ?? ( primaryConnection = new DatabaseConnection(
-				                       ConfigurationStatics.InstallationConfiguration.PrimaryDatabaseInfo,
-				                       useLongTimeouts: useLongTimeouts ) ) );
+			primaryConnection ??= new DatabaseConnection( ConfigurationStatics.InstallationConfiguration.PrimaryDatabaseInfo!, useLongTimeouts: useLongTimeouts ) );
 
 	/// <summary>
 	/// Gets the connection to the specified secondary database.
@@ -87,7 +84,7 @@ public class DataAccessState {
 	public T GetCacheValue<T>( string key, Func<T> valueCreator ) {
 		if( !cacheEnabled )
 			return valueCreator();
-		return (T)cache.GetOrAdd( key, () => valueCreator() );
+		return (T)cache!.GetOrAdd( key, () => valueCreator() );
 	}
 
 	/// <summary>
@@ -142,7 +139,7 @@ public class DataAccessState {
 			method();
 		}
 		finally {
-			mainStateOverrideStack.Value = mainStateOverrideStack.Value.Pop();
+			mainStateOverrideStack.Value = mainStateOverrideStack.Value!.Pop();
 		}
 	}
 
@@ -155,7 +152,7 @@ public class DataAccessState {
 			return method();
 		}
 		finally {
-			mainStateOverrideStack.Value = mainStateOverrideStack.Value.Pop();
+			mainStateOverrideStack.Value = mainStateOverrideStack.Value!.Pop();
 		}
 	}
 }

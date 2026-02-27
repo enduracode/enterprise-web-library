@@ -1,5 +1,4 @@
-﻿#nullable disable warnings
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using EnterpriseWebLibrary.SystemSpecificLogic;
@@ -105,14 +104,14 @@ public static partial class EwlStatics {
 	/// <summary>
 	/// Returns the first element of the list.  Returns null if the list is empty.
 	/// </summary>
-	public static T FirstItem<T>( this List<T> list ) where T: class {
+	public static T? FirstItem<T>( this List<T> list ) where T: class {
 		return list.Count == 0 ? null : list[ 0 ];
 	}
 
 	/// <summary>
 	/// Returns the last element of the list.  Returns null if the list is empty.
 	/// </summary>
-	public static T LastItem<T>( this List<T> list ) where T: class {
+	public static T? LastItem<T>( this List<T> list ) where T: class {
 		return list.Count == 0 ? null : list[ list.Count - 1 ];
 	}
 
@@ -153,7 +152,7 @@ public static partial class EwlStatics {
 	/// <summary>
 	/// Returns true if the specified objects are equal according to the default equality comparer.
 	/// </summary>
-	public static bool AreEqual<T>( T x, T y, IEqualityComparer<T> comparer = null ) {
+	public static bool AreEqual<T>( T x, T y, IEqualityComparer<T>? comparer = null ) {
 		return ( comparer ?? EqualityComparer<T>.Default ).Equals( x, y );
 	}
 
@@ -162,7 +161,7 @@ public static partial class EwlStatics {
 	/// the sort order (zero) as the second specified object, according to the default sort-order comparer. If you are comparing strings, Microsoft recommends
 	/// that you use a StringComparer instead of the default comparer.
 	/// </summary>
-	public static int Compare<T>( T x, T y, IComparer<T> comparer = null ) {
+	public static int Compare<T>( T x, T y, IComparer<T>? comparer = null ) {
 		return ( comparer ?? Comparer<T>.Default ).Compare( x, y );
 	}
 
@@ -170,7 +169,7 @@ public static partial class EwlStatics {
 	/// Returns the default value of the specified type.
 	/// </summary>
 	public static T GetDefaultValue<T>( bool useEmptyAsStringDefault ) {
-		return typeof( T ) == typeof( string ) && useEmptyAsStringDefault ? (T)(object)"" : default( T );
+		return typeof( T ) == typeof( string ) && useEmptyAsStringDefault ? (T)(object)"" : default( T )!;
 	}
 
 	/// <summary>

@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 using JetBrains.Annotations;
 
@@ -38,7 +37,7 @@ public class PagePath: FlowComponent {
 	}
 
 	private readonly IReadOnlyCollection<WrappingListItem> hyperlinkItems;
-	private readonly PageName pageName;
+	private readonly PageName? pageName;
 	private readonly IReadOnlyCollection<FlowComponent> children;
 
 	/// <summary>

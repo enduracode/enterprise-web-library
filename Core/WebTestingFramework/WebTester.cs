@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System.Reflection;
+﻿using System.Reflection;
 using System.Text.RegularExpressions;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.UserManagement;
@@ -17,7 +16,7 @@ namespace EnterpriseWebLibrary.WebTestingFramework {
 		/// failure occurs before the tests begin to run, for example.
 		/// </summary>
 		public static int RunAllWebTestsForSystem() {
-			WebTester webTester = null;
+			WebTester? webTester = null;
 			try {
 				OneTimeInstall.InstallSeleniumServiceIfNecessary();
 
@@ -49,7 +48,7 @@ namespace EnterpriseWebLibrary.WebTestingFramework {
 			return Environment.ExitCode;
 		}
 
-		private IWebDriver browser;
+		private IWebDriver? browser;
 
 		private WebTester() {
 			setupBrowser();
@@ -84,11 +83,11 @@ namespace EnterpriseWebLibrary.WebTestingFramework {
 					"Intermediate log on",
 					delegate {
 						// NOTE: We need to go to the specific URL here instead of relying on a redirect, or Selenium will time out or otherwise fail (it sucks at following redirects).
-						browser.Url = "/" + ConfigurationStatics.InstallationConfiguration.SystemShortName + "/Ewf/IntermediateLogIn.aspx?ReturnUrl=";
+						browser!.Url = "/" + ConfigurationStatics.InstallationConfiguration.SystemShortName + "/Ewf/IntermediateLogIn.aspx?ReturnUrl=";
 						// NOTE: Does not work for MIT Calendar, etc.
 						//selenium.Type( "ctl00_ctl00_main_contentPlace_ctl12_theTextBox", ConfigurationStatics.SystemGeneralProvider.IntermediateLogInPassword );
 						// NOTE: Move g8Summit to machine configuration file.
-						SubmitForm( browser );
+						SubmitForm( browser! );
 						//selenium.WaitForPageToLoad( "30000" );
 					} );
 			if( UserManagementStatics.UserManagementEnabled /* && FormsAuthStatics.FormsAuthEnabled */ )
@@ -96,15 +95,15 @@ namespace EnterpriseWebLibrary.WebTestingFramework {
 					"Forms log on",
 					delegate {
 						// NOTE: System-name approach suffers from same problem as above.
-						browser.Url = "/" + ConfigurationStatics.InstallationConfiguration.SystemShortName + "/Ewf/UserManagement/LogIn.aspx?ReturnUrl=";
+						browser!.Url = "/" + ConfigurationStatics.InstallationConfiguration.SystemShortName + "/Ewf/UserManagement/LogIn.aspx?ReturnUrl=";
 
 						// NOTE: I don't think we need waits after opens.
 						//selenium.WaitForPageToLoad( "30000" );
-						Assert.That( browser.Title.EndsWith( "Log In" ) );
+						Assert.That( browser!.Title.EndsWith( "Log In" ) );
 						// NOTE: For RSIS, we need the ability to pass a different email address and a different password for testing.
 						//selenium.Type( "ctl00_ctl00_main_contentPlace_emailAddress_theTextBox", ConfigurationStatics.SystemGeneralProvider.FormsLogInEmail );
 						//selenium.Type( "ctl00_ctl00_main_contentPlace_password_theTextBox", ConfigurationStatics.SystemGeneralProvider.FormsLogInPassword );
-						SubmitForm( browser );
+						SubmitForm( browser! );
 						//selenium.WaitForPageToLoad( "30000" );
 					} );
 		}
@@ -128,10 +127,10 @@ namespace EnterpriseWebLibrary.WebTestingFramework {
 						testClass.GetMethods()
 							.Where( m => m.GetCustomAttributes( typeof( TestAttribute ), true ).Length > 0 )
 							.Single()
-							.Invoke( null, new object[] { browser } );
+							.Invoke( null, new object[] { browser! } );
 					}
 					catch( TargetInvocationException e ) {
-						throw e.InnerException;
+						throw e.InnerException!;
 					}
 				} );
 		}
@@ -162,8 +161,8 @@ namespace EnterpriseWebLibrary.WebTestingFramework {
 			if( e.Message.Length > 0 ) {
 				Console.Error.WriteLine( e.Message );
 				if( Regex.IsMatch( e.Message, "ERROR: Element .* not found" ) ) {
-					Console.Error.WriteLine( "Location:" + browser.Url );
-					Console.Error.WriteLine( "Page title: " + browser.Title );
+				Console.Error.WriteLine( "Location:" + browser!.Url );
+					Console.Error.WriteLine( "Page title: " + browser!.Title );
 					Console.Error.WriteLine( "Fields are:" );
 					//foreach( var field in browser.GetAllFields() )
 					//	Console.Error.WriteLine( field );
