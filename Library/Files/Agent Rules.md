@@ -27,19 +27,22 @@ during builds; it must be run explicitly.
 
 In Visual Studio, run `Update-DependentLogic` in the Package Manager Console.
 
-Outside Visual Studio, locate and run the DU executable directly:
+Outside Visual Studio, run the DU executable directly. First, determine the EWL
+package name and version by reading `Library\Library.csproj` (look for the
+`PackageReference` whose `Include` matches `Ewl` followed by alphanumerics,
+e.g. `EwlBill`). Then locate the NuGet global-packages folder by running:
 
-```powershell
-# 1. Read the EWL package name and version from Library.csproj
-[xml]$projectXml = Get-Content "Library\Library.csproj"
-$ref = $projectXml.Project.ItemGroup.PackageReference | Where-Object { $_.Include -match '^Ewl[A-Za-z0-9]+$' }
+```shell
+dotnet nuget locals global-packages --list
+```
 
-# 2. Find the NuGet global packages folder
-$packagesPath = ((dotnet nuget locals global-packages --list) -split ' ', 2)[1].TrimEnd()
+The DU executable is at
+`<global-packages>/<package-name>/<version>/tools/Development Utility/EnterpriseWebLibrary.DevelopmentUtility.exe`.
+Run it with the directory containing the `.sln` file as the first argument and
+`UpdateDependentLogic` as the second:
 
-# 3. Run the DU
-$duPath = "$packagesPath\$($ref.Include)\$($ref.Version)\tools\Development Utility\EnterpriseWebLibrary.DevelopmentUtility.exe"
-& $duPath (Get-Location) UpdateDependentLogic
+```shell
+"<path-to-DU>/EnterpriseWebLibrary.DevelopmentUtility.exe" "<solution-directory>" UpdateDependentLogic
 ```
 
 ### Test Commands
