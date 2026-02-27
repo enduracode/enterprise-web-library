@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -166,15 +165,15 @@ public class ActionComponentCssElementCreator: ControlCssElementCreator {
 
 	private static CssElement getStateElement(
 		string baseName, string allContentName, string normalContentName, string newContentName, IEnumerable<string> styleSelectors, bool? newContent,
-		string actionlessSelector, params ( string, string )[] actionStateSelectors ) {
+		string? actionlessSelector, params ( string, string )[] actionStateSelectors ) {
 		var newContentSelector = "." + NewContentClass.ClassName;
 		var normalContentSelector = ":not(" + newContentSelector + ")";
 		var contentSelectors = newContent.HasValue
 			                       ? newContent.Value ? newContentSelector.ToCollection() : normalContentSelector.ToCollection()
-			                       : new[] { normalContentSelector, newContentSelector };
+			                       : [ normalContentSelector, newContentSelector ];
 		var selectors = from styleSelector in styleSelectors
-		                from contentSelector in ( actionlessSelector != null ? ( null as string ).ToCollection() : new string[ 0 ] ).Concat( contentSelectors )
-		                from stateSelector in contentSelector == null ? ( general: actionlessSelector, anchorOnly: "" ).ToCollection() : actionStateSelectors
+		                from contentSelector in ( actionlessSelector != null ? ( null as string ).ToCollection() : [ ] ).Concat( contentSelectors )
+		                from stateSelector in contentSelector == null ? ( general: actionlessSelector!, anchorOnly: "" ).ToCollection() : actionStateSelectors
 		                from selector in contentSelector == null || stateSelector.general.StartsWith( ":visited" )
 			                                 ? getHyperlinkSelector( styleSelector, contentSelector ?? "", stateSelector.general ).ToCollection()
 			                                 : ( baseName.StartsWith( "Button" )

@@ -1,5 +1,4 @@
-﻿#nullable disable
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
@@ -9,7 +8,7 @@ internal sealed class EwfHttpContextAccessor: IHttpContextAccessor {
 
 	internal bool UseFrameworkContext {
 		set {
-			var aspNetContext = aspNetAccessor.HttpContext;
+			var aspNetContext = aspNetAccessor.HttpContext!;
 			if( value )
 				aspNetContext.Items.Add( frameworkContextKey, new EwfHttpContext( aspNetContext ) );
 			else
@@ -17,11 +16,11 @@ internal sealed class EwfHttpContextAccessor: IHttpContextAccessor {
 		}
 	}
 
-	HttpContext IHttpContextAccessor.HttpContext {
+	HttpContext? IHttpContextAccessor.HttpContext {
 		get {
 			var aspNetContext = aspNetAccessor.HttpContext;
 			return aspNetContext is not null && aspNetContext.Items.TryGetValue( frameworkContextKey, out var frameworkContext )
-				       ? (EwfHttpContext)frameworkContext
+				       ? (EwfHttpContext)frameworkContext!
 				       : aspNetContext;
 		}
 		set {

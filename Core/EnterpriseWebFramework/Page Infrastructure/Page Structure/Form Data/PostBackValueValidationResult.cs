@@ -1,23 +1,18 @@
-﻿#nullable disable
-namespace EnterpriseWebLibrary.EnterpriseWebFramework {
-	internal class PostBackValueValidationResult<T> {
-		internal static PostBackValueValidationResult<T> CreateInvalid() {
-			return new PostBackValueValidationResult<T>( false );
-		}
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
-		internal static PostBackValueValidationResult<T> CreateValid( T value ) {
-			return new PostBackValueValidationResult<T>( true, value );
-		}
+internal class PostBackValueValidationResult<T> {
+	internal static PostBackValueValidationResult<T> CreateInvalid() => new( false );
 
-		private readonly bool isValid;
-		private readonly T value;
+	internal static PostBackValueValidationResult<T> CreateValid( T value ) => new( true, value );
 
-		private PostBackValueValidationResult( bool isValid, T value = default( T ) ) {
-			this.isValid = isValid;
-			this.value = value;
-		}
+	private readonly bool isValid;
+	private readonly T? value;
 
-		internal bool IsValid { get { return isValid; } }
-		internal T Value { get { return value; } }
+	private PostBackValueValidationResult( bool isValid, T? value = default ) {
+		this.isValid = isValid;
+		this.value = value;
 	}
+
+	internal bool IsValid => isValid;
+	internal T Value => value!;
 }

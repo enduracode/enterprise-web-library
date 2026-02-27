@@ -1,19 +1,18 @@
-﻿#nullable disable
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 
 public sealed class ElementClassSet {
-	public static readonly ElementClassSet Empty = new( ImmutableDictionary<string, PageModificationValueCondition>.Empty );
+	public static readonly ElementClassSet Empty = new( ImmutableDictionary<string, PageModificationValueCondition?>.Empty );
 
-	public static implicit operator ElementClassSet( ElementClass elementClass ) =>
+	public static implicit operator ElementClassSet( ElementClass? elementClass ) =>
 		elementClass != null
-			? new ElementClassSet( ( (PageModificationValueCondition)null ).ToCollection().ToImmutableDictionary( i => elementClass.ClassName ) )
+			? new ElementClassSet( ( (PageModificationValueCondition?)null ).ToCollection().ToImmutableDictionary( i => elementClass.ClassName ) )
 			: Empty;
 
-	internal readonly IImmutableDictionary<string, PageModificationValueCondition> ConditionsByClassName;
+	internal readonly IImmutableDictionary<string, PageModificationValueCondition?> ConditionsByClassName;
 
-	internal ElementClassSet( IImmutableDictionary<string, PageModificationValueCondition> conditionsByClassName ) {
+	internal ElementClassSet( IImmutableDictionary<string, PageModificationValueCondition?> conditionsByClassName ) {
 		ConditionsByClassName = conditionsByClassName;
 	}
 
@@ -36,7 +35,7 @@ public sealed class ElementClassSet {
 	/// </summary>
 	internal void AddElementId( string id ) {
 		foreach( var keyValuePair in ConditionsByClassName.Where( i => i.Value != null ) )
-			keyValuePair.Value.AddJsModificationStatement( expression => "if( {0} ) {1} else {2}".FormatWith(
+			keyValuePair.Value!.AddJsModificationStatement( expression => "if( {0} ) {1} else {2}".FormatWith(
 				expression,
 				"{ " + "$( '#{0}' ).addClass( '{1}' );".FormatWith( id, keyValuePair.Key ) + " }",
 				"{ " + "$( '#{0}' ).removeClass( '{1}' );".FormatWith( id, keyValuePair.Key ) + " }" ) );
@@ -65,6 +64,7 @@ public static class ElementClassSetExtensionCreators {
 	public static ElementClassSet ToElementClassSet( this PageModificationValueCondition pageModificationValueCondition, ElementClassSet staticClassSet ) {
 		if( staticClassSet.ConditionsByClassName.Values.Any( i => i != null ) )
 			throw new ApplicationException( "At least one class already has dynamic behavior." );
-		return new ElementClassSet( staticClassSet.ConditionsByClassName.Keys.ToImmutableDictionary( i => i, i => pageModificationValueCondition ) );
+		return new ElementClassSet(
+			staticClassSet.ConditionsByClassName.Keys.ToImmutableDictionary( i => i, PageModificationValueCondition? ( _ ) => pageModificationValueCondition ) );
 	}
 }
