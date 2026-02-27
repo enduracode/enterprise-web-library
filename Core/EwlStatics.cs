@@ -168,9 +168,7 @@ public static partial class EwlStatics {
 	/// <summary>
 	/// Returns the default value of the specified type.
 	/// </summary>
-	public static T GetDefaultValue<T>( bool useEmptyAsStringDefault ) {
-		return typeof( T ) == typeof( string ) && useEmptyAsStringDefault ? (T)(object)"" : default( T )!;
-	}
+	public static T GetDefaultValue<T>( bool useEmptyAsStringDefault ) => typeof( T ) == typeof( string ) && useEmptyAsStringDefault ? (T)(object)"" : default!;
 
 	/// <summary>
 	/// Shrinks the specified image down to the specified width, preserving the aspect ratio.

@@ -39,7 +39,7 @@ public class DataAccessState {
 	private readonly Action<DatabaseConnection> connectionInitializer;
 
 	private bool cacheEnabled;
-	private Cache<string, object>? cache;
+	private Cache<string, object?>? cache;
 
 	/// <summary>
 	/// This should only be used for two purposes. First, to create objects that will be returned by the mainDataAccessStateGetter argument of
@@ -84,7 +84,7 @@ public class DataAccessState {
 	public T GetCacheValue<T>( string key, Func<T> valueCreator ) {
 		if( !cacheEnabled )
 			return valueCreator();
-		return (T)cache!.GetOrAdd( key, () => valueCreator() );
+		return (T)cache!.GetOrAdd( key, () => valueCreator() )!;
 	}
 
 	/// <summary>
@@ -123,7 +123,7 @@ public class DataAccessState {
 
 	internal void ResetCache() {
 		cacheEnabled = true;
-		cache = new Cache<string, object>( false );
+		cache = new Cache<string, object?>( false );
 	}
 
 	internal void DisableCache() {
