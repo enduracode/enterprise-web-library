@@ -1153,6 +1153,16 @@ internal class UpdateDependentLogic: Operation {
 				  }
 				  """ );
 
+		var agentsFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".opencode", "agents" );
+		if( Directory.Exists( agentsFolderPath ) )
+			foreach( var fileName in IoMethods.GetFileNamesInFolder( agentsFolderPath )
+				        .Where( i => i.StartsWith( EwlStatics.EwlInitialism.ToLowerInvariant() + '-' ) ) )
+				IoMethods.DeleteFile( EwlStatics.CombinePaths( agentsFolderPath, fileName ) );
+		foreach( var fileName in IoMethods.GetFileNamesInFolder( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "Agents" ) ) )
+			IoMethods.CopyFile(
+				EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "Agents", fileName ),
+				EwlStatics.CombinePaths( agentsFolderPath, EwlStatics.EwlInitialism.ToLowerInvariant() + '-' + fileName ) );
+
 		var pluginFolderName = EwlStatics.EwlInitialism.ToLowerInvariant();
 		var pluginFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".opencode", "plugins", pluginFolderName );
 		IoMethods.DeleteFolder( pluginFolderPath );
@@ -1229,6 +1239,7 @@ internal class UpdateDependentLogic: Operation {
 		writer.WriteLine();
 		if( !forGit )
 			writer.WriteLine( "subinclude:.opencode/.gitignore" );
+		writer.WriteLine( $".opencode/agents/{EwlStatics.EwlInitialism.ToLowerInvariant()}-*" );
 		writer.WriteLine( $".opencode/plugins/{EwlStatics.EwlInitialism.ToLowerInvariant()}" );
 		writer.WriteLine( $".opencode/plugins/{EwlStatics.EwlInitialism.ToLowerInvariant()}{FileExtensions.JavaScript}" );
 		writer.WriteLine( $".opencode/skills/{EwlStatics.EwlInitialism.ToLowerInvariant()}-*" );

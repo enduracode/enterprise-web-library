@@ -11,6 +11,7 @@ Error Log.txt
 *.csproj.user
 *.ewlt.cs
 
+.opencode/agents/ewl-*
 .opencode/plugins/ewl
 .opencode/plugins/ewl.js
 .opencode/skills/ewl-*
