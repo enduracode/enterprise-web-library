@@ -72,6 +72,21 @@ dotnet test "Tests\Tests.csproj" --filter "FullyQualifiedName~Tests.DoubleTools.
 repo exist to support ReSharper. Plugins in `.opencode\plugins\ewl\` enforce
 UTF-8 BOM and CRLF line endings on every file creation or update.
 
+### ReSharper Format/Inspect Subagent
+
+When editing C# files, use the `ewl-cleanup` subagent to handle ReSharper
+formatting and commit the results separately from your functional changes.
+Follow this workflow:
+
+1. **Before making functional changes**, invoke the `ewl-cleanup` subagent
+   with the list of C# files you plan to edit. It will format them and commit
+   any formatting changes.
+2. **Make your functional changes** to the files.
+3. **After making functional changes**, invoke the `ewl-cleanup` subagent
+   again with the same files, this time requesting both formatting and
+   inspection. It will format the files, commit formatting changes, fix any
+   ReSharper inspection issues it can, and report back.
+
 ---
 
 ## Shell and Path Handling
