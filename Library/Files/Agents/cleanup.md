@@ -36,10 +36,11 @@ This ensures the `jb` command is available and current.
 
 ### Step 2: Format
 
-Run the ReSharper CleanupCode tool on the specified files:
+Run the ReSharper CleanupCode tool on the specified files. Find the `.sln` file
+for the system and substitute its path below:
 
 ```shell
-jb cleanupcode "Solution.sln" --include="file1.cs;file2.cs" --profile="Main"
+jb cleanupcode "<SolutionFile>.sln" --include="file1.cs;file2.cs" --profile="Main"
 ```
 
 ### Step 3: Commit formatting changes
@@ -54,7 +55,7 @@ If the caller asks for inspection, run the ReSharper InspectCode tool. The
 default output format is SARIF (JSON):
 
 ```shell
-jb inspectcode "Solution.sln" --include="file1.cs;file2.cs" -o=inspect-results.json
+jb inspectcode "<SolutionFile>.sln" --include="file1.cs;file2.cs" -o=inspect-results.json
 ```
 
 Parse the JSON output for issues in the specified files.
