@@ -3,7 +3,6 @@ description: Formats and inspects files using ReSharper command-line tools, then
 mode: subagent
 model: anthropic/claude-sonnet-4-6
 tools:
-  write: false
   todowrite: false
   webfetch: false
   task: false
