@@ -104,9 +104,10 @@ public static class HtmlBlockStatics {
 			html = Regex.Replace(
 				html,
 				secure ? MergeOps.ApplicationRelativeSecureUrlPrefix : MergeOps.ApplicationRelativeNonSecureUrlPrefix,
-				( ConfigurationStatics.InstallationConfiguration.WebApplications.SingleOrDefault(
-					  i => string.Equals( i.Name, ConfigurationStatics.AppName, StringComparison.Ordinal ) ) ??
-				  ConfigurationStatics.InstallationConfiguration.WebApplications.First() ).DefaultBaseUrl.GetUrlString( secure ) );
+				( ConfigurationStatics.InstallationConfiguration.WebApplications.SingleOrDefault( i => string.Equals(
+					  i.Name,
+					  ConfigurationStatics.AppName,
+					  StringComparison.Ordinal ) ) ?? ConfigurationStatics.InstallationConfiguration.WebApplications.First() ).DefaultBaseUrl.GetUrlString( secure ) );
 		return html;
 	}
 }
