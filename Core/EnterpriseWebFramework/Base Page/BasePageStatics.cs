@@ -1,19 +1,18 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.SystemSpecificLogic;
+﻿using EnterpriseWebLibrary.SystemSpecificLogic;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 internal static class BasePageStatics {
 	internal const string FormSelector = "form#" + PageBase.FormId;
 
-	private static SystemProviderReference<AppStandardPageLogicProvider> provider;
+	private static SystemProviderReference<AppStandardPageLogicProvider> provider = null!;
 
 	internal static void Init( SystemProviderReference<AppStandardPageLogicProvider> provider ) {
 		BasePageStatics.provider = provider;
 	}
 
-	internal static AppStandardPageLogicProvider AppProvider => provider.GetProvider();
+	internal static AppStandardPageLogicProvider AppProvider => provider.GetProvider()!;
 
 	internal static bool StatusMessagesDisplayAsNotification() =>
-		PageBase.Current.StatusMessages.All( i => i.Item1 == StatusMessageType.Info ) && PageBase.Current.StatusMessages.Count() <= 3;
+		PageBase.Current!.StatusMessages.All( i => i.Item1 == StatusMessageType.Info ) && PageBase.Current.StatusMessages.Count() <= 3;
 }

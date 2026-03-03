@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Flow;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Flow;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
@@ -12,7 +11,7 @@ internal class StatusMessageModalBox: EtherealComponent {
 			new FlowIdContainer(
 				new Section(
 					"Messages",
-					PageBase.Current.StatusMessages.Any() && !BasePageStatics.StatusMessagesDisplayAsNotification()
+					PageBase.Current!.StatusMessages.Any() && !BasePageStatics.StatusMessagesDisplayAsNotification()
 						? new StatusMessageList().ToCollection()
 						: Enumerable.Empty<FlowComponent>().Materialize() ).ToCollection() ).ToCollection(),
 			open: PageBase.Current.StatusMessages.Any() && !BasePageStatics.StatusMessagesDisplayAsNotification() ).ToCollection();

@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.Configuration;
+﻿using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 using EnterpriseWebLibrary.SystemSpecificLogic;
 using MimeTypes;
@@ -22,13 +21,13 @@ public abstract class StaticFile: ResourceBase {
 	/// </summary>
 	public const string AppStaticFilesFolderName = "StaticFiles";
 
-	private static AppStaticFileHandlingProvider provider;
+	private static AppStaticFileHandlingProvider provider = null!;
 
 	/// <summary>
 	/// Development Utility and private use only.
 	/// </summary>
 	public static string GetFrameworkStaticFilesFolderPath( InstallationConfiguration installationConfiguration ) =>
-		installationConfiguration.SystemIsEwl && installationConfiguration.InstallationType == InstallationType.Development
+		installationConfiguration is { SystemIsEwl: true, InstallationType: InstallationType.Development }
 			? EwlStatics.CombinePaths( installationConfiguration.InstallationPath, EwlStatics.CoreProjectName, FrameworkStaticFilesSourceFolderPath )
 			: EwlStatics.CombinePaths( installationConfiguration.InstallationPath, InstallationFileStatics.WebFrameworkStaticFilesFolderName );
 
@@ -48,7 +47,7 @@ public abstract class StaticFile: ResourceBase {
 
 	protected override IReadOnlyCollection<NestedUrl> getNestedUrls() => [ ];
 
-	protected sealed override UrlHandler getUrlParent() => EsAsBaseType;
+	protected sealed override UrlHandler? getUrlParent() => EsAsBaseType;
 
 	protected sealed override IEnumerable<UrlPattern> getChildUrlPatterns() => base.getChildUrlPatterns();
 
@@ -96,7 +95,7 @@ public abstract class StaticFile: ResourceBase {
 
 	protected sealed override bool disablesUrlNormalization => base.disablesUrlNormalization;
 
-	protected sealed override ExternalRedirect getRedirect() => base.getRedirect();
+	protected sealed override ExternalRedirect? getRedirect() => base.getRedirect();
 
 	protected sealed override EwfSafeRequestHandler getOrHead() {
 		var extensionIndex = relativeFilePath.LastIndexOf( '.' );
@@ -140,16 +139,16 @@ public abstract class StaticFile: ResourceBase {
 	}
 
 	protected sealed override bool managesDataModificationsInUnsafeRequestMethods => base.managesDataModificationsInUnsafeRequestMethods;
-	protected sealed override EwfResponse put() => base.put();
-	protected sealed override EwfResponse patch() => base.patch();
-	protected sealed override EwfResponse delete() => base.delete();
-	protected sealed override EwfResponse post() => base.post();
+	protected sealed override EwfResponse? put() => base.put();
+	protected sealed override EwfResponse? patch() => base.patch();
+	protected sealed override EwfResponse? delete() => base.delete();
+	protected sealed override EwfResponse? post() => base.post();
 
 	public sealed override bool MatchesCurrent() => base.MatchesCurrent();
 
 	protected sealed override ResourceBase reCreate() => this;
 
-	public sealed override bool Equals( BasicUrlHandler other ) =>
+	public sealed override bool Equals( BasicUrlHandler? other ) =>
 		other is StaticFile otherFile && otherFile.isFrameworkFile == isFrameworkFile && otherFile.relativeFilePath == relativeFilePath &&
 		otherFile.isVersioned == isVersioned;
 

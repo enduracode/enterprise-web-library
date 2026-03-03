@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -15,7 +14,7 @@ public class ImageSetup {
 		internal static readonly ElementClass Class = new( "ewfImage" );
 
 		IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
-			return new[] { new CssElement( "Image", "img.{0}".FormatWith( Class.ClassName ) ) };
+			return [ new CssElement( "Image", "img.{0}".FormatWith( Class.ClassName ) ) ];
 		}
 	}
 
@@ -29,9 +28,9 @@ public class ImageSetup {
 	/// <param name="displaySetup"></param>
 	/// <param name="sizesToAvailableWidth">Whether the image sizes itself to fit all available width.</param>
 	/// <param name="classes">The classes on the image.</param>
-	public ImageSetup( string alternativeText, DisplaySetup displaySetup = null, bool sizesToAvailableWidth = false, ElementClassSet classes = null ) {
+	public ImageSetup( string? alternativeText, DisplaySetup? displaySetup = null, bool sizesToAvailableWidth = false, ElementClassSet? classes = null ) {
 		ComponentGetter = ( srcGetter, srcsetGetter ) => {
-			return new DisplayableElement( context => new DisplayableElementData(
+			return new DisplayableElement( _ => new DisplayableElementData(
 				displaySetup,
 				() => {
 					var attributes = new List<ElementAttribute>();

@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 

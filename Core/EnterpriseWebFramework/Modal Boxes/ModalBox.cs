@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 using JetBrains.Annotations;
@@ -14,7 +13,7 @@ public class ModalBox: EtherealComponent {
 	private static readonly ElementClass closeButtonContainerClass = new( "ewfMdlB" );
 	private static readonly ElementClass contentContainerClass = new( "ewfMdlC" );
 
-	private static Func<ModalBoxId> browsingModalBoxIdGetter;
+	private static Func<ModalBoxId> browsingModalBoxIdGetter = null!;
 
 	[ UsedImplicitly ]
 	internal class CssElementCreator: ControlCssElementCreator {
@@ -42,7 +41,7 @@ public class ModalBox: EtherealComponent {
 
 	internal static EtherealComponent CreateBrowsingModalBox( ModalBoxId id ) => new ModalBox( id, true, Enumerable.Empty<FlowComponent>().Materialize() );
 
-	internal static string GetBrowsingModalBoxOpenStatements( BrowsingContextSetup browsingContextSetup, string url ) {
+	internal static string GetBrowsingModalBoxOpenStatements( BrowsingContextSetup? browsingContextSetup, string url ) {
 		browsingContextSetup ??= new BrowsingContextSetup();
 
 		// As of February 2018, iOS ignores iframe width and height styles, and sizes them to fit their content. See
@@ -72,7 +71,7 @@ public class ModalBox: EtherealComponent {
 	/// <param name="content"></param>
 	/// <param name="classes">The classes on the dialog element.</param>
 	/// <param name="open"></param>
-	public ModalBox( ModalBoxId id, bool includeCloseButton, IReadOnlyCollection<FlowComponent> content, ElementClassSet classes = null, bool open = false ) {
+	public ModalBox( ModalBoxId id, bool includeCloseButton, IReadOnlyCollection<FlowComponent> content, ElementClassSet? classes = null, bool open = false ) {
 		children = new ElementComponent( context => new ElementData(
 			() => new ElementLocalData(
 				"dialog",

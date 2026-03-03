@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System.Text;
+﻿using System.Text;
 using System.Text.RegularExpressions;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;

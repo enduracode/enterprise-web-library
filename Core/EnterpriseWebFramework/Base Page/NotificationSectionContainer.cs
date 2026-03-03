@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Flow;
 using JetBrains.Annotations;
@@ -18,7 +17,7 @@ internal class NotificationSectionContainer: FlowComponent {
 	// Status messages must be retrieved after PageBase.getContent in case that method adds them.
 	IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() =>
 		new FlowIdContainer(
-			PageBase.Current.StatusMessages.Any() && BasePageStatics.StatusMessagesDisplayAsNotification()
+			PageBase.Current!.StatusMessages.Any() && BasePageStatics.StatusMessagesDisplayAsNotification()
 				? new GenericFlowContainer(
 					new Section( null, SectionStyle.Box, null, "Messages", null, new StatusMessageList().ToCollection(), true, true, null ).ToCollection(),
 					classes: elementClass ).ToCollection()

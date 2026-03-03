@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.Configuration;
+﻿using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 using EnterpriseWebLibrary.UserManagement;
 using ServiceStack.Stripe;
@@ -11,7 +10,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 /// A modal credit-card collector that is implemented with Stripe Checkout.
 /// </summary>
 public sealed class CreditCardCollector: EtherealComponent {
-	private static Action stripeCheckoutIncludeSetter;
+	private static Action stripeCheckoutIncludeSetter = null!;
 
 	internal static void Init( Action stripeCheckoutIncludeSetter ) {
 		CreditCardCollector.stripeCheckoutIncludeSetter = stripeCheckoutIncludeSetter;
@@ -39,15 +38,15 @@ public sealed class CreditCardCollector: EtherealComponent {
 	public CreditCardCollector(
 		JsStatementList jsOpenStatements, string testPublishableKey, string livePublishableKey, string name, string description, decimal? amountInDollars,
 		string testSecretKey, string liveSecretKey, Func<string, decimal, StatusMessageAndDestination> successHandler,
-		string prefilledEmailAddressOverride = null ) {
-		if( !EwfRequest.Current.IsSecure )
+		string? prefilledEmailAddressOverride = null ) {
+		if( !EwfRequest.Current!.IsSecure )
 			throw new ApplicationException( "Credit-card collection can only be done from secure pages." );
 
 		if( amountInDollars.HasValue && amountInDollars.Value.DollarValueHasFractionalCents() )
 			throw new ApplicationException( "Amount must not include fractional cents." );
 
 		var token = new DataValue<string>( false );
-		TrustedResourceInfo successDestination = null;
+		TrustedResourceInfo? successDestination = null;
 		var postBack = PostBack.CreateFull(
 			id: PostBack.GetCompositeId( "ewfCreditCardCollection", description ),
 			modificationMethod: () => {
