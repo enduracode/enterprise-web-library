@@ -410,7 +410,7 @@ internal static class TableStatics {
 				worksheet.AddRowToWorksheet( cells.Select( i => ( (CellPlaceholder)i ).SimpleText ?? "" ).ToArray() );
 		};
 
-	internal static void AssertAtLeastOneCellPerField( int fieldCount, List<List<CellPlaceholder>> cellPlaceholderListsForItems ) {
+	internal static void AssertAtLeastOneCellPerField( int fieldCount, List<List<CellPlaceholder?>> cellPlaceholderListsForItems ) {
 		// If there is absolutely nothing in the table, we must bypass the assertion since it will always throw an exception.
 		if( !cellPlaceholderListsForItems.Any() )
 			return;

@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase;
@@ -39,11 +38,11 @@ public class ColumnPrimaryTable: ColumnPrimaryTable<int> {
 	/// the exception of item groups in which none of the items have rank IDs.</param>
 	/// <param name="etherealContent"></param>
 	public static ColumnPrimaryTable Create(
-		DisplaySetup displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string postBackIdBase = "",
-		string caption = "", string subCaption = "", bool allowExportToExcel = false, ActionComponentSetupsParameter tableActions = null,
-		IReadOnlyCollection<SelectedItemAction<int>> selectedItemActions = null, IReadOnlyCollection<EwfTableField> fields = null,
-		IReadOnlyCollection<EwfTableItem> headItems = null, int firstDataFieldIndex = 0, bool enableItemReordering = false,
-		IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
+		DisplaySetup? displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet? classes = null, string postBackIdBase = "",
+		string caption = "", string subCaption = "", bool allowExportToExcel = false, ActionComponentSetupsParameter? tableActions = null,
+		IReadOnlyCollection<SelectedItemAction<int>>? selectedItemActions = null, IReadOnlyCollection<EwfTableField>? fields = null,
+		IReadOnlyCollection<EwfTableItem>? headItems = null, int firstDataFieldIndex = 0, bool enableItemReordering = false,
+		IReadOnlyCollection<EtherealComponent>? etherealContent = null ) =>
 		new(
 			displaySetup,
 			style,
@@ -85,11 +84,11 @@ public class ColumnPrimaryTable: ColumnPrimaryTable<int> {
 	/// the exception of item groups in which none of the items have rank IDs.</param>
 	/// <param name="etherealContent"></param>
 	public static ColumnPrimaryTable<ItemIdType> CreateWithItemIdType<ItemIdType>(
-		DisplaySetup displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string postBackIdBase = "",
-		string caption = "", string subCaption = "", bool allowExportToExcel = false, ActionComponentSetupsParameter tableActions = null,
-		IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions = null, IReadOnlyCollection<EwfTableField> fields = null,
-		IReadOnlyCollection<EwfTableItem> headItems = null, int firstDataFieldIndex = 0, bool enableItemReordering = false,
-		IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
+		DisplaySetup? displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet? classes = null, string postBackIdBase = "",
+		string caption = "", string subCaption = "", bool allowExportToExcel = false, ActionComponentSetupsParameter? tableActions = null,
+		IReadOnlyCollection<SelectedItemAction<ItemIdType>>? selectedItemActions = null, IReadOnlyCollection<EwfTableField>? fields = null,
+		IReadOnlyCollection<EwfTableItem>? headItems = null, int firstDataFieldIndex = 0, bool enableItemReordering = false,
+		IReadOnlyCollection<EtherealComponent>? etherealContent = null ) =>
 		new(
 			displaySetup,
 			style,
@@ -107,10 +106,10 @@ public class ColumnPrimaryTable: ColumnPrimaryTable<int> {
 			etherealContent );
 
 	private ColumnPrimaryTable(
-		DisplaySetup displaySetup, EwfTableStyle style, ElementClassSet classes, string postBackIdBase, string caption, string subCaption, bool allowExportToExcel,
-		ActionComponentSetupsParameter tableActions, IReadOnlyCollection<SelectedItemAction<int>> selectedItemActions, IReadOnlyCollection<EwfTableField> fields,
-		IReadOnlyCollection<EwfTableItem> headItems, int firstDataFieldIndex, bool enableItemReordering,
-		IReadOnlyCollection<EtherealComponent> etherealContent ): base(
+		DisplaySetup? displaySetup, EwfTableStyle style, ElementClassSet? classes, string postBackIdBase, string caption, string subCaption,
+		bool allowExportToExcel, ActionComponentSetupsParameter? tableActions, IReadOnlyCollection<SelectedItemAction<int>>? selectedItemActions,
+		IReadOnlyCollection<EwfTableField>? fields, IReadOnlyCollection<EwfTableItem>? headItems, int firstDataFieldIndex, bool enableItemReordering,
+		IReadOnlyCollection<EtherealComponent>? etherealContent ): base(
 		displaySetup,
 		style,
 		classes,
@@ -134,20 +133,20 @@ public class ColumnPrimaryTable<ItemIdType>: FlowComponent {
 	private readonly IReadOnlyCollection<DisplayableElement> outerChildren;
 	private readonly string postBackIdBase;
 	private readonly PostBack exportToExcelPostBack;
-	private readonly IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions;
+	private readonly IReadOnlyCollection<SelectedItemAction<ItemIdType>>? selectedItemActions;
 	private readonly TableSelectedItemData<ItemIdType> selectedItemData = new();
 	private readonly List<ColumnPrimaryItemGroup<ItemIdType>> itemGroups = new();
 	private bool? hasExplicitItemGroups;
 
 	internal ColumnPrimaryTable(
-		DisplaySetup displaySetup, EwfTableStyle style, ElementClassSet classes, string postBackIdBase, string caption, string subCaption, bool allowExportToExcel,
-		ActionComponentSetupsParameter tableActions, IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions,
-		IReadOnlyCollection<EwfTableField> fields, IReadOnlyCollection<EwfTableItem> headItems, int firstDataFieldIndex, bool enableItemReordering,
-		IReadOnlyCollection<EtherealComponent> etherealContent ) {
+		DisplaySetup? displaySetup, EwfTableStyle style, ElementClassSet? classes, string postBackIdBase, string caption, string subCaption,
+		bool allowExportToExcel, ActionComponentSetupsParameter? tableActions, IReadOnlyCollection<SelectedItemAction<ItemIdType>>? selectedItemActions,
+		IReadOnlyCollection<EwfTableField>? fields, IReadOnlyCollection<EwfTableItem>? headItems, int firstDataFieldIndex, bool enableItemReordering,
+		IReadOnlyCollection<EtherealComponent>? etherealContent ) {
 		if( fields != null && !fields.Any() )
 			throw new ApplicationException( "If fields are specified, there must be at least one of them." );
 
-		headItems = headItems ?? Enumerable.Empty<EwfTableItem>().Materialize();
+		headItems ??= Enumerable.Empty<EwfTableItem>().Materialize();
 
 		var excelRowAdders = new List<Action<ExcelWorksheet>>();
 		outerChildren = new DisplayableElement( tableContext => {
@@ -198,7 +197,7 @@ public class ColumnPrimaryTable<ItemIdType>: FlowComponent {
 					EwfTableItem.Create(
 						TableStatics.GetItemSelectionAndActionComponents(
 								"$( this ).closest( 'thead' ).children( ':last-child' ).children()",
-								selectedItemData.Buttons,
+								selectedItemData.Buttons!,
 								selectedItemData.Validation )
 							.ToCell( new TableCellSetup( fieldSpan: columnCount ) ) ) );
 			var nonemptyGroupIndexes = itemGroups.Select( ( group, index ) => ( group, index ) )
@@ -224,7 +223,7 @@ public class ColumnPrimaryTable<ItemIdType>: FlowComponent {
 								nonemptyGroupIndexes.Select( index => {
 									var group = itemGroups[ index ];
 									var groupSelectedItemData = selectedItemData.ItemGroupData[ index ];
-									IReadOnlyCollection<FlowComponent> components = null;
+									IReadOnlyCollection<FlowComponent>? components = null;
 									if( groupSelectedItemData.HasValue ) {
 										var beginCell = ( headItems.Any() ? 1 : 0 ) + itemGroups.Take( index ).Sum( i => i.Items.Count );
 										var endCell = beginCell + group.Items.Count;
@@ -249,7 +248,7 @@ public class ColumnPrimaryTable<ItemIdType>: FlowComponent {
 											                                    ? group.Items.EquiZip(
 												                                    groupSelectedItemData.Value.checkboxes,
 												                                    ( item, checkbox ) => item.Setup.Id != null ? checkbox : null )
-											                                    : Enumerable.Repeat( (PhrasingComponent)null, group.Items.Count ) )
+											                                    : Enumerable.Repeat( (PhrasingComponent?)null, group.Items.Count ) )
 									.SelectMany( i => i )
 									.Select( i => i.ToCell( setup: new TableCellSetup( containsActivatableElements: i != null ) ) ) )
 							.Materialize() ) );
@@ -311,7 +310,7 @@ public class ColumnPrimaryTable<ItemIdType>: FlowComponent {
 						postBackIdBase,
 						true,
 						enableItemReordering,
-						hasExplicitItemGroups.Value,
+						hasExplicitItemGroups!.Value,
 						i.Items ) )
 					.Materialize();
 				if( enableItemReordering )
@@ -319,7 +318,7 @@ public class ColumnPrimaryTable<ItemIdType>: FlowComponent {
 						EwfTableItem.Create(
 							( headItems.Any() ? "".ToCell( setup: new TableCellSetup( fieldSpan: headItems.Count ) ).ToCollection() : Enumerable.Empty<EwfTableCell>() )
 							.Concat(
-								reorderingControlCollections.SelectMany( i => i )
+								reorderingControlCollections.SelectMany( i => i! )
 									.Select( i => i.ToCell( setup: new TableCellSetup( containsActivatableElements: i != null ) ) ) )
 							.Materialize(),
 							setup: EwfTableItemSetup.Create( textAlignment: TextAlignment.Center ) ) );

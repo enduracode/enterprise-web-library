@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System.Threading;
+﻿using System.Threading;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -19,7 +18,7 @@ public class EwfTableItemGroup: EwfTableItemGroup<int> {
 	/// each item with an ID, within this group.</param>
 	public static EwfTableItemGroup Create(
 		Func<EwfTableItemGroupRemainingData> remainingDataGetter, IEnumerable<Func<EwfTableItem>> items,
-		IReadOnlyCollection<SelectedItemAction<int>> selectedItemActions = null ) =>
+		IReadOnlyCollection<SelectedItemAction<int>>? selectedItemActions = null ) =>
 		new( remainingDataGetter, selectedItemActions, items );
 
 	/// <summary>
@@ -31,11 +30,11 @@ public class EwfTableItemGroup: EwfTableItemGroup<int> {
 	/// each item with an ID, within this group.</param>
 	public static EwfTableItemGroup<ItemIdType> CreateWithItemIdType<ItemIdType>(
 		Func<EwfTableItemGroupRemainingData> remainingDataGetter, IEnumerable<Func<EwfTableItem<ItemIdType>>> items,
-		IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions = null ) =>
+		IReadOnlyCollection<SelectedItemAction<ItemIdType>>? selectedItemActions = null ) =>
 		new( remainingDataGetter, selectedItemActions, items );
 
 	private EwfTableItemGroup(
-		Func<EwfTableItemGroupRemainingData> remainingDataGetter, IReadOnlyCollection<SelectedItemAction<int>> selectedItemActions,
+		Func<EwfTableItemGroupRemainingData> remainingDataGetter, IReadOnlyCollection<SelectedItemAction<int>>? selectedItemActions,
 		IEnumerable<Func<EwfTableItem>> items ): base( remainingDataGetter, selectedItemActions, items ) {}
 }
 
@@ -48,7 +47,7 @@ public class EwfTableItemGroup<ItemIdType> {
 	internal readonly List<Lazy<EwfTableItem<ItemIdType>>> Items;
 
 	internal EwfTableItemGroup(
-		Func<EwfTableItemGroupRemainingData> remainingDataGetter, IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions,
+		Func<EwfTableItemGroupRemainingData> remainingDataGetter, IReadOnlyCollection<SelectedItemAction<ItemIdType>>? selectedItemActions,
 		IEnumerable<Func<EwfTableItem<ItemIdType>>> items ) {
 		RemainingData = new Lazy<EwfTableItemGroupRemainingData>( remainingDataGetter );
 		SelectedItemActions = selectedItemActions ?? Enumerable.Empty<SelectedItemAction<ItemIdType>>().Materialize();

@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
@@ -11,7 +10,7 @@ public class InlineList: FlowComponent {
 	/// </summary>
 	/// <param name="items">The items. Do not pass null.</param>
 	/// <param name="setup">The setup object for the list.</param>
-	public InlineList( IEnumerable<ComponentListItem> items, ComponentListSetup setup = null ) {
+	public InlineList( IEnumerable<ComponentListItem> items, ComponentListSetup? setup = null ) {
 		children = ( setup ?? new ComponentListSetup() ).GetComponents(
 			CssElementCreator.InlineListClass,
 			from i in items select i.GetItemAndComponent( ElementClassSet.Empty, null, includeContentContainer: true ) );

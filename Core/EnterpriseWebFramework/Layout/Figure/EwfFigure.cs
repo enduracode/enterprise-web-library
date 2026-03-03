@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -12,7 +11,7 @@ public class EwfFigure: FlowComponent {
 		internal static readonly ElementClass Class = new( "ewfFig" );
 
 		IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
-			return new[] { new CssElement( "Figure", "figure.{0}".FormatWith( Class.ClassName ) ) };
+			return [ new CssElement( "Figure", "figure.{0}".FormatWith( Class.ClassName ) ) ];
 		}
 	}
 
@@ -26,7 +25,7 @@ public class EwfFigure: FlowComponent {
 	/// <param name="classes">The classes on the figure.</param>
 	/// <param name="caption">The caption.</param>
 	public EwfFigure(
-		IReadOnlyCollection<FlowComponent> content, DisplaySetup displaySetup = null, ElementClassSet classes = null, FigureCaption caption = null ) {
+		IReadOnlyCollection<FlowComponent> content, DisplaySetup? displaySetup = null, ElementClassSet? classes = null, FigureCaption? caption = null ) {
 		children = new DisplayableElement( context => new DisplayableElementData(
 			displaySetup,
 			() => new DisplayableElementLocalData( "figure" ),

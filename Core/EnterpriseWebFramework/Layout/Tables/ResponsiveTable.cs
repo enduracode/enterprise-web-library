@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase;
@@ -50,12 +49,12 @@ public class ResponsiveTable: ResponsiveTable<int> {
 	/// you add item groups.</param>
 	/// <param name="etherealContent"></param>
 	public static ResponsiveTable Create(
-		DisplaySetup displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string idBase = "", string caption = "",
-		string subCaption = "", bool allowExportToExcel = false, ActionComponentSetupsParameter tableActions = null,
-		IReadOnlyCollection<SelectedItemAction<int>> selectedItemActions = null, IReadOnlyCollection<EwfTableField> fields = null,
-		IReadOnlyCollection<EwfTableItem> headItems = null, DataRowLimit defaultItemLimit = DataRowLimit.Unlimited, bool enableItemReordering = false,
-		bool disableEmptyFieldDetection = false, TailUpdateRegionsParameter tailUpdateRegions = null,
-		IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
+		DisplaySetup? displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet? classes = null, string idBase = "", string caption = "",
+		string subCaption = "", bool allowExportToExcel = false, ActionComponentSetupsParameter? tableActions = null,
+		IReadOnlyCollection<SelectedItemAction<int>>? selectedItemActions = null, IReadOnlyCollection<EwfTableField>? fields = null,
+		IReadOnlyCollection<EwfTableItem>? headItems = null, DataRowLimit defaultItemLimit = DataRowLimit.Unlimited, bool enableItemReordering = false,
+		bool disableEmptyFieldDetection = false, TailUpdateRegionsParameter? tailUpdateRegions = null,
+		IReadOnlyCollection<EtherealComponent>? etherealContent = null ) =>
 		new(
 			displaySetup,
 			style,
@@ -105,12 +104,12 @@ public class ResponsiveTable: ResponsiveTable<int> {
 	/// you add item groups.</param>
 	/// <param name="etherealContent"></param>
 	public static ResponsiveTable<ItemIdType> CreateWithItemIdType<ItemIdType>(
-		DisplaySetup displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet classes = null, string idBase = "", string caption = "",
-		string subCaption = "", bool allowExportToExcel = false, ActionComponentSetupsParameter tableActions = null,
-		IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions = null, IReadOnlyCollection<EwfTableField> fields = null,
-		IReadOnlyCollection<EwfTableItem> headItems = null, DataRowLimit defaultItemLimit = DataRowLimit.Unlimited, bool enableItemReordering = false,
-		bool disableEmptyFieldDetection = false, TailUpdateRegionsParameter tailUpdateRegions = null,
-		IReadOnlyCollection<EtherealComponent> etherealContent = null ) =>
+		DisplaySetup? displaySetup = null, EwfTableStyle style = EwfTableStyle.Standard, ElementClassSet? classes = null, string idBase = "", string caption = "",
+		string subCaption = "", bool allowExportToExcel = false, ActionComponentSetupsParameter? tableActions = null,
+		IReadOnlyCollection<SelectedItemAction<ItemIdType>>? selectedItemActions = null, IReadOnlyCollection<EwfTableField>? fields = null,
+		IReadOnlyCollection<EwfTableItem>? headItems = null, DataRowLimit defaultItemLimit = DataRowLimit.Unlimited, bool enableItemReordering = false,
+		bool disableEmptyFieldDetection = false, TailUpdateRegionsParameter? tailUpdateRegions = null,
+		IReadOnlyCollection<EtherealComponent>? etherealContent = null ) =>
 		new(
 			displaySetup,
 			style,
@@ -130,10 +129,10 @@ public class ResponsiveTable: ResponsiveTable<int> {
 			etherealContent );
 
 	private ResponsiveTable(
-		DisplaySetup displaySetup, EwfTableStyle style, ElementClassSet classes, string postBackIdBase, string caption, string subCaption, bool allowExportToExcel,
-		ActionComponentSetupsParameter tableActions, IReadOnlyCollection<SelectedItemAction<int>> selectedItemActions, IReadOnlyCollection<EwfTableField> fields,
-		IReadOnlyCollection<EwfTableItem> headItems, DataRowLimit defaultItemLimit, bool enableItemReordering, bool disableEmptyFieldDetection,
-		TailUpdateRegionsParameter tailUpdateRegions, IReadOnlyCollection<EtherealComponent> etherealContent ): base(
+		DisplaySetup? displaySetup, EwfTableStyle style, ElementClassSet? classes, string postBackIdBase, string caption, string subCaption,
+		bool allowExportToExcel, ActionComponentSetupsParameter? tableActions, IReadOnlyCollection<SelectedItemAction<int>>? selectedItemActions,
+		IReadOnlyCollection<EwfTableField>? fields, IReadOnlyCollection<EwfTableItem>? headItems, DataRowLimit defaultItemLimit, bool enableItemReordering,
+		bool disableEmptyFieldDetection, TailUpdateRegionsParameter? tailUpdateRegions, IReadOnlyCollection<EtherealComponent>? etherealContent ): base(
 		displaySetup,
 		style,
 		classes,
@@ -160,18 +159,18 @@ public class ResponsiveTable<ItemIdType>: FlowComponent {
 	private readonly IReadOnlyCollection<DisplayableElement> outerChildren;
 	private readonly string idBase;
 	private readonly PostBack exportToExcelPostBack;
-	private readonly IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions;
+	private readonly IReadOnlyCollection<SelectedItemAction<ItemIdType>>? selectedItemActions;
 	private readonly TableSelectedItemData<ItemIdType> selectedItemData = new();
-	private readonly ComponentStateItem<int> itemLimit;
+	private readonly ComponentStateItem<int>? itemLimit;
 	private readonly List<EwfTableItemGroup<ItemIdType>> itemGroups = new();
 	private bool? hasExplicitItemGroups;
-	private TailUpdateRegionsParameter tailUpdateRegions;
+	private TailUpdateRegionsParameter? tailUpdateRegions;
 
 	internal ResponsiveTable(
-		DisplaySetup displaySetup, EwfTableStyle style, ElementClassSet classes, string idBase, string caption, string subCaption, bool allowExportToExcel,
-		ActionComponentSetupsParameter tableActions, IReadOnlyCollection<SelectedItemAction<ItemIdType>> selectedItemActions,
-		IReadOnlyCollection<EwfTableField> fields, IReadOnlyCollection<EwfTableItem> headItems, DataRowLimit defaultItemLimit, bool enableItemReordering,
-		bool disableEmptyFieldDetection, TailUpdateRegionsParameter tailUpdateRegions, IReadOnlyCollection<EtherealComponent> etherealContent ) {
+		DisplaySetup? displaySetup, EwfTableStyle style, ElementClassSet? classes, string idBase, string caption, string subCaption, bool allowExportToExcel,
+		ActionComponentSetupsParameter? tableActions, IReadOnlyCollection<SelectedItemAction<ItemIdType>>? selectedItemActions,
+		IReadOnlyCollection<EwfTableField>? fields, IReadOnlyCollection<EwfTableItem>? headItems, DataRowLimit defaultItemLimit, bool enableItemReordering,
+		bool disableEmptyFieldDetection, TailUpdateRegionsParameter? tailUpdateRegions, IReadOnlyCollection<EtherealComponent>? etherealContent ) {
 		idBase = PostBack.GetCompositeId( idBase, "ewfTable" );
 
 		if( fields != null && !fields.Any() )
@@ -201,7 +200,7 @@ public class ResponsiveTable<ItemIdType>: FlowComponent {
 
 						var visibleItemGroupsAndItems = new List<( EwfTableItemGroup<ItemIdType>, IReadOnlyList<EwfTableItem<ItemIdType>> )>();
 						foreach( var itemGroup in itemGroups ) {
-							var limit = defaultItemLimit != DataRowLimit.Unlimited ? itemLimit.Value : (int)DataRowLimit.Unlimited;
+							var limit = defaultItemLimit != DataRowLimit.Unlimited ? itemLimit!.Value : (int)DataRowLimit.Unlimited;
 							var visibleItems = itemGroup.Items.Take( limit - visibleItemGroupsAndItems.Sum( i => i.Item2.Count ) ).Select( i => i.Value );
 							visibleItemGroupsAndItems.Add( ( itemGroup, visibleItems.ToImmutableArray() ) );
 							if( visibleItemGroupsAndItems.Sum( i => i.Item2.Count ) == limit )
@@ -225,7 +224,7 @@ public class ResponsiveTable<ItemIdType>: FlowComponent {
 						var itemLimitingUpdateRegionSet = new UpdateRegionSet();
 						var itemLimitingAndGeneralActionComponents =
 							( defaultItemLimit != DataRowLimit.Unlimited
-								  ? getItemLimitingControlContainer( idBase, itemLimit, itemLimitingUpdateRegionSet, this.tailUpdateRegions ).ToCollection()
+								  ? getItemLimitingControlContainer( idBase, itemLimit!, itemLimitingUpdateRegionSet, this.tailUpdateRegions! ).ToCollection()
 								  : Enumerable.Empty<FlowComponent>() )
 							.Concat( TableStatics.GetGeneralActionList( allowExportToExcel ? exportToExcelPostBack : null, tableActions ) )
 							.Materialize();
@@ -242,7 +241,7 @@ public class ResponsiveTable<ItemIdType>: FlowComponent {
 										? EwfTableItem.Create(
 												TableStatics.GetItemSelectionAndActionComponents(
 														"$( this ).closest( 'table' ).children( 'tbody' ).children().children( ':first-child' )",
-														selectedItemData.Buttons,
+														selectedItemData.Buttons!,
 														selectedItemData.Validation )
 													.ToCell( new TableCellSetup( fieldSpan: fields.Count ) ) )
 											.ToCollection()
@@ -258,8 +257,8 @@ public class ResponsiveTable<ItemIdType>: FlowComponent {
 								buildRows(
 									headItems,
 									fields,
-									selectedItemData.ItemGroupData == null ? null : Enumerable.Repeat( (PhrasingComponent)null, headItems.Count ),
-									!enableItemReordering ? null : Enumerable.Repeat( (IReadOnlyCollection<PhrasingComponent>)null, headItems.Count ),
+									selectedItemData.ItemGroupData == null ? null : Enumerable.Repeat( (PhrasingComponent?)null, headItems.Count ),
+									!enableItemReordering ? null : Enumerable.Repeat( (IReadOnlyCollection<PhrasingComponent>?)null, headItems.Count ),
 									null,
 									true,
 									allVisibleItems ) )
@@ -277,10 +276,10 @@ public class ResponsiveTable<ItemIdType>: FlowComponent {
 									groupAndItems.Item2,
 									fields,
 									selectedItemData.ItemGroupData == null ? null :
-									!groupSelectedItemData.HasValue ? Enumerable.Repeat( (PhrasingComponent)null, groupAndItems.Item2.Count ) :
+									!groupSelectedItemData.HasValue ? Enumerable.Repeat( (PhrasingComponent?)null, groupAndItems.Item2.Count ) :
 									groupSelectedItemData.Value.checkboxes.Take( groupAndItems.Item2.Count )
 										.EquiZip( groupAndItems.Item2, ( checkbox, item ) => item.Setup.Id != null ? checkbox : null ),
-									TableStatics.GetReorderingControls( idBase, false, enableItemReordering, hasExplicitItemGroups.Value, groupAndItems.Item2 ),
+									TableStatics.GetReorderingControls( idBase, false, enableItemReordering, hasExplicitItemGroups!.Value, groupAndItems.Item2 ),
 									null,
 									false,
 									allVisibleItems )
@@ -319,7 +318,7 @@ public class ResponsiveTable<ItemIdType>: FlowComponent {
 											"",
 											new UpdateRegionLinker(
 												"tail",
-												from region in hasExplicitItemGroups.Value
+												from region in hasExplicitItemGroups!.Value
 													               ? groupAndItems.Item1.RemainingData.Value.TailUpdateRegions
 													               : groupAndItems.Item1.GetTailUpdateRegionsNotIncludingAllItems()
 												let staticRowCount = itemGroups[ cachedVisibleGroupIndex ].Items.Count - region.UpdatingItemCount
@@ -345,8 +344,8 @@ public class ResponsiveTable<ItemIdType>: FlowComponent {
 								_ => bodyRowGroupsAndRows.Select( i => i.Item1 ) ) ) );
 
 						if( defaultItemLimit != DataRowLimit.Unlimited ) {
-							var oldItemLimit = itemLimit.Value;
-							var lowerItemLimit = new Lazy<int>( () => Math.Min( oldItemLimit, itemLimit.Value ) );
+							var oldItemLimit = itemLimit!.Value;
+							var lowerItemLimit = new Lazy<int>( () => Math.Min( oldItemLimit, itemLimit!.Value ) );
 
 							var itemLimitingTailUpdateRegionComponentGetter = new Func<int, IEnumerable<FlowComponent>>( staticItemCount => {
 								var rowCount = 0;
@@ -388,16 +387,16 @@ public class ResponsiveTable<ItemIdType>: FlowComponent {
 
 						var itemCount = itemGroups.Sum( i => i.Items.Count );
 						var itemLimitingRowGroup = new List<FlowComponent>();
-						if( defaultItemLimit != DataRowLimit.Unlimited && itemLimit.Value < itemCount ) {
-							var nextLimit = EnumTools.GetValues<DataRowLimit>().First( i => i > (DataRowLimit)itemLimit.Value );
-							var itemIncrementCount = Math.Min( (int)nextLimit, itemCount ) - itemLimit.Value;
+						if( defaultItemLimit != DataRowLimit.Unlimited && itemLimit!.Value < itemCount ) {
+							var nextLimit = EnumTools.GetValues<DataRowLimit>().First( i => i > (DataRowLimit)itemLimit!.Value );
+							var itemIncrementCount = Math.Min( (int)nextLimit, itemCount ) - itemLimit!.Value;
 							var button = new EwfButton(
 								new StandardButtonStyle( "Show " + itemIncrementCount + " more item" + ( itemIncrementCount != 1 ? "s" : "" ) ),
 								behavior: new PostBackBehavior(
 									postBack: PostBack.CreateIntermediate(
 										itemLimitingUpdateRegionSet,
 										id: PostBack.GetCompositeId( idBase, "showMore" ),
-										modificationMethod: () => itemLimit.Value = (int)nextLimit ) ) );
+										modificationMethod: () => itemLimit!.Value = (int)nextLimit ) ) );
 							var item = EwfTableItem.Create( button.ToCollection().ToCell( new TableCellSetup( fieldSpan: fields.Count ) ) );
 							itemLimitingRowGroup.Add(
 								new ElementComponent( _ => new ElementData(
@@ -436,13 +435,13 @@ public class ResponsiveTable<ItemIdType>: FlowComponent {
 					focusDependentData: new DisplayableElementFocusDependentData(
 						includeIdAttribute: true,
 						jsInitStatements:
-						$"$( '#{context.Id}' ).DataTable( {{ columns: [ {getDataTablesColumnSpecifications( fields )} ], info: false, order: [], paging: false, responsive: true, searching: false }} );" ) ),
+						$"$( '#{context.Id}' ).DataTable( {{ columns: [ {getDataTablesColumnSpecifications( fields! )} ], info: false, order: [], paging: false, responsive: true, searching: false }} );" ) ),
 				classes: TableStatics.GetClasses(
 					style,
 					new ElementClass( "ewfResponsive" ).Add( new ElementClass( "compact" ) ) // see https://datatables.net/manual/styling/classes
 						.Add( classes ?? ElementClassSet.Empty ) ),
 				children: children,
-				etherealChildren: ( defaultItemLimit != DataRowLimit.Unlimited ? itemLimit.ToCollection() : Enumerable.Empty<EtherealComponent>() )
+				etherealChildren: ( defaultItemLimit != DataRowLimit.Unlimited ? itemLimit!.ToCollection() : Enumerable.Empty<EtherealComponent>() )
 				.Concat( etherealContent ?? Enumerable.Empty<EtherealComponent>() )
 				.Materialize() );
 		} ).ToCollection();
@@ -574,7 +573,7 @@ public class ResponsiveTable<ItemIdType>: FlowComponent {
 					updateRegionSets:
 					itemGroups.SelectMany( i => i.RemainingData.Value.TailUpdateRegions )
 						.Materialize()
-						.Concat( tailUpdateRegions?.Collection.Value ?? [ ] )
+						.Concat( tailUpdateRegions.Collection.Value )
 						.SelectMany( i => i.Sets.Collection.Value )
 						.ToParameter() ).ToComponentListItem()
 				.AppendLineListItem( "".ToComponentListItem() )
@@ -600,9 +599,9 @@ public class ResponsiveTable<ItemIdType>: FlowComponent {
 	}
 
 	private IEnumerable<FlowComponent> buildRows<IdType>(
-		IReadOnlyCollection<EwfTableItem<IdType>> items, IReadOnlyCollection<EwfTableField> fields, IEnumerable<PhrasingComponent> checkboxes,
-		IEnumerable<IReadOnlyCollection<PhrasingComponent>> reorderingControls, bool? useContrastForFirstRow, bool useHeadCells,
-		List<IReadOnlyCollection<EwfTableCell>> allVisibleItems ) {
+		IReadOnlyCollection<EwfTableItem<IdType>> items, IReadOnlyCollection<EwfTableField> fields, IEnumerable<PhrasingComponent?>? checkboxes,
+		IEnumerable<IReadOnlyCollection<PhrasingComponent>?>? reorderingControls, bool? useContrastForFirstRow, bool useHeadCells,
+		List<IReadOnlyCollection<EwfTableCell>>? allVisibleItems ) {
 		// Assert that the cells in the list of items are valid and store a data structure for below.
 		var cellPlaceholderListsForRows = TableStatics.BuildCellPlaceholderListsForItems(
 			items.Select( i => i.Cells ).Materialize(),

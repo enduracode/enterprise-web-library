@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 using JetBrains.Annotations;
@@ -29,8 +28,8 @@ public sealed class Section: FlowComponent {
 			var normalExpandedSelector = "section." + normalExpandedClass.ClassName;
 			var boxClosedSelector = "section." + boxClosedClass.ClassName;
 			var boxExpandedSelector = "section." + boxExpandedClass.ClassName;
-			return new[]
-				{
+			return
+				[
 					new CssElement( "SectionAllStylesBothStates", "section." + allStylesBothStatesClass.ClassName ),
 					new CssElement( "SectionAllStylesClosedState", normalClosedSelector, boxClosedSelector ),
 					new CssElement( "SectionAllStylesExpandedState", normalExpandedSelector, boxExpandedSelector ),
@@ -42,7 +41,7 @@ public sealed class Section: FlowComponent {
 					new CssElement( "SectionHeadingContainer", "* > div." + headingClass.ClassName ),
 					new CssElement( "SectionHeading", "h1." + headingClass.ClassName ), new CssElement( "SectionExpandLabel", "span." + closeClass.ClassName ),
 					new CssElement( "SectionCloseLabel", "span." + expandClass.ClassName ), new CssElement( "SectionContentContainer", "div." + contentClass.ClassName )
-				};
+				];
 		}
 	}
 
@@ -57,8 +56,8 @@ public sealed class Section: FlowComponent {
 	/// <param name="classes">The classes on the section.</param>
 	/// <param name="etherealContent"></param>
 	public Section(
-		IReadOnlyCollection<FlowComponent> content, DisplaySetup displaySetup = null, SectionStyle style = SectionStyle.Normal, ElementClassSet classes = null,
-		IReadOnlyCollection<EtherealComponent> etherealContent = null ): this(
+		IReadOnlyCollection<FlowComponent> content, DisplaySetup? displaySetup = null, SectionStyle style = SectionStyle.Normal, ElementClassSet? classes = null,
+		IReadOnlyCollection<EtherealComponent>? etherealContent = null ): this(
 		"",
 		content,
 		displaySetup: displaySetup,
@@ -78,9 +77,9 @@ public sealed class Section: FlowComponent {
 	/// <param name="expanded">Set to true or false if you want users to be able to expand or close the section by clicking on the heading.</param>
 	/// <param name="etherealContent"></param>
 	public Section(
-		string heading, IReadOnlyCollection<FlowComponent> content, DisplaySetup displaySetup = null, SectionStyle style = SectionStyle.Normal,
-		ElementClassSet classes = null, IReadOnlyCollection<FlowComponent> postHeadingComponents = null, bool? expanded = null,
-		IReadOnlyCollection<EtherealComponent> etherealContent = null ): this(
+		string heading, IReadOnlyCollection<FlowComponent> content, DisplaySetup? displaySetup = null, SectionStyle style = SectionStyle.Normal,
+		ElementClassSet? classes = null, IReadOnlyCollection<FlowComponent>? postHeadingComponents = null, bool? expanded = null,
+		IReadOnlyCollection<EtherealComponent>? etherealContent = null ): this(
 		displaySetup,
 		style,
 		classes,
@@ -92,8 +91,8 @@ public sealed class Section: FlowComponent {
 		etherealContent ) {}
 
 	internal Section(
-		DisplaySetup displaySetup, SectionStyle style, ElementClassSet classes, string heading, IReadOnlyCollection<FlowComponent> postHeadingComponents,
-		IReadOnlyCollection<FlowComponent> content, bool? expanded, bool disableStatePersistence, IReadOnlyCollection<EtherealComponent> etherealContent ) {
+		DisplaySetup? displaySetup, SectionStyle style, ElementClassSet? classes, string heading, IReadOnlyCollection<FlowComponent>? postHeadingComponents,
+		IReadOnlyCollection<FlowComponent>? content, bool? expanded, bool disableStatePersistence, IReadOnlyCollection<EtherealComponent>? etherealContent ) {
 		children = new DisplayableElement( context => {
 			var hiddenFieldId = new HiddenFieldId();
 			var expandedPmv = heading.Any() && expanded.HasValue && !disableStatePersistence ? new PageModificationValue<string>() : null;
@@ -121,8 +120,8 @@ public sealed class Section: FlowComponent {
 										       StringTools.ConcatenateWithDelimiter(
 											       " ",
 											       style == SectionStyle.Normal
-												       ? new[] { normalClosedClass.ClassName, normalExpandedClass.ClassName }
-												       : new[] { boxClosedClass.ClassName, boxExpandedClass.ClassName } ) )
+												       ? [ normalClosedClass.ClassName, normalExpandedClass.ClassName ]
+												       : [ boxClosedClass.ClassName, boxExpandedClass.ClassName ] ) )
 									       : hiddenFieldId.GetJsValueModificationStatements(
 										       "document.getElementById( '{0}' ).value === '{2}' ? '{1}' : '{2}'".FormatWith(
 											       hiddenFieldId.ElementId.Id,
@@ -138,7 +137,7 @@ public sealed class Section: FlowComponent {
 					       : new GenericFlowContainer( new GenericFlowContainer( headingComponents.Materialize(), classes: headingClass ).ToCollection() );
 			}
 
-			content = content ?? Enumerable.Empty<FlowComponent>().Materialize();
+			content ??= Enumerable.Empty<FlowComponent>().Materialize();
 			return new DisplayableElementData(
 				displaySetup,
 				() => new DisplayableElementLocalData(
@@ -154,14 +153,15 @@ public sealed class Section: FlowComponent {
 					content.Any() ? new GenericFlowContainer( content, classes: contentClass ).ToCollection() : Enumerable.Empty<FlowComponent>() )
 				.Materialize(),
 				etherealChildren: ( expandedPmv != null
-					                    ? new EwfHiddenField( expanded.Value.ToString(), id: hiddenFieldId, pageModificationValue: expandedPmv ).PageComponent
+					                    ? new EwfHiddenField( expanded!.Value.ToString(), id: hiddenFieldId, pageModificationValue: expandedPmv ).PageComponent
 						                    .ToCollection()
 					                    : Enumerable.Empty<EtherealComponent>() ).Concat( etherealContent ?? Enumerable.Empty<EtherealComponent>() )
 				.Materialize() );
 		} ).ToCollection();
 	}
 
-	private ElementClassSet getSectionClasses( bool? expanded, PageModificationValue<string> expandedPmv, ElementClass closedClass, ElementClass expandedClass ) {
+	private ElementClassSet getSectionClasses(
+		bool? expanded, PageModificationValue<string>? expandedPmv, ElementClass closedClass, ElementClass expandedClass ) {
 		return !expanded.HasValue ? expandedClass :
 		       expandedPmv == null ? expanded.Value ? expandedClass : closedClass :
 		       expandedPmv.ToCondition( bool.FalseString.ToCollection() )

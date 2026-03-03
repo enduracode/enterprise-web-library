@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
@@ -14,7 +13,7 @@ public class LineList: FlowComponent {
 	/// <param name="alignment">The horizontal alignment of the items in the list.</param>
 	/// <param name="verticalAlignment">The default vertical alignment of the items in the list.</param>
 	public LineList(
-		IEnumerable<LineListItem> items, ComponentListSetup generalSetup = null, FlexboxAlignment alignment = FlexboxAlignment.NotSpecified,
+		IEnumerable<LineListItem> items, ComponentListSetup? generalSetup = null, FlexboxAlignment alignment = FlexboxAlignment.NotSpecified,
 		FlexboxVerticalAlignment verticalAlignment = FlexboxVerticalAlignment.NotSpecified ) {
 		children = ( generalSetup ?? new ComponentListSetup() ).GetComponents(
 			CssElementCreator.LineListClass.Add( FlexboxAlignmentStatics.Class( alignment ) ).Add( FlexboxVerticalAlignmentStatics.Class( verticalAlignment ) ),
