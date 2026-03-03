@@ -51,11 +51,13 @@ for the system and substitute its path below:
 jb cleanupcode "<SolutionFile>.sln" --profile="Main" --include="file1.cs;file2.cs" --no-updates
 ```
 
-### Step 3: Commit formatting changes
+### Step 3: Commit formatting changes (only when requested)
 
-After formatting, check if any files were modified by the formatter. If so,
-commit ONLY the formatted files with the message "Formatted code". If no files
-were modified, skip the commit and report that no formatting changes were needed.
+Only commit if the caller asks you to commit. If so, and if any files were
+modified by the formatter, commit ONLY the formatted files with the message
+"Formatted code". If no files were modified, skip the commit and report that no
+formatting changes were needed. If the caller does not ask you to commit, skip
+this step.
 
 ### Step 4: Inspect (only when requested)
 
