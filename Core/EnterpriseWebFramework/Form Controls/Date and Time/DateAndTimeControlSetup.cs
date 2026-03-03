@@ -26,7 +26,7 @@ public class DateAndTimeControlSetup {
 	/// <param name="validationErrorNotifier"></param>
 	public static DateAndTimeControlSetup Create(
 		DisplaySetup? displaySetup = null, ElementClassSet? classes = null, string autoFillTokens = "", IsoDayOfWeek calendarFirstDayOfWeek = IsoDayOfWeek.None,
-		int minuteInterval = 15, SpecifiedValue<FormAction>? action = null, FormAction? valueChangedAction = null,
+		int minuteInterval = 15, SpecifiedValue<FormAction?>? action = null, FormAction? valueChangedAction = null,
 		PageModificationValue<LocalDate?>? datePageModificationValue = null, PageModificationValue<string>? timePageModificationValue = null,
 		Func<bool, bool>? validationPredicate = null, Action? validationErrorNotifier = null ) =>
 		new(
@@ -70,7 +70,7 @@ public class DateAndTimeControlSetup {
 
 	internal DateAndTimeControlSetup(
 		DisplaySetup? displaySetup, bool isReadOnly, ElementClassSet? classes, string autoFillTokens, IsoDayOfWeek calendarFirstDayOfWeek, int? minuteInterval,
-		SpecifiedValue<FormAction>? action, FormAction? valueChangedAction, PageModificationValue<LocalDate?>? datePageModificationValue,
+		SpecifiedValue<FormAction?>? action, FormAction? valueChangedAction, PageModificationValue<LocalDate?>? datePageModificationValue,
 		PageModificationValue<string>? timePageModificationValue, Func<bool, bool>? validationPredicate, Action? validationErrorNotifier ) {
 		DisplaySetup = displaySetup;
 		IsReadOnly = isReadOnly;

@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -19,8 +18,8 @@ public class DurationControlSetup {
 	/// <param name="validationPredicate"></param>
 	/// <param name="validationErrorNotifier"></param>
 	public static DurationControlSetup Create(
-		DisplaySetup displaySetup = null, ElementClassSet classes = null, SpecifiedValue<FormAction> action = null, FormAction valueChangedAction = null,
-		PageModificationValue<string> pageModificationValue = null, Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
+		DisplaySetup? displaySetup = null, ElementClassSet? classes = null, SpecifiedValue<FormAction?>? action = null, FormAction? valueChangedAction = null,
+		PageModificationValue<string>? pageModificationValue = null, Func<bool, bool>? validationPredicate = null, Action? validationErrorNotifier = null ) {
 		return new DurationControlSetup(
 			displaySetup,
 			false,
@@ -40,22 +39,22 @@ public class DurationControlSetup {
 	/// <param name="validationPredicate"></param>
 	/// <param name="validationErrorNotifier"></param>
 	public static DurationControlSetup CreateReadOnly(
-		DisplaySetup displaySetup = null, ElementClassSet classes = null, Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
+		DisplaySetup? displaySetup = null, ElementClassSet? classes = null, Func<bool, bool>? validationPredicate = null, Action? validationErrorNotifier = null ) {
 		return new DurationControlSetup( displaySetup, true, classes, null, null, null, validationPredicate, validationErrorNotifier );
 	}
 
-	internal readonly DisplaySetup DisplaySetup;
+	internal readonly DisplaySetup? DisplaySetup;
 	internal readonly bool IsReadOnly;
-	internal readonly ElementClassSet Classes;
-	internal readonly FormAction Action;
-	internal readonly FormAction ValueChangedAction;
-	internal readonly PageModificationValue<string> PageModificationValue;
-	internal readonly Func<bool, bool> ValidationPredicate;
-	internal readonly Action ValidationErrorNotifier;
+	internal readonly ElementClassSet? Classes;
+	internal readonly FormAction? Action;
+	internal readonly FormAction? ValueChangedAction;
+	internal readonly PageModificationValue<string>? PageModificationValue;
+	internal readonly Func<bool, bool>? ValidationPredicate;
+	internal readonly Action? ValidationErrorNotifier;
 
 	internal DurationControlSetup(
-		DisplaySetup displaySetup, bool isReadOnly, ElementClassSet classes, SpecifiedValue<FormAction> action, FormAction valueChangedAction,
-		PageModificationValue<string> pageModificationValue, Func<bool, bool> validationPredicate, Action validationErrorNotifier ) {
+		DisplaySetup? displaySetup, bool isReadOnly, ElementClassSet? classes, SpecifiedValue<FormAction?>? action, FormAction? valueChangedAction,
+		PageModificationValue<string>? pageModificationValue, Func<bool, bool>? validationPredicate, Action? validationErrorNotifier ) {
 		DisplaySetup = displaySetup;
 		IsReadOnly = isReadOnly;
 		Classes = classes;

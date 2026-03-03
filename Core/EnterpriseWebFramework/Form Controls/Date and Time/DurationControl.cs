@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;
@@ -23,7 +22,7 @@ public class DurationControl: FormControl<PhrasingComponent> {
 
 	public FormControlLabeler Labeler { get; }
 	public PhrasingComponent PageComponent { get; }
-	public EwfValidation Validation { get; }
+	public EwfValidation? Validation { get; }
 
 	/// <summary>
 	/// Creates a duration control.
@@ -32,7 +31,7 @@ public class DurationControl: FormControl<PhrasingComponent> {
 	/// <param name="allowEmpty"></param>
 	/// <param name="setup">The setup object for the duration control.</param>
 	/// <param name="validationMethod">The validation method. Pass null if you’re only using this control for page modification.</param>
-	public DurationControl( Duration? value, bool allowEmpty, DurationControlSetup setup = null, Action<Duration?, Validator> validationMethod = null ) {
+	public DurationControl( Duration? value, bool allowEmpty, DurationControlSetup? setup = null, Action<Duration?, Validator>? validationMethod = null ) {
 		setup ??= DurationControlSetup.Create();
 
 		var textControl = new TextControl(
@@ -43,7 +42,7 @@ public class DurationControl: FormControl<PhrasingComponent> {
 				       : TextControlSetup.Create(
 					       placeholder: "h:m",
 					       formattedValueExpressionGetter: valueExpression => "formatDuration( {0} )".FormatWith( valueExpression ),
-					       action: new SpecifiedValue<FormAction>( setup.Action ),
+					       action: new SpecifiedValue<FormAction?>( setup.Action ),
 					       valueChangedAction: setup.ValueChangedAction,
 					       pageModificationValue: setup.PageModificationValue,
 					       validationPredicate: setup.ValidationPredicate,

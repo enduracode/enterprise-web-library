@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 
@@ -24,9 +23,9 @@ public class EmailAddressControlSetup {
 	/// <param name="validationPredicate"></param>
 	/// <param name="validationErrorNotifier"></param>
 	public static EmailAddressControlSetup Create(
-		DisplaySetup displaySetup = null, ElementClassSet classes = null, string placeholder = "", string autoFillTokens = "",
-		SpecifiedValue<FormAction> action = null, FormAction valueChangedAction = null, PageModificationValue<string> pageModificationValue = null,
-		Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
+		DisplaySetup? displaySetup = null, ElementClassSet? classes = null, string placeholder = "", string autoFillTokens = "",
+		SpecifiedValue<FormAction?>? action = null, FormAction? valueChangedAction = null, PageModificationValue<string>? pageModificationValue = null,
+		Func<bool, bool>? validationPredicate = null, Action? validationErrorNotifier = null ) {
 		return new EmailAddressControlSetup(
 			new TextControlSetup(
 				displaySetup,
@@ -68,9 +67,9 @@ public class EmailAddressControlSetup {
 	/// <param name="validationPredicate"></param>
 	/// <param name="validationErrorNotifier"></param>
 	public static EmailAddressControlSetup CreateAutoComplete(
-		TrustedResourceInfo autoCompleteResource, DisplaySetup displaySetup = null, ElementClassSet classes = null, string placeholder = "",
-		string autoFillTokens = "", SpecifiedValue<FormAction> action = null, bool triggersActionWhenItemSelected = false, FormAction valueChangedAction = null,
-		PageModificationValue<string> pageModificationValue = null, Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
+		TrustedResourceInfo autoCompleteResource, DisplaySetup? displaySetup = null, ElementClassSet? classes = null, string placeholder = "",
+		string autoFillTokens = "", SpecifiedValue<FormAction?>? action = null, bool triggersActionWhenItemSelected = false, FormAction? valueChangedAction = null,
+		PageModificationValue<string>? pageModificationValue = null, Func<bool, bool>? validationPredicate = null, Action? validationErrorNotifier = null ) {
 		return new EmailAddressControlSetup(
 			new TextControlSetup(
 				displaySetup,
@@ -103,7 +102,7 @@ public class EmailAddressControlSetup {
 	/// <param name="validationPredicate"></param>
 	/// <param name="validationErrorNotifier"></param>
 	public static EmailAddressControlSetup CreateReadOnly(
-		DisplaySetup displaySetup = null, ElementClassSet classes = null, Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
+		DisplaySetup? displaySetup = null, ElementClassSet? classes = null, Func<bool, bool>? validationPredicate = null, Action? validationErrorNotifier = null ) {
 		return new EmailAddressControlSetup(
 			new TextControlSetup(
 				displaySetup,

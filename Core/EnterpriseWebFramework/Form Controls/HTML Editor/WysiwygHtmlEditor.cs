@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.IdReferencing;
 using Tewl.InputValidation;
@@ -22,11 +21,11 @@ public class WysiwygHtmlEditor: FormControl<FlowComponent> {
 	/// <param name="setup">The setup object for the HTML editor.</param>
 	/// <param name="maxLength"></param>
 	public WysiwygHtmlEditor(
-		string value, bool allowEmpty, Action<string, Validator> validationMethod, WysiwygHtmlEditorSetup setup = null, int? maxLength = null ) {
-		setup = setup ?? new WysiwygHtmlEditorSetup();
+		string value, bool allowEmpty, Action<string, Validator> validationMethod, WysiwygHtmlEditorSetup? setup = null, int? maxLength = null ) {
+		setup ??= new WysiwygHtmlEditorSetup();
 
 		var id = new ElementId();
-		FormValue<string> formValue = null;
+		FormValue<string>? formValue = null;
 		formValue = new FormValue<string>(
 			() => value,
 			() => setup.IsReadOnly ? "" : id.Id,
@@ -37,7 +36,7 @@ public class WysiwygHtmlEditor: FormControl<FlowComponent> {
 
 				// This hack prevents the NewLine that CKEditor seems to always add to the end of the textarea from causing
 				// ValueChangedOnPostBack to always return true.
-				if( rawValue.EndsWith( Environment.NewLine ) && rawValue.Remove( rawValue.Length - Environment.NewLine.Length ) == formValue.GetDurableValue() )
+				if( rawValue.EndsWith( Environment.NewLine ) && rawValue.Remove( rawValue.Length - Environment.NewLine.Length ) == formValue!.GetDurableValue() )
 					rawValue = formValue.GetDurableValue();
 
 				return PostBackValueValidationResult<string>.CreateValid( rawValue );
@@ -102,5 +101,5 @@ public class WysiwygHtmlEditor: FormControl<FlowComponent> {
 		return $"CKEDITOR.replace( '{id}', {{ removePlugins: 'exportpdf', {startupFocus}, {configuration}, versionCheck: false }} );";
 	}
 
-	FormControlLabeler FormControl<FlowComponent>.Labeler => null;
+	FormControlLabeler? FormControl<FlowComponent>.Labeler => null;
 }

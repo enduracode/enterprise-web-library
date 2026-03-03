@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
@@ -7,11 +6,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 /// The configuration for a WYSIWYG HTML editor.
 /// </summary>
 public class WysiwygHtmlEditorSetup {
-	internal readonly DisplaySetup DisplaySetup;
+	internal readonly DisplaySetup? DisplaySetup;
 	internal readonly bool IsReadOnly;
 	internal readonly string CkEditorConfiguration;
-	internal readonly Func<bool, bool> ValidationPredicate;
-	internal readonly Action ValidationErrorNotifier;
+	internal readonly Func<bool, bool>? ValidationPredicate;
+	internal readonly Action? ValidationErrorNotifier;
 
 	/// <summary>
 	/// Creates an HTML editor setup object.
@@ -23,8 +22,8 @@ public class WysiwygHtmlEditorSetup {
 	/// <param name="validationPredicate"></param>
 	/// <param name="validationErrorNotifier"></param>
 	public WysiwygHtmlEditorSetup(
-		DisplaySetup displaySetup = null, bool isReadOnly = false, string ckEditorConfiguration = "", Func<bool, bool> validationPredicate = null,
-		Action validationErrorNotifier = null ) {
+		DisplaySetup? displaySetup = null, bool isReadOnly = false, string ckEditorConfiguration = "", Func<bool, bool>? validationPredicate = null,
+		Action? validationErrorNotifier = null ) {
 		DisplaySetup = displaySetup;
 		IsReadOnly = isReadOnly;
 		CkEditorConfiguration = ckEditorConfiguration;

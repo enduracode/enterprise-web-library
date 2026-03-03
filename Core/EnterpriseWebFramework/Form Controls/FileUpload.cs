@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.IdReferencing;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;
 using EnterpriseWebLibrary.IO;
@@ -12,7 +11,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 /// A file-upload control.
 /// </summary>
 public class FileUpload: FormControl<PhrasingComponent> {
-	private static Action formMultipartEncodingSetter;
+	private static Action formMultipartEncodingSetter = null!;
 
 	internal static void Init( Action formMultipartEncodingSetter ) {
 		FileUpload.formMultipartEncodingSetter = formMultipartEncodingSetter;
@@ -20,7 +19,7 @@ public class FileUpload: FormControl<PhrasingComponent> {
 
 	public FormControlLabeler Labeler { get; }
 	public PhrasingComponent PageComponent { get; }
-	public EwfValidation Validation { get; }
+	public EwfValidation? Validation { get; }
 
 	/// <summary>
 	/// Creates a file-upload control.
@@ -30,12 +29,12 @@ public class FileUpload: FormControl<PhrasingComponent> {
 	/// <param name="validationErrorNotifier"></param>
 	/// <param name="validationMethod">The validation method. Pass null if you’re only using this control for page modification.</param>
 	public FileUpload(
-		DisplaySetup displaySetup = null, Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null,
-		Action<RsFile, Validator> validationMethod = null ) {
+		DisplaySetup? displaySetup = null, Func<bool, bool>? validationPredicate = null, Action? validationErrorNotifier = null,
+		Action<RsFile?, Validator>? validationMethod = null ) {
 		Labeler = new FormControlLabeler();
 
 		var id = new ElementId();
-		var formValue = new FormValue<IFormFile>( () => null, () => id.Id, _ => "", PostBackValueValidationResult<IFormFile>.CreateValid );
+		var formValue = new FormValue<IFormFile?>( () => null, () => id.Id, _ => "", PostBackValueValidationResult<IFormFile?>.CreateValid );
 
 		PageComponent = new CustomPhrasingComponent(
 			new DisplayableElement(
@@ -69,7 +68,7 @@ public class FileUpload: FormControl<PhrasingComponent> {
 			} );
 	}
 
-	private RsFile getRsFile( IFormFile file ) {
+	private RsFile? getRsFile( IFormFile? file ) {
 		if( file == null )
 			return null;
 

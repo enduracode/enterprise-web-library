@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.IdReferencing;
 using Tewl.InputValidation;
 
@@ -10,7 +9,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 /// </summary>
 public class EwfHiddenField: FormControl<EtherealComponent> {
 	private readonly EtherealComponent component;
-	private readonly EwfValidation validation;
+	private readonly EwfValidation? validation;
 
 	/// <summary>
 	/// Creates a hidden field.
@@ -22,9 +21,9 @@ public class EwfHiddenField: FormControl<EtherealComponent> {
 	/// <param name="jsInitStatementGetter">A function that takes the field’s ID and returns the JavaScript statements that should be executed when the DOM is
 	/// loaded. Do not return null.</param>
 	public EwfHiddenField(
-		string value, HiddenFieldId id = null, PageModificationValue<string> pageModificationValue = null,
-		Action<PostBackValue<string>, Validator> validationMethod = null, Func<string, string> jsInitStatementGetter = null ) {
-		pageModificationValue = pageModificationValue ?? new PageModificationValue<string>();
+		string value, HiddenFieldId? id = null, PageModificationValue<string>? pageModificationValue = null,
+		Action<PostBackValue<string>, Validator>? validationMethod = null, Func<string, string>? jsInitStatementGetter = null ) {
+		pageModificationValue ??= new PageModificationValue<string>();
 
 		var elementId = new ElementId();
 		var formValue = new FormValue<string>(
@@ -55,7 +54,7 @@ public class EwfHiddenField: FormControl<EtherealComponent> {
 									: "",
 								jsInitStatementGetter?.Invoke( context.Id ) ?? "" ) ) );
 				},
-				clientSideIdReferences: elementId.ToCollection().Append( id?.ElementId ).Where( i => i != null ) ),
+				clientSideIdReferences: elementId.ToCollection().Append( id?.ElementId ).Where( i => i != null ).Select( i => i! ) ),
 			formValue: formValue );
 
 		formValue.AddPageModificationValue( pageModificationValue, v => v );
@@ -64,7 +63,7 @@ public class EwfHiddenField: FormControl<EtherealComponent> {
 			validation = formValue.CreateValidation( validationMethod );
 	}
 
-	FormControlLabeler FormControl<EtherealComponent>.Labeler => null;
+	FormControlLabeler? FormControl<EtherealComponent>.Labeler => null;
 	public EtherealComponent PageComponent => component;
-	public EwfValidation Validation => validation;
+	public EwfValidation? Validation => validation;
 }

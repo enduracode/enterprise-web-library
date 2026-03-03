@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -17,8 +16,8 @@ public class CheckboxSetup {
 	/// <param name="valueChangedAction">The action that will occur when the value is changed. Pass null for no action.</param>
 	/// <param name="pageModificationValue"></param>
 	public static CheckboxSetup Create(
-		DisplaySetup displaySetup = null, ElementClassSet classes = null, SpecifiedValue<FormAction> action = null, FormAction valueChangedAction = null,
-		PageModificationValue<bool> pageModificationValue = null ) =>
+		DisplaySetup? displaySetup = null, ElementClassSet? classes = null, SpecifiedValue<FormAction?>? action = null, FormAction? valueChangedAction = null,
+		PageModificationValue<bool>? pageModificationValue = null ) =>
 		new( displaySetup, false, classes, action, valueChangedAction, pageModificationValue );
 
 	/// <summary>
@@ -26,19 +25,19 @@ public class CheckboxSetup {
 	/// </summary>
 	/// <param name="displaySetup"></param>
 	/// <param name="classes">The classes on the control.</param>
-	public static CheckboxSetup CreateReadOnly( DisplaySetup displaySetup = null, ElementClassSet classes = null ) =>
+	public static CheckboxSetup CreateReadOnly( DisplaySetup? displaySetup = null, ElementClassSet? classes = null ) =>
 		new( displaySetup, true, classes, null, null, null );
 
-	internal readonly DisplaySetup DisplaySetup;
+	internal readonly DisplaySetup? DisplaySetup;
 	internal readonly bool IsReadOnly;
-	internal readonly ElementClassSet Classes;
-	internal readonly FormAction Action;
-	internal readonly FormAction ValueChangedAction;
-	internal readonly PageModificationValue<bool> PageModificationValue;
+	internal readonly ElementClassSet? Classes;
+	internal readonly FormAction? Action;
+	internal readonly FormAction? ValueChangedAction;
+	internal readonly PageModificationValue<bool>? PageModificationValue;
 
 	private CheckboxSetup(
-		DisplaySetup displaySetup, bool isReadOnly, ElementClassSet classes, SpecifiedValue<FormAction> action, FormAction valueChangedAction,
-		PageModificationValue<bool> pageModificationValue ) {
+		DisplaySetup? displaySetup, bool isReadOnly, ElementClassSet? classes, SpecifiedValue<FormAction?>? action, FormAction? valueChangedAction,
+		PageModificationValue<bool>? pageModificationValue ) {
 		DisplaySetup = displaySetup;
 		IsReadOnly = isReadOnly;
 		Classes = classes;
@@ -52,7 +51,7 @@ public class CheckboxSetup {
 			DisplaySetup,
 			IsReadOnly,
 			Classes,
-			new SpecifiedValue<FormAction>( Action ),
+			new SpecifiedValue<FormAction?>( Action ),
 			ValueChangedAction,
 			PageModificationValue ?? new PageModificationValue<bool>() );
 }

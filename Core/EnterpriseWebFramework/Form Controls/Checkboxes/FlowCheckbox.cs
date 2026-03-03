@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;
@@ -19,19 +18,18 @@ public class FlowCheckbox: FormControl<FlowComponent> {
 	[ UsedImplicitly ]
 	private class CssElementCreator: ControlCssElementCreator {
 		IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() =>
-			new[]
-				{
-					new CssElement( "FlowCheckboxAllStates", new[] { unhighlightedClass, highlightedClass }.Select( getSelector ).ToArray() ),
-					new CssElement( "FlowCheckboxUnhighlightedState", getSelector( unhighlightedClass ) ),
-					new CssElement( "FlowCheckboxHighlightedState", getSelector( highlightedClass ) ),
-					new CssElement( "FlowCheckboxNestedContentContainer", "div.{0}".FormatWith( nestedContentClass.ClassName ) )
-				};
+			[
+				new( "FlowCheckboxAllStates", new[] { unhighlightedClass, highlightedClass }.Select( getSelector ).ToArray() ),
+				new( "FlowCheckboxUnhighlightedState", getSelector( unhighlightedClass ) ),
+				new( "FlowCheckboxHighlightedState", getSelector( highlightedClass ) ),
+				new( "FlowCheckboxNestedContentContainer", "div.{0}".FormatWith( nestedContentClass.ClassName ) )
+			];
 
 		private string getSelector( ElementClass elementClass ) => "div.{0}".FormatWith( elementClass.ClassName );
 	}
 
 	public FlowComponent PageComponent { get; }
-	public EwfValidation Validation { get; }
+	public EwfValidation? Validation { get; }
 
 	/// <summary>
 	/// Creates a checkbox.
@@ -41,7 +39,8 @@ public class FlowCheckbox: FormControl<FlowComponent> {
 	/// <param name="setup">The setup object for the flow checkbox.</param>
 	/// <param name="validationMethod">The validation method. Pass null if you’re only using the checkbox for page modification.</param>
 	public FlowCheckbox(
-		bool value, IReadOnlyCollection<PhrasingComponent> label, FlowCheckboxSetup setup = null, Action<PostBackValue<bool>, Validator> validationMethod = null ) {
+		bool value, IReadOnlyCollection<PhrasingComponent> label, FlowCheckboxSetup? setup = null,
+		Action<PostBackValue<bool>, Validator>? validationMethod = null ) {
 		setup ??= FlowCheckboxSetup.Create();
 		var checkboxSetup = setup.CheckboxSetup.AddPmv();
 
@@ -50,7 +49,7 @@ public class FlowCheckbox: FormControl<FlowComponent> {
 		PageComponent = getComponent(
 			setup.DisplaySetup,
 			setup.Classes,
-			checkboxSetup.PageModificationValue,
+			checkboxSetup.PageModificationValue!,
 			checkbox,
 			setup.HighlightedWhenChecked,
 			setup.NestedContentGetter,
@@ -66,7 +65,7 @@ public class FlowCheckbox: FormControl<FlowComponent> {
 		PageComponent = getComponent(
 			setup.DisplaySetup,
 			setup.Classes,
-			setup.RadioButtonSetup.PageModificationValue,
+			setup.RadioButtonSetup.PageModificationValue!,
 			checkbox,
 			setup.HighlightedWhenSelected,
 			setup.NestedContentGetter,
@@ -76,8 +75,8 @@ public class FlowCheckbox: FormControl<FlowComponent> {
 	}
 
 	private FlowComponent getComponent(
-		DisplaySetup displaySetup, ElementClassSet classes, PageModificationValue<bool> pageModificationValue, Checkbox checkbox, bool highlightedWhenChecked,
-		Func<IReadOnlyCollection<FlowComponent>> nestedContentGetter, bool nestedContentAlwaysDisplayed ) {
+		DisplaySetup? displaySetup, ElementClassSet? classes, PageModificationValue<bool> pageModificationValue, Checkbox checkbox, bool highlightedWhenChecked,
+		Func<IReadOnlyCollection<FlowComponent>>? nestedContentGetter, bool nestedContentAlwaysDisplayed ) {
 		var nestedContent = nestedContentGetter?.Invoke() ?? Enumerable.Empty<FlowComponent>().Materialize();
 		return new GenericFlowContainer(
 			checkbox.PageComponent.ToCollection()
@@ -97,5 +96,5 @@ public class FlowCheckbox: FormControl<FlowComponent> {
 				           : unhighlightedClass ).Add( classes ?? ElementClassSet.Empty ) );
 	}
 
-	FormControlLabeler FormControl<FlowComponent>.Labeler => null;
+	FormControlLabeler? FormControl<FlowComponent>.Labeler => null;
 }

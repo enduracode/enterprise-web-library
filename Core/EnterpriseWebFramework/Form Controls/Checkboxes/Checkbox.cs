@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.IdReferencing;
@@ -25,7 +24,7 @@ public class Checkbox: FormControl<PhrasingComponent> {
 	}
 
 	public PhrasingComponent PageComponent { get; }
-	public EwfValidation Validation { get; }
+	public EwfValidation? Validation { get; }
 
 	/// <summary>
 	/// Creates a checkbox.
@@ -35,7 +34,7 @@ public class Checkbox: FormControl<PhrasingComponent> {
 	/// <param name="setup">The setup object for the checkbox.</param>
 	/// <param name="validationMethod">The validation method. Pass null if you’re only using this control for page modification.</param>
 	public Checkbox(
-		bool value, IReadOnlyCollection<PhrasingComponent> label, CheckboxSetup setup = null, Action<PostBackValue<bool>, Validator> validationMethod = null ) {
+		bool value, IReadOnlyCollection<PhrasingComponent> label, CheckboxSetup? setup = null, Action<PostBackValue<bool>, Validator>? validationMethod = null ) {
 		setup ??= CheckboxSetup.Create();
 		var pageModificationValue = setup.PageModificationValue ?? new PageModificationValue<bool>();
 
@@ -70,8 +69,8 @@ public class Checkbox: FormControl<PhrasingComponent> {
 	/// Creates a radio button.
 	/// </summary>
 	internal Checkbox(
-		FormValue<ElementId> formValue, ElementId id, RadioButtonSetup setup, IReadOnlyCollection<PhrasingComponent> label, FormAction selectionChangedAction,
-		Func<string> jsClickStatementGetter, EwfValidation validation, string listItemId = null ) {
+		FormValue<ElementId> formValue, ElementId id, RadioButtonSetup setup, IReadOnlyCollection<PhrasingComponent> label, FormAction? selectionChangedAction,
+		Func<string> jsClickStatementGetter, EwfValidation? validation, string? listItemId = null ) {
 		PageComponent = getComponent(
 			formValue,
 			id,
@@ -79,19 +78,20 @@ public class Checkbox: FormControl<PhrasingComponent> {
 			setup.DisplaySetup,
 			setup.IsReadOnly,
 			setup.Classes,
-			setup.PageModificationValue,
+			setup.PageModificationValue!,
 			label,
 			setup.Action,
 			selectionChangedAction,
 			() => setup.IsReadOnly
 				      ? ""
-				      : ( setup.PageModificationValue.Value ? "" : selectionChangedAction?.GetJsStatements() ?? "" ).ConcatenateWithSpace( jsClickStatementGetter() ) );
+				      : ( setup.PageModificationValue!.Value ? "" : selectionChangedAction?.GetJsStatements() ?? "" )
+				      .ConcatenateWithSpace( jsClickStatementGetter() ) );
 		Validation = validation;
 	}
 
 	private PhrasingComponent getComponent(
-		FormValue formValue, ElementId id, string radioButtonListItemId, DisplaySetup displaySetup, bool isReadOnly, ElementClassSet classes,
-		PageModificationValue<bool> pageModificationValue, IReadOnlyCollection<PhrasingComponent> label, FormAction action, FormAction valueChangedAction,
+		FormValue formValue, ElementId id, string? radioButtonListItemId, DisplaySetup? displaySetup, bool isReadOnly, ElementClassSet? classes,
+		PageModificationValue<bool> pageModificationValue, IReadOnlyCollection<PhrasingComponent> label, FormAction? action, FormAction? valueChangedAction,
 		Func<string> jsClickStatementGetter ) {
 		return new CustomPhrasingComponent(
 			new DisplayableElement( labelContext => new DisplayableElementData(
@@ -146,5 +146,5 @@ public class Checkbox: FormControl<PhrasingComponent> {
 					.Materialize() ) ).ToCollection() );
 	}
 
-	FormControlLabeler FormControl<PhrasingComponent>.Labeler => null;
+	FormControlLabeler? FormControl<PhrasingComponent>.Labeler => null;
 }

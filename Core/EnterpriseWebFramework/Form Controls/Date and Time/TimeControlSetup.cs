@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -22,9 +21,9 @@ public class TimeControlSetup {
 	/// <param name="validationPredicate"></param>
 	/// <param name="validationErrorNotifier"></param>
 	public static TimeControlSetup Create(
-		DisplaySetup displaySetup = null, ElementClassSet classes = null, string autoFillTokens = "", SpecifiedValue<FormAction> action = null,
-		FormAction valueChangedAction = null, PageModificationValue<string> pageModificationValue = null, Func<bool, bool> validationPredicate = null,
-		Action validationErrorNotifier = null ) {
+		DisplaySetup? displaySetup = null, ElementClassSet? classes = null, string autoFillTokens = "", SpecifiedValue<FormAction?>? action = null,
+		FormAction? valueChangedAction = null, PageModificationValue<string>? pageModificationValue = null, Func<bool, bool>? validationPredicate = null,
+		Action? validationErrorNotifier = null ) {
 		return new TimeControlSetup(
 			displaySetup,
 			false,
@@ -45,23 +44,24 @@ public class TimeControlSetup {
 	/// <param name="validationPredicate"></param>
 	/// <param name="validationErrorNotifier"></param>
 	public static TimeControlSetup CreateReadOnly(
-		DisplaySetup displaySetup = null, ElementClassSet classes = null, Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
+		DisplaySetup? displaySetup = null, ElementClassSet? classes = null, Func<bool, bool>? validationPredicate = null, Action? validationErrorNotifier = null ) {
 		return new TimeControlSetup( displaySetup, true, classes, "", null, null, null, validationPredicate, validationErrorNotifier );
 	}
 
-	internal readonly DisplaySetup DisplaySetup;
+	internal readonly DisplaySetup? DisplaySetup;
 	internal readonly bool IsReadOnly;
-	internal readonly ElementClassSet Classes;
+	internal readonly ElementClassSet? Classes;
 	internal readonly string AutoFillTokens;
-	internal readonly FormAction Action;
-	internal readonly FormAction ValueChangedAction;
-	internal readonly PageModificationValue<string> PageModificationValue;
-	internal readonly Func<bool, bool> ValidationPredicate;
-	internal readonly Action ValidationErrorNotifier;
+	internal readonly FormAction? Action;
+	internal readonly FormAction? ValueChangedAction;
+	internal readonly PageModificationValue<string>? PageModificationValue;
+	internal readonly Func<bool, bool>? ValidationPredicate;
+	internal readonly Action? ValidationErrorNotifier;
 
 	internal TimeControlSetup(
-		DisplaySetup displaySetup, bool isReadOnly, ElementClassSet classes, string autoFillTokens, SpecifiedValue<FormAction> action,
-		FormAction valueChangedAction, PageModificationValue<string> pageModificationValue, Func<bool, bool> validationPredicate, Action validationErrorNotifier ) {
+		DisplaySetup? displaySetup, bool isReadOnly, ElementClassSet? classes, string autoFillTokens, SpecifiedValue<FormAction?>? action,
+		FormAction? valueChangedAction, PageModificationValue<string>? pageModificationValue, Func<bool, bool>? validationPredicate,
+		Action? validationErrorNotifier ) {
 		DisplaySetup = displaySetup;
 		IsReadOnly = isReadOnly;
 		Classes = classes;

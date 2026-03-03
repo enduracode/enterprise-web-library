@@ -21,7 +21,7 @@ public class TimeControl: FormControl<FlowComponent> {
 
 	public FormControlLabeler Labeler { get; }
 	public FlowComponent PageComponent { get; }
-	public EwfValidation Validation { get; }
+	public EwfValidation? Validation { get; }
 
 	/// <summary>
 	/// Creates a time control.
@@ -49,7 +49,7 @@ public class TimeControl: FormControl<FlowComponent> {
 					       : TextControlSetup.Create(
 						       autoFillTokens: setup.AutoFillTokens,
 						       formattedValueExpressionGetter: valueExpression => "formatTime( {0} )".FormatWith( valueExpression ),
-						       action: new SpecifiedValue<FormAction>( setup.Action ),
+						       action: new SpecifiedValue<FormAction?>( setup.Action ),
 						       valueChangedAction: setup.ValueChangedAction,
 						       pageModificationValue: setup.PageModificationValue,
 						       validationPredicate: setup.ValidationPredicate,
@@ -114,7 +114,7 @@ public class TimeControl: FormControl<FlowComponent> {
 						items,
 						placeholderText: "",
 						autoFillTokens: setup.AutoFillTokens,
-						action: new SpecifiedValue<FormAction>( setup.Action ),
+						action: new SpecifiedValue<FormAction?>( setup.Action ),
 						selectionChangedAction: setup.ValueChangedAction,
 						validationPredicate: setup.ValidationPredicate,
 						validationErrorNotifier: setup.ValidationErrorNotifier ),

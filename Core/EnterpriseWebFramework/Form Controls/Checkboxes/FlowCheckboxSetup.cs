@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -20,9 +19,9 @@ public class FlowCheckboxSetup {
 	/// <param name="nestedContentGetter">A function that gets the content that will appear beneath the checkbox.</param>
 	/// <param name="nestedContentAlwaysDisplayed">Pass true to force the nested content to always be displayed instead of only when the box is checked.</param>
 	public static FlowCheckboxSetup Create(
-		DisplaySetup displaySetup = null, ElementClassSet classes = null, bool highlightedWhenChecked = false, SpecifiedValue<FormAction> action = null,
-		FormAction valueChangedAction = null, PageModificationValue<bool> pageModificationValue = null,
-		Func<IReadOnlyCollection<FlowComponent>> nestedContentGetter = null, bool nestedContentAlwaysDisplayed = false ) {
+		DisplaySetup? displaySetup = null, ElementClassSet? classes = null, bool highlightedWhenChecked = false, SpecifiedValue<FormAction?>? action = null,
+		FormAction? valueChangedAction = null, PageModificationValue<bool>? pageModificationValue = null,
+		Func<IReadOnlyCollection<FlowComponent>>? nestedContentGetter = null, bool nestedContentAlwaysDisplayed = false ) {
 		return new FlowCheckboxSetup(
 			displaySetup,
 			classes,
@@ -41,8 +40,8 @@ public class FlowCheckboxSetup {
 	/// <param name="nestedContentGetter">A function that gets the content that will appear beneath the checkbox.</param>
 	/// <param name="nestedContentAlwaysDisplayed">Pass true to force the nested content to always be displayed instead of only when the box is checked.</param>
 	public static FlowCheckboxSetup CreateReadOnly(
-		DisplaySetup displaySetup = null, ElementClassSet classes = null, bool highlightedWhenChecked = false,
-		Func<IReadOnlyCollection<FlowComponent>> nestedContentGetter = null, bool nestedContentAlwaysDisplayed = false ) {
+		DisplaySetup? displaySetup = null, ElementClassSet? classes = null, bool highlightedWhenChecked = false,
+		Func<IReadOnlyCollection<FlowComponent>>? nestedContentGetter = null, bool nestedContentAlwaysDisplayed = false ) {
 		return new FlowCheckboxSetup(
 			displaySetup,
 			classes,
@@ -52,16 +51,16 @@ public class FlowCheckboxSetup {
 			nestedContentAlwaysDisplayed );
 	}
 
-	internal readonly DisplaySetup DisplaySetup;
-	internal readonly ElementClassSet Classes;
+	internal readonly DisplaySetup? DisplaySetup;
+	internal readonly ElementClassSet? Classes;
 	internal readonly CheckboxSetup CheckboxSetup;
 	internal readonly bool HighlightedWhenChecked;
-	internal readonly Func<IReadOnlyCollection<FlowComponent>> NestedContentGetter;
+	internal readonly Func<IReadOnlyCollection<FlowComponent>>? NestedContentGetter;
 	internal readonly bool NestedContentAlwaysDisplayed;
 
 	private FlowCheckboxSetup(
-		DisplaySetup displaySetup, ElementClassSet classes, CheckboxSetup checkboxSetup, bool highlightedWhenChecked,
-		Func<IReadOnlyCollection<FlowComponent>> nestedContentGetter, bool nestedContentAlwaysDisplayed ) {
+		DisplaySetup? displaySetup, ElementClassSet? classes, CheckboxSetup checkboxSetup, bool highlightedWhenChecked,
+		Func<IReadOnlyCollection<FlowComponent>>? nestedContentGetter, bool nestedContentAlwaysDisplayed ) {
 		DisplaySetup = displaySetup;
 		Classes = classes;
 		CheckboxSetup = checkboxSetup;

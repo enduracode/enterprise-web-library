@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -20,8 +19,8 @@ public class FlowRadioButtonSetup {
 	/// <param name="nestedContentAlwaysDisplayed">Pass true to force the nested content to always be displayed instead of only when the button is selected.
 	/// </param>
 	public static FlowRadioButtonSetup Create(
-		DisplaySetup displaySetup = null, ElementClassSet classes = null, bool highlightedWhenSelected = false, SpecifiedValue<FormAction> action = null,
-		PageModificationValue<bool> pageModificationValue = null, Func<IReadOnlyCollection<FlowComponent>> nestedContentGetter = null,
+		DisplaySetup? displaySetup = null, ElementClassSet? classes = null, bool highlightedWhenSelected = false, SpecifiedValue<FormAction?>? action = null,
+		PageModificationValue<bool>? pageModificationValue = null, Func<IReadOnlyCollection<FlowComponent>>? nestedContentGetter = null,
 		bool nestedContentAlwaysDisplayed = false ) =>
 		new(
 			displaySetup,
@@ -41,20 +40,20 @@ public class FlowRadioButtonSetup {
 	/// <param name="nestedContentAlwaysDisplayed">Pass true to force the nested content to always be displayed instead of only when the button is selected.
 	/// </param>
 	public static FlowRadioButtonSetup CreateReadOnly(
-		DisplaySetup displaySetup = null, ElementClassSet classes = null, bool highlightedWhenSelected = false,
-		Func<IReadOnlyCollection<FlowComponent>> nestedContentGetter = null, bool nestedContentAlwaysDisplayed = false ) =>
+		DisplaySetup? displaySetup = null, ElementClassSet? classes = null, bool highlightedWhenSelected = false,
+		Func<IReadOnlyCollection<FlowComponent>>? nestedContentGetter = null, bool nestedContentAlwaysDisplayed = false ) =>
 		new( displaySetup, classes, RadioButtonSetup.CreateReadOnly(), highlightedWhenSelected, nestedContentGetter, nestedContentAlwaysDisplayed );
 
-	internal readonly DisplaySetup DisplaySetup;
-	internal readonly ElementClassSet Classes;
+	internal readonly DisplaySetup? DisplaySetup;
+	internal readonly ElementClassSet? Classes;
 	internal readonly RadioButtonSetup RadioButtonSetup;
 	internal readonly bool HighlightedWhenSelected;
-	internal readonly Func<IReadOnlyCollection<FlowComponent>> NestedContentGetter;
+	internal readonly Func<IReadOnlyCollection<FlowComponent>>? NestedContentGetter;
 	internal readonly bool NestedContentAlwaysDisplayed;
 
 	private FlowRadioButtonSetup(
-		DisplaySetup displaySetup, ElementClassSet classes, RadioButtonSetup radioButtonSetup, bool highlightedWhenSelected,
-		Func<IReadOnlyCollection<FlowComponent>> nestedContentGetter, bool nestedContentAlwaysDisplayed ) {
+		DisplaySetup? displaySetup, ElementClassSet? classes, RadioButtonSetup radioButtonSetup, bool highlightedWhenSelected,
+		Func<IReadOnlyCollection<FlowComponent>>? nestedContentGetter, bool nestedContentAlwaysDisplayed ) {
 		DisplaySetup = displaySetup;
 		Classes = classes;
 		RadioButtonSetup = radioButtonSetup;
