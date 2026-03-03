@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.DataAccess.BlobStorage;
+﻿using EnterpriseWebLibrary.DataAccess.BlobStorage;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 using EnterpriseWebLibrary.IO;
@@ -19,7 +18,7 @@ public static class BlobManagementStatics {
 	/// EnterpriseWebLibrary.FileExtensions. Do not use this to force the file to be a specific type of file, such as an image (which consists of several file
 	/// extensions). Instead, use mustBeRenderableImage.</param>
 	/// <param name="mustBeRenderableImage">Pass true to only accept images (of any renderable type - jpgs, pngs, but not nefs).</param>
-	public static void ValidateUploadedFile( Validator validator, RsFile file, string[] acceptableFileExtensions, bool mustBeRenderableImage ) {
+	public static void ValidateUploadedFile( Validator validator, RsFile? file, string[]? acceptableFileExtensions, bool mustBeRenderableImage ) {
 		if( file == null )
 			return;
 
@@ -38,8 +37,8 @@ public static class BlobManagementStatics {
 			else
 				// Make sure it is an image type that we understand. Also perform optional custom validation.
 				try {
-					using( var stream = new MemoryStream( file.Contents ) )
-						System.Drawing.Image.FromStream( stream );
+					using var stream = new MemoryStream( file.Contents );
+					System.Drawing.Image.FromStream( stream );
 				}
 				catch( ArgumentException ) {
 					// If we end up in this catch block, it means that System.Drawing.Image does not understand our image. Since we already know that our content type
@@ -51,7 +50,7 @@ public static class BlobManagementStatics {
 	/// <summary>
 	/// Returns null if the file is null, the file is not an image, or there is no thumbnail resource getter.
 	/// </summary>
-	internal static IReadOnlyCollection<PhrasingComponent> GetThumbnailControl( BlobFile file, Func<int, ResourceInfo> thumbnailResourceGetter ) {
+	internal static IReadOnlyCollection<PhrasingComponent> GetThumbnailControl( BlobFile? file, Func<int, ResourceInfo>? thumbnailResourceGetter ) {
 		// NOTE: We'd like to check here whether the file is a renderable image or not. But we can't because we don't have the file contents.
 		// So, we'll have to make sure that all ThumbnailPageInfoCreators provide a page that knows how to handle NEF files (ideally we'd want
 		// it to behave as if there was no thumbnail at all if there is an unrenderable image file).
@@ -69,7 +68,7 @@ public static class BlobManagementStatics {
 	/// The file name is used as the label unless labelOverride is specified.
 	/// SystemBlobFileManagementProvider must be implemented.
 	/// </summary>
-	public static IReadOnlyCollection<PhrasingComponent> GetFileButton( int fileCollectionId, string labelOverride = null, string textIfNoFile = "" ) {
+	public static IReadOnlyCollection<PhrasingComponent> GetFileButton( int fileCollectionId, string? labelOverride = null, string textIfNoFile = "" ) {
 		var file = BlobStorageStatics.GetFirstFileFromCollection( fileCollectionId );
 		if( file == null )
 			return textIfNoFile.ToComponents();
@@ -81,7 +80,7 @@ public static class BlobManagementStatics {
 					actionGetter: () => new PostBackAction(
 						new PageReloadBehavior(
 							secondaryResponse: new SecondaryResponse(
-								new BlobFileResponse( BlobStorageStatics.GetFirstFileFromCollection( fileCollectionId ).FileId, () => true ),
+								new BlobFileResponse( BlobStorageStatics.GetFirstFileFromCollection( fileCollectionId )!.FileId, () => true ),
 								false ) ) ) ) ) ).ToCollection();
 	}
 
@@ -90,7 +89,7 @@ public static class BlobManagementStatics {
 	/// The file name is used as the label unless labelOverride is specified.
 	/// SystemBlobFileManagementProvider must be implemented.
 	/// </summary>
-	public static IReadOnlyCollection<PhrasingComponent> GetFileButtonFromFileId( int fileId, string labelOverride = null ) {
+	public static IReadOnlyCollection<PhrasingComponent> GetFileButtonFromFileId( int fileId, string? labelOverride = null ) {
 		var file = BlobStorageStatics.SystemProvider.GetFile( fileId );
 		return new EwfButton(
 			new StandardButtonStyle( labelOverride ?? file.FileName, buttonSize: ButtonSize.ShrinkWrap ),

@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 using EnterpriseWebLibrary.IO;
@@ -22,9 +21,9 @@ public class BlobFileManagerSetup {
 	/// <param name="uploadValidationErrorNotifier"></param>
 	/// <param name="uploadValidationMethod"></param>
 	public static BlobFileManagerSetup Create(
-		DisplaySetup displaySetup = null, ElementClassSet classes = null, Func<int, ResourceInfo> thumbnailResourceGetter = null,
-		bool omitNoExistingFileMessage = false, Func<bool, bool> uploadValidationPredicate = null, Action uploadValidationErrorNotifier = null,
-		Action<RsFile, Validator> uploadValidationMethod = null ) =>
+		DisplaySetup? displaySetup = null, ElementClassSet? classes = null, Func<int, ResourceInfo>? thumbnailResourceGetter = null,
+		bool omitNoExistingFileMessage = false, Func<bool, bool>? uploadValidationPredicate = null, Action? uploadValidationErrorNotifier = null,
+		Action<RsFile, Validator>? uploadValidationMethod = null ) =>
 		new(
 			displaySetup,
 			classes,
@@ -34,17 +33,17 @@ public class BlobFileManagerSetup {
 			uploadValidationErrorNotifier,
 			uploadValidationMethod );
 
-	internal readonly DisplaySetup DisplaySetup;
-	internal readonly ElementClassSet Classes;
-	internal readonly Func<int, ResourceInfo> ThumbnailResourceGetter;
+	internal readonly DisplaySetup? DisplaySetup;
+	internal readonly ElementClassSet? Classes;
+	internal readonly Func<int, ResourceInfo>? ThumbnailResourceGetter;
 	internal readonly bool OmitNoExistingFileMessage;
-	internal readonly Func<bool, bool> UploadValidationPredicate;
-	internal readonly Action UploadValidationErrorNotifier;
-	internal readonly Action<RsFile, Validator> UploadValidationMethod;
+	internal readonly Func<bool, bool>? UploadValidationPredicate;
+	internal readonly Action? UploadValidationErrorNotifier;
+	internal readonly Action<RsFile, Validator>? UploadValidationMethod;
 
-	internal BlobFileManagerSetup(
-		DisplaySetup displaySetup, ElementClassSet classes, Func<int, ResourceInfo> thumbnailResourceGetter, bool omitNoExistingFileMessage,
-		Func<bool, bool> uploadValidationPredicate, Action uploadValidationErrorNotifier, Action<RsFile, Validator> uploadValidationMethod ) {
+	private BlobFileManagerSetup(
+		DisplaySetup? displaySetup, ElementClassSet? classes, Func<int, ResourceInfo>? thumbnailResourceGetter, bool omitNoExistingFileMessage,
+		Func<bool, bool>? uploadValidationPredicate, Action? uploadValidationErrorNotifier, Action<RsFile, Validator>? uploadValidationMethod ) {
 		DisplaySetup = displaySetup;
 		Classes = classes;
 		ThumbnailResourceGetter = thumbnailResourceGetter;

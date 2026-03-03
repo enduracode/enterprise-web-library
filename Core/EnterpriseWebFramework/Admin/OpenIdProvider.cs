@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System.Security.Cryptography.X509Certificates;
+﻿using System.Security.Cryptography.X509Certificates;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic.AlternativeResourceModes;
 using EnterpriseWebLibrary.EnterpriseWebFramework.OpenIdProvider;
@@ -10,7 +9,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin;
 partial class OpenIdProvider {
 	protected override string getResourceName() => "OpenID Provider";
 
-	protected override AlternativeResourceMode createAlternativeMode() =>
+	protected override AlternativeResourceMode? createAlternativeMode() =>
 		OpenIdProviderStatics.OpenIdProviderEnabled ? null : new DisabledResourceMode( "The OpenID Provider is not enabled in this system." );
 
 	protected override PageContent getContent() {

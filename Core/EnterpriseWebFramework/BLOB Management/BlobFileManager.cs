@@ -50,7 +50,7 @@ public sealed class BlobFileManager: FlowComponent {
 						}
 
 						uploadedFile = postBackValue;
-						setup.UploadValidationMethod?.Invoke( postBackValue, validator );
+						setup.UploadValidationMethod?.Invoke( postBackValue!, validator );
 					} ).ToFormItem(
 					setup: new FormItemSetup( displaySetup: fileUploadDisplayedPmv.ToCondition( bool.TrueString.ToCollection() ).ToDisplaySetup() ),
 					label: "Select a new file:".ToComponents() )
@@ -73,8 +73,7 @@ public sealed class BlobFileManager: FlowComponent {
 				.PageComponent.ToCollection() ).ToCollection();
 
 		modificationMethod = () => {
-			if( fileCollectionId == null )
-				fileCollectionId = BlobStorageStatics.SystemProvider.InsertFileCollection();
+			fileCollectionId ??= BlobStorageStatics.SystemProvider.InsertFileCollection();
 
 			if( uploadedFile != null ) {
 				BlobStorageStatics.SystemProvider.DeleteFilesLinkedToFileCollection( fileCollectionId.Value );

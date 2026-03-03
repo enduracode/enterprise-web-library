@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
@@ -27,7 +26,7 @@ partial class UserManagement {
 		return Convert.ToBase64String( certificate.Export( X509ContentType.Pfx, password ) );
 	}
 
-	protected override AlternativeResourceMode createAlternativeMode() =>
+	protected override AlternativeResourceMode? createAlternativeMode() =>
 		UserManagementStatics.UserManagementEnabled ? null : new DisabledResourceMode( "User management is not enabled in this system." );
 
 	protected override IEnumerable<UrlPattern> getChildUrlPatterns() => User.UrlPatterns.UserIdPositiveInt( Es, "create" ).ToCollection();

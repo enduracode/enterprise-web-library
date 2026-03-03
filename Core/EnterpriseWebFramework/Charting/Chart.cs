@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System.Drawing;
+﻿using System.Drawing;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
@@ -40,7 +39,7 @@ public sealed class Chart: FlowComponent {
 	/// <param name="dataSets">The data sets.</param>
 	/// <param name="colors">The colors to use for the data sets. Pass null for default colors. If you specify your own colors, the number of colors does not
 	/// need to match the number of data sets. If you pass fewer colors than data sets, the chart will use random colors for the remaining data sets.</param>
-	public Chart( ChartSetup setup, [ NotNull ] IReadOnlyCollection<ChartDataSet> dataSets, IEnumerable<Color> colors = null ) {
+	public Chart( ChartSetup setup, IReadOnlyCollection<ChartDataSet> dataSets, IEnumerable<Color>? colors = null ) {
 		var rand = new Random();
 		colors = ( colors ?? getDefaultColors() ).Take( dataSets.Count )
 			.Pad( dataSets.Count, () => Color.FromArgb( rand.Next( 256 ), rand.Next( 256 ), rand.Next( 256 ) ) );

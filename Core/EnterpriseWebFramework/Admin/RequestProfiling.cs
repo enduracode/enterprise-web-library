@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.Caching;
+﻿using EnterpriseWebLibrary.Caching;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
@@ -11,7 +10,7 @@ using EnterpriseWebLibrary.UserManagement;
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.Admin;
 
 partial class RequestProfiling {
-	protected override AlternativeResourceMode createAlternativeMode() =>
+	protected override AlternativeResourceMode? createAlternativeMode() =>
 		UserManagementStatics.UserManagementEnabled || !ConfigurationStatics.IsLiveInstallation
 			? null
 			: new DisabledResourceMode( "To prevent unauthorized profiling, this feature requires user management to be enabled." );

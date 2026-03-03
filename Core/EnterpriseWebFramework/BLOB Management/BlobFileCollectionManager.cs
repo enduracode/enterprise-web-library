@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.DataAccess.BlobStorage;
+﻿using EnterpriseWebLibrary.DataAccess.BlobStorage;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
@@ -33,10 +32,10 @@ public sealed class BlobFileCollectionManager: FlowComponent {
 	/// <param name="fileCreatedOrReplacedNotifier">A method that executes after a file is created or replaced.</param>
 	/// <param name="filesDeletedNotifier">A method that executes after one or more files are deleted.</param>
 	public BlobFileCollectionManager(
-		int fileCollectionId, DateTimeZone timeZone, DisplaySetup displaySetup = null, string postBackIdBase = "", bool sortByName = false,
-		Func<int, ResourceInfo> thumbnailResourceGetter = null, IEnumerable<int> openedFileIds = null, MarkFileAsReadMethod unopenedFileOpenedNotifier = null,
-		bool disableModifications = false, Action<RsFile, Validator> uploadValidationMethod = null, NewFileNotificationMethod fileCreatedOrReplacedNotifier = null,
-		Action filesDeletedNotifier = null ) {
+		int fileCollectionId, DateTimeZone timeZone, DisplaySetup? displaySetup = null, string postBackIdBase = "", bool sortByName = false,
+		Func<int, ResourceInfo>? thumbnailResourceGetter = null, IEnumerable<int>? openedFileIds = null, MarkFileAsReadMethod? unopenedFileOpenedNotifier = null,
+		bool disableModifications = false, Action<RsFile, Validator>? uploadValidationMethod = null,
+		NewFileNotificationMethod? fileCreatedOrReplacedNotifier = null, Action? filesDeletedNotifier = null ) {
 		postBackIdBase = PostBack.GetCompositeId( "ewfFileCollection", postBackIdBase );
 
 		var columnSetups = new List<EwfTableField>();
@@ -77,8 +76,8 @@ public sealed class BlobFileCollectionManager: FlowComponent {
 	}
 
 	private EwfTableItem getFileItem(
-		BlobFile file, string postBackIdBase, Func<int, ResourceInfo> thumbnailResourceGetter, DateTimeZone timeZone, IEnumerable<int> openedFileIds,
-		MarkFileAsReadMethod unopenedFileOpenedNotifier ) {
+		BlobFile file, string postBackIdBase, Func<int, ResourceInfo>? thumbnailResourceGetter, DateTimeZone timeZone, IEnumerable<int>? openedFileIds,
+		MarkFileAsReadMethod? unopenedFileOpenedNotifier ) {
 		var cells = new List<EwfTableCell>();
 
 		var thumbnailControl = BlobManagementStatics.GetThumbnailControl( file, thumbnailResourceGetter );
@@ -109,9 +108,9 @@ public sealed class BlobFileCollectionManager: FlowComponent {
 	}
 
 	private IReadOnlyCollection<FlowComponent> getUploadComponents(
-		int fileCollectionId, IReadOnlyCollection<BlobFile> files, DisplaySetup displaySetup, string postBackIdBase,
-		Action<RsFile, Validator> uploadValidationMethod, NewFileNotificationMethod fileCreatedOrReplacedNotifier ) {
-		RsFile file = null;
+		int fileCollectionId, IReadOnlyCollection<BlobFile> files, DisplaySetup? displaySetup, string postBackIdBase,
+		Action<RsFile, Validator>? uploadValidationMethod, NewFileNotificationMethod? fileCreatedOrReplacedNotifier ) {
+		RsFile? file = null;
 		return FormState.ExecuteWithActions(
 			PostBack.CreateFull(
 				id: PostBack.GetCompositeId( postBackIdBase, "add" ),
@@ -144,7 +143,7 @@ public sealed class BlobFileCollectionManager: FlowComponent {
 					new FileUpload(
 						validationMethod: ( postBackValue, validator ) => {
 							file = postBackValue;
-							uploadValidationMethod?.Invoke( postBackValue, validator );
+							uploadValidationMethod?.Invoke( postBackValue!, validator );
 						} ).ToFormItem( label: "Select a new file:".ToComponents() ) )
 				.ToCollection() );
 	}
