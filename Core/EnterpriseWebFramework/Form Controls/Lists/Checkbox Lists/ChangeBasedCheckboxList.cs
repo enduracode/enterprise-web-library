@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -25,13 +24,13 @@ public static class ChangeBasedCheckboxList {
 	/// <param name="validationErrorNotifier"></param>
 	public static CheckboxList<ItemIdType> Create<ItemIdType>(
 		IEnumerable<ChangeBasedListItem<ItemIdType>> items, IEnumerable<ItemIdType> selectedItemIds, out Action modificationMethod,
-		DisplaySetup displaySetup = null, bool includeSelectAndDeselectAllButtons = false, ContentBasedLength minColumnWidth = null,
-		IEnumerable<ItemIdType> uiSelectedItemIds = null, SpecifiedValue<FormAction> action = null, FormAction selectionChangedAction = null,
-		Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
+		DisplaySetup? displaySetup = null, bool includeSelectAndDeselectAllButtons = false, ContentBasedLength? minColumnWidth = null,
+		IEnumerable<ItemIdType>? uiSelectedItemIds = null, SpecifiedValue<FormAction?>? action = null, FormAction? selectionChangedAction = null,
+		Func<bool, bool>? validationPredicate = null, Action? validationErrorNotifier = null ) {
 		items = items.Materialize();
 		var selectedItemIdSet = selectedItemIds.ToImmutableHashSet();
 
-		ImmutableHashSet<ItemIdType> selectedItemIdsInPostBack = null;
+		ImmutableHashSet<ItemIdType>? selectedItemIdsInPostBack = null;
 		modificationMethod = () => {
 			if( selectedItemIdsInPostBack == null )
 				return;
@@ -51,7 +50,7 @@ public static class ChangeBasedCheckboxList {
 				validationPredicate: validationPredicate,
 				validationErrorNotifier: validationErrorNotifier ),
 			uiSelectedItemIds ?? selectedItemIdSet,
-			validationMethod: ( postBackValue, validator ) => selectedItemIdsInPostBack = postBackValue.ToImmutableHashSet() );
+			validationMethod: ( postBackValue, _ ) => selectedItemIdsInPostBack = postBackValue.ToImmutableHashSet() );
 	}
 
 	/// <summary>
@@ -68,9 +67,9 @@ public static class ChangeBasedCheckboxList {
 	/// <param name="validationPredicate"></param>
 	/// <param name="validationErrorNotifier"></param>
 	public static CheckboxList<ItemIdType> Create<ItemIdType>(
-		IEnumerable<ChangeBasedListItemWithSelectionState<ItemIdType>> items, out Action modificationMethod, DisplaySetup displaySetup = null,
-		bool includeSelectAndDeselectAllButtons = false, ContentBasedLength minColumnWidth = null, SpecifiedValue<FormAction> action = null,
-		FormAction selectionChangedAction = null, Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
+		IEnumerable<ChangeBasedListItemWithSelectionState<ItemIdType>> items, out Action modificationMethod, DisplaySetup? displaySetup = null,
+		bool includeSelectAndDeselectAllButtons = false, ContentBasedLength? minColumnWidth = null, SpecifiedValue<FormAction?>? action = null,
+		FormAction? selectionChangedAction = null, Func<bool, bool>? validationPredicate = null, Action? validationErrorNotifier = null ) {
 		items = items.Materialize();
 		return Create(
 			from i in items select i.Item,

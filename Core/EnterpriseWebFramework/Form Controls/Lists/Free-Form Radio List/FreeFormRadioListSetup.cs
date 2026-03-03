@@ -1,5 +1,4 @@
-﻿#nullable disable
-namespace EnterpriseWebLibrary.EnterpriseWebFramework;
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 /// <summary>
 /// The configuration for a free-form radio list.
@@ -16,9 +15,9 @@ public static class FreeFormRadioListSetup {
 	/// <param name="validationPredicate"></param>
 	/// <param name="validationErrorNotifier"></param>
 	public static FreeFormRadioListSetup<ItemIdType> Create<ItemIdType>(
-		bool disableSingleButtonDetection = false, FormAction selectionChangedAction = null, PageModificationValue<ItemIdType> itemIdPageModificationValue = null,
-		IReadOnlyCollection<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups = null, Func<bool, bool> validationPredicate = null,
-		Action validationErrorNotifier = null ) {
+		bool disableSingleButtonDetection = false, FormAction? selectionChangedAction = null, PageModificationValue<ItemIdType>? itemIdPageModificationValue = null,
+		IReadOnlyCollection<ListItemMatchPageModificationSetup<ItemIdType>>? itemMatchPageModificationSetups = null, Func<bool, bool>? validationPredicate = null,
+		Action? validationErrorNotifier = null ) {
 		return new FreeFormRadioListSetup<ItemIdType>(
 			disableSingleButtonDetection,
 			selectionChangedAction,
@@ -34,19 +33,19 @@ public static class FreeFormRadioListSetup {
 /// </summary>
 public class FreeFormRadioListSetup<ItemIdType> {
 	internal readonly bool DisableSingleButtonDetection;
-	internal readonly FormAction SelectionChangedAction;
-	internal readonly PageModificationValue<ItemIdType> ItemIdPageModificationValue;
+	internal readonly FormAction? SelectionChangedAction;
+	internal readonly PageModificationValue<ItemIdType>? ItemIdPageModificationValue;
 	internal readonly IReadOnlyCollection<ListItemMatchPageModificationSetup<ItemIdType>> ItemMatchPageModificationSetups;
-	internal readonly Func<bool, bool> ValidationPredicate;
-	internal readonly Action ValidationErrorNotifier;
+	internal readonly Func<bool, bool>? ValidationPredicate;
+	internal readonly Action? ValidationErrorNotifier;
 
 	/// <summary>
 	/// Creates a setup object for a free-form radio list.
 	/// </summary>
 	internal FreeFormRadioListSetup(
-		bool disableSingleButtonDetection, FormAction selectionChangedAction, PageModificationValue<ItemIdType> itemIdPageModificationValue,
-		IReadOnlyCollection<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups, Func<bool, bool> validationPredicate,
-		Action validationErrorNotifier ) {
+		bool disableSingleButtonDetection, FormAction? selectionChangedAction, PageModificationValue<ItemIdType>? itemIdPageModificationValue,
+		IReadOnlyCollection<ListItemMatchPageModificationSetup<ItemIdType>>? itemMatchPageModificationSetups, Func<bool, bool>? validationPredicate,
+		Action? validationErrorNotifier ) {
 		DisableSingleButtonDetection = disableSingleButtonDetection;
 		SelectionChangedAction = selectionChangedAction;
 		ItemIdPageModificationValue = itemIdPageModificationValue;

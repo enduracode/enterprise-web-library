@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
@@ -19,9 +18,9 @@ public static class CheckboxListSetup {
 	/// <param name="validationPredicate"></param>
 	/// <param name="validationErrorNotifier"></param>
 	public static CheckboxListSetup<ItemIdType> Create<ItemIdType>(
-		IEnumerable<SelectListItem<ItemIdType>> items, DisplaySetup displaySetup = null, bool includeSelectAndDeselectAllButtons = false,
-		ContentBasedLength minColumnWidth = null, SpecifiedValue<FormAction> action = null, FormAction selectionChangedAction = null,
-		Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
+		IEnumerable<SelectListItem<ItemIdType>> items, DisplaySetup? displaySetup = null, bool includeSelectAndDeselectAllButtons = false,
+		ContentBasedLength? minColumnWidth = null, SpecifiedValue<FormAction?>? action = null, FormAction? selectionChangedAction = null,
+		Func<bool, bool>? validationPredicate = null, Action? validationErrorNotifier = null ) {
 		return new CheckboxListSetup<ItemIdType>(
 			displaySetup,
 			includeSelectAndDeselectAllButtons,
@@ -38,18 +37,18 @@ public static class CheckboxListSetup {
 /// The configuration for a checkbox list.
 /// </summary>
 public class CheckboxListSetup<ItemIdType> {
-	internal readonly DisplaySetup DisplaySetup;
+	internal readonly DisplaySetup? DisplaySetup;
 	internal readonly bool IncludeSelectAndDeselectAllButtons;
 	internal readonly IReadOnlyCollection<SelectListItem<ItemIdType>> Items;
-	internal readonly ContentBasedLength MinColumnWidth;
-	internal readonly FormAction Action;
-	internal readonly FormAction SelectionChangedAction;
-	internal readonly Func<bool, bool> ValidationPredicate;
-	internal readonly Action ValidationErrorNotifier;
+	internal readonly ContentBasedLength? MinColumnWidth;
+	internal readonly FormAction? Action;
+	internal readonly FormAction? SelectionChangedAction;
+	internal readonly Func<bool, bool>? ValidationPredicate;
+	internal readonly Action? ValidationErrorNotifier;
 
 	internal CheckboxListSetup(
-		DisplaySetup displaySetup, bool includeSelectAndDeselectAllButtons, IEnumerable<SelectListItem<ItemIdType>> items, ContentBasedLength minColumnWidth,
-		SpecifiedValue<FormAction> action, FormAction selectionChangedAction, Func<bool, bool> validationPredicate, Action validationErrorNotifier ) {
+		DisplaySetup? displaySetup, bool includeSelectAndDeselectAllButtons, IEnumerable<SelectListItem<ItemIdType>> items, ContentBasedLength? minColumnWidth,
+		SpecifiedValue<FormAction?>? action, FormAction? selectionChangedAction, Func<bool, bool>? validationPredicate, Action? validationErrorNotifier ) {
 		DisplaySetup = displaySetup;
 		IncludeSelectAndDeselectAllButtons = includeSelectAndDeselectAllButtons;
 		Items = items.Materialize();

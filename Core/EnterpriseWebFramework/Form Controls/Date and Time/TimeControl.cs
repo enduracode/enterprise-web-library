@@ -19,7 +19,7 @@ public class TimeControl: FormControl<FlowComponent> {
 			new CssElement( "TimeControl", "div.{0}".FormatWith( elementClass.ClassName ) ).ToCollection();
 	}
 
-	public FormControlLabeler Labeler { get; }
+	public FormControlLabeler? Labeler { get; }
 	public FlowComponent PageComponent { get; }
 	public EwfValidation? Validation { get; }
 

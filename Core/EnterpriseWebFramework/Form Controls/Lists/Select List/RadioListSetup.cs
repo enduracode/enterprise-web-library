@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -27,11 +26,11 @@ public static class RadioListSetup {
 	/// <param name="validationPredicate"></param>
 	/// <param name="validationErrorNotifier"></param>
 	public static RadioListSetup<ItemIdType> Create<ItemIdType>(
-		IEnumerable<SelectListItem<ItemIdType>> items, DisplaySetup displaySetup = null, bool useHorizontalLayout = false, ElementClassSet classes = null,
-		Func<ItemIdType, string> unlistedSelectedItemLabelGetter = null, bool disableSingleButtonDetection = false, SpecifiedValue<FormAction> action = null,
-		FormAction selectionChangedAction = null, PageModificationValue<ItemIdType> itemIdPageModificationValue = null,
-		IReadOnlyCollection<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups = null, Func<bool, bool> validationPredicate = null,
-		Action validationErrorNotifier = null ) =>
+		IEnumerable<SelectListItem<ItemIdType>> items, DisplaySetup? displaySetup = null, bool useHorizontalLayout = false, ElementClassSet? classes = null,
+		Func<ItemIdType, string>? unlistedSelectedItemLabelGetter = null, bool disableSingleButtonDetection = false, SpecifiedValue<FormAction?>? action = null,
+		FormAction? selectionChangedAction = null, PageModificationValue<ItemIdType>? itemIdPageModificationValue = null,
+		IReadOnlyCollection<ListItemMatchPageModificationSetup<ItemIdType>>? itemMatchPageModificationSetups = null, Func<bool, bool>? validationPredicate = null,
+		Action? validationErrorNotifier = null ) =>
 		new(
 			displaySetup,
 			useHorizontalLayout,
@@ -61,8 +60,8 @@ public static class RadioListSetup {
 	/// <param name="validationPredicate"></param>
 	/// <param name="validationErrorNotifier"></param>
 	public static RadioListSetup<ItemIdType> CreateReadOnly<ItemIdType>(
-		IEnumerable<SelectListItem<ItemIdType>> items, DisplaySetup displaySetup = null, bool useHorizontalLayout = false, ElementClassSet classes = null,
-		Func<ItemIdType, string> unlistedSelectedItemLabelGetter = null, Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) =>
+		IEnumerable<SelectListItem<ItemIdType>> items, DisplaySetup? displaySetup = null, bool useHorizontalLayout = false, ElementClassSet? classes = null,
+		Func<ItemIdType, string>? unlistedSelectedItemLabelGetter = null, Func<bool, bool>? validationPredicate = null, Action? validationErrorNotifier = null ) =>
 		new(
 			displaySetup,
 			useHorizontalLayout,
@@ -78,18 +77,18 @@ public static class RadioListSetup {
 /// The configuration for a radio list.
 /// </summary>
 public class RadioListSetup<ItemIdType> {
-	internal readonly DisplaySetup DisplaySetup;
+	internal readonly DisplaySetup? DisplaySetup;
 	internal readonly bool UseHorizontalLayout;
 	internal readonly bool IsReadOnly;
-	internal readonly ElementClassSet Classes;
-	internal readonly Func<ItemIdType, string> UnlistedSelectedItemLabelGetter;
+	internal readonly ElementClassSet? Classes;
+	internal readonly Func<ItemIdType, string>? UnlistedSelectedItemLabelGetter;
 	internal readonly IEnumerable<SelectListItem<ItemIdType>> Items;
 	internal readonly FreeFormRadioListSetup<ItemIdType> FreeFormSetup;
-	internal readonly FormAction Action;
+	internal readonly FormAction? Action;
 
 	internal RadioListSetup(
-		DisplaySetup displaySetup, bool useHorizontalLayout, bool isReadOnly, ElementClassSet classes, Func<ItemIdType, string> unlistedSelectedItemLabelGetter,
-		IEnumerable<SelectListItem<ItemIdType>> items, FreeFormRadioListSetup<ItemIdType> freeFormSetup, SpecifiedValue<FormAction> action ) {
+		DisplaySetup? displaySetup, bool useHorizontalLayout, bool isReadOnly, ElementClassSet? classes, Func<ItemIdType, string>? unlistedSelectedItemLabelGetter,
+		IEnumerable<SelectListItem<ItemIdType>> items, FreeFormRadioListSetup<ItemIdType> freeFormSetup, SpecifiedValue<FormAction?>? action ) {
 		DisplaySetup = displaySetup;
 		UseHorizontalLayout = useHorizontalLayout;
 		IsReadOnly = isReadOnly;

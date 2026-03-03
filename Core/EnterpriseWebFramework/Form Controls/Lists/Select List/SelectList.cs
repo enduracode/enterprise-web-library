@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Web;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
@@ -26,11 +25,10 @@ public static class SelectList {
 	[ UsedImplicitly ]
 	private class CssElementCreator: ControlCssElementCreator {
 		IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() =>
-			new[]
-				{
-					new CssElement( "DropDownList", "select.{0}".FormatWith( SelectCssClass.ClassName ), ".chosen-container" ),
-					new CssElement( "DropDownListContainer", "div.{0}".FormatWith( DropDownClass.ClassName ) )
-				};
+			[
+				new( "DropDownList", "select.{0}".FormatWith( SelectCssClass.ClassName ), ".chosen-container" ),
+				new( "DropDownListContainer", "div.{0}".FormatWith( DropDownClass.ClassName ) )
+			];
 	}
 
 	public static IEnumerable<SelectListItem<bool?>> GetYesNoItems() {
@@ -38,7 +36,7 @@ public static class SelectList {
 	}
 
 	public static IEnumerable<SelectListItem<bool?>> GetTrueFalseItems( string trueLabel, string falseLabel ) {
-		return new[] { SelectListItem.Create<bool?>( true, trueLabel ), SelectListItem.Create<bool?>( false, falseLabel ) };
+		return [ SelectListItem.Create<bool?>( true, trueLabel ), SelectListItem.Create<bool?>( false, falseLabel ) ];
 	}
 
 	/// <summary>
@@ -50,9 +48,9 @@ public static class SelectList {
 	/// <param name="defaultValueItemLabel">The label of the default-value item, which will appear first, and only if none of the list items have an ID with the
 	/// default value. Do not pass null. If you pass the empty string, no default-value item will appear and therefore none of the radio buttons will be
 	/// selected if the selected item ID has the default value and none of the list items do.</param>
-	/// <param name="validationMethod">The validation method. Pass null if you’re only using this radio-button list for page modification.</param>
+	/// <param name="validationMethod">The validation method. Pass null if you're only using this radio-button list for page modification.</param>
 	public static SelectList<ItemIdType> CreateRadioList<ItemIdType>(
-		RadioListSetup<ItemIdType> setup, ItemIdType selectedItemId, string defaultValueItemLabel = "", Action<ItemIdType, Validator> validationMethod = null ) =>
+		RadioListSetup<ItemIdType> setup, ItemIdType selectedItemId, string defaultValueItemLabel = "", Action<ItemIdType, Validator>? validationMethod = null ) =>
 		new(
 			setup.DisplaySetup,
 			setup.UseHorizontalLayout,
@@ -88,10 +86,10 @@ public static class SelectList {
 	/// This will only be included if none of the list items have an ID with the default value and the default-value item label is the empty string. If you pass
 	/// false, the list will still include a default-value placeholder if the selected item ID has the default value and none of the list items do, but in this
 	/// case the placeholder will not be considered a valid selection.</param>
-	/// <param name="validationMethod">The validation method. Pass null if you’re only using this control for page modification.</param>
+	/// <param name="validationMethod">The validation method. Pass null if you're only using this control for page modification.</param>
 	public static SelectList<ItemIdType> CreateDropDown<ItemIdType>(
 		DropDownSetup<ItemIdType> setup, ItemIdType selectedItemId, string defaultValueItemLabel = "", bool placeholderIsValid = false,
-		Action<ItemIdType, Validator> validationMethod = null ) =>
+		Action<ItemIdType, Validator>? validationMethod = null ) =>
 		new(
 			setup.DisplaySetup,
 			null,
@@ -136,23 +134,23 @@ public class SelectList<ItemIdType>: FormControl<FlowComponent> {
 		internal string StringId =>
 			// Represent the default value with the empty string to support drop-down list placeholders. The HTML spec states that the "placeholder label option"
 			// must have a value of the empty string. See https://html.spec.whatwg.org/multipage/forms.html#the-select-element.
-			EwlStatics.AreEqual( item.Id, EwlStatics.GetDefaultValue<ItemIdType>( false ) ) ? "" : item.Id.ToString();
+			EwlStatics.AreEqual( item.Id, EwlStatics.GetDefaultValue<ItemIdType>( false ) ) ? "" : item.Id!.ToString()!;
 
 		internal bool IsValid => isValid;
 		internal bool IsPlaceholder => isPlaceholder;
 	}
 
-	public FormControlLabeler Labeler { get; }
+	public FormControlLabeler? Labeler { get; }
 	public FlowComponent PageComponent { get; }
-	public EwfValidation Validation { get; }
+	public EwfValidation? Validation { get; }
 
 	internal SelectList(
-		DisplaySetup displaySetup, bool? useHorizontalRadioLayout, bool? useNativeDropDownControl, ContentBasedLength width, bool isReadOnly,
-		ElementClassSet classes, Func<ItemIdType, string> unlistedSelectedItemLabelGetter, string defaultValueItemLabel, bool? placeholderIsValid,
-		string placeholderText, IEnumerable<SelectListItem<ItemIdType>> listItems, bool? disableSingleRadioButtonDetection, ItemIdType selectedItemId,
-		string autoFillTokens, FormAction action, FormAction selectionChangedAction, PageModificationValue<ItemIdType> itemIdPageModificationValue,
-		IReadOnlyCollection<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups, Func<bool, bool> validationPredicate,
-		Action validationErrorNotifier, Action<ItemIdType, Validator> validationMethod ) {
+		DisplaySetup? displaySetup, bool? useHorizontalRadioLayout, bool? useNativeDropDownControl, ContentBasedLength? width, bool isReadOnly,
+		ElementClassSet? classes, Func<ItemIdType, string>? unlistedSelectedItemLabelGetter, string defaultValueItemLabel, bool? placeholderIsValid,
+		string? placeholderText, IEnumerable<SelectListItem<ItemIdType>> listItems, bool? disableSingleRadioButtonDetection, ItemIdType selectedItemId,
+		string autoFillTokens, FormAction? action, FormAction? selectionChangedAction, PageModificationValue<ItemIdType>? itemIdPageModificationValue,
+		IReadOnlyCollection<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups, Func<bool, bool>? validationPredicate,
+		Action? validationErrorNotifier, Action<ItemIdType, Validator>? validationMethod ) {
 		var items = listItems.Select( i => new ListItem( i, true, false ) ).ToImmutableArray();
 		items = getInitialItems(
 				!useHorizontalRadioLayout.HasValue,
@@ -180,7 +178,7 @@ public class SelectList<ItemIdType>: FormControl<FlowComponent> {
 				items.All( i => i.IsValid ) ? null : false,
 				selectedItemId,
 				setup: FreeFormRadioListSetup.Create(
-					disableSingleButtonDetection: disableSingleRadioButtonDetection.Value,
+					disableSingleButtonDetection: disableSingleRadioButtonDetection!.Value,
 					selectionChangedAction: selectionChangedAction,
 					itemIdPageModificationValue: itemIdPageModificationValue,
 					itemMatchPageModificationSetups: itemMatchPageModificationSetups,
@@ -195,7 +193,7 @@ public class SelectList<ItemIdType>: FormControl<FlowComponent> {
 				                   label: i.Item.Label.ToComponents(),
 				                   setup: isReadOnly
 					                          ? RadioButtonSetup.CreateReadOnly()
-					                          : RadioButtonSetup.Create( action: new SpecifiedValue<FormAction>( action ) ) );
+					                          : RadioButtonSetup.Create( action: new SpecifiedValue<FormAction?>( action ) ) );
 			PageComponent = new GenericFlowContainer(
 				useHorizontalRadioLayout.Value
 					? new LineList( from i in radioButtons select (LineListItem)i.PageComponent.ToCollection().ToComponentListItem() ).ToCollection<FlowComponent>()
@@ -214,7 +212,7 @@ public class SelectList<ItemIdType>: FormControl<FlowComponent> {
 			var formValue = new FormValue<ItemIdType>(
 				() => selectedItemId,
 				() => isReadOnly ? "" : id.Id,
-				v => v.ObjectToString( true ),
+				v => v.ObjectToString( true )!,
 				rawValue => rawValue != null && itemsByStringId.ContainsKey( rawValue )
 					            ? PostBackValueValidationResult<ItemIdType>.CreateValid( itemsByStringId[ rawValue ].Id )
 					            : PostBackValueValidationResult<ItemIdType>.CreateInvalid() );
@@ -228,7 +226,7 @@ public class SelectList<ItemIdType>: FormControl<FlowComponent> {
 						focusDependentData: new DisplayableElementFocusDependentData(
 							includeIdAttribute: !isReadOnly,
 							jsInitStatements: !isReadOnly
-								                  ? SubmitButton.GetImplicitSubmissionKeyPressStatements( action, useNativeDropDownControl.Value )
+								                  ? SubmitButton.GetImplicitSubmissionKeyPressStatements( action, useNativeDropDownControl!.Value )
 									                  .Surround( "$( '#{0}' ).keypress( function( e ) {{ ".FormatWith( containerContext.Id ), " } );" )
 								                  : "" ) ),
 					classes: SelectList.DropDownClass.Add( classes ?? ElementClassSet.Empty ),
@@ -268,16 +266,17 @@ public class SelectList<ItemIdType>: FormControl<FlowComponent> {
 													: "",
 												StringTools.ConcatenateWithDelimiter(
 														" ",
-														( itemIdPageModificationValue?.GetJsModificationStatements( "$( this ).val()" ) ?? "" ).ToCollection()
-														.Concat(
-															itemMatchPageModificationSetups.Select( setup => setup.PageModificationValue.GetJsModificationStatements(
-																"[ {0} ].indexOf( $( this ).val() ) != -1".FormatWith(
-																	StringTools.ConcatenateWithDelimiter(
-																		", ",
-																		setup.ItemIds.Select( i => "'" + i.ObjectToString( true ) + "'" ).ToArray() ) ) ) ) )
-														.ToArray() )
+														itemIdPageModificationValue.GetJsModificationStatements( "$( this ).val()" )
+															.ToCollection()
+															.Concat(
+																itemMatchPageModificationSetups.Select( setup => setup.PageModificationValue.GetJsModificationStatements(
+																	"[ {0} ].indexOf( $( this ).val() ) != -1".FormatWith(
+																		StringTools.ConcatenateWithDelimiter(
+																			", ",
+																			setup.ItemIds.Select( i => "'" + i.ObjectToString( true ) + "'" ).ToArray() ) ) ) ) )
+															.ToArray() )
 													.Surround( "$( '#{0}' ).change( function() {{ ".FormatWith( context.Id ), " } );" ),
-												getChosenLogic( useNativeDropDownControl.Value, width, items, isFocused ).Surround( "$( '#{0}' )".FormatWith( context.Id ), ";" ) ) );
+												getChosenLogic( useNativeDropDownControl!.Value, width, items, isFocused ).Surround( "$( '#{0}' )".FormatWith( context.Id ), ";" ) ) );
 									} );
 							},
 							classes: SelectList.SelectCssClass,
@@ -311,7 +310,7 @@ public class SelectList<ItemIdType>: FormControl<FlowComponent> {
 	}
 
 	private IEnumerable<ListItem> getInitialItems(
-		bool isDropDown, Func<ItemIdType, string> unlistedSelectedItemLabelGetter, string defaultValueItemLabel, bool? placeholderIsValid, string placeholderText,
+		bool isDropDown, Func<ItemIdType, string>? unlistedSelectedItemLabelGetter, string defaultValueItemLabel, bool? placeholderIsValid, string? placeholderText,
 		IReadOnlyCollection<ListItem> items, ItemIdType selectedItemId ) {
 		var itemIdDefaultValue = EwlStatics.GetDefaultValue<ItemIdType>( true );
 		var selectedItemIdHasDefaultValue = EwlStatics.AreEqual( selectedItemId, itemIdDefaultValue );
@@ -325,21 +324,21 @@ public class SelectList<ItemIdType>: FormControl<FlowComponent> {
 		if( items.Any( i => EwlStatics.AreEqual( i.Item.Id, itemIdDefaultValue ) ) )
 			yield break;
 
-		var includeDefaultValueItemOrValidPlaceholder = defaultValueItemLabel.Any() || ( isDropDown && placeholderIsValid.Value );
+		var includeDefaultValueItemOrValidPlaceholder = defaultValueItemLabel.Any() || ( isDropDown && placeholderIsValid!.Value );
 		if( !selectedItemIdHasDefaultValue && !includeDefaultValueItemOrValidPlaceholder )
 			yield break;
 
 		var isPlaceholder = isDropDown && !defaultValueItemLabel.Any();
 		yield return new ListItem(
-			SelectListItem.Create( itemIdDefaultValue, isPlaceholder ? placeholderText : defaultValueItemLabel ),
+			SelectListItem.Create( itemIdDefaultValue, isPlaceholder ? placeholderText! : defaultValueItemLabel ),
 			includeDefaultValueItemOrValidPlaceholder,
 			isPlaceholder );
 	}
 
-	private string getChosenLogic( bool useNativeControl, ContentBasedLength width, ImmutableArray<ListItem> items, bool isFocused ) {
+	private string getChosenLogic( bool useNativeControl, ContentBasedLength? width, ImmutableArray<ListItem> items, bool isFocused ) {
 		var placeholderItem = items.SingleOrDefault( i => i.IsPlaceholder );
 
-		// Chosen’s allow_single_deselect only works if the placeholder is the first item.
+		// Chosen's allow_single_deselect only works if the placeholder is the first item.
 		var chosenLogic = !useNativeControl && ( placeholderItem == null || placeholderItem == items.First() )
 			                  ? ".on( 'chosen:ready', function() {{ {0} }} ).chosen( {{ {1} }} )".FormatWith(
 				                  "$( this ).next().find( 'input.chosen-search-input' ).attr( 'aria-label', 'Search' );" +

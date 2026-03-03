@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 using Tewl.InputValidation;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -8,9 +7,9 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 /// The configuration for an HTML block editor.
 /// </summary>
 public class HtmlBlockEditorSetup {
-	internal readonly DisplaySetup DisplaySetup;
+	internal readonly DisplaySetup? DisplaySetup;
 	internal readonly WysiwygHtmlEditorSetup WysiwygSetup;
-	internal readonly Action<Validator> AdditionalValidationMethod;
+	internal readonly Action<Validator>? AdditionalValidationMethod;
 
 	/// <summary>
 	/// Creates an HTML block editor setup object.
@@ -23,8 +22,8 @@ public class HtmlBlockEditorSetup {
 	/// <param name="validationErrorNotifier"></param>
 	/// <param name="additionalValidationMethod"></param>
 	public HtmlBlockEditorSetup(
-		DisplaySetup displaySetup = null, bool isReadOnly = false, string ckEditorConfiguration = "", Func<bool, bool> validationPredicate = null,
-		Action validationErrorNotifier = null, Action<Validator> additionalValidationMethod = null ) {
+		DisplaySetup? displaySetup = null, bool isReadOnly = false, string ckEditorConfiguration = "", Func<bool, bool>? validationPredicate = null,
+		Action? validationErrorNotifier = null, Action<Validator>? additionalValidationMethod = null ) {
 		DisplaySetup = displaySetup;
 		WysiwygSetup = new WysiwygHtmlEditorSetup(
 			isReadOnly: isReadOnly,

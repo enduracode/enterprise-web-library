@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -30,11 +29,12 @@ public static class DropDownSetup {
 	/// <param name="validationPredicate"></param>
 	/// <param name="validationErrorNotifier"></param>
 	public static DropDownSetup<ItemIdType> Create<ItemIdType>(
-		IEnumerable<SelectListItem<ItemIdType>> items, DisplaySetup displaySetup = null, bool useNativeControl = false, ContentBasedLength width = null,
-		Func<ItemIdType, string> unlistedSelectedItemLabelGetter = null, string placeholderText = "Please select", string autoFillTokens = "",
-		SpecifiedValue<FormAction> action = null, FormAction selectionChangedAction = null, PageModificationValue<ItemIdType> itemIdPageModificationValue = null,
-		IReadOnlyCollection<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups = null, Func<bool, bool> validationPredicate = null,
-		Action validationErrorNotifier = null ) =>
+		IEnumerable<SelectListItem<ItemIdType>> items, DisplaySetup? displaySetup = null, bool useNativeControl = false, ContentBasedLength? width = null,
+		Func<ItemIdType, string>? unlistedSelectedItemLabelGetter = null, string placeholderText = "Please select", string autoFillTokens = "",
+		SpecifiedValue<FormAction?>? action = null, FormAction? selectionChangedAction = null,
+		PageModificationValue<ItemIdType>? itemIdPageModificationValue = null,
+		IReadOnlyCollection<ListItemMatchPageModificationSetup<ItemIdType>>? itemMatchPageModificationSetups = null, Func<bool, bool>? validationPredicate = null,
+		Action? validationErrorNotifier = null ) =>
 		new(
 			displaySetup,
 			useNativeControl,
@@ -66,9 +66,9 @@ public static class DropDownSetup {
 	/// <param name="validationPredicate"></param>
 	/// <param name="validationErrorNotifier"></param>
 	public static DropDownSetup<ItemIdType> CreateReadOnly<ItemIdType>(
-		IEnumerable<SelectListItem<ItemIdType>> items, DisplaySetup displaySetup = null, ContentBasedLength width = null,
-		Func<ItemIdType, string> unlistedSelectedItemLabelGetter = null, string placeholderText = "Please select", Func<bool, bool> validationPredicate = null,
-		Action validationErrorNotifier = null ) =>
+		IEnumerable<SelectListItem<ItemIdType>> items, DisplaySetup? displaySetup = null, ContentBasedLength? width = null,
+		Func<ItemIdType, string>? unlistedSelectedItemLabelGetter = null, string placeholderText = "Please select", Func<bool, bool>? validationPredicate = null,
+		Action? validationErrorNotifier = null ) =>
 		new(
 			displaySetup,
 			true,
@@ -91,28 +91,28 @@ public static class DropDownSetup {
 /// The configuration for a drop-down.
 /// </summary>
 public class DropDownSetup<ItemIdType> {
-	internal readonly DisplaySetup DisplaySetup;
+	internal readonly DisplaySetup? DisplaySetup;
 	internal readonly bool UseNativeControl;
-	internal readonly ContentBasedLength Width;
+	internal readonly ContentBasedLength? Width;
 	internal readonly bool IsReadOnly;
-	internal readonly ElementClassSet Classes;
-	internal readonly Func<ItemIdType, string> UnlistedSelectedItemLabelGetter;
+	internal readonly ElementClassSet? Classes;
+	internal readonly Func<ItemIdType, string>? UnlistedSelectedItemLabelGetter;
 	internal readonly string PlaceholderText;
 	internal readonly IEnumerable<SelectListItem<ItemIdType>> Items;
 	internal readonly string AutoFillTokens;
-	internal readonly FormAction Action;
-	internal readonly FormAction SelectionChangedAction;
-	internal readonly PageModificationValue<ItemIdType> ItemIdPageModificationValue;
+	internal readonly FormAction? Action;
+	internal readonly FormAction? SelectionChangedAction;
+	internal readonly PageModificationValue<ItemIdType>? ItemIdPageModificationValue;
 	internal readonly IReadOnlyCollection<ListItemMatchPageModificationSetup<ItemIdType>> ItemMatchPageModificationSetups;
-	internal readonly Func<bool, bool> ValidationPredicate;
-	internal readonly Action ValidationErrorNotifier;
+	internal readonly Func<bool, bool>? ValidationPredicate;
+	internal readonly Action? ValidationErrorNotifier;
 
 	internal DropDownSetup(
-		DisplaySetup displaySetup, bool useNativeControl, ContentBasedLength width, bool isReadOnly, ElementClassSet classes,
-		Func<ItemIdType, string> unlistedSelectedItemLabelGetter, string placeholderText, IEnumerable<SelectListItem<ItemIdType>> items, string autoFillTokens,
-		SpecifiedValue<FormAction> action, FormAction selectionChangedAction, PageModificationValue<ItemIdType> itemIdPageModificationValue,
-		IReadOnlyCollection<ListItemMatchPageModificationSetup<ItemIdType>> itemMatchPageModificationSetups, Func<bool, bool> validationPredicate,
-		Action validationErrorNotifier ) {
+		DisplaySetup? displaySetup, bool useNativeControl, ContentBasedLength? width, bool isReadOnly, ElementClassSet? classes,
+		Func<ItemIdType, string>? unlistedSelectedItemLabelGetter, string placeholderText, IEnumerable<SelectListItem<ItemIdType>> items, string autoFillTokens,
+		SpecifiedValue<FormAction?>? action, FormAction? selectionChangedAction, PageModificationValue<ItemIdType>? itemIdPageModificationValue,
+		IReadOnlyCollection<ListItemMatchPageModificationSetup<ItemIdType>>? itemMatchPageModificationSetups, Func<bool, bool>? validationPredicate,
+		Action? validationErrorNotifier ) {
 		DisplaySetup = displaySetup;
 		UseNativeControl = useNativeControl;
 		Width = width;

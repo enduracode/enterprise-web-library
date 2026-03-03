@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 
@@ -25,7 +24,7 @@ public class HtmlBlockContainer: FlowComponent {
 	/// <param name="htmlBlockId"></param>
 	/// <param name="displaySetup"></param>
 	/// <param name="classes">The classes on the container.</param>
-	public HtmlBlockContainer( int htmlBlockId, DisplaySetup displaySetup = null, ElementClassSet classes = null ): this(
+	public HtmlBlockContainer( int htmlBlockId, DisplaySetup? displaySetup = null, ElementClassSet? classes = null ): this(
 		HtmlBlockStatics.GetHtml( htmlBlockId ),
 		displaySetup: displaySetup,
 		classes: classes ) {}
@@ -36,9 +35,9 @@ public class HtmlBlockContainer: FlowComponent {
 	/// <param name="html"></param>
 	/// <param name="displaySetup"></param>
 	/// <param name="classes">The classes on the container.</param>
-	public HtmlBlockContainer( string html, DisplaySetup displaySetup = null, ElementClassSet classes = null ) {
+	public HtmlBlockContainer( string html, DisplaySetup? displaySetup = null, ElementClassSet? classes = null ) {
 		this.html = html;
-		children = new DisplayableElement( context => new DisplayableElementData(
+		children = new DisplayableElement( _ => new DisplayableElementData(
 			displaySetup,
 			() => new DisplayableElementLocalData( "div" ),
 			classes: elementClass.Add( classes ?? ElementClassSet.Empty ),

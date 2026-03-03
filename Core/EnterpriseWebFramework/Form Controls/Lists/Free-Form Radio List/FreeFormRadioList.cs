@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.IdReferencing;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.IdReferencing;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;
 using JetBrains.Annotations;
 using MoreLinq;
@@ -21,10 +20,10 @@ public static class FreeFormRadioList {
 	/// state to be valid.</param>
 	/// <param name="selectedItemId"></param>
 	/// <param name="setup">The setup object for the free-form radio list.</param>
-	/// <param name="validationMethod">The validation method. Pass null if you’re only using this radio-button list for page modification.</param>
+	/// <param name="validationMethod">The validation method. Pass null if you're only using this radio-button list for page modification.</param>
 	public static FreeFormRadioList<ItemIdType> Create<ItemIdType>(
-		bool? noSelectionIsValid, ItemIdType selectedItemId, FreeFormRadioListSetup<ItemIdType> setup = null,
-		Action<ItemIdType, Validator> validationMethod = null ) {
+		bool? noSelectionIsValid, ItemIdType selectedItemId, FreeFormRadioListSetup<ItemIdType>? setup = null,
+		Action<ItemIdType, Validator>? validationMethod = null ) {
 		return new FreeFormRadioList<ItemIdType>( noSelectionIsValid, setup, selectedItemId, validationMethod );
 	}
 }
@@ -35,17 +34,17 @@ public static class FreeFormRadioList {
 /// </summary>
 [ PublicAPI ]
 public class FreeFormRadioList<ItemIdType> {
-	private readonly FormValue<ElementId> formValue;
+	private readonly FormValue<ElementId?> formValue;
 	private readonly bool? noSelectionIsValid;
 
 	private readonly List<( ItemIdType itemId, ElementId buttonId, bool isReadOnly, PageModificationValue<bool> pmv )>
 		itemIdAndButtonIdAndIsReadOnlyAndPmvQuadruples = new();
 
 	private readonly FreeFormRadioListSetup<ItemIdType> listSetup;
-	private readonly EwfValidation validation;
+	private readonly EwfValidation? validation;
 
 	internal FreeFormRadioList(
-		bool? noSelectionIsValid, FreeFormRadioListSetup<ItemIdType> setup, ItemIdType selectedItemId, Action<ItemIdType, Validator> validationMethod ) {
+		bool? noSelectionIsValid, FreeFormRadioListSetup<ItemIdType>? setup, ItemIdType selectedItemId, Action<ItemIdType, Validator>? validationMethod ) {
 		setup ??= FreeFormRadioListSetup.Create<ItemIdType>();
 
 		formValue = RadioButtonGroup.GetFormValue(
@@ -81,14 +80,14 @@ public class FreeFormRadioList<ItemIdType> {
 				validationMethod( postBackItemId, validator );
 			} );
 
-		PageBase.Current.AddControlTreeValidation( () => RadioButtonGroup.ValidateControls(
+		PageBase.Current!.AddControlTreeValidation( () => RadioButtonGroup.ValidateControls(
 			noSelectionIsValid.HasValue,
 			EwlStatics.AreEqual( getNoSelectionItemId(), selectedItemId ),
 			from i in itemIdAndButtonIdAndIsReadOnlyAndPmvQuadruples select ( i.buttonId, i.isReadOnly, EwlStatics.AreEqual( i.itemId, selectedItemId ) ),
 			setup.DisableSingleButtonDetection ) );
 	}
 
-	private ItemIdType getItemIdFromButtonId( ElementId buttonId ) =>
+	private ItemIdType getItemIdFromButtonId( ElementId? buttonId ) =>
 		itemIdAndButtonIdAndIsReadOnlyAndPmvQuadruples.Where( i => i.buttonId == buttonId )
 			.Select( i => i.itemId )
 			.FallbackIfEmpty( getNoSelectionItemId() )
@@ -100,14 +99,14 @@ public class FreeFormRadioList<ItemIdType> {
 	/// <param name="listItemId"></param>
 	/// <param name="label">The radio button label. Do not pass null. Pass an empty collection for no label.</param>
 	/// <param name="setup">The setup object for the radio button.</param>
-	public Checkbox CreateRadioButton( ItemIdType listItemId, IReadOnlyCollection<PhrasingComponent> label, RadioButtonSetup setup = null ) {
+	public Checkbox CreateRadioButton( ItemIdType listItemId, IReadOnlyCollection<PhrasingComponent> label, RadioButtonSetup? setup = null ) {
 		setup = setup?.AddPmv() ?? RadioButtonSetup.Create( pageModificationValue: new PageModificationValue<bool>() );
 
 		validateListItem( listItemId );
 
 		var id = new ElementId();
-		formValue.AddPageModificationValue( setup.PageModificationValue, v => v == id );
-		itemIdAndButtonIdAndIsReadOnlyAndPmvQuadruples.Add( ( listItemId, id, setup.IsReadOnly, setup.PageModificationValue ) );
+		formValue.AddPageModificationValue( setup.PageModificationValue!, v => v == id );
+		itemIdAndButtonIdAndIsReadOnlyAndPmvQuadruples.Add( ( listItemId, id, setup.IsReadOnly, setup.PageModificationValue! ) );
 
 		return new Checkbox(
 			formValue,
@@ -133,7 +132,7 @@ public class FreeFormRadioList<ItemIdType> {
 	/// <param name="listItemId"></param>
 	/// <param name="label">The radio button label. Do not pass null. Pass an empty collection for no label.</param>
 	/// <param name="setup">The setup object for the flow radio button.</param>
-	public FlowCheckbox CreateFlowRadioButton( ItemIdType listItemId, IReadOnlyCollection<PhrasingComponent> label, FlowRadioButtonSetup setup = null ) {
+	public FlowCheckbox CreateFlowRadioButton( ItemIdType listItemId, IReadOnlyCollection<PhrasingComponent> label, FlowRadioButtonSetup? setup = null ) {
 		setup = setup?.AddPmv() ?? FlowRadioButtonSetup.Create( pageModificationValue: new PageModificationValue<bool>() );
 		return new FlowCheckbox( setup, CreateRadioButton( listItemId, label, setup: setup.RadioButtonSetup ) );
 	}
@@ -147,7 +146,7 @@ public class FreeFormRadioList<ItemIdType> {
 
 	private ItemIdType getNoSelectionItemId() => EwlStatics.GetDefaultValue<ItemIdType>( true );
 
-	private string getStringId( ItemIdType id ) => id.ObjectToString( true );
+	private string getStringId( ItemIdType id ) => id.ObjectToString( true )!;
 
-	public EwfValidation Validation => validation;
+	public EwfValidation? Validation => validation;
 }

@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.MailMerging;
 using EnterpriseWebLibrary.SystemSpecificLogic;
@@ -12,13 +11,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 public static class HtmlBlockStatics {
 	private const string providerName = "HtmlBlockEditing";
 
-	private static SystemProviderReference<SystemHtmlBlockEditingProvider> provider;
+	private static SystemProviderReference<SystemHtmlBlockEditingProvider> provider = null!;
 
 	internal static void Init() {
 		provider = SystemSpecificLogicStatics.GetLibraryProvider<SystemHtmlBlockEditingProvider>( providerName );
 	}
 
-	internal static SystemHtmlBlockEditingProvider SystemProvider => provider.GetProvider();
+	internal static SystemHtmlBlockEditingProvider SystemProvider => provider.GetProvider()!;
 
 	/// <summary>
 	/// Gets the HTML from the specified HTML block, after decoding intra site URIs.
@@ -67,7 +66,7 @@ public static class HtmlBlockStatics {
 		// The scheme name consist of a sequence of characters beginning with a letter and followed by any combination of letters, digits, plus ("+"), period
 		// ("."), or hyphen ("-"). Although schemes are case-insensitive, the canonical form is lowercase and documents that specify schemes must do so with
 		// lowercase letters.
-		var schemeRegex = new Regex( @"^([a-z][a-z0-9+.-]*://|mailto:)", RegexOptions.IgnoreCase );
+		var schemeRegex = new Regex( "^([a-z][a-z0-9+.-]*://|mailto:)", RegexOptions.IgnoreCase );
 
 		// Get everything that looks like an HTML tag
 		foreach( Match match in htmlTagRegex.Matches( html ) )
@@ -78,7 +77,7 @@ public static class HtmlBlockStatics {
 			// The URL is definitely relative if it doesn't include a scheme. Skip scheme-less URLs that appear to be merge fields.
 			if( !schemeRegex.IsMatch( url ) && !url.StartsWith( "@@" ) ) {
 				// Passed all tests. Change this relative URL to an absolute URL.
-				var uri = new Uri( new Uri( EwfRequest.Current.Url ), url );
+				var uri = new Uri( new Uri( EwfRequest.Current!.Url ), url );
 				html = html.Replace( url, uri.AbsoluteUri );
 			}
 		}

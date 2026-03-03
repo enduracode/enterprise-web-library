@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
@@ -15,12 +14,12 @@ internal class CheckboxListCssElementCreator: ControlCssElementCreator {
 	internal static readonly ElementClass ContentContainerClass = new( "ewfClC" );
 
 	IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
-		return new[]
-			{
+		return
+			[
 				new CssElement( "CheckboxList", "div.{0}".FormatWith( ListClass.ClassName ) ),
 				new CssElement( "CheckboxListActionContainer", "div.{0}".FormatWith( ActionContainerClass.ClassName ) ),
 				new CssElement( "CheckboxListContentContainer", "div.{0}".FormatWith( ContentContainerClass.ClassName ) )
-			};
+			];
 	}
 }
 
@@ -30,16 +29,16 @@ internal class CheckboxListCssElementCreator: ControlCssElementCreator {
 /// </summary>
 public sealed class CheckboxList<ItemIdType>: FormControl<FlowComponent> {
 	public FlowComponent PageComponent { get; }
-	public EwfValidation Validation { get; }
+	public EwfValidation? Validation { get; }
 
 	/// <summary>
 	/// Creates a checkbox list.
 	/// </summary>
 	/// <param name="setup">The setup object for the checkbox list. Do not pass null.</param>
 	/// <param name="value">The selected-item IDs.</param>
-	/// <param name="validationMethod">The validation method. Pass null if you’re only using this control for page modification.</param>
+	/// <param name="validationMethod">The validation method. Pass null if you're only using this control for page modification.</param>
 	public CheckboxList(
-		CheckboxListSetup<ItemIdType> setup, IEnumerable<ItemIdType> value, Action<IReadOnlyCollection<ItemIdType>, Validator> validationMethod = null ) {
+		CheckboxListSetup<ItemIdType> setup, IEnumerable<ItemIdType> value, Action<IReadOnlyCollection<ItemIdType>, Validator>? validationMethod = null ) {
 		var valueSet = value.ToImmutableHashSet();
 
 		var selectedItemIdsInPostBack = new List<ItemIdType>();
@@ -49,9 +48,9 @@ public sealed class CheckboxList<ItemIdType>: FormControl<FlowComponent> {
 				i.Label.ToComponents(),
 				setup: FlowCheckboxSetup.Create(
 					highlightedWhenChecked: true,
-					action: new SpecifiedValue<FormAction>( setup.Action ),
+					action: new SpecifiedValue<FormAction?>( setup.Action ),
 					valueChangedAction: setup.SelectionChangedAction ),
-				validationMethod: ( postBackValue, validator ) => {
+				validationMethod: ( postBackValue, _ ) => {
 					if( postBackValue.Value )
 						selectedItemIdsInPostBack.Add( i.Id );
 					selectionChangedOnPostBack = selectionChangedOnPostBack || postBackValue.ChangedOnPostBack;
@@ -85,7 +84,7 @@ public sealed class CheckboxList<ItemIdType>: FormControl<FlowComponent> {
 									  .ToComponentListItem() ) ).ToCollection(),
 					  classes: CheckboxListCssElementCreator.ActionContainerClass ).ToCollection()
 				  : Enumerable.Empty<FlowComponent>() ).Append(
-				new DisplayableElement( context => new DisplayableElementData(
+				new DisplayableElement( _ => new DisplayableElementData(
 					null,
 					() => new DisplayableElementLocalData(
 						"div",
@@ -109,5 +108,5 @@ public sealed class CheckboxList<ItemIdType>: FormControl<FlowComponent> {
 			} );
 	}
 
-	FormControlLabeler FormControl<FlowComponent>.Labeler => null;
+	FormControlLabeler? FormControl<FlowComponent>.Labeler => null;
 }
