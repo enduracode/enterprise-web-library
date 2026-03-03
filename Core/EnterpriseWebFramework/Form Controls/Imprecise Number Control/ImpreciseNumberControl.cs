@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;
 using Tewl.InputValidation;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -10,7 +9,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 public class ImpreciseNumberControl: FormControl<PhrasingComponent> {
 	public FormControlLabeler Labeler { get; }
 	public PhrasingComponent PageComponent { get; }
-	public EwfValidation Validation { get; }
+	public EwfValidation? Validation { get; }
 
 	/// <summary>
 	/// Creates an imprecise-number control.
@@ -22,15 +21,15 @@ public class ImpreciseNumberControl: FormControl<PhrasingComponent> {
 	/// <param name="valueStep">The allowed granularity of the value. Do not pass zero or a negative number. Pass null to allow any value.</param>
 	/// <param name="validationMethod">The validation method. Pass null if you’re only using this control for page modification.</param>
 	public ImpreciseNumberControl(
-		decimal value, decimal minValue, decimal maxValue, ImpreciseNumberControlSetup setup = null, decimal? valueStep = null,
-		Action<decimal, Validator> validationMethod = null ) {
-		setup = setup ?? ImpreciseNumberControlSetup.Create();
+		decimal value, decimal minValue, decimal maxValue, ImpreciseNumberControlSetup? setup = null, decimal? valueStep = null,
+		Action<decimal, Validator>? validationMethod = null ) {
+		setup ??= ImpreciseNumberControlSetup.Create();
 		( Labeler, PageComponent, Validation ) = setup.NumberControlSetup.LabelerAndComponentAndValidationGetter(
 			value,
 			false,
 			minValue,
 			maxValue,
 			valueStep,
-			( postBackValue, validator ) => validationMethod( postBackValue.Value, validator ) );
+			validationMethod is null ? null : ( postBackValue, validator ) => validationMethod( postBackValue!.Value, validator ) );
 	}
 }

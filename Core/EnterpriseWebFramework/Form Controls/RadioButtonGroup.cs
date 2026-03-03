@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.IdReferencing;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.IdReferencing;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;
 using Tewl.InputValidation;
 
@@ -10,11 +9,11 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 /// ID for the group. Otherwise use FreeFormRadioList.
 /// </summary>
 public class RadioButtonGroup {
-	internal static FormValue<ElementId> GetFormValue(
-		Func<IEnumerable<( ElementId id, bool isReadOnly, bool isSelected )>> buttonGetter, Func<ElementId, string> stringValueSelector,
+	internal static FormValue<ElementId?> GetFormValue(
+		Func<IEnumerable<( ElementId id, bool isReadOnly, bool isSelected )>> buttonGetter, Func<ElementId?, string> stringValueSelector,
 		Func<string, IEnumerable<ElementId>> selectedButtonIdInPostBackGetter, bool allowsNoSelection ) {
-		FormValue<ElementId> formValue = null;
-		return formValue = new FormValue<ElementId>(
+		FormValue<ElementId?>? formValue = null;
+		return formValue = new FormValue<ElementId?>(
 			       () => buttonGetter().Where( i => i.isSelected ).Select( i => i.id ).FirstOrDefault(),
 			       () => buttonGetter().Where( i => i.id.Id.Any() && !i.isReadOnly ).Select( i => i.id ).FirstOrDefault()?.Id ?? "",
 			       stringValueSelector,
@@ -22,20 +21,20 @@ public class RadioButtonGroup {
 				       if( rawValue != null ) {
 					       var selectedButtonId = selectedButtonIdInPostBackGetter( rawValue ).SingleOrDefault();
 					       return selectedButtonId != null
-						              ? PostBackValueValidationResult<ElementId>.CreateValid( selectedButtonId )
-						              : PostBackValueValidationResult<ElementId>.CreateInvalid();
+						              ? PostBackValueValidationResult<ElementId?>.CreateValid( selectedButtonId )
+						              : PostBackValueValidationResult<ElementId?>.CreateInvalid();
 				       }
 
-				       var durableValue = formValue.GetDurableValue();
+				       var durableValue = formValue!.GetDurableValue();
 				       if( durableValue != null ) {
 					       var button = buttonGetter().Single( i => i.id == durableValue );
 					       if( !button.id.Id.Any() || button.isReadOnly )
-						       return PostBackValueValidationResult<ElementId>.CreateValid( durableValue );
+						       return PostBackValueValidationResult<ElementId?>.CreateValid( durableValue );
 				       }
 
 				       return allowsNoSelection
-					              ? PostBackValueValidationResult<ElementId>.CreateValid( null )
-					              : PostBackValueValidationResult<ElementId>.CreateInvalid();
+					              ? PostBackValueValidationResult<ElementId?>.CreateValid( null )
+					              : PostBackValueValidationResult<ElementId?>.CreateInvalid();
 			       } );
 	}
 
@@ -52,9 +51,9 @@ public class RadioButtonGroup {
 		}
 	}
 
-	private readonly FormValue<ElementId> formValue;
+	private readonly FormValue<ElementId?> formValue;
 	private readonly List<( ElementId id, bool isReadOnly, bool value, PageModificationValue<bool> pmv )> buttonIdAndIsReadOnlyAndValueAndPmvQuadruples = new();
-	private readonly FormAction selectionChangedAction;
+	private readonly FormAction? selectionChangedAction;
 
 	/// <summary>
 	/// Creates a radio button group.
@@ -64,7 +63,7 @@ public class RadioButtonGroup {
 	/// <param name="disableSingleButtonDetection">Pass true to allow just a single radio button to be displayed for this group. Use with caution, as this
 	/// violates the HTML specification.</param>
 	/// <param name="selectionChangedAction">The action that will occur when the selection is changed. Pass null for no action.</param>
-	public RadioButtonGroup( bool allowNoSelection, bool disableSingleButtonDetection = false, FormAction selectionChangedAction = null ) {
+	public RadioButtonGroup( bool allowNoSelection, bool disableSingleButtonDetection = false, FormAction? selectionChangedAction = null ) {
 		formValue = GetFormValue(
 			() => from i in buttonIdAndIsReadOnlyAndValueAndPmvQuadruples select ( i.id, i.isReadOnly, i.value ),
 			v => v?.Id ?? "",
@@ -76,7 +75,7 @@ public class RadioButtonGroup {
 
 		this.selectionChangedAction = selectionChangedAction;
 
-		PageBase.Current.AddControlTreeValidation( () => ValidateControls(
+		PageBase.Current!.AddControlTreeValidation( () => ValidateControls(
 			allowNoSelection,
 			buttonIdAndIsReadOnlyAndValueAndPmvQuadruples.All( i => !i.value ),
 			from i in buttonIdAndIsReadOnlyAndValueAndPmvQuadruples select ( i.id, i.isReadOnly, i.value ),
@@ -91,12 +90,13 @@ public class RadioButtonGroup {
 	/// <param name="setup">The setup object for the radio button.</param>
 	/// <param name="validationMethod">The validation method. Pass null if you’re only using this control for page modification.</param>
 	public Checkbox CreateRadioButton(
-		bool value, IReadOnlyCollection<PhrasingComponent> label, RadioButtonSetup setup = null, Action<PostBackValue<bool>, Validator> validationMethod = null ) {
+		bool value, IReadOnlyCollection<PhrasingComponent> label, RadioButtonSetup? setup = null,
+		Action<PostBackValue<bool>, Validator>? validationMethod = null ) {
 		setup = setup?.AddPmv() ?? RadioButtonSetup.Create( pageModificationValue: new PageModificationValue<bool>() );
 
 		var id = new ElementId();
-		formValue.AddPageModificationValue( setup.PageModificationValue, v => v == id );
-		buttonIdAndIsReadOnlyAndValueAndPmvQuadruples.Add( ( id, setup.IsReadOnly, value, setup.PageModificationValue ) );
+		formValue.AddPageModificationValue( setup.PageModificationValue!, v => v == id );
+		buttonIdAndIsReadOnlyAndValueAndPmvQuadruples.Add( ( id, setup.IsReadOnly, value, setup.PageModificationValue! ) );
 
 		return new Checkbox(
 			formValue,
@@ -122,8 +122,8 @@ public class RadioButtonGroup {
 	/// <param name="setup">The setup object for the flow radio button.</param>
 	/// <param name="validationMethod">The validation method. Pass null if you’re only using the radio button for page modification.</param>
 	public FlowCheckbox CreateFlowRadioButton(
-		bool value, IReadOnlyCollection<PhrasingComponent> label, FlowRadioButtonSetup setup = null,
-		Action<PostBackValue<bool>, Validator> validationMethod = null ) {
+		bool value, IReadOnlyCollection<PhrasingComponent> label, FlowRadioButtonSetup? setup = null,
+		Action<PostBackValue<bool>, Validator>? validationMethod = null ) {
 		setup = setup?.AddPmv() ?? FlowRadioButtonSetup.Create( pageModificationValue: new PageModificationValue<bool>() );
 		return new FlowCheckbox( setup, CreateRadioButton( value, label, setup: setup.RadioButtonSetup, validationMethod: validationMethod ) );
 	}

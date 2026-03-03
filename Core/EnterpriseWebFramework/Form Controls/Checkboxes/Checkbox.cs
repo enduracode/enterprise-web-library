@@ -69,7 +69,7 @@ public class Checkbox: FormControl<PhrasingComponent> {
 	/// Creates a radio button.
 	/// </summary>
 	internal Checkbox(
-		FormValue<ElementId> formValue, ElementId id, RadioButtonSetup setup, IReadOnlyCollection<PhrasingComponent> label, FormAction? selectionChangedAction,
+		FormValue<ElementId?> formValue, ElementId id, RadioButtonSetup setup, IReadOnlyCollection<PhrasingComponent> label, FormAction? selectionChangedAction,
 		Func<string> jsClickStatementGetter, EwfValidation? validation, string? listItemId = null ) {
 		PageComponent = getComponent(
 			formValue,

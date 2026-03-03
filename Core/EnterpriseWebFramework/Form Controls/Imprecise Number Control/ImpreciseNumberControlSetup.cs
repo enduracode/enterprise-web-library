@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -22,9 +21,9 @@ public class ImpreciseNumberControlSetup {
 	/// <param name="validationPredicate"></param>
 	/// <param name="validationErrorNotifier"></param>
 	public static ImpreciseNumberControlSetup Create(
-		DisplaySetup displaySetup = null, ElementClassSet classes = null, string autoFillTokens = "", SpecifiedValue<FormAction> action = null,
-		FormAction valueChangedAction = null, PageModificationValue<decimal> pageModificationValue = null, Func<bool, bool> validationPredicate = null,
-		Action validationErrorNotifier = null ) {
+		DisplaySetup? displaySetup = null, ElementClassSet? classes = null, string autoFillTokens = "", SpecifiedValue<FormAction?>? action = null,
+		FormAction? valueChangedAction = null, PageModificationValue<decimal>? pageModificationValue = null, Func<bool, bool>? validationPredicate = null,
+		Action? validationErrorNotifier = null ) {
 		return new ImpreciseNumberControlSetup(
 			new NumberControlSetup(
 				displaySetup,
@@ -50,7 +49,7 @@ public class ImpreciseNumberControlSetup {
 	/// <param name="validationPredicate"></param>
 	/// <param name="validationErrorNotifier"></param>
 	public static ImpreciseNumberControlSetup CreateReadOnly(
-		DisplaySetup displaySetup = null, ElementClassSet classes = null, Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
+		DisplaySetup? displaySetup = null, ElementClassSet? classes = null, Func<bool, bool>? validationPredicate = null, Action? validationErrorNotifier = null ) {
 		return new ImpreciseNumberControlSetup(
 			new NumberControlSetup( displaySetup, true, true, classes, "", "", null, null, null, null, null, validationPredicate, validationErrorNotifier ) );
 	}

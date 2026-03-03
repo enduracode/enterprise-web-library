@@ -9,7 +9,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 public class NumericTextControl: FormControl<PhrasingComponent> {
 	public FormControlLabeler Labeler { get; }
 	public PhrasingComponent PageComponent { get; }
-	public EwfValidation Validation { get; }
+	public EwfValidation? Validation { get; }
 
 	/// <summary>
 	/// Creates a numeric-text control.

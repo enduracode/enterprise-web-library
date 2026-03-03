@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;
 using Tewl.InputValidation;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -10,7 +9,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 public class NumberControl: FormControl<PhrasingComponent> {
 	public FormControlLabeler Labeler { get; }
 	public PhrasingComponent PageComponent { get; }
-	public EwfValidation Validation { get; }
+	public EwfValidation? Validation { get; }
 
 	/// <summary>
 	/// Creates a number control.
@@ -23,9 +22,9 @@ public class NumberControl: FormControl<PhrasingComponent> {
 	/// <param name="valueStep">The allowed granularity of the value. Do not pass zero or a negative number. Pass null to allow any value.</param>
 	/// <param name="validationMethod">The validation method. Pass null if you’re only using this control for page modification.</param>
 	public NumberControl(
-		decimal? value, bool allowEmpty, NumberControlSetup setup = null, decimal? minValue = null, decimal? maxValue = null, decimal? valueStep = null,
-		Action<decimal?, Validator> validationMethod = null ) {
-		setup = setup ?? NumberControlSetup.Create();
+		decimal? value, bool allowEmpty, NumberControlSetup? setup = null, decimal? minValue = null, decimal? maxValue = null, decimal? valueStep = null,
+		Action<decimal?, Validator>? validationMethod = null ) {
+		setup ??= NumberControlSetup.Create();
 		( Labeler, PageComponent, Validation ) = setup.LabelerAndComponentAndValidationGetter( value, allowEmpty, minValue, maxValue, valueStep, validationMethod );
 	}
 }

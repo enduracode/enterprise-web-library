@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System.Globalization;
+﻿using System.Globalization;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.IdReferencing;
@@ -19,8 +18,8 @@ public class TextControlSetup {
 	[ UsedImplicitly ]
 	private class CssElementCreator: ControlCssElementCreator {
 		IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
-			return new[]
-				{
+			return
+				[
 					new CssElement(
 						"SingleLineTextControlAllStates",
 						new[] { ":enabled:not(:focus)", ":enabled:focus", ":disabled" }.Select( getSingleLineSelector ).ToArray() ),
@@ -33,7 +32,7 @@ public class TextControlSetup {
 					new CssElement( "MultilineTextControlNormalState", getMultilineSelector( ":enabled:not(:focus)" ) ),
 					new CssElement( "MultilineTextControlFocusState", getMultilineSelector( ":enabled:focus" ) ),
 					new CssElement( "MultilineTextControlReadOnlyState", getMultilineSelector( ":disabled" ) )
-				};
+				];
 		}
 
 		private string getSingleLineSelector( string suffix ) => "input.{0}".FormatWith( ElementClass.ClassName ) + suffix;
@@ -70,10 +69,10 @@ public class TextControlSetup {
 	/// <param name="validationPredicate"></param>
 	/// <param name="validationErrorNotifier"></param>
 	public static TextControlSetup Create(
-		DisplaySetup displaySetup = null, ContentBasedLength widthOverride = null, int numberOfRows = 1, ElementClassSet classes = null,
+		DisplaySetup? displaySetup = null, ContentBasedLength? widthOverride = null, int numberOfRows = 1, ElementClassSet? classes = null,
 		bool disableTrimming = false, string placeholder = "", string autoFillTokens = "", bool? checksSpellingAndGrammar = null,
-		Func<string, string> formattedValueExpressionGetter = null, SpecifiedValue<FormAction> action = null, FormAction valueChangedAction = null,
-		PageModificationValue<string> pageModificationValue = null, Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
+		Func<string, string>? formattedValueExpressionGetter = null, SpecifiedValue<FormAction?>? action = null, FormAction? valueChangedAction = null,
+		PageModificationValue<string>? pageModificationValue = null, Func<bool, bool>? validationPredicate = null, Action? validationErrorNotifier = null ) {
 		return new TextControlSetup(
 			displaySetup,
 			numberOfRows == 1 ? "text" : "",
@@ -123,11 +122,11 @@ public class TextControlSetup {
 	/// <param name="validationPredicate"></param>
 	/// <param name="validationErrorNotifier"></param>
 	public static TextControlSetup CreateAutoComplete(
-		TrustedResourceInfo autoCompleteResource, DisplaySetup displaySetup = null, ContentBasedLength widthOverride = null, int numberOfRows = 1,
-		ElementClassSet classes = null, bool disableTrimming = false, string placeholder = "", string autoFillTokens = "", bool? checksSpellingAndGrammar = null,
-		Func<string, string> formattedValueExpressionGetter = null, SpecifiedValue<FormAction> action = null, bool triggersActionWhenItemSelected = false,
-		FormAction valueChangedAction = null, PageModificationValue<string> pageModificationValue = null, Func<bool, bool> validationPredicate = null,
-		Action validationErrorNotifier = null ) {
+		TrustedResourceInfo autoCompleteResource, DisplaySetup? displaySetup = null, ContentBasedLength? widthOverride = null, int numberOfRows = 1,
+		ElementClassSet? classes = null, bool disableTrimming = false, string placeholder = "", string autoFillTokens = "", bool? checksSpellingAndGrammar = null,
+		Func<string, string>? formattedValueExpressionGetter = null, SpecifiedValue<FormAction?>? action = null, bool triggersActionWhenItemSelected = false,
+		FormAction? valueChangedAction = null, PageModificationValue<string>? pageModificationValue = null, Func<bool, bool>? validationPredicate = null,
+		Action? validationErrorNotifier = null ) {
 		return new TextControlSetup(
 			displaySetup,
 			numberOfRows == 1 ? "text" : "",
@@ -162,8 +161,8 @@ public class TextControlSetup {
 	/// <param name="validationPredicate"></param>
 	/// <param name="validationErrorNotifier"></param>
 	public static TextControlSetup CreateReadOnly(
-		DisplaySetup displaySetup = null, ContentBasedLength widthOverride = null, int numberOfRows = 1, ElementClassSet classes = null,
-		Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
+		DisplaySetup? displaySetup = null, ContentBasedLength? widthOverride = null, int numberOfRows = 1, ElementClassSet? classes = null,
+		Func<bool, bool>? validationPredicate = null, Action? validationErrorNotifier = null ) {
 		return new TextControlSetup(
 			displaySetup,
 			numberOfRows == 1 ? "text" : "",
@@ -205,9 +204,9 @@ public class TextControlSetup {
 	/// <param name="validationErrorNotifier"></param>
 	/// <returns></returns>
 	public static TextControlSetup CreateObscured(
-		DisplaySetup displaySetup = null, ContentBasedLength widthOverride = null, ElementClassSet classes = null, string placeholder = "",
-		string autoFillTokens = "", SpecifiedValue<FormAction> action = null, FormAction valueChangedAction = null,
-		PageModificationValue<string> pageModificationValue = null, Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
+		DisplaySetup? displaySetup = null, ContentBasedLength? widthOverride = null, ElementClassSet? classes = null, string placeholder = "",
+		string autoFillTokens = "", SpecifiedValue<FormAction?>? action = null, FormAction? valueChangedAction = null,
+		PageModificationValue<string>? pageModificationValue = null, Func<bool, bool>? validationPredicate = null, Action? validationErrorNotifier = null ) {
 		return new TextControlSetup(
 			displaySetup,
 			"password",
@@ -232,15 +231,15 @@ public class TextControlSetup {
 	}
 
 	internal readonly
-		Func<string, bool, int?, int?, Func<string, Validator, string>, Action<string, Validator>, ( FormControlLabeler, PhrasingComponent, EwfValidation )>
+		Func<string, bool, int?, int?, Func<string, Validator, string?>, Action<string, Validator>?, ( FormControlLabeler, PhrasingComponent, EwfValidation? )>
 		LabelerAndComponentAndValidationGetter;
 
 	internal TextControlSetup(
-		DisplaySetup displaySetup, string inputElementType, ContentBasedLength widthOverride, int? numberOfRows, bool isReadOnly, ElementClassSet classes,
-		bool disableTrimming, bool requiresNumericValue, string placeholder, string autoFillTokens, TrustedResourceInfo autoCompleteResource,
-		bool? checksSpellingAndGrammar, Func<string, string> formattedValueExpressionGetter, SpecifiedValue<FormAction> specifiedAction,
-		bool? triggersActionWhenItemSelected, FormAction valueChangedAction, PageModificationValue<string> pageModificationValueParameter,
-		PageModificationValue<long?> numericPageModificationValue, Func<bool, bool> validationPredicate, Action validationErrorNotifier ) {
+		DisplaySetup? displaySetup, string inputElementType, ContentBasedLength? widthOverride, int? numberOfRows, bool isReadOnly, ElementClassSet? classes,
+		bool disableTrimming, bool requiresNumericValue, string placeholder, string autoFillTokens, TrustedResourceInfo? autoCompleteResource,
+		bool? checksSpellingAndGrammar, Func<string, string>? formattedValueExpressionGetter, SpecifiedValue<FormAction?>? specifiedAction,
+		bool? triggersActionWhenItemSelected, FormAction? valueChangedAction, PageModificationValue<string>? pageModificationValueParameter,
+		PageModificationValue<long?>? numericPageModificationValue, Func<bool, bool>? validationPredicate, Action? validationErrorNotifier ) {
 		formattedValueExpressionGetter ??= _ => "";
 		var action = specifiedAction != null ? specifiedAction.Value : FormState.Current.FormControlDefaultAction;
 
@@ -268,7 +267,7 @@ public class TextControlSetup {
 					       new DisplayableElement(
 						       context => {
 							       if( !isReadOnly ) {
-								       if( inputElementType.Any() || ( autoCompleteResource != null && triggersActionWhenItemSelected.Value ) )
+								       if( inputElementType.Any() || ( autoCompleteResource != null && triggersActionWhenItemSelected!.Value ) )
 									       action?.AddToPageIfNecessary();
 								       valueChangedAction?.AddToPageIfNecessary();
 							       }
@@ -283,9 +282,9 @@ public class TextControlSetup {
 										       attributes.Add( new ElementAttribute( "name", context.Id ) );
 
 									       if( inputElementType.Any() )
-										       attributes.Add( new ElementAttribute( "size", ( maxLength is < 1000 ? maxLength : 1000 ).ToString() ) );
+										       attributes.Add( new ElementAttribute( "size", ( maxLength is < 1000 ? maxLength : 1000 ).ToString()! ) );
 									       else
-										       attributes.Add( new ElementAttribute( "rows", numberOfRows.Value.ToString() ) );
+										       attributes.Add( new ElementAttribute( "rows", numberOfRows!.Value.ToString() ) );
 
 									       if( inputElementType.Any() )
 										       attributes.Add( new ElementAttribute( "value", inputElementType != "password" ? pageModificationValue.Value : "" ) );
@@ -324,7 +323,7 @@ public class TextControlSetup {
 										       autocompleteOptions.Add( Tuple.Create( "minLength", minCharacters.ToString() ) );
 										       autocompleteOptions.Add( Tuple.Create( "source", "'" + autoCompleteResource.GetUrl() + "'" ) );
 
-										       if( action != null && triggersActionWhenItemSelected.Value ) {
+										       if( action != null && triggersActionWhenItemSelected!.Value ) {
 											       var handler = "function( event, ui ) {{ $( '#{0}' ).val( ui.item.value ); {1} return false; }}".FormatWith(
 												       context.Id,
 												       action.GetJsStatements() );
@@ -382,7 +381,7 @@ public class TextControlSetup {
 								                                                if( validationPredicate != null && !validationPredicate( postBackValue.ChangedOnPostBack ) )
 									                                                return;
 
-								                                                string validatedValue;
+								                                                string? validatedValue;
 								                                                if( string.Equals( inputElementType, "password", StringComparison.Ordinal )
 									                                                    ? postBackValue.Value.Length == 0
 									                                                    : postBackValue.Value.IsWhitespace() ) {

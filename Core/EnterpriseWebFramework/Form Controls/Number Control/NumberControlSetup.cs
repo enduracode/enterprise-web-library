@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System.Globalization;
+﻿using System.Globalization;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.IdReferencing;
@@ -28,9 +27,9 @@ public class NumberControlSetup {
 	/// <param name="validationPredicate"></param>
 	/// <param name="validationErrorNotifier"></param>
 	public static NumberControlSetup Create(
-		DisplaySetup displaySetup = null, ElementClassSet classes = null, string placeholder = "", string autoFillTokens = "",
-		SpecifiedValue<FormAction> action = null, FormAction valueChangedAction = null, PageModificationValue<decimal?> pageModificationValue = null,
-		Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
+		DisplaySetup? displaySetup = null, ElementClassSet? classes = null, string placeholder = "", string autoFillTokens = "",
+		SpecifiedValue<FormAction?>? action = null, FormAction? valueChangedAction = null, PageModificationValue<decimal?>? pageModificationValue = null,
+		Func<bool, bool>? validationPredicate = null, Action? validationErrorNotifier = null ) {
 		return new NumberControlSetup(
 			displaySetup,
 			false,
@@ -64,9 +63,9 @@ public class NumberControlSetup {
 	/// <param name="validationPredicate"></param>
 	/// <param name="validationErrorNotifier"></param>
 	public static NumberControlSetup CreateAutoComplete(
-		TrustedResourceInfo autoCompleteResource, DisplaySetup displaySetup = null, ElementClassSet classes = null, string placeholder = "",
-		string autoFillTokens = "", SpecifiedValue<FormAction> action = null, bool triggersActionWhenItemSelected = false, FormAction valueChangedAction = null,
-		PageModificationValue<decimal?> pageModificationValue = null, Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
+		TrustedResourceInfo autoCompleteResource, DisplaySetup? displaySetup = null, ElementClassSet? classes = null, string placeholder = "",
+		string autoFillTokens = "", SpecifiedValue<FormAction?>? action = null, bool triggersActionWhenItemSelected = false, FormAction? valueChangedAction = null,
+		PageModificationValue<decimal?>? pageModificationValue = null, Func<bool, bool>? validationPredicate = null, Action? validationErrorNotifier = null ) {
 		return new NumberControlSetup(
 			displaySetup,
 			false,
@@ -91,7 +90,7 @@ public class NumberControlSetup {
 	/// <param name="validationPredicate"></param>
 	/// <param name="validationErrorNotifier"></param>
 	public static NumberControlSetup CreateReadOnly(
-		DisplaySetup displaySetup = null, ElementClassSet classes = null, Func<bool, bool> validationPredicate = null, Action validationErrorNotifier = null ) {
+		DisplaySetup? displaySetup = null, ElementClassSet? classes = null, Func<bool, bool>? validationPredicate = null, Action? validationErrorNotifier = null ) {
 		return new NumberControlSetup(
 			displaySetup,
 			false,
@@ -108,13 +107,13 @@ public class NumberControlSetup {
 			validationErrorNotifier );
 	}
 
-	internal readonly Func<decimal?, bool, decimal?, decimal?, decimal?, Action<decimal?, Validator>, ( FormControlLabeler, PhrasingComponent, EwfValidation )>
+	internal readonly Func<decimal?, bool, decimal?, decimal?, decimal?, Action<decimal?, Validator>?, ( FormControlLabeler, PhrasingComponent, EwfValidation? )>
 		LabelerAndComponentAndValidationGetter;
 
 	internal NumberControlSetup(
-		DisplaySetup displaySetup, bool isImprecise, bool isReadOnly, ElementClassSet classes, string placeholder, string autoFillTokens,
-		TrustedResourceInfo autoCompleteResource, SpecifiedValue<FormAction> specifiedAction, bool? triggersActionWhenItemSelected, FormAction valueChangedAction,
-		object pageModificationValueParameter, Func<bool, bool> validationPredicate, Action validationErrorNotifier ) {
+		DisplaySetup? displaySetup, bool isImprecise, bool isReadOnly, ElementClassSet? classes, string placeholder, string autoFillTokens,
+		TrustedResourceInfo? autoCompleteResource, SpecifiedValue<FormAction?>? specifiedAction, bool? triggersActionWhenItemSelected,
+		FormAction? valueChangedAction, object? pageModificationValueParameter, Func<bool, bool>? validationPredicate, Action? validationErrorNotifier ) {
 		var action = specifiedAction != null ? specifiedAction.Value : FormState.Current.FormControlDefaultAction;
 
 		LabelerAndComponentAndValidationGetter = ( value, allowEmpty, minValue, maxValue, valueStep, validationMethod ) => {
@@ -127,7 +126,7 @@ public class NumberControlSetup {
 			var formValue = new FormValue<decimal?>(
 				() => value,
 				() => isReadOnly ? "" : id.Id,
-				v => v.ToString(),
+				v => v.ToString()!,
 				rawValue => rawValue == null ? PostBackValueValidationResult<decimal?>.CreateInvalid() :
 				            !rawValue.Any() && !isImprecise ? PostBackValueValidationResult<decimal?>.CreateValid( null ) :
 				            !decimal.TryParse(
@@ -138,7 +137,7 @@ public class NumberControlSetup {
 				            PostBackValueValidationResult<decimal?>.CreateValid( result ) );
 
 			if( isImprecise )
-				formValue.AddPageModificationValue( (PageModificationValue<decimal>)pageModificationValue, v => v.Value );
+				formValue.AddPageModificationValue( (PageModificationValue<decimal>)pageModificationValue, v => v!.Value );
 			else
 				formValue.AddPageModificationValue( (PageModificationValue<decimal?>)pageModificationValue, v => v );
 
@@ -185,7 +184,7 @@ public class NumberControlSetup {
 										       autocompleteOptions.Add( Tuple.Create( "minLength", minCharacters.ToString() ) );
 										       autocompleteOptions.Add( Tuple.Create( "source", "'" + autoCompleteResource.GetUrl() + "'" ) );
 
-										       if( action != null && triggersActionWhenItemSelected.Value ) {
+										       if( action != null && triggersActionWhenItemSelected!.Value ) {
 											       var handler = "function( event, ui ) {{ $( '#{0}' ).val( ui.item.value ); {1} return false; }}".FormatWith(
 												       context.Id,
 												       action.GetJsStatements() );
