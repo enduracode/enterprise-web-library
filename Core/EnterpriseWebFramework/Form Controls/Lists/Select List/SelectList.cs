@@ -48,7 +48,7 @@ public static class SelectList {
 	/// <param name="defaultValueItemLabel">The label of the default-value item, which will appear first, and only if none of the list items have an ID with the
 	/// default value. Do not pass null. If you pass the empty string, no default-value item will appear and therefore none of the radio buttons will be
 	/// selected if the selected item ID has the default value and none of the list items do.</param>
-	/// <param name="validationMethod">The validation method. Pass null if you're only using this radio-button list for page modification.</param>
+	/// <param name="validationMethod">The validation method. Pass null if you’re only using this radio-button list for page modification.</param>
 	public static SelectList<ItemIdType> CreateRadioList<ItemIdType>(
 		RadioListSetup<ItemIdType> setup, ItemIdType selectedItemId, string defaultValueItemLabel = "", Action<ItemIdType, Validator>? validationMethod = null ) =>
 		new(
@@ -86,7 +86,7 @@ public static class SelectList {
 	/// This will only be included if none of the list items have an ID with the default value and the default-value item label is the empty string. If you pass
 	/// false, the list will still include a default-value placeholder if the selected item ID has the default value and none of the list items do, but in this
 	/// case the placeholder will not be considered a valid selection.</param>
-	/// <param name="validationMethod">The validation method. Pass null if you're only using this control for page modification.</param>
+	/// <param name="validationMethod">The validation method. Pass null if you’re only using this control for page modification.</param>
 	public static SelectList<ItemIdType> CreateDropDown<ItemIdType>(
 		DropDownSetup<ItemIdType> setup, ItemIdType selectedItemId, string defaultValueItemLabel = "", bool placeholderIsValid = false,
 		Action<ItemIdType, Validator>? validationMethod = null ) =>
@@ -338,7 +338,7 @@ public class SelectList<ItemIdType>: FormControl<FlowComponent> {
 	private string getChosenLogic( bool useNativeControl, ContentBasedLength? width, ImmutableArray<ListItem> items, bool isFocused ) {
 		var placeholderItem = items.SingleOrDefault( i => i.IsPlaceholder );
 
-		// Chosen's allow_single_deselect only works if the placeholder is the first item.
+		// Chosen’s allow_single_deselect only works if the placeholder is the first item.
 		var chosenLogic = !useNativeControl && ( placeholderItem == null || placeholderItem == items.First() )
 			                  ? ".on( 'chosen:ready', function() {{ {0} }} ).chosen( {{ {1} }} )".FormatWith(
 				                  "$( this ).next().find( 'input.chosen-search-input' ).attr( 'aria-label', 'Search' );" +

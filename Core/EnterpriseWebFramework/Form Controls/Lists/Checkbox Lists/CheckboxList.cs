@@ -36,7 +36,7 @@ public sealed class CheckboxList<ItemIdType>: FormControl<FlowComponent> {
 	/// </summary>
 	/// <param name="setup">The setup object for the checkbox list. Do not pass null.</param>
 	/// <param name="value">The selected-item IDs.</param>
-	/// <param name="validationMethod">The validation method. Pass null if you're only using this control for page modification.</param>
+	/// <param name="validationMethod">The validation method. Pass null if you’re only using this control for page modification.</param>
 	public CheckboxList(
 		CheckboxListSetup<ItemIdType> setup, IEnumerable<ItemIdType> value, Action<IReadOnlyCollection<ItemIdType>, Validator>? validationMethod = null ) {
 		var valueSet = value.ToImmutableHashSet();
