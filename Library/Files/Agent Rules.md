@@ -59,10 +59,6 @@ dotnet test "Tests\Tests.csproj" --filter "FullyQualifiedName~Tests.SomeClass.So
 
 ## Formatting
 
-**ReSharper** is used to format all C# files. The `.editorconfig` files in the
-repo exist to support ReSharper. Plugins in `.opencode\plugins\ewl\` enforce
-UTF-8 BOM and CRLF line endings on every file creation or update.
-
 ### ReSharper Format/Inspect Subagent
 
 When editing C# files, use the `ewl-cleanup` subagent to handle ReSharper
@@ -81,17 +77,19 @@ Follow this workflow:
 
 ## Critical Development Rules
 
-1. **Never edit files in any `Generated Code\` folder.** They are fully regenerated
+1. **Before editing any C# files, you MUST invoke the `ewl-cleanup` subagent first.**
+   See the [Formatting](#formatting) section for the full workflow.
+2. **Never edit files in any `Generated Code\` folder.** They are fully regenerated
    by the Development Utility. Your changes will be overwritten. Similarly, never
    edit `.ewlt.cs` files; these are also generated.
-2. **Tabs for indentation** in C# files, never spaces.
-3. Configuration lives in XML files validated against XSD schemas in `Configuration\`
+3. **Tabs for indentation** in C# files, never spaces.
+4. Configuration lives in XML files validated against XSD schemas in `Configuration\`
    folders.
-4. UI is built with EWL's component model (methods returning component collections),
+5. UI is built with EWL's component model (methods returning component collections),
    not Razor views.
-5. Page classes use EWL's code-generation-based URL routing, inheriting from
+6. Page classes use EWL's code-generation-based URL routing, inheriting from
    generated bases.
-6. Data access uses EWL's generated data-access layer from database schema.
+7. Data access uses EWL's generated data-access layer from database schema.
 
 ---
 
