@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 
@@ -14,8 +13,8 @@ public class ElementActivationBehavior {
 	internal static readonly ElementClass ActivatableClass = new( "ewfAc" );
 
 	internal static FlowComponent GetActivatableElement(
-		string elementName, ElementClassSet classes, IReadOnlyCollection<ElementAttribute> attributes, ElementActivationBehavior activationBehavior,
-		IReadOnlyCollection<FlowComponent> children, IReadOnlyCollection<EtherealComponent> etherealChildren ) =>
+		string elementName, ElementClassSet classes, IReadOnlyCollection<ElementAttribute> attributes, ElementActivationBehavior? activationBehavior,
+		IReadOnlyCollection<FlowComponent>? children, IReadOnlyCollection<EtherealComponent> etherealChildren ) =>
 		new ElementComponent( context => {
 			activationBehavior?.PostBackAdder();
 			return new ElementData(
@@ -49,13 +48,13 @@ public class ElementActivationBehavior {
 	/// Creates button behavior. EnduraCode goal 2450 will add a JavaScript predicate parameter to this method.
 	/// </summary>
 	/// <param name="buttonBehavior">The behavior. Pass null to use the form default action.</param>
-	public static ElementActivationBehavior CreateButton( ButtonBehavior buttonBehavior = null ) =>
+	public static ElementActivationBehavior CreateButton( ButtonBehavior? buttonBehavior = null ) =>
 		new( buttonBehavior ?? new FormActionBehavior( FormState.Current.DefaultAction ) );
 
 	internal readonly ElementClassSet Classes;
 	internal readonly Func<IReadOnlyCollection<ElementAttribute>> AttributeGetter;
 	internal readonly Func<bool> IncludesIdAttribute;
-	internal readonly IReadOnlyCollection<EtherealComponent> EtherealChildren;
+	internal readonly IReadOnlyCollection<EtherealComponent>? EtherealChildren;
 	internal readonly Func<string, string> JsInitStatementGetter;
 	internal readonly bool IsFocusable;
 	internal readonly Action PostBackAdder;

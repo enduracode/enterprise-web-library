@@ -1,5 +1,4 @@
-﻿#nullable disable
-using System.Web;
+﻿using System.Web;
 using EnterpriseWebLibrary.Email;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
@@ -11,7 +10,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 /// The behavior for a hyperlink.
 /// </summary>
 public sealed class HyperlinkBehavior {
-	public static implicit operator HyperlinkBehavior( ResourceInfo destination ) => new( destination, false, false, "", null );
+	public static implicit operator HyperlinkBehavior( ResourceInfo? destination ) => new( destination, false, false, "", null );
 
 	private readonly bool hasDestination;
 	private readonly Func<bool> userCanNavigateToDestinationPredicate;
@@ -20,22 +19,22 @@ public sealed class HyperlinkBehavior {
 	internal readonly Func<bool, IReadOnlyCollection<ElementAttribute>> AttributeGetter;
 	internal readonly Lazy<string> Url;
 	internal readonly Func<bool, bool> IncludesIdAttribute;
-	internal readonly IReadOnlyCollection<EtherealComponent> EtherealChildren;
+	internal readonly IReadOnlyCollection<EtherealComponent>? EtherealChildren;
 	internal readonly Func<string, bool, string> JsInitStatementGetter;
 	internal readonly bool IsFocusable;
 	internal readonly Action PostBackAdder;
 
 	internal HyperlinkBehavior(
-		ResourceInfo destination, bool disableAuthorizationCheck, bool prerenderDestination, string target, Func<string, string> actionStatementGetter ) {
+		ResourceInfo? destination, bool disableAuthorizationCheck, bool prerenderDestination, string target, Func<string, string>? actionStatementGetter ) {
 		hasDestination = destination != null;
-		userCanNavigateToDestinationPredicate = () => !hasDestination || disableAuthorizationCheck || destination.UserCanAccess;
+		userCanNavigateToDestinationPredicate = () => !hasDestination || disableAuthorizationCheck || destination!.UserCanAccess;
 
-		var destinationAlternativeMode = hasDestination && !disableAuthorizationCheck ? destination.AlternativeMode : null;
+		var destinationAlternativeMode = hasDestination && !disableAuthorizationCheck ? destination!.AlternativeMode : null;
 		Classes = destinationAlternativeMode is NewContentResourceMode ? ActionComponentCssElementCreator.NewContentClass : ElementClassSet.Empty;
 
-		Url = new Lazy<string>( () => hasDestination ? destination.GetEwfUrl( !disableAuthorizationCheck, false ).Url : "" );
+		Url = new Lazy<string>( () => hasDestination ? destination!.GetEwfUrl( !disableAuthorizationCheck, false ).Url : "" );
 		var isPostBackHyperlink = new Lazy<bool>( () =>
-			hasDestination && !( destinationAlternativeMode is DisabledResourceMode ) && !target.Any() && PageBase.Current.IsAutoDataUpdater.Value );
+			hasDestination && !( destinationAlternativeMode is DisabledResourceMode ) && !target.Any() && PageBase.Current!.IsAutoDataUpdater!.Value );
 		AttributeGetter = forNonHyperlinkElement =>
 			( hasDestination && !forNonHyperlinkElement ? new ElementAttribute( "href", Url.Value ).ToCollection() : Enumerable.Empty<ElementAttribute>() ).Concat(
 				hasDestination && target.Any() && !forNonHyperlinkElement
@@ -51,7 +50,7 @@ public sealed class HyperlinkBehavior {
 					: Enumerable.Empty<ElementAttribute>() )
 			.Materialize();
 
-		FormAction postBackAction = null;
+		FormAction? postBackAction = null;
 		string getActionInitStatements( string id, bool omitPreventDefaultStatement, string actionStatements ) =>
 			"$( '#{0}' ).click( function( e ) {{ {1} }} );".FormatWith(
 				id,
@@ -70,7 +69,7 @@ public sealed class HyperlinkBehavior {
 			EtherealChildren = null;
 			JsInitStatementGetter = ( id, forNonHyperlinkElement ) => {
 				var actionStatements = isPostBackHyperlink.Value
-					                       ? postBackAction.GetJsStatements()
+					                       ? postBackAction!.GetJsStatements()
 					                       :
 					                       hasDestination && actionStatementGetter != null
 						                       ? actionStatementGetter( Url.Value )
@@ -92,13 +91,13 @@ public sealed class HyperlinkBehavior {
 				return;
 			var postBackId = PostBack.GetCompositeId( "hyperlink", ( destination is ExternalResource ).ToString(), Url.Value, disableAuthorizationCheck.ToString() );
 			postBackAction = new PostBackFormAction(
-				PageBase.Current.GetPostBack( postBackId ) ?? PostBack.CreateFull(
+				PageBase.Current!.GetPostBack( postBackId ) ?? PostBack.CreateFull(
 					id: postBackId,
 					isSlow: destination is PageBase { IsSlow: true },
 					actionGetter: () =>
 						destination is ExternalResource externalDestination
 							? externalDestination.ToPostBackAction()
-							: new PostBackAction( (TrustedResourceInfo)destination, authorizationCheckDisabledPredicate: _ => disableAuthorizationCheck ) ) );
+							: new PostBackAction( (TrustedResourceInfo?)destination, authorizationCheckDisabledPredicate: _ => disableAuthorizationCheck ) ) );
 			postBackAction.AddToPageIfNecessary();
 		};
 	}
@@ -127,9 +126,9 @@ public sealed class HyperlinkBehavior {
 }
 
 public static class HyperlinkBehaviorExtensionCreators {
-	private static Func<BrowsingContextSetup, string, string> browsingModalBoxOpenStatementGetter;
+	private static Func<BrowsingContextSetup?, string, string> browsingModalBoxOpenStatementGetter = null!;
 
-	internal static void Init( Func<BrowsingContextSetup, string, string> browsingModalBoxOpenStatementGetter ) {
+	internal static void Init( Func<BrowsingContextSetup?, string, string> browsingModalBoxOpenStatementGetter ) {
 		HyperlinkBehaviorExtensionCreators.browsingModalBoxOpenStatementGetter = browsingModalBoxOpenStatementGetter;
 	}
 
@@ -141,7 +140,7 @@ public static class HyperlinkBehaviorExtensionCreators {
 	/// <param name="disableAuthorizationCheck">Pass true to allow navigation to a resource that the authenticated user cannot access. Use with caution.</param>
 	/// <param name="prerenderDestination">Pass true to encourage the browser to prerender the destination if possible.</param>
 	public static HyperlinkBehavior ToHyperlinkDefaultBehavior(
-		this ResourceInfo destination, bool disableAuthorizationCheck = false, bool prerenderDestination = false ) =>
+		this ResourceInfo? destination, bool disableAuthorizationCheck = false, bool prerenderDestination = false ) =>
 		new( destination, disableAuthorizationCheck, prerenderDestination, "", null );
 
 	/// <summary>
@@ -149,7 +148,7 @@ public static class HyperlinkBehaviorExtensionCreators {
 	/// </summary>
 	/// <param name="destination">Where to navigate. Specify null if you don’t want the link to do anything.</param>
 	/// <param name="disableAuthorizationCheck">Pass true to allow navigation to a resource that the authenticated user cannot access. Use with caution.</param>
-	public static HyperlinkBehavior ToHyperlinkNewTabBehavior( this ResourceInfo destination, bool disableAuthorizationCheck = false ) =>
+	public static HyperlinkBehavior ToHyperlinkNewTabBehavior( this ResourceInfo? destination, bool disableAuthorizationCheck = false ) =>
 		new( destination, disableAuthorizationCheck, false, "_blank", null );
 
 	/// <summary>
@@ -159,7 +158,7 @@ public static class HyperlinkBehaviorExtensionCreators {
 	/// <param name="disableAuthorizationCheck">Pass true to allow navigation to a resource that the authenticated user cannot access. Use with caution.</param>
 	/// <param name="browsingContextSetup">The setup object for the browsing context (i.e. the iframe).</param>
 	public static HyperlinkBehavior ToHyperlinkModalBoxBehavior(
-		this ResourceInfo destination, bool disableAuthorizationCheck = false, BrowsingContextSetup browsingContextSetup = null ) =>
+		this ResourceInfo? destination, bool disableAuthorizationCheck = false, BrowsingContextSetup? browsingContextSetup = null ) =>
 		new( destination, disableAuthorizationCheck, false, "_blank", url => browsingModalBoxOpenStatementGetter( browsingContextSetup, url ) );
 
 	/// <summary>
@@ -167,7 +166,7 @@ public static class HyperlinkBehaviorExtensionCreators {
 	/// </summary>
 	/// <param name="destination">Where to navigate. Specify null if you don’t want the link to do anything.</param>
 	/// <param name="disableAuthorizationCheck">Pass true to allow navigation to a resource that the authenticated user cannot access. Use with caution.</param>
-	public static HyperlinkBehavior ToHyperlinkParentContextBehavior( this ResourceInfo destination, bool disableAuthorizationCheck = false ) =>
+	public static HyperlinkBehavior ToHyperlinkParentContextBehavior( this ResourceInfo? destination, bool disableAuthorizationCheck = false ) =>
 		new( destination, disableAuthorizationCheck, false, "_parent", null );
 
 	/// <summary>

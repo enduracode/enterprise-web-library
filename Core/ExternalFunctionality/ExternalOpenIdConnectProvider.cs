@@ -32,7 +32,7 @@ public interface ExternalOpenIdConnectProvider {
 	bool ReadAuthenticationRequest( out string clientIdentifier );
 
 	Task<IActionResult> WriteAuthenticationResponse(
-		string clientIdentifier, string subjectIdentifier, IEnumerable<( string name, string value )> additionalClaims );
+		string clientIdentifier, string subjectIdentifier, IEnumerable<( string name, string value )>? additionalClaims );
 
 	Task<IActionResult> WriteAuthenticationErrorResponse();
 

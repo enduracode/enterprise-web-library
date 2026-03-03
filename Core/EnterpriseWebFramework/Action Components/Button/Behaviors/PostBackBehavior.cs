@@ -1,5 +1,4 @@
-﻿#nullable disable
-namespace EnterpriseWebLibrary.EnterpriseWebFramework;
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 /// <summary>
 /// A behavior that causes a post-back.
@@ -14,7 +13,7 @@ public class PostBackBehavior: ButtonBehavior {
 	/// Creates a post-back behavior.
 	/// </summary>
 	/// <param name="postBack">Pass null to use the post-back corresponding to the first of the current data modifications.</param>
-	public PostBackBehavior( PostBack postBack = null ) {
+	public PostBackBehavior( PostBack? postBack = null ) {
 		PostBackAction = new PostBackFormAction( postBack ?? FormState.Current.PostBack );
 	}
 
@@ -24,9 +23,7 @@ public class PostBackBehavior: ButtonBehavior {
 		return true;
 	}
 
-	IReadOnlyCollection<EtherealComponent> ButtonBehavior.GetEtherealChildren() {
-		return null;
-	}
+	IReadOnlyCollection<EtherealComponent>? ButtonBehavior.GetEtherealChildren() => null;
 
 	string ButtonBehavior.GetJsInitStatements( string id ) {
 		FormAction action = PostBackAction;

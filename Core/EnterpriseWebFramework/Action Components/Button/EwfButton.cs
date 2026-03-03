@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;
 
@@ -20,7 +19,7 @@ public sealed class EwfButton: PhrasingComponent {
 	/// besides <see cref="CustomButtonBehavior"/>, we recommend using the DOMContentLoaded event to add an additional click handler to the appropriate button
 	/// element(s), which you can select using a class if there is no simpler way.</param>
 	/// <param name="classes">The classes on the button.</param>
-	public EwfButton( ButtonStyle style, DisplaySetup displaySetup = null, ButtonBehavior behavior = null, ElementClassSet classes = null ) {
+	public EwfButton( ButtonStyle style, DisplaySetup? displaySetup = null, ButtonBehavior? behavior = null, ElementClassSet? classes = null ) {
 		behavior ??= new FormActionBehavior( FormState.Current.DefaultAction );
 		var elementChildren = style.GetChildren();
 		var elementEtherealChildren = behavior.GetEtherealChildren();

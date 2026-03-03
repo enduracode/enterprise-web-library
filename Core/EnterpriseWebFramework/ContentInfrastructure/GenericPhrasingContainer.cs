@@ -18,7 +18,7 @@ public class GenericPhrasingContainer: PhrasingComponent {
 	/// <param name="classes">The classes on the element.</param>
 	/// <param name="etherealContent"></param>
 	public GenericPhrasingContainer(
-		IReadOnlyCollection<PhrasingComponent> content, DisplaySetup? displaySetup = null, ElementClassSet? classes = null,
+		IReadOnlyCollection<PhrasingComponent>? content, DisplaySetup? displaySetup = null, ElementClassSet? classes = null,
 		IReadOnlyCollection<EtherealComponent>? etherealContent = null ) {
 		children = new DisplayableElement( _ => new DisplayableElementData(
 			displaySetup,

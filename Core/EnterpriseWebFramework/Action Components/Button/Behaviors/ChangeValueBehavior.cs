@@ -1,5 +1,4 @@
-﻿#nullable disable
-namespace EnterpriseWebLibrary.EnterpriseWebFramework;
+﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 /// <summary>
 /// A behavior that changes a hidden-field value.
@@ -24,9 +23,7 @@ public class ChangeValueBehavior: ButtonBehavior {
 		return true;
 	}
 
-	IReadOnlyCollection<EtherealComponent> ButtonBehavior.GetEtherealChildren() {
-		return null;
-	}
+	IReadOnlyCollection<EtherealComponent>? ButtonBehavior.GetEtherealChildren() => null;
 
 	string ButtonBehavior.GetJsInitStatements( string id ) {
 		return "$( '#{0}' ).click( function() {{ {1} }} );".FormatWith( id, hiddenFieldId.GetJsValueModificationStatements( "'{0}'".FormatWith( value ) ) );

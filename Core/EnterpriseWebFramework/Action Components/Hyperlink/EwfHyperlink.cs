@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
@@ -24,7 +23,7 @@ public sealed class EwfHyperlink: PhrasingComponent {
 	/// <param name="style">The style.</param>
 	/// <param name="displaySetup"></param>
 	/// <param name="classes">The classes on the hyperlink.</param>
-	public EwfHyperlink( HyperlinkBehavior behavior, HyperlinkStyle style, DisplaySetup displaySetup = null, ElementClassSet classes = null ) {
+	public EwfHyperlink( HyperlinkBehavior behavior, HyperlinkStyle style, DisplaySetup? displaySetup = null, ElementClassSet? classes = null ) {
 		children = new DisplayableElement( context => {
 			behavior.PostBackAdder();
 			return new DisplayableElementData(

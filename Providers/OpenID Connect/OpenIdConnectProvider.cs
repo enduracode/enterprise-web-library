@@ -63,8 +63,10 @@ public class OpenIdConnectProvider: ExternalOpenIdConnectProvider {
 								ProviderCertificates = new Certificate[] { new() { String = certificateGetter!(), Password = certificatePassword } }
 							},
 						ClientConfigurations = clientGetter!()
-							.Select(
-								i => new ClientConfiguration { Description = i.ClientName, ClientID = i.ClientIdentifier, RedirectUris = i.RedirectionUrls.ToArray() } )
+							.Select( i => new ClientConfiguration
+								{
+									Description = i.ClientName, ClientID = i.ClientIdentifier, RedirectUris = i.RedirectionUrls.ToArray()
+								} )
 							.ToArray()
 					}
 			};
@@ -84,13 +86,12 @@ public class OpenIdConnectProvider: ExternalOpenIdConnectProvider {
 		var openIdProvider = currentServicesGetter!().GetRequiredService<IOpenIDProvider>();
 
 		AuthenticationRequest? request = null;
-		Task.Run(
-				async () => {
-					try {
-						request = await openIdProvider.ReceiveAuthnRequestAsync();
-					}
-					catch( OpenIDException ) {}
-				} )
+		Task.Run( async () => {
+				try {
+					request = await openIdProvider.ReceiveAuthnRequestAsync();
+				}
+				catch( OpenIDException ) {}
+			} )
 			.Wait();
 		if( request is null ) {
 			clientIdentifier = "";
@@ -102,7 +103,7 @@ public class OpenIdConnectProvider: ExternalOpenIdConnectProvider {
 	}
 
 	async Task<IActionResult> ExternalOpenIdConnectProvider.WriteAuthenticationResponse(
-		string clientIdentifier, string subjectIdentifier, IEnumerable<( string name, string value )> additionalClaims ) {
+		string clientIdentifier, string subjectIdentifier, IEnumerable<( string name, string value )>? additionalClaims ) {
 		var openIdProvider = currentServicesGetter!().GetRequiredService<IOpenIDProvider>();
 		return await openIdProvider.SendAuthnResponseAsync(
 			       subjectIdentifier,
@@ -112,7 +113,7 @@ public class OpenIdConnectProvider: ExternalOpenIdConnectProvider {
 				                    null!,
 				                    subjectIdentifier,
 				                    null,
-				                    claims: additionalClaims.Select( i => new Claim( i.name, i.value ) ).ToImmutableArray() ) );
+				                    claims: additionalClaims?.Select( i => new Claim( i.name, i.value ) ).ToImmutableArray() ) );
 	}
 
 	Task<IActionResult> ExternalOpenIdConnectProvider.WriteAuthenticationErrorResponse() {

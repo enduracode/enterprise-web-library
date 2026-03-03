@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;
 
@@ -8,7 +7,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 public class FontAwesomeIcon: PhrasingComponent {
 	internal class CssElementCreator: ControlCssElementCreator {
 		IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
-			return new[] { new CssElement( "Icon", "span.fa" ) };
+			return [ new CssElement( "Icon", "span.fa" ) ];
 		}
 	}
 

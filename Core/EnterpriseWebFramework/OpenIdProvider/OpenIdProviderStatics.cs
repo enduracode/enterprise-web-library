@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.WellKnownUrlHandling;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.WellKnownUrlHandling;
 using EnterpriseWebLibrary.ExternalFunctionality;
 using EnterpriseWebLibrary.SystemSpecificLogic;
 
@@ -8,7 +7,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.OpenIdProvider;
 internal static class OpenIdProviderStatics {
 	internal const string CertificatePassword = "password";
 
-	private static SystemProviderReference<AppOpenIdProviderProvider> provider;
+	private static SystemProviderReference<AppOpenIdProviderProvider> provider = null!;
 
 	private static ( Func<string> getter, Action<string> updater )? certificateMethods;
 
@@ -18,7 +17,7 @@ internal static class OpenIdProviderStatics {
 
 	internal static bool OpenIdProviderEnabled => provider.GetProvider( returnNullIfNotFound: true ) is not null;
 
-	internal static AppOpenIdProviderProvider AppProvider => provider.GetProvider();
+	internal static AppOpenIdProviderProvider AppProvider => provider.GetProvider()!;
 
 	internal static void InitAppSpecificLogicDependencies() {
 		if( !OpenIdProviderEnabled )

@@ -26,5 +26,5 @@ partial class Authenticate {
 			EwfResponse.CreateFromAspNetMvcAction(
 				result.Value is null
 					? ExternalFunctionalityStatics.ExternalOpenIdConnectProvider.WriteAuthenticationErrorResponse
-					: () => result.Value.ResponseWriter( clientIdentifier ) ) );
+					: () => result.Value.ResponseWriter!( clientIdentifier ) ) );
 }

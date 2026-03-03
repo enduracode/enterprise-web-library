@@ -1,5 +1,4 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
+﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -10,8 +9,8 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 public class ImageButtonStyle: ButtonStyle {
 	private readonly bool sizesToAvailableWidth;
 	private readonly ResourceInfo imageInfo;
-	private readonly string alternativeText;
-	private readonly ResourceInfo rolloverImageInfo;
+	private readonly string? alternativeText;
+	private readonly ResourceInfo? rolloverImageInfo;
 
 	/// <summary>
 	/// Creates a image style object.
@@ -21,7 +20,7 @@ public class ImageButtonStyle: ButtonStyle {
 	/// omits the alt attribute) or the empty string only when the specification allows.</param>
 	/// <param name="sizesToAvailableWidth">Whether the image sizes itself to fit all available width.</param>
 	/// <param name="rolloverImageInfo"></param>
-	public ImageButtonStyle( ResourceInfo imageInfo, string alternativeText, bool sizesToAvailableWidth = false, ResourceInfo rolloverImageInfo = null ) {
+	public ImageButtonStyle( ResourceInfo imageInfo, string? alternativeText, bool sizesToAvailableWidth = false, ResourceInfo? rolloverImageInfo = null ) {
 		this.sizesToAvailableWidth = sizesToAvailableWidth;
 		this.imageInfo = imageInfo;
 		this.alternativeText = alternativeText;
