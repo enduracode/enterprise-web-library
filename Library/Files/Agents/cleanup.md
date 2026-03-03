@@ -14,6 +14,14 @@ command-line tools on files, fix inspection issues, and commit changes to
 version control. ReSharper handles multiple languages including C#, HTML, XML,
 CSS, JavaScript, and others.
 
+## Important Rules
+
+- **Always use the Edit tool** to modify files. Never use Bash with Python,
+  sed, awk, or other commands to edit file contents.
+- **Only fix what ReSharper reports.** Do not make any changes beyond what
+  the R# tools identify. Do not remove blank lines, rewrite code, or make
+  stylistic changes on your own.
+
 ## Version Control
 
 Before running any version control commands, determine which VCS this repository
@@ -51,22 +59,20 @@ were modified, skip the commit and report that no formatting changes were needed
 
 ### Step 4: Inspect (only when requested)
 
-If the caller asks for inspection, run the ReSharper InspectCode tool. The
-default output format is SARIF (JSON):
+If the caller asks for inspection, run the ReSharper InspectCode tool:
 
 ```shell
-jb inspectcode "<SolutionFile>.sln" --include="file1.cs;file2.cs" -o=inspect-results.json
+jb inspectcode "<SolutionFile>.sln" --include="file1.cs;file2.cs" --severity=SUGGESTION -o=inspect-results.json
 ```
 
-Parse the JSON output for issues in the specified files.
+Parse the SARIF JSON output for issues in the specified files.
 
 ### Step 5: Fix inspection issues (only when inspection was requested)
 
-For each inspection issue found, attempt to fix it by editing the file. Common
-fixes include removing unused usings, adding missing access modifiers,
-simplifying expressions, etc. After fixing all issues you can, re-run the
-formatter (Step 2) to ensure fixes are properly formatted, then commit all
-changes with the message "Fixed ReSharper issues".
+For each issue reported, attempt to fix it using the Edit tool. Common fixes
+include removing unused usings, adding missing access modifiers, simplifying
+expressions, etc. After fixing all issues you can, re-run the formatter (Step 2)
+to ensure fixes are properly formatted.
 
 If any issues cannot be fixed automatically (e.g. they require design decisions
 or broader refactoring), report them in your summary for the primary agent to
@@ -81,7 +87,5 @@ Always respond with a concise summary:
    "no changes"
 3. **Inspection issues found** (if inspection was requested): count of issues
 4. **Issues fixed**: list of fixes applied, with file and description
-5. **Fix commit**: the commit/changeset ID if fixes were committed, or
-   "no changes"
-6. **Remaining issues**: any issues that could not be fixed automatically, with
+5. **Remaining issues**: any issues that could not be fixed automatically, with
    file, line, severity, and description -- or "none"
