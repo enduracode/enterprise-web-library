@@ -48,7 +48,7 @@ Run the ReSharper CleanupCode tool on the specified files. Find the `.sln` file
 for the system and substitute its path below:
 
 ```shell
-jb cleanupcode "<SolutionFile>.sln" --include="file1.cs;file2.cs" --profile="Main"
+jb cleanupcode "<SolutionFile>.sln" --profile="Main" --include="file1.cs;file2.cs" --no-updates
 ```
 
 ### Step 3: Commit formatting changes
@@ -62,7 +62,7 @@ were modified, skip the commit and report that no formatting changes were needed
 If the caller asks for inspection, run the ReSharper InspectCode tool:
 
 ```shell
-jb inspectcode "<SolutionFile>.sln" --include="file1.cs;file2.cs" --severity=SUGGESTION -o=inspect-results.json
+jb inspectcode "<SolutionFile>.sln" --include="file1.cs;file2.cs" --severity=SUGGESTION --output=inspect-results.json --no-updates
 ```
 
 Parse the SARIF JSON output for issues in the specified files.
