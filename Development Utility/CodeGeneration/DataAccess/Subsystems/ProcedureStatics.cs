@@ -13,9 +13,8 @@ internal static class ProcedureStatics {
 
 			// header
 			CodeGenerationStatics.AddSummaryDocComment( writer, "Executes the " + procedure + " procedure." );
-			var parameterDeclarations = parameters.Select(
-				i => ( i.Direction == ParameterDirection.Output ? "out " : i.Direction == ParameterDirection.InputOutput ? "ref " : "" ) + i.DataTypeName + " " +
-				     i.Name );
+			var parameterDeclarations = parameters.Select( i =>
+				( i.Direction == ParameterDirection.Output ? "out " : i.Direction == ParameterDirection.InputOutput ? "ref " : "" ) + i.DataTypeName + " " + i.Name );
 			writer.WriteLine( "public static void " + procedure + "( " + StringTools.ConcatenateWithDelimiter( ", ", parameterDeclarations.ToArray() ) + " ) {" );
 
 			// body
@@ -39,11 +38,11 @@ internal static class ProcedureStatics {
 					DataAccessStatics.GetConnectionExpression( database ) );
 
 
-				// We are not sure if this is handling null correctly. When a null comes back via an "out" parameter, we're not sure whether it is represented with
+				// We are not sure if this is handling null correctly. When a null comes back via an "out" parameter, we’re not sure whether it is represented with
 				// DBNull.Value or in another way. This issue can be resolved as soon as we have a system with stored procedures that we can use for testing.
 
-				// NOTE: This is a hack. We would like to use a simple cast to convert the value of the database parameter to the method parameter's type, but we
-				// can't because the types in Oracle.DataAccess.Types, like OracleDecimal, do not support any kind of conversion to .NET types when they are boxed.
+				// NOTE: This is a hack. We would like to use a simple cast to convert the value of the database parameter to the method parameter’s type, but we
+				// can’t because the types in Oracle.DataAccess.Types, like OracleDecimal, do not support any kind of conversion to .NET types when they are boxed.
 				writer.WriteLine(
 					"{0}Local = {1};".FormatWith(
 						parameter.Name,
@@ -67,8 +66,8 @@ internal static class ProcedureStatics {
 
 			// The parameters returned by this method are used with an OracleCommand object that will be executed using
 			// ExecuteReader. Per the Oracle Data Provider for .NET documentation for OracleCommand.ExecuteReader, output
-			// REF CURSOR parameters in a procedure can be accessed through the returned data reader and don't need to be
-			// treated as ordinary command parameters. That's why we don't include them here.
+			// REF CURSOR parameters in a procedure can be accessed through the returned data reader and don’t need to be
+			// treated as ordinary command parameters. That’s why we don’t include them here.
 			if( dataType != "REF CURSOR" || parameterDirection != ParameterDirection.Output ) {
 				var dataTypeRows = database.GetDataTypes().Where( r => (string)r[ "TypeName" ] == dataType ).Materialize();
 				if( dataTypeRows.Count != 1 )
