@@ -1155,6 +1155,16 @@ internal class UpdateDependentLogic: Operation {
 				  }
 				  """ );
 
+		var toolsFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".opencode", "tools" );
+		if( Directory.Exists( toolsFolderPath ) )
+			foreach( var fileName in IoMethods.GetFileNamesInFolder( toolsFolderPath )
+				        .Where( i => i.StartsWith( EwlStatics.EwlInitialism.ToLowerInvariant() + '-' ) ) )
+				IoMethods.DeleteFile( EwlStatics.CombinePaths( toolsFolderPath, fileName ) );
+		foreach( var fileName in IoMethods.GetFileNamesInFolder( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "OpenCode Tools" ) ) )
+			IoMethods.CopyFile(
+				EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "OpenCode Tools", fileName ),
+				EwlStatics.CombinePaths( toolsFolderPath, EwlStatics.EwlInitialism.ToLowerInvariant() + '-' + fileName ) );
+
 		var agentsFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".opencode", "agents" );
 		if( Directory.Exists( agentsFolderPath ) )
 			foreach( var fileName in IoMethods.GetFileNamesInFolder( agentsFolderPath )
