@@ -69,7 +69,8 @@ If the caller asks for inspection, run the ReSharper InspectCode tool:
 jb inspectcode "<SolutionFile>.sln" --include="file1.cs;file2.cs" --severity=SUGGESTION --output=inspect-results.json --no-updates
 ```
 
-Parse the SARIF JSON output for issues in the specified files.
+Parse the SARIF JSON output for issues in the specified files, then delete the
+`inspect-results.json` file.
 
 ### Step 5: Fix inspection issues (only when inspection was requested)
 
