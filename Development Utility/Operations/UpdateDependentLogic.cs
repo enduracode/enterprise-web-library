@@ -1241,6 +1241,7 @@ internal class UpdateDependentLogic: Operation {
 		writer.WriteLine();
 		if( !forGit )
 			writer.WriteLine( "subinclude:.opencode/.gitignore" );
+		writer.WriteLine( $".opencode/tools/{EwlStatics.EwlInitialism.ToLowerInvariant()}-*" );
 		writer.WriteLine( $".opencode/agents/{EwlStatics.EwlInitialism.ToLowerInvariant()}-*" );
 		writer.WriteLine( $".opencode/plugins/{EwlStatics.EwlInitialism.ToLowerInvariant()}" );
 		writer.WriteLine( $".opencode/plugins/{EwlStatics.EwlInitialism.ToLowerInvariant()}{FileExtensions.JavaScript}" );
