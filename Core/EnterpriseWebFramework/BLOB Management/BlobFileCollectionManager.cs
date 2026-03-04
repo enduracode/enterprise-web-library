@@ -34,7 +34,7 @@ public sealed class BlobFileCollectionManager: FlowComponent {
 	public BlobFileCollectionManager(
 		int fileCollectionId, DateTimeZone timeZone, DisplaySetup? displaySetup = null, string postBackIdBase = "", bool sortByName = false,
 		Func<int, ResourceInfo>? thumbnailResourceGetter = null, IEnumerable<int>? openedFileIds = null, MarkFileAsReadMethod? unopenedFileOpenedNotifier = null,
-		bool disableModifications = false, Action<RsFile, Validator>? uploadValidationMethod = null,
+		bool disableModifications = false, Action<RsFile?, Validator>? uploadValidationMethod = null,
 		NewFileNotificationMethod? fileCreatedOrReplacedNotifier = null, Action? filesDeletedNotifier = null ) {
 		postBackIdBase = PostBack.GetCompositeId( "ewfFileCollection", postBackIdBase );
 
@@ -109,7 +109,7 @@ public sealed class BlobFileCollectionManager: FlowComponent {
 
 	private IReadOnlyCollection<FlowComponent> getUploadComponents(
 		int fileCollectionId, IReadOnlyCollection<BlobFile> files, DisplaySetup? displaySetup, string postBackIdBase,
-		Action<RsFile, Validator>? uploadValidationMethod, NewFileNotificationMethod? fileCreatedOrReplacedNotifier ) {
+		Action<RsFile?, Validator>? uploadValidationMethod, NewFileNotificationMethod? fileCreatedOrReplacedNotifier ) {
 		RsFile? file = null;
 		return FormState.ExecuteWithActions(
 			PostBack.CreateFull(
@@ -143,7 +143,7 @@ public sealed class BlobFileCollectionManager: FlowComponent {
 					new FileUpload(
 						validationMethod: ( postBackValue, validator ) => {
 							file = postBackValue;
-							uploadValidationMethod?.Invoke( postBackValue!, validator );
+							uploadValidationMethod?.Invoke( postBackValue, validator );
 						} ).ToFormItem( label: "Select a new file:".ToComponents() ) )
 				.ToCollection() );
 	}

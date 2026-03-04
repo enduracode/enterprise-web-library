@@ -50,7 +50,7 @@ public sealed class BlobFileManager: FlowComponent {
 						}
 
 						uploadedFile = postBackValue;
-						setup.UploadValidationMethod?.Invoke( postBackValue!, validator );
+						setup.UploadValidationMethod?.Invoke( postBackValue, validator );
 					} ).ToFormItem(
 					setup: new FormItemSetup( displaySetup: fileUploadDisplayedPmv.ToCondition( bool.TrueString.ToCollection() ).ToDisplaySetup() ),
 					label: "Select a new file:".ToComponents() )

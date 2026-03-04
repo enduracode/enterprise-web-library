@@ -224,7 +224,7 @@ public class ResponsiveTable<ItemIdType>: FlowComponent {
 						var itemLimitingUpdateRegionSet = new UpdateRegionSet();
 						var itemLimitingAndGeneralActionComponents =
 							( defaultItemLimit != DataRowLimit.Unlimited
-								  ? getItemLimitingControlContainer( idBase, itemLimit!, itemLimitingUpdateRegionSet, this.tailUpdateRegions! ).ToCollection()
+								  ? getItemLimitingControlContainer( idBase, itemLimit!, itemLimitingUpdateRegionSet, this.tailUpdateRegions ).ToCollection()
 								  : Enumerable.Empty<FlowComponent>() )
 							.Concat( TableStatics.GetGeneralActionList( allowExportToExcel ? exportToExcelPostBack : null, tableActions ) )
 							.Materialize();
@@ -565,7 +565,7 @@ public class ResponsiveTable<ItemIdType>: FlowComponent {
 
 	private FlowComponent getItemLimitingControlContainer(
 		string postBackIdBase, AbstractDataValue<int> currentItemLimit, UpdateRegionSet itemLimitingUpdateRegionSet,
-		TailUpdateRegionsParameter tailUpdateRegions ) {
+		TailUpdateRegionsParameter? tailUpdateRegions ) {
 		var itemCount = itemGroups.Sum( i => i.Items.Count );
 		var list = new LineList(
 			new PhrasingIdContainer(
@@ -573,7 +573,7 @@ public class ResponsiveTable<ItemIdType>: FlowComponent {
 					updateRegionSets:
 					itemGroups.SelectMany( i => i.RemainingData.Value.TailUpdateRegions )
 						.Materialize()
-						.Concat( tailUpdateRegions.Collection.Value )
+						.Concat( tailUpdateRegions?.Collection.Value ?? [ ] )
 						.SelectMany( i => i.Sets.Collection.Value )
 						.ToParameter() ).ToComponentListItem()
 				.AppendLineListItem( "".ToComponentListItem() )

@@ -23,7 +23,7 @@ public class BlobFileManagerSetup {
 	public static BlobFileManagerSetup Create(
 		DisplaySetup? displaySetup = null, ElementClassSet? classes = null, Func<int, ResourceInfo>? thumbnailResourceGetter = null,
 		bool omitNoExistingFileMessage = false, Func<bool, bool>? uploadValidationPredicate = null, Action? uploadValidationErrorNotifier = null,
-		Action<RsFile, Validator>? uploadValidationMethod = null ) =>
+		Action<RsFile?, Validator>? uploadValidationMethod = null ) =>
 		new(
 			displaySetup,
 			classes,
@@ -39,11 +39,11 @@ public class BlobFileManagerSetup {
 	internal readonly bool OmitNoExistingFileMessage;
 	internal readonly Func<bool, bool>? UploadValidationPredicate;
 	internal readonly Action? UploadValidationErrorNotifier;
-	internal readonly Action<RsFile, Validator>? UploadValidationMethod;
+	internal readonly Action<RsFile?, Validator>? UploadValidationMethod;
 
-	private BlobFileManagerSetup(
+	internal BlobFileManagerSetup(
 		DisplaySetup? displaySetup, ElementClassSet? classes, Func<int, ResourceInfo>? thumbnailResourceGetter, bool omitNoExistingFileMessage,
-		Func<bool, bool>? uploadValidationPredicate, Action? uploadValidationErrorNotifier, Action<RsFile, Validator>? uploadValidationMethod ) {
+		Func<bool, bool>? uploadValidationPredicate, Action? uploadValidationErrorNotifier, Action<RsFile?, Validator>? uploadValidationMethod ) {
 		DisplaySetup = displaySetup;
 		Classes = classes;
 		ThumbnailResourceGetter = thumbnailResourceGetter;
