@@ -24,8 +24,8 @@ public class MySql: Database {
 		using( var sw = new StringWriter() ) {
 			sw.WriteLine( "START TRANSACTION;" );
 			sw.Write( script );
+			sw.WriteLine();
 			sw.WriteLine( "COMMIT;" );
-			sw.WriteLine( "quit" );
 
 			executeMethodWithDbExceptionHandling(
 				delegate {
@@ -87,10 +87,9 @@ public class MySql: Database {
 			sw.WriteLine( "DROP DATABASE IF EXISTS {0};".FormatWith( info.Database ) );
 			sw.WriteLine( "CREATE DATABASE {0};".FormatWith( info.Database ) );
 			if( filePath.Any() ) {
-				sw.WriteLine( "use {0}".FormatWith( info.Database ) );
-				sw.WriteLine( "source {0}".FormatWith( filePath.Replace( '\\', '/' ) ) );
+				sw.WriteLine( "use {0};".FormatWith( info.Database ) );
+				sw.Write( File.ReadAllText( filePath ) );
 			}
-			sw.WriteLine( "quit" );
 
 			executeMethodWithDbExceptionHandling(
 				delegate {
@@ -139,11 +138,20 @@ public class MySql: Database {
 
 	private string binFolderPath {
 		get {
-			const string mySqlFolderPath = @"C:\Program Files\MySQL";
-			return EwlStatics.CombinePaths(
-				mySqlFolderPath,
-				IoMethods.GetFolderNamesInFolder( mySqlFolderPath ).Single( i => i.StartsWith( "MySQL Server ", StringComparison.Ordinal ) ),
-				"bin" );
+			if( Environment.OSVersion.Platform == PlatformID.Win32NT ) {
+				const string mySqlFolderPath = @"C:\Program Files\MySQL";
+				return EwlStatics.CombinePaths(
+					mySqlFolderPath,
+					IoMethods.GetFolderNamesInFolder( mySqlFolderPath ).Single( i => i.StartsWith( "MySQL Server ", StringComparison.Ordinal ) ),
+					"bin" );
+			}
+			// On macOS, MySQL tools are typically in /usr/local/mysql/bin or /opt/homebrew/bin (for Homebrew)
+			if( Directory.Exists( "/usr/local/mysql/bin" ) )
+				return "/usr/local/mysql/bin";
+			if( Directory.Exists( "/opt/homebrew/bin" ) )
+				return "/opt/homebrew/bin";
+			// Fallback: assume mysql is in PATH
+			return "";
 		}
 	}
 

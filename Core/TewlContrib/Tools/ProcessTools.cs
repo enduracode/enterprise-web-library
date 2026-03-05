@@ -41,10 +41,9 @@ namespace EnterpriseWebLibrary.TewlContrib {
 					p.BeginErrorReadLine();
 
 					// Pass input to the program.
-					if( input.Length > 0 ) {
+					if( input.Length > 0 )
 						p.StandardInput.Write( input );
-						p.StandardInput.Flush();
-					}
+					p.StandardInput.Close();
 
 					// Throw an exception after the program exits if the code is not zero. Include all recorded output.
 					p.WaitForExit();
@@ -66,10 +65,9 @@ namespace EnterpriseWebLibrary.TewlContrib {
 				}
 				else {
 					p.Start();
-					if( input.Length > 0 ) {
+					if( input.Length > 0 )
 						p.StandardInput.Write( input );
-						p.StandardInput.Flush();
-					}
+					p.StandardInput.Close();
 				}
 				return outputResult;
 			}
