@@ -515,7 +515,7 @@ internal static class StandardModificationStatics {
 				"this.{0}.Value = {1};".FormatWith(
 					getColumnDataValueName( identityColumn ),
 					identityColumn.GetIncomingValueConversionExpression(
-						"EwlStatics.ChangeType( insert.Execute( {0}, isLongRunning: isLongRunning ), typeof( {1} ) )".FormatWith(
+						"EwlStatics.ChangeType( insert.Execute( {0}, isLongRunning: isLongRunning )!, typeof( {1} ) )".FormatWith(
 							DataAccessStatics.GetConnectionExpression( database ),
 							identityColumn.UnconvertedDataTypeName ) ) ) );
 		else

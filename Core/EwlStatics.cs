@@ -1,9 +1,11 @@
 ﻿using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using EnterpriseWebLibrary.SystemSpecificLogic;
 using EnterpriseWebLibrary.TewlContrib;
 using Imageflow.Fluent;
+using JetBrains.Annotations;
 using NodaTime;
 
 namespace EnterpriseWebLibrary;
@@ -11,6 +13,7 @@ namespace EnterpriseWebLibrary;
 /// <summary>
 /// A collection of miscellaneous statics that may be useful.
 /// </summary>
+[ PublicAPI ]
 public static partial class EwlStatics {
 	/// <summary>
 	/// EWL use only.
@@ -43,11 +46,12 @@ public static partial class EwlStatics {
 	/// This method was written by Peter Johnson at:
 	/// http://aspalliance.com/author.aspx?uId=1026.
 	/// </remarks>
+	[ return: NotNullIfNotNull( "value" ) ]
 	public static object? ChangeType( object? value, Type conversionType ) {
 		// This if block was taken from Convert.ChangeType as is, and is needed here since we’re
 		// checking properties on conversionType below.
 		if( conversionType == null )
-			throw new ArgumentNullException( "conversionType" );
+			throw new ArgumentNullException( nameof(conversionType) );
 
 		// If it’s not a nullable type, just pass through the parameters to Convert.ChangeType
 
@@ -112,7 +116,7 @@ public static partial class EwlStatics {
 	/// Returns the last element of the list.  Returns null if the list is empty.
 	/// </summary>
 	public static T? LastItem<T>( this List<T> list ) where T: class {
-		return list.Count == 0 ? null : list[ list.Count - 1 ];
+		return list.Count == 0 ? null : list[ ^1 ];
 	}
 
 	/// <summary>
@@ -140,14 +144,13 @@ public static partial class EwlStatics {
 	/// </summary>
 	public static string[] GetCSharpKeywords() =>
 		// See https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/.
-		new[]
-			{
+			[
 				"abstract", "as", "base", "bool", "break", "byte", "case", "catch", "char", "checked", "class", "const", "continue", "decimal", "default", "delegate",
 				"do", "double", "else", "enum", "event", "explicit", "extern", "false", "finally", "fixed", "float", "for", "foreach", "goto", "if", "implicit", "in",
 				"int", "interface", "internal", "is", "lock", "long", "namespace", "new", "null", "object", "operator", "out", "override", "params", "private",
 				"protected", "public", "readonly", "ref", "return", "sbyte", "sealed", "short", "sizeof", "stackalloc", "static", "string", "struct", "switch",
 				"this", "throw", "true", "try", "typeof", "uint", "ulong", "unchecked", "unsafe", "ushort", "using", "virtual", "void", "volatile", "while"
-			};
+			];
 
 	/// <summary>
 	/// Returns true if the specified objects are equal according to the default equality comparer.
