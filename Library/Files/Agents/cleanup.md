@@ -22,7 +22,7 @@ and others.
   Do not make any changes beyond what the R# tool identifies. Do not remove
   blank lines, rewrite code, or make stylistic changes on your own.
 - **Typography corrections are a separate step** and follow different rules
-  (see Step 6 below).
+  (see Step 4c below).
 
 ## Version Control
 
@@ -61,18 +61,22 @@ modified by the formatter, commit ONLY the formatted files with the message
 formatting changes were needed. If the caller does not ask you to commit, skip
 this step.
 
-### Step 4: Inspect (only when requested)
+### Step 4: Inspect and fix (only when requested)
 
-If the caller asks for inspection, run the ReSharper InspectCode tool:
+If the caller asks for inspection, perform all of the sub-steps below.
+
+#### Step 4a: Run inspection
+
+Run the ReSharper InspectCode tool. Write the output file to the working directory using a relative path:
 
 ```shell
-jb inspectcode "<SolutionFile>.sln" --include="file1.cs;file2.cs" --severity=SUGGESTION --output=inspect-results.json --no-updates
+jb inspectcode "<SolutionFile>.sln" --include="file1.cs;file2.cs" --severity=SUGGESTION --format=Sarif --output=inspect-results.json --no-updates
 ```
 
-Parse the SARIF JSON output for issues in the specified files, then delete the
+Parse the SARIF output for issues in the specified files, then delete the
 `inspect-results.json` file.
 
-### Step 5: Fix inspection issues (only when inspection was requested)
+#### Step 4b: Fix inspection issues
 
 For each issue reported, attempt to fix it using the Edit tool. Common fixes
 include removing unused usings, adding missing access modifiers, simplifying
@@ -83,10 +87,13 @@ If any issues cannot be fixed automatically (e.g. they require design decisions
 or broader refactoring), report them in your summary for the primary agent to
 handle.
 
-### Step 6: Fix typography (only when inspection was requested)
+#### Step 4c: Fix typography in modified regions
 
-Scan the specified files for ASCII characters in human-language text that should
-be proper Unicode typographic characters. Human-language text includes:
+Use VCS to get the diff of the specified files against the parent
+revision (e.g. `hg diff` or `git diff`). Identify which line ranges were
+modified. Then scan **only those modified regions** for ASCII characters in
+human-language text that should be proper Unicode typographic characters.
+Human-language text includes:
 
 - XML doc comments (`///` and `/** */`)
 - Code comments (`//` and `/* */`)
@@ -98,7 +105,7 @@ straight ASCII character should be replaced with its Unicode typographic
 equivalent. Then call the `ewl-fix-typography` tool with all corrections for
 that file in a single call.
 
-#### Characters to fix
+##### Characters to fix
 
 | ASCII | Unicode replacement | When to use |
 |---|---|---|
@@ -107,7 +114,7 @@ that file in a single call.
 | `"` (U+0022) | U+201C LEFT DOUBLE QUOTATION MARK | Opening double quote in human-language quoted text within comments. Do NOT change string literal delimiters. |
 | `"` (U+0022) | U+201D RIGHT DOUBLE QUOTATION MARK | Closing double quote in human-language quoted text within comments. Do NOT change string literal delimiters. |
 
-#### Rules
+##### Rules
 
 - **Do NOT change characters in code.** Only change characters in
   human-language contexts (comments, string literals containing prose, XML
@@ -119,8 +126,8 @@ that file in a single call.
   opening quotation mark.
 - **When in doubt, leave the character as-is.** It is better to miss a
   correction than to introduce a wrong character.
-- **Process ALL specified files**, not just those that were modified by earlier
-  steps. This ensures legacy straight quotes are also upgraded.
+- **Only process modified regions.** Use the VCS diff to determine which lines
+  were changed. Do not fix typography outside of modified regions.
 
 ## Response Format
 
