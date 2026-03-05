@@ -69,11 +69,21 @@ public static class ConfigurationStatics {
 		// Determine the installation path and load configuration information.
 		// Assume this is an installed installation. If this assumption turns out to be wrong, consider it a development installation. Installed executables are
 		// one level below the installation folder.
-		var installationPath = EwlStatics.CombinePaths( assemblyFolderPath.Any() ? assemblyFolderPath : Path.GetDirectoryName( AppAssembly.Location )!, ".." );
+		var assemblyFolder = assemblyFolderPath.Any() ? assemblyFolderPath : Path.GetDirectoryName( AppAssembly.Location )!;
+		var installationPath = EwlStatics.CombinePaths( assemblyFolder, ".." );
 		var isDevelopmentInstallation = !InstallationConfiguration.InstalledInstallationExists( installationPath );
-		if( isDevelopmentInstallation )
-			// Visual Studio puts executables inside bin\Debug\target-framework-moniker\runtime-identifier.
-			installationPath = EwlStatics.CombinePaths( installationPath, "..", "..", "..", ".." );
+		if( isDevelopmentInstallation ) {
+			// .NET puts executables inside bin/Debug|Release/target-framework-moniker[/runtime-identifier].
+			// On Windows with RID: bin\Debug\net10.0-windows\win-x64 (5 levels above project root)
+			// On macOS/Linux without RID: bin/Release/net10.0 (4 levels above project root)
+			// Check if grandparent of assembly folder is "bin" to determine if RID folder exists
+			var grandparentPath = Path.GetDirectoryName( Path.GetDirectoryName( assemblyFolder ) );
+			var grandparentName = Path.GetFileName( grandparentPath );
+			var levelsAboveProjectRoot = grandparentName == "bin" ? 4 : 5;
+			installationPath = assemblyFolder;
+			for( var i = 0; i < levelsAboveProjectRoot; i++ )
+				installationPath = Path.GetDirectoryName( installationPath )!;
+		}
 		initializationLog += Environment.NewLine + "Successfully determined installation path";
 		InstallationConfiguration = new InstallationConfiguration( installationPath, isDevelopmentInstallation );
 		initializationLog += Environment.NewLine + "Successfully loaded installation configuration";

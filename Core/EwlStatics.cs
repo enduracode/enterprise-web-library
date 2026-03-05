@@ -82,24 +82,11 @@ public static partial class EwlStatics {
 		if( one == null || two == null )
 			throw new ArgumentException( "String cannot be null." );
 
-		var pathList = new List<string>( paths );
-		pathList.Insert( 0, two );
-		pathList.Insert( 0, one );
-
-		var combinedPath = "";
-
-		foreach( var path in pathList )
-			combinedPath += getTrimmedPath( path );
+		var combinedPath = Path.Combine( one, two );
+		foreach( var path in paths )
+			combinedPath = Path.Combine( combinedPath, path );
 
 		return combinedPath.TrimEnd( Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar );
-	}
-
-	private static string getTrimmedPath( string path ) {
-		path = path.Trim( Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar );
-		path = path.Trim();
-		if( path.Length > 0 )
-			return path + Path.DirectorySeparatorChar;
-		return "";
 	}
 
 	/// <summary>

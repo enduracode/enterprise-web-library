@@ -57,7 +57,7 @@ public class LikeCondition: InlineDbCommandCondition {
 		foreach( var token in tokens.Take( 20 /*Google allows many more tokens than this.*/ ) ) {
 			var parameter = new DbCommandParameter(
 				parameterName + "L" + parameterNumber++,
-				new DbParameterValue( token.Truncate( 128 /*This is Google's cap on word length.*/ ) ) );
+				new DbParameterValue( Tewl.Tools.StringTools.Truncate( token, 128 /*This is Google's cap on word length.*/ ) ) );
 			newCommandText = StringTools.ConcatenateWithDelimiter(
 				" AND ",
 				newCommandText,

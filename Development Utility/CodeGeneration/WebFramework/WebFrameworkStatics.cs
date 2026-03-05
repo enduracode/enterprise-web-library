@@ -204,7 +204,7 @@ internal static class WebFrameworkStatics {
 				.Materialize() );
 
 		foreach( var file in files ) {
-			new StaticFile( file, inFramework, inVersionedFolder == true, folderSetupClassName ).GenerateCode( writer );
+			new WebItems.StaticFile( file, inFramework, inVersionedFolder == true, folderSetupClassName ).GenerateCode( writer );
 			allItems.Add( ( null, file ) );
 		}
 
