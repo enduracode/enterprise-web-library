@@ -40,13 +40,15 @@ dotnet build "Enterprise Web Library.sln" -c Release
 
 The EWL Development Utility (DU) performs code generation, populating
 `Generated Code\` folders in every project. It does **not** run automatically
-during builds; it must be run explicitly. There are two ways:
+during builds; it must be run explicitly.
 
-1. **Run the released version** via `Solution Files\Update Dependent Logic.ps1`.
-   This downloads the latest EWL package and runs the DU from it.
-2. **Run the DU project directly** (`Development Utility\`) -- use this when
-   making changes to code generation itself and need to test them. This only
-   works if the DU project and all its dependencies compile successfully.
+```shell
+dotnet run --project "Development Utility/Development Utility.csproj" -- . UpdateDependentLogic
+```
+
+If this fails due to compilation errors in the DU or its dependencies, fall
+back to the released version via `Solution Files\Update Dependent Logic.ps1`,
+which downloads the latest EWL package and runs the DU from it.
 
 ### Other Helper Scripts
 
