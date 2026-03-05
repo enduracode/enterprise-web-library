@@ -77,19 +77,30 @@ Follow this workflow:
 
 ## Critical Development Rules
 
-1. **Before editing any C# files, you MUST invoke the `ewl-cleanup` subagent first.**
+1. **Before doing any work, check that no applications from this system are
+   running.** Running applications (web sites, console apps, etc.) lock their
+   output DLLs and cause build failures. To check, find each project's output
+   assembly (the `<AssemblyName>` element in its `.csproj` or
+   `Directory.Build.props`) under its `bin/` directory and test whether it is
+   locked:
+   ```shell
+   powershell -NoProfile -Command "try { [IO.File]::Open('<dll-path>', 'Open', 'ReadWrite', 'None').Close() } catch { exit 1 }"
+   ```
+   If any output DLL is locked, notify the user that the applications must be
+   stopped before proceeding.
+2. **Before editing any C# files, you MUST invoke the `ewl-cleanup` subagent first.**
    See the [Formatting](#formatting) section for the full workflow.
-2. **Never edit files in any `Generated Code\` folder.** They are fully regenerated
+3. **Never edit files in any `Generated Code\` folder.** They are fully regenerated
    by the Development Utility. Your changes will be overwritten. Similarly, never
    edit `.ewlt.cs` files; these are also generated.
-3. **Tabs for indentation** in C# files, never spaces.
-4. Configuration lives in XML files validated against XSD schemas in `Configuration\`
+4. **Tabs for indentation** in C# files, never spaces.
+5. Configuration lives in XML files validated against XSD schemas in `Configuration\`
    folders.
-5. UI is built with EWL's component model (methods returning component collections),
+6. UI is built with EWL's component model (methods returning component collections),
    not Razor views.
-6. Page classes use EWL's code-generation-based URL routing, inheriting from
+7. Page classes use EWL's code-generation-based URL routing, inheriting from
    generated bases.
-7. Data access uses EWL's generated data-access layer from database schema.
+8. Data access uses EWL's generated data-access layer from database schema.
 
 ---
 
