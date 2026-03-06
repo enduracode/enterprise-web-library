@@ -1,5 +1,4 @@
-﻿using System.Runtime.InteropServices;
-using NodaTime;
+﻿using NodaTime;
 
 namespace EnterpriseWebLibrary;
 
@@ -20,8 +19,7 @@ public static class Clock {
 	public static Instant TransactionTime => transactionTimeGetter!();
 
 	/// <summary>
-	/// Returns an unsigned value, which makes more sense than the signed value returned by <see cref="Environment.TickCount64"/>.
+	/// Returns an unsigned value. Environment.TickCount64 is signed but won't overflow for millions of years.
 	/// </summary>
-	[ DllImport( "kernel32" ) ]
-	internal static extern ulong GetTickCount64();
+	internal static ulong GetTickCount64() => (ulong)Environment.TickCount64;
 }
