@@ -77,7 +77,8 @@ public abstract class StaticFile: ResourceBase {
 			isFrameworkFile
 				? GetFrameworkStaticFilesFolderPath( ConfigurationStatics.InstallationConfiguration )
 				: EwlStatics.CombinePaths( EwfConfigurationStatics.AppConfiguration.Path, AppStaticFilesFolderName ),
-			relativeFilePath );
+			// Normalize path separators for cross-platform compatibility
+			relativeFilePath.Replace( '\\', Path.DirectorySeparatorChar ) );
 
 	/// <summary>
 	/// Gets whether the file is part of the framework.
