@@ -12,6 +12,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations;
 
 internal class GetLogicSize: Operation {
 	private static readonly Operation instance = new GetLogicSize();
+	private static readonly string platformRuntimeIdentifier = Environment.OSVersion.Platform == PlatformID.Win32NT ? "win-x64" : "";
 
 	internal static int GetNDependLocCount( DevelopmentInstallation installation, bool debug ) {
 		var servicesProvider = new NDependServicesProvider();
@@ -53,7 +54,7 @@ internal class GetLogicSize: Operation {
 					EwlStatics.CombinePaths(
 						installation.GeneralLogic.Path,
 						app.Name,
-						ConfigurationStatics.GetProjectOutputFolderPath( debug, runtimeIdentifier: "win-x64" ),
+						ConfigurationStatics.GetProjectOutputFolderPath( debug, runtimeIdentifier: platformRuntimeIdentifier ),
 						project.NamespaceAndAssemblyName + ".dll" ) )
 			.Concat(
 				from i in installation.ExistingInstallationLogic.RuntimeConfiguration.WindowsServices
@@ -63,14 +64,14 @@ internal class GetLogicSize: Operation {
 				select EwlStatics.CombinePaths(
 					installation.GeneralLogic.Path,
 					i.Name,
-					ConfigurationStatics.GetProjectOutputFolderPath( debug, runtimeIdentifier: "win-x64" ),
+					ConfigurationStatics.GetProjectOutputFolderPath( debug, runtimeIdentifier: platformRuntimeIdentifier ),
 					i.NamespaceAndAssemblyName + ".exe" ) )
 			.Concat(
 				installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject != null
 					? EwlStatics.CombinePaths(
 							installation.GeneralLogic.Path,
 							installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.Name,
-							ConfigurationStatics.GetProjectOutputFolderPath( debug, runtimeIdentifier: "win-x64" ),
+							ConfigurationStatics.GetProjectOutputFolderPath( debug, runtimeIdentifier: platformRuntimeIdentifier ),
 							installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.NamespaceAndAssemblyName + ".exe" )
 						.ToCollection()
 					: Enumerable.Empty<string>() );

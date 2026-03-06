@@ -30,7 +30,9 @@ public class ExistingInstallationLogic {
 		if( runtimeConfiguration.InstallationType == InstallationType.Development )
 			path = EwlStatics.CombinePaths(
 				path,
-				ConfigurationStatics.GetProjectOutputFolderPath( useDebugFolderIfDevelopmentInstallation, runtimeIdentifier: "win-x64" ) );
+				ConfigurationStatics.GetProjectOutputFolderPath(
+					useDebugFolderIfDevelopmentInstallation,
+					runtimeIdentifier: Environment.OSVersion.Platform == PlatformID.Win32NT ? "win-x64" : "" ) );
 		return path;
 	}
 
@@ -214,12 +216,13 @@ public class ExistingInstallationLogic {
 				}
 
 			try {
+				var runtimeIdentifier = Environment.OSVersion.Platform == PlatformID.Win32NT ? "win-x64" : "";
 				output = TewlContrib.ProcessTools.RunProgram(
 						EwlStatics.CombinePaths(
 							generalInstallationLogic.Path,
 							IsuStatics.DataMigratorProjectName,
 							runtimeConfiguration.InstallationType == InstallationType.Development
-								? ConfigurationStatics.GetProjectOutputFolderPath( true, runtimeIdentifier: "win-x64" )
+								? ConfigurationStatics.GetProjectOutputFolderPath( true, runtimeIdentifier: runtimeIdentifier )
 								: "",
 							IsuStatics.DataMigratorNamespaceAndAssemblyName ),
 						"",
