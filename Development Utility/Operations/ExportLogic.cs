@@ -14,7 +14,7 @@ using Tewl.IO;
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations;
 
 internal class ExportLogic: Operation {
-	private const string nuGetTargetFramework = "net9.0-windows7.0";
+	private const string nuGetTargetFramework = "net9.0";
 	private static readonly Operation instance = new ExportLogic();
 
 	internal static PackagingConfiguration GetPackagingConfiguration( DevelopmentInstallation installation ) {
@@ -56,9 +56,7 @@ internal class ExportLogic: Operation {
 							EwlStatics.CombinePaths(
 								installation.GeneralLogic.Path,
 								mainProjectPath,
-								installation.SystemIsTewl()
-									? EwlStatics.CombinePaths( "bin", useDebugAssembly ? "Debug" : "Release", "net9.0" )
-									: ConfigurationStatics.GetProjectOutputFolderPath( useDebugAssembly ),
+								ConfigurationStatics.GetProjectOutputFolderPath( useDebugAssembly ),
 								fileName ),
 							EwlStatics.CombinePaths( folderPath, @"lib\{0}".FormatWith( nuGetTargetFramework ), fileName ) );
 
@@ -593,7 +591,7 @@ internal class ExportLogic: Operation {
 
 	private IEnumerable<InstallationSupportUtility.SystemManagerInterface.Messages.BuildMessage.NuGetPackage> packageEwl(
 		DevelopmentInstallation installation, PackagingConfiguration packagingConfiguration, string logicPackagesFolderPath ) =>
-		CreateEwlNuGetPackages( installation, packagingConfiguration, false, logicPackagesFolderPath, new bool?[] { true, false } )
+		CreateEwlNuGetPackages( installation, packagingConfiguration, false, logicPackagesFolderPath, [ true, false ] )
 			.Select( i => {
 				var package = new InstallationSupportUtility.SystemManagerInterface.Messages.BuildMessage.NuGetPackage();
 				package.Id = i.id;
