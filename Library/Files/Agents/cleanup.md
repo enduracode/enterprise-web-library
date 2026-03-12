@@ -22,7 +22,7 @@ and others.
   Do not make any changes beyond what the R# tool identifies. Do not remove
   blank lines, rewrite code, or make stylistic changes on your own.
 - **Typography corrections are a separate step** and follow different rules
-  (see Step 4c below).
+  (see Step 5c below).
 
 ## Version Control
 
@@ -34,7 +34,18 @@ the `ewl-mercurial` skill and use Mercurial. Otherwise use Git.
 
 You will be invoked with a list of file paths. Perform these steps:
 
-### Step 1: Ensure JetBrains tools are up to date
+### Step 1: Verify files are clean
+
+Use VCS to check whether any of the specified files have uncommitted changes
+(e.g. `hg status <files>` or `git status <files>`). If any file has existing
+modifications, **stop immediately** without formatting or committing anything.
+Report the problem back to the caller, listing the files that have uncommitted
+changes.
+
+This prevents pre-existing functional changes from being accidentally included
+in a formatting commit.
+
+### Step 2: Ensure JetBrains tools are up to date
 
 Run the following to install or update the ReSharper command-line tools:
 
@@ -44,7 +55,7 @@ dotnet tool update -g JetBrains.ReSharper.GlobalTools
 
 This ensures the `jb` command is available and current.
 
-### Step 2: Format
+### Step 3: Format
 
 Run the ReSharper CleanupCode tool on the specified files. Find the `.sln` file
 for the system and substitute its path below:
@@ -53,7 +64,7 @@ for the system and substitute its path below:
 jb cleanupcode "<SolutionFile>.sln" --profile="Main" --include="file1.cs;file2.cs" --no-updates
 ```
 
-### Step 3: Commit formatting changes (only when requested)
+### Step 4: Commit formatting changes (only when requested)
 
 Only commit if the caller asks you to commit. If so, and if any files were
 modified by the formatter, commit ONLY the formatted files with the message
@@ -61,11 +72,11 @@ modified by the formatter, commit ONLY the formatted files with the message
 formatting changes were needed. If the caller does not ask you to commit, skip
 this step.
 
-### Step 4: Inspect and fix (only when requested)
+### Step 5: Inspect and fix (only when requested)
 
 If the caller asks for inspection, perform all of the sub-steps below.
 
-#### Step 4a: Run inspection
+#### Step 5a: Run inspection
 
 Run the ReSharper InspectCode tool. Write the output file to the working directory using a relative path:
 
@@ -76,18 +87,18 @@ jb inspectcode "<SolutionFile>.sln" --include="file1.cs;file2.cs" --severity=SUG
 Parse the SARIF output for issues in the specified files, then delete the
 `inspect-results.json` file.
 
-#### Step 4b: Fix inspection issues
+#### Step 5b: Fix inspection issues
 
 For each issue reported, attempt to fix it using the Edit tool. Common fixes
 include removing unused usings, adding missing access modifiers, simplifying
-expressions, etc. After fixing all issues you can, re-run the formatter (Step 2)
+expressions, etc. After fixing all issues you can, re-run the formatter (Step 3)
 to ensure fixes are properly formatted.
 
 If any issues cannot be fixed automatically (e.g. they require design decisions
 or broader refactoring), report them in your summary for the primary agent to
 handle.
 
-#### Step 4c: Fix typography in modified regions
+#### Step 5c: Fix typography in modified regions
 
 Use VCS to get the diff of the specified files against the parent
 revision (e.g. `hg diff` or `git diff`). Identify which line ranges were
