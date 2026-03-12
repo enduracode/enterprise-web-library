@@ -72,6 +72,7 @@ export const FixCurlyPathsPlugin = async ({ $ }) => ({
       glob: ["path"],
       grep: ["path"],
       "ewl-fix-typography": ["filePath"],
+      bash: ["workdir"],
     }
 
     const keys = pathParams[input.tool]
