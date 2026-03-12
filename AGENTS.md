@@ -98,9 +98,6 @@ The Bash tool runs **Git Bash (MSYS2)**, not `cmd.exe`. Key implications:
   that some Windows tools (e.g. `findstr`) misparse arguments when the working
   directory path contains spaces, even for piped input. Prefer Unix-style tools
   (`grep`, `sed`, `awk`) over Windows equivalents (`findstr`, `find`).
-- The curly apostrophe (U+2019) in paths like `EnduraCode's TEWL` breaks some
-  tools. Use wildcards (e.g. `EnduraCode*TEWL`) to avoid encoding issues.
-
 ---
 
 ## Critical Development Rules
