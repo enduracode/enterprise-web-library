@@ -34,10 +34,11 @@ the `ewl-mercurial` skill and use Mercurial. Otherwise use Git.
 
 You will be invoked with a list of file paths. Perform these steps:
 
-### Step 1: Verify files are clean
+### Step 1: Verify files are clean (only when a commit is requested)
 
-Use VCS to check whether any of the specified files have uncommitted changes
-(e.g. `hg status <files>` or `git status <files>`). If any file has existing
+Only perform this step if the caller asks you to commit. Use VCS to check
+whether any of the specified files have uncommitted changes (e.g.
+`hg status <files>` or `git status <files>`). If any file has existing
 modifications, **stop immediately** without formatting or committing anything.
 Report the problem back to the caller, listing the files that have uncommitted
 changes.
