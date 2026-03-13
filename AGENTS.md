@@ -94,12 +94,11 @@ formatting and commit the results separately from your functional changes.
 Follow this workflow:
 
 1. **Before making functional changes**, invoke the `ewl-cleanup` subagent
-   with the list of C# files you plan to edit. Ask it to format and commit.
-   It will format the files and commit any formatting changes.
+   with the list of C# files you plan to edit. Ask it to format (not
+   inspect) and commit.
 2. **Make your functional changes** to the files.
 3. **After making functional changes**, invoke the `ewl-cleanup` subagent
-   again with the same files, this time requesting formatting and inspection
-   but no commits. It will format the files and fix inspection issues.
+   again with the same files. Ask it to format and inspect but not commit.
 
 ---
 
