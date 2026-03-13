@@ -14,7 +14,7 @@ public abstract class StaticFile: ResourceBase {
 	/// <summary>
 	/// Development Utility and private use only.
 	/// </summary>
-	public const string FrameworkStaticFilesSourceFolderPath = @"EnterpriseWebFramework\StaticFiles";
+	public const string FrameworkStaticFilesSourceFolderPath = "EnterpriseWebFramework/StaticFiles";
 
 	/// <summary>
 	/// Development Utility and private use only.

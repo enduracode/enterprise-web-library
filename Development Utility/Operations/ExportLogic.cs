@@ -58,12 +58,12 @@ internal class ExportLogic: Operation {
 								mainProjectPath,
 								ConfigurationStatics.GetProjectOutputFolderPath( useDebugAssembly ),
 								fileName ),
-							EwlStatics.CombinePaths( folderPath, @"lib\{0}".FormatWith( nuGetTargetFramework ), fileName ) );
+							EwlStatics.CombinePaths( folderPath, "lib/{0}".FormatWith( nuGetTargetFramework ), fileName ) );
 
 					if( !installation.SystemIsTewl() ) {
 						var toolsFolderPath = EwlStatics.CombinePaths( folderPath, "tools" );
 						IoMethods.CopyFile(
-							EwlStatics.CombinePaths( installation.GeneralLogic.Path, @"Development Utility\Package Manager Console Commands.ps1" ),
+							EwlStatics.CombinePaths( installation.GeneralLogic.Path, "Development Utility/Package Manager Console Commands.ps1" ),
 							EwlStatics.CombinePaths( toolsFolderPath, "init.ps1" ) );
 
 						const string duProjectAndFolderName = "Development Utility";
@@ -119,7 +119,7 @@ internal class ExportLogic: Operation {
 
 					Log.Information(
 						TewlContrib.ProcessTools.RunProgram(
-							EwlStatics.CombinePaths( installation.GeneralLogic.Path, @"Solution Files\nuget" ),
+							EwlStatics.CombinePaths( installation.GeneralLogic.Path, "Solution Files/nuget" ),
 							"pack \"" + manifestPath + "\" -OutputDirectory \"" + outputFolderPath + "\"",
 							"",
 							true ) );
@@ -270,7 +270,7 @@ internal class ExportLogic: Operation {
 								projectName,
 								ConfigurationStatics.GetProjectOutputFolderPath( useDebugAssembly ),
 								fileName ),
-							EwlStatics.CombinePaths( folderPath, @"lib\{0}".FormatWith( nuGetTargetFramework ), fileName ) );
+							EwlStatics.CombinePaths( folderPath, "lib/{0}".FormatWith( nuGetTargetFramework ), fileName ) );
 
 					var manifestPath = EwlStatics.CombinePaths( folderPath, "Package.nuspec" );
 					using( var writer = IoMethods.GetTextWriterForWrite( manifestPath, false ) )
@@ -286,7 +286,7 @@ internal class ExportLogic: Operation {
 
 					Log.Information(
 						TewlContrib.ProcessTools.RunProgram(
-							EwlStatics.CombinePaths( installation.GeneralLogic.Path, @"Solution Files\nuget" ),
+							EwlStatics.CombinePaths( installation.GeneralLogic.Path, "Solution Files/nuget" ),
 							"pack \"" + manifestPath + "\" -OutputDirectory \"" + outputFolderPath + "\"",
 							"",
 							true ) );

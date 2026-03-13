@@ -10,7 +10,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility;
 internal static class AppStatics {
 	internal const string MercurialRepositoryFolderName = ".hg";
 	internal const string GitRepositoryFolderName = ".git";
-	internal const string TewlProjectPath = @"Shared\TEWL";
+	internal const string TewlProjectPath = "Shared/TEWL";
 	internal const string StaticFileLogicFolderName = "Logic";
 	internal const string ProviderProjectFolderName = "Providers";
 	internal const string MySqlProviderProjectName = "MySQL";
