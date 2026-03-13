@@ -23,7 +23,7 @@ public static class ProcessTools {
 			p.StartInfo.CreateNoWindow = true; // prevents command window from appearing
 			p.StartInfo.UseShellExecute = false; // necessary for redirecting output
 			p.StartInfo.WorkingDirectory = workingDirectory;
-			p.StartInfo.RedirectStandardInput = true;
+			p.StartInfo.RedirectStandardInput = input.Length > 0;
 			if( waitForExit ) {
 				// Set up output recording.
 				p.StartInfo.RedirectStandardOutput = true;
@@ -39,10 +39,10 @@ public static class ProcessTools {
 				p.BeginOutputReadLine();
 				p.BeginErrorReadLine();
 
-				// Pass input to the program.
+				// Pass input to the program, then close the stream to signal EOF.
 				if( input.Length > 0 ) {
 					p.StandardInput.Write( input );
-					p.StandardInput.Flush();
+					p.StandardInput.Close();
 				}
 
 				// Throw an exception after the program exits if the code is not zero. Include all recorded output.
@@ -67,7 +67,7 @@ public static class ProcessTools {
 				p.Start();
 				if( input.Length > 0 ) {
 					p.StandardInput.Write( input );
-					p.StandardInput.Flush();
+					p.StandardInput.Close();
 				}
 			}
 			return outputResult;
