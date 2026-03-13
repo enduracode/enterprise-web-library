@@ -26,6 +26,7 @@
 						<element name="shortName" type="string" />
 						<element name="DeveloperNotificationEmailFromAddress" type="string" />
 						<element name="DebugLogMaxSizeGb" type="unsignedInt" minOccurs="0" />
+						<element name="AzureHosting" type="rs:AzureHosting" minOccurs="0" />
 						<element name="InstallationTypeConfiguration" type="rs:InstallationTypeConfiguration" />
 					</sequence>
 				</complexType>
@@ -84,6 +85,12 @@
 				</sequence>
 			</extension>
 		</complexContent>
+	</complexType>
+	<complexType name="AzureHosting">
+		<sequence>
+			<element name="TenantId" type="string" />
+			<element name="SubscriptionId" type="string" />
+		</sequence>
 	</complexType>
 	<complexType name="InstallationTypeConfiguration" abstract="true" />
 	<complexType name="LiveInstallationConfiguration">
