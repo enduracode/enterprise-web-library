@@ -35,7 +35,9 @@ public static class ConfigurationStatics {
 
 	internal static void Init( string assemblyFolderPath, string appName, bool isClientSideApp, ref string initializationLog ) {
 		EwlFolderPath = Environment.GetEnvironmentVariable( "{0}FolderPath".FormatWith( EwlStatics.EwlInitialism.EnglishToPascal() ) ) ??
-		                @"C:\{0}".FormatWith( EwlStatics.EwlName );
+		                ( OperatingSystem.IsWindows()
+			                  ? @"C:\{0}".FormatWith( EwlStatics.EwlName )
+			                  : EwlStatics.CombinePaths( "/opt", EwlStatics.EwlName.ToUrlSlug() ) );
 
 		initializationLog += Environment.NewLine + "About to load machine config";
 
