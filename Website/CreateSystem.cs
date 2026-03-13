@@ -21,11 +21,10 @@ partial class CreateSystem {
 				actionGetter: () => new PostBackAction(
 					new PageReloadBehavior(
 						secondaryResponse:
-						new SecondaryResponse(
-							() => EwfResponse.Create(
-								ContentTypes.ApplicationZip,
-								new EwfResponseBodyCreator( createAndZipSystem ),
-								fileNameCreator: () => "{0}.zip".FormatWith( systemShortName.Value ) ) ) ) ) ),
+						new SecondaryResponse( () => EwfResponse.Create(
+							ContentTypes.ApplicationZip,
+							new EwfResponseBodyCreator( createAndZipSystem ),
+							fileNameCreator: () => "{0}.zip".FormatWith( systemShortName.Value ) ) ) ) ) ),
 			() => new UiPageContent( contentFootActions: new ButtonSetup( "Create System" ) ).Add(
 				FormItemList.CreateStack()
 					.AddItem(
@@ -46,21 +45,19 @@ partial class CreateSystem {
 								maxLength: 50,
 								additionalValidationMethod: validator => {
 									if( baseNamespace.Value.Separate( ".", false )
-									   .Any(
-										   i => i.Length == 0 || !string.Equals(
-											        i,
-											        EwlStatics.GetCSharpIdentifier( i, omitAtSignPrefixIfNotRequired: true ),
-											        StringComparison.Ordinal ) ) )
+									   .Any( i => i.Length == 0 || !string.Equals(
+										              i,
+										              EwlStatics.GetCSharpIdentifier( i, omitAtSignPrefixIfNotRequired: true ),
+										              StringComparison.Ordinal ) ) )
 										validator.NoteErrorAndAddMessage( "The base namespace must be a valid C# identifier." );
 								} )
 							.ToFormItem( label: "Base namespace".ToComponents() ) ) ) );
 
 	private void createAndZipSystem( Stream stream ) {
-		IoMethods.ExecuteWithTempFolder(
-			folderPath => {
-				createSystemFilesInFolder( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "System Template" ), folderPath, "" );
-				ZipOps.ZipFolderAsStream( folderPath, stream );
-			} );
+		IoMethods.ExecuteWithTempFolder( folderPath => {
+			createSystemFilesInFolder( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "System Template" ), folderPath, "" );
+			ZipOps.ZipFolderAsStream( folderPath, stream );
+		} );
 	}
 
 	private void createSystemFilesInFolder( string templateFolderPath, string tempFolderPath, string relativeFolderPath ) {
@@ -79,6 +76,6 @@ partial class CreateSystem {
 				Encoding.UTF8 );
 		}
 		foreach( var subFolderName in IoMethods.GetFolderNamesInFolder( sourceFolderPath ) )
-			createSystemFilesInFolder( templateFolderPath, tempFolderPath, Path.Combine( relativeFolderPath, subFolderName ) );
+			createSystemFilesInFolder( templateFolderPath, tempFolderPath, EwlStatics.CombinePaths( relativeFolderPath, subFolderName ) );
 	}
 }

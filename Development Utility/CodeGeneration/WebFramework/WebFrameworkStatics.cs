@@ -109,7 +109,7 @@ internal static class WebFrameworkStatics {
 		if( ignoredFolderPaths.Contains( folderPathRelativeToProject ) )
 			return;
 
-		if( folderPathRelativeToProject == staticFilesFolderPath ) {
+		if( string.Equals( folderPathRelativeToProject, staticFilesFolderPath, StringComparison.Ordinal ) ) {
 			generateStaticFileLogic(
 				writer,
 				projectPath,
@@ -133,7 +133,7 @@ internal static class WebFrameworkStatics {
 			}
 		EntitySetup? entitySetup = null;
 		if( entitySetupFileName.Length > 0 ) {
-			var filePathRelativeToProject = Path.Combine( folderPathRelativeToProject, entitySetupFileName );
+			var filePathRelativeToProject = EwlStatics.CombinePaths( folderPathRelativeToProject, entitySetupFileName );
 			var generalData = new WebItemGeneralData( projectPath, projectNamespace, filePathRelativeToProject, false );
 			entitySetup = new EntitySetup( projectContainsFramework, generalData );
 			entitySetup.GenerateCode( writer );
@@ -153,7 +153,7 @@ internal static class WebFrameworkStatics {
 
 		// Delve into sub folders.
 		foreach( var subFolderName in IoMethods.GetFolderNamesInFolder( folderPath ).OrderBy( i => i ) ) {
-			var subFolderPath = Path.Combine( folderPathRelativeToProject, subFolderName );
+			var subFolderPath = EwlStatics.CombinePaths( folderPathRelativeToProject, subFolderName );
 			if( subFolderPath == "bin" || subFolderPath == "obj" )
 				continue;
 			generateForFolder(
@@ -215,7 +215,7 @@ internal static class WebFrameworkStatics {
 			projectPath,
 			staticFilesFolderPath,
 			AppStatics.StaticFileLogicFolderName,
-			folderPathRelativeToProject.Substring( ( staticFilesFolderPath + ( isRootFolder ? "" : Path.DirectorySeparatorChar.ToString() ) ).Length ) );
+			folderPathRelativeToProject.Substring( ( staticFilesFolderPath + ( isRootFolder ? "" : Path.AltDirectorySeparatorChar.ToString() ) ).Length ) );
 		Directory.CreateDirectory( logicFolderPath );
 		createStaticFileLogicTemplate( logicFolderPath, folderNamespace, folderSetupClassName );
 		foreach( var i in files )
@@ -265,7 +265,8 @@ internal static class WebFrameworkStatics {
 				folderPathRelativeToProject.Substring(
 					( ( inFramework
 						    ? EnterpriseWebFramework.StaticFile.FrameworkStaticFilesSourceFolderPath
-						    : EnterpriseWebFramework.StaticFile.AppStaticFilesFolderName ) + ( isRootFolder ? "" : Path.DirectorySeparatorChar.ToString() ) ).Length ) ) );
+						    : EnterpriseWebFramework.StaticFile.AppStaticFilesFolderName ) + ( isRootFolder ? "" : Path.AltDirectorySeparatorChar.ToString() ) )
+					.Length ) ) );
 
 		writer.WriteLine( "}" );
 		writer.WriteLine( "}" );

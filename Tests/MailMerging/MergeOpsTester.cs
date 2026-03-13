@@ -115,7 +115,7 @@ internal class MergeOpsTester {
 	}
 
 	private string getFilePath( string fileNamePart ) {
-		filePath = Path.Combine( outputFolderPath, ( timestampPrefix + fileNamePart + FileExtensions.WordDocx ) );
+		filePath = EwlStatics.CombinePaths( outputFolderPath, timestampPrefix + fileNamePart + FileExtensions.WordDocx );
 		return filePath;
 	}
 
@@ -125,8 +125,8 @@ internal class MergeOpsTester {
 	public void InitializeFixture() {
 		/* Make sure all the tests run have the same prefix */
 		timestampPrefix = "test_run_" + DateTime.Now.ToString( "yyyy_MM_dd_HH_MM_ss_" );
-		outputFolderPath = Directory
-			.CreateDirectory( Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.DesktopDirectory ), "MergeOps Test Output" ) )
+		outputFolderPath = Directory.CreateDirectory(
+				EwlStatics.CombinePaths( Environment.GetFolderPath( Environment.SpecialFolder.DesktopDirectory ), "MergeOps Test Output" ) )
 			.FullName;
 
 		Assert.That( File.Exists( testingWordTemplatePath ), Is.True, "Template file wasn't found: " + testingWordTemplatePath );

@@ -11,6 +11,7 @@ using EnterpriseWebLibrary.ExternalFunctionality;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
 using EnterpriseWebLibrary.SystemSpecificLogic;
+using EnterpriseWebLibrary.TewlContrib;
 using NodaTime.Text;
 using Serilog;
 using Tewl.IO;
@@ -1211,7 +1212,7 @@ internal class UpdateDependentLogic: Operation {
 		var folder = new DirectoryInfo( installation.GeneralLogic.Path );
 		while( folder is not null ) {
 			if( Directory.Exists( EwlStatics.CombinePaths( folder.FullName, ".hg" ) ) || Directory.Exists( EwlStatics.CombinePaths( folder.FullName, ".git" ) ) )
-				return Path.GetRelativePath( folder.FullName, installation.GeneralLogic.Path ).Replace( Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar );
+				return PathTools.NormalizePath( Path.GetRelativePath( folder.FullName, installation.GeneralLogic.Path ) );
 			folder = folder.Parent;
 		}
 		return "";

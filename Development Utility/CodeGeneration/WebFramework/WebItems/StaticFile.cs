@@ -49,7 +49,7 @@ internal class StaticFile {
 				generalData.PathRelativeToProject.Substring(
 					( ( inFramework
 						    ? EnterpriseWebFramework.StaticFile.FrameworkStaticFilesSourceFolderPath
-						    : EnterpriseWebFramework.StaticFile.AppStaticFilesFolderName ) + Path.DirectorySeparatorChar ).Length ) ) );
+						    : EnterpriseWebFramework.StaticFile.AppStaticFilesFolderName ) + Path.AltDirectorySeparatorChar ).Length ) ) );
 
 		writer.WriteLine( "}" );
 		writer.WriteLine( "}" );

@@ -7,7 +7,7 @@ internal class WebItemGeneralData {
 	internal const string ParameterDefaultsFieldName = "__parameterDefaults";
 
 	internal static string GetNamespaceFromPath( string projectNamespace, string pathRelativeToProject, bool isFilePath ) {
-		var tokens = pathRelativeToProject.Separate( Path.DirectorySeparatorChar.ToString(), false );
+		var tokens = pathRelativeToProject.Separate( Path.AltDirectorySeparatorChar.ToString(), false );
 		var namespaceTokens = isFilePath ? tokens.Take( tokens.Count - 1 ) : tokens;
 		return projectNamespace + StringTools.ConcatenateWithDelimiter( ".", namespaceTokens.Select( i => EwlStatics.GetCSharpIdentifier( i.Capitalize() ) ) )
 			       .PrependDelimiter( "." );

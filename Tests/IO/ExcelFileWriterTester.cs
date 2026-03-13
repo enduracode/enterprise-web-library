@@ -13,8 +13,8 @@ internal class ExcelFileWriterTester {
 	public void InitializeFixture() {
 		// Make sure all the tests run have the same prefix
 		timestampPrefix = "test_run_" + DateTime.Now.ToString( "yyyy_MM_dd_HH_MM_ss_" );
-		outputFolderPath = Directory
-			.CreateDirectory( Path.Combine( Environment.GetFolderPath( Environment.SpecialFolder.DesktopDirectory ), "Excel Writer Output" ) )
+		outputFolderPath = Directory.CreateDirectory(
+				EwlStatics.CombinePaths( Environment.GetFolderPath( Environment.SpecialFolder.DesktopDirectory ), "Excel Writer Output" ) )
 			.FullName;
 	}
 
@@ -343,7 +343,7 @@ internal class ExcelFileWriterTester {
 		var start = DateTime.Now;
 		var writer = includeDefaultWorksheet ? new ExcelFileWriter() : new ExcelFileWriter( false );
 		var fileName = code( writer );
-		var filePath = Path.Combine( outputFolderPath, ExcelFileWriter.GetSafeFileName( timestampPrefix + fileName ) );
+		var filePath = EwlStatics.CombinePaths( outputFolderPath, ExcelFileWriter.GetSafeFileName( timestampPrefix + fileName ) );
 		var doneCreating = DateTime.Now;
 		long size;
 		using( var f = File.Create( filePath ) ) {
