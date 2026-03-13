@@ -79,31 +79,10 @@ public static partial class EwlStatics {
 	}
 
 	/// <summary>
-	/// Recursively calls Path.Combine on the given paths.  Path is returned without a trailing slash.
+	/// Recursively calls <see cref="Path.Combine(string[])"/> on the given paths. Path is returned without a trailing slash.
 	/// </summary>
-	public static string CombinePaths( string one, string two, params string[] paths ) {
-		if( one == null || two == null )
-			throw new ArgumentException( "String cannot be null." );
-
-		var pathList = new List<string>( paths );
-		pathList.Insert( 0, two );
-		pathList.Insert( 0, one );
-
-		var combinedPath = "";
-
-		foreach( var path in pathList )
-			combinedPath += getTrimmedPath( path );
-
-		return combinedPath.TrimEnd( '\\' );
-	}
-
-	private static string getTrimmedPath( string path ) {
-		path = path.Trim( '\\' );
-		path = path.Trim();
-		if( path.Length > 0 )
-			return path + "\\";
-		return "";
-	}
+	public static string CombinePaths( string one, string two, params string[] paths ) =>
+		PathTools.NormalizePath( Path.Combine( [ one, two, ..paths ] ).TrimEnd( Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar ) );
 
 	/// <summary>
 	/// Returns the first element of the list.  Returns null if the list is empty.
