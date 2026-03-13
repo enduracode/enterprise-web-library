@@ -21,26 +21,25 @@ public class MySql: Database {
 	string Database.SecondaryDatabaseName => ( info as DatabaseInfo ).SecondaryDatabaseName;
 
 	void Database.ExecuteSqlScriptInTransaction( string script ) {
-		using( var sw = new StringWriter() ) {
-			sw.WriteLine( "START TRANSACTION;" );
-			sw.Write( script );
-			sw.WriteLine( "COMMIT;" );
-			sw.WriteLine( "quit" );
+		using var sw = new StringWriter();
+		sw.WriteLine( "START TRANSACTION;" );
+		sw.Write( script );
+		sw.WriteLine( "COMMIT;" );
+		sw.WriteLine( "quit" );
 
-			executeMethodWithDbExceptionHandling(
-				delegate {
-					try {
-						TewlContrib.ProcessTools.RunProgram(
-							EwlStatics.CombinePaths( binFolderPath, "mysql" ),
-							getHostAndAuthenticationArguments() + " " + info.Database + " --disable-reconnect --batch --disable-auto-rehash",
-							sw.ToString(),
-							true );
-					}
-					catch( Exception e ) {
-						throw DataAccessMethods.CreateDbConnectionException( info, "updating logic in", e );
-					}
-				} );
-		}
+		executeMethodWithDbExceptionHandling(
+			delegate {
+				try {
+					TewlContrib.ProcessTools.RunProgram(
+						getMySqlProgram( "mysql" ),
+						getHostAndAuthenticationArguments() + " " + info.Database + " --disable-reconnect --batch --disable-auto-rehash",
+						sw.ToString(),
+						true );
+				}
+				catch( Exception e ) {
+					throw DataAccessMethods.CreateDbConnectionException( info, "updating logic in", e );
+				}
+			} );
 	}
 
 	int Database.GetLineMarker() {
@@ -71,7 +70,7 @@ public class MySql: Database {
 				try {
 					// The --hex-blob option prevents certain BLOBs from causing errors during database re-creation.
 					TewlContrib.ProcessTools.RunProgram(
-						EwlStatics.CombinePaths( binFolderPath, "mysqldump" ),
+						getMySqlProgram( "mysqldump" ),
 						getHostAndAuthenticationArguments() + " --single-transaction --hex-blob --result-file=\"{0}\" ".FormatWith( filePath ) + info.Database,
 						"",
 						true );
@@ -88,7 +87,7 @@ public class MySql: Database {
 			sw.WriteLine( "CREATE DATABASE {0};".FormatWith( info.Database ) );
 			if( filePath.Any() ) {
 				sw.WriteLine( "use {0}".FormatWith( info.Database ) );
-				sw.WriteLine( "source {0}".FormatWith( filePath.Replace( '\\', '/' ) ) );
+				sw.WriteLine( "source {0}".FormatWith( filePath ) );
 			}
 			sw.WriteLine( "quit" );
 
@@ -96,7 +95,7 @@ public class MySql: Database {
 				delegate {
 					try {
 						TewlContrib.ProcessTools.RunProgram(
-							EwlStatics.CombinePaths( binFolderPath, "mysql" ),
+							getMySqlProgram( "mysql" ),
 							getHostAndAuthenticationArguments() + " --disable-reconnect --batch --disable-auto-rehash",
 							sw.ToString(),
 							true );
@@ -137,14 +136,16 @@ public class MySql: Database {
 			} );
 	}
 
-	private string binFolderPath {
-		get {
-			const string mySqlFolderPath = @"C:\Program Files\MySQL";
-			return EwlStatics.CombinePaths(
-				mySqlFolderPath,
-				IoMethods.GetFolderNamesInFolder( mySqlFolderPath ).Single( i => i.StartsWith( "MySQL Server ", StringComparison.Ordinal ) ),
-				"bin" );
-		}
+	private string getMySqlProgram( string name ) {
+		if( !OperatingSystem.IsWindows() )
+			return name;
+
+		const string mySqlFolderPath = @"C:\Program Files\MySQL";
+		return EwlStatics.CombinePaths(
+			mySqlFolderPath,
+			IoMethods.GetFolderNamesInFolder( mySqlFolderPath ).Single( i => i.StartsWith( "MySQL Server ", StringComparison.Ordinal ) ),
+			"bin",
+			name );
 	}
 
 	private string getHostAndAuthenticationArguments() {
