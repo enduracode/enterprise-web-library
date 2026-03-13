@@ -6,3 +6,6 @@ dotnet_style_collection_initializer = false
 csharp_style_prefer_primary_constructors = false
 dotnet_diagnostic.IDE0051.severity = none
 dotnet_diagnostic.IDE1006.severity = none
+[*.{xml,xsd}]
+indent_style = tab
+tab_width = 2

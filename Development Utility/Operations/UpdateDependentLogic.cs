@@ -305,6 +305,9 @@ internal class UpdateDependentLogic: Operation {
 				writer.WriteLine( "csharp_style_prefer_primary_constructors = false" );
 				writer.WriteLine( "dotnet_diagnostic.IDE0051.severity = none" );
 				writer.WriteLine( "dotnet_diagnostic.IDE1006.severity = none" );
+				writer.WriteLine( "[*.{xml,xsd}]" );
+				writer.WriteLine( "indent_style = tab" );
+				writer.WriteLine( "tab_width = 2" );
 			} );
 		updateReSharperSettings( installation );
 		updateOpenCodeConfig( installation );
