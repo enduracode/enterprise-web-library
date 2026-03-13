@@ -42,13 +42,13 @@ The EWL Development Utility (DU) performs code generation, populating
 `Generated Code\` folders in every project. It does **not** run automatically
 during builds; it must be run explicitly.
 
+Use `Solution Files\Update Dependent Logic.ps1`, which downloads the latest
+published EWL package and runs the DU from it. Only use the local DU when
+making changes to code generation logic:
+
 ```shell
 dotnet run --project "Development Utility/Development Utility.csproj" -- . UpdateDependentLogic
 ```
-
-If this fails due to compilation errors in the DU or its dependencies, fall
-back to the released version via `Solution Files\Update Dependent Logic.ps1`,
-which downloads the latest EWL package and runs the DU from it.
 
 ### Build Server Flow
 
