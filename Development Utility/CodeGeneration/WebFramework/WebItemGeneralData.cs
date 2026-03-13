@@ -61,7 +61,7 @@ internal class WebItemGeneralData {
 	internal string GetNestedUrlCollectionExpression() =>
 		$"[{StringTools.ConcatenateWithDelimiter( ", ", Parameters.Where( i => i.IsNestedUrl ).Select( i => i.FieldName ) ).Surround( " ", " " )}]";
 
-	internal IEnumerable<WebItemParameter> Parameters => RequiredParameters.Concat( OptionalParameters );
+	private IEnumerable<WebItemParameter> Parameters => RequiredParameters.Concat( OptionalParameters );
 
 	internal bool IsResource() =>
 		Regex.IsMatch( code, "^[\\t ]*// {0}Resource\r?$".FormatWith( EwlStatics.EwlInitialism.EnglishToPascal() ), RegexOptions.Multiline ) || IsPage() ||
