@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Runtime.InteropServices;
 using System.ServiceProcess;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
@@ -30,7 +31,7 @@ public class ExistingInstallationLogic {
 		if( runtimeConfiguration.InstallationType == InstallationType.Development )
 			path = EwlStatics.CombinePaths(
 				path,
-				ConfigurationStatics.GetProjectOutputFolderPath( useDebugFolderIfDevelopmentInstallation, runtimeIdentifier: "win-x64" ) );
+				ConfigurationStatics.GetProjectOutputFolderPath( useDebugFolderIfDevelopmentInstallation, runtimeIdentifier: RuntimeInformation.RuntimeIdentifier ) );
 		return path;
 	}
 
@@ -219,7 +220,7 @@ public class ExistingInstallationLogic {
 							generalInstallationLogic.Path,
 							IsuStatics.DataMigratorProjectName,
 							runtimeConfiguration.InstallationType == InstallationType.Development
-								? ConfigurationStatics.GetProjectOutputFolderPath( true, runtimeIdentifier: "win-x64" )
+								? ConfigurationStatics.GetProjectOutputFolderPath( true, runtimeIdentifier: RuntimeInformation.RuntimeIdentifier )
 								: "",
 							IsuStatics.DataMigratorNamespaceAndAssemblyName ),
 						"",

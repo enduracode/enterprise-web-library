@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using EnterpriseWebLibrary.Configuration.Machine;
 using JetBrains.Annotations;
 using Tewl.IO;
@@ -115,7 +116,9 @@ public static class ConfigurationStatics {
 	/// Generated code use only.
 	/// </summary>
 	public static string ServerSideConsoleAppRelativeFolderPath =>
-		InstallationConfiguration.InstallationType == InstallationType.Development ? GetProjectOutputFolderPath( true, runtimeIdentifier: "win-x64" ) : "";
+		InstallationConfiguration.InstallationType == InstallationType.Development
+			? GetProjectOutputFolderPath( true, runtimeIdentifier: RuntimeInformation.RuntimeIdentifier )
+			: "";
 
 
 	// Do not perform schema validation for non-development installations because the schema file won't be available on non-development machines. Do not perform
