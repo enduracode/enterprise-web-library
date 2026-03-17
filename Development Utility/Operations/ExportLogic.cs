@@ -243,7 +243,9 @@ internal class ExportLogic: Operation {
 	private static void publishApp( string projectPath, string outputFolderPath ) {
 		TewlContrib.ProcessTools.RunProgram(
 			"dotnet",
-			"publish \"{0}\" --configuration Release --no-restore --output \"{1}\"".FormatWith( projectPath, outputFolderPath ),
+			$"""
+			 publish "{projectPath}" --configuration Release --no-restore --output "{outputFolderPath}"
+			 """,
 			"",
 			true );
 	}
