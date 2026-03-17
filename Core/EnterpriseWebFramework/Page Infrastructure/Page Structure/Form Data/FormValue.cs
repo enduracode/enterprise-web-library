@@ -25,7 +25,7 @@ internal class FormValue<T>: FormValue {
 
 	private readonly Func<T, string> stringValueSelector;
 	private readonly Func<string?, PostBackValueValidationResult<T>>? stringPostBackValueValidator;
-	private readonly Func<IFormFile, PostBackValueValidationResult<T>>? filePostBackValueValidator;
+	private readonly Func<IFormFile?, PostBackValueValidationResult<T>>? filePostBackValueValidator;
 	private readonly List<Action<T>> pageModificationValueAdders = [ ];
 	private readonly HashSet<DataModificationAction> dataModificationActions = [ ];
 
@@ -58,7 +58,7 @@ internal class FormValue<T>: FormValue {
 	/// we've seen exceptions take as long as 50 ms each when debugging.</param>
 	public FormValue(
 		Func<T> durableValueGetter, Func<string> postBackValueKeyGetter, Func<T, string> stringValueSelector,
-		Func<IFormFile, PostBackValueValidationResult<T>> filePostBackValueValidator ) {
+		Func<IFormFile?, PostBackValueValidationResult<T>> filePostBackValueValidator ) {
 		this.durableValueGetter = durableValueGetter;
 		this.postBackValueKeyGetter = postBackValueKeyGetter;
 		this.stringValueSelector = stringValueSelector;
@@ -126,7 +126,7 @@ internal class FormValue<T>: FormValue {
 
 	private PostBackValueValidationResult<T> validatePostBackValue( object? value ) {
 		if( filePostBackValueValidator != null )
-			return value != null ? filePostBackValueValidator( (IFormFile)value ) : PostBackValueValidationResult<T>.CreateInvalid();
+			return value != null ? filePostBackValueValidator( value as IFormFile ) : PostBackValueValidationResult<T>.CreateInvalid();
 
 		var stringValue = value as string;
 		return value == null || stringValue != null ? stringPostBackValueValidator!( stringValue ) : PostBackValueValidationResult<T>.CreateInvalid();
