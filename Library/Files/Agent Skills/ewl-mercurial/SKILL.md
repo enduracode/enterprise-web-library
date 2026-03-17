@@ -180,8 +180,16 @@ installation is expected at `C:\Program Files\TortoiseHg\hg`.
 
 ### Commit messages
 
-Keep all lines in commit messages to **80 characters or fewer** (the
-TortoiseHg default `summarylen`).
+**IMPORTANT**: Every line in a commit message MUST be **80 characters or
+fewer** (the TortoiseHg default `summarylen`). Fill each line with as many
+words as will fit within the 80-character limit before wrapping to the next
+line. Do not wrap prematurely (e.g. at 50 characters when more words would
+fit). Use a literal newline inside the `-m` argument to break lines:
+
+```shell
+hg commit -m "Fixed file-upload crash when no file is selected, since ASP.NET
+Core represents this as a string form value (not an IFormFile)."
+```
 
 ### Ignore file
 
