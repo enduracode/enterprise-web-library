@@ -586,9 +586,17 @@ internal class ExportLogic: Operation {
 	}
 
 	private void packageClientSideApp( DevelopmentInstallation installation, string clientSideAppFolder ) {
-		publishApp(
-			EwlStatics.CombinePaths( installation.GeneralLogic.Path, installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.Name ),
-			EwlStatics.CombinePaths( clientSideAppFolder, installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.Name ) );
+		var projectName = installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject.Name;
+		publishApp( EwlStatics.CombinePaths( installation.GeneralLogic.Path, projectName ), EwlStatics.CombinePaths( clientSideAppFolder, projectName ) );
+
+		if( installation.SystemIsSystemManager() )
+			TewlContrib.ProcessTools.RunProgram(
+				"dotnet",
+				$"""
+				 publish "{EwlStatics.CombinePaths( installation.GeneralLogic.Path, projectName )}" --configuration Release --output "{EwlStatics.CombinePaths( clientSideAppFolder, projectName.ToUrlSlug() )}" --runtime linux-x64 --no-self-contained
+				 """,
+				"",
+				true );
 	}
 
 	private IEnumerable<InstallationSupportUtility.SystemManagerInterface.Messages.BuildMessage.NuGetPackage> packageEwl(

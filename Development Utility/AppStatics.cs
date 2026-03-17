@@ -69,6 +69,9 @@ internal static class AppStatics {
 	internal static bool SystemIsTewl( this DevelopmentInstallation installation ) =>
 		string.Equals( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName, "Tewl", StringComparison.Ordinal );
 
+	internal static bool SystemIsSystemManager( this DevelopmentInstallation installation ) =>
+		string.Equals( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName, "SystemManager", StringComparison.Ordinal );
+
 	internal static string DotNetToolsFolderPath =>
 		IoMethods.GetFirstExistingFolderPath(
 				[
