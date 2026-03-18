@@ -4,7 +4,6 @@ mode: subagent
 model: anthropic/claude-sonnet-4-6
 tools:
   todowrite: false
-  webfetch: false
   task: false
   edit: false
   write: false
@@ -25,9 +24,10 @@ report findings.
   your first action. This gives you the class inventory needed to identify
   missed abstractions.
 - **Look up methods when needed.** The inventory lists classes and the BCL types
-  they abstract over. When you identify a potential match, use the Read tool to
-  examine the actual TEWL or EWL source file to find the specific method that
-  should be used. Include the specific method name in your recommendation.
+  they abstract over. When you identify a potential match, use the WebFetch tool
+  to fetch the source file from GitHub (URLs are in the skill) to find the
+  specific method that should be used. Include the specific method name in your
+  recommendation.
 - **Respect intentional usage.** Some code may intentionally use low-level APIs
   for performance or because the abstraction does not cover the specific use
   case. If the diff includes a comment explaining why, do not flag it.
@@ -67,8 +67,9 @@ contains a column listing the underlying BCL types that each abstraction wraps.
 When you find a match:
 
 1. Note the file, line number, and the code pattern found.
-2. Use the Read tool to examine the relevant TEWL or EWL source file to find
-   the specific method that should be used.
+2. Use the WebFetch tool to fetch the relevant TEWL or EWL source file from
+   GitHub (see the URLs in the skill) to find the specific method that should
+   be used.
 3. Record the finding with the specific method recommendation.
 
 ### Step 4: Report findings

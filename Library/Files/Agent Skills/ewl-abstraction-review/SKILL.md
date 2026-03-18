@@ -16,10 +16,12 @@ provided by these libraries.
 1. When reviewing a diff, look for BCL type names in the "Underlying APIs"
    column. If an added line references one of those types, check whether the
    corresponding EWL/TEWL class provides a method that covers the use case.
-2. To make a specific recommendation, use the Read tool to examine the source
-   file of the matching class. TEWL source is at
-   `C:\Users\willi\Revision Control\EWL Dependencies\EnduraCode's TEWL\Shared\Tewl\`.
-   EWL Core source is in `C:\Users\willi\Revision Control\EwlBill`.
+2. To make a specific recommendation, use the WebFetch tool to examine the
+   source file of the matching class on GitHub:
+   - **TEWL**: `https://raw.githubusercontent.com/enduracode/tewl/integration/Tewl/{path}`
+     (e.g. `.../Tewl/Tools/StringTools.cs`, `.../Tewl/IO/IoMethods.cs`)
+   - **EWL Core**: `https://raw.githubusercontent.com/enduracode/enterprise-web-library/branch/default/Core/{path}`
+     (e.g. `.../Core/EwlStatics.cs`, `.../Core/IO/ZipOps.cs`)
 3. Only flag a pattern if the abstraction clearly applies. Some low-level BCL
    usage is intentional or falls outside the scope of the abstraction.
 
