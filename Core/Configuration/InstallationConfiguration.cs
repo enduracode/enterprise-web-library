@@ -313,6 +313,8 @@ public class InstallationConfiguration {
 		}
 	}
 
+	internal AzureHosting? AzureHosting => installationStandardConfiguration.installedInstallation.AzureHosting;
+
 	internal LiveInstallationConfiguration LiveInstallationConfiguration =>
 		(LiveInstallationConfiguration)installationStandardConfiguration.installedInstallation.InstallationTypeConfiguration;
 

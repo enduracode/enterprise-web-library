@@ -56,6 +56,8 @@ public class ExistingInstalledInstallationLogic {
 		this.existingInstallationLogic = existingInstallationLogic;
 	}
 
+	public bool InstallationInAzure => existingInstallationLogic.RuntimeConfiguration.AzureHosting is not null;
+
 	public void PatchLogicForEnvironment() {
 		var isWin7 = Environment.OSVersion.Platform == PlatformID.Win32NT && Environment.OSVersion.Version.Major == 6 && Environment.OSVersion.Version.Minor == 1;
 		if( isWin7 )
