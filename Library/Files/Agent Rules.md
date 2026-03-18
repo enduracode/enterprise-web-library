@@ -57,20 +57,23 @@ dotnet test "Tests\Tests.csproj" --filter "FullyQualifiedName~Tests.SomeClass.So
 
 ---
 
-## Formatting
+## Code Inspection
 
-### ReSharper Format/Inspect Subagent
+After making functional changes to C# or XML/XSD files, run both inspection
+subagents in the order below.
 
-When editing C# or XML/XSD files, use the `ewl-cleanup` subagent to handle
-ReSharper formatting and commit the results separately from your functional
-changes. Follow this workflow:
+### Abstraction Review
 
-1. **Before making functional changes**, invoke the `ewl-cleanup` subagent
-   with the list of C# and XML/XSD files you plan to edit. Ask it to format
-   (not inspect) and commit.
-2. **Make your functional changes** to the files.
-3. **After making functional changes**, invoke the `ewl-cleanup` subagent
-   again with the same files. Ask it to format and inspect but not commit.
+If any changed files are C# files, invoke the `ewl-abstraction-review` subagent
+with the list of changed C# files. It reviews diffs for cases where manual code
+could be replaced with TEWL or EWL abstractions. Fix any findings it reports.
+
+### ReSharper Format/Inspect
+
+Invoke the `ewl-cleanup` subagent with the list of changed files. Ask it to
+format and inspect but not commit. If the abstraction review produced fixes
+above, those files are included here automatically since they are part of the
+same changed-file set.
 
 ---
 
@@ -87,19 +90,23 @@ changes. Follow this workflow:
    ```
    If any output DLL is locked, notify the user that the applications must be
    stopped before proceeding.
-2. **Before editing any C# or XML/XSD files, you MUST invoke the `ewl-cleanup` subagent first.**
-   See the [Formatting](#formatting) section for the full workflow.
-3. **Never edit files in any `Generated Code\` folder.** They are fully regenerated
+2. **Before editing any C# or XML/XSD files, invoke the `ewl-cleanup`
+   subagent** with the list of files you plan to edit. Ask it to format (not
+   inspect) and commit. This creates a clean formatting baseline separate from
+   your functional changes.
+3. **After making functional changes**, run the inspection subagents described
+   in [Code Inspection](#code-inspection).
+4. **Never edit files in any `Generated Code\` folder.** They are fully regenerated
    by the Development Utility. Your changes will be overwritten. Similarly, never
    edit `.ewlt.cs` files; these are also generated.
-4. **Tabs for indentation** in C# files, never spaces.
-5. Configuration lives in XML files validated against XSD schemas in `Configuration\`
+5. **Tabs for indentation** in C# files, never spaces.
+6. Configuration lives in XML files validated against XSD schemas in `Configuration\`
    folders.
-6. UI is built with EWL's component model (methods returning component collections),
+7. UI is built with EWL's component model (methods returning component collections),
    not Razor views.
-7. Page classes use EWL's code-generation-based URL routing, inheriting from
+8. Page classes use EWL's code-generation-based URL routing, inheriting from
    generated bases.
-8. Data access uses EWL's generated data-access layer from database schema.
+9. Data access uses EWL's generated data-access layer from database schema.
 
 ---
 
