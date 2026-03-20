@@ -1,7 +1,7 @@
 ---
 description: Formats and inspects files using ReSharper command-line tools, fixes typography, then commits changes to version control
 mode: subagent
-model: opencode/claude-sonnet-4-6
+model: opencode/kimi-k2.5
 tools:
   todowrite: false
   webfetch: false
