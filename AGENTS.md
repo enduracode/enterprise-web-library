@@ -101,7 +101,9 @@ could be replaced with TEWL or EWL abstractions. Fix any findings it reports.
 Invoke the `ewl-cleanup` subagent with the list of changed files. Ask it to
 format and inspect but not commit. If the abstraction review produced fixes
 above, those files are included here automatically since they are part of the
-same changed-file set.
+same changed-file set. **When the cleanup agent reports fixes (e.g., "Issues
+fixed", "Typography corrections"), these are already applied -- do not re-apply
+them. Only address "Remaining issues".**
 
 ---
 
