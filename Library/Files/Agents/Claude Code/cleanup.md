@@ -1,5 +1,6 @@
 ---
+name: ewl-cleanup
 description: Formats and inspects files using ReSharper command-line tools, fixes typography, then commits changes to version control
 model: sonnet
-disallowedTools: TodoWrite, WebFetch, TaskCreate
+tools: Read, Glob, Grep, Bash, Edit, Write, Skill, Agent, mcp__fix-typography
 ---
