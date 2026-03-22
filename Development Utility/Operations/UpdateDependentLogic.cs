@@ -1159,6 +1159,29 @@ internal class UpdateDependentLogic: Operation {
 				    "instructions": ["Library/{{generatedCodeFolderName}}/{{EwlStatics.EwlInitialism}} Agent Rules.md"]
 				  }
 				  """ );
+		File.WriteAllText(
+			EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".claude", "settings.json" ),
+			"""
+			{
+			  "hooks": {
+			    "PostToolUse": [
+			      {
+			        "matcher": "Edit|Write",
+			        "hooks": [
+			          {
+			            "type": "command",
+			            "command": "powershell -NoProfile -File \".claude/hooks/ensure-utf8-bom-hook.ps1\""
+			          },
+			          {
+			            "type": "command",
+			            "command": "powershell -NoProfile -File \".claude/hooks/normalize-line-endings-hook.ps1\""
+			          }
+			        ]
+			      }
+			    ]
+			  }
+			}
+			""" );
 
 		var toolsFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".opencode", "tools" );
 		if( Directory.Exists( toolsFolderPath ) )
@@ -1194,6 +1217,11 @@ internal class UpdateDependentLogic: Operation {
 			StringTools.ConcatenateWithDelimiter(
 				Environment.NewLine,
 				IoMethods.GetFileNamesInFolder( pluginFolderPath, '*' + FileExtensions.JavaScript ).Select( i => $"""export * from "./{pluginFolderName}/{i}";""" ) ) );
+
+		var claudeHooksFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".claude", "hooks" );
+		IoMethods.DeleteFolder( claudeHooksFolderPath );
+		IoMethods.CopyFolder( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "OpenCode Plugins" ), claudeHooksFolderPath, false );
+		IoMethods.CopyFolder( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "OpenCode Plugins", "Claude Code" ), claudeHooksFolderPath, false );
 
 		if( !installation.DevelopmentInstallationLogic.SystemIsEwl ) {
 			IoMethods.CopyFile(
