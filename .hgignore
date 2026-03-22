@@ -20,7 +20,7 @@ subinclude:.opencode/.gitignore
 .opencode/plugins/ewl.js
 .opencode/skills/ewl-*
 .claude/settings.json
-.claude/.mcp.json
+.mcp.json
 .claude/ewl/
 .claude/agents/ewl-*
 .claude/hooks/
