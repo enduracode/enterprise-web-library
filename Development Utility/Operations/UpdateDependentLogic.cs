@@ -1255,8 +1255,15 @@ internal class UpdateDependentLogic: Operation {
 
 		var claudeHooksFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".claude", "hooks" );
 		IoMethods.DeleteFolder( claudeHooksFolderPath );
-		IoMethods.CopyFolder( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "OpenCode Plugins" ), claudeHooksFolderPath, false );
-		IoMethods.CopyFolder( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "OpenCode Plugins", "Claude Code" ), claudeHooksFolderPath, false );
+		foreach( var fileName in IoMethods.GetFileNamesInFolder( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "OpenCode Plugins" ) ) )
+			IoMethods.CopyFile(
+				EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "OpenCode Plugins", fileName ),
+				EwlStatics.CombinePaths( claudeHooksFolderPath, fileName ) );
+		foreach( var fileName in IoMethods.GetFileNamesInFolder(
+			        EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "OpenCode Plugins", "Claude Code" ) ) )
+			IoMethods.CopyFile(
+				EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "OpenCode Plugins", "Claude Code", fileName ),
+				EwlStatics.CombinePaths( claudeHooksFolderPath, fileName ) );
 
 		if( !installation.DevelopmentInstallationLogic.SystemIsEwl ) {
 			IoMethods.CopyFile(
