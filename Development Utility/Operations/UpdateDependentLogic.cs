@@ -1162,27 +1162,39 @@ internal class UpdateDependentLogic: Operation {
 				  """ );
 		File.WriteAllText(
 			EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".claude", "settings.json" ),
-			"""
-			{
-			  "hooks": {
-			    "PostToolUse": [
-			      {
-			        "matcher": "Edit|Write",
-			        "hooks": [
-			          {
-			            "type": "command",
-			            "command": "powershell -NoProfile -File \".claude/hooks/ensure-utf8-bom-hook.ps1\""
-			          },
-			          {
-			            "type": "command",
-			            "command": "powershell -NoProfile -File \".claude/hooks/normalize-line-endings-hook.ps1\""
-			          }
-			        ]
-			      }
-			    ]
-			  }
-			}
-			""" );
+			new JsonObject
+				{
+					[ "autoMemoryEnabled" ] = false,
+					[ "permissions" ] =
+						new JsonObject
+							{
+								[ "allow" ] = new JsonArray(
+									"Bash",
+									"Edit",
+									"Write",
+									"Read",
+									"Glob",
+									"Grep",
+									"WebFetch",
+									"WebSearch",
+									"NotebookEdit",
+									"mcp__fix-typography" )
+							},
+					[ "hooks" ] = new JsonObject
+						{
+							[ "PostToolUse" ] = new JsonArray(
+								new JsonObject
+									{
+										[ "matcher" ] = "Edit|Write",
+										[ "hooks" ] = new JsonArray(
+											new JsonObject { [ "type" ] = "command", [ "command" ] = "powershell -NoProfile -File \".claude/hooks/ensure-utf8-bom-hook.ps1\"" },
+											new JsonObject
+												{
+													[ "type" ] = "command", [ "command" ] = "powershell -NoProfile -File \".claude/hooks/normalize-line-endings-hook.ps1\""
+												} )
+									} )
+						}
+				}.ToJsonStringWithSimpleEscaping( writeIndented: true ) );
 
 		var toolsFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".opencode", "tools" );
 		if( Directory.Exists( toolsFolderPath ) )
