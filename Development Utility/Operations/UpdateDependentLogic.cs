@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Configuration.InstallationStandard;
@@ -1195,7 +1196,7 @@ internal class UpdateDependentLogic: Operation {
 
 		var claudeToolsFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".claude", EwlStatics.EwlInitialism.ToLowerInvariant() );
 		IoMethods.DeleteFolder( claudeToolsFolderPath );
-		IoMethods.CopyFolder( claudeCodeFilesPath, claudeToolsFolderPath, false );
+		IoMethods.CopyFolder( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "OpenCode Tools", "Claude Code" ), claudeToolsFolderPath, false );
 		File.WriteAllText(
 			EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".claude", ".mcp.json" ),
 			new JsonObject
@@ -1278,6 +1279,13 @@ internal class UpdateDependentLogic: Operation {
 				        .Where( i => i.StartsWith( EwlStatics.EwlInitialism.ToLowerInvariant() + '-' ) ) )
 				IoMethods.DeleteFolder( EwlStatics.CombinePaths( skillsFolderPath, folderName ) );
 		IoMethods.CopyFolder( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "Agent Skills" ), skillsFolderPath, false );
+
+		var claudeSkillsFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".claude", "skills" );
+		if( Directory.Exists( claudeSkillsFolderPath ) )
+			foreach( var folderName in IoMethods.GetFolderNamesInFolder( claudeSkillsFolderPath )
+				        .Where( i => i.StartsWith( EwlStatics.EwlInitialism.ToLowerInvariant() + '-' ) ) )
+				IoMethods.DeleteFolder( EwlStatics.CombinePaths( claudeSkillsFolderPath, folderName ) );
+		IoMethods.CopyFolder( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "Agent Skills" ), claudeSkillsFolderPath, false );
 	}
 
 	private string getSystemPathInRepository( DevelopmentInstallation installation ) {
@@ -1330,6 +1338,13 @@ internal class UpdateDependentLogic: Operation {
 		writer.WriteLine( $".opencode/plugins/{EwlStatics.EwlInitialism.ToLowerInvariant()}" );
 		writer.WriteLine( $".opencode/plugins/{EwlStatics.EwlInitialism.ToLowerInvariant()}{FileExtensions.JavaScript}" );
 		writer.WriteLine( $".opencode/skills/{EwlStatics.EwlInitialism.ToLowerInvariant()}-*" );
+		writer.WriteLine( ".claude/settings.json" );
+		writer.WriteLine( ".claude/.mcp.json" );
+		writer.WriteLine( $".claude/{EwlStatics.EwlInitialism.ToLowerInvariant()}/" );
+		writer.WriteLine( $".claude/agents/{EwlStatics.EwlInitialism.ToLowerInvariant()}-*" );
+		writer.WriteLine( ".claude/hooks/" );
+		writer.WriteLine( ".claude/CLAUDE.md" );
+		writer.WriteLine( $".claude/skills/{EwlStatics.EwlInitialism.ToLowerInvariant()}-*" );
 		writer.WriteLine();
 		writer.WriteLine( "Solution Files/bin/" );
 		writer.WriteLine( "Solution Files/obj/" );
