@@ -1187,11 +1187,7 @@ internal class UpdateDependentLogic: Operation {
 									{
 										[ "matcher" ] = "Edit|Write",
 										[ "hooks" ] = new JsonArray(
-											new JsonObject { [ "type" ] = "command", [ "command" ] = "powershell -NoProfile -File \".claude/hooks/ensure-utf8-bom-hook.ps1\"" },
-											new JsonObject
-												{
-													[ "type" ] = "command", [ "command" ] = "powershell -NoProfile -File \".claude/hooks/normalize-line-endings-hook.ps1\""
-												} )
+											new JsonObject { [ "type" ] = "command", [ "command" ] = "powershell -NoProfile -File \".claude/hooks/post-edit-hook.ps1\"" } )
 									} )
 						}
 				}.ToJsonStringWithSimpleEscaping( writeIndented: true ) );
