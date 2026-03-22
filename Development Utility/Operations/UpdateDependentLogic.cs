@@ -1173,6 +1173,18 @@ internal class UpdateDependentLogic: Operation {
 							},
 					[ "hooks" ] = new JsonObject
 						{
+							[ "PreToolUse" ] =
+								new JsonArray(
+									new JsonObject
+										{
+											[ "matcher" ] = "Bash",
+											[ "hooks" ] =
+												new JsonArray(
+													new JsonObject
+														{
+															[ "type" ] = "command", [ "command" ] = "powershell -NoProfile -File \".claude/hooks/require-powershell-tool.ps1\""
+														} )
+										} ),
 							[ "PostToolUse" ] = new JsonArray(
 								new JsonObject
 									{
