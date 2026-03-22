@@ -1193,6 +1193,26 @@ internal class UpdateDependentLogic: Operation {
 				EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "OpenCode Tools", fileName ),
 				EwlStatics.CombinePaths( toolsFolderPath, EwlStatics.EwlInitialism.ToLowerInvariant() + '-' + fileName ) );
 
+		var claudeToolsFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".claude", EwlStatics.EwlInitialism.ToLowerInvariant() );
+		IoMethods.DeleteFolder( claudeToolsFolderPath );
+		IoMethods.CopyFolder( claudeCodeFilesPath, claudeToolsFolderPath, false );
+		File.WriteAllText(
+			EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".claude", ".mcp.json" ),
+			new JsonObject
+				{
+					[ "mcpServers" ] = new JsonObject(
+						IoMethods.GetFileNamesInFolder( EwlStatics.CombinePaths( claudeToolsFolderPath, "MCP Servers" ) )
+							.Select( i => KeyValuePair.Create(
+								Path.GetFileNameWithoutExtension( i ),
+								(JsonNode?)new JsonObject
+									{
+										[ "type" ] = "stdio",
+										[ "command" ] = "node",
+										[ "args" ] = new JsonArray( $"MCP Servers/{i}" ),
+										[ "cwd" ] = $"${{CLAUDE_PROJECT_DIR}}/.claude/{EwlStatics.EwlInitialism.ToLowerInvariant()}"
+									} ) ) )
+				}.ToJsonStringWithSimpleEscaping( writeIndented: true ) );
+
 		var agentsFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".opencode", "agents" );
 		if( Directory.Exists( agentsFolderPath ) )
 			foreach( var fileName in IoMethods.GetFileNamesInFolder( agentsFolderPath )
