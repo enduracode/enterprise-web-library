@@ -1223,6 +1223,20 @@ internal class UpdateDependentLogic: Operation {
 				EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "Agents", fileName ),
 				EwlStatics.CombinePaths( agentsFolderPath, EwlStatics.EwlInitialism.ToLowerInvariant() + '-' + fileName ) );
 
+		var claudeAgentsFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".claude", "agents" );
+		if( Directory.Exists( claudeAgentsFolderPath ) )
+			foreach( var fileName in IoMethods.GetFileNamesInFolder( claudeAgentsFolderPath )
+				        .Where( i => i.StartsWith( EwlStatics.EwlInitialism.ToLowerInvariant() + '-' ) ) )
+				IoMethods.DeleteFile( EwlStatics.CombinePaths( claudeAgentsFolderPath, fileName ) );
+		Directory.CreateDirectory( claudeAgentsFolderPath );
+		foreach( var fileName in IoMethods.GetFileNamesInFolder( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "Agents" ) ) ) {
+			var lines = File.ReadAllLines( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "Agents", fileName ) );
+			File.WriteAllLines(
+				EwlStatics.CombinePaths( claudeAgentsFolderPath, EwlStatics.EwlInitialism.ToLowerInvariant() + '-' + fileName ),
+				File.ReadAllLines( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "Agents", "Claude Code", fileName ) )
+					.Concat( lines[ ( Array.IndexOf( lines, "---", 1 ) + 1 ).. ] ) );
+		}
+
 		var pluginFolderName = EwlStatics.EwlInitialism.ToLowerInvariant();
 		var pluginFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".opencode", "plugins", pluginFolderName );
 		IoMethods.DeleteFolder( pluginFolderPath );
