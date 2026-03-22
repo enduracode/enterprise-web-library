@@ -1160,6 +1160,7 @@ internal class UpdateDependentLogic: Operation {
 				    "instructions": ["Library/{{generatedCodeFolderName}}/{{EwlStatics.EwlInitialism}} Agent Rules.md"]
 				  }
 				  """ );
+		Directory.CreateDirectory( EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".claude" ) );
 		File.WriteAllText(
 			EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".claude", "settings.json" ),
 			new JsonObject
