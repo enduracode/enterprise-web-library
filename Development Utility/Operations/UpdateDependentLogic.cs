@@ -1195,13 +1195,20 @@ internal class UpdateDependentLogic: Operation {
 				Environment.NewLine,
 				IoMethods.GetFileNamesInFolder( pluginFolderPath, '*' + FileExtensions.JavaScript ).Select( i => $"""export * from "./{pluginFolderName}/{i}";""" ) ) );
 
-		if( !installation.DevelopmentInstallationLogic.SystemIsEwl )
+		if( !installation.DevelopmentInstallationLogic.SystemIsEwl ) {
 			IoMethods.CopyFile(
 				EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "Agent Rules.md" ),
 				EwlStatics.CombinePaths(
 					installation.DevelopmentInstallationLogic.LibraryPath,
 					generatedCodeFolderName,
 					$"{EwlStatics.EwlInitialism} Agent Rules.md" ) );
+			File.WriteAllText(
+				EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".claude", "CLAUDE.md" ),
+				$"""
+				 @Library/{generatedCodeFolderName}/{EwlStatics.EwlInitialism} Agent Rules.md
+				 @AGENTS.md
+				 """ );
+		}
 
 		var skillsFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".opencode", "skills" );
 		if( Directory.Exists( skillsFolderPath ) )
