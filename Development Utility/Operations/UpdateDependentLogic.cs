@@ -1183,7 +1183,8 @@ internal class UpdateDependentLogic: Operation {
 												new JsonArray(
 													new JsonObject
 														{
-															[ "type" ] = "command", [ "command" ] = "powershell -NoProfile -File \".claude/hooks/require-powershell-tool.ps1\""
+															[ "type" ] = "command",
+															[ "command" ] = "powershell -NoProfile -File \"$CLAUDE_PROJECT_DIR/.claude/hooks/require-powershell-tool.ps1\""
 														} )
 										} ),
 							[ "PostToolUse" ] = new JsonArray(
@@ -1191,7 +1192,10 @@ internal class UpdateDependentLogic: Operation {
 									{
 										[ "matcher" ] = "Edit|Write",
 										[ "hooks" ] = new JsonArray(
-											new JsonObject { [ "type" ] = "command", [ "command" ] = "powershell -NoProfile -File \".claude/hooks/post-edit-hook.ps1\"" } )
+											new JsonObject
+												{
+													[ "type" ] = "command", [ "command" ] = "powershell -NoProfile -File \"$CLAUDE_PROJECT_DIR/.claude/hooks/post-edit-hook.ps1\""
+												} )
 									} )
 						}
 				}.ToJsonStringWithSimpleEscaping( writeIndented: true ) );
