@@ -1219,6 +1219,14 @@ internal class UpdateDependentLogic: Operation {
 		}
 
 		IoMethods.CopyFolder( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "OpenCode Tools", "Claude Code" ), claudeToolsFolderPath, false );
+		if( !Directory.Exists( EwlStatics.CombinePaths( claudeToolsFolderPath, "node_modules" ) ) )
+			try {
+				TewlContrib.ProcessTools.RunProgram( "npm", "install --silent", "", true, workingDirectory: claudeToolsFolderPath );
+			}
+			catch( Exception e ) {
+				throw new UserCorrectableException( "Failed to install Claude Code MCP server npm dependencies. Ensure Node.js is installed.", e );
+			}
+
 		File.WriteAllText(
 			EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".mcp.json" ),
 			new JsonObject
