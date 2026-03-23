@@ -72,6 +72,9 @@ When you find a match:
    be used.
 3. Record the finding with the specific method recommendation.
 
+In addition to BCL type matching, check the "Code Pattern Triggers" section of
+the inventory for specific code patterns that have known replacements.
+
 ### Step 4: Report findings
 
 Report your findings in the format described below. If no issues are found,

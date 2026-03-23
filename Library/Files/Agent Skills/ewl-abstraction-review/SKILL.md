@@ -219,3 +219,15 @@ abstractions. Agents frequently reinvent them manually.
 | Class | Description | Underlying APIs |
 |---|---|---|
 | MergeOps | Mail merge to multiple formats: Word documents, PDFs, CSV, TSV, Excel, XML, and template strings | Stream, MemoryStream, TextWriter, XmlWriter, Aspose.Words |
+
+---
+
+## Code Pattern Triggers
+
+These patterns cannot be identified by BCL type matching alone. Flag them when
+they appear in added lines.
+
+| Code Pattern | Replacement | Class | Notes |
+|---|---|---|---|
+| `.ToList()` | `.Materialize()` | CollectionTools | Returns `IReadOnlyCollection<T>`; preferred for non-mutated collections |
+| `"\n"`, `"\r\n"`, `Environment.NewLine` | `Newline` (etc.) | NewlineConstants | Available via static using in EWL systems |
