@@ -40,7 +40,6 @@ solution root. Add a `.csproj` file:
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <Nullable>annotations</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
