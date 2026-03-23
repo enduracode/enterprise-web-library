@@ -1,6 +1,6 @@
 ---
 name: ewl-server-side-console-app
-description: Create server-side console apps (bulk operations workers) and call them from EWL web apps or ASP.NET MVC apps
+description: Create server-side console apps and call them from EWL web apps or other apps in the system. Use when creating a new console app, background worker, bulk operations worker, batch job, scheduled task, background job, background process, worker process, offline job, offline processor, or Exe project in an EWL system.
 ---
 
 ## Overview
