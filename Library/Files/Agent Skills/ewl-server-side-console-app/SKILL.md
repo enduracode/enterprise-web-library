@@ -255,4 +255,5 @@ outside the transaction scope.
 Run `Update-DependentLogic` after adding or modifying the
 `serverSideConsoleProjects` configuration in `Development.xml`. This
 regenerates both the worker's `Main.g.cs` and the Library's
-`ServerSideConsoleAppStatics` class.
+`ServerSideConsoleAppStatics` class. After running the DU for a new project,
+add it to the solution with `dotnet sln add`.
