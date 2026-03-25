@@ -1,6 +1,5 @@
 ﻿using System.Runtime.InteropServices;
 using System.Threading;
-using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Configuration.InstallationStandard;
 using Microsoft.Web.Administration;
 
@@ -240,10 +239,4 @@ public class IsuStatics {
 				}
 			} );
 	}
-
-	/// <summary>
-	/// Installation Support Utility use only.
-	/// </summary>
-	public static string GetDataPackageZipFilePath( string installationFullName ) =>
-		EwlStatics.CombinePaths( ConfigurationStatics.EwlFolderPath, "Local Data Packages", installationFullName + ".zip" );
 }

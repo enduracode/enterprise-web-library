@@ -21,8 +21,8 @@ internal class NoDatabase: Database {
 		throw new NotSupportedException();
 	}
 
-	void Database.ExportToFile( string filePath ) {}
-	void Database.DeleteAndReCreateFromFile( string filePath ) {}
+	void Database.ExportToFile( ExportFile file ) {}
+	void Database.DeleteAndReCreateFromFile( ExportFile file ) {}
 
 	IEnumerable<DataRow> Database.GetDataTypes() => throw new NotSupportedException();
 	IEnumerable<DatabaseTable> Database.GetTables() => [ ];

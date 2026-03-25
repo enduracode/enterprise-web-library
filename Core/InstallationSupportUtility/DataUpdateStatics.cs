@@ -91,7 +91,7 @@ public class DataUpdateStatics {
 		var dataExportToRsisWebSiteNotPermitted = installation.InstallationTypeElements is LiveInstallationElements liveInstallationElements &&
 		                                          liveInstallationElements.DataExportToRsisWebSiteNotPermitted;
 		if( dataExportToRsisWebSiteNotPermitted
-			    ? !File.Exists( IsuStatics.GetDataPackageZipFilePath( installation.FullName ) )
+			    ? !File.Exists( DataStatics.GetPackageZipFilePath( installation.FullName ) )
 			    : !installation.DataPackageSize.HasValue )
 			return "";
 
@@ -111,7 +111,7 @@ public class DataUpdateStatics {
 
 			// If the update data installation is a live installation for which data export to the RSIS web site is not permitted, get the data package from disk.
 			if( dataExportToRsisWebSiteNotPermitted )
-				IoMethods.CopyFile( IsuStatics.GetDataPackageZipFilePath( installation.FullName ), packageZipFilePath );
+				IoMethods.CopyFile( DataStatics.GetPackageZipFilePath( installation.FullName ), packageZipFilePath );
 			else
 				operationResult.TimeSpentWaitingForNetwork =
 					EwlStatics.ExecuteTimedRegion( () => operationResult.NumberOfBytesTransferred = downloadDataPackage( installation, packageZipFilePath ) );

@@ -64,7 +64,11 @@ public class MySql: Database {
 			} );
 	}
 
-	void Database.ExportToFile( string filePath ) {
+	void Database.ExportToFile( ExportFile file ) {
+		if( file.IsAzureBlob )
+			throw new NotSupportedException();
+		file.TryGetFilePath( out var filePath );
+
 		executeMethodWithDbExceptionHandling(
 			delegate {
 				try {
@@ -81,7 +85,11 @@ public class MySql: Database {
 			} );
 	}
 
-	void Database.DeleteAndReCreateFromFile( string filePath ) {
+	void Database.DeleteAndReCreateFromFile( ExportFile file ) {
+		if( file.IsAzureBlob )
+			throw new NotSupportedException();
+		file.TryGetFilePath( out var filePath );
+
 		using( var sw = new StringWriter() ) {
 			sw.WriteLine( "DROP DATABASE IF EXISTS {0};".FormatWith( info.Database ) );
 			sw.WriteLine( "CREATE DATABASE {0};".FormatWith( info.Database ) );

@@ -31,8 +31,8 @@ public interface Database {
 	void UpdateLineMarker( int value );
 
 	// Data package support
-	void ExportToFile( string filePath );
-	void DeleteAndReCreateFromFile( string filePath );
+	void ExportToFile( ExportFile file );
+	void DeleteAndReCreateFromFile( ExportFile file );
 
 	// Other
 	IEnumerable<DataRow> GetDataTypes();

@@ -68,7 +68,11 @@ public class Oracle: Database {
 			} );
 	}
 
-	void Database.ExportToFile( string filePath ) {
+	void Database.ExportToFile( ExportFile file ) {
+		if( file.IsAzureBlob )
+			throw new NotSupportedException();
+		file.TryGetFilePath( out var filePath );
+
 		Directory.CreateDirectory( dataPumpFolderPath );
 		try {
 			executeMethodWithDbExceptionHandling(
@@ -98,7 +102,11 @@ public class Oracle: Database {
 		}
 	}
 
-	void Database.DeleteAndReCreateFromFile( string filePath ) {
+	void Database.DeleteAndReCreateFromFile( ExportFile file ) {
+		if( file.IsAzureBlob )
+			throw new NotSupportedException();
+		file.TryGetFilePath( out var filePath );
+
 		executeDbMethodWithSpecifiedDatabaseInfo(
 			new OracleInfo(
 				( info as DatabaseInfo ).SecondaryDatabaseName,

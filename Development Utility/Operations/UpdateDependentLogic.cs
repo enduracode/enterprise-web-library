@@ -334,7 +334,6 @@ internal class UpdateDependentLogic: Operation {
 		}
 
 		var azureDeployPipelinesExist = false;
-		var systemShortNameSlug = installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName.ToUrlSlug();
 		foreach( var installationConfigurationFolderPath in Directory.GetDirectories(
 			        EwlStatics.CombinePaths(
 				        installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath,
@@ -350,7 +349,6 @@ internal class UpdateDependentLogic: Operation {
 
 			const string regionEnd = "# END-EWL-REGION";
 
-			// names follow Cloud Adoption Framework; see https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-naming
 			var installedInstallation = XmlOps.DeserializeFromFile<InstallationStandardConfiguration>(
 					EwlStatics.CombinePaths( installationConfigurationFolderPath, InstallationConfiguration.InstallationStandardConfigurationFileName ),
 					false )
@@ -360,7 +358,9 @@ internal class UpdateDependentLogic: Operation {
 				!installedInstallation.name.Contains( "Staging", StringComparison.Ordinal )
 					? "Integration"
 					: "master";
-			var installationType = installedInstallation.InstallationTypeConfiguration is LiveInstallationConfiguration ? "prod" : "intermediate";
+			var installationType = installedInstallation.InstallationTypeConfiguration is LiveInstallationConfiguration
+				                       ? InstallationType.Live
+				                       : InstallationType.Intermediate;
 			var generatedRegion = $"""
 			                       trigger: none
 
@@ -378,8 +378,8 @@ internal class UpdateDependentLogic: Operation {
 			                         template: ../../../Azure Deploy Job.yml
 			                         parameters:
 			                           installationName: '{installedInstallation.name}'
-			                           resourceGroup: 'rg-{systemShortNameSlug}-{installationType}'
-			                           appService: 'app-{systemShortNameSlug}-{installedInstallation.shortName.ToUrlSlug()}'
+			                           resourceGroup: '{AzureStatics.GetResourceGroupName( installation, installationType )}'
+			                           appService: '{AzureStatics.GetAppServiceName( installation, installedInstallation.shortName )}'
 			                           {regionEnd}
 			                       """;
 
