@@ -29,7 +29,7 @@ internal class NoDatabase: Database {
 	IEnumerable<string> Database.GetProcedures() => throw new NotSupportedException();
 	IEnumerable<DataRow> Database.GetProcedureParameters( string procedure ) => throw new NotSupportedException();
 	void Database.PerformMaintenance() {}
-	void Database.ShrinkAfterPostUpdateDataCommands() {}
+	void Database.ShrinkAfterPostUpdateDataCommands( bool databaseInAzure ) {}
 
 	void Database.ExecuteDbMethod( Action<DatabaseConnection> method ) {
 		throw new NotSupportedException();

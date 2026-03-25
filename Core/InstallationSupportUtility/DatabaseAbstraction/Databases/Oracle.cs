@@ -312,7 +312,7 @@ public class Oracle: Database {
 		cn.ExecuteNonQueryCommand( command, isLongRunning: true );
 	}
 
-	void Database.ShrinkAfterPostUpdateDataCommands() {}
+	void Database.ShrinkAfterPostUpdateDataCommands( bool databaseInAzure ) {}
 
 	public void ExecuteDbMethod( Action<DatabaseConnection> method ) {
 		executeDbMethodWithSpecifiedDatabaseInfo( info, method );

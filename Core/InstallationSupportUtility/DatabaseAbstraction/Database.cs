@@ -41,7 +41,7 @@ public interface Database {
 	IEnumerable<string> GetProcedures();
 	IEnumerable<DataRow> GetProcedureParameters( string procedure );
 	void PerformMaintenance();
-	void ShrinkAfterPostUpdateDataCommands();
+	void ShrinkAfterPostUpdateDataCommands( bool databaseInAzure );
 
 	/// <summary>
 	/// Executes the given method inside a connection for this database.

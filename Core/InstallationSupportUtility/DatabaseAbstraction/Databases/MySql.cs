@@ -185,7 +185,7 @@ public class MySql: Database {
 
 	void Database.PerformMaintenance() {}
 
-	void Database.ShrinkAfterPostUpdateDataCommands() {}
+	void Database.ShrinkAfterPostUpdateDataCommands( bool databaseInAzure ) {}
 
 	public void ExecuteDbMethod( Action<DatabaseConnection> method ) {
 		executeMethodWithDbExceptionHandling( () => {

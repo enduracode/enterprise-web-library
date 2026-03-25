@@ -66,21 +66,29 @@ public class SqlServer: Database {
 			} );
 	}
 
-	void Database.ExportToFile( string filePath ) {
-		try {
-			ExecuteDbMethod( cn => executeLongRunningCommand( cn, "BACKUP DATABASE " + info.Database + " TO DISK = '" + backupFilePath + "'" ) );
-			IoMethods.CopyFile( backupFilePath, filePath );
+	void Database.ExportToFile( ExportFile file ) {
+		if( file.IsAzureBlob ) {
+			file.TryGetAzureBlob( out var containerUrl, out var blobName );
+			executeDbMethodAgainstMaster( cn => createManagedIdentityCredentialIfNecessary( cn, containerUrl ) );
+			ExecuteDbMethod( cn => executeLongRunningCommand( cn, $"BACKUP DATABASE {info.Database} TO URL = '{containerUrl}/{blobName}' WITH COPY_ONLY" ) );
 		}
-		finally {
-			IoMethods.DeleteFile( backupFilePath );
+		else {
+			file.TryGetFilePath( out var filePath );
+			try {
+				ExecuteDbMethod( cn => executeLongRunningCommand( cn, "BACKUP DATABASE " + info.Database + " TO DISK = '" + backupFilePath + "'" ) );
+				IoMethods.CopyFile( backupFilePath, filePath );
+			}
+			finally {
+				IoMethods.DeleteFile( backupFilePath );
+			}
 		}
 	}
 
-	void Database.DeleteAndReCreateFromFile( string filePath ) {
-		executeDbMethodAgainstMaster( cn => deleteAndReCreateFromFile( cn, filePath ) );
-		if( !filePath.Any() )
+	void Database.DeleteAndReCreateFromFile( ExportFile file ) {
+		bool? fileExisted = null;
+		executeDbMethodAgainstMaster( cn => fileExisted = deleteAndReCreateFromFile( cn, file ) );
+		if( !fileExisted!.Value )
 			ExecuteDbMethod( cn => {
-				executeLongRunningCommand( cn, "ALTER DATABASE {0} SET PAGE_VERIFY CHECKSUM".FormatWith( info.Database ) );
 				executeLongRunningCommand( cn, "ALTER DATABASE {0} SET AUTO_UPDATE_STATISTICS_ASYNC ON".FormatWith( info.Database ) );
 				executeLongRunningCommand( cn, "ALTER DATABASE {0} SET ALLOW_SNAPSHOT_ISOLATION ON".FormatWith( info.Database ) );
 				executeLongRunningCommand( cn, "ALTER DATABASE {0} SET READ_COMMITTED_SNAPSHOT ON WITH ROLLBACK IMMEDIATE".FormatWith( info.Database ) );
@@ -101,20 +109,23 @@ public class SqlServer: Database {
 
 				executeLongRunningCommand( cn, "CREATE SEQUENCE MainSequence AS int MINVALUE 1" );
 
-				const string userName = @"NT AUTHORITY\NETWORK SERVICE";
-				executeLongRunningCommand( cn, "CREATE USER [{0}]".FormatWith( userName ) );
-				executeLongRunningCommand( cn, "ALTER ROLE db_datareader ADD MEMBER [{0}]".FormatWith( userName ) );
-				executeLongRunningCommand( cn, "ALTER ROLE db_datawriter ADD MEMBER [{0}]".FormatWith( userName ) );
+				if( !file.IsAzureBlob ) {
+					const string userName = @"NT AUTHORITY\NETWORK SERVICE";
+					executeLongRunningCommand( cn, "CREATE USER [{0}]".FormatWith( userName ) );
+					executeLongRunningCommand( cn, "ALTER ROLE db_datareader ADD MEMBER [{0}]".FormatWith( userName ) );
+					executeLongRunningCommand( cn, "ALTER ROLE db_datawriter ADD MEMBER [{0}]".FormatWith( userName ) );
+				}
 			} );
 	}
 
-	private void deleteAndReCreateFromFile( DatabaseConnection cn, string filePath ) {
+	private bool deleteAndReCreateFromFile( DatabaseConnection cn, ExportFile file ) {
 		// NOTE: Instead of catching exceptions, figure out if the database exists by querying.
 		try {
 			// Gets rid of existing connections. These don't need to be executed against the master database, but it's convenient because it saves us from needing
 			// a second database connection.
 			executeLongRunningCommand( cn, "ALTER DATABASE {0} SET AUTO_UPDATE_STATISTICS_ASYNC OFF".FormatWith( info.Database ) );
-			executeLongRunningCommand( cn, "ALTER DATABASE {0} SET SINGLE_USER WITH ROLLBACK IMMEDIATE".FormatWith( info.Database ) );
+			if( !file.IsAzureBlob )
+				executeLongRunningCommand( cn, "ALTER DATABASE {0} SET SINGLE_USER WITH ROLLBACK IMMEDIATE".FormatWith( info.Database ) );
 
 			executeLongRunningCommand( cn, "DROP DATABASE " + info.Database );
 		}
@@ -122,12 +133,29 @@ public class SqlServer: Database {
 			// The database did not exist. That's fine.
 		}
 
+		if( file.IsAzureBlob ) {
+			if( file.TryGetAzureBlob( out var containerUrl, out var blobName ) ) {
+				createManagedIdentityCredentialIfNecessary( cn, containerUrl );
+				try {
+					executeLongRunningCommand( cn, $"RESTORE DATABASE [{info.Database}] FROM URL = '{containerUrl}/{blobName}'" );
+				}
+				catch( Exception e ) {
+					throw new UserCorrectableException( "Failed to restore database from URL. Please try the operation again after obtaining a new backup.", e );
+				}
+				return true;
+			}
+
+			// Azure SQL MI manages file storage internally; CREATE DATABASE with file specifications is not supported.
+			executeLongRunningCommand( cn, $"CREATE DATABASE [{info.Database}]" );
+			return false;
+		}
+
 		var sqlServerFilesFolderPath = EwlStatics.CombinePaths( ConfigurationStatics.EwlFolderPath, "SQL Server Databases" );
 		Directory.CreateDirectory( sqlServerFilesFolderPath );
 
 		var dataFilePath = EwlStatics.CombinePaths( sqlServerFilesFolderPath, info.Database + ".mdf" );
 		var logFilePath = EwlStatics.CombinePaths( sqlServerFilesFolderPath, info.Database + ".ldf" );
-		if( filePath.Any() )
+		if( file.TryGetFilePath( out var filePath ) ) {
 			try {
 				IoMethods.CopyFile( filePath, backupFilePath );
 				try {
@@ -145,10 +173,12 @@ public class SqlServer: Database {
 			finally {
 				IoMethods.DeleteFile( backupFilePath );
 			}
-		else
-			executeLongRunningCommand(
-				cn,
-				@"CREATE DATABASE {0}
+			return true;
+		}
+
+		executeLongRunningCommand(
+			cn,
+			@"CREATE DATABASE {0}
 ON (
 	NAME = {1},
 	FILENAME = '{2}',
@@ -162,6 +192,13 @@ LOG ON (
 	MAXSIZE = 1000MB,
 	FILEGROWTH = 100MB
 )".FormatWith( info.Database, dataLogicalFileName, dataFilePath, logLogicalFileName, logFilePath ) );
+		return false;
+	}
+
+	private void createManagedIdentityCredentialIfNecessary( DatabaseConnection connection, string containerUrl ) {
+		executeLongRunningCommand(
+			connection,
+			$"IF NOT EXISTS ( SELECT * FROM sys.credentials WHERE name = '{containerUrl}' ) CREATE CREDENTIAL [{containerUrl}] WITH IDENTITY = 'MANAGED IDENTITY'" );
 	}
 
 	// Use the EWL folder for all backup/restore operations because the SQL Server account probably already has access to it.
@@ -201,7 +238,7 @@ LOG ON (
 			} );
 	}
 
-	void Database.ShrinkAfterPostUpdateDataCommands() {
+	void Database.ShrinkAfterPostUpdateDataCommands( bool databaseInAzure ) {
 		// Give SQL Server a chance to clean up ghost records that may have been generated by post update data commands.
 		// To determine how long this takes for a specified database, repeatedly refresh the Disk Usage by Table report while the ISU is running and watch the
 		// Data(KB) column values drop for your LOB tables after the post update data commands have executed.
@@ -210,7 +247,9 @@ LOG ON (
 
 		ExecuteDbMethod( cn => {
 			executeLongRunningCommand( cn, "ALTER DATABASE {0} SET AUTO_UPDATE_STATISTICS_ASYNC OFF".FormatWith( info.Database ) );
-			executeLongRunningCommand( cn, "ALTER DATABASE {0} SET SINGLE_USER WITH ROLLBACK IMMEDIATE".FormatWith( info.Database ) );
+			if( !databaseInAzure )
+				executeLongRunningCommand( cn, "ALTER DATABASE {0} SET SINGLE_USER WITH ROLLBACK IMMEDIATE".FormatWith( info.Database ) );
+
 			ExceptionHandlingTools.Retry(
 				() => {
 					// This sometimes fails with "A severe error occurred on the current command."
@@ -219,7 +258,9 @@ LOG ON (
 				"Failed to shrink database.",
 				maxAttempts: 10,
 				retryIntervalMs: 30000 );
-			executeLongRunningCommand( cn, "ALTER DATABASE {0} SET MULTI_USER".FormatWith( info.Database ) );
+
+			if( !databaseInAzure )
+				executeLongRunningCommand( cn, "ALTER DATABASE {0} SET MULTI_USER".FormatWith( info.Database ) );
 			executeLongRunningCommand( cn, "ALTER DATABASE {0} SET AUTO_UPDATE_STATISTICS_ASYNC ON".FormatWith( info.Database ) );
 		} );
 	}
