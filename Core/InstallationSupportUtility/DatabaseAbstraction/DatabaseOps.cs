@@ -25,34 +25,6 @@ public static class DatabaseOps {
 	public static string GetDatabaseNounPhrase( Database database ) =>
 		"{0} database".FormatWith( database.SecondaryDatabaseName.Any() ? "{0} secondary".FormatWith( database.SecondaryDatabaseName ) : "primary" );
 
-	internal static void ExportDatabaseToFile( Database database, ExportFile file ) {
-		if( database is not NoDatabase )
-			database.ExportToFile( file );
-	}
-
-	internal static void DeleteAndReCreateDatabaseFromFile( Database database, bool databaseHasMinimumDataRevision, ExportFile file ) {
-		if( database is NoDatabase )
-			return;
-
-		bool fileExists;
-		if( file.IsAzureBlob ) {
-			file.TryGetAzureBlob( out var containerUrl, out var blobName );
-			fileExists = true;
-		}
-		else {
-			file.TryGetFilePath( out var filePath );
-			if( !( fileExists = File.Exists( filePath ) ) )
-				file = new ExportFile( "", null, null );
-		}
-
-		if( databaseHasMinimumDataRevision && !fileExists )
-			throw new UserCorrectableException(
-				"Failed to re-create the {0} because the data package did not exist, or did not contain a file.".FormatWith( GetDatabaseNounPhrase( database ) ) );
-		database.DeleteAndReCreateFromFile( file );
-		if( !fileExists )
-			Log.Information( "Created a new {0} because the data package did not exist, or did not contain a file.".FormatWith( GetDatabaseNounPhrase( database ) ) );
-	}
-
 	/// <summary>
 	/// SQL Server takes awhile to recover to a usable state after restoring.  Wait until it is.
 	/// </summary>

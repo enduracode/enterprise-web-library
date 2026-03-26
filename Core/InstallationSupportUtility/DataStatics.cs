@@ -1,8 +1,10 @@
 ﻿using Azure.Identity;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
+using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Databases;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
 using JetBrains.Annotations;
+using Serilog;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility;
 
@@ -18,13 +20,42 @@ public static class DataStatics {
 		EwlStatics.CombinePaths( ConfigurationStatics.EwlFolderPath, "Local Data Packages", installationFullName + ".zip" );
 
 	public static void ExportDatabase( ExistingInstalledInstallation installation, Database database, string packageFolderPath ) {
-		DatabaseOps.ExportDatabaseToFile( database, getDatabaseExportFile( installation, database, packageFolderPath ) );
+		if( database is not NoDatabase )
+			database.ExportToFile( getDatabaseExportFile( installation, database, packageFolderPath ) );
 	}
 
-	private static ExportFile getDatabaseExportFile( ExistingInstalledInstallation installation, Database database, string packageFolderPath ) {
+	public static void DeleteAndReCreateDatabase(
+		ExistingInstallation installation, Database database, bool databaseHasMinimumDataRevision, string packageFolderPath ) {
+		if( database is NoDatabase )
+			return;
+
+		var file = getDatabaseExportFile( installation as ExistingInstalledInstallation, database, packageFolderPath );
+
+		bool fileExists;
+		if( file.IsAzureBlob ) {
+			file.TryGetAzureBlob( out var containerUrl, out var blobName );
+			fileExists = true;
+		}
+		else {
+			file.TryGetFilePath( out var filePath );
+			if( !( fileExists = File.Exists( filePath ) ) )
+				file = new ExportFile( "", null, null );
+		}
+
+		if( databaseHasMinimumDataRevision && !fileExists )
+			throw new UserCorrectableException(
+				"Failed to re-create the {0} because the data package did not exist, or did not contain a file.".FormatWith(
+					DatabaseOps.GetDatabaseNounPhrase( database ) ) );
+		database.DeleteAndReCreateFromFile( file );
+		if( !fileExists )
+			Log.Information(
+				"Created a new {0} because the data package did not exist, or did not contain a file.".FormatWith( DatabaseOps.GetDatabaseNounPhrase( database ) ) );
+	}
+
+	private static ExportFile getDatabaseExportFile( ExistingInstalledInstallation? installation, Database database, string packageFolderPath ) {
 		var fileName = ( database.SecondaryDatabaseName.Length > 0 ? database.SecondaryDatabaseName : "Primary" ) + ".bak";
 
-		if( installation.ExistingInstalledInstallationLogic.InstallationInAzure )
+		if( installation?.ExistingInstalledInstallationLogic.InstallationInAzure == true )
 			return new ExportFile(
 				null,
 				AzureStatics.GetDataPackageContainerUrl(
