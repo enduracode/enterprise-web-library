@@ -3,7 +3,6 @@ using EnterpriseWebLibrary.Configuration.InstallationStandard;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
-using EnterpriseWebLibrary.InstallationSupportUtility.SystemManagerInterface.Messages.SystemListMessage;
 using Serilog;
 using Tewl.IO;
 
@@ -19,34 +18,47 @@ internal class UpdateData: Operation {
 	void Operation.Execute( Installation genericInstallation, IReadOnlyList<string> arguments, OperationResult operationResult ) {
 		var installation = (DevelopmentInstallation)genericInstallation;
 
-		var source = arguments[ 0 ];
-		if( source == "Default" )
-			source = "";
+		var sourceName = arguments[ 0 ];
+		if( sourceName == "Default" )
+			sourceName = "";
 		var forceNewPackageDownload = bool.Parse( arguments[ 1 ] );
 
-		RsisInstallation? sourceInstallation;
+		DataSource? source;
 		var recognizedInstallation = installation as RecognizedDevelopmentInstallation;
 		if( recognizedInstallation is not null ) {
 			var sources = SystemManagerConnectionStatics.SystemList.GetDataUpdateSources( recognizedInstallation );
-			if( source.Any() ) {
-				sourceInstallation = sources.SingleOrDefault( i => i.ShortName == source );
-				if( sourceInstallation == null )
+			if( sourceName.Any() ) {
+				source = sources.SingleOrDefault( i => i.ShortName.Equals( sourceName, StringComparison.Ordinal ) ) is {} specifiedSource
+					         ? new DataSource( specifiedSource )
+					         : null;
+				if( source is null )
 					throw new UserCorrectableException( "The specified source does not exist." );
 			}
 			else {
-				sourceInstallation = sources.FirstOrDefault( i => i.DataPackageSize.HasValue ) ?? sources.FirstOrDefault();
-				if( sourceInstallation == null )
+				source = ( sources.FirstOrDefault( i => i.DataPackageSize.HasValue ) ?? sources.FirstOrDefault() ) is {} defaultSource
+					         ? new DataSource( defaultSource )
+					         : null;
+				if( source is null )
 					throw new UserCorrectableException( "No sources exist." );
 			}
 		}
 		else {
-			if( source.Any() )
-				throw new UserCorrectableException( "Source-specification is not currently supported." );
-			sourceInstallation = null;
+			var sources = getAzureSources( installation );
+			if( sourceName.Any() ) {
+				source = sources.SingleOrDefault( i => i.shortName.Equals( sourceName, StringComparison.Ordinal ) ) is {} specifiedSource
+					         ? new DataSource( specifiedSource )
+					         : null;
+				if( source is null )
+					throw new UserCorrectableException( "The specified source does not exist." );
+			}
+			else
+				source = sources.FirstOrDefault() is {} defaultSource ? new DataSource( defaultSource ) : null;
 		}
 
 		var databases = installation.ExistingInstallationLogic.Database.ToCollection()
-			.Concat( recognizedInstallation?.RecognizedInstallationLogic.SecondaryDatabasesIncludedInDataPackages ?? Enumerable.Empty<Database>() )
+			.Concat(
+				recognizedInstallation?.RecognizedInstallationLogic.SecondaryDatabasesIncludedInDataPackages ??
+				Enumerable.Empty<InstallationSupportUtility.DatabaseAbstraction.Database>() )
 			.Materialize();
 		if( databases.SelectMany( i => {
 			   try {
@@ -59,7 +71,7 @@ internal class UpdateData: Operation {
 		   .Any( i => i.hasModTable ) )
 			Log.Information( "Cached tables exist. Please restart any running applications to prevent them from using stale data." );
 
-		DataUpdateStatics.DownloadDataPackageAndGetDataUpdateMethod( installation, false, sourceInstallation, forceNewPackageDownload, operationResult )();
+		DataUpdateStatics.DownloadDataPackageAndGetDataUpdateMethod( installation, false, source, forceNewPackageDownload, operationResult )();
 
 		foreach( var database in databases )
 			DatabaseOps.ClearModificationTables( database );

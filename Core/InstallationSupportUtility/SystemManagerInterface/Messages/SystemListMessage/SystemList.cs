@@ -29,7 +29,7 @@ public partial class SystemList {
 	/// <summary>
 	/// Returns a list of installations that are appropriate to update data from, given the installation. Installation Support Utility use only.
 	/// </summary>
-	public IEnumerable<RsisInstallation> GetDataUpdateSources( RecognizedInstallation installation ) {
+	public IReadOnlyCollection<RsisInstallation> GetDataUpdateSources( RecognizedInstallation installation ) {
 		var availableInstallations = GetSystemByInstallationId( installation.Id )!.InstalledInstallations.ToList();
 
 		// Development installations can only update data from intermediate installations.
