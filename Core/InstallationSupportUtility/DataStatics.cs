@@ -73,7 +73,7 @@ public static class DataStatics {
 							new DefaultAzureCredentialOptions { TenantId = installation.ExistingInstallationLogic.RuntimeConfiguration.AzureHosting!.TenantId } ) ),
 					installation,
 					InstallationType.Live ),
-				fileName );
+				packageFolderPath + fileName );
 
 		return new ExportFile( EwlStatics.CombinePaths( packageFolderPath, fileName ), null, null );
 	}

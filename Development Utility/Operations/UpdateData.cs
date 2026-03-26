@@ -46,13 +46,13 @@ internal class UpdateData: Operation {
 			var sources = getAzureSources( installation );
 			if( sourceName.Any() ) {
 				source = sources.SingleOrDefault( i => i.shortName.Equals( sourceName, StringComparison.Ordinal ) ) is {} specifiedSource
-					         ? new DataSource( specifiedSource )
+					         ? new DataSource( installation, specifiedSource )
 					         : null;
 				if( source is null )
 					throw new UserCorrectableException( "The specified source does not exist." );
 			}
 			else
-				source = sources.FirstOrDefault() is {} defaultSource ? new DataSource( defaultSource ) : null;
+				source = sources.FirstOrDefault() is {} defaultSource ? new DataSource( installation, defaultSource ) : null;
 		}
 
 		var databases = installation.ExistingInstallationLogic.Database.ToCollection()
