@@ -1,8 +1,11 @@
-﻿using EnterpriseWebLibrary.InstallationSupportUtility;
+﻿using EnterpriseWebLibrary.Configuration;
+using EnterpriseWebLibrary.Configuration.InstallationStandard;
+using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
 using EnterpriseWebLibrary.InstallationSupportUtility.SystemManagerInterface.Messages.SystemListMessage;
 using Serilog;
+using Tewl.IO;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations;
 
@@ -60,5 +63,33 @@ internal class UpdateData: Operation {
 
 		foreach( var database in databases )
 			DatabaseOps.ClearModificationTables( database );
+	}
+
+	private IReadOnlyCollection<InstallationStandardConfigurationInstalledInstallation> getAzureSources( DevelopmentInstallation installation ) {
+		var installations = new List<InstallationStandardConfigurationInstalledInstallation>();
+		foreach( var installationConfigurationFolderPath in Directory.GetDirectories(
+			        EwlStatics.CombinePaths(
+				        installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath,
+				        InstallationConfiguration.InstallationConfigurationFolderName,
+				        InstallationConfiguration.InstallationsFolderName ) ) ) {
+			if( new[] { InstallationConfiguration.DevelopmentInstallationFolderName, AppStatics.MercurialRepositoryFolderName, AppStatics.GitRepositoryFolderName }
+			   .Contains( Path.GetFileName( installationConfigurationFolderPath ) ) )
+				continue;
+
+			var installedInstallation = XmlOps.DeserializeFromFile<InstallationStandardConfiguration>(
+					EwlStatics.CombinePaths( installationConfigurationFolderPath, InstallationConfiguration.InstallationStandardConfigurationFileName ),
+					false )
+				.installedInstallation;
+
+			if( installedInstallation.AzureHosting is null )
+				continue;
+
+			// Development installations can only update data from intermediate installations.
+			if( installedInstallation.InstallationTypeConfiguration is LiveInstallationConfiguration )
+				continue;
+
+			installations.Add( installedInstallation );
+		}
+		return installations;
 	}
 }
