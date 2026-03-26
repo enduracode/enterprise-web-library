@@ -22,15 +22,17 @@ public static class DataStatics {
 
 	public static void ExportDatabase( ExistingInstalledInstallation installation, Database database, string packageFolderPath ) {
 		if( database is not NoDatabase )
-			database.ExportToFile( getDatabaseExportFile( installation, database, packageFolderPath ) );
+			database.ExportToFile(
+				getDatabaseExportFile( installation, database, installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationType, packageFolderPath ) );
 	}
 
 	public static void DeleteAndReCreateDatabase(
-		ExistingInstallation installation, Database database, bool databaseHasMinimumDataRevision, string packageFolderPath ) {
+		ExistingInstallation installation, Database database, bool databaseHasMinimumDataRevision, InstallationType sourceInstallationType,
+		string packageFolderPath ) {
 		if( database is NoDatabase )
 			return;
 
-		var file = getDatabaseExportFile( installation as ExistingInstalledInstallation, database, packageFolderPath );
+		var file = getDatabaseExportFile( installation as ExistingInstalledInstallation, database, sourceInstallationType, packageFolderPath );
 
 		bool fileExists;
 		if( file.IsAzureBlob ) {
@@ -61,7 +63,8 @@ public static class DataStatics {
 				"Created a new {0} because the data package did not exist, or did not contain a file.".FormatWith( DatabaseOps.GetDatabaseNounPhrase( database ) ) );
 	}
 
-	private static ExportFile getDatabaseExportFile( ExistingInstalledInstallation? installation, Database database, string packageFolderPath ) {
+	private static ExportFile getDatabaseExportFile(
+		ExistingInstalledInstallation? installation, Database database, InstallationType exportInstallationType, string packageFolderPath ) {
 		var fileName = ( database.SecondaryDatabaseName.Length > 0 ? database.SecondaryDatabaseName : "Primary" ) + ".bak";
 
 		if( installation?.ExistingInstalledInstallationLogic.InstallationInAzure == true )
@@ -72,7 +75,7 @@ public static class DataStatics {
 						new DefaultAzureCredential(
 							new DefaultAzureCredentialOptions { TenantId = installation.ExistingInstallationLogic.RuntimeConfiguration.AzureHosting!.TenantId } ) ),
 					installation,
-					InstallationType.Live ),
+					exportInstallationType ),
 				packageFolderPath + fileName );
 
 		return new ExportFile( EwlStatics.CombinePaths( packageFolderPath, fileName ), null, null );
