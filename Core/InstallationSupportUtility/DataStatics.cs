@@ -1,4 +1,5 @@
 ﻿using Azure.Identity;
+using Azure.Storage.Blobs;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction.Databases;
@@ -34,7 +35,15 @@ public static class DataStatics {
 		bool fileExists;
 		if( file.IsAzureBlob ) {
 			file.TryGetAzureBlob( out var containerUrl, out var blobName );
-			fileExists = true;
+			var blobClient = new BlobClient(
+				new Uri( $"{containerUrl}/{blobName}" ),
+				new DefaultAzureCredential(
+					new DefaultAzureCredentialOptions
+						{
+							TenantId = ( (ExistingInstalledInstallation)installation ).ExistingInstallationLogic.RuntimeConfiguration.AzureHosting!.TenantId
+						} ) );
+			if( !( fileExists = blobClient.Exists() ) )
+				file = new ExportFile( null, "", "" );
 		}
 		else {
 			file.TryGetFilePath( out var filePath );
