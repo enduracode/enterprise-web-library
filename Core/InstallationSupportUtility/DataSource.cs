@@ -41,7 +41,8 @@ public class DataSource {
 
 	internal bool IsAzureInstallation => installation is not null;
 
-	internal string BlobPrefix => AzureStatics.GetDataBlobPrefix( sourceAzureInstallation!.shortName ) ?? throw new InvalidOperationException();
+	internal string BlobPrefix =>
+		sourceAzureInstallation is null ? throw new InvalidOperationException() : AzureStatics.GetDataBlobPrefix( sourceAzureInstallation!.shortName );
 
 	/// <summary>
 	/// Gets a data package, either by downloading one or using the last one that was downloaded. Returns the path to the package, which may be a ZIP file. Also
@@ -115,21 +116,14 @@ public class DataSource {
 
 	private long downloadAzurePackage( string packageFolderPath ) {
 		long totalBytes = 0;
+		var credential = new DefaultAzureCredential( new DefaultAzureCredentialOptions { TenantId = sourceAzureInstallation!.AzureHosting.TenantId } );
 		var containerClient = new BlobContainerClient(
-			new Uri(
-				AzureStatics.GetDataPackageContainerUrl(
-					AzureStatics.DiscoverGeneralStorageAccountName(
-						new DefaultAzureCredential( new DefaultAzureCredentialOptions { TenantId = sourceAzureInstallation!.AzureHosting.TenantId } ) ),
-					installation!,
-					InstallationType ) ),
-			new DefaultAzureCredential( new DefaultAzureCredentialOptions { TenantId = sourceAzureInstallation.AzureHosting.TenantId } ) );
+			new Uri( AzureStatics.GetDataPackageContainerUrl( AzureStatics.DiscoverGeneralStorageAccountName( credential ), installation!, InstallationType ) ),
+			credential );
 		var blobPrefix = AzureStatics.GetDataBlobPrefix( sourceAzureInstallation.shortName );
 		Directory.CreateDirectory( packageFolderPath );
 		foreach( var blobItem in containerClient.GetBlobs( BlobTraits.None, BlobStates.None, blobPrefix, CancellationToken.None ) ) {
-			var localFilePath = EwlStatics.CombinePaths( packageFolderPath, blobItem.Name[ blobPrefix.Length.. ] );
-
-
-			containerClient.GetBlobClient( blobItem.Name ).DownloadTo( localFilePath );
+			containerClient.GetBlobClient( blobItem.Name ).DownloadTo( EwlStatics.CombinePaths( packageFolderPath, blobItem.Name[ blobPrefix.Length.. ] ) );
 			totalBytes += blobItem.Properties.ContentLength ?? 0;
 		}
 		return totalBytes;
