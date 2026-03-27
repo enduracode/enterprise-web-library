@@ -1,5 +1,6 @@
 ﻿using Azure.Identity;
 using Azure.ResourceManager;
+using Azure.ResourceManager.ContainerRegistry;
 using Azure.ResourceManager.Storage;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
@@ -18,6 +19,17 @@ public static class AzureStatics {
 				continue;
 
 			return subscription.GetResourceGroups().Get( "rg-general" ).Value.GetStorageAccounts().Single().Data.Name;
+		}
+		throw new Exception();
+	}
+
+	public static string DiscoverGeneralContainerRegistryLoginServer( DefaultAzureCredential credential ) {
+		var client = new ArmClient( credential );
+		foreach( var subscription in client.GetSubscriptions() ) {
+			if( !subscription.GetResourceGroups().Exists( "rg-general" ) )
+				continue;
+
+			return subscription.GetResourceGroups().Get( "rg-general" ).Value.GetContainerRegistries().Single().Data.LoginServer;
 		}
 		throw new Exception();
 	}
