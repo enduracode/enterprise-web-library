@@ -1,6 +1,9 @@
 ﻿using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Azure.Identity;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Configuration.InstallationStandard;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
@@ -18,9 +21,8 @@ public class DataSource {
 
 	private readonly RsisInstallation? systemManagerInstallation;
 
-	private readonly string? azureTenantId;
-	private readonly string? azureContainerUrl;
-	private readonly string? azureBlobPrefix;
+	private readonly ExistingInstallation? installation;
+	private readonly InstallationStandardConfigurationInstalledInstallation? sourceAzureInstallation;
 
 	public DataSource( RsisInstallation systemManagerInstallation ) {
 		InstallationType = systemManagerInstallation.InstallationTypeElements is LiveInstallationElements ? InstallationType.Live : InstallationType.Intermediate;
@@ -33,67 +35,74 @@ public class DataSource {
 			                   ? InstallationType.Live
 			                   : InstallationType.Intermediate;
 
-		azureTenantId = sourceAzureInstallation.AzureHosting.TenantId;
-		azureContainerUrl = AzureStatics.GetDataPackageContainerUrl(
-			AzureStatics.DiscoverGeneralStorageAccountName(
-				new DefaultAzureCredential( new DefaultAzureCredentialOptions { TenantId = sourceAzureInstallation.AzureHosting.TenantId } ) ),
-			installation,
-			InstallationType );
-		azureBlobPrefix = AzureStatics.GetDataBlobPrefix( sourceAzureInstallation.shortName );
+		this.installation = installation;
+		this.sourceAzureInstallation = sourceAzureInstallation;
 	}
 
-	internal bool IsAzureInstallation => azureTenantId is not null;
+	internal bool IsAzureInstallation => installation is not null;
 
-	internal string BlobPrefix => azureBlobPrefix ?? throw new InvalidOperationException();
+	internal string BlobPrefix => AzureStatics.GetDataBlobPrefix( sourceAzureInstallation!.shortName ) ?? throw new InvalidOperationException();
 
 	/// <summary>
 	/// Gets a data package, either by downloading one or using the last one that was downloaded. Returns the path to the package, which may be a ZIP file. Also
 	/// archives downloaded data packages and deletes those that are too old to be useful. Installation Support Utility use only.
 	/// </summary>
 	internal string GetDataPackage( bool forceNewPackageDownload, OperationResult operationResult ) {
-		var dataExportToRsisWebSiteNotPermitted = systemManagerInstallation.InstallationTypeElements is LiveInstallationElements
-			{
-				DataExportToRsisWebSiteNotPermitted: true
-			};
-		if( dataExportToRsisWebSiteNotPermitted
-			    ? !File.Exists( DataStatics.GetPackageZipFilePath( systemManagerInstallation.FullName ) )
-			    : !systemManagerInstallation.DataPackageSize.HasValue )
-			return "";
-
-		var downloadedPackagesFolder = EwlStatics.CombinePaths( GetDownloadedPackagesFolderPath(), systemManagerInstallation.FullName );
-
-		var packageZipFilePath = "";
-		// See if we can re-use an existing package.
-		if( !forceNewPackageDownload && Directory.Exists( downloadedPackagesFolder ) ) {
-			var downloadedPackages = IoMethods.GetFilePathsInFolder( downloadedPackagesFolder );
-			if( downloadedPackages.Any() )
-				packageZipFilePath = downloadedPackages.First();
+		var dataExportToRsisWebSiteNotPermitted = false;
+		if( systemManagerInstallation is not null ) {
+			dataExportToRsisWebSiteNotPermitted = systemManagerInstallation.InstallationTypeElements is LiveInstallationElements
+				{
+					DataExportToRsisWebSiteNotPermitted: true
+				};
+			if( dataExportToRsisWebSiteNotPermitted
+				    ? !File.Exists( DataStatics.GetPackageZipFilePath( systemManagerInstallation.FullName ) )
+				    : !systemManagerInstallation.DataPackageSize.HasValue )
+				return "";
 		}
 
-		// Download a package from RSIS if the user forces this behavior or if there is no package available on disk.
-		if( forceNewPackageDownload || packageZipFilePath.Length == 0 ) {
-			packageZipFilePath = EwlStatics.CombinePaths( downloadedPackagesFolder, "{0}-Package.zip".FormatWith( DateTime.Now.ToString( "yyyy-MM-dd" ) ) );
+		var downloadedPackagesFolder = EwlStatics.CombinePaths(
+			GetDownloadedPackagesFolderPath(),
+			IsAzureInstallation
+				? InstallationConfiguration.GetFullNameFromSystemAndInstallationNames(
+					installation!.ExistingInstallationLogic.RuntimeConfiguration.SystemName,
+					sourceAzureInstallation!.name )
+				: systemManagerInstallation!.FullName );
+
+		var packagePath = "";
+		// See if we can re-use an existing package.
+		if( !forceNewPackageDownload && Directory.Exists( downloadedPackagesFolder ) ) {
+			if( IoMethods.GetFilePathsInFolder( downloadedPackagesFolder ).FirstOrDefault() is {} filePath )
+				packagePath = filePath;
+			if( Directory.GetDirectories( downloadedPackagesFolder ).FirstOrDefault() is {} folderPath )
+				packagePath = folderPath;
+		}
+
+		// Download a package if the user forces this behavior or if there is no package available on disk.
+		if( forceNewPackageDownload || packagePath.Length == 0 ) {
+			packagePath = EwlStatics.CombinePaths(
+				downloadedPackagesFolder,
+				$"{DateTime.Now:yyyy-MM-dd}-Package" + ( IsAzureInstallation ? "" : FileExtensions.Zip ) );
 
 			// If the update data installation is a live installation for which data export to the RSIS website is not permitted, get the data package from disk.
 			if( dataExportToRsisWebSiteNotPermitted )
-				IoMethods.CopyFile( DataStatics.GetPackageZipFilePath( systemManagerInstallation.FullName ), packageZipFilePath );
+				IoMethods.CopyFile( DataStatics.GetPackageZipFilePath( systemManagerInstallation!.FullName ), packagePath );
 			else
 				operationResult.TimeSpentWaitingForNetwork = EwlStatics.ExecuteTimedRegion( () =>
-					operationResult.NumberOfBytesTransferred = downloadDataPackage( systemManagerInstallation, packageZipFilePath ) );
+					operationResult.NumberOfBytesTransferred = IsAzureInstallation ? downloadAzurePackage( packagePath ) : downloadSystemManagerPackage( packagePath ) );
 		}
 
 		deleteOldFiles( downloadedPackagesFolder, InstallationType == InstallationType.Live );
-		return packageZipFilePath;
+		return packagePath;
 	}
 
-	private long downloadDataPackage( RsisInstallation installation, string packageZipFilePath ) {
+	private long downloadSystemManagerPackage( string packageZipFilePath ) {
 		using var fileWriteStream = IoMethods.GetFileStreamForWrite( packageZipFilePath );
 
 		SystemManagerConnectionStatics.ExecuteActionWithSystemManagerClient(
 			"data package download",
 			client => Task.Run( async () => {
 					using var response = await client.GetAsync(
-						                     $"{SystemManagerConnectionStatics.InstallationsUrlSegment}/{installation.Id}/{SystemManagerConnectionStatics.DataPackageUrlSegment}",
+						                     $"{SystemManagerConnectionStatics.InstallationsUrlSegment}/{systemManagerInstallation!.Id}/{SystemManagerConnectionStatics.DataPackageUrlSegment}",
 						                     HttpCompletionOption.ResponseHeadersRead );
 					response.EnsureSuccessStatusCode();
 					await ( await response.Content.ReadAsStreamAsync() ).CopyToAsync( fileWriteStream );
@@ -102,6 +111,28 @@ public class DataSource {
 			supportLargePayload: true );
 
 		return fileWriteStream.Length;
+	}
+
+	private long downloadAzurePackage( string packageFolderPath ) {
+		long totalBytes = 0;
+		var containerClient = new BlobContainerClient(
+			new Uri(
+				AzureStatics.GetDataPackageContainerUrl(
+					AzureStatics.DiscoverGeneralStorageAccountName(
+						new DefaultAzureCredential( new DefaultAzureCredentialOptions { TenantId = sourceAzureInstallation!.AzureHosting.TenantId } ) ),
+					installation!,
+					InstallationType ) ),
+			new DefaultAzureCredential( new DefaultAzureCredentialOptions { TenantId = sourceAzureInstallation.AzureHosting.TenantId } ) );
+		var blobPrefix = AzureStatics.GetDataBlobPrefix( sourceAzureInstallation.shortName );
+		Directory.CreateDirectory( packageFolderPath );
+		foreach( var blobItem in containerClient.GetBlobs( BlobTraits.None, BlobStates.None, blobPrefix, CancellationToken.None ) ) {
+			var localFilePath = EwlStatics.CombinePaths( packageFolderPath, blobItem.Name[ blobPrefix.Length.. ] );
+
+
+			containerClient.GetBlobClient( blobItem.Name ).DownloadTo( localFilePath );
+			totalBytes += blobItem.Properties.ContentLength ?? 0;
+		}
+		return totalBytes;
 	}
 
 	/// <summary>
