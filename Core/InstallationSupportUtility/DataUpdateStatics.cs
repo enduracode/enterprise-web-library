@@ -90,10 +90,12 @@ public class DataUpdateStatics {
 			if( installationIsIntermediate && sourceInstallationType == InstallationType.Live ) {
 				Log.Information( "Executing live -> intermediate conversion commands..." );
 				doDatabaseLiveToIntermediateConversionIfCommandsExist(
+					installation,
 					installation.ExistingInstallationLogic.Database,
 					installation.ExistingInstallationLogic.RuntimeConfiguration.PrimaryDatabaseSystemConfiguration );
 				foreach( var secondaryDatabase in recognizedInstallation!.RecognizedInstallationLogic.SecondaryDatabasesIncludedInDataPackages )
 					doDatabaseLiveToIntermediateConversionIfCommandsExist(
+						installation,
 						secondaryDatabase,
 						installation.ExistingInstallationLogic.RuntimeConfiguration.GetSecondaryDatabaseSystemConfiguration( secondaryDatabase.SecondaryDatabaseName ) );
 			}
@@ -119,7 +121,8 @@ public class DataUpdateStatics {
 				} );
 	}
 
-	private static void doDatabaseLiveToIntermediateConversionIfCommandsExist( Database database, Configuration.SystemGeneral.Database? configuration ) {
+	private static void doDatabaseLiveToIntermediateConversionIfCommandsExist(
+		ExistingInstallation installation, Database database, Configuration.SystemGeneral.Database? configuration ) {
 		if( !( configuration?.LiveToIntermediateConversionCommands ?? Enumerable.Empty<string>() ).Any() )
 			return;
 
@@ -130,6 +133,7 @@ public class DataUpdateStatics {
 				cn.ExecuteNonQueryCommand( cmd, isLongRunning: true );
 			}
 		} );
-		database.ShrinkAfterPostUpdateDataCommands();
+		database.ShrinkAfterPostUpdateDataCommands(
+			installation is ExistingInstalledInstallation { ExistingInstalledInstallationLogic.InstallationInAzure: true } );
 	}
 }
