@@ -39,7 +39,7 @@ public static class AzureStatics {
 		return $"https://{storageAccountName}.blob.core.windows.net/{containerName}";
 	}
 
-	public static string GetDataBlobPrefix( string installationShortName ) => getInstallationName( installationShortName );
+	public static string GetDataBlobPrefix( string installationShortName ) => $"{getInstallationName( installationShortName )}-";
 
 	public static string GetAppServiceName( ExistingInstallation installation, string installationShortName ) =>
 		$"app-{getSystemName( installation )}-{getInstallationName( installationShortName )}";

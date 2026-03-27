@@ -15,37 +15,53 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility;
 /// </summary>
 public class DataUpdateStatics {
 	public static Action DownloadDataPackageAndGetDataUpdateMethod(
-		ExistingInstallation installation, bool installationIsStandbyDb, RsisInstallation? source, bool forceNewPackageDownload, OperationResult operationResult ) {
+		ExistingInstallation installation, bool installationIsStandbyDb, DataSource? source, bool forceNewPackageDownload, OperationResult operationResult ) {
 		var recognizedInstallation = installation as RecognizedInstallation;
 
-		string packageZipFilePath;
-		if( recognizedInstallation != null )
-			packageZipFilePath = getDataPackage( source!, forceNewPackageDownload, operationResult );
-		else {
+		InstallationType sourceInstallationType;
+		string packagePath;
+		if( source is null ) {
+			sourceInstallationType = InstallationType.Intermediate;
 			var path = EwlStatics.CombinePaths(
 				getDownloadedPackagesFolderPath(),
 				installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + FileExtensions.Zip );
-			packageZipFilePath = File.Exists( path ) ? path : "";
+			packagePath = File.Exists( path ) ? path : "";
+		}
+		else {
+			sourceInstallationType = source.InstallationType;
+			packagePath = installation is ExistingInstalledInstallation { ExistingInstalledInstallationLogic.InstallationInAzure: true }
+				              ? source.BlobPrefix
+				              : getDataPackage( source, forceNewPackageDownload, operationResult );
 		}
 
 		return () => {
 			IoMethods.ExecuteWithTempFolder( tempFolderPath => {
-				var packageFolderPath = EwlStatics.CombinePaths( tempFolderPath, "Package" );
-				if( packageZipFilePath.Any() )
-					ZipOps.UnZipFileAsFolder( packageZipFilePath, packageFolderPath );
+				string packageFolderPath;
+				if( installation is ExistingInstalledInstallation { ExistingInstalledInstallationLogic.InstallationInAzure: true } ||
+				    source?.IsAzureInstallation == true )
+					packageFolderPath = packagePath;
+				else {
+					packageFolderPath = EwlStatics.CombinePaths( tempFolderPath, "Package" );
+					if( packagePath.Any() )
+						ZipOps.UnZipFileAsFolder( packagePath, packageFolderPath );
+				}
 
 				// Delete and re-create databases.
-				DatabaseOps.DeleteAndReCreateDatabaseFromFile(
+				DataStatics.DeleteAndReCreateDatabase(
+					installation,
 					installation.ExistingInstallationLogic.Database,
 					databaseHasMinimumDataRevision( installation.ExistingInstallationLogic.RuntimeConfiguration.PrimaryDatabaseSystemConfiguration ),
+					sourceInstallationType,
 					packageFolderPath );
 				if( recognizedInstallation != null )
 					foreach( var secondaryDatabase in recognizedInstallation.RecognizedInstallationLogic.SecondaryDatabasesIncludedInDataPackages )
-						DatabaseOps.DeleteAndReCreateDatabaseFromFile(
+						DataStatics.DeleteAndReCreateDatabase(
+							installation,
 							secondaryDatabase,
 							databaseHasMinimumDataRevision(
 								installation.ExistingInstallationLogic.RuntimeConfiguration.GetSecondaryDatabaseSystemConfiguration(
 									secondaryDatabase.SecondaryDatabaseName ) ),
+							sourceInstallationType,
 							packageFolderPath );
 			} );
 
@@ -67,10 +83,10 @@ public class DataUpdateStatics {
 			}
 
 			// If we’re an intermediate installation and we are getting data from a live installation, sanitize the data and do other conversion commands.
-			if( installation is RecognizedInstalledInstallation
-				   {
-					   KnownInstallationLogic.RsisInstallation.InstallationTypeElements: IntermediateInstallationElements
-				   } && source!.InstallationTypeElements is LiveInstallationElements ) {
+			var installationIsIntermediate = installation is RecognizedInstalledInstallation recognized
+				                                 ? recognized.KnownInstallationLogic.RsisInstallation.InstallationTypeElements is IntermediateInstallationElements
+				                                 : installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationType == InstallationType.Intermediate;
+			if( installationIsIntermediate && sourceInstallationType == InstallationType.Live ) {
 				Log.Information( "Executing live -> intermediate conversion commands..." );
 				doDatabaseLiveToIntermediateConversionIfCommandsExist(
 					installation.ExistingInstallationLogic.Database,
