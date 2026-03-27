@@ -23,7 +23,7 @@ public class DataUpdateStatics {
 		if( source is null ) {
 			sourceInstallationType = InstallationType.Intermediate;
 			var path = EwlStatics.CombinePaths(
-				getDownloadedPackagesFolderPath(),
+				DataSource.GetDownloadedPackagesFolderPath(),
 				installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + FileExtensions.Zip );
 			packagePath = File.Exists( path ) ? path : "";
 		}
@@ -31,7 +31,7 @@ public class DataUpdateStatics {
 			sourceInstallationType = source.InstallationType;
 			packagePath = installation is ExistingInstalledInstallation { ExistingInstalledInstallationLogic.InstallationInAzure: true }
 				              ? source.BlobPrefix
-				              : getDataPackage( source, forceNewPackageDownload, operationResult );
+				              : source.GetDataPackage( forceNewPackageDownload, operationResult );
 		}
 
 		return () => {
