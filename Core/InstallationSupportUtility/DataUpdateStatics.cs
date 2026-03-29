@@ -47,13 +47,29 @@ public class DataUpdateStatics {
 						ZipOps.UnZipFileAsFolder( packagePath, packageFolderPath );
 				}
 
+				IReadOnlyCollection<string> dataMigrationUsers = [ ];
+				IReadOnlyCollection<string> dataModificationUsers = [ ];
+				if( installation is ExistingInstalledInstallation { ExistingInstalledInstallationLogic.InstallationInAzure: true } ) {
+					dataMigrationUsers = AzureStatics.GetDataMigratorIdentityName(
+							installation,
+							installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationShortName )
+						.ToCollection();
+					dataModificationUsers = AzureStatics
+						.GetAppServiceName( installation, installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationShortName )
+						.ToCollection()
+						.Append( AzureStatics.GetContainerAppJobName( installation, installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationType ) )
+						.Materialize();
+				}
+
 				// Delete and re-create databases.
 				DataStatics.DeleteAndReCreateDatabase(
 					installation,
 					installation.ExistingInstallationLogic.Database,
 					databaseHasMinimumDataRevision( installation.ExistingInstallationLogic.RuntimeConfiguration.PrimaryDatabaseSystemConfiguration ),
 					sourceInstallationType,
-					packageFolderPath );
+					packageFolderPath,
+					dataMigrationUsers,
+					dataModificationUsers );
 				if( recognizedInstallation != null )
 					foreach( var secondaryDatabase in recognizedInstallation.RecognizedInstallationLogic.SecondaryDatabasesIncludedInDataPackages )
 						DataStatics.DeleteAndReCreateDatabase(
@@ -63,7 +79,9 @@ public class DataUpdateStatics {
 								installation.ExistingInstallationLogic.RuntimeConfiguration.GetSecondaryDatabaseSystemConfiguration(
 									secondaryDatabase.SecondaryDatabaseName ) ),
 							sourceInstallationType,
-							packageFolderPath );
+							packageFolderPath,
+								[ ],
+								[ ] );
 			} );
 
 			DatabaseOps.WaitForDatabaseRecovery( installation.ExistingInstallationLogic.Database );
