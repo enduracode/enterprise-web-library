@@ -32,7 +32,7 @@ public interface Database {
 
 	// Data package support
 	void ExportToFile( ExportFile file );
-	void DeleteAndReCreateFromFile( ExportFile file );
+	void DeleteAndReCreateFromFile( ExportFile file, IReadOnlyCollection<string> dataMigrationUsers, IReadOnlyCollection<string> dataModificationUsers );
 
 	// Other
 	IEnumerable<DataRow> GetDataTypes();

@@ -28,7 +28,7 @@ public static class DataStatics {
 
 	public static void DeleteAndReCreateDatabase(
 		ExistingInstallation installation, Database database, bool databaseHasMinimumDataRevision, InstallationType sourceInstallationType,
-		string packageFolderPath ) {
+		string packageFolderPath, IReadOnlyCollection<string> dataMigrationUsers, IReadOnlyCollection<string> dataModificationUsers ) {
 		if( database is NoDatabase )
 			return;
 
@@ -57,7 +57,7 @@ public static class DataStatics {
 			throw new UserCorrectableException(
 				"Failed to re-create the {0} because the data package did not exist, or did not contain a file.".FormatWith(
 					DatabaseOps.GetDatabaseNounPhrase( database ) ) );
-		database.DeleteAndReCreateFromFile( file );
+		database.DeleteAndReCreateFromFile( file, dataMigrationUsers, dataModificationUsers );
 		if( !fileExists )
 			Log.Information(
 				"Created a new {0} because the data package did not exist, or did not contain a file.".FormatWith( DatabaseOps.GetDatabaseNounPhrase( database ) ) );

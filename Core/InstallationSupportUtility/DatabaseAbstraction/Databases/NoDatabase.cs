@@ -22,7 +22,9 @@ internal class NoDatabase: Database {
 	}
 
 	void Database.ExportToFile( ExportFile file ) {}
-	void Database.DeleteAndReCreateFromFile( ExportFile file ) {}
+
+	void Database.DeleteAndReCreateFromFile(
+		ExportFile file, IReadOnlyCollection<string> dataMigrationUsers, IReadOnlyCollection<string> dataModificationUsers ) {}
 
 	IEnumerable<DataRow> Database.GetDataTypes() => throw new NotSupportedException();
 	IEnumerable<DatabaseTable> Database.GetTables() => [ ];

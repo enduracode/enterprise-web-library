@@ -85,7 +85,8 @@ public class MySql: Database {
 			} );
 	}
 
-	void Database.DeleteAndReCreateFromFile( ExportFile file ) {
+	void Database.DeleteAndReCreateFromFile(
+		ExportFile file, IReadOnlyCollection<string> dataMigrationUsers, IReadOnlyCollection<string> dataModificationUsers ) {
 		if( file.IsAzureBlob )
 			throw new NotSupportedException();
 		file.TryGetFilePath( out var filePath );

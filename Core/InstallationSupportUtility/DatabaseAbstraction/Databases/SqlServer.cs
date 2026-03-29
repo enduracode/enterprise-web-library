@@ -84,11 +84,12 @@ public class SqlServer: Database {
 		}
 	}
 
-	void Database.DeleteAndReCreateFromFile( ExportFile file ) {
+	void Database.DeleteAndReCreateFromFile(
+		ExportFile file, IReadOnlyCollection<string> dataMigrationUsers, IReadOnlyCollection<string> dataModificationUsers ) {
 		bool? fileExisted = null;
 		executeDbMethodAgainstMaster( cn => fileExisted = deleteAndReCreateFromFile( cn, file ) );
-		if( !fileExisted!.Value )
-			ExecuteDbMethod( cn => {
+		ExecuteDbMethod( cn => {
+			if( !fileExisted!.Value ) {
 				executeLongRunningCommand( cn, "ALTER DATABASE {0} SET AUTO_UPDATE_STATISTICS_ASYNC ON".FormatWith( info.Database ) );
 				executeLongRunningCommand( cn, "ALTER DATABASE {0} SET ALLOW_SNAPSHOT_ISOLATION ON".FormatWith( info.Database ) );
 				executeLongRunningCommand( cn, "ALTER DATABASE {0} SET READ_COMMITTED_SNAPSHOT ON WITH ROLLBACK IMMEDIATE".FormatWith( info.Database ) );
@@ -108,14 +109,45 @@ public class SqlServer: Database {
 				lineMarkerInsert.Execute( cn );
 
 				executeLongRunningCommand( cn, "CREATE SEQUENCE MainSequence AS int MINVALUE 1" );
+			}
 
-				if( !file.IsAzureBlob ) {
-					const string userName = @"NT AUTHORITY\NETWORK SERVICE";
-					executeLongRunningCommand( cn, "CREATE USER [{0}]".FormatWith( userName ) );
-					executeLongRunningCommand( cn, "ALTER ROLE db_datareader ADD MEMBER [{0}]".FormatWith( userName ) );
-					executeLongRunningCommand( cn, "ALTER ROLE db_datawriter ADD MEMBER [{0}]".FormatWith( userName ) );
+			if( file.IsAzureBlob ) {
+				var oldUsers = new List<string>();
+				var command = cn.DatabaseInfo.CreateCommand();
+				command.CommandText = "SELECT name FROM sys.database_principals WHERE type = 'E'";
+				cn.ExecuteReaderCommand(
+					command,
+					reader => {
+						while( reader.Read() ) {
+							var user = reader.GetString( 0 );
+							if( !dataMigrationUsers.Contains( user, StringComparer.Ordinal ) && !dataModificationUsers.Contains( user, StringComparer.Ordinal ) )
+								oldUsers.Add( user );
+						}
+					} );
+				foreach( var user in oldUsers )
+					executeLongRunningCommand( cn, $"DROP USER [{user}]" );
+
+				foreach( var user in dataMigrationUsers ) {
+					executeLongRunningCommand(
+						cn,
+						$"IF NOT EXISTS ( SELECT * FROM sys.database_principals WHERE name = '{user}' ) CREATE USER [{user}] FROM EXTERNAL PROVIDER" );
+					executeLongRunningCommand( cn, $"ALTER ROLE db_owner ADD MEMBER [{user}]" );
 				}
-			} );
+				foreach( var user in dataModificationUsers ) {
+					executeLongRunningCommand(
+						cn,
+						$"IF NOT EXISTS ( SELECT * FROM sys.database_principals WHERE name = '{user}' ) CREATE USER [{user}] FROM EXTERNAL PROVIDER" );
+					executeLongRunningCommand( cn, $"ALTER ROLE db_datareader ADD MEMBER [{user}]" );
+					executeLongRunningCommand( cn, $"ALTER ROLE db_datawriter ADD MEMBER [{user}]" );
+				}
+			}
+			else if( !fileExisted.Value ) {
+				const string userName = @"NT AUTHORITY\NETWORK SERVICE";
+				executeLongRunningCommand( cn, "CREATE USER [{0}]".FormatWith( userName ) );
+				executeLongRunningCommand( cn, "ALTER ROLE db_datareader ADD MEMBER [{0}]".FormatWith( userName ) );
+				executeLongRunningCommand( cn, "ALTER ROLE db_datawriter ADD MEMBER [{0}]".FormatWith( userName ) );
+			}
+		} );
 	}
 
 	private bool deleteAndReCreateFromFile( DatabaseConnection cn, ExportFile file ) {
