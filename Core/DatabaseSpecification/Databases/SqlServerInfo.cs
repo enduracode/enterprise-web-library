@@ -87,7 +87,8 @@ public class SqlServerInfo: DatabaseInfo {
 			builder.UserID = loginName;
 			builder.Password = password;
 		}
-		else if( Environment.GetEnvironmentVariable( "WEBSITE_SITE_NAME" ) is not null /* Azure App Service */ )
+		else if( Environment.GetEnvironmentVariable( "WEBSITE_SITE_NAME" ) is not null /* Azure App Service */ ||
+		         Environment.GetEnvironmentVariable( "CONTAINER_APP_JOB_NAME" ) is not null /* Azure Container Apps job */ )
 			builder.Authentication = SqlAuthenticationMethod.ActiveDirectoryManagedIdentity;
 		else
 			builder.IntegratedSecurity = true;
