@@ -30,7 +30,7 @@ public class DataUpdateStatics {
 		}
 		else {
 			sourceInstallationType = source.InstallationType;
-			packagePath = installation is ExistingInstalledInstallation { ExistingInstalledInstallationLogic.InstallationInAzure: true }
+			packagePath = installation.ExistingInstallationLogic.InstallationInAzure
 				              ? source.BlobPrefix
 				              : source.GetDataPackage( forceNewPackageDownload, operationResult );
 		}
@@ -38,8 +38,7 @@ public class DataUpdateStatics {
 		return () => {
 			IoMethods.ExecuteWithTempFolder( tempFolderPath => {
 				string packageFolderPath;
-				if( installation is ExistingInstalledInstallation { ExistingInstalledInstallationLogic.InstallationInAzure: true } ||
-				    source?.IsAzureInstallation == true )
+				if( installation.ExistingInstallationLogic.InstallationInAzure || source?.IsAzureInstallation == true )
 					packageFolderPath = packagePath;
 				else {
 					packageFolderPath = EwlStatics.CombinePaths( tempFolderPath, "Package" );
@@ -49,7 +48,7 @@ public class DataUpdateStatics {
 
 				IReadOnlyCollection<string> dataMigrationUsers = [ ];
 				IReadOnlyCollection<string> dataModificationUsers = [ ];
-				if( installation is ExistingInstalledInstallation { ExistingInstalledInstallationLogic.InstallationInAzure: true } ) {
+				if( installation.ExistingInstallationLogic.InstallationInAzure ) {
 					dataMigrationUsers = AzureStatics.GetDataMigratorIdentityName(
 							installation.ExistingInstallationLogic.RuntimeConfiguration,
 							installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationShortName )
@@ -156,7 +155,6 @@ public class DataUpdateStatics {
 				cn.ExecuteNonQueryCommand( cmd, isLongRunning: true );
 			}
 		} );
-		database.ShrinkAfterPostUpdateDataCommands(
-			installation is ExistingInstalledInstallation { ExistingInstalledInstallationLogic.InstallationInAzure: true } );
+		database.ShrinkAfterPostUpdateDataCommands( installation.ExistingInstallationLogic.InstallationInAzure );
 	}
 }

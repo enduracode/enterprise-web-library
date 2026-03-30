@@ -67,7 +67,7 @@ public static class DataStatics {
 		ExistingInstalledInstallation? installation, Database database, InstallationType exportInstallationType, string packageFolderPath ) {
 		var fileName = ( database.SecondaryDatabaseName.Length > 0 ? database.SecondaryDatabaseName : "Primary" ) + ".bak";
 
-		if( installation?.ExistingInstalledInstallationLogic.InstallationInAzure == true )
+		if( installation?.ExistingInstallationLogic.InstallationInAzure == true )
 			return new ExportFile(
 				null,
 				AzureStatics.GetDataPackageContainerUrl(

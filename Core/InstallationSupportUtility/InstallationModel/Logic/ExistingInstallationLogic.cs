@@ -26,6 +26,8 @@ public class ExistingInstallationLogic {
 
 	public InstallationConfiguration RuntimeConfiguration => runtimeConfiguration;
 
+	public bool InstallationInAzure => runtimeConfiguration.InstallationType != InstallationType.Development && runtimeConfiguration.AzureHosting is not null;
+
 	public string GetWindowsServiceFolderPath( Configuration.SystemGeneral.WindowsService service, bool useDebugFolderIfDevelopmentInstallation ) {
 		var path = EwlStatics.CombinePaths( generalInstallationLogic.Path, service.Name );
 		if( runtimeConfiguration.InstallationType == InstallationType.Development )
