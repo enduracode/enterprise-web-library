@@ -378,8 +378,8 @@ internal class UpdateDependentLogic: Operation {
 			                         template: ../../../Azure Deploy Job.yml
 			                         parameters:
 			                           installationName: '{installedInstallation.name}'
-			                           resourceGroup: '{AzureStatics.GetResourceGroupName( installation, installationType )}'
-			                           appService: '{AzureStatics.GetAppServiceName( installation, installedInstallation.shortName )}'
+			                           resourceGroup: '{AzureStatics.GetResourceGroupName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType )}'
+			                           appService: '{AzureStatics.GetAppServiceName( installation.ExistingInstallationLogic.RuntimeConfiguration, installedInstallation.shortName )}'
 			                           {regionEnd}
 			                       """;
 

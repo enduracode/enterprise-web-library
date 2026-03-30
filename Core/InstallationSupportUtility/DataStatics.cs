@@ -74,7 +74,7 @@ public static class DataStatics {
 					AzureStatics.DiscoverGeneralStorageAccountName(
 						new DefaultAzureCredential(
 							new DefaultAzureCredentialOptions { TenantId = installation.ExistingInstallationLogic.RuntimeConfiguration.AzureHosting!.TenantId } ) ),
-					installation,
+					installation.ExistingInstallationLogic.RuntimeConfiguration,
 					exportInstallationType ),
 				packageFolderPath + fileName );
 

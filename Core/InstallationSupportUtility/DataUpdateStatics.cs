@@ -51,13 +51,18 @@ public class DataUpdateStatics {
 				IReadOnlyCollection<string> dataModificationUsers = [ ];
 				if( installation is ExistingInstalledInstallation { ExistingInstalledInstallationLogic.InstallationInAzure: true } ) {
 					dataMigrationUsers = AzureStatics.GetDataMigratorIdentityName(
-							installation,
+							installation.ExistingInstallationLogic.RuntimeConfiguration,
 							installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationShortName )
 						.ToCollection();
 					dataModificationUsers = AzureStatics
-						.GetAppServiceName( installation, installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationShortName )
+						.GetAppServiceName(
+							installation.ExistingInstallationLogic.RuntimeConfiguration,
+							installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationShortName )
 						.ToCollection()
-						.Append( AzureStatics.GetContainerAppJobName( installation, installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationType ) )
+						.Append(
+							AzureStatics.GetContainerAppJobName(
+								installation.ExistingInstallationLogic.RuntimeConfiguration,
+								installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationType ) )
 						.Materialize();
 				}
 
