@@ -1,5 +1,8 @@
-﻿using Azure.Identity;
+﻿using Azure;
+using Azure.Identity;
 using Azure.ResourceManager;
+using Azure.ResourceManager.AppContainers;
+using Azure.ResourceManager.AppContainers.Models;
 using Azure.ResourceManager.ContainerRegistry;
 using Azure.ResourceManager.Storage;
 using EnterpriseWebLibrary.Configuration;
@@ -62,4 +65,24 @@ public static class AzureStatics {
 	private static string getInstallationName( string installationShortName ) => installationShortName.ToUrlSlug();
 
 	private static string getInstallationType( InstallationType installationType ) => installationType == InstallationType.Live ? "prod" : "intermediate";
+
+
+	public static void RunContainerAppJob( InstallationConfiguration configuration, IEnumerable<string> arguments ) {
+		var credential = new DefaultAzureCredential();
+		var container = new JobExecutionContainer
+			{
+				Image =
+					$"{DiscoverGeneralContainerRegistryLoginServer( credential )}/{GetContainerImageName( configuration, configuration.InstallationShortName, configuration.InstallationType )}",
+				Name = "main"
+			};
+		foreach( var arg in arguments )
+			container.Args.Add( arg );
+
+		new ArmClient( credential ).GetContainerAppJobResource(
+				ContainerAppJobResource.CreateResourceIdentifier(
+					configuration.AzureHosting!.SubscriptionId,
+					GetResourceGroupName( configuration, configuration.InstallationType ),
+					GetContainerAppJobName( configuration, configuration.InstallationType ) ) )
+			.Start( WaitUntil.Completed, template: new ContainerAppJobExecutionTemplate { Containers = { container } } );
+	}
 }

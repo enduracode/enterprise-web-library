@@ -217,18 +217,23 @@ public class ExistingInstallationLogic {
 				}
 
 			try {
-				output = TewlContrib.ProcessTools.RunProgram(
-						EwlStatics.CombinePaths(
-							generalInstallationLogic.Path,
-							IsuStatics.DataMigratorProjectName,
-							runtimeConfiguration.InstallationType == InstallationType.Development
-								? ConfigurationStatics.GetProjectOutputFolderPath( true, runtimeIdentifier: RuntimeInformation.RuntimeIdentifier )
-								: "",
-							IsuStatics.DataMigratorNamespaceAndAssemblyName ),
-						"",
-						"",
-						true )
-					.TrimEnd();
+				if( InstallationInAzure )
+					AzureStatics.RunContainerAppJob(
+						runtimeConfiguration,
+						$"{IsuStatics.DataMigratorProjectName}/{IsuStatics.DataMigratorNamespaceAndAssemblyName}.dll".ToCollection() );
+				else
+					output = TewlContrib.ProcessTools.RunProgram(
+							EwlStatics.CombinePaths(
+								generalInstallationLogic.Path,
+								IsuStatics.DataMigratorProjectName,
+								runtimeConfiguration.InstallationType == InstallationType.Development
+									? ConfigurationStatics.GetProjectOutputFolderPath( true, runtimeIdentifier: RuntimeInformation.RuntimeIdentifier )
+									: "",
+								IsuStatics.DataMigratorNamespaceAndAssemblyName ),
+							"",
+							"",
+							true )
+						.TrimEnd();
 			}
 			catch( Exception e ) {
 				const string message = "Failed to migrate data.";
