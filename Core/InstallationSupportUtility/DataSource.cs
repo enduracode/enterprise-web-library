@@ -5,7 +5,6 @@ using Azure.Identity;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using EnterpriseWebLibrary.Configuration;
-using EnterpriseWebLibrary.Configuration.InstallationStandard;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
 using EnterpriseWebLibrary.InstallationSupportUtility.SystemManagerInterface.Messages.SystemListMessage;
 using JetBrains.Annotations;
@@ -22,7 +21,9 @@ public class DataSource {
 	private readonly RsisInstallation? systemManagerInstallation;
 
 	private readonly ExistingInstallation? installation;
-	private readonly InstallationStandardConfigurationInstalledInstallation? sourceAzureInstallation;
+	private readonly string? azureSourceInstallationName;
+	private readonly string? azureSourceInstallationShortName;
+	private readonly string? azureSourceInstallationTenantId;
 
 	public DataSource( RsisInstallation systemManagerInstallation ) {
 		InstallationType = systemManagerInstallation.InstallationTypeElements is LiveInstallationElements ? InstallationType.Live : InstallationType.Intermediate;
@@ -30,19 +31,21 @@ public class DataSource {
 		this.systemManagerInstallation = systemManagerInstallation;
 	}
 
-	public DataSource( ExistingInstallation installation, InstallationStandardConfigurationInstalledInstallation sourceAzureInstallation ) {
-		InstallationType = sourceAzureInstallation.InstallationTypeConfiguration is LiveInstallationConfiguration
-			                   ? InstallationType.Live
-			                   : InstallationType.Intermediate;
+	public DataSource(
+		ExistingInstallation installation, string? sourceInstallationName, string sourceInstallationShortName, string sourceInstallationTenantId,
+		InstallationType sourceInstallationType ) {
+		InstallationType = sourceInstallationType;
 
 		this.installation = installation;
-		this.sourceAzureInstallation = sourceAzureInstallation;
+		azureSourceInstallationName = sourceInstallationName;
+		azureSourceInstallationShortName = sourceInstallationShortName;
+		azureSourceInstallationTenantId = sourceInstallationTenantId;
 	}
 
 	internal bool IsAzureInstallation => installation is not null;
 
 	internal string BlobPrefix =>
-		sourceAzureInstallation is null ? throw new InvalidOperationException() : AzureStatics.GetDataBlobPrefix( sourceAzureInstallation!.shortName );
+		IsAzureInstallation ? AzureStatics.GetDataBlobPrefix( azureSourceInstallationShortName! ) : throw new InvalidOperationException();
 
 	/// <summary>
 	/// Gets a data package, either by downloading one or using the last one that was downloaded. Returns the path to the package, which may be a ZIP file. Also
@@ -66,7 +69,7 @@ public class DataSource {
 			IsAzureInstallation
 				? InstallationConfiguration.GetFullNameFromSystemAndInstallationNames(
 					installation!.ExistingInstallationLogic.RuntimeConfiguration.SystemName,
-					sourceAzureInstallation!.name )
+					azureSourceInstallationName ?? throw new InvalidOperationException() )
 				: systemManagerInstallation!.FullName );
 
 		var packagePath = "";
@@ -116,7 +119,7 @@ public class DataSource {
 
 	private long downloadAzurePackage( string packageFolderPath ) {
 		long totalBytes = 0;
-		var credential = new DefaultAzureCredential( new DefaultAzureCredentialOptions { TenantId = sourceAzureInstallation!.AzureHosting.TenantId } );
+		var credential = new DefaultAzureCredential( new DefaultAzureCredentialOptions { TenantId = azureSourceInstallationTenantId } );
 		var containerClient = new BlobContainerClient(
 			new Uri(
 				AzureStatics.GetDataPackageContainerUrl(
@@ -124,7 +127,7 @@ public class DataSource {
 					installation!.ExistingInstallationLogic.RuntimeConfiguration,
 					InstallationType ) ),
 			credential );
-		var blobPrefix = AzureStatics.GetDataBlobPrefix( sourceAzureInstallation.shortName );
+		var blobPrefix = AzureStatics.GetDataBlobPrefix( azureSourceInstallationShortName! );
 		Directory.CreateDirectory( packageFolderPath );
 		foreach( var blobItem in containerClient.GetBlobs( BlobTraits.None, BlobStates.None, blobPrefix, CancellationToken.None ) ) {
 			containerClient.GetBlobClient( blobItem.Name ).DownloadTo( EwlStatics.CombinePaths( packageFolderPath, blobItem.Name[ blobPrefix.Length.. ] ) );

@@ -46,13 +46,25 @@ internal class UpdateData: Operation {
 			var sources = getAzureSources( installation );
 			if( sourceName.Any() ) {
 				source = sources.SingleOrDefault( i => i.shortName.Equals( sourceName, StringComparison.Ordinal ) ) is {} specifiedSource
-					         ? new DataSource( installation, specifiedSource )
+					         ? new DataSource(
+						         installation,
+						         specifiedSource.name,
+						         specifiedSource.shortName,
+						         specifiedSource.AzureHosting.TenantId,
+						         specifiedSource.InstallationTypeConfiguration is LiveInstallationConfiguration ? InstallationType.Live : InstallationType.Intermediate )
 					         : null;
 				if( source is null )
 					throw new UserCorrectableException( "The specified source does not exist." );
 			}
 			else
-				source = sources.FirstOrDefault() is {} defaultSource ? new DataSource( installation, defaultSource ) : null;
+				source = sources.FirstOrDefault() is {} defaultSource
+					         ? new DataSource(
+						         installation,
+						         defaultSource.name,
+						         defaultSource.shortName,
+						         defaultSource.AzureHosting.TenantId,
+						         defaultSource.InstallationTypeConfiguration is LiveInstallationConfiguration ? InstallationType.Live : InstallationType.Intermediate )
+					         : null;
 		}
 
 		var databases = installation.ExistingInstallationLogic.Database.ToCollection()
