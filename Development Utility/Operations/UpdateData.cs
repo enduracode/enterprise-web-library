@@ -83,7 +83,7 @@ internal class UpdateData: Operation {
 		   .Any( i => i.hasModTable ) )
 			Log.Information( "Cached tables exist. Please restart any running applications to prevent them from using stale data." );
 
-		DataUpdateStatics.DownloadDataPackageAndGetDataUpdateMethod( installation, false, source, forceNewPackageDownload, operationResult )();
+		DataStatics.DownloadDataPackageAndGetDataUpdateMethod( installation, false, source, forceNewPackageDownload, operationResult )();
 
 		foreach( var database in databases )
 			DatabaseOps.ClearModificationTables( database );
