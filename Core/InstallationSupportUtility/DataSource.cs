@@ -119,7 +119,7 @@ public class DataSource {
 
 	private long downloadAzurePackage( string packageFolderPath ) {
 		long totalBytes = 0;
-		var credential = new DefaultAzureCredential( new DefaultAzureCredentialOptions { TenantId = azureSourceInstallationTenantId } );
+		var credential = new AzureCliCredential( new AzureCliCredentialOptions { TenantId = azureSourceInstallationTenantId } );
 		var containerClient = new BlobContainerClient(
 			new Uri(
 				AzureStatics.GetDataPackageContainerUrl(

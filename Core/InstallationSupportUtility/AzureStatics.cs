@@ -1,4 +1,5 @@
 ﻿using Azure;
+using Azure.Core;
 using Azure.Identity;
 using Azure.ResourceManager;
 using Azure.ResourceManager.AppContainers;
@@ -14,7 +15,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility;
 public static class AzureStatics {
 	// names follow Cloud Adoption Framework; see https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-naming
 
-	internal static string DiscoverGeneralStorageAccountName( DefaultAzureCredential credential ) {
+	internal static string DiscoverGeneralStorageAccountName( TokenCredential credential ) {
 		var client = new ArmClient( credential );
 		foreach( var subscription in client.GetSubscriptions() ) {
 			if( !subscription.GetResourceGroups().Exists( "rg-general" ) )
@@ -25,7 +26,7 @@ public static class AzureStatics {
 		throw new Exception();
 	}
 
-	private static string discoverGeneralContainerRegistryLoginServer( DefaultAzureCredential credential ) {
+	private static string discoverGeneralContainerRegistryLoginServer( TokenCredential credential ) {
 		var client = new ArmClient( credential );
 		foreach( var subscription in client.GetSubscriptions() ) {
 			if( !subscription.GetResourceGroups().Exists( "rg-general" ) )
@@ -68,7 +69,7 @@ public static class AzureStatics {
 
 
 	internal static void RunContainerAppJob( InstallationConfiguration configuration, IEnumerable<string> arguments ) {
-		var credential = new DefaultAzureCredential();
+		var credential = new ManagedIdentityCredential( ManagedIdentityId.SystemAssigned );
 		var container = new JobExecutionContainer
 			{
 				Image =

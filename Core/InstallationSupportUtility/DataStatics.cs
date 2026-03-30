@@ -146,13 +146,7 @@ public static class DataStatics {
 		bool fileExists;
 		if( file.IsAzureBlob ) {
 			file.TryGetAzureBlob( out var containerUrl, out var blobName );
-			var blobClient = new BlobClient(
-				new Uri( $"{containerUrl}/{blobName}" ),
-				new DefaultAzureCredential(
-					new DefaultAzureCredentialOptions
-						{
-							TenantId = ( (ExistingInstalledInstallation)installation ).ExistingInstallationLogic.RuntimeConfiguration.AzureHosting!.TenantId
-						} ) );
+			var blobClient = new BlobClient( new Uri( $"{containerUrl}/{blobName}" ), new ManagedIdentityCredential( ManagedIdentityId.SystemAssigned ) );
 			if( !( fileExists = blobClient.Exists() ) )
 				file = new ExportFile( null, "", "" );
 		}
@@ -214,9 +208,7 @@ public static class DataStatics {
 			return new ExportFile(
 				null,
 				AzureStatics.GetDataPackageContainerUrl(
-					AzureStatics.DiscoverGeneralStorageAccountName(
-						new DefaultAzureCredential(
-							new DefaultAzureCredentialOptions { TenantId = installation.ExistingInstallationLogic.RuntimeConfiguration.AzureHosting!.TenantId } ) ),
+					AzureStatics.DiscoverGeneralStorageAccountName( new ManagedIdentityCredential( ManagedIdentityId.SystemAssigned ) ),
 					installation.ExistingInstallationLogic.RuntimeConfiguration,
 					exportInstallationType ),
 				packageFolderPath + fileName );
