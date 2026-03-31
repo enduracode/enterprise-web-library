@@ -1,6 +1,5 @@
 ﻿using System.Text;
 using System.Text.Json.Nodes;
-using System.Text.RegularExpressions;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Configuration.InstallationStandard;
 using EnterpriseWebLibrary.Configuration.SystemDevelopment;
@@ -323,11 +322,7 @@ internal class UpdateDependentLogic: Operation {
 				File.ReadAllText( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "Azure Pipeline Templates", "Build.yml" ) )
 					.Replace( "@@EwlInitialism", EwlStatics.EwlInitialism )
 					.Replace( "@@TriggerPath", systemPathInRepository.AppendDelimiter( Path.AltDirectorySeparatorChar.ToString() ) + "**" )
-					.Replace(
-						"@@DotNetVersion",
-						Regex.Match( ConfigurationStatics.TargetFramework, @"^net(\d+)\.\d+-windows$" ) is { Success: true } match
-							? match.Groups[ 1 ].Value + ".x"
-							: throw new Exception( "Failed to extract .NET version" ) )
+					.Replace( "@@DotNetVersion", ConfigurationStatics.TargetFramework[ "net".Length.. ].Separate( ".", false )[ 0 ] + ".x" )
 					.Replace(
 						"@@WorkingFolderPath",
 						"$(Build.SourcesDirectory)" + systemPathInRepository.PrependDelimiter( Path.AltDirectorySeparatorChar.ToString() ) ) );
