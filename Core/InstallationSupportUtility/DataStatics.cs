@@ -207,10 +207,7 @@ public static class DataStatics {
 		if( installation?.ExistingInstallationLogic.InstallationInAzure == true )
 			return new ExportFile(
 				null,
-				AzureStatics.GetDataPackageContainerUrl(
-					AzureStatics.DiscoverGeneralStorageAccountName( new ManagedIdentityCredential( ManagedIdentityId.SystemAssigned ) ),
-					installation.ExistingInstallationLogic.RuntimeConfiguration,
-					exportInstallationType ),
+				AzureStatics.GetDataPackageContainerUrl( installation.ExistingInstallationLogic.RuntimeConfiguration, exportInstallationType ),
 				packageFolderPath + fileName );
 
 		return new ExportFile( EwlStatics.CombinePaths( packageFolderPath, fileName ), null, null );

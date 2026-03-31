@@ -122,10 +122,7 @@ public class DataSource {
 		var credential = new AzureCliCredential( new AzureCliCredentialOptions { TenantId = azureSourceInstallationTenantId } );
 		var containerClient = new BlobContainerClient(
 			new Uri(
-				AzureStatics.GetDataPackageContainerUrl(
-					AzureStatics.DiscoverGeneralStorageAccountName( credential ),
-					installation!.ExistingInstallationLogic.RuntimeConfiguration,
-					InstallationType ) ),
+				AzureStatics.GetDataPackageContainerUrl( installation!.ExistingInstallationLogic.RuntimeConfiguration, InstallationType, credential: credential ) ),
 			credential );
 		var blobPrefix = AzureStatics.GetDataBlobPrefix( azureSourceInstallationShortName! );
 		Directory.CreateDirectory( packageFolderPath );

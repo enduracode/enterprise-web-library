@@ -15,7 +15,7 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility;
 public static class AzureStatics {
 	// names follow Cloud Adoption Framework; see https://learn.microsoft.com/en-us/azure/cloud-adoption-framework/ready/azure-best-practices/resource-naming
 
-	internal static string DiscoverGeneralStorageAccountName( TokenCredential credential ) {
+	private static string discoverGeneralStorageAccountName( TokenCredential credential ) {
 		var client = new ArmClient( credential );
 		foreach( var subscription in client.GetSubscriptions() ) {
 			if( !subscription.GetResourceGroups().Exists( "rg-general" ) )
@@ -51,9 +51,9 @@ public static class AzureStatics {
 		$"id-{getSystemName( installationConfiguration )}-{getInstallationName( installationShortName )}-datamigrator";
 
 	internal static string GetDataPackageContainerUrl(
-		string storageAccountName, InstallationConfiguration installationConfiguration, InstallationType installationType ) {
+		InstallationConfiguration installationConfiguration, InstallationType installationType, TokenCredential? credential = null ) {
 		var containerName = $"{getSystemName( installationConfiguration )}-{getInstallationType( installationType )}-data-packages";
-		return $"https://{storageAccountName}.blob.core.windows.net/{containerName}";
+		return GetStorageContainerUrl( containerName, credential: credential );
 	}
 
 	public static string GetDataBlobPrefix( string installationShortName ) => $"{getInstallationName( installationShortName )}-";
@@ -67,6 +67,11 @@ public static class AzureStatics {
 
 	private static string getInstallationType( InstallationType installationType ) => installationType == InstallationType.Live ? "prod" : "intermediate";
 
+
+	public static string GetStorageContainerUrl( string containerName, TokenCredential? credential = null ) {
+		var storageAccountName = discoverGeneralStorageAccountName( credential ?? new ManagedIdentityCredential( ManagedIdentityId.SystemAssigned ) );
+		return $"https://{storageAccountName}.blob.core.windows.net/{containerName}";
+	}
 
 	internal static void RunContainerAppJob( InstallationConfiguration configuration, IEnumerable<string> arguments ) {
 		var credential = new ManagedIdentityCredential( ManagedIdentityId.SystemAssigned );
