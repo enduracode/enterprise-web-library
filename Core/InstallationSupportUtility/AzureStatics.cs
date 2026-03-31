@@ -26,7 +26,7 @@ public static class AzureStatics {
 		throw new Exception();
 	}
 
-	private static string discoverGeneralContainerRegistryLoginServer( TokenCredential credential ) {
+	public static string DiscoverGeneralContainerRegistryLoginServer( TokenCredential credential ) {
 		var client = new ArmClient( credential );
 		foreach( var subscription in client.GetSubscriptions() ) {
 			if( !subscription.GetResourceGroups().Exists( "rg-general" ) )
@@ -40,7 +40,7 @@ public static class AzureStatics {
 	public static string GetResourceGroupName( InstallationConfiguration installationConfiguration, InstallationType installationType ) =>
 		$"rg-{getSystemName( installationConfiguration )}-{getInstallationType( installationType )}";
 
-	private static string getContainerImageName(
+	public static string GetContainerImageName(
 		InstallationConfiguration installationConfiguration, string installationShortName, InstallationType installationType ) =>
 		$"{getSystemName( installationConfiguration )}-{getInstallationType( installationType )}:{getInstallationName( installationShortName )}";
 
@@ -49,6 +49,9 @@ public static class AzureStatics {
 
 	internal static string GetDataMigratorIdentityName( InstallationConfiguration installationConfiguration, string installationShortName ) =>
 		$"id-{getSystemName( installationConfiguration )}-{getInstallationName( installationShortName )}-datamigrator";
+
+	public static string GetIsuInstallationContainerName( InstallationConfiguration installationConfiguration, InstallationType installationType ) =>
+		$"{getSystemName( installationConfiguration )}-{getInstallationType( installationType )}-isu-installations";
 
 	internal static string GetDataPackageContainerUrl(
 		InstallationConfiguration installationConfiguration, InstallationType installationType, TokenCredential? credential = null ) {
@@ -78,7 +81,7 @@ public static class AzureStatics {
 		var container = new JobExecutionContainer
 			{
 				Image =
-					$"{discoverGeneralContainerRegistryLoginServer( credential )}/{getContainerImageName( configuration, configuration.InstallationShortName, configuration.InstallationType )}",
+					$"{DiscoverGeneralContainerRegistryLoginServer( credential )}/{GetContainerImageName( configuration, configuration.InstallationShortName, configuration.InstallationType )}",
 				Name = "main"
 			};
 		foreach( var arg in arguments )

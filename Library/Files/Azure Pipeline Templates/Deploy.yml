@@ -5,8 +5,11 @@ parameters:
   type: string
 - name: serviceConnection
   type: string
-  default: 'Azure'
 - name: resourceGroup
+  type: string
+- name: containerImage
+  type: string
+- name: isuInstallationUrl
   type: string
 - name: appService
   type: string
@@ -68,6 +71,56 @@ jobs:
       artifactName: '${{ parameters.installationName }} Configuration'
       targetPath: '$(Pipeline.Workspace)/ServerSideLogic/Configuration/Installation'
     displayName: 'Download installation configuration'
+
+  - task: AzureCLI@2
+    inputs:
+      azureSubscription: '${{ parameters.serviceConnection }}'
+      scriptType: 'pscore'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        az acr login --name ("${{ parameters.containerImage }}" -split '\.')[0]
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+        @"
+        FROM mcr.microsoft.com/dotnet/aspnet:@@ContainerImageDotNetVersion
+        WORKDIR /app
+        COPY . .
+        ENTRYPOINT ["dotnet"]
+        "@ | Set-Content "$(Pipeline.Workspace)/Dockerfile"
+
+        docker build -t "${{ parameters.containerImage }}" -f "$(Pipeline.Workspace)/Dockerfile" "$(Pipeline.Workspace)/ServerSideLogic"
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+        docker push "${{ parameters.containerImage }}"
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    displayName: 'Build and push Docker image'
+
+  - task: AzureCLI@2
+    inputs:
+      azureSubscription: '${{ parameters.serviceConnection }}'
+      scriptType: 'pscore'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        $isuInstallationPath = "$(Pipeline.Workspace)/IsuInstallation"
+        New-Item -ItemType Directory -Path "$isuInstallationPath/Configuration" -Force | Out-Null
+        Copy-Item -Recurse "$(Pipeline.Workspace)/ServerSideLogic/Configuration/*" "$isuInstallationPath/Configuration"
+
+        $migratorDir = "$(Pipeline.Workspace)/ServerSideLogic/Data Migrator"
+        if (Test-Path $migratorDir) {
+          New-Item -ItemType Directory -Path "$isuInstallationPath/Data Migrator" -Force | Out-Null
+          Set-Content "$isuInstallationPath/Data Migrator/.placeholder" ""
+        }
+
+        $zipPath = "$(Pipeline.Workspace)/IsuInstallation.zip"
+        Compress-Archive -Path "$isuInstallationPath/*" -DestinationPath $zipPath
+
+        az storage blob upload `
+          --blob-url "${{ parameters.isuInstallationUrl }}" `
+          --file $zipPath `
+          --overwrite true `
+          --auth-mode login
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    displayName: 'Upload ISU installation'
 
   # Azure App Service does not support configuring modules in web.config
   - pwsh: |

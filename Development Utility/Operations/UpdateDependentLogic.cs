@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using System.Text.Json.Nodes;
+using Azure.Identity;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Configuration.InstallationStandard;
 using EnterpriseWebLibrary.Configuration.SystemDevelopment;
@@ -356,6 +357,7 @@ internal class UpdateDependentLogic: Operation {
 			var installationType = installedInstallation.InstallationTypeConfiguration is LiveInstallationConfiguration
 				                       ? InstallationType.Live
 				                       : InstallationType.Intermediate;
+			var credential = new AzureCliCredential( new AzureCliCredentialOptions { TenantId = installedInstallation.AzureHosting.TenantId } );
 			var generatedRegion = $"""
 			                       trigger: none
 
@@ -373,7 +375,10 @@ internal class UpdateDependentLogic: Operation {
 			                         template: ../../../Azure Deploy Job.yml
 			                         parameters:
 			                           installationName: '{installedInstallation.name}'
+			                           serviceConnection: 'Azure - {( installationType == InstallationType.Live ? "Prod" : "Intermediate" )}'
 			                           resourceGroup: '{AzureStatics.GetResourceGroupName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType )}'
+			                           containerImage: '{AzureStatics.DiscoverGeneralContainerRegistryLoginServer( credential )}/{AzureStatics.GetContainerImageName( installation.ExistingInstallationLogic.RuntimeConfiguration, installedInstallation.shortName, installationType )}'
+			                           isuInstallationUrl: '{AzureStatics.GetStorageContainerUrl( AzureStatics.GetIsuInstallationContainerName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType ), credential )}/{installedInstallation.shortName.ToUrlSlug()}{FileExtensions.Zip}'
 			                           appService: '{AzureStatics.GetAppServiceName( installation.ExistingInstallationLogic.RuntimeConfiguration, installedInstallation.shortName )}'
 			                           {regionEnd}
 			                       """;
@@ -389,6 +394,7 @@ internal class UpdateDependentLogic: Operation {
 				EwlStatics.CombinePaths( installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath, "Azure Deploy Job.yml" ),
 				File.ReadAllText( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "Azure Pipeline Templates", "Deploy.yml" ) )
 					.Replace( "@@EwlInitialism", EwlStatics.EwlInitialism )
+					.Replace( "@@ContainerImageDotNetVersion", ConfigurationStatics.TargetFramework[ "net".Length.. ] )
 					.Replace( "@@DataMigratorPath", $"{IsuStatics.DataMigratorProjectName}/{IsuStatics.DataMigratorNamespaceAndAssemblyName}.exe" ) );
 
 		if( !installation.DevelopmentInstallationLogic.SystemIsEwl && !installation.SystemIsTewl() ) {
