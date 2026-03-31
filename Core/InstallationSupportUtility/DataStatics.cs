@@ -72,7 +72,7 @@ public static class DataStatics {
 						.Append(
 							AzureStatics.GetContainerAppJobName(
 								installation.ExistingInstallationLogic.RuntimeConfiguration,
-								installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationType ) )
+								installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationShortName ) )
 						.Materialize();
 				}
 

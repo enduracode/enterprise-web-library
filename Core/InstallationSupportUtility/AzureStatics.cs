@@ -44,8 +44,8 @@ public static class AzureStatics {
 		InstallationConfiguration installationConfiguration, string installationShortName, InstallationType installationType ) =>
 		$"{getSystemName( installationConfiguration )}-{getInstallationType( installationType )}:{getInstallationName( installationShortName )}";
 
-	internal static string GetContainerAppJobName( InstallationConfiguration installationConfiguration, InstallationType installationType ) =>
-		$"caj-{getSystemName( installationConfiguration )}-{getInstallationType( installationType )}-system";
+	public static string GetContainerAppJobName( InstallationConfiguration installationConfiguration, string installationShortName ) =>
+		$"caj-{getSystemName( installationConfiguration )}-{getInstallationName( installationShortName )}-system";
 
 	internal static string GetDataMigratorIdentityName( InstallationConfiguration installationConfiguration, string installationShortName ) =>
 		$"id-{getSystemName( installationConfiguration )}-{getInstallationName( installationShortName )}-datamigrator";
@@ -78,12 +78,7 @@ public static class AzureStatics {
 
 	internal static void RunContainerAppJob( InstallationConfiguration configuration, IEnumerable<string> arguments ) {
 		var credential = new ManagedIdentityCredential( ManagedIdentityId.SystemAssigned );
-		var container = new JobExecutionContainer
-			{
-				Image =
-					$"{DiscoverGeneralContainerRegistryLoginServer( credential )}/{GetContainerImageName( configuration, configuration.InstallationShortName, configuration.InstallationType )}",
-				Name = "main"
-			};
+		var container = new JobExecutionContainer { Name = "main" };
 		foreach( var arg in arguments )
 			container.Args.Add( arg );
 
@@ -91,7 +86,7 @@ public static class AzureStatics {
 				ContainerAppJobResource.CreateResourceIdentifier(
 					configuration.AzureHosting!.SubscriptionId,
 					GetResourceGroupName( configuration, configuration.InstallationType ),
-					GetContainerAppJobName( configuration, configuration.InstallationType ) ) )
+					GetContainerAppJobName( configuration, configuration.InstallationShortName ) ) )
 			.Start( WaitUntil.Completed, template: new ContainerAppJobExecutionTemplate { Containers = { container } } );
 	}
 }
