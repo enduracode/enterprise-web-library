@@ -9,6 +9,8 @@ parameters:
   type: string
 - name: containerImage
   type: string
+- name: containerAppJob
+  type: string
 - name: isuInstallationUrl
   type: string
 - name: appService
@@ -93,7 +95,13 @@ jobs:
 
         docker push "${{ parameters.containerImage }}"
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-    displayName: 'Build and push Docker image'
+
+        az containerapp job update `
+          --name "${{ parameters.containerAppJob }}" `
+          --resource-group "$(ResourceGroup)" `
+          --image "${{ parameters.containerImage }}"
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    displayName: 'Build and push container image'
 
   - task: AzureCLI@2
     inputs:
@@ -211,27 +219,25 @@ jobs:
       scriptType: 'pscore'
       scriptLocation: 'inlineScript'
       inlineScript: |
-        $token = az account get-access-token --query accessToken -o tsv
+        $execution = az containerapp job start `
+          --name "${{ parameters.containerAppJob }}" `
+          --resource-group "$(ResourceGroup)" `
+          --args "@@DataMigratorPath" `
+          --query name -o tsv
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-        $body = @{
-          command = "`"site/wwwroot/@@DataMigratorPath`""
-        } | ConvertTo-Json
-
-        $response = Invoke-RestMethod -Uri "https://$(KuduHostName)/api/command" `
-          -Method Post `
-          -Headers @{Authorization="Bearer $token"} `
-          -Body $body `
-          -ContentType "application/json"
-
-        Write-Host "Output: $($response.Output)"
-        if ($response.Error) {
-          Write-Host "Error: $($response.Error)"
-          exit 1
-        }
-        if ($response.ExitCode -ne 0) {
-          Write-Host "Migrator exited with code $($response.ExitCode)"
-          exit $response.ExitCode
+        while ($true) {
+          $status = az containerapp job execution show `
+            --name "${{ parameters.containerAppJob }}" `
+            --resource-group "$(ResourceGroup)" `
+            --job-execution-name $execution `
+            --query properties.status -o tsv
+          if ($status -eq "Succeeded") { break }
+          if ($status -eq "Failed") {
+            Write-Host "Failed to migrate data."
+            exit 1
+          }
+          Start-Sleep -Seconds 10
         }
     displayName: 'Run data migrator'
 

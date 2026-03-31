@@ -378,6 +378,7 @@ internal class UpdateDependentLogic: Operation {
 			                           serviceConnection: 'Azure - {( installationType == InstallationType.Live ? "Prod" : "Intermediate" )}'
 			                           resourceGroup: '{AzureStatics.GetResourceGroupName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType )}'
 			                           containerImage: '{AzureStatics.DiscoverGeneralContainerRegistryLoginServer( credential )}/{AzureStatics.GetContainerImageName( installation.ExistingInstallationLogic.RuntimeConfiguration, installedInstallation.shortName, installationType )}'
+			                           containerAppJob: '{AzureStatics.GetContainerAppJobName( installation.ExistingInstallationLogic.RuntimeConfiguration, installedInstallation.shortName )}'
 			                           isuInstallationUrl: '{AzureStatics.GetStorageContainerUrl( AzureStatics.GetIsuInstallationContainerName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType ), credential )}/{installedInstallation.shortName.ToUrlSlug()}{FileExtensions.Zip}'
 			                           appService: '{AzureStatics.GetAppServiceName( installation.ExistingInstallationLogic.RuntimeConfiguration, installedInstallation.shortName )}'
 			                           {regionEnd}
@@ -395,7 +396,7 @@ internal class UpdateDependentLogic: Operation {
 				File.ReadAllText( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "Azure Pipeline Templates", "Deploy.yml" ) )
 					.Replace( "@@EwlInitialism", EwlStatics.EwlInitialism )
 					.Replace( "@@ContainerImageDotNetVersion", ConfigurationStatics.TargetFramework[ "net".Length.. ] )
-					.Replace( "@@DataMigratorPath", $"{IsuStatics.DataMigratorProjectName}/{IsuStatics.DataMigratorNamespaceAndAssemblyName}.exe" ) );
+					.Replace( "@@DataMigratorPath", $"{IsuStatics.DataMigratorProjectName}/{IsuStatics.DataMigratorNamespaceAndAssemblyName}.dll" ) );
 
 		if( !installation.DevelopmentInstallationLogic.SystemIsEwl && !installation.SystemIsTewl() ) {
 			if( Directory.Exists( EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.MercurialRepositoryFolderName ) ) )
