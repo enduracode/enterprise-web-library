@@ -41,17 +41,21 @@ steps:
       Write-Host "##vso[task.setvariable variable=DuInstallationPath]$duInstallationPath"
   displayName: 'Find EWL Development Utility'
 
-- task: PowerShell@2
+- task: AzureCLI@2
   inputs:
-    targetType: 'inline'
-    script: |
+    azureSubscription: 'Azure - Intermediate'
+    scriptType: 'ps'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
       & "$(DuPath)" "$(DuInstallationPath)" UpdateData Default True
   displayName: 'EWL - Update data'
 
-- task: PowerShell@2
+- task: AzureCLI@2
   inputs:
-    targetType: 'inline'
-    script: |
+    azureSubscription: 'Azure - Intermediate'
+    scriptType: 'ps'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
       & "$(DuPath)" "$(DuInstallationPath)" UpdateDependentLogic
   displayName: 'EWL - Update dependent logic'
 
