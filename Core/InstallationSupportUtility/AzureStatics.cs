@@ -42,13 +42,16 @@ public static class AzureStatics {
 
 	public static string GetContainerImageName(
 		InstallationConfiguration installationConfiguration, string installationShortName, InstallationType installationType ) =>
-		$"{getSystemName( installationConfiguration )}-{getInstallationType( installationType )}:{getInstallationName( installationShortName )}";
+		$"{getSystemName( installationConfiguration )}-{getInstallationType( installationType )}:{GetInstallationName( installationShortName )}";
 
 	public static string GetContainerAppJobName( InstallationConfiguration installationConfiguration, string installationShortName ) =>
-		$"caj-{getSystemName( installationConfiguration )}-{getInstallationName( installationShortName )}-system";
+		$"caj-{getSystemName( installationConfiguration )}-{GetInstallationName( installationShortName )}-system";
 
 	internal static string GetDataMigratorIdentityName( InstallationConfiguration installationConfiguration, string installationShortName ) =>
-		$"id-{getSystemName( installationConfiguration )}-{getInstallationName( installationShortName )}-datamigrator";
+		$"id-{getSystemName( installationConfiguration )}-{GetInstallationName( installationShortName )}-datamigrator";
+
+	public static string GetIsuContainerAppJobName( InstallationConfiguration installationConfiguration, InstallationType installationType ) =>
+		$"caj-{getSystemName( installationConfiguration )}-{getInstallationType( installationType )}-isu";
 
 	public static string GetIsuInstallationContainerName( InstallationConfiguration installationConfiguration, InstallationType installationType ) =>
 		$"{getSystemName( installationConfiguration )}-{getInstallationType( installationType )}-isu-installations";
@@ -59,14 +62,14 @@ public static class AzureStatics {
 		return GetStorageContainerUrl( containerName, credential: credential );
 	}
 
-	public static string GetDataBlobPrefix( string installationShortName ) => $"{getInstallationName( installationShortName )}-";
+	public static string GetDataBlobPrefix( string installationShortName ) => $"{GetInstallationName( installationShortName )}-";
 
 	public static string GetAppServiceName( InstallationConfiguration installationConfiguration, string installationShortName ) =>
-		$"app-{getSystemName( installationConfiguration )}-{getInstallationName( installationShortName )}";
+		$"app-{getSystemName( installationConfiguration )}-{GetInstallationName( installationShortName )}";
 
 	private static string getSystemName( InstallationConfiguration installationConfiguration ) => installationConfiguration.SystemShortName.ToUrlSlug();
 
-	private static string getInstallationName( string installationShortName ) => installationShortName.ToUrlSlug();
+	public static string GetInstallationName( string installationShortName ) => installationShortName.ToUrlSlug();
 
 	private static string getInstallationType( InstallationType installationType ) => installationType == InstallationType.Live ? "prod" : "intermediate";
 

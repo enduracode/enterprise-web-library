@@ -329,7 +329,8 @@ internal class UpdateDependentLogic: Operation {
 						"$(Build.SourcesDirectory)" + systemPathInRepository.PrependDelimiter( Path.AltDirectorySeparatorChar.ToString() ) ) );
 		}
 
-		var azureDeployPipelinesExist = false;
+		var azureLogicPipelinesExist = false;
+		var azureDataPipelinesExist = false;
 		foreach( var installationConfigurationFolderPath in Directory.GetDirectories(
 			        EwlStatics.CombinePaths(
 				        installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath,
@@ -339,64 +340,104 @@ internal class UpdateDependentLogic: Operation {
 			   .Contains( Path.GetFileName( installationConfigurationFolderPath ) ) )
 				continue;
 
-			var azureDeployPipelinePath = EwlStatics.CombinePaths( installationConfigurationFolderPath, "Azure Deploy Pipeline.yml" );
-			if( !File.Exists( azureDeployPipelinePath ) )
-				continue;
-
-			const string regionEnd = "# END-EWL-REGION";
-
 			var installedInstallation = XmlOps.DeserializeFromFile<InstallationStandardConfiguration>(
 					EwlStatics.CombinePaths( installationConfigurationFolderPath, InstallationConfiguration.InstallationStandardConfigurationFileName ),
 					false )
 				.installedInstallation;
-			var triggerBranch =
-				installedInstallation.InstallationTypeConfiguration is IntermediateInstallationConfiguration &&
-				!installedInstallation.name.Contains( "Staging", StringComparison.Ordinal )
-					? "Integration"
-					: "master";
 			var installationType = installedInstallation.InstallationTypeConfiguration is LiveInstallationConfiguration
 				                       ? InstallationType.Live
 				                       : InstallationType.Intermediate;
-			var credential = new AzureCliCredential( new AzureCliCredentialOptions { TenantId = installedInstallation.AzureHosting.TenantId } );
-			var generatedRegion = $"""
-			                       trigger: none
+			var azureServiceConnection = "Azure - " + ( installationType == InstallationType.Live ? "Prod" : "Intermediate" );
+			var azureCredential = installedInstallation.AzureHosting is null
+				                      ? null
+				                      : new AzureCliCredential( new AzureCliCredentialOptions { TenantId = installedInstallation.AzureHosting.TenantId } );
 
-			                       resources:
-			                         pipelines:
-			                         - pipeline: build
-			                           source: Build
-			                           trigger:
-			                             enabled: {( installedInstallation.InstallationTypeConfiguration is IntermediateInstallationConfiguration ? "true" : "false" )}
-			                             branches:
-			                               include:
-			                               - {triggerBranch}
+			var azurePipelineFolderPath = EwlStatics.CombinePaths( installationConfigurationFolderPath, "Azure Pipelines" );
+			var azureUpdateLogicPipelinePath = EwlStatics.CombinePaths( azurePipelineFolderPath, "Update Logic.yml" );
+			if( File.Exists( azureUpdateLogicPipelinePath ) || installedInstallation.AzureHosting is not null ) {
+				var triggerBranch =
+					installedInstallation.InstallationTypeConfiguration is IntermediateInstallationConfiguration &&
+					!installedInstallation.name.Contains( "Staging", StringComparison.Ordinal )
+						? "Integration"
+						: "master";
+				var generatedRegion = $"""
+				                       trigger: none
 
-			                       extends:
-			                         template: ../../../Azure Deploy Job.yml
-			                         parameters:
-			                           installationName: '{installedInstallation.name}'
-			                           serviceConnection: 'Azure - {( installationType == InstallationType.Live ? "Prod" : "Intermediate" )}'
-			                           resourceGroup: '{AzureStatics.GetResourceGroupName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType )}'
-			                           containerImage: '{AzureStatics.DiscoverGeneralContainerRegistryLoginServer( credential )}/{AzureStatics.GetContainerImageName( installation.ExistingInstallationLogic.RuntimeConfiguration, installedInstallation.shortName, installationType )}'
-			                           containerAppJob: '{AzureStatics.GetContainerAppJobName( installation.ExistingInstallationLogic.RuntimeConfiguration, installedInstallation.shortName )}'
-			                           isuInstallationUrl: '{AzureStatics.GetStorageContainerUrl( AzureStatics.GetIsuInstallationContainerName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType ), credential )}/{installedInstallation.shortName.ToUrlSlug()}{FileExtensions.Zip}'
-			                           appService: '{AzureStatics.GetAppServiceName( installation.ExistingInstallationLogic.RuntimeConfiguration, installedInstallation.shortName )}'
-			                           {regionEnd}
-			                       """;
+				                       resources:
+				                         pipelines:
+				                         - pipeline: build
+				                          source: Build
+				                          trigger:
+				                            enabled: {( installedInstallation.InstallationTypeConfiguration is IntermediateInstallationConfiguration ? "true" : "false" )}
+				                            branches:
+				                              include:
+				                              - {triggerBranch}
 
-			var existingText = File.ReadAllText( azureDeployPipelinePath );
-			var markerIndex = existingText.IndexOf( regionEnd, StringComparison.Ordinal );
-			File.WriteAllText( azureDeployPipelinePath, generatedRegion + ( markerIndex == -1 ? "" : existingText[ ( markerIndex + regionEnd.Length ).. ] ) );
+				                       extends:
+				                         template: ../../../../Azure Update Logic Job.yml
+				                         parameters:
+				                          installationName: '{installedInstallation.name}'
+				                          serviceConnection: '{azureServiceConnection}'
+				                          resourceGroup: '{AzureStatics.GetResourceGroupName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType )}'
+				                          containerImage: '{AzureStatics.DiscoverGeneralContainerRegistryLoginServer( azureCredential! )}/{AzureStatics.GetContainerImageName( installation.ExistingInstallationLogic.RuntimeConfiguration, installedInstallation.shortName, installationType )}'
+				                          containerAppJob: '{AzureStatics.GetContainerAppJobName( installation.ExistingInstallationLogic.RuntimeConfiguration, installedInstallation.shortName )}'
+				                          isuInstallationUrl: '{AzureStatics.GetStorageContainerUrl( AzureStatics.GetIsuInstallationContainerName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType ), azureCredential )}/{installedInstallation.shortName.ToUrlSlug()}{FileExtensions.Zip}'
+				                          appService: '{AzureStatics.GetAppServiceName( installation.ExistingInstallationLogic.RuntimeConfiguration, installedInstallation.shortName )}'
+				                       """;
+				updateInstallationAzurePipeline( azureUpdateLogicPipelinePath, generatedRegion );
 
-			azureDeployPipelinesExist = true;
+				azureLogicPipelinesExist = true;
+			}
+
+			if( installedInstallation.AzureHosting is not null ) {
+				var edGeneratedRegion = $"""
+				                         trigger: none
+
+				                         extends:
+				                           template: ../../../../Azure Export Data Job.yml
+				                           parameters:
+				                             serviceConnection: '{azureServiceConnection}'
+				                             subscription: '{installedInstallation.AzureHosting.SubscriptionId}'
+				                             resourceGroup: '{AzureStatics.GetResourceGroupName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType )}'
+				                             containerAppJob: '{AzureStatics.GetIsuContainerAppJobName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType )}'
+				                             installation: '{AzureStatics.GetInstallationName( installedInstallation.shortName )}'
+				                         """;
+				updateInstallationAzurePipeline( EwlStatics.CombinePaths( azurePipelineFolderPath, "Export Data.yml" ), edGeneratedRegion );
+
+				var udGeneratedRegion = $"""
+				                         trigger: none
+
+				                         extends:
+				                           template: ../../../../Azure Update Data Job.yml
+				                           parameters:
+				                             serviceConnection: '{azureServiceConnection}'
+				                             subscription: '{installedInstallation.AzureHosting.SubscriptionId}'
+				                             resourceGroup: '{AzureStatics.GetResourceGroupName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType )}'
+				                             containerAppJob: '{AzureStatics.GetIsuContainerAppJobName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType )}'
+				                             installation: '{AzureStatics.GetInstallationName( installedInstallation.shortName )}'
+				                         """;
+				updateInstallationAzurePipeline( EwlStatics.CombinePaths( azurePipelineFolderPath, "Update Data.yml" ), udGeneratedRegion );
+
+				azureDataPipelinesExist = true;
+			}
 		}
-		if( azureDeployPipelinesExist )
+		if( azureLogicPipelinesExist )
 			File.WriteAllText(
-				EwlStatics.CombinePaths( installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath, "Azure Deploy Job.yml" ),
+				EwlStatics.CombinePaths( installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath, "Azure Update Logic Job.yml" ),
 				File.ReadAllText( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "Azure Pipeline Templates", "Deploy.yml" ) )
 					.Replace( "@@EwlInitialism", EwlStatics.EwlInitialism )
 					.Replace( "@@ContainerImageDotNetVersion", ConfigurationStatics.TargetFramework[ "net".Length.. ] )
 					.Replace( "@@DataMigratorPath", $"{IsuStatics.DataMigratorProjectName}/{IsuStatics.DataMigratorNamespaceAndAssemblyName}.dll" ) );
+		if( azureDataPipelinesExist ) {
+			File.WriteAllText(
+				EwlStatics.CombinePaths( installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath, "Azure Export Data Job.yml" ),
+				File.ReadAllText( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "Azure Pipeline Templates", "Export Data.yml" ) )
+					.Replace( "@@EwlInitialism", EwlStatics.EwlInitialism ) );
+			File.WriteAllText(
+				EwlStatics.CombinePaths( installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath, "Azure Update Data Job.yml" ),
+				File.ReadAllText( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "Azure Pipeline Templates", "Update Data.yml" ) )
+					.Replace( "@@EwlInitialism", EwlStatics.EwlInitialism ) );
+		}
 
 		if( !installation.DevelopmentInstallationLogic.SystemIsEwl && !installation.SystemIsTewl() ) {
 			if( Directory.Exists( EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.MercurialRepositoryFolderName ) ) )
@@ -1333,6 +1374,15 @@ internal class UpdateDependentLogic: Operation {
 			folder = folder.Parent;
 		}
 		return "";
+	}
+
+	private void updateInstallationAzurePipeline( string pipelinePath, string generatedRegion ) {
+		const string regionEnd = "# END-EWL-REGION";
+		var existingText = File.Exists( pipelinePath ) ? File.ReadAllText( pipelinePath ) : "";
+		var markerIndex = existingText.IndexOf( regionEnd, StringComparison.Ordinal );
+		File.WriteAllText(
+			pipelinePath,
+			generatedRegion + Environment.NewLine + "    " + regionEnd + ( markerIndex == -1 ? "" : existingText[ ( markerIndex + regionEnd.Length ).. ] ) );
 	}
 
 	private void updateIgnoreFile( DevelopmentInstallation installation, bool forGit ) {
