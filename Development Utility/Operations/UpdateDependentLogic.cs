@@ -366,23 +366,23 @@ internal class UpdateDependentLogic: Operation {
 				                       resources:
 				                         pipelines:
 				                         - pipeline: build
-				                          source: Build
-				                          trigger:
-				                            enabled: {( installedInstallation.InstallationTypeConfiguration is IntermediateInstallationConfiguration ? "true" : "false" )}
-				                            branches:
-				                              include:
-				                              - {triggerBranch}
+				                           source: Build
+				                           trigger:
+				                             enabled: {( installedInstallation.InstallationTypeConfiguration is IntermediateInstallationConfiguration ? "true" : "false" )}
+				                             branches:
+				                               include:
+				                               - {triggerBranch}
 
 				                       extends:
 				                         template: ../../../../Azure Update Logic Job.yml
 				                         parameters:
-				                          installationName: '{installedInstallation.name}'
-				                          serviceConnection: '{azureServiceConnection}'
-				                          resourceGroup: '{AzureStatics.GetResourceGroupName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType )}'
-				                          containerImage: '{AzureStatics.DiscoverGeneralContainerRegistryLoginServer( azureCredential! )}/{AzureStatics.GetContainerImageName( installation.ExistingInstallationLogic.RuntimeConfiguration, installedInstallation.shortName, installationType )}'
-				                          containerAppJob: '{AzureStatics.GetContainerAppJobName( installation.ExistingInstallationLogic.RuntimeConfiguration, installedInstallation.shortName )}'
-				                          isuInstallationUrl: '{AzureStatics.GetStorageContainerUrl( AzureStatics.GetIsuInstallationContainerName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType ), azureCredential )}/{installedInstallation.shortName.ToUrlSlug()}{FileExtensions.Zip}'
-				                          appService: '{AzureStatics.GetAppServiceName( installation.ExistingInstallationLogic.RuntimeConfiguration, installedInstallation.shortName )}'
+				                           installationName: '{installedInstallation.name}'
+				                           serviceConnection: '{azureServiceConnection}'
+				                           resourceGroup: '{AzureStatics.GetResourceGroupName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType )}'
+				                           containerImage: '{AzureStatics.DiscoverGeneralContainerRegistryLoginServer( azureCredential! )}/{AzureStatics.GetContainerImageName( installation.ExistingInstallationLogic.RuntimeConfiguration, installedInstallation.shortName, installationType )}'
+				                           containerAppJob: '{AzureStatics.GetContainerAppJobName( installation.ExistingInstallationLogic.RuntimeConfiguration, installedInstallation.shortName )}'
+				                           isuInstallationUrl: '{AzureStatics.GetStorageContainerUrl( AzureStatics.GetIsuInstallationContainerName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType ), azureCredential )}/{installedInstallation.shortName.ToUrlSlug()}{FileExtensions.Zip}'
+				                           appService: '{AzureStatics.GetAppServiceName( installation.ExistingInstallationLogic.RuntimeConfiguration, installedInstallation.shortName )}'
 				                       """;
 				updateInstallationAzurePipeline( azureUpdateLogicPipelinePath, generatedRegion );
 
