@@ -26,9 +26,17 @@ and others.
 
 ## Version Control
 
-Before running any version control commands, determine which VCS this repository
-uses by checking for a `.hg` directory at the repository root. If present, load
-the `ewl-mercurial` skill and use Mercurial. Otherwise use Git.
+Do **not** assume Git. Before any version-control command, start at the
+working directory and walk upward until you find either `.hg` or `.git`.
+
+- If you find `.hg`, the repository uses **Mercurial**. Load the
+  `ewl-mercurial` skill and use `hg` for all VCS commands.
+- If you find `.git` and have not found `.hg`, use **Git**.
+- If you reach the filesystem root without finding either directory, stop and
+  report that you could not determine the VCS.
+
+Never try Git first just because it is more familiar. If `.hg` exists, use
+Mercurial.
 
 ## Workflow
 
