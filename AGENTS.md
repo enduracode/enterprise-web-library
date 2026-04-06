@@ -1,8 +1,8 @@
-# AGENTS.md - Enterprise Web Library (EWL)
+**IMPORTANT: Review [Critical Development Rules](#critical-development-rules) before performing any tasks. Subagents are invoked via the `task` tool with `subagent_type`.**
 
 ## Project Overview
 
-EWL is an opinionated .NET framework for building web-based enterprise software.
+Enterprise Web Library (EWL) is an opinionated .NET framework for building web-based enterprise software.
 The solution is C# targeting **net9.0**, using ASP.NET Core with EWL's own
 component-based web framework layered on top (no Razor views). Source control is
 Mercurial. If a `.hg` directory is present, load the `ewl-mercurial` skill

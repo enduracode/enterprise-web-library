@@ -1,4 +1,4 @@
-# Agent Rules - EWL Client Systems
+**IMPORTANT: Review [Critical Development Rules](#critical-development-rules) before performing any tasks. Subagents are invoked via the `task` tool with `subagent_type`.**
 
 This system uses the Enterprise Web Library (EWL), an opinionated .NET framework
 for building web-based enterprise software. The solution is C# targeting
