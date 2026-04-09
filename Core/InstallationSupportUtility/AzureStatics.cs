@@ -45,7 +45,7 @@ public static class AzureStatics {
 		$"{getSystemName( installationConfiguration )}-{getInstallationType( installationType )}:{GetInstallationName( installationShortName )}";
 
 	public static string GetContainerAppJobName( InstallationConfiguration installationConfiguration, string installationShortName ) =>
-		$"caj-{getSystemName( installationConfiguration )}-{GetInstallationName( installationShortName )}-system";
+		$"caj-{getSystemName( installationConfiguration )}-{GetInstallationName( installationShortName )}";
 
 	internal static string GetDataMigratorIdentityName( InstallationConfiguration installationConfiguration, string installationShortName ) =>
 		$"id-{getSystemName( installationConfiguration )}-{GetInstallationName( installationShortName )}-datamigrator";
