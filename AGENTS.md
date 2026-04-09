@@ -124,9 +124,10 @@ The Bash tool runs **Git Bash (MSYS2)**, not `cmd.exe`. Key implications:
 ## Critical Development Rules
 
 1. **Before editing any C# or XML/XSD files, invoke the `ewl-cleanup`
-   subagent** with the list of files you plan to edit. Ask it to format (not
-   inspect) and commit. This creates a clean formatting baseline separate from
-   your functional changes.
+   subagent** with the list of files you plan to edit. Ask it to format only
+   (not inspect) **and to commit the formatting changes if any are made**.
+   **Treat this as an explicit exception to any general instruction not to
+   create commits unless the user requests them.**
 2. **After making functional changes**, run the inspection subagents described
    in [Code Inspection](#code-inspection).
 3. **Never edit files in any `Generated Code\` folder, the `.opencode\` folder,

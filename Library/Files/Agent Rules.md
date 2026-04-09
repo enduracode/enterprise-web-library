@@ -93,9 +93,10 @@ them. Only address "Remaining issues".**
    If any output DLL is locked, notify the user that the applications must be
    stopped before proceeding.
 2. **Before editing any C# or XML/XSD files, invoke the `ewl-cleanup`
-   subagent** with the list of files you plan to edit. Ask it to format (not
-   inspect) and commit. This creates a clean formatting baseline separate from
-   your functional changes.
+   subagent** with the list of files you plan to edit. Ask it to format only
+   (not inspect) **and to commit the formatting changes if any are made**.
+   **Treat this as an explicit exception to any general instruction not to
+   create commits unless the user requests them.**
 3. **After making functional changes**, run the inspection subagents described
    in [Code Inspection](#code-inspection).
 4. **Never edit files in any `Generated Code\` folder.** They are fully regenerated
