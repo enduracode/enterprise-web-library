@@ -75,7 +75,9 @@ public class SqlServer: Database {
 		else {
 			file.TryGetFilePath( out var filePath );
 			try {
-				ExecuteDbMethod( cn => executeLongRunningCommand( cn, "BACKUP DATABASE " + info.Database + " TO DISK = '" + backupFilePath + "'" ) );
+				ExecuteDbMethod( cn => executeLongRunningCommand(
+					cn,
+					"BACKUP DATABASE " + info.Database + " TO DISK = '" + getSqlServerFilePath( backupFilePath ) + "'" ) );
 				IoMethods.CopyFile( backupFilePath, filePath );
 			}
 			finally {
@@ -195,8 +197,8 @@ public class SqlServer: Database {
 					// without their physical files colliding.
 					executeLongRunningCommand(
 						cn,
-						"RESTORE DATABASE " + info.Database + " FROM DISK = '" + backupFilePath + "'" + " WITH MOVE '" + dataLogicalFileName + "' TO '" + dataFilePath +
-						"', MOVE '" + logLogicalFileName + "' TO '" + logFilePath + "'" );
+						"RESTORE DATABASE " + info.Database + " FROM DISK = '" + getSqlServerFilePath( backupFilePath ) + "'" + " WITH MOVE '" + dataLogicalFileName +
+						"' TO '" + getSqlServerFilePath( dataFilePath ) + "', MOVE '" + logLogicalFileName + "' TO '" + getSqlServerFilePath( logFilePath ) + "'" );
 				}
 				catch( Exception e ) {
 					throw new UserCorrectableException( "Failed to create database from file. Please try the operation again after obtaining a new database file.", e );
@@ -223,7 +225,7 @@ LOG ON (
 	SIZE = 10MB,
 	MAXSIZE = 1000MB,
 	FILEGROWTH = 100MB
-)".FormatWith( info.Database, dataLogicalFileName, dataFilePath, logLogicalFileName, logFilePath ) );
+)".FormatWith( info.Database, dataLogicalFileName, getSqlServerFilePath( dataFilePath ), logLogicalFileName, getSqlServerFilePath( logFilePath ) ) );
 		return false;
 	}
 
@@ -235,6 +237,8 @@ LOG ON (
 
 	// Use the EWL folder for all backup/restore operations because the SQL Server account probably already has access to it.
 	private string backupFilePath => EwlStatics.CombinePaths( ConfigurationStatics.EwlFolderPath, info.Database + ".bak" );
+
+	private string getSqlServerFilePath( string path ) => path.Replace( Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar );
 
 	IEnumerable<DataRow> Database.GetDataTypes() => throw new NotSupportedException();
 
