@@ -5,7 +5,7 @@ using Microsoft.Web.Administration;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility;
 
-public class IsuStatics {
+public static class IsuStatics {
 	/// <summary>
 	/// Installation Support Utility use only.
 	/// </summary>
@@ -140,19 +140,19 @@ public class IsuStatics {
 	public static void UpdateIisSite( string name, string appPool, string physicalPath, IReadOnlyCollection<IisHostName> hostNames ) {
 		executeInIisServerManagerTransaction( () => IisConfigurationStatics.ExecuteInServerManagerTransaction( serverManager => {
 			const int dummyPort = 80;
-			var site = serverManager.Sites[ name ] ?? serverManager.Sites.Add( name, physicalPath, dummyPort );
+			var site = serverManager.Sites[ name ] ?? serverManager.Sites.Add( name, getPhysicalPath( physicalPath ), dummyPort );
 
 			var rootApp = site.Applications[ "/" ];
 			rootApp.ApplicationPoolName = appPool;
 			rootApp[ "preloadEnabled" ] = true;
 
 			var rootVd = rootApp.VirtualDirectories[ "/" ];
-			rootVd.PhysicalPath = physicalPath;
+			rootVd.PhysicalPath = getPhysicalPath( physicalPath );
 
 			var bindings = hostNames.SelectMany( i => {
 					var nonsecureBinding = Tuple.Create( false, i.NonsecurePortSpecified ? i.NonsecurePort : 80, i.Name );
 					return i.SecureBinding != null
-						       ? new[] { nonsecureBinding, Tuple.Create( true, i.SecureBinding.PortSpecified ? i.SecureBinding.Port : 443, i.Name ) }
+						       ? [ nonsecureBinding, Tuple.Create( true, i.SecureBinding.PortSpecified ? i.SecureBinding.Port : 443, i.Name ) ]
 						       : nonsecureBinding.ToCollection();
 				} )
 				.ToList();
@@ -199,14 +199,16 @@ public class IsuStatics {
 			var iisSite = serverManager.Sites[ site ];
 
 			var path = "/{0}".FormatWith( name );
-			var app = iisSite.Applications[ path ] ?? iisSite.Applications.Add( path, physicalPath );
+			var app = iisSite.Applications[ path ] ?? iisSite.Applications.Add( path, getPhysicalPath( physicalPath ) );
 			app.ApplicationPoolName = appPool;
 			app[ "preloadEnabled" ] = true;
 
 			var rootVd = app.VirtualDirectories[ "/" ];
-			rootVd.PhysicalPath = physicalPath;
+			rootVd.PhysicalPath = getPhysicalPath( physicalPath );
 		} ) );
 	}
+
+	private static string getPhysicalPath( string path ) => path.Replace( Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar );
 
 	/// <summary>
 	/// ISU and internal use only.
