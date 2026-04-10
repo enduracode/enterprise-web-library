@@ -99,7 +99,9 @@ jobs:
         az containerapp job update `
           --name "${{ parameters.containerAppJob }}" `
           --resource-group "$(ResourceGroup)" `
-          --image "${{ parameters.containerImage }}"
+          --image "${{ parameters.containerImage }}" `
+          --registry-server ("${{ parameters.containerImage }}" -split '/')[0] `
+          --registry-identity "system"
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     displayName: 'Build and push container image'
 
