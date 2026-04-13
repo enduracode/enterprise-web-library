@@ -1,4 +1,5 @@
-﻿using Azure;
+﻿using System.Threading;
+using Azure;
 using Azure.Core;
 using Azure.Identity;
 using Azure.ResourceManager;
@@ -51,7 +52,7 @@ public static class AzureStatics {
 		$"id-{getSystemName( installationConfiguration )}-{GetInstallationName( installationShortName )}-datamigrator";
 
 	public static string GetIsuContainerAppJobName( InstallationConfiguration installationConfiguration, InstallationType installationType ) =>
-		$"caj-{getSystemName( installationConfiguration )}-{getInstallationType( installationType )}-isu";
+		$"caj-{getSystemName( installationConfiguration )}-{( installationType == InstallationType.Live ? "prod" : "int" )}-isu";
 
 	public static string GetIsuInstallationContainerName( InstallationConfiguration installationConfiguration, InstallationType installationType ) =>
 		$"{getSystemName( installationConfiguration )}-{getInstallationType( installationType )}-isu-installations";
@@ -85,11 +86,24 @@ public static class AzureStatics {
 		foreach( var arg in arguments )
 			container.Args.Add( arg );
 
-		new ArmClient( credential ).GetContainerAppJobResource(
-				ContainerAppJobResource.CreateResourceIdentifier(
-					configuration.AzureHosting!.SubscriptionId,
-					GetResourceGroupName( configuration, configuration.InstallationType ),
-					GetContainerAppJobName( configuration, configuration.InstallationShortName ) ) )
-			.Start( WaitUntil.Completed, template: new ContainerAppJobExecutionTemplate { Containers = { container } } );
+		var job = new ArmClient( credential ).GetContainerAppJobResource(
+			ContainerAppJobResource.CreateResourceIdentifier(
+				configuration.AzureHosting!.SubscriptionId,
+				GetResourceGroupName( configuration, configuration.InstallationType ),
+				GetContainerAppJobName( configuration, configuration.InstallationShortName ) ) );
+		var executionName = job.Start( WaitUntil.Completed, template: new ContainerAppJobExecutionTemplate { Containers = { container } } ).Value.Name;
+		var execution = job.GetContainerAppJobExecutions().Get( executionName ).Value;
+
+		while( true ) {
+			var status = execution.Get().Value.Data.Status;
+
+			if( status == JobExecutionRunningState.Succeeded )
+				return;
+
+			if( status is not null && status != JobExecutionRunningState.Running && status != JobExecutionRunningState.Processing )
+				throw new Exception( $"Container App Job execution failed with status {status}." );
+
+			Thread.Sleep( 10000 );
+		}
 	}
 }
