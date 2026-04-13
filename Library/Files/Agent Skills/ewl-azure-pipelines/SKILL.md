@@ -155,12 +155,14 @@ The deploy job template (Deploy.yml) contains:
 2. Download server-side logic artifact
 3. Download installation configuration artifact
 4. Stop app (`az webapp stop`)
-5. Upload logic (`AzureWebApp@1` with `zipDeploy`)
-6. Run data migrator (Kudu `/api/command` API)
-7. Start app (`az webapp start`)
+5. Build and push the installation container image and update the Container App Job image
+6. Upload the ISU installation package to blob storage
+7. Upload logic (`AzureWebApp@1` with `zipDeploy`)
+8. Upload the IIS transform via Kudu VFS
+9. Run data migrator by starting the installation Container App Job and polling for completion
+10. Start app (`az webapp start`)
 
-### Kudu API Notes
+### Kudu VFS Notes
 
-The Kudu `/api/command` endpoint runs via `cmd.exe`. Paths with spaces must
-be wrapped in double quotes. Use PowerShell backtick-quotes (`` `" ``) inside
-the JSON body string.
+The deploy template still uses the Kudu VFS API to upload
+`site/applicationHost.xdt` after deployment so IIS modules can be removed.
