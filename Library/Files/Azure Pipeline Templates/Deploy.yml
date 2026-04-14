@@ -80,6 +80,9 @@ jobs:
       scriptType: 'pscore'
       scriptLocation: 'inlineScript'
       inlineScript: |
+        az extension add --name containerapp --upgrade
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
         az acr login --name ("${{ parameters.containerImage }}" -split '\.')[0]
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
