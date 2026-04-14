@@ -355,6 +355,8 @@ internal class UpdateDependentLogic: Operation {
 			var azurePipelineFolderPath = EwlStatics.CombinePaths( installationConfigurationFolderPath, "Azure Pipelines" );
 			var azureUpdateLogicPipelinePath = EwlStatics.CombinePaths( azurePipelineFolderPath, "Update Logic.yml" );
 			if( File.Exists( azureUpdateLogicPipelinePath ) || installedInstallation.AzureHosting is not null ) {
+				Directory.CreateDirectory( azurePipelineFolderPath );
+
 				var triggerBranch =
 					installedInstallation.InstallationTypeConfiguration is IntermediateInstallationConfiguration &&
 					!installedInstallation.name.Contains( "Staging", StringComparison.Ordinal )
@@ -390,6 +392,8 @@ internal class UpdateDependentLogic: Operation {
 			}
 
 			if( installedInstallation.AzureHosting is not null ) {
+				Directory.CreateDirectory( azurePipelineFolderPath );
+
 				var edGeneratedRegion = $"""
 				                         trigger: none
 
