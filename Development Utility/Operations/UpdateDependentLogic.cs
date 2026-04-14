@@ -400,6 +400,7 @@ internal class UpdateDependentLogic: Operation {
 				                         extends:
 				                           template: ../../../../Azure Export Data Job.yml
 				                           parameters:
+				                             isuContainerImage: '{AzureStatics.DiscoverGeneralContainerRegistryLoginServer( azureCredential! )}/ewl-installation-support-utility:stable'
 				                             serviceConnection: '{azureServiceConnection}'
 				                             subscription: '{installedInstallation.AzureHosting.SubscriptionId}'
 				                             resourceGroup: '{AzureStatics.GetResourceGroupName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType )}'
@@ -414,6 +415,7 @@ internal class UpdateDependentLogic: Operation {
 				                         extends:
 				                           template: ../../../../Azure Update Data Job.yml
 				                           parameters:
+				                             isuContainerImage: '{AzureStatics.DiscoverGeneralContainerRegistryLoginServer( azureCredential! )}/ewl-installation-support-utility:stable'
 				                             serviceConnection: '{azureServiceConnection}'
 				                             subscription: '{installedInstallation.AzureHosting.SubscriptionId}'
 				                             resourceGroup: '{AzureStatics.GetResourceGroupName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType )}'
