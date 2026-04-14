@@ -405,6 +405,7 @@ internal class UpdateDependentLogic: Operation {
 				                             subscription: '{installedInstallation.AzureHosting.SubscriptionId}'
 				                             resourceGroup: '{AzureStatics.GetResourceGroupName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType )}'
 				                             containerAppJob: '{AzureStatics.GetIsuContainerAppJobName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType )}'
+				                             isuInstallationStorageContainer: '{AzureStatics.GetIsuInstallationContainerName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType )}'
 				                             installation: '{AzureStatics.GetInstallationName( installedInstallation.shortName )}'
 				                         """;
 				updateInstallationAzurePipeline( EwlStatics.CombinePaths( azurePipelineFolderPath, "Export Data.yml" ), edGeneratedRegion );
@@ -420,6 +421,7 @@ internal class UpdateDependentLogic: Operation {
 				                             subscription: '{installedInstallation.AzureHosting.SubscriptionId}'
 				                             resourceGroup: '{AzureStatics.GetResourceGroupName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType )}'
 				                             containerAppJob: '{AzureStatics.GetIsuContainerAppJobName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType )}'
+				                             isuInstallationStorageContainer: '{AzureStatics.GetIsuInstallationContainerName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType )}'
 				                             installation: '{AzureStatics.GetInstallationName( installedInstallation.shortName )}'
 				                         """;
 				updateInstallationAzurePipeline( EwlStatics.CombinePaths( azurePipelineFolderPath, "Update Data.yml" ), udGeneratedRegion );

@@ -11,6 +11,8 @@ parameters:
   type: string
 - name: containerAppJob
   type: string
+- name: isuInstallationStorageContainer
+  type: string
 - name: installation
   type: string
 - name: source
@@ -28,5 +30,5 @@ jobs:
       azureServiceConnection: '${{ parameters.serviceConnection }}'
       method: 'POST'
       urlSuffix: '/subscriptions/${{ parameters.subscription }}/resourceGroups/${{ parameters.resourceGroup }}/providers/Microsoft.App/jobs/${{ parameters.containerAppJob }}/start?api-version=2024-03-01'
-      body: '{"containers":[{"name":"main","image":"${{ parameters.isuContainerImage }}","resources":{"cpu":0.5,"memory":"1Gi"},"args":["${{ parameters.installation }}","UpdateData","${{ parameters.source }}","${{ parameters.sourceType }}"]}]}'
+      body: '{"containers":[{"name":"main","image":"${{ parameters.isuContainerImage }}","resources":{"cpu":0.5,"memory":"1Gi"},"env":[{"name":"EwlConfigurationStorageContainer","value":"${{ parameters.isuInstallationStorageContainer }}"}],"args":["${{ parameters.installation }}","UpdateData","${{ parameters.source }}","${{ parameters.sourceType }}"]}]}'
     displayName: 'Start job'
