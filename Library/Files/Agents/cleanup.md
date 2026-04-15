@@ -1,7 +1,7 @@
 ---
 description: Formats and inspects files using ReSharper command-line tools, fixes typography, then commits changes to version control
 mode: subagent
-model: fireworks/kimi-k2p5
+model: fireworks-ai/accounts/fireworks/routers/kimi-k2p5-turbo
 tools:
   todowrite: false
   webfetch: false
