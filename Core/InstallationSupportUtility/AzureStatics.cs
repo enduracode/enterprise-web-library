@@ -93,11 +93,15 @@ public static class AzureStatics {
 		return $"https://{storageAccountName}.blob.core.windows.net/{containerName}";
 	}
 
-	internal static void RunContainerAppJob( InstallationConfiguration configuration, IEnumerable<string> arguments ) {
+	internal static void RunContainerAppJob(
+		InstallationConfiguration configuration, string image, double cpu, string memory, IEnumerable<string> arguments,
+		IEnumerable<ContainerAppEnvironmentVariable>? environmentVariables = null ) {
 		var credential = new ManagedIdentityCredential( ManagedIdentityId.SystemAssigned );
-		var container = new JobExecutionContainer { Name = "main" };
-		foreach( var arg in arguments )
-			container.Args.Add( arg );
+		var container = new JobExecutionContainer { Name = "main", Image = image, Resources = new AppContainerResources { Cpu = cpu, Memory = memory } };
+		foreach( var i in environmentVariables ?? [ ] )
+			container.Env.Add( i );
+		foreach( var i in arguments )
+			container.Args.Add( i );
 
 		var job = new ArmClient( credential ).GetContainerAppJobResource(
 			ContainerAppJobResource.CreateResourceIdentifier(
