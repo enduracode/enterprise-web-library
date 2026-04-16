@@ -11,6 +11,7 @@
     <PackageReference Include="Azure.ResourceManager.AppContainers" Version="1.5.0" />
     <PackageReference Include="Azure.ResourceManager.ContainerRegistry" Version="1.5.0-beta.1" />
     <PackageReference Include="Azure.ResourceManager.AppService" Version="1.4.1" />
+    <PackageReference Include="Azure.ResourceManager.ManagedServiceIdentities" Version="1.4.0" />
     <PackageReference Include="Azure.ResourceManager.Storage" Version="1.6.1" />
     <PackageReference Include="Azure.Storage.Blobs" Version="12.27.0" />
     <PackageReference Include="Destructurama.JsonNet" Version="4.0.2" />

@@ -6,6 +6,7 @@ using Azure.ResourceManager;
 using Azure.ResourceManager.AppContainers;
 using Azure.ResourceManager.AppContainers.Models;
 using Azure.ResourceManager.ContainerRegistry;
+using Azure.ResourceManager.ManagedServiceIdentities;
 using Azure.ResourceManager.Storage;
 using EnterpriseWebLibrary.Configuration;
 using JetBrains.Annotations;
@@ -50,6 +51,18 @@ public static class AzureStatics {
 
 	internal static string GetDataMigratorIdentityName( InstallationConfiguration installationConfiguration, string installationShortName ) =>
 		$"id-{getSystemName( installationConfiguration )}-{GetInstallationName( installationShortName )}-datamigrator";
+
+	public static string GetDataMigratorIdentityClientId(
+		InstallationConfiguration installationConfiguration, string installationShortName, string subscriptionId, InstallationType installationType,
+		TokenCredential credential ) {
+		return new ArmClient( credential ).GetUserAssignedIdentityResource(
+				UserAssignedIdentityResource.CreateResourceIdentifier(
+					subscriptionId,
+					GetResourceGroupName( installationConfiguration, installationType ),
+					GetDataMigratorIdentityName( installationConfiguration, installationShortName ) ) )
+			.Get()
+			.Value.Data.ClientId!.Value.ToString();
+	}
 
 	public static string GetIsuContainerAppJobName( InstallationConfiguration installationConfiguration, InstallationType installationType ) =>
 		$"caj-{getSystemName( installationConfiguration )}-{( installationType == InstallationType.Live ? "prod" : "int" )}-isu";

@@ -11,6 +11,8 @@ parameters:
   type: string
 - name: containerAppJob
   type: string
+- name: dataMigratorIdentityClientId
+  type: string
 - name: isuInstallationUrl
   type: string
 - name: appService
@@ -232,7 +234,12 @@ jobs:
         $execution = az containerapp job start `
           --name "${{ parameters.containerAppJob }}" `
           --resource-group "$(ResourceGroup)" `
+          --container-name "main" `
+          --image "${{ parameters.containerImage }}" `
+          --cpu 0.5 `
+          --memory 1Gi `
           --args "@@DataMigratorPath" `
+          --env-vars "EwlDataMigratorManagedIdentityClientId=${{ parameters.dataMigratorIdentityClientId }}" `
           --query name -o tsv
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 

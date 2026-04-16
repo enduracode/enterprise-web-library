@@ -383,6 +383,7 @@ internal class UpdateDependentLogic: Operation {
 				                           resourceGroup: '{AzureStatics.GetResourceGroupName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType )}'
 				                           containerImage: '{AzureStatics.DiscoverGeneralContainerRegistryLoginServer( azureCredential! )}/{AzureStatics.GetContainerImageName( installation.ExistingInstallationLogic.RuntimeConfiguration, installedInstallation.shortName, installationType )}'
 				                           containerAppJob: '{AzureStatics.GetContainerAppJobName( installation.ExistingInstallationLogic.RuntimeConfiguration, installedInstallation.shortName )}'
+				                           dataMigratorIdentityClientId: '{AzureStatics.GetDataMigratorIdentityClientId( installation.ExistingInstallationLogic.RuntimeConfiguration, installedInstallation.shortName, installedInstallation.AzureHosting!.SubscriptionId, installationType, azureCredential! )}'
 				                           isuInstallationUrl: '{AzureStatics.GetStorageContainerUrl( AzureStatics.GetIsuInstallationContainerName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType ), azureCredential )}/{installedInstallation.shortName.ToUrlSlug()}{FileExtensions.Zip}'
 				                           appService: '{AzureStatics.GetAppServiceName( installation.ExistingInstallationLogic.RuntimeConfiguration, installedInstallation.shortName )}'
 				                       """;
