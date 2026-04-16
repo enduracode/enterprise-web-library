@@ -206,9 +206,7 @@ public class ExistingInstallationLogic {
 				try {
 					TewlContrib.ProcessTools.RunProgram(
 						"dotnet",
-						"build \"{0}\" --configuration {1}".FormatWith(
-							EwlStatics.CombinePaths( generalInstallationLogic.Path, IsuStatics.DataMigratorProjectName ),
-							"Debug" ),
+						$"""build "{EwlStatics.CombinePaths( generalInstallationLogic.Path, IsuStatics.DataMigratorProjectName )}" --configuration Debug --runtime {RuntimeInformation.RuntimeIdentifier}""",
 						"",
 						true );
 				}
