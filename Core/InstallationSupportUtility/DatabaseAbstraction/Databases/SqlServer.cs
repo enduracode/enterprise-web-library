@@ -70,7 +70,7 @@ public class SqlServer: Database {
 		if( file.IsAzureBlob ) {
 			file.TryGetAzureBlob( out var containerUrl, out var blobName );
 			executeDbMethodAgainstMaster( cn => createManagedIdentityCredentialIfNecessary( cn, containerUrl ) );
-			ExecuteDbMethod( cn => executeLongRunningCommand( cn, $"BACKUP DATABASE {info.Database} TO URL = '{containerUrl}/{blobName}' WITH COPY_ONLY" ) );
+			ExecuteDbMethod( cn => executeLongRunningCommand( cn, $"BACKUP DATABASE {info.Database} TO URL = '{containerUrl}/{blobName}' WITH COPY_ONLY, FORMAT" ) );
 		}
 		else {
 			file.TryGetFilePath( out var filePath );
