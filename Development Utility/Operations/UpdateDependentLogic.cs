@@ -494,7 +494,7 @@ internal class UpdateDependentLogic: Operation {
 						: "null";
 				writer.Write( $"return DataMigrationOps.MigrateData( {providerExpression} );" );
 			},
-			runtimeIdentifier: "win-x64" );
+			runtimeIdentifier: getServerSideConsoleAppRuntimeIdentifier() );
 	}
 
 	private void copyInFileDependencies( DevelopmentInstallation installation ) {
@@ -872,8 +872,12 @@ internal class UpdateDependentLogic: Operation {
 
 				writer.WriteLine( "}" );
 			},
-			runtimeIdentifier: "win-x64" );
+			runtimeIdentifier: getServerSideConsoleAppRuntimeIdentifier() );
 	}
+
+	private string getServerSideConsoleAppRuntimeIdentifier() =>
+		// In Azure DevOps pipelines, assume server-side console apps will run as Container Apps jobs.
+		string.Equals( Environment.GetEnvironmentVariable( "TF_BUILD" ), bool.TrueString, StringComparison.Ordinal ) ? "linux-x64" : "win-x64";
 
 	private void generateUnitTestProjectCode( DevelopmentInstallation installation ) {
 		var projectPath = EwlStatics.CombinePaths(
