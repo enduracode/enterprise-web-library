@@ -70,12 +70,15 @@ could be replaced with TEWL or EWL abstractions. Fix any findings it reports.
 
 ### ReSharper Format/Inspect
 
-Invoke the `ewl-cleanup` subagent with the list of changed files. Ask it to
-format and inspect but not commit. If the abstraction review produced fixes
-above, those files are included here automatically since they are part of the
-same changed-file set. **When the cleanup agent reports fixes (e.g., "Issues
-fixed", "Typography corrections"), these are already applied -- do not re-apply
-them. Only address "Remaining issues".**
+Invoke the `ewl-cleanup` subagent with the list of changed **C# and XML/XSD**
+files. Other file types (Markdown, JSON, shell scripts, etc.) are out of
+scope for this subagent and should not be included even if they were modified
+in the same task. Ask it to format and inspect but not commit. If the
+abstraction review produced fixes above, those files are included here
+automatically since they are part of the same changed-file set. **When the
+cleanup agent reports fixes (e.g., "Issues fixed", "Typography corrections"),
+these are already applied -- do not re-apply them. Only address "Remaining
+issues".**
 
 ---
 
@@ -93,10 +96,10 @@ them. Only address "Remaining issues".**
    If any output DLL is locked, notify the user that the applications must be
    stopped before proceeding.
 2. **Before editing any C# or XML/XSD files, invoke the `ewl-cleanup`
-   subagent** with the list of files you plan to edit. Ask it to format only
-   (not inspect) **and to commit the formatting changes if any are made**.
-   **Treat this as an explicit exception to any general instruction not to
-   create commits unless the user requests them.**
+   subagent** with the list of **C# and XML/XSD files** you plan to edit.
+   Ask it to format only (not inspect) **and to commit the formatting changes
+   if any are made**. **Treat this as an explicit exception to any general
+   instruction not to create commits unless the user requests them.**
 3. **After making functional changes**, run the inspection subagents described
    in [Code Inspection](#code-inspection).
 4. **Never edit files in any `Generated Code\` folder.** They are fully regenerated
@@ -120,6 +123,44 @@ them. Only address "Remaining issues".**
 - **`Website`** (or other web-application projects) -- page classes and UI logic.
   References Library; gets EWL transitively.
 - **`Solution Files`** -- solution-level build configuration and scripts.
+
+---
+
+## Agent, Skill, and Tool Source Files
+
+This system's `.opencode\` folder, `.claude\` folder, and
+`Library\Generated Code\EWL Agent Rules.md` (which is referenced from this
+system's `opencode.jsonc` and supplements this system's own `AGENTS.md`) are
+**fully regenerated** by the EWL Development Utility. Do not edit them
+directly — edit the corresponding sources in the EWL source repository and
+then rerun the DU's `UpdateDependentLogic` operation on this system (see
+"Code Generation (Development Utility)" above for how to invoke it).
+
+The sources all live under `Library\Files\` of the **EWL source repository**
+(the one whose package is referenced by this system's `Library.csproj`).
+They are not part of this system's own tree. Source → generated target
+mappings:
+
+| Source (in EWL repo, under `Library\Files\`) | Generated target (in this system) |
+|---|---|
+| `Agents\<name>.md` | `.opencode\agents\ewl-<name>.md` and (concatenated with the Claude Code preamble below) `.claude\agents\ewl-<name>.md` |
+| `Agents\Claude Code\<name>.md` | Preamble prepended to the body of the shared agent file when generating `.claude\agents\ewl-<name>.md` |
+| `Agent Skills\<skill>\` | `.opencode\skills\<skill>\` and `.claude\skills\<skill>\` |
+| `OpenCode Plugins\` | `.opencode\plugins\ewl\` (plus `.opencode\plugins\ewl.js` aggregator) and `.claude\hooks\` |
+| `OpenCode Plugins\Claude Code\` | Additional files copied into `.claude\hooks\` |
+| `OpenCode Tools\<file>` | `.opencode\tools\ewl-<file>` |
+| `OpenCode Tools\Claude Code\` | `.claude\ewl\` (MCP server source) |
+| `Agent Rules.md` | `Library\Generated Code\EWL Agent Rules.md` |
+
+The generator is the `updateOpenCodeConfig` method in
+`Development Utility\Operations\UpdateDependentLogic.cs` of the EWL source
+repository.
+
+Remember Critical Rule #4: the generated copies are overwritten on every DU
+run, so any change you make directly to a generated file will be lost. After
+editing a source file in the EWL repository, rerun `UpdateDependentLogic`
+for every affected system and verify that the regenerated output reflects
+your changes.
 
 ---
 
