@@ -187,22 +187,32 @@ public class SqlServer: Database {
 		var sqlServerFilesFolderPath = EwlStatics.CombinePaths( ConfigurationStatics.EwlFolderPath, "SQL Server Databases" );
 		Directory.CreateDirectory( sqlServerFilesFolderPath );
 
+		// Delete container folders from the existing database. The new database may not use them, and even if it does, SQL Server won’t overwrite existing folders.
+		foreach( var containerFolderName in IoMethods.GetFolderNamesInFolder( sqlServerFilesFolderPath )
+			        .Where( i => i.StartsWith( getContainerFolderPrefix(), StringComparison.Ordinal ) ) )
+			IoMethods.DeleteFolder( EwlStatics.CombinePaths( sqlServerFilesFolderPath, containerFolderName ) );
+
 		var dataFilePath = EwlStatics.CombinePaths( sqlServerFilesFolderPath, info.Database + ".mdf" );
 		var logFilePath = EwlStatics.CombinePaths( sqlServerFilesFolderPath, info.Database + ".ldf" );
 		if( file.TryGetFilePath( out var filePath ) ) {
 			try {
 				IoMethods.CopyFile( filePath, backupFilePath );
+				var restoreLogic = getRestoreLogic( cn, sqlServerFilesFolderPath, dataFilePath, logFilePath );
 				try {
-					// WITH MOVE is required so that multiple instances of the same system's database (RsisDev and RsisTesting, for example) can exist on the same machine
+					// WITH MOVE is required so that multiple instances of the same system’s database (RsisDev and RsisTesting, for example) can exist on the same machine
 					// without their physical files colliding.
 					executeLongRunningCommand(
 						cn,
-						"RESTORE DATABASE " + info.Database + " FROM DISK = '" + getSqlServerFilePath( backupFilePath ) + "'" + " WITH MOVE '" + dataLogicalFileName +
-						"' TO '" + getSqlServerFilePath( dataFilePath ) + "', MOVE '" + logLogicalFileName + "' TO '" + getSqlServerFilePath( logFilePath ) + "'" );
+						"RESTORE DATABASE " + info.Database + " FROM DISK = '" + getSqlServerFilePath( backupFilePath ) + "' WITH " + StringTools.ConcatenateWithDelimiter(
+							", ",
+							restoreLogic.filePaths.Select( i => $"MOVE '{i.logicalName}' TO '{getSqlServerFilePath( i.path )}'" ) ) );
 				}
 				catch( Exception e ) {
 					throw new UserCorrectableException( "Failed to create database from file. Please try the operation again after obtaining a new database file.", e );
 				}
+
+				foreach( var i in restoreLogic.fileRenameCommands )
+					executeLongRunningCommand( cn, i );
 			}
 			finally {
 				IoMethods.DeleteFile( backupFilePath );
@@ -234,6 +244,59 @@ LOG ON (
 			connection,
 			$"IF NOT EXISTS ( SELECT * FROM sys.credentials WHERE name = '{containerUrl}' ) CREATE CREDENTIAL [{containerUrl}] WITH IDENTITY = 'MANAGED IDENTITY'" );
 	}
+
+	private ( IReadOnlyCollection<( string logicalName, string path )> filePaths, IReadOnlyCollection<string> fileRenameCommands ) getRestoreLogic(
+		DatabaseConnection cn, string sqlServerFilesFolderPath, string dataFilePath, string logFilePath ) {
+		var dataFile = "";
+		var logFile = "";
+		var containerFiles = new List<string>();
+		var fileListCommand = cn.DatabaseInfo.CreateCommand();
+		fileListCommand.CommandText = $"RESTORE FILELISTONLY FROM DISK = '{getSqlServerFilePath( backupFilePath )}'";
+		cn.ExecuteReaderCommand(
+			fileListCommand,
+			reader => {
+				while( reader.Read() ) {
+					var type = reader.GetString( "Type" );
+					var name = reader.GetString( "LogicalName" );
+					if( type.Equals( "D", StringComparison.Ordinal ) ) {
+						if( dataFile.Length > 0 )
+							throw new UserCorrectableException( "The database contains multiple data files." );
+						dataFile = name;
+					}
+					else if( type.Equals( "L", StringComparison.Ordinal ) ) {
+						if( logFile.Length > 0 )
+							throw new UserCorrectableException( "The database contains multiple log files." );
+						logFile = name;
+					}
+					else {
+						if( !type.Equals( "S", StringComparison.Ordinal ) )
+							throw new UserCorrectableException( $"The database contains a file with an unsupported type: '{type}'." );
+						containerFiles.Add( name );
+					}
+				}
+			} );
+		if( dataFile.Length == 0 )
+			throw new UserCorrectableException( "The database does not contain a data file." );
+		if( logFile.Length == 0 )
+			throw new UserCorrectableException( "The database does not contain a log file." );
+
+		var filePaths = new List<( string, string )>();
+		filePaths.Add( ( dataFile, dataFilePath ) );
+		filePaths.Add( ( logFile, logFilePath ) );
+		filePaths.AddRange( containerFiles.Select( name => ( name, EwlStatics.CombinePaths( sqlServerFilesFolderPath, getContainerFolderPrefix() + name ) ) ) );
+
+		var fileRenameCommands = new List<string>();
+		if( !dataFile.Equals( dataLogicalFileName, StringComparison.Ordinal ) )
+			fileRenameCommands.Add( getRename( dataFile, dataLogicalFileName ) );
+		if( !logFile.Equals( logLogicalFileName, StringComparison.Ordinal ) )
+			fileRenameCommands.Add( getRename( logFile, logLogicalFileName ) );
+
+		return ( filePaths, fileRenameCommands );
+
+		string getRename( string oldName, string newName ) => $"ALTER DATABASE {info.Database} MODIFY FILE ( NAME = N'{oldName}', NEWNAME = N'{newName}' )";
+	}
+
+	private string getContainerFolderPrefix() => info.Database + "_";
 
 	// Use the EWL folder for all backup/restore operations because the SQL Server account probably already has access to it.
 	private string backupFilePath => EwlStatics.CombinePaths( ConfigurationStatics.EwlFolderPath, info.Database + ".bak" );
