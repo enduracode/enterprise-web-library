@@ -79,7 +79,7 @@ public static class AzureStatics {
 	public static string GetDataBlobPrefix( string installationShortName ) => $"{GetInstallationName( installationShortName )}-";
 
 	public static string GetAppServiceName( InstallationConfiguration installationConfiguration, string installationShortName ) =>
-		$"app-{getSystemName( installationConfiguration )}-{GetInstallationName( installationShortName )}";
+		$"app-brossgroup-{getSystemName( installationConfiguration )}-{GetInstallationName( installationShortName )}";
 
 	private static string getSystemName( InstallationConfiguration installationConfiguration ) => installationConfiguration.SystemShortName.ToUrlSlug();
 
