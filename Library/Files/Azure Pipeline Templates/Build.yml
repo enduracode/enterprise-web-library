@@ -16,6 +16,7 @@ steps:
 - task: UseDotNet@2
   inputs:
     version: '@@DotNetVersion'
+@@ClassicPreBuildSteps
 
 - task: DotNetCoreCLI@2
   inputs:
@@ -73,6 +74,7 @@ steps:
     script: |
       & "$(DuPath)" "$(DuInstallationPath)" ExportLogic
   displayName: 'EWL - Export logic'
+@@ClassicPublishSteps
 
 - task: PowerShell@2
   inputs:

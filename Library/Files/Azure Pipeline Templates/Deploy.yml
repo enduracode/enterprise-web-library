@@ -136,14 +136,7 @@ jobs:
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     displayName: 'Upload ISU installation'
 
-  # Azure App Service does not support configuring modules in web.config
-  - pwsh: |
-      $webConfigPath = "$(Pipeline.Workspace)/ServerSideLogic/Website/web.config"
-      [xml]$webConfig = Get-Content $webConfigPath
-      $sysWebServer = $webConfig.configuration.location.'system.webServer'
-      $sysWebServer.RemoveChild($sysWebServer.modules) | Out-Null
-      $webConfig.Save($webConfigPath)
-    displayName: 'Remove modules element from web.config'
+@@RemoveModulesStep
 
   - task: AzureCLI@2
     inputs:
