@@ -28,108 +28,13 @@ internal class UpdateDependentLogic: Operation {
 	private static readonly Operation instance = new UpdateDependentLogic();
 	public static Operation Instance => instance;
 
-	private static IReadOnlyCollection<WebProject> getClassicWebProjects( DevelopmentInstallation installation ) =>
-		( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects ?? [ ] ).Where( p => p.IsClassic( installation.GeneralLogic.Path ) )
-		.MaterializeAsList();
-
-	// Returns the block inserted at @@ClassicPreBuildSteps in Build.yml. When classic web projects exist in the system, we
-	// must install a full-featured nuget.exe (needed to restore packages.config references) and run a solution-level
-	// restore before the SDK-style dotnet restore — otherwise the classic project's references will be missing when the
-	// DU runs UpdateDependentLogic or ExportLogic.
-	private static string getClassicPreBuildSteps( IReadOnlyCollection<WebProject> classicWebProjects, string workingFolderPath ) {
-		if( !classicWebProjects.Any() )
-			return "";
-		return $"""
-
-
-		        - task: NuGetToolInstaller@1
-		          displayName: 'Install NuGet tool'
-
-		        - task: NuGetCommand@2
-		          inputs:
-		            command: 'restore'
-		            restoreSolution: '{workingFolderPath}/*.sln'
-		          displayName: 'Restore NuGet packages for classic projects'
-		        """;
-	}
-
-	// Returns the block inserted at @@ClassicPublishSteps in Build.yml. For each classic web project, we write a
-	// Publish.pubxml via PowerShell and then run MSBuild against the project with DeployOnBuild=true to pre-compile and
-	// merge the ASP.NET output into the Server Side Logic folder. The Publish.pubxml is inlined instead of checked-in so
-	// that systems don’t need to commit pipeline-specific files.
-	private static string getClassicPublishSteps( IReadOnlyCollection<WebProject> classicWebProjects, string workingFolderPath ) {
-		if( !classicWebProjects.Any() )
-			return "";
-		var steps = new StringBuilder();
-		foreach( var project in classicWebProjects ) {
-			var publishUrl = $"$(DuInstallationPath)\\Logic Packages\\Server Side Logic\\{project.name}";
-			steps.Append(
-				$$"""
-
-
-				  - task: PowerShell@2
-				    inputs:
-				      targetType: 'inline'
-				      script: |
-				        $path = "{{workingFolderPath}}/{{project.name}}/Properties/PublishProfiles/Publish.pubxml"
-				        New-Item -ItemType Directory -Path ([System.IO.Path]::GetDirectoryName($path)) -Force | Out-Null
-				        $lines = @(
-				          '<?xml version="1.0" encoding="utf-8"?>',
-				          '<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">',
-				          '  <PropertyGroup>',
-				          '    <WebPublishMethod>FileSystem</WebPublishMethod>',
-				          '    <PublishProvider>FileSystem</PublishProvider>',
-				          '    <LastUsedBuildConfiguration>Release</LastUsedBuildConfiguration>',
-				          '    <LastUsedPlatform>Any CPU</LastUsedPlatform>',
-				          '    <SiteUrlToLaunchAfterPublish />',
-				          '    <LaunchSiteAfterPublish>False</LaunchSiteAfterPublish>',
-				          '    <ExcludeApp_Data>False</ExcludeApp_Data>',
-				          '    <DeleteExistingFiles>True</DeleteExistingFiles>',
-				          '    <PrecompileBeforePublish>True</PrecompileBeforePublish>',
-				          '    <EnableUpdateable>False</EnableUpdateable>',
-				          '    <DebugSymbols>True</DebugSymbols>',
-				          '    <WDPMergeOption>DonotMerge</WDPMergeOption>',
-				          '  </PropertyGroup>',
-				          '</Project>'
-				        )
-				        [System.IO.File]::WriteAllLines($path, $lines, [System.Text.Encoding]::UTF8)
-				    displayName: 'Write publish profile for {{project.name}}'
-
-				  - task: MSBuild@1
-				    inputs:
-				      solution: '{{workingFolderPath}}/{{project.name}}/{{project.name}}.csproj'
-				      msbuildArchitecture: 'x64'
-				      configuration: 'Release'
-				      msbuildArguments: '/p:PublishProfile=Publish /p:DeployOnBuild=true /p:AspnetMergePath="C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.6.2 Tools" "/p:publishurl={{publishUrl}}" /p:MvcBuildViews=false'
-				    displayName: 'Publish {{project.name}}'
-				  """ );
-		}
-		return steps.ToString();
-	}
-
-	// Returns the pwsh step that strips the <modules> element out of the web app's web.config. Only emitted for modern
-	// (SDK-style) web projects; classic Web Forms apps require their module configuration at runtime.
-	private static string getRemoveModulesStep( DevelopmentInstallation installation ) {
-		var modernWebProjects = ( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects ?? [ ] )
-			.Where( p => !p.IsClassic( installation.GeneralLogic.Path ) )
-			.MaterializeAsList();
-		if( !modernWebProjects.Any() )
-			return "";
-		var steps = new StringBuilder();
-		foreach( var project in modernWebProjects )
-			steps.Append(
-				$"""
-
-				   # Azure App Service does not support configuring modules in web.config
-				   - pwsh: |
-				       $webConfigPath = "$(Pipeline.Workspace)/ServerSideLogic/{project.name}/web.config"
-				       [xml]$webConfig = Get-Content $webConfigPath
-				       $sysWebServer = $webConfig.configuration.location.'system.webServer'
-				       $sysWebServer.RemoveChild($sysWebServer.modules) | Out-Null
-				       $webConfig.Save($webConfigPath)
-				     displayName: 'Remove modules element from {project.name} web.config'
-				 """ );
-		return steps.ToString();
+	// Returns a YAML flow-sequence literal of the names of the web projects matching the predicate. For example, for an
+	// installation with classic web projects 'IAEM' and 'Admin', getWebProjectsList(installation, p => p.IsClassic(...))
+	// returns "[ 'IAEM', 'Admin' ]". An empty set returns "[ ]". The value is inlined into pipeline template parameter
+	// defaults so that ${{ each project in parameters.* }} expansions produce the correct set of steps.
+	private static string getWebProjectsList( DevelopmentInstallation installation, Func<WebProject, bool> predicate ) {
+		var names = ( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects ?? [ ] ).Where( predicate ).Select( p => $"'{p.name}'" );
+		return $"[ {StringTools.ConcatenateWithDelimiter( ", ", names )} ]";
 	}
 
 	private UpdateDependentLogic() {}
@@ -424,7 +329,6 @@ internal class UpdateDependentLogic: Operation {
 		if( File.Exists( azureBuildPipelinePath ) ) {
 			var systemPathInRepository = getSystemPathInRepository( installation );
 			var workingFolderPath = "$(Build.SourcesDirectory)" + systemPathInRepository.PrependDelimiter( Path.AltDirectorySeparatorChar.ToString() );
-			var classicWebProjects = getClassicWebProjects( installation );
 			File.WriteAllText(
 				azureBuildPipelinePath,
 				File.ReadAllText( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "Azure Pipeline Templates", "Build.yml" ) )
@@ -432,8 +336,7 @@ internal class UpdateDependentLogic: Operation {
 					.Replace( "@@TriggerPath", systemPathInRepository.AppendDelimiter( Path.AltDirectorySeparatorChar.ToString() ) + "**" )
 					.Replace( "@@DotNetVersion", ConfigurationStatics.TargetFramework[ "net".Length.. ].Separate( ".", false )[ 0 ] + ".x" )
 					.Replace( "@@WorkingFolderPath", workingFolderPath )
-					.Replace( "@@ClassicPreBuildSteps", getClassicPreBuildSteps( classicWebProjects, workingFolderPath ) )
-					.Replace( "@@ClassicPublishSteps", getClassicPublishSteps( classicWebProjects, workingFolderPath ) ) );
+					.Replace( "@@ClassicWebProjectsList", getWebProjectsList( installation, p => p.IsClassic( installation.GeneralLogic.Path ) ) ) );
 		}
 
 		var azureLogicPipelinesExist = false;
@@ -544,7 +447,7 @@ internal class UpdateDependentLogic: Operation {
 					.Replace( "@@EwlInitialism", EwlStatics.EwlInitialism )
 					.Replace( "@@ContainerImageDotNetVersion", ConfigurationStatics.TargetFramework[ "net".Length.. ] )
 					.Replace( "@@DataMigratorPath", $"{IsuStatics.DataMigratorProjectName}/{IsuStatics.DataMigratorNamespaceAndAssemblyName}.dll" )
-					.Replace( "@@RemoveModulesStep", getRemoveModulesStep( installation ) ) );
+					.Replace( "@@ModernWebProjectsList", getWebProjectsList( installation, p => !p.IsClassic( installation.GeneralLogic.Path ) ) ) );
 		if( azureDataPipelinesExist ) {
 			File.WriteAllText(
 				EwlStatics.CombinePaths( installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath, "Azure Export Data Job.yml" ),
