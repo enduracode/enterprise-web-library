@@ -676,6 +676,11 @@ internal class UpdateDependentLogic: Operation {
 	private void generateWebProjectCode( DevelopmentInstallation installation, WebApplication application, int index ) {
 		var project = installation.DevelopmentInstallationLogic.DevelopmentConfiguration.GetWebProject( application.Name );
 
+		// Classic (non-SDK-style) web projects are hand-maintained Web Forms / MVC 5 / Web API 2 projects. The DU must not generate code into them, overwrite
+		// their Web.config, or manage their project-level MSBuild files, because the author maintains those directly.
+		if( project.IsClassic( installation.GeneralLogic.Path ) )
+			return;
+
 		Directory.CreateDirectory( EwlStatics.CombinePaths( application.Path, StaticFile.AppStaticFilesFolderName ) );
 
 		generateCodeForProject(
@@ -1470,6 +1475,11 @@ internal class UpdateDependentLogic: Operation {
 		writer.WriteLine( "Library/Generated Code/" );
 
 		foreach( var app in installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications ) {
+			// Classic (non-SDK-style) web projects maintain their own Web.config, project-level MSBuild files, and Properties folder under source control; the
+			// DU does not generate into them.
+			if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.GetWebProject( app.Name ).IsClassic( installation.GeneralLogic.Path ) )
+				continue;
+
 			writer.WriteLine();
 			writer.WriteLine( app.Name + "/bin/" );
 			writer.WriteLine( app.Name + "/obj/" );
