@@ -26,9 +26,6 @@ parameters:
 - name: appServiceOverride
   type: string
   default: ''
-- name: modernWebProjects
-  type: object
-  default: @@ModernWebProjectsList
 
 jobs:
 - job: Deploy
@@ -139,15 +136,15 @@ jobs:
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     displayName: 'Upload ISU installation'
 
-  # Azure App Service does not support configuring modules in web.config
-  - ${{ each project in parameters.modernWebProjects }}:
-    - pwsh: |
-        $webConfigPath = "$(Pipeline.Workspace)/ServerSideLogic/${{ project }}/web.config"
-        [xml]$webConfig = Get-Content $webConfigPath
-        $sysWebServer = $webConfig.configuration.location.'system.webServer'
-        $sysWebServer.RemoveChild($sysWebServer.modules) | Out-Null
-        $webConfig.Save($webConfigPath)
-      displayName: 'Remove modules element from ${{ project }} web.config'
+  - ${{ if ne('@@ModernWebProjects', '') }}:
+    - ${{ each project in split('@@ModernWebProjects', ',') }}:
+      - pwsh: |
+          $webConfigPath = "$(Pipeline.Workspace)/ServerSideLogic/${{ project }}/web.config"
+          [xml]$webConfig = Get-Content $webConfigPath
+          $sysWebServer = $webConfig.configuration.location.'system.webServer'
+          $sysWebServer.RemoveChild($sysWebServer.modules) | Out-Null
+          $webConfig.Save($webConfigPath)
+        displayName: 'Remove modules element from ${{ project }} web.config'
 
   - task: AzureCLI@2
     inputs:

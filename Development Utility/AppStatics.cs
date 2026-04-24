@@ -1,9 +1,9 @@
 ﻿using System.Reflection;
 using System.Runtime.Loader;
+using System.Xml;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
 using Serilog;
-using Tewl.IO;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility;
 
@@ -72,19 +72,18 @@ internal static class AppStatics {
 	internal static bool SystemIsSystemManager( this DevelopmentInstallation installation ) =>
 		string.Equals( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName, "SystemManager", StringComparison.Ordinal );
 
-	internal static string DotNetToolsFolderPath =>
-		IoMethods.GetFirstExistingFolderPath(
-				[
-					// Ordered by preferred path.
-					@"C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8.1 Tools",
-					@"C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools",
-					@"C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.7.2 Tools",
-					@"C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.6.2 Tools"
-				],
-			".NET Tools" );
-
 	internal static string GetLiteralDateTimeExpression( DateTimeOffset dateTime ) =>
 		"DateTimeOffset.Parse( \"" + dateTime.ToString( "o" ) + "\", null, DateTimeStyles.RoundtripKind )";
+
+	internal static bool WebProjectIsLegacy( DevelopmentInstallation installation, WebApplication application ) {
+		using var reader = XmlReader.Create(
+			EwlStatics.CombinePaths( installation.GeneralLogic.Path, application.Name, application.Name + ".csproj" ),
+			new XmlReaderSettings { IgnoreComments = true, IgnoreWhitespace = true } );
+		while( reader.Read() )
+			if( reader.NodeType == XmlNodeType.Element /* first of these will be Project */ )
+				return reader.GetAttribute( "Sdk" ) is null;
+		return false;
+	}
 
 	// see https://stackoverflow.com/a/1793962/35349
 	internal static string NormalizeLineEndingsFromXml( string text ) => text.Replace( Environment.NewLine, "\n" ).Replace( "\n", Environment.NewLine );

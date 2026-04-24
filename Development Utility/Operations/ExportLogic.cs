@@ -519,13 +519,10 @@ internal class ExportLogic: Operation {
 
 	private void packageWebApps( DevelopmentInstallation installation, string serverSideLogicFolderPath ) {
 		foreach( var app in installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications ) {
-			var project = installation.DevelopmentInstallationLogic.DevelopmentConfiguration.GetWebProject( app.Name );
-
-			// Classic (non-SDK-style) web projects cannot be published by dotnet publish; the Azure Build Pipeline runs MSBuild against them separately and drops
-			// the output directly into the Server Side Logic folder.
-			if( project.IsClassic( installation.GeneralLogic.Path ) )
+			if( AppStatics.WebProjectIsLegacy( installation, app ) )
 				continue;
 
+			var project = installation.DevelopmentInstallationLogic.DevelopmentConfiguration.GetWebProject( app.Name );
 			publishApp( EwlStatics.CombinePaths( installation.GeneralLogic.Path, app.Name ), EwlStatics.CombinePaths( serverSideLogicFolderPath, app.Name ) );
 			IoMethods.CopyFolder(
 				EwlStatics.CombinePaths( installation.GeneralLogic.Path, app.Name, StaticFile.AppStaticFilesFolderName ),

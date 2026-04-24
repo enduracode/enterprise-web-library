@@ -27,16 +27,6 @@ internal class UpdateDependentLogic: Operation {
 
 	private static readonly Operation instance = new UpdateDependentLogic();
 	public static Operation Instance => instance;
-
-	// Returns a YAML flow-sequence literal of the names of the web projects matching the predicate. For example, for an
-	// installation with classic web projects 'IAEM' and 'Admin', getWebProjectsList(installation, p => p.IsClassic(...))
-	// returns "[ 'IAEM', 'Admin' ]". An empty set returns "[ ]". The value is inlined into pipeline template parameter
-	// defaults so that ${{ each project in parameters.* }} expansions produce the correct set of steps.
-	private static string getWebProjectsList( DevelopmentInstallation installation, Func<WebProject, bool> predicate ) {
-		var names = ( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.webProjects ?? [ ] ).Where( predicate ).Select( p => $"'{p.name}'" );
-		return $"[ {StringTools.ConcatenateWithDelimiter( ", ", names )} ]";
-	}
-
 	private UpdateDependentLogic() {}
 
 	bool Operation.IsValid( Installation installation ) => installation is DevelopmentInstallation;
@@ -273,7 +263,8 @@ internal class UpdateDependentLogic: Operation {
 				} );
 		generateLibraryCode( installation );
 		foreach( var i in installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications.Select( ( app, index ) => ( app, index ) ) )
-			generateWebProjectCode( installation, i.app, i.index );
+			if( !AppStatics.WebProjectIsLegacy( installation, i.app ) )
+				generateWebProjectCode( installation, i.app, i.index );
 		foreach( var service in installation.ExistingInstallationLogic.RuntimeConfiguration.WindowsServices )
 			generateWindowsServiceCode( installation, service );
 		foreach( var project in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.ServerSideConsoleProjectsNonNullable )
@@ -328,15 +319,20 @@ internal class UpdateDependentLogic: Operation {
 			"Azure Build Pipeline.yml" );
 		if( File.Exists( azureBuildPipelinePath ) ) {
 			var systemPathInRepository = getSystemPathInRepository( installation );
-			var workingFolderPath = "$(Build.SourcesDirectory)" + systemPathInRepository.PrependDelimiter( Path.AltDirectorySeparatorChar.ToString() );
 			File.WriteAllText(
 				azureBuildPipelinePath,
 				File.ReadAllText( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "Azure Pipeline Templates", "Build.yml" ) )
 					.Replace( "@@EwlInitialism", EwlStatics.EwlInitialism )
 					.Replace( "@@TriggerPath", systemPathInRepository.AppendDelimiter( Path.AltDirectorySeparatorChar.ToString() ) + "**" )
 					.Replace( "@@DotNetVersion", ConfigurationStatics.TargetFramework[ "net".Length.. ].Separate( ".", false )[ 0 ] + ".x" )
-					.Replace( "@@WorkingFolderPath", workingFolderPath )
-					.Replace( "@@ClassicWebProjectsList", getWebProjectsList( installation, p => p.IsClassic( installation.GeneralLogic.Path ) ) ) );
+					.Replace( "@@WorkingFolderPath", "$(Build.SourcesDirectory)" + systemPathInRepository.PrependDelimiter( Path.AltDirectorySeparatorChar.ToString() ) )
+					.Replace(
+						"@@LegacyWebProjects",
+						StringTools.ConcatenateWithDelimiter(
+							",",
+							installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications.Where( i => AppStatics.WebProjectIsLegacy( installation, i ) )
+								.Select( i => i.Name ) ) )
+					.Replace( "@@DotNetToolsFolderPath", getDotNetToolsFolderPath() ) );
 		}
 
 		var azureLogicPipelinesExist = false;
@@ -446,8 +442,13 @@ internal class UpdateDependentLogic: Operation {
 				File.ReadAllText( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "Azure Pipeline Templates", "Deploy.yml" ) )
 					.Replace( "@@EwlInitialism", EwlStatics.EwlInitialism )
 					.Replace( "@@ContainerImageDotNetVersion", ConfigurationStatics.TargetFramework[ "net".Length.. ] )
-					.Replace( "@@DataMigratorPath", $"{IsuStatics.DataMigratorProjectName}/{IsuStatics.DataMigratorNamespaceAndAssemblyName}.dll" )
-					.Replace( "@@ModernWebProjectsList", getWebProjectsList( installation, p => !p.IsClassic( installation.GeneralLogic.Path ) ) ) );
+					.Replace(
+						"@@ModernWebProjects",
+						StringTools.ConcatenateWithDelimiter(
+							",",
+							installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications.Where( i => !AppStatics.WebProjectIsLegacy( installation, i ) )
+								.Select( i => i.Name ) ) )
+					.Replace( "@@DataMigratorPath", $"{IsuStatics.DataMigratorProjectName}/{IsuStatics.DataMigratorNamespaceAndAssemblyName}.dll" ) );
 		if( azureDataPipelinesExist ) {
 			File.WriteAllText(
 				EwlStatics.CombinePaths( installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath, "Azure Export Data Job.yml" ),
@@ -675,11 +676,6 @@ internal class UpdateDependentLogic: Operation {
 
 	private void generateWebProjectCode( DevelopmentInstallation installation, WebApplication application, int index ) {
 		var project = installation.DevelopmentInstallationLogic.DevelopmentConfiguration.GetWebProject( application.Name );
-
-		// Classic (non-SDK-style) web projects are hand-maintained Web Forms / MVC 5 / Web API 2 projects. The DU must not generate code into them, overwrite
-		// their Web.config, or manage their project-level MSBuild files, because the author maintains those directly.
-		if( project.IsClassic( installation.GeneralLogic.Path ) )
-			return;
 
 		Directory.CreateDirectory( EwlStatics.CombinePaths( application.Path, StaticFile.AppStaticFilesFolderName ) );
 
@@ -1149,7 +1145,7 @@ internal class UpdateDependentLogic: Operation {
 		if( useSvcUtil )
 			try {
 				TewlContrib.ProcessTools.RunProgram(
-					EwlStatics.CombinePaths( AppStatics.DotNetToolsFolderPath, "SvcUtil" ),
+					EwlStatics.CombinePaths( getDotNetToolsFolderPath(), "SvcUtil" ),
 					"/d:\"" + projectGeneratedCodeFolderPath + "\" /noLogo \"" + EwlStatics.CombinePaths( projectPath, schemaPathInProject ) + "\" /o:\"" + codeFileName +
 					"\" /dconly /n:*," + nameSpace + " /ser:DataContractSerializer",
 					"",
@@ -1162,7 +1158,7 @@ internal class UpdateDependentLogic: Operation {
 			Directory.CreateDirectory( projectGeneratedCodeFolderPath );
 			try {
 				TewlContrib.ProcessTools.RunProgram(
-					EwlStatics.CombinePaths( AppStatics.DotNetToolsFolderPath, "xsd" ),
+					EwlStatics.CombinePaths( getDotNetToolsFolderPath(), "xsd" ),
 					"/nologo \"" + EwlStatics.CombinePaths( projectPath, schemaPathInProject ) + "\" /c /n:" + nameSpace + " /o:\"" + projectGeneratedCodeFolderPath +
 					"\"",
 					"",
@@ -1182,6 +1178,17 @@ internal class UpdateDependentLogic: Operation {
 				}
 		}
 	}
+
+	private string getDotNetToolsFolderPath() =>
+		IoMethods.GetFirstExistingFolderPath(
+				[
+					// Ordered by preferred path.
+					@"C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8.1 Tools",
+					@"C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools",
+					@"C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.7.2 Tools",
+					@"C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.6.2 Tools"
+				],
+			".NET Tools" );
 
 	private void generateEditorConfig( string folderPath, Action<TextWriter> lineWriter ) {
 		using var writer = new StreamWriter( EwlStatics.CombinePaths( folderPath, ".editorconfig" ), false, new UTF8Encoding( false ) );
@@ -1475,11 +1482,8 @@ internal class UpdateDependentLogic: Operation {
 		writer.WriteLine( "Library/Generated Code/" );
 
 		foreach( var app in installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications ) {
-			// Classic (non-SDK-style) web projects maintain their own Web.config, project-level MSBuild files, and Properties folder under source control; the
-			// DU does not generate into them.
-			if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.GetWebProject( app.Name ).IsClassic( installation.GeneralLogic.Path ) )
+			if( AppStatics.WebProjectIsLegacy( installation, app ) )
 				continue;
-
 			writer.WriteLine();
 			writer.WriteLine( app.Name + "/bin/" );
 			writer.WriteLine( app.Name + "/obj/" );
