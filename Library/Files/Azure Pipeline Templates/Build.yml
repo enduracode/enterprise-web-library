@@ -102,7 +102,7 @@ steps:
         solution: '@@WorkingFolderPath/${{ project }}/${{ project }}.csproj'
         msbuildArchitecture: 'x64'
         configuration: 'Release'
-        msbuildArguments: '/p:PublishProfile=Publish /p:DeployOnBuild=true /p:AspnetMergePath="@@DotNetToolsFolderPath" "/p:publishurl=$(DuInstallationPath)\Logic Packages\Server Side Logic\${{ project }}" /p:MvcBuildViews=false'
+        msbuildArguments: '/p:PublishProfile=Publish /p:DeployOnBuild=true /p:AspnetMergePath="@@DotNetToolsFolderPath" "/p:publishurl=$(DuInstallationPath)\Legacy Publish Output\${{ project }}" /p:MvcBuildViews=false'
       displayName: 'Publish ${{ project }}'
 
 - task: PowerShell@2
@@ -111,6 +111,16 @@ steps:
     script: |
       & "$(DuPath)" "$(DuInstallationPath)" ExportLogic
   displayName: 'EWL - Export logic'
+
+- ${{ if ne('@@LegacyWebProjects', '') }}:
+  - task: PowerShell@2
+    inputs:
+      targetType: 'inline'
+      script: |
+        $sourcePath = "$(DuInstallationPath)\Legacy Publish Output"
+        $targetPath = "$(DuInstallationPath)\Logic Packages\Server Side Logic"
+        Move-Item -Path (Join-Path $sourcePath '*') -Destination $targetPath
+    displayName: 'Add publish output to server-side logic'
 
 - task: PowerShell@2
   inputs:
