@@ -50,6 +50,44 @@ steps:
       & "$(DuPath)" "$(DuInstallationPath)" UpdateData Default True
   displayName: 'EWL - Update data'
 
+- ${{ if ne('@@LegacyWebProjects', '') }}:
+  - task: PowerShell@2
+    inputs:
+      targetType: 'inline'
+      script: |
+        $tdlProjectFolderPaths = @(Get-ChildItem -Path "@@WorkingFolderPath" -Directory | Where-Object { Test-Path (Join-Path $_.FullName "TypedDataLayer\Configuration.xml") })
+        if ($tdlProjectFolderPaths.Count -ne 1) {
+          Write-Host "Expected exactly one project with a TypedDataLayer configuration file but found $($tdlProjectFolderPaths.Count)."
+          exit 1
+        }
+
+        $tdlProjectFolderPath = $tdlProjectFolderPaths[0].FullName
+        $projectFiles = @(Get-ChildItem -Path $tdlProjectFolderPath -File -Filter "*.csproj")
+        if ($projectFiles.Count -ne 1) {
+          Write-Host "Expected exactly one project file in '$tdlProjectFolderPath' but found $($projectFiles.Count)."
+          exit 1
+        }
+
+        [xml]$projectXml = Get-Content -Path $projectFiles[0].FullName
+        $tdlReferences = @($projectXml.Project.ItemGroup.PackageReference | Where-Object { $_.Include -eq "TypedDataLayer" })
+        if ($tdlReferences.Count -ne 1) {
+          Write-Host "Expected exactly one TypedDataLayer package reference in '$($projectFiles[0].FullName)' but found $($tdlReferences.Count)."
+          exit 1
+        }
+
+        $nuGetPackageFolderPath = ((dotnet nuget locals global-packages --list) -split ' ', 2)[1].TrimEnd()
+        $tdlCommandRunnerPath = "$nuGetPackageFolderPath\typeddatalayer\$($tdlReferences[0].Version)\CommandRunner\CommandRunner.exe"
+        if (!(Test-Path $tdlCommandRunnerPath)) {
+          Write-Host "TypedDataLayer command runner not found at '$tdlCommandRunnerPath'."
+          exit 1
+        }
+
+        & $tdlCommandRunnerPath "$(DuInstallationPath)" UpdateAllDependentLogic
+        if ($LASTEXITCODE -ne 0) {
+          exit $LASTEXITCODE
+        }
+    displayName: 'TypedDataLayer - Update dependent logic'
+
 - task: AzureCLI@2
   inputs:
     azureSubscription: 'Azure - Intermediate'
