@@ -125,17 +125,26 @@ jobs:
           $webConfig.Save($webConfigPath)
         displayName: 'Remove modules element from ${{ app.key }} web.config'
 
+  - pwsh: |
+      $zipPath = "$(Pipeline.Workspace)/ServerSideLogic.zip"
+      Compress-Archive -Path "$(Pipeline.Workspace)/ServerSideLogic/*" -DestinationPath $zipPath -Force
+    displayName: 'Package server-side logic'
+
   - ${{ each app in parameters.webApps }}:
-    - task: AzureWebApp@1
+    - task: AzureCLI@2
       inputs:
         azureSubscription: '${{ parameters.serviceConnection }}'
-        appType: 'webApp'
-        appName: '${{ app.value.appService }}'
-        resourceGroupName: '${{ parameters.resourceGroup }}'
-        package: '$(Pipeline.Workspace)/ServerSideLogic'
-        deployToSlotOrASE: '${{ app.value.deployToSlot }}'
-        slotName: '${{ app.value.deploymentSlot }}'
-        deploymentMethod: 'zipDeploy'
+        scriptType: 'pscore'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          $token = az account get-access-token --query accessToken -o tsv
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          Invoke-RestMethod -Uri "https://${{ app.value.kuduHostName }}/api/publish?type=zip&clean=true&restart=false" `
+            -Method Post `
+            -Headers @{Authorization="Bearer $token"} `
+            -InFile "$(Pipeline.Workspace)/ServerSideLogic.zip" `
+            -ContentType "application/zip"
       displayName: 'Upload logic to ${{ app.key }} app service'
 
   # remove IIS modules
