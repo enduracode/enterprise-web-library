@@ -10,6 +10,7 @@ using Azure.ResourceManager.ManagedServiceIdentities;
 using Azure.ResourceManager.Storage;
 using EnterpriseWebLibrary.Configuration;
 using JetBrains.Annotations;
+using static MoreLinq.Extensions.AtLeastExtension;
 
 namespace EnterpriseWebLibrary.InstallationSupportUtility;
 
@@ -78,8 +79,9 @@ public static class AzureStatics {
 
 	public static string GetDataBlobPrefix( string installationShortName ) => $"{GetInstallationName( installationShortName )}-";
 
-	public static string GetAppServiceName( InstallationConfiguration installationConfiguration, string installationShortName ) =>
-		$"app-brossgroup-{getSystemName( installationConfiguration )}-{GetInstallationName( installationShortName )}";
+	public static string GetAppServiceName( InstallationConfiguration installationConfiguration, string installationShortName, WebApplication app ) =>
+		$"app-brossgroup-{getSystemName( installationConfiguration )}-{GetInstallationName( installationShortName )}" +
+		$"{( installationConfiguration.WebApplications.AtLeast( 2 ) ? $"-{app.Name.ToUrlSlug()}" : "" )}";
 
 	private static string getSystemName( InstallationConfiguration installationConfiguration ) => installationConfiguration.SystemShortName.ToUrlSlug();
 

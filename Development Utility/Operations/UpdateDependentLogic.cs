@@ -368,6 +368,26 @@ internal class UpdateDependentLogic: Operation {
 					!installedInstallation.name.Contains( "Staging", StringComparison.Ordinal )
 						? "Integration"
 						: "master";
+				var webAppList = !installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications.Any()
+					                 ? "{}"
+					                 : string.Concat(
+						                 installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications.Select( app => {
+							                 var appService = AzureStatics.GetAppServiceName(
+								                 installation.ExistingInstallationLogic.RuntimeConfiguration,
+								                 installedInstallation.shortName,
+								                 app );
+							                 const string deploymentSlot = "";
+							                 var kuduHostName = ( deploymentSlot.Length > 0 ? $"{appService}-{deploymentSlot}" : appService ) + ".scm.azurewebsites.net";
+							                 return $"""
+							                               {getYamlString( app.Name )}:
+							                                 isLegacy: {( AppStatics.WebProjectIsLegacy( installation, app ) ? "true" : "false" )}
+							                                 appService: {getYamlString( appService )}
+							                                 deploymentSlot: {getYamlString( deploymentSlot )}
+							                                 slotArgs: {getYamlString( deploymentSlot.Length > 0 ? $"--slot {deploymentSlot}" : "" )}
+							                                 deployToSlot: {getYamlString( deploymentSlot.Length > 0 ? "true" : "false" )}
+							                                 kuduHostName: {getYamlString( kuduHostName )}
+							                         """;
+						                 } ) );
 				var generatedRegion = $"""
 				                       trigger: none
 
@@ -391,7 +411,7 @@ internal class UpdateDependentLogic: Operation {
 				                           containerAppJob: '{AzureStatics.GetContainerAppJobName( installation.ExistingInstallationLogic.RuntimeConfiguration, installedInstallation.shortName )}'
 				                           dataMigratorIdentityClientId: '{AzureStatics.GetDataMigratorIdentityClientId( installation.ExistingInstallationLogic.RuntimeConfiguration, installedInstallation.shortName, installedInstallation.AzureHosting!.SubscriptionId, installationType, azureCredential! )}'
 				                           isuInstallationUrl: '{AzureStatics.GetStorageContainerUrl( AzureStatics.GetIsuInstallationContainerName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType ), azureCredential )}/{installedInstallation.shortName.ToUrlSlug()}{FileExtensions.Zip}'
-				                           appService: '{AzureStatics.GetAppServiceName( installation.ExistingInstallationLogic.RuntimeConfiguration, installedInstallation.shortName )}'
+				                           webApps: {webAppList}
 				                       """;
 				updateInstallationAzurePipeline( azureUpdateLogicPipelinePath, generatedRegion );
 
@@ -442,12 +462,6 @@ internal class UpdateDependentLogic: Operation {
 				File.ReadAllText( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "Azure Pipeline Templates", "Deploy.yml" ) )
 					.Replace( "@@EwlInitialism", EwlStatics.EwlInitialism )
 					.Replace( "@@ContainerImageDotNetVersion", ConfigurationStatics.TargetFramework[ "net".Length.. ] )
-					.Replace(
-						"@@ModernWebProjects",
-						StringTools.ConcatenateWithDelimiter(
-							",",
-							installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications.Where( i => !AppStatics.WebProjectIsLegacy( installation, i ) )
-								.Select( i => i.Name ) ) )
 					.Replace( "@@DataMigratorPath", $"{IsuStatics.DataMigratorProjectName}/{IsuStatics.DataMigratorNamespaceAndAssemblyName}.dll" ) );
 		if( azureDataPipelinesExist ) {
 			File.WriteAllText(
@@ -1411,6 +1425,8 @@ internal class UpdateDependentLogic: Operation {
 		}
 		return "";
 	}
+
+	private string getYamlString( string value ) => $"'{value.Replace( "'", "''" )}'";
 
 	private void updateInstallationAzurePipeline( string pipelinePath, string generatedRegion ) {
 		const string regionEnd = "# END-EWL-REGION";

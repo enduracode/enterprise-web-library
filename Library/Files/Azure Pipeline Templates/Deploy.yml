@@ -15,46 +15,14 @@ parameters:
   type: string
 - name: isuInstallationUrl
   type: string
-- name: appService
-  type: string
-- name: deploymentSlot
-  type: string
-  default: ''
-- name: resourceGroupOverride
-  type: string
-  default: ''
-- name: appServiceOverride
-  type: string
-  default: ''
+- name: webApps
+  type: object
 
 jobs:
 - job: Deploy
   pool:
     vmImage: 'ubuntu-latest'
   steps:
-
-  - pwsh: |
-      $resourceGroup = if ("${{ parameters.resourceGroupOverride }}") { "${{ parameters.resourceGroupOverride }}" } else { "${{ parameters.resourceGroup }}" }
-      $appService = if ("${{ parameters.appServiceOverride }}") { "${{ parameters.appServiceOverride }}" } else { "${{ parameters.appService }}" }
-      $deploymentSlot = "${{ parameters.deploymentSlot }}"
-
-      if ($deploymentSlot) {
-        $slotArgs = "--slot $deploymentSlot"
-        $deployToSlot = "true"
-        $kuduHostName = "$appService-$deploymentSlot.scm.azurewebsites.net"
-      } else {
-        $slotArgs = ""
-        $deployToSlot = "false"
-        $kuduHostName = "$appService.scm.azurewebsites.net"
-      }
-
-      Write-Host "##vso[task.setvariable variable=ResourceGroup]$resourceGroup"
-      Write-Host "##vso[task.setvariable variable=AppService]$appService"
-      Write-Host "##vso[task.setvariable variable=DeploymentSlot]$deploymentSlot"
-      Write-Host "##vso[task.setvariable variable=SlotArgs]$slotArgs"
-      Write-Host "##vso[task.setvariable variable=DeployToSlot]$deployToSlot"
-      Write-Host "##vso[task.setvariable variable=KuduHostName]$kuduHostName"
-    displayName: 'Resolve deployment parameters'
 
   - task: DownloadPipelineArtifact@2
     inputs:
@@ -76,14 +44,16 @@ jobs:
       targetPath: '$(Pipeline.Workspace)/ServerSideLogic/Configuration/Installation'
     displayName: 'Download installation configuration'
 
-  - task: AzureCLI@2
-    inputs:
-      azureSubscription: '${{ parameters.serviceConnection }}'
-      scriptType: 'pscore'
-      scriptLocation: 'inlineScript'
-      inlineScript: |
-        az webapp stop --resource-group "$(ResourceGroup)" --name "$(AppService)" $(SlotArgs)
-    displayName: 'Stop app'
+  - ${{ each app in parameters.webApps }}:
+    - task: AzureCLI@2
+      inputs:
+        azureSubscription: '${{ parameters.serviceConnection }}'
+        scriptType: 'pscore'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          az webapp stop --resource-group "${{ parameters.resourceGroup }}" --name "${{ app.value.appService }}" ${{ app.value.slotArgs }}
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      displayName: 'Stop ${{ app.key }}'
 
   - task: AzureCLI@2
     inputs:
@@ -112,7 +82,7 @@ jobs:
 
         az containerapp job registry set `
           --name "${{ parameters.containerAppJob }}" `
-          --resource-group "$(ResourceGroup)" `
+          --resource-group "${{ parameters.resourceGroup }}" `
           --server ("${{ parameters.containerImage }}" -split '/')[0] `
           --identity "system"
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -145,80 +115,83 @@ jobs:
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     displayName: 'Upload ISU installation'
 
-  - ${{ if ne('@@ModernWebProjects', '') }}:
-    - ${{ each project in split('@@ModernWebProjects', ',') }}:
+  - ${{ each app in parameters.webApps }}:
+    - ${{ if eq(app.value.isLegacy, false) }}:
       - pwsh: |
-          $webConfigPath = "$(Pipeline.Workspace)/ServerSideLogic/${{ project }}/web.config"
+          $webConfigPath = "$(Pipeline.Workspace)/ServerSideLogic/${{ app.key }}/web.config"
           [xml]$webConfig = Get-Content $webConfigPath
           $sysWebServer = $webConfig.configuration.location.'system.webServer'
           $sysWebServer.RemoveChild($sysWebServer.modules) | Out-Null
           $webConfig.Save($webConfigPath)
-        displayName: 'Remove modules element from ${{ project }} web.config'
+        displayName: 'Remove modules element from ${{ app.key }} web.config'
 
-  - task: AzureWebApp@1
-    inputs:
-      azureSubscription: '${{ parameters.serviceConnection }}'
-      appType: 'webApp'
-      appName: '$(AppService)'
-      resourceGroupName: '$(ResourceGroup)'
-      package: '$(Pipeline.Workspace)/ServerSideLogic'
-      deployToSlotOrASE: '$(DeployToSlot)'
-      slotName: '$(DeploymentSlot)'
-      deploymentMethod: 'zipDeploy'
-    displayName: 'Upload logic to app service'
+  - ${{ each app in parameters.webApps }}:
+    - task: AzureWebApp@1
+      inputs:
+        azureSubscription: '${{ parameters.serviceConnection }}'
+        appType: 'webApp'
+        appName: '${{ app.value.appService }}'
+        resourceGroupName: '${{ parameters.resourceGroup }}'
+        package: '$(Pipeline.Workspace)/ServerSideLogic'
+        deployToSlotOrASE: '${{ app.value.deployToSlot }}'
+        slotName: '${{ app.value.deploymentSlot }}'
+        deploymentMethod: 'zipDeploy'
+      displayName: 'Upload logic to ${{ app.key }} app service'
 
   # remove IIS modules
-  - task: AzureCLI@2
-    inputs:
-      azureSubscription: '${{ parameters.serviceConnection }}'
-      scriptType: 'pscore'
-      scriptLocation: 'inlineScript'
-      inlineScript: |
-        $token = az account get-access-token --query accessToken -o tsv
-        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+  - ${{ each app in parameters.webApps }}:
+    - ${{ if eq(app.value.isLegacy, false) }}:
+      - task: AzureCLI@2
+        inputs:
+          azureSubscription: '${{ parameters.serviceConnection }}'
+          scriptType: 'pscore'
+          scriptLocation: 'inlineScript'
+          inlineScript: |
+            $token = az account get-access-token --query accessToken -o tsv
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-        $xdtLines = @(
-          '<?xml version="1.0"?>',
-          '<configuration xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">',
-          '  <location path="%XDT_SITENAME%" xdt:Locator="Match(path)" xdt:Transform="InsertIfMissing">',
-          '    <system.webServer xdt:Transform="InsertIfMissing">',
-          '      <modules xdt:Transform="InsertIfMissing">',
-          '        <remove name="OutputCache" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
-          '        <remove name="Session" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
-          '        <remove name="WindowsAuthentication" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
-          '        <remove name="FormsAuthentication" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
-          '        <remove name="DefaultAuthentication" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
-          '        <remove name="RoleManager" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
-          '        <remove name="UrlAuthorization" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
-          '        <remove name="FileAuthorization" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
-          '        <remove name="AnonymousIdentification" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
-          '        <remove name="Profile" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
-          '        <remove name="UrlMappingsModule" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
-          '        <remove name="UrlRoutingModule-4.0" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
-          '        <remove name="ScriptModule-4.0" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
-          '        <remove name="ServiceModel" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
-          '        <remove name="ServiceModel-4.0" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
-          '        <remove name="RewriteModule" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
-          '        <remove name="AspNetCoreModule" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
-          '        <remove name="ModSecurity IIS (32bits)" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
-          '        <remove name="ModSecurity IIS (64bits)" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
-          '        <remove name="iisnode" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
-          '        <remove name="ApplicationRequestRouting" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
-          '      </modules>',
-          '    </system.webServer>',
-          '  </location>',
-          '</configuration>'
-        )
-        $xdtBytes = [System.Text.Encoding]::UTF8.GetBytes($xdtLines -join "`n")
+            $xdtLines = @(
+              '<?xml version="1.0"?>',
+              '<configuration xmlns:xdt="http://schemas.microsoft.com/XML-Document-Transform">',
+              '  <location path="%XDT_SITENAME%" xdt:Locator="Match(path)" xdt:Transform="InsertIfMissing">',
+              '    <system.webServer xdt:Transform="InsertIfMissing">',
+              '      <modules xdt:Transform="InsertIfMissing">',
+              '        <remove name="OutputCache" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+              '        <remove name="Session" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+              '        <remove name="WindowsAuthentication" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+              '        <remove name="FormsAuthentication" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+              '        <remove name="DefaultAuthentication" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+              '        <remove name="RoleManager" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+              '        <remove name="UrlAuthorization" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+              '        <remove name="FileAuthorization" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+              '        <remove name="AnonymousIdentification" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+              '        <remove name="Profile" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+              '        <remove name="UrlMappingsModule" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+              '        <remove name="UrlRoutingModule-4.0" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+              '        <remove name="ScriptModule-4.0" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+              '        <remove name="ServiceModel" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+              '        <remove name="ServiceModel-4.0" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+              '        <remove name="RewriteModule" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+              '        <remove name="AspNetCoreModule" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+              '        <remove name="ModSecurity IIS (32bits)" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+              '        <remove name="ModSecurity IIS (64bits)" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+              '        <remove name="iisnode" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+              '        <remove name="ApplicationRequestRouting" xdt:Locator="Match(name)" xdt:Transform="InsertIfMissing" />',
+              '      </modules>',
+              '    </system.webServer>',
+              '  </location>',
+              '</configuration>'
+            )
+            $xdtBytes = [System.Text.Encoding]::UTF8.GetBytes($xdtLines -join "`n")
 
-        Invoke-RestMethod -Uri "https://$(KuduHostName)/api/vfs/site/applicationHost.xdt" `
-          -Method Put `
-          -Headers @{Authorization="Bearer $token"; "If-Match"="*"} `
-          -Body $xdtBytes `
-          -ContentType "application/xml"
+            Invoke-RestMethod -Uri "https://${{ app.value.kuduHostName }}/api/vfs/site/applicationHost.xdt" `
+              -Method Put `
+              -Headers @{Authorization="Bearer $token"; "If-Match"="*"} `
+              -Body $xdtBytes `
+              -ContentType "application/xml"
 
-        Write-Host "applicationHost.xdt uploaded successfully"
-    displayName: 'Upload IIS configuration transform'
+            Write-Host "applicationHost.xdt uploaded successfully"
+        displayName: 'Upload ${{ app.key }} IIS configuration transform'
 
   - task: AzureCLI@2
     inputs:
@@ -228,7 +201,7 @@ jobs:
       inlineScript: |
         $execution = az containerapp job start `
           --name "${{ parameters.containerAppJob }}" `
-          --resource-group "$(ResourceGroup)" `
+          --resource-group "${{ parameters.resourceGroup }}" `
           --container-name "main" `
           --image "${{ parameters.containerImage }}" `
           --cpu 0.5 `
@@ -241,7 +214,7 @@ jobs:
         while ($true) {
           $status = az containerapp job execution show `
             --name "${{ parameters.containerAppJob }}" `
-            --resource-group "$(ResourceGroup)" `
+            --resource-group "${{ parameters.resourceGroup }}" `
             --job-execution-name $execution `
             --query properties.status -o tsv
           if ($status -eq "Succeeded") { break }
@@ -253,11 +226,13 @@ jobs:
         }
     displayName: 'Run data migrator'
 
-  - task: AzureCLI@2
-    inputs:
-      azureSubscription: '${{ parameters.serviceConnection }}'
-      scriptType: 'pscore'
-      scriptLocation: 'inlineScript'
-      inlineScript: |
-        az webapp start --resource-group "$(ResourceGroup)" --name "$(AppService)" $(SlotArgs)
-    displayName: 'Start app'
+  - ${{ each app in parameters.webApps }}:
+    - task: AzureCLI@2
+      inputs:
+        azureSubscription: '${{ parameters.serviceConnection }}'
+        scriptType: 'pscore'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          az webapp start --resource-group "${{ parameters.resourceGroup }}" --name "${{ app.value.appService }}" ${{ app.value.slotArgs }}
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      displayName: 'Start ${{ app.key }}'

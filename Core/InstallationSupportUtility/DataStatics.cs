@@ -64,11 +64,11 @@ public static class DataStatics {
 							installation.ExistingInstallationLogic.RuntimeConfiguration,
 							installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationShortName )
 						.ToCollection();
-					dataModificationUsers = AzureStatics
-						.GetAppServiceName(
+					dataModificationUsers = installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications
+						.Select( i => AzureStatics.GetAppServiceName(
 							installation.ExistingInstallationLogic.RuntimeConfiguration,
-							installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationShortName )
-						.ToCollection()
+							installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationShortName,
+							i ) )
 						.Append(
 							AzureStatics.GetContainerAppJobName(
 								installation.ExistingInstallationLogic.RuntimeConfiguration,
