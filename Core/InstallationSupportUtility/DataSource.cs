@@ -134,7 +134,8 @@ public class DataSource {
 	}
 
 	/// <summary>
-	/// Deletes all (but one - the last file is never deleted) *.zip files in the given folder that are old, but keeps increasingly sparse archive packages alive.
+	/// Deletes old *.zip files and folders in the given folder, but keeps increasingly sparse archive packages alive. Never deletes the last (most recent) file
+	/// or folder.
 	/// </summary>
 	private void deleteOldFiles( string folderPath, bool keepHistoricalArchive ) {
 		if( !Directory.Exists( folderPath ) )
@@ -147,6 +148,15 @@ public class DataSource {
 			if( !keepHistoricalArchive || creationTime < DateTime.Now.AddDays( -45 ) ||
 			    ( creationTime < DateTime.Now.AddDays( -3 ) && creationTime.DayOfWeek != DayOfWeek.Saturday ) )
 				IoMethods.DeleteFile( fileName );
+		}
+
+		// Handle Azure packages in the same way.
+		var azurePackagePaths = Directory.GetDirectories( folderPath ).OrderByDescending( Directory.GetLastWriteTime );
+		foreach( var azurePackagePath in azurePackagePaths.Skip( 1 ) ) {
+			var creationTime = File.GetCreationTime( azurePackagePath );
+			if( !keepHistoricalArchive || creationTime < DateTime.Now.AddDays( -45 ) ||
+			    ( creationTime < DateTime.Now.AddDays( -3 ) && creationTime.DayOfWeek != DayOfWeek.Saturday ) )
+				IoMethods.DeleteFolder( azurePackagePath );
 		}
 	}
 }
