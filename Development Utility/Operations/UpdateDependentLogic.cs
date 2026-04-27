@@ -378,15 +378,15 @@ internal class UpdateDependentLogic: Operation {
 								                 app );
 							                 const string deploymentSlot = "";
 							                 var kuduHostName = ( deploymentSlot.Length > 0 ? $"{appService}-{deploymentSlot}" : appService ) + ".scm.azurewebsites.net";
-							                 return $"""
-							                               {getYamlString( app.Name )}:
-							                                 isLegacy: {( AppStatics.WebProjectIsLegacy( installation, app ) ? "true" : "false" )}
-							                                 appService: {getYamlString( appService )}
-							                                 deploymentSlot: {getYamlString( deploymentSlot )}
-							                                 slotArgs: {getYamlString( deploymentSlot.Length > 0 ? $"--slot {deploymentSlot}" : "" )}
-							                                 deployToSlot: {getYamlString( deploymentSlot.Length > 0 ? "true" : "false" )}
-							                                 kuduHostName: {getYamlString( kuduHostName )}
-							                         """;
+							                 return WindowsNewline + $"""
+							                                                {getYamlString( app.Name )}:
+							                                                  isLegacy: {( AppStatics.WebProjectIsLegacy( installation, app ) ? "true" : "false" )}
+							                                                  appService: {getYamlString( appService )}
+							                                                  deploymentSlot: {getYamlString( deploymentSlot )}
+							                                                  slotArgs: {getYamlString( deploymentSlot.Length > 0 ? $"--slot {deploymentSlot}" : "" )}
+							                                                  deployToSlot: {getYamlString( deploymentSlot.Length > 0 ? "true" : "false" )}
+							                                                  kuduHostName: {getYamlString( kuduHostName )}
+							                                          """;
 						                 } ) );
 				var generatedRegion = $"""
 				                       trigger: none
