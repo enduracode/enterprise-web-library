@@ -1419,8 +1419,10 @@ internal class UpdateDependentLogic: Operation {
 	private string getSystemPathInRepository( DevelopmentInstallation installation ) {
 		var folder = new DirectoryInfo( installation.GeneralLogic.Path );
 		while( folder is not null ) {
-			if( Directory.Exists( EwlStatics.CombinePaths( folder.FullName, ".hg" ) ) || Directory.Exists( EwlStatics.CombinePaths( folder.FullName, ".git" ) ) )
-				return PathTools.NormalizePath( Path.GetRelativePath( folder.FullName, installation.GeneralLogic.Path ) );
+			if( Directory.Exists( EwlStatics.CombinePaths( folder.FullName, ".hg" ) ) || Directory.Exists( EwlStatics.CombinePaths( folder.FullName, ".git" ) ) ) {
+				var path = PathTools.NormalizePath( Path.GetRelativePath( folder.FullName, installation.GeneralLogic.Path ) );
+				return path.Equals( ".", StringComparison.Ordinal ) ? "" : path;
+			}
 			folder = folder.Parent;
 		}
 		return "";
