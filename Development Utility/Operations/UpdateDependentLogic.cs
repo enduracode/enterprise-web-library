@@ -903,7 +903,9 @@ internal class UpdateDependentLogic: Operation {
 
 	private string getServerSideConsoleAppRuntimeIdentifier() =>
 		// In Azure DevOps pipelines, assume server-side console apps will run as Container Apps jobs.
-		string.Equals( Environment.GetEnvironmentVariable( "TF_BUILD" ), bool.TrueString, StringComparison.Ordinal ) ? "linux-x64" : "win-x64";
+		string.Equals( Environment.GetEnvironmentVariable( "TF_BUILD" ), bool.TrueString, StringComparison.Ordinal )
+			? Environment.GetEnvironmentVariable( EwlStatics.EwlInitialism + "_SERVERSIDECONSOLEAPPRID" ) ?? "linux-x64"
+			: "win-x64";
 
 	private void generateUnitTestProjectCode( DevelopmentInstallation installation ) {
 		var projectPath = EwlStatics.CombinePaths(
