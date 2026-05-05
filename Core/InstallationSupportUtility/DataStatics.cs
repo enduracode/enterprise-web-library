@@ -126,7 +126,7 @@ public static class DataStatics {
 					installation,
 					installation.ExistingInstallationLogic.Database,
 					installation.ExistingInstallationLogic.RuntimeConfiguration.PrimaryDatabaseSystemConfiguration );
-				foreach( var secondaryDatabase in recognizedInstallation!.RecognizedInstallationLogic.SecondaryDatabasesIncludedInDataPackages )
+				foreach( var secondaryDatabase in recognizedInstallation?.RecognizedInstallationLogic.SecondaryDatabasesIncludedInDataPackages ?? [ ] )
 					doDatabaseLiveToIntermediateConversionIfCommandsExist(
 						installation,
 						secondaryDatabase,
