@@ -1110,7 +1110,8 @@ internal class UpdateDependentLogic: Operation {
 			writer.WriteLine( """<Using Include="Tewl" />""" );
 			writer.WriteLine( """<Using Include="Tewl.Tools" />""" );
 
-			writer.WriteLine( """<Using Include="Humanizer.StringExtensions"><Static>True</Static></Using>""" );
+			if( !installation.SystemIsTewl() )
+				writer.WriteLine( """<Using Include="EnterpriseWebLibrary.TewlContrib.StringToolsLegacy"><Static>True</Static></Using>""" );
 			writer.WriteLine( """<Using Include="Tewl.NewlineConstants"><Static>True</Static></Using>""" );
 
 			writer.WriteLine( "</ItemGroup>" );
