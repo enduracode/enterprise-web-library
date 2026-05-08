@@ -15,12 +15,9 @@
     <PackageReference Include="Azure.ResourceManager.Storage" Version="1.6.2" />
     <PackageReference Include="Azure.Storage.Blobs" Version="12.27.0" />
     <PackageReference Include="Destructurama.JsonNet" Version="4.0.2" />
-    <PackageReference Include="Ewl.Tools" Version="32.0.0" />
+    <PackageReference Include="Ewl.Tools" Version="33.0.0" />
     <PackageReference Include="FluentMigrator.Runner.SqlServer" Version="8.0.1" />
-    <PackageReference Include="Humanizer.Core" Version="3.0.10" />
-    <PackageReference Include="Ical.Net" Version="4.3.1" />
     <PackageReference Include="Imageflow.AllPlatforms" Version="0.15.1" />
-    <PackageReference Include="JetBrains.Annotations" Version="2025.2.4" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.1" />
     <PackageReference Include="Microsoft.Web.Administration" Version="11.1.0" />
     <PackageReference Include="Microsoft.Windows.Compatibility" Version="10.0.7" />
