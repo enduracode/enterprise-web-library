@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <PackageReference Include="FluentMigrator.Runner.SQLite" Version="7.1.0" />
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.0" />
+    <PackageReference Include="FluentMigrator.Runner.SQLite" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.7" />
     <PackageReference Include="Serilog.Expressions" Version="5.0.0" />
   </ItemGroup>
 

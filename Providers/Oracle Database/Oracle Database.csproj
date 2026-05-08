@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <PackageReference Include="FluentMigrator.Runner.Oracle" Version="7.1.0" />
-    <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="23.26.0" />
+    <PackageReference Include="FluentMigrator.Runner.Oracle" Version="8.0.1" />
+    <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="23.26.200" />
   </ItemGroup>
 
   <ItemGroup>
