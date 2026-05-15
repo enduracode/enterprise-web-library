@@ -438,21 +438,25 @@ internal class UpdateDependentLogic: Operation {
 				                         """;
 				updateInstallationAzurePipeline( EwlStatics.CombinePaths( azurePipelineFolderPath, "Export Data.yml" ), edGeneratedRegion );
 
-				var udGeneratedRegion = $"""
-				                         trigger: none
+				if( installationType == InstallationType.Live )
+					IoMethods.DeleteFile( EwlStatics.CombinePaths( azurePipelineFolderPath, "Update Data.yml" ) );
+				else {
+					var udGeneratedRegion = $"""
+					                         trigger: none
 
-				                         extends:
-				                           template: ../../../../Azure Update Data Job.yml
-				                           parameters:
-				                             isuContainerImage: '{AzureStatics.DiscoverGeneralContainerRegistryLoginServer( azureCredential! )}/ewl-installation-support-utility:stable'
-				                             serviceConnection: '{azureServiceConnection}'
-				                             subscription: '{installedInstallation.AzureHosting.SubscriptionId}'
-				                             resourceGroup: '{AzureStatics.GetResourceGroupName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType )}'
-				                             containerAppJob: '{AzureStatics.GetIsuContainerAppJobName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType )}'
-				                             isuInstallationStorageContainer: '{AzureStatics.GetIsuInstallationContainerName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType )}'
-				                             installation: '{AzureStatics.GetInstallationName( installedInstallation.shortName )}'
-				                         """;
-				updateInstallationAzurePipeline( EwlStatics.CombinePaths( azurePipelineFolderPath, "Update Data.yml" ), udGeneratedRegion );
+					                         extends:
+					                           template: ../../../../Azure Update Data Job.yml
+					                           parameters:
+					                             isuContainerImage: '{AzureStatics.DiscoverGeneralContainerRegistryLoginServer( azureCredential! )}/ewl-installation-support-utility:stable'
+					                             serviceConnection: '{azureServiceConnection}'
+					                             subscription: '{installedInstallation.AzureHosting.SubscriptionId}'
+					                             resourceGroup: '{AzureStatics.GetResourceGroupName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType )}'
+					                             containerAppJob: '{AzureStatics.GetIsuContainerAppJobName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType )}'
+					                             isuInstallationStorageContainer: '{AzureStatics.GetIsuInstallationContainerName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType )}'
+					                             installation: '{AzureStatics.GetInstallationName( installedInstallation.shortName )}'
+					                         """;
+					updateInstallationAzurePipeline( EwlStatics.CombinePaths( azurePipelineFolderPath, "Update Data.yml" ), udGeneratedRegion );
+				}
 
 				azureDataPipelinesExist = true;
 			}
