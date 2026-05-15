@@ -223,7 +223,173 @@ or broader refactoring), report them in your summary for the primary agent to
 handle. Do NOT undo any change via VCS if a fix goes wrong — stop and report
 instead.
 
-#### Step 5c: Fix typography in modified regions
+#### Step 5c: Reflow long comments in modified regions
+
+Wrap long C# comment lines so each line is at most **160 visible columns**, where
+a tab counts as **2 columns** and every other character counts as 1. Operate
+**only on comment text inside modified regions** of the input files. Use the
+`edit` tool for each change.
+
+This step runs only when inspection is requested (i.e. as part of Step 5). The
+format-only invocation (Steps 1-4) must NOT run this step.
+
+##### Detect scope
+
+Use the VCS determined earlier to get the diff:
+
+- **Mercurial:** `hg diff <files>`
+- **Git:** `git diff <files>`
+
+From the diff, identify each file's set of **modified line numbers** (the line
+numbers of added/changed lines in the new file). If the diff is empty for all
+specified files, report "Reflow: skipped (no modified regions)" and continue
+to Step 5d. Do NOT read the files.
+
+##### Define comment blocks
+
+A **comment block** is one of:
+
+- A run of consecutive lines whose first non-whitespace characters are `///`.
+- A run of consecutive lines whose first non-whitespace characters are `//`
+  (but not `///`) and that all share the same leading indentation.
+- A single `/* ... */` span (from the line containing `/*` through the line
+  containing the matching `*/`).
+
+A comment block is **in scope** if at least one of its lines falls within the
+modified line numbers for that file.
+
+Within a `///` block, a **paragraph** is a maximal run of consecutive `///`
+lines that:
+
+- contains no blank `///` lines (a blank `///` line is one whose content after
+  the marker is empty or whitespace-only), AND
+- contains no XML block tags. XML block tags are lines whose comment content,
+  after the marker and leading whitespace, starts with one of:
+  `<summary>`, `</summary>`, `<remarks>`, `</remarks>`, `<example>`,
+  `</example>`, `<param`, `</param>`, `<returns>`, `</returns>`, `<exception`,
+  `</exception>`, `<typeparam`, `</typeparam>`, `<code>`, `</code>`,
+  `<list`, `</list>`, `<item>`, `</item>`.
+
+Blank `///` lines and XML-block-tag lines are paragraph delimiters and are
+NEVER merged into a neighboring paragraph.
+
+For `//` blocks, treat a blank line within the block (i.e. a fully blank source
+line breaking the run, which by definition ends the block) and consecutive
+non-blank `//` lines as a single paragraph each.
+
+For `/* */` blocks, treat the entire block as one paragraph.
+
+Reflow only the paragraphs that overlap the modified line numbers.
+
+##### Lines you may edit
+
+- Only lines whose first non-whitespace content is `//` or `///`, or lines
+  entirely inside a `/* */` block.
+- A code line that has a trailing `// ...` comment is NOT editable, even if it
+  exceeds 160 columns. Leave such lines alone.
+
+##### Words you may change
+
+**You may NOT change, add, or delete any word or punctuation character of the
+prose.** The only edits you may make are:
+
+- Inserting a line break between two existing tokens (replacing the inter-token
+  whitespace with a newline plus the continuation prefix).
+- Removing a line break between two existing tokens (joining the lines and
+  replacing the newline + continuation prefix with a single space).
+- Adjusting the leading indentation + comment marker + marker-trailing
+  whitespace on a continuation line you just created, to match the source
+  paragraph's style.
+
+If you find yourself wanting to change a word, fix a typo, or add/remove
+punctuation, STOP. That is out of scope for this step.
+
+##### Width measurement
+
+Count the visible columns of a line as: tab = 2 columns; every other character
+= 1 column. The target is `<= 160` columns per line.
+
+##### Continuation-line style
+
+Every continuation line you create must start with:
+
+- the **same leading indentation** (tabs/spaces) as the source paragraph's
+  lines, then
+- the **same comment marker** (`///`, `//`, or for `/* */` blocks whatever
+  prefix the source already uses on its continuation lines -- e.g. `   * `
+  or plain indent), then
+- the **same marker-trailing whitespace** the source paragraph uses (typically
+  a single space).
+
+Do not invent a new continuation style. If the source `/* */` block has only
+one source line and therefore no example continuation style, default to no
+prefix beyond the indentation that aligned with the `/*`.
+
+##### Unbreakable tokens
+
+The following tokens must never be split across two lines. Treat each as a
+single atomic token for the wrap algorithm, even if the token itself exceeds
+160 columns:
+
+- **URLs**: any token starting with `http://`, `https://`, `mailto:`, or
+  `ftp://`.
+- **Path-like tokens**: any whitespace-free token containing `/` or `\`.
+- **XML tags inside `///` comments**: any substring from `<` through the
+  matching `>` (including self-closing tags like `<see cref="..."/>`).
+- **Backtick code spans**: any substring from `` ` `` through the next `` ` ``
+  on the same paragraph.
+- **Hyphenated compounds**: any whitespace-free token containing `-`. Do not
+  break at an internal hyphen.
+
+If a single unbreakable token is itself longer than 160 columns, allow that
+one line to exceed 160. Do NOT insert a hyphen to split it. Do NOT skip the
+rest of the paragraph -- reflow the surrounding text normally.
+
+##### Preserve fenced code blocks
+
+Inside `///` paragraphs (or `//` paragraphs), if the paragraph contains
+Markdown fence lines (``` ``` ```) or `<code>...</code>` content, treat those
+fenced regions as verbatim: do not reflow lines inside them, and treat the
+fence lines themselves as paragraph delimiters.
+
+##### Procedure per in-scope paragraph
+
+1. Read the paragraph's source lines.
+2. Strip each line's leading indentation, comment marker, and
+   marker-trailing whitespace to obtain the prose tokens. Preserve internal
+   single spaces between tokens.
+3. Greedy line-fill: starting from an empty output line, append each token.
+   If appending would push the visible column count above 160, finish the
+   current output line and start a new one beginning with the same token.
+   Treat unbreakable tokens as one token.
+4. Re-prefix every output line with the paragraph's leading indentation +
+   comment marker + marker-trailing whitespace.
+5. Round-trip check: join the output lines' stripped prose with single spaces
+   and confirm it equals the input lines' stripped prose joined with single
+   spaces. If it does NOT match exactly, do not write the edit; skip the
+   paragraph and list it under "Reflow: paragraphs skipped" in your summary.
+6. If the check passes, call `edit` with `oldString` equal to the original
+   paragraph text and `newString` equal to the reflowed paragraph text.
+
+##### Skip conditions (report, do not edit)
+
+Skip a paragraph and report it instead of editing if any of these hold:
+
+- The paragraph's lines do not share a single consistent indentation +
+  marker prefix.
+- A fenced code block in the paragraph does not start/end at a paragraph
+  boundary (i.e. the fence lines are mid-paragraph and we cannot cleanly
+  isolate them).
+- The round-trip check in step 5 fails.
+
+##### Failure handling
+
+If the `edit` tool returns an error, or if a re-read of the file shows
+something other than the exact reflowed text you constructed, **stop and
+report**. Do NOT use the `edit` tool to undo. Do NOT use VCS to revert. Do
+NOT retry the same paragraph.
+
+#### Step 5d: Fix typography in modified regions
 
 **First, check whether there is anything to do.** Use the VCS determined in
 the detection step to get the diff of the specified files against the parent
@@ -289,5 +455,9 @@ Always respond with a concise summary:
 4. **Issues fixed**: list of fixes applied, with file and description
 5. **Remaining issues**: any issues that could not be fixed automatically, with
    file, line, severity, and description -- or "none"
-6. **Typography corrections**: count of characters fixed, or "none", or
+6. **Comment reflow**: count of paragraphs reflowed, or "none", or
+   "skipped (no modified regions)", or "skipped (format-only invocation)".
+   List any paragraphs skipped due to the safety-net rules with file, line,
+   and reason.
+7. **Typography corrections**: count of characters fixed, or "none", or
    "skipped (no modified regions)"
