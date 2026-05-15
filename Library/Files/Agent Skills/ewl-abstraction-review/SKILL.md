@@ -230,4 +230,5 @@ they appear in added lines.
 | Code Pattern | Replacement | Class | Notes |
 |---|---|---|---|
 | `.ToList()` | `.Materialize()` | CollectionTools | Returns `IReadOnlyCollection<T>`; preferred for non-mutated collections |
+| `.Append(a).Append(b)` (multiple chained `.Append` calls on a sequence) | `.ConcatItems( a, b )` | CollectionTools | Only suggest when multiple individual items are appended in a chain and it won't hurt readability. A single `.Append(item)` is fine as-is and should not be replaced. Mixed `.Append`/`.Concat` chains cannot use `ConcatItems` — leave them alone. |
 | `"\n"`, `"\r\n"`, `Environment.NewLine` | `Newline` (etc.) | NewlineConstants | Available via static using in EWL systems |
