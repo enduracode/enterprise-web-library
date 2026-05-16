@@ -31,7 +31,7 @@ If the test involves the repo having `.hg` at the top, note that `Test-Path -Lit
 ### Pre-flight checks
 
 - The TUI session you are running in now will still work while tests run; `opencode run` launches a separate process with its own lifetime.
-- `hg status` / `git status` in the target system should be clean or in a known state. Testing typically leaves test edits behind, which you must revert.
+- `hg status` / `git status` in the target system should be clean or in a known state. Testing typically leaves test edits behind, which you must revert. A dirty target repo can cause the primary agent to ask a clarification question, which blocks headless testing.
 - Both the primary model and the subagent model consume Zen credits (for `opencode/*` model IDs) or upstream provider credits (for `anthropic/*`, `openai/*`, etc.). Budget accordingly: expect a few dollars for a full test matrix of ~8 scenarios.
 
 ## Propagating edits to the target system
@@ -63,6 +63,7 @@ The CLI lives at `$env:LOCALAPPDATA\opencode\opencode-cli.exe`. The `run` subcom
 | `--model <provider/model>` | Pick the primary model. Examples: `opencode/gpt-5.4`, `opencode/claude-sonnet-4-6`. |
 | `--agent <name>` | Primary agent role. Use `build` to match the normal interactive default. |
 | `--title <string>` | Human-readable session title. Very useful for filtering later. Always prefix with a scenario tag like `scen1-<what>`. |
+| `--print-logs --log-level DEBUG` | Optional diagnostics when debugging hangs or permission behavior. These do not replace transcript inspection. |
 | (positional) | The prompt text. |
 
 Minimal invocation pattern:
@@ -81,11 +82,15 @@ Pop-Location
 
 Each `opencode run` creates a fresh primary session -- no TUI restart or cache clearing needed. Agent/skill files are re-read on every startup.
 
+There is no supported `opencode run` switch that disables interactive questions or auto-answers prompts. Prevent blocking questions by starting from a clean target repo, using prompts that are specific enough for the primary agent to act without clarification, and configuring permissions to `deny` rather than `ask` for operations that should not happen during the test.
+
 ### Prompt style
 
 Prompts to the primary agent should describe a **real change request**, not a test-framework instruction. The agent must discover workflow rules (Critical Rules, agent-invocation order) from its `AGENTS.md` on its own. **Don't** write prompts like "invoke the ewl-cleanup subagent on file X per Critical Rule #2"; that short-circuits exactly the wiring you are trying to test. **Do** write prompts like "Add a public constant `Yaml` with value `.yaml` to Shared/Tewl/FileExtensions.cs".
 
 For direct-invocation tests of a single subagent (bypassing the primary), either use `--agent <subagent-name>` or phrase the prompt so the primary clearly delegates (e.g. "Please run the ewl-cleanup subagent directly on this file...").
+
+Prefer compile-safe prompts unless the scenario specifically validates behavior in the presence of compiler errors. Artificially invalid code can distract the primary agent or inspection tools, produce noisy diagnostics, and obscure the behavior under test.
 
 ### Extracting the session ID
 
@@ -102,12 +107,15 @@ Record each test's session ID (plus target dir) to a list so you can delete them
 
 ### Detecting hangs
 
-If the primary or a subagent loops on an issue (e.g. fighting with a curly-apostrophe path), the `opencode run` process may stop making progress but not exit. Symptoms:
+If the primary or a subagent loops on an issue (e.g. fighting with a curly-apostrophe path), the `opencode run` process may stop making progress but not exit. In some cases the JSONL wrapper may also fail to return even though flat-file storage shows the primary session and child sessions have already reached `step-finish` with `reason: "stop"`. Symptoms:
 - `Get-Content $jsonlPath` stops growing.
 - The OpenCode debug log file stops accumulating lines.
 - The `opencode` process (`Get-Process -Name opencode`) keeps running for minutes with no new events.
+- Flat-file storage shows no new `message\` or `part\` files for the primary session or child sessions.
 
-If this happens, kill the run:
+When this happens, treat flat-file storage as authoritative. If the primary session and all relevant child sessions have stopped, classify the scenario from the stored transcript even if `opencode run` timed out or had to be killed. If the transcript shows an in-progress tool call, permission `ask`, question prompt, or model loop, kill the run and mark the scenario inconclusive or failed according to the test contract.
+
+Use a shorter per-run watchdog timeout during large matrices, then inspect storage before deciding whether the scenario actually failed. Kill only processes that belong to the current test window:
 
 ```powershell
 Get-Process -Name opencode -ErrorAction SilentlyContinue |
@@ -115,7 +123,7 @@ Get-Process -Name opencode -ErrorAction SilentlyContinue |
   Stop-Process -Force
 ```
 
-Then mark the scenario as inconclusive. The partial transcript in flat-file storage is still readable.
+If the partial transcript ends before the scenario's required evidence exists, mark the scenario as inconclusive. If the partial transcript includes a final primary response and stopped child sessions, it is not automatically inconclusive; record it as pass/fail using the evidence in storage.
 
 ## Reading the transcript (flat-file storage)
 
@@ -364,13 +372,14 @@ Always run each scenario at least twice before trusting the result; cheap subage
 2. `dotnet run --project "Development Utility/Development Utility.csproj" -- <target-system> UpdateDependentLogic`
 3. Snapshot tool-output dir before testing (optional).
 4. For each test scenario:
-   a. Stage any pre-existing setup (e.g. make a deliberate prior edit, if the scenario calls for it).
-   b. `opencode run --format json --model <m> --agent build --title <scenario> <prompt>` in the target dir; capture stdout to a JSONL file.
-   c. Extract the session ID from the JSONL.
-   d. Record `<scenario>|<target-dir>|<session-id>` to a session-list file.
-   e. Inspect the transcript via flat-file storage; note tool calls and responses.
-   f. Check the debug log for `external_directory` asks and destructive VCS commands.
-   g. Revert any repository changes produced during the scenario.
+   a. Verify the target repo is clean except for known pre-existing files; revert previous test edits and strip only test-created commits before continuing.
+   b. Stage any pre-existing setup (e.g. make a deliberate prior edit, if the scenario calls for it).
+   c. `opencode run --format json --model <m> --agent build --title <scenario> <prompt>` in the target dir; capture stdout to a JSONL file.
+   d. Extract the session ID from the JSONL.
+   e. Record `<scenario>|<target-dir>|<session-id>` to a session-list file.
+   f. Inspect the transcript via flat-file storage; note tool calls and responses.
+   g. Check the debug log for `external_directory` asks and destructive VCS commands.
+   h. Revert any repository changes produced during the scenario.
 5. Write the test report: pass/fail per scenario with evidence.
 6. Clean up (ALWAYS -- wrap in try/finally):
    a. Enumerate child session IDs from flat files before deletion.
