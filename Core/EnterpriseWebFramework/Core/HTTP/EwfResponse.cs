@@ -105,7 +105,7 @@ public class EwfResponse {
 	// OnStarting callbacks but exceptions from them don’t seem to flow cleanly into the main error handler.
 	internal sealed class ResponseBodyFeature: IHttpResponseBodyFeature {
 		public readonly IHttpResponseBodyFeature AspNetFeature;
-		private bool transactionsCommitted;
+		public bool TransactionsCommitted { get; private set; }
 
 		public ResponseBodyFeature( IHttpResponseBodyFeature aspNetFeature ) {
 			AspNetFeature = aspNetFeature;
@@ -113,16 +113,16 @@ public class EwfResponse {
 
 		Stream IHttpResponseBodyFeature.Stream {
 			get {
-				if( !transactionsCommitted )
-					commitTransactions();
+				if( !TransactionsCommitted )
+					CommitTransactions();
 				return AspNetFeature.Stream;
 			}
 		}
 
 		PipeWriter IHttpResponseBodyFeature.Writer {
 			get {
-				if( !transactionsCommitted )
-					commitTransactions();
+				if( !TransactionsCommitted )
+					CommitTransactions();
 				return AspNetFeature.Writer;
 			}
 		}
@@ -132,14 +132,14 @@ public class EwfResponse {
 		}
 
 		async Task IHttpResponseBodyFeature.StartAsync( CancellationToken cancellationToken ) {
-			if( !transactionsCommitted )
-				commitTransactions();
+			if( !TransactionsCommitted )
+				CommitTransactions();
 			await AspNetFeature.StartAsync( cancellationToken );
 		}
 
 		async Task IHttpResponseBodyFeature.SendFileAsync( string path, long offset, long? count, CancellationToken cancellationToken ) {
-			if( !transactionsCommitted )
-				commitTransactions();
+			if( !TransactionsCommitted )
+				CommitTransactions();
 			await AspNetFeature.SendFileAsync( path, offset, count, cancellationToken );
 		}
 
@@ -147,9 +147,9 @@ public class EwfResponse {
 			return AspNetFeature.CompleteAsync();
 		}
 
-		private void commitTransactions() {
+		public void CommitTransactions() {
 			transactionCommitter();
-			transactionsCommitted = true;
+			TransactionsCommitted = true;
 		}
 	}
 

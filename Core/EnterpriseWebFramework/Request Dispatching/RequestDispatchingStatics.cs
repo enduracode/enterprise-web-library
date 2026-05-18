@@ -140,6 +140,10 @@ public static class RequestDispatchingStatics {
 					contextAccessor.UseFrameworkContext = false;
 					try {
 						await next( context );
+
+						// If the post-framework pipeline was successful, ensure transactions commit and non-transactional modifications execute.
+						if( !responseBodyFeature.TransactionsCommitted )
+							responseBodyFeature.CommitTransactions();
 					}
 					finally {
 						contextAccessor.UseFrameworkContext = true;
