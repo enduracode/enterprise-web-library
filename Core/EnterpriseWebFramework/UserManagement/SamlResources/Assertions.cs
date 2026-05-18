@@ -46,7 +46,7 @@ partial class Assertions {
 				              ? AuthenticationStatics.AppProvider.GetAuthenticatedUserHomeResource()
 				              : AuthenticationStatics.GetDefaultLogInPage( null ) ).ToTrustedUrl();
 
-		var destinationUrl = new VerifyClientFunctionality( returnUrl ).GetUrl();
+		var destinationUrl = new Pages.VerifyClientFunctionality( returnUrl ).GetUrl();
 		return EwfResponse.Create(
 			ContentTypes.PlainText,
 			new EwfResponseBodyCreator( writer => writer.Write( "See Other: {0}".FormatWith( destinationUrl ) ) ),

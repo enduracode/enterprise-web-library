@@ -34,6 +34,7 @@ public static class AuthenticationStatics {
 	private static LocalIdentityProvider.ChangePasswordPageUrlGetterMethod? changePasswordPageUrlGetter;
 
 	private static IReadOnlyCollection<SamlIdentityProvider>? samlIdentityProviders;
+	private static IReadOnlyCollection<CustomIdentityProvider>? customIdentityProviders;
 
 	public delegate SystemUser PasswordLoginModificationMethod( string emailAddress, DataValue<string> password, string errorMessage = "" );
 
@@ -68,9 +69,13 @@ public static class AuthenticationStatics {
 		samlIdentityProviders = UserManagementStatics.UserManagementEnabled
 			                        ? UserManagementStatics.IdentityProviders.OfType<SamlIdentityProvider>().Materialize()
 			                        : [ ];
+		customIdentityProviders = UserManagementStatics.UserManagementEnabled
+			                          ? UserManagementStatics.IdentityProviders.OfType<CustomIdentityProvider>().Materialize()
+			                          : [ ];
 	}
 
 	internal static IReadOnlyCollection<SamlIdentityProvider> SamlIdentityProviders => samlIdentityProviders!;
+	internal static IReadOnlyCollection<CustomIdentityProvider> CustomIdentityProviders => customIdentityProviders!;
 
 	internal static IReadOnlyCollection<FlowComponent> GetUserInfoComponents() {
 		var customComponents = AppProvider.GetUserInfoComponents();
@@ -455,18 +460,27 @@ public static class AuthenticationStatics {
 		CookieStatics.TryGetCookieValueFromResponseOrRequest( identityProviderCookieName, out var cookieValue ) && cookieValue is not null &&
 		cookieValue[ 0 ] == ( SystemUser.Current is not null ? '+' : '-' )
 			? UserManagementStatics.IdentityProviders.SingleOrDefault( identityProvider => string.Equals(
-				identityProvider is LocalIdentityProvider ? "Local" :
-				identityProvider is SamlIdentityProvider saml ? saml.EntityId : throw new ApplicationException( "identity provider" ),
-				cookieValue.Substring( 1 ),
+				identityProvider switch
+					{
+						LocalIdentityProvider => "Local",
+						SamlIdentityProvider saml => saml.EntityId,
+						CustomIdentityProvider custom => custom.Identifier,
+						_ => throw new Exception( "identity provider" )
+					},
+				cookieValue[ 1.. ],
 				StringComparison.Ordinal ) )
 			: null;
 
 	internal static void SetUserLastIdentityProvider( IdentityProvider identityProvider ) {
 		setCookie(
 			identityProviderCookieName,
-			( SystemUser.Current is not null ? "+" : "-" ) + ( identityProvider is LocalIdentityProvider ? "Local" :
-			                                                   identityProvider is SamlIdentityProvider saml ? saml.EntityId :
-			                                                   throw new ApplicationException( "identity provider" ) ) );
+			( SystemUser.Current is not null ? "+" : "-" ) + identityProvider switch
+				{
+					LocalIdentityProvider => "Local",
+					SamlIdentityProvider saml => saml.EntityId,
+					CustomIdentityProvider custom => custom.Identifier,
+					_ => throw new Exception( "identity provider" )
+				} );
 	}
 
 

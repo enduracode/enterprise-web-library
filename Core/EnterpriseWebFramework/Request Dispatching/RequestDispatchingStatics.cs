@@ -15,6 +15,7 @@ using EnterpriseWebLibrary.UserManagement;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.DependencyInjection;
+using MoreLinq.Extensions;
 using NodaTime;
 using StackExchange.Profiling;
 
@@ -296,7 +297,8 @@ public static class RequestDispatchingStatics {
 						context.Response.Clear();
 
 					// We can remove this as soon as requesting a URL with a vertical pipe doesn't blow up our web applications.
-					var errorIsBogusPathException = exception is ArgumentException argException && argException.Message == "Illegal characters in path.";
+					var errorIsBogusPathException = exception is ArgumentException argException &&
+					                                argException.Message.Equals( "Illegal characters in path.", StringComparison.Ordinal );
 
 					var baseUrlRequest = new Lazy<bool>( () => string.Equals(
 						EwfRequest.Current!.Url,
@@ -307,20 +309,31 @@ public static class RequestDispatchingStatics {
 					else if( exception is AccessDeniedException accessDeniedException ) {
 						if( accessDeniedException.CausedByIntermediateUser )
 							transferRequest( context, 403, new NonLiveLogIn( getReturnResource().GetEwfUrl( false, false ).Url ) );
-						else if( UserManagementStatics.UserManagementEnabled && !ConfigurationStatics.IsLiveInstallation && RequestState.UserAccessible &&
-						         !RequestState.ImpersonatorExists )
+						else if( UserManagementStatics.UserManagementEnabled && !ConfigurationStatics.IsLiveInstallation &&
+						         RequestState is { UserAccessible: true, ImpersonatorExists: false } )
 							transferRequest( context, 403, new UserManagement.Pages.Impersonate( getReturnResource().GetEwfUrl( false, false ).Url ) );
 						else if( accessDeniedException.LogInPageGetter( getReturnResource().ToTrustedUrl() ) is {} logInPage )
 							transferRequest( context, 403, logInPage );
 						else if( RequestState.UserAccessible && ( UserManagementStatics.LocalIdentityProviderEnabled ||
-						                                          AuthenticationStatics.SamlIdentityProviders.Count > 1 ||
-						                                          ( AuthenticationStatics.SamlIdentityProviders.Any() && SystemUser.Current is not null ) ) )
+						                                          AuthenticationStatics.SamlIdentityProviders
+							                                          .Concat<IdentityProvider>( AuthenticationStatics.CustomIdentityProviders )
+							                                          .AtLeast( 2 ) ||
+						                                          ( AuthenticationStatics.SamlIdentityProviders
+							                                            .Concat<IdentityProvider>( AuthenticationStatics.CustomIdentityProviders )
+							                                            .Any() && SystemUser.Current is not null ) ) )
 							transferRequest( context, 403, new UserManagement.Pages.LogIn( getReturnResource().ToTrustedUrl() ) );
 						else if( RequestState.UserAccessible && AuthenticationStatics.SamlIdentityProviders.Any() )
 							transferRequest(
 								context,
 								403,
 								new UserManagement.SamlResources.LogIn( AuthenticationStatics.SamlIdentityProviders.Single().EntityId, getReturnResource().ToTrustedUrl() ) );
+						else if( RequestState.UserAccessible && AuthenticationStatics.CustomIdentityProviders.Any() )
+							transferRequest(
+								context,
+								403,
+								new UserManagement.Pages.ExternalLogIn(
+									AuthenticationStatics.CustomIdentityProviders.Single().Identifier,
+									getReturnResource().ToTrustedUrl() ) );
 						else
 							transferRequest( context, 403, getErrorPage( new AccessDenied( !baseUrlRequest.Value ) ) );
 

@@ -35,6 +35,7 @@ using Serilog.Events;
 using StackExchange.Profiling;
 using StackExchange.Profiling.Internal;
 using StackExchange.Profiling.Storage;
+using static MoreLinq.Extensions.AtLeastExtension;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
@@ -545,9 +546,16 @@ public static class EwfOps {
 						AuthenticationStatics.Init(
 							providerGetter.GetProvider<AppAuthenticationProvider>( "Authentication" ),
 							app.Services.GetRequiredService<IDataProtectionProvider>(),
-							returnUrl => UserManagementStatics.LocalIdentityProviderEnabled || AuthenticationStatics.SamlIdentityProviders.Count > 1
-								             ? new UserManagement.Pages.LogIn( returnUrl )
-								             : new UserManagement.SamlResources.LogIn( AuthenticationStatics.SamlIdentityProviders.Single().EntityId, returnUrl ),
+							returnUrl =>
+								UserManagementStatics.LocalIdentityProviderEnabled || AuthenticationStatics.SamlIdentityProviders
+									.Concat<IdentityProvider>( AuthenticationStatics.CustomIdentityProviders )
+									.AtLeast( 2 )
+									? new UserManagement.Pages.LogIn( returnUrl )
+									:
+									AuthenticationStatics.SamlIdentityProviders.Any()
+										?
+										new UserManagement.SamlResources.LogIn( AuthenticationStatics.SamlIdentityProviders.Single().EntityId, returnUrl )
+										: new UserManagement.Pages.ExternalLogIn( AuthenticationStatics.CustomIdentityProviders.Single().Identifier, returnUrl ),
 							( user, code ) => new UserManagement.Pages.LogIn(
 								null,
 								optionalParameterSetter: ( specifier, _ ) => {

@@ -1,6 +1,6 @@
 ﻿using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.SamlResources;
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages;
 
 // EwlPage
 // Parameter: returnUrl
@@ -15,7 +15,7 @@ partial class VerifyClientFunctionality {
 
 	protected override string getResourceName() => "Browser Functionality Verification";
 
-	protected override UrlHandler getUrlParent() => new Metadata();
+	protected override UrlHandler getUrlParent() => new Admin.EntitySetup();
 
 	protected override PageContent getContent() {
 		if( verificationFailed() )

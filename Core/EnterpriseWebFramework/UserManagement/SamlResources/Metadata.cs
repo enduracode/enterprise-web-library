@@ -2,10 +2,9 @@
 using System.Xml;
 using EnterpriseWebLibrary.ExternalFunctionality;
 
-// EwlResource
-
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.SamlResources;
 
+// EwlResource
 partial class Metadata {
 	protected override void init() {
 		if( !AuthenticationStatics.SamlIdentityProviders.Any() )
@@ -15,17 +14,14 @@ partial class Metadata {
 	protected override UrlHandler getUrlParent() => new Admin.EntitySetup();
 
 	protected override IEnumerable<UrlPattern> getChildUrlPatterns() =>
-		LogIn.UrlPatterns.Literal( "log-in" )
-			.Append( Assertions.UrlPatterns.Literal( "assertions" ) )
-			.Append( VerifyClientFunctionality.UrlPatterns.Literal( "verify-functionality" ) );
+		LogIn.UrlPatterns.Literal( "log-in" ).Append( Assertions.UrlPatterns.Literal( "assertions" ) );
 
 	protected override EwfSafeRequestHandler getOrHead() =>
 		new EwfSafeResponseWriter(
 			EwfResponse.Create(
 				"application/samlmetadata+xml",
-				new EwfResponseBodyCreator(
-					( Stream stream ) => {
-						using var writer = XmlWriter.Create( stream, new XmlWriterSettings { Indent = true } );
-						Task.Run( async () => await ExternalFunctionalityStatics.ExternalSamlProvider.GetMetadata() ).Result.OwnerDocument.Save( writer );
-					} ) ) );
+				new EwfResponseBodyCreator( ( Stream stream ) => {
+					using var writer = XmlWriter.Create( stream, new XmlWriterSettings { Indent = true } );
+					Task.Run( async () => await ExternalFunctionalityStatics.ExternalSamlProvider.GetMetadata() ).Result.OwnerDocument.Save( writer );
+				} ) ) );
 }
