@@ -2,7 +2,7 @@
 
   <ItemGroup>
     <PackageReference Include="FluentMigrator.Runner.SQLite" Version="8.0.1" />
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.7" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.8" />
     <PackageReference Include="Serilog.Expressions" Version="5.0.0" />
   </ItemGroup>
 
