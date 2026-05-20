@@ -141,6 +141,7 @@ public class SqlServer: Database {
 						$"IF NOT EXISTS ( SELECT * FROM sys.database_principals WHERE name = '{user}' ) CREATE USER [{user}] FROM EXTERNAL PROVIDER" );
 					executeLongRunningCommand( cn, $"ALTER ROLE db_datareader ADD MEMBER [{user}]" );
 					executeLongRunningCommand( cn, $"ALTER ROLE db_datawriter ADD MEMBER [{user}]" );
+					grantExecuteIfStoredProceduresExist( cn, user );
 				}
 			}
 			else if( !fileExisted.Value ) {
@@ -148,6 +149,7 @@ public class SqlServer: Database {
 				executeLongRunningCommand( cn, "CREATE USER [{0}]".FormatWith( userName ) );
 				executeLongRunningCommand( cn, "ALTER ROLE db_datareader ADD MEMBER [{0}]".FormatWith( userName ) );
 				executeLongRunningCommand( cn, "ALTER ROLE db_datawriter ADD MEMBER [{0}]".FormatWith( userName ) );
+				grantExecuteIfStoredProceduresExist( cn, userName );
 			}
 		} );
 	}
@@ -302,6 +304,13 @@ LOG ON (
 	private string backupFilePath => EwlStatics.CombinePaths( ConfigurationStatics.EwlFolderPath, info.Database + ".bak" );
 
 	private string getSqlServerFilePath( string path ) => path.Replace( Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar );
+
+	private void grantExecuteIfStoredProceduresExist( DatabaseConnection cn, string user ) {
+		var command = cn.DatabaseInfo.CreateCommand();
+		command.CommandText = "SELECT COUNT(*) FROM sys.procedures WHERE is_ms_shipped = 0";
+		if( (int)cn.ExecuteScalarCommand( command )! > 0 )
+			executeLongRunningCommand( cn, $"GRANT EXECUTE TO [{user}]" );
+	}
 
 	IEnumerable<DataRow> Database.GetDataTypes() => throw new NotSupportedException();
 
