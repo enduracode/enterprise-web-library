@@ -101,7 +101,7 @@ jobs:
         $migratorDir = "$(Pipeline.Workspace)/ServerSideLogic/Data Migrator"
         if (Test-Path $migratorDir) {
           New-Item -ItemType Directory -Path "$isuInstallationPath/Data Migrator" -Force | Out-Null
-          Set-Content "$isuInstallationPath/Data Migrator/.placeholder" ""
+          Set-Content "$isuInstallationPath/Data Migrator/placeholder" ""
         }
 
         $zipPath = "$(Pipeline.Workspace)/IsuInstallation.zip"
