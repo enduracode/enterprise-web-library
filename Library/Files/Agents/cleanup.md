@@ -24,7 +24,7 @@ and others, but this subagent operates only on C# and XML/XSD files.
   Do not make any changes beyond what the R# tool identifies. Do not remove
   blank lines, rewrite code, or make stylistic changes on your own.
 - **Typography corrections are a separate step** and follow different rules
-  (see Step 5c below).
+  (see Step 5d below).
 - **Never run any version-control command that modifies state**, other than
   the single commit permitted by Step 4. See "Version control safety" below
   for the full list of prohibited commands and the rationale.
@@ -53,9 +53,9 @@ whether a `.hg` or `.git` directory exists in that level.
 This bounded walk correctly handles nested sub-repositories. If a file lives
 inside a sub-repo (for example, a `.git` directory nested inside an outer
 `.hg` repo), the walk will find the sub-repo first, and the sub-repo is the
-correct VCS for that file including for the diff in Step 5c. Invoke VCS
-commands with the sub-repo root as the working directory (for example, via
-`hg -R <sub-repo-root>` or `git -C <sub-repo-root>`), and pass paths
+correct VCS for that file including for the diff in Steps 5c and 5d. Invoke
+VCS commands with the sub-repo root as the working directory (for example,
+via `hg -R <sub-repo-root>` or `git -C <sub-repo-root>`), and pass paths
 relative to that sub-repo root.
 
 ### Do NOT walk above the working directory
@@ -215,23 +215,29 @@ Parse the SARIF output for issues in the specified files, then delete the
 
 For each issue reported, attempt to fix it using the Edit tool. Common fixes
 include removing unused usings, adding missing access modifiers, simplifying
-expressions, etc. After fixing all issues you can, re-run the formatter (Step 3)
-to ensure fixes are properly formatted.
+expressions, etc.
 
 If any issues cannot be fixed automatically (e.g. they require design decisions
 or broader refactoring), report them in your summary for the primary agent to
 handle. Do NOT undo any change via VCS if a fix goes wrong — stop and report
 instead.
 
-#### Step 5c: Reflow long comments in modified regions
+Any changes you make here will be re-formatted by the final formatter pass in
+Step 5e. Do not re-run the formatter yourself in this step.
 
-Wrap long C# comment lines so each line is at most **160 visible columns**, where
-a tab counts as **2 columns** and every other character counts as 1. Operate
-**only on comment text inside modified regions** of the input files. Use the
-`edit` tool for each change.
+#### Step 5c: Un-wrap comment paragraphs in modified regions
+
+Collapse each in-scope comment paragraph into a single physical line. The
+final formatter pass in Step 5e will re-wrap those lines at the team's
+configured column boundary. Operate **only on comment text inside modified
+regions** of the input files. Use the `edit` tool for each change.
 
 This step runs only when inspection is requested (i.e. as part of Step 5). The
 format-only invocation (Steps 1-4) must NOT run this step.
+
+You do NOT count visible columns. You do NOT decide where to break lines.
+Your job is to identify in-scope paragraphs, verify they are safe to
+un-wrap, and join their source lines into one line per paragraph.
 
 ##### Detect scope
 
@@ -242,7 +248,7 @@ Use the VCS determined earlier to get the diff:
 
 From the diff, identify each file's set of **modified line numbers** (the line
 numbers of added/changed lines in the new file). If the diff is empty for all
-specified files, report "Reflow: skipped (no modified regions)" and continue
+specified files, report "Un-wrap: skipped (no modified regions)" and continue
 to Step 5d. Do NOT read the files.
 
 ##### Define comment blocks
@@ -273,119 +279,65 @@ lines that:
 Blank `///` lines and XML-block-tag lines are paragraph delimiters and are
 NEVER merged into a neighboring paragraph.
 
-For `//` blocks, treat a blank line within the block (i.e. a fully blank source
-line breaking the run, which by definition ends the block) and consecutive
-non-blank `//` lines as a single paragraph each.
+For `//` blocks, treat consecutive non-blank `//` lines as a single paragraph.
+A blank source line ends the block (and therefore the paragraph).
 
 For `/* */` blocks, treat the entire block as one paragraph.
 
-Reflow only the paragraphs that overlap the modified line numbers.
+Un-wrap only the paragraphs that overlap the modified line numbers.
 
 ##### Lines you may edit
 
 - Only lines whose first non-whitespace content is `//` or `///`, or lines
   entirely inside a `/* */` block.
-- A code line that has a trailing `// ...` comment is NOT editable, even if it
-  exceeds 160 columns. Leave such lines alone.
+- A code line that has a trailing `// ...` comment is NOT editable. Leave
+  such lines alone.
 
 ##### Words you may change
 
 **You may NOT change, add, or delete any word or punctuation character of the
 prose.** The only edits you may make are:
 
-- Inserting a line break between two existing tokens (replacing the inter-token
-  whitespace with a newline plus the continuation prefix).
-- Removing a line break between two existing tokens (joining the lines and
-  replacing the newline + continuation prefix with a single space).
-- Adjusting the leading indentation + comment marker + marker-trailing
-  whitespace on a continuation line you just created, to match the source
-  paragraph's style.
+- Removing a line break between two existing comment lines within the same
+  paragraph, replacing the newline plus the next line's prefix
+  (indentation + comment marker + marker-trailing whitespace) with a single
+  space.
 
 If you find yourself wanting to change a word, fix a typo, or add/remove
 punctuation, STOP. That is out of scope for this step.
-
-##### Width measurement
-
-Count the visible columns of a line as: tab = 2 columns; every other character
-= 1 column. The target is `<= 160` columns per line.
-
-##### Continuation-line style
-
-Every continuation line you create must start with:
-
-- the **same leading indentation** (tabs/spaces) as the source paragraph's
-  lines, then
-- the **same comment marker** (`///`, `//`, or for `/* */` blocks whatever
-  prefix the source already uses on its continuation lines -- e.g. `   * `
-  or plain indent), then
-- the **same marker-trailing whitespace** the source paragraph uses (typically
-  a single space).
-
-Do not invent a new continuation style. If the source `/* */` block has only
-one source line and therefore no example continuation style, default to no
-prefix beyond the indentation that aligned with the `/*`.
-
-##### Unbreakable tokens
-
-The following tokens must never be split across two lines. Treat each as a
-single atomic token for the wrap algorithm, even if the token itself exceeds
-160 columns:
-
-- **URLs**: any token starting with `http://`, `https://`, `mailto:`, or
-  `ftp://`.
-- **Path-like tokens**: any whitespace-free token containing `/` or `\`.
-- **XML tags inside `///` comments**: any substring from `<` through the
-  matching `>` (including self-closing tags like `<see cref="..."/>`).
-- **Backtick code spans**: any substring from `` ` `` through the next `` ` ``
-  on the same paragraph.
-- **Hyphenated compounds**: any whitespace-free token containing `-`. Do not
-  break at an internal hyphen.
-
-If a single unbreakable token is itself longer than 160 columns, allow that
-one line to exceed 160. Do NOT insert a hyphen to split it. Do NOT skip the
-rest of the paragraph -- reflow the surrounding text normally.
-
-##### Preserve fenced code blocks
-
-Inside `///` paragraphs (or `//` paragraphs), if the paragraph contains
-Markdown fence lines (``` ``` ```) or `<code>...</code>` content, treat those
-fenced regions as verbatim: do not reflow lines inside them, and treat the
-fence lines themselves as paragraph delimiters.
-
-##### Procedure per in-scope paragraph
-
-1. Read the paragraph's source lines.
-2. Strip each line's leading indentation, comment marker, and
-   marker-trailing whitespace to obtain the prose tokens. Preserve internal
-   single spaces between tokens.
-3. Greedy line-fill: starting from an empty output line, append each token.
-   If appending would push the visible column count above 160, finish the
-   current output line and start a new one beginning with the same token.
-   Treat unbreakable tokens as one token.
-4. Re-prefix every output line with the paragraph's leading indentation +
-   comment marker + marker-trailing whitespace.
-5. Round-trip check: join the output lines' stripped prose with single spaces
-   and confirm it equals the input lines' stripped prose joined with single
-   spaces. If it does NOT match exactly, do not write the edit; skip the
-   paragraph and list it under "Reflow: paragraphs skipped" in your summary.
-6. If the check passes, call `edit` with `oldString` equal to the original
-   paragraph text and `newString` equal to the reflowed paragraph text.
 
 ##### Skip conditions (report, do not edit)
 
 Skip a paragraph and report it instead of editing if any of these hold:
 
+- The paragraph already consists of a single source line.
 - The paragraph's lines do not share a single consistent indentation +
   marker prefix.
-- A fenced code block in the paragraph does not start/end at a paragraph
-  boundary (i.e. the fence lines are mid-paragraph and we cannot cleanly
-  isolate them).
-- The round-trip check in step 5 fails.
+- The paragraph contains a Markdown fence line (` ``` `) or `<code>...</code>`
+  content.
+- The paragraph is part of a `<list>` / `<item>` structure (any line of the
+  paragraph contains `<list`, `</list>`, `<item>`, or `</item>`).
+
+Note that XML block tag lines (`<summary>`, `<remarks>`, etc.) are paragraph
+delimiters per the rules above, so they never appear inside a paragraph and
+do not need an explicit skip rule here.
+
+##### Procedure per in-scope paragraph
+
+1. Read the paragraph's source lines.
+2. Identify the per-line prefix: leading indentation + comment marker +
+   marker-trailing whitespace. Every source line in the paragraph must share
+   this prefix exactly. If they don't, skip the paragraph and report it.
+3. Strip the prefix from each source line to obtain its prose contribution.
+4. Concatenate the contributions with single spaces to obtain the paragraph's
+   prose.
+5. Call `edit` with `oldString` equal to the original multi-line paragraph
+   text and `newString` equal to `prefix + concatenated prose`.
 
 ##### Failure handling
 
 If the `edit` tool returns an error, or if a re-read of the file shows
-something other than the exact reflowed text you constructed, **stop and
+something other than the exact un-wrapped text you constructed, **stop and
 report**. Do NOT use the `edit` tool to undo. Do NOT use VCS to revert. Do
 NOT retry the same paragraph.
 
@@ -395,8 +347,8 @@ NOT retry the same paragraph.
 the detection step to get the diff of the specified files against the parent
 revision (e.g. `hg diff <files>` or `git diff <files>`, invoked in the
 correct repo). If the diff is empty for all specified files, report
-"Typography: skipped (no modified regions)" and continue to the response.
-Do NOT read the files and do NOT call `ewl-fix-typography`.
+"Typography: skipped (no modified regions)" and continue to Step 5e. Do NOT
+read the files and do NOT call `ewl-fix-typography`.
 
 If the diff is non-empty, identify which line ranges were modified. Then
 scan **only those modified regions** for ASCII characters in human-language
@@ -444,6 +396,25 @@ summary.
 - **Only process modified regions.** Use the VCS diff to determine which lines
   were changed. Do not fix typography outside of modified regions.
 
+#### Step 5e: Final format pass if any post-Step-3 changes occurred
+
+If any of Steps 5b, 5c, or 5d wrote to a file, re-run the ReSharper
+CleanupCode tool from Step 3 on the changed files only. This gives R# the
+final word on layout (including re-wrapping the long lines Step 5c
+produced).
+
+```shell
+jb cleanupcode "<SolutionFile>.sln" --profile="Main" --include="file1.cs;file2.cs" --no-updates
+```
+
+Track which files received changes in Steps 5b through 5d. If the set is
+empty, skip this step.
+
+Do NOT commit the result of this final pass. The single commit permitted by
+Step 4 has already happened (if at all) and captured only the Step 3 output.
+The post-Step-3 changes are left as uncommitted edits for the primary agent
+or user to inspect and commit.
+
 ## Response Format
 
 Always respond with a concise summary:
@@ -455,9 +426,15 @@ Always respond with a concise summary:
 4. **Issues fixed**: list of fixes applied, with file and description
 5. **Remaining issues**: any issues that could not be fixed automatically, with
    file, line, severity, and description -- or "none"
-6. **Comment reflow**: count of paragraphs reflowed, or "none", or
+6. **Comment un-wrap**: "changes made", "no changes",
    "skipped (no modified regions)", or "skipped (format-only invocation)".
-   List any paragraphs skipped due to the safety-net rules with file, line,
-   and reason.
-7. **Typography corrections**: count of characters fixed, or "none", or
-   "skipped (no modified regions)"
+   Do NOT list particular paragraphs or lines -- the final formatter pass in
+   Step 5e re-wraps everything, so specifics from this step are not useful.
+   If any paragraphs were skipped due to the safety-net rules, mention that
+   skips occurred without listing them.
+7. **Typography corrections**: "changes made", "no changes", or
+   "skipped (no modified regions)". Do NOT list particular characters or
+   lines -- the final formatter pass in Step 5e may rewrap the lines they
+   appear on, so specifics are not useful.
+8. **Final formatter pass**: "ran on N files" or "skipped (no post-format
+   changes)"
