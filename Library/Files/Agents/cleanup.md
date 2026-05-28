@@ -91,6 +91,33 @@ If the determined VCS is Mercurial (a `.hg` directory was found), load the
 `ewl-mercurial` skill before issuing any VCS command. Never default to Git
 when Mercurial is the determined VCS.
 
+### Determine modified regions
+
+Steps 5c and 5d both need to know which lines of each input file count as
+"modified". Use this procedure (per file, in the file's resolved repo) to
+produce either a set of modified line numbers or the value **whole file**:
+
+**Git:** Run `git status --porcelain -- <file>` and classify:
+
+- `??` (untracked), `A ` (added, staged), or `AM` (added then edited) →
+  **whole file**. Skip the diff.
+- ` M`, `M `, or `MM` → run `git diff HEAD -- <file>` and take the line
+  numbers of `+` lines in the new file. `git diff HEAD` (not `git diff`)
+  covers staged and unstaged hunks together.
+- empty output (clean tracked file) → modified region is empty.
+- `R`, `C`, `D`, `U`, or anything else → stop and report.
+
+**Mercurial:** Run `hg status -- <file>` and classify:
+
+- `?` (untracked) or `A` (added) → **whole file**. Skip the diff.
+- `M` → run `hg diff <file>` and take the line numbers of `+` lines in the
+  new file.
+- empty output (clean tracked file) → modified region is empty.
+- `R`, `!`, or anything else → stop and report.
+
+When the result is **whole file**, every line of the working copy is treated
+as modified for purposes of Steps 5c and 5d.
+
 ## Version control safety
 
 The following commands are **absolutely prohibited** under all circumstances,
@@ -241,15 +268,18 @@ un-wrap, and join their source lines into one line per paragraph.
 
 ##### Detect scope
 
-Use the VCS determined earlier to get the diff:
+For each input file, apply the **Determine modified regions** procedure (under
+"Version Control" above). The result for each file is either a set of modified
+line numbers or **whole file**.
 
-- **Mercurial:** `hg diff <files>`
-- **Git:** `git diff <files>`
+If every file's modified region is empty (all clean tracked files), report
+"Un-wrap: skipped (no modified regions)" and continue to Step 5d. Do NOT read
+those files.
 
-From the diff, identify each file's set of **modified line numbers** (the line
-numbers of added/changed lines in the new file). If the diff is empty for all
-specified files, report "Un-wrap: skipped (no modified regions)" and continue
-to Step 5d. Do NOT read the files.
+For files whose result is **whole file**, treat every comment block in the
+file as in scope (still subject to the skip conditions and editable-line rules
+below). For files with a specific set of modified line numbers, only blocks
+overlapping those numbers are in scope.
 
 ##### Define comment blocks
 
@@ -343,16 +373,18 @@ NOT retry the same paragraph.
 
 #### Step 5d: Fix typography in modified regions
 
-**First, check whether there is anything to do.** Use the VCS determined in
-the detection step to get the diff of the specified files against the parent
-revision (e.g. `hg diff <files>` or `git diff <files>`, invoked in the
-correct repo). If the diff is empty for all specified files, report
-"Typography: skipped (no modified regions)" and continue to Step 5e. Do NOT
-read the files and do NOT call `ewl-fix-typography`.
+**First, check whether there is anything to do.** For each input file, apply
+the **Determine modified regions** procedure (under "Version Control" above)
+to get either a set of modified line numbers or **whole file**.
 
-If the diff is non-empty, identify which line ranges were modified. Then
-scan **only those modified regions** for ASCII characters in human-language
-text that should be proper Unicode typographic characters.
+If every file's modified region is empty (all clean tracked files), report
+"Typography: skipped (no modified regions)" and continue to Step 5e. Do NOT
+read those files and do NOT call `ewl-fix-typography`.
+
+For files whose result is **whole file**, scan the entire file's
+human-language regions. For files with a specific set of modified line
+numbers, scan **only those modified regions** for ASCII characters in
+human-language text that should be proper Unicode typographic characters.
 Human-language text includes:
 
 - XML doc comments (`///` and `/** */`)
@@ -393,8 +425,9 @@ summary.
   opening quotation mark.
 - **When in doubt, leave the character as-is.** It is better to miss a
   correction than to introduce a wrong character.
-- **Only process modified regions.** Use the VCS diff to determine which lines
-  were changed. Do not fix typography outside of modified regions.
+- **Only process modified regions.** Use the **Determine modified regions**
+  procedure to identify which lines (or the whole file, for new/added files)
+  are in scope. Do not fix typography outside of modified regions.
 
 #### Step 5e: Final format pass if any post-Step-3 changes occurred
 
