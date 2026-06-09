@@ -89,7 +89,7 @@ export function registerPowershell( server ) {
 					);
 				}, timeoutMs );
 
-				proc.on( "close", ( code ) => {
+				const finishWithCode = ( code ) => {
 					const suffix =
 						( stderr ? "\n\nStderr:\n" + stderr : "" ) +
 						( stdoutTruncated || stderrTruncated
@@ -97,6 +97,25 @@ export function registerPowershell( server ) {
 							: "" ) +
 						( code !== 0 ? "\n\nProcess exited with code " + code + "." : "" );
 					finish( stdout.trim() + suffix );
+				};
+
+				// Resolve on "exit" (the PowerShell process terminating), not "close".
+				// "close" additionally waits for stdout/stderr to reach EOF, which never
+				// happens when the command launches a detached, long-lived process (e.g. a
+				// web server) that inherits those pipe handles -- that would wedge the tool
+				// until the timeout. After "exit" we allow a short grace window for any
+				// buffered output to flush, then resolve. If "close" fires first (the
+				// common, no-detached-child case), we resolve immediately with no delay.
+				let closed = false;
+				proc.on( "close", ( code ) => {
+					closed = true;
+					finishWithCode( code );
+				} );
+				proc.on( "exit", ( code ) => {
+					if( closed ) return;
+					proc.stdout.unref?.();
+					proc.stderr.unref?.();
+					setTimeout( () => finishWithCode( code ?? 0 ), 200 );
 				} );
 
 				proc.on( "error", ( err ) => {
