@@ -263,12 +263,9 @@ public class LocalIdentityProvider: IdentityProvider {
 		return authenticationSuccessful == true ? "" : null;
 	}
 
-	private byte[] getHashedLoginCode( string code, byte[] salt ) {
-		using var pbkdf2 = new Rfc2898DeriveBytes( code, salt, 10000, HashAlgorithmName.SHA1 );
-
+	private byte[] getHashedLoginCode( string code, byte[] salt ) =>
 		// see https://security.stackexchange.com/a/167403/20277
-		return pbkdf2.GetBytes( 20 );
-	}
+		Rfc2898DeriveBytes.Pbkdf2( code, salt, 10000, HashAlgorithmName.SHA1, 20 );
 }
 
 /// <summary>
