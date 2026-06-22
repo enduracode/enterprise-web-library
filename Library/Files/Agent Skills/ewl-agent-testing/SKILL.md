@@ -10,7 +10,7 @@ Changes to agent configuration (`AGENTS.md`, subagent prompts, skills, plugins, 
 This skill documents the end-to-end loop:
 
 1. Make the source edit in the EWL source tree.
-2. Propagate to the target test system(s) with `UpdateDependentLogic`.
+2. Propagate to the target test system(s) with `sync`.
 3. Launch `opencode run` headlessly against each target system.
 4. Capture session transcripts from flat-file storage.
 5. Check logs for permission-ask events and other red flags.
@@ -36,19 +36,23 @@ If the test involves the repo having `.hg` at the top, note that `Test-Path -Lit
 
 ## Propagating edits to the target system
 
-After editing any file under `Library\Files\` in the EWL source repo, run the EWL DU against the target system so its `.opencode\`, `.claude\`, and `Library\Generated Code\EWL Agent Rules.md` reflect your changes. Invoke the DU from within the EWL source repo:
+After editing any file under `Library\Files\` in the EWL source repo, run the EWL DU against the target system so its `.opencode\`, `.claude\`, and `Library\Generated Code\EWL Agent Rules.md` reflect your changes. Invoke the DU project from the target system directory:
 
 ```powershell
+$ewlSource = (Get-Location).Path
+
 # Target: EWL System Manager
-dotnet run --project "Development Utility/Development Utility.csproj" `
-  -- "$env:USERPROFILE\Revision Control\EWL System Manager" UpdateDependentLogic
+Push-Location -LiteralPath "$env:USERPROFILE\Revision Control\EWL System Manager"
+dotnet run --project "$ewlSource\Development Utility\Development Utility.csproj" -- sync
+Pop-Location
 
 # Target: TEWL (curly-apostrophe path, requires enumeration)
 $parent = "$env:USERPROFILE\Revision Control\EWL Dependencies"
 $tewlDir = (Get-ChildItem -LiteralPath $parent -Directory |
   Where-Object { $_.Name -like '*TEWL*' }).FullName
-dotnet run --project "Development Utility/Development Utility.csproj" `
-  -- $tewlDir UpdateDependentLogic
+Push-Location -LiteralPath $tewlDir
+dotnet run --project "$ewlSource\Development Utility\Development Utility.csproj" -- sync
+Pop-Location
 ```
 
 After the DU finishes, verify the generated file you care about looks right -- e.g. `<system>\.opencode\agents\ewl-cleanup.md`, `<system>\.opencode\tools\ewl-<tool>.js`, or `<system>\Library\Generated Code\EWL Agent Rules.md`. If you are iterating on the EWL source, rerun the DU between each iteration; `opencode run` reads these files at startup.
@@ -369,7 +373,7 @@ Always run each scenario at least twice before trusting the result; cheap subage
 ## End-to-end workflow summary
 
 1. Edit the source in `Library\Files\...` of the EWL source repo.
-2. `dotnet run --project "Development Utility/Development Utility.csproj" -- <target-system> UpdateDependentLogic`
+2. From the target system directory, run `dotnet run --project "<ewl-source>\Development Utility\Development Utility.csproj" -- sync`.
 3. Snapshot tool-output dir before testing (optional).
 4. For each test scenario:
    a. Verify the target repo is clean except for known pre-existing files; revert previous test edits and strip only test-created commits before continuing.

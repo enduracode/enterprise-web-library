@@ -7,4 +7,4 @@ $packagingConfigurationFilePath = 'Library\Configuration\Installation\Installati
 $packageId = if( Test-Path $packagingConfigurationFilePath ) { ( [xml]( Get-Content $packagingConfigurationFilePath ) ).PackagingConfiguration.SystemShortName } else { 'Ewl' }
 & dotnet tool install "$packageId.DevelopmentUtility" --tool-path "Latest DU Package" --no-cache --prerelease
 
-& "Latest DU Package\ewl" UpdateDependentLogic
+& "Latest DU Package\ewl" sync

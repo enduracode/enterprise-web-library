@@ -9,7 +9,7 @@ The Development Utility generates data-access classes from your database
 schema. These live in `Generated Code\` folders and must never be edited
 directly. You can extend them with hand-written `partial class` files.
 
-Run `Update-DependentLogic` after any schema change to regenerate.
+Run `sync` after any schema change to regenerate.
 
 ## Table retrievals
 

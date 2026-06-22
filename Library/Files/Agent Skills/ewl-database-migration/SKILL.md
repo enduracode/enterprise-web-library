@@ -6,7 +6,7 @@ description: Database schema migration using FluentMigrator with the EWL Data Mi
 ## Overview
 
 EWL uses FluentMigrator for database schema and reference data migrations.
-Migrations run automatically during `Update-DependentLogic` (for local
+Migrations run automatically during `sync` (for local
 development) and during deployment via `DataMigrator.exe`.
 
 ## Setting up the Data Migrator
@@ -119,7 +119,7 @@ Reserve `.AsCustom()` for types that have no built-in method, such as
 
 ## Running migrations
 
-Migrations run automatically when you execute `Update-DependentLogic`. Each
+Migrations run automatically when you execute `sync`. Each
 installation tracks which migrations have already been applied. When you
 deploy to a server, only new migrations run.
 
@@ -183,10 +183,10 @@ Execute.WithConnection( ( connection, transaction ) => {
 
 For initial schema and reference data (before FluentMigrator), use
 `Library/Configuration/Database Updates.sql`. This script runs during the
-first `Update-DependentLogic` and creates the baseline schema.
+first `sync` and creates the baseline schema.
 
 ## After schema changes
 
-After any migration that changes the schema, run `Update-DependentLogic` to
+After any migration that changes the schema, run `sync` to
 regenerate the data-access layer (`Generated Code\` files). This keeps
 your C# retrieval and modification classes in sync with the database.

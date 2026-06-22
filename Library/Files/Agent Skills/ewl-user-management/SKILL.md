@@ -63,7 +63,7 @@ Add role constants and caching to `Development.xml`:
 </database>
 ```
 
-Run `Update-DependentLogic` to generate data-access classes.
+Run `sync` to generate data-access classes.
 
 ## Modification logic
 

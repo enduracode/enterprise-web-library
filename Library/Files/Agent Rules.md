@@ -24,24 +24,16 @@ The EWL Development Utility (DU) performs code generation, populating
 `Generated Code\` folders in every project. It does **not** run automatically
 during builds; it must be run explicitly.
 
-In Visual Studio, run `Update-DependentLogic` in the Package Manager Console.
-
-Outside Visual Studio, run the DU executable directly. First, determine the EWL
-package name and version by reading `Library\Library.csproj` (look for the
-`PackageReference` whose `Include` matches `Ewl` followed by alphanumerics,
-e.g. `EwlBill`). Then locate the NuGet global-packages folder by running:
+From the solution directory, restore local dotnet tools if needed:
 
 ```shell
-dotnet nuget locals global-packages --list
+dotnet tool restore
 ```
 
-The DU executable is at
-`<global-packages>/<package-name>/<version>/tools/Development Utility/EnterpriseWebLibrary.DevelopmentUtility.exe`.
-Run it with the directory containing the `.sln` file as the first argument and
-`UpdateDependentLogic` as the second:
+Then run the DU with the `sync` operation:
 
 ```shell
-"<path-to-DU>/EnterpriseWebLibrary.DevelopmentUtility.exe" "<solution-directory>" UpdateDependentLogic
+dotnet ewl sync
 ```
 
 ### Test Commands
@@ -132,7 +124,7 @@ This system's `.opencode\` folder, `.claude\` folder, and
 system's `opencode.jsonc` and supplements this system's own `AGENTS.md`) are
 **fully regenerated** by the EWL Development Utility. Do not edit them
 directly — edit the corresponding sources in the EWL source repository and
-then rerun the DU's `UpdateDependentLogic` operation on this system (see
+then rerun the DU's `sync` operation on this system (see
 "Code Generation (Development Utility)" above for how to invoke it).
 Exception: skills under `.opencode\skills\` and `.claude\skills\` whose names
 are **not** prefixed with `ewl-` are system-specific, not generated, and may
@@ -160,7 +152,7 @@ repository.
 
 Remember Critical Rule #4: the generated copies are overwritten on every DU
 run, so any change you make directly to a generated file will be lost. After
-editing a source file in the EWL repository, rerun `UpdateDependentLogic`
+editing a source file in the EWL repository, rerun `sync`
 for every affected system and verify that the regenerated output reflects
 your changes.
 

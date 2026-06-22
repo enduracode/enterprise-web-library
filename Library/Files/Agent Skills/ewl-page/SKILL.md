@@ -26,7 +26,7 @@ partial class Home {
 Use `// EwlResource` instead of `// EwlPage` for non-page resources such as
 file downloads, CSS, or robots.txt.
 
-Run `Update-DependentLogic` after adding or changing any page class.
+Run `sync` after adding or changing any page class.
 
 ## Page parameters
 

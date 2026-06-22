@@ -140,11 +140,11 @@ The build template is fully generated and includes:
 
 1. .NET SDK install
 2. NuGet restore
-3. EWL DU discovery (from NuGet global packages cache)
-4. UpdateData
-5. UpdateDependentLogic
+3. EWL DU dotnet-tool restore
+4. `update-data`
+5. `sync`
 6. Second restore (for generated Directory.Build.props)
-7. ExportLogic
+7. `export-logic`
 8. Artifact publishing (per Logic Packages subfolder)
 
 ## Deploy Job Template

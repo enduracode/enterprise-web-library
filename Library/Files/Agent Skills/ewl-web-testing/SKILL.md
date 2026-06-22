@@ -98,7 +98,7 @@ dotnet new console -n Driver -o "$root\Driver" --force
 dotnet add "$root\Driver\Driver.csproj" package Microsoft.Playwright
 dotnet build "$root\Driver\Driver.csproj"
 # The TFM segment below matches your dotnet major version; check bin\Debug.
-& "$root\Driver\bin\Debug\net9.0\playwright.ps1" install chromium
+& "$root\Driver\bin\Debug\net10.0\playwright.ps1" install chromium
 ```
 
 If the driver project already exists, skip this step. Chromium install is a
