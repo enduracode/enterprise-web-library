@@ -40,7 +40,7 @@ internal static class Program {
 						}
 					}
 
-					if( args[ 0 ] == "CreateInstallationConfiguration" ) {
+					if( args[ 0 ] == "create-installation-configuration" ) {
 						if( message.Any() )
 							throw new UserCorrectableException( message );
 						return;
@@ -57,6 +57,12 @@ internal static class Program {
 
 					// Get operation.
 					var operations = AssemblyTools.BuildSingletonDictionary<Operation, string>( Assembly.GetExecutingAssembly(), i => i.GetType().Name );
+
+					// This temporary code supports migration to new kebab-cased operation names, and the rename of UpdateDependentLogic to Sync.
+					foreach( var i in operations.Materialize() )
+						operations.Add( i.Key.CamelToEnglish().ToUrlSlug(), i.Value );
+					operations.Add( "sync", operations[ "UpdateDependentLogic" ] );
+
 					var operationName = args[ 0 ];
 					if( !operations.TryGetValue( operationName, out var operation ) )
 						throw new UserCorrectableException( operationName + " is not a known operation." );
