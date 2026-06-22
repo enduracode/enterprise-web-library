@@ -21,11 +21,11 @@ internal static class Program {
 
 					AppStatics.Init();
 
-					if( args.Length < 2 )
-						throw new UserCorrectableException( "You must specify the installation path as the first argument and the operation name as the second." );
+					if( args.Length < 1 )
+						throw new UserCorrectableException( "You must specify the operation name as the first argument." );
 
 					// Create installations folder from template if necessary.
-					var installationPath = args[ 0 ];
+					var installationPath = Environment.CurrentDirectory;
 					var templateFolderPath = getInstallationsFolderPath( installationPath, true );
 					var message = "";
 					if( !Directory.Exists( templateFolderPath ) )
@@ -40,7 +40,7 @@ internal static class Program {
 						}
 					}
 
-					if( args[ 1 ] == "CreateInstallationConfiguration" ) {
+					if( args[ 0 ] == "CreateInstallationConfiguration" ) {
 						if( message.Any() )
 							throw new UserCorrectableException( message );
 						return;
@@ -57,13 +57,13 @@ internal static class Program {
 
 					// Get operation.
 					var operations = AssemblyTools.BuildSingletonDictionary<Operation, string>( Assembly.GetExecutingAssembly(), i => i.GetType().Name );
-					var operationName = args[ 1 ];
+					var operationName = args[ 0 ];
 					if( !operations.TryGetValue( operationName, out var operation ) )
 						throw new UserCorrectableException( operationName + " is not a known operation." );
 
 					if( !operation.IsValid( installation ) )
 						throw new UserCorrectableException( "The " + operation.GetType().Name + " operation cannot be performed on this installation." );
-					operation.Execute( installation, args.Skip( 2 ).MaterializeAsList(), new OperationResult() );
+					operation.Execute( installation, args.Skip( 1 ).MaterializeAsList(), new OperationResult() );
 				}
 				catch( Exception e ) {
 					Log.Error( e.ToString() );

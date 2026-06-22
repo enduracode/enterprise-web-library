@@ -3,6 +3,13 @@
 	<element name="systemDevelopmentConfiguration" type="rs:SystemDevelopmentConfiguration" />
 	<complexType name="SystemDevelopmentConfiguration">
 		<sequence>
+			<element name="Providers" minOccurs="0">
+				<complexType>
+					<sequence>
+						<element name="Provider" type="string" maxOccurs="unbounded" />
+					</sequence>
+				</complexType>
+			</element>
 			<element name="LibraryNamespaceAndAssemblyName" type="string" />
 			<element name="UpdateFileEncodings" type="boolean" minOccurs="0" />
 			<element name="webProjects" minOccurs="0">

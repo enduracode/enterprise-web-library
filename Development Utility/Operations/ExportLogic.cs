@@ -60,11 +60,45 @@ internal class ExportLogic: Operation {
 								fileName ),
 							EwlStatics.CombinePaths( folderPath, "lib/{0}".FormatWith( nuGetTargetFramework ), fileName ) );
 
-					if( !installation.SystemIsTewl() ) {
-						var toolsFolderPath = EwlStatics.CombinePaths( folderPath, "tools" );
-						IoMethods.CopyFile(
-							EwlStatics.CombinePaths( installation.GeneralLogic.Path, "Development Utility/Package Manager Console Commands.ps1" ),
-							EwlStatics.CombinePaths( toolsFolderPath, "init.ps1" ) );
+					var manifestPath = EwlStatics.CombinePaths( folderPath, "Package.nuspec" );
+					using( var writer = IoMethods.GetTextWriterForWrite( manifestPath, false ) )
+						writeNuGetPackageManifest(
+							writer,
+							installation,
+							mainId,
+							mainId,
+							"",
+							EwlStatics.CombinePaths( installation.GeneralLogic.Path, mainProjectPath, Path.GetFileName( mainProjectPath ) + ".csproj" ),
+							prerelease,
+							localExportDateAndTime );
+
+					Log.Information(
+						TewlContrib.ProcessTools.RunProgram(
+							EwlStatics.CombinePaths( installation.GeneralLogic.Path, "Solution Files/nuget" ),
+							"pack \"" + manifestPath + "\" -OutputDirectory \"" + outputFolderPath + "\"",
+							"",
+							true ) );
+				} );
+
+				return File.ReadAllBytes(
+					EwlStatics.CombinePaths(
+						outputFolderPath,
+						EwlNuGetPackageSpecificationStatics.GetNuGetPackageFileName(
+							mainId,
+							installation.CurrentMajorVersion,
+							!prerelease.HasValue || prerelease.Value ? installation.NextBuildNumber : null,
+							localExportDateAndTime: localExportDateAndTime ) ) );
+			} )
+			.MaterializeAsList();
+		packages.Add( ( mainId, mainPackages ) );
+
+		if( !installation.SystemIsTewl() ) {
+			var duId = mainId + ".DevelopmentUtility";
+			var duPackages = prereleaseValues.Select( prerelease => {
+					var localExportDateAndTime = prerelease.HasValue ? (DateTime?)null : now;
+
+					IoMethods.ExecuteWithTempFolder( folderPath => {
+						var toolsFolderPath = EwlStatics.CombinePaths( folderPath, $"tools/{nuGetTargetFramework}/any" );
 
 						const string duProjectAndFolderName = "Development Utility";
 						publishApp(
@@ -103,41 +137,51 @@ internal class ExportLogic: Operation {
 							false );
 						IoMethods.DeleteFolder(
 							EwlStatics.CombinePaths( toolsFolderPath, InstallationFileStatics.WebFrameworkStaticFilesFolderName, AppStatics.StaticFileLogicFolderName ) );
-					}
 
-					var manifestPath = EwlStatics.CombinePaths( folderPath, "Package.nuspec" );
-					using( var writer = IoMethods.GetTextWriterForWrite( manifestPath, false ) )
-						writeNuGetPackageManifest(
-							writer,
-							installation,
-							mainId,
-							mainId,
-							"",
-							EwlStatics.CombinePaths( installation.GeneralLogic.Path, mainProjectPath, Path.GetFileName( mainProjectPath ) + ".csproj" ),
-							prerelease,
-							localExportDateAndTime );
+						using( var writer = IoMethods.GetTextWriterForWrite(
+							      EwlStatics.CombinePaths( toolsFolderPath, "DotnetToolSettings" + FileExtensions.Xml ),
+							      false ) ) {
+							writer.WriteLine( """<?xml version="1.0" encoding="utf-8"?>""" );
+							writer.WriteLine( """<DotNetCliTool Version="1">""" );
+							writer.WriteLine( "<Commands>" );
+							writer.WriteLine(
+								$"""<Command Name="{EwlStatics.EwlInitialism.ToLowerInvariant()}" EntryPoint="{duProjectAndFolderName}/EnterpriseWebLibrary.DevelopmentUtility.dll" Runner="dotnet" />""" );
+							writer.WriteLine( "</Commands>" );
+							writer.WriteLine( "</DotNetCliTool>" );
+						}
 
-					Log.Information(
-						TewlContrib.ProcessTools.RunProgram(
-							EwlStatics.CombinePaths( installation.GeneralLogic.Path, "Solution Files/nuget" ),
-							"pack \"" + manifestPath + "\" -OutputDirectory \"" + outputFolderPath + "\"",
-							"",
-							true ) );
-				} );
+						var manifestPath = EwlStatics.CombinePaths( folderPath, "Package.nuspec" );
+						using( var writer = IoMethods.GetTextWriterForWrite( manifestPath, false ) )
+							writeNuGetPackageManifest(
+								writer,
+								installation,
+								"",
+								duId,
+								duProjectAndFolderName,
+								EwlStatics.CombinePaths( installation.GeneralLogic.Path, duProjectAndFolderName, duProjectAndFolderName + ".csproj" ),
+								prerelease,
+								localExportDateAndTime );
 
-				return File.ReadAllBytes(
-					EwlStatics.CombinePaths(
-						outputFolderPath,
-						EwlNuGetPackageSpecificationStatics.GetNuGetPackageFileName(
-							mainId,
-							installation.CurrentMajorVersion,
-							!prerelease.HasValue || prerelease.Value ? installation.NextBuildNumber : null,
-							localExportDateAndTime: localExportDateAndTime ) ) );
-			} )
-			.MaterializeAsList();
-		packages.Add( ( mainId, mainPackages ) );
+						Log.Information(
+							TewlContrib.ProcessTools.RunProgram(
+								EwlStatics.CombinePaths( installation.GeneralLogic.Path, "Solution Files/nuget" ),
+								"pack \"" + manifestPath + "\" -OutputDirectory \"" + outputFolderPath + "\"",
+								"",
+								true ) );
+					} );
 
-		if( !installation.SystemIsTewl() ) {
+					return File.ReadAllBytes(
+						EwlStatics.CombinePaths(
+							outputFolderPath,
+							EwlNuGetPackageSpecificationStatics.GetNuGetPackageFileName(
+								duId,
+								installation.CurrentMajorVersion,
+								!prerelease.HasValue || prerelease.Value ? installation.NextBuildNumber : null,
+								localExportDateAndTime: localExportDateAndTime ) ) );
+				} )
+				.MaterializeAsList();
+			packages.Add( ( duId, duPackages ) );
+
 			var mySqlId = mainId + ".MySql";
 			packages.Add(
 				( mySqlId,
@@ -346,25 +390,29 @@ internal class ExportLogic: Operation {
 		writer.WriteLine( "<projectUrl>http://enterpriseweblibrary.org</projectUrl>" );
 		writer.WriteLine( "<license type=\"expression\">MIT</license>" );
 		writer.WriteLine( "<requireLicenseAcceptance>false</requireLicenseAcceptance>" );
-		writer.WriteLine( "<dependencies>" );
-		writer.WriteLine( "<group targetFramework=\"{0}\">".FormatWith( nuGetTargetFramework ) );
-		if( !string.Equals( id, mainId, StringComparison.Ordinal ) )
-			writer.WriteLine(
-				"<dependency id=\"{0}\" version=\"[{1}]\" />".FormatWith(
-					mainId,
-					EwlNuGetPackageSpecificationStatics.GetNuGetPackageVersionString(
-						installation.CurrentMajorVersion,
-						!prerelease.HasValue || prerelease.Value ? installation.NextBuildNumber : null,
-						localExportDateAndTime: localExportDateAndTime ) ) );
-		var lines = from line in File.ReadAllLines( projectFilePath )
-		            let trimmedLine = line.Trim()
-		            where trimmedLine.StartsWith( "<PackageReference " )
-		            select trimmedLine;
-		foreach( var line in lines )
-			writer.WriteLine( line.Replace( "PackageReference", "dependency" ).Replace( "Include", "id" ).Replace( "Version", "version" ) );
-		writer.WriteLine( "</group>" );
-		writer.WriteLine( "</dependencies>" );
 		writer.WriteLine( "<tags>C# ASP.NET DAL SQL-Server MySQL Oracle</tags>" );
+		if( mainId.Length > 0 ) {
+			writer.WriteLine( "<dependencies>" );
+			writer.WriteLine( "<group targetFramework=\"{0}\">".FormatWith( nuGetTargetFramework ) );
+			if( !string.Equals( id, mainId, StringComparison.Ordinal ) )
+				writer.WriteLine(
+					"<dependency id=\"{0}\" version=\"[{1}]\" />".FormatWith(
+						mainId,
+						EwlNuGetPackageSpecificationStatics.GetNuGetPackageVersionString(
+							installation.CurrentMajorVersion,
+							!prerelease.HasValue || prerelease.Value ? installation.NextBuildNumber : null,
+							localExportDateAndTime: localExportDateAndTime ) ) );
+			var lines = from line in File.ReadAllLines( projectFilePath )
+			            let trimmedLine = line.Trim()
+			            where trimmedLine.StartsWith( "<PackageReference " )
+			            select trimmedLine;
+			foreach( var line in lines )
+				writer.WriteLine( line.Replace( "PackageReference", "dependency" ).Replace( "Include", "id" ).Replace( "Version", "version" ) );
+			writer.WriteLine( "</group>" );
+			writer.WriteLine( "</dependencies>" );
+		}
+		else
+			writer.WriteLine( """<packageTypes><packageType name="DotnetTool" /></packageTypes>""" );
 		writer.WriteLine( "</metadata>" );
 		writer.WriteLine( "</package>" );
 	}
