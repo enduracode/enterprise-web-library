@@ -26,7 +26,7 @@ Now open `Library/Configuration/Development.xml` and add entries for your roles 
 </database>
 ```
 
-Run `Update-DependentLogic`.
+Run `sync`.
 
 
 ## Adding modification logic

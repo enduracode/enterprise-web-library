@@ -22,7 +22,7 @@ Then open `Library/Configuration/Development.xml` and replace the empty `<databa
 </database>
 ```
 
- Run `Update-DependentLogic`. This will give you the schema, reference data, and data-access layer needed for the rest of this guide. See the [Database Migration](DatabaseMigration.md) and [Data Access](DataAccess.md) guides to learn how all of this works.
+ Run `sync`. This will give you the schema, reference data, and data-access layer needed for the rest of this guide. See the [Database Migration](DatabaseMigration.md) and [Data Access](DataAccess.md) guides to learn how all of this works.
 
 
 ## Adding pages
@@ -36,7 +36,7 @@ For the form, add a class called `ServiceOrder` to the `Website` project. In `Se
 // Parameter: int? serviceOrderId
 ```
 
-The first line tells the framework to generate code for this class, to make it a page, and the second declares a URL query parameter that will be incorporated into this generated code. Speaking of generated code, run `Update-DependentLogic` now to create it.
+The first line tells the framework to generate code for this class, to make it a page, and the second declares a URL query parameter that will be incorporated into this generated code. Speaking of generated code, run `sync` now to create it.
 
 Now we need to set up a URL pattern for the form page. Open `Home.cs`, add a using directive for `System.Linq`, and replace the implementation of `getChildUrlPatterns` with the following expression:
 
@@ -401,7 +401,7 @@ We’ll use CSS to do this, and our first step is to add a style sheet. Click th
 }
 ```
 
-Run `Update-DependentLogic` to generate some code for our new style sheet. Open `Providers/StandardPageLogic.cs` and override `GetStyleSheets`:
+Run `sync` to generate some code for our new style sheet. Open `Providers/StandardPageLogic.cs` and override `GetStyleSheets`:
 
 ```C#
 public override List<ResourceInfo> GetStyleSheets() => [ new StaticFiles.StylesCss() ];
@@ -552,7 +552,7 @@ insert into UserRoles values( 3, 'Bicycle mechanic' )
 go
 ```
 
-Run `Update-DependentLogic` to execute that and regenerate code. Now let’s prevent anonymous users from visiting the list of service orders. In `Home.cs` add this property above `getChildUrlPatterns`:
+Run `sync` to execute that and regenerate code. Now let’s prevent anonymous users from visiting the list of service orders. In `Home.cs` add this property above `getChildUrlPatterns`:
 
 ```C#
 protected override bool userCanAccess => SystemUser.Current is not null;

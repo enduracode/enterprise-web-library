@@ -8,7 +8,7 @@ Last updated for Enterprise Web Library version 83.
 ## Requirements
 
 *	Windows 11
-*	Visual Studio 2022 or later (recommended), or .NET 8 SDK
+*	Visual Studio 2026 or later (recommended), or the .NET 10 SDK
 *	SQL Server 2022 or later, MySQL 8.0 or later, or Oracle Database 12c or later (if you want a relational database)
 
 For servers, the only requirement is Windows Server 2019 or later with IIS enabled.
@@ -18,9 +18,9 @@ For servers, the only requirement is Windows Server 2019 or later with IIS enabl
 
 1.	Visit http://ewl.enterpriseweblibrary.org/create-system to download a ZIP file containing your new starter system. Extract the files into a location of your choice.
 
-2.	Open the solution file in Visual Studio. In the Package Manager Console, run `Install-Package Ewl -ProjectName Library`.
+2.	Open the solution file in Visual Studio. In the Terminal, run `dotnet tool install Ewl.DevelopmentUtility`.
 
-3.	Again in the Package Manager Console, run `Update-DependentLogic`. This will copy some web-framework files into the solution, and generate a few pieces of code in both projects. It will also apply some IIS configuration (if installed) in case you wish to use this as a local web server instead of Kestrel.
+3.	Again in the Terminal, run `dotnet ewl sync`. This will copy some web-framework files into the solution, and generate a few pieces of code in both projects. It will also apply some IIS configuration (if installed) in case you wish to use this as a local web server instead of Kestrel.
 
 4.	Understand the elements of your new system:
 
@@ -43,18 +43,18 @@ For servers, the only requirement is Windows Server 2019 or later with IIS enabl
 
 	* For Oracle, use `<database xsi:type="OracleDatabase">` with the `<tnsName>`, `<userAndSchema>`, and `<password>` child elements. Name your schema whatever you like. We have no convention. The MySQL convention may work.
 
-2.	In the Package Manager Console, run `Update-Data`. This will create (or re-create) the database.
+2.	In the Terminal, run `dotnet ewl update-data`. This will create (or re-create) the database.
 
 3.	Add the `<database>` element to the development configuration file (i.e. `Library/Configuration/Development.xml`) after the `<webProjects>` element.
 
-Now, when you run `Update-DependentLogic`, data-access code will be generated for your database.
+Now, when you run `dotnet ewl sync`, data-access code will be generated for your database.
 
 
 ## Deploying your system
 
 This section is more theoretical than practical since it’s generally not a good practice to deploy enterprise software by hand, and without a continuous integration infrastructure.
 
-1.	In the Package Manager Console, run `ExportLogic`.
+1.	In the Terminal, run `dotnet ewl export-logic`.
 
 2.	Somehow copy the exported logic and configuration to the server.
 

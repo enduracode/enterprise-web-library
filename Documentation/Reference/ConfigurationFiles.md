@@ -6,7 +6,7 @@
 
 ### `Development.xml`
 
-Required. The development-time configuration used by `Update-DependentLogic`. Not deployed to servers.
+Required. The development-time configuration used by `sync`. Not deployed to servers.
 
 
 ### `General.xml`
