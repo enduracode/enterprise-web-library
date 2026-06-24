@@ -24,30 +24,14 @@ steps:
     custom: 'restore'
   displayName: 'Restore NuGet dependencies'
 
-- task: PowerShell@2
-  inputs:
-    targetType: 'inline'
-    script: |
-      [xml]$projectXml = Get-Content -Path "@@WorkingFolderPath/Library/Library.csproj"
-      $ewlReference = $projectXml.Project.ItemGroup.PackageReference | Where-Object {$_.Include -match '^Ewl[A-Za-z0-9]+$'}
-      $name = $ewlReference.Include
-      $version = $ewlReference.Version
-
-      $nuGetPackageFolderPath = ((dotnet nuget locals global-packages --list) -split ' ', 2)[1].TrimEnd()
-      $duPath = Get-ChildItem "$nuGetPackageFolderPath\$name\$version\tools\Development Utility\EnterpriseWebLibrary.DevelopmentUtility.exe"
-      Write-Host "##vso[task.setvariable variable=DuPath]$duPath"
-
-      $duInstallationPath = "@@WorkingFolderPath" -replace '/', '\'
-      Write-Host "##vso[task.setvariable variable=DuInstallationPath]$duInstallationPath"
-  displayName: 'Find EWL Development Utility'
-
 - task: AzureCLI@2
   inputs:
     azureSubscription: 'Azure - Intermediate'
     scriptType: 'ps'
     scriptLocation: 'inlineScript'
     inlineScript: |
-      & "$(DuPath)" "$(DuInstallationPath)" UpdateData Default True
+      dotnet ewl update-data Default True
+    workingDirectory: '@@WorkingFolderPath'
   displayName: 'EWL - Update data'
 
 - ${{ if ne('@@LegacyWebProjects', '') }}:
@@ -82,7 +66,8 @@ steps:
           exit 1
         }
 
-        & $tdlCommandRunnerPath "$(DuInstallationPath)" UpdateAllDependentLogic
+        $installationPath = "@@WorkingFolderPath" -replace '/', '\'
+        & $tdlCommandRunnerPath $installationPath UpdateAllDependentLogic
         if ($LASTEXITCODE -ne 0) {
           exit $LASTEXITCODE
         }
@@ -94,8 +79,9 @@ steps:
     scriptType: 'ps'
     scriptLocation: 'inlineScript'
     inlineScript: |
-      & "$(DuPath)" "$(DuInstallationPath)" UpdateDependentLogic
-  displayName: 'EWL - Update dependent logic'
+      dotnet ewl sync
+    workingDirectory: '@@WorkingFolderPath'
+  displayName: 'EWL - Sync'
 
 # Restore again to take into account the Directory.Build.props files that we generated.
 - task: DotNetCoreCLI@2
@@ -140,14 +126,15 @@ steps:
         solution: '@@WorkingFolderPath/${{ project }}/${{ project }}.csproj'
         msbuildArchitecture: 'x64'
         configuration: 'Release'
-        msbuildArguments: '/p:PublishProfile=Publish /p:DeployOnBuild=true /p:AspnetMergePath="@@DotNetToolsFolderPath" "/p:publishurl=$(DuInstallationPath)\Legacy Publish Output\${{ project }}" /p:MvcBuildViews=false'
+        msbuildArguments: '/p:PublishProfile=Publish /p:DeployOnBuild=true /p:AspnetMergePath="@@DotNetToolsFolderPath" "/p:publishurl=@@WorkingFolderPath/Legacy Publish Output/${{ project }}" /p:MvcBuildViews=false'
       displayName: 'Publish ${{ project }}'
 
 - task: PowerShell@2
   inputs:
     targetType: 'inline'
     script: |
-      & "$(DuPath)" "$(DuInstallationPath)" ExportLogic
+      dotnet ewl export-logic
+    workingDirectory: '@@WorkingFolderPath'
   displayName: 'EWL - Export logic'
 
 - ${{ if ne('@@LegacyWebProjects', '') }}:
@@ -155,8 +142,8 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
-        $sourcePath = "$(DuInstallationPath)\Legacy Publish Output"
-        $targetPath = "$(DuInstallationPath)\Logic Packages\Server Side Logic"
+        $sourcePath = "@@WorkingFolderPath/Legacy Publish Output"
+        $targetPath = "@@WorkingFolderPath/Logic Packages/Server Side Logic"
         Move-Item -Path (Join-Path $sourcePath '*') -Destination $targetPath
     displayName: 'Add publish output to server-side logic'
 
@@ -164,7 +151,7 @@ steps:
   inputs:
     targetType: 'inline'
     script: |
-      $logicPackagesPath = "$(DuInstallationPath)\Logic Packages"
+      $logicPackagesPath = "@@WorkingFolderPath/Logic Packages"
       if (Test-Path $logicPackagesPath) {
         $folders = Get-ChildItem -Path $logicPackagesPath -Directory
         foreach ($folder in $folders) {
