@@ -58,7 +58,7 @@ public class InstallationConfiguration {
 
 	/// <summary>
 	/// Returns true if an installed installation exists at the specified path.
-	/// </summary> 
+	/// </summary>
 	public static bool InstalledInstallationExists( string installationPath ) {
 		// Consider this installation "installed" if a Configuration folder exists at the root of the installation folder.
 		return Directory.Exists( EwlStatics.CombinePaths( installationPath, ConfigurationFolderName ) );
@@ -289,6 +289,8 @@ public class InstallationConfiguration {
 				oracleDatabase.password,
 				!oracleDatabase.SupportsConnectionPoolingSpecified || oracleDatabase.SupportsConnectionPooling,
 				!oracleDatabase.SupportsLinguisticIndexesSpecified || oracleDatabase.SupportsLinguisticIndexes );
+		if( database is FolderDatabase folderDatabase )
+			return new FolderDatabaseInfo( secondaryDatabaseName, folderDatabase.FolderPath );
 		throw new ApplicationException( "Unknown database type." );
 	}
 

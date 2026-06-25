@@ -86,6 +86,15 @@
 			</extension>
 		</complexContent>
 	</complexType>
+	<complexType name="FolderDatabase">
+		<complexContent>
+			<extension base="rs:Database">
+				<sequence>
+					<element name="FolderPath" type="string" minOccurs="0" />
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
 	<complexType name="AzureHosting">
 		<sequence>
 			<element name="TenantId" type="string" />

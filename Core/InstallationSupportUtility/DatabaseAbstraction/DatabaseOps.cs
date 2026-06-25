@@ -16,6 +16,7 @@ public static class DatabaseOps {
 				SqlServerInfo info => new SqlServer( info, "Data", "Log" ),
 				MySqlInfo info => new MySql( info ),
 				OracleInfo info => new Oracle( info ),
+				FolderDatabaseInfo info => new FolderDatabase( info ),
 				_ => throw new ApplicationException( "Invalid database information object type." )
 			};
 
