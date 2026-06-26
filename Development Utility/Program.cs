@@ -104,6 +104,7 @@ internal static class Program {
 			return new RecognizedDevelopmentInstallation( generalInstallationLogic, existingInstallationLogic, knownSystemLogic, recognizedInstallationLogic );
 		}
 
-		return new UnrecognizedDevelopmentInstallation( generalInstallationLogic, existingInstallationLogic );
+		var unrecognizedLogic = new UnrecognizedInstallationLogic( existingInstallationLogic );
+		return new UnrecognizedDevelopmentInstallation( generalInstallationLogic, existingInstallationLogic, unrecognizedLogic );
 	}
 }

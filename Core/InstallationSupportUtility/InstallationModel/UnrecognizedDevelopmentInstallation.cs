@@ -1,30 +1,34 @@
-﻿namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel {
-	public class UnrecognizedDevelopmentInstallation: DevelopmentInstallation {
-		private readonly GeneralInstallationLogic generalInstallationLogic;
-		private readonly ExistingInstallationLogic existingInstallationLogic;
-		private readonly DevelopmentInstallationLogic developmentInstallationLogic;
+﻿namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
 
-		public UnrecognizedDevelopmentInstallation( GeneralInstallationLogic generalInstallationLogic, ExistingInstallationLogic existingInstallationLogic ) {
-			this.generalInstallationLogic = generalInstallationLogic;
-			this.existingInstallationLogic = existingInstallationLogic;
-			developmentInstallationLogic = new DevelopmentInstallationLogic( generalInstallationLogic, existingInstallationLogic, null );
-		}
+public class UnrecognizedDevelopmentInstallation: UnrecognizedInstallation, DevelopmentInstallation {
+	private readonly GeneralInstallationLogic generalInstallationLogic;
+	private readonly ExistingInstallationLogic existingInstallationLogic;
+	private readonly UnrecognizedInstallationLogic unrecognizedInstallationLogic;
+	private readonly DevelopmentInstallationLogic developmentInstallationLogic;
 
-		public override string ToString() {
-			return LatestFullName;
-		}
-
-		public string LatestFullName { get { return existingInstallationLogic.RuntimeConfiguration.FullName; } }
-
-		public string LatestFullShortName { get { return existingInstallationLogic.RuntimeConfiguration.FullShortName; } }
-
-		public GeneralInstallationLogic GeneralLogic { get { return generalInstallationLogic; } }
-
-		public ExistingInstallationLogic ExistingInstallationLogic { get { return existingInstallationLogic; } }
-
-		public DevelopmentInstallationLogic DevelopmentInstallationLogic { get { return developmentInstallationLogic; } }
-
-		int DevelopmentInstallation.CurrentMajorVersion { get { return 1; } }
-		int DevelopmentInstallation.NextBuildNumber { get { return 1; } }
+	public UnrecognizedDevelopmentInstallation(
+		GeneralInstallationLogic generalInstallationLogic, ExistingInstallationLogic existingInstallationLogic,
+		UnrecognizedInstallationLogic unrecognizedInstallationLogic ) {
+		this.generalInstallationLogic = generalInstallationLogic;
+		this.existingInstallationLogic = existingInstallationLogic;
+		this.unrecognizedInstallationLogic = unrecognizedInstallationLogic;
+		developmentInstallationLogic = new DevelopmentInstallationLogic( generalInstallationLogic, existingInstallationLogic, null );
 	}
+
+	public override string ToString() => LatestFullName;
+
+	public string LatestFullName => existingInstallationLogic.RuntimeConfiguration.FullName;
+
+	public string LatestFullShortName => existingInstallationLogic.RuntimeConfiguration.FullShortName;
+
+	public GeneralInstallationLogic GeneralLogic => generalInstallationLogic;
+
+	public ExistingInstallationLogic ExistingInstallationLogic => existingInstallationLogic;
+
+	public UnrecognizedInstallationLogic UnrecognizedInstallationLogic => unrecognizedInstallationLogic;
+
+	public DevelopmentInstallationLogic DevelopmentInstallationLogic => developmentInstallationLogic;
+
+	int DevelopmentInstallation.CurrentMajorVersion => 1;
+	int DevelopmentInstallation.NextBuildNumber => 1;
 }

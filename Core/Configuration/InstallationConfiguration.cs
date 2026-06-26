@@ -260,6 +260,11 @@ public class InstallationConfiguration {
 		installationStandardConfiguration.database != null ? getDatabaseInfo( "", installationStandardConfiguration.database ) : null;
 
 	/// <summary>
+	/// Gets the names of the secondary databases for this configuration.
+	/// </summary>
+	public IReadOnlyCollection<string> SecondaryDatabaseNames => installationStandardConfiguration.SecondaryDatabases.Select( i => i.Name ).Materialize();
+
+	/// <summary>
 	/// Gets a database information object corresponding to the secondary database for this configuration with the specified name.
 	/// </summary>
 	public DatabaseInfo GetSecondaryDatabaseInfo( string name ) {

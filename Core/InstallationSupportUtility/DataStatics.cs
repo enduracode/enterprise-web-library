@@ -85,7 +85,7 @@ public static class DataStatics {
 					packageFolderPath,
 					dataMigrationUsers,
 					dataModificationUsers );
-				if( recognizedInstallation != null )
+				if( recognizedInstallation is not null )
 					foreach( var secondaryDatabase in recognizedInstallation.RecognizedInstallationLogic.SecondaryDatabasesIncludedInDataPackages )
 						deleteAndReCreateDatabase(
 							installation,
@@ -97,6 +97,20 @@ public static class DataStatics {
 							packageFolderPath,
 								[ ],
 								[ ] );
+				else {
+					var unrecognizedInstallation = (UnrecognizedInstallation)installation;
+					foreach( var secondaryDatabase in unrecognizedInstallation.UnrecognizedInstallationLogic.AllSecondaryDatabases )
+						deleteAndReCreateDatabase(
+							installation,
+							secondaryDatabase,
+							databaseHasMinimumDataRevision(
+								installation.ExistingInstallationLogic.RuntimeConfiguration.GetSecondaryDatabaseSystemConfiguration(
+									secondaryDatabase.SecondaryDatabaseName ) ),
+							sourceInstallationType,
+							packageFolderPath,
+								[ ],
+								[ ] );
+				}
 			} );
 
 			DatabaseOps.WaitForDatabaseRecovery( installation.ExistingInstallationLogic.Database );
