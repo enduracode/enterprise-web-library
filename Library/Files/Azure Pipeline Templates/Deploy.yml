@@ -11,6 +11,8 @@ parameters:
   type: string
 - name: containerAppJob
   type: string
+- name: jobContainerUrl
+  type: string
 - name: dataMigratorIdentityClientId
   type: string
 - name: isuInstallationUrl
@@ -85,6 +87,13 @@ jobs:
           --resource-group "${{ parameters.resourceGroup }}" `
           --server ("${{ parameters.containerImage }}" -split '/')[0] `
           --identity "system"
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+        az containerapp job update `
+          --name "${{ parameters.containerAppJob }}" `
+          --resource-group "${{ parameters.resourceGroup }}" `
+          --container-name "main" `
+          --image "${{ parameters.containerImage }}"
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     displayName: 'Build and push container image'
 
@@ -211,13 +220,20 @@ jobs:
         $execution = az containerapp job start `
           --name "${{ parameters.containerAppJob }}" `
           --resource-group "${{ parameters.resourceGroup }}" `
-          --container-name "main" `
-          --image "${{ parameters.containerImage }}" `
-          --cpu 0.5 `
-          --memory 1Gi `
-          --args "@@DataMigratorPath" `
-          --env-vars "EwlDataMigratorManagedIdentityClientId=${{ parameters.dataMigratorIdentityClientId }}" `
           --query name -o tsv
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+        $record = @{
+          env   = @{ EwlDataMigratorManagedIdentityClientId = "${{ parameters.dataMigratorIdentityClientId }}" }
+          args  = @("@@DataMigratorPath")
+          input = ""
+        } | ConvertTo-Json -Compress
+        az storage blob upload `
+          --blob-url "${{ parameters.jobContainerUrl }}/$execution.json" `
+          --data $record `
+          --overwrite true `
+          --content-type "application/json" `
+          --auth-mode login
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
         while ($true) {

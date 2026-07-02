@@ -422,6 +422,7 @@ internal class UpdateDependentLogic: Operation {
 				                           resourceGroup: '{AzureStatics.GetResourceGroupName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType )}'
 				                           containerImage: '{AzureStatics.DiscoverGeneralContainerRegistryLoginServer( azureCredential! )}/{AzureStatics.GetContainerImageName( installation.ExistingInstallationLogic.RuntimeConfiguration, installedInstallation.shortName, installationType )}'
 				                           containerAppJob: '{AzureStatics.GetContainerAppJobName( installation.ExistingInstallationLogic.RuntimeConfiguration, installedInstallation.shortName )}'
+				                           jobContainerUrl: '{AzureStatics.GetJobContainerUrl( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType, credential: azureCredential )}'
 				                           dataMigratorIdentityClientId: '{AzureStatics.GetDataMigratorIdentityClientId( installation.ExistingInstallationLogic.RuntimeConfiguration, installedInstallation.shortName, installedInstallation.AzureHosting!.SubscriptionId, installationType, azureCredential! )}'
 				                           isuInstallationUrl: '{AzureStatics.GetStorageContainerUrl( AzureStatics.GetIsuInstallationContainerName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType ), azureCredential )}/{installedInstallation.shortName.ToUrlSlug()}{FileExtensions.Zip}'
 				                           webApps: {webAppList}
@@ -446,6 +447,7 @@ internal class UpdateDependentLogic: Operation {
 				                             resourceGroup: '{AzureStatics.GetResourceGroupName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType )}'
 				                             containerAppJob: '{AzureStatics.GetIsuContainerAppJobName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType )}'
 				                             isuInstallationStorageContainer: '{AzureStatics.GetIsuInstallationContainerName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType )}'
+				                             isuJobContainerUrl: '{AzureStatics.GetIsuJobContainerUrl( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType, credential: azureCredential )}'
 				                             installation: '{AzureStatics.GetInstallationName( installedInstallation.shortName )}'
 				                         """;
 				updateInstallationAzurePipeline( EwlStatics.CombinePaths( azurePipelineFolderPath, "Export Data.yml" ), edGeneratedRegion );
@@ -465,6 +467,7 @@ internal class UpdateDependentLogic: Operation {
 					                             resourceGroup: '{AzureStatics.GetResourceGroupName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType )}'
 					                             containerAppJob: '{AzureStatics.GetIsuContainerAppJobName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType )}'
 					                             isuInstallationStorageContainer: '{AzureStatics.GetIsuInstallationContainerName( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType )}'
+					                             isuJobContainerUrl: '{AzureStatics.GetIsuJobContainerUrl( installation.ExistingInstallationLogic.RuntimeConfiguration, installationType, credential: azureCredential )}'
 					                             installation: '{AzureStatics.GetInstallationName( installedInstallation.shortName )}'
 					                         """;
 					updateInstallationAzurePipeline( EwlStatics.CombinePaths( azurePipelineFolderPath, "Update Data.yml" ), udGeneratedRegion );

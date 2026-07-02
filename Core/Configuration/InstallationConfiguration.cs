@@ -1,4 +1,7 @@
-﻿using EnterpriseWebLibrary.Configuration.InstallationStandard;
+﻿using System.Text.Json;
+using Azure.Identity;
+using Azure.Storage.Blobs;
+using EnterpriseWebLibrary.Configuration.InstallationStandard;
 using EnterpriseWebLibrary.Configuration.SystemGeneral;
 using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
@@ -67,15 +70,31 @@ public class InstallationConfiguration {
 	/// <summary>
 	/// Gets the full name of the given system and installation.  For example, 'Red Stapler Information System - Live'.
 	/// </summary>
-	public static string GetFullNameFromSystemAndInstallationNames( string systemName, string installationName ) {
-		return systemName + " - " + installationName;
-	}
+	public static string GetFullNameFromSystemAndInstallationNames( string systemName, string installationName ) => $"{systemName} - {installationName}";
 
 	/// <summary>
 	/// Gets the full short name of the given system and installation.  For example, 'RsisLive'.
 	/// </summary>
-	public static string GetFullShortNameFromSystemAndInstallationNames( string systemShortName, string installationShortName ) {
-		return systemShortName + installationShortName;
+	public static string GetFullShortNameFromSystemAndInstallationNames( string systemShortName, string installationShortName ) =>
+		systemShortName + installationShortName;
+
+	internal static void WriteAzureJobStartData( string containerUrl, string executionName, AzureJobStartData data ) {
+		new BlobClient( new Uri( $"{containerUrl}/{executionName}.json" ), new ManagedIdentityCredential( ManagedIdentityId.SystemAssigned ) ).Upload(
+			BinaryData.FromString( JsonSerializer.Serialize( data ) ),
+			overwrite: true );
+	}
+
+	internal static AzureJobStartData ReadAzureJobStartData() {
+		AzureJobStartData? data = null;
+		ExceptionHandlingTools.Retry(
+			() => data = JsonSerializer.Deserialize<AzureJobStartData>(
+				      new BlobClient(
+						      new Uri(
+							      $"{Environment.GetEnvironmentVariable( $"{EwlStatics.EwlInitialism.EnglishToPascal()}JobContainerUrl" )!}/{Environment.GetEnvironmentVariable( "CONTAINER_APP_JOB_EXECUTION_NAME" )}.json" ),
+						      new ManagedIdentityCredential( ManagedIdentityId.SystemAssigned ) ).DownloadContent()
+					      .Value.Content.ToString() )!,
+			"Job start data did not appear." );
+		return data!;
 	}
 
 	private readonly string installationPath;

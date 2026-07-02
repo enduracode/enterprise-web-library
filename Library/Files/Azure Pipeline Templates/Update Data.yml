@@ -13,6 +13,8 @@ parameters:
   type: string
 - name: isuInstallationStorageContainer
   type: string
+- name: isuJobContainerUrl
+  type: string
 - name: installation
   type: string
 - name: source
@@ -22,13 +24,45 @@ parameters:
 
 jobs:
 - job: UpdateData
-  pool: server
+  pool:
+    vmImage: 'ubuntu-latest'
   steps:
-  - task: InvokeRestAPI@1
+  - task: AzureCLI@2
     inputs:
-      connectionType: 'connectedServiceNameARM'
-      azureServiceConnection: '${{ parameters.serviceConnection }}'
-      method: 'POST'
-      urlSuffix: '/subscriptions/${{ parameters.subscription }}/resourceGroups/${{ parameters.resourceGroup }}/providers/Microsoft.App/jobs/${{ parameters.containerAppJob }}/start?api-version=2024-03-01'
-      body: '{"containers":[{"name":"main","image":"${{ parameters.isuContainerImage }}","resources":{"cpu":0.5,"memory":"1Gi"},"env":[{"name":"EwlConfigurationStorageContainer","value":"${{ parameters.isuInstallationStorageContainer }}"}],"args":["${{ parameters.installation }}","UpdateData","${{ parameters.source }}","${{ parameters.sourceType }}"]}]}'
+      azureSubscription: '${{ parameters.serviceConnection }}'
+      scriptType: 'pscore'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        $execution = az containerapp job start `
+          --name "${{ parameters.containerAppJob }}" `
+          --resource-group "${{ parameters.resourceGroup }}" `
+          --query name -o tsv
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+        $record = @{
+          args  = @("${{ parameters.installation }}", "UpdateData", "${{ parameters.source }}", "${{ parameters.sourceType }}")
+          env   = @{ EwlConfigurationStorageContainer = "${{ parameters.isuInstallationStorageContainer }}" }
+          input = ""
+        } | ConvertTo-Json -Compress
+        az storage blob upload `
+          --blob-url "${{ parameters.isuJobContainerUrl }}/$execution.json" `
+          --data $record `
+          --overwrite true `
+          --content-type "application/json" `
+          --auth-mode login
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+        while ($true) {
+          $status = az containerapp job execution show `
+            --name "${{ parameters.containerAppJob }}" `
+            --resource-group "${{ parameters.resourceGroup }}" `
+            --job-execution-name $execution `
+            --query properties.status -o tsv
+          if ($status -eq "Succeeded") { break }
+          if ($status -eq "Failed") {
+            Write-Host "Failed to update data."
+            exit 1
+          }
+          Start-Sleep -Seconds 10
+        }
     displayName: 'Start job'

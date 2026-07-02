@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Collections.Immutable;
+using System.Threading;
 using Azure;
 using Azure.Core;
 using Azure.Identity;
@@ -50,6 +51,12 @@ public static class AzureStatics {
 	public static string GetContainerAppJobName( InstallationConfiguration installationConfiguration, string installationShortName ) =>
 		$"caj-{getSystemName( installationConfiguration )}-{GetInstallationName( installationShortName )}";
 
+	public static string GetJobContainerUrl(
+		InstallationConfiguration installationConfiguration, InstallationType installationType, TokenCredential? credential = null ) {
+		var containerName = $"{getSystemName( installationConfiguration )}-{getInstallationType( installationType )}-jobs";
+		return GetStorageContainerUrl( containerName, credential: credential );
+	}
+
 	internal static string GetDataMigratorIdentityName( InstallationConfiguration installationConfiguration, string installationShortName ) =>
 		$"id-{getSystemName( installationConfiguration )}-{GetInstallationName( installationShortName )}-datamigrator";
 
@@ -79,6 +86,12 @@ public static class AzureStatics {
 
 	public static string GetDataBlobPrefix( string installationShortName ) => $"{GetInstallationName( installationShortName )}-";
 
+	public static string GetIsuJobContainerUrl(
+		InstallationConfiguration installationConfiguration, InstallationType installationType, TokenCredential? credential = null ) {
+		var containerName = $"{getSystemName( installationConfiguration )}-{getInstallationType( installationType )}-isu-jobs";
+		return GetStorageContainerUrl( containerName, credential: credential );
+	}
+
 	public static string GetAppServiceName( InstallationConfiguration installationConfiguration, string installationShortName, WebApplication app ) =>
 		$"app-brossgroup-{getSystemName( installationConfiguration )}-{GetInstallationName( installationShortName )}" +
 		$"{( installationConfiguration.WebApplications.AtLeast( 2 ) ? $"-{app.Name.ToUrlSlug()}" : "" )}";
@@ -96,23 +109,23 @@ public static class AzureStatics {
 	}
 
 	internal static void RunContainerAppJob(
-		InstallationConfiguration configuration, string image, double cpu, string memory, IEnumerable<string> arguments,
-		IEnumerable<ContainerAppEnvironmentVariable>? environmentVariables = null ) {
+		InstallationConfiguration configuration, IReadOnlyList<string> arguments, IReadOnlyDictionary<string, string>? environmentVariables = null,
+		string input = "" ) {
 		var credential = new ManagedIdentityCredential( ManagedIdentityId.SystemAssigned );
-		var container = new JobExecutionContainer { Name = "main", Image = image, Resources = new AppContainerResources { Cpu = cpu, Memory = memory } };
-		foreach( var i in environmentVariables ?? [ ] )
-			container.Env.Add( i );
-		foreach( var i in arguments )
-			container.Args.Add( i );
 
 		var job = new ArmClient( credential ).GetContainerAppJobResource(
 			ContainerAppJobResource.CreateResourceIdentifier(
 				configuration.AzureHosting!.SubscriptionId,
 				GetResourceGroupName( configuration, configuration.InstallationType ),
 				GetContainerAppJobName( configuration, configuration.InstallationShortName ) ) );
-		var executionName = job.Start( WaitUntil.Completed, template: new ContainerAppJobExecutionTemplate { Containers = { container } } ).Value.Name;
-		var execution = job.GetContainerAppJobExecutions().Get( executionName ).Value;
+		var executionName = job.Start( WaitUntil.Started ).Value.Name;
 
+		InstallationConfiguration.WriteAzureJobStartData(
+			GetJobContainerUrl( configuration, configuration.InstallationType, credential: credential ),
+			executionName,
+			new AzureJobStartData( environmentVariables ?? ImmutableDictionary<string, string>.Empty, arguments, input ) );
+
+		var execution = job.GetContainerAppJobExecutions().Get( executionName ).Value;
 		while( true ) {
 			var status = execution.Get().Value.Data.Status;
 
