@@ -48,12 +48,6 @@ public static class DataMigrationOps {
 
 		Console.WriteLine( $"{EwlStatics.EwlInitialism} {ConfigurationStatics.AppName} for {ConfigurationStatics.InstallationConfiguration.SystemName}" );
 
-		if( Environment.GetEnvironmentVariable( "CONTAINER_APP_JOB_NAME" ) is not null /* Azure Container Apps job */ ) {
-			var jobStartData = InstallationConfiguration.ReadAzureJobStartData();
-			foreach( var i in jobStartData.EnvironmentVariables )
-				Environment.SetEnvironmentVariable( i.Key, i.Value );
-		}
-
 		var appAssembly = Assembly.GetCallingAssembly();
 		using var serviceProvider = new ServiceCollection().AddFluentMigratorCore()
 			.ConfigureRunner( builder => builder.addDatabaseServices( ConfigurationStatics.InstallationConfiguration.PrimaryDatabaseInfo! )

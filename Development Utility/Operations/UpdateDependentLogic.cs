@@ -23,8 +23,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations;
 
 internal class UpdateDependentLogic: Operation {
 	private const string generatedCodeFolderName = "Generated Code";
-	private static readonly string serverSideConsoleAppJsonArgument = "{0}UseJsonArguments".FormatWith( EwlStatics.EwlInitialism.ToLowerInvariant() );
 	private const string unitTestNamespaceAndAssemblyName = "Tests";
+	private const string azureJobDispatcherNamespaceAndAssemblyName = "AzureJobDispatcher";
 
 	private static readonly Operation instance = new UpdateDependentLogic();
 	public static Operation Instance => instance;
@@ -271,7 +271,11 @@ internal class UpdateDependentLogic: Operation {
 		foreach( var project in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.ServerSideConsoleProjectsNonNullable )
 			generateServerSideConsoleProjectCode( installation, project );
 		if( !installation.SystemIsTewl() )
-			generateDataCleanerProject( installation );
+			generateServerSideConsoleProject(
+				installation,
+				IsuStatics.DataCleanerProjectName,
+				IsuStatics.DataCleanerNamespaceAndAssemblyName,
+				"DataCleanupOps.CleanUpData()" );
 		if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.clientSideAppProject != null )
 			generateCodeForProject(
 				installation,
@@ -482,6 +486,7 @@ internal class UpdateDependentLogic: Operation {
 				File.ReadAllText( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "Azure Pipeline Templates", "Deploy.yml" ) )
 					.Replace( "@@EwlInitialism", EwlStatics.EwlInitialism )
 					.Replace( "@@ContainerImageDotNetVersion", ConfigurationStatics.TargetFramework[ "net".Length.. ] )
+					.Replace( "@@JobDispatcherPath", $"{AppStatics.AzureJobDispatcherProjectName}/{azureJobDispatcherNamespaceAndAssemblyName}.dll" )
 					.Replace( "@@DataMigratorPath", $"{IsuStatics.DataMigratorProjectName}/{IsuStatics.DataMigratorNamespaceAndAssemblyName}.dll" ) );
 		if( azureDataPipelinesExist ) {
 			File.WriteAllText(
@@ -492,6 +497,12 @@ internal class UpdateDependentLogic: Operation {
 				EwlStatics.CombinePaths( installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath, "Azure Update Data Job.yml" ),
 				File.ReadAllText( EwlStatics.CombinePaths( ConfigurationStatics.FilesFolderPath, "Azure Pipeline Templates", "Update Data.yml" ) )
 					.Replace( "@@EwlInitialism", EwlStatics.EwlInitialism ) );
+
+			generateServerSideConsoleProject(
+				installation,
+				AppStatics.AzureJobDispatcherProjectName,
+				azureJobDispatcherNamespaceAndAssemblyName,
+				"EnterpriseWebLibrary.Configuration.InstallationConfiguration.DispatchAzureJob()" );
 		}
 
 		if( !installation.DevelopmentInstallationLogic.SystemIsEwl && !installation.SystemIsTewl() ) {
@@ -695,7 +706,7 @@ internal class UpdateDependentLogic: Operation {
 			                  "\", ConfigurationStatics.ServerSideConsoleAppRelativeFolderPath, \"" + project.NamespaceAndAssemblyName + "\" )";
 			var runProgramExpression =
 				"EnterpriseWebLibrary.TewlContrib.ProcessTools.RunProgram( {0}, \"{1}\", Newtonsoft.Json.JsonConvert.SerializeObject( arguments, Newtonsoft.Json.Formatting.None ) + System.Environment.NewLine + input, false )"
-					.FormatWith( programPath, serverSideConsoleAppJsonArgument );
+					.FormatWith( programPath, InstallationConfiguration.ServerSideConsoleAppJsonArgument );
 
 			writer.WriteLine( "if( EwfRequest.Current is not null )" );
 			writer.WriteLine( "AutomaticDatabaseConnectionManager.AddNonTransactionalModificationMethod( () => " + runProgramExpression + " );" );
@@ -845,87 +856,6 @@ internal class UpdateDependentLogic: Operation {
 			},
 			runtimeIdentifier: "win-x64" );
 	}
-
-	private void generateDataCleanerProject( DevelopmentInstallation installation ) {
-		var projectPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, IsuStatics.DataCleanerProjectName );
-
-		IoMethods.DeleteFolder( projectPath );
-		Directory.CreateDirectory( projectPath );
-		using( var writer = new StreamWriter( EwlStatics.CombinePaths( projectPath, $"{IsuStatics.DataCleanerProjectName}.csproj" ), false, Encoding.UTF8 ) ) {
-			writer.WriteLine( "<Project Sdk=\"Microsoft.NET.Sdk\">" );
-			writer.WriteLine( "<PropertyGroup>" );
-			writer.WriteLine( "<OutputType>Exe</OutputType>" );
-			writer.WriteLine( "</PropertyGroup>" );
-			writer.WriteLine( "<ItemGroup>" );
-			writer.WriteLine(
-				$"""<ProjectReference Include="..\Library\{( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemUsesLegacyEwl.HasValue ? "Library New" : "Library" )}.csproj" />""" );
-			writer.WriteLine( "</ItemGroup>" );
-			writer.WriteLine( "</Project>" );
-		}
-
-		using( var writer = new StreamWriter( EwlStatics.CombinePaths( projectPath, "Program.cs" ), false, Encoding.UTF8 ) ) {
-			writer.WriteLine( $"namespace {IsuStatics.DataCleanerNamespaceAndAssemblyName};" );
-			writer.WriteLine();
-			writer.WriteLine( "partial class Program {" );
-			writer.WriteLine( "static partial void ewlMain( IReadOnlyList<string> arguments ) {" );
-			writer.WriteLine( "DataCleanupOps.CleanUpData();" );
-			writer.WriteLine( "}" );
-			writer.WriteLine( "}" );
-		}
-
-		generateServerSideConsoleProjectCode(
-			installation,
-			new ServerSideConsoleProject { Name = IsuStatics.DataCleanerProjectName, NamespaceAndAssemblyName = IsuStatics.DataCleanerNamespaceAndAssemblyName } );
-	}
-
-	private void generateServerSideConsoleProjectCode( DevelopmentInstallation installation, ServerSideConsoleProject project ) {
-		generateCodeForProject(
-			installation,
-			project.Name,
-			EwlStatics.CombinePaths( installation.GeneralLogic.Path, project.Name ),
-			project.NamespaceAndAssemblyName,
-			writer => {
-				writer.WriteLine( "using System.Collections.Immutable;" );
-				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess;" );
-				writer.WriteLine( $"using {installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName};" );
-				writer.WriteLine();
-				writer.WriteLine( "namespace {0};".FormatWith( project.NamespaceAndAssemblyName ) );
-				writer.WriteLine();
-				writer.WriteLine( "internal static partial class Program {" );
-
-				writer.WriteLine( "private static int Main( string[] args ) {" );
-				writer.WriteLine( "var dataAccessState = new Lazy<DataAccessState>( () => new DataAccessState() );" );
-				writer.WriteLine(
-					"GlobalInitializationOps.InitStatics( new GlobalInitializer(), \"{0}\", false, mainDataAccessStateGetter: () => dataAccessState.Value! );".FormatWith(
-						project.Name ) );
-				writer.WriteLine( "try {" );
-				writer.WriteLine( "return GlobalInitializationOps.ExecuteAppWithStandardExceptionHandling( () => {" );
-
-				// See https://stackoverflow.com/a/44135529/35349.
-				writer.WriteLine( "Console.SetIn( new StreamReader( Console.OpenStandardInput(), Console.InputEncoding, false, 4096 ) );" );
-
-				writer.WriteLine(
-					"ewlMain( args.Length > 0 && string.Equals( args[ 0 ], \"{0}\", StringComparison.Ordinal ) ? Newtonsoft.Json.JsonConvert.DeserializeObject<ImmutableArray<string>>( Console.ReadLine()! ) : args );"
-						.FormatWith( serverSideConsoleAppJsonArgument ) );
-				writer.WriteLine( "} );" );
-				writer.WriteLine( "}" );
-				writer.WriteLine( "finally {" );
-				writer.WriteLine( "GlobalInitializationOps.CleanUpStatics();" );
-				writer.WriteLine( "}" );
-				writer.WriteLine( "}" );
-
-				writer.WriteLine( "static partial void ewlMain( IReadOnlyList<string> arguments );" );
-
-				writer.WriteLine( "}" );
-			},
-			runtimeIdentifier: getServerSideConsoleAppRuntimeIdentifier() );
-	}
-
-	private string getServerSideConsoleAppRuntimeIdentifier() =>
-		// In Azure DevOps pipelines, assume server-side console apps will run as Container Apps jobs.
-		string.Equals( Environment.GetEnvironmentVariable( "TF_BUILD" ), bool.TrueString, StringComparison.Ordinal )
-			? Environment.GetEnvironmentVariable( EwlStatics.EwlInitialism + "_SERVERSIDECONSOLEAPPRID" ) ?? "linux-x64"
-			: "win-x64";
 
 	private void generateUnitTestProjectCode( DevelopmentInstallation installation ) {
 		var projectPath = EwlStatics.CombinePaths(
@@ -1487,6 +1417,88 @@ internal class UpdateDependentLogic: Operation {
 			generatedRegion + Environment.NewLine + "    " + regionEnd + ( markerIndex == -1 ? "" : existingText[ ( markerIndex + regionEnd.Length ).. ] ) );
 	}
 
+	private void generateServerSideConsoleProject(
+		DevelopmentInstallation installation, string projectName, string namespaceAndAssemblyName, string mainStatement ) {
+		var projectPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, projectName );
+
+		IoMethods.DeleteFolder( projectPath );
+		Directory.CreateDirectory( projectPath );
+		using( var writer = new StreamWriter( EwlStatics.CombinePaths( projectPath, $"{projectName}.csproj" ), false, Encoding.UTF8 ) ) {
+			writer.WriteLine( "<Project Sdk=\"Microsoft.NET.Sdk\">" );
+			writer.WriteLine( "<PropertyGroup>" );
+			writer.WriteLine( "<OutputType>Exe</OutputType>" );
+			writer.WriteLine( "</PropertyGroup>" );
+			writer.WriteLine( "<ItemGroup>" );
+			writer.WriteLine(
+				$"""<ProjectReference Include="..\Library\{( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemUsesLegacyEwl.HasValue ? "Library New" : "Library" )}.csproj" />""" );
+			writer.WriteLine( "</ItemGroup>" );
+			writer.WriteLine( "</Project>" );
+		}
+
+		using( var writer = new StreamWriter( EwlStatics.CombinePaths( projectPath, "Program.cs" ), false, Encoding.UTF8 ) ) {
+			writer.WriteLine( $"namespace {namespaceAndAssemblyName};" );
+			writer.WriteLine();
+			writer.WriteLine( "partial class Program {" );
+			writer.WriteLine( "static partial void ewlMain( IReadOnlyList<string> arguments ) {" );
+			writer.WriteLine( $"{mainStatement};" );
+			writer.WriteLine( "}" );
+			writer.WriteLine( "}" );
+		}
+
+		generateServerSideConsoleProjectCode(
+			installation,
+			new ServerSideConsoleProject { Name = projectName, NamespaceAndAssemblyName = namespaceAndAssemblyName } );
+	}
+
+	private void generateServerSideConsoleProjectCode( DevelopmentInstallation installation, ServerSideConsoleProject project ) {
+		generateCodeForProject(
+			installation,
+			project.Name,
+			EwlStatics.CombinePaths( installation.GeneralLogic.Path, project.Name ),
+			project.NamespaceAndAssemblyName,
+			writer => {
+				writer.WriteLine( "using System.Collections.Immutable;" );
+				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess;" );
+				writer.WriteLine( $"using {installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName};" );
+				writer.WriteLine();
+				writer.WriteLine( "namespace {0};".FormatWith( project.NamespaceAndAssemblyName ) );
+				writer.WriteLine();
+				writer.WriteLine( "internal static partial class Program {" );
+
+				writer.WriteLine( "private static int Main( string[] args ) {" );
+				writer.WriteLine( "var dataAccessState = new Lazy<DataAccessState>( () => new DataAccessState() );" );
+				writer.WriteLine(
+					"GlobalInitializationOps.InitStatics( new GlobalInitializer(), \"{0}\", false, mainDataAccessStateGetter: () => dataAccessState.Value! );".FormatWith(
+						project.Name ) );
+				writer.WriteLine( "try {" );
+				writer.WriteLine( "return GlobalInitializationOps.ExecuteAppWithStandardExceptionHandling( () => {" );
+
+				// See https://stackoverflow.com/a/44135529/35349.
+				writer.WriteLine( "Console.SetIn( new StreamReader( Console.OpenStandardInput(), Console.InputEncoding, false, 4096 ) );" );
+
+				writer.WriteLine(
+					"ewlMain( args.Length > 0 && string.Equals( args[ 0 ], \"{0}\", StringComparison.Ordinal ) ? Newtonsoft.Json.JsonConvert.DeserializeObject<ImmutableArray<string>>( Console.ReadLine()! ) : args );"
+						.FormatWith( InstallationConfiguration.ServerSideConsoleAppJsonArgument ) );
+				writer.WriteLine( "} );" );
+				writer.WriteLine( "}" );
+				writer.WriteLine( "finally {" );
+				writer.WriteLine( "GlobalInitializationOps.CleanUpStatics();" );
+				writer.WriteLine( "}" );
+				writer.WriteLine( "}" );
+
+				writer.WriteLine( "static partial void ewlMain( IReadOnlyList<string> arguments );" );
+
+				writer.WriteLine( "}" );
+			},
+			runtimeIdentifier: getServerSideConsoleAppRuntimeIdentifier() );
+	}
+
+	private string getServerSideConsoleAppRuntimeIdentifier() =>
+		// In Azure DevOps pipelines, assume server-side console apps will run as Container Apps jobs.
+		string.Equals( Environment.GetEnvironmentVariable( "TF_BUILD" ), bool.TrueString, StringComparison.Ordinal )
+			? Environment.GetEnvironmentVariable( EwlStatics.EwlInitialism + "_SERVERSIDECONSOLEAPPRID" ) ?? "linux-x64"
+			: "win-x64";
+
 	private void updateIgnoreFile( DevelopmentInstallation installation, bool forGit ) {
 		var filePath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, forGit ? ".gitignore" : ".hgignore" );
 		var lines = File.Exists( filePath ) ? File.ReadAllLines( filePath ) : Enumerable.Empty<string>();
@@ -1516,6 +1528,7 @@ internal class UpdateDependentLogic: Operation {
 		writer.WriteLine( $"{IsuStatics.DataCleanerProjectName}/" );
 		if( !unitTestProjectExists )
 			writer.WriteLine( $"{unitTestProject}/" );
+		writer.WriteLine( $"{AppStatics.AzureJobDispatcherProjectName}/" );
 		writer.WriteLine( "Error Log.txt" );
 		writer.WriteLine( "*.csproj.user" );
 		writer.WriteLine( "*" + CodeGeneration.DataAccess.DataAccessStatics.CSharpTemplateFileExtension );

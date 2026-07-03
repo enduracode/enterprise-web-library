@@ -2,7 +2,6 @@
 using System.Runtime.InteropServices;
 using System.ServiceProcess;
 using Azure.Identity;
-using Azure.ResourceManager.AppContainers.Models;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 using JetBrains.Annotations;
@@ -221,23 +220,19 @@ public class ExistingInstallationLogic {
 					var credential = new ManagedIdentityCredential( ManagedIdentityId.SystemAssigned );
 					AzureStatics.RunContainerAppJob(
 						runtimeConfiguration,
-						$"{AzureStatics.DiscoverGeneralContainerRegistryLoginServer( credential )}/{AzureStatics.GetContainerImageName(
-							runtimeConfiguration,
-							runtimeConfiguration.InstallationShortName,
-							runtimeConfiguration.InstallationType )}",
-						.5,
-						"1Gi",
-						$"{IsuStatics.DataMigratorProjectName}/{IsuStatics.DataMigratorNamespaceAndAssemblyName}.dll".ToCollection(),
-						environmentVariables: new ContainerAppEnvironmentVariable
+							[ $"{IsuStatics.DataMigratorProjectName}/{IsuStatics.DataMigratorNamespaceAndAssemblyName}.dll" ],
+						environmentVariables: new OrderedDictionary<string, string>
 							{
-								Name = "EwlDataMigratorManagedIdentityClientId",
-								Value = AzureStatics.GetDataMigratorIdentityClientId(
-									runtimeConfiguration,
-									runtimeConfiguration.InstallationShortName,
-									runtimeConfiguration.AzureHosting!.SubscriptionId,
-									runtimeConfiguration.InstallationType,
-									credential )
-							}.ToCollection() );
+								{
+									"EwlDataMigratorManagedIdentityClientId",
+									AzureStatics.GetDataMigratorIdentityClientId(
+										runtimeConfiguration,
+										runtimeConfiguration.InstallationShortName,
+										runtimeConfiguration.AzureHosting!.SubscriptionId,
+										runtimeConfiguration.InstallationType,
+										credential )
+								}
+							} );
 				}
 				else
 					output = TewlContrib.ProcessTools.RunProgram(

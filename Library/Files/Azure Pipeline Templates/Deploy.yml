@@ -93,7 +93,8 @@ jobs:
           --name "${{ parameters.containerAppJob }}" `
           --resource-group "${{ parameters.resourceGroup }}" `
           --container-name "main" `
-          --image "${{ parameters.containerImage }}"
+          --image "${{ parameters.containerImage }}" `
+          --args "@@JobDispatcherPath"
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
     displayName: 'Build and push container image'
 

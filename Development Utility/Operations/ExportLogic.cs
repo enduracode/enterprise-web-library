@@ -630,6 +630,21 @@ internal class ExportLogic: Operation {
 			"",
 			true );
 		copyServerSideProject( installation, serverSideLogicFolderPath, IsuStatics.DataCleanerProjectName );
+
+		if( File.Exists(
+			   EwlStatics.CombinePaths(
+				   installation.GeneralLogic.Path,
+				   AppStatics.AzureJobDispatcherProjectName,
+				   $"{AppStatics.AzureJobDispatcherProjectName}.csproj" ) ) ) {
+			TewlContrib.ProcessTools.RunProgram(
+				"dotnet",
+				$"""
+				 restore "{EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.AzureJobDispatcherProjectName )}"
+				 """,
+				"",
+				true );
+			copyServerSideProject( installation, serverSideLogicFolderPath, AppStatics.AzureJobDispatcherProjectName );
+		}
 	}
 
 	private void copyServerSideProject( DevelopmentInstallation installation, string serverSideLogicFolderPath, string project ) {

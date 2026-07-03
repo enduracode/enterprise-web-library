@@ -20,6 +20,7 @@ internal static class AppStatics {
 	internal const string SamlProviderProjectName = "SAML";
 	internal const string PdfProviderProjectName = "PDF";
 	internal const string WordProviderProjectName = "Word";
+	internal const string AzureJobDispatcherProjectName = "Azure Job Dispatcher";
 
 	internal static bool NDependIsPresent;
 

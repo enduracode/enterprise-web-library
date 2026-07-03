@@ -1,10 +1,13 @@
-﻿using System.Text.Json;
+﻿using System.ComponentModel;
+using System.Diagnostics;
+using System.Text.Json;
 using Azure.Identity;
 using Azure.Storage.Blobs;
 using EnterpriseWebLibrary.Configuration.InstallationStandard;
 using EnterpriseWebLibrary.Configuration.SystemGeneral;
 using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
+using JetBrains.Annotations;
 using MoreLinq;
 using Tewl.IO;
 
@@ -60,6 +63,11 @@ public class InstallationConfiguration {
 	public const string AsposeLicenseFolderName = "Aspose Licenses";
 
 	/// <summary>
+	/// Development Utility and private use only.
+	/// </summary>
+	public static readonly string ServerSideConsoleAppJsonArgument = $"{EwlStatics.EwlInitialism.ToLowerInvariant()}UseJsonArguments";
+
+	/// <summary>
 	/// Returns true if an installed installation exists at the specified path.
 	/// </summary>
 	public static bool InstalledInstallationExists( string installationPath ) {
@@ -95,6 +103,36 @@ public class InstallationConfiguration {
 					      .Value.Content.ToString() )!,
 			"Job start data did not appear." );
 		return data!;
+	}
+
+	/// <summary>
+	/// Generated code use only.
+	/// </summary>
+	[ PublicAPI ]
+	[ EditorBrowsable( EditorBrowsableState.Never ) ]
+	public static void DispatchAzureJob() {
+		var startData = ReadAzureJobStartData();
+		foreach( var i in startData.EnvironmentVariables )
+			Environment.SetEnvironmentVariable( i.Key, i.Value );
+
+		using var p = new Process();
+		p.StartInfo.FileName = "dotnet";
+		p.StartInfo.Arguments = $"""
+		                         "{startData.Arguments[ 0 ]}" {ServerSideConsoleAppJsonArgument}
+		                         """;
+		p.StartInfo.CreateNoWindow = true;
+		p.StartInfo.UseShellExecute = false;
+		p.StartInfo.RedirectStandardInput = true;
+
+		p.Start();
+
+		p.StandardInput.Write(
+			Newtonsoft.Json.JsonConvert.SerializeObject( startData.Arguments.Skip( 1 ), Newtonsoft.Json.Formatting.None ) + Environment.NewLine + startData.Input );
+		p.StandardInput.Close();
+
+		p.WaitForExit();
+		if( p.ExitCode != 0 )
+			throw new DoNotEmailOrLogException();
 	}
 
 	private readonly string installationPath;

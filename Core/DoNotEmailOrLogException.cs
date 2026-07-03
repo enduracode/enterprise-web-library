@@ -1,5 +1,3 @@
-﻿using System;
+﻿namespace EnterpriseWebLibrary;
 
-namespace EnterpriseWebLibrary {
-	public class DoNotEmailOrLogException: ApplicationException {}
-}
+public class DoNotEmailOrLogException: Exception;
