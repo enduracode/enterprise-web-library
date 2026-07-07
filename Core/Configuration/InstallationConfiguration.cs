@@ -322,7 +322,7 @@ public class InstallationConfiguration {
 	/// <summary>
 	/// Gets the names of the secondary databases for this configuration.
 	/// </summary>
-	public IReadOnlyCollection<string> SecondaryDatabaseNames => installationStandardConfiguration.SecondaryDatabases.Select( i => i.Name ).Materialize();
+	public IReadOnlyCollection<string> SecondaryDatabaseNames => installationStandardConfiguration.SecondaryDatabases?.Select( i => i.Name ).Materialize() ?? [ ];
 
 	/// <summary>
 	/// Gets a database information object corresponding to the secondary database for this configuration with the specified name.
