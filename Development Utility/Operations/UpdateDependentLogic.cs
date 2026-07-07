@@ -48,7 +48,7 @@ internal class UpdateDependentLogic: Operation {
 						EwlStatics.CombinePaths(
 							ConfigurationStatics.InstallationConfiguration.InstallationType == InstallationType.Development
 								? EwlStatics.CombinePaths( Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ), ".nuget/packages" )
-								: EwlStatics.CombinePaths( ConfigurationStatics.InstallationConfiguration.InstallationPath, "../../.." ),
+								: EwlStatics.CombinePaths( ConfigurationStatics.InstallationConfiguration.InstallationPath, "../../../../.." ),
 							id,
 							version,
 							"Development Utility/EnterpriseWebLibrary.DevelopmentUtility" ),
