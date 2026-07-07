@@ -92,7 +92,10 @@ public class InstallationConfiguration {
 			overwrite: true );
 	}
 
-	internal static AzureJobStartData ReadAzureJobStartData() {
+	/// <summary>
+	/// Installation Support Utility and private use only.
+	/// </summary>
+	public static AzureJobStartData ReadAzureJobStartData() {
 		AzureJobStartData? data = null;
 		ExceptionHandlingTools.Retry(
 			() => data = JsonSerializer.Deserialize<AzureJobStartData>(

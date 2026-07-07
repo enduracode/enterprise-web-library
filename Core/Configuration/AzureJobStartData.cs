@@ -2,7 +2,10 @@
 
 namespace EnterpriseWebLibrary.Configuration;
 
-internal sealed record AzureJobStartData(
+/// <summary>
+/// Installation Support Utility and private use only.
+/// </summary>
+public sealed record AzureJobStartData(
 	[ property: JsonPropertyName( "env" ) ]
 	IReadOnlyDictionary<string, string> EnvironmentVariables,
 	[ property: JsonPropertyName( "args" ) ]
