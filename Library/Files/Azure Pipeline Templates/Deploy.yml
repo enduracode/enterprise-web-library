@@ -229,9 +229,11 @@ jobs:
           args  = @("@@DataMigratorPath")
           input = ""
         } | ConvertTo-Json -Compress
+        $recordPath = Join-Path $env:AGENT_TEMPDIRECTORY "$execution.json"
+        Set-Content -Path $recordPath -Value $record -Encoding utf8
         az storage blob upload `
           --blob-url "${{ parameters.jobContainerUrl }}/$execution.json" `
-          --data $record `
+          --file $recordPath `
           --overwrite true `
           --content-type "application/json" `
           --auth-mode login
