@@ -10,7 +10,7 @@ namespace EnterpriseWebLibrary.Configuration;
 [ PublicAPI ]
 public static class ConfigurationStatics {
 	/// <summary>
-	/// Development Utility and private use only.
+	/// Development Utility, System Manager, and private use only.
 	/// </summary>
 	public const string TargetFramework = "net10.0";
 
