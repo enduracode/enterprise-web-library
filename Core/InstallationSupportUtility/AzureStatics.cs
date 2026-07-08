@@ -9,6 +9,7 @@ using Azure.ResourceManager.AppContainers.Models;
 using Azure.ResourceManager.ContainerRegistry;
 using Azure.ResourceManager.ManagedServiceIdentities;
 using Azure.ResourceManager.Storage;
+using Azure.ResourceManager.Storage.Models;
 using EnterpriseWebLibrary.Configuration;
 using JetBrains.Annotations;
 using static MoreLinq.Extensions.AtLeastExtension;
@@ -25,7 +26,7 @@ public static class AzureStatics {
 			if( !subscription.GetResourceGroups().Exists( "rg-general" ) )
 				continue;
 
-			return subscription.GetResourceGroups().Get( "rg-general" ).Value.GetStorageAccounts().Single().Data.Name;
+			return subscription.GetResourceGroups().Get( "rg-general" ).Value.GetStorageAccounts().Single( i => i.Data.Kind == StorageKind.StorageV2 ).Data.Name;
 		}
 		throw new Exception();
 	}
