@@ -9,4 +9,5 @@ namespace EnterpriseWebLibrary.DataAccess.BlobStorage;
 /// <param name="FileName"></param>
 /// <param name="ContentType">The media type of the file, or the empty string if unknown.</param>
 /// <param name="UploadTime"></param>
-public record BlobFile( int FileId, string FileName, string ContentType, Instant UploadTime );
+/// <param name="BlobReferenceId">The ID of the BLOB reference for the file.</param>
+public record BlobFile( int FileId, string FileName, string ContentType, Instant UploadTime, int BlobReferenceId );
