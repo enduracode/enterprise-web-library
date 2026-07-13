@@ -82,12 +82,14 @@ public interface SystemBlobStorageProvider {
 	int InsertFileCollectionFile( int fileCollectionId, int fileId );
 
 	/// <summary>
-	/// Updates the specified file-collection file to link to the specified file.
+	/// Updates the specified file-collection file to reference the specified file. Also deletes the previously referenced file with
+	/// <see cref="BlobStorageStatics.DeleteFile"/> unless revision history is enabled for file-collection files.
 	/// </summary>
 	void UpdateFileCollectionFile( int fileCollectionFileId, int fileId );
 
 	/// <summary>
-	/// Deletes the specified file-collection-file.
+	/// Deletes the specified file-collection file. Also deletes the referenced file with <see cref="BlobStorageStatics.DeleteFile"/> unless revision history is
+	/// enabled for file-collection files.
 	/// </summary>
 	void DeleteFileCollectionFile( int fileCollectionFileId );
 }

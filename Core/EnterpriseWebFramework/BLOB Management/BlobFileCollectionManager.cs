@@ -23,8 +23,8 @@ public sealed class BlobFileCollectionManager: FlowComponent {
 	/// <param name="postBackIdBase">Do not pass null.</param>
 	/// <param name="sortByName"></param>
 	/// <param name="thumbnailResourceGetter">A function that takes a file ID and returns the corresponding thumbnail resource. Do not return null.</param>
-	/// <param name="openedFileIds">The file IDs that should not be marked with a UI element drawing the user’s attention to the fact that they haven’t read it.
-	/// All other files not in this collection will be marked. The collection can be null, and will result as nothing being shown as new.</param>
+	/// <param name="openedFileIds">The file-collection file IDs that should not be marked with a UI element drawing the user’s attention to the fact that they
+	/// haven’t read it. All other files not in this collection will be marked. The collection can be null, and will result as nothing being shown as new.</param>
 	/// <param name="unopenedFileOpenedNotifier">A method that executes when an unopened file is opened. Use to update the app’s database with an indication
 	/// that the file has been seen by the user.</param>
 	/// <param name="disableModifications">Pass true if there should be no way to upload or delete files.</param>
@@ -54,15 +54,15 @@ public sealed class BlobFileCollectionManager: FlowComponent {
 						                     "Delete Selected Files",
 						                     ids => {
 							                     foreach( var i in ids )
-								                     BlobStorageStatics.SystemProvider.DeleteFile( i );
+								                     BlobStorageStatics.SystemProvider.DeleteFileCollectionFile( i );
 							                     filesDeletedNotifier?.Invoke();
 							                     PageBase.AddStatusMessage( StatusMessageType.Info, "Selected files deleted successfully." );
 						                     } )
 					                     .ToCollection(),
 			fields: columnSetups );
 
-		IReadOnlyCollection<BlobFile> files = BlobStorageStatics.SystemProvider.GetFilesLinkedToFileCollection( fileCollectionId );
-		files = ( sortByName ? files.OrderByName() : files.OrderByUploadTimeDescending() ).Materialize();
+		var unorderedFiles = BlobStorageStatics.SystemProvider.GetFilesLinkedToFileCollection( fileCollectionId );
+		var files = ( sortByName ? unorderedFiles.OrderByName() : unorderedFiles.OrderByUploadTimeDescending() ).Materialize();
 
 		table.AddData( files, file => getFileItem( file, postBackIdBase, thumbnailResourceGetter, timeZone, openedFileIds, unopenedFileOpenedNotifier ) );
 
@@ -76,25 +76,26 @@ public sealed class BlobFileCollectionManager: FlowComponent {
 	}
 
 	private EwfTableItem getFileItem(
-		BlobFile file, string postBackIdBase, Func<int, ResourceInfo>? thumbnailResourceGetter, DateTimeZone timeZone, IEnumerable<int>? openedFileIds,
-		MarkFileAsReadMethod? unopenedFileOpenedNotifier ) {
+		BlobFileCollectionFile collectionFile, string postBackIdBase, Func<int, ResourceInfo>? thumbnailResourceGetter, DateTimeZone timeZone,
+		IEnumerable<int>? openedFileIds, MarkFileAsReadMethod? unopenedFileOpenedNotifier ) {
 		var cells = new List<EwfTableCell>();
 
+		var file = BlobStorageStatics.SystemProvider.GetFile( collectionFile.FileId );
 		var thumbnailControl = BlobManagementStatics.GetThumbnailControl( file, thumbnailResourceGetter );
 		if( thumbnailControl.Any() )
 			cells.Add( thumbnailControl.ToCell() );
 
-		var fileIsUnopened = openedFileIds != null && !openedFileIds.Contains( file.FileId );
+		var fileIsUnopened = openedFileIds != null && !openedFileIds.Contains( collectionFile.FileCollectionFileId );
 
 		cells.Add(
 			new EwfButton(
 					new StandardButtonStyle( file.FileName ),
 					behavior: new PostBackBehavior(
 						postBack: PostBack.CreateFull(
-							id: PostBack.GetCompositeId( postBackIdBase, file.FileId.ToString() ),
+							id: PostBack.GetCompositeId( postBackIdBase, collectionFile.FileCollectionFileId.ToString() ),
 							modificationMethod: () => {
 								if( fileIsUnopened )
-									unopenedFileOpenedNotifier?.Invoke( file.FileId );
+									unopenedFileOpenedNotifier?.Invoke( collectionFile.FileCollectionFileId );
 							},
 							actionGetter: () => new PostBackAction(
 								new PageReloadBehavior( secondaryResponse: new SecondaryResponse( new BlobFileResponse( file.FileId, () => true ), false ) ) ) ) ) )
@@ -104,45 +105,41 @@ public sealed class BlobFileCollectionManager: FlowComponent {
 		cells.Add( file.UploadTime.InZone( timeZone ).Date.ToDayMonthYearString( false ).ToCell() );
 		cells.Add( ( fileIsUnopened ? "New!" : "" ).ToCell() );
 
-		return EwfTableItem.Create( cells, setup: EwfTableItemSetup.Create( id: new SpecifiedValue<int>( file.FileId ) ) );
+		return EwfTableItem.Create( cells, setup: EwfTableItemSetup.Create( id: new SpecifiedValue<int>( collectionFile.FileCollectionFileId ) ) );
 	}
 
 	private IReadOnlyCollection<FlowComponent> getUploadComponents(
-		int fileCollectionId, IReadOnlyCollection<BlobFile> files, DisplaySetup? displaySetup, string postBackIdBase,
+		int fileCollectionId, IReadOnlyCollection<BlobFileCollectionFile> files, DisplaySetup? displaySetup, string postBackIdBase,
 		Action<RsFile?, Validator>? uploadValidationMethod, NewFileNotificationMethod? fileCreatedOrReplacedNotifier ) {
-		RsFile? file = null;
+		BlobFileCollectionFile? existingFile = null;
+		RsFile? newFile = null;
 		return FormState.ExecuteWithActions(
 			PostBack.CreateFull(
 				id: PostBack.GetCompositeId( postBackIdBase, "add" ),
 				modificationMethod: () => {
-					if( file == null )
+					if( newFile is null )
 						return;
 
-					var existingFile = files.SingleOrDefault( i => i.FileName == file.FileName );
-					int newFileId;
-					if( existingFile != null ) {
-						BlobStorageStatics.SystemProvider.UpdateFile(
-							existingFile.FileId,
-							file.FileName,
-							file.Contents,
-							BlobStorageStatics.GetContentTypeForPostedFile( file ) );
-						newFileId = existingFile.FileId;
-					}
-					else
-						newFileId = BlobStorageStatics.SystemProvider.InsertFile(
-							fileCollectionId,
-							file.FileName,
-							file.Contents,
-							BlobStorageStatics.GetContentTypeForPostedFile( file ) );
+					var newFileId = BlobStorageStatics.InsertFile( newFile.FileName, BlobStorageStatics.GetContentTypeForPostedFile( newFile ), newFile.Contents );
 
-					fileCreatedOrReplacedNotifier?.Invoke( newFileId );
+					int collectionFileId;
+					if( existingFile is null )
+						collectionFileId = BlobStorageStatics.SystemProvider.InsertFileCollectionFile( fileCollectionId, newFileId );
+					else {
+						BlobStorageStatics.SystemProvider.UpdateFileCollectionFile( existingFile.FileCollectionFileId, newFileId );
+						collectionFileId = existingFile.FileCollectionFileId;
+					}
+
+					fileCreatedOrReplacedNotifier?.Invoke( collectionFileId );
 					PageBase.AddStatusMessage( StatusMessageType.Info, "File uploaded successfully." );
 				} ),
 			() => FormItemList.CreateWrapping( setup: new FormItemListSetup( displaySetup: displaySetup, buttonSetup: new ButtonSetup( "Upload new file" ) ) )
 				.AddItem(
 					new FileUpload(
 						validationMethod: ( postBackValue, validator ) => {
-							file = postBackValue;
+							if( postBackValue is not null )
+								existingFile = files.SingleOrDefault( i => BlobStorageStatics.SystemProvider.GetFile( i.FileId ).FileName == postBackValue.FileName );
+							newFile = postBackValue;
 							uploadValidationMethod?.Invoke( postBackValue, validator );
 						} ).ToFormItem( label: "Select a new file:".ToComponents() ) )
 				.ToCollection() );

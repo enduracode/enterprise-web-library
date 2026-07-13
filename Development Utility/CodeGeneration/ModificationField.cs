@@ -5,6 +5,7 @@ internal class ModificationField {
 		name.EndsWith( suffix, StringComparison.Ordinal ) && ( contains.Length == 0 || name.Contains( contains, StringComparison.Ordinal ) );
 
 	private readonly string source;
+	private readonly bool sourceRetainsPreviousValues;
 	private readonly string name;
 	private readonly string pascalCasedName;
 	private readonly string camelCasedName;
@@ -16,9 +17,10 @@ internal class ModificationField {
 	private readonly short? numericScale;
 
 	internal ModificationField(
-		string source, string name, string pascalCasedName, string camelCasedName, Type type, string typeName, string nullableTypeName,
-		string enumerableElementTypeName, int? size, short? numericScale ) {
+		string source, bool sourceRetainsPreviousValues, string name, string pascalCasedName, string camelCasedName, Type type, string typeName,
+		string nullableTypeName, string enumerableElementTypeName, int? size, short? numericScale ) {
 		this.source = source;
+		this.sourceRetainsPreviousValues = sourceRetainsPreviousValues;
 		this.name = name;
 		this.pascalCasedName = pascalCasedName;
 		this.camelCasedName = camelCasedName;
@@ -31,6 +33,7 @@ internal class ModificationField {
 	}
 
 	internal string Source => source;
+	internal bool SourceRetainsPreviousValues => sourceRetainsPreviousValues;
 	internal string Name => name;
 	internal string PascalCasedName => pascalCasedName;
 	internal string CamelCasedName => camelCasedName;

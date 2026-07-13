@@ -326,11 +326,15 @@ internal class ModificationFormItemMethodWriter {
 			false,
 			new CSharpParameter( "BlobFileManagerSetup?", "managerSetup", "null" ).ToCollection(),
 			"SpecifiedValue<{0}>?".FormatWith( valueParamTypeName ),
-			new CSharpParameter( "bool", "requireUploadIfNoFile", "false" ).ToCollection(),
+			field.TypeName == field.NullableTypeName ? new CSharpParameter( "bool", "requireUploadIfNoFile", "false" ).ToCollection() : [ ],
 			false,
-			dv =>
-				"new BlobFileManager( (int?)( value != null ? value.Value : {0}.Value ), requireUploadIfNoFile, id => {0}.Value = id, out modificationMethod, setup: managerSetup )"
-					.FormatWith( dv ) );
+			dv => field.TypeName == field.NullableTypeName
+				      ? $"new BlobFileManager( (int?)( value != null ? value.Value : {dv}.Value ), requireUploadIfNoFile, id => {dv}.Value = id, out modificationMethod, setup: managerSetup )"
+				      : $"new BlobFileManager( (int?)( value != null ? value.Value : {dv}.Value ), true, id => {dv}.Value = id!.Value, out modificationMethod, setup: managerSetup )",
+			additionalSummarySentences: field.SourceRetainsPreviousValues
+				                            ? null
+				                            : "WARNING: When a file is no longer referenced, this modification class is responsible for deleting it using the post-update and post-delete methods."
+					                            .ToCollection() );
 	}
 
 	private void addListControls() {

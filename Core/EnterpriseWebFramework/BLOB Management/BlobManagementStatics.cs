@@ -2,10 +2,12 @@
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 using EnterpriseWebLibrary.IO;
+using JetBrains.Annotations;
 using Tewl.InputValidation;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
+[ PublicAPI ]
 public static class BlobManagementStatics {
 	/// <summary>
 	/// If file is null, this will be a no-op.
@@ -61,35 +63,12 @@ public static class BlobManagementStatics {
 		return new EwfImage( new ImageSetup( null, sizesToAvailableWidth: true ), thumbnailResourceGetter( file.FileId ) ).ToCollection();
 	}
 
-	// NOTE: Use this from blob file manager, etc.
-	/// <summary>
-	/// Returns a link to download a file with the given file collection ID.
-	/// If no file is associated with the given file collection ID, returns a literal control with textIfNoFile text.
-	/// The file name is used as the label unless labelOverride is specified.
-	/// SystemBlobFileManagementProvider must be implemented.
-	/// </summary>
-	public static IReadOnlyCollection<PhrasingComponent> GetFileButton( int fileCollectionId, string? labelOverride = null, string textIfNoFile = "" ) {
-		var file = BlobStorageStatics.GetFirstFileFromCollection( fileCollectionId );
-		if( file == null )
-			return textIfNoFile.ToComponents();
-		return new EwfButton(
-			new StandardButtonStyle( labelOverride ?? file.FileName, buttonSize: ButtonSize.ShrinkWrap ),
-			behavior: new PostBackBehavior(
-				postBack: PostBack.CreateFull(
-					id: PostBack.GetCompositeId( "ewfFile", file.FileId.ToString() ),
-					actionGetter: () => new PostBackAction(
-						new PageReloadBehavior(
-							secondaryResponse: new SecondaryResponse(
-								new BlobFileResponse( BlobStorageStatics.GetFirstFileFromCollection( fileCollectionId )!.FileId, () => true ),
-								false ) ) ) ) ) ).ToCollection();
-	}
-
 	/// <summary>
 	/// Returns a link to download a file with the given file ID.
 	/// The file name is used as the label unless labelOverride is specified.
-	/// SystemBlobFileManagementProvider must be implemented.
+	/// SystemBlobStorageProvider must be implemented.
 	/// </summary>
-	public static IReadOnlyCollection<PhrasingComponent> GetFileButtonFromFileId( int fileId, string? labelOverride = null ) {
+	public static IReadOnlyCollection<PhrasingComponent> GetFileButton( int fileId, string? labelOverride = null ) {
 		var file = BlobStorageStatics.SystemProvider.GetFile( fileId );
 		return new EwfButton(
 			new StandardButtonStyle( labelOverride ?? file.FileName, buttonSize: ButtonSize.ShrinkWrap ),

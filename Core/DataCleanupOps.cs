@@ -2,6 +2,7 @@
 using System.Text;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.DataAccess.BlobStorage;
 using EnterpriseWebLibrary.DataAccess.CommandWriting;
 using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
@@ -24,6 +25,13 @@ public static class DataCleanupOps {
 	/// </summary>
 	[ EditorBrowsable( EditorBrowsableState.Never ) ]
 	public static void CleanUpData() {
+		if( BlobStorageStatics.BlobStorageEnabled )
+			if( ConfigurationStatics.DatabaseExists && !AutomaticDatabaseConnectionManager.HasCurrent )
+				DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( () =>
+					DataAccessState.Current.PrimaryDatabaseConnection.ExecuteInTransaction( cleanUpBlobs ) );
+			else
+				cleanUpBlobs();
+
 		if( UserManagementStatics.UserManagementEnabled )
 			if( ConfigurationStatics.DatabaseExists && !AutomaticDatabaseConnectionManager.HasCurrent )
 				DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen( () =>
@@ -83,6 +91,27 @@ public static class DataCleanupOps {
 		}
 
 		SystemSpecificLogicStatics.GeneralProvider.CleanUpData( AutomaticDatabaseConnectionManager.HasCurrent );
+	}
+
+	private static void cleanUpBlobs() {
+		var provider = BlobStorageStatics.SystemProvider;
+		var blobHashes = provider.GetBlobHashes().Materialize();
+
+		foreach( var hashGrouping in blobHashes.GroupBy( i => i.hash, new StructuralEqualityComparer<byte[]>() ).Where( i => i.Count() > 1 ) )
+		foreach( var blobGrouping in hashGrouping.Select( i => i.blobId )
+			        .GroupBy( provider.GetBlob, new StructuralEqualityComparer<byte[]>() )
+			        .Where( i => i.Count() > 1 ) ) {
+			int? firstId = null;
+			foreach( var blobId in blobGrouping.OrderBy( i => i ) )
+				if( firstId is null )
+					firstId = blobId;
+				else
+					provider.UpdateReferencesToBlob( blobId, firstId.Value );
+		}
+
+		var referencedIds = provider.GetReferencedBlobIds().ToHashSet();
+		foreach( var id in blobHashes.Select( i => i.blobId ).Where( i => !referencedIds.Contains( i ) ) )
+			provider.DeleteBlob( id );
 	}
 
 	private static void cleanUpUserRequests() {

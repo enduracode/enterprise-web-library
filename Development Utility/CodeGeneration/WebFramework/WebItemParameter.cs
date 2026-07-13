@@ -305,6 +305,7 @@ internal class WebItemParameter {
 	internal ModificationField GetModificationField() =>
 		new(
 			"parameter",
+			false,
 			PropertyName,
 			PropertyName,
 			name,

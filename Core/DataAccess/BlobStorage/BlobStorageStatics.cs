@@ -1,4 +1,5 @@
-﻿using EnterpriseWebLibrary.ExternalFunctionality;
+﻿using System.Security.Cryptography;
+using EnterpriseWebLibrary.ExternalFunctionality;
 using EnterpriseWebLibrary.IO;
 using EnterpriseWebLibrary.SystemSpecificLogic;
 using JetBrains.Annotations;
@@ -14,32 +15,81 @@ public static class BlobStorageStatics {
 		provider = SystemSpecificLogicStatics.GetLibraryProvider<SystemBlobStorageProvider>( providerName );
 	}
 
+	internal static bool BlobStorageEnabled => provider!.GetProvider( returnNullIfNotFound: true ) is not null;
+
 	internal static SystemBlobStorageProvider SystemProvider => provider!.GetProvider()!;
 
 	/// <summary>
-	/// Returns the first file in the specified file collection, or null if the collection is empty.
+	/// Retrieves the BLOB referenced by the specified ID.
 	/// </summary>
-	public static BlobFile? GetFirstFileFromCollection( int fileCollectionId ) =>
-		SystemProvider.GetFilesLinkedToFileCollection( fileCollectionId ).FirstOrDefault();
+	public static byte[] GetBlob( int referenceId ) => SystemProvider.GetBlob( SystemProvider.GetReferencedBlobId( referenceId ) );
+
+	/// <summary>
+	/// Inserts a new BLOB and returns the reference ID.
+	/// </summary>
+	public static int InsertBlob( byte[] blob ) => SystemProvider.InsertBlobReference( SystemProvider.InsertBlob( blob, SHA256.HashData( blob ) ) );
+
+	/// <summary>
+	/// Deletes the BLOB referenced by the specified ID.
+	/// </summary>
+	public static void DeleteBlob( int referenceId ) =>
+		// The Data Cleaner is responsible for deleting the actual BLOB if no references remain.
+		SystemProvider.DeleteBlobReference( referenceId );
+
+	/// <summary>
+	/// Retrieves the contents of the specified file.
+	/// </summary>
+	public static byte[] GetFileContents( BlobFile file ) => GetBlob( file.BlobReferenceId );
+
+	/// <summary>
+	/// Inserts a new file with the specified values and returns the ID.
+	/// </summary>
+	public static int InsertFile( string fileName, string contentType, byte[] contents ) =>
+		SystemProvider.InsertFile( fileName, contentType, Clock.TransactionTime, InsertBlob( contents ) );
+
+	/// <summary>
+	/// Deletes the specified file.
+	/// </summary>
+	public static void DeleteFile( int fileId ) {
+		var file = SystemProvider.GetFile( fileId );
+		SystemProvider.DeleteFile( fileId );
+		DeleteBlob( file.BlobReferenceId );
+	}
+
+	/// <summary>
+	/// Returns the content type of the given file.
+	/// </summary>
+	// This implementation simply returns the media type provided by the client, which makes it vulnerable to spoofing. The only way around this is to determine
+	// the media type by looking at the contents of the file.
+	internal static string GetContentTypeForPostedFile( RsFile file ) => file.ContentType;
 
 	/// <summary>
 	/// Copies the specified file collection and returns the ID of the copy.
 	/// </summary>
-	public static int CopyFileCollection( int fileCollectionId ) {
-		var newFileCollectionId = SystemProvider.InsertFileCollection();
-		foreach( var file in SystemProvider.GetFilesLinkedToFileCollection( fileCollectionId ) )
-			SystemProvider.InsertFile( newFileCollectionId, file.FileName, SystemProvider.GetFileContents( file.FileId ), file.ContentType );
-		return newFileCollectionId;
+	public static int CopyFileCollection( int collectionId ) {
+		var newCollectionId = SystemProvider.InsertFileCollection();
+		foreach( var collectionFile in SystemProvider.GetFilesLinkedToFileCollection( collectionId ) ) {
+			var file = SystemProvider.GetFile( collectionFile.FileId );
+			var newFileId = SystemProvider.InsertFile(
+				file.FileName,
+				file.ContentType,
+				file.UploadTime,
+				SystemProvider.InsertBlobReference( SystemProvider.GetReferencedBlobId( file.BlobReferenceId ) ) );
+			SystemProvider.InsertFileCollectionFile( newCollectionId, newFileId );
+		}
+		return newCollectionId;
 	}
 
+	internal static IEnumerable<BlobFileCollectionFile> OrderByName( this IEnumerable<BlobFileCollectionFile> rows ) =>
+		rows.OrderBy( i => SystemProvider.GetFile( i.FileId ).FileName ).ThenBy( i => i.FileId );
+
+	internal static IEnumerable<BlobFileCollectionFile> OrderByUploadTimeDescending( this IEnumerable<BlobFileCollectionFile> rows ) =>
+		rows.OrderByDescending( i => SystemProvider.GetFile( i.FileId ).UploadTime ).ThenByDescending( i => i.FileId );
+
 	/// <summary>
-	/// SystemBlobFileManagementProvider must be implemented.
 	/// You should check other meta information about the file (such as the extension) before calling this expensive method.
 	/// </summary>
-	public static bool IsValidPdfFile( int fileId ) {
-		var contents = SystemProvider.GetFileContents( fileId );
-		return IsValidPdfFile( contents );
-	}
+	public static bool IsValidPdfFile( BlobFile file ) => IsValidPdfFile( GetFileContents( file ) );
 
 	/// <summary>
 	/// Returns true if the file is a valid PDF file.
@@ -55,16 +105,4 @@ public static class BlobStorageStatics {
 	/// You should check other meta information about the file (such as the extension) before calling this expensive method.
 	/// </summary>
 	public static bool IsValidPdfFile( Stream sourceStream ) => ExternalFunctionalityStatics.ExternalPdfProvider.FileIsValidPdf( sourceStream );
-
-	/// <summary>
-	/// Returns the content type of the given HttpPostedFile.
-	/// </summary>
-	// This implementation simply returns the media type provided by the client, which makes it vulnerable to spoofing. The only way around this is to determine
-	// the media type by looking at the contents of the file.
-	internal static string GetContentTypeForPostedFile( RsFile file ) => file.ContentType;
-
-	internal static IEnumerable<BlobFile> OrderByName( this IEnumerable<BlobFile> rows ) => rows.OrderBy( i => i.FileName ).ThenBy( i => i.FileId );
-
-	internal static IEnumerable<BlobFile> OrderByUploadTimeDescending( this IEnumerable<BlobFile> rows ) =>
-		rows.OrderByDescending( i => i.UploadTime ).ThenByDescending( i => i.FileId );
 }

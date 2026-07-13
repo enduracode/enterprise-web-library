@@ -40,7 +40,7 @@ public class BlobFileResponse {
 		EwfResponse.Create(
 			file.ContentType,
 			new EwfResponseBodyCreator( () => {
-				var contents = BlobStorageStatics.SystemProvider.GetFileContents( file.FileId );
+				var contents = BlobStorageStatics.GetFileContents( file );
 				if( forcedImageWidth.Value.HasValue )
 					contents = EwlStatics.ResizeImage( contents, forcedImageWidth.Value.Value ).ToArray();
 				return contents;

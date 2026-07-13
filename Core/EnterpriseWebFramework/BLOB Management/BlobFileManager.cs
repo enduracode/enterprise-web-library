@@ -11,28 +11,13 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 public sealed class BlobFileManager: FlowComponent {
 	private readonly IReadOnlyCollection<FlowComponent> children;
 
-	public BlobFileManager(
-		int? fileCollectionId, bool requireUploadIfNoFile, Action<int> idSetter, out Action modificationMethod, BlobFileManagerSetup? setup = null ) {
+	public BlobFileManager( int? fileId, bool requireUploadIfNoFile, Action<int?> idSetter, out Action modificationMethod, BlobFileManagerSetup? setup = null ) {
 		setup ??= BlobFileManagerSetup.Create();
-		var file = fileCollectionId != null ? BlobStorageStatics.GetFirstFileFromCollection( fileCollectionId.Value ) : null;
+		var file = fileId.HasValue ? BlobStorageStatics.SystemProvider.GetFile( fileId.Value ) : null;
 
 		var components = new List<FlowComponent>();
-		if( file != null ) {
-			var download = new EwfButton(
-				new StandardButtonStyle( Translation.DownloadExisting + " (" + file.FileName + ")", buttonSize: ButtonSize.ShrinkWrap ),
-				behavior: new PostBackBehavior(
-					postBack: PostBack.CreateFull(
-						id: PostBack.GetCompositeId( "ewfFile", file.FileId.ToString() ),
-						actionGetter: () => {
-							// Refresh the file here in case a new one was uploaded on the same post-back.
-							return new PostBackAction(
-								new PageReloadBehavior(
-									secondaryResponse: new SecondaryResponse(
-										new BlobFileResponse( BlobStorageStatics.GetFirstFileFromCollection( fileCollectionId!.Value )!.FileId, () => true ),
-										false ) ) );
-						} ) ) );
-			components.Add( download );
-		}
+		if( fileId.HasValue )
+			components.AddRange( BlobManagementStatics.GetFileButton( fileId.Value, labelOverride: Translation.DownloadExisting + " (" + file!.FileName + ")" ) );
 		else if( !setup.OmitNoExistingFileMessage )
 			components.Add( new GenericPhrasingContainer( Translation.NoExistingFile.ToComponents() ) );
 
@@ -72,20 +57,10 @@ public sealed class BlobFileManager: FlowComponent {
 			etherealContent: new EwfHiddenField( ( file == null ).ToString(), id: fileUploadDisplayedHiddenFieldId, pageModificationValue: fileUploadDisplayedPmv )
 				.PageComponent.ToCollection() ).ToCollection();
 
-		modificationMethod = () => {
-			fileCollectionId ??= BlobStorageStatics.SystemProvider.InsertFileCollection();
-
-			if( uploadedFile != null ) {
-				BlobStorageStatics.SystemProvider.DeleteFilesLinkedToFileCollection( fileCollectionId.Value );
-				BlobStorageStatics.SystemProvider.InsertFile(
-					fileCollectionId.Value,
-					uploadedFile.FileName,
-					uploadedFile.Contents,
-					BlobStorageStatics.GetContentTypeForPostedFile( uploadedFile ) );
-			}
-
-			idSetter( fileCollectionId.Value );
-		};
+		modificationMethod = () => idSetter(
+			uploadedFile is null
+				? fileId
+				: BlobStorageStatics.InsertFile( uploadedFile.FileName, BlobStorageStatics.GetContentTypeForPostedFile( uploadedFile ), uploadedFile.Contents ) );
 	}
 
 	IReadOnlyCollection<FlowComponentOrNode> FlowComponent.GetChildren() => children;
