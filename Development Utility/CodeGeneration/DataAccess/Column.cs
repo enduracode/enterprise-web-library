@@ -128,12 +128,13 @@ internal class Column {
 		       valueContainer.DataType == typeof( Guid ) ? $"""new Guid( "{valueString}" )""" : valueString;
 	}
 
-	internal ModificationField GetModificationField() {
+	internal ModificationField GetModificationField( bool retainsPreviousValues ) {
 		var type = valueContainer.DataType.IsValueType && valueContainer.AllowsNull
 			           ? typeof( Nullable<> ).MakeGenericType( valueContainer.DataType )
 			           : valueContainer.DataType;
 		return new ModificationField(
 			"column",
+			retainsPreviousValues,
 			valueContainer.Name,
 			valueContainer.PascalCasedName,
 			valueContainer.CamelCasedName,

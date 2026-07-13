@@ -123,7 +123,7 @@ internal static class StandardModificationStatics {
 			writeSetAllDataMethod();
 
 		foreach( var column in columns.DataColumns )
-			new ModificationFormItemMethodWriter( column.GetModificationField() ).WriteFormItemGetters( writer );
+			new ModificationFormItemMethodWriter( column.GetModificationField( isRevisionHistoryClass ) ).WriteFormItemGetters( writer );
 
 		// Write execute methods and helpers.
 		writeExecuteMethod( table.QualifiedName );
@@ -242,7 +242,8 @@ internal static class StandardModificationStatics {
 	}
 
 	private static void writePrivateDeleteRowsMethod( DatabaseConnection cn, DatabaseTable table, bool hasModTable, bool isRevisionHistoryClass ) {
-		// NOTE: For revision history tables, we should have the delete method automatically clean up the revisions table (but not user transactions) for us when doing direct-with-revision-bypass deletions.
+		// NOTE: For revision history tables, we should have the delete method automatically clean up the revisions table (but not user transactions) for us when
+		// doing direct-with-revision-bypass deletions.
 
 		writer.WriteLine(
 			"private static int deleteRows( List<{0}> conditions, bool isLongRunning ) {{".FormatWith(
