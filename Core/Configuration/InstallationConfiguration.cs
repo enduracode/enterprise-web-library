@@ -345,7 +345,11 @@ public class InstallationConfiguration {
 				true,
 				sqlServerDatabase.FullTextCatalog );
 		if( database is MySqlDatabase mySqlDatabase )
-			return new MySqlInfo( secondaryDatabaseName, mySqlDatabase.database ?? FullShortName.CamelToEnglish().EnglishToOracle(), true );
+			return new MySqlInfo(
+				secondaryDatabaseName,
+				mySqlDatabase.server ?? "",
+				mySqlDatabase.database ?? FullShortName.CamelToEnglish().EnglishToOracle(),
+				true );
 		if( database is OracleDatabase oracleDatabase )
 			return new OracleInfo(
 				secondaryDatabaseName,

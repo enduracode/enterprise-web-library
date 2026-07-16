@@ -75,13 +75,13 @@ public class SqlServerInfo: DatabaseInfo {
 	/// </summary>
 	public string? FullTextCatalog => fullTextCatalog;
 
-	string DatabaseInfo.GetConnectionString( int timeout, string clientIdOverride ) {
+	string DatabaseInfo.GetConnectionString( int timeout, DatabaseClientIdentity? identityOverride ) {
 		var builder = new SqlConnectionStringBuilder();
 
 		builder.DataSource = server ?? "(local)";
-		if( clientIdOverride.Length > 0 ) {
+		if( identityOverride is not null ) {
 			builder.Authentication = SqlAuthenticationMethod.ActiveDirectoryManagedIdentity;
-			builder.UserID = clientIdOverride;
+			builder.UserID = identityOverride.ClientId;
 		}
 		else if( loginName is not null ) {
 			builder.UserID = loginName;

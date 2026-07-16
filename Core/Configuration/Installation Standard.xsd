@@ -68,6 +68,7 @@
 		<complexContent>
 			<extension base="rs:Database">
 				<sequence>
+					<element name="server" type="string" minOccurs="0" />
 					<element name="database" type="string" minOccurs="0" />
 				</sequence>
 			</extension>

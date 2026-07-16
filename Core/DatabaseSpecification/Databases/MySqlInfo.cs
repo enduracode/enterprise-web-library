@@ -1,4 +1,6 @@
 ﻿using System.Data.Common;
+using Azure.Core;
+using Azure.Identity;
 using EnterpriseWebLibrary.ExternalFunctionality;
 using FluentMigrator.Runner;
 using StackExchange.Profiling;
@@ -18,15 +20,25 @@ public class MySqlInfo: DatabaseInfo {
 		factory = new Lazy<DbProviderFactory>( () => provider.Value.GetDbProviderFactory() );
 	}
 
+	internal static string GetValidUsername( string user ) => user.TruncateStart( 32 );
+
 	private readonly string secondaryDatabaseName;
+
+	/// <summary>
+	/// Gets the server. Returns the empty string to represent the local machine.
+	/// </summary>
+	public string Server { get; }
+
 	private readonly string database;
 	private readonly bool supportsConnectionPooling;
 
 	/// <summary>
-	/// Creates a new MySQL information object. Specify the empty string for the secondary database name if this represents the primary database.
+	/// Creates a new MySQL information object. Specify the empty string for the secondary database name if this represents the primary database. Pass the empty
+	/// string for the server to represent the local machine.
 	/// </summary>
-	public MySqlInfo( string secondaryDatabaseName, string database, bool supportsConnectionPooling ) {
+	public MySqlInfo( string secondaryDatabaseName, string server, string database, bool supportsConnectionPooling ) {
 		this.secondaryDatabaseName = secondaryDatabaseName;
+		Server = server;
 		this.database = database;
 		this.supportsConnectionPooling = supportsConnectionPooling;
 	}
@@ -41,6 +53,23 @@ public class MySqlInfo: DatabaseInfo {
 	string DatabaseInfo.QueryCacheHint => "";
 
 	/// <summary>
+	/// Gets the username.
+	/// </summary>
+	public string GetUser() =>
+		Environment.GetEnvironmentVariable( $"{EwlStatics.EwlInitialism.EnglishToPascal()}EntraAdminGroupName" ) is {} admin
+			? GetValidUsername( admin )
+			: Environment.GetEnvironmentVariable( "WEBSITE_SITE_NAME" ) is {} appServiceName /* Azure App Service */
+				? GetValidUsername( appServiceName )
+				: Environment.GetEnvironmentVariable( "CONTAINER_APP_JOB_NAME" ) is {} containerAppJobName /* Azure Container Apps job */
+					? GetValidUsername( containerAppJobName )
+					: throw new Exception( "The managed-identity user name is not available." );
+
+	/// <summary>
+	/// Gets the password.
+	/// </summary>
+	public string GetPassword() => getManagedIdentityToken( ManagedIdentityId.SystemAssigned );
+
+	/// <summary>
 	/// Gets the database.
 	/// </summary>
 	public string Database => database;
@@ -50,13 +79,20 @@ public class MySqlInfo: DatabaseInfo {
 	/// </summary>
 	public bool SupportsConnectionPooling => supportsConnectionPooling;
 
-	string DatabaseInfo.GetConnectionString( int timeout, string clientIdOverride ) {
-		var connectionString = "Server=localhost; User ID=root; Password=password; Database=" + database;
-		if( !supportsConnectionPooling )
-			connectionString += "; Pooling=false";
-		connectionString += "; Connection Timeout={0}".FormatWith( timeout );
-		return connectionString;
-	}
+	string DatabaseInfo.GetConnectionString( int timeout, DatabaseClientIdentity? identityOverride ) =>
+		provider!.Value.GetConnectionString(
+			Server,
+			Server.Length > 0 ? identityOverride is null ? GetUser() : identityOverride.Name : "root",
+			Server.Length > 0
+				? getManagedIdentityToken(
+					identityOverride is null ? ManagedIdentityId.SystemAssigned : ManagedIdentityId.FromUserAssignedClientId( identityOverride.ClientId ) )
+				: "password",
+			database,
+			supportsConnectionPooling,
+			(uint)timeout );
+
+	private string getManagedIdentityToken( ManagedIdentityId id ) =>
+		new ManagedIdentityCredential( id ).GetToken( new TokenRequestContext( [ "https://ossrdbms-aad.database.windows.net/.default" ] ) ).Token;
 
 	DbConnection DatabaseInfo.CreateConnection( string connectionString ) {
 		var connection = factory!.Value.CreateConnection()!;

@@ -29,7 +29,7 @@ public class FolderDatabaseInfo: DatabaseInfo {
 	string DatabaseInfo.LastAutoIncrementValueExpression => throw new NotSupportedException();
 	string DatabaseInfo.QueryCacheHint => throw new NotSupportedException();
 
-	string DatabaseInfo.GetConnectionString( int timeout, string clientIdOverride ) => throw new NotSupportedException();
+	string DatabaseInfo.GetConnectionString( int timeout, DatabaseClientIdentity? identityOverride ) => throw new NotSupportedException();
 	DbConnection DatabaseInfo.CreateConnection( string connectionString ) => throw new NotSupportedException();
 	DbCommand DatabaseInfo.CreateCommand() => throw new NotSupportedException();
 	DbParameter DatabaseInfo.CreateParameter() => throw new NotSupportedException();

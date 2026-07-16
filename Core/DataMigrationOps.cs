@@ -54,8 +54,11 @@ public static class DataMigrationOps {
 				.WithGlobalConnectionString(
 					ConfigurationStatics.InstallationConfiguration.PrimaryDatabaseInfo!.GetConnectionString(
 						60,
-						clientIdOverride:
-						Environment.GetEnvironmentVariable( "{0}DataMigratorManagedIdentityClientId".FormatWith( EwlStatics.EwlInitialism.EnglishToPascal() ) ) ?? "" ) )
+						identityOverride: Environment.GetEnvironmentVariable( $"{EwlStatics.EwlInitialism.EnglishToPascal()}DataMigratorManagedIdentityName" ) is {} name
+							                  ? new DatabaseClientIdentity(
+								                  name,
+								                  Environment.GetEnvironmentVariable( $"{EwlStatics.EwlInitialism.EnglishToPascal()}DataMigratorManagedIdentityClientId" )! )
+							                  : null ) )
 				.ScanIn( appAssembly )
 				.For.Migrations() )
 			.AddScoped( typeof( IVersionTableMetaData ), typeof( TableConfiguration ) )

@@ -71,7 +71,7 @@ public class OracleInfo: DatabaseInfo {
 	/// </summary>
 	public bool SupportsLinguisticIndexes => supportsLinguisticIndexes;
 
-	string DatabaseInfo.GetConnectionString( int timeout, string clientIdOverride ) {
+	string DatabaseInfo.GetConnectionString( int timeout, DatabaseClientIdentity? identityOverride ) {
 		var connectionString = "Data Source=" + dataSource + "; User Id=" + userAndSchema + "; Password=" + password +
 		                       ( userAndSchema == "sys" ? "; DBA Privilege=SYSDBA" : "" );
 		if( !supportsConnectionPooling )

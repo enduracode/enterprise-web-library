@@ -35,7 +35,7 @@ public interface DatabaseInfo {
 	/// <summary>
 	/// Returns the connection string for the database.
 	/// </summary>
-	string GetConnectionString( int timeout, string clientIdOverride = "" );
+	string GetConnectionString( int timeout, DatabaseClientIdentity? identityOverride = null );
 
 	/// <summary>
 	/// Creates an ADO.NET database connection to the database.
