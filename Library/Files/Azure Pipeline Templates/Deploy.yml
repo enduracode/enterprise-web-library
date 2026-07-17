@@ -13,6 +13,8 @@ parameters:
   type: string
 - name: jobContainerUrl
   type: string
+- name: dataMigratorIdentityName
+  type: string
 - name: dataMigratorIdentityClientId
   type: string
 - name: isuInstallationUrl
@@ -225,7 +227,10 @@ jobs:
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
         $record = @{
-          env   = @{ EwlDataMigratorManagedIdentityClientId = "${{ parameters.dataMigratorIdentityClientId }}" }
+          env   = @{
+            EwlDataMigratorManagedIdentityName = "${{ parameters.dataMigratorIdentityName }}"
+            EwlDataMigratorManagedIdentityClientId = "${{ parameters.dataMigratorIdentityClientId }}"
+          }
           args  = @("@@DataMigratorPath")
           input = ""
         } | ConvertTo-Json -Compress

@@ -224,7 +224,11 @@ public class ExistingInstallationLogic {
 						environmentVariables: new OrderedDictionary<string, string>
 							{
 								{
-									"EwlDataMigratorManagedIdentityClientId",
+									$"{EwlStatics.EwlInitialism.EnglishToPascal()}DataMigratorManagedIdentityName",
+									AzureStatics.GetDataMigratorIdentityName( runtimeConfiguration, runtimeConfiguration.InstallationShortName )
+								},
+								{
+									$"{EwlStatics.EwlInitialism.EnglishToPascal()}DataMigratorManagedIdentityClientId",
 									AzureStatics.GetDataMigratorIdentityClientId(
 										runtimeConfiguration,
 										runtimeConfiguration.InstallationShortName,

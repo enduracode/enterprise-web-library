@@ -58,7 +58,7 @@ public static class AzureStatics {
 		return GetStorageContainerUrl( containerName, credential: credential );
 	}
 
-	internal static string GetDataMigratorIdentityName( InstallationConfiguration installationConfiguration, string installationShortName ) =>
+	public static string GetDataMigratorIdentityName( InstallationConfiguration installationConfiguration, string installationShortName ) =>
 		$"id-{getSystemName( installationConfiguration )}-{GetInstallationName( installationShortName )}-datamigrator";
 
 	public static string GetDataMigratorIdentityClientId(
