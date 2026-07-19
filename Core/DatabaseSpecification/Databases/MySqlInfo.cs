@@ -83,7 +83,7 @@ public class MySqlInfo: DatabaseInfo {
 	string DatabaseInfo.GetConnectionString( int timeout, DatabaseClientIdentity? identityOverride ) =>
 		provider!.Value.GetConnectionString(
 			Server,
-			Server.Length > 0 ? identityOverride is null ? GetUser() : identityOverride.Name : "root",
+			Server.Length > 0 ? identityOverride is null ? GetUser() : GetValidUsername( identityOverride.Name ) : "root",
 			Server.Length > 0
 				? getManagedIdentityToken(
 					identityOverride is null ? ManagedIdentityId.SystemAssigned : ManagedIdentityId.FromUserAssignedClientId( identityOverride.ClientId ) )
