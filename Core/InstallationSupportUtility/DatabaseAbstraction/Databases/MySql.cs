@@ -65,19 +65,26 @@ public class MySql: Database {
 	}
 
 	void Database.ExportToFile( ExportFile file ) {
-		if( file.IsAzureBlob )
-			throw new NotSupportedException();
-		file.TryGetFilePath( out var filePath );
-
 		executeMethodWithDbExceptionHandling(
 			delegate {
 				try {
-					// The --hex-blob option prevents certain BLOBs from causing errors during database re-creation.
-					TewlContrib.ProcessTools.RunProgram(
-						getMySqlProgram( "mysqldump" ),
-						getHostAndAuthenticationArguments() + " --single-transaction --hex-blob --result-file=\"{0}\" ".FormatWith( filePath ) + info.Database,
-						"",
-						true );
+					if( file.IsAzureBlob ) {
+						file.TryGetAzureBlob( out var containerUrl, out var blobName );
+						var blobClient = new BlockBlobClient( new Uri( $"{containerUrl}/{blobName}" ), new ManagedIdentityCredential( ManagedIdentityId.SystemAssigned ) );
+						using var stream = blobClient.OpenWrite( true );
+						runMySqlProgramInAzure( "mysqldump", "--single-transaction --hex-blob --set-gtid-purged=OFF " + info.Database, null, stream );
+					}
+					else {
+						file.TryGetFilePath( out var filePath );
+
+						// The --hex-blob option prevents certain BLOBs from causing errors during database re-creation.
+						TewlContrib.ProcessTools.RunProgram(
+							getMySqlProgram( "mysqldump" ),
+							getHostAndAuthenticationArguments() + " --single-transaction --hex-blob --set-gtid-purged=OFF --result-file=\"{0}\" ".FormatWith( filePath ) +
+							info.Database,
+							"",
+							true );
+					}
 				}
 				catch( Exception e ) {
 					throw DataAccessMethods.CreateDbConnectionException( info, "exporting (to file)", e );
