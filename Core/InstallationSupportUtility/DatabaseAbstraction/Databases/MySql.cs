@@ -76,7 +76,13 @@ public class MySql: Database {
 						file.TryGetAzureBlob( out var containerUrl, out var blobName );
 						var blobClient = new BlockBlobClient( new Uri( $"{containerUrl}/{blobName}" ), new ManagedIdentityCredential( ManagedIdentityId.SystemAssigned ) );
 						using var stream = blobClient.OpenWrite( true );
-						runMySqlProgramInAzure( "mysqldump", "--single-transaction --hex-blob --set-gtid-purged=OFF " + info.Database, null, stream );
+						runMySqlProgramInAzure(
+							"mysqldump",
+							$"""
+							 --single-transaction --hex-blob --set-gtid-purged=OFF "{info.Database}"
+							 """,
+							null,
+							stream );
 					}
 					else {
 						file.TryGetFilePath( out var filePath );
@@ -127,7 +133,13 @@ public class MySql: Database {
 				using var stream = blobClient.OpenRead();
 				executeMethodWithDbExceptionHandling( () => {
 					try {
-						runMySqlProgramInAzure( "mysql", "--disable-reconnect --batch --disable-auto-rehash " + info.Database, stream, null );
+						runMySqlProgramInAzure(
+							"mysql",
+							$"""
+							 --disable-reconnect --batch --disable-auto-rehash "{info.Database}"
+							 """,
+							stream,
+							null );
 					}
 					catch( Exception e ) {
 						if( e.Message.Contains( "ERROR" ) && e.Message.Contains( "at line" ) )
@@ -180,7 +192,9 @@ public class MySql: Database {
 				try {
 					TewlContrib.ProcessTools.RunProgram(
 						getMySqlProgram( "mysql" ),
-						getHostAndAuthenticationArguments() + " --disable-reconnect --batch --disable-auto-rehash " + info.Database,
+						$"""
+						 {getHostAndAuthenticationArguments()} --disable-reconnect --batch --disable-auto-rehash "{info.Database}"
+						 """,
 						sw.ToString(),
 						true );
 				}
