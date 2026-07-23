@@ -64,10 +64,15 @@ public static class BlobStorageStatics {
 	internal static string GetContentTypeForPostedFile( RsFile file ) => file.ContentType;
 
 	/// <summary>
+	/// Inserts a new file collection into the database and returns the ID.
+	/// </summary>
+	public static int InsertFileCollection() => SystemProvider.InsertFileCollection();
+
+	/// <summary>
 	/// Copies the specified file collection and returns the ID of the copy.
 	/// </summary>
 	public static int CopyFileCollection( int collectionId ) {
-		var newCollectionId = SystemProvider.InsertFileCollection();
+		var newCollectionId = InsertFileCollection();
 		foreach( var collectionFile in SystemProvider.GetFilesLinkedToFileCollection( collectionId ) ) {
 			var file = SystemProvider.GetFile( collectionFile.FileId );
 			var newFileId = SystemProvider.InsertFile(
