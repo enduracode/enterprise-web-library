@@ -1,7 +1,7 @@
 ---
 description: Reviews diffs for missed TEWL and EWL abstractions, reporting cases where manual code duplicates existing utility methods
 mode: subagent
-model: opencode/claude-sonnet-5
+model: opencode/gpt-5.6-terra
 tools:
   todowrite: false
   task: false
