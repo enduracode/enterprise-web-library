@@ -179,12 +179,6 @@ Execute.WithConnection( ( connection, transaction ) => {
 } );
 ```
 
-## Initial database setup
-
-For initial schema and reference data (before FluentMigrator), use
-`Library/Configuration/Database Updates.sql`. This script runs during the
-first `sync` and creates the baseline schema.
-
 ## After schema changes
 
 After any migration that changes the schema, run `sync` to
