@@ -33,7 +33,13 @@ public static class DatabaseOps {
 		if( database is NoDatabase )
 			return;
 		Log.Information( "Waiting for database to be ready..." );
-		ExceptionHandlingTools.Retry( () => database.GetLineMarker(), "Database failed to be ready." );
+		ExceptionHandlingTools.Retry(
+			() => database.ExecuteDbMethod( connection => {
+				var command = connection.DatabaseInfo.CreateCommand();
+				command.CommandText = database is Oracle ? "SELECT 1 FROM DUAL" : "SELECT 1";
+				connection.ExecuteScalarCommand( command );
+			} ),
+			"Database failed to be ready." );
 		Log.Information( "Database is ready." );
 	}
 
