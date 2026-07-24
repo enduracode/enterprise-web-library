@@ -169,15 +169,14 @@ public static partial class EwlStatics {
 					"After you have licensed this component, please return true from {0}.{1}.".FormatWith(
 						nameof(SystemGeneralProvider),
 						nameof(SystemGeneralProvider.ImageflowLicensed) ) ) );
-		return Task.Run( async () => {
-				using var job = new ImageJob();
-				return await job.BuildCommandString(
-						       image,
-						       new BytesDestination(),
-						       newHeight.HasValue ? $"width={newWidth}&height={newHeight.Value}&mode=crop" : $"width={newWidth}" )
-					       .Finish()
-					       .InProcessAsync();
-			} )
+		using var job = new ImageJob();
+		return Task.Run(
+				job.BuildCommandString(
+						image,
+						new BytesDestination(),
+						newHeight.HasValue ? $"width={newWidth}&height={newHeight.Value}&mode=crop" : $"width={newWidth}" )
+					.Finish()
+					.InProcessAsync )
 			.Result.First!.TryGetBytes()!.Value;
 	}
 
