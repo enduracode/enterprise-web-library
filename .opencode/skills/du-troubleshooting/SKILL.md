@@ -5,9 +5,24 @@ description: Run local EWL Development Utility (DU) operations on EWL systems. U
 
 # Running the Local DU
 
-Use `Development Utility/Development Utility.csproj` in this repository, not a released DU.
+Use the local `Development Utility/Development Utility.csproj` project in this repository.
 
-The DU treats its current working directory as the target installation path. Set the command tool's working directory to the path specified by the user; do not pass that path as a DU argument. Resolve `Development Utility/Development Utility.csproj` against the session's workspace root and pass its absolute path to `dotnet run --project`.
+Resolve `Development Utility/Development Utility.csproj` against the session's workspace root to get its absolute path. Set the command tool's working directory to the target installation path, then build the local DU, resolve its output path through MSBuild, and execute the DLL directly:
+
+```powershell
+$duProject = '<resolved absolute DU-project path>'
+dotnet build $duProject
+if( $LASTEXITCODE -eq 0 ) {
+	$duDll = dotnet msbuild $duProject -getProperty:TargetPath
+	if( $LASTEXITCODE -eq 0 ) {
+		dotnet $duDll <operation> <arguments>
+	}
+}
+```
+
+In this command, `$duProject` is the absolute project path resolved above, and `<operation> <arguments>` is the requested DU operation. Keep the command tool's working directory set to the target installation for the entire command because the DU uses its process working directory as the installation path. Resolving `TargetPath` avoids hard-coding a configuration, target framework, runtime identifier, or output-folder layout.
+
+The DU startup banner's `installation path` is the local EWL source/configuration location, not the target installation. The target is the process working directory set on the command tool.
 
 If the user names a system instead of providing a path, locate it using repository context and nearby system repositories, then identify its EWL installation directory from its configuration. Ask only if multiple plausible installations remain.
 
@@ -35,5 +50,4 @@ Running this operation replaces target data and can leave running applications w
 
 ## Troubleshooting
 
-- If the DU identifies the wrong installation, verify the process working directory is the exact installation path requested by the user.
 - If the installation is invalid, verify that the target has runtime installation configuration.
