@@ -33,34 +33,6 @@ internal class UpdateDependentLogic: Operation {
 	bool Operation.IsValid( Installation installation ) => installation is DevelopmentInstallation;
 
 	void Operation.Execute( Installation genericInstallation, IReadOnlyList<string> arguments, OperationResult operationResult ) {
-		var installation = (DevelopmentInstallation)genericInstallation;
-
-		if( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemUsesLegacyEwl == true ) {
-			Log.Information( "Running legacy Update-DependentLogic command." );
-			var referenceSubstrings = File.ReadAllLines( EwlStatics.CombinePaths( installation.DevelopmentInstallationLogic.LibraryPath, "Library.csproj" ) )
-				.Select( i => i.Trim() )
-				.First( i => i.StartsWith( """<PackageReference Include="Ewl""", StringComparison.Ordinal ) )
-				.Separate( "\"", false );
-			var id = referenceSubstrings[ 1 ];
-			var version = referenceSubstrings[ 3 ];
-			Console.WriteLine(
-				TewlContrib.ProcessTools.RunProgram(
-						EwlStatics.CombinePaths(
-							ConfigurationStatics.InstallationConfiguration.InstallationType == InstallationType.Development
-								? EwlStatics.CombinePaths( Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ), ".nuget/packages" )
-								: EwlStatics.CombinePaths( ConfigurationStatics.InstallationConfiguration.InstallationPath, "../../../../.." ),
-							id,
-							version,
-							"Development Utility/EnterpriseWebLibrary.DevelopmentUtility" ),
-						$"""
-						 "{genericInstallation.GeneralLogic.Path}" UpdateAllDependentLogic
-						 """,
-						"",
-						true )
-					.TrimEnd() );
-			Log.Information( "Ran legacy Update-DependentLogic command." );
-		}
-
 		// This block exists because of https://enduracode.kilnhg.com/Review/K164316.
 		try {
 			IsuStatics.ConfigureIis( false );
@@ -69,6 +41,8 @@ internal class UpdateDependentLogic: Operation {
 		catch {
 			Log.Information( "Did not configure IIS." );
 		}
+
+		var installation = (DevelopmentInstallation)genericInstallation;
 
 		if( installation.DevelopmentInstallationLogic.DevelopmentConfiguration.UpdateFileEncodingsSpecified )
 			Log.Information(
@@ -137,6 +111,33 @@ internal class UpdateDependentLogic: Operation {
 				for( string? line; ( line = reader.ReadLine() ) is not null; )
 					Console.WriteLine( $"  {line}" );
 		Log.Information( "Migrated data." );
+
+		// must be after MigrateData
+		if( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemUsesLegacyEwl == true ) {
+			Log.Information( "Running legacy Update-DependentLogic command." );
+			var referenceSubstrings = File.ReadAllLines( EwlStatics.CombinePaths( installation.DevelopmentInstallationLogic.LibraryPath, "Library.csproj" ) )
+				.Select( i => i.Trim() )
+				.First( i => i.StartsWith( """<PackageReference Include="Ewl""", StringComparison.Ordinal ) )
+				.Separate( "\"", false );
+			var id = referenceSubstrings[ 1 ];
+			var version = referenceSubstrings[ 3 ];
+			Console.WriteLine(
+				TewlContrib.ProcessTools.RunProgram(
+						EwlStatics.CombinePaths(
+							ConfigurationStatics.InstallationConfiguration.InstallationType == InstallationType.Development
+								? EwlStatics.CombinePaths( Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ), ".nuget/packages" )
+								: EwlStatics.CombinePaths( ConfigurationStatics.InstallationConfiguration.InstallationPath, "../../../../.." ),
+							id,
+							version,
+							"Development Utility/EnterpriseWebLibrary.DevelopmentUtility" ),
+						$"""
+						 "{genericInstallation.GeneralLogic.Path}" UpdateAllDependentLogic
+						 """,
+						"",
+						true )
+					.TrimEnd() );
+			Log.Information( "Ran legacy Update-DependentLogic command." );
+		}
 
 		if( !installation.SystemIsTewl() )
 			try {
