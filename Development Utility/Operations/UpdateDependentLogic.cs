@@ -108,6 +108,9 @@ internal class UpdateDependentLogic: Operation {
 					        installation.GeneralLogic.Path,
 					        searchPattern: "*" + FileExtensions.Xsd,
 					        searchOption: SearchOption.AllDirectories ) )
+			        .Where( i => installation.ExistingInstallationLogic.RuntimeConfiguration.SystemUsesLegacyEwl != true || !Path
+				                     .GetRelativePath( installation.GeneralLogic.Path, i )
+				                     .StartsWith( "packages" + Path.DirectorySeparatorChar, StringComparison.Ordinal ) )
 			        .OrderBy( i => i ) ) {
 			// see https://stackoverflow.com/a/27976558/35349
 			using( var reader = new StreamReader( filePath, bomlessEncoding ) ) {
