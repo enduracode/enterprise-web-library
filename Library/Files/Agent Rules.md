@@ -126,9 +126,9 @@ system's `opencode.jsonc` and supplements this system's own `AGENTS.md`) are
 directly — edit the corresponding sources in the EWL source repository and
 then rerun the DU's `sync` operation on this system (see
 "Code Generation (Development Utility)" above for how to invoke it).
-Exception: skills under `.opencode\skills\` and `.claude\skills\` whose names
-are **not** prefixed with `ewl-` are system-specific, not generated, and may
-be edited directly.
+Exception: commands under `.opencode\commands\` and skills under
+`.opencode\skills\` and `.claude\skills\` whose names are **not** prefixed
+with `ewl-` are system-specific, not generated, and may be edited directly.
 
 The sources all live under `Library\Files\` of the **EWL source repository**
 (the one whose package is referenced by this system's `Library.csproj`).
