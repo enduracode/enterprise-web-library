@@ -1,6 +1,6 @@
 ---
 name: ewl-opencode-machine-setup
-description: Configure opencode on a new development machine for EWL work by creating the global AGENTS.md and granting read/write access to the EWL source, EWL System Manager source, and EWL folder. Use when setting up opencode on a new machine, or when the user asks to bootstrap, initialize, or configure global opencode for EWL.
+description: Configure opencode on a new development machine for EWL work by creating the global AGENTS.md and granting access to the EWL source, EWL System Manager source, EWL folder, and Systems directory. Use when setting up opencode on a new machine, or when the user asks to bootstrap, initialize, or configure global opencode for EWL.
 ---
 
 ## Overview
@@ -9,10 +9,10 @@ This skill bootstraps opencode’s **global** configuration on a new Windows
 development machine for Enterprise Web Library (EWL) work. It creates (or
 updates) two files in the user’s global opencode config directory:
 
-1. `AGENTS.md` -- a short instruction block listing the three key EWL
-   locations on the machine.
+1. `AGENTS.md` -- a short instruction block listing the key EWL locations on
+   the machine and how to find other EWL codebases.
 2. `opencode.jsonc` -- an `external_directory` permission map granting
-   read/write access to those three locations.
+   access to those locations.
 
 Both files apply to **every** opencode session on the machine, regardless of
 which project directory the session is started in.
@@ -35,9 +35,9 @@ On Windows that resolves to:
 
 Create the directory if it does not already exist.
 
-## Step 2: Find the three EWL locations
+## Step 2: Find the EWL locations
 
-You need to resolve the following three absolute paths on the current
+You need to resolve the following four absolute paths on the current
 machine:
 
 | Label | Typical Windows location | What’s at this path |
@@ -45,6 +45,7 @@ machine:
 | EWL source code | `%USERPROFILE%\Revision Control\EwlBill` | Contains `Enterprise Web Library.sln`, `Core\`, `Library\`, `Development Utility\` |
 | EWL System Manager source code | `%USERPROFILE%\Revision Control\EWL System Manager` | Contains `Installation Support Utility\`, `Web Site\`, `Program Runner\`, `Data Cleaner\` |
 | EWL folder | `C:\Enterprise Web Library` | Machine-wide EWL infrastructure: `Local NuGet Feed\`, configuration, etc. |
+| EWL systems directory | `%USERPROFILE%\Revision Control\Systems` | Other EWL codebases; each codebase can be identified by a `dotnet-tools.json` file containing `ewl` |
 
 For each path, resolve it using the following procedure:
 
@@ -57,8 +58,8 @@ For each path, resolve it using the following procedure:
    - `C:\dev\`
    - directly under `%USERPROFILE%\` (i.e., `%USERPROFILE%\EwlBill`, etc.)
 
-   For the EWL folder, probe `D:\Enterprise Web Library` as the most likely
-   alternate.
+    For the EWL folder, probe `D:\Enterprise Web Library` as the most likely
+    alternate. For the EWL systems directory, probe `D:\Revision Control\Systems`.
 3. **Sanity-check candidates** by looking for the expected marker files /
    subdirectories from the table above before committing to a match.
 4. **If still not found, ask the user** with the `question` tool. Allow the
@@ -68,7 +69,7 @@ For each path, resolve it using the following procedure:
 5. **Verify each user-provided path exists** with `Test-Path` before writing
    it into config.
 
-Store the three resolved absolute paths (or note which ones the user
+Store the four resolved absolute paths (or note which ones the user
 skipped) for use in the next steps.
 
 ## Step 3: Read existing files at the target locations
@@ -103,6 +104,7 @@ If looking for something possibly involving the Enterprise Web Library (EWL), ch
 - EWL source code: `<resolved EWL source path>`
 - EWL System Manager source code: `<resolved ESM path>`
 - EWL folder: `<resolved EWL folder path>`
+- Other EWL codebases: Search `<resolved EWL systems path>` recursively for `dotnet-tools.json` files containing `ewl`.
 ```
 
 If a previous version of this block is already in the file, replace it with
@@ -134,7 +136,8 @@ Example (with the standard locations from the table above):
     "external_directory": {
       "C:/Users/willi/Revision Control/EwlBill/**": "allow",
       "C:/Users/willi/Revision Control/EWL System Manager/**": "allow",
-      "C:/Enterprise Web Library/**": "allow"
+      "C:/Enterprise Web Library/**": "allow",
+      "C:/Users/willi/Revision Control/Systems/**": "allow"
     }
   }
 }
@@ -144,7 +147,7 @@ Example (with the standard locations from the table above):
 
 - Preserve `$schema` and any existing fields the user did not ask to change.
 - If `permission.external_directory` already exists as a map, add the EWL
-  entries to the existing map.
+  entries, including the EWL systems directory, to the existing map.
 - If a key for one of our paths already exists with a different action,
   ask the user before overwriting.
 - **Do not** add a `"*": "ask"` fallback. opencode’s built-in default for
@@ -187,8 +190,9 @@ for the changes to take effect.
 ## Step 8: Verification (after restart)
 
 To confirm the setup is working, the user can ask opencode (in any session)
-to read a file under one of the three configured paths. If the read
-proceeds with no `external_directory` prompt, the rules are active. The
-global `AGENTS.md` will also be visible: it is injected at the top of the
-system prompt of every session as `Instructions from:
+to read a file under one of the configured paths, or to find
+`dotnet-tools.json` files containing `ewl` under the EWL systems directory.
+If the read or search proceeds with no `external_directory` prompt, the rules
+are active. The global `AGENTS.md` will also be visible: it is injected at the
+top of the system prompt of every session as `Instructions from:
 C:\Users\<name>\.config\opencode\AGENTS.md` followed by the file contents.
