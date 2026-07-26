@@ -1482,9 +1482,9 @@ internal class UpdateDependentLogic: Operation {
 
 				writer.WriteLine( "private static int Main( string[] args ) {" );
 				writer.WriteLine( "var dataAccessState = new Lazy<DataAccessState>( () => new DataAccessState() );" );
+				var isClientSideApp = project.Name.Equals( AppStatics.AzureJobDispatcherProjectName, StringComparison.Ordinal ) ? "null" : "false";
 				writer.WriteLine(
-					"GlobalInitializationOps.InitStatics( new GlobalInitializer(), \"{0}\", false, mainDataAccessStateGetter: () => dataAccessState.Value! );".FormatWith(
-						project.Name ) );
+					$"""GlobalInitializationOps.InitStatics( new GlobalInitializer(), "{project.Name}", {isClientSideApp}, mainDataAccessStateGetter: () => dataAccessState.Value! );""" );
 				writer.WriteLine( "try {" );
 				writer.WriteLine( "return GlobalInitializationOps.ExecuteAppWithStandardExceptionHandling( () => {" );
 

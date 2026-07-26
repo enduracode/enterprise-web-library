@@ -33,7 +33,8 @@ public static class GlobalInitializationOps {
 	/// </summary>
 	/// <param name="globalInitializer">The system’s global initializer. Do not pass null.</param>
 	/// <param name="appName"></param>
-	/// <param name="isClientSideApp"></param>
+	/// <param name="isClientSideApp">Pass null for a server-side application that will sometimes run before the data migrator, with the system potentially in an
+	/// inconsistent state.</param>
 	/// <param name="timeGetters">Methods that return the current time and transaction time.</param>
 	/// <param name="assemblyFolderPath">Pass a nonempty string to override the assembly folder path, which is used to locate the installation folder. Use with
 	/// caution.</param>
@@ -45,7 +46,7 @@ public static class GlobalInitializationOps {
 	/// <param name="currentUserGetter">A method that returns the current authenticated user. If you pass null, the authenticated user will not be available in
 	/// the application.</param>
 	public static void InitStatics(
-		SystemInitializer globalInitializer, string appName, bool isClientSideApp, ( Func<Instant> current, Func<Instant> transaction )? timeGetters = null,
+		SystemInitializer globalInitializer, string appName, bool? isClientSideApp, ( Func<Instant> current, Func<Instant> transaction )? timeGetters = null,
 		string assemblyFolderPath = "", Action<TextWriter>? telemetryAppErrorContextWriter = null, Func<DataAccessState>? mainDataAccessStateGetter = null,
 		bool useLongDatabaseTimeouts = false, Func<AutomaticDatabaseConnectionManager?>? currentDatabaseConnectionManagerGetter = null,
 		Func<SystemUser?>? currentUserGetter = null ) {
@@ -59,7 +60,7 @@ public static class GlobalInitializationOps {
 
 			// Initialize these before the exception handling block below because it’s reasonable for the exception handling to depend on them.
 			Clock.Init( timeGetters ?? ( SystemClock.Instance.GetCurrentInstant, SystemClock.Instance.GetCurrentInstant ) );
-			ConfigurationStatics.Init( assemblyFolderPath, appName, isClientSideApp, ref initializationLog );
+			ConfigurationStatics.Init( assemblyFolderPath, appName, isClientSideApp ?? false, ref initializationLog );
 			SystemSpecificLogicStatics.Init( globalInitializer.GetType() );
 			EmailStatics.Init( ( forceImmediateExecution, method ) => {
 				if( !AutomaticDatabaseConnectionManager.HasCurrent || forceImmediateExecution )
@@ -107,7 +108,8 @@ public static class GlobalInitializationOps {
 			DataAccessStatics.Init();
 			DataAccessState.Init( mainDataAccessStateGetter, useLongDatabaseTimeouts );
 			AutomaticDatabaseConnectionManager.Init( currentDatabaseConnectionManagerGetter );
-			DataAccessStatics.InitRetrievalCaches();
+			if( isClientSideApp is not null )
+				DataAccessStatics.InitRetrievalCaches();
 
 			BlobStorageStatics.Init();
 			HtmlBlockStatics.Init();
@@ -119,10 +121,13 @@ public static class GlobalInitializationOps {
 				},
 				currentUserGetter ?? ( () => null ) );
 
-			GlobalInitializationOps.globalInitializer = globalInitializer;
-			globalInitializer.InitStatics();
+			if( isClientSideApp is not null ) {
+				GlobalInitializationOps.globalInitializer = globalInitializer;
+				globalInitializer.InitStatics();
+			}
 
-			AutomaticDatabaseConnectionManager.ExecuteWithAutomaticDatabaseConnections( UserManagementStatics.InitSystemSpecificLogicDependencies );
+			if( isClientSideApp is not null )
+				AutomaticDatabaseConnectionManager.ExecuteWithAutomaticDatabaseConnections( UserManagementStatics.InitSystemSpecificLogicDependencies );
 		}
 		catch( Exception e ) {
 			secondaryInitFailed = true;
