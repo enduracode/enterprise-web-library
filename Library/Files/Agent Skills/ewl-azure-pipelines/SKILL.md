@@ -147,6 +147,127 @@ The build template is fully generated and includes:
 7. `export-logic`
 8. Artifact publishing (per Logic Packages subfolder)
 
+### Self-Hosted Build Pool Provisioning
+
+Generated build pipelines use the organization-level `EwlBuild` pool. Azure
+DevOps represents access to this pool at three separate levels:
+
+1. The organization-level agent pool
+2. A project-level agent queue mapped to that pool
+3. Pipeline permission to use the project queue
+
+When a run fails validation with "Could not find a pool with name EwlBuild.
+The pool does not exist or has not been authorized for use," check all three
+levels. A common cause for a new project is that the organization pool exists
+but has not been added to the project. In **Project settings > Pipelines >
+Agent pools**, add `EwlBuild` as an existing pool, then authorize the specific
+build pipeline under the pool's **Pipeline permissions**. Prefer specific
+pipeline authorization over granting access to all pipelines.
+
+Useful read-only commands:
+
+```powershell
+az pipelines pool list --pool-name "EwlBuild" `
+  --organization "https://example.visualstudio.com" --output json
+
+az devops invoke --organization "https://example.visualstudio.com" `
+  --area distributedtask --resource queues `
+  --route-parameters project=<project-id> --api-version 7.1 --output json
+
+az pipelines agent list --pool-id <organization-pool-id> `
+  --include-capabilities true `
+  --organization "https://example.visualstudio.com" --output json
+```
+
+Pool IDs are organization-wide, but queue IDs are project-specific. Do not use
+a queue ID copied from another project when inspecting or changing pipeline
+permissions.
+
+The `queue` property returned by the build or definition API may still show the
+definition's default `Azure Pipelines` queue even when the YAML job uses
+`EwlBuild`. To identify the agent that actually executed a job, inspect the
+build timeline and its `workerName` values:
+
+```powershell
+az devops invoke --organization "https://example.visualstudio.com" `
+  --area build --resource timeline `
+  --route-parameters project=<project-id> buildId=<build-id> `
+  --api-version 7.1 --output json
+```
+
+### On-Demand Builder Service Hook
+
+The `EwlBuild` agent runs on an on-demand builder VM managed by the live EWL
+System Manager. Every Azure DevOps project whose build pipeline uses this pool
+needs its own service-hook subscription; this is not inherited from another
+project and requires no YAML change.
+
+In **Project settings > Service hooks**, create a **Web Hooks** subscription
+with:
+
+- Event: **Run state changed**
+- Pipeline: the EWL build pipeline (or **Any** only when every project pipeline
+  should start the builder)
+- Run state: **InProgress**
+- URL: `https://admin.enduracode.com/azure-pipeline-runs`
+- HTTP header: `X-EWL-System-Manager-Secret: <current webhook secret>`
+- Resource details: Minimal
+
+The current secret is stored in the **Azure DevOps** section of the EWL System
+Manager's Miscellaneous administration page. Reuse it; do not generate or save
+a replacement while configuring a new project, since rotating it would break
+existing project hooks.
+
+Use the service-hook **Test** action before running the pipeline. The hook asks
+the System Manager to start the active builder VM and run the Azure Pipelines
+agent. After work is complete, the System Manager shuts the builder down, so an
+offline agent is normal between runs. Without this hook, an authorized build
+can remain queued indefinitely waiting for the offline agent.
+
+### Azure DevOps API Troubleshooting
+
+Prefer `az pipelines` and `az devops invoke` for supported Azure DevOps APIs,
+and always pass `--organization` and `--project` or project route parameters
+explicitly. Local CLI defaults may point to another project.
+
+For APIs not exposed conveniently by the CLI, obtain an Azure DevOps token and
+use it without printing or persisting it:
+
+```powershell
+$token = (az account get-access-token `
+  --resource '499b84ac-1321-427f-aa17-267ca6975798' `
+  --output json | ConvertFrom-Json).accessToken
+$headers = @{ Authorization = "Bearer $token" }
+
+Invoke-RestMethod `
+  -Uri 'https://example.visualstudio.com/<project>/_apis/pipelines/pipelinePermissions/queue/<queue-id>?api-version=7.1-preview.1' `
+  -Headers $headers
+```
+
+The identity used by `az account get-access-token` must have access to the
+Azure DevOps organization. This may differ from the PAT or identity used by the
+Azure DevOps CLI extension.
+
+Azure DevOps APIs are split across resource-area hosts. In particular, Service
+Hooks use the `hookssvc` resource area rather than the main organization host.
+Discover resource areas before constructing a raw endpoint:
+
+```powershell
+Invoke-RestMethod `
+  -Uri 'https://example.visualstudio.com/_apis/ResourceAreas?api-version=7.1-preview.1' `
+  -Headers $headers
+```
+
+Use the `locationUrl` returned for the desired area. An empty subscription list
+from `/_apis/hooks/subscriptions` on the main organization host does not prove
+that no service hooks exist. Likewise, a `TF400860` service-version error
+usually indicates the wrong host or route, not an unsupported project setup.
+
+When reporting API results, never output access tokens, secret variable values,
+webhook headers, or URL query strings that may contain credentials. Reduce
+service-hook output to IDs, event filters, status, and a URL stripped to its
+scheme, host, and path.
+
 ## Deploy Job Template
 
 The deploy job template (Deploy.yml) contains:
