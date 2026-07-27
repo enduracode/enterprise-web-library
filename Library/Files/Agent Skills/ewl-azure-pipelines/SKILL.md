@@ -268,6 +268,19 @@ webhook headers, or URL query strings that may contain credentials. Reduce
 service-hook output to IDs, event filters, status, and a URL stripped to its
 scheme, host, and path.
 
+### Retried Build Logs
+
+Normally, a build URL refers to a new build and its current timeline contains
+the linked job and task records. For a failed task, retrieve the build timeline
+and read that task record's `log.id`.
+
+Only when the linked job or task ID is absent from the current timeline, or the
+timeline record has `previousAttempts`, resolve the URL IDs through the
+timeline before reading logs. This handles the uncommon case where Azure DevOps
+reruns a failed job within the same build and retains logs from earlier
+attempts. Do not assume sequential log IDs or inspect an earlier attempt by
+default.
+
 ## Deploy Job Template
 
 The deploy job template (Deploy.yml) contains:
