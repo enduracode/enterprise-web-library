@@ -86,6 +86,10 @@ internal class UpdateDependentLogic: Operation {
 				                     .GetRelativePath( installation.GeneralLogic.Path, i )
 				                     .StartsWith( "packages" + Path.DirectorySeparatorChar, StringComparison.Ordinal ) )
 			        .OrderBy( i => i ) ) {
+			if( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemUsesLegacyEwl == true &&
+			    Path.GetFileName( filePath ).Equals( "Standard Library Files.xml", StringComparison.Ordinal ) )
+				continue;
+
 			// see https://stackoverflow.com/a/27976558/35349
 			using( var reader = new StreamReader( filePath, bomlessEncoding ) ) {
 				reader.Peek();
