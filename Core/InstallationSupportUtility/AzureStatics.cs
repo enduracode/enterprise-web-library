@@ -79,7 +79,7 @@ public static class AzureStatics {
 	public static string GetIsuInstallationContainerName( InstallationConfiguration installationConfiguration, InstallationType installationType ) =>
 		$"{getSystemName( installationConfiguration )}-{getInstallationType( installationType )}-isu-installations";
 
-	internal static string GetDataPackageContainerUrl(
+	public static string GetDataPackageContainerUrl(
 		InstallationConfiguration installationConfiguration, InstallationType installationType, TokenCredential? credential = null ) {
 		var containerName = $"{getSystemName( installationConfiguration )}-{getInstallationType( installationType )}-data-packages";
 		return GetStorageContainerUrl( containerName, credential: credential );

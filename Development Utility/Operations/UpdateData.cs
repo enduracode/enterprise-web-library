@@ -1,4 +1,8 @@
-﻿using EnterpriseWebLibrary.Configuration;
+﻿using System.Threading;
+using Azure.Identity;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
+using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Configuration.InstallationStandard;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
@@ -57,7 +61,22 @@ internal class UpdateData: Operation {
 					throw new UserCorrectableException( "The specified source does not exist." );
 			}
 			else
-				source = sources.FirstOrDefault() is {} defaultSource
+				source = sources.Select( s => {
+						         var credential = new AzureCliCredential( new AzureCliCredentialOptions { TenantId = s.AzureHosting.TenantId } );
+						         var blobs = new BlobContainerClient(
+								         new Uri(
+									         AzureStatics.GetDataPackageContainerUrl(
+										         installation.ExistingInstallationLogic.RuntimeConfiguration,
+										         s.InstallationTypeConfiguration is LiveInstallationConfiguration ? InstallationType.Live : InstallationType.Intermediate,
+										         credential ) ),
+								         credential ).GetBlobs( BlobTraits.None, BlobStates.None, AzureStatics.GetDataBlobPrefix( s.shortName ), CancellationToken.None )
+							         .Materialize();
+						         return ( source: s, packageSize: blobs.Any() ? blobs.Sum( i => i.Properties.ContentLength!.Value ) : (long?)null );
+					         } )
+					         .Where( i => i.packageSize.HasValue )
+					         .OrderBy( i => i.packageSize!.Value )
+					         .FirstOrDefault()
+					         .source is {} defaultSource
 					         ? new DataSource(
 						         installation,
 						         defaultSource.name,
