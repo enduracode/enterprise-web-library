@@ -57,6 +57,18 @@ public static class BlobStorageStatics {
 	}
 
 	/// <summary>
+	/// Copies the specified file and returns the ID of the copy.
+	/// </summary>
+	public static int CopyFile( int fileId ) {
+		var file = SystemProvider.GetFile( fileId );
+		return SystemProvider.InsertFile(
+			file.FileName,
+			file.ContentType,
+			file.UploadTime,
+			SystemProvider.InsertBlobReference( SystemProvider.GetReferencedBlobId( file.BlobReferenceId ) ) );
+	}
+
+	/// <summary>
 	/// Returns the content type of the given file.
 	/// </summary>
 	// This implementation simply returns the media type provided by the client, which makes it vulnerable to spoofing. The only way around this is to determine
@@ -73,15 +85,8 @@ public static class BlobStorageStatics {
 	/// </summary>
 	public static int CopyFileCollection( int collectionId ) {
 		var newCollectionId = InsertFileCollection();
-		foreach( var collectionFile in SystemProvider.GetFilesLinkedToFileCollection( collectionId ) ) {
-			var file = SystemProvider.GetFile( collectionFile.FileId );
-			var newFileId = SystemProvider.InsertFile(
-				file.FileName,
-				file.ContentType,
-				file.UploadTime,
-				SystemProvider.InsertBlobReference( SystemProvider.GetReferencedBlobId( file.BlobReferenceId ) ) );
-			SystemProvider.InsertFileCollectionFile( newCollectionId, newFileId );
-		}
+		foreach( var collectionFile in SystemProvider.GetFilesLinkedToFileCollection( collectionId ) )
+			SystemProvider.InsertFileCollectionFile( newCollectionId, CopyFile( collectionFile.FileId ) );
 		return newCollectionId;
 	}
 
