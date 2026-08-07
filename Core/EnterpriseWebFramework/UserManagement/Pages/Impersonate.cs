@@ -68,7 +68,7 @@ partial class Impersonate {
 							" Do not impersonate a user without permission. Your actions will be attributed to the user you are impersonating, not to you.".ToComponents() )
 						.Materialize() ) );
 
-		var user = new DataValue<SystemUser?>( false );
+		var user = new DataValue<SystemUser?>( false, null, new SpecifiedValue<SystemUser?>( null ) );
 		var pb = PostBack.CreateFull(
 			modificationMethod: () => UserImpersonationStatics.BeginImpersonation( user.Value ),
 			actionGetter: () => new PostBackAction(
@@ -77,26 +77,54 @@ partial class Impersonate {
 		FormState.ExecuteWithActions(
 			pb,
 			() => {
+				var multipleValuesEntered = false;
 				content.Add(
-					new EmailAddressControl(
-							"",
-							true,
-							validationMethod: ( postBackValue, validator ) => {
-								if( !postBackValue.Any() ) {
-									user.Value = null;
-									return;
-								}
-								user.Value = UserManagementStatics.SystemProvider.GetUser( postBackValue );
-								if( user.Value == null )
-									validator.NoteErrorAndAddMessage( "The email address you entered does not match a user." );
-							} ).ToFormItem( label: "User's email address (leave blank for anonymous)".ToComponents() )
-						.ToComponentCollection()
-						.Append(
-							new Paragraph(
-								new EwfButton(
-										new StandardButtonStyle( RequestState.Instance.ImpersonatorExists ? "Change User" : "Begin Impersonation", buttonSize: ButtonSize.Large ) )
-									.ToCollection() ) )
-						.Materialize() );
+						FormItemList.CreateWrapping()
+							.AddItem(
+								new EmailAddressControl(
+									"",
+									true,
+									setup: EmailAddressControlSetup.Create( validationErrorNotifier: () => user.Value = null ),
+									validationMethod: ( value, validator ) => {
+										if( !value.Any() )
+											return;
+										user.Value = UserManagementStatics.SystemProvider.GetUser( value );
+										if( user.Value is null )
+											validator.NoteErrorAndAddMessage( "The email address you entered does not match a user." );
+									} ).ToFormItem( label: "User’s email address".ToComponents() ) )
+							.AddItem(
+								new NumericTextControl(
+									"",
+									true,
+									setup: NumericTextControlSetup.Create( validationErrorNotifier: notifySubsequentFieldValueEntered ),
+									minLength: 1,
+									maxLength: 10,
+									validationMethod: ( value, validator ) => {
+										if( value.Any() )
+											notifySubsequentFieldValueEntered();
+										else
+											return;
+										user.Value = UserManagementStatics.SystemProvider.GetUser( int.Parse( value ) );
+										if( user.Value is null )
+											validator.NoteErrorAndAddMessage( "The ID you entered does not match a user." );
+									} ).ToFormItem( label: "Or user’s ID".ToComponents() ) ) )
+					.Add( new SideComments( "(leave both fields blank for anonymous)".ToComponents() ) )
+					.Add(
+						new FlowErrorContainer(
+							new ErrorSourceSet(
+								validations: new EwfValidation( validator => {
+									if( multipleValuesEntered )
+										validator.NoteErrorAndAddMessage( "Please enter only one of the above." );
+								} ).ToCollection() ),
+							new ListErrorDisplayStyle() ) )
+					.Add(
+						new Paragraph(
+							new EwfButton(
+									new StandardButtonStyle( RequestState.Instance.ImpersonatorExists ? "Change User" : "Begin Impersonation", buttonSize: ButtonSize.Large ) )
+								.ToCollection() ) );
+				return;
+
+				void notifySubsequentFieldValueEntered() => multipleValuesEntered = user.HasChanged;
 			} );
 
 		return content;
