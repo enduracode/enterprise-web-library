@@ -173,21 +173,7 @@ public class Oracle: Database {
 				throw;
 			}
 		else
-			ExecuteDbMethod( cn => {
-				executeLongRunningCommand(
-					cn,
-					@"CREATE TABLE global_numbers (
-	k VARCHAR2( 100 )
-		CONSTRAINT global_numbers_pk PRIMARY KEY,
-	v NUMBER
-)" );
-				var lineMarkerInsert = new InlineInsert( "global_numbers" );
-				lineMarkerInsert.AddColumnModifications( new InlineDbCommandColumnValue( "k", new DbParameterValue( "LineMarker" ) ).ToCollection() );
-				lineMarkerInsert.AddColumnModifications( new InlineDbCommandColumnValue( "v", new DbParameterValue( 0 ) ).ToCollection() );
-				lineMarkerInsert.Execute( cn );
-
-				executeLongRunningCommand( cn, "CREATE SEQUENCE main_sequence" );
-			} );
+			ExecuteDbMethod( cn => executeLongRunningCommand( cn, "CREATE SEQUENCE main_sequence" ) );
 	}
 
 	private void deleteAndReCreateUser( DatabaseConnection cn ) {

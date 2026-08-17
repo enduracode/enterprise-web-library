@@ -210,20 +210,6 @@ public class MySql: Database {
 	}
 
 	private void initDatabase( DatabaseConnection cn ) {
-		var globalIntsCreate = cn.DatabaseInfo.CreateCommand();
-		globalIntsCreate.CommandText = @"CREATE TABLE global_ints(
-ParameterName VARCHAR( 50 )
-	PRIMARY KEY,
-ParameterValue INT
-	NOT NULL
-)";
-		cn.ExecuteNonQueryCommand( globalIntsCreate );
-
-		var lineMarkerInsert = new InlineInsert( "global_ints" );
-		lineMarkerInsert.AddColumnModifications( new InlineDbCommandColumnValue( "ParameterName", new DbParameterValue( "LineMarker" ) ).ToCollection() );
-		lineMarkerInsert.AddColumnModifications( new InlineDbCommandColumnValue( "ParameterValue", new DbParameterValue( 0 ) ).ToCollection() );
-		lineMarkerInsert.Execute( cn );
-
 		var mainSequenceCreate = cn.DatabaseInfo.CreateCommand();
 		mainSequenceCreate.CommandText = @"CREATE TABLE main_sequence(
 MainSequenceId INT

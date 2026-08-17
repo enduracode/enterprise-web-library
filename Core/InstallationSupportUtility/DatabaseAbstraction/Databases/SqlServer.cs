@@ -100,20 +100,6 @@ public class SqlServer: Database {
 				executeLongRunningCommand( cn, "ALTER DATABASE {0} SET ALLOW_SNAPSHOT_ISOLATION ON".FormatWith( databaseIdentifier ) );
 				executeLongRunningCommand( cn, "ALTER DATABASE {0} SET READ_COMMITTED_SNAPSHOT ON WITH ROLLBACK IMMEDIATE".FormatWith( databaseIdentifier ) );
 
-				executeLongRunningCommand(
-					cn,
-					@"CREATE TABLE GlobalInts(
-	ParameterName varchar( 50 )
-		NOT NULL
-		CONSTRAINT GlobalIntsPk PRIMARY KEY,
-	ParameterValue int
-		NOT NULL
-)" );
-				var lineMarkerInsert = new InlineInsert( "GlobalInts" );
-				lineMarkerInsert.AddColumnModifications( new InlineDbCommandColumnValue( "ParameterName", new DbParameterValue( "LineMarker" ) ).ToCollection() );
-				lineMarkerInsert.AddColumnModifications( new InlineDbCommandColumnValue( "ParameterValue", new DbParameterValue( 0 ) ).ToCollection() );
-				lineMarkerInsert.Execute( cn );
-
 				executeLongRunningCommand( cn, "CREATE SEQUENCE MainSequence AS int MINVALUE 1" );
 			}
 
