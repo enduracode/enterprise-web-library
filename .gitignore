@@ -16,7 +16,7 @@ Error Log.txt
 .opencode/agents/ewl-*
 .opencode/plugins/ewl
 .opencode/plugins/ewl.js
-.opencode/skills/ewl-*
+.agents/skills/ewl-*
 .claude/settings.json
 .mcp.json
 .claude/ewl/

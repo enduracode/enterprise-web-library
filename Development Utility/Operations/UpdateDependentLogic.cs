@@ -1403,7 +1403,7 @@ internal class UpdateDependentLogic: Operation {
 				 """ );
 		}
 
-		var skillsFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".opencode", "skills" );
+		var skillsFolderPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".agents", "skills" );
 		if( Directory.Exists( skillsFolderPath ) )
 			foreach( var folderName in IoMethods.GetFolderNamesInFolder( skillsFolderPath )
 				        .Where( i => i.StartsWith( EwlStatics.EwlInitialism.ToLowerInvariant() + '-' ) ) )
@@ -1563,7 +1563,7 @@ internal class UpdateDependentLogic: Operation {
 		writer.WriteLine( $".opencode/agents/{EwlStatics.EwlInitialism.ToLowerInvariant()}-*" );
 		writer.WriteLine( $".opencode/plugins/{EwlStatics.EwlInitialism.ToLowerInvariant()}" );
 		writer.WriteLine( $".opencode/plugins/{EwlStatics.EwlInitialism.ToLowerInvariant()}{FileExtensions.JavaScript}" );
-		writer.WriteLine( $".opencode/skills/{EwlStatics.EwlInitialism.ToLowerInvariant()}-*" );
+		writer.WriteLine( $".agents/skills/{EwlStatics.EwlInitialism.ToLowerInvariant()}-*" );
 		writer.WriteLine( ".claude/settings.json" );
 		writer.WriteLine( ".mcp.json" );
 		writer.WriteLine( $".claude/{EwlStatics.EwlInitialism.ToLowerInvariant()}/" );

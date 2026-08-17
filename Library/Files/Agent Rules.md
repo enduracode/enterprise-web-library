@@ -119,7 +119,8 @@ issues".**
 
 ## Agent, Skill, and Tool Source Files
 
-This system's `.opencode\` folder, `.claude\` folder, and
+This system's `.opencode\` folder, `.claude\` folder, EWL-prefixed skill
+directories under `.agents\skills\`, and
 `Library\Generated Code\EWL Agent Rules.md` (which is referenced from this
 system's `opencode.jsonc` and supplements this system's own `AGENTS.md`) are
 **fully regenerated** by the EWL Development Utility. Do not edit them
@@ -127,7 +128,7 @@ directly — edit the corresponding sources in the EWL source repository and
 then rerun the DU's `sync` operation on this system (see
 "Code Generation (Development Utility)" above for how to invoke it).
 Exception: commands under `.opencode\commands\` and skills under
-`.opencode\skills\` and `.claude\skills\` whose names are **not** prefixed
+`.agents\skills\` and `.claude\skills\` whose names are **not** prefixed
 with `ewl-` are system-specific, not generated, and may be edited directly.
 
 The sources all live under `Library\Files\` of the **EWL source repository**
@@ -139,7 +140,7 @@ mappings:
 |---|---|
 | `Agents\<name>.md` | `.opencode\agents\ewl-<name>.md` and (concatenated with the Claude Code preamble below) `.claude\agents\ewl-<name>.md` |
 | `Agents\Claude Code\<name>.md` | Preamble prepended to the body of the shared agent file when generating `.claude\agents\ewl-<name>.md` |
-| `Agent Skills\<skill>\` | `.opencode\skills\<skill>\` and `.claude\skills\<skill>\` |
+| `Agent Skills\<skill>\` | `.agents\skills\<skill>\` and `.claude\skills\<skill>\` |
 | `OpenCode Plugins\` | `.opencode\plugins\ewl\` (plus `.opencode\plugins\ewl.js` aggregator) and `.claude\hooks\` |
 | `OpenCode Plugins\Claude Code\` | Additional files copied into `.claude\hooks\` |
 | `OpenCode Tools\<file>` | `.opencode\tools\ewl-<file>` |

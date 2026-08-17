@@ -36,7 +36,7 @@ If the test involves the repo having `.hg` at the top, note that `Test-Path -Lit
 
 ## Propagating edits to the target system
 
-After editing any file under `Library\Files\` in the EWL source repo, run the EWL DU against the target system so its `.opencode\`, `.claude\`, and `Library\Generated Code\EWL Agent Rules.md` reflect your changes. Invoke the DU project from the target system directory:
+After editing any file under `Library\Files\` in the EWL source repo, run the EWL DU against the target system so its `.opencode\`, `.agents\`, `.claude\`, and `Library\Generated Code\EWL Agent Rules.md` reflect your changes. Invoke the DU project from the target system directory:
 
 ```powershell
 $ewlSource = (Get-Location).Path
