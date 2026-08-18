@@ -18,7 +18,7 @@ public class ExistingInstalledInstallationLogic {
 		var newVirtualDirectoryNames = new HashSet<string>();
 
 		foreach( var newApp in appGetter( newLogic ) ) {
-			IsuStatics.UpdateIisAppPool( newApp.IisAppPoolAndSiteName! );
+			IsuStatics.UpdateIisAppPool( newApp.IisAppPoolAndSiteName!, Directory.Exists( EwlStatics.CombinePaths( newApp.Path, "bin" ) ) );
 			newAppPoolNames.Add( newApp.IisAppPoolAndSiteName! );
 
 			if( newApp.IisApplication is Site site ) {

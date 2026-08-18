@@ -208,31 +208,33 @@ public class InstallationConfiguration {
 		WebApplications = systemWebApplicationElements.Select( ( element, index ) => {
 				var name = element.Name;
 				var supportsSecureConnections = element.SupportsSecureConnections;
-				return isDevelopmentInstallation
-					       ?
-					       new WebApplication(
+				if( isDevelopmentInstallation )
+					return new WebApplication(
+						name,
+						installationPath,
+						supportsSecureConnections,
+						index,
+						SystemShortName,
+						systemWebApplicationElements.AtLeast( 2 ),
+						SystemDevelopmentConfiguration!.GetWebProject( name ) );
+
+				var legacyInstallationPath = EwlStatics.CombinePaths( installationPath, "Legacy" );
+				var webAppInstallationPath = Directory.Exists( EwlStatics.CombinePaths( legacyInstallationPath, name ) ) ? legacyInstallationPath : installationPath;
+				return InstallationType == InstallationType.Live
+					       ? new WebApplication(
 						       name,
-						       installationPath,
+						       webAppInstallationPath,
 						       supportsSecureConnections,
-						       index,
-						       SystemShortName,
-						       systemWebApplicationElements.AtLeast( 2 ),
-						       SystemDevelopmentConfiguration!.GetWebProject( name ) )
-					       : InstallationType == InstallationType.Live
-						       ? new WebApplication(
-							       name,
-							       installationPath,
-							       supportsSecureConnections,
-							       LiveInstallationConfiguration.WebApplications.Single( i => i.Name == name ),
-							       FullShortName,
-							       systemWebApplicationElements.AtLeast( 2 ) )
-						       : new WebApplication(
-							       name,
-							       installationPath,
-							       true,
-							       IntermediateInstallationConfiguration.WebApplications.Single( i => i.Name == name ),
-							       FullShortName,
-							       systemWebApplicationElements.AtLeast( 2 ) );
+						       LiveInstallationConfiguration.WebApplications.Single( i => i.Name == name ),
+						       FullShortName,
+						       systemWebApplicationElements.AtLeast( 2 ) )
+					       : new WebApplication(
+						       name,
+						       webAppInstallationPath,
+						       true,
+						       IntermediateInstallationConfiguration.WebApplications.Single( i => i.Name == name ),
+						       FullShortName,
+						       systemWebApplicationElements.AtLeast( 2 ) );
 			} )
 			.Materialize();
 
