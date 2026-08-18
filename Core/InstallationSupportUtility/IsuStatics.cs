@@ -77,10 +77,10 @@ public static class IsuStatics {
 	/// <summary>
 	/// ISU and internal use only.
 	/// </summary>
-	public static void UpdateIisAppPool( string name ) {
+	public static void UpdateIisAppPool( string name, bool usesClassicClr = false ) {
 		executeInIisServerManagerTransaction( () => IisConfigurationStatics.ExecuteInServerManagerTransaction( serverManager => {
 			var pool = serverManager.ApplicationPools[ name ] ?? serverManager.ApplicationPools.Add( name );
-			pool.ManagedRuntimeVersion = "";
+			pool.ManagedRuntimeVersion = usesClassicClr ? "v4.0" : "";
 			pool.AutoStart = false;
 		} ) );
 	}
