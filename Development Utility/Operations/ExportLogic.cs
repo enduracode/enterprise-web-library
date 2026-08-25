@@ -485,6 +485,8 @@ internal class ExportLogic: Operation {
 		packageWindowsServices( installation, serverSideLogicFolderPath );
 		packageServerSideConsoleApps( installation, serverSideLogicFolderPath );
 		packageGeneralFiles( installation, serverSideLogicFolderPath, true );
+		if( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemUsesLegacyEwl == true )
+			packageLegacyGeneralFiles( installation, EwlStatics.CombinePaths( serverSideLogicFolderPath, "Legacy" ) );
 		build.ServerSideLogicPackage = ZipOps.ZipFolderAsByteArray( serverSideLogicFolderPath );
 		operationResult.NumberOfBytesTransferred = build.ServerSideLogicPackage.LongLength;
 
@@ -539,6 +541,23 @@ internal class ExportLogic: Operation {
 					IoMethods.CopyFile(
 						installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationSharedConfigurationFilePath,
 						EwlStatics.CombinePaths( packageFolderPath, InstallationConfiguration.InstallationSharedConfigurationFileName ) );
+				if( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemUsesLegacyEwl == true ) {
+					var legacyInstallationConfigurationFolderPath = EwlStatics.CombinePaths(
+						InstallationFileStatics.GetGeneralFilesFolderPath( installation.GeneralLogic.Path, true ),
+						InstallationConfiguration.ConfigurationFolderName,
+						InstallationConfiguration.InstallationConfigurationFolderName,
+						InstallationConfiguration.InstallationsFolderName,
+						Path.GetFileName( installationConfigurationFolderPath ) );
+					var legacyPackageFolderPath = EwlStatics.CombinePaths( packageFolderPath, "Legacy" );
+					IoMethods.CopyFile(
+						EwlStatics.CombinePaths( legacyInstallationConfigurationFolderPath, InstallationConfiguration.InstallationStandardConfigurationFileName ),
+						EwlStatics.CombinePaths( legacyPackageFolderPath, InstallationConfiguration.InstallationStandardConfigurationFileName ) );
+					if( File.Exists(
+						   EwlStatics.CombinePaths( legacyInstallationConfigurationFolderPath, InstallationConfiguration.InstallationCustomConfigurationFileName ) ) )
+						IoMethods.CopyFile(
+							EwlStatics.CombinePaths( legacyInstallationConfigurationFolderPath, InstallationConfiguration.InstallationCustomConfigurationFileName ),
+							EwlStatics.CombinePaths( legacyPackageFolderPath, InstallationConfiguration.InstallationCustomConfigurationFileName ) );
+				}
 				buildMessageInstallation.ConfigurationPackage = ZipOps.ZipFolderAsByteArray( packageFolderPath );
 
 				build.Installations.Add( buildMessageInstallation );
@@ -567,10 +586,64 @@ internal class ExportLogic: Operation {
 
 	private void packageWebApps( DevelopmentInstallation installation, string serverSideLogicFolderPath ) {
 		foreach( var app in installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications ) {
-			if( AppStatics.WebProjectIsLegacy( installation, app ) )
-				continue;
-
 			var project = installation.DevelopmentInstallationLogic.DevelopmentConfiguration.GetWebProject( app.Name );
+			if( AppStatics.WebProjectIsLegacy( installation, app ) ) {
+				IoMethods.ExecuteWithTempFolder( folderPath => {
+					var publishProfilePath = EwlStatics.CombinePaths( folderPath, "Publish.pubxml" );
+					File.WriteAllText(
+						publishProfilePath,
+						$"""
+						 <?xml version="1.0" encoding="utf-8"?>
+						 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+						   <PropertyGroup>
+						     <WebPublishMethod>FileSystem</WebPublishMethod>
+						     <PublishProvider>FileSystem</PublishProvider>
+						     <LastUsedBuildConfiguration>Release</LastUsedBuildConfiguration>
+						     <LastUsedPlatform>Any CPU</LastUsedPlatform>
+						     <SiteUrlToLaunchAfterPublish />
+						     <LaunchSiteAfterPublish>False</LaunchSiteAfterPublish>
+						     <ExcludeApp_Data>False</ExcludeApp_Data>
+						     <DeleteExistingFiles>True</DeleteExistingFiles>
+						     <PrecompileBeforePublish>True</PrecompileBeforePublish>
+						     <EnableUpdateable>False</EnableUpdateable>
+						     <DebugSymbols>True</DebugSymbols>
+						     <WDPMergeOption>MergeAllOutputsToASingleAssembly</WDPMergeOption>
+						     <UseMerge>True</UseMerge>
+						     <SingleAssemblyName>{project.NamespaceAndAssemblyName}.Package</SingleAssemblyName>
+						   </PropertyGroup>
+						   <ItemGroup>
+						     <AssemblyAttributes Include="AssemblyTitle">
+						       <Value>{project.NamespaceAndAssemblyName}.Package</Value>
+						     </AssemblyAttributes>
+						   </ItemGroup>
+						 </Project>
+						 """ );
+
+					TewlContrib.ProcessTools.RunProgram(
+						EwlStatics.CombinePaths(
+							TewlContrib.ProcessTools.RunProgram(
+									EwlStatics.CombinePaths( Environment.GetEnvironmentVariable( "ProgramFiles(x86)" )!, "Microsoft Visual Studio/Installer/vswhere" ),
+									"-latest -property installationPath",
+									"",
+									true )
+								.TrimEnd(),
+							"MSBuild/Current/Bin/MSBuild" ),
+						StringTools.ConcatenateWithDelimiter(
+							" ",
+							$"\"{EwlStatics.CombinePaths( installation.GeneralLogic.Path, app.Name, app.Name + ".csproj" )}\"",
+							"-property:Configuration=Release",
+							$"-property:PublishProfile=\"{publishProfilePath}\"",
+							"-property:DeployOnBuild=true",
+							$"-property:AspnetMergePath=\"{AppStatics.GetDotNetToolsFolderPath()}\"",
+							$"-property:publishurl=\"{EwlStatics.CombinePaths( serverSideLogicFolderPath, "Legacy", app.Name )}\"",
+							"-property:MvcBuildViews=false",
+							"-verbosity:minimal" ),
+						"",
+						true );
+				} );
+				continue;
+			}
+
 			publishApp( EwlStatics.CombinePaths( installation.GeneralLogic.Path, app.Name ), EwlStatics.CombinePaths( serverSideLogicFolderPath, app.Name ) );
 			IoMethods.CopyFolder(
 				EwlStatics.CombinePaths( installation.GeneralLogic.Path, app.Name, StaticFile.AppStaticFilesFolderName ),
@@ -649,6 +722,20 @@ internal class ExportLogic: Operation {
 
 	private void copyServerSideProject( DevelopmentInstallation installation, string serverSideLogicFolderPath, string project ) {
 		publishApp( EwlStatics.CombinePaths( installation.GeneralLogic.Path, project ), EwlStatics.CombinePaths( serverSideLogicFolderPath, project ) );
+	}
+
+	private void packageLegacyGeneralFiles( DevelopmentInstallation installation, string folderPath ) {
+		IoMethods.CopyFile(
+			EwlStatics.CombinePaths(
+				InstallationFileStatics.GetGeneralFilesFolderPath( installation.GeneralLogic.Path, true ),
+				InstallationConfiguration.ConfigurationFolderName,
+				InstallationConfiguration.SystemGeneralConfigurationFileName ),
+			EwlStatics.CombinePaths( folderPath, InstallationConfiguration.ConfigurationFolderName, InstallationConfiguration.SystemGeneralConfigurationFileName ) );
+		var filesFolderSourcePath = EwlStatics.CombinePaths(
+			InstallationFileStatics.GetGeneralFilesFolderPath( installation.GeneralLogic.Path, true ),
+			InstallationFileStatics.FilesFolderName );
+		if( Directory.Exists( filesFolderSourcePath ) )
+			IoMethods.CopyFolder( filesFolderSourcePath, EwlStatics.CombinePaths( folderPath, InstallationFileStatics.FilesFolderName ), false );
 	}
 
 	private void packageClientSideApp( DevelopmentInstallation installation, string clientSideAppFolder ) {

@@ -44,45 +44,6 @@ steps:
     workingDirectory: '@@WorkingFolderPath'
   displayName: 'EWL - Sync'
 
-- ${{ if ne('@@LegacyWebProjects', '') }}:
-  - task: PowerShell@2
-    inputs:
-      targetType: 'inline'
-      script: |
-        $tdlProjectFolderPaths = @(Get-ChildItem -Path "@@WorkingFolderPath" -Directory | Where-Object { Test-Path (Join-Path $_.FullName "TypedDataLayer\Configuration.xml") })
-        if ($tdlProjectFolderPaths.Count -ne 1) {
-          Write-Host "Expected exactly one project with a TypedDataLayer configuration file but found $($tdlProjectFolderPaths.Count)."
-          exit 1
-        }
-
-        $tdlProjectFolderPath = $tdlProjectFolderPaths[0].FullName
-        $projectFiles = @(Get-ChildItem -Path $tdlProjectFolderPath -File -Filter "*.csproj")
-        if ($projectFiles.Count -ne 1) {
-          Write-Host "Expected exactly one project file in '$tdlProjectFolderPath' but found $($projectFiles.Count)."
-          exit 1
-        }
-
-        [xml]$projectXml = Get-Content -Path $projectFiles[0].FullName
-        $tdlReferences = @($projectXml.Project.ItemGroup.PackageReference | Where-Object { $_.Include -eq "TypedDataLayer" })
-        if ($tdlReferences.Count -ne 1) {
-          Write-Host "Expected exactly one TypedDataLayer package reference in '$($projectFiles[0].FullName)' but found $($tdlReferences.Count)."
-          exit 1
-        }
-
-        $nuGetPackageFolderPath = ((dotnet nuget locals global-packages --list) -split ' ', 2)[1].TrimEnd()
-        $tdlCommandRunnerPath = "$nuGetPackageFolderPath\typeddatalayer\$($tdlReferences[0].Version)\CommandRunner\CommandRunner.exe"
-        if (!(Test-Path $tdlCommandRunnerPath)) {
-          Write-Host "TypedDataLayer command runner not found at '$tdlCommandRunnerPath'."
-          exit 1
-        }
-
-        $installationPath = "@@WorkingFolderPath" -replace '/', '\'
-        & $tdlCommandRunnerPath $installationPath UpdateAllDependentLogic
-        if ($LASTEXITCODE -ne 0) {
-          exit $LASTEXITCODE
-        }
-    displayName: 'TypedDataLayer - Update dependent logic'
-
 # Restore again to take into account the Directory.Build.props files that we generated.
 - task: DotNetCoreCLI@2
   inputs:
@@ -91,44 +52,6 @@ steps:
     custom: 'restore'
   displayName: 'Restore again after code generation'
 
-- ${{ if ne('@@LegacyWebProjects', '') }}:
-  - ${{ each project in split('@@LegacyWebProjects', ',') }}:
-    - task: PowerShell@2
-      inputs:
-        targetType: 'inline'
-        script: |
-          $path = "@@WorkingFolderPath/${{ project }}/Properties/PublishProfiles/Publish.pubxml"
-          New-Item -ItemType Directory -Path ([System.IO.Path]::GetDirectoryName($path)) -Force | Out-Null
-          $lines = @(
-            '<?xml version="1.0" encoding="utf-8"?>',
-            '<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">',
-            '  <PropertyGroup>',
-            '    <WebPublishMethod>FileSystem</WebPublishMethod>',
-            '    <PublishProvider>FileSystem</PublishProvider>',
-            '    <LastUsedBuildConfiguration>Release</LastUsedBuildConfiguration>',
-            '    <LastUsedPlatform>Any CPU</LastUsedPlatform>',
-            '    <SiteUrlToLaunchAfterPublish />',
-            '    <LaunchSiteAfterPublish>False</LaunchSiteAfterPublish>',
-            '    <ExcludeApp_Data>False</ExcludeApp_Data>',
-            '    <DeleteExistingFiles>True</DeleteExistingFiles>',
-            '    <PrecompileBeforePublish>True</PrecompileBeforePublish>',
-            '    <EnableUpdateable>False</EnableUpdateable>',
-            '    <DebugSymbols>True</DebugSymbols>',
-            '    <WDPMergeOption>DonotMerge</WDPMergeOption>',
-            '  </PropertyGroup>',
-            '</Project>'
-          )
-          [System.IO.File]::WriteAllLines($path, $lines, [System.Text.Encoding]::UTF8)
-      displayName: 'Write publish profile for ${{ project }}'
-
-    - task: MSBuild@1
-      inputs:
-        solution: '@@WorkingFolderPath/${{ project }}/${{ project }}.csproj'
-        msbuildArchitecture: 'x64'
-        configuration: 'Release'
-        msbuildArguments: '/p:PublishProfile=Publish /p:DeployOnBuild=true /p:AspnetMergePath="@@DotNetToolsFolderPath" "/p:publishurl=@@WorkingFolderPath/Legacy Publish Output/${{ project }}" /p:MvcBuildViews=false'
-      displayName: 'Publish ${{ project }}'
-
 - task: PowerShell@2
   inputs:
     targetType: 'inline'
@@ -136,16 +59,6 @@ steps:
       dotnet ewl export-logic
     workingDirectory: '@@WorkingFolderPath'
   displayName: 'EWL - Export logic'
-
-- ${{ if ne('@@LegacyWebProjects', '') }}:
-  - task: PowerShell@2
-    inputs:
-      targetType: 'inline'
-      script: |
-        $sourcePath = "@@WorkingFolderPath/Legacy Publish Output"
-        $targetPath = "@@WorkingFolderPath/Logic Packages/Server Side Logic"
-        Move-Item -Path (Join-Path $sourcePath '*') -Destination $targetPath
-    displayName: 'Add publish output to server-side logic'
 
 - task: PowerShell@2
   inputs:

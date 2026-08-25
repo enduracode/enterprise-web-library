@@ -142,6 +142,32 @@ internal class UpdateDependentLogic: Operation {
 					.TrimEnd() );
 			Log.Information( "Ran legacy Update-DependentLogic command." );
 		}
+		var tdlProjectFilePath = Directory.GetDirectories( installation.GeneralLogic.Path )
+			.Where( i => File.Exists( EwlStatics.CombinePaths( i, "TypedDataLayer", "Configuration.xml" ) ) )
+			.Select( i => EwlStatics.CombinePaths( i, $"{Path.GetFileName( i )}.csproj" ) )
+			.SingleOrDefault();
+		if( tdlProjectFilePath is not null ) {
+			Log.Information( "Running legacy Update-DataLayer command." );
+			var referenceSubstrings = File.ReadAllLines( tdlProjectFilePath )
+				.Select( i => i.Trim() )
+				.First( i => i.StartsWith( """<PackageReference Include="TypedDataLayer""", StringComparison.Ordinal ) )
+				.Separate( "\"", false );
+			var id = referenceSubstrings[ 1 ];
+			var version = referenceSubstrings[ 3 ];
+			Console.WriteLine(
+				TewlContrib.ProcessTools.RunProgram(
+						EwlStatics.CombinePaths(
+							SettingsUtility.GetGlobalPackagesFolder( Settings.LoadDefaultSettings( installation.GeneralLogic.Path ) ),
+							id,
+							version,
+							"CommandRunner/CommandRunner" ),
+						"UpdateAllDependentLogic",
+						"",
+						true,
+						workingDirectory: installation.GeneralLogic.Path )
+					.TrimEnd() );
+			Log.Information( "Ran legacy Update-DataLayer command." );
+		}
 
 		if( !installation.SystemIsTewl() )
 			try {
@@ -355,14 +381,9 @@ internal class UpdateDependentLogic: Operation {
 					.Replace( "@@EwlInitialism", EwlStatics.EwlInitialism )
 					.Replace( "@@TriggerPath", systemPathInRepository.AppendDelimiter( Path.AltDirectorySeparatorChar.ToString() ) + "**" )
 					.Replace( "@@DotNetVersion", ConfigurationStatics.TargetFramework[ "net".Length.. ].Separate( ".", false )[ 0 ] + ".x" )
-					.Replace( "@@WorkingFolderPath", "$(Build.SourcesDirectory)" + systemPathInRepository.PrependDelimiter( Path.AltDirectorySeparatorChar.ToString() ) )
 					.Replace(
-						"@@LegacyWebProjects",
-						StringTools.ConcatenateWithDelimiter(
-							",",
-							installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications.Where( i => AppStatics.WebProjectIsLegacy( installation, i ) )
-								.Select( i => i.Name ) ) )
-					.Replace( "@@DotNetToolsFolderPath", getDotNetToolsFolderPath() ) );
+						"@@WorkingFolderPath",
+						"$(Build.SourcesDirectory)" + systemPathInRepository.PrependDelimiter( Path.AltDirectorySeparatorChar.ToString() ) ) );
 		}
 
 		var azureLogicPipelinesExist = false;
@@ -647,7 +668,9 @@ internal class UpdateDependentLogic: Operation {
 				writer.WriteLine();
 				TypedCssClassStatics.Generate(
 					installation.DevelopmentInstallationLogic.LibraryPath.ToCollection()
-						.Concat( installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications.Select( i => i.Path ) ),
+						.Concat(
+							installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications.Where( i => !AppStatics.WebProjectIsLegacy( installation, i ) )
+								.Select( i => i.Path ) ),
 					installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName,
 					writer );
 				writer.WriteLine();
@@ -671,7 +694,7 @@ internal class UpdateDependentLogic: Operation {
 					writer.WriteLine( "}" );
 				}
 
-				if( installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications.Any() ) {
+				if( installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications.Any( i => !AppStatics.WebProjectIsLegacy( installation, i ) ) ) {
 					writer.WriteLine();
 					CodeGeneration.WebFramework.WebFrameworkStatics.Generate(
 						writer,
@@ -1140,7 +1163,7 @@ internal class UpdateDependentLogic: Operation {
 		if( useSvcUtil )
 			try {
 				TewlContrib.ProcessTools.RunProgram(
-					EwlStatics.CombinePaths( getDotNetToolsFolderPath(), "SvcUtil" ),
+					EwlStatics.CombinePaths( AppStatics.GetDotNetToolsFolderPath(), "SvcUtil" ),
 					"/d:\"" + projectGeneratedCodeFolderPath + "\" /noLogo \"" + EwlStatics.CombinePaths( projectPath, schemaPathInProject ) + "\" /o:\"" + codeFileName +
 					"\" /dconly /n:*," + nameSpace + " /ser:DataContractSerializer",
 					"",
@@ -1153,7 +1176,7 @@ internal class UpdateDependentLogic: Operation {
 			Directory.CreateDirectory( projectGeneratedCodeFolderPath );
 			try {
 				TewlContrib.ProcessTools.RunProgram(
-					EwlStatics.CombinePaths( getDotNetToolsFolderPath(), "xsd" ),
+					EwlStatics.CombinePaths( AppStatics.GetDotNetToolsFolderPath(), "xsd" ),
 					"/nologo \"" + EwlStatics.CombinePaths( projectPath, schemaPathInProject ) + "\" /c /n:" + nameSpace + " /o:\"" + projectGeneratedCodeFolderPath +
 					"\"",
 					"",
@@ -1173,17 +1196,6 @@ internal class UpdateDependentLogic: Operation {
 				}
 		}
 	}
-
-	private string getDotNetToolsFolderPath() =>
-		IoMethods.GetFirstExistingFolderPath(
-				[
-					// Ordered by preferred path.
-					@"C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8.1 Tools",
-					@"C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools",
-					@"C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.7.2 Tools",
-					@"C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.6.2 Tools"
-				],
-			".NET Tools" );
 
 	private void generateEditorConfig( string folderPath, Action<TextWriter> lineWriter ) {
 		using var writer = new StreamWriter( EwlStatics.CombinePaths( folderPath, ".editorconfig" ), false, new UTF8Encoding( false ) );

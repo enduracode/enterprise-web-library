@@ -48,6 +48,13 @@ jobs:
       targetPath: '$(Pipeline.Workspace)/ServerSideLogic/Configuration/Installation'
     displayName: 'Download installation configuration'
 
+  - pwsh: |
+      $legacyConfigSource = "$(Pipeline.Workspace)/ServerSideLogic/Configuration/Installation/Legacy"
+      if (Test-Path $legacyConfigSource) {
+        Move-Item $legacyConfigSource "$(Pipeline.Workspace)/ServerSideLogic/Legacy/Configuration/Installation"
+      }
+    displayName: 'Place legacy installation configuration'
+
   - ${{ each app in parameters.webApps }}:
     - task: AzureCLI@2
       inputs:

@@ -54,7 +54,7 @@ internal class GetLogicSize: Operation {
 					EwlStatics.CombinePaths(
 						installation.GeneralLogic.Path,
 						app.Name,
-						AppStatics.WebProjectIsLegacy( installation, app, out _ )
+						AppStatics.WebProjectIsLegacy( installation, app )
 							? "bin"
 							: ConfigurationStatics.GetProjectOutputFolderPath( debug, runtimeIdentifier: RuntimeInformation.RuntimeIdentifier ),
 						project.NamespaceAndAssemblyName + ".dll" ) )

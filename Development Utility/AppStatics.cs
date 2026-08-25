@@ -4,6 +4,7 @@ using System.Xml;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
 using Serilog;
+using Tewl.IO;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility;
 
@@ -88,4 +89,15 @@ internal static class AppStatics {
 
 	// see https://stackoverflow.com/a/1793962/35349
 	internal static string NormalizeLineEndingsFromXml( string text ) => text.Replace( Environment.NewLine, "\n" ).Replace( "\n", Environment.NewLine );
+
+	internal static string GetDotNetToolsFolderPath() =>
+		IoMethods.GetFirstExistingFolderPath(
+				[
+					// Ordered by preferred path.
+					@"C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8.1 Tools",
+					@"C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools",
+					@"C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.7.2 Tools",
+					@"C:\Program Files (x86)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.6.2 Tools"
+				],
+			".NET Tools" );
 }
