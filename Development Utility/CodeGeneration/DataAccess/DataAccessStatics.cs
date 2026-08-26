@@ -60,7 +60,7 @@ internal static class DataAccessStatics {
 			: "";
 
 	internal static string GetMethodParamsFromCommandText( DatabaseInfo info, string commandText ) {
-		return StringTools.ConcatenateWithDelimiter( ", ", GetNamedParamList( info, commandText ).Select( i => "object " + i ).ToArray() );
+		return StringTools.ConcatenateWithDelimiter( ", ", GetNamedParamList( info, commandText ).Select( i => "object? " + i ).ToArray() );
 	}
 
 	internal static void WriteAddParamBlockFromCommandText(
