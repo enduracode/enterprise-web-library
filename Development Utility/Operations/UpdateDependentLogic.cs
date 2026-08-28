@@ -118,6 +118,17 @@ internal class UpdateDependentLogic: Operation {
 
 		// must be after MigrateData
 		if( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemUsesLegacyEwl == true ) {
+			var legacyToolsFolderPath = EwlStatics.CombinePaths(
+				Environment.GetEnvironmentVariable( "ProgramFiles(x86)" )!,
+				"Microsoft SDKs/Windows/v8.0A/bin/NETFX 4.0 Tools" );
+			var fileNames = new[] { "SvcUtil.exe", "xsd.exe" }.Where( i => !File.Exists( EwlStatics.CombinePaths( legacyToolsFolderPath, i ) ) ).Materialize();
+			foreach( var i in fileNames )
+				IoMethods.CopyFile( EwlStatics.CombinePaths( AppStatics.GetDotNetToolsFolderPath(), i ), EwlStatics.CombinePaths( legacyToolsFolderPath, i ) );
+			if( fileNames.Any() )
+				File.WriteAllText(
+					EwlStatics.CombinePaths( legacyToolsFolderPath, "README-EWL-legacy-sdk-tools.txt" ),
+					$"EWL copies missing .NET Framework SDK tools into this directory from:{Environment.NewLine}{AppStatics.GetDotNetToolsFolderPath()}" );
+
 			var webConfigs = installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications
 				.Where( i => AppStatics.WebProjectIsLegacy( installation, i ) )
 				.Select( i => ( path: i.WebConfigFilePath, contents: File.ReadAllBytes( i.WebConfigFilePath ) ) )
