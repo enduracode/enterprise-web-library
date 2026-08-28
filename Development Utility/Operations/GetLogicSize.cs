@@ -26,12 +26,12 @@ internal class GetLogicSize: Operation {
 		Log.Information( "Performed NDepend analysis." );
 
 		var codeBase = analysisResult.CodeBase;
-		var generatedCodeAttribute = codeBase.Types.WithFullName( "System.CodeDom.Compiler.GeneratedCodeAttribute" ).SingleOrDefault();
+		var generatedCodeAttributes = codeBase.Types.WithFullName( "System.CodeDom.Compiler.GeneratedCodeAttribute" ).Materialize();
 		var methods = from n in codeBase.Application.Namespaces
 		              from t in n.ChildTypes
-		              where generatedCodeAttribute == null || !t.HasAttribute( generatedCodeAttribute )
+		              where !generatedCodeAttributes.Any( t.HasAttribute )
 		              from m in t.MethodsAndConstructors
-		              where generatedCodeAttribute == null || !m.HasAttribute( generatedCodeAttribute )
+		              where !generatedCodeAttributes.Any( m.HasAttribute )
 		              // We've considered excluding .designer.cs files here, but decided that they should remain part of the count since they still represent
 		              // logic that must be maintained (in the designer).
 		              where m.SourceFileDeclAvailable && m.SourceDecls.Any( s => s.SourceFile.FilePath.ParentDirectoryPath.DirectoryName != "Generated Code" )
