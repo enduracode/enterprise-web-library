@@ -118,29 +118,39 @@ internal class UpdateDependentLogic: Operation {
 
 		// must be after MigrateData
 		if( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemUsesLegacyEwl == true ) {
-			Log.Information( "Running legacy Update-DependentLogic command." );
-			var referenceSubstrings = File.ReadAllLines( EwlStatics.CombinePaths( installation.DevelopmentInstallationLogic.LibraryPath, "Library.csproj" ) )
-				.Select( i => i.Trim() )
-				.First( i => i.StartsWith( """<PackageReference Include="Ewl""", StringComparison.Ordinal ) )
-				.Separate( "\"", false );
-			var id = referenceSubstrings[ 1 ];
-			var version = referenceSubstrings[ 3 ];
-			Console.WriteLine(
-				TewlContrib.ProcessTools.RunProgram(
-						EwlStatics.CombinePaths(
-							ConfigurationStatics.InstallationConfiguration.InstallationType == InstallationType.Development
-								? EwlStatics.CombinePaths( Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ), ".nuget/packages" )
-								: EwlStatics.CombinePaths( ConfigurationStatics.InstallationConfiguration.InstallationPath, "../../../../.." ),
-							id,
-							version,
-							"Development Utility/EnterpriseWebLibrary.DevelopmentUtility" ),
-						$"""
-						 "{genericInstallation.GeneralLogic.Path}" UpdateAllDependentLogic
-						 """,
-						"",
-						true )
-					.TrimEnd() );
-			Log.Information( "Ran legacy Update-DependentLogic command." );
+			var webConfigs = installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications
+				.Where( i => AppStatics.WebProjectIsLegacy( installation, i ) )
+				.Select( i => ( path: i.WebConfigFilePath, contents: File.ReadAllBytes( i.WebConfigFilePath ) ) )
+				.Materialize();
+			try {
+				Log.Information( "Running legacy Update-DependentLogic command." );
+				var referenceSubstrings = File.ReadAllLines( EwlStatics.CombinePaths( installation.DevelopmentInstallationLogic.LibraryPath, "Library.csproj" ) )
+					.Select( i => i.Trim() )
+					.First( i => i.StartsWith( """<PackageReference Include="Ewl""", StringComparison.Ordinal ) )
+					.Separate( "\"", false );
+				var id = referenceSubstrings[ 1 ];
+				var version = referenceSubstrings[ 3 ];
+				Console.WriteLine(
+					TewlContrib.ProcessTools.RunProgram(
+							EwlStatics.CombinePaths(
+								ConfigurationStatics.InstallationConfiguration.InstallationType == InstallationType.Development
+									? EwlStatics.CombinePaths( Environment.GetFolderPath( Environment.SpecialFolder.UserProfile ), ".nuget/packages" )
+									: EwlStatics.CombinePaths( ConfigurationStatics.InstallationConfiguration.InstallationPath, "../../../../.." ),
+								id,
+								version,
+								"Development Utility/EnterpriseWebLibrary.DevelopmentUtility" ),
+							$"""
+							 "{genericInstallation.GeneralLogic.Path}" UpdateAllDependentLogic
+							 """,
+							"",
+							true )
+						.TrimEnd() );
+				Log.Information( "Ran legacy Update-DependentLogic command." );
+			}
+			finally {
+				foreach( var i in webConfigs )
+					File.WriteAllBytes( i.path, i.contents );
+			}
 		}
 		var tdlProjectFilePath = Directory.GetDirectories( installation.GeneralLogic.Path )
 			.Where( i => File.Exists( EwlStatics.CombinePaths( i, "TypedDataLayer", "Configuration.xml" ) ) )
