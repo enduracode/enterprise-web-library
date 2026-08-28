@@ -627,7 +627,7 @@ internal class ExportLogic: Operation {
 									"",
 									true )
 								.TrimEnd(),
-							"MSBuild/Current/Bin/MSBuild" ),
+							"MSBuild/Current/Bin/MSBuild.exe" /* need .exe because there’s a folder with the same name */ ),
 						StringTools.ConcatenateWithDelimiter(
 							" ",
 							$"\"{EwlStatics.CombinePaths( installation.GeneralLogic.Path, app.Name, app.Name + ".csproj" )}\"",
