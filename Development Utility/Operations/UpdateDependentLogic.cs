@@ -162,6 +162,23 @@ internal class UpdateDependentLogic: Operation {
 				foreach( var i in webConfigs )
 					File.WriteAllBytes( i.path, i.contents );
 			}
+
+			foreach( var app in installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications ) {
+				var standardLibraryFilesPath = EwlStatics.CombinePaths( app.Path, "Standard Library Files.xml" );
+				if( !File.Exists( standardLibraryFilesPath ) )
+					continue;
+				File.WriteAllText(
+					standardLibraryFilesPath,
+					"""
+					<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+						<ItemGroup>
+							<Content Include="Ewf\**\*" Exclude="Ewf\**\*.cs" />
+							<Compile Include="Ewf\**\*.cs" />
+						</ItemGroup>
+					</Project>
+					""",
+					bomlessEncoding );
+			}
 		}
 		var tdlProjectFilePath = Directory.GetDirectories( installation.GeneralLogic.Path )
 			.Where( i => File.Exists( EwlStatics.CombinePaths( i, "TypedDataLayer", "Configuration.xml" ) ) )
