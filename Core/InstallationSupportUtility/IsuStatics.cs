@@ -66,6 +66,9 @@ public static class IsuStatics {
 			foreach( var element in modulesSection.GetCollection() )
 				element.SetMetadata( "lockItem", null );
 
+			var ipSecuritySection = config.GetSection( "system.webServer/security/ipSecurity", "" );
+			ipSecuritySection.OverrideMode = OverrideMode.Allow;
+
 			var serverRuntimeSection = config.GetSection( "system.webServer/serverRuntime", "" );
 			serverRuntimeSection.OverrideMode = OverrideMode.Allow;
 		} ) );
