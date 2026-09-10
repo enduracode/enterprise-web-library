@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Configuration.InstallationStandard;
@@ -15,6 +16,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations;
 
 internal class ExportLogic: Operation {
 	private const string nuGetTargetFramework = "net10.0";
+	private const string sqlitePackageSuffix = "Sqlite";
 	private static readonly Operation instance = new ExportLogic();
 
 	internal static PackagingConfiguration GetPackagingConfiguration( DevelopmentInstallation installation ) {
@@ -210,7 +212,7 @@ internal class ExportLogic: Operation {
 						outputFolderPath,
 						prereleaseValues ) ) );
 
-			var sqliteId = mainId + ".Sqlite";
+			var sqliteId = mainId + "." + sqlitePackageSuffix;
 			packages.Add(
 				( sqliteId,
 					createProviderNuGetPackages(
@@ -368,6 +370,14 @@ internal class ExportLogic: Operation {
 			InstallationFileStatics.FilesFolderName );
 		if( Directory.Exists( filesFolderSourcePath ) )
 			IoMethods.CopyFolder( filesFolderSourcePath, EwlStatics.CombinePaths( folderPath, InstallationFileStatics.FilesFolderName ), false );
+
+		// logic metadata
+		using var stream = File.Create( EwlStatics.CombinePaths( folderPath, ExistingInstalledInstallationLogic.LogicMetadataFileName ) );
+		JsonSerializer.Serialize(
+			stream,
+			new ExistingInstalledInstallationLogic.LogicMetadata(
+				installation.DevelopmentInstallationLogic.DevelopmentConfiguration.Providers?.Contains( sqlitePackageSuffix ) == true ||
+				installation.DevelopmentInstallationLogic.SystemIsEwl ) );
 	}
 
 	private static void writeNuGetPackageManifest(

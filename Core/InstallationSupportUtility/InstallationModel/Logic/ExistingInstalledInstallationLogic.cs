@@ -1,5 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Security.AccessControl;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Configuration.InstallationStandard;
 using EnterpriseWebLibrary.ExternalFunctionality;
@@ -9,6 +11,12 @@ namespace EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
 
 [ PublicAPI ]
 public class ExistingInstalledInstallationLogic {
+	public const string LogicMetadataFileName = "Logic Metadata.json";
+
+	public sealed record LogicMetadata(
+		[ property: JsonPropertyName( "sqliteFunctionalityEnabled" ), JsonRequired ]
+		bool SqliteFunctionalityEnabled );
+
 	public static void UpdateIisApplications( ExistingInstalledInstallationLogic? newLogic, ExistingInstalledInstallationLogic? oldLogic ) {
 		var appGetter = new Func<ExistingInstalledInstallationLogic?, IEnumerable<WebApplication>>( logic =>
 			logic?.existingInstallationLogic.RuntimeConfiguration.WebApplications.Where( i => i.IisAppPoolAndSiteName!.Length > 0 ).Materialize() ??
@@ -71,12 +79,18 @@ public class ExistingInstalledInstallationLogic {
 	/// Creates text files in the installation folder and gives NETWORK SERVICE full control over them.
 	/// </summary>
 	public void CreateFreshLogFiles() {
+		LogicMetadata logicMetadata;
+		using( var stream = File.OpenRead( EwlStatics.CombinePaths( existingInstallationLogic.RuntimeConfiguration.InstallationPath, LogicMetadataFileName ) ) )
+			logicMetadata = JsonSerializer.Deserialize<LogicMetadata>( stream )!;
+
 		createFreshLogFile( existingInstallationLogic.RuntimeConfiguration.ErrorLogFilePath );
 		foreach( var i in existingInstallationLogic.RuntimeConfiguration.WebApplications ) {
 			createFreshLogFile( i.DiagnosticLogFilePath );
 
-			ExternalFunctionalityStatics.ExternalSqliteProvider.DeleteDatabaseAndReCreateFile( i.DebugLogFilePath );
-			modifyLogFilePermissions( i.DebugLogFilePath );
+			if( logicMetadata.SqliteFunctionalityEnabled ) {
+				ExternalFunctionalityStatics.ExternalSqliteProvider.DeleteDatabaseAndReCreateFile( i.DebugLogFilePath );
+				modifyLogFilePermissions( i.DebugLogFilePath );
+			}
 		}
 	}
 
