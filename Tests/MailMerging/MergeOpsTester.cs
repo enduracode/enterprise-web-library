@@ -1,8 +1,6 @@
-﻿#nullable disable
-using EnterpriseWebLibrary.MailMerging;
+﻿using EnterpriseWebLibrary.MailMerging;
 using EnterpriseWebLibrary.MailMerging.DataTree;
 using EnterpriseWebLibrary.MailMerging.Fields;
-using NUnit.Framework;
 using Tests.MailMerging.DataStructure.PracticeDocumentDataStructure;
 using Tests.MailMerging.DataStructure.PracticeDocumentDataStructure.PhysicianDataStructure;
 using Tests.MailMerging.DataStructure.PracticeDocumentDataStructure.PracticeManagerDataStructure;
@@ -13,7 +11,7 @@ using Tests.MailMerging.MergeFields.TestFileMergeFields;
 namespace Tests.MailMerging;
 
 [ TestFixture ]
-internal class MergeOpsTester {
+class MergeOpsTester {
 	private static readonly string testingWordTemplatePath = EwlStatics.CombinePaths(
 		TestContext.CurrentContext.TestDirectory,
 		"..\\..\\..\\..\\TestFiles\\MergeOps\\word.docx" );
@@ -22,12 +20,12 @@ internal class MergeOpsTester {
 		TestContext.CurrentContext.TestDirectory,
 		"..\\..\\..\\..\\TestFiles\\MergeOps\\PracticesUserAccess.docx" );
 
-	private string timestampPrefix;
-	private string outputFolderPath;
+	private string timestampPrefix = null!;
+	private string outputFolderPath = null!;
 	private DateTime start;
 	private DateTime doneCreating;
 	private DateTime doneTesting;
-	private string filePath;
+	private string filePath = "";
 
 	[ Test ]
 	public void PersonMerge() {
@@ -66,7 +64,7 @@ internal class MergeOpsTester {
 			singlePersonMergeData.ToCollection(),
 			new List<MergeDataTreeChild<MergeTestData>>
 				{
-					new MergeDataTreeChild<MergeTestData, MergeTestData.Thing>( "Things", internalTableDataFields, info => info.Things )
+					new MergeDataTreeChild<MergeTestData, MergeTestData.Thing>( "Things", internalTableDataFields, info => info!.Things )
 				} );
 
 		using( var templateStream = File.OpenRead( testingWordTemplatePath ) ) {
@@ -99,8 +97,8 @@ internal class MergeOpsTester {
 					MergeFieldOps.CreateBasicField( new MergeFields.PhysicianMergeFields.LastName() )
 				} );
 
-		var managersChild = new MergeDataTreeChild<PracticeMockData, PracticeManagerMockData>( "PracticeManagers", managerFields, data => data.Managers );
-		var physiciansChild = new MergeDataTreeChild<PracticeMockData, PhysicianMockData>( "Physicians", physicianFields, data => data.Physicians );
+		var managersChild = new MergeDataTreeChild<PracticeMockData, PracticeManagerMockData>( "PracticeManagers", managerFields, data => data!.Managers );
+		var physiciansChild = new MergeDataTreeChild<PracticeMockData, PhysicianMockData>( "Physicians", physicianFields, data => data!.Physicians );
 		var mergeTree = MergeDataTreeOps.CreateRowTree(
 			practiceFields,
 			practiceData.ToCollection(),

@@ -1,13 +1,11 @@
-﻿#nullable disable
-using NUnit.Framework;
-using Tewl.IO;
+﻿using Tewl.IO;
 
 namespace Tests.IO;
 
 [ TestFixture ]
-internal class ExcelFileWriterTester {
-	private string timestampPrefix;
-	private string outputFolderPath;
+class ExcelFileWriterTester {
+	private string timestampPrefix = null!;
+	private string outputFolderPath = null!;
 
 	[ OneTimeSetUp ]
 	public void InitializeFixture() {

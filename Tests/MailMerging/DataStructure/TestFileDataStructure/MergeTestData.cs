@@ -1,11 +1,10 @@
-﻿#nullable disable
-namespace Tests.MailMerging.DataStructure.TestFileDataStructure;
+﻿namespace Tests.MailMerging.DataStructure.TestFileDataStructure;
 
 public class MergeTestData {
 	public class Thing {
-		public string TheValue;
+		public required string TheValue;
 	}
 
-	public string FullName;
-	public List<Thing> Things;
+	public required string FullName;
+	public required List<Thing> Things;
 }
