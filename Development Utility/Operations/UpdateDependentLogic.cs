@@ -1291,11 +1291,11 @@ internal class UpdateDependentLogic: Operation {
 			    "command": {
 			      "adhoc": {
 			        "description": "Enables ad hoc development mode for the current session.",
-			        "template": "Enable ad hoc development mode for this session until `/standard` is invoked. Do not invoke the `ewl-cleanup` or `ewl-abstraction-review` subagents. Do not run checks that start, require, or inspect running projects or applications. Continue to follow all other project instructions and perform any verification explicitly requested by the user."
+			        "template": "Select ad hoc development mode as defined in the project rules. Keep it active across requests until `/standard` is invoked, including in session summaries."
 			      },
 			      "standard": {
 			        "description": "Enables standard development mode for the current session.",
-			        "template": "Enable standard development mode for this session. Resume use of the `ewl-cleanup` and `ewl-abstraction-review` subagents and checks involving running projects or applications whenever required by project instructions."
+			        "template": "Select standard development mode as defined in the project rules. Keep it active across requests until `/adhoc` is invoked, including in session summaries."
 			      }
 			    },
 			    "permission": {
