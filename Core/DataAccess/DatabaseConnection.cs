@@ -474,8 +474,8 @@ public class DatabaseConnection {
 		}
 
 		if( databaseInfo is MySqlInfo ) {
-			if( new[] { "Deadlock found when trying to get lock", "Lock wait timeout exceeded" }.Any(
-				   i => innerException.Message.Contains( i, StringComparison.Ordinal ) ) )
+			if( new[] { "Deadlock found when trying to get lock", "Lock wait timeout exceeded" }.Any( i =>
+				   innerException.Message.Contains( i, StringComparison.Ordinal ) ) )
 				return new DbConcurrencyException( getCommandExceptionMessage( command, "A concurrency error occurred." ), innerException );
 
 			if( innerException.Message.Contains( "Command Timeout expired", StringComparison.Ordinal ) )
@@ -562,8 +562,5 @@ public class DatabaseConnection {
 	/// <summary>
 	/// Returns schema information about the database.
 	/// </summary>
-	internal DataTable GetSchema( string collectionName, params string?[] restrictionValues ) =>
-#pragma warning disable CS8620
-		cn.GetSchema( collectionName, restrictionValues );
-#pragma warning restore CS8620
+	internal DataTable GetSchema( string collectionName, params string?[] restrictionValues ) => cn.GetSchema( collectionName, restrictionValues );
 }
