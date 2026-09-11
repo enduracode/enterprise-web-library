@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.Configuration.InstallationStandard;
 using EnterpriseWebLibrary.DevelopmentUtility.Configuration.Packaging;
@@ -651,6 +652,19 @@ internal class ExportLogic: Operation {
 						"",
 						true );
 				} );
+
+				var webConfigPath = EwlStatics.CombinePaths( serverSideLogicFolderPath, "Legacy", app.Name, WebApplication.WebConfigFileName );
+				var webConfig = XDocument.Load( webConfigPath, LoadOptions.PreserveWhitespace );
+				if( webConfig.Root!.Element( "system.web" )?.Element( "compilation" ) is {} compilation )
+					compilation.SetAttributeValue( "debug", "false" );
+				if( webConfig.Root.Element( "system.webServer" )
+					    ?.Element( "modules" )
+					    ?.Nodes()
+					    .OfType<XComment>()
+					    .SingleOrDefault( i => i.Value.Trim().Equals( """<add name="HttpCacheModule" />""", StringComparison.Ordinal ) ) is {} cacheModuleComment )
+					cacheModuleComment.ReplaceWith( new XElement( "add", new XAttribute( "name", "HttpCacheModule" ) ) );
+				webConfig.Save( webConfigPath, SaveOptions.DisableFormatting );
+
 				continue;
 			}
 
