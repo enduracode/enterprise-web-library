@@ -59,7 +59,9 @@ After the DU finishes, verify the generated file you care about looks right -- e
 
 ## Launching OpenCode headlessly
 
-The CLI lives at `$env:LOCALAPPDATA\opencode\opencode-cli.exe`. The `run` subcommand takes a prompt and exits when the model stops. Important flags:
+Resolve the executable from the running OpenCode session before testing. Inspect `Win32_Process` for OpenCode executable paths and parent processes, then run `--version` on the selected executable. Set `$openCodeExe` to that absolute path and use it for every test and cleanup command. Do not assume that PATH or `$env:LOCALAPPDATA\opencode\opencode-cli.exe` points to the running version: an older installation may coexist with the active one. If running sessions use different executables, identify the current session's process ancestry or ask the user. Verify the requested provider/model with `models <provider>` on this same executable; do not substitute another model or provider without user direction.
+
+The `run` subcommand takes a prompt and exits when the model stops. Important flags:
 
 | Flag | Purpose |
 |---|---|
@@ -74,7 +76,7 @@ Minimal invocation pattern:
 
 ```powershell
 Push-Location -LiteralPath $targetDir
-& "$env:LOCALAPPDATA\opencode\opencode-cli.exe" run `
+& $openCodeExe run `
   --format json `
   --model "opencode/gpt-5.4" `
   --agent build `
@@ -131,7 +133,7 @@ If the partial transcript ends before the scenario's required evidence exists, m
 
 ## Reading the transcript (flat-file storage)
 
-`opencode run` writes session data to flat files under `%USERPROFILE%\.local\share\opencode\storage\`, **not** the SQLite database `opencode.db`. The database is used by the TUI for its own persistence; don't look there for `run` sessions.
+Session storage is version-dependent. Current OpenCode releases can store `run` sessions in SQLite; older releases use flat files under `%USERPROFILE%\.local\share\opencode\storage\`. Start with captured JSON events and the selected executable's `export <session-id>` command or HTTP API. Use the legacy flat-file instructions below only when those files actually exist. Do not query or modify the session database directly.
 
 Flat-file layout:
 
@@ -235,7 +237,7 @@ OpenCode exposes a session-delete endpoint through `opencode serve`. The CLI doe
 ```powershell
 Add-Type -AssemblyName System.Web
 
-$proc = Start-Process -FilePath "$env:LOCALAPPDATA\opencode\opencode-cli.exe" `
+$proc = Start-Process -FilePath $openCodeExe `
   -ArgumentList @("serve", "--port", "4099", "--hostname", "127.0.0.1") `
   -PassThru -WindowStyle Hidden
 
@@ -292,7 +294,7 @@ Child session IDs come from enumerating `session\global\ses_*.json` before delet
 ### Step 3: Verify cleanup
 
 ```powershell
-& "$env:LOCALAPPDATA\opencode\opencode-cli.exe" session list 2>&1 |
+& $openCodeExe session list 2>&1 |
   Select-String -Pattern "^(scen|smoke|test)" -SimpleMatch
 # Expect no matches.
 ```
@@ -300,7 +302,7 @@ Child session IDs come from enumerating `session\global\ses_*.json` before delet
 ### What NOT to clean up
 
 - **OpenCode debug log files** under `log\`. These are time-rotated and contain traffic from non-test sessions too. Leave them.
-- **The SQLite database** `opencode.db`. Your `run` sessions don't write to it; the TUI does.
+- **The SQLite database** `opencode.db`. Current releases may store both `run` and TUI sessions there; delete test sessions through the supported HTTP API rather than modifying the database directly.
 - **OpenCode processes that were running before the test.** They are your interactive sessions. Only kill processes you started (filter by `StartTime`).
 - **Tool-output files under `tool-output\`** unless you specifically identified them as created by your test run (snapshot the directory contents before/after).
 
