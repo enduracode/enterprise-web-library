@@ -493,7 +493,7 @@ internal class ExportLogic: Operation {
 
 		var serverSideLogicFolderPath = EwlStatics.CombinePaths( logicPackagesFolderPath, "Server Side Logic" );
 		packageWebApps( installation, serverSideLogicFolderPath );
-		packageWindowsServices( installation, serverSideLogicFolderPath );
+		packageBackgroundServices( installation, serverSideLogicFolderPath );
 		packageServerSideConsoleApps( installation, serverSideLogicFolderPath );
 		packageGeneralFiles( installation, serverSideLogicFolderPath, true );
 		if( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemUsesLegacyEwl == true )
@@ -698,8 +698,8 @@ internal class ExportLogic: Operation {
 		}
 	}
 
-	private void packageWindowsServices( DevelopmentInstallation installation, string serverSideLogicFolderPath ) {
-		foreach( var service in installation.ExistingInstallationLogic.RuntimeConfiguration.WindowsServices )
+	private void packageBackgroundServices( DevelopmentInstallation installation, string serverSideLogicFolderPath ) {
+		foreach( var service in installation.ExistingInstallationLogic.RuntimeConfiguration.BackgroundServices )
 			publishApp( EwlStatics.CombinePaths( installation.GeneralLogic.Path, service.Name ), EwlStatics.CombinePaths( serverSideLogicFolderPath, service.Name ) );
 	}
 

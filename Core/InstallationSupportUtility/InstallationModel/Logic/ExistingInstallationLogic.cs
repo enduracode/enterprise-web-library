@@ -29,7 +29,7 @@ public class ExistingInstallationLogic {
 
 	public bool InstallationInAzure => runtimeConfiguration.InstallationType != InstallationType.Development && runtimeConfiguration.AzureHosting is not null;
 
-	public string GetWindowsServiceFolderPath( Configuration.SystemGeneral.WindowsService service, bool useDebugFolderIfDevelopmentInstallation ) {
+	public string GetBackgroundServiceFolderPath( Configuration.SystemGeneral.BackgroundService service, bool useDebugFolderIfDevelopmentInstallation ) {
 		var path = EwlStatics.CombinePaths( generalInstallationLogic.Path, service.Name );
 		if( runtimeConfiguration.InstallationType == InstallationType.Development )
 			path = EwlStatics.CombinePaths(
@@ -41,14 +41,14 @@ public class ExistingInstallationLogic {
 	public Database Database => database;
 
 	public void InstallServices() {
-		foreach( var service in runtimeConfiguration.WindowsServices ) {
+		foreach( var service in runtimeConfiguration.BackgroundServices ) {
 			if( ServiceController.GetServices().Any( sc => sc.ServiceName == service.InstalledName ) )
 				throw new UserCorrectableException( "A service could not be installed because one with the same name already exists." );
 			TewlContrib.ProcessTools.RunProgram(
 				"sc",
-				"create \"{0}\" binpath= \"{1}\" obj= \"NT AUTHORITY\\NetworkService\"".FormatWith(
-					service.InstalledName,
-					EwlStatics.CombinePaths( GetWindowsServiceFolderPath( service, true ), service.NamespaceAndAssemblyName + ".exe" ) ),
+				$"""
+				 create "{service.InstalledName}" binpath= "\"{EwlStatics.CombinePaths( GetBackgroundServiceFolderPath( service, true ), service.NamespaceAndAssemblyName + ".exe" )}\"" obj= "NT AUTHORITY\NetworkService"
+				 """,
 				"",
 				true );
 			TewlContrib.ProcessTools.RunProgram(
@@ -63,7 +63,7 @@ public class ExistingInstallationLogic {
 		stopServices();
 
 		var allServices = ServiceController.GetServices();
-		foreach( var service in runtimeConfiguration.WindowsServices.Where( s => allServices.Any( sc => sc.ServiceName == s.InstalledName ) ) )
+		foreach( var service in runtimeConfiguration.BackgroundServices.Where( s => allServices.Any( sc => sc.ServiceName == s.InstalledName ) ) )
 			TewlContrib.ProcessTools.RunProgram( "sc", "delete \"{0}\"".FormatWith( service.InstalledName ), "", true );
 	}
 
@@ -72,7 +72,7 @@ public class ExistingInstallationLogic {
 	/// </summary>
 	public void Start() {
 		var allServices = ServiceController.GetServices();
-		foreach( var service in RuntimeConfiguration.WindowsServices ) {
+		foreach( var service in RuntimeConfiguration.BackgroundServices ) {
 			var serviceController = allServices.SingleOrDefault( sc => sc.ServiceName == service.InstalledName );
 			if( serviceController == null ) {
 				TelemetryStatics.ReportFault(
@@ -125,7 +125,7 @@ public class ExistingInstallationLogic {
 
 	private void stopServices() {
 		var allServices = ServiceController.GetServices();
-		var serviceNames = RuntimeConfiguration.WindowsServices.Select( s => s.InstalledName );
+		var serviceNames = RuntimeConfiguration.BackgroundServices.Select( s => s.InstalledName );
 		foreach( var service in allServices.Where( sc => serviceNames.Contains( sc.ServiceName ) ) ) {
 			TewlContrib.ProcessTools.RunProgram( "sc", "config \"{0}\" start= demand".FormatWith( service.ServiceName ), "", true );
 

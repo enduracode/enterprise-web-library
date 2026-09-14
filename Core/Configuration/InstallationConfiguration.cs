@@ -272,10 +272,8 @@ public class InstallationConfiguration {
 	/// <summary>
 	/// Gets a list of the services in the system.
 	/// </summary>
-	public IEnumerable<WindowsService> WindowsServices =>
-		systemGeneralConfiguration.WindowsServices is null
-			? [ ]
-			: systemGeneralConfiguration.WindowsServices.Select( ws => new WindowsService( ws, FullShortName ) );
+	public IEnumerable<BackgroundService> BackgroundServices =>
+		systemGeneralConfiguration.BackgroundServices is {} services ? services.Select( i => new BackgroundService( i, FullShortName ) ) : [ ];
 
 	/// <summary>
 	/// Gets a list of the developers for the system.

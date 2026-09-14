@@ -19,7 +19,7 @@
 					</sequence>
 				</complexType>
 			</element>
-			<element name="WindowsServices" minOccurs="0">
+			<element name="BackgroundServices" minOccurs="0">
 				<complexType>
 					<sequence>
 						<element name="Service" maxOccurs="unbounded">

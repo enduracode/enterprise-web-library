@@ -59,8 +59,9 @@ internal class GetLogicSize: Operation {
 							: ConfigurationStatics.GetProjectOutputFolderPath( debug, runtimeIdentifier: RuntimeInformation.RuntimeIdentifier ),
 						project.NamespaceAndAssemblyName + ".dll" ) )
 			.Concat(
-				from i in installation.ExistingInstallationLogic.RuntimeConfiguration.WindowsServices
-				select EwlStatics.CombinePaths( installation.ExistingInstallationLogic.GetWindowsServiceFolderPath( i, debug ), i.NamespaceAndAssemblyName + ".exe" ) )
+				from i in installation.ExistingInstallationLogic.RuntimeConfiguration.BackgroundServices
+				select
+					EwlStatics.CombinePaths( installation.ExistingInstallationLogic.GetBackgroundServiceFolderPath( i, debug ), i.NamespaceAndAssemblyName + ".exe" ) )
 			.Concat(
 				from i in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.ServerSideConsoleProjectsNonNullable
 				select EwlStatics.CombinePaths(

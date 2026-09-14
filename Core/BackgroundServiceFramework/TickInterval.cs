@@ -1,7 +1,7 @@
 ﻿using JetBrains.Annotations;
 using NodaTime;
 
-namespace EnterpriseWebLibrary.WindowsServiceFramework;
+namespace EnterpriseWebLibrary.BackgroundServiceFramework;
 
 [ PublicAPI ]
 public sealed class TickInterval {
