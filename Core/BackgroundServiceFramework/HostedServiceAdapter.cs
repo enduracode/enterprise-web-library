@@ -40,7 +40,7 @@ internal sealed class HostedServiceAdapter: BackgroundService {
 	}
 
 	public override async Task StopAsync( CancellationToken cancellationToken ) {
-		await base.StopAsync( CancellationToken.None );
+		await base.StopAsync( cancellationToken );
 
 		TelemetryStatics.ExecuteBlockWithStandardExceptionHandling( service.CleanUp );
 	}
