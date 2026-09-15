@@ -338,8 +338,8 @@ internal class UpdateDependentLogic: Operation {
 		foreach( var i in installation.ExistingInstallationLogic.RuntimeConfiguration.WebApplications.Select( ( app, index ) => ( app, index ) ) )
 			if( !AppStatics.WebProjectIsLegacy( installation, i.app ) )
 				generateWebProjectCode( installation, i.app, i.index );
-		foreach( var service in installation.ExistingInstallationLogic.RuntimeConfiguration.WindowsServices )
-			generateWindowsServiceCode( installation, service );
+		foreach( var service in installation.ExistingInstallationLogic.RuntimeConfiguration.BackgroundServices )
+			generateBackgroundServiceCode( installation, service );
 		foreach( var project in installation.DevelopmentInstallationLogic.DevelopmentConfiguration.ServerSideConsoleProjectsNonNullable )
 			generateServerSideConsoleProjectCode( installation, project );
 		if( !installation.SystemIsTewl() )
@@ -881,52 +881,23 @@ internal class UpdateDependentLogic: Operation {
 			Encoding.UTF8 );
 	}
 
-	private void generateWindowsServiceCode( DevelopmentInstallation installation, WindowsService service ) {
+	private void generateBackgroundServiceCode( DevelopmentInstallation installation, BackgroundService service ) {
 		generateCodeForProject(
 			installation,
 			service.Name,
 			EwlStatics.CombinePaths( installation.GeneralLogic.Path, service.Name ),
 			service.NamespaceAndAssemblyName,
 			writer => {
-				writer.WriteLine( "using System;" );
-				writer.WriteLine( "using System.ComponentModel;" );
-				writer.WriteLine( "using System.ServiceProcess;" );
-				writer.WriteLine( "using System.Threading;" );
 				writer.WriteLine( "using EnterpriseWebLibrary;" );
-				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess;" );
-				writer.WriteLine( "using EnterpriseWebLibrary.WindowsServiceFramework;" );
+				writer.WriteLine( "using EnterpriseWebLibrary.BackgroundServiceFramework;" );
 				writer.WriteLine();
-				writer.WriteLine( "namespace " + service.NamespaceAndAssemblyName + " {" );
-
-				writer.WriteLine( "internal static partial class Program {" );
-
-				writer.WriteLine( "[ MTAThread ]" );
-				writer.WriteLine( "private static void Main() {" );
-				writer.WriteLine( "SystemInitializer? globalInitializer = null;" );
-				writer.WriteLine( "initGlobalInitializer( ref globalInitializer );" );
-				writer.WriteLine( "var dataAccessState = new System.Lazy<DataAccessState>( () => new DataAccessState() );" );
+				writer.WriteLine( $"namespace {service.NamespaceAndAssemblyName};" );
+				writer.WriteLine();
+				writer.WriteLine( "internal partial class Service: BackgroundServiceBase {" );
 				writer.WriteLine(
-					"GlobalInitializationOps.InitStatics( globalInitializer!, \"{0}\", false, mainDataAccessStateGetter: () => dataAccessState.Value!, useLongDatabaseTimeouts: true );"
-						.FormatWith( service.Name ) );
-				writer.WriteLine( "try {" );
-				writer.WriteLine(
-					"TelemetryStatics.ExecuteBlockWithStandardExceptionHandling( () => ServiceBase.Run( new ServiceBaseAdapter( new " + service.Name.EnglishToPascal() +
-					"() ) ) );" );
-				writer.WriteLine( "}" );
-				writer.WriteLine( "finally {" );
-				writer.WriteLine( "GlobalInitializationOps.CleanUpStatics();" );
-				writer.WriteLine( "}" );
-				writer.WriteLine( "}" );
-
-				writer.WriteLine( "static partial void initGlobalInitializer( ref SystemInitializer? globalInitializer );" );
-
-				writer.WriteLine( "}" );
-
-				writer.WriteLine( "internal partial class " + service.Name.EnglishToPascal() + ": WindowsServiceBase {" );
-				writer.WriteLine( "internal " + service.Name.EnglishToPascal() + "() {}" );
-				writer.WriteLine( "string WindowsServiceBase.Name { get { return \"" + service.Name + "\"; } }" );
-				writer.WriteLine( "}" );
-
+					"internal static void RunApplication( SystemInitializer globalInitializer ) => BackgroundServiceOps.RunApplication( globalInitializer, new Service() );" );
+				writer.WriteLine( "private Service() {}" );
+				writer.WriteLine( $"""string BackgroundServiceBase.Name => "{service.Name.EscapeForLiteral()}";""" );
 				writer.WriteLine( "}" );
 			},
 			runtimeIdentifier: "win-x64" );
@@ -1648,7 +1619,7 @@ internal class UpdateDependentLogic: Operation {
 			writer.WriteLine( app.Name + $"/{WebApplication.DebugLogFileName}" );
 		}
 
-		foreach( var service in installation.ExistingInstallationLogic.RuntimeConfiguration.WindowsServices ) {
+		foreach( var service in installation.ExistingInstallationLogic.RuntimeConfiguration.BackgroundServices ) {
 			writer.WriteLine();
 			writer.WriteLine( service.Name + "/bin/" );
 			writer.WriteLine( service.Name + "/obj/" );
