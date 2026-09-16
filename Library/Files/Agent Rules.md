@@ -17,6 +17,8 @@ Do not perform skipped formatting or review workflows manually as a substitute. 
 
 This formatting and review workflow applies only in standard mode. Use the current harness's subagent tool.
 
+If the user asks to leave changes uncommitted, says they will commit themselves, or otherwise gives instructions that may conflict with the required pre-edit formatting commit, ask whether formatting-only commits are still permitted. Do not assume those commits or pre-edit formatting itself are waived. Resolve this before making functional edits to files requiring pre-edit formatting.
+
 1. Before the first functional edit to each clean, existing C# or XML/XSD file in a task, invoke `ewl-cleanup` to format only, not inspect, and commit any formatting changes. This authorizes formatting-only commits of those files. Skip this pre-edit step for new or already-modified files; preserve existing work and continue. Do not repeat it for subsequent edits or attempt it retrospectively when returning from ad hoc mode.
 2. Make the requested changes and regenerate affected output when required below.
 3. After functional C# changes, invoke `ewl-abstraction-review` on the changed, non-generated C# files. Address applicable findings.

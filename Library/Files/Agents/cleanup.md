@@ -208,7 +208,9 @@ This ensures the `jb` command is available and current.
 ### Step 3: Format
 
 Run the ReSharper CleanupCode tool on the specified files. Find the `.sln` file
-for the system and substitute its path below:
+for the system and substitute its path below. Set the command tool's timeout
+to **300000 milliseconds (five minutes)** for this invocation and the final
+formatter pass in Step 5e; do not use the default two-minute timeout.
 
 ```shell
 jb cleanupcode "<SolutionFile>.sln" --profile="Main" --include="file1.cs;file2.cs" --no-updates
@@ -229,7 +231,9 @@ If the caller asks for inspection, perform all of the sub-steps below.
 
 #### Step 5a: Run inspection
 
-Run the ReSharper InspectCode tool. Write the output file to the working directory using a relative path:
+Run the ReSharper InspectCode tool with the command tool's timeout set to
+**600000 milliseconds (ten minutes)**; do not use the default two-minute
+timeout. Write the output file to the working directory using a relative path:
 
 ```shell
 jb inspectcode "<SolutionFile>.sln" --include="file1.cs;file2.cs" --severity=SUGGESTION --format=Sarif --output=inspect-results.json --no-updates
