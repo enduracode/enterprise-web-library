@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <AssemblyName>EnterpriseWebLibrary.Library</AssemblyName>
-    <DefaultItemExcludesInProjectFolder>$(DefaultItemExcludesInProjectFolder);Files\System Template\\**\*.*</DefaultItemExcludesInProjectFolder>
+    <DefaultItemExcludesInProjectFolder>$(DefaultItemExcludesInProjectFolder);Files\**\*</DefaultItemExcludesInProjectFolder>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Files\System Template\\**\*.*" />
+    <Content Include="Files\**\*" />
   </ItemGroup>
 
 </Project>
