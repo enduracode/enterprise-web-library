@@ -1,258 +1,220 @@
 ---
 name: ewl-migration-review-preparation
-description: Prepare or refresh Modern Review.md and Legacy Coverage.md for a large legacy-to-modern EWL migration. Use when the migration author needs a detailed handoff that lets a lower-cost review agent trace each modern file to exact legacy source ranges and audit leftover legacy behavior.
+description: Prepare or refresh a file-diff-based Migration Review.md and Migration Followup.md for a large migration. Use in the migration-author session to map every added/deleted region to a multi-file review item, explain legacy origins and their fate, and hand off review to a lower-cost agent.
 ---
 
-# Migration review preparation
+# Prepare a migration review
 
-## Purpose
+Typically use GPT-6 Astra in the original migration session. GPT 5.6 Terra typically
+operates the resulting package with `ewl-migration-review`. The caller selects the
+model; do not change models or spawn agents automatically. Use existing migration
+context, but verify mappings against source rather than memory or similar names.
 
-Create a durable, system-specific review package for a migration that is too
-large to review as one diff. Organize the main walkthrough around modern code in
-source order, while independently inventorying legacy code so omissions remain
-visible. Write enough explicit context that a less-capable agent can navigate and
-record review decisions without rediscovering the migration's design.
+## Deliverables and ownership
 
-This skill prepares review material; it does not approve modern code or reconcile
-legacy code. The migration author may know that a mapping is likely or intentional,
-but only the user's later review changes review status.
+Both documents live in the **system root beside its solution**:
 
-Typically run this skill in the original GPT-6 Astra migration session; the
-interactive review session typically uses GPT 5.6 Terra. Use the migration author's
-existing context, but verify it against actual source.
-Do not select a model or launch another agent automatically. The caller chooses the
-model/session. The companion `ewl-migration-review` skill owns interactive review.
+- **`Migration Review.md`**: disposable review plan, file index, and item status.
+  Leave it unstaged. Do not add ignore rules. Delete it only when the user confirms
+  the migration is committed and review is finished.
+- **`Migration Followup.md`**: durable improvements the user explicitly defers until
+  after migration; intended for version control. Never stage/commit automatically.
 
-## Outputs
+There is no separate legacy ledger, review subdirectory, per-item review-notes
+field, or per-item approval-evidence field. Machine snapshots live outside the
+repository in temporary local storage managed by the review helper.
 
-Unless the repository already establishes another location, create these tracked
-files under `Migration Review/` at the repository root:
+## Establish scope and baseline
 
-- `Modern Review.md`: modern files in the order the user should review them,
-  with entries in source order within each file.
-- `Legacy Coverage.md`: an independent inventory of legacy behavior in scope,
-  including behavior for which no modern counterpart has been found.
+Read repository instructions; identify VCS, solution, current branch, and existing
+staged/unstaged/untracked changes. Pin a full immutable **pre-migration** revision.
+Include the entire migration, including already committed pieces: do not derive
+scope solely from today's uncommitted diff. Inventory added, modified, deleted,
+renamed, binary, and file-mode changes. Untracked new files must not be missed.
 
-Do not create identifiers for modern entries. Identify them by relative file path
-and stable symbol or section name. Give legacy blocks stable IDs such as `LEG-001`
-because one modern entry may cover part or all of several legacy blocks.
+Default comparison: **fixed baseline -> working copy**. HEAD -> working copy and
+HEAD -> index are additional comparisons only when explicitly requested; they do
+not replace the baseline or the full migration inventory. The fixed-baseline index
+view is another useful explicit option. Label comparison versions accurately.
 
-## Establish the review boundary
+Record all excluded changed paths and concrete reasons, not implicit exclusions
+based on project/language. Include routing, markup, configuration, project entries,
+and other wiring that affects behavior. Generated changes may be grouped or excluded
+with a reason; edit their sources, not generated output.
 
-Before writing mappings:
+No staging, commits, shelves, source changes, or rearrangement of user changes is
+needed to prepare this package. Ask if baseline/scope is genuinely ambiguous. Do
+not interpret staging as approval during preparation; the review skill synchronizes
+that signal. Preserve approvals already established in the review workflow.
 
-1. Read repository instructions and determine the version-control system.
-2. Record the modern repository root and solution path.
-3. Pin an immutable legacy baseline revision. Do not use a moving name such as
-   `HEAD`, a branch, or a topic as the stored baseline.
-4. Determine the legacy source location. Prefer a read-only worktree or separate
-   checkout at the baseline. If source will be read through VCS commands instead,
-   say so explicitly.
-5. Define migration scope from the actual modern diff and the legacy feature area.
-   Include deleted legacy pages, markup, code-behind, business logic, routing,
-   configuration, project wiring, and relevant unchanged helpers.
-6. Separate unrelated working-copy changes from migration scope. List exclusions;
-   do not silently omit them.
+## Define review items, not single-file chunks
 
-Inspect staged, unstaged, and untracked changes; Git diff alone omits new untracked
-files. Record the exact set of migration paths so that committing reviewed pieces
-does not make them disappear from subsequent inventories. Detect Git versus
-Mercurial in the target repository; load `ewl-mercurial` before Mercurial commands.
-No commits, shelves, resets, or reorganization of the user's migration are needed.
-Ask before creating a backup commit or a new baseline checkout. A preparation
-request does not authorize staging, committing, or changing application code.
+A **review item** is functionality approved as a unit. It may own additions,
+modifications, and removals in several files. Use unique descriptive titles, not
+numeric modern IDs. Order items by dependencies and reviewer convenience.
 
-Ask one focused question if the baseline or scope cannot be established safely.
+Every changed region has exactly one owning item. A region means explicit baseline
+deleted lines or current added lines; a replacement includes both sides. Unchanged
+diff context is not a changed region. Include imports, punctuation, formatting,
+blank lines, and other mechanical changes in an appropriate item. File existence,
+rename/mode changes, binary content, and empty-file changes also need one owner.
 
-## Investigate in both directions
+Separate **Review scope** from **Supporting references (not approved here)**.
+Approval covers all scoped changes, including deleted methods/files. It never
+propagates through an origin, caller, or cross-reference to another item's scope.
+Retained unchanged legacy implementation can be a reference without needing its
+own approval. Cross-reference shared explanations rather than copying them.
 
-### Modern-first map
+### Legacy origins and fate
 
-Inventory every new or updated non-generated source file in migration scope. Put
-files in a deliberate sequential review order, normally dependencies and shared
-models first, then business logic, then UI and wiring. Within each file, divide the
-review into methods or meaningful contiguous sections. Avoid entries so broad that
-the user cannot compare behavior, and avoid mechanical line-by-line entries.
+For each origin specify baseline path, symbol, exact inclusive range, behavior
+contributed, and whether coverage is complete or partial. Give full signatures for
+overloads and stable anchors for unnamed sections. Include callers, markup, SQL,
+or framework behavior needed to understand a port, clearly labeled as context.
 
-For each entry, inspect both implementations and document:
+Always state its fate in the **actual migrated tree**:
 
-- Exact modern symbol or section boundaries.
-- Every legacy origin, with legacy ID, relative path, symbol/section, and inclusive
-  baseline line range.
-- Whether each origin is complete or only a specified part of the legacy block.
-- How behavior moved, split, merged, delegated, or was rewritten.
-- A concrete comparison checklist covering conditions, authorization, validation,
-  persistence, file operations, external effects, errors, and UI behavior where
-  applicable.
-- Intentional differences and their rationale.
-- Dependencies on other modern review entries.
-- Any uncertainty requiring the migration author's attention.
+- **Removed by migration**: identify the scoped deletion and its owning item.
+- **Remaining—in use**: identify current callers and why it is retained.
+- **Remaining—inactive**: source remains but execution was disconnected.
+- **Partially removed**: specify surviving versus removed ranges and their owners.
+- **Unresolved**: evidence insufficient; flag for investigation, not a guessed port.
 
-Include supporting old callers, helpers, markup, stored procedures, or framework
-behavior when they are necessary to understand the origin. Distinguish direct
-origins from supporting context. Give the reviewer narrowly relevant ranges, not
-entire files when only a few methods matter. Include full signatures for overloads
-and a unique text anchor for unnamed sections.
+Planned later removal is still **remaining now**. Explain overlap/duplication and
+whether it is intentional, temporary, or unresolved. Similar logic in retained code
+does not by itself establish that duplication is acceptable.
 
-Do not infer provenance from similar names alone. Read the implementations.
-Distinguish genuinely new behavior from behavior whose origin has not been found.
+### Independent removal audit
 
-### Independent legacy inventory
+Inspect the legacy side independently of the identified modern ports. Account for
+every deleted region and whole-file deletion, including behavior with no replacement.
+For each, identify the replacement or proposed reason it no longer has a purpose.
+Also inspect changed callers/routes that disconnect legacy behavior without deleting
+its source. Own that loss of behavior in the item changing the caller/route.
 
-Build `Legacy Coverage.md` from the legacy scope itself, not by reversing the
-modern map. Read all in-scope legacy files and divide them into meaningful blocks.
-This independent pass is what exposes missing modern counterparts.
+This audit prevents useful non-migrated behavior from disappearing unnoticed. A
+reverse list made only from known ports is not exhaustive. There is no separate
+removal-approval command: the responsible item's approval covers these removals.
 
-Include markup and declarative behavior when it affects validation, visibility,
-post-backs, authorization, or navigation. Group generated designer declarations
-and purely mechanical project wiring when individual review adds no value, but
-record what the group contains. Include unchanged legacy code that remains in the
-execution path and identify it as retained or delegated rather than pretending it
-was ported.
+## `Migration Review.md` format
 
-Every legacy block starts `Unreconciled`. A known likely disposition or modern
-counterpart is documentation, not approval.
-
-## Required document format
-
-Keep the files easy for both humans and agents to edit. Use the following structure
-and field names consistently.
-
-### `Modern Review.md`
+Use this structure. The file-index table is both readable and machine-checked.
+Git helpers are in the companion `ewl-migration-review/scripts` directory.
 
 ```markdown
-# Modern Review
+# Migration Review
 
 ## Setup
-
-- Solution: `IAEM Certification Portal.sln`
-- Modern repository: `<absolute path used for VS-instance matching>`
-- Legacy baseline: `<full immutable revision>`
-- Legacy source: `<absolute baseline checkout/worktree path>`
-- Legacy coverage: [Legacy Coverage.md](Legacy%20Coverage.md)
+- Solution: `System.sln`
+- Baseline: `<full immutable Git commit hash>`
+- Comparison: Baseline -> working copy
 - Scope: ...
-- Excluded working-copy changes: ...
 
-## Review Order
+## File index
 
-- [ ] `Library/Example.cs`
-- [ ] `Web App/Example.cs`
+<!-- review-files:start -->
+| Old path | Current path | Baseline lines | Current lines | Review item | File change |
+|---|---|---|---|---|---|
+| Library/Example.cs | Library/Example.cs | 20-24 | 20-28 | Application creation | no |
+| - | Library/Storage.cs | - | 1-32 | Application creation | yes |
+| Legacy/OldPage.cs | - | 1-80 | - | Application creation | yes |
+<!-- review-files:end -->
 
-## `Library/Example.cs`
+## Excluded changes
 
-### `CreateExampleAsync`
+<!-- review-exclusions:start -->
+| Path | Reason |
+|---|---|
+| unrelated-document.md | Unrelated pre-existing work, outside this migration. |
+<!-- review-exclusions:end -->
+
+## File readiness
+Refresh with the helper before relying on this summary; not yet checked.
+
+## Review item: Application creation
 
 - Status: Pending
-- Modern range: `CreateExampleAsync` (current lines 42-79; lines are advisory)
-- Legacy origins:
-  - `LEG-004`: `Legacy/Example.aspx.cs`, `createExample`, baseline lines 91-138,
-    complete block
-  - `LEG-009`: `Legacy/Rules.cs`, `canCreate`, baseline lines 20-41, conditions
-    on lines 27-38 only
-- Mapping: ...
-- Compare:
-  - [ ] ...
-- Intentional differences: ...
-- Dependencies: ...
-- Preparation uncertainty: None
-- Review notes: None
-- Approval evidence: None
+
+### Review scope
+- `Library/Example.cs` — changes to `CreateApplication`.
+- `Library/Storage.cs` — new directory-creation implementation, complete file.
+- `Legacy/OldPage.cs` — complete removal; UI behavior moves into this item.
+
+### Legacy origins
+- `Legacy/OldPage.cs`, `Create`, baseline lines 15-40.
+  - Fate: Removed by migration; deletion owned by this item.
+  - Mapping: Initial values and database creation move to `CreateApplication`.
+- `Legacy/Helpers.cs`, `CreateDirectories`, baseline lines 60-78.
+  - Fate: Remaining—in use by legacy staff workflows.
+  - Overlap: Directory creation is also implemented in `Library/Storage.cs`.
+  - Reason retained: Staff workflow migration is outside this item's scope.
+
+### Supporting references (not approved here)
+- `Legacy/Helpers.cs` — retained staff caller context, not owned changes.
+- Application submission — another review item; do not approve transitively.
+
+### Compare
+- [ ] Initial values, validation, authorization and failure behavior.
+- [ ] Every removed handler has a replacement or an explained loss of purpose.
+
+### Intentional differences and open questions
+- ...
 ```
 
-Allowed modern statuses are `Pending`, `Reviewed`, `Changed since review`, and
-`Needs work`. A file-level checkbox is a summary only; entry statuses are
-authoritative. Preserve notes and statuses when refreshing the map. If code changed
-enough to invalidate reviewed provenance, set `Changed since review` and explain
-why; never silently reset or retain approval.
+Table rules: repository-relative forward-slash paths; `-` for an absent side/range;
+inclusive 1-based ranges such as `4-7, 12`; plain item titles without pipes or
+backticks; `yes`/`no` for ownership of the file-level change. Multiple rows can
+partition a file among items. Exactly one row owns each file-level change. A detected
+rename uses old/new paths in one pair; an untracked move may be reported by Git as
+delete/add—use the actual helper inventory, linking both in the same item.
 
-Approval evidence is recorded by the review skill: working-tree or staged-index
-version, symbol/section, and a content fingerprint from its bundled helper. It
-allows approval to survive commits and line movement while detecting later edits.
+Ranges cover changed lines ONLY, not whole methods including unchanged context.
+Empty tables retain headers and markers. Do not put follow-up prose or status in
+these structured tables. Review scope prose gives symbols and context; the index
+gives precise line ownership. `File readiness` is a convenience summary refreshed
+from helper output, not proof independent of a fresh diff check.
 
-For non-code files, use stable headings or descriptions instead of symbols. Current
-modern line numbers are advisory because edits move them; symbols and sections are
-the primary locators. Legacy ranges are fixed against the immutable baseline and
-must be exact.
+## Build and check the handoff
 
-### `Legacy Coverage.md`
+For Git systems, create the setup, empty index/exclusions tables, and named item
+headings; then use `node <review-skill>/scripts/review.mjs inspect --repo <root>`.
+The JSON inventory reports every changed file, changed-line ranges, file-level
+changes and coverage errors. Fill the index and rerun until all in-scope lines have
+one owner. The helper compares the full fixed baseline, including untracked files,
+and ignores only the two root review documents automatically. Exclusions must be
+explicit. Supporting references never create ownership.
 
-```markdown
-# Legacy Coverage
+Preparation does not invoke `approve`. New items start Pending even when mappings
+appear correct. Explain unresolved origins and retained duplication prominently.
+Validate all baseline ranges against the actual baseline, not a Fork temporary
+snapshot, moving HEAD, or advisory current line numbers.
 
-## Setup
+For Mercurial, load `ewl-mercurial` and perform the same inventory/audit using that
+VCS. The bundled machine coverage/approval/diff helper currently requires Git. Say
+so explicitly; do not promise automatic readiness certification on Mercurial.
 
-- Legacy baseline: `<same full revision as Modern Review.md>`
-- Legacy source: `<same baseline checkout/worktree>`
-- Scope: ...
+## Durable follow-up
 
-## Summary
+Create root `Migration Followup.md` if absent, initially just a heading and a brief
+description when no improvements have been explicitly deferred. Each requested item
+is a checkbox with improvement, modern file/symbol, rationale, desired outcome and
+relevant dependencies. It must be understandable after deleting the review package:
+no dependency on temporary paths, review-item status, or scratch evidence.
 
-- Unreconciled: 12
-- Ported: 0
-- Retained/delegated: 0
-- Intentionally removed: 0
-- Replaced by framework: 0
+Current defects, incomplete mappings and questionable deletions remain review
+issues unless the user explicitly defers them. Recording a follow-up never approves
+an item. Neither document is automatically staged or committed.
 
-## `LEG-004` - Candidate application creation
+## Refresh and older packages
 
-- Location: `Legacy/Example.aspx.cs`, `createExample`, baseline lines 91-138
-- Behavior: ...
-- Expected modern coverage:
-  - `Library/Example.cs` - `CreateExampleAsync`: database creation and initial
-    values
-  - `Web App/Example.cs` - `getContent`: user interaction and validation message
-- Disposition: Unreconciled
-- Reconciliation notes: None
-- Validity: Current
-```
+Preserve user decisions and deferred work. Before refreshing an existing map, run
+the review helper and identify stale mappings/changed content. Never manufacture
+new approval snapshots to match changed code. Revised ownership or content may
+require reapproval. Retain the complete migration inventory after commits.
 
-Allowed dispositions are `Unreconciled`, `Ported`, `Retained/delegated`,
-`Intentionally removed`, and `Replaced by framework`. Except for `Unreconciled`,
-every disposition requires a user-approved rationale. A block split across modern
-entries remains unreconciled until all applicable parts are explicitly reconciled.
-Use `Expected disposition` for the author's proposed classification; keep it
-separate from the authoritative `Disposition`. `Validity` becomes `Needs recheck`
-when later edits invalidate an existing reconciliation. Preserve the prior decision
-and notes; the review skill handles its explicit reconfirmation.
-
-## Refreshing existing documents
-
-Treat existing human decisions as data:
-
-- Preserve review notes, statuses, dispositions, and rationales unless current code
-  proves they are stale.
-- Add new mappings without renumbering legacy IDs.
-- Mark removed or substantially changed reviewed modern entries as changed; do not
-  delete their history silently.
-- Add newly discovered legacy blocks with new IDs.
-- Recompute summary counts and file-level checkboxes from entry-level state.
-- Validate that both documents name the same baseline and source location.
-
-Do not consume staging approval while preparing or refreshing provenance. Leave
-that synchronization to `ewl-migration-review`: user staging DOES approve the staged
-modern code, but never reconciles legacy blocks. If noting existing staging in the
-documents, write `Staged approval not yet synchronized by the review skill`, not
-`Staging is not review evidence`. Preserve approvals already recorded by review.
-
-## Completion checks
-
-Before reporting preparation complete:
-
-1. Every in-scope new or updated modern source file appears in `Modern Review.md`.
-2. Every modern entry has exact legacy origins or an explicit `Genuinely new` or
-   `Origin unresolved` statement.
-3. Every in-scope legacy block appears independently in `Legacy Coverage.md`.
-4. Every cross-reference resolves in both directions, including partial coverage.
-5. Legacy line ranges match the pinned baseline.
-6. Both setup sections agree.
-7. All new review decisions remain pending/unreconciled; author knowledge is
-   recorded only as mapping, rationale, or uncertainty.
-
-Explain any leftover legacy source ranges (including grouped mechanical content)
-and any unmapped modern sections. A mapping list derived only from known ports is
-not proof of exhaustive coverage. Traceability also does not prove behavior; the
-documents should list verification still needed, without requiring each eventual
-review commit to build independently.
-
-Report unresolved mappings and possible omissions prominently. Do not hide them in
-a general summary.
+When converting older Modern Review/Legacy Coverage documents, merge their origin,
+deletion and fate information into the appropriate items. Preserve meaningful
+rationales in item prose, and explicitly deferred improvements in Migration Followup.
+Do not discard old approvals or notes silently; explain which decisions can be
+validated and which need recheck. Do not add legacy IDs, per-item journals, or hash
+fields to the new format. Remove superseded documents only with user approval.

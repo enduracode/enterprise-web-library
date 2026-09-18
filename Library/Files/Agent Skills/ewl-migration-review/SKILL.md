@@ -1,198 +1,216 @@
 ---
 name: ewl-migration-review
-description: Operate an existing Modern Review.md and Legacy Coverage.md during an interactive migration review. Use for open legacy origins, mark reviewed, sync staged review status, record reconciliation, show what remains, or recompare the code selected in Visual Studio.
+description: Operate Migration Review.md using multi-file review items. Use to open item diffs together in VS Code, locate new files in Visual Studio, approve an item, check which files are ready to stage, recognize staged approval, or record durable Migration Followup.md improvements.
 ---
 
 # Interactive migration review
 
-## Session setup
+Typically GPT 5.6 Terra operates documents prepared by GPT-6 Astra in the original
+migration session. The caller selects the model; do not change it or spawn agents.
+Read repository instructions and the setup in root **Migration Review.md**, beside
+the solution. Use targeted searches for item names/paths, not the whole migration
+each turn. Ambiguous/missing provenance belongs with the preparation agent using
+`ewl-migration-review-preparation`; do not invent mappings.
 
-The user reviews/edits modern code in Visual Studio, opens legacy code in VS Code,
-and normally owns staging, especially partial-file staging. This skill is a narrow
-navigation/bookkeeping workflow typically run with GPT 5.6 Terra from documents
-prepared by GPT-6 Astra in the original migration session. The caller chooses
-the model/session; do not change models or launch another agent automatically.
+## One approval covers one review item
 
-1. Read repository instructions and detect the VCS in the modern repository. Load
-   `ewl-mercurial` before Mercurial commands. Staging rules apply only to Git;
-   Mercurial has no index and uses explicit review decisions instead.
-2. Locate `Migration Review/Modern Review.md` and `Legacy Coverage.md` (or their
-   established alternate location). Read setup sections and check that baseline
-   revision and source location agree. The OpenCode directory need not be the
-   modern repository. Resolve the solution path relative to the modern repository.
-3. Use targeted searches for file/symbol headings and legacy IDs. Read only relevant
-   entries and source ranges per turn, not the entire migration or both ledgers.
+A **review item** owns explicitly listed changed regions across one or more files,
+including deleted regions/files. `Approve`, `mark reviewed`, and equivalent explicit
+decisions approve the ENTIRE established item scope. No separate removal acceptance
+is needed. Supporting references, origins and callers outside that scope are NOT
+approved transitively. They may be owned by other items or retained unchanged.
 
-If documents, origins, or symbol boundaries are missing, ambiguous, or invalidated
-by significant edits, flag the problem for the migration author using
-`ewl-migration-review-preparation`. Never invent provenance. Use the supplied
-mapping/checklist; substantive migration redesign belongs with the author.
+Each changed line and file-level change must have exactly one owner in the file
+index. Distinguish baseline deleted lines from current added lines. A replacement
+includes both. New/deleted files require all their added/deleted lines; empty files,
+renames, modes, and binary changes require file-level ownership as well.
 
-## Query Visual Studio in the background
+The file index is a coverage check, not merely a list of associated items. A file is
+ready to stage only when all its changed regions and file-level changes are assigned
+and approved for the current content. Do not certify from Markdown checkmarks alone.
 
-Use the bundled script from this loaded skill's actual directory with Windows
-PowerShell 5.1, through the harness's PowerShell tool, and a bounded timeout (normally
-20 seconds):
+## Helpers and disposable state
 
-```powershell
-& '<skill-directory>\scripts\Get-VisualStudioLocation.ps1' `
-  -SolutionPath '<absolute solution path>'
-```
-
-The helper enumerates VS instances and matches the solution path. It reads state
-without activating VS. Foreground-window detection is wrong: the user has alt-tabbed
-to OpenCode. The JSON contains `Instances` and `Errors` arrays. Require one matching
-instance with `EditorState: Text`. Report inaccessible/busy instances honestly; they
-are not necessarily closed. For duplicate matching solutions, ask which process
-ID and then pass `-ProcessId`.
-
-- Use a nonempty selection first, otherwise the caret.
-- Endpoints are 1-based with an exclusive end. Ending at column 1 excludes that
-  line. Rectangular selections (`SelectionMode` other than 0) need clarification.
-- Resolve current symbols/sections rather than trusting advisory modern line
-  numbers. A selection spanning entries needs an explicit scope before approval.
-- If `Saved` is false, ask the user to save before mapping disk lines or approving
-  code. Never save their buffer yourself.
-- If `CaretVisible` is false or the caret is above `FirstDisplayedLine`, ask for a
-  click/selection in the intended code. A null visibility result is unknown. Do not
-  infer the last visible source line from pane height: folding/wrapping changes it.
-
-## Open origins
-
-For `open origins`, `show legacy`, or a new location-based comparison:
-
-1. Resolve the modern entry from VS (or an explicit user-supplied file/symbol).
-2. Read that entry and its referenced legacy blocks.
-3. Confirm the legacy checkout is at the pinned revision and the requested files
-   have no local changes. Validate their ranges. If not, request preparation rather
-   than comparing the wrong source. Never modify the legacy checkout.
-4. Open a dedicated VS Code window once per session, then open origins in documented
-   order at their starting lines:
+Git systems require Node.js 22+ and Git on PATH. Resolve scripts relative to THIS
+loaded skill's directory. Use the harness's PowerShell tool on Windows.
 
 ```powershell
-code --new-window '<legacy-checkout-directory>'
-code --reuse-window --goto '<absolute-legacy-file>:<start-line>:1'
+node '<skill>\scripts\review.mjs' inspect --repo '<repository root>'
 ```
 
-Quote paths and check success. A missing `code` CLI is a navigation blocker.
-`--reuse-window` targets the last active VS Code window, not a named window; if the
-user switches VS Code windows, do not claim the legacy window is pinned. The CLI
-does not select arbitrary ranges. State the full inclusive range in chat, together
-with a concise checklist and intentional differences. Open baseline source, never
-a same-named modern file. Supporting context is distinct from a direct origin.
+Output reports the baseline, current file inventory, exact changed-line ranges,
+coverage errors, per-item approval and file readiness. Nonzero exit means an
+operational error; an exit-zero report with `errors` is NOT complete coverage.
+Coverage uses the immutable baseline -> working copy, including untracked files and
+already-committed migration pieces. Check that the mapped baseline is the intended
+one. Unrelated changes require explicit reasoned exclusions in the document; do
+not exclude something merely to get a green report. Each item's origins must state
+whether they remain in use/inactive, are removed/partially removed, or are unresolved.
 
-Remember this modern entry as the current review target. A later bare `mark
-reviewed` refers to that established target; the user may now be viewing legacy code
-or another VS document. Query VS for a new location-based request, not to silently
-replace the established target. Echo the target in acknowledgments. If ambiguous,
-ask. For `recompare`, reopen its origins and consult its approval evidence.
+Approval content snapshots are stored under the OS temp directory's
+`opencode/migration-review/<repository-and-baseline-key>/`, outside the repository.
+The report names the location. No per-item review-notes or evidence fields in the
+Markdown. A missing snapshot means unverifiable approval, not automatic restoration
+from a checkmark. Ask the user before reapproving. Keep the temp state for the review
+lifetime; remove it only after the user confirms completion. Never delete unrelated
+temp directories.
 
-## Modern approval and legacy reconciliation are independent
+The helper never stages, commits, updates Markdown, or edits source. The agent
+updates the document's item statuses and file-readiness summary from fresh output.
+Read the affected sections before edits to preserve concurrent user changes.
 
-Track modern review status, legacy disposition, and staging/commit state separately.
-Modern code can legitimately be `Reviewed` while its origins remain `Unreconciled`.
-Opening code, approving modern code, staging, and committing never imply legacy
-reconciliation. Do not "fix" that discrepancy automatically.
+For Mercurial, load `ewl-mercurial`. There is no index and these helpers require Git;
+use explicit decisions/manual diffs and disclose the missing machine readiness
+check. Never run Git on a Mercurial working copy.
 
-### Recognize user staging as modern approval
+## Open an item's diffs in one VS Code window
 
-Before reporting/updating modern status, inspect the index and working tree in the
-modern repository, scoped to relevant mapped files (all mapped files for full status):
-
-```text
-git status --short
-git diff --cached --unified=0 -- <path>
-git diff --unified=0 -- <path>
-```
-
-- Fully staged new files are reviewed. For updated files, all migration changes
-  staged with no newer unstaged migration edits means their modern entries are
-  reviewed. Preserve earlier recorded decisions for already-committed portions.
-- Partial staging approves only the staged portions. Mark a whole entry reviewed
-  only when all its migration changes are approved; otherwise keep it pending and
-  record the precisely approved portion. Hunk context is not approval. Resolve
-  HEAD, index, and working-tree coordinates separately. Ask when ambiguous.
-- Edits after staging leave the staged version approved but the affected current
-  entry `Changed since review`. Do not mistake the staged file for current disk code.
-- Staging Markdown, unrelated files, or generated files does not approve source
-  entries. Staging mapped routing/configuration/project wiring approves those entries
-  only, not behavior in other files.
-- Staging NEVER changes legacy disposition or validity.
-
-Record staged approval in `Modern Review.md`, with version-specific evidence, so it
-survives a commit clearing the index. If a commit happened before staging was
-observed, ask rather than inferring approval merely from committed state. Unstaging
-does not erase an already-recorded approval of unchanged code.
-
-The user owns staging. Never stage, unstage, reset, or replace index contents unless
-explicitly asked. If asked to stage a whole file, inspect for extra unreviewed or
-unrelated edits first. Prefer user-driven partial-file staging in VS. This includes
-the Markdown documents: update their working copies, but do not restage them.
-
-### Explicit modern approval
-
-For `mark reviewed`, use the established target, explicit file/symbol, or (if neither
-exists) VS selection/caret. Mark exactly that scope `Reviewed`, record evidence and
-the user's note. A partial-section approval does not approve the whole method.
-This does not stage or reconcile anything. For `needs work`, record the issue and
-set `Needs work`. File checkboxes summarize entry states only.
-
-### Evidence and subsequent edits
-
-Resolve the entry's complete current source range and run:
+For `start review`, select the first pending item. For `next review item`, select the
+next pending item without approving the previous one. For a named file, use the file
+index; if several items own it, offer those names instead of guessing.
 
 ```powershell
-& '<skill-directory>\scripts\Get-ReviewFingerprint.ps1' `
-  -Repository '<modern repository root>' -RelativePath 'Library/Example.cs' `
-  -Source WorkingTree -StartLine 42 -EndLine 79
+& '<skill>\scripts\Open-ReviewItem.ps1' -Repository '<root>' -Item '<exact item title>'
 ```
 
-Store `Source`, symbol/section, inclusive range, and `Sha256` under `Approval
-evidence`. For staged approval use `-Source Index`, resolving the range in index
-content (`git show :<path>`), not disk lines. For full-file approval omit line
-arguments and label the evidence whole-file. The helper is read-only and normalizes
-BOM/newline conventions, not other whitespace. Partial approvals need precise
-section/range notes and evidence; do not invent hashes.
+The launcher prepares immutable-baseline files outside the repository, then opens
+ONE dedicated VS Code workspace window with a diff tab for each scoped file pair.
+Preview tabs are disabled to keep all tabs visible. It omits `--wait`. Added files
+compare empty -> new; deleted files compare old -> empty without recreating them in
+the repository. Renames compare old -> current path. Binary content can be covered
+but may need an appropriate viewer rather than a text diff.
 
-Before relying on approval, locate the same symbol/section and recompute the hash.
-Line movement alone preserves a section hash. A mismatch flags `Changed since
-review` (including formatting changes); preserve previous evidence until reapproval.
-For whole-file evidence, a mismatch requires checking which entries changed, not
-assuming all changed. No evidence means approval freshness is unknown: ask before
-claiming historical approval applies. Never silently replace a mismatching hash.
+The launcher opens the workspace with `--new-window`, waits for its unique window
+title, then foregrounds that window before each `--reuse-window --diff` call. If it
+cannot identify/focus the intended window, it stops rather than sending diffs to an
+unrelated window. This deliberate navigation does not inspect the user's VS Code
+selection. Do not switch windows during the launch batch. `-PrepareOnly` generates
+the navigation plan/workspace without
+launching UI and is useful for verification. Temp baseline copies are read-only in
+the generated workspace; the working-copy side remains editable.
 
-When a changed section invalidates already-reconciled legacy coverage, preserve its
-prior disposition/rationale and set `Validity: Needs recheck`. This is triggered by
-source changes, not by staging. Unreconciled blocks remain unreconciled. Only explicit
-reconciliation confirmation clears the flag; modern reapproval alone does not.
+Default: fixed baseline -> working copy. `-Source index` explicitly displays fixed
+baseline -> index, NOT HEAD -> index. For requests for uncommitted/staged changes
+relative to HEAD, use explicit Git comparisons and separately materialized resources;
+label that view and preserve the fixed-baseline ownership inventory. Do not change
+the document's baseline to make a partial view fit. A partial comparison does not
+by itself establish that the entire item's migration scope was reviewed.
 
-### Explicit legacy reconciliation
+Remember the current item and compared versions. Opening supporting legacy origins
+does not replace this target. A bare `approved` refers to this established item,
+not whatever unrelated editor was last selected. Echo the item's name and scope.
+If the user switches manually through Fork, ask for the file/item when needed;
+process arguments do not expose current diff-tab/caret state reliably.
 
-Require an explicit instruction such as `reconcile this as ported`, `retain this in
-the legacy API`, `intentionally remove this because ...`, or `the framework replaces
-this`. Read the block's entire expected modern coverage and review notes. If only
-part is accounted for, keep `Unreconciled` and record partial progress. All portions
-of a split legacy block must be accounted for before reconciling the block.
+For `open origins`, read only the item's relevant origins, materialize/open their
+exact immutable baseline versions, and use `code --reuse-window --goto <file>:<line>:1`
+in the review window. State the inclusive ranges and retention/duplication context.
+The CLI does not highlight arbitrary ranges; do not claim it does. A Fork temporary
+file labeled staged is not proof that it is the migration baseline.
 
-Allowed dispositions: `Unreconciled`, `Ported`, `Retained/delegated`, `Intentionally
-removed`, `Replaced by framework`. Non-unreconciled dispositions require the user's
-rationale or explicit approval of an existing rationale. Record it and recompute
-counts. Preparation's proposed disposition is not a review decision.
+## Keep Visual Studio detection for new files
 
-## Progress and edits
+When the user reviews new source in VS or asks `review this VS file`, query:
 
-For `what is left`, report separately:
+```powershell
+& '<skill>\scripts\Get-VisualStudioLocation.ps1' -SolutionPath '<absolute solution path>'
+```
 
-- Modern entries that are pending, changed, or need work, in review order.
-- Unreconciled legacy blocks and reconciled blocks needing recheck; emphasize
-  those with no modern counterpart.
-- Invalid mappings and questions requiring the migration author.
+Use Windows PowerShell 5.1 and a bounded tool timeout (normally 20 seconds). The
+read-only helper matches the solution, not the foreground application; the user
+has alt-tabbed to OpenCode. Require one matching `Instances` entry with
+`EditorState: Text`; surface `Errors`. For duplicate solution instances, ask for
+the process ID and pass `-ProcessId`.
 
-Do not collapse these into one percentage. Before editing, reread the affected
-Markdown sections and preserve concurrent user edits. Update authoritative entry
-states and summary checkboxes/counts together. Report the target and changes briefly.
+Use selection, otherwise caret, to locate the owning item through the file index
+and current source. Coordinates are 1-based; selection end is exclusive. Rectangular
+selections or selections spanning items require scope clarification. If `Saved` is
+false, ask the user to save before disk-based mapping/approval; never save for them.
+If `CaretVisible` is false or the caret is above `FirstDisplayedLine`, ask for a
+click/selection in the intended code. Null visibility means unknown. Do not infer
+the last source line from display height when folding/wrapping is possible.
 
-Do not change modern source just to simplify tracking. Do not commit automatically.
-On an explicit commit request, follow repository rules and preserve index selections;
-do not add unreviewed code to make a commit complete/buildable. Review commits need
-not build independently. Verification of behavior remains separate from bookkeeping.
+VS and VS Code can both retain background state. Do not silently switch between
+them. Use an explicit request or the established review context.
+
+## Approve, reopen, and detect changes
+
+Before approving, refresh coverage. Correct simple line-coordinate drift only after
+verifying source and ownership; substantive changes go to preparation. Do not
+silently broaden an item to absorb new edits. No uncovered/duplicate/stale ranges
+are allowed when approving.
+
+Approval snapshots describe saved disk/index content. With no VS Code inspection
+extension, unsaved diff-editor buffers cannot be verified; have the user save edits
+before approval when editing in the diff. Never claim the snapshot contains an
+unsaved buffer. A read-only baseline or index side must not be edited.
+
+On explicit whole-item approval:
+
+```powershell
+node '<skill>\scripts\review.mjs' approve --repo '<root>' --item '<exact item title>'
+```
+
+Then inspect again and update the item's `Status` and file-readiness summary.
+Opening a diff, moving to the next item, or recording a follow-up is not approval.
+If the user approves only part, do not approve the whole item: clarify or ask
+preparation to split its scope. Keep supporting-reference items untouched.
+
+For `needs work`/`reopen`, use the helper's `reopen` command with the same arguments
+and describe the specific blocker in item prose. `recompare` opens the established
+item again and refreshes state, not automatic reapproval. Changed approved content
+produces `Changed since approval`; preserve the old local snapshot until the user
+reapproves. Missing/ambiguous ownership or changed coordinates require rechecking,
+not overwriting the evidence to match. Readiness includes ALL owning items of a
+file, not merely the last one reviewed.
+
+### Recognize staging without changing it
+
+User staging is approval of the staged portions. Inspect BOTH `git diff --cached`
+and `git diff`, against HEAD for what was staged and against the fixed baseline for
+full migration coverage. A staged change does not approve an unrelated earlier
+committed change in the same file. Hunk context is not approval.
+
+With valid working-copy coverage, run `review.mjs sync-staged --repo <root>` to
+persist safe staged approvals. It recognizes files whose entire baseline change
+is staged and whose working content matches the index. It records only those
+files' owned regions, not other files or supporting references in the item. A
+multi-file item remains pending until every owned region is approved; an already
+fully staged file can itself be ready while other files in that item await review.
+Read `approvedRegions`/`totalRegions` and `stagingDeferred` in the output. The latter
+requires explicit scope verification, not a guessed approval. Staged-region
+snapshots survive commits and expire naturally when their content/mapping changes.
+
+If staging covers an entire item's scope (or completes prior verified approvals),
+record approval with `approve --source index` after verifying its complete indexed
+scope. The map's current-side ranges must match the index for that command. If
+coordinates or partial scope do not match, keep the item pending and report exactly
+what is staged; ask for explicit item approval or refreshed mapping rather than
+guessing. Never alter index contents to make the command pass. Working-copy edits
+after staged approval remain unapproved. Run normal working-tree inspection before
+claiming a file is ready. A commit alone does not imply approval; recorded approval
+survives commits, but an unobserved staging action needs user confirmation.
+
+Never stage/unstage/reset/restage unless explicitly asked. User-owned partial-file
+staging is preferred. Explicit file selection is mandatory for requested staging or
+commits: do not sweep up disposable Migration Review.md. Review commits need not
+build independently. Do not add source changes just to make them buildable.
+
+## Follow-up and completion
+
+For `follow up after migration` or equivalent, add an unchecked improvement to root
+**Migration Followup.md**, with modern paths/symbols, rationale, desired outcome and
+dependencies. It must stand alone after temporary review material is deleted. Do
+not defer a current defect or missing port without the user's instruction. A
+follow-up never changes approval or ownership. This file is intended for VCS, but
+is not staged or committed automatically.
+
+For `which files are ready to stage`, run fresh working-tree inspection and report
+ready files separately from pending items, changed approvals, and coverage errors.
+Mirror the result in `File readiness`; never certify from that cached table alone.
+For `what is left`, also list unresolved origins/deletions and deferred follow-ups
+separately. No separate legacy ledger or removal-approval state is needed.
+
+Keep Migration Review.md unstaged; no ignore-file changes or review subdirectory.
+After the user confirms migration commits and completed review, delete only the
+disposable document and this review's local state. Preserve Migration Followup.md.
