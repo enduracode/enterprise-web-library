@@ -229,6 +229,27 @@ they appear in added lines.
 
 | Code Pattern | Replacement | Class | Notes |
 |---|---|---|---|
-| `.ToList()` | `.Materialize()` | CollectionTools | Returns `IReadOnlyCollection<T>`; preferred for non-mutated collections |
+| Enumerable `.ToArray()` or `.ToList()` | `.Materialize()` or `.MaterializeAsList()` | CollectionTools | Inspect consumers and collection contracts using the guidance below; do not require a concrete array or mutable list solely to materialize a sequence. |
 | `.Append(a).Append(b)` (multiple chained `.Append` calls on a sequence) | `.ConcatItems( a, b )` | CollectionTools | Only suggest when multiple individual items are appended in a chain and it won't hurt readability. A single `.Append(item)` is fine as-is and should not be replaced. Mixed `.Append`/`.Concat` chains cannot use `ConcatItems` — leave them alone. |
 | `"\n"`, `"\r\n"`, `Environment.NewLine` | `Newline` (etc.) | NewlineConstants | Available via static using in EWL systems |
+
+### Collection materialization and contracts
+
+- Prefer `Materialize()` and `IReadOnlyCollection<T>` when consumers only
+  enumerate, count, or perform ordinary sequence operations. Materialization
+  preserves enumeration order; ordered output alone does not require indexing.
+- Use `MaterializeAsList()` and `IReadOnlyList<T>` when indexing or an
+  intentional list contract is required.
+- Review newly introduced or changed return types and consumer parameters
+  together. An unnecessary list contract introduced in the same migration
+  is not a reason to retain it; recommend the simpler collection contract
+  where appropriate. Respect independently established API requirements.
+- Keep `ToArray()` when an API requires an actual array, or when array-specific
+  behavior or an independent copy is required. Keep `ToList()` or mutable
+  lists when callers mutate them. Do not confuse enumerable materialization
+  with APIs such as `MemoryStream.ToArray()`.
+- Assess sets by their semantics and usage rather than mechanically replacing
+  them with collections. Uniqueness, set operations, and membership-oriented
+  APIs can justify `HashSet<T>` / `IReadOnlySet<T>`. Hash-set `Contains` is
+  O(1) on average versus O(n) for a list; small collections may not benefit
+  in practice, but a small size alone does not make a set inappropriate.

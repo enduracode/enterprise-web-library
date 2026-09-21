@@ -75,6 +75,16 @@ When you find a match:
 In addition to BCL type matching, check the "Code Pattern Triggers" section of
 the inventory for specific code patterns that have known replacements.
 
+Explicitly scan added collection materialization calls, including both
+`.ToArray()` and `.ToList()`. Follow the inventory’s collection-contract
+guidance: inspect consumers to distinguish enumeration/count needs from
+indexing, mutation, concrete-array requirements, and set semantics. Newly
+introduced or changed contracts are reviewable too; do not preserve an
+unnecessary `IReadOnlyList<T>` merely because it appears in the same change.
+Prefer `Materialize()` for read-only collections and `MaterializeAsList()`
+when list semantics are needed. A justified membership-oriented set is not
+a missed abstraction merely because callers use `Contains`.
+
 ### Step 4: Report findings
 
 Report your findings in the format described below. If no issues are found,
