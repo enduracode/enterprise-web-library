@@ -14,12 +14,29 @@ If the system uses `WhitelistedTables`, include each table before using its
 generated APIs. EWL rejects nullable string columns; check compatibility
 before promising a table-row replacement in a legacy migration.
 
-Keep declaration lists in `Development.xml` generally alphabetical by table
-or declaration name: whitelisted tables, small tables, row-constant tables,
-custom queries and their named variants, and custom modifications. Minor
-exceptions are appropriate for natural groupings, including singular/plural
-references to the same entity. Preserve semantically significant ordering,
-especially the sequence of SQL commands within a modification.
+Keep declaration lists in `Development.xml` generally alphabetical by
+normalized domain name: whitelisted tables, small tables, row-constant tables,
+custom queries and their named variants, and custom modifications. Compare
+entity words rather than sorting literal identifiers:
+
+- Ignore recognized legacy Hungarian-style prefixes, such as `t` or `tbl`
+  on tables and equivalent conventional prefixes on stored procedures or
+  other entities. Strip only actual naming prefixes, not letters belonging
+  to the domain word. EWL convention is to omit these prefixes on new
+  entities, so interleave prefixed and unprefixed names: `UserRequests`
+  precedes `tblUserRoles`, and `tblApplicationStatus` precedes `Blobs`.
+- Treat established abbreviations as their full entity word. For example,
+  `AppType` and `ApplicationStatus` share the base word `Application`;
+  compare `Status` with `Type`, placing `ApplicationStatus` first.
+- Ignore plural inflections when comparing entity words, placing the base
+  entity before its compounds. Thus `Files`, `FileCollections`, and
+  `FileCollectionFiles` belong in that order; `Blobs` precedes
+  `BlobReferences`. Apply this to compound words as well as whole names.
+
+These are ordering rules, not instructions to rename existing entities.
+Allow minor exceptions for sensible domain groupings. Preserve semantically
+significant ordering, especially the sequence of SQL commands within a
+modification.
 
 ## Table retrievals
 
