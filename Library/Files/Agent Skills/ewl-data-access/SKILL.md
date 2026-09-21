@@ -1,6 +1,6 @@
 ---
 name: ewl-data-access
-description: EWL generated data access layer including table retrievals, modifications, small tables, row constants, table constants, sequences, and caching
+description: EWL data access including generated table and custom retrievals, modifications, SprocExecution, small tables, row constants, sequences, and transaction-scoped caching
 ---
 
 ## Overview
@@ -13,6 +13,13 @@ Run `sync` after schema or generation-configuration changes to regenerate.
 If the system uses `WhitelistedTables`, include each table before using its
 generated APIs. EWL rejects nullable string columns; check compatibility
 before promising a table-row replacement in a legacy migration.
+
+Keep declaration lists in `Development.xml` generally alphabetical by table
+or declaration name: whitelisted tables, small tables, row-constant tables,
+custom queries and their named variants, and custom modifications. Minor
+exceptions are appropriate for natural groupings, including singular/plural
+references to the same entity. Preserve semantically significant ordering,
+especially the sequence of SQL commands within a modification.
 
 ## Table retrievals
 
@@ -50,6 +57,112 @@ add lookup names. Put derived properties and related-row accessors in
 hand-written partial `Row` classes. Separate types remain appropriate for
 distinct concepts, aggregations, and external contracts. Preserve access
 checks, null/default semantics, trimming, and ordering during replacement.
+
+## Custom retrievals
+
+When table retrievals do not express a join, projection, aggregate, or legacy
+schema query, prefer a configured custom retrieval over handwritten command
+factories, parameter binding, reader loops, and ordinal-to-model mappings.
+These are first-class EWL data access, not an exception requiring raw ADO.NET.
+
+Strongly prefer simple retrievals. Start with generated table retrievals;
+when custom SQL is needed, keep it focused on the entity being retrieved.
+Do not join small lookup tables merely to obtain names or other related-row
+values. Resolve those through cached small-table retrievals in hand-written
+partial-row properties, or use row constants when generation-time values are
+appropriate. Joins and subqueries remain appropriate for genuine relational
+filtering, authorization, revision selection, and aggregation. Preserve their
+semantics when simplifying, including any exclusion of missing lookup rows.
+
+For a single-table custom retrieval with no joins, strongly prefer `SELECT *`.
+Use explicit projections only for a concrete reason, such as aggregation,
+avoiding a materially large payload (e.g. blob content), or a distinct result
+contract. Prefer variants of one entity retrieval over separate ID-only and
+column-only retrievals when the same row type will serve the callers. Do not
+add lookup joins or duplicate DTOs merely to reproduce an old display model.
+
+Declare queries under the database's `queries` in `Development.xml`:
+
+```xml
+<queries>
+	<query name="Orders">
+		<selectFromClause>SELECT * FROM Orders</selectFromClause>
+		<postSelectFromClauses>
+			<postSelectFromClause name="LinkedToCustomerOrderedById">WHERE CustomerId = @customerId ORDER BY OrderId</postSelectFromClause>
+			<postSelectFromClause name="MatchingId">WHERE OrderId = @orderId</postSelectFromClause>
+		</postSelectFromClauses>
+	</query>
+</queries>
+```
+
+After generation, this produces `DataAccess.Retrieval.OrdersRetrieval`
+with a typed nested `Row`, `GetRowsLinkedToCustomerOrderedById(...)`, and
+`GetRowsMatchingId(...)`. Named parameters are
+bound by generated code; inspect their generated order and signatures. The
+current generator declares query parameters as `object?`, not schema-inferred
+strongly typed parameters. Use explicit aliases for expressions and duplicate
+column names. Preserve authorization and relational semantics, null/default behavior,
+trimming, ordering, and duplicate/single-row expectations.
+
+The table whitelist controls table APIs; it does not prevent a custom query
+from referencing other tables. A nullable-string blocker for whole-table
+generation does not justify bypassing custom retrievals. Query generation
+examines the selected result columns and does not apply the table generator's
+nullable-string rejection. Generated query rows map SQL NULL strings to empty
+strings; nullable value types remain nullable according to result metadata.
+Check whether that represents the intended semantics, especially for outer
+joins. Do not expand a migration into schema changes merely to retrieve a
+custom retrieval, including `SELECT *` where its null semantics are suitable.
+
+Prefer generated query rows directly where they represent the needed data.
+Partial row extensions can add derived properties and lookup names. An existing
+record that merely copies columns and lookup labels is not a distinct contract:
+replace it with the generated `Row`, and use its column names directly rather
+than adding aliases to mimic the record. A genuinely distinct external contract
+may justify a projection; it does not require manual SQL execution or ordinal
+readers.
+
+Generated methods materialize results and cache them by query variant and
+parameter values while the current data-access cache is enabled. Apply the
+transaction and cache rules below, rather than bypassing generated retrievals
+to attempt a newer read within the same transaction.
+
+### Custom retrieval naming
+
+Use these preferred conventions, drawn from Scheduling Engine, RLE Link,
+System Manager, and Todd (TBG Enterprise System). Historical names vary; do
+not treat every existing spelling as a rule.
+
+- Name the query for the plural domain entities it returns: `EventExports`,
+  `Builds`, `PersonValidationErrors`, `Articles`, `ClientGroups`. The generator
+  adds `Retrieval`; omit that suffix and UI-oriented suffixes such as `List`
+  from the query name. For example, `Applications` generates
+  `ApplicationsRetrieval.Row`.
+- Qualify genuinely distinct result shapes or relationships:
+  `EventCountsByOrganizationId`, `CountriesWithPersonCount`, `TimeEntryTotals`,
+  `ClientsToCarriers`. An `Ids` suffix is appropriate when a deliberately
+  ID-only projection is justified, not a reason to create one unnecessarily.
+- Put filtering and ordering in `postSelectFromClause` names, which become
+  `GetRows<Variant>` methods. Prefer `MatchingId` or `MatchingEmailAddress` for
+  value matches and `LinkedToOrganization` or `LinkedToClientGroup` for related
+  entities. Describe the selection, rather than just its screen or caller.
+- Compose conditions as needed: `MatchingEmailAddressAndActive` or
+  `LinkedToPersonNotDeletedOrderedById`. Make important ordering explicit
+  with `OrderedBy...` and `Desc` where appropriate, as in System Manager’s
+  `LinkedToSystemAndReleasedOrderedByReleaseDateDesc`. Use `Unordered` when
+  order is unspecified, especially for multirow variants. A unique-ID match
+  does not need an ordering suffix.
+- Keep variants returning the same entity shape together under one query.
+  Add hand-written helpers and related-row properties in
+  `DataAccess/Retrieval/<QueryName>Retrieval.cs` as partial classes; keep
+  workflow coordination in domain classes such as `ApplicationStatics`.
+
+Reference declarations are in each system’s `Library/Configuration/Development.xml`:
+Scheduling Engine (`EventExports`, `EventCountsByOrganizationId`), RLE Link
+(`PersonValidationErrors`, `CountriesWithPersonCount`), System Manager
+(`Builds`, `ChangeLocations`), and Todd (`Articles`, `ClientGroups`,
+`ClientsToCarriers`). These are naming examples, not blanket endorsements of
+the complexity of their SQL.
 
 ## Small tables
 
@@ -114,6 +227,52 @@ ServiceOrdersModification.DeleteRows(
 // Insert with all columns in one call
 UsersModification.InsertRow( userId, email, roleId, 0, null, null, null, null, null, "" );
 ```
+
+For SQL writes not covered by table modifications, use configured
+`customModifications` rather than a generic handwritten command factory:
+
+```xml
+<customModifications>
+	<modification>
+		<name>DeleteOrderNotes</name>
+		<commands>
+			<command>DELETE FROM OrderNotes WHERE OrderId = @orderId</command>
+		</commands>
+	</modification>
+</customModifications>
+```
+
+This generates `DataAccess.CustomModifications.DeleteOrderNotes(...)`, binds
+named parameters, and executes the configured commands in a transaction.
+Nested transaction execution does not commit the outer request transaction.
+Use this for custom SQL writes; stored procedures can be called directly as
+described next, without adding generation configuration.
+
+## Stored procedures
+
+Use `SprocExecution` from
+`EnterpriseWebLibrary.DataAccess.CommandWriting.Commands` directly. Its
+`ExecuteNonQuery`, `ExecuteScalar`, and `ExecuteReader` methods use an EWL
+`DatabaseConnection` and therefore its current transaction.
+
+```csharp
+var command = new SprocExecution( "AddApplication" );
+command.AddParameter( new DbCommandParameter( "ApplicationID", new DbParameterValue( applicationId, "UniqueIdentifier" ) ) );
+command.AddParameter( new DbCommandParameter( "UserID", new DbParameterValue( userId, "Int" ) ) );
+command.ExecuteNonQuery( DataAccessState.Current.PrimaryDatabaseConnection );
+```
+
+`DbCommandParameter` and `DbParameterValue` are in
+`EnterpriseWebLibrary.DataAccess.CommandWriting`. The example uses SQL Server
+type names; select actual procedure parameter types for the database provider.
+Avoid generic string-name/object-tuple wrappers with runtime CLR-to-SQL type
+switches: explicit operation-specific calls already use the framework's
+first-class procedure API. Inspect the actual procedure contract for return
+values, output parameters, nulls, and side effects.
+
+Do not promise generated `Procedures` methods for SQL Server. The current DU
+invokes `ProcedureStatics.Generate` only for Oracle. Direct `SprocExecution`
+does not require code generation and is appropriate for SQL Server procedures.
 
 ## Primary keys
 
@@ -239,6 +398,54 @@ partial class ServiceOrdersTableRetrieval {
 }
 ```
 
+## Transactions and retrieval caching
+
+EWL's normal data-access model uses a consistent database snapshot for the
+unit of work. `AutomaticDatabaseConnectionManager` owns a `DataAccessState`
+and lazily opens connections and begins automatic transactions. SQL Server
+transactions explicitly use `IsolationLevel.Snapshot`, so the database must
+support/enable snapshot isolation; Oracle uses Serializable. Do not confuse
+SQL Server SNAPSHOT with statement-level read-committed snapshot isolation.
+
+In web applications, each request has a connection manager and data-access
+state. The framework generally manages cache and transaction boundaries:
+
+- Reads during normal request processing share the database transaction's
+  snapshot. Re-executing a SELECT, bypassing a retrieval cache, or resetting
+  that cache does **not** obtain newer commits from other transactions.
+- All modifications belong in the framework's modification phase. Reads,
+  validation, and authorization checks do not universally need to be moved
+  there for “freshness”; they operate against the same snapshot.
+- The framework disables retrieval caching during modifications and resets
+  it afterward. This prevents cached pre-modification values from hiding
+  the transaction's **own writes**; it does not refresh the database snapshot.
+- Entering/exiting the modification phase uses nested transaction/savepoint
+  handling, not a new snapshot or an early outer commit.
+- The state object's lifetime is coordinated with transactions, but is not
+  strictly one object per transaction. It may survive framework-managed
+  commit/rollback boundaries, at which the framework resets caches. Multiple
+  databases have separate transactions, not one globally atomic snapshot.
+
+Do not add manual `ExecuteWithCache` blocks or ad hoc cache resets to normal
+web request handling. Other application types sometimes explicitly create
+read-only `DataAccessState.Current.ExecuteWithCache(...)` blocks; those blocks
+enable retrieval caching, **not** a database transaction. Coordinate them
+with the application's transaction lifetime, exclude modifications, and do
+not reuse cached results across transaction boundaries. Nested cache blocks
+reuse the existing cache. Where an automatic connection manager is used,
+`ExecuteWithModificationsEnabled` provides the write/cache lifecycle.
+
+Stored procedures, raw SQL, and external-process writes do not independently
+invalidate arbitrary generated query caches. Use the normal modification
+lifecycle rather than inventing a cache invalidation layer. A legacy HTTP
+request or supplemental connection has its own transaction: it cannot see
+the caller's uncommitted inserts, and its commits do not refresh the caller's
+existing snapshot. Treat that as transaction/workflow design, not a reason
+to use handwritten retrievals. Snapshot isolation and cached reads do not
+by themselves enforce every concurrency invariant; use the appropriate
+database constraints and transactional design rather than repeated “fresh”
+checks within the same snapshot.
+
 ## Application-level table caching
 
 Create a companion `YourDataTableEwlModifications` table containing only the
@@ -279,3 +486,14 @@ and the EWL source:
 - `Development Utility/CodeGeneration/DataAccess/Subsystems/TableConstantStatics.cs`
   — schema constants.
 - `Core/DataAccess/DataAccessState.cs` — cache scope and read-only cache use.
+- `Development Utility/CodeGeneration/DataAccess/Subsystems/QueryRetrievalStatics.cs`
+  and `Development Utility/CodeGeneration/DataAccess/Column.cs` — custom query
+  generation, result types, and null handling.
+- `Development Utility/CodeGeneration/DataAccess/Subsystems/CustomModificationStatics.cs`
+  — configured SQL modifications and transaction wrappers.
+- `Core/DataAccess/CommandWriting/Commands/SprocExecution.cs` — direct procedure calls.
+- `Core/DataAccess/AutomaticDatabaseConnectionManager.cs` and
+  `Core/DataAccess/DatabaseConnection.cs` — state/transaction lifetimes,
+  snapshot isolation, and savepoints.
+- `Core/EnterpriseWebFramework/Page Infrastructure/Data Modification/BasicDataModificationAction.cs`
+  — web modification/cache lifecycle.
