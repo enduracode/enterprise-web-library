@@ -108,6 +108,7 @@ Load the relevant skill when the task calls for it rather than duplicating its g
 - `ewl-page`: page directives, parameters, URL routing, entity setups, and access control.
 - `ewl-page-advanced`: forms, postbacks, validation, and component state.
 - `ewl-data-access`: retrievals, modifications, generated form controls, sequences, and row constants.
+- `ewl-configuration`: installation custom/shared configuration, schema changes, named accessors, and centralized `GlobalStatics` initialization.
 - `ewl-database-migration`: schema changes and migration workflow.
 - `ewl-table`: EWF tables, sorting, paging, and selection.
 - `ewl-user-management`: users, roles, and identity providers.
