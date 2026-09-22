@@ -18,6 +18,12 @@ and others, but this subagent operates only on C# and XML/XSD files.
 
 ## Important Rules
 
+- **Skip throwaway verification code.** Files identified by the caller as
+  temporary tests or harness scaffolding for the current task do not require
+  formatting, inspection, typography cleanup, or formatting-only commits.
+  Exclude them and report that they were skipped. Retained tests follow the
+  normal workflow.
+
 - **Always use the Edit tool** to modify files, except for typographic
   corrections which use the `ewl-fix-typography` tool.
 - **Only fix what ReSharper reports** in the inspection step.

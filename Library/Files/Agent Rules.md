@@ -17,6 +17,8 @@ Do not perform skipped formatting or review workflows manually as a substitute. 
 
 This formatting and review workflow applies only in standard mode. Use the current harness's subagent tool.
 
+Throwaway tests and their temporary harness files, created solely to verify the current task, are exempt from pre-edit formatting, formatting-only commits, abstraction review, and cleanup inspections. Run them and remove the temporary artifacts after verification as described below. Deliberately retained tests follow the normal workflow.
+
 If the user asks to leave changes uncommitted, says they will commit themselves, or otherwise gives instructions that may conflict with the required pre-edit formatting commit, ask whether formatting-only commits are still permitted. Do not assume those commits or pre-edit formatting itself are waived. Resolve this before making functional edits to files requiring pre-edit formatting.
 
 1. Before the first functional edit to each clean, existing C# or XML/XSD file in a task, invoke `ewl-cleanup` to format only, not inspect, and commit any formatting changes. This authorizes formatting-only commits of those files. Skip this pre-edit step for new or already-modified files; preserve existing work and continue. Do not repeat it for subsequent edits or attempt it retrospectively when returning from ad hoc mode.
@@ -30,6 +32,8 @@ In standard mode, check for relevant running applications when needed before an 
 ## Build, Generation, and Tests
 
 Find the actual solution and test projects before running commands. The names below are placeholders; NUnit, a `Tests` project, and its exclusion from Release are common conventions, not guaranteed system properties.
+
+Tests created solely for task verification should generally be throwaway. Run them, report the results, then remove only the test code and scaffolding introduced for that verification. Preserve existing tests and user work. Avoid leaving new test projects, solution entries, dependencies, or production APIs added only to support a temporary harness; restore temporary generation inputs and regenerate affected output when necessary. Retain new regression tests when explicitly requested or when there is a clear ongoing need, rather than treating every verification check as a permanent addition. Throwaway tests do not need abstraction review or cleanup inspections.
 
 ```shell
 dotnet restore "Solution Name.slnx"
@@ -100,6 +104,7 @@ Follow surrounding code and system-specific conventions, with these EWL defaults
 - **Prefer generated table-retrieval rows over duplicate models when migrating to EWL.** Use generated `*TableRetrieval.Row` types directly where they already represent the data being consumed. Add derived properties and related-data accessors in hand-written partial `Row` classes rather than introducing custom records, DTOs, or wrappers that merely copy database columns or add lookup names. Prefer generated retrievals over hand-written SQL used only to populate those duplicate structures. Introduce a separate type when it represents a genuinely distinct concept, aggregation, or external contract; explain why the row type is insufficient. Preserve authorization and existing behavior when replacing legacy retrievals.
 - Use `DataModificationException` for user-correctable data errors; follow surrounding usage of `UserCorrectableException` and `UnexpectedValueException` for other errors.
 - Follow the system's schema and established primary-key convention; EWL systems commonly allocate IDs with `MainSequence.GetNextValue()`.
+- **Prefer the logical-operation timestamp over the current clock.** In web-specific code use `EwfRequest.Current.RequestTime`; in background-service code use `BackgroundServiceStatics.TickTime`; in shared Library code callable from multiple application types use `Clock.TransactionTime`. Related modifications in the same transaction should receive the same timestamp. Require a strong, task-specific reason to read current wall-clock time instead, and explain that exception. See `ewl-data-access` for details.
 
 ## Task-Specific Reference
 

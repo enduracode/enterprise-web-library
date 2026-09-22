@@ -117,6 +117,17 @@ proper API method exists.
 Reserve `.AsCustom()` for types that have no built-in method, such as
 `datetime2` with a specific precision.
 
+### Time-column precision
+
+For ordinary SQL Server business timestamps where whole-second precision is
+sufficient, prefer `.AsCustom( "datetime2( 0 )" )` over `.AsDateTime2()`.
+`datetime2(0)` uses 6 bytes per value, compared with 8 for the default
+`datetime2(7)`; `datetime2(3)` uses 7 bytes. Choose higher precision when an
+actual requirement calls for it, rather than using the maximum by default.
+Examples include `Files.UploadTime` in eMOLST and IAEM CEM, and
+`UserEmailVerifications.VerificationTime` and `GlobalRow.SalesforceLastLoginTime`
+in Rochester RHIO, all declared with `.AsCustom( "datetime2( 0 )" )`.
+
 ## Running migrations
 
 Migrations run automatically when you execute `sync`. Each

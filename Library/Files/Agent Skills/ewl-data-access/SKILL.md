@@ -216,6 +216,25 @@ mechanism described below.
 
 ## Modifications
 
+### Modification timestamps
+
+Use the timestamp for the logical operation so related modifications in the same
+transaction receive the same value:
+
+| Code context | Default timestamp |
+|---|---|
+| Web-specific code | `EwfRequest.Current.RequestTime` |
+| Background-service code | `BackgroundServiceStatics.TickTime` |
+| Shared Library code callable from multiple application types | `Clock.TransactionTime` |
+
+Prefer these over repeated reads of `SystemClock.Instance.GetCurrentInstant()`,
+`DateTime.UtcNow`, or other current-time APIs. There must be a strong,
+task-specific reason to use current wall-clock time instead, such as an explicit
+requirement to record the actual completion instant of an external operation.
+Explain that exception; a potentially long request or tick alone does not
+override the default. When changing a status and recording its timestamp, assign
+both in the same database modification.
+
 Generated `*Modification` classes provide insert, update, and delete:
 
 ```csharp
