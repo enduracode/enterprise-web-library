@@ -78,6 +78,14 @@ Changes pushed to EWL must compile against output from the currently released DU
 
 ---
 
+## EWL Accomplishments
+
+EWL release notes are called **accomplishments** and are stored outside version control. When asked to write an accomplishment or EWL release note, provide the text in chat or in a temporary Markdown file outside the repository. Do not create or modify version-controlled EWL documentation for these requests.
+
+Match the existing accomplishment style: a short paragraph prefixed with the feature name or `Ad hoc -`, explaining the change and any required migration steps. Explicitly identify breaking changes. Keep implementation details, verification reports, and lengthy checklists out of the accomplishment unless requested.
+
+---
+
 ## Test Commands
 
 Tests use NUnit in `Tests\Tests.csproj`; always use Debug because this project is excluded from Release.
