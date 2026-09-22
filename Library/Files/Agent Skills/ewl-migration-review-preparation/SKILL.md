@@ -12,17 +12,21 @@ context, but verify mappings against source rather than memory or similar names.
 
 ## Deliverables and ownership
 
-Both documents live in the **system root beside its solution**:
+The review package lives in the **system root beside its solution**:
 
 - **`Migration Review.md`**: disposable review plan, file index, and item status.
   Leave it unstaged. Do not add ignore rules. Delete it only when the user confirms
   the migration is committed and review is finished.
 - **`Migration Followup.md`**: durable improvements the user explicitly defers until
   after migration; intended for version control. Never stage/commit automatically.
+- **`Migration Review.approvals.json`**: helper-managed full approval snapshots,
+  including content, hashes, timestamps, and partial staged approvals. Keep unstaged;
+  disposable with the review document after confirmed completion. Preserve existing
+  evidence; preparation never creates approvals.
 
 There is no separate legacy ledger, review subdirectory, per-item review-notes
-field, or per-item approval-evidence field. Machine snapshots live outside the
-repository in temporary local storage managed by the review helper.
+field, or per-item approval-evidence field. The sibling JSON holds machine snapshots;
+temporary baseline copies and navigation workspaces remain outside the repository.
 
 ## Establish scope and baseline
 
@@ -59,7 +63,7 @@ diff context is not a changed region. Include imports, punctuation, formatting,
 blank lines, and other mechanical changes in an appropriate item. File existence,
 rename/mode changes, binary content, and empty-file changes also need one owner.
 
-Separate **Review scope** from **Supporting references (not approved here)**.
+Label file entries **Review** or **Reference (not approved here)**.
 Approval covers all scoped changes, including deleted methods/files. It never
 propagates through an origin, caller, or cross-reference to another item's scope.
 Retained unchanged legacy implementation can be a reference without needing its
@@ -135,30 +139,22 @@ Refresh with the helper before relying on this summary; not yet checked.
 
 - Status: Pending
 
-### Review scope
-- `Library/Example.cs` — changes to `CreateApplication`.
-- `Library/Storage.cs` — new directory-creation implementation, complete file.
-- `Legacy/OldPage.cs` — complete removal; UI behavior moves into this item.
-
-### Legacy origins
-- `Legacy/OldPage.cs`, `Create`, baseline lines 15-40.
-  - Fate: Removed by migration; deletion owned by this item.
-  - Mapping: Initial values and database creation move to `CreateApplication`.
-- `Legacy/Helpers.cs`, `CreateDirectories`, baseline lines 60-78.
-  - Fate: Remaining—in use by legacy staff workflows.
-  - Overlap: Directory creation is also implemented in `Library/Storage.cs`.
-  - Reason retained: Staff workflow migration is outside this item's scope.
-
-### Supporting references (not approved here)
-- `Legacy/Helpers.cs` — retained staff caller context, not owned changes.
-- Application submission — another review item; do not approve transitively.
-
-### Compare
-- [ ] Initial values, validation, authorization and failure behavior.
-- [ ] Every removed handler has a replacement or an explained loss of purpose.
-
-### Intentional differences and open questions
-- ...
+- **Review:** `Library/Example.cs` — old 20-24 → new 20-28.
+  Changed `CreateApplication` to initialize and create the application.
+  Unverified: initial-value parity, validation, authorization, and failure behavior.
+  - Origin: `Legacy/OldPage.cs` — old 15-40, complete `Create()` behavior.
+    Removed by migration; the complete page deletion is listed below.
+- **Review:** `Library/Storage.cs` — old absent → new 1-32 (complete addition).
+  Added directory creation independently of the legacy assembly.
+  - **Reference (not approved here):** `Legacy/Helpers.cs` — old 60-78,
+    complete `CreateDirectories(string)` behavior; current 60-78.
+    Remaining—in use by legacy staff workflows outside this item's scope.
+    Intentional overlap: both implementations create application directories.
+    Unverified: path and failure equivalence.
+- **Review:** `Legacy/OldPage.cs` — old 1-80 → new absent (complete deletion).
+  Removed the page; creation moved to `Library/Example.cs` above.
+  Removed submission handling at old 42-65; replacement belongs to
+  “Application submission,” not this item's approval.
 ```
 
 Table rules: repository-relative forward-slash paths; `-` for an absent side/range;
@@ -170,9 +166,31 @@ delete/add—use the actual helper inventory, linking both in the same item.
 
 Ranges cover changed lines ONLY, not whole methods including unchanged context.
 Empty tables retain headers and markers. Do not put follow-up prose or status in
-these structured tables. Review scope prose gives symbols and context; the index
-gives precise line ownership. `File readiness` is a convenience summary refreshed
+these structured tables. `File readiness` is a convenience summary refreshed
 from helper output, not proof independent of a fresh diff check.
+
+Each item consists of its Status and ONE concise annotated file list. Do not split
+it into Review scope, Legacy origins, Supporting references, Compare, or Differences
+sections. Every Review entry repeats its exact changed-line ranges from the index,
+with explicitly labeled old (fixed baseline) and new (working copy) sides. For an
+insertion/deletion in a retained file, write “old no changed lines” or “new no changed
+lines,” not “absent”; absent means the file does not exist on that side. Rename
+entries show both paths. Binary, empty-file, and mode-only entries explicitly state
+that line ranges are not applicable and identify the file-level change.
+
+Attach change descriptions, origins/fate, comparison concerns, intentional
+differences, and questions to the relevant file entry. Nest origins/references
+beneath their replacement when helpful; combine repeated notes and cross-reference
+other entries/items for shared explanations. All source references have exact
+version-labeled inclusive ranges; label broader method ranges as context rather
+than approval scope. Give symbols/full overloaded signatures where useful.
+Unresolved ranges are explicitly unresolved, never guessed.
+
+Describe completed changes in PAST TENSE (“Extracted,” “Added,” “Removed”), not
+commands to the reviewer (“Extract,” “Check,” “Verify”). Use concise declarative
+concerns such as “Unverified: concurrent creation” or “Open question: intended
+source-type policy.” Current behavior/fate can use present tense. Preserve concrete
+risks and user decisions; omit generic checklists, repeated history, and filler.
 
 ## Build and check the handoff
 
@@ -181,8 +199,8 @@ headings; then use `node <review-skill>/scripts/review.mjs inspect --repo <root>
 The JSON inventory reports every changed file, changed-line ranges, file-level
 changes and coverage errors. Fill the index and rerun until all in-scope lines have
 one owner. The helper compares the full fixed baseline, including untracked files,
-and ignores only the two root review documents automatically. Exclusions must be
-explicit. Supporting references never create ownership.
+and automatically excludes the two root review documents and sibling approval JSON.
+Exclusions must be explicit. Supporting references never create ownership.
 
 Preparation does not invoke `approve`. New items start Pending even when mappings
 appear correct. Explain unresolved origins and retained duplication prominently.
@@ -205,16 +223,10 @@ Current defects, incomplete mappings and questionable deletions remain review
 issues unless the user explicitly defers them. Recording a follow-up never approves
 an item. Neither document is automatically staged or committed.
 
-## Refresh and older packages
+## Refresh
 
 Preserve user decisions and deferred work. Before refreshing an existing map, run
 the review helper and identify stale mappings/changed content. Never manufacture
 new approval snapshots to match changed code. Revised ownership or content may
 require reapproval. Retain the complete migration inventory after commits.
 
-When converting older Modern Review/Legacy Coverage documents, merge their origin,
-deletion and fate information into the appropriate items. Preserve meaningful
-rationales in item prose, and explicitly deferred improvements in Migration Followup.
-Do not discard old approvals or notes silently; explain which decisions can be
-validated and which need recheck. Do not add legacy IDs, per-item journals, or hash
-fields to the new format. Remove superseded documents only with user approval.

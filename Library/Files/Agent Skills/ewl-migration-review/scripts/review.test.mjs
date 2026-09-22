@@ -147,3 +147,22 @@ test('empty files, binary files, and renames require file-level ownership', t =>
 	f.write('Binary.dat', Buffer.from([0, 1, 9, 3]));
 	assert.equal(f.invoke().items.find(i => i.name === 'Feature').status, 'Changed since approval');
 });
+
+test('sibling approval storage retains content and staged parts without affecting coverage or the index', t => {
+	const f = fixture(t);
+	const approvalPath = path.join(f.repo, 'Migration Review.approvals.json');
+	assert.equal(f.invoke().approvalsPath, approvalPath);
+	assert.equal(fs.existsSync(approvalPath), false);
+	f.invoke('approve', { item: 'Other' });
+	f.git('add', '--', 'New.txt');
+	const index = f.git('ls-files', '--stage');
+	f.invoke('sync-staged');
+	const stored = JSON.parse(fs.readFileSync(approvalPath, 'utf8'));
+	assert.ok(stored.items.Other.content.some(part => part.current.some(line => line.text === 'last')));
+	assert.ok(Object.values(stored.stagedParts).some(value => value.part.current.some(line => line.text === 'brand new')));
+	assert.deepEqual(f.invoke().errors, []);
+	assert.equal(f.git('ls-files', '--stage'), index);
+	assert.equal(f.git('ls-files', '--', 'Migration Review.approvals.json'), '');
+	f.setDocument(doc => doc.replace('Supporting references: Other (not in scope).', 'Reorganized file notes.'));
+	assert.equal(f.invoke().items.find(item => item.name === 'Other').status, 'Approved');
+});

@@ -47,17 +47,31 @@ one. Unrelated changes require explicit reasoned exclusions in the document; do
 not exclude something merely to get a green report. Each item's origins must state
 whether they remain in use/inactive, are removed/partially removed, or are unresolved.
 
-Approval content snapshots are stored under the OS temp directory's
-`opencode/migration-review/<repository-and-baseline-key>/`, outside the repository.
-The report names the location. No per-item review-notes or evidence fields in the
-Markdown. A missing snapshot means unverifiable approval, not automatic restoration
-from a checkmark. Ask the user before reapproving. Keep the temp state for the review
-lifetime; remove it only after the user confirms completion. Never delete unrelated
-temp directories.
+Full approval snapshots are stored in **`Migration Review.approvals.json`**, beside
+the root review document. They retain approved changed-line content, hashes,
+timestamps, and partial staged approvals. The report's `approvalsPath` names this
+file; `state` names external scratch storage for navigation workspaces and baseline
+copies. `--state <directory>` overrides that scratch directory, not the
+sibling approval path. No per-item review-notes or evidence fields in Markdown.
+A missing snapshot means unverifiable approval, not automatic restoration from a
+checkmark. Ask the user before reapproving. Keep the JSON unstaged, without ignore
+rules; it is automatically excluded from migration coverage.
 
-The helper never stages, commits, updates Markdown, or edits source. The agent
+The sibling is authoritative. Keep review evidence until confirmed completion;
+never delete unrelated temp directories.
+
+The helper only writes the sibling approval JSON and external scratch files; it
+never stages, commits, updates Markdown, or edits application source. The agent
 updates the document's item statuses and file-readiness summary from fresh output.
 Read the affected sections before edits to preserve concurrent user changes.
+
+Items use Status plus one concise annotated file list. **Review** entries give
+exact old/new changed-line ranges; **Reference (not approved here)** entries and
+nested origins give version-labeled context ranges and fate. Origins, differences,
+unverified behavior, and questions stay under the relevant file, rather than in
+separate thematic sections. Completed changes use past tense (“Extracted”), not
+reviewer commands; concerns are declarative (“Unverified: retry behavior”). Keep
+this layout when updating an item. The index remains the ownership authority.
 
 For Mercurial, load `ewl-mercurial`. There is no index and these helpers require Git;
 use explicit decisions/manual diffs and disclose the missing machine readiness
@@ -102,7 +116,8 @@ not whatever unrelated editor was last selected. Echo the item's name and scope.
 If the user switches manually through Fork, ask for the file/item when needed;
 process arguments do not expose current diff-tab/caret state reliably.
 
-For `open origins`, read only the item's relevant origins, materialize/open their
+For `open origins`, read the relevant origin/reference entries nested in the item's
+file list, materialize/open their
 exact immutable baseline versions, and use `code --reuse-window --goto <file>:<line>:1`
 in the review window. State the inclusive ranges and retention/duplication context.
 The CLI does not highlight arbitrary ranges; do not claim it does. A Fork temporary
@@ -211,6 +226,8 @@ Mirror the result in `File readiness`; never certify from that cached table alon
 For `what is left`, also list unresolved origins/deletions and deferred follow-ups
 separately. No separate legacy ledger or removal-approval state is needed.
 
-Keep Migration Review.md unstaged; no ignore-file changes or review subdirectory.
+Keep Migration Review.md and Migration Review.approvals.json unstaged; no ignore-file
+changes or review subdirectory.
 After the user confirms migration commits and completed review, delete only the
-disposable document and this review's local state. Preserve Migration Followup.md.
+disposable document, sibling approval JSON, and this review's external local state.
+Preserve Migration Followup.md.

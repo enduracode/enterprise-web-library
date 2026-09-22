@@ -1,4 +1,4 @@
-// Git review coverage and disposable approvals. No repository, index, or document writes.
+// Git review coverage and disposable approvals. Only the sibling approval JSON is written in the repository.
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -90,9 +90,9 @@ export function execute(options) {
 	const map = parseMap(fs.readFileSync(document, 'utf8'), root);
 	git('cat-file', '-e', `${map.baseline}^{commit}`);
 	const state = path.resolve(options.state ?? path.join(os.tmpdir(), 'opencode', 'migration-review', digest(root + '\0' + map.baseline)));
-	if (state === root || state.startsWith(root + path.sep)) throw new Error('Approval state must be outside the repository.');
+	if (state === root || state.startsWith(root + path.sep)) throw new Error('Navigation state must be outside the repository.');
 	const identity = { version: 1, repository: root, baseline: map.baseline };
-	const approvalsPath = path.join(state, 'approvals.json');
+	const approvalsPath = path.join(root, 'Migration Review.approvals.json');
 	let approvals = { ...identity, items: {}, stagedParts: {} };
 	const originalApprovalText = fs.existsSync(approvalsPath) ? fs.readFileSync(approvalsPath, 'utf8') : null;
 	if (fs.existsSync(approvalsPath)) {
@@ -144,7 +144,7 @@ export function execute(options) {
 		if (options.source === 'working')
 			for (const file of git('ls-files', '--others', '--exclude-standard', '-z').toString().split('\0').filter(Boolean))
 				changes.push({ oldPath: '-', newPath: file, status: 'A' });
-		const automaticExclusions = new Set(['Migration Review.md', 'Migration Followup.md']);
+		const automaticExclusions = new Set(['Migration Review.md', 'Migration Followup.md', 'Migration Review.approvals.json']);
 		const relevant = changes.filter(change => ![change.oldPath, change.newPath].filter(file => file !== '-').every(file => automaticExclusions.has(file)) &&
 			![change.oldPath, change.newPath].filter(file => file !== '-').every(file => map.excluded.has(file)));
 		const errors = [], itemParts = new Map(map.items.map(item => [item, []])), files = [];
@@ -218,8 +218,7 @@ export function execute(options) {
 		const stagedPaths = git('diff', '--cached', '--name-only', '-z', '--').toString().split('\0').filter(Boolean);
 		const stagingDeferred = [];
 		function save() {
-			fs.mkdirSync(state, { recursive: true });
-			const lock = path.join(state, 'approval-write.lock');
+			const lock = approvalsPath + '.lock';
 			fs.mkdirSync(lock); // Refuse concurrent writers rather than lose another review decision.
 			try {
 				const latest = fs.existsSync(approvalsPath) ? fs.readFileSync(approvalsPath, 'utf8') : null;
@@ -270,7 +269,7 @@ export function execute(options) {
 		for (const file of files) file.ready = !file.errors.length && file.items.length > 0 &&
 			file.items.every(name => !invalidItems.has(name) && itemParts.get(name)
 				.filter(part => part.oldPath === file.oldPath && part.newPath === file.newPath).every(part => partApproved(name, part)));
-		const report = { ...identity, source: options.source, state, errors, items, files,
+		const report = { ...identity, source: options.source, state, approvalsPath, errors, items, files,
 			exclusions: Object.fromEntries(map.excluded), stagedPaths, stagingDeferred };
 		if (options.command === 'prepare-diffs') {
 			if (errors.length) throw new Error('Fix coverage errors before opening a review item: ' + errors.join('\n'));
