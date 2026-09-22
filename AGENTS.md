@@ -30,7 +30,7 @@ before running any version control commands.
 | `Development Utility\` | CLI tool for code generation and build ops |
 | `Providers\` | Pluggable provider implementations |
 
-Solution file: `Enterprise Web Library.sln`
+Solution file: `Enterprise Web Library.slnx`
 
 ---
 
@@ -38,13 +38,13 @@ Solution file: `Enterprise Web Library.sln`
 
 ```shell
 # Restore packages
-dotnet restore "Enterprise Web Library.sln"
+dotnet restore "Enterprise Web Library.slnx"
 
 # Build (Debug, the default)
-dotnet build "Enterprise Web Library.sln"
+dotnet build "Enterprise Web Library.slnx"
 
 # Build (Release) -- note: Tests project is excluded from Release
-dotnet build "Enterprise Web Library.sln" -c Release
+dotnet build "Enterprise Web Library.slnx" -c Release
 ```
 
 ### Code Generation (Development Utility)

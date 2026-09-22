@@ -32,9 +32,9 @@ In standard mode, check for relevant running applications when needed before an 
 Find the actual solution and test projects before running commands. The names below are placeholders; NUnit, a `Tests` project, and its exclusion from Release are common conventions, not guaranteed system properties.
 
 ```shell
-dotnet restore "Solution Name.sln"
-dotnet build "Solution Name.sln"
-dotnet build "Solution Name.sln" -c Release
+dotnet restore "Solution Name.slnx"
+dotnet build "Solution Name.slnx"
+dotnet build "Solution Name.slnx" -c Release
 dotnet test "Tests\Tests.csproj" -c Debug
 dotnet test "Tests\Tests.csproj" -c Debug --filter "FullyQualifiedName~Tests.SomeClass.SomeTest"
 ```

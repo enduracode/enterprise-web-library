@@ -64,7 +64,7 @@ partial class CreateSystem {
 		var sourceFolderPath = EwlStatics.CombinePaths( templateFolderPath, relativeFolderPath );
 		foreach( var fileName in IoMethods.GetFileNamesInFolder( sourceFolderPath ) ) {
 			var filePath = EwlStatics.CombinePaths( relativeFolderPath, fileName );
-			var destinationFilePath = EwlStatics.CombinePaths( tempFolderPath, filePath == "Solution.sln" ? "{0}.sln".FormatWith( systemName.Value ) : filePath );
+			var destinationFilePath = EwlStatics.CombinePaths( tempFolderPath, filePath == "Solution.slnx" ? "{0}.slnx".FormatWith( systemName.Value ) : filePath );
 			Directory.CreateDirectory( Path.GetDirectoryName( destinationFilePath )! );
 			File.WriteAllText(
 				destinationFilePath,

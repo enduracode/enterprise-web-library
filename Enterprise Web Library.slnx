@@ -1,0 +1,24 @@
+<Solution>
+  <Project Path="Core/Core.csproj" />
+  <Project Path="Library/Library.csproj" />
+  <Project Path="Development Utility/Development Utility.csproj" />
+  <Project Path="Website/Website.csproj" />
+  <Project Path="Tests/Tests.csproj">
+    <Build Solution="Release|*" Project="false" />
+  </Project>
+  <Folder Name="/Providers/">
+    <Project Path="Providers/MySQL/MySQL.csproj" />
+    <Project Path="Providers/Oracle Database/Oracle Database.csproj" />
+    <Project Path="Providers/SQLite/SQLite.csproj" />
+    <Project Path="Providers/OpenID Connect/OpenID Connect.csproj" />
+    <Project Path="Providers/SAML/SAML.csproj" />
+    <Project Path="Providers/PDF/PDF.csproj" />
+    <Project Path="Providers/Word/Word.csproj" />
+  </Folder>
+  <Folder Name="/Solution Files/">
+    <File Path="Solution Files/Export EWL to Local Feed.ps1" />
+    <File Path="Solution Files/nuget.exe" />
+    <File Path="Solution Files/stdLibDoxySettings.txt" />
+    <File Path="Solution Files/Update Dependent Logic.ps1" />
+  </Folder>
+</Solution>

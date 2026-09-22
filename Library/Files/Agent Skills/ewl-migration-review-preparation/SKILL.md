@@ -105,7 +105,7 @@ Git helpers are in the companion `ewl-migration-review/scripts` directory.
 # Migration Review
 
 ## Setup
-- Solution: `System.sln`
+- Solution: `System.slnx`
 - Baseline: `<full immutable Git commit hash>`
 - Comparison: Baseline -> working copy
 - Scope: ...

@@ -24,6 +24,7 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations;
 internal class UpdateDependentLogic: Operation {
 	private const string generatedCodeFolderName = "Generated Code";
 	private const string unitTestNamespaceAndAssemblyName = "Tests";
+	private const string reSharperSolutionExtension = ".sln"; // ReSharper still uses .sln.DotSettings; see https://youtrack.jetbrains.com/issue/RSRP-503582.
 	private const string azureJobDispatcherNamespaceAndAssemblyName = "AzureJobDispatcher";
 
 	private static readonly Operation instance = new UpdateDependentLogic();
@@ -1217,7 +1218,9 @@ internal class UpdateDependentLogic: Operation {
 		const string defaultSettingsFileName = $"{EwlStatics.EwlInitialism} ReSharper Settings.DotSettings";
 		if( !installation.SystemIsTewl() )
 			File.WriteAllText(
-				EwlStatics.CombinePaths( installation.GeneralLogic.Path, installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + ".sln.DotSettings" ),
+				EwlStatics.CombinePaths(
+					installation.GeneralLogic.Path,
+					installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + reSharperSolutionExtension + ".DotSettings" ),
 				$"""
 				 <wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
 				 	<s:String x:Key="/Default/Environment/InjectedLayers/FileInjectedLayer/=05EBF8F119D84B4B92F9F0399ECB948E/RelativePath/@EntryValue">..\Library\{(
@@ -1564,8 +1567,8 @@ internal class UpdateDependentLogic: Operation {
 			writer.WriteLine( "syntax: glob" );
 		writer.WriteLine();
 		writer.WriteLine( ".vs/" );
-		writer.WriteLine( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + ".sln.DotSettings" );
-		writer.WriteLine( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + ".sln.DotSettings.user" );
+		writer.WriteLine( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + reSharperSolutionExtension + ".DotSettings" );
+		writer.WriteLine( installation.ExistingInstallationLogic.RuntimeConfiguration.SystemName + reSharperSolutionExtension + ".DotSettings.user" );
 		writer.WriteLine( "opencode.jsonc" );
 		writer.WriteLine( $"{InstallationFileStatics.WebFrameworkStaticFilesFolderName}/" );
 		if( !dataMigratorProjectExists )

@@ -207,14 +207,20 @@ This ensures the `jb` command is available and current.
 
 ### Step 3: Format
 
-Run the ReSharper CleanupCode tool on the specified files. Find the `.sln` file
+Run the ReSharper CleanupCode tool on the specified files. Find the `.slnx` file
 for the system and substitute its path below. Set the command tool's timeout
 to **300000 milliseconds (five minutes)** for this invocation and the final
 formatter pass in Step 5e; do not use the default two-minute timeout.
 
 ```shell
-jb cleanupcode "<SolutionFile>.sln" --profile="Main" --include="file1.cs;file2.cs" --no-updates
+jb cleanupcode "<SolutionFile>.slnx" --profile="Main" --include="file1.cs;file2.cs" --no-updates
 ```
+
+ReSharper still uses `<SolutionFile>.sln.DotSettings` and
+`<SolutionFile>.sln.DotSettings.user` for `.slnx` solutions. Preserve these
+filenames and the injected EWL settings layers. If the `Main` profile cannot
+be found or the tool reports that no items were found to clean up, report a
+failure rather than treating the run as successful or using a built-in profile.
 
 ### Step 4: Commit formatting changes (only when requested)
 
@@ -236,7 +242,7 @@ Run the ReSharper InspectCode tool with the command tool's timeout set to
 timeout. Write the output file to the working directory using a relative path:
 
 ```shell
-jb inspectcode "<SolutionFile>.sln" --include="file1.cs;file2.cs" --severity=SUGGESTION --format=Sarif --output=inspect-results.json --no-updates
+jb inspectcode "<SolutionFile>.slnx" --include="file1.cs;file2.cs" --severity=SUGGESTION --format=Sarif --output=inspect-results.json --no-updates
 ```
 
 Parse the SARIF output for issues in the specified files, then delete the
@@ -441,7 +447,7 @@ final word on layout (including re-wrapping the long lines Step 5c
 produced).
 
 ```shell
-jb cleanupcode "<SolutionFile>.sln" --profile="Main" --include="file1.cs;file2.cs" --no-updates
+jb cleanupcode "<SolutionFile>.slnx" --profile="Main" --include="file1.cs;file2.cs" --no-updates
 ```
 
 Track which files received changes in Steps 5b through 5d. If the set is

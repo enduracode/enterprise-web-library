@@ -42,7 +42,7 @@ machine:
 
 | Label | Typical Windows location | What’s at this path |
 |---|---|---|
-| EWL source code | `%USERPROFILE%\Revision Control\EwlBill` | Contains `Enterprise Web Library.sln`, `Core\`, `Library\`, `Development Utility\` |
+| EWL source code | `%USERPROFILE%\Revision Control\EwlBill` | Contains `Enterprise Web Library.slnx`, `Core\`, `Library\`, `Development Utility\` |
 | EWL System Manager source code | `%USERPROFILE%\Revision Control\EWL System Manager` | Contains `Installation Support Utility\`, `Web Site\`, `Program Runner\`, `Data Cleaner\` |
 | EWL folder | `C:\Enterprise Web Library` | Machine-wide EWL infrastructure: `Local NuGet Feed\`, configuration, etc. |
 | EWL client systems directory | User-provided | Contains EWL client codebases; each codebase can be identified by a `dotnet-tools.json` file containing `ewl` |
