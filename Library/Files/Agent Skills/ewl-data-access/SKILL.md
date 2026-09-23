@@ -484,14 +484,89 @@ checks within the same snapshot.
 
 ## Application-level table caching
 
-Create a companion `YourDataTableEwlModifications` table containing only the
-main table's primary key column(s). This enables change-tracking cache
-invalidation so that large queries become tiny queries while never returning
-stale data.
+First inspect the generated retrieval API and the database schema to determine
+whether the particular table uses application-level memory caching. Do not infer
+it from another table in the same system, from `SmallTables`, or from ordinary
+retrieval-result caching. A generated `GetRows( Func<BasicRow, bool>? predicate )`
+and its cached-table XML documentation identify this API.
+
+To enable it, create a companion `YourDataTableEwlModifications` table containing
+only the main table's primary key column(s), with matching names and database
+types, then run DU sync. EWL uses this table to track changes and refresh its
+application-level row cache under the database snapshot. Follow existing
+companion-table migrations in the system; this is change tracking, not a second
+copy of the entity table.
 
 Requirements:
 - All modifications go through EWL-generated Modification classes
 - Database transactions use snapshot isolation
+
+### Filter cached tables through the predicate API
+
+For a table with application-level caching, prefer `GetRows( predicate: ... )`
+and filter in memory. Combine the applicable status, date, ownership, and other
+conditions in the retrieval predicate, before grouping, projecting, or counting
+the results. A request to filter at retrieval time does **not** imply pushing
+the filter into SQL when the retrieval is backed by a table cache.
+
+Use `GetRowsMatchingConditions(...)` only when filtering in code is unsuitable,
+as the generated cached-table documentation directs. Do not bypass the cache
+with SQL conditions or a custom SQL retrieval merely to filter earlier. For a
+non-cached table, use its generated SQL-condition API when appropriate; the
+presence of a per-operation query-result cache does not make it a memory-cached
+table. Cached rows are not inherently in a stable order, so order explicitly
+when the caller needs ordering.
+
+TEWL helpers can be used directly in these in-memory predicates. For example,
+`LocalDateTimeTools.IsBetween` has an inclusive beginning and exclusive end,
+and `LocalDateTimeTools.RangesOverlap` handles interval overlap. Choose the
+helper for the actual predicate rather than using overlap logic for a single
+timestamp. For an `Instant` tested against a local calendar-day range, convert
+it to `LocalDateTime` in the intended time zone and test between the local day
+boundaries. Handle nullable timestamps explicitly and do not substitute the
+server's local time zone for the business time zone.
+
+### Cache reusable predicate results in the retrieval's partial Cache
+
+The application-level table cache and the generated retrieval's `Cache.Current`
+have different purposes. The former stores table rows across operations; the
+latter belongs to the current data-access caching lifecycle. Use a hand-written
+partial `Cache` for reusable filtered collections or grouped lookups, rather
+than introducing an independent static cache.
+
+```csharp
+partial class EventsTableRetrieval {
+	private partial class Cache {
+		public readonly EnterpriseWebLibrary.Collections.Cache<( int, LocalDateTime, LocalDateTime ), IReadOnlyCollection<Row>>
+			RowsByOrganizationAndRange = new( false );
+	}
+
+	public static IReadOnlyCollection<Row> GetRowsLinkedToOrganizationAndWithinRange(
+		int organizationId, LocalDateTime begin, LocalDateTime end ) =>
+		Cache.Current.RowsByOrganizationAndRange.GetOrAdd(
+			( organizationId, begin, end ),
+			() => GetRows( predicate: i => i.OrganizationId == organizationId && i.StartDateAndTime.IsBetween( begin, end ) ).Materialize() );
+}
+```
+
+Include every variable predicate input in the cache key, including date bounds,
+status, and time zone when those are parameters. Materialize reusable result
+collections inside `GetOrAdd`. Simple one-off predicates need not gain a cache
+wrapper solely for uniformity. These caches follow the normal data-access
+lifecycle; do not add manual cache resets or enable caching around writes.
+
+Reference patterns in other EWL systems:
+
+- Scheduling Engine, `EventRevisionsTableRetrieval`: organization/status filters
+  and a date-range retrieval using `LocalDateTimeTools.RangesOverlap`, cached by
+  organization and both date boundaries.
+- Scheduling Engine, `ExcludedDateRevisionsTableRetrieval`: a predicate using a
+  related event-ID set, plus a cached `ILookup` built from the filtered rows.
+- Scheduling Engine, `UsersTableRetrieval`: simple direct predicates for active
+  users and email lookup without an extra hand-written result cache.
+- RLE Link, `AffiliationEventsTableRetrieval`: cached predicates for one ID or a
+  set of IDs, with `HashSet<T>.CreateSetComparer()` for the set-valued key. Do not
+  mutate a set after using it as a cache key.
 
 ## Revision history
 
