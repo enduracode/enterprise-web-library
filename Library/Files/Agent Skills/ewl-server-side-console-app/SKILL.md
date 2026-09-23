@@ -98,11 +98,12 @@ partial class Program {
 		var userId = int.Parse( arguments[ 1 ] );
 		var filePath = arguments[ 2 ];
 
-		DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen(
-			() => DataAccessState.Current.PrimaryDatabaseConnection.ExecuteInTransaction( () => {
-				// Perform bulk operations here
-				// Parse files, import records, send emails, etc.
-			} ) );
+		AutomaticDatabaseConnectionManager.ExecuteWithAutomaticDatabaseConnections( () => {
+			// Read and prepare data here; retrieval caching is enabled.
+			AutomaticDatabaseConnectionManager.Current.ExecuteWithModificationsEnabled( () => {
+				// Apply database changes and queue completion emails here.
+			} );
+		} );
 	}
 }
 ```
@@ -110,6 +111,11 @@ partial class Program {
 The `arguments` list is strongly typed as `IReadOnlyList<string>`. Parse each
 positional argument as needed. The full EWL data access layer is available,
 including table retrievals, modifications, and email.
+
+Use automatic connection management by default. Manual open-connection and
+transaction wrappers in older workers are legacy examples. See
+`ewl-data-access`, “Automatic transactions in services and console apps”, for
+commit boundaries, narrow modification scopes, and deferred email delivery.
 
 ## Generated starter method
 
@@ -220,35 +226,17 @@ JSON arguments line. Use it for large data that does not fit in arguments.
 
 ## Error handling and notifications
 
-The worker runs as a separate process with its own EWL initialization. Use
-standard EWL patterns for error handling and email notifications:
+The worker runs as a separate process with its own EWL initialization. Queue
+success emails inside `ExecuteWithModificationsEnabled`; normal EWL email
+delivery is deferred until the outer automatic scope commits. Exceptions that
+escape the operation roll back its transactions and discard queued emails.
 
-```csharp
-static partial void ewlMain( IReadOnlyList<string> arguments ) {
-	DataAccessState.Current.PrimaryDatabaseConnection.ExecuteWithConnectionOpen(
-		() => DataAccessState.Current.PrimaryDatabaseConnection.ExecuteInTransaction( () => {
-			// Process data, collect errors
-			var errors = new List<DataValidationError>();
-			processRecords( errors );
-
-			// Send result email
-			var message = new EmailMessage();
-			message.ToAddresses.Add( new EmailAddress( user.EmailAddress, user.FriendlyName ) );
-			message.Subject = errors.Any() ? "Import failed" : "Import succeeded";
-			message.BodyHtml = buildResultHtml( errors );
-			GlobalStatics.SendEmail( message );
-
-			// Roll back transaction on failure
-			if( errors.Any() )
-				throw new DoNotCommitException();
-		}, createSavepointIfAlreadyInTransaction: true ) );
-}
-```
-
-The `DoNotCommitException` pattern rolls back the transaction so no partial
-data is committed, while still allowing the email to be sent before the
-rollback (if using a non-transactional email method) or by sending the email
-outside the transaction scope.
+If an import must notify the user of failure, handle that failure after the
+failed automatic scope has finished rolling back. Send the failure notification
+outside that scope, or use a new automatic scope and a narrow modification
+scope to queue it. Do not queue an email in a transaction that will roll back
+and expect the notification to survive. Preserve standard application error
+reporting rather than silently swallowing unexpected exceptions.
 
 ## Run Sync
 
