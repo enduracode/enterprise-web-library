@@ -8,9 +8,7 @@ namespace EnterpriseWebLibrary.Providers;
 public class BlobStorage: SystemBlobStorageProvider {
 	public const int FileCollectionManagerCollectionId = 1;
 
-	IEnumerable<(int blobId, byte[] hash)> SystemBlobStorageProvider.GetBlobHashes() {
-		throw new NotSupportedException();
-	}
+	IEnumerable<(int blobId, byte[] hash)> SystemBlobStorageProvider.GetBlobHashes() => [ ];
 
 	byte[] SystemBlobStorageProvider.GetBlob( int blobId ) {
 		throw new NotSupportedException();
@@ -24,9 +22,7 @@ public class BlobStorage: SystemBlobStorageProvider {
 		throw new NotSupportedException();
 	}
 
-	IEnumerable<int> SystemBlobStorageProvider.GetReferencedBlobIds() {
-		throw new NotSupportedException();
-	}
+	IEnumerable<int> SystemBlobStorageProvider.GetReferencedBlobIds() => [ ];
 
 	int SystemBlobStorageProvider.GetReferencedBlobId( int referenceId ) {
 		throw new NotSupportedException();
