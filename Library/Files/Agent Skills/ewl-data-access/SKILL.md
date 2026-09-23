@@ -75,6 +75,16 @@ hand-written partial `Row` classes. Separate types remain appropriate for
 distinct concepts, aggregations, and external contracts. Preserve access
 checks, null/default semantics, trimming, and ordering during replacement.
 
+### Lookup and dictionary naming
+
+Name lookup and dictionary variables and fields for their values followed by
+`By<Key>`, such as `submissionsByFormId`, `leadsByStorefrontId`, or
+`countsByStatusId`. Make the indexing key explicit rather than naming the
+variable as though it were an ungrouped collection. Apply this to both local
+groupings and cached retrieval results, following normal local-variable and
+member casing conventions. This matches patterns such as RLE Link's
+`allPersonTasksByUserId` and Scheduling Engine's `AllRowsByOrganizationId`.
+
 ## Custom retrievals
 
 When table retrievals do not express a join, projection, aggregate, or legacy
@@ -436,6 +446,12 @@ partial class ServiceOrdersTableRetrieval {
 
 ## Transactions and retrieval caching
 
+Use automatic database connection management by default throughout application
+code, including services and console apps. Existing service code using
+`ExecuteWithConnectionOpen` and `ExecuteInTransaction` is legacy, not a pattern
+to copy into new code. Manual connection/transaction management requires a
+concrete task-specific reason.
+
 EWL's normal data-access model uses a consistent database snapshot for the
 unit of work. `AutomaticDatabaseConnectionManager` owns a `DataAccessState`
 and lazily opens connections and begins automatic transactions. SQL Server
@@ -463,13 +479,13 @@ state. The framework generally manages cache and transaction boundaries:
   databases have separate transactions, not one globally atomic snapshot.
 
 Do not add manual `ExecuteWithCache` blocks or ad hoc cache resets to normal
-web request handling. Other application types sometimes explicitly create
-read-only `DataAccessState.Current.ExecuteWithCache(...)` blocks; those blocks
-enable retrieval caching, **not** a database transaction. Coordinate them
-with the application's transaction lifetime, exclude modifications, and do
-not reuse cached results across transaction boundaries. Nested cache blocks
-reuse the existing cache. Where an automatic connection manager is used,
-`ExecuteWithModificationsEnabled` provides the write/cache lifecycle.
+automatic-connection scopes. These scopes already enable retrieval caching;
+`ExecuteWithModificationsEnabled` provides the write/cache lifecycle. Legacy
+code may explicitly use read-only `DataAccessState.Current.ExecuteWithCache(...)`
+blocks. Those enable caching, **not** a database transaction. Coordinate them
+with the transaction lifetime, exclude modifications, and do not reuse cached
+results across transaction boundaries. Nested cache blocks reuse the existing
+cache.
 
 Stored procedures, raw SQL, and external-process writes do not independently
 invalidate arbitrary generated query caches. Use the normal modification
@@ -481,6 +497,45 @@ to use handwritten retrievals. Snapshot isolation and cached reads do not
 by themselves enforce every concurrency invariant; use the appropriate
 database constraints and transactional design rather than repeated “fresh”
 checks within the same snapshot.
+
+### Automatic transactions in services and console apps
+
+For standalone operations, use
+`AutomaticDatabaseConnectionManager.ExecuteWithAutomaticDatabaseConnections`.
+Place this scope outside existing manually opened connection blocks; it owns
+its own data-access state and lazily opens and cleans up its connections and
+transactions. In framework-managed contexts such as web requests, use the
+existing manager rather than creating a nested one.
+
+Perform reads and message construction directly in the automatic scope, where
+retrieval caching is enabled by default. Use narrow
+`AutomaticDatabaseConnectionManager.Current.ExecuteWithModificationsEnabled`
+calls for database modifications or calls that queue external effects. Avoid
+wrapping an entire read-oriented operation in a modification scope and then
+explicitly re-enabling caching merely for its reads.
+
+```csharp
+AutomaticDatabaseConnectionManager.ExecuteWithAutomaticDatabaseConnections( () => {
+	var message = createReportMessage();
+
+	AutomaticDatabaseConnectionManager.Current.ExecuteWithModificationsEnabled(
+		() => EmailStatics.SendEmailWithDefaultFromAddress( message ) );
+} );
+```
+
+Normal EWL email sending automatically queues delivery when an automatic
+manager exists. The send call must run with modifications enabled even when
+there are no database writes, because registering the non-transactional action
+requires that phase. Actual delivery occurs after the **outer automatic scope**
+commits its transactions, not when the inner modification scope exits; rollback
+discards queued delivery. Developer-notification emails bypass this deferral.
+Arbitrary HTTP calls and other external effects are not automatically deferred;
+use `AddNonTransactionalModificationMethod` where appropriate.
+
+Choose each outer scope to match the intended commit boundary. In particular,
+do not replace separately committed per-item work with one large scope around
+an entire service tick: modification scopes inside it do not independently
+commit the outer transaction.
 
 ## Application-level table caching
 
