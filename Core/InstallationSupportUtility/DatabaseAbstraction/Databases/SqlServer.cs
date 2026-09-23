@@ -267,7 +267,8 @@ LOG ON (
 						containerFiles.Add( name );
 					}
 				}
-			} );
+			},
+			isLongRunning: true );
 		if( dataFile.Length == 0 )
 			throw new UserCorrectableException( "The database does not contain a data file." );
 		if( logFile.Length == 0 )
