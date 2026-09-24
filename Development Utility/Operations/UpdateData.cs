@@ -20,6 +20,9 @@ internal class UpdateData: Operation {
 	bool Operation.IsValid( Installation installation ) => installation is DevelopmentInstallation;
 
 	void Operation.Execute( Installation genericInstallation, IReadOnlyList<string> arguments, OperationResult operationResult ) {
+		if( arguments.Count != 2 )
+			throw new UserCorrectableException( "The operation requires a source name (or Default) and a True/False for whether to force a new package download." );
+
 		var installation = (DevelopmentInstallation)genericInstallation;
 
 		var sourceName = arguments[ 0 ];

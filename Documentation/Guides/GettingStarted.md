@@ -43,7 +43,7 @@ For servers, the only requirement is Windows Server 2019 or later with IIS enabl
 
 	* For Oracle, use `<database xsi:type="OracleDatabase">` with the `<tnsName>`, `<userAndSchema>`, and `<password>` child elements. Name your schema whatever you like. We have no convention. The MySQL convention may work.
 
-2.	In the Terminal, run `dotnet ewl update-data`. This will create (or re-create) the database.
+2.	In the Terminal, run `dotnet ewl update-data Default False`. This will create (or re-create) the database.
 
 3.	Add the `<database>` element to the development configuration file (i.e. `Library/Configuration/Development.xml`) after the `<webProjects>` element.
 
