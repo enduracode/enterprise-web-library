@@ -35,6 +35,8 @@ Find the actual solution and test projects before running commands. The names be
 
 Tests created solely for task verification should generally be throwaway. Run them, report the results, then remove only the test code and scaffolding introduced for that verification. Preserve existing tests and user work. Avoid leaving new test projects, solution entries, dependencies, or production APIs added only to support a temporary harness; restore temporary generation inputs and regenerate affected output when necessary. Retain new regression tests when explicitly requested or when there is a clear ongoing need, rather than treating every verification check as a permanent addition. Throwaway tests do not need abstraction review or cleanup inspections.
 
+**Development email stays local.** In an EWL `Development` installation, `EmailStatics` writes messages to `Outgoing Dev Mail` under `ConfigurationStatics.EwlFolderPath` using SMTP pickup-directory delivery; it does not deliver them to real recipients over the network. Do not avoid an otherwise in-scope email test or request extra approval solely because the recipient addresses are real. The action can still modify application data. This behavior applies to EWL email sending, not independent SMTP/HTTP integrations or Intermediate/Live installations. See `ewl-web-testing` for checking generated messages.
+
 ```shell
 dotnet restore "Solution Name.slnx"
 dotnet build "Solution Name.slnx"

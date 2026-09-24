@@ -158,6 +158,19 @@ ASCII or curly apostrophes in the email label. Use `changingUser: true` for an
 existing impersonation session (button “Change User” rather than “Begin
 Impersonation”). Confirm the resulting identity and page, not just the click.
 
+### Development email tests
+
+EWL `EmailStatics` does not send network email in a `Development` installation.
+It writes `.eml` messages to `Outgoing Dev Mail` under
+`ConfigurationStatics.EwlFolderPath` (normally `C:\Enterprise Web Library`).
+Real recipient addresses in these local messages are not a reason to skip an
+in-scope email flow or ask for separate permission. Exercise the action and
+verify the newly generated message, including recipients, subject, body, and
+attachments as relevant. Track test-created messages and remove only those
+during cleanup. Account for the action's database changes as usual. Do not infer
+this behavior for Intermediate/Live installations or direct SMTP/HTTP code that
+bypasses EWL. The implementation is `Core/Email/EmailStatics.cs`.
+
 ### EWL interactions and helper methods
 
 | Task | Pattern |
