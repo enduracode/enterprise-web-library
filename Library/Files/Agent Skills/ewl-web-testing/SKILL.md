@@ -191,6 +191,32 @@ First/Nth to resolve ambiguity. Indices are acceptable only when the scenario
 explicitly identifies the corresponding collection/order. Wait for navigation
 or an expected visible result after submission, then capture screenshots.
 
+### Date controls
+
+The current EWL `DateControl` renders a Duet custom element,
+`duet-date-picker.ewfDc`, not a jQuery `input.hasDatepicker`. Scope that locator to
+the intended form item when several dates appear on a page. Finding or counting
+these elements verifies rendering only; it does not verify date validation.
+
+EWL initializes the picker asynchronously. Before interacting, wait for
+`customElements.whenDefined('duet-date-picker')` and the selected element's
+`componentOnReady()`. Its `identifier` attribute identifies the actual text
+input. The current adapter displays and parses `m/d/yyyy`; the custom element's
+`value`, `min`, and `max` attributes use ISO dates.
+
+For typed-date and invalid-date tests, fill the actual text input. EWL deliberately
+submits that input's text rather than the picker's hidden/ISO value, allowing
+invalid text to round-trip through server validation. Merely setting the custom
+element's `value` or a hidden field does not exercise that path. Calendar-selection
+flows and page-modification behavior also involve the `duetChange` event; use the
+picker UI when that behavior is the subject of the test.
+
+Submit the relevant form and assert validation messages or persisted values to
+claim validation coverage. Date-control rendering, `LocalDate` type checks, and
+database leap-day/DST-date round-trips are distinct checks. Inspect
+`Core/EnterpriseWebFramework/Form Controls/Date and Time/DateControlSetup.cs` when
+selectors, initialization, or submission behavior differ from these details.
+
 ### Testing browser caching
 
 Keep the **same browser context alive** across initial retrieval, replacement,
