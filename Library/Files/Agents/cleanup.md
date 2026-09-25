@@ -161,6 +161,10 @@ Do NOT retry `ewl-fix-typography` to "correct" a prior call. Do NOT use
 the `edit` tool to bulk-undo. The primary agent or user owns the recovery
 decision.
 
+CleanupCode diagnostic output is not itself a failure; use the exit-code
+policy in Step 3. A zero-exit run must not be blocked from Step 4 merely
+because stdout or stderr contains warnings, errors, or exception stack traces.
+
 ## Workflow
 
 You will be invoked with a list of file paths. First perform the defensive
@@ -225,8 +229,23 @@ jb cleanupcode "<SolutionFile>.slnx" --profile="Main" --include="file1.cs;file2.
 ReSharper still uses `<SolutionFile>.sln.DotSettings` and
 `<SolutionFile>.sln.DotSettings.user` for `.slnx` solutions. Preserve these
 filenames and the injected EWL settings layers. If the `Main` profile cannot
-be found or the tool reports that no items were found to clean up, report a
-failure rather than treating the run as successful or using a built-in profile.
+be found, do not substitute a built-in profile.
+
+**Use the process exit code to determine CleanupCode success**, for both this
+step and the final format pass in Step 5e. Capture it immediately after the
+command (`$LASTEXITCODE` in PowerShell), before running another native command.
+Exit code 0 means continue normally, including the requested formatting-only
+commit in Step 4. Do not classify the run as failed, retry it, skip the commit,
+or change cleanup profiles based on stdout/stderr diagnostic text, even when
+it contains errors or exception stack traces. Keep the output available for
+diagnosis, but do not treat it as an additional success/failure signal.
+
+On a nonzero exit code, timeout, or failure to launch, stop and report; do not
+commit partial output. CleanupCode 2026.2.2 returns 1 for a missing profile
+and 3 when no items match. It can emit `Cannot get PsiServices. Likely invalid
+element.` with exit code 0; an identical-input test produced byte-identical
+output to Visual Studio ReSharper despite that diagnostic. This policy does
+not relax file-scope or version-control safety checks.
 
 ### Step 4: Commit formatting changes (only when requested)
 
