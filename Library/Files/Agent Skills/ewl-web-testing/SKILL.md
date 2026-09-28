@@ -78,7 +78,7 @@ the caller’s previous environment value afterward.
 
 ## 2. Discover application URL and start servers
 
-Distinguish the **server origin** (e.g. `https://localhost:44310`) from the
+Distinguish the **server origin** (e.g. `https://localhost:8700`) from the
 **canonical application base URL** (which may include an IIS-style path base).
 Read the launch profile and installation config, then confirm redirects and
 generated links in the running app before constructing resource URLs. Preserve

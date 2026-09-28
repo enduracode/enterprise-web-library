@@ -870,11 +870,12 @@ internal class UpdateDependentLogic: Operation {
 		}
 
 		Directory.CreateDirectory( EwlStatics.CombinePaths( application.Path, "Properties" ) );
+		var kestrelPorts = WebApplication.GetKestrelPorts( index );
 		File.WriteAllText(
 			EwlStatics.CombinePaths( application.Path, "Properties/launchSettings.json" ),
 			File.ReadAllText( EwlStatics.CombinePaths( configurationFilesFolderPath, "launchSettings.json" ) )
-				.Replace( "@@NonsecurePort", ( 44311 + index * 2 ).ToString() )
-				.Replace( "@@SecurePort", ( 44310 + index * 2 ).ToString() )
+				.Replace( "@@NonsecurePort", kestrelPorts.nonsecure.ToString() )
+				.Replace( "@@SecurePort", kestrelPorts.secure.ToString() )
 				.Replace(
 					"@@Path",
 					installation.ExistingInstallationLogic.RuntimeConfiguration.SystemShortName +

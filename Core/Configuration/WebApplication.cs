@@ -18,6 +18,14 @@ public class WebApplication {
 	public const string DebugLogFileName = "Debug Log.db";
 
 	/// <summary>
+	/// Development Utility and private use only.
+	/// </summary>
+	public static ( int nonsecure, int secure ) GetKestrelPorts( int applicationIndex ) {
+		var secure = 8700 + applicationIndex * 2; // Avoid 44300–44399, which VS uses for Hot Reload.
+		return ( secure + 1, secure );
+	}
+
+	/// <summary>
 	/// Development Utility and internal use only.
 	/// </summary>
 	public readonly string Name;
@@ -47,12 +55,13 @@ public class WebApplication {
 
 		var userFilePath = EwlStatics.CombinePaths( Path, name + ".csproj.user" );
 		UsesKestrel = !File.Exists( userFilePath ) || File.ReadAllText( userFilePath ).Contains( "<ActiveDebugProfile>Kestrel</ActiveDebugProfile>" );
+		var kestrelPorts = GetKestrelPorts( index );
 
 		// We must pass values for all components since we will not have defaults to fall back on when getting the URL string for this object.
 		DefaultBaseUrl = new BaseUrl(
 			"localhost",
-			UsesKestrel.Value ? 44311 + index * 2 : 80,
-			UsesKestrel.Value ? 44310 + index * 2 : 443,
+			UsesKestrel.Value ? kestrelPorts.nonsecure : 80,
+			UsesKestrel.Value ? kestrelPorts.secure : 443,
 			systemShortName + ( systemHasMultipleWebApplications ? name.EnglishToPascal() : "" ) );
 
 		var cookieAttributes = configuration.DefaultCookieAttributes;
