@@ -14,10 +14,11 @@ provided by these libraries.
 ## How to Use This Inventory
 
 1. When reviewing a diff, look for BCL type names in the "Underlying APIs"
-   column. If an added line references one of those types, check whether the
+   column. If an in-scope expression or statement references one of those types, check whether the
    corresponding EWL/TEWL class provides a method that covers the use case.
 2. To make a specific recommendation, use the WebFetch tool to examine the
-   source file of the matching class on GitHub:
+   source file of the matching class on GitHub, or inspect available local
+   EWL/TEWL source (particularly for newer APIs or stale remote paths):
    - **TEWL**: `https://raw.githubusercontent.com/enduracode/tewl/integration/Tewl/{path}`
      (e.g. `.../Tewl/Tools/StringTools.cs`, `.../Tewl/IO/IoMethods.cs`)
    - **EWL Core**: `https://raw.githubusercontent.com/enduracode/enterprise-web-library/branch/default/Core/{path}`
@@ -224,14 +225,39 @@ abstractions. Agents frequently reinvent them manually.
 
 ## Code Pattern Triggers
 
-These patterns cannot be identified by BCL type matching alone. Flag them when
-they appear in added lines.
+These patterns cannot be identified by BCL type matching alone. Check them in
+added or modified expressions and statements, including unchanged lines within
+the same expression or statement. Do not flag unrelated pre-existing issues in
+adjacent statements; a changed enclosing block does not put its entire body in
+scope. These recommendations may use BCL methods or simpler overloads as well as
+TEWL/EWL abstractions.
 
 | Code Pattern | Replacement | Class | Notes |
 |---|---|---|---|
 | Enumerable `.ToArray()` or `.ToList()` | `.Materialize()` or `.MaterializeAsList()` | CollectionTools | Inspect consumers and collection contracts using the guidance below; do not require a concrete array or mutable list solely to materialize a sequence. |
-| `.Append(a).Append(b)` (multiple chained `.Append` calls on a sequence) | `.ConcatItems( a, b )` | CollectionTools | Only suggest when multiple individual items are appended in a chain and it won't hurt readability. A single `.Append(item)` is fine as-is and should not be replaced. Mixed `.Append`/`.Concat` chains cannot use `ConcatItems` — leave them alone. |
+| `.Concat( [ a, b ] )` (explicitly listed individual items, without spreads) | `.Append( a ).Append( b )` | Enumerable | Prefer chained `Append` calls; preserve existing `Append` chains and `ConcatItems` usages. See sequence-composition guidance below. |
+| `.ToCollection()` passed to a method or used to start a chain | Pass the item directly or use a single-object extension method | Receiving API / extension methods | Verify an equivalent compatible overload exists; preserve required collection wrapping. |
 | `"\n"`, `"\r\n"`, `Environment.NewLine` | `Newline` (etc.) | NewlineConstants | Available via static using in EWL systems |
+
+### Sequence composition and single-item wrapping
+
+- When adding individual items to an existing sequence, prefer chained `Append`
+  calls over `Concat` with an explicit-item collection expression. A single item
+  uses one `Append` call. Do not introduce or recommend `ConcatItems`; preserve
+  existing usages without flagging them, including within changed expressions.
+- Use `Concat` when adding another sequence, including collection expressions
+  containing spreads. Preserve mixed `Append`/`Concat` chains. Do not flag
+  standalone collection expressions such as a return value or method argument
+  merely because their items could be assembled with `Append` calls.
+- For each in-scope `.ToCollection()`, inspect the actual receiving overloads and
+  applicable extension methods. For example, `page.Add( component.ToCollection() )`
+  can become `page.Add( component )` when `Add( FlowComponent )` is available.
+  A chain such as `pattern.ToCollection().Append( otherPattern )` can start with
+  `pattern.Append( otherPattern )` when the single-object EWL helper exists.
+- Verify type compatibility, overload resolution, and equivalent behavior rather
+  than assuming every API has a single-item overload. Keep wrapping when the
+  consumer requires a collection or removing it changes semantics. Report the
+  specific supported overload or extension method, not a speculative removal.
 
 ### Collection materialization and contracts
 

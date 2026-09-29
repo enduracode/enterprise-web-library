@@ -185,6 +185,8 @@ Non-EWL agents, skills, tools, and system-specific commands outside these owned 
 - **`IReadOnlyCollection<T>`** preferred over `List<T>` for return types
 - **Tuples** for multi-return values: `( bool secure, string host, int port, string path )`
 - Extension methods used heavily: `.ToCollection()`, `.Materialize()`, `.Any()`
+- When adding individual items to a sequence, prefer chained `.Append(...)` calls over introducing `.ConcatItems(...)` or `.Concat( [ a, b ] )`. Preserve existing `ConcatItems` usages. Use `Concat` for another sequence, including collection expressions containing spreads; preserve mixed `Append`/`Concat` chains. This preference does not apply to standalone collection expressions.
+- Avoid unnecessary `.ToCollection()` calls: pass the item directly when an equivalent single-item overload exists, or use a single-object extension method to start a chain when available. Verify overload compatibility and behavior; keep wrapping when the consumer requires a collection.
 
 ### Error Handling
 
