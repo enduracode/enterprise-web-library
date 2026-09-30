@@ -9,8 +9,8 @@ This skill bootstraps opencode’s **global** configuration on a new Windows
 development machine for Enterprise Web Library (EWL) work. It creates (or
 updates) two files in the user’s global opencode config directory:
 
-1. `AGENTS.md` -- a short instruction block listing the key EWL locations on
-   the machine and how to find other EWL codebases.
+1. `AGENTS.md` -- instructions listing the key EWL locations on the machine,
+   how to find other EWL codebases, and the personal-browser isolation rule.
 2. `opencode.jsonc` -- an `external_directory` permission map granting
    access to those locations.
 
@@ -107,12 +107,20 @@ If looking for something possibly involving the Enterprise Web Library (EWL), ch
 - EWL System Manager source code: `<resolved ESM path>`
 - EWL folder: `<resolved EWL folder path>`
 - EWL client systems: `<resolved EWL client systems path>`. When the user asks how other EWL systems do something, or which systems implement an EWL feature, search this directory recursively for `dotnet-tools.json` files containing `ewl` and inspect the matching codebases.
+
+## Personal browser isolation
+
+Use only automation browsers launched with dedicated, disposable profiles. Never access or reuse personal browser profiles, cookies, saved credentials, password-manager sessions, or authentication state through any tool or subprocess. Never attach to or control an existing personal browser through debugging protocols, extensions, desktop automation, accessibility APIs, or simulated input. If a task requires access to a personal browser session, ask the user to perform that step themselves. For EWL web testing, follow the web-testing skill’s fresh-browser workflow.
 ```
 
 If a previous version of this block is already in the file, replace it with
 the freshly resolved version. If the file has unrelated content, merge by
 appending the block at the end (with a blank line separator) after
 confirming with the user.
+
+When upgrading an existing installation, add or update the personal-browser
+isolation section without duplicating it or removing the existing EWL locations.
+This is behavioral guidance, not an OS sandbox or a shell permission rule.
 
 ## Step 5: Write `opencode.jsonc`
 
@@ -199,3 +207,8 @@ systems on the machine. If the read or search proceeds with no
 also be visible: it is injected at the top of the system prompt of every
 session as `Instructions from:
 C:\Users\<name>\.config\opencode\AGENTS.md` followed by the file contents.
+
+Also ask the fresh session how it would test an authenticated local application
+when the personal browser is already signed in. It should choose a fresh test
+browser and separate test authentication, not reuse the personal session. Verify
+this from its response without opening or inspecting any personal browser data.
