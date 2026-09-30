@@ -30,7 +30,7 @@ and others, but this subagent operates only on C# and XML/XSD files.
   Do not make any changes beyond what the R# tool identifies. Do not remove
   blank lines, rewrite code, or make stylistic changes on your own.
 - **Post-format exceptions are mandatory.** Step 3a restores the migration
-  skill’s fluent layout and the original end-of-file newline state after
+  skill’s fluent layout and preserves ReSharper’s end-of-file newline state after
   every successful formatter pass, including format-only invocations. These
   narrowly scoped whitespace edits are permitted independently of inspections.
 - **Typography corrections are a separate step** and follow different rules
@@ -226,15 +226,6 @@ This ensures the `jb` command is available and current.
 
 ### Step 3: Format
 
-Before the first formatter pass, record each input file’s number of trailing
-newlines (including zero for no final newline; count CRLF as one newline).
-Retain this baseline
-through the entire invocation; do not replace it with the state left by a
-formatter or an edit tool. BOM and line-ending style belong to the existing
-editor/plugins: `ensure-utf8-bom` adds the BOM and `normalize-line-endings`
-normalizes to CRLF. Do not audit, normalize, or undo their work. The latter
-does not remove an extra trailing newline; checking its count is still needed.
-
 Run the ReSharper CleanupCode tool on the specified files. Find the `.slnx` file
 for the system and substitute its path below. Set the command tool's timeout
 to **300000 milliseconds (five minutes)** for this invocation and the final
@@ -272,6 +263,18 @@ Step 3 and Step 5e. It is part of formatting, so it also runs before a
 formatting-only commit. Do not run CleanupCode again solely because this
 step changed a file; that would undo the layout and create a formatting loop.
 
+Before any post-format edits, record each formatted file’s resulting number
+of trailing newlines (including zero for no final newline; count CRLF as one
+newline). This post-ReSharper result is the baseline for this pass. Never
+restore the pre-format state: if ReSharper removed a final newline, it must
+stay removed. Capture a fresh baseline each time this step runs, including
+after the final formatter pass in Step 5e.
+
+BOM and line-ending style belong to the existing editor/plugins:
+`ensure-utf8-bom` adds the BOM and `normalize-line-endings` normalizes to CRLF.
+Do not audit, normalize, or undo their work. The latter does not remove an
+extra trailing newline; checking its count is still needed.
+
 For input C# files defining FluentMigrator migrations, load
 `ewl-database-migration` and apply its fluent-layout rules. Detect these by
 their migration classes/API usage, not solely a folder name. In particular:
@@ -296,11 +299,12 @@ Create.Table( "Files" ).InSchema( "dbo" )
 ```
 
 Use targeted Edit operations rather than rewriting whole files. Then verify
-the original trailing newline count for
+the post-ReSharper trailing newline count for
 **all files touched by the pass**, not just migrations. Some edit tools or
 post-edit hooks add a newline after the final `}`. Do not assume a successful
 edit preserved EOF; check after edits/hooks have completed. Restore any
-changed trailing newline count to the pre-Step-3 baseline, using the file’s
+changed trailing newline count to the baseline captured immediately after
+the most recent successful formatter pass, using the file’s
 current newline style, without trimming
 other whitespace. This EOF-only restoration is an explicit exception to the
 Edit-only rule: when Edit cannot preserve EOF, use a narrowly scoped,
@@ -533,7 +537,7 @@ If any of Steps 5b, 5c, or 5d wrote to a file, re-run the ReSharper
 CleanupCode tool from Step 3 on the changed files only, then run Step 3a
 again. R# handles layout (including re-wrapping the long lines Step 5c
 produced), with Step 3a having the final word on migration fluent layout
-and preservation of the original EOF state.
+and preservation of that formatter pass’s EOF state.
 
 ```shell
 jb cleanupcode "<SolutionFile>.slnx" --profile="Main" --include="file1.cs;file2.cs" --no-updates
@@ -571,4 +575,4 @@ Always respond with a concise summary:
 8. **Final formatter pass**: "ran on N files" or "skipped (no post-format
     changes)"
 9. **Migration layout and EOF**: report layout changes/skipped constructs and
-   whether original EOF states were preserved, including any unresolved issue.
+   whether ReSharper’s EOF states were preserved, including any unresolved issue.
