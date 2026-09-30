@@ -1,7 +1,7 @@
 ---
 description: Formats and inspects files using ReSharper command-line tools, fixes typography, then commits changes to version control
 mode: subagent
-model: opencode/gpt-5.6-terra
+model: openai/gpt-6-sol
 tools:
   todowrite: false
   webfetch: false
@@ -29,6 +29,10 @@ and others, but this subagent operates only on C# and XML/XSD files.
 - **Only fix what ReSharper reports** in the inspection step.
   Do not make any changes beyond what the R# tool identifies. Do not remove
   blank lines, rewrite code, or make stylistic changes on your own.
+- **Post-format exceptions are mandatory.** Step 3a restores the migration
+  skill’s fluent layout and the original end-of-file newline state after
+  every successful formatter pass, including format-only invocations. These
+  narrowly scoped whitespace edits are permitted independently of inspections.
 - **Typography corrections are a separate step** and follow different rules
   (see Step 5d below).
 - **Never run any version-control command that modifies state**, other than
@@ -36,6 +40,11 @@ and others, but this subagent operates only on C# and XML/XSD files.
   for the full list of prohibited commands and the rationale.
 - **Never walk above the working directory.** VCS detection stops at the
   working directory as a ceiling. See "Version Control" below.
+- **Stop on a permission denial.** Do not retry denied file reads or edits
+  through shell commands or another tool. Report that the caller must launch
+  cleanup from a session rooted in the target repository with appropriate
+  permissions. A shell tool accepting a different working directory does not
+  change the agent session’s permission boundary.
 
 ## Version Control
 
@@ -217,6 +226,15 @@ This ensures the `jb` command is available and current.
 
 ### Step 3: Format
 
+Before the first formatter pass, record each input file’s number of trailing
+newlines (including zero for no final newline; count CRLF as one newline).
+Retain this baseline
+through the entire invocation; do not replace it with the state left by a
+formatter or an edit tool. BOM and line-ending style belong to the existing
+editor/plugins: `ensure-utf8-bom` adds the BOM and `normalize-line-endings`
+normalizes to CRLF. Do not audit, normalize, or undo their work. The latter
+does not remove an extra trailing newline; checking its count is still needed.
+
 Run the ReSharper CleanupCode tool on the specified files. Find the `.slnx` file
 for the system and substitute its path below. Set the command tool's timeout
 to **300000 milliseconds (five minutes)** for this invocation and the final
@@ -247,10 +265,55 @@ element.` with exit code 0; an identical-input test produced byte-identical
 output to Visual Studio ReSharper despite that diagnostic. This policy does
 not relax file-scope or version-control safety checks.
 
+### Step 3a: Restore migration layout and end-of-file state
+
+Run this step immediately after **every successful** CleanupCode pass, both
+Step 3 and Step 5e. It is part of formatting, so it also runs before a
+formatting-only commit. Do not run CleanupCode again solely because this
+step changed a file; that would undo the layout and create a formatting loop.
+
+For input C# files defining FluentMigrator migrations, load
+`ewl-database-migration` and apply its fluent-layout rules. Detect these by
+their migration classes/API usage, not solely a folder name. In particular:
+
+- Keep `Create.Table(...)` and its optional `.InSchema(...)` on one line.
+- Put each `.WithColumn(...)` and its complete following modifier chain on
+  one physical line, ending before the next `.WithColumn(...)` or the end
+  of the statement. This includes type, nullability, primary/foreign key,
+  default, and other modifiers; retain the final semicolon.
+- Preserve indentation and all tokens, arguments, and method-call order.
+  Only join whitespace between calls. Do not change SQL, string contents,
+  comments, or other fluent APIs. If joining would cross a comment,
+  directive, multiline literal, or another ambiguous construct, leave that
+  construct alone and report it for the caller rather than guessing.
+
+Example final layout, even if ReSharper splits the calls:
+
+```csharp
+Create.Table( "Files" ).InSchema( "dbo" )
+	.WithColumn( "FileId" ).AsInt32().NotNullable().PrimaryKey( "FilesPk" )
+	.WithColumn( "Name" ).AsString( 200 ).NotNullable();
+```
+
+Use targeted Edit operations rather than rewriting whole files. Then verify
+the original trailing newline count for
+**all files touched by the pass**, not just migrations. Some edit tools or
+post-edit hooks add a newline after the final `}`. Do not assume a successful
+edit preserved EOF; check after edits/hooks have completed. Restore any
+changed trailing newline count to the pre-Step-3 baseline, using the file’s
+current newline style, without trimming
+other whitespace. This EOF-only restoration is an explicit exception to the
+Edit-only rule: when Edit cannot preserve EOF, use a narrowly scoped,
+encoding-preserving file operation (for example, .NET byte APIs through
+`ewl-powershell`). Do not use `Set-Content` or `WriteAllLines`, which can add
+a newline or change encoding. Preserve all bytes before the trailing newline
+sequence, including any BOM the plugin added. Verify the resulting bytes and diff. If safe
+restoration is unavailable, stop and report before committing.
+
 ### Step 4: Commit formatting changes (only when requested)
 
 Only commit if the caller asks you to commit. If so, and if any files were
-modified by the formatter, commit ONLY the formatted files with the message
+modified by formatting (including Step 3a), commit ONLY the formatted files with the message
 `Formatted code`. Pass the exact file list on the commit command line —
 never use `.`, `--all`, `-A`, or `-a`. If no files were modified, skip the
 commit and report that no formatting changes were needed. If the caller
@@ -467,9 +530,10 @@ summary.
 #### Step 5e: Final format pass if any post-Step-3 changes occurred
 
 If any of Steps 5b, 5c, or 5d wrote to a file, re-run the ReSharper
-CleanupCode tool from Step 3 on the changed files only. This gives R# the
-final word on layout (including re-wrapping the long lines Step 5c
-produced).
+CleanupCode tool from Step 3 on the changed files only, then run Step 3a
+again. R# handles layout (including re-wrapping the long lines Step 5c
+produced), with Step 3a having the final word on migration fluent layout
+and preservation of the original EOF state.
 
 ```shell
 jb cleanupcode "<SolutionFile>.slnx" --profile="Main" --include="file1.cs;file2.cs" --no-updates
@@ -479,7 +543,7 @@ Track which files received changes in Steps 5b through 5d. If the set is
 empty, skip this step.
 
 Do NOT commit the result of this final pass. The single commit permitted by
-Step 4 has already happened (if at all) and captured only the Step 3 output.
+Step 4 has already happened (if at all) and captured only the Step 3/3a output.
 The post-Step-3 changes are left as uncommitted edits for the primary agent
 or user to inspect and commit.
 
@@ -505,4 +569,6 @@ Always respond with a concise summary:
    lines -- the final formatter pass in Step 5e may rewrap the lines they
    appear on, so specifics are not useful.
 8. **Final formatter pass**: "ran on N files" or "skipped (no post-format
-   changes)"
+    changes)"
+9. **Migration layout and EOF**: report layout changes/skipped constructs and
+   whether original EOF states were preserved, including any unresolved issue.
