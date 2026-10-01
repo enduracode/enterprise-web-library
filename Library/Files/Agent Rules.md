@@ -98,6 +98,7 @@ Follow surrounding code and system-specific conventions, with these EWL defaults
 | Private constants | camelCase | `tickInterval` |
 
 - File-scoped namespaces; `using` directives at the top, System first, then other namespaces alphabetically, without blank lines between groups.
+- At a necessary synchronous boundary (such as `SystemInitializer.CleanUpStatics`), bridge async operations with `Task.Run( async () => await operation() ).Wait()` for no result, or `.Result` for a returned value. Do not use `.GetAwaiter().GetResult()` for this bridge. Keep async callers async; use the bridge only where the calling contract is synchronous.
 - Tabs for indentation. Spaces inside parentheses and attribute brackets: `( value )`, `[ Test ]`. No spaces inside generic angle brackets: `Func<Instant>`.
 - Opening braces on the declaration line. Prefer expression-bodied members for single expressions.
 - Preserve non-ASCII typography in prose; do not convert curly quotes to straight quotes. Use the typography tool when needed, and preserve code syntax and literal data.
