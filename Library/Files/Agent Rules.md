@@ -97,6 +97,7 @@ Follow surrounding code and system-specific conventions, with these EWL defaults
 | Private fields, locals, parameters | camelCase | `organizationId` |
 | Private constants | camelCase | `tickInterval` |
 
+- Do not add an `Async` suffix solely because a method is asynchronous. Use the normal method naming conventions. Preserve names required by implemented interfaces, overrides, or external contracts (for example, `DisposeAsync`).
 - File-scoped namespaces; `using` directives at the top, System first, then other namespaces alphabetically, without blank lines between groups.
 - At a necessary synchronous boundary (such as `SystemInitializer.CleanUpStatics`), bridge async operations with `Task.Run( async () => await operation() ).Wait()` for no result, or `.Result` for a returned value. Do not use `.GetAwaiter().GetResult()` for this bridge. Keep async callers async; use the bridge only where the calling contract is synchronous.
 - Tabs for indentation. Spaces inside parentheses and attribute brackets: `( value )`, `[ Test ]`. No spaces inside generic angle brackets: `Func<Instant>`.
