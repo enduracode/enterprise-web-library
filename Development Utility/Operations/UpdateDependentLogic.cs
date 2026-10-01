@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System.Runtime.InteropServices;
+using System.Security;
+using System.Text;
 using System.Text.Json.Nodes;
 using Azure.Identity;
 using EnterpriseWebLibrary.Configuration;
@@ -23,6 +25,8 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.Operations;
 
 internal class UpdateDependentLogic: Operation {
 	private const string generatedCodeFolderName = "Generated Code";
+	private const string customSyncLogicFileName = "CustomSyncLogic.cs";
+	private const string customSyncRunnerProjectName = "Custom Sync Runner";
 	private const string unitTestNamespaceAndAssemblyName = "Tests";
 	private const string reSharperSolutionExtension = ".sln"; // ReSharper still uses .sln.DotSettings; see https://youtrack.jetbrains.com/issue/RSRP-503582.
 	private const string azureJobDispatcherNamespaceAndAssemblyName = "AzureJobDispatcher";
@@ -358,6 +362,8 @@ internal class UpdateDependentLogic: Operation {
 				_ => {},
 				runtimeIdentifier: "win-x64",
 				selfContained: true );
+		if( !installation.DevelopmentInstallationLogic.SystemIsEwl && !installation.SystemIsTewl() )
+			generateCustomSyncRunner( installation );
 		generateUnitTestProjectCode( installation );
 
 		generateXmlSchemaLogicForInstallationConfigurationFile( installation, "Custom" );
@@ -375,6 +381,9 @@ internal class UpdateDependentLogic: Operation {
 			writer.WriteLine( "</PropertyGroup>" );
 			writer.WriteLine( "</Project>" );
 		}
+		var customSyncLogicPath = EwlStatics.CombinePaths(
+			installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath,
+			customSyncLogicFileName );
 		if( !installation.DevelopmentInstallationLogic.SystemIsEwl ) {
 			using var writer = new StreamWriter(
 				EwlStatics.CombinePaths( installation.DevelopmentInstallationLogic.LibraryPath, "Directory.Build.targets" ),
@@ -387,9 +396,19 @@ internal class UpdateDependentLogic: Operation {
 				                   Condition="'$(MSBuildProjectName)'=='Library New'"
 				                  """
 				                : "";
+
+			if( !installation.SystemIsTewl() && File.Exists( customSyncLogicPath ) ) {
+				writer.WriteLine( "<ItemGroup>" );
+				var path = PathTools.NormalizePath( Path.GetRelativePath( installation.DevelopmentInstallationLogic.LibraryPath, customSyncLogicPath ) );
+				writer.WriteLine( $"""<Compile Remove="{SecurityElement.Escape( path )}" />""" );
+				writer.WriteLine( $"""<None Include="{SecurityElement.Escape( path )}"{condition} />""" );
+				writer.WriteLine( "</ItemGroup>" );
+			}
+
 			writer.WriteLine( $"""<Target Name="{EwlStatics.EwlInitialism.EnglishToPascal()}ToolRestore" BeforeTargets="CollectPackageReferences"{condition}>""" );
 			writer.WriteLine( """<Exec Command="dotnet tool restore" WorkingDirectory="$(MSBuildThisFileDirectory).." />""" );
 			writer.WriteLine( "</Target>" );
+
 			writer.WriteLine( "</Project>" );
 		}
 
@@ -405,6 +424,10 @@ internal class UpdateDependentLogic: Operation {
 				writer.WriteLine( "[*.{xml,xsd}]" );
 				writer.WriteLine( "indent_style = tab" );
 				writer.WriteLine( "tab_width = 2" );
+				if( !installation.DevelopmentInstallationLogic.SystemIsEwl && !installation.SystemIsTewl() && File.Exists( customSyncLogicPath ) ) {
+					writer.WriteLine( $"[{PathTools.NormalizePath( Path.GetRelativePath( installation.GeneralLogic.Path, customSyncLogicPath ) )}]" );
+					writer.WriteLine( "csharp_default_internal_modifier = implicit" );
+				}
 			} );
 		updateReSharperSettings( installation );
 		updateOpenCodeConfig( installation );
@@ -585,6 +608,8 @@ internal class UpdateDependentLogic: Operation {
 			if( File.Exists( EwlStatics.CombinePaths( installation.GeneralLogic.Path, ".gitignore" ) ) )
 				updateIgnoreFile( installation, true );
 		}
+
+		runCustomSyncLogic( installation );
 	}
 
 	private void generateDataMigratorProjectCode( DevelopmentInstallation installation ) {
@@ -905,6 +930,62 @@ internal class UpdateDependentLogic: Operation {
 			runtimeIdentifier: "win-x64" );
 	}
 
+	private void generateCustomSyncRunner( DevelopmentInstallation installation ) {
+		var projectPath = EwlStatics.CombinePaths( installation.GeneralLogic.Path, customSyncRunnerProjectName );
+		IoMethods.DeleteFolder( projectPath );
+
+		var logicPath = EwlStatics.CombinePaths( installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath, customSyncLogicFileName );
+		var templatePath = EwlStatics.CombinePaths(
+			installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath,
+			$"CustomSyncLogic{CodeGeneration.DataAccess.DataAccessStatics.CSharpTemplateFileExtension}" );
+		if( !File.Exists( logicPath ) ) {
+			File.WriteAllText(
+				templatePath,
+				$$"""
+				  using System.Threading.Tasks;
+
+				  // IMPORTANT: Change extension from "{{CodeGeneration.DataAccess.DataAccessStatics.CSharpTemplateFileExtension}}" to ".cs" before editing.
+				  static partial class CustomSyncLogic {
+				  	private static async Task run() {
+				  		await Task.CompletedTask;
+				  	}
+				  }
+				  """,
+				Encoding.UTF8 );
+			return;
+		}
+		IoMethods.DeleteFile( templatePath );
+
+		Directory.CreateDirectory( projectPath );
+		using( var writer = new StreamWriter( EwlStatics.CombinePaths( projectPath, $"{customSyncRunnerProjectName}.csproj" ), false, Encoding.UTF8 ) )
+			writer.WriteLine(
+				$"""
+				 <Project Sdk="Microsoft.NET.Sdk">
+
+				   <PropertyGroup>
+				     <OutputType>Exe</OutputType>
+				   </PropertyGroup>
+
+				   <ItemGroup>
+				     <Compile Include="{SecurityElement.Escape( PathTools.NormalizePath( Path.GetRelativePath( projectPath, logicPath ) ) )}" Visible="false" />
+				   </ItemGroup>
+
+				 </Project>
+				 """ );
+		generateCodeForProject(
+			installation,
+			customSyncRunnerProjectName,
+			projectPath,
+			"CustomSyncRunner",
+			writer => {
+				writer.WriteLine( "using System.Threading.Tasks;" );
+				writer.WriteLine( "static partial class CustomSyncLogic {" );
+				writer.WriteLine( "private static Task<int> Main() => CustomSyncOps.RunAsync( run );" );
+				writer.WriteLine( "}" );
+			},
+			runtimeIdentifier: RuntimeInformation.RuntimeIdentifier );
+	}
+
 	private void generateUnitTestProjectCode( DevelopmentInstallation installation ) {
 		var projectPath = EwlStatics.CombinePaths(
 			installation.GeneralLogic.Path,
@@ -1066,7 +1147,8 @@ internal class UpdateDependentLogic: Operation {
 				writer.WriteLine( "<ItemGroup>" );
 
 			if( !installation.DevelopmentInstallationLogic.SystemIsEwl && !installation.SystemIsTewl() )
-				if( projectName.Equals( "Library", StringComparison.Ordinal ) || projectName.Equals( IsuStatics.DataMigratorProjectName, StringComparison.Ordinal ) ) {
+				if( projectName.Equals( "Library", StringComparison.Ordinal ) || projectName.Equals( IsuStatics.DataMigratorProjectName, StringComparison.Ordinal ) ||
+				    projectName.Equals( customSyncRunnerProjectName, StringComparison.Ordinal ) ) {
 					const string toolPackageSuffix = ".DevelopmentUtility";
 					var toolMember = JsonNode.Parse( File.ReadAllText( EwlStatics.CombinePaths( installation.GeneralLogic.Path, "dotnet-tools.json" ) ) )![ "tools" ]!
 						.AsObject()
@@ -1575,6 +1657,7 @@ internal class UpdateDependentLogic: Operation {
 		if( !dataMigratorProjectExists )
 			writer.WriteLine( $"{IsuStatics.DataMigratorProjectName}/" );
 		writer.WriteLine( $"{IsuStatics.DataCleanerProjectName}/" );
+		writer.WriteLine( $"{customSyncRunnerProjectName}/" );
 		if( !unitTestProjectExists )
 			writer.WriteLine( $"{unitTestProject}/" );
 		writer.WriteLine( $"{AppStatics.AzureJobDispatcherProjectName}/" );
@@ -1675,5 +1758,22 @@ internal class UpdateDependentLogic: Operation {
 			if( line == regionEnd )
 				skipping = false;
 		}
+	}
+
+	private void runCustomSyncLogic( DevelopmentInstallation installation ) {
+		if( installation.DevelopmentInstallationLogic.SystemIsEwl || installation.SystemIsTewl() || !File.Exists(
+			    EwlStatics.CombinePaths( installation.ExistingInstallationLogic.RuntimeConfiguration.ConfigurationFolderPath, customSyncLogicFileName ) ) )
+			return;
+
+		Log.Information( "Running custom logic." );
+		if( TewlContrib.ProcessTools.RunProgram(
+			    "dotnet",
+			    $"run --project \"{EwlStatics.CombinePaths( installation.GeneralLogic.Path, customSyncRunnerProjectName, $"{customSyncRunnerProjectName}.csproj" )}\"",
+			    "",
+			    true ) is { Length: > 0 } output )
+			using( var reader = new StringReader( output ) )
+				for( string? line; ( line = reader.ReadLine() ) is not null; )
+					Console.WriteLine( $"  {line}" );
+		Log.Information( "Ran custom logic." );
 	}
 }

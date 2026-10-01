@@ -1,6 +1,6 @@
 ---
 name: ewl-configuration
-description: Installation custom/shared configuration, Custom.xsd, strongly typed configuration accessors, and GlobalStatics initialization. Use when adding or consuming installation settings or moving configuration loading out of domain classes.
+description: Installation custom/shared configuration, Custom.xsd, GlobalStatics initialization, and Configuration/CustomSyncLogic.cs. Use when adding or consuming installation settings, centralizing configuration loading, or adding system-specific sync steps and dependency acquisition through Custom Sync Runner.
 ---
 
 ## Centralized installation configuration
@@ -74,6 +74,30 @@ schema changes and verify the regenerated configuration types and callers,
 subject to explicit user verification waivers. Moving accessors alone does not
 require a schema change.
 
+## Custom sync logic
+
+Use the optional `Library/Configuration/CustomSyncLogic.cs` extension point for
+system-specific development preparation, such as obtaining pinned external tools
+or assets. Use the system’s actual configuration directory.
+
+Rename the generated `CustomSyncLogic.ewlt.cs` template to `CustomSyncLogic.cs`
+before editing. Preserve its global-namespace `static partial class CustomSyncLogic`
+and `private static async Task run()` signature. Keep preparation idempotent.
+
+Sync generates and executes the development-only Custom Sync Runner project.
+Edit only the handwritten logic; the runner supplies its entry point and
+configuration initialization. It is not automatically included in the solution
+or deployed. After sync, run it manually from the installation root with:
+
+```powershell
+dotnet run --project "Custom Sync Runner/Custom Sync Runner.csproj"
+```
+
+The runner provides `ConfigurationStatics` (including `FilesFolderPath` and
+`InstallationConfiguration.InstallationPath`) and stateless EWL/TEWL helpers.
+It does not reference the system’s Library or initialize application providers,
+`GlobalStatics`, database access, or telemetry. No global cleanup call is needed.
+
 ## Reference implementations
 
 - **EnduraCode Scheduling Engine:** `Library/GlobalStatics.cs` loads custom
@@ -83,6 +107,8 @@ require a schema change.
   including the `ContactFormNotificationAddress` accessor.
 - **EWL System Manager:** the same initialization pattern for shared
   configuration, exposing settings such as `OrganizationShortName`.
+  `Library/Configuration/CustomSyncLogic.cs` also demonstrates pinned HEY CLI asset
+  acquisition through Custom Sync Runner.
 - **RLE Link:** its Library initializer initializes domain statics, but no
   installation-configuration loader was found there; it is not an example of
   custom-configuration loading.
