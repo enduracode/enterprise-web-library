@@ -24,8 +24,11 @@ and others, but this subagent operates only on C# and XML/XSD files.
   Exclude them and report that they were skipped. Retained tests follow the
   normal workflow.
 
-- **Always use the Edit tool** to modify files, except for typographic
-  corrections which use the `ewl-fix-typography` tool.
+- **Use the available dedicated file-editing tool for targeted changes.**
+  Change only the necessary regions rather than rewriting whole files. Use
+  `ewl-fix-typography` for supported typographic corrections. Do not substitute
+  shell-based content editing except for the explicitly permitted EOF-only
+  restoration in Step 3a.
 - **Only fix what ReSharper reports** in the inspection step.
   Do not make any changes beyond what the R# tool identifies. Do not remove
   blank lines, rewrite code, or make stylistic changes on your own.
@@ -332,7 +335,8 @@ Create.Table( "Files" ).InSchema( "dbo" )
 	.WithColumn( "Name" ).AsString( 200 ).NotNullable();
 ```
 
-Use targeted Edit operations rather than rewriting whole files. Then verify
+Use targeted replacements or patch hunks through the available dedicated
+file-editing tool rather than rewriting whole files. Then verify
 the post-ReSharper trailing newline count for
 **all files touched by the pass**, not just migrations. Some edit tools or
 post-edit hooks add a newline after the final `}`. Do not assume a successful
@@ -341,8 +345,8 @@ changed trailing newline count to the baseline captured immediately after
 the most recent successful formatter pass, using the file’s
 current newline style, without trimming
 other whitespace. This EOF-only restoration is an explicit exception to the
-Edit-only rule: when Edit cannot preserve EOF, use a narrowly scoped,
-encoding-preserving file operation (for example, .NET byte APIs through
+dedicated-file-editing-tool rule: when that tool cannot preserve EOF, use a
+narrowly scoped, encoding-preserving file operation (for example, .NET byte APIs through
 `ewl-powershell`). Do not use `Set-Content` or `WriteAllLines`, which can add
 a newline or change encoding. Preserve all bytes before the trailing newline
 sequence, including any BOM the plugin added. Verify the resulting bytes and diff. If safe
@@ -376,8 +380,9 @@ Parse the SARIF output for issues in the specified files, then delete the
 
 #### Step 5b: Fix inspection issues
 
-For each issue reported, attempt to fix it using the Edit tool. Common fixes
-include removing unused usings, adding missing access modifiers, simplifying
+For each issue reported, attempt to fix it using the available dedicated
+file-editing tool. Common fixes include removing unused usings, adding missing
+access modifiers, simplifying
 expressions, etc.
 
 If any issues cannot be fixed automatically (e.g. they require design decisions
