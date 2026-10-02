@@ -39,7 +39,9 @@ and others, but this subagent operates only on C# and XML/XSD files.
   the single commit permitted by Step 4. See "Version control safety" below
   for the full list of prohibited commands and the rationale.
 - **Never walk above the working directory.** VCS detection stops at the
-  working directory as a ceiling. See "Version Control" below.
+  working directory as a ceiling. If repository metadata is above that ceiling,
+  use the ignore-file fallback below and let the VCS resolve its repository
+  internally from the working directory.
 - **Stop on a permission denial.** Do not retry denied file reads or edits
   through shell commands or another tool. Report that the caller must launch
   cleanup from a session rooted in the target repository with appropriate
@@ -52,18 +54,17 @@ and others, but this subagent operates only on C# and XML/XSD files.
 
 For each input file, find the VCS by walking from the **file's directory**
 upward toward (and including) the working directory. At each level, check
-whether a `.hg` or `.git` directory exists in that level.
+whether a `.hg` directory or `.git` directory/file exists in that level.
 
 1. Start at the directory containing the file.
 2. Check for `.hg` and `.git` in that directory. If `.hg` is present, the
-   file's VCS is **Mercurial**, rooted at that level. If only `.git` is
-   present, the file's VCS is **Git**, rooted at that level. `.hg` wins
-   over `.git` at the same level.
+   file's VCS is **Mercurial**, rooted at that level. If only a `.git`
+   directory or file is present, the file's VCS is **Git**, rooted at that
+   level. `.hg` wins over `.git` at the same level.
 3. If neither is present, move up one level and repeat, **but do not go
    above the working directory**. The working directory is the ceiling.
 4. If you reach (and check) the working directory without finding either,
-   stop and report "VCS not detected for `<file>` within the working
-   directory." Do NOT keep walking upward.
+   use the ignore-file fallback below. Do NOT keep walking upward.
 
 This bounded walk correctly handles nested sub-repositories. If a file lives
 inside a sub-repo (for example, a `.git` directory nested inside an outer
@@ -72,6 +73,38 @@ correct VCS for that file including for the diff in Steps 5c and 5d. Invoke
 VCS commands with the sub-repo root as the working directory (for example,
 via `hg -R <sub-repo-root>` or `git -C <sub-repo-root>`), and pass paths
 relative to that sub-repo root.
+
+### Ignore-file fallback for solution-directory sessions
+
+The session working directory may be the solution directory inside a larger
+repository. Only when the bounded metadata search finds no repository, check
+for `.gitignore` and `.hgignore` **in the working directory**, not in each
+input file’s directory:
+
+- Only `.gitignore` exists: select Git provisionally.
+- Only `.hgignore` exists: select Mercurial provisionally.
+- Both or neither exist: stop and report that VCS detection is ambiguous or
+  unavailable. Do not guess or walk above the working directory.
+
+Ignore files are hints, not proof of a repository. Confirm the provisional
+selection with a read-only command **from the working directory**:
+
+- Git: `git rev-parse --is-inside-work-tree` must succeed and return `true`.
+- Mercurial: load `ewl-mercurial`, then `hg root` must succeed.
+
+If confirmation fails, stop and report; do not try the other VCS. A repository
+path printed by the VCS may be above the working directory. Do not read that
+path, inspect its metadata, or use it as a command working directory. The VCS
+may resolve its enclosing repository internally; this does not authorize the
+agent to traverse outside its session boundary.
+
+For a confirmed fallback, use the **session working directory** as the VCS
+command directory and pass input-file paths relative to it for status, diff,
+and exact-file commits. Do not treat that directory as the repository root.
+The VCS handles the enclosing repository. Keep ReSharper commands rooted at
+the solution directory as usual. All existing clean checks, exact-file scope,
+and commit restrictions still apply, including preservation of unrelated
+staged changes.
 
 ### Do NOT walk above the working directory
 
@@ -88,9 +121,8 @@ hg -R ..\.. status
 ```
 
 External-directory access is denied at the permission layer as well, so
-these calls will fail if attempted. If your detection walk reaches the
-working directory without finding a VCS, stop and report — do not try
-harder.
+these calls will fail if attempted. If the metadata search and ignore-file
+fallback cannot confirm a VCS, stop and report — do not try harder.
 
 ### Mixed-repo input
 
@@ -98,7 +130,9 @@ If different input files resolve to different repositories (for example,
 one file in an outer Hg repo and another in an inner Git sub-repo), stop
 immediately and report the grouping (which files belong to which repo root).
 Tell the caller to re-invoke this subagent once per repo. Do not partially
-process, do not pick one repo for everything.
+process, do not pick one repo for everything. Also stop if some files use
+the working-directory fallback while others resolve to an explicit nested
+repository; these are distinct command scopes and require separate invocations.
 
 ### Mercurial-first
 
