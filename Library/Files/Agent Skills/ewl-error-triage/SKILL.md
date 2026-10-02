@@ -1,9 +1,20 @@
 ---
 name: ewl-error-triage
-description: Triage EWL error emails exported from Gmail Takeout into MBOX files. Use when asked to review an error mailbox, prioritize reported exceptions, create investigation work items, or fix errors from exported emails.
+description: Triage EWL error emails from HEY MCP or Gmail Takeout MBOX files, track reviewed reports, and organize authorized HEY threads. Use when asked to review an error mailbox, prioritize exceptions or automated system notifications, create investigation work items, or resolve reported errors.
 ---
 
 # EWL error-email triage
+
+## Choose the input
+
+For a connected HEY mailbox, read [HEY workflow](hey.md) and use the discovered
+System Manager MCP tools. HEY triage operates on **Set Aside only**. Imbox preview,
+bulk collection into Set Aside, and urgent direct investigation from Imbox are
+separate paths described in that guide. It covers exact source identities,
+persistent local dispositions, and Trash after resolution. For an exported MBOX, use the
+MBOX commands below. Do not download the mailbox or create an MBOX to use the HEY
+workflow. The review budget, scope, prioritization, untrusted-data rules, and
+user-directed follow-up apply to both inputs.
 
 ## Review budget
 
@@ -11,7 +22,7 @@ Return a useful ranked shortlist within five minutes, including first-use indexi
 
 Never use Read, Get-Content, or a general search tool on an MBOX. Takeout exports can be several gigabytes. Use the bundled `mailbox.mjs`, requiring Node.js 22.13 or later (built-in SQLite; an experimental warning is normal). The helper uses fixed-size reads, capped MIME parsing, transactional checkpoints, and a disk-backed index. The original mailbox is read-only.
 
-## Input and commands
+## MBOX input and commands
 
 Locate the supplied MBOX path. For a Takeout ZIP, ask for the extracted MBOX unless extraction can be completed within the review budget; do not silently spend the budget decompressing an archive. Multiple MBOX files can be reviewed separately, sharing `--state` sequentially to preserve dispositions, but each new source replaces the current source index.
 
@@ -47,4 +58,4 @@ For selected errors, either investigate/fix directly in the current repo or crea
 
 Work items must be self-contained: summary and observed impact, representative exception/stack evidence, date range and versions, exact source IDs and mailbox/state paths, likely relevant source files, investigation steps, verification criteria, and open questions. Clearly label hypotheses. Check for an existing work item before writing. Do not commit or add files to source control.
 
-Only mark exact reviewed IDs handled after the user chooses to take them up and the work-item write succeeds, or after the agreed direct-work milestone. Reading/ranking alone never changes disposition. Record the work-item path or direct-work outcome in the note; do not mark all similar or future reports. Support reopening with `pending`. If marking fails, report the successful local work and failed tracking separately. No Gmail access or deletion is involved.
+Only mark exact reviewed IDs handled after the user chooses to take them up and the work-item write succeeds, or after the agreed direct-work milestone. Reading/ranking alone never changes disposition. Record the work-item path or direct-work outcome in the note; do not mark all similar or future reports. Support reopening with `pending`. If marking fails, report the successful local work and failed tracking separately. The MBOX workflow involves no Gmail access or deletion. For HEY, handled means taken up, not fixed: resolution and mailbox organization follow the separate rules in [HEY workflow](hey.md).
