@@ -32,6 +32,11 @@ helper/profile paths and resolve the endpoint from trusted client configuration.
   dispositions. Existing ad hoc ledgers are historical records, not this format;
   do not rename them into `collections` to replay previous work.
 
+When changing development/live endpoints, keep historical collections bound to
+their original endpoint and create a new collection for new work. Local matching
+profiles can be reused after checking scope. Disposition continuity requires a
+verified identity/account mapping; see [Changing the MCP endpoint](hey.md#changing-the-mcp-endpoint).
+
 ## Trusted local matching profile
 
 Keep system-specific aliases and subject/sender patterns in a local JSON profile,

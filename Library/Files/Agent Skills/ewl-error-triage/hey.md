@@ -187,6 +187,43 @@ are atomic and reject unknown IDs rather than partially marking a selection.
 For collected-but-unreviewed threads, use the separate collection manifest instead
 of creating reviewed-message records just to track the move.
 
+## Changing the MCP endpoint
+
+The canonical mailbox key is `endpoint|identity:<HEY identity ID>|account:<account ID>`.
+The endpoint is part of the namespace: changing from development to live (or changing
+its URL) does not automatically reuse the old dispositions, even in the same SQLite
+file. Keep the client-side store/profile files; server enrollment is separate.
+
+When continuing the same mailbox through a new endpoint:
+
+1. Verify the new connection with normal TLS and a fresh `get_identity`. Match the
+   actual HEY identity and selected account IDs against the old namespace. Similar
+   display names, matching System Manager user IDs, or a successful tool listing are
+   not enough. Resolve any mismatch before carrying history across.
+2. Back up local state while no helper is writing. List the old namespace with
+   `hey-state.mjs list --status all`, following `nextOffset`. Keep original records
+   and historical collection ledgers; do not modify the SQLite file directly.
+3. For each exact source being carried forward, check the new namespace first.
+   Use `record` to copy a missing source’s message/topic IDs and confirmed metadata,
+   then `mark` to preserve its known disposition and work-item/resolution note. Note
+   the source namespace when marking. This carries an existing milestone; it does
+   not constitute a new review, fix, or resolution. Never overwrite a conflicting
+   target disposition merely because an older record exists—reconcile timestamps,
+   notes, and user-directed outcomes. If a source/topic mapping has changed, verify
+   it through the new connection before recording it.
+4. Treat old mailbox-action outcomes as history, not proof of current placement.
+   Reconcile any outstanding cleanup against current mailbox state before deciding
+   to perform it. Copying dispositions must not replay moves or trash operations.
+   Unseen messages and new entries in previously handled threads remain new work.
+5. Start new collection manifests at the new endpoint. Their endpoint/identity/box
+   binding is intentionally immutable; do not edit it to bypass a mismatch. Trusted
+   matching profiles can be reused after confirming the requested scope still applies.
+
+If identity verification or a transfer fails, report the old namespace and the
+remaining unmapped exact IDs. Do not treat an empty new namespace as proof that the
+mailbox has never been reviewed. Detailed triage can resume after the transition is
+explicitly accounted for, with partial migration disclosed.
+
 ## Set Aside and Trash
 
 Reading/ranking alone changes neither handled/resolved status nor mailbox placement.
