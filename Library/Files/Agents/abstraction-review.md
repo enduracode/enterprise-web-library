@@ -1,7 +1,7 @@
 ---
 description: Reviews changed code for missed TEWL and EWL abstractions, unnecessary collection wrapping, and collection-composition conventions
 mode: subagent
-model: openai/gpt-6-sol
+model: openai/gpt-6.1-sol
 tools:
   todowrite: false
   task: false

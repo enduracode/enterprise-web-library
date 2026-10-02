@@ -1,7 +1,7 @@
 ---
 description: Formats and inspects files using ReSharper command-line tools, fixes typography, then commits changes to version control
 mode: subagent
-model: openai/gpt-6-sol
+model: openai/gpt-6.1-sol
 tools:
   todowrite: false
   webfetch: false
