@@ -40,6 +40,13 @@ milestone and exact-ID tracking, but do not force the report through the triage 
 
 ## Imbox collection without prior triage
 
+Use the bundled [collection helper](hey-collect.md) for discovery, paced moves,
+reconciliation, bounded summaries, and final auditing. It uses the System Manager
+MCP endpoint, honors the local EWL folder, and separates collection metadata from
+reviewed-message dispositions. Do not rebuild a one-off bulk mover for each flood.
+Keep verified aliases and subject/sender patterns in trusted local profiles,
+resolved from configuration/application templates rather than guessed from labels.
+
 “Move all” means all matching errors and automated **system** notifications in the
 user’s requested scope, not every Imbox thread or every automated sender. Resolve
 unclear system/sender/date criteria first. Identify candidates from sufficient
@@ -92,7 +99,10 @@ the manifest. Existing dispositions must not be reset by collection.
    in partial/truncated output are unknown, not absent. An empty confirmed queue
    means no queued reports, not permission to substitute Imbox triage.
    Start with at most 30 summaries across at most three listing/search pages in
-   total and up to five representative message reads. Filter for requested systems and
+   total and up to five representative message reads. Deliberately sample across
+   requested categories where membership evidence and budget permit: first-page
+   ordering after a large collection may conceal entire categories. Report categories
+   not reviewed. Filter for requested systems and
    error/exception/fault evidence; include automated notifications only within the
    user’s requested scope. Separate error reports from informational notifications.
    HEY does not provide the MBOX helper’s global frequency index: rank recurrence

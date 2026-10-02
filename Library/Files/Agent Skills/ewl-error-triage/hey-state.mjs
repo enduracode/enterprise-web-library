@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
+import { stateDirectory } from './hey-paths.mjs';
 
 // Metadata only. This helper has no mailbox/network access.
 function main() {
@@ -25,11 +26,7 @@ function main() {
 		if (!values[key]?.trim() || values[key].length > 2000) throw new Error(`Missing or oversized --${key}.`);
 		return values[key];
 	};
-	// Match ConfigurationStatics.Init: process environment overrides the platform default.
-	const ewlFolder = process.env.EwlFolderPath ?? (process.platform === 'win32'
-		? 'C:\\Enterprise Web Library' : '/opt/enterprise-web-library');
-	const state = values.state !== undefined ? required('state') : path.join(ewlFolder, 'Error Triage', 'HEY');
-	if (!path.isAbsolute(state)) throw new Error('--state or EwlFolderPath must resolve to an absolute directory outside source control.');
+	const state = stateDirectory(values.state);
 	const databasePath = path.join(state, 'hey-state.sqlite');
 	if (command === 'location') return { stateDirectory: state, databasePath };
 	const mailbox = required('mailbox');
