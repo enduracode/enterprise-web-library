@@ -40,7 +40,7 @@ var failures = new List<string>();
 using var playwright = await Playwright.CreateAsync();
 IBrowser? browser = null;
 IBrowserContext? context = null;
-IPage? page = null;
+IPage? page;
 IPage? activePage = null;
 var trackedPages = new HashSet<IPage>();
 string? failurePageUrl = null;
@@ -129,7 +129,16 @@ finally {
 	}
 	await File.WriteAllTextAsync(
 		Path.Combine( artifacts, "report.json" ),
-		JsonSerializer.Serialize( new { scenario, success = failures.Count == 0, failurePageUrl, failures, results }, new JsonSerializerOptions { WriteIndented = true } ) );
+		JsonSerializer.Serialize(
+			new
+				{
+					scenario,
+					success = failures.Count == 0,
+					failurePageUrl,
+					failures,
+					results
+				},
+			new JsonSerializerOptions { WriteIndented = true } ) );
 }
 foreach( var failure in failures )
 	Console.Error.WriteLine( failure );
