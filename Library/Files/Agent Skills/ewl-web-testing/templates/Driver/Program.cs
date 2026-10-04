@@ -29,7 +29,7 @@ for( var i = 0; i < args.Length; i++ )
 			throw new ArgumentException( "Unknown argument: " + args[ i ] );
 	}
 if( artifacts.Length == 0 )
-	throw new ArgumentException( "Pass --artifacts with the bootstrapped workspace path." );
+	throw new ArgumentException( "Pass --artifacts with this invocation’s unique run-artifact directory." );
 var screenshots = Path.Combine( artifacts, "screenshots" );
 Directory.CreateDirectory( screenshots );
 Directory.CreateDirectory( Path.Combine( artifacts, "run" ) );
@@ -41,13 +41,16 @@ using var playwright = await Playwright.CreateAsync();
 IBrowser? browser = null;
 IBrowserContext? context = null;
 IPage? page = null;
+IPage? activePage = null;
+var trackedPages = new HashSet<IPage>();
+string? failurePageUrl = null;
 try {
 	browser = await playwright.Chromium.LaunchAsync( new BrowserTypeLaunchOptions { Headless = headless } );
 	context = await browser.NewContextAsync(
 		          new BrowserNewContextOptions { IgnoreHTTPSErrors = true, ViewportSize = new ViewportSize { Width = 1400, Height = 900 } } );
 	page = await context.NewPageAsync();
 	page.SetDefaultTimeout( 30000 );
-	page.PageError += ( _, error ) => failures.Add( "Browser error: " + error );
+	setActivePage( page );
 
 	switch( scenario ) {
 		case "self-check":
@@ -79,23 +82,28 @@ try {
 			// Add scenario-specific assertions. HTTP 200 alone does not prove authorization or correct page content.
 			break;
 		}
-		// Add application-specific scenarios in the TEMP COPY only. Immediately record each created test ID in run/records.json
+		// Add application-specific scenarios in the TEMP COPY only. Call setActivePage before each page/user flow.
+		// Immediately record each created test ID in this invocation’s run/records.json
 		// and push its cleanup action onto cleanup. Keep the same context alive when testing browser caching.
 		default:
 			throw new ArgumentException( "Unknown scenario: " + scenario );
 	}
-	await page.ScreenshotAsync( new PageScreenshotOptions { Path = Path.Combine( screenshots, "success.png" ), FullPage = true } );
+	await activePage!.ScreenshotAsync( new PageScreenshotOptions { Path = Path.Combine( screenshots, "success.png" ), FullPage = true } );
 }
 catch( Exception exception ) {
 	failures.Add( exception.ToString() );
-	if( page is not null && !page.IsClosed )
+	failurePageUrl = activePage?.Url;
+	if( activePage is not null && !activePage.IsClosed )
 		try {
-			await page.ScreenshotAsync( new PageScreenshotOptions { Path = Path.Combine( screenshots, "failure.png" ), FullPage = true } );
-			await File.WriteAllTextAsync( Path.Combine( artifacts, "run", "failure-page.txt" ), await page.Locator( "body" ).InnerTextAsync() );
+			await File.WriteAllTextAsync( Path.Combine( artifacts, "run", "failure-url.txt" ), failurePageUrl );
+			await activePage.ScreenshotAsync( new PageScreenshotOptions { Path = Path.Combine( screenshots, "failure.png" ), FullPage = true } );
+			await File.WriteAllTextAsync( Path.Combine( artifacts, "run", "failure-page.txt" ), await activePage.Locator( "body" ).InnerTextAsync() );
 		}
 		catch( Exception captureError ) {
 			failures.Add( "Failure capture: " + captureError );
 		}
+	else if( activePage is not null )
+		failures.Add( "Failure capture: the active scenario page was closed before evidence could be captured." );
 }
 finally {
 	while( cleanup.TryPop( out var action ) )
@@ -121,12 +129,18 @@ finally {
 	}
 	await File.WriteAllTextAsync(
 		Path.Combine( artifacts, "report.json" ),
-		JsonSerializer.Serialize( new { scenario, success = failures.Count == 0, failures, results }, new JsonSerializerOptions { WriteIndented = true } ) );
+		JsonSerializer.Serialize( new { scenario, success = failures.Count == 0, failurePageUrl, failures, results }, new JsonSerializerOptions { WriteIndented = true } ) );
 }
 foreach( var failure in failures )
 	Console.Error.WriteLine( failure );
 Console.WriteLine( $"{scenario}: {( failures.Count == 0 ? "PASS" : "FAIL" )}. Report: {Path.Combine( artifacts, "report.json" )}" );
 return failures.Count == 0 ? 0 : 1;
+
+void setActivePage( IPage scenarioPage ) {
+	activePage = scenarioPage;
+	if( trackedPages.Add( scenarioPage ) )
+		scenarioPage.PageError += ( _, error ) => failures.Add( $"Browser error ({scenarioPage.Url}): {error}" );
+}
 
 string getValue( ref int index ) {
 	if( index + 1 >= args.Length || args[ index + 1 ].StartsWith( "--", StringComparison.Ordinal ) )

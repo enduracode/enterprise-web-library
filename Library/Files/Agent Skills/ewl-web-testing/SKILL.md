@@ -72,7 +72,8 @@ $workspace = '<path printed by bootstrap>'
 
 `self-check` needs no server or credentials. It launches Chromium, generates PNG
 and PDF fixtures, uploads in-memory bytes, downloads a fixture and verifies its
-bytes, then writes `report.json` and `screenshots/success.png`. A nonzero exit is
+bytes, then writes `report.json` and `screenshots/success.png` inside that invocation’s
+unique artifact directory (see below). A nonzero exit is
 a failure. Run.ps1 reinstates `PLAYWRIGHT_BROWSERS_PATH` for each run and restores
 the caller’s previous environment value afterward.
 
@@ -141,6 +142,13 @@ passes arguments directly to dotnet, including paths/emails containing spaces;
 avoid Start-Process argument-array quoting pitfalls. Set the command timeout to
 suit the scenario (normally 180000–300000 ms), and use bounded Playwright waits.
 
+Each Run.ps1 invocation prints `Run artifacts: <workspace>/results/<run-id>` and
+passes that unique directory to the driver as `--artifacts`. Reports, screenshots,
+and scenario record files belong under that directory; repeated scenarios and
+retries preserve earlier evidence. Record each printed path and read its own
+`report.json`, not a shared workspace-level report. The workspace-level `run/`
+directory still holds server logs and the process ledger described above.
+
 The template creates a fresh context per invocation. It writes a machine-readable
 report, captures a failure screenshot/page text, closes the browser, and runs a
 stack of scenario cleanup actions in `finally`. Add actual content/authorization
@@ -148,6 +156,20 @@ assertions: HTTP 200 alone does not prove that the intended page was rendered.
 Record each created test ID immediately in `run/records.json`, then register its
 cleanup action. A process kill bypasses finally, so the record file must support
 manual recovery. Never log credentials or persist authentication state in a repo.
+
+### Active-page evidence in multi-page/user scenarios
+
+Call the template’s `setActivePage( scenarioPage )` before each flow on another
+page or user context. It selects the success/failure screenshot page and attaches
+browser-error tracking once per page. Failure evidence includes the active page’s
+URL in `report.json` and `run/failure-url.txt`, plus its screenshot and body text;
+the original landing page is not a substitute for the page that actually failed.
+
+Keep scenario pages and contexts open until the outer failure handler has captured
+evidence. Register additional context/page disposal on the `cleanup` stack rather
+than using a narrower `await using` scope that disposes them before the outer
+`catch` runs. Record created IDs and register cleanup before waiting for the next
+UI assertion, so a failed wait does not leave an untracked record or message.
 
 ### Impersonation
 
@@ -171,6 +193,57 @@ during cleanup. Account for the action's database changes as usual. Do not infer
 this behavior for Intermediate/Live installations or direct SMTP/HTTP code that
 bypasses EWL. The implementation is `Core/Email/EmailStatics.cs`.
 
+Parse `.eml` files with [MimeKit](https://github.com/jstedfast/MimeKit)
+([API documentation](https://mimekit.net/docs/html/)), which handles multipart MIME,
+Base64, quoted-printable, and character encodings. MailKit uses MimeKit for message
+parsing, but no SMTP/IMAP client is needed for local pickup files. Add and pin the
+MimeKit package only in the temporary driver when an email scenario needs it.
+Do not regex the raw message or Base64-decode everything after the first blank
+line; MIME boundaries and individual part headers must be interpreted first.
+
+```csharp
+using var message = MimeKit.MimeMessage.Load( mailPath );
+var recipients = message.To.Mailboxes.Select( i => i.Address );
+var subject = message.Subject;
+var body = message.TextBody ?? message.HtmlBody ?? "";
+```
+
+Snapshot pickup-file paths before the action, then identify new messages using
+the expected recipients, subject, and test marker. Record the identified file
+path and register its cleanup immediately, before parsing/asserting the body or
+waiting for another UI state. Extract login codes or action links from the
+expected decoded-body region, not the first arbitrary six-digit sequence. Remove
+only identified test-created messages, including when parsing or assertions fail.
+
+### Authentication throttling versus general request limits
+
+EWL authentication has its own limits, independent of general HTTP request
+throttling. Identify the actual response and limiter before retrying; do not
+assume every throttle is HTTP 429 or shares a universal cooldown.
+
+- Login-code sending has a cooldown keyed by normalized email address (one minute
+  in the current source), with a user-visible remaining-wait message.
+- Password login and reauthentication use separate rate limiters (currently one
+  replenished attempt per 30 seconds with burst capacity five). Login-code validity
+  and remaining-attempt restrictions are separate again.
+- General request limits vary by request method and authenticated user or client
+  IP. Their response and recovery path differ from authentication form messages.
+
+Inspect the applicable installed EWL version and any system-specific behavior:
+`Core/UserManagement/IdentityProviders/LocalIdentityProvider.cs`,
+`Core/EnterpriseWebFramework/UserManagement/AuthenticationStatics.cs`, and
+`Core/EnterpriseWebFramework/Request Dispatching/RequestDispatchingStatics.cs`.
+Source-checkout defaults may be newer than the application’s pinned package.
+
+For a retry unrelated to testing throttling, recognize the specific cooldown
+response, honor the displayed wait (or `Retry-After` when supplied), and retry only
+within a bounded count and overall timeout. Log the throttle and retry separately
+from application failures. Do not hide unexpected authentication failures behind
+blanket retry loops or count a throttle message as successful authentication.
+A fresh browser context does not reset server-side limits. Use distinct temporary
+identities when appropriate, but preserve the same identity when that is the
+behavior being tested; do not clear server caches or restart it to bypass limits.
+
 ### EWL interactions and helper methods
 
 | Task | Pattern |
@@ -190,6 +263,27 @@ Scope duplicate buttons to the intended form item/section; do not blindly use
 First/Nth to resolve ambiguity. Indices are acceptable only when the scenario
 explicitly identifies the corresponding collection/order. Wait for navigation
 or an expected visible result after submission, then capture screenshots.
+
+Icon-bearing actions can have accessible names that differ from their visible
+text, so `Name = "New Article", Exact = true` may fail despite the link being
+present. Inspect the rendered accessible name (for example with the locator’s
+`AriaSnapshotAsync`) and scope to the intended navigation area or section. Prefer
+an exact match when it works; otherwise use an inspected, word-boundary regex:
+
+```csharp
+navigation.GetByRole( AriaRole.Link, new() {
+	NameRegex = new System.Text.RegularExpressions.Regex( @"\bNew Article\b" )
+} );
+section.GetByRole( AriaRole.Button, new() {
+	NameRegex = new System.Text.RegularExpressions.Regex( @"\bFollow\b" )
+} );
+```
+
+Loose case-insensitive substring matches can confuse opposing actions:
+`Follow` matches `Unfollow`, and `Favorite` matches `Unfavorite`. Use exact names
+or word boundaries, and after an action assert that the new state appears and
+the previous state disappears. Do not resolve ambiguity with First/Nth or weaken
+assertions simply because an icon changed the accessible name.
 
 ### Date controls
 
@@ -246,7 +340,8 @@ user bypasses its cache; deployment cannot retroactively expire that response.
 
 ## 4. Report and tear down
 
-Read `report.json`, failure page text if any, and key screenshots with the read
+Read each invocation’s `results/<run-id>/report.json`, failure URL/page text if any,
+and key screenshots with the read
 tool. Report each actual pass/failure, not just the final process exit. Do not
 claim that a link-picker check verifies saving rich-text content or vice versa.
 
@@ -270,6 +365,10 @@ After source changes, use a local DU containing them to regenerate into a client
 system. Verify the scripts AND all driver files arrive in both generated skill
 directories. Bootstrap into a new empty workspace (the isolated browsers folder
 must start empty), run self-check, and exercise smoke against a local app.
+Run repeated scenarios and verify earlier reports/screenshots remain intact.
+Intentionally fail on a second page and confirm its URL, text, and screenshot are
+captured before cleanup. Use deterministic fixtures to verify icon-bearing and
+opposing-action selectors and MIME decoding without sending network email.
 Exercise HTTP helpers against a deterministic local endpoint when changing them.
 Use `ewl-agent-testing` for a fresh headless OpenCode run that discovers the skill
 and bootstraps independently; inspect its transcript and clean up its session.
