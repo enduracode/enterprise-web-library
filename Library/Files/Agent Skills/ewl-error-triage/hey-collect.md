@@ -90,12 +90,16 @@ node "<skill directory>\hey-collect.mjs" audit --collection "errors-YYYY-MM-DD"
    dates are counted. Threads created after discovery started are skipped. This is
    a paginated observed snapshot, not a server-side transaction; audit concurrent
    arrivals/changes rather than silently including them.
+   Discovery, reconciliation, and audit explicitly enumerate both New For You and
+   Previously Seen. Posting IDs are deduplicated across the two streams. Opaque
+   HEY cursors are retained inside helper-owned `unread:`/`seen:` stream markers;
+   do not pass these composite markers directly to HEY tools.
 2. **Summarize** is offline and bounded: scope, progress, outstanding outcomes, last
    audit, and round-robin category samples. Samples are ledger metadata, not fresh
    membership proof or diagnoses. Do not dump full manifests into model context.
 3. **Move** requires complete discovery. A batch is durable as `attempting` before
    requests leave. Defaults: 50 threads per batch, four concurrent calls, shared
-   300 ms minimum request-start interval. Tune `--interval-ms`/`--concurrency` to
+   125 ms global request-start interval (up to eight requests/second). Tune `--interval-ms`/`--concurrency` to
    service capacity; a 429 stops the command. Repeat invocations until the requested
    selection is verified; do not silently stop at `--batches`.
 4. A successful response is **accepted**, not **verified**. Exact posting/account
@@ -111,6 +115,9 @@ node "<skill directory>\hey-collect.mjs" audit --collection "errors-YYYY-MM-DD"
 
 No command automatically retries a failed mutation. Placement verification does
 not establish preservation of seen state; curated MCP lacks per-thread seen/unseen.
+All mutations remain per-topic MCP operations. Raising the batch size does not turn
+them into an upstream bulk request. Tune pacing only within service capacity and
+stop on rate limits; do not use direct CLI access to bypass the broker.
 
 ## Recovery
 

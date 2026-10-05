@@ -4,7 +4,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { RpcError, decodeResponse, createCaller, binding, assertBinding, newCollection, discover, move,
+import { RpcError, decodeResponse, createCaller, defaultRequestInterval, binding, assertBinding, newCollection, discover, move,
 	verify, reconcile, audit, summary, saveManifest } from './hey-collect.mjs';
 
 const endpoint = 'https://localhost:8700/SystemManager/mcp/hey';
@@ -155,6 +155,24 @@ try {
 		result: { isError: true, content: [{ type: 'text', text: 'HTTP 429 SECRET TOKEN' }] } }), 1), e => e.kind === 'rate-limit' && !e.message.includes('SECRET'));
 	assert.throws(() => createCaller({ endpoint: 'http://localhost/mcp', token: 'x' }));
 	assert.throws(() => createCaller({ endpoint: 'https://remote.invalid/mcp', token: 'x', insecureLocal: true }));
+	assert.equal(defaultRequestInterval, 125);
+	const starts = []; let active = 0, peak = 0;
+	const paced = createCaller({ endpoint, token: 'test' }, async (_, __, body) => {
+		starts.push(performance.now());
+		const request = JSON.parse(body);
+		if (request.method === 'notifications/initialized') return { status: 202 };
+		if (request.method === 'tools/call') {
+			active++; peak = Math.max(peak, active);
+			await new Promise(resolve => setTimeout(resolve, 250)); active--;
+		}
+		return { status: 200, contentType: 'application/json', text: JSON.stringify({ jsonrpc: '2.0', id: request.id,
+			result: request.method === 'initialize' ? { protocolVersion: '2025-06-18' } : { content: [{ type: 'text', text: '{}' }] } }) };
+	});
+	await paced.initialize();
+	await Promise.all([paced.call('hey_threads', 'get_topic', { topicId: 1 }), paced.call('hey_threads', 'get_topic', { topicId: 2 })]);
+	assert.equal(starts.length, 4);
+	assert(starts.at(-1) - starts[0] >= 3 * defaultRequestInterval - 10); // Shared pacing across concurrent calls; allow timer jitter.
+	assert.equal(peak, 2); // Pace starts without serializing slow responses.
 	let sent = 0;
 	const client = createCaller({ endpoint, token: 'never-log-this', interval: 20 }, async (url, headers, body) => {
 		sent++; assert.equal(headers.Authorization, 'never-log-this');

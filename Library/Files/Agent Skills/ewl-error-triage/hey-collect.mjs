@@ -64,16 +64,24 @@ async function exchange(url, headers, body, insecure, signal) {
 	});
 }
 
-export function createCaller({ endpoint, token, insecureLocal = false, interval = 300, signal }, send = exchange) {
+export const defaultRequestInterval = 125;
+
+export function createCaller({ endpoint, token, insecureLocal = false, interval = defaultRequestInterval, signal }, send = exchange) {
 	const url = new URL(endpointUrl(endpoint));
 	if (!token || /[\r\n]/.test(token)) throw new Error('Supply the raw API token through the configured environment variable.');
 	if (insecureLocal && !['localhost', '127.0.0.1', '[::1]'].includes(url.hostname))
 		throw new Error('--insecure-local is restricted to loopback endpoints.');
-	let sequence = 0, nextStart = 0, rateLimited = false;
+	let sequence = 0, nextStart = 0, rateLimited = false, requestStarts = Promise.resolve();
 	async function rpc(method, params, notification = false) {
-		const start = Math.max(Date.now(), nextStart); nextStart = start + interval;
-		await sleep(start - Date.now()); signal?.throwIfAborted();
-		if (rateLimited) throw new RpcError('rate-limit');
+		// Serialize starts, not requests: slow responses still overlap. Use a monotonic
+		// clock so wall-clock corrections or overdue timers do not bunch queued starts.
+		const turn = requestStarts.then(async () => {
+			await sleep(nextStart - performance.now()); signal?.throwIfAborted();
+			if (rateLimited) throw new RpcError('rate-limit');
+			nextStart = performance.now() + interval;
+		});
+		requestStarts = turn.catch(() => {});
+		await turn;
 		const requestId = ++sequence;
 		const response = await send(url, { Authorization: token, Accept: 'application/json, text/event-stream',
 			'Content-Type': 'application/json', 'MCP-Protocol-Version': '2025-06-18' },
@@ -92,13 +100,43 @@ export function createCaller({ endpoint, token, insecureLocal = false, interval 
 			await rpc('notifications/initialized', {}, true);
 		},
 		async call(name, action, params = {}) {
-			const allowed = { hey_identity: ['get_identity'], hey_boxes: ['list_boxes', 'get_box', 'get_box_posting_changes'], hey_threads: ['move_topic'] };
+			const allowed = { hey_identity: ['get_identity'], hey_boxes: ['list_boxes', 'get_box', 'get_imbox', 'get_imbox_seen', 'get_box_posting_changes'],
+				hey_threads: ['move_topic', 'get_topic', 'get_topic_entries', 'get_message', 'trash_topic', 'restore_topic', 'describe'] };
 			if (!allowed[name]?.includes(action)) throw new Error('Operation is outside the collection surface.');
 			const result = await rpc('tools/call', { name, arguments: { action, params } });
 			const content = result?.content?.filter(item => item.type === 'text');
 			if (content?.length !== 1) throw new RpcError('unexpected tool content');
 			try { return JSON.parse(content[0].text); } catch { throw new RpcError('invalid tool JSON'); }
 		}
+	};
+}
+
+// Concurrent ordinary MCP reads share the caller's global request-start pacing.
+export function createReader(call, { concurrency = 4 } = {}) {
+	return async requests => {
+		const results = new Map();
+		if (!Number.isSafeInteger(concurrency) || concurrency < 1 || concurrency > 8 || new Set(requests.map(r => r.id)).size !== requests.length)
+			throw new Error('Invalid read concurrency or duplicate request IDs.');
+		let index = 0, failure;
+		await Promise.all(Array.from({ length: Math.min(concurrency, requests.length) }, async () => {
+			while (index < requests.length && !failure) {
+				const r = requests[index++];
+				try { results.set(r.id, await call('hey_threads', r.action, r.params)); }
+				catch (error) { failure = error; }
+			}
+		}));
+		if (failure) throw failure;
+		return results;
+	};
+}
+
+export function withBothImboxSections(call, sourceBoxId) {
+	return async (name, action, params = {}) => {
+		if (name !== 'hey_boxes' || action !== 'get_box' || String(params.boxId) !== String(sourceBoxId)) return call(name, action, params);
+		const page = params.page ?? '', section = page.startsWith('seen:') ? 'seen' : 'unread';
+		const cursor = page.replace(/^(?:seen|unread):/, '');
+		const data = await call(name, section === 'seen' ? 'get_imbox_seen' : 'get_imbox', cursor ? { page: cursor } : {});
+		return { results: unwrap(data), ...(data.next_page ? { next_page: `${section}:${data.next_page}` } : section === 'unread' ? { next_page: 'seen:' } : {}) };
 	};
 }
 
@@ -363,7 +401,7 @@ Required: --collection NAME; discover also requires --profile FILE.
 Connection: --endpoint URL or SYSTEM_MANAGER_MCP_URL; token from SYSTEM_MANAGER_API_TOKEN.
 Options: --token-env NAME, --account ID, --state DIR, --insecure-local,
          --pages 100 (discover), --batches 1 --batch-size 50 --concurrency 4 (move),
-         --retry-reconciled (move), --interval-ms 300, --limit 20 (summarize).
+         --retry-reconciled (move), --interval-ms 125, --limit 20 (summarize).
 Default storage: <EwlFolderPath or platform EWL folder>/Error Triage/HEY/collections/NAME.json.
 Summarize is offline. No commands read bodies, send, draft, trash, or change dispositions.
 See hey-collect.md for discovery, recovery, auditing, and profile semantics.`;
@@ -392,7 +430,7 @@ async function main() {
 	};
 	const settings = { batchSize: number('batch-size', 50, 500), batches: number('batches', 1, 10000), concurrency: number('concurrency', 4, 8),
 		retryReconciled: !!values['retry-reconciled'], progress: value => console.log(JSON.stringify(value)) };
-	const interval = number('interval-ms', 300, 60000);
+	const interval = number('interval-ms', defaultRequestInterval, 60000);
 	if (interval < 100) throw new Error('--interval-ms must be at least 100; honor server rate limits.');
 	const directory = path.join(stateDirectory(values.state), 'collections'), file = path.join(directory, values.collection + '.json');
 	fs.mkdirSync(directory, { recursive: true });
@@ -425,8 +463,8 @@ async function main() {
 		const client = createCaller({ endpoint, token: process.env[values['token-env'] ?? 'SYSTEM_MANAGER_API_TOKEN'],
 			insecureLocal: !!values['insecure-local'], interval, signal: controller.signal });
 		await client.initialize();
-		const call = client.call;
-		const current = await binding(call, endpoint, values.account ?? m?.accountId);
+		const current = await binding(client.call, endpoint, values.account ?? m?.accountId);
+		const call = withBothImboxSections(client.call, current.sourceBoxId);
 		if (m) assertBinding(m, current);
 		const save = value => saveManifest(file, value);
 		if (command === 'discover') {

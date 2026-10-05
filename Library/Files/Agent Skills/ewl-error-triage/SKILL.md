@@ -21,6 +21,11 @@ For a large authorized HEY collection, use the bundled `hey-collect.mjs` and
 collection manifests in local EWL state, outside source control. `hey-state.mjs`
 tracks actually reviewed messages separately.
 
+For a user-authorized resolved-report cleanup, use the reusable `hey-cleanup.mjs`
+and [cleanup guide](hey-cleanup.md). Assess all entries once, trash, then compare
+and restore changed threads. In-process SQLite tracking and 125 ms global request
+pacing reduce overhead; reads and mutations use ordinary MCP operations.
+
 ## Review budget
 
 Return a useful ranked shortlist within five minutes, including first-use indexing. Record the start time. Allow at most 90 seconds for one scan, then use the remainder for bounded email review. Never repeatedly scan to completion within a review. Reserve the last minute for the response. Model/tool latency may prevent a strict wall-clock guarantee; explicitly report partial coverage instead of claiming an exhaustive review. Detailed investigation, work-item writing, and fixes are separate, user-directed follow-up work.

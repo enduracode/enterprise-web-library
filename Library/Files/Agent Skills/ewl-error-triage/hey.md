@@ -151,6 +151,9 @@ There is no automatic expiration; the email-review cutoff does not purge pending
 handled, or resolved records. Keep it outside source control, deployment packages,
 and installation-data refresh/replacement; include it in local-data backups.
 Deleting it loses disposition history but does not change HEY or existing work items.
+The in-process store uses SQLite WAL journaling. Back up with SQLite's backup API,
+or close all helpers before copying the database; copying only the main database
+while a connection is open can omit committed WAL data.
 This helper is local-only;
 it never contacts HEY, reads credentials, or moves mail. Do not substitute a
 temporary test directory for the user’s durable state during real triage.
@@ -234,6 +237,15 @@ After confirmed resolution, trash the corresponding threads when covered by that
 request. Routine informational notifications need an explicit disposition criterion;
 their being automated does not itself mean they are resolved.
 
+Use [the reusable cleanup helper](hey-cleanup.md) for a resolved-report flood, rather
+than building a system-specific trash script. Assess every current entry, then use
+**trash → compare → restore if changed**. Assessment and post-action comparison are
+mandatory; a separate duplicate pre-trash diagnostic pass is not. Trash verification
+includes restoring changed threads and returning them to the assessment queue.
+HEY documents that later replies bring deleted threads back to the Imbox, but that
+does not protect replies received before deletion. Do not use automatic resurfacing
+as the sole freshness check. Never mark unseen entries resolved.
+
 Describe the actions first. In HEY’s MCP gateway, path/query parameters and body
 properties are siblings inside `params`; there is no extra `body` wrapper:
 
@@ -256,11 +268,20 @@ properties are siblings inside `params`; there is no extra `body` wrapper:
 - The curated MCP surface lacks per-thread seen/unseen actions. Restoring the
   original box does not establish preservation of seen state. Do not use the
   whole-box `mark_box_seen` as a substitute.
-- `trash_topic` acts on a whole topic, not just the reviewed error message. Before
-  trashing, re-read its current entries and check for unreviewed, unresolved, newer,
-  or unrelated content. If the thread cannot be checked within the budget, defer
-  trashing. Never infer that unseen similar/future messages are resolved. For shared
-  topics, confirm the effect on the acting user before claiming global deletion.
+- `trash_topic` acts on a whole topic, not just the reviewed error message. Assess
+  all current entries for unreviewed, unresolved, or unrelated content; defer any
+  thread not entirely covered by the authorized resolution. Retain exact entry IDs
+  and update tokens (content hashes when tokens are absent). After trashing, freshly
+  read all entries and compare them with that assessment. Any addition, removal, or
+  change requires restoration and reassessment; if already active, do not trash it
+  again. Verification failures remain uncertain and stop further mutations until
+  reconciliation. Reconciliation never replays trash, but may restore a newly
+  detected changed thread and recover its original placement. Previously uncertain
+  restorations are checked by reads without replaying restoration or placement moves;
+  incorrect or unverifiable placement remains uncertain. Compare entry signatures before
+  tokenless content reads; restore known-changed threads before comparing surviving
+  original messages. Do not resolve new entries. Shared-thread access removal may
+  prevent read-back: do not claim verification or global deletion in that case.
 - `restore_topic` can undo trashing; read back topic status and original placement,
   using `move_topic` only if restoration leaves it in a different box. Restoration
   can create a new posting ID; refresh it rather than reusing a pre-trash ID. Reopening

@@ -1,7 +1,75 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
+import { fileURLToPath } from 'node:url';
 import { stateDirectory } from './hey-paths.mjs';
+
+export function openReportStore(directory) {
+	const state = stateDirectory(directory);
+	fs.mkdirSync(state, { recursive: true });
+	const db = new DatabaseSync(path.join(state, 'hey-state.sqlite'));
+	db.exec(`PRAGMA busy_timeout=5000; PRAGMA journal_mode=WAL;
+		CREATE TABLE IF NOT EXISTS reports (
+			mailbox TEXT NOT NULL, message_id TEXT NOT NULL, topic_id TEXT NOT NULL,
+			system TEXT NOT NULL, installation TEXT NOT NULL, observed TEXT NOT NULL,
+			status TEXT NOT NULL DEFAULT 'pending', note TEXT NOT NULL DEFAULT '',
+			mailbox_action TEXT NOT NULL DEFAULT '', mailbox_outcome TEXT NOT NULL DEFAULT '',
+			mailbox_note TEXT NOT NULL DEFAULT '', updated TEXT NOT NULL,
+			PRIMARY KEY(mailbox, message_id));`);
+	const get = db.prepare('SELECT * FROM reports WHERE mailbox=? AND message_id=?');
+	const transaction = method => {
+		db.exec('BEGIN IMMEDIATE');
+		try { const result = method(); db.exec('COMMIT'); return result; }
+		catch (error) { db.exec('ROLLBACK'); throw error; }
+	};
+	return {
+		db, close: () => db.close(), transaction,
+		get: (mailbox, message) => get.get(mailbox, String(message)),
+		record(mailbox, messages) {
+			transaction(() => {
+				const insert = db.prepare(`INSERT INTO reports(mailbox,message_id,topic_id,system,installation,observed,updated)
+					VALUES(?,?,?,?,?,?,?) ON CONFLICT(mailbox,message_id) DO NOTHING`);
+				for (const m of messages) {
+					if (!mailbox || !/^[1-9]\d*$/.test(String(m.id)) || !/^[1-9]\d*$/.test(String(m.topicId))) throw new Error('Invalid exact source.');
+					const old = get.get(mailbox, String(m.id));
+					if (old && old.topic_id !== String(m.topicId)) throw new Error('Known message has a different topic.');
+					insert.run(mailbox, String(m.id), String(m.topicId), m.system ?? '', m.installation ?? '', m.createdAt ?? '', new Date().toISOString());
+				}
+			});
+		},
+		mailbox(mailbox, messages, action, outcome, note) {
+			if (!['trash', 'restore', 'set_aside'].includes(action) || !['pending', 'verified', 'failed', 'uncertain'].includes(outcome) || !note) throw new Error('Invalid mailbox action.');
+			transaction(() => {
+				const statement = db.prepare('UPDATE reports SET mailbox_action=?,mailbox_outcome=?,mailbox_note=?,updated=? WHERE mailbox=? AND message_id=?');
+				for (const id of messages) {
+					if (!get.get(mailbox, String(id))) throw new Error('Unknown source ID.');
+					statement.run(action, outcome, note, new Date().toISOString(), mailbox, String(id));
+				}
+			});
+		},
+		resolve(mailbox, messages, note) {
+			if (!note) throw new Error('Resolution note required.');
+			transaction(() => {
+				const update = db.prepare("UPDATE reports SET status='resolved',note=?,updated=? WHERE mailbox=? AND message_id=?");
+				for (const id of messages) {
+					const old = get.get(mailbox, String(id)); if (!old) throw new Error('Unknown source ID.');
+					if (old.status === 'resolved' && (old.note === note || old.note.startsWith(note + '\nPrior milestone: '))) continue;
+					const merged = old.note && old.note !== note ? note + '\nPrior milestone: ' + old.note : note;
+					update.run(merged, new Date().toISOString(), mailbox, String(id));
+				}
+			});
+		},
+		reopen(mailbox, messages, note) {
+			transaction(() => {
+				const update = db.prepare("UPDATE reports SET status='pending',note=?,updated=? WHERE mailbox=? AND message_id=?");
+				for (const id of messages) {
+					const old = get.get(mailbox, String(id)); if (!old) throw new Error('Unknown source ID.');
+					update.run(note + '\nPrior milestone: ' + old.note, new Date().toISOString(), mailbox, String(id));
+				}
+			});
+		}
+	};
+}
 
 // Metadata only. This helper has no mailbox/network access.
 function main() {
@@ -94,5 +162,7 @@ function main() {
 	finally { db.close(); }
 }
 
-try { console.log(JSON.stringify(main())); }
-catch (error) { console.error(error.message); process.exitCode = 1; }
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+	try { console.log(JSON.stringify(main())); }
+	catch (error) { console.error(error.message); process.exitCode = 1; }
+}
