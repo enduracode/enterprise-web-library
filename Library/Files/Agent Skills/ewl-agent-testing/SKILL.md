@@ -94,7 +94,7 @@ There is no supported `opencode run` switch that disables interactive questions 
 
 Prompts to the primary agent should describe a **real change request**, not a test-framework instruction. The agent must discover workflow rules (Critical Rules, agent-invocation order) from its `AGENTS.md` on its own. **Don't** write prompts like "invoke the ewl-cleanup subagent on file X per Critical Rule #2"; that short-circuits exactly the wiring you are trying to test. **Do** write prompts like "Add a public constant `Yaml` with value `.yaml` to Shared/Tewl/FileExtensions.cs".
 
-For direct-invocation tests of a single subagent (bypassing the primary), either use `--agent <subagent-name>` or phrase the prompt so the primary clearly delegates (e.g. "Please run the ewl-cleanup subagent directly on this file...").
+For focused tests of a single subagent, start with a primary agent and phrase the prompt so it clearly delegates (e.g. "Please run the ewl-cleanup subagent directly on this file..."). OpenCode 1.18.33 does not directly launch a subagent through `run --agent <subagent-name>`: it reports that the agent is not primary and falls back to the default primary. Inspect the child transcript to confirm actual delegation.
 
 Prefer compile-safe prompts unless the scenario specifically validates behavior in the presence of compiler errors. Artificially invalid code can distract the primary agent or inspection tools, produce noisy diagnostics, and obscure the behavior under test.
 
@@ -211,7 +211,7 @@ OpenCode writes a rotating debug log to `%USERPROFILE%\.local\share\opencode\log
 - `service=session.prompt ... sessionID=ses_...` -- session lifecycle.
 - `service=llm providerID=... modelID=... sessionID=... agent=... stream` -- model calls.
 - `service=permission permission=<kind> pattern=<pattern> ... action=...` -- permission decisions.
-- `service=permission ... action=\"ask\" evaluated` -- blocking permission prompts. **If you see any of these for your test scenario, the agent tried to access something it shouldn't have.** During the session that led to the `external_directory: deny` rule being added to `ewl-cleanup`, these `ask` events were the exact fingerprint of the walk-up bug.
+- `service=permission ... action=\"ask\" evaluated` -- approval requests. Classify these against the scenario’s authorized paths and expected approvals, not as automatic evidence of unintended traversal. Unexpected metadata discovery above the target system directory remains a failure. A scenario expecting silent access to a configured allowed path fails or is inconclusive if it instead blocks on approval.
 
 Find the log for a run window and grep for red flags:
 
@@ -366,11 +366,51 @@ For any agent-rules / subagent / skill / plugin change, cover these five categor
 |---|---|---|
 | **Primary-agent scope** | `AGENTS.md` + Critical Rules wording steers the primary agent to invoke the right subagent at the right time | Run a real file-change prompt; inspect which subagents the primary chose to invoke. |
 | **Subagent defensive checks** | The subagent refuses out-of-scope or invalid inputs | Force an out-of-scope invocation directly and verify a clean refusal (no side effects). |
-| **Walk-up / permission denial** | No `external_directory` `ask` events; sessions stay inside the working directory | Grep the debug log for `action=\"ask\"` for the test window. |
+| **Walk-up / permission denial** | Repository discovery stays at or below the target system directory; genuine denials stop without bypasses | Inspect paths and tool calls, and classify `ask` events against the scenario’s expected approvals. |
 | **VCS safety** | No destructive VCS ops (`hg revert`, `git reset --hard`, etc.) in the transcript | Grep the transcript's tool-call commands. |
 | **Sub-repo handling** | When a sub-repo exists, subagents choose the innermost VCS for the target file | Test in TEWL (`Shared\.git` inside outer `.hg`) or any EWL system with a nested VCS dir. |
 
 Always run each scenario at least twice before trusting the result; cheap subagent models are noticeably non-deterministic.
+
+### Cross-system cleanup matrix
+
+For a cleanup scope or permission change, include the following current-version
+scenarios in addition to defensive input checks. Use fresh primary sessions
+rooted in a client system, and inspect their actual cleanup children. Do not
+use another top-level session rooted in the cleanup target as a substitute for
+the cross-system test.
+
+- **Normal cleanup:** omit the target directory and verify the session system’s
+  solution, settings, exact-file scope, and requested mode are used.
+- **Authorized cross-system access:** supply another EWL system directory,
+  relative source-file paths, mode, commit authorization, and relevant target
+  conventions checked by the parent. Verify dedicated reads and edits reach
+  only the intended source files without unintended approval prompts.
+- **Remembered approval:** use a harmless directory without a configured
+  allowance; approve it in the primary with the reusable approval choice,
+  then check the child can access it. A one-request approval is not a reusable
+  grant. Keep this interactive experiment separate from unattended runs.
+- **Genuine denial:** configure a narrowly scoped denied fixture path and
+  verify cleanup reports the path and operation, with no shell or other-tool
+  retry. Also reject source paths outside the supplied target system directory.
+- **Maintained standalone template:** explicitly authorize a disposable
+  formatter solution and workspace. Verify linked source inclusion, the
+  system’s `Main` profile and settings layers, meaningful formatting, and
+  removal of owned scaffolding. No build artifacts belong in the maintained
+  template directory. Authorize workspace access before the unattended run;
+  do not add permanent machine grants solely for a test.
+- **Nested repository / enclosing repository:** verify the innermost VCS and
+  the existing ignore-file fallback when the system solution is below its
+  repository root. Metadata discovery must not probe above the target system
+  directory, even when broader filesystem access is allowed.
+- **Exact-file commit:** use disposable repositories and verify only clean,
+  explicitly authorized input files enter `Formatted code` commits. Preserve
+  unrelated modified files and, for Git, unrelated staged changes. Reject
+  modified inputs when a formatting-only commit is requested.
+
+Record unexecuted approval experiments as unverified rather than inferring
+success from the primary’s access or from a different session root. Dispose
+only test-owned files, repositories, processes, and sessions.
 
 ## End-to-end workflow summary
 

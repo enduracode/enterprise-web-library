@@ -29,6 +29,10 @@ If the user asks to leave changes uncommitted, says they will commit themselves,
 
 In standard mode, check for relevant running applications when needed before an operation that overwrites their binaries. If an application blocks the operation, identify it and ask the user to stop it; continue independent work. Do not check every output before unrelated work or interpret every file-access failure as an application lock.
 
+### Cross-system cleanup invocations
+
+When invoking `ewl-cleanup` on another system, supply its **target system directory** (the EWL system directory containing its solution), the exact source-file list, cleanup mode, and explicit formatting-only commit authorization when applicable. Resolve relative source paths against that directory. The parent agent must check the target system’s applicable agent rules and relay relevant cleanup constraints or conventions. Cleanup defaults to the session working directory for same-system invocations and discovers the solution itself; a solution path is only an optional exceptional override. For maintained templates outside the main solution, explicitly authorize disposable formatter scaffolding and specify its workspace. Command working directories do not grant filesystem access; resolve reported permission denials before reinvoking cleanup.
+
 ## Build, Generation, and Tests
 
 Find the actual solution and test projects before running commands. The names below are placeholders; NUnit, a `Tests` project, and its exclusion from Release are common conventions, not guaranteed system properties.

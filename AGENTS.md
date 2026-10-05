@@ -115,6 +115,10 @@ In standard mode, check for relevant running applications when needed before ove
 
 ## Shell and Path Handling
 
+### Cross-system cleanup invocations
+
+When invoking `ewl-cleanup` on another system, supply its **target system directory** (the EWL system directory containing its solution), the exact source-file list, cleanup mode, and explicit formatting-only commit authorization when applicable. Resolve relative source paths against that directory. The parent agent must check the target system’s applicable agent rules and relay relevant cleanup constraints or conventions. Cleanup defaults to the session working directory for same-system invocations and discovers the solution itself; a solution path is only an optional exceptional override. For maintained templates outside the main solution, explicitly authorize disposable formatter scaffolding and specify its workspace. Command working directories do not grant filesystem access; resolve reported permission denials before reinvoking cleanup.
+
 - Prefer dedicated tools for file reads, searches, and edits.
 - Use `ewl-powershell` for PowerShell commands; do not invoke PowerShell through another shell tool.
 - Follow the actual shell tool's description rather than assuming Bash or PowerShell syntax. Quote paths containing spaces or non-ASCII characters.
