@@ -226,11 +226,11 @@ public class DatabaseConnection {
 	/// <summary>
 	/// Rolls back all commands since the last call to BeginTransaction.
 	/// </summary>
-	internal void RollbackTransaction() {
+	internal bool RollbackTransaction() {
 		// Prevent an exception in this method from covering up the primary exception from CommitTransaction.
 		if( commitFailed ) {
 			commitFailed = false;
-			return;
+			return false;
 		}
 
 		if( savepoints is null )
@@ -239,6 +239,7 @@ public class DatabaseConnection {
 		if( !savepoints.TryPop( out var savepoint ) )
 			savepoints = null;
 
+		var rollbackFailed = rollbackWasToLastSavepoint == false;
 		if( rollbackWasToLastSavepoint is null ) {
 			if( savepoint is { Length: 0 } ) {
 				rollbackWasToLastSavepoint = true;
@@ -273,6 +274,7 @@ public class DatabaseConnection {
 						rollbackWasToLastSavepoint = false;
 						savepoint = null;
 					}
+					rollbackFailed = true;
 				}
 			}
 			catch( Exception e ) {
@@ -288,6 +290,8 @@ public class DatabaseConnection {
 		}
 		else if( savepoint is null || ( rollbackWasToLastSavepoint == true && savepoint.Length > 0 ) )
 			rollbackWasToLastSavepoint = null;
+
+		return !rollbackFailed;
 	}
 
 	/// <summary>

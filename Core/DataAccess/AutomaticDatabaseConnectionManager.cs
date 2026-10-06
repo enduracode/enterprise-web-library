@@ -173,23 +173,24 @@ public class AutomaticDatabaseConnectionManager {
 		modTransactionSecondaryDatabaseCount = null;
 	}
 
-	internal void RollbackModifications() {
+	internal bool RollbackModifications() {
 		if( !inModificationTransaction )
 			throw new InvalidOperationException();
 
 		transactionsMarkedForRollback = true;
 
+		var rollbackFailed = false;
 		foreach( var connection in getConnectionsWithTransaction( false ) )
 			if( modTransactionIncludesPrimaryDatabase )
-				connection.RollbackTransaction();
+				rollbackFailed |= !connection.RollbackTransaction();
 			else
-				cleanUpConnection( connection );
+				rollbackFailed |= !cleanUpConnection( connection );
 
 		var secondaryConnections = getConnectionsWithTransaction( true ).Materialize();
 		foreach( var connection in secondaryConnections.Take( modTransactionSecondaryDatabaseCount!.Value ) )
-			connection.RollbackTransaction();
+			rollbackFailed |= !connection.RollbackTransaction();
 		foreach( var connection in secondaryConnections.Skip( modTransactionSecondaryDatabaseCount.Value ) )
-			cleanUpConnection( connection );
+			rollbackFailed |= !cleanUpConnection( connection );
 
 		transactionsMarkedForRollback = false;
 
@@ -199,6 +200,8 @@ public class AutomaticDatabaseConnectionManager {
 
 		modTransactionIncludesPrimaryDatabase = false;
 		modTransactionSecondaryDatabaseCount = null;
+
+		return !rollbackFailed;
 	}
 
 	private IEnumerable<DatabaseConnection> getConnectionsWithTransaction( bool forSecondaryDatabases ) {
@@ -288,12 +291,14 @@ public class AutomaticDatabaseConnectionManager {
 		transactionsMarkedForRollback = false;
 	}
 
-	private void cleanUpConnection( DatabaseConnection connection ) {
+	private bool cleanUpConnection( DatabaseConnection connection ) {
+		var rollbackFailed = false;
+
 		// Keep the connection initialized during cleanup to accommodate commit-time validation methods.
 		try {
 			try {
 				if( !DataAccessStatics.DatabaseShouldHaveAutomaticTransactions( connection.DatabaseInfo ) )
-					return;
+					return true;
 
 				try {
 					if( !transactionsMarkedForRollback )
@@ -310,7 +315,7 @@ public class AutomaticDatabaseConnectionManager {
 				}
 				finally {
 					if( transactionsMarkedForRollback )
-						connection.RollbackTransaction();
+						rollbackFailed = !connection.RollbackTransaction();
 				}
 			}
 			finally {
@@ -323,6 +328,8 @@ public class AutomaticDatabaseConnectionManager {
 			else
 				primaryDatabaseConnectionInitialized = false;
 		}
+
+		return !rollbackFailed;
 	}
 
 	private void executeNonTransactionalModificationMethods() {
