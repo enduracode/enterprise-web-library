@@ -174,7 +174,7 @@ public class DatabaseConnection {
 	/// <summary>
 	/// Begins a new transaction.
 	/// </summary>
-	public void BeginTransaction( bool createSavepointIfAlreadyInTransaction = false ) {
+	internal void BeginTransaction( bool createSavepointIfAlreadyInTransaction = false ) {
 		assertCurrentTransactionUsable();
 
 		string? savepoint;
@@ -226,7 +226,7 @@ public class DatabaseConnection {
 	/// <summary>
 	/// Rolls back all commands since the last call to BeginTransaction.
 	/// </summary>
-	public void RollbackTransaction() {
+	internal void RollbackTransaction() {
 		// Prevent an exception in this method from covering up the primary exception from CommitTransaction.
 		if( commitFailed ) {
 			commitFailed = false;
@@ -305,7 +305,7 @@ public class DatabaseConnection {
 	/// <summary>
 	/// Commits all commands since the last call to BeginTransaction.
 	/// </summary>
-	public void CommitTransaction() {
+	internal void CommitTransaction() {
 		if( savepoints is null )
 			throw new Exception( "Cannot commit without a matching begin." );
 		assertCurrentTransactionUsable();
