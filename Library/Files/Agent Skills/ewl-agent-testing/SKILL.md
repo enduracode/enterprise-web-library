@@ -12,7 +12,7 @@ This skill documents the end-to-end loop:
 1. Make the source edit in the EWL source tree.
 2. Propagate to the target test system(s) with `sync`.
 3. Launch `opencode run` headlessly against each target system.
-4. Capture session transcripts from flat-file storage.
+4. Capture JSON events and export primary/child transcripts through supported APIs.
 5. Check logs for permission-ask events and other red flags.
 6. Revert any repository changes the test produced.
 7. Delete the test session via the HTTP API and clean up flat-file leftovers.
@@ -72,7 +72,84 @@ The `run` subcommand takes a prompt and exits when the model stops. Important fl
 | `--print-logs --log-level DEBUG` | Optional diagnostics when debugging hangs or permission behavior. These do not replace transcript inspection. |
 | (positional) | The prompt text. |
 
-Minimal invocation pattern:
+### Reusable runner
+
+Prefer the Node runner `run.mjs` beside this skill’s `SKILL.md` (Node 22 or
+newer, built-in modules only). It closes stdin, captures stdout JSON events and
+stderr separately as UTF-8, applies a watchdog to the owned CLI process tree,
+and exports primary and descendant transcripts through the supported HTTP API.
+It records ownership in a manifest before launching. It does not answer
+approvals, change configuration, create scenario fixtures, or restore source
+files or commits. Select and verify the actual executable and model first, as
+described above.
+
+Supply an existing output workspace and an explicit executable, target system
+directory, model, and scenario label:
+
+```powershell
+node "<skill directory>\run.mjs" run `
+  --exe "$openCodeExe" `
+  --dir "$targetDir" `
+  --model "openai/gpt-6.1-sol" `
+  --title "preedit-summary" `
+  --output "C:\Users\<user>\AppData\Local\Temp\opencode" `
+  --timeout-ms 300000 `
+  --prompt "In Library/MailMerging/GlobalFields/GlobalRowType.cs, add a summary doc comment to the class."
+```
+
+Use `--prompt-file <absolute UTF-8 file>` instead of `--prompt` for lengthy
+requests. `--agent` defaults to `build`. An optional `--config-file` applies
+an additional OpenCode configuration only to owned subprocesses via
+`OPENCODE_CONFIG`; it never edits machine settings. Normal inherited environment
+and OpenCode configuration still apply. The runner does not switch providers
+or check model availability on your behalf.
+
+The runner prints a manifest path in a unique `agent-test-<UUID>` directory.
+That directory contains `events.jsonl`, `stderr.log`, `manifest.json`, and one
+`ses_*.json` API export per discovered session. The title gets a `scen-` prefix
+and a unique suffix, allowing recovery if the CLI emits no events. Inspect the
+exports, not just the primary’s final message. Exit code 0 means the CLI exited
+successfully and collection found sessions; it does not establish that the
+scenario passed. A timeout, launch failure, or collection failure returns 1
+and preserves available evidence. Classify stopped sessions from their
+transcripts rather than treating a timeout as automatic scenario failure.
+If the CLI already exited but descendants kept its output pipes open, the
+watchdog closes those pipes and records a termination warning. Such descendants
+cannot reliably be identified from the exited parent PID; use scenario-owned
+PID records for their cleanup. Do not kill unrelated processes by name or age.
+
+Refresh exports or delete the recorded session tree after review:
+
+```powershell
+node "<skill directory>\run.mjs" export --manifest "<manifest path>"
+node "<skill directory>\run.mjs" cleanup --manifest "<manifest path>"
+```
+
+Both commands use the recorded executable, target directory, and optional
+configuration. The runner starts an owned loopback API server on an available
+port and stops only that process tree. It honors inherited
+`OPENCODE_SERVER_USERNAME`/`OPENCODE_SERVER_PASSWORD` authentication. Cleanup
+refreshes descendant ownership, deletes through the supported API, and verifies
+absence. Never edit the manifest to include unrelated sessions. Artifacts remain
+available for review; the caller removes only that run’s artifact directory
+and handles scenario-specific repository recovery separately. For older
+flat-file storage, check for owned orphan files using the cleanup guidance
+below; the runner does not directly touch OpenCode’s storage or database.
+
+Runner regression checks use disposable fake CLI/API fixtures without model
+calls. After changing the runner, execute:
+
+```powershell
+node --test "<skill directory>\run.test.mjs"
+```
+
+Also exercise a real fresh OpenCode session against a regenerated client system;
+fake fixtures do not establish compatibility with the installed OpenCode API.
+
+### Direct launches
+
+Use direct launches only when the scenario needs behavior not covered by the
+runner. Minimal invocation pattern:
 
 ```powershell
 Push-Location -LiteralPath $targetDir
@@ -111,7 +188,17 @@ if ($content -match '"sessionID":"(ses_[^"]+)"') {
 
 Record each test's session ID (plus target dir) to a list so you can delete them at the end.
 
+The reusable runner records the ownership tree and exports beside its manifest;
+manual session-ID extraction is needed only for direct launches.
+
 ### Detecting hangs
+
+When launching `opencode run` from Node with a prompt supplied through arguments,
+use `stdio: ['ignore', 'pipe', 'pipe']`, or call `child.stdin.end()` immediately.
+An open stdin pipe prevented execution from starting in OpenCode 1.18.33 and
+left an empty transcript until the watchdog fired. Check stdin handling before
+classifying this symptom as a model or permission hang. The reusable runner
+handles this automatically.
 
 If the primary or a subagent loops on an issue (e.g. fighting with a curly-apostrophe path), the `opencode run` process may stop making progress but not exit. In some cases the JSONL wrapper may also fail to return even though flat-file storage shows the primary session and child sessions have already reached `step-finish` with `reason: "stop"`. Symptoms:
 - `Get-Content $jsonlPath` stops growing.
@@ -393,6 +480,12 @@ the cross-system test.
 - **Genuine denial:** configure a narrowly scoped denied fixture path and
   verify cleanup reports the path and operation, with no shell or other-tool
   retry. Also reject source paths outside the supplied target system directory.
+  A configured rule alone is not proof of denial: confirm a dedicated tool
+  returns a permission error. Check the actual matched resource representation
+  on Windows; an absolute forward-slash read pattern did not match the tested
+  v1.18.33 path. A uniquely named fixture with a narrow suffix pattern such as
+  `*Blocked.cs` can avoid separator ambiguity. Do not count a successful read
+  as a passed denial test, and inspect the child for subsequent access attempts.
 - **Maintained standalone template:** explicitly authorize a disposable
   formatter solution and workspace. Verify linked source inclusion, the
   system’s `Main` profile and settings layers, meaningful formatting, and
