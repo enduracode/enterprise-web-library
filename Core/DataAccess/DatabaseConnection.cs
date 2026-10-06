@@ -474,6 +474,13 @@ public class DatabaseConnection {
 				return new Exception( getCommandExceptionMessage( command, m ), innerException );
 			}
 
+			var errorNumbers = sqlException.Errors.Cast<SqlError>()
+				.Select( i => i.Number )
+				.Where( i => i != 3621 /* statement termination, not a meaningful error here */ )
+				.Materialize();
+			if( errorNumbers.Any() && errorNumbers.All( number => number is 515 or 547 or 2601 or 2627 or 8115 or 8152 or 2628 ) )
+				return new DbCommandExecutionException( getCommandExceptionMessage( command, "Error number: " + errorNumber + "." ), innerException );
+
 			return new Exception( getCommandExceptionMessage( command, "Error number: " + errorNumber + "." ), innerException );
 		}
 
