@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Reflection;
+using Dapper;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.DatabaseSpecification;
@@ -9,6 +10,7 @@ using FluentMigrator.Runner;
 using FluentMigrator.Runner.VersionTableInfo;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
+using NodaTime;
 
 namespace EnterpriseWebLibrary;
 
@@ -18,6 +20,8 @@ namespace EnterpriseWebLibrary;
 [ PublicAPI ]
 [ EditorBrowsable( EditorBrowsableState.Never ) ]
 public static class DataMigrationOps {
+	private static readonly Duration commandTimeout = Duration.FromMinutes( 60 );
+
 	private class TableConfiguration: IVersionTableMetaData {
 		bool IVersionTableMetaData.OwnsSchema => true;
 		string IVersionTableMetaData.SchemaName => "";
@@ -59,12 +63,15 @@ public static class DataMigrationOps {
 								                  name,
 								                  Environment.GetEnvironmentVariable( $"{EwlStatics.EwlInitialism.EnglishToPascal()}DataMigratorManagedIdentityClientId" )! )
 							                  : null ) )
+				.WithGlobalCommandTimeout( commandTimeout.ToTimeSpan() )
 				.ScanIn( appAssembly )
 				.For.Migrations() )
 			.AddScoped( typeof( IVersionTableMetaData ), typeof( TableConfiguration ) )
 			.AddLogging( builder => builder.AddFluentMigratorConsole() )
 			.BuildServiceProvider();
 		using var scope = serviceProvider.CreateScope();
+
+		SqlMapper.Settings.CommandTimeout = (int)commandTimeout.TotalSeconds;
 
 		var runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
 		try {

@@ -14,6 +14,7 @@
     <PackageReference Include="Azure.ResourceManager.ManagedServiceIdentities" Version="1.4.1" />
     <PackageReference Include="Azure.ResourceManager.Storage" Version="1.6.2" />
     <PackageReference Include="Azure.Storage.Blobs" Version="12.28.0" />
+    <PackageReference Include="Dapper" Version="2.1.89" />
     <PackageReference Include="Destructurama.JsonNet" Version="4.0.2" />
     <PackageReference Include="Ewl.Tools" Version="33.0.0" />
     <PackageReference Include="FluentMigrator.Runner.SqlServer" Version="8.0.1" />
