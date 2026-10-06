@@ -137,6 +137,14 @@ deploy to a server, only new migrations run.
 If you do not use the EWL System Manager, call `DataMigrator.exe` as part
 of your deployment process.
 
+### Command timeouts
+
+EWL sets a 60-minute default command timeout for FluentMigrator-issued
+commands and Dapper calls in the standalone Data Migrator. This applies per
+command, not to the entire migration. Normally omit Dapper’s `commandTimeout`;
+explicit values, specified in seconds, override the default. Direct ADO.NET
+commands and bulk-copy APIs require their own timeout configuration.
+
 ## Common migration patterns
 
 ### Adding a column
@@ -175,8 +183,7 @@ public class AddManagerUserRole: ForwardOnlyMigration {
 ### Complex row-by-row logic
 
 For cursor-type logic that loops through rows, use `Execute.WithConnection`
-and query with Dapper (add a `Dapper` package reference to the Data Migrator
-project):
+and query with Dapper. Dapper is supplied transitively by EWL; add `using Dapper;`.
 
 ```csharp
 Execute.WithConnection( ( connection, transaction ) => {
