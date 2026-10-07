@@ -11,5 +11,7 @@ public interface ExternalMySqlProvider {
 
 	DbProviderFactory GetDbProviderFactory();
 
+	Exception? CreateCommandException( Exception originalException, Func<string, string> messageGetter );
+
 	void RegisterDependencyInjectionServicesForMigration( IMigrationRunnerBuilder builder );
 }

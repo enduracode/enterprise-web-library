@@ -1,4 +1,5 @@
 ﻿using System.Data.Common;
+using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.ExternalFunctionality;
 using FluentMigrator.Runner;
 using Oracle.ManagedDataAccess.Client;
@@ -34,6 +35,21 @@ public class OracleDatabaseProvider: ExternalOracleDatabaseProvider {
 
 	void ExternalOracleDatabaseProvider.SetParameterType( DbParameter parameter, string dbTypeString ) {
 		( (OracleParameter)parameter ).OracleDbType = dbTypeString.ToEnum<OracleDbType>();
+	}
+
+	Exception? ExternalOracleDatabaseProvider.CreateCommandException( Exception originalException, Func<string, string> messageGetter ) {
+		// ORA-00060 is the code for deadlock. ORA-08177 happens when we attempt to update a row that has changed since the transaction began.
+		if( new[] { "ORA-00060", "ORA-08177" }.Any( i => originalException.Message.Contains( i ) ) )
+			return new DbConcurrencyException( messageGetter( "A concurrency error occurred." ), originalException );
+
+		if( originalException.Message.Contains( "ORA-01013", StringComparison.Ordinal ) )
+			return new DbCommandTimeoutException( messageGetter( "A command timeout occurred." ), originalException );
+
+		// This has happened on RLE servers when Dave Foss has manually shut down Oracle.
+		if( originalException.Message.Contains( "ORA-01109" ) )
+			return new DbConnectionFailureException( messageGetter( "Failed to connect to Oracle." ), originalException );
+
+		return null;
 	}
 
 	void ExternalOracleDatabaseProvider.RegisterDependencyInjectionServicesForMigration( IMigrationRunnerBuilder builder ) {

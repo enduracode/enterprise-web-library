@@ -4,6 +4,7 @@ using EnterpriseWebLibrary.DataAccess.RevisionHistory;
 using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using EnterpriseWebLibrary.EnterpriseWebFramework;
+using EnterpriseWebLibrary.ExternalFunctionality;
 using EnterpriseWebLibrary.UserManagement;
 using JetBrains.Annotations;
 using Microsoft.Data.SqlClient;
@@ -484,27 +485,17 @@ public class DatabaseConnection {
 			return new Exception( getCommandExceptionMessage( command, "Error number: " + errorNumber + "." ), innerException );
 		}
 
-		if( databaseInfo is MySqlInfo ) {
-			if( new[] { "Deadlock found when trying to get lock", "Lock wait timeout exceeded" }.Any( i =>
-				   innerException.Message.Contains( i, StringComparison.Ordinal ) ) )
-				return new DbConcurrencyException( getCommandExceptionMessage( command, "A concurrency error occurred." ), innerException );
+		if( databaseInfo is MySqlInfo )
+			if( ExternalFunctionalityStatics.ExternalMySqlProvider.CreateCommandException(
+				    innerException,
+				    customMessage => getCommandExceptionMessage( command, customMessage ) ) is {} exception )
+				return exception;
 
-			if( innerException.Message.Contains( "Command Timeout expired", StringComparison.Ordinal ) )
-				return new DbCommandTimeoutException( getCommandExceptionMessage( command, "A command timeout occurred." ), innerException );
-		}
-
-		if( databaseInfo is OracleInfo ) {
-			// ORA-00060 is the code for deadlock. ORA-08177 happens when we attempt to update a row that has changed since the transaction began.
-			if( new[] { "ORA-00060", "ORA-08177" }.Any( i => innerException.Message.Contains( i ) ) )
-				return new DbConcurrencyException( getCommandExceptionMessage( command, "A concurrency error occurred." ), innerException );
-
-			if( innerException.Message.Contains( "ORA-01013", StringComparison.Ordinal ) )
-				return new DbCommandTimeoutException( getCommandExceptionMessage( command, "A command timeout occurred." ), innerException );
-
-			// This has happened on RLE servers when Dave Foss has manually shut down Oracle.
-			if( innerException.Message.Contains( "ORA-01109" ) )
-				return new DbConnectionFailureException( getCommandExceptionMessage( command, "Failed to connect to Oracle." ), innerException );
-		}
+		if( databaseInfo is OracleInfo )
+			if( ExternalFunctionalityStatics.ExternalOracleDatabaseProvider.CreateCommandException(
+				    innerException,
+				    customMessage => getCommandExceptionMessage( command, customMessage ) ) is {} exception )
+				return exception;
 
 		return new Exception( getCommandExceptionMessage( command, "" ), innerException );
 	}
