@@ -5,8 +5,5 @@
 /// connnection unusable until <see cref="DatabaseConnection.RollbackTransaction"/> is called for all nesting levels.
 /// </summary>
 public class DbConcurrencyException: Exception {
-	/// <summary>
-	/// Creates a DB concurrency exception.
-	/// </summary>
-	public DbConcurrencyException( string message, Exception innerException ): base( message, innerException ) {}
+	internal DbConcurrencyException( string message, Exception innerException ): base( message, innerException ) {}
 }
