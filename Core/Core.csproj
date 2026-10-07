@@ -6,6 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="EnterpriseWebLibrary.MySql" />
+    <InternalsVisibleTo Include="EnterpriseWebLibrary.OracleDatabase" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Aspose.Words" Version="23.8.0" />
     <PackageReference Include="Azure.Identity" Version="1.21.0" />
     <PackageReference Include="Azure.ResourceManager.AppContainers" Version="1.5.0" />
