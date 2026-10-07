@@ -17,7 +17,7 @@ public interface ExternalOracleDatabaseProvider {
 
 	void SetParameterType( DbParameter parameter, string dbTypeString );
 
-	Exception? CreateCommandException( Exception originalException, Func<string, string> messageGetter );
+	Exception CreateCommandException( Exception originalException, Func<string, string> messageGetter );
 
 	void RegisterDependencyInjectionServicesForMigration( IMigrationRunnerBuilder builder );
 }

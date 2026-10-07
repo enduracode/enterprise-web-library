@@ -486,16 +486,14 @@ public class DatabaseConnection {
 		}
 
 		if( databaseInfo is MySqlInfo )
-			if( ExternalFunctionalityStatics.ExternalMySqlProvider.CreateCommandException(
-				    innerException,
-				    customMessage => getCommandExceptionMessage( command, customMessage ) ) is {} exception )
-				return exception;
+			return ExternalFunctionalityStatics.ExternalMySqlProvider.CreateCommandException(
+				innerException,
+				customMessage => getCommandExceptionMessage( command, customMessage ) );
 
 		if( databaseInfo is OracleInfo )
-			if( ExternalFunctionalityStatics.ExternalOracleDatabaseProvider.CreateCommandException(
-				    innerException,
-				    customMessage => getCommandExceptionMessage( command, customMessage ) ) is {} exception )
-				return exception;
+			return ExternalFunctionalityStatics.ExternalOracleDatabaseProvider.CreateCommandException(
+				innerException,
+				customMessage => getCommandExceptionMessage( command, customMessage ) );
 
 		return new Exception( getCommandExceptionMessage( command, "" ), innerException );
 	}

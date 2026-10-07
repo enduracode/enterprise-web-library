@@ -37,19 +37,22 @@ public class OracleDatabaseProvider: ExternalOracleDatabaseProvider {
 		( (OracleParameter)parameter ).OracleDbType = dbTypeString.ToEnum<OracleDbType>();
 	}
 
-	Exception? ExternalOracleDatabaseProvider.CreateCommandException( Exception originalException, Func<string, string> messageGetter ) {
-		// ORA-00060 is the code for deadlock. ORA-08177 happens when we attempt to update a row that has changed since the transaction began.
-		if( new[] { "ORA-00060", "ORA-08177" }.Any( i => originalException.Message.Contains( i ) ) )
-			return new DbConcurrencyException( messageGetter( "A concurrency error occurred." ), originalException );
+	Exception ExternalOracleDatabaseProvider.CreateCommandException( Exception originalException, Func<string, string> messageGetter ) {
+		if( originalException is not OracleException original )
+			return new Exception( messageGetter( "" ), originalException );
 
-		if( originalException.Message.Contains( "ORA-01013", StringComparison.Ordinal ) )
-			return new DbCommandTimeoutException( messageGetter( "A command timeout occurred." ), originalException );
+		// ORA-00060 is the code for deadlock. ORA-08177 happens when we attempt to update a row that has changed since the transaction began.
+		if( original.Number is 60 or 8177 )
+			return new DbConcurrencyException( messageGetter( "A concurrency error occurred." ), original );
+
+		if( original.Number == 1013 )
+			return new DbCommandTimeoutException( messageGetter( "A command timeout occurred." ), original );
 
 		// This has happened on RLE servers when Dave Foss has manually shut down Oracle.
-		if( originalException.Message.Contains( "ORA-01109" ) )
-			return new DbConnectionFailureException( messageGetter( "Failed to connect to Oracle." ), originalException );
+		if( original.Number == 1109 )
+			return new DbConnectionFailureException( messageGetter( "Failed to connect to Oracle." ), original );
 
-		return null;
+		return new Exception( messageGetter( "Error number: " + original.Number + "." ), original );
 	}
 
 	void ExternalOracleDatabaseProvider.RegisterDependencyInjectionServicesForMigration( IMigrationRunnerBuilder builder ) {

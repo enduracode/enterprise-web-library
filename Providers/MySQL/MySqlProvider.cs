@@ -26,15 +26,17 @@ public class MySqlProvider: ExternalMySqlProvider {
 
 	DbProviderFactory ExternalMySqlProvider.GetDbProviderFactory() => MySqlConnectorFactory.Instance;
 
-	Exception? ExternalMySqlProvider.CreateCommandException( Exception originalException, Func<string, string> messageGetter ) {
-		if( new[] { "Deadlock found when trying to get lock", "Lock wait timeout exceeded" }.Any( i =>
-			   originalException.Message.Contains( i, StringComparison.Ordinal ) ) )
-			return new DbConcurrencyException( messageGetter( "A concurrency error occurred." ), originalException );
+	Exception ExternalMySqlProvider.CreateCommandException( Exception originalException, Func<string, string> messageGetter ) {
+		if( originalException is not MySqlException original )
+			return new Exception( messageGetter( "" ), originalException );
 
-		if( originalException.Message.Contains( "Command Timeout expired", StringComparison.Ordinal ) )
-			return new DbCommandTimeoutException( messageGetter( "A command timeout occurred." ), originalException );
+		if( original.ErrorCode is MySqlErrorCode.LockDeadlock or MySqlErrorCode.LockWaitTimeout )
+			return new DbConcurrencyException( messageGetter( "A concurrency error occurred." ), original );
 
-		return null;
+		if( original.ErrorCode == MySqlErrorCode.CommandTimeoutExpired )
+			return new DbCommandTimeoutException( messageGetter( "A command timeout occurred." ), original );
+
+		return new Exception( messageGetter( "Error number: " + original.Number + "." ), original );
 	}
 
 	void ExternalMySqlProvider.RegisterDependencyInjectionServicesForMigration( IMigrationRunnerBuilder builder ) {
