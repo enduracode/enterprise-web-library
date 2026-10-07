@@ -122,20 +122,33 @@ public class AutomaticDatabaseConnectionManager {
 	/// <summary>
 	/// Executes the specified method with data modifications enabled and the data-access cache disabled. Rolls back modifications if an exception occurs.
 	/// </summary>
-	public void ExecuteWithModificationsEnabled( Action modificationMethod ) {
+	/// <param name="modificationMethod">The modification method.</param>
+	/// <param name="successfulRollbackHandler">A function that is called if an exception occurs and modifications are successfully rolled back. Takes the
+	/// exception and returns whether database transactions can continue. Returning true implies that you have fully handled the exception. Returning false
+	/// rethrows it. You can also throw a new exception if needed.</param>
+	/// <returns>False if modifications are rolled back and the exception is handled; true otherwise.</returns>
+	public bool ExecuteWithModificationsEnabled( Action modificationMethod, Func<Exception, bool>? successfulRollbackHandler = null ) {
 		EnableModifications();
 		dataAccessState.DisableCache();
+
+		var exceptionOccurred = false;
 		try {
 			modificationMethod();
 			dataAccessState.ResetCache();
 			PreExecuteCommitTimeValidationMethods();
 		}
-		catch {
-			RollbackModifications();
+		catch( Exception e ) {
+			var rollbackFailed = !RollbackModifications();
 			dataAccessState.ResetCache();
-			throw;
+			if( rollbackFailed || successfulRollbackHandler?.Invoke( e ) != true )
+				throw;
+			exceptionOccurred = true;
 		}
+		if( exceptionOccurred )
+			return false;
+
 		CommitModifications();
+		return true;
 	}
 
 	internal void EnableModifications() {

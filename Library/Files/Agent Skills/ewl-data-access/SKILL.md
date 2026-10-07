@@ -537,6 +537,67 @@ do not replace separately committed per-item work with one large scope around
 an entire service tick: modification scopes inside it do not independently
 commit the outer transaction.
 
+### Recovering from failed modifications
+
+To recover from failed modifications and continue working in the same database
+transactions, use `ExecuteWithModificationsEnabled` with its optional
+`successfulRollbackHandler`. This is the required recovery pattern for new code.
+Do not implement alternative recovery with manual savepoints, transaction-state
+queries, or exception suppression inside the modification callback. Do not catch
+exceptions outside the call to classify them as safe for continuation: command
+errors may be wrapped or translated, including into `DataModificationException`,
+without establishing that rollback succeeded.
+
+The handler receives the original exception only after the failed modifications
+are successfully rolled back, their non-transactional registrations are discarded,
+modification bookkeeping is reset, and the retrieval cache is reset. If rollback
+reports transaction loss or throws, the handler is not called. Failures while
+enabling or completing modifications also bypass it. A successful rollback
+permits the handler to evaluate the exception;
+it does not automatically make programming, concurrency, or timeout failures
+appropriate to suppress. Accept only explicitly intended failure categories.
+
+The handler returns true to suppress the exception and false to rethrow it. It
+may also wrap and throw the exception itself. Handler failures propagate.
+The method returns true when modifications succeed and false when a recovered
+failure is suppressed. With no handler, failures continue to throw; existing
+callers can ignore the success return. Earlier successful modifications remain
+pending. Successful calls do not commit the database transactions; the automatic
+connection manager commits them afterward.
+
+```csharp
+AutomaticDatabaseConnectionManager.ExecuteWithAutomaticDatabaseConnections( () => {
+	var preparedRows = prepareRows();
+	foreach( var row in preparedRows ) {
+		if( !AutomaticDatabaseConnectionManager.Current.ExecuteWithModificationsEnabled(
+			    row.ModifyData,
+			    successfulRollbackHandler: exception => {
+				    if( exception is not DbCommandExecutionException and not DataModificationException )
+					    return false;
+				    reportRowFailure( row, exception );
+				    return true;
+			    } ) )
+			continue;
+
+		row.UpdateInMemoryState();
+	}
+} );
+```
+
+Make a separate `ExecuteWithModificationsEnabled` call for each item, in sequence;
+these calls cannot nest. Keep in-memory success updates outside the modification
+callback and recovery handler, since
+rollback cannot undo application-state changes. Do not retry the callback from
+the handler: rollback does not refresh the database transaction snapshots. Queue
+external effects through `AddNonTransactionalModificationMethod`; registrations
+from successful modifications execute only after the automatic connection manager
+commits the database transactions. A fatal failure of the overall operation
+discards pending effects. Direct external calls cannot be undone by rollback.
+
+Separately committed per-item database transactions and whole-transaction retries
+have different commit/retry semantics; they are not substitutes for savepoint recovery
+within the same database transactions.
+
 ## Application-level table caching
 
 First inspect the generated retrieval API and the database schema to determine
