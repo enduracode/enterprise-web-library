@@ -13,5 +13,7 @@ public interface ExternalMySqlProvider {
 
 	Exception CreateCommandException( Exception originalException, Func<string, string> messageGetter );
 
+	bool RollbackExceptionIsLostTransaction( Exception exception );
+
 	void RegisterDependencyInjectionServicesForMigration( IMigrationRunnerBuilder builder );
 }

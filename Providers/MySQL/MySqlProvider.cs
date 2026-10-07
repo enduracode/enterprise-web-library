@@ -39,6 +39,9 @@ public class MySqlProvider: ExternalMySqlProvider {
 		return new Exception( messageGetter( "Error number: " + original.Number + "." ), original );
 	}
 
+	bool ExternalMySqlProvider.RollbackExceptionIsLostTransaction( Exception exception ) =>
+		exception is MySqlException { ErrorCode: MySqlErrorCode.StoredProcedureDoesNotExist /* confusing name, but means missing savepoint in this context */ };
+
 	void ExternalMySqlProvider.RegisterDependencyInjectionServicesForMigration( IMigrationRunnerBuilder builder ) {
 		builder.AddMySql8();
 	}

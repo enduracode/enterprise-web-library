@@ -257,8 +257,8 @@ public class DatabaseConnection {
 				//
 				// We set rollbackWasToLastSavepoint to false so that we do not accumulate additional exceptions while the client attempts to roll back all nest levels.
 				catch( Exception exception ) when( exception is InvalidOperationException or SqlException { Number: 3903 } ||
-				                                   ( databaseInfo is MySqlInfo && exception.Message.Contains( "SAVEPOINT", StringComparison.Ordinal ) &&
-				                                     exception.Message.Contains( "does not exist", StringComparison.Ordinal ) ) ) {
+				                                   ( databaseInfo is MySqlInfo &&
+				                                     ExternalFunctionalityStatics.ExternalMySqlProvider.RollbackExceptionIsLostTransaction( exception ) ) ) {
 					if( savepoints is not null ) {
 						rollbackWasToLastSavepoint = false;
 						savepoint = null;
