@@ -215,14 +215,7 @@ public class DatabaseConnection {
 			savepointCommitTimeValidationIndexes!.Push( commitTimeValidationMethods!.Count );
 	}
 
-	private void createSavepoint( string name ) {
-		if( databaseInfo is OracleInfo ) {
-			var saveMethod = tx!.WrappedTransaction.GetType().GetMethod( "Save" )!;
-			saveMethod.Invoke( tx!.WrappedTransaction, [ name ] );
-		}
-		else
-			tx!.WrappedTransaction.Save( name );
-	}
+	private void createSavepoint( string name ) => tx!.WrappedTransaction.Save( name );
 
 	/// <summary>
 	/// Rolls back all commands since the last call to BeginTransaction.
@@ -252,12 +245,7 @@ public class DatabaseConnection {
 					if( savepoint is null )
 						tx!.Rollback();
 					else if( savepoint.Length > 0 )
-						if( databaseInfo is OracleInfo ) {
-							var rollbackMethod = tx!.WrappedTransaction.GetType().GetMethod( "Rollback", [ typeof( string ) ] )!;
-							rollbackMethod.Invoke( tx!.WrappedTransaction, [ savepoint ] );
-						}
-						else
-							tx!.WrappedTransaction.Rollback( savepoint );
+						tx!.WrappedTransaction.Rollback( savepoint );
 				}
 
 				// We need this catch block because databases will sometimes roll back a transaction on their own when they encounter a “serious” error. In SQL Server,
