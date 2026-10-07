@@ -52,6 +52,13 @@ public class OracleDatabaseProvider: ExternalOracleDatabaseProvider {
 		if( original.Number == 1109 )
 			return new DbConnectionFailureException( messageGetter( "Failed to connect to Oracle." ), original );
 
+		var errorNumbers = original.Errors.Cast<OracleError>()
+			.Select( i => i.Number )
+			.Where( i => i != 6512 /* PL/SQL backtrace location, not a meaningful error here */ )
+			.Materialize();
+		if( errorNumbers.Any() && errorNumbers.All( number => number is 1 or 1400 or 1407 or 1401 or 12899 or 1426 or 1438 or 2290 or 2291 or 2292 ) )
+			return new DbCommandExecutionException( messageGetter( "Error number: " + original.Number + "." ), original );
+
 		return new Exception( messageGetter( "Error number: " + original.Number + "." ), original );
 	}
 

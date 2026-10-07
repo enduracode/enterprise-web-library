@@ -36,6 +36,12 @@ public class MySqlProvider: ExternalMySqlProvider {
 		if( original.ErrorCode == MySqlErrorCode.CommandTimeoutExpired )
 			return new DbCommandTimeoutException( messageGetter( "A command timeout occurred." ), original );
 
+		if( original.ErrorCode is MySqlErrorCode.ColumnCannotBeNull or MySqlErrorCode.DuplicateKeyEntry or MySqlErrorCode.NoReferencedRow
+			    or MySqlErrorCode.NoReferencedRow2 or MySqlErrorCode.RowIsReferenced or MySqlErrorCode.RowIsReferenced2 or MySqlErrorCode.WarningDataOutOfRange
+			    or MySqlErrorCode.DataTooLong or MySqlErrorCode.DataOutOfRange ||
+		    original.Number == 3819 /* CHECK constraint violation, not named in MySqlErrorCode */ )
+			return new DbCommandExecutionException( messageGetter( "Error number: " + original.Number + "." ), original );
+
 		return new Exception( messageGetter( "Error number: " + original.Number + "." ), original );
 	}
 
