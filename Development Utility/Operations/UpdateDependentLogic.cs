@@ -1090,7 +1090,18 @@ internal class UpdateDependentLogic: Operation {
 				writeMsBuildProperty( """<DefineConstants Condition="'$(MSBuildProjectName)'=='Library New'">EWL_NEW</DefineConstants>""" );
 			}
 
-			writeMsBuildProperty( "<Version>{0}</Version>".FormatWith( "{0}.0.{1}.0".FormatWith( installation.CurrentMajorVersion, installation.NextBuildNumber ) ) );
+			var versionProperty = "<Version>{0}</Version>".FormatWith( "{0}.0.{1}.0".FormatWith( installation.CurrentMajorVersion, installation.NextBuildNumber ) );
+			if( installation.SystemIsTewl() && !projectName.Equals( "Library", StringComparison.Ordinal ) ) {
+				// keep version out of shared repo
+				writer.WriteLine(
+					"""</PropertyGroup><Import Project="$(MSBuildThisFileDirectory)Version.props" Condition="Exists('$(MSBuildThisFileDirectory)Version.props')" /><PropertyGroup>""" );
+				File.WriteAllText(
+					EwlStatics.CombinePaths( projectPath, "Version.props" ),
+					$"<Project><PropertyGroup>{versionProperty}</PropertyGroup></Project>",
+					Encoding.UTF8 );
+			}
+			else
+				writeMsBuildProperty( versionProperty );
 
 			// assembly attributes; see https://docs.microsoft.com/en-us/dotnet/standard/assembly/set-attributes
 			writeMsBuildProperty( "<GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>" );
