@@ -1176,14 +1176,14 @@ internal class UpdateDependentLogic: Operation {
 				writer.WriteLine( $"""<Compile Include="..\Library\{externalFunctionalityProviderPath}" Visible="false" />""" );
 
 			if( projectName.Equals( UnitTestingInitializationOps.UnitTestProjectName, StringComparison.Ordinal ) ) {
-				writer.WriteLine( """<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.5.1" />""" );
+				writer.WriteLine( """<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />""" );
 
-				writer.WriteLine( """<PackageReference Include="NUnit.Analyzers" Version="4.13.0">""" );
+				writer.WriteLine( """<PackageReference Include="NUnit.Analyzers" Version="4.15.0">""" );
 				writer.WriteLine( "<PrivateAssets>all</PrivateAssets>" );
 				writer.WriteLine( "<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>" );
 				writer.WriteLine( "</PackageReference>" );
 
-				writer.WriteLine( """<PackageReference Include="NUnit3TestAdapter" Version="6.2.0" />""" );
+				writer.WriteLine( """<PackageReference Include="NUnit3TestAdapter" Version="6.3.0" />""" );
 			}
 			else if( !installation.DevelopmentInstallationLogic.SystemIsEwl || !projectName.EndsWith( " Provider", StringComparison.Ordinal ) )
 				writer.WriteLine( $"""<InternalsVisibleTo Include="{unitTestNamespaceAndAssemblyName}" />""" );

@@ -2,7 +2,7 @@
 
   <ItemGroup>
     <PackageReference Include="FluentMigrator.Runner.MySql" Version="8.0.1" />
-    <PackageReference Include="MySqlConnector" Version="2.5.0" />
+    <PackageReference Include="MySqlConnector" Version="2.6.2" />
   </ItemGroup>
 
   <ItemGroup>
