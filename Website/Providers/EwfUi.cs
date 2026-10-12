@@ -1,6 +1,6 @@
 ﻿namespace EnterpriseWebLibrary.Website.Providers;
 
-internal class EwfUi: AppEwfUiProvider {
+class EwfUi: AppEwfUiProvider {
 	public override ActionComponentSetupsParameter? GetGlobalNavActions( string postBackIdBase ) {
 		if( CreateSystem.GetInfo().MatchesCurrent() )
 			return null;

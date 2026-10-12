@@ -6,7 +6,7 @@ using NodaTime;
 namespace EnterpriseWebLibrary.Providers;
 
 [ UsedImplicitly ]
-internal class UserManagement: SystemUserManagementProvider {
+class UserManagement: SystemUserManagementProvider {
 	protected override IEnumerable<IdentityProvider> GetIdentityProviders() =>
 		new LocalIdentityProvider(
 			"{0} Team".FormatWith( EwlStatics.EwlInitialism ),

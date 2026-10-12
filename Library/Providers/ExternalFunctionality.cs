@@ -8,7 +8,7 @@ using JetBrains.Annotations;
 namespace EnterpriseWebLibrary.Providers;
 
 [ UsedImplicitly ]
-internal class ExternalFunctionality: SystemExternalFunctionalityProvider {
+class ExternalFunctionality: SystemExternalFunctionalityProvider {
 	protected override ExternalMySqlProvider GetMySqlProvider() => new MySqlProvider();
 	protected override ExternalOracleDatabaseProvider GetOracleDatabaseProvider() => new OracleDatabaseProvider();
 	protected override ExternalSqliteProvider? GetSqliteProvider() => new SqliteProvider();
