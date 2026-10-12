@@ -3,7 +3,7 @@
 namespace EnterpriseWebLibrary.Website.Providers;
 
 partial class RequestDispatching {
-	protected override void ConfigurePostFrameworkPipeline( WebApplication app ) {
+	protected override void ConfigurePostFrameworkPipeline( WebApplication app, Action slowRequestNotifier ) {
 		app.MapGet( "asp-net/minimal-api", WebFrameworkDemo.AspNet.ApiMethods.Get );
 
 		app.UseHttpsRedirection();

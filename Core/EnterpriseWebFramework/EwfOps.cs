@@ -611,7 +611,7 @@ public static class EwfOps {
 					RequestDispatchingStatics.GetAppProvider().AddCustomMiddleware( app );
 					app.Use( RequestDispatchingStatics.ProcessRequest );
 					app.UseRouting();
-					RequestDispatchingStatics.GetAppProvider().ConfigurePostFrameworkPipeline( app );
+					RequestDispatchingStatics.GetAppProvider().ConfigurePostFrameworkPipeline( app, () => RequestDispatchingStatics.RequestState.AllowSlowRequest() );
 					app.Use( ensureUrlResolved );
 
 					app.Run();

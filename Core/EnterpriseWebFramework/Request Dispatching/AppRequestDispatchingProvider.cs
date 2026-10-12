@@ -16,7 +16,10 @@ public abstract class AppRequestDispatchingProvider {
 	/// <summary>
 	/// Configures the portion of the ASP.NET pipeline that will run for requests not handled by the framework.
 	/// </summary>
-	protected internal virtual void ConfigurePostFrameworkPipeline( WebApplication app ) {}
+	/// <param name="app"></param>
+	/// <param name="slowRequestNotifier">Call during any request that will take more than about a second to process. Use only from the post-framework pipeline.
+	/// </param>
+	protected internal virtual void ConfigurePostFrameworkPipeline( WebApplication app, Action slowRequestNotifier ) {}
 
 	/// <summary>
 	/// Returns the current slow-request threshold for the application.
