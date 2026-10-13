@@ -7,7 +7,7 @@ using EnterpriseWebLibrary.InstallationSupportUtility;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess;
 
-internal class Column {
+class Column {
 	/// <summary>
 	/// If includeKeyInfo is true, all key columns for involved tables will be returned even if they were not selected.
 	/// </summary>
@@ -96,9 +96,12 @@ internal class Column {
 	internal bool IsKey => isKey!.Value;
 
 	// NOTE: It would be best to use primary keys here, but unfortunately we don't always have that information.
-	//internal bool UseToUniquelyIdentifyRow { get { return !allowsNull && dataType.IsValueType /*We could use IsPrimitive if not for Oracle resolving to System.Decimal.*/; } }
-	// Right now we assume that at least one column in table (or query) returns true for UseToUniquelyIdentifyRow. This might not always be the case, for example if you have a query
-	// that selects file contents only. If we re-implement this in a way that makes our assumption false, we'll need to modify DataAccessStatics to detect the case where no
+	//internal bool UseToUniquelyIdentifyRow { get { return !allowsNull && dataType.IsValueType /*We could use IsPrimitive if not for Oracle resolving to
+	// System.Decimal.*/; } }
+	// Right now we assume that at least one column in table (or query) returns true for UseToUniquelyIdentifyRow. This might not always be the case, for example
+	// if you have a query
+	// that selects file contents only. If we re-implement this in a way that makes our assumption false, we'll need to modify DataAccessStatics to detect the
+	// case where no
 	// columns return true for this and provide a useful exception.
 	internal bool UseToUniquelyIdentifyRow => !valueContainer.DataType.IsArray && !isRowVersion;
 

@@ -4,7 +4,7 @@ using Tewl.IO;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess.Subsystems.StandardModification;
 
-internal static class StandardModificationStatics {
+static class StandardModificationStatics {
 	private static TextWriter writer = null!;
 	private static Database database = null!;
 	private static TableColumns columns = null!;

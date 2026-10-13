@@ -7,7 +7,7 @@ using Tewl.IO;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess.Subsystems;
 
-internal static class TableRetrievalStatics {
+static class TableRetrievalStatics {
 	private const string oracleRowVersionDataType = "decimal";
 
 	internal static void Generate(
