@@ -1,13 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using JetBrains.Annotations;
 
-namespace EnterpriseWebLibrary.EnterpriseWebFramework {
+namespace EnterpriseWebLibrary.EnterpriseWebFramework;
+
+/// <summary>
+/// An object that defines one or more CSS elements.
+/// </summary>
+[ UsedImplicitly( ImplicitUseTargetFlags.WithInheritors ) ]
+public interface ControlCssElementCreator {
 	/// <summary>
-	/// An object that defines one or more CSS elements.
+	/// Creates an array of CSS elements.
 	/// </summary>
-	public interface ControlCssElementCreator {
-		/// <summary>
-		/// Creates an array of CSS elements.
-		/// </summary>
-		IReadOnlyCollection<CssElement> CreateCssElements();
-	}
+	IReadOnlyCollection<CssElement> CreateCssElements();
 }
