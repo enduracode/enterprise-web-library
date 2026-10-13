@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
-internal class NotificationSectionContainer: FlowComponent {
+class NotificationSectionContainer: FlowComponent {
 	private static readonly ElementClass elementClass = new( "ewfNotification" );
 
 	[ UsedImplicitly ]

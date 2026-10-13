@@ -5,7 +5,7 @@ using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
-internal class StatusMessageList: FlowComponent {
+class StatusMessageList: FlowComponent {
 	private static readonly ElementClass infoMessageContainerClass = new( "ewfInfoMsg" );
 	private static readonly ElementClass warningMessageContainerClass = new( "ewfWarnMsg" );
 	private static readonly ElementClass messageTextClass = new( "ewfStatusText" );
