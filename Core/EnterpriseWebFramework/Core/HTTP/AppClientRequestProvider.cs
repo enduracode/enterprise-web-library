@@ -7,6 +7,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 /// <summary>
 /// Application-specific logic for the client request.
 /// </summary>
+[ UsedImplicitly( ImplicitUseTargetFlags.WithInheritors ) ]
 public class AppClientRequestProvider {
 	/// <summary>
 	/// Returns true if the specified request is secure. Override this to be more than just <see cref="HttpRequest.IsHttps"/> if you are using a reverse proxy to

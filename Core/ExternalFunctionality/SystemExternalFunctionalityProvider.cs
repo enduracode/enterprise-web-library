@@ -1,8 +1,11 @@
-﻿namespace EnterpriseWebLibrary.ExternalFunctionality;
+﻿using JetBrains.Annotations;
+
+namespace EnterpriseWebLibrary.ExternalFunctionality;
 
 /// <summary>
 /// System-specific logic for external functionality.
 /// </summary>
+[ UsedImplicitly( ImplicitUseTargetFlags.WithInheritors ) ]
 public abstract class SystemExternalFunctionalityProvider {
 	/// <summary>
 	/// Returns the external MySQL provider for the system. This should be a simple constructor expression with no other logic.

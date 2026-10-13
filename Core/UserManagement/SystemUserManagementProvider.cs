@@ -1,10 +1,12 @@
-﻿using NodaTime;
+﻿using JetBrains.Annotations;
+using NodaTime;
 
 namespace EnterpriseWebLibrary.UserManagement;
 
 /// <summary>
 /// Defines how user management operations will be carried out against the database for a particular application.
 /// </summary>
+[ UsedImplicitly( ImplicitUseTargetFlags.WithInheritors ) ]
 public abstract class SystemUserManagementProvider {
 	/// <summary>
 	/// Returns the identity providers for the system.

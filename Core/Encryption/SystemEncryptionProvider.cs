@@ -1,8 +1,11 @@
-﻿namespace EnterpriseWebLibrary.Encryption;
+﻿using JetBrains.Annotations;
+
+namespace EnterpriseWebLibrary.Encryption;
 
 /// <summary>
 /// System-specific encryption logic.
 /// </summary>
+[ UsedImplicitly( ImplicitUseTargetFlags.WithInheritors ) ]
 public interface SystemEncryptionProvider {
 	/// <summary>
 	/// To generate a key for a new system, use Aes.Create() and then retrieve the key from the resulting object. It should be 32 bytes (256 bits) long since that

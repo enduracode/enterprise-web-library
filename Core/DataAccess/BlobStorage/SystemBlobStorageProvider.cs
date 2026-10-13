@@ -1,10 +1,12 @@
-﻿using NodaTime;
+﻿using JetBrains.Annotations;
+using NodaTime;
 
 namespace EnterpriseWebLibrary.DataAccess.BlobStorage;
 
 /// <summary>
 /// System-specific BLOB-storage logic.
 /// </summary>
+[ UsedImplicitly( ImplicitUseTargetFlags.WithInheritors ) ]
 public interface SystemBlobStorageProvider {
 	/// <summary>
 	/// Retrieves all BLOB IDs and hashes.

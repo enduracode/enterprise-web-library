@@ -1,4 +1,5 @@
 ﻿using System.Security.Cryptography;
+using JetBrains.Annotations;
 using NodaTime;
 
 namespace EnterpriseWebLibrary;
@@ -6,6 +7,7 @@ namespace EnterpriseWebLibrary;
 /// <summary>
 /// General system-specific logic.
 /// </summary>
+[ UsedImplicitly( ImplicitUseTargetFlags.WithInheritors ) ]
 public abstract class SystemGeneralProvider {
 	/// <summary>
 	/// Gets the display name of the system.

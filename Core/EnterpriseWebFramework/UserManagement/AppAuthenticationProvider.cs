@@ -1,11 +1,13 @@
 ﻿using EnterpriseWebLibrary.EnterpriseWebFramework.Core;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
+using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 
 /// <summary>
 /// Application-specific authentication logic.
 /// </summary>
+[ UsedImplicitly( ImplicitUseTargetFlags.WithInheritors ) ]
 public class AppAuthenticationProvider {
 	/// <summary>
 	/// Returns the components that identify the authenticated user and let them log out, change their password, etc. Returns null for the framework’s built-in

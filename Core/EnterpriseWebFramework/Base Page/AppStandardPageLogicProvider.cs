@@ -1,10 +1,12 @@
 ﻿using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
+using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 /// <summary>
 /// Application-specific logic for the standard functionality in all pages.
 /// </summary>
+[ UsedImplicitly( ImplicitUseTargetFlags.WithInheritors ) ]
 public abstract class AppStandardPageLogicProvider {
 	// The warning below also appears on PageBase.getPageViewDataModificationMethod.
 	/// <summary>

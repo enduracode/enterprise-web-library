@@ -1,10 +1,8 @@
 ﻿using EnterpriseWebLibrary.DataAccess.BlobStorage;
-using JetBrains.Annotations;
 using NodaTime;
 
 namespace EnterpriseWebLibrary.Providers;
 
-[ UsedImplicitly ]
 public class BlobStorage: SystemBlobStorageProvider {
 	public const int FileCollectionManagerCollectionId = 1;
 

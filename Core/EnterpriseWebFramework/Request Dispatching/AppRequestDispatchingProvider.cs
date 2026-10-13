@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using EnterpriseWebLibrary.EnterpriseWebFramework.WellKnownUrlHandling;
+using JetBrains.Annotations;
 using Microsoft.AspNetCore.Builder;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -7,6 +8,7 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 /// <summary>
 /// Application-specific request-dispatching logic.
 /// </summary>
+[ UsedImplicitly( ImplicitUseTargetFlags.WithInheritors ) ]
 public abstract class AppRequestDispatchingProvider {
 	/// <summary>
 	/// Adds custom middleware components to the ASP.NET request pipeline.

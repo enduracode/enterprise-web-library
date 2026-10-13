@@ -1,10 +1,12 @@
 ﻿using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
+using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 /// <summary>
 /// Application-specific configuration for the EWF UI.
 /// </summary>
+[ UsedImplicitly( ImplicitUseTargetFlags.WithInheritors ) ]
 public abstract class AppEwfUiProvider {
 	/// <summary>
 	/// Creates and returns a list of custom style sheets that should be used on EWF UI pages.

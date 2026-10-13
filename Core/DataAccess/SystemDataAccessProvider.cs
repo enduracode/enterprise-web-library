@@ -1,8 +1,11 @@
-﻿namespace EnterpriseWebLibrary.DataAccess;
+﻿using JetBrains.Annotations;
+
+namespace EnterpriseWebLibrary.DataAccess;
 
 /// <summary>
 /// System-specific data-access logic.
 /// </summary>
+[ UsedImplicitly( ImplicitUseTargetFlags.WithInheritors ) ]
 public interface SystemDataAccessProvider {
 	/// <summary>
 	/// EWL use only.

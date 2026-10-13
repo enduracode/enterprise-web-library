@@ -1,8 +1,11 @@
-﻿namespace EnterpriseWebLibrary.EnterpriseWebFramework.OpenIdProvider;
+﻿using JetBrains.Annotations;
+
+namespace EnterpriseWebLibrary.EnterpriseWebFramework.OpenIdProvider;
 
 /// <summary>
 /// Application-specific OpenID Provider logic.
 /// </summary>
+[ UsedImplicitly( ImplicitUseTargetFlags.WithInheritors ) ]
 public abstract class AppOpenIdProviderProvider {
 	/// <summary>
 	/// Returns a pair of methods for managing the installation’s self-signed certificate, or null if a certificate is not supported.
@@ -15,7 +18,7 @@ public abstract class AppOpenIdProviderProvider {
 	protected internal abstract IEnumerable<OpenIdClient> GetClients();
 
 	/// <summary>
-	/// Authenticates the user for the Authorization Endpoint. 
+	/// Authenticates the user for the Authorization Endpoint.
 	/// </summary>
 	protected internal abstract OpenIdAuthenticationResult AuthenticateUser( string clientIdentifier );
 }

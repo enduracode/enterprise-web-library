@@ -1,11 +1,9 @@
 ﻿using EnterpriseWebLibrary.UserManagement;
 using EnterpriseWebLibrary.UserManagement.IdentityProviders;
-using JetBrains.Annotations;
 using NodaTime;
 
 namespace EnterpriseWebLibrary.Providers;
 
-[ UsedImplicitly ]
 class UserManagement: SystemUserManagementProvider {
 	protected override IEnumerable<IdentityProvider> GetIdentityProviders() =>
 		new LocalIdentityProvider(
