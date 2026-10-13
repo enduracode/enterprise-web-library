@@ -3,7 +3,6 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementB
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;
 using EnterpriseWebLibrary.MailMerging;
 using EnterpriseWebLibrary.MailMerging.RowTree;
-using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
@@ -13,7 +12,6 @@ public static class MailMergingStatics {
 	private static readonly ElementClass rowTreeClass = new( "ewfMrt" );
 	private static readonly ElementClass rowTreeChildClass = new( "ewfMrtc" );
 
-	[ UsedImplicitly ]
 	private class CssElementCreator: ControlCssElementCreator {
 		IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() =>
 			new[]

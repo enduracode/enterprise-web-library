@@ -4,7 +4,6 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementB
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.IdReferencing;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
-using JetBrains.Annotations;
 using Tewl.InputValidation;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -15,7 +14,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 public class TextControlSetup {
 	internal static readonly ElementClass ElementClass = new( "ewfTextC" );
 
-	[ UsedImplicitly ]
 	private class CssElementCreator: ControlCssElementCreator {
 		IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
 			return

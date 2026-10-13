@@ -1,14 +1,12 @@
 ﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Flow;
-using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
 class NotificationSectionContainer: FlowComponent {
 	private static readonly ElementClass elementClass = new( "ewfNotification" );
 
-	[ UsedImplicitly ]
 	private class CssElementCreator: ControlCssElementCreator {
 		IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() =>
 			new CssElement( "NotificationSectionContainer", "{0} div.{1}".FormatWith( BasePageStatics.FormSelector, elementClass.ClassName ) ).ToCollection();

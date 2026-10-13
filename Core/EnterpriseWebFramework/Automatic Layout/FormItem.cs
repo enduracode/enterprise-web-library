@@ -16,7 +16,6 @@ public class FormItem {
 	private static readonly ElementClass labelClass = new( "ewfFiL" );
 	private static readonly ElementClass contentClass = new( "ewfFiC" );
 
-	[ UsedImplicitly ]
 	private class CssElementCreator: ControlCssElementCreator {
 		IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() =>
 			new CssElement( "FormItem", "div.{0}".FormatWith( itemClass.ClassName ) ).ToCollection()

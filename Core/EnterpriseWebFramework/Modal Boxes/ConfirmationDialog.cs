@@ -1,6 +1,5 @@
 ﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
-using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
@@ -10,7 +9,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 public class ConfirmationDialog: EtherealComponent {
 	private static readonly ElementClass buttonListContainerClass = new( "ewfCdbl" );
 
-	[ UsedImplicitly ]
 	internal class CssElementCreator: ControlCssElementCreator {
 		IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() =>
 			new CssElement( "ConfirmationDialogButtonListContainer", $"div.{buttonListContainerClass.ClassName}" ).ToCollection();

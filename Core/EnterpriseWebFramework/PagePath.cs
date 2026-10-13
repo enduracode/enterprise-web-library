@@ -1,6 +1,5 @@
 ﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
-using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
@@ -30,7 +29,6 @@ public enum PagePathCurrentPageBehavior {
 public class PagePath: FlowComponent {
 	private static readonly ElementClass elementClass = new( "ewfPagePath" );
 
-	[ UsedImplicitly ]
 	private class CssElementCreator: ControlCssElementCreator {
 		IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() =>
 			new CssElement( "PagePathContainer", "div.{0}".FormatWith( elementClass.ClassName ) ).ToCollection();

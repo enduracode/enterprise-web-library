@@ -1,7 +1,6 @@
 ﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;
-using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
@@ -10,7 +9,6 @@ class StatusMessageList: FlowComponent {
 	private static readonly ElementClass warningMessageContainerClass = new( "ewfWarnMsg" );
 	private static readonly ElementClass messageTextClass = new( "ewfStatusText" );
 
-	[ UsedImplicitly ]
 	private class CssElementCreator: ControlCssElementCreator {
 		IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() =>
 			new CssElement( "InfoMessageContainer", "{0} div.{1}".FormatWith( BasePageStatics.FormSelector, infoMessageContainerClass.ClassName ) ).ToCollection()

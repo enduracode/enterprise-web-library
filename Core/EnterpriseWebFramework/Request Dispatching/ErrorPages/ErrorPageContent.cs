@@ -1,12 +1,10 @@
 ﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
-using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.ErrorPages;
 
 public class ErrorPageContent: PageContent {
 	private static readonly ElementClass elementClass = new( "ewfError" );
 
-	[ UsedImplicitly ]
 	private class CssElementCreator: ControlCssElementCreator {
 		IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() =>
 			new CssElement( "ErrorPageBody", "body.{0}".FormatWith( elementClass.ClassName ) ).ToCollection();

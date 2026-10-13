@@ -3,7 +3,6 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.Componen
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.IdReferencing;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;
-using JetBrains.Annotations;
 using Tewl.InputValidation;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -14,7 +13,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 public class Checkbox: FormControl<PhrasingComponent> {
 	private static readonly ElementClass elementClass = new( "ewfCb" );
 
-	[ UsedImplicitly ]
 	private class CssElementCreator: ControlCssElementCreator {
 		IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() =>
 			new CssElement( "Checkbox", "label.{0}".FormatWith( elementClass.ClassName ) ).ToCollection()

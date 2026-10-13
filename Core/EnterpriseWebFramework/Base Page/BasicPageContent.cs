@@ -8,7 +8,6 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralC
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 using EnterpriseWebLibrary.EnterpriseWebFramework.PageInfrastructure;
 using EnterpriseWebLibrary.SystemSpecificLogic;
-using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
@@ -29,7 +28,6 @@ public sealed class BasicPageContent: PageContent {
 	private static Func<bool, string> intermediateUrlGetter = null!;
 	private static Func<( string message, ActionComponentSetupsParameter actions )?> impersonationWarningLineGetter = null!;
 
-	[ UsedImplicitly ]
 	private class CssElementCreator: ControlCssElementCreator {
 		IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
 			var elements = new List<CssElement>();

@@ -2,7 +2,6 @@
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;
-using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
@@ -17,7 +16,6 @@ public class ListErrorDisplayStyle: ErrorDisplayStyle<FlowComponent> {
 	/// </summary>
 	public static readonly IReadOnlyCollection<string> CssSelectors = "div.{0}".FormatWith( containerClass.ClassName ).ToCollection();
 
-	[ UsedImplicitly ]
 	private class CssElementCreator: ControlCssElementCreator {
 		IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
 			return new CssElement( "ErrorMessageListContainer", CssSelectors.ToArray() ).ToCollection();

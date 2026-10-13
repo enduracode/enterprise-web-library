@@ -5,7 +5,6 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.Componen
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.IdReferencing;
-using JetBrains.Annotations;
 using Tewl.InputValidation;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
@@ -22,7 +21,6 @@ public static class SelectList {
 	// This class name is used by the third-party select-css file.
 	internal static readonly ElementClass SelectCssClass = new( "select-css" );
 
-	[ UsedImplicitly ]
 	private class CssElementCreator: ControlCssElementCreator {
 		IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() =>
 			[

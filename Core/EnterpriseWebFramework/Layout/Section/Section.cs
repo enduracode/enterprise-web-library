@@ -1,7 +1,6 @@
 ﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ComponentDisplay;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
-using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
@@ -21,7 +20,6 @@ public sealed class Section: FlowComponent {
 	private static readonly ElementClass expandClass = new( "ewfSecExpand" );
 	private static readonly ElementClass contentClass = new( "ewfSecContent" );
 
-	[ UsedImplicitly ]
 	private class CssElementCreator: ControlCssElementCreator {
 		IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() {
 			var normalClosedSelector = "section." + normalClosedClass.ClassName;

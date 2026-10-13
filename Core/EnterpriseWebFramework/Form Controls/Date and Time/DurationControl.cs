@@ -2,7 +2,6 @@
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;
-using JetBrains.Annotations;
 using NodaTime;
 using Tewl.InputValidation;
 
@@ -14,7 +13,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 public class DurationControl: FormControl<PhrasingComponent> {
 	private static readonly ElementClass elementClass = new( "ewfDcc" );
 
-	[ UsedImplicitly ]
 	private class CssElementCreator: ControlCssElementCreator {
 		IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() =>
 			new CssElement( "DurationControlContainer", "span.{0}".FormatWith( elementClass.ClassName ) ).ToCollection();

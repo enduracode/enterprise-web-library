@@ -2,7 +2,6 @@
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
-using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -14,7 +13,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 public sealed class Chart: FlowComponent {
 	private static readonly ElementClass elementClass = new( "ewfChart" );
 
-	[ UsedImplicitly ]
 	private class CssElementCreator: ControlCssElementCreator {
 		IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() =>
 			new CssElement( "Chart", "div.{0}".FormatWith( elementClass.ClassName ) ).ToCollection();

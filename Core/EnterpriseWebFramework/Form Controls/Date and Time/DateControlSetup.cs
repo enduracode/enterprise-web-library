@@ -3,7 +3,6 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementB
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.IdReferencing;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.GeneralContentModels.Phrasing;
-using JetBrains.Annotations;
 using NodaTime;
 using NodaTime.Text;
 using Tewl.InputValidation;
@@ -16,7 +15,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 public class DateControlSetup {
 	private static readonly ElementClass elementClass = new( "ewfDc" );
 
-	[ UsedImplicitly ]
 	private class CssElementCreator: ControlCssElementCreator {
 		IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() =>
 			new CssElement( "DateControl", "duet-date-picker.{0}".FormatWith( elementClass.ClassName ) ).ToCollection();

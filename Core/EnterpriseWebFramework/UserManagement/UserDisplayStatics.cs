@@ -13,7 +13,6 @@ namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement;
 public static class UserDisplayStatics {
 	private static readonly ElementClass avatarClass = new( "ewfUa" );
 
-	[ UsedImplicitly ]
 	private class CssElementCreator: ControlCssElementCreator {
 		IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() =>
 			new CssElement( "UserAvatar", $"span.{avatarClass.ClassName}" ).ToCollection();

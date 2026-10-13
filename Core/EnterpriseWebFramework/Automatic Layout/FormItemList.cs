@@ -24,7 +24,6 @@ public class FormItemList: FlowComponent {
 	private static readonly ElementClass labelClass = new( "ewfFilL" );
 	private static readonly ElementClass contentClass = new( "ewfFilC" );
 
-	[ UsedImplicitly ]
 	private class CssElementCreator: ControlCssElementCreator {
 		IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() =>
 			new CssElement( "FormItemList", "div.{0}".FormatWith( allListsClass.ClassName ) ).ToCollection()

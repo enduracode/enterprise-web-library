@@ -8,7 +8,6 @@ using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic.AlternativeResourceModes;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Ui;
 using EnterpriseWebLibrary.SystemSpecificLogic;
-using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
@@ -55,7 +54,6 @@ public class UiPageContent: PageContent {
 	private static readonly ElementClass globalFootContainerClass = new( "ewfUiGf" );
 	private static readonly ElementClass poweredByEwlFooterClass = new( "ewfUiPoweredBy" );
 
-	[ UsedImplicitly ]
 	private class CssElementCreator: ControlCssElementCreator {
 		// Some of the elements below cover a subset of other CSS elements in a more specific way. For example, UiGlobalNavControlList selects the control list
 		// used for global navigation. This control list is also selected, with lower specificity, by the CSS element that selects all control lists. In general

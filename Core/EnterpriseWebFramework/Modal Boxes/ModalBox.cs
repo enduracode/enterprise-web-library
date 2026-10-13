@@ -1,7 +1,6 @@
 ﻿using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase;
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
-using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework;
 
@@ -15,7 +14,6 @@ public class ModalBox: EtherealComponent {
 
 	private static Func<ModalBoxId> browsingModalBoxIdGetter = null!;
 
-	[ UsedImplicitly ]
 	internal class CssElementCreator: ControlCssElementCreator {
 		internal static IReadOnlyCollection<string> GetContainerSelectors( string additionalSelector ) =>
 			"dialog.{0}".FormatWith( boxClass.ClassName + additionalSelector ).ToCollection();

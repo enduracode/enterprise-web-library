@@ -2,7 +2,6 @@
 using EnterpriseWebLibrary.EnterpriseWebFramework.ContentInfrastructure.ElementBase.Classification;
 using EnterpriseWebLibrary.EnterpriseWebFramework.Core.ResourceMetaLogic;
 using EnterpriseWebLibrary.UserManagement;
-using JetBrains.Annotations;
 
 namespace EnterpriseWebLibrary.EnterpriseWebFramework.UserManagement.Pages;
 
@@ -13,7 +12,6 @@ partial class Impersonate {
 	internal const string AnonymousUser = "anonymous";
 	private static readonly ElementClass elementClass = new( "ewfSelectUser" );
 
-	[ UsedImplicitly ]
 	private class CssElementCreator: ControlCssElementCreator {
 		IReadOnlyCollection<CssElement> ControlCssElementCreator.CreateCssElements() =>
 			new CssElement( "SelectUserPageBody", "body.{0}".FormatWith( elementClass.ClassName ) ).ToCollection();
