@@ -5,11 +5,12 @@ using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess.Subsystems;
 
-internal static class QueryRetrievalStatics {
+static class QueryRetrievalStatics {
 	private static DatabaseInfo info = null!;
 
 	internal static void Generate(
-		DatabaseConnection cn, TextWriter writer, string baseNamespace, Database database, EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
+		DatabaseConnection cn, TextWriter writer, string baseNamespace, Database database,
+		EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
 		if( configuration.queries == null )
 			return;
 
@@ -45,14 +46,15 @@ internal static class QueryRetrievalStatics {
 		writer.WriteLine( "}" ); // namespace
 	}
 
-	private static IReadOnlyCollection<Column> validateQueryAndGetColumns( DatabaseConnection cn, EnterpriseWebLibrary.Configuration.SystemDevelopment.Query query ) {
+	private static IReadOnlyCollection<Column> validateQueryAndGetColumns(
+		DatabaseConnection cn, EnterpriseWebLibrary.Configuration.SystemDevelopment.Query query ) {
 		// Attempt to query with every postSelectFromClause to ensure validity.
 		foreach( var postSelectFromClause in query.postSelectFromClauses )
 			cn.ExecuteReaderCommandWithSchemaOnlyBehavior(
 				DataAccessStatics.GetCommandFromRawQueryText( cn, query.selectFromClause + postSelectFromClause.ValueNonNullable.PrependDelimiter( " " ) ),
 				_ => {} );
 
-		return Column.GetColumnsInQueryResults( cn, query.selectFromClause, false, false );
+		return Column.GetColumnsInQueryResults( cn, query.selectFromClause, false );
 	}
 
 	private static void writeCacheClass( TextWriter writer, Database database, EnterpriseWebLibrary.Configuration.SystemDevelopment.Query query ) {

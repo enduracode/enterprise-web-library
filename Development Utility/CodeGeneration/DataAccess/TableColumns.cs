@@ -24,11 +24,8 @@ class TableColumns {
 
 	internal TableColumns( DatabaseConnection cn, DatabaseTable table, bool forRevisionHistoryLogic ) {
 		try {
-			// This hack allows code to be generated against a database that is configured for ASP.NET Application Services.
-			var isAspNetApplicationServicesTable = table.Name.StartsWith( "aspnet_" );
-
 			// NOTE: Cache this result.
-			AllColumns = Column.GetColumnsInQueryResults( cn, "SELECT * FROM " + table.QualifiedName, true, !isAspNetApplicationServicesTable );
+			AllColumns = Column.GetColumnsInQueryResults( cn, "SELECT * FROM " + table.QualifiedName, true );
 
 			// Identify key, identity, and non identity columns.
 			var nonIdentityColumns = new List<Column>();

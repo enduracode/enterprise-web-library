@@ -9,7 +9,7 @@ using EnterpriseWebLibrary.InstallationSupportUtility.InstallationModel;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess;
 
-internal static class DataAccessOps {
+static class DataAccessOps {
 	public static void GenerateDataAccessCode( TextWriter writer, DevelopmentInstallation installation ) {
 		var baseNamespace = installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName + ".DataAccess";
 
@@ -106,7 +106,6 @@ internal static class DataAccessOps {
 					var modTableColumns = Column.GetColumnsInQueryResults(
 						cn,
 						"SELECT * FROM {0}".FormatWith( DatabaseOps.GetModificationTableQualifiedName( database, table ) ),
-						false,
 						false );
 
 					if( modTableColumns.Count != columns.KeyColumns.Count )

@@ -1,27 +1,23 @@
 ﻿using System.Data;
 using System.Data.Common;
 using EnterpriseWebLibrary.DataAccess;
-using EnterpriseWebLibrary.DatabaseSpecification;
+using EnterpriseWebLibrary.DataAccess.CommandWriting;
+using EnterpriseWebLibrary.DataAccess.CommandWriting.Commands;
+using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction.Conditions;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess;
 
 class Column {
-	/// <summary>
-	/// If includeKeyInfo is true, all key columns for involved tables will be returned even if they were not selected.
-	/// </summary>
-	internal static IReadOnlyCollection<Column> GetColumnsInQueryResults(
-		DatabaseConnection cn, string commandText, bool includeKeyInfo, bool validateStringColumns ) {
+	internal static IReadOnlyCollection<Column> GetColumnsInQueryResults( DatabaseConnection cn, string commandText, bool isTableQuery ) {
 		var columns = new List<Column>();
 
 		var cmd = DataAccessStatics.GetCommandFromRawQueryText( cn, commandText );
 		var validationMethods = new List<Action>();
-		var readerMethod = new Action<DbDataReader>( r => {
-			foreach( DataRow row in r.GetSchemaTable()!.Rows )
-				columns.Add( new Column( row, includeKeyInfo, validateStringColumns, validationMethods, cn.DatabaseInfo ) );
-		} );
-		if( includeKeyInfo )
+		var readerMethod = new Action<DbDataReader>( r =>
+			columns.AddRange( from DataRow row in r.GetSchemaTable()!.Rows select new Column( cn, row, isTableQuery, isTableQuery, validationMethods ) ) );
+		if( isTableQuery )
 			cn.ExecuteReaderCommandWithKeyInfoBehavior( cmd, readerMethod );
 		else
 			cn.ExecuteReaderCommandWithSchemaOnlyBehavior( cmd, readerMethod );
@@ -39,7 +35,9 @@ class Column {
 	private readonly bool isRowVersion;
 	private readonly bool? isKey;
 
-	private Column( DataRow schemaTableRow, bool includeKeyInfo, bool validateIfString, List<Action> validationMethods, DatabaseInfo databaseInfo ) {
+	private Column( DatabaseConnection connection, DataRow schemaTableRow, bool includeKeyInfo, bool validateIfString, List<Action> validationMethods ) {
+		var databaseInfo = connection.DatabaseInfo;
+
 		ordinal = (int)schemaTableRow[ "ColumnOrdinal" ];
 
 		var dbTypeString = databaseInfo.GetDbTypeString( schemaTableRow[ "ProviderType" ] );
@@ -65,6 +63,12 @@ class Column {
 			if( validateIfString && !( databaseInfo is OracleInfo ) && valueContainer.DataType == typeof( string ) &&
 			    ( !( databaseInfo is MySqlInfo ) || dbTypeString != "JSON" ) && valueContainer.AllowsNull )
 				throw new UserCorrectableException( "String column {0} allows null, which is not allowed.".FormatWith( valueContainer.Name ) );
+
+			if( isKey is true ) {
+				var error = getKeyError( connection, schemaTableRow );
+				if( error.Length > 0 )
+					throw new UserCorrectableException( error );
+			}
 		} );
 	}
 

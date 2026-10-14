@@ -416,7 +416,8 @@ public class DatabaseConnection {
 	}
 
 	/// <summary>
-	/// Executes the specified command with SchemaOnly and KeyInfo behavior to get a data reader and then executes the specified method with the reader.
+	/// Executes the specified command with SchemaOnly and KeyInfo behavior to get a data reader and then executes the specified method with the reader. Note that
+	/// KeyInfo behavior causes all key columns for involved tables to be returned even if they were not selected.
 	/// </summary>
 	public void ExecuteReaderCommandWithKeyInfoBehavior( DbCommand cmd, Action<DbDataReader> readerMethod ) {
 		executeReaderCommand( cmd, CommandBehavior.SchemaOnly | CommandBehavior.KeyInfo, false, readerMethod );
