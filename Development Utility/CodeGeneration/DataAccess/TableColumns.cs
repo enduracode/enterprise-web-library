@@ -9,16 +9,6 @@ class TableColumns {
 
 	private readonly List<Column> keyColumns = new();
 
-	private readonly Column? identityColumn;
-
-	internal readonly Column? RowVersionColumn;
-	internal readonly IEnumerable<Column> AllColumnsExceptRowVersion;
-	internal readonly IEnumerable<Column> AllNonIdentityColumnsExceptRowVersion;
-
-	private readonly Column? primaryKeyAndRevisionIdColumn;
-
-	private readonly IEnumerable<Column> dataColumns;
-
 	internal bool HasKeyColumns => keyColumns.Any();
 
 	/// <summary>
@@ -27,8 +17,17 @@ class TableColumns {
 	internal IReadOnlyCollection<Column> KeyColumns =>
 		keyColumns.Any() ? keyColumns : throw new Exception( "The table must contain a primary key or other means of uniquely identifying a row." );
 
+	private readonly Column? identityColumn;
 	internal Column? IdentityColumn => identityColumn;
+
+	internal readonly Column? RowVersionColumn;
+	internal readonly IEnumerable<Column> AllColumnsExceptRowVersion;
+	internal readonly IEnumerable<Column> AllNonIdentityColumnsExceptRowVersion;
+
+	private readonly Column? primaryKeyAndRevisionIdColumn;
 	internal Column? PrimaryKeyAndRevisionIdColumn => primaryKeyAndRevisionIdColumn;
+
+	private readonly IEnumerable<Column> dataColumns;
 
 	/// <summary>
 	/// Gets all columns that are not the identity column, the row version column, or the primary key and revision ID column.
