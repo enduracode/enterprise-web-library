@@ -101,19 +101,14 @@ class Column {
 				if( !reader.Read() )
 					throw new Exception( "no rows exist" );
 
-				(string[] types, Func<string, bool> collationPredicate, string error) rules = connection.DatabaseInfo switch
+				( string[] types, string collation, string error ) rules = connection.DatabaseInfo switch
 					{
-						SqlServerInfo => ( [ "VarChar", "NVarChar" ],
-							                 collation => collation.EndsWith( "_BIN2", StringComparison.OrdinalIgnoreCase ) ||
-							                              collation.EndsWith( "_BIN2_UTF8", StringComparison.OrdinalIgnoreCase ),
-							                 "varchar or nvarchar with a BIN2 collation" ),
-						MySqlInfo => ( [ "VarChar" ], collation => collation.Equals( "utf8mb4_0900_bin", StringComparison.OrdinalIgnoreCase ),
-							             "varchar with collation utf8mb4_0900_bin (binary, NO PAD)" ),
-						OracleInfo => ( [ "Varchar2", "NVarchar2" ], collation => collation.Equals( "BINARY", StringComparison.OrdinalIgnoreCase ),
-							              "VARCHAR2 or NVARCHAR2 with explicit BINARY column collation" ),
+						SqlServerInfo => ( [ "VarChar", "NVarChar" ], "Latin1_General_100_BIN2_UTF8", "varchar or nvarchar with collation Latin1_General_100_BIN2_UTF8" ),
+						MySqlInfo => ( [ "VarChar" ], "utf8mb4_0900_bin", "varchar with collation utf8mb4_0900_bin (binary, NO PAD)" ),
+						OracleInfo => ( [ "Varchar2", "NVarchar2" ], "BINARY", "VARCHAR2 or NVARCHAR2 with explicit BINARY column collation" ),
 						_ => throw new UnexpectedValueException( "database info", connection.DatabaseInfo )
 					};
-				if( !rules.types.Contains( dbTypeString, StringComparer.Ordinal ) || !rules.collationPredicate( reader.GetString( 0 ) ) )
+				if( !rules.types.Contains( dbTypeString, StringComparer.Ordinal ) || !rules.collation.Equals( reader.GetString( 0 ), StringComparison.Ordinal ) )
 					error = $"Key column {valueContainer.Name} must use {rules.error}.";
 
 				if( reader.Read() )
