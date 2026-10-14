@@ -7,32 +7,20 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess;
 class TableColumns {
 	internal readonly IReadOnlyCollection<Column> AllColumns;
 
-	private readonly List<Column> keyColumns = new();
+	private readonly List<Column> keyColumns = [ ];
 
-	internal bool HasKeyColumns => keyColumns.Any();
-
-	/// <summary>
-	/// Returns either all components of the primary key, or the identity (alone).
-	/// </summary>
-	internal IReadOnlyCollection<Column> KeyColumns =>
-		keyColumns.Any() ? keyColumns : throw new Exception( "The table must contain a primary key or other means of uniquely identifying a row." );
-
-	private readonly Column? identityColumn;
-	internal Column? IdentityColumn => identityColumn;
+	internal Column? IdentityColumn { get; }
 
 	internal readonly Column? RowVersionColumn;
 	internal readonly IEnumerable<Column> AllColumnsExceptRowVersion;
 	internal readonly IEnumerable<Column> AllNonIdentityColumnsExceptRowVersion;
 
-	private readonly Column? primaryKeyAndRevisionIdColumn;
-	internal Column? PrimaryKeyAndRevisionIdColumn => primaryKeyAndRevisionIdColumn;
-
-	private readonly IEnumerable<Column> dataColumns;
+	internal Column? PrimaryKeyAndRevisionIdColumn { get; }
 
 	/// <summary>
 	/// Gets all columns that are not the identity column, the row version column, or the primary key and revision ID column.
 	/// </summary>
-	internal IEnumerable<Column> DataColumns => dataColumns;
+	internal IEnumerable<Column> DataColumns { get; }
 
 	internal TableColumns( DatabaseConnection cn, DatabaseTable table, bool forRevisionHistoryLogic ) {
 		try {
@@ -48,18 +36,18 @@ class TableColumns {
 				if( col.IsKey )
 					keyColumns.Add( col );
 				if( col.IsIdentity ) {
-					if( identityColumn != null )
+					if( IdentityColumn != null )
 						throw new UserCorrectableException( "Only one identity column per table is supported." );
-					identityColumn = col;
+					IdentityColumn = col;
 				}
 				else
 					nonIdentityColumns.Add( col );
 			}
 
 			// If the table has a composite key, try to use the identity as the key instead since this will enable InsertRow to return a value.
-			if( identityColumn != null && keyColumns.Count > 1 ) {
+			if( IdentityColumn != null && keyColumns.Count > 1 ) {
 				keyColumns.Clear();
-				keyColumns.Add( identityColumn );
+				keyColumns.Add( IdentityColumn );
 			}
 
 			RowVersionColumn = AllColumns.SingleOrDefault( i => i.IsRowVersion );
@@ -70,15 +58,23 @@ class TableColumns {
 				if( keyColumns.Count != 1 )
 					throw new UserCorrectableException(
 						"A revision history modification class can only be created for tables with exactly one primary key column, which is assumed to also be a foreign key to the revisions table." );
-				primaryKeyAndRevisionIdColumn = keyColumns.Single();
-				if( primaryKeyAndRevisionIdColumn.IsIdentity )
+				PrimaryKeyAndRevisionIdColumn = keyColumns.Single();
+				if( PrimaryKeyAndRevisionIdColumn.IsIdentity )
 					throw new UserCorrectableException( "The revision ID column of a revision history table must not be an identity." );
 			}
 
-			dataColumns = AllColumns.Where( col => col is { IsIdentity: false, IsRowVersion: false } && col != primaryKeyAndRevisionIdColumn ).ToArray();
+			DataColumns = AllColumns.Where( col => col is { IsIdentity: false, IsRowVersion: false } && col != PrimaryKeyAndRevisionIdColumn ).ToArray();
 		}
 		catch( Exception e ) {
 			throw UserCorrectableException.CreateSecondaryException( "An exception occurred while getting columns for table " + table.QualifiedName + ".", e );
 		}
 	}
+
+	internal bool HasKeyColumns => keyColumns.Any();
+
+	/// <summary>
+	/// Returns either all components of the primary key, or the identity (alone).
+	/// </summary>
+	internal IReadOnlyCollection<Column> KeyColumns =>
+		keyColumns.Any() ? keyColumns : throw new Exception( "The table must contain a primary key or other means of uniquely identifying a row." );
 }
