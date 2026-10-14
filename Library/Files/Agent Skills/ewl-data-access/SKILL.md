@@ -671,6 +671,24 @@ collections inside `GetOrAdd`. Simple one-off predicates need not gain a cache
 wrapper solely for uniformity. These caches follow the normal data-access
 lifecycle; do not add manual cache resets or enable caching around writes.
 
+String keys in custom caches require explicit equality decisions. Dictionaries,
+`ILookup`, sets, and composite keys containing strings normally use .NET equality,
+which can differ from database collation and padding rules. Consider case,
+accents, and leading/trailing whitespace for both stored values and lookup
+inputs, including keys based on non-PK columns. A lookup built from rows can
+miss a value that SQL would match; a cache keyed by query inputs can instead
+create separate entries for database-equivalent inputs. Choose validation,
+normalization, a comparer, or database fallback according to the intended
+semantics. Do not assume a case-insensitive comparer reproduces database equality
+or silently normalize externally assigned identifiers.
+
+The framework cannot enforce these decisions for arbitrary custom caches.
+Generated retrieval validation does not cover direct custom-cache lookups, and
+validation inside a `GetOrAdd` value factory is bypassed on cache hits. When a
+custom method requires canonical inputs, validate them at its entry point before
+accessing the cache. TEWL's `EnsureTrimmed()` rejects leading/trailing whitespace
+without changing the value; it does not address case or accent equivalence.
+
 Reference patterns in other EWL systems:
 
 - Scheduling Engine, `EventRevisionsTableRetrieval`: organization/status filters
