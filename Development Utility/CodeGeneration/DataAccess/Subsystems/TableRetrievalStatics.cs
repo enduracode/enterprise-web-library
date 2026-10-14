@@ -363,13 +363,15 @@ static class TableRetrievalStatics {
 				var equalityConditionClassName = DataAccessStatics.GetEqualityConditionClassName( cn, database, table, i );
 				writer.WriteLine( "var {0}Condition = conditions.OfType<{1}>().FirstOrDefault();".FormatWith( i.CamelCasedName, equalityConditionClassName ) );
 			}
-			var pkConditionVariableNames = tableColumns.KeyColumns.Select( i => i.CamelCasedName + "Condition" );
 			writer.WriteLine(
-				"var isPkQuery = " + StringTools.ConcatenateWithDelimiter( " && ", pkConditionVariableNames.Select( i => i + " is not null" ).ToArray() ) +
+				"var isPkQuery = " + StringTools.ConcatenateWithDelimiter( " && ", tableColumns.KeyColumns.Select( i => i.CamelCasedName + "Condition is not null" ) ) +
 				" && conditions.Count() == " + tableColumns.KeyColumns.Count + ";" );
 			writer.WriteLine( "if( isPkQuery ) {" );
 			writer.WriteLine(
-				"var pk = {0};".FormatWith( RetrievalStatics.GetColumnTupleExpression( pkConditionVariableNames.Select( i => i + "!.Value" ).Materialize() ) ) );
+				"var pk = {0};".FormatWith(
+					RetrievalStatics.GetColumnTupleExpression(
+						tableColumns.KeyColumns.Select( i => $"{i.CamelCasedName}Condition!.Value{( i.DataTypeName == "System.String" ? ".EnsureTrimmed()" : "" )}" )
+							.Materialize() ) ) );
 			writer.WriteLine(
 				"if( cache." + ( excludePreviousRevisions ? "LatestRevision" : "" ) + "RowsByPk.TryGetValue( pk, out var row ) ) return row.ToCollection();" );
 			if( hasModTable ) {
@@ -435,7 +437,10 @@ static class TableRetrievalStatics {
 				writer.WriteLine( "} );" );
 
 				var cacheExpression = "cache.{0}RowsByPk".FormatWith( isRevisionHistoryTable ? "LatestRevision" : "" );
-				var keyExpression = pkIsId ? "id" : RetrievalStatics.GetColumnTupleExpression( tableColumns.KeyColumns.Select( i => i.CamelCasedName ).Materialize() );
+				var keyExpression = RetrievalStatics.GetColumnTupleExpression(
+					tableColumns.KeyColumns.Select( i =>
+							( pkIsId ? "id" : EwlStatics.GetCSharpIdentifier( i.CamelCasedName ) ) + ( i.DataTypeName == "System.String" ? ".EnsureTrimmed()" : "" ) )
+						.Materialize() );
 				writer.WriteLine( isTry ? $"return {cacheExpression}.TryGetValue( {keyExpression}, out row );" : $"return {cacheExpression}[ {keyExpression} ];" );
 			}
 			else {

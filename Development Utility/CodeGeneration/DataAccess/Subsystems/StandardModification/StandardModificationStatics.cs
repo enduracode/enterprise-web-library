@@ -327,7 +327,7 @@ static class StandardModificationStatics {
 					prefix,
 					DataAccessStatics.GetEqualityConditionClassName( cn, database, table, column ),
 					EwlStatics.GetCSharpIdentifier( column.CamelCasedName ) ) );
-			writer.WriteLine( "mod.{0}.Value = {1}.Value;".FormatWith( getColumnDataValueName( column ), EwlStatics.GetCSharpIdentifier( column.CamelCasedName ) ) );
+			writer.WriteLine( $"mod.{EwlStatics.GetCSharpIdentifier( column.PascalCasedName )} = {EwlStatics.GetCSharpIdentifier( column.CamelCasedName )}.Value;" );
 			prefix = "else if";
 		}
 		writer.WriteLine( "}" );
@@ -393,13 +393,17 @@ static class StandardModificationStatics {
 			writer,
 			"Gets " + ( columnIsReadOnly ? "" : "or sets " ) + "the value for the " + column.Name +
 			$" column, which {column.GetNullabilityPhrase()}. Throws an exception if the value has not been initialized." );
-		var propertyDeclarationBeginning = "public " + column.DataTypeName + " " + EwlStatics.GetCSharpIdentifier( column.PascalCasedName ) +
-		                                   " { get { return this." + getColumnDataValueName( column ) + ".Value; } ";
-		if( columnIsReadOnly )
-			writer.WriteLine( propertyDeclarationBeginning + "}" );
-		else {
-			writer.WriteLine( propertyDeclarationBeginning + "set { this." + getColumnDataValueName( column ) + ".Value = value; } }" );
+		var setter = columnIsReadOnly ? "private set" : "set";
+		var validValue = column is { DataTypeName: "System.String", IsKey: true } ? "value.EnsureTrimmed()" : "value";
+		writer.WriteLine(
+			StringTools.ConcatenateWithDelimiter(
+				" ",
+				$$"""public {{column.DataTypeName}} {{EwlStatics.GetCSharpIdentifier( column.PascalCasedName )}} {""",
+				$$"""get { return this.{{getColumnDataValueName( column )}}.Value; }""",
+				$$"""{{setter}} { this.{{getColumnDataValueName( column )}}.Value = {{validValue}}; }""",
+				"}" ) );
 
+		if( !columnIsReadOnly ) {
 			CodeGenerationStatics.AddSummaryDocComment(
 				writer,
 				"Indicates whether or not the value for the " + column.Name +
@@ -442,7 +446,8 @@ static class StandardModificationStatics {
 
 	private static void writeColumnValueAssignmentsFromParameters( IEnumerable<Column> columns, string modObjectName ) {
 		foreach( var column in columns )
-			writer.WriteLine( $"{modObjectName}.{getColumnDataValueName( column )}.Value = {EwlStatics.GetCSharpIdentifier( column.CamelCasedName )};" );
+			writer.WriteLine(
+				$"{modObjectName}.{EwlStatics.GetCSharpIdentifier( column.PascalCasedName )} = {EwlStatics.GetCSharpIdentifier( column.CamelCasedName )};" );
 	}
 
 	private static void writeExecuteMethod( string tableName ) {
@@ -501,11 +506,11 @@ static class StandardModificationStatics {
 		// If this is a revision history table, write code to insert a new revision when a row is inserted into this table.
 		if( isRevisionHistoryClass ) {
 			writer.WriteLine( "var revisionHistorySetup = RevisionHistoryStatics.SystemProvider;" );
-			var revisionIdProperty = $"this.{getColumnDataValueName( columns.PrimaryKeyAndRevisionIdColumn! )}";
-			writer.WriteLine( revisionIdProperty + ".Value = revisionHistorySetup.GetNextMainSequenceValue();" );
+			var revisionIdProperty = $"this.{EwlStatics.GetCSharpIdentifier( columns.PrimaryKeyAndRevisionIdColumn!.PascalCasedName )}";
+			writer.WriteLine( revisionIdProperty + " = revisionHistorySetup.GetNextMainSequenceValue();" );
 			writer.WriteLine(
-				"revisionHistorySetup.InsertRevision( global::System.Convert.ToInt32( " + revisionIdProperty + ".Value ), global::System.Convert.ToInt32( " +
-				revisionIdProperty + ".Value ), " + DataAccessStatics.GetConnectionExpression( database ) + ".GetUserTransactionId() );" );
+				"revisionHistorySetup.InsertRevision( global::System.Convert.ToInt32( " + revisionIdProperty + " ), global::System.Convert.ToInt32( " +
+				revisionIdProperty + " ), " + DataAccessStatics.GetConnectionExpression( database ) + ".GetUserTransactionId() );" );
 		}
 
 		writer.WriteLine( "var insert = new InlineInsert( \"" + table.QualifiedName + "\" );" );
@@ -513,8 +518,8 @@ static class StandardModificationStatics {
 		if( identityColumn != null )
 			// One reason the ChangeType call is necessary: SQL Server identities always come back as decimal, and you can’t cast a boxed decimal to an int.
 			writer.WriteLine(
-				"this.{0}.Value = {1};".FormatWith(
-					getColumnDataValueName( identityColumn ),
+				"this.{0} = {1};".FormatWith(
+					EwlStatics.GetCSharpIdentifier( identityColumn.PascalCasedName ),
 					identityColumn.GetIncomingValueConversionExpression(
 						"EwlStatics.ChangeType( insert.Execute( {0}, isLongRunning: isLongRunning )!, typeof( {1} ) )".FormatWith(
 							DataAccessStatics.GetConnectionExpression( database ),
