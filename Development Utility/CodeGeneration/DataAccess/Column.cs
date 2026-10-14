@@ -6,6 +6,7 @@ using EnterpriseWebLibrary.DataAccess.CommandWriting.Commands;
 using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction.Conditions;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using EnterpriseWebLibrary.InstallationSupportUtility;
+using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess;
 
@@ -65,11 +66,63 @@ class Column {
 				throw new UserCorrectableException( "String column {0} allows null, which is not allowed.".FormatWith( valueContainer.Name ) );
 
 			if( isKey is true ) {
-				var error = getKeyError( connection, schemaTableRow );
+				var error = getKeyError(
+					connection,
+					new DatabaseTable(
+						schemaTableRow[ "BaseSchemaName" ] switch
+							{
+								DBNull => "",
+								var schema => (string)schema
+							},
+						(string)schemaTableRow[ "BaseTableName" ] ),
+					dbTypeString );
 				if( error.Length > 0 )
 					throw new UserCorrectableException( error );
 			}
 		} );
+	}
+
+	private string getKeyError( DatabaseConnection connection, DatabaseTable table, string dbTypeString ) {
+		if( valueContainer.DataType != typeof( string ) )
+			return "";
+
+		var command = connection.DatabaseInfo is OracleInfo
+			              ? new InlineSelect( "COLLATION".ToCollection(), table.Schema.Length > 0 ? "FROM ALL_TAB_COLUMNS" : "FROM USER_TAB_COLUMNS", false )
+			              : new InlineSelect( "COLLATION_NAME".ToCollection(), "FROM INFORMATION_SCHEMA.COLUMNS", false );
+		command.AddConditions(
+			( table.Schema.Length > 0 ? getCondition( connection.DatabaseInfo is OracleInfo ? "OWNER" : "TABLE_SCHEMA", table.Schema ).ToCollection() : [ ] )
+			.Append( getCondition( "TABLE_NAME", table.Name ) )
+			.Append( getCondition( "COLUMN_NAME", valueContainer.Name ) ) );
+
+		var error = "";
+		command.Execute(
+			connection,
+			reader => {
+				if( !reader.Read() )
+					throw new Exception( "no rows exist" );
+
+				(string[] types, Func<string, bool> collationPredicate, string error) rules = connection.DatabaseInfo switch
+					{
+						SqlServerInfo => ( [ "VarChar", "NVarChar" ],
+							                 collation => collation.EndsWith( "_BIN2", StringComparison.OrdinalIgnoreCase ) ||
+							                              collation.EndsWith( "_BIN2_UTF8", StringComparison.OrdinalIgnoreCase ),
+							                 "varchar or nvarchar with a BIN2 collation" ),
+						MySqlInfo => ( [ "VarChar" ], collation => collation.Equals( "utf8mb4_0900_bin", StringComparison.OrdinalIgnoreCase ),
+							             "varchar with collation utf8mb4_0900_bin (binary, NO PAD)" ),
+						OracleInfo => ( [ "Varchar2", "NVarchar2" ], collation => collation.Equals( "BINARY", StringComparison.OrdinalIgnoreCase ),
+							              "VARCHAR2 or NVARCHAR2 with explicit BINARY column collation" ),
+						_ => throw new UnexpectedValueException( "database info", connection.DatabaseInfo )
+					};
+				if( !rules.types.Contains( dbTypeString, StringComparer.Ordinal ) || !rules.collationPredicate( reader.GetString( 0 ) ) )
+					error = $"Key column {valueContainer.Name} must use {rules.error}.";
+
+				if( reader.Read() )
+					throw new Exception( "multiple rows exist" );
+			} );
+		return error;
+
+		static EqualityCondition getCondition( string columnName, string value ) =>
+			new( new InlineDbCommandColumnValue( columnName, new DbParameterValue( value ) ) );
 	}
 
 	internal string Name => valueContainer.Name;
