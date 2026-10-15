@@ -117,6 +117,9 @@ static class DataAccessOps {
 						var modTableColumn = modTableColumns.SingleOrDefault( i => string.Equals( i.Name, column.Name, StringComparison.OrdinalIgnoreCase ) );
 						if( modTableColumn is null )
 							throw new UserCorrectableException( "The modification table for {0} must have a {1} column.".FormatWith( table.QualifiedName, column.Name ) );
+						if( !modTableColumn.DataTypeName.Equals( column.DataTypeName, StringComparison.Ordinal ) )
+							throw new UserCorrectableException(
+								$"The {column.Name} column in the modification table for {table.QualifiedName} must have the same type as the primary-key column." );
 					}
 				}
 
