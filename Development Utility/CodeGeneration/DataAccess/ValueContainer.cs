@@ -4,7 +4,7 @@ using NodaTime;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess;
 
-internal class ValueContainer {
+class ValueContainer {
 	private readonly string name;
 	private readonly string pascalCasedName;
 
@@ -144,6 +144,22 @@ internal class ValueContainer {
 			       : getExpression( conversionExpression );
 
 		string getExpression( string parameterValueExpression ) => $"new DbParameterValue( {parameterValueExpression}, \"{dbTypeString}\" )";
+	}
+
+	public string GetSqlLiteralExpression( string valueExpression ) {
+		if( dataType == typeof( string ) ) {
+			var prefix = dbTypeString.StartsWith( "nvarchar", StringComparison.OrdinalIgnoreCase ) ? "N" :
+			             dbTypeString.StartsWith( "varchar", StringComparison.OrdinalIgnoreCase ) ? "" :
+			             throw new UnexpectedValueException( "database type", dbTypeString );
+			return $"""
+			        "{prefix}'" + {valueExpression}.Replace( "'", "''", StringComparison.Ordinal ) + "'"
+			        """;
+		}
+
+		if( dataType == typeof( int ) || dataType == typeof( decimal ) )
+			return $"{valueExpression}.ToString( System.Globalization.CultureInfo.InvariantCulture )";
+
+		throw new UnexpectedValueException( "data type", dataType );
 	}
 
 	public string GetNullabilityPhrase() =>

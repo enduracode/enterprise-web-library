@@ -251,12 +251,11 @@ static class TableRetrievalStatics {
 				.FormatWith(
 					table.QualifiedName,
 					tableColumns.KeyColumns.Count < 2
-						? "{0} = {{i}}".FormatWith( tableColumns.KeyColumns.Single().DelimitedIdentifier.EscapeForLiteral() )
+						? $$"""{{tableColumns.KeyColumns.Single().DelimitedIdentifier.EscapeForLiteral()}} = {{{tableColumns.KeyColumns.Single().GetSqlLiteralExpression( "i" )}}}"""
 						: StringTools.ConcatenateWithDelimiter(
 							" AND ",
-							tableColumns.KeyColumns.Select( i => "{0} = {{i.{1}}}".FormatWith(
-								i.DelimitedIdentifier.EscapeForLiteral(),
-								EwlStatics.GetCSharpIdentifier( i.CamelCasedName ) ) ) ) ) );
+							tableColumns.KeyColumns.Select( i =>
+								$$"""{{i.DelimitedIdentifier.EscapeForLiteral()}} = {{{i.GetSqlLiteralExpression( "i." + EwlStatics.GetCSharpIdentifier( i.CamelCasedName ) )}}}""" ) ) ) );
 		writer.WriteLine(
 			"{0}.ExecuteReaderCommand( command, r => {{ while( r.Read() ) results.Add( new BasicRow( r ) ); }} );".FormatWith(
 				DataAccessStatics.GetConnectionExpression( database ) ) );

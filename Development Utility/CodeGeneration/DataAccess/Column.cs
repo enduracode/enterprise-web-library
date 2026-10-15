@@ -164,6 +164,8 @@ class Column {
 
 	internal string GetCommandParameterValueExpression( string valueExpression ) => valueContainer.GetParameterValueExpression( valueExpression );
 
+	internal string GetSqlLiteralExpression( string valueExpression ) => valueContainer.GetSqlLiteralExpression( valueExpression );
+
 	internal string GetDataReaderValueExpression( string readerName, int? ordinalOverride = null ) {
 		var getValueExpression = valueContainer.GetIncomingValueConversionExpression( "{0}.GetValue( {1} )".FormatWith( readerName, ordinalOverride ?? ordinal ) );
 		return valueContainer.AllowsNull
