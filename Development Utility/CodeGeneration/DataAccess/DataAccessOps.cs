@@ -106,7 +106,8 @@ static class DataAccessOps {
 					var modTableColumns = Column.GetColumnsInQueryResults(
 						cn,
 						"SELECT * FROM {0}".FormatWith( DatabaseOps.GetModificationTableQualifiedName( database, table ) ),
-						false );
+						true,
+						validateAllColumnsAsKeys: true );
 
 					if( modTableColumns.Count != columns.KeyColumns.Count )
 						throw new UserCorrectableException(

@@ -11,14 +11,16 @@ using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess;
 
 class Column {
-	internal static IReadOnlyCollection<Column> GetColumnsInQueryResults( DatabaseConnection cn, string commandText, bool isTableQuery ) {
+	internal static IReadOnlyCollection<Column> GetColumnsInQueryResults(
+		DatabaseConnection cn, string commandText, bool isTableQuery, bool validateAllColumnsAsKeys = false ) {
 		var columns = new List<Column>();
 
 		var cmd = DataAccessStatics.GetCommandFromRawQueryText( cn, commandText );
 		var validationMethods = new List<Action>();
-		var readerMethod = new Action<DbDataReader>( r =>
-			columns.AddRange( from DataRow row in r.GetSchemaTable()!.Rows select new Column( cn, row, isTableQuery, isTableQuery, validationMethods ) ) );
-		if( isTableQuery )
+		var readerMethod = new Action<DbDataReader>( r => columns.AddRange(
+			from DataRow row in r.GetSchemaTable()!.Rows
+			select new Column( cn, row, validateAllColumnsAsKeys ? null : isTableQuery, isTableQuery, validationMethods ) ) );
+		if( isTableQuery && !validateAllColumnsAsKeys )
 			cn.ExecuteReaderCommandWithKeyInfoBehavior( cmd, readerMethod );
 		else
 			cn.ExecuteReaderCommandWithSchemaOnlyBehavior( cmd, readerMethod );
@@ -36,7 +38,7 @@ class Column {
 	private readonly bool isRowVersion;
 	private readonly bool? isKey;
 
-	private Column( DatabaseConnection connection, DataRow schemaTableRow, bool includeKeyInfo, bool validateIfString, List<Action> validationMethods ) {
+	private Column( DatabaseConnection connection, DataRow schemaTableRow, bool? includeKeyInfo, bool validateIfString, List<Action> validationMethods ) {
 		var databaseInfo = connection.DatabaseInfo;
 
 		ordinal = (int)schemaTableRow[ "ColumnOrdinal" ];
@@ -57,7 +59,7 @@ class Column {
 		isIdentity = ( databaseInfo is SqlServerInfo && (bool)schemaTableRow[ "IsIdentity" ] ) ||
 		             ( databaseInfo is MySqlInfo && (bool)schemaTableRow[ "IsAutoIncrement" ] );
 		isRowVersion = databaseInfo is SqlServerInfo && (bool)schemaTableRow[ "IsRowVersion" ];
-		if( includeKeyInfo )
+		if( includeKeyInfo is true )
 			isKey = (bool)schemaTableRow[ "IsKey" ];
 
 		validationMethods.Add( () => {
@@ -65,7 +67,7 @@ class Column {
 			    ( !( databaseInfo is MySqlInfo ) || dbTypeString != "JSON" ) && valueContainer.AllowsNull )
 				throw new UserCorrectableException( "String column {0} allows null, which is not allowed.".FormatWith( valueContainer.Name ) );
 
-			if( isKey is true ) {
+			if( isKey is true || includeKeyInfo is null ) {
 				var error = getKeyError(
 					connection,
 					new DatabaseTable(
