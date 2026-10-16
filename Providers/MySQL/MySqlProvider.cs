@@ -1,12 +1,73 @@
-﻿using System.Data.Common;
+﻿using System.Data;
+using System.Data.Common;
+using System.Globalization;
 using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using EnterpriseWebLibrary.ExternalFunctionality;
+using FluentMigrator;
 using FluentMigrator.Runner;
+using FluentMigrator.Runner.Generators.MySql;
+using FluentMigrator.Runner.Initialization;
+using FluentMigrator.Runner.Processors;
+using FluentMigrator.Runner.Processors.MySql;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using MySqlConnector;
 
 namespace EnterpriseWebLibrary.MySql;
 
 public class MySqlProvider: ExternalMySqlProvider {
+	private class Processor: MySql8Processor {
+		private bool sessionInitialized;
+
+		public Processor(
+			MySqlDbFactory factory, MySql8Generator generator, ILogger<MySql8Processor> logger, IOptionsSnapshot<ProcessorOptions> options,
+			IConnectionStringAccessor connectionStringAccessor ): base( factory, generator, logger, options, connectionStringAccessor ) {}
+
+		protected override void EnsureConnectionIsOpen() {
+			if( Connection.State != ConnectionState.Open )
+				sessionInitialized = false;
+
+			base.EnsureConnectionIsOpen();
+
+			if( sessionInitialized )
+				return;
+
+			using var command = CreateCommand( MySqlInfo.SqlModeInitializationStatement );
+			command.ExecuteNonQuery();
+			sessionInitialized = true;
+		}
+	}
+
+	private class Quoter: MySqlQuoter {
+		// Mirrors GenericQuoter.QuoteValue in FluentMigrator 8.0.1, bypassing MySqlQuoter’s backslash doubling. Compare dispatch when upgrading FM.
+		public override string QuoteValue( object value ) =>
+			value switch
+				{
+					null or DBNull => FormatNull(),
+					string text => FormatNationalString( text ),
+					NonUnicodeString text => FormatAnsiString( text.ToString() ),
+					char character => FormatChar( character ),
+					bool boolean => FormatBool( boolean ),
+					Guid guid => FormatGuid( guid ),
+					DateTime dateTime => FormatDateTime( dateTime ),
+					DateTimeOffset dateTimeOffset => FormatDateTimeOffset( dateTimeOffset ),
+					double number => number.ToString( CultureInfo.InvariantCulture ),
+					float number => number.ToString( CultureInfo.InvariantCulture ),
+					SystemMethods method => FormatSystemMethods( method ),
+					Enum enumeration => FormatEnum( enumeration ),
+					decimal number => number.ToString( CultureInfo.InvariantCulture ),
+					int number => number.ToString( CultureInfo.InvariantCulture ),
+					RawSql sql => sql.Value,
+					byte[] bytes => FormatByteArray( bytes ),
+					TimeSpan timeSpan => FromTimeSpan( timeSpan ),
+					_ => value.ToString()!
+				};
+
+		public override string FormatChar( char value ) => FormatAnsiString( value.ToString() );
+	}
+
 	string ExternalMySqlProvider.GetConnectionString(
 		string server, string userId, string password, string database, bool supportsConnectionPooling, uint timeout ) {
 		var builder = new MySqlConnectionStringBuilder();
@@ -20,6 +81,7 @@ public class MySqlProvider: ExternalMySqlProvider {
 		if( !supportsConnectionPooling )
 			builder.Pooling = false;
 		builder.ConnectionTimeout = timeout;
+		builder.NoBackslashEscapes = true;
 
 		return builder.ConnectionString;
 	}
@@ -50,5 +112,7 @@ public class MySqlProvider: ExternalMySqlProvider {
 
 	void ExternalMySqlProvider.RegisterDependencyInjectionServicesForMigration( IMigrationRunnerBuilder builder ) {
 		builder.AddMySql8();
+		builder.Services.AddScoped<MySql8Processor, Processor>();
+		builder.Services.AddScoped<MySqlQuoter, Quoter>();
 	}
 }

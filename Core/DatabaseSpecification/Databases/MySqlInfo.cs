@@ -12,6 +12,8 @@ namespace EnterpriseWebLibrary.DatabaseSpecification.Databases;
 /// Contains information about a MySQL database.
 /// </summary>
 public class MySqlInfo: DatabaseInfo {
+	internal const string SqlModeInitializationStatement = "SET SESSION sql_mode = CONCAT_WS( ',', NULLIF( @@SESSION.sql_mode, '' ), 'NO_BACKSLASH_ESCAPES' )";
+
 	private static Lazy<ExternalMySqlProvider>? provider;
 	private static Lazy<DbProviderFactory>? factory;
 

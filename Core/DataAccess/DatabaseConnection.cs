@@ -92,8 +92,10 @@ public class DatabaseConnection {
 			// to abort this line ourselves if it hangs.
 			cn.Open();
 
-			if( databaseInfo is MySqlInfo )
+			if( databaseInfo is MySqlInfo ) {
+				executeText( MySqlInfo.SqlModeInitializationStatement );
 				executeText( "SET SESSION innodb_lock_wait_timeout = 1" );
+			}
 			else if( databaseInfo is OracleInfo info ) {
 				// Make Oracle case-insensitive, like SQL Server.
 				if( info.SupportsLinguisticIndexes ) {
