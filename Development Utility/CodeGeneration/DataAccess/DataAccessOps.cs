@@ -94,12 +94,14 @@ static class DataAccessOps {
 
 					// This check ensures safety in the table-retrieval method that gets modified rows given a list of primary keys. This method uses inline SQL in order
 					// to support a potentially large number of keys in a single query.
-					var types = new[] { "System.Int32" }.Concat( cn.DatabaseInfo is OracleInfo ? "System.Decimal".ToCollection() : Enumerable.Empty<string>() )
+					var types = "System.Int32".ToCollection()
+						.Concat( cn.DatabaseInfo is OracleInfo ? "System.Decimal".ToCollection() : [ ] )
+						.Append( "System.String" )
 						.ToImmutableHashSet( StringComparer.Ordinal );
 					foreach( var column in columns.KeyColumns )
 						if( !types.Contains( column.DataTypeName ) )
 							throw new UserCorrectableException(
-								"Table {0} is cached using a modification table but the {1} primary-key column is not numeric.".FormatWith(
+								"Table {0} is cached using a modification table but the {1} primary-key column is not numeric or a string.".FormatWith(
 									table.QualifiedName,
 									column.Name ) );
 
