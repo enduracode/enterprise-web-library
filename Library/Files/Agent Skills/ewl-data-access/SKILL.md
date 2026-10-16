@@ -332,6 +332,30 @@ mod.ServiceOrderId = MainSequence.GetNextValue();
 Preserve externally assigned IDs and established GUID/legacy identity
 conventions; do not substitute a sequence for those keys.
 
+### String primary keys
+
+String PK components must use these types and exact column collations,
+regardless of whether the table uses application-level caching:
+
+| DBMS | String column types | Required column collation |
+|---|---|---|
+| SQL Server 2019+ | `varchar`, `nvarchar` | `Latin1_General_100_BIN2_UTF8` |
+| MySQL 8+ | `varchar` | `utf8mb4_0900_bin` |
+| Oracle 19c+ | `VARCHAR2`, `NVARCHAR2` | Explicit `BINARY` |
+
+Fixed-width character types are not supported. MySQL `NVARCHAR`/`NCHAR` select
+`utf8mb3` and do not satisfy the MySQL requirement; use `VARCHAR` with the required
+`utf8mb4` collation. Oracle explicit column collations require
+`MAX_STRING_SIZE=EXTENDED` and `COMPATIBLE` of at least 12.2. Enabling EXTENDED is
+DBA maintenance, not merely an application migration.
+
+Generated string-PK setters and direct complete-PK lookups reject values that
+differ from their .NET `Trim()` result. Reject invalid keys rather than trimming
+or normalizing external IDs. Internal whitespace is allowed. Empty string keys
+are allowed on SQL Server and MySQL; Oracle treats empty strings as NULL and
+cannot store them as PK values. General SQL-condition queries retain SQL
+semantics.
+
 ## Row constants
 
 Stable lookup tables declared in `Development.xml` as `rowConstantTables`
@@ -608,14 +632,41 @@ and its cached-table XML documentation identify this API.
 
 To enable it, create a companion `YourDataTableEwlModifications` table containing
 only the main table's primary key column(s), with matching names and database
-types, then run DU sync. EWL uses this table to track changes and refresh its
-application-level row cache under the database snapshot. Follow existing
-companion-table migrations in the system; this is change tracking, not a second
-copy of the entity table.
+types, then run DU sync. MySQL and Oracle use the corresponding
+`_table_ewl_modifications` and `_TABLE_EWL_MODIFICATIONS` suffixes. EWL uses this
+table to track changes and refresh its application-level row cache under the
+database snapshot. Follow existing companion-table migrations in the system;
+this is change tracking, not a second copy of the entity table. Companion keys
+must allow repeated entries; do not add a primary key or unique constraint to them.
 
 Requirements:
 - All modifications go through EWL-generated Modification classes
 - Database transactions use snapshot isolation
+- Each key component resolves to `System.Int32` or `System.String`, or to
+  `System.Decimal` on Oracle. Composite keys can combine supported types; native
+  GUID keys are not supported by this caching mechanism.
+
+### String-key database prerequisites
+
+Follow the [string primary-key rules](#string-primary-keys). Apply the same
+supported string types and exact collations to the companion-table columns so
+change tracking preserves key equality.
+
+For each modification-table cache with at least one string key component,
+generated `__Init` also asserts these database-level settings before loading the
+cache:
+
+- SQL Server: the current database's default collation must use UTF-8 (code page
+  65001), including when the string keys are all `nvarchar`. This does not require
+  a binary database-default collation; binary equality is the separate column rule.
+- Oracle: `NLS_CHARACTERSET` must be `AL32UTF8` and `NLS_NCHAR_CHARACTERSET` must be
+  `AL16UTF16`, regardless of which supported string types the table uses.
+
+Invalid settings fail application initialization. These are startup assertions,
+not per-request or periodic-refresh checks. They apply to the database containing
+the affected table, not every configured primary or secondary database. Establish
+the schema and database prerequisites before deploying code that enables the
+cache, using a DU release that supports string keys; do not edit generated code.
 
 ### Filter cached tables through the predicate API
 
@@ -701,6 +752,21 @@ Reference patterns in other EWL systems:
 - RLE Link, `AffiliationEventsTableRetrieval`: cached predicates for one ID or a
   set of IDs, with `HashSet<T>.CreateSetComparer()` for the set-valued key. Do not
   mutate a set after using it as a cache key.
+
+## MySQL SQL-mode compatibility
+
+EWL opens ordinary MySQL connections with `NO_BACKSLASH_ESCAPES`, preserving the
+other session SQL modes and matching MySqlConnector's serialization setting.
+FluentMigrator connections use the same mode, with adjusted literal quoting that
+preserves backslashes. This applies to EWL MySQL sessions even when no string-key
+table cache exists; the connection remains `utf8mb4`.
+
+Before upgrading, review handwritten SQL and migration SQL that uses MySQL
+backslash escapes: `\n`, `\\`, and `\'` no longer have their old escaping meaning
+in these sessions. Use parameters where possible; in string literals, escape an
+apostrophe by doubling it. SQL generated by the adapted FluentMigrator quoter
+handles values under the new mode. Separate CLI and dump/restore sessions do not
+inherit EWL's connection initialization; dump SQL follows its own mode setup.
 
 ## Revision history
 
