@@ -20,7 +20,7 @@ class Column {
 		var readerMethod = new Action<DbDataReader>( r => columns.AddRange(
 			from DataRow row in r.GetSchemaTable()!.Rows
 			select new Column( cn, row, validateAllColumnsAsKeys ? null : isTableQuery, isTableQuery, validationMethods ) ) );
-		if( isTableQuery && !validateAllColumnsAsKeys )
+		if( isTableQuery )
 			cn.ExecuteReaderCommandWithKeyInfoBehavior( cmd, readerMethod );
 		else
 			cn.ExecuteReaderCommandWithSchemaOnlyBehavior( cmd, readerMethod );
