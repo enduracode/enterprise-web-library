@@ -63,6 +63,29 @@ static class TableRetrievalStatics {
 			if( table.hasModTable ) {
 				CodeGenerationStatics.AddGeneratedCodeUseOnlyComment( writer );
 				writer.WriteLine( "internal static void __Init() {" );
+				if( columns.KeyColumns.Any( i => i.DataTypeName == "System.String" ) ) {
+					if( cn.DatabaseInfo is SqlServerInfo )
+						writeTableCacheDatabaseAssertion(
+							writer,
+							database,
+							"""
+							"CONVERT( int, COLLATIONPROPERTY( collation_name, 'CodePage' ) )"
+							""",
+							"FROM sys.databases WHERE database_id = DB_ID()",
+							"reader.GetInt32( 0 ) != 65001",
+							"a UTF-8 database-default collation" );
+					else if( cn.DatabaseInfo is OracleInfo )
+						writeTableCacheDatabaseAssertion(
+							writer,
+							database,
+							"""
+							"( SELECT VALUE FROM NLS_DATABASE_PARAMETERS WHERE PARAMETER = 'NLS_CHARACTERSET' )", "( SELECT VALUE FROM NLS_DATABASE_PARAMETERS WHERE PARAMETER = 'NLS_NCHAR_CHARACTERSET' )"
+							""",
+							"FROM DUAL",
+							"""!reader.GetString( 0 ).Equals( "AL32UTF8", StringComparison.Ordinal ) || !reader.GetString( 1 ).Equals( "AL16UTF16", StringComparison.Ordinal )""",
+							"NLS_CHARACTERSET to be AL32UTF8 and NLS_NCHAR_CHARACTERSET to be AL16UTF16" );
+				}
+
 				writer.WriteLine( "__get{0}();".FormatWith( getTableCacheName( false ) ) );
 				if( isRevisionHistoryTable )
 					writer.WriteLine( "__get{0}();".FormatWith( getTableCacheName( true ) ) );
@@ -207,6 +230,24 @@ static class TableRetrievalStatics {
 					RetrievalStatics.GetColumnTupleTypeName( tableColumns.KeyColumns ) ) );
 		writer.WriteLine( "private Cache() {}" );
 		writer.WriteLine( "}" );
+	}
+
+	private static void writeTableCacheDatabaseAssertion(
+		TextWriter writer, Database database, string selectExpressions, string fromClause, string condition, string errorPhrase ) {
+		writer.WriteLine(
+			$$"""
+			  new DataAccessState().ExecuteWithThis( () => {{DataAccessStatics.GetConnectionExpression( database )}}.ExecuteWithConnectionOpen( () => {
+			  	var command = new InlineSelect( [ {{selectExpressions}} ], "{{fromClause.EscapeForLiteral()}}", false );
+			  	command.Execute( {{DataAccessStatics.GetConnectionExpression( database )}}, reader => {
+			  		if( !reader.Read() )
+			  			throw new Exception( "No rows exist." );
+			  		if( {{condition}} )
+			  			throw new Exception( "{{$"Cached tables with string keys in the {DatabaseOps.GetDatabaseNounPhrase( database )} require {errorPhrase}.".EscapeForLiteral()}}" );
+			  		if( reader.Read() )
+			  			throw new Exception( "Multiple rows exist." );
+			  	} );
+			  } ) );
+			  """ );
 	}
 
 	private static void writeTableCacheMethods(
