@@ -23,7 +23,7 @@ using static MoreLinq.Extensions.AtLeastExtension;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations;
 
-internal class UpdateDependentLogic: Operation {
+class UpdateDependentLogic: Operation {
 	private const string generatedCodeFolderName = "Generated Code";
 	private const string customSyncLogicFileName = "CustomSyncLogic.cs";
 	private const string customSyncRunnerProjectName = "Custom Sync Runner";
