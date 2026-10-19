@@ -24,9 +24,14 @@ public static class EmailStatics {
 	private static Action<EmailMessage, bool> emailSender = null!;
 
 	internal static void Init( Action<bool, Action> emailSendingMethodExecutor ) {
-		systemManagerInterface = File.Exists( SystemManagerInterfaceFilePath )
-			                         ? XmlOps.DeserializeFromFile<SystemManagerEmailInterface>( SystemManagerInterfaceFilePath, false )
-			                         : null;
+		if( File.Exists( SystemManagerInterfaceFilePath ) )
+			try {
+				systemManagerInterface = XmlOps.DeserializeFromFile<SystemManagerEmailInterface>( SystemManagerInterfaceFilePath, false );
+			}
+			catch {
+				// A corrupt email-interface file causes a SerializationException here, which would prevent all systems, including the System Manager, from running on
+				// the machine. Proactively catching other exceptions seems like a good tradeoff.
+			}
 
 		if( ConfigurationStatics.InstallationConfiguration.InstallationType == InstallationType.Development )
 			emailSender = ( message, isDeveloperNotificationEmail ) => emailSendingMethodExecutor(
@@ -60,14 +65,13 @@ public static class EmailStatics {
 						isDeveloperNotificationEmail,
 						() => {
 							try {
-								Task.Run(
-										async () => {
-											SendGrid.Response response;
-											using( MiniProfiler.Current.Step( $"{EwlStatics.EwlInitialism} Email - Send message using SendGrid" ) )
-												response = await client.SendEmailAsync( sendGridMessage );
-											if( response.StatusCode != System.Net.HttpStatusCode.Accepted )
-												throw new Exception( await response.Body.ReadAsStringAsync() );
-										} )
+								Task.Run( async () => {
+										SendGrid.Response response;
+										using( MiniProfiler.Current.Step( $"{EwlStatics.EwlInitialism} Email - Send message using SendGrid" ) )
+											response = await client.SendEmailAsync( sendGridMessage );
+										if( response.StatusCode != System.Net.HttpStatusCode.Accepted )
+											throw new Exception( await response.Body.ReadAsStringAsync() );
+									} )
 									.Wait();
 							}
 							catch( Exception e ) {
