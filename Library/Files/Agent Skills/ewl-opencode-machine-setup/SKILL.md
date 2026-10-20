@@ -1,102 +1,66 @@
 ---
 name: ewl-opencode-machine-setup
-description: Configure opencode on a new development machine for EWL work by creating the global AGENTS.md and granting access to the EWL source, EWL System Manager source, EWL folder, and EWL client systems directory. Use when setting up opencode on a new machine, or when the user asks to bootstrap, initialize, or configure global opencode for EWL.
+description: Complete EWL workstation setup after the human-run DU configure-workstation operation, including dedicated-account global OpenCode configuration and agent rules, development dependencies, filesystem and database access, authentication, and verification.
 ---
 
-## Overview
+# Complete EWL workstation setup
 
-This skill bootstraps opencode’s **global** configuration on a new Windows
-development machine for Enterprise Web Library (EWL) work. It creates (or
-updates) two files in the user’s global opencode config directory:
+## Scope and bootstrap handoff
 
-1. `AGENTS.md` -- instructions listing the key EWL locations on the machine,
-   how to find other EWL codebases, and the personal-browser isolation rule.
-2. `opencode.jsonc` -- an `external_directory` permission map granting
-   access to those locations.
+This Windows skill continues after the human-run DU `configure-workstation`
+operation. Its implementation in
+`Development Utility/Operations/ConfigureWorkstation.cs` is the source of truth
+for bootstrap responsibilities and checks. Refer to it when diagnosing an
+incomplete handoff; do not repeat its provisioning or invoke it as an agent.
+Agents must not initiate OpenCode installation or upgrades.
 
-Both files apply to **every** opencode session on the machine, regardless of
-which project directory the session is started in.
+Complete the development setup below under the dedicated server account. Global
+agent configuration belongs to that account, not the developer’s personal profile.
+Personal client preferences remain with the developer. Do not start a personal
+server or switch to standalone mode. Use the existing explicit-server connection.
 
-## Prerequisites and platform
+Record completed bootstrap checks as such; distinguish them from remaining runtime
+verification. Honor explicit verification waivers and report unverified items.
 
-This skill targets **Windows**. The default search heuristics and the example
-paths below all assume Windows. If the current machine is not Windows, ask
-the user for the equivalent locations rather than guessing; otherwise the
-remaining steps apply.
+## 1. Discover locations and complete access
 
-## Step 1: Locate the global opencode config directory
+Identify the developer’s checkout locations rather than assuming repositories are
+under the dedicated account’s `%USERPROFILE%`. Ask for the developer’s repository
+root when it is not established by the handoff.
 
-opencode’s global config lives at `~/.config/opencode/`, **not** `~/.opencode/`.
-On Windows that resolves to:
+| Location | Typical path and identifying contents |
+|---|---|
+| EWL source | Developer’s `Revision Control\EwlBill`; `Enterprise Web Library.slnx`, `Core`, `Library`, `Development Utility` |
+| EWL System Manager source | Developer’s `Revision Control\EWL System Manager`; `Installation Support Utility`, `Web Site`, `Program Runner`, `Data Cleaner` |
+| EWL infrastructure | `C:\Enterprise Web Library`; local feed and machine configuration |
+| Client systems | Ask the user; recursively identify systems by `dotnet-tools.json` files containing `ewl` |
 
-```
-%USERPROFILE%\.config\opencode\
-```
+If needed, check `D:\Revision Control`, `C:\Source`, `C:\Repos`, `C:\dev`, or the
+developer’s profile for source roots, and `D:\Enterprise Web Library` for
+infrastructure. Check only accessible locations; ask for access rather than
+bypassing a denial. Confirm candidates using the identifying contents above.
+Verify each supplied path exists. Allow the user to skip absent systems and omit
+their paths from instructions. Record resolved absolute paths and skipped items.
 
-Create the directory if it does not already exist.
+Bootstrap grants access to the EwlBill checkout. Arrange inherited Modify access
+to other agreed repositories, infrastructure, and local-feed locations with human
+administrator assistance as needed. Preserve existing ACLs and the developer’s
+access to agent-created files. Do not grant the entire personal profile. Windows
+ACLs and OpenCode tool permissions are separate concerns.
 
-## Step 2: Find the EWL locations
+## 2. Complete global configuration and agent rules
 
-You need to resolve the following four absolute paths on the current
-machine:
+Resolve the dedicated account’s config directory with `opencode debug paths config`.
+The ordinary location is `%USERPROFILE%\.config\opencode`, not `.opencode`.
+Read `AGENTS.md` and the existing `opencode.json` or `opencode.jsonc` before editing.
+Do not create both JSON forms. Preserve unrelated settings, `$schema`, credentials,
+and bootstrap rules. Ask before replacing conflicting user choices; do not display
+secret-bearing configuration. Back up existing content before substantial rewrites.
 
-| Label | Typical Windows location | What’s at this path |
-|---|---|---|
-| EWL source code | `%USERPROFILE%\Revision Control\EwlBill` | Contains `Enterprise Web Library.slnx`, `Core\`, `Library\`, `Development Utility\` |
-| EWL System Manager source code | `%USERPROFILE%\Revision Control\EWL System Manager` | Contains `Installation Support Utility\`, `Web Site\`, `Program Runner\`, `Data Cleaner\` |
-| EWL folder | `C:\Enterprise Web Library` | Machine-wide EWL infrastructure: `Local NuGet Feed\`, configuration, etc. |
-| EWL client systems directory | User-provided | Contains EWL client codebases; each codebase can be identified by a `dotnet-tools.json` file containing `ewl` |
-
-For each path, resolve it using the following procedure:
-
-1. **Try the default location** from the table above. For the EWL client
-   systems directory, ask the user for the location with the `question` tool
-   instead of assuming a default.
-2. **If not found, search common alternates.** Probe each of these as a
-   possible parent for the EWL source and EWL System Manager directories:
-   - `D:\Revision Control\`
-   - `C:\Source\`
-   - `C:\Repos\`
-   - `C:\dev\`
-   - directly under `%USERPROFILE%\` (i.e., `%USERPROFILE%\EwlBill`, etc.)
-
-    For the EWL folder, probe `D:\Enterprise Web Library` as the most likely
-    alternate.
-3. **Sanity-check candidates** by looking for the expected marker files /
-   subdirectories from the table above before committing to a match.
-4. **If still not found, ask the user** with the `question` tool. Allow the
-   user to skip a path that doesn’t exist on this machine (e.g., a developer
-   may only have EWL source and not the EWL System Manager). Skipped paths
-   are simply omitted from the generated `external_directory` map.
-5. **Verify each user-provided path exists** with `Test-Path` before writing
-   it into config.
-
-Store the four resolved absolute paths (or note which ones the user
-skipped) for use in the next steps.
-
-## Step 3: Read existing files at the target locations
-
-Before writing anything, read whatever may already be there so you can merge
-instead of clobber:
-
-- `%USERPROFILE%\.config\opencode\AGENTS.md`
-- `%USERPROFILE%\.config\opencode\opencode.jsonc`
-- `%USERPROFILE%\.config\opencode\opencode.json` (alternate filename --
-  if this exists instead of `.jsonc`, work with it; do not create both)
-
-If either file contains content unrelated to this skill, **do not overwrite
-it**. Surface the existing content to the user and ask how to proceed
-(merge, replace, or abort).
-
-## Step 4: Write `AGENTS.md`
-
-Target path: `%USERPROFILE%\.config\opencode\AGENTS.md`
-
-Use **concrete absolute paths** (the values resolved in Step 2), not
-templated `~/...` or `%USERPROFILE%\...` references. The file is read as
-prose by the model, and literal paths are clearer.
-
-Template (substitute the resolved paths; omit any line for a skipped path):
+Update the EWL location section of `AGENTS.md` using concrete absolute paths, not
+environment-variable placeholders. Replace the existing section rather than
+appending duplicates; preserve unrelated instructions. Use this structure, omitting
+skipped paths and substituting the discovered locations:
 
 ```markdown
 # Global Agent Rules
@@ -104,111 +68,150 @@ Template (substitute the resolved paths; omit any line for a skipped path):
 If looking for something possibly involving the Enterprise Web Library (EWL), check these locations:
 
 - EWL source code: `<resolved EWL source path>`
-- EWL System Manager source code: `<resolved ESM path>`
-- EWL folder: `<resolved EWL folder path>`
-- EWL client systems: `<resolved EWL client systems path>`. When the user asks how other EWL systems do something, or which systems implement an EWL feature, search this directory recursively for `dotnet-tools.json` files containing `ewl` and inspect the matching codebases.
-
-## Personal browser isolation
-
-Use only automation browsers launched with dedicated, disposable profiles. Never access or reuse personal browser profiles, cookies, saved credentials, password-manager sessions, or authentication state through any tool or subprocess. Never attach to or control an existing personal browser through debugging protocols, extensions, desktop automation, accessibility APIs, or simulated input. If a task requires access to a personal browser session, ask the user to perform that step themselves. For EWL web testing, follow the web-testing skill’s fresh-browser workflow.
+- EWL System Manager source code: `<resolved System Manager path>`
+- EWL folder: `<resolved infrastructure path>`
+- EWL client systems: `<resolved client root>`. When the user asks how other EWL systems do something, or which systems implement an EWL feature, search this directory recursively for `dotnet-tools.json` files containing `ewl` and inspect the matching codebases.
 ```
 
-If a previous version of this block is already in the file, replace it with
-the freshly resolved version. If the file has unrelated content, merge by
-appending the block at the end (with a blank line separator) after
-confirming with the user.
+Retain bootstrap’s browser-isolation and human-only OpenCode update rules without
+duplicating them. Use `ewl-web-testing` for browser testing.
 
-When upgrading an existing installation, add or update the personal-browser
-isolation section without duplicating it or removing the existing EWL locations.
-This is behavioral guidance, not an OS sandbox or a shell permission rule.
+Consult the OpenCode skill and current official documentation before changing
+configuration shapes or permission rules. Do not recreate the old global
+external-directory allowlist or add a catch-all approval rule. Preserve existing
+tool/agent policies; resolve actual access failures using the applicable rule and
+Windows ACLs. Validate configuration before requesting a supported reload/restart,
+then confirm effective behavior in a fresh connection. Do not assume load-once
+behavior or that an inline config override repairs a malformed file; restore the
+known-good backup if an edit prevents loading.
 
-## Step 5: Write `opencode.jsonc`
+## 3. Development dependencies and credentials
 
-Target path: `%USERPROFILE%\.config\opencode\opencode.jsonc`
+Inventory what the selected systems require. Reuse existing installations and
+configure access/PATH for the **dedicated account**. Verify tools from its server
+session, not merely from the personal terminal. Persistent environment changes
+require a coordinated server restart; an absolute executable path can bridge setup.
 
-If a `.json` form already exists instead, edit that file in place and keep
-the `.json` extension. Otherwise create `.jsonc`.
+- Check required .NET SDKs and Git/Mercurial access. A personal-account-only source
+  control installation may require a dedicated-account installation or human
+  assistance for a shared install. For Git for Windows, use the official release,
+  verify its hash/signature, and add its `cmd` directory to PATH. Verify version
+  and init/status in a disposable repository.
+- Install Node.js LTS when required by agent testing or integrations. Prefer an
+  official Windows distribution under the dedicated account, verify its checksum,
+  and verify `node --version`. Ask the human if machine-wide elevation is needed.
+- Ask which source-control commit identity to use; never invent it. Configure Git
+  and/or Mercurial authentication and identity independently for this account.
+  In `Mercurial.ini`, preserve existing settings when adding `[ui] username`.
+  EWL uses Evolve and Topics: verify availability using
+  `hg --config extensions.evolve= --config extensions.topic= version --verbose`
+  before enabling the available extensions. A successful commit alone is insufficient.
+- Provision ReSharper CLI tools/settings and other system-specific dependencies.
+  Follow `ewl-web-testing` for browser binaries, disposable profiles, authentication,
+  application startup, and owned-process cleanup.
+- Complete provider and MCP authentication under the server identity. Ask the
+  human to perform interactive sign-ins. Keep secrets out of shared files and
+  transcripts. If Azure access is needed, use a separate authorized service
+  principal for the dedicated account rather than reusing the personal CLI session.
 
-### Pattern format
+### NuGet sources
 
-Paths in `external_directory` patterns must use **forward slashes**, even
-on Windows. opencode normalizes path separators internally before matching,
-and forward-slash globs are the documented convention.
+Configure NuGet as the dedicated identity. Windows-encrypted passwords are bound
+to the account and machine; copying another user’s configuration does not transfer
+usable credentials. Merge sources without replacing unrelated entries.
 
-Append `/**` to each path so the rule matches all descendants.
+For EnduraCode workstations, confirm these sources:
 
-Example (with the standard locations and a user-provided EWL client systems
-path):
+- `EnduraCode`: `https://heptapod.host/api/v4/projects/1911/packages/nuget/index.json`
+- `Local`, when needed: `C:\Enterprise Web Library\Local NuGet Feed`
 
-```jsonc
-{
-  "$schema": "https://opencode.ai/config.json",
-  "permission": {
-    "external_directory": {
-      "C:/Users/willi/Revision Control/EwlBill/**": "allow",
-      "C:/Users/willi/Revision Control/EWL System Manager/**": "allow",
-      "C:/Enterprise Web Library/**": "allow",
-      "<resolved EWL client systems path with forward slashes>/**": "allow"
-    }
-  }
+Have the human supply a deploy-token username and package-registry read token in a
+dedicated-account PowerShell 7 window. Do not request the token in chat:
+
+```powershell
+whoami
+dotnet nuget list source
+$username = Read-Host 'Deploy-token username'
+$password = Read-Host 'Deploy-token password' -AsSecureString
+$credential = [pscredential]::new($username, $password)
+try {
+    dotnet nuget add source `
+        'https://heptapod.host/api/v4/projects/1911/packages/nuget/index.json' `
+        --name EnduraCode --username $credential.UserName `
+        --password $credential.GetNetworkCredential().Password
+    if ($LASTEXITCODE -ne 0) { throw 'NuGet source configuration failed.' }
+} finally {
+    $credential = $null
+    $password.Dispose()
+    Remove-Variable credential, password
 }
 ```
 
-### Merge rules when the file already exists
+For an existing source, use `dotnet nuget update source EnduraCode` with the same
+credential arguments. Do not use `--store-password-in-clear-text` on Windows.
+If paste is incomplete, try Windows Terminal’s Ctrl+Shift+V or right-click paste;
+check `$password.Length` without revealing its value. Confirm/create the local-feed
+directory before adding it. Verify with an actual solution restore; listing sources
+alone does not establish authentication or package access.
 
-- Preserve `$schema` and any existing fields the user did not ask to change.
-- If `permission.external_directory` already exists as a map, add the EWL
-  entries, including the EWL client systems directory, to the existing map.
-- If a key for one of our paths already exists with a different action,
-  ask the user before overwriting.
-- **Do not** add a `"*": "ask"` fallback. opencode’s built-in default for
-  `external_directory` is already `"ask"`; an explicit `"*": "ask"` entry
-  is redundant and (because the pattern map is evaluated in insertion order
-  with first-match-wins for `external_directory`) could shadow later
-  entries if placed at the top.
+## 4. Database access
 
-### What this grants
+Discover relevant SQL Server instances and MySQL/Oracle endpoints from EWL
+configuration without printing credentials. Ask what access is authorized; full
+administration is not implicit in workstation setup.
 
-opencode’s `external_directory` permission gates any tool call that touches
-paths outside the current working directory: `read`, `edit`, `write`,
-`list`, `glob`, `grep`, and many `bash` commands. Adding an `allow` entry
-for a path means tool calls under that path proceed silently. Because
-`read` and the editing tools all funnel through this gate, a single
-`external_directory` allow per path is sufficient for full read/write
-access.
+### SQL Server integrated authentication
 
-## Step 6: Validate
+When full instance administration is authorized, have an existing SQL administrator
+provision the dedicated Windows login in **each relevant instance**, with default
+database `master` and `sysadmin` membership. Substitute the actual computer/account:
 
-If you are uncertain about any config field shape, fetch the authoritative
-schema at <https://opencode.ai/config.json> and verify before writing.
-opencode validates strictly on startup and refuses to start when config is
-invalid, so a broken file means a broken opencode.
+```sql
+USE [master];
+IF SUSER_ID(N'MACHINE\agents') IS NULL
+    CREATE LOGIN [MACHINE\agents] FROM WINDOWS WITH DEFAULT_DATABASE = [master];
+IF IS_SRVROLEMEMBER(N'sysadmin', N'MACHINE\agents') = 0
+    ALTER SERVER ROLE [sysadmin] ADD MEMBER [MACHINE\agents];
+```
 
-If the user already has a broken global config and opencode will not start,
-the escape hatches are:
+Inspect existing login type, default database, and membership; resolve conflicting
+principals. Set the default database explicitly if needed. NULL membership is not
+success. Windows Administrators membership is unnecessary.
 
-- Start opencode from a project directory with
-  `OPENCODE_DISABLE_PROJECT_CONFIG=1` to skip project config.
-- Set `OPENCODE_CONFIG_CONTENT='{"$schema":"https://opencode.ai/config.json"}'`
-  to inject inline JSON as a final merge.
+EWL `update-data` replaces databases: database-level users/grants may disappear,
+while instance logins and `sysadmin` membership survive ordinary database refreshes.
+A sysadmin accesses restored databases as `dbo`. With database-specific access,
+plan post-restore user mapping/grants instead. Reprovision after instance rebuilds.
 
-## Step 7: Tell the user to restart opencode
+From the server identity verify `ORIGINAL_LOGIN()`, `SUSER_SNAME()`, and
+`IS_SRVROLEMEMBER('sysadmin')`. Recheck after the next authorized data refresh;
+do not refresh a database solely to test access without authorization.
 
-opencode loads config and `AGENTS.md` **once at startup**; there is no
-hot-reload. After saving, instruct the user to quit and restart opencode
-for the changes to take effect.
+### MySQL, Oracle, and filesystem access
 
-## Step 8: Verification (after restart)
+Use authorized configured credentials; do not assume familiar local passwords.
+Check MySQL host matching, transport, and effective privileges. For Oracle, check
+client/provider dependencies, TNS aliases, wallets, environment, and any external
+authentication. Administrative access requires verifying privileges and connection
+mode, not merely a successful login. Reprovision user-bound protected credentials.
 
-To confirm the setup is working, the user can ask opencode (in any session)
-to read a file under one of the configured paths, or to list the EWL client
-systems on the machine. If the read or search proceeds with no
-`external_directory` prompt, the rules are active. The global `AGENTS.md` will
-also be visible: it is injected at the top of the system prompt of every
-session as `Instructions from:
-C:\Users\<name>\.config\opencode\AGENTS.md` followed by the file contents.
+Verify schema inspection/code generation, reads, writes, and migration permissions
+through authorized development operations. Check backup/restore filesystem access
+separately, including access for the database service account.
 
-Also ask the fresh session how it would test an authenticated local application
-when the personal browser is already signed in. It should choose a fresh test
-browser and separate test authentication, not reuse the personal session. Verify
-this from its response without opening or inspecting any personal browser data.
+## 5. Complete and verify workstation configuration
+
+Distribute maintained EWL integrations through DU sync when prerequisites are ready;
+never edit generated agents, skills, or plugins. Follow target-system rules and
+avoid overwriting running binaries. Honor any explicit sync deferral.
+
+- Confirm a fresh session loads the global agent rules and can read an agreed
+  EWL file and discover client systems from the configured locations.
+- Verify configured dependencies and database access through a representative,
+  authorized development operation, such as a system’s normal sync and build.
+  Reuse evidence collected during setup rather than repeating successful checks.
+
+Finish with a secret-free summary of resolved/skipped paths, configuration changes,
+dependency versions, authentication ownership, database access, completed checks,
+and remaining limitations or user-accepted waivers. Distinguish runtime evidence
+from source review. Do not claim setup is verified merely because bootstrap returned.

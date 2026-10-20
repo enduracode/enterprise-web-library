@@ -38,6 +38,11 @@ class UpdateDependentLogic: Operation {
 	bool Operation.IsValid( Installation installation ) => installation is DevelopmentInstallation;
 
 	void Operation.Execute( Installation genericInstallation, IReadOnlyList<string> arguments, OperationResult operationResult ) {
+		if( OperatingSystem.IsWindows() && !File.Exists(
+			    EwlStatics.CombinePaths( Environment.GetFolderPath( Environment.SpecialFolder.ProgramFiles ), "OpenCode", "opencode.exe" ) ) )
+			Log.Information(
+				"OpenCode workstation setup was not detected. Run the Development Utility’s configure-workstation operation if you’d like to set it up." );
+
 		// This block exists because of https://enduracode.kilnhg.com/Review/K164316.
 		try {
 			IsuStatics.ConfigureIis( false );
