@@ -7,7 +7,7 @@ using Tewl.IO;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility;
 
-internal static class Program {
+static class Program {
 	[ MTAThread ]
 	private static int Main( string[] args ) {
 		GlobalInitializationOps.InitStatics( new GlobalInitializer(), "Development Utility", true );
