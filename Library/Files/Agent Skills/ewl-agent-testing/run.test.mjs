@@ -1,145 +1,119 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
-import { execute, main } from './run.mjs';
+import { connection, main } from './run.mjs';
 
-const fakeRun = `
-const fs = require('node:fs');
-const path = require('node:path');
-const args = process.argv.slice(2);
-const title = args[args.indexOf('--title') + 1];
-const prompt = args.at(-1);
-const directory = fs.realpathSync(process.cwd());
-const root = { id: 'ses_Primary', title, directory };
-const child = { id: 'ses_Child', parentID: root.id, title: 'Child', directory };
-const grandchild = { id: 'ses_Grandchild', parentID: child.id, title: 'Grandchild', directory };
-fs.writeFileSync('sessions.json', JSON.stringify([root, child, grandchild, { id: 'ses_Unrelated', title: 'Personal session', directory }]));
-process.stdin.resume();
-process.stdin.on('end', () => {
-  if (prompt === 'hang') { setInterval(() => {}, 1000); return; }
-  const bytes = Buffer.from(JSON.stringify({ type: 'text', sessionID: root.id, part: { text: 'café—你好' } }) + '\\n');
-  process.stdout.write(bytes.subarray(0, bytes.length - 8));
-  setTimeout(() => { process.stdout.write(bytes.subarray(bytes.length - 8)); process.stderr.write('diagnostic only\\n'); }, 10);
+test('rejects non-loopback destinations and embedded credentials', () => {
+  for (const url of ['http://example.com', 'http://user:pass@127.0.0.1', 'http://127.0.0.1/path', 'http://127.0.0.1/?x=1'])
+    assert.throws(() => connection(url, 'secret'), /loopback/);
+  assert.throws(() => connection('http://127.0.0.1', ''), /password/);
 });
-`;
 
-const fakeServe = `
-const fs = require('node:fs');
-const http = require('node:http');
-const args = process.argv.slice(2);
-const port = Number(args[args.indexOf('--port') + 1]);
-http.createServer((req, res) => {
-  const url = new URL(req.url, 'http://localhost');
-  let sessions = fs.existsSync('sessions.json') ? JSON.parse(fs.readFileSync('sessions.json')) : [];
-  let result;
-  if (url.pathname === '/global/health') result = { healthy: true };
-  else if (url.pathname === '/session') result = sessions;
-  else {
-    const [, , id, action] = url.pathname.split('/');
-    const info = sessions.find(s => s.id === id);
-    if (!info) { res.writeHead(404); res.end('{}'); return; }
-    if (req.method === 'DELETE') {
-      const removed = new Set([id]);
-      for (let i = 0; i < sessions.length; i++) for (const s of sessions) if (removed.has(s.parentID)) removed.add(s.id);
-      sessions = sessions.filter(s => !removed.has(s.id));
-      fs.writeFileSync('sessions.json', JSON.stringify(sessions));
-      result = true;
-    } else if (action === 'children') result = sessions.filter(s => s.parentID === id);
-    else if (action === 'message') result = [{ info: { role: 'assistant' }, parts: [{ type: 'text', text: 'café—你好' }] }];
-    else result = info;
+for (const scenario of ['normal', 'timeout', 'interrupt failure', 'export failure', 'partial deletion']) {
+test(`permanent-server runner preserves ownership and recovery: ${scenario}`, async t => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), 'ewl-runner-'));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const credential = path.join(directory, 'connection.json');
+  const prompt = path.join(directory, 'prompt.txt');
+  await writeFile(credential, JSON.stringify({ password: 'test-secret-not-for-manifest' }));
+  await writeFile(prompt, 'Unicode café—你好');
+  let sessions = [{ id: 'ses_Unrelated', title: 'Unrelated', location: { directory } }];
+  let noAuthentication = 0;
+  let interrupted = false;
+  let exportFailed = false;
+  let deletionFailed = false;
+  const deleted = [];
+  const server = http.createServer(async (req, res) => {
+    if (req.headers.authorization !== 'Basic ' + Buffer.from('opencode:test-secret-not-for-manifest').toString('base64')) {
+      noAuthentication++; res.writeHead(401).end(); return;
+    }
+    const url = new URL(req.url, 'http://127.0.0.1');
+    const bytes = [];
+    for await (const chunk of req) bytes.push(chunk);
+    const text = Buffer.concat(bytes).toString();
+    const body = text ? JSON.parse(text) : undefined;
+    let result;
+    if (url.pathname === '/api/info') result = { version: '2.0.32' };
+    else if (url.pathname === '/api/session' && req.method === 'POST') {
+      const info = { id: 'ses_Primary', ...body };
+      sessions.push(info, ...['A', 'B'].map(n => ({ id: `ses_Child${n}`, parentID: info.id, location: { directory } })));
+      result = { data: info };
+    } else if (url.pathname === '/api/session') {
+      // Deliberately paginate the two children to catch silent first-page-only exports.
+      const cursor = url.searchParams.get('cursor');
+      const children = sessions.filter(s => s.parentID === (url.searchParams.get('parentID') ?? cursor));
+      result = { data: cursor ? children.slice(1) : children.slice(0, 1), cursor: { next: !cursor && children.length > 1 ? url.searchParams.get('parentID') : null } };
+    } else {
+      const id = url.pathname.split('/').find(s => s.startsWith('ses_'));
+      const info = sessions.find(s => s.id === id);
+      if (!info) { res.writeHead(404).end('{}'); return; }
+      if (req.method === 'DELETE') {
+        if (scenario === 'partial deletion' && id === 'ses_ChildA' && !deletionFailed) {
+          deletionFailed = true; res.writeHead(503).end('{}'); return;
+        }
+        deleted.push(id); sessions = sessions.filter(s => s.id !== id); res.writeHead(204).end(); return;
+      }
+      if (url.pathname.endsWith('/wait')) {
+        if (scenario === 'timeout' || scenario === 'interrupt failure') return;
+        res.writeHead(204).end(); return;
+      }
+      if (url.pathname.endsWith('/interrupt')) {
+        interrupted = true;
+        res.writeHead(scenario === 'interrupt failure' ? 503 : 204).end(); return;
+      }
+      if (url.pathname.endsWith('/export') && scenario === 'export failure' && id === 'ses_ChildA' && !exportFailed) {
+        exportFailed = true; res.writeHead(503).end('{}'); return;
+      }
+      result = url.pathname.endsWith('/export') ? { data: { info, messages: [{ type: 'user', text: 'café—你好' }] } } : { data: info };
+    }
+    res.writeHead(200, { 'Content-Type': 'application/json' }).end(JSON.stringify(result));
+  });
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  t.after(() => new Promise(resolve => server.close(resolve)));
+  const run = () => main(['run', '--server', `http://127.0.0.1:${server.address().port}`, '--connection-file', credential,
+    '--dir', directory, '--model', 'fixture/model', '--title', 'runner', '--output', directory, '--prompt-file', prompt,
+    '--timeout-ms', '100']);
+  if (scenario === 'timeout') await assert.rejects(run(), /timeout|timed out/i);
+  else if (scenario === 'interrupt failure') await assert.rejects(run(), /interrupt: HTTP 503/);
+  else if (scenario === 'export failure') await assert.rejects(run(), /export: HTTP 503/);
+  else await run();
+  const artifacts = (await readdir(directory)).find(n => n.startsWith('agent-test-'));
+  const file = path.join(directory, artifacts, 'manifest.json');
+  const manifestText = await readFile(file, 'utf8');
+  assert.ok(!manifestText.includes('test-secret-not-for-manifest'));
+  let manifest = JSON.parse(manifestText);
+  assert.deepEqual(deleted, []);
+  assert.equal(sessions.length, 4);
+  assert.equal(interrupted, scenario === 'timeout' || scenario === 'interrupt failure');
+  if (interrupted) assert.match(manifest.failure, /timeout|timed out/i);
+  if (scenario === 'export failure') {
+    assert.equal(exportFailed, true);
+    assert.ok(manifest.sessions.some(s => s.id === 'ses_ChildA'));
+    // Retry must rediscover the remainder of the tree after a mid-export failure.
+    await main(['export', '--manifest', file]);
+    manifest = JSON.parse(await readFile(file, 'utf8'));
   }
-  res.writeHead(200, { 'content-type': 'application/json' });
-  res.end(JSON.stringify(result));
-}).listen(port, '127.0.0.1');
-`;
-
-async function fixture(t) {
-	const directory = await mkdtemp(path.join(os.tmpdir(), 'ewl-agent-runner-'));
-	t.after(() => rm(directory, { recursive: true, force: true }));
-	await writeFile(path.join(directory, 'run'), fakeRun);
-	await writeFile(path.join(directory, 'serve'), fakeServe);
-	return directory;
+  assert.equal(manifest.sessions.length, 3);
+  const exported = JSON.parse(await readFile(path.join(directory, artifacts, 'ses_ChildB.json'), 'utf8'));
+  assert.equal(exported.data.messages[0].text, 'café—你好');
+  manifest.sessions.push({ id: 'ses_Unrelated', parentID: null });
+  await writeFile(file, JSON.stringify(manifest));
+  await assert.rejects(main(['cleanup', '--manifest', file]), /ownership mismatch/);
+  assert.equal(sessions.length, 4);
+  manifest.sessions.pop();
+  await writeFile(file, JSON.stringify(manifest));
+  if (scenario === 'partial deletion') {
+    await assert.rejects(main(['cleanup', '--manifest', file]), /HTTP 503/);
+    assert.deepEqual(deleted, ['ses_ChildB']);
+    assert.ok(sessions.some(s => s.id === 'ses_Primary'));
+    assert.ok(!JSON.parse(await readFile(file, 'utf8')).cleanedAt);
+  }
+  await main(['cleanup', '--manifest', file]);
+  await main(['cleanup', '--manifest', file]);
+  assert.deepEqual(sessions.map(s => s.id), ['ses_Unrelated']);
+  assert.equal(noAuthentication, 0);
+});
 }
-
-async function runFixture(t, prompt, timeoutMs = 10000) {
-	const directory = await fixture(t);
-	const { readdir } = await import('node:fs/promises');
-	const result = await main([
-		'run', '--exe', process.execPath, '--dir', directory, '--output', directory,
-		'--model', 'fixture/model', '--title', 'runner-test', '--prompt', prompt, '--timeout-ms', String(timeoutMs),
-	]);
-	const artifact = (await readdir(directory)).find(p => p.startsWith('agent-test-'));
-	const manifestPath = path.join(directory, artifact, 'manifest.json');
-	return { result, directory, artifacts: path.dirname(manifestPath), manifestPath, manifest: JSON.parse(await readFile(manifestPath, 'utf8')) };
-}
-
-test('stdin is closed and Unicode event bytes, descendant exports, and unrelated sessions are preserved', async t => {
-	const run = await runFixture(t, 'finish');
-	assert.equal(run.result, 0);
-	assert.equal(run.manifest.result.timedOut, false);
-	assert.deepEqual(run.manifest.sessions.map(s => s.id), ['ses_Primary', 'ses_Child', 'ses_Grandchild']);
-	const event = JSON.parse(await readFile(path.join(run.artifacts, 'events.jsonl'), 'utf8'));
-	assert.equal(event.part.text, 'café—你好');
-	assert.equal(await readFile(path.join(run.artifacts, 'stderr.log'), 'utf8'), 'diagnostic only\n');
-	const exported = JSON.parse(await readFile(path.join(run.artifacts, 'ses_Grandchild.json'), 'utf8'));
-	assert.equal(exported.messages[0].parts[0].text, 'café—你好');
-	const statePath = path.join(run.directory, 'sessions.json');
-	const state = JSON.parse(await readFile(statePath));
-	state.push({ id: 'ses_LateChild', parentID: 'ses_Primary', directory: run.directory, title: 'Late child' });
-	await writeFile(statePath, JSON.stringify(state));
-	assert.equal(await main(['export', '--manifest', run.manifestPath]), 0);
-	assert.equal(await main(['cleanup', '--manifest', run.manifestPath]), 0);
-	assert.deepEqual(JSON.parse(await readFile(statePath)).map(s => s.id), ['ses_Unrelated']);
-	assert.equal(await main(['cleanup', '--manifest', run.manifestPath]), 0);
-	assert.ok((await readFile(path.join(run.artifacts, 'events.jsonl'))).length);
-});
-
-test('watchdog bounds a blocked run and recovers ownership with no CLI events', async t => {
-	const run = await runFixture(t, 'hang', 1000);
-	assert.equal(run.result, 1);
-	assert.equal(run.manifest.result.timedOut, true);
-	assert.equal(await readFile(path.join(run.artifacts, 'events.jsonl'), 'utf8'), '');
-	assert.equal(run.manifest.sessions.length, 3);
-	await main(['cleanup', '--manifest', run.manifestPath]);
-});
-
-test('cleanup refuses a recorded session whose ownership does not match', async t => {
-	const run = await runFixture(t, 'finish');
-	run.manifest.sessions.push({ id: 'ses_Unrelated', parentID: null });
-	await writeFile(run.manifestPath, JSON.stringify(run.manifest));
-	await assert.rejects(main(['cleanup', '--manifest', run.manifestPath]), /ownership mismatch/);
-	assert.equal(JSON.parse(await readFile(path.join(run.directory, 'sessions.json'))).length, 4);
-	run.manifest.sessions.pop();
-	await writeFile(run.manifestPath, JSON.stringify(run.manifest));
-	await main(['cleanup', '--manifest', run.manifestPath]);
-});
-
-test('failed process launch produces a bounded result instead of hanging', async () => {
-	const result = await execute(path.join(os.tmpdir(), 'missing-agent-runner-executable'), [], {
-		directory: os.tmpdir(), env: process.env, timeoutMs: 1000, stdout() {}, stderr() {},
-	});
-	assert.match(result.launchError, /ENOENT/);
-	assert.equal(result.timedOut, false);
-});
-
-test('inherited output pipes return promptly or are bounded by the watchdog', async t => {
-	const output = [];
-	let descendant;
-	t.after(() => { if (descendant) { try { process.kill(descendant); } catch (error) { if (error.code !== 'ESRCH') throw error; } } });
-	const result = await execute(process.execPath, ['-e', `
-const { spawn } = require('node:child_process');
-const child = spawn(process.execPath, ['-e', 'setInterval(() => {}, 1000)'], { stdio: ['ignore', 'inherit', 'inherit'] });
-console.log(child.pid);
-child.unref();
-`], {
-		directory: os.tmpdir(), env: process.env, timeoutMs: 1000, stdout(data) { output.push(data); }, stderr() {},
-	});
-	descendant = Number(Buffer.concat(output).toString().trim());
-	assert.ok(Number.isSafeInteger(descendant) && descendant > 0);
-	assert.equal(result.exitCode, 0);
-	// Node closes inherited pipes promptly on Windows; other hosts can retain them.
-	if (result.timedOut) assert.match(result.terminationError, /inherited output handles/);
-	else assert.equal(result.terminationError, undefined);
-});

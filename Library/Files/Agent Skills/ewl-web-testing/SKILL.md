@@ -17,11 +17,12 @@ owns generic mechanics. When several users or records match a test criterion,
 enumerate the candidates and ask the user to choose. Do not pick one silently.
 Prefer explicitly authorized temporary records over changing existing data.
 
-Required: Windows PowerShell 5.1+, a .NET 10 SDK, the skill’s complete directory,
+Required: PowerShell 7 on Windows, a .NET 10 SDK, the skill’s complete directory,
 and a locally configured/buildable EWL application and database. First bootstrap
 needs NuGet and Playwright browser-download access. No previous OpenCode temp
 directory, driver, browser installation, cookies, or authentication state is needed.
-Run PowerShell with `ewl-powershell`; follow the harness’s file-operation rules.
+Run PowerShell with the native `shell` tool configured to PowerShell
+7; the EWL plugin initializes UTF-8 output. Follow the harness’s file-operation rules.
 
 ## Bundled files and source ownership
 
@@ -128,8 +129,7 @@ $iis.Id
 
 Probe readiness with short request timeouts and a bounded retry loop. An expected
 authentication redirect/403 can demonstrate readiness; a listener alone does not.
-Playwright’s `IgnoreHTTPSErrors` handles the local certificate. PowerShell 5.1
-does not support `Invoke-WebRequest -SkipCertificateCheck`.
+Playwright’s `IgnoreHTTPSErrors` handles the local certificate.
 
 ## 3. Run and extend the temporary driver
 

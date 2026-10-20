@@ -1,529 +1,147 @@
 ---
 name: ewl-agent-testing
-description: Test changes to EWL agent rules, subagents, skills, OpenCode plugins, and MCP tools by driving OpenCode headlessly, capturing transcripts, and cleaning up afterwards. Load this skill when verifying changes to anything under Library\Files\Agent Rules.md, Library\Files\Agents\, Library\Files\Agent Skills\, Library\Files\OpenCode Plugins\, or Library\Files\OpenCode Tools\.
+description: Test changes to EWL agent rules, subagents, skills, and OpenCode plugins by driving OpenCode headlessly, capturing transcripts, and cleaning up afterwards. Load this skill when verifying changes to anything under Library\Files\Agent Rules.md, Library\Files\Agents\, Library\Files\Agent Skills\, or Library\Files\OpenCode Plugins\.
 ---
 
 ## Overview
 
-Changes to agent configuration (`AGENTS.md`, subagent prompts, skills, plugins, MCP tools) only take effect in a **newly started** OpenCode session -- the TUI running in front of you does not pick up edits to these files. To verify that the change behaves correctly, drive a fresh OpenCode instance headlessly and inspect what it did.
+Use `run.mjs` against the existing authenticated dedicated server. Never start an
+additional server, change global configuration, or automatically approve requests.
+Run commands through the native PowerShell 7 `shell` tool; the EWL plugin initializes
+UTF-8 output. Preserve personal browser isolation and existing working-copy changes.
 
-This skill documents the end-to-end loop:
+The runner creates a fresh session, records ownership before submitting the prompt,
+waits for idle, and exports the primary and descendant transcripts through the API.
+Completion means the session became idle, not that the scenario passed. Inspect the
+actual tool calls, permissions, outcomes, and resulting files or processes.
 
-1. Make the source edit in the EWL source tree.
-2. Propagate to the target test system(s) with `sync`.
-3. Launch `opencode run` headlessly against each target system.
-4. Capture JSON events and export primary/child transcripts through supported APIs.
-5. Check logs for permission-ask events and other red flags.
-6. Revert any repository changes the test produced.
-7. Delete the test session via the HTTP API and clean up flat-file leftovers.
+## Prepare a scenario
 
-## Before you start
+1. Choose a client system such as EWL System Manager for integration acceptance.
+   Do not use the EWL source repository as a substitute for testing distributed
+   integrations. Isolated tool/model probes may use a disposable workspace.
+2. Verify the existing server identity and endpoint, and select an available model
+   through the model catalog. Do not substitute a different provider/model silently.
+3. Check applicable target-system rules and record existing version-control status.
+   Prefer disposable fixtures; do not overwrite existing changes.
+4. After maintained integration changes, regenerate the target with a DU containing
+   those changes unless generation is explicitly deferred or waived. Inspect the
+   generated files and active plugin list. Local plugin targets are package
+   directories with an entrypoint. Configuration watchers can reload locations;
+   session creation alone does not establish that registration has completed.
+5. Create an authorized temporary output workspace and a UTF-8 prompt file. Use
+   the dedicated server account’s workspace, not the personal account’s temp path.
+   Never include passwords or provider credentials in prompts or artifacts.
 
-### Pick a target system
+For workflow tests, describe the real change request and let the agent discover
+the applicable workflow. Do not tell it which subagents to invoke unless testing
+that specific delegation. For a focused cleanup-agent test, explicitly request
+delegation and verify the actual child transcript; a primary agent performing the
+steps itself does not establish subagent behavior.
 
-Never test in the EWL source repository itself. Test in a client system that references EWL, because EWL's own configuration is regenerated (not consumed) by the DU. Good targets include:
+Prefer compile-safe fixtures. Throwaway test scaffolding does not require the
+normal formatting/review workflow. Tests consume provider credits.
 
-- **EWL System Manager** (`$env:USERPROFILE\Revision Control\EWL System Manager`) -- Mercurial, no sub-repos, well-populated with C# files.
-- **TEWL** (`$env:USERPROFILE\Revision Control\EWL Dependencies\EnduraCode's TEWL`) -- Mercurial outer repo with a Git sub-repo at `Shared\`. Use this for sub-repo tests and for tests that exercise paths containing a curly apostrophe (U+2019).
+## Run and export
 
-If the test involves the repo having `.hg` at the top, note that `Test-Path -LiteralPath` is required when the path contains U+2019; `Test-Path` with a plain string will sometimes fail to match.
-
-### Pre-flight checks
-
-- The TUI session you are running in now will still work while tests run; `opencode run` launches a separate process with its own lifetime.
-- `hg status` / `git status` in the target system should be clean or in a known state. Testing typically leaves test edits behind, which you must revert. A dirty target repo can cause the primary agent to ask a clarification question, which blocks headless testing.
-- Both the primary model and the subagent model consume Zen credits (for `opencode/*` model IDs) or upstream provider credits (for `anthropic/*`, `openai/*`, etc.). Budget accordingly: expect a few dollars for a full test matrix of ~8 scenarios.
-
-## Propagating edits to the target system
-
-After editing any file under `Library\Files\` in the EWL source repo, run the EWL DU against the target system so its `.opencode\`, `.agents\`, `.claude\`, and `Library\Generated Code\EWL Agent Rules.md` reflect your changes. Invoke the DU project from the target system directory:
-
-```powershell
-$ewlSource = (Get-Location).Path
-
-# Target: EWL System Manager
-Push-Location -LiteralPath "$env:USERPROFILE\Revision Control\EWL System Manager"
-dotnet run --project "$ewlSource\Development Utility\Development Utility.csproj" -- sync
-Pop-Location
-
-# Target: TEWL (curly-apostrophe path, requires enumeration)
-$parent = "$env:USERPROFILE\Revision Control\EWL Dependencies"
-$tewlDir = (Get-ChildItem -LiteralPath $parent -Directory |
-  Where-Object { $_.Name -like '*TEWL*' }).FullName
-Push-Location -LiteralPath $tewlDir
-dotnet run --project "$ewlSource\Development Utility\Development Utility.csproj" -- sync
-Pop-Location
-```
-
-After the DU finishes, verify the generated file you care about looks right -- e.g. `<system>\.opencode\agents\ewl-cleanup.md`, `<system>\.opencode\tools\ewl-<tool>.js`, or `<system>\Library\Generated Code\EWL Agent Rules.md`. If you are iterating on the EWL source, rerun the DU between each iteration; `opencode run` reads these files at startup.
-
-## Launching OpenCode headlessly
-
-Resolve the executable from the running OpenCode session before testing. Inspect `Win32_Process` for OpenCode executable paths and parent processes, then run `--version` on the selected executable. Set `$openCodeExe` to that absolute path and use it for every test and cleanup command. Do not assume that PATH or `$env:LOCALAPPDATA\opencode\opencode-cli.exe` points to the running version: an older installation may coexist with the active one. If running sessions use different executables, identify the current session's process ancestry or ask the user. Verify the requested provider/model with `models <provider>` on this same executable; do not substitute another model or provider without user direction.
-
-The `run` subcommand takes a prompt and exits when the model stops. Important flags:
-
-| Flag | Purpose |
-|---|---|
-| `--format json` | Stream raw JSON events to stdout; one JSON object per line. Captures every tool call, message part, and step boundary. |
-| `--model <provider/model>` | Pick the primary model. Examples: `opencode/gpt-5.4`, `opencode/claude-sonnet-4-6`. |
-| `--agent <name>` | Primary agent role. Use `build` to match the normal interactive default. |
-| `--title <string>` | Human-readable session title. Very useful for filtering later. Always prefix with a scenario tag like `scen1-<what>`. |
-| `--print-logs --log-level DEBUG` | Optional diagnostics when debugging hangs or permission behavior. These do not replace transcript inspection. |
-| (positional) | The prompt text. |
-
-### Reusable runner
-
-Prefer the Node runner `run.mjs` beside this skill’s `SKILL.md` (Node 22 or
-newer, built-in modules only). It closes stdin, captures stdout JSON events and
-stderr separately as UTF-8, applies a watchdog to the owned CLI process tree,
-and exports primary and descendant transcripts through the supported HTTP API.
-It records ownership in a manifest before launching. It does not answer
-approvals, change configuration, create scenario fixtures, or restore source
-files or commits. Select and verify the actual executable and model first, as
-described above.
-
-Supply an existing output workspace and an explicit executable, target system
-directory, model, and scenario label:
+Node 22 or newer is required; the runner uses built-in modules only.
 
 ```powershell
 node "<skill directory>\run.mjs" run `
-  --exe "$openCodeExe" `
-  --dir "$targetDir" `
-  --model "openai/gpt-6.1-sol" `
-  --title "preedit-summary" `
-  --output "C:\Users\<user>\AppData\Local\Temp\opencode" `
-  --timeout-ms 300000 `
-  --prompt "In Library/MailMerging/GlobalFields/GlobalRowType.cs, add a summary doc comment to the class."
+  --server "http://127.0.0.1:45278" `
+  --connection-file "<dedicated profile>\.config\opencode\service.json" `
+  --dir "<target system directory>" --model "<verified provider/model>" `
+  --title "<scenario>" --output "<managed temporary workspace>" `
+  --prompt-file "<absolute UTF-8 prompt file>" --timeout-ms 300000
 ```
 
-Use `--prompt-file <absolute UTF-8 file>` instead of `--prompt` for lengthy
-requests. `--agent` defaults to `build`. An optional `--config-file` applies
-an additional OpenCode configuration only to owned subprocesses via
-`OPENCODE_CONFIG`; it never edits machine settings. Normal inherited environment
-and OpenCode configuration still apply. The runner does not switch providers
-or check model availability on your behalf.
+Use the actual server endpoint. The private connection file contains `password`;
+the runner does not print or store its value in artifacts. Use an explicit numeric
+loopback address supported by the runner rather than relying on hostname resolution.
 
 The runner prints a manifest path in a unique `agent-test-<UUID>` directory.
-That directory contains `events.jsonl`, `stderr.log`, `manifest.json`, and one
-`ses_*.json` API export per discovered session. The title gets a `scen-` prefix
-and a unique suffix, allowing recovery if the CLI emits no events. Inspect the
-exports, not just the primary’s final message. Exit code 0 means the CLI exited
-successfully and collection found sessions; it does not establish that the
-scenario passed. A timeout, launch failure, or collection failure returns 1
-and preserves available evidence. Classify stopped sessions from their
-transcripts rather than treating a timeout as automatic scenario failure.
-If the CLI already exited but descendants kept its output pipes open, the
-watchdog closes those pipes and records a termination warning. Such descendants
-cannot reliably be identified from the exited parent PID; use scenario-owned
-PID records for their cleanup. Do not kill unrelated processes by name or age.
-
-Refresh exports or delete the recorded session tree after review:
+Keep the manifest: it records the owned sessions and connection-file path for later
+export and cleanup. Do not edit it to include unrelated sessions.
 
 ```powershell
-node "<skill directory>\run.mjs" export --manifest "<manifest path>"
-node "<skill directory>\run.mjs" cleanup --manifest "<manifest path>"
+node "<skill directory>\run.mjs" export --manifest "<manifest.json>"
+node "<skill directory>\run.mjs" cleanup --manifest "<manifest.json>"
 ```
 
-Both commands use the recorded executable, target directory, and optional
-configuration. The runner starts an owned loopback API server on an available
-port and stops only that process tree. It honors inherited
-`OPENCODE_SERVER_USERNAME`/`OPENCODE_SERVER_PASSWORD` authentication. Cleanup
-refreshes descendant ownership, deletes through the supported API, and verifies
-absence. Never edit the manifest to include unrelated sessions. Artifacts remain
-available for review; the caller removes only that run’s artifact directory
-and handles scenario-specific repository recovery separately. For older
-flat-file storage, check for owned orphan files using the cleanup guidance
-below; the runner does not directly touch OpenCode’s storage or database.
+A timeout interrupts the primary session. Inspect descendants and use cleanup
+before removing artifacts. An approval request can leave a headless test waiting;
+do not bypass it. Classify the test as blocked/inconclusive when required evidence
+is missing. A permission denial must not be retried through another tool.
 
-Runner regression checks use disposable fake CLI/API fixtures without model
-calls. After changing the runner, execute:
+## Evaluate results
+
+- Inspect exported tool inputs, results, permissions, and final outcomes—not only
+  the agent’s summary or the runner’s exit code.
+- Confirm expected delegation and the child’s model/agent identity when relevant.
+- Inspect file diffs and any reported build, browser, or process results.
+- For Unicode tests, inspect code points on disk and literal characters in tool
+  inputs. Typography uses ordinary edits; preserve syntax delimiters.
+- Distinguish existing grants, new approval requests, and genuine denials. The
+  cleanup plugin preserves existing grants but denies new requests for cleanup.
+- Repeat behavioral scenarios at least twice before relying on a result. Do not
+  rerun unrelated checks after success unless changes or unresolved concerns justify it.
+
+Use the running server’s log for additional diagnostics, filtering to owned
+sessions and the test window. Do not dump credentials or unrelated model payloads.
+
+## Cleanup
+
+Always clean up owned test sessions, including failed runs. The runner verifies
+ownership before deleting through the server API; it never starts or stops the
+shared server. Refresh exports before cleanup when additional evidence is needed.
+
+Do not edit the session database or delete shared log/storage directories. Do not
+use process-name-wide termination. Stop only processes demonstrably created by the
+test. Remove only owned fixtures and temporary reports; preserve useful transcripts
+until reviewed. Never use blanket VCS revert/reset/clean/strip commands to remove
+test changes from a working repository. If recovery would affect existing work,
+stop and report rather than guessing.
+
+## Regression tests for the runner
 
 ```powershell
 node --test "<skill directory>\run.test.mjs"
 ```
 
-Also exercise a real fresh OpenCode session against a regenerated client system;
-fake fixtures do not establish compatibility with the installed OpenCode API.
-
-### Direct launches
-
-Use direct launches only when the scenario needs behavior not covered by the
-runner. Minimal invocation pattern:
-
-```powershell
-Push-Location -LiteralPath $targetDir
-& $openCodeExe run `
-  --format json `
-  --model "opencode/gpt-5.4" `
-  --agent build `
-  --title "scen1-preedit-gpt54" `
-  "In Library/MailMerging/GlobalFields/GlobalRowType.cs, add a summary doc comment to the class." `
-  | Out-File -FilePath "$env:TEMP\ewl-agent-tests\scen1.jsonl" -Encoding utf8
-Pop-Location
-```
-
-Each `opencode run` creates a fresh primary session -- no TUI restart or cache clearing needed. Agent/skill files are re-read on every startup.
-
-There is no supported `opencode run` switch that disables interactive questions or auto-answers prompts. Prevent blocking questions by starting from a clean target repo, using prompts that are specific enough for the primary agent to act without clarification, and configuring permissions to `deny` rather than `ask` for operations that should not happen during the test.
-
-### Prompt style
-
-Prompts to the primary agent should describe a **real change request**, not a test-framework instruction. The agent must discover workflow rules (Critical Rules, agent-invocation order) from its `AGENTS.md` on its own. **Don't** write prompts like "invoke the ewl-cleanup subagent on file X per Critical Rule #2"; that short-circuits exactly the wiring you are trying to test. **Do** write prompts like "Add a public constant `Yaml` with value `.yaml` to Shared/Tewl/FileExtensions.cs".
-
-For focused tests of a single subagent, start with a primary agent and phrase the prompt so it clearly delegates (e.g. "Please run the ewl-cleanup subagent directly on this file..."). OpenCode 1.18.33 does not directly launch a subagent through `run --agent <subagent-name>`: it reports that the agent is not primary and falls back to the default primary. Inspect the child transcript to confirm actual delegation.
-
-Prefer compile-safe prompts unless the scenario specifically validates behavior in the presence of compiler errors. Artificially invalid code can distract the primary agent or inspection tools, produce noisy diagnostics, and obscure the behavior under test.
-
-### Extracting the session ID
-
-The session ID appears in every JSON event as `sessionID`. Pull the first one:
-
-```powershell
-$content = Get-Content $jsonlPath -Raw
-if ($content -match '"sessionID":"(ses_[^"]+)"') {
-  $sessionId = $matches[1]
-}
-```
-
-Record each test's session ID (plus target dir) to a list so you can delete them at the end.
-
-The reusable runner records the ownership tree and exports beside its manifest;
-manual session-ID extraction is needed only for direct launches.
-
-### Detecting hangs
-
-When launching `opencode run` from Node with a prompt supplied through arguments,
-use `stdio: ['ignore', 'pipe', 'pipe']`, or call `child.stdin.end()` immediately.
-An open stdin pipe prevented execution from starting in OpenCode 1.18.33 and
-left an empty transcript until the watchdog fired. Check stdin handling before
-classifying this symptom as a model or permission hang. The reusable runner
-handles this automatically.
-
-If the primary or a subagent loops on an issue (e.g. fighting with a curly-apostrophe path), the `opencode run` process may stop making progress but not exit. In some cases the JSONL wrapper may also fail to return even though flat-file storage shows the primary session and child sessions have already reached `step-finish` with `reason: "stop"`. Symptoms:
-- `Get-Content $jsonlPath` stops growing.
-- The OpenCode debug log file stops accumulating lines.
-- The `opencode` process (`Get-Process -Name opencode`) keeps running for minutes with no new events.
-- Flat-file storage shows no new `message\` or `part\` files for the primary session or child sessions.
-
-When this happens, treat flat-file storage as authoritative. If the primary session and all relevant child sessions have stopped, classify the scenario from the stored transcript even if `opencode run` timed out or had to be killed. If the transcript shows an in-progress tool call, permission `ask`, question prompt, or model loop, kill the run and mark the scenario inconclusive or failed according to the test contract.
-
-Use a shorter per-run watchdog timeout during large matrices, then inspect storage before deciding whether the scenario actually failed. Kill only processes that belong to the current test window:
-
-```powershell
-Get-Process -Name opencode -ErrorAction SilentlyContinue |
-  Where-Object { $_.StartTime -gt (Get-Date).AddMinutes(-30) } |
-  Stop-Process -Force
-```
-
-If the partial transcript ends before the scenario's required evidence exists, mark the scenario as inconclusive. If the partial transcript includes a final primary response and stopped child sessions, it is not automatically inconclusive; record it as pass/fail using the evidence in storage.
-
-## Reading the transcript (flat-file storage)
-
-Session storage is version-dependent. Current OpenCode releases can store `run` sessions in SQLite; older releases use flat files under `%USERPROFILE%\.local\share\opencode\storage\`. Start with captured JSON events and the selected executable's `export <session-id>` command or HTTP API. Use the legacy flat-file instructions below only when those files actually exist. Do not query or modify the session database directly.
-
-Flat-file layout:
-
-```
-storage\
-  session\
-    global\ses_<id>.json           # session metadata (title, parentID, directory)
-  message\
-    ses_<id>\
-      msg_<id>.json                # per-message metadata (role, etc.)
-  part\
-    msg_<id>\
-      prt_<id>.json                # individual parts: tool calls, text, reasoning
-  session_diff\ses_<id>.json       # internal diff tracking
-```
-
-The `prt_*.json` files carry the useful content. Each has a `type` field (`tool`, `text`, `reasoning`, `step-start`, `step-finish`). For tool calls:
-
-```json
-{
-  "type": "tool",
-  "tool": "bash",
-  "state": {
-    "status": "completed",
-    "input": { "command": "hg status", "description": "..." },
-    "output": "..."
-  }
-}
-```
-
-A PowerShell helper for walking a session + its children:
-
-```powershell
-param([Parameter(Mandatory)][string]$SessionId)
-
-$storage = "$env:USERPROFILE\.local\share\opencode\storage"
-
-# primary session file
-$sess = Get-ChildItem "$storage\session" -Recurse -File -Filter "$SessionId.json" |
-  Select-Object -First 1 | ForEach-Object { Get-Content $_.FullName -Raw | ConvertFrom-Json }
-
-# enumerate children (subagent invocations via the task tool)
-$children = Get-ChildItem "$storage\session" -Recurse -File -Filter "ses_*.json" |
-  ForEach-Object { Get-Content $_.FullName -Raw | ConvertFrom-Json } |
-  Where-Object { $_.parentID -eq $SessionId }
-
-$allSids = @($SessionId) + @($children | ForEach-Object { $_.id })
-
-foreach ($sid in $allSids) {
-  $msgDir = "$storage\message\$sid"
-  if (-not (Test-Path $msgDir)) { continue }
-  $msgs = Get-ChildItem $msgDir -File -Filter "msg_*.json" |
-    Sort-Object Name |
-    ForEach-Object { Get-Content $_.FullName -Raw | ConvertFrom-Json }
-  foreach ($m in $msgs) {
-    $partDir = "$storage\part\$($m.id)"
-    if (-not (Test-Path $partDir)) { continue }
-    Get-ChildItem $partDir -File -Filter "prt_*.json" |
-      Sort-Object Name |
-      ForEach-Object { Get-Content $_.FullName -Raw | ConvertFrom-Json }
-  }
-}
-```
-
-A full version of this script -- formatting the output for quick reading -- belongs in `$env:TEMP\ewl-agent-tests\inspect-session.ps1` during a testing run.
-
-### Child (subagent) sessions
-
-Every call to the `task` tool creates a child session with `parentID` equal to the primary session ID and a `title` the invoking agent generated (e.g. "Format target file (@ewl-cleanup subagent)"). The child has its own `message\` and `part\` dirs. Subagent chains can go multiple levels deep; if needed, walk `parentID` recursively.
-
-## Checking OpenCode's debug log
-
-OpenCode writes a rotating debug log to `%USERPROFILE%\.local\share\opencode\log\<timestamp>.log`. The most useful line types for testing:
-
-- `service=session.prompt ... sessionID=ses_...` -- session lifecycle.
-- `service=llm providerID=... modelID=... sessionID=... agent=... stream` -- model calls.
-- `service=permission permission=<kind> pattern=<pattern> ... action=...` -- permission decisions.
-- `service=permission ... action=\"ask\" evaluated` -- approval requests. Classify these against the scenario’s authorized paths and expected approvals, not as automatic evidence of unintended traversal. Unexpected metadata discovery above the target system directory remains a failure. A scenario expecting silent access to a configured allowed path fails or is inconclusive if it instead blocks on approval.
-
-Find the log for a run window and grep for red flags:
-
-```powershell
-$log = Get-ChildItem "$env:USERPROFILE\.local\share\opencode\log\*.log" |
-  Sort-Object LastWriteTime -Descending | Select-Object -First 1
-Select-String -Path $log.FullName -Pattern 'external_directory.*action=\"ask\"'
-Select-String -Path $log.FullName -Pattern 'hg revert|git checkout -- |git reset --hard'
-```
-
-The log does NOT capture the subagent's own reasoning text or every tool result body; for that, use the flat-file transcript above.
-
-## Cleaning up sessions
-
-Test sessions accumulate in OpenCode's session list and in flat-file storage. Always clean up at the end of a test run, even if the run failed (wrap the execution in try/finally semantics, or always run a manual cleanup pass before moving on).
-
-### Step 1: Delete via HTTP API
-
-OpenCode exposes a session-delete endpoint through `opencode serve`. The CLI does not expose `session delete` directly, but starting a local server and calling `DELETE /session/{id}?directory=<target-dir>` works cleanly.
-
-**Critical detail**: PowerShell jobs and the Bash tool each run in their own short-lived PowerShell process. A job started in one Bash-tool invocation will not exist in the next one. Start the server with `Start-Process` (a detached OS process) and do all the delete calls within the same Bash-tool invocation:
-
-```powershell
-Add-Type -AssemblyName System.Web
-
-$proc = Start-Process -FilePath $openCodeExe `
-  -ArgumentList @("serve", "--port", "4099", "--hostname", "127.0.0.1") `
-  -PassThru -WindowStyle Hidden
-
-# Wait for ready
-for ($i = 0; $i -lt 40; $i++) {
-  Start-Sleep -Milliseconds 500
-  try {
-    Invoke-RestMethod -Uri "http://127.0.0.1:4099/session" -Method Get -TimeoutSec 2 |
-      Out-Null
-    break
-  } catch {}
-}
-
-foreach ($s in $testSessions) {  # items with .id and .dir
-  $encodedDir = [System.Web.HttpUtility]::UrlEncode($s.dir)
-  $uri = "http://127.0.0.1:4099/session/$($s.id)?directory=$encodedDir"
-  try {
-    Invoke-RestMethod -Method Delete -Uri $uri -TimeoutSec 30 | Out-Null
-    Write-Host "DELETED $($s.id)"
-  } catch {
-    Write-Host "FAILED $($s.id): $($_.Exception.Message)"
-  }
-}
-
-Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
-```
-
-The `directory` query parameter must URL-encode the full absolute path, including any spaces and curly apostrophes. `System.Web.HttpUtility.UrlEncode` handles both.
-
-### Step 2: Clean up orphan flat files
-
-The HTTP DELETE removes the session metadata files and makes the session invisible to `opencode session list`, but it does NOT reliably delete the associated `message\ses_<id>\` and `part\msg_<id>\` directories on disk. After DELETE, explicitly purge those:
-
-```powershell
-$storage = "$env:USERPROFILE\.local\share\opencode\storage"
-foreach ($id in $allTestSessionIds) {     # primary + children
-  Get-ChildItem "$storage\session" -Recurse -File -Filter "$id.json" |
-    Remove-Item -Force
-  Remove-Item "$storage\session_diff\$id.json" -Force -ErrorAction SilentlyContinue
-  $msgDir = "$storage\message\$id"
-  if (Test-Path $msgDir) {
-    $msgIds = Get-ChildItem $msgDir -File -Filter "msg_*.json" |
-      ForEach-Object { [System.IO.Path]::GetFileNameWithoutExtension($_.Name) }
-    Remove-Item $msgDir -Recurse -Force
-    foreach ($mid in $msgIds) {
-      Remove-Item "$storage\part\$mid" -Recurse -Force -ErrorAction SilentlyContinue
-    }
-  }
-}
-```
-
-Child session IDs come from enumerating `session\global\ses_*.json` before deletion and collecting everything with `parentID` in the primary set. Do this enumeration BEFORE the HTTP delete runs, because DELETE removes the session JSON files first.
-
-### Step 3: Verify cleanup
-
-```powershell
-& $openCodeExe session list 2>&1 |
-  Select-String -Pattern "^(scen|smoke|test)" -SimpleMatch
-# Expect no matches.
-```
-
-### What NOT to clean up
-
-- **OpenCode debug log files** under `log\`. These are time-rotated and contain traffic from non-test sessions too. Leave them.
-- **The SQLite database** `opencode.db`. Current releases may store both `run` and TUI sessions there; delete test sessions through the supported HTTP API rather than modifying the database directly.
-- **OpenCode processes that were running before the test.** They are your interactive sessions. Only kill processes you started (filter by `StartTime`).
-- **Tool-output files under `tool-output\`** unless you specifically identified them as created by your test run (snapshot the directory contents before/after).
-
-## Reverting test-induced repository changes
-
-If the test made the primary agent actually edit files (the recommended approach) the target repo now has uncommitted changes and possibly test commits created by a cleanup subagent in commit-enabled mode. Back these out before the next scenario:
-
-```powershell
-# Mercurial target:
-Push-Location -LiteralPath $targetDir
-& "C:\Program Files\TortoiseHg\hg" revert --all --no-backup
-# Strip any draft test commits the subagent created (e.g. "Formatted code" commits):
-& "C:\Program Files\TortoiseHg\hg" --config extensions.strip= strip --no-backup <rev>
-# Verify:
-& "C:\Program Files\TortoiseHg\hg" log -l 3 --template "{rev}:{short(node)} {desc|firstline}\n"
-Pop-Location
-
-# Git sub-repo target (e.g. TEWL\Shared):
-Push-Location -LiteralPath "$tewlDir\Shared"
-git reset --hard HEAD         # only if no pre-existing uncommitted changes matter
-# OR more surgically:
-git reset --soft HEAD~1       # undo the test commit, keep changes staged
-git reset HEAD <files>        # unstage
-git checkout -- <files>       # discard
-Pop-Location
-```
-
-**Important**: `hg revert` without `--no-backup` leaves `.orig` files behind. Remove them:
-
-```powershell
-Get-ChildItem $targetDir -Recurse -File -Filter "*.orig" |
-  Where-Object { (Get-Date) - $_.LastWriteTime -lt [TimeSpan]::FromHours(1) } |
-  Remove-Item -Force
-```
-
-**Do not use `hg strip` or `git reset --hard` on commits you didn't create in this session.** Test cleanup only targets commits/files you added during testing.
-
-### The special `nul` file
-
-Bash's `2>nul` (intended to suppress stderr on Windows CMD) creates an actual file called `nul` in the CWD when run under MSYS bash on Windows, because MSYS doesn't recognize `nul` as the reserved device name. Agents that don't know about this will leave a file named `nul` in the target repo. Remove it with:
-
-```powershell
-cmd /c 'del "\\?\<absolute-path>\nul"'
-```
-
-The `\\?\` prefix bypasses Win32 name validation so `del` can touch the reserved name.
-
-## Known environment quirks
-
-- **Paths with U+2019 (curly apostrophe)**, like `EnduraCode's TEWL`: use `-LiteralPath` everywhere, and construct paths by enumerating (`Get-ChildItem | Where-Object { $_.Name -like '*TEWL*' } | Select-ExpandProperty FullName`) rather than hard-coding the character in a literal string. MSYS bash mangles these paths; agents often fall back to `ewl-powershell` after a few bash attempts fail.
-- **Post-edit plugins re-save files**, so a file's mtime may advance seconds after your `edit` tool call. If an `Edit` operation complains that a file has been modified since last read, simply `Read` it again and retry. The BOM plugin and the line-endings plugin are the common culprits.
-- **Reserved Windows filenames**: `nul`, `con`, `aux`, `prn`, plus `com1`..`com9`, `lpt1`..`lpt9`. Avoid using them as file names in prompts; agents that attempt `2>nul` or similar may create them.
-- **Windows PowerShell 5.1** is the default under the Bash tool. It cannot load `netstandard2.0` assemblies cleanly in some cases. When testing .NET-backed tooling, prefer a small compiled helper (`dotnet build` + `dotnet <dll>`) over `Add-Type` from PowerShell.
-- **The `ewl-fix-typography` tool refuses unsupported replacements.** Since April 2026, the tool validates that the existing character at the requested position is a plausible source for the target (e.g. U+0027 for a smart-quote target). If the subagent miscomputes a column, the tool returns a refusal with context rather than silently corrupting the file. Treat a refusal as a signal to recompute the column, not to retry.
-
-## Test matrix template
-
-For any agent-rules / subagent / skill / plugin change, cover these five categories. Pick one or two scenarios per category for a quick smoke run; expand to all for a full verification.
-
-| Category | What it validates | Notes |
-|---|---|---|
-| **Primary-agent scope** | `AGENTS.md` + Critical Rules wording steers the primary agent to invoke the right subagent at the right time | Run a real file-change prompt; inspect which subagents the primary chose to invoke. |
-| **Subagent defensive checks** | The subagent refuses out-of-scope or invalid inputs | Force an out-of-scope invocation directly and verify a clean refusal (no side effects). |
-| **Walk-up / permission denial** | Repository discovery stays at or below the target system directory; genuine denials stop without bypasses | Inspect paths and tool calls, and classify `ask` events against the scenario’s expected approvals. |
-| **VCS safety** | No destructive VCS ops (`hg revert`, `git reset --hard`, etc.) in the transcript | Grep the transcript's tool-call commands. |
-| **Sub-repo handling** | When a sub-repo exists, subagents choose the innermost VCS for the target file | Test in TEWL (`Shared\.git` inside outer `.hg`) or any EWL system with a nested VCS dir. |
-
-Always run each scenario at least twice before trusting the result; cheap subagent models are noticeably non-deterministic.
-
-### Cross-system cleanup matrix
-
-For a cleanup scope or permission change, include the following current-version
-scenarios in addition to defensive input checks. Use fresh primary sessions
-rooted in a client system, and inspect their actual cleanup children. Do not
-use another top-level session rooted in the cleanup target as a substitute for
-the cross-system test.
-
-- **Normal cleanup:** omit the target directory and verify the session system’s
-  solution, settings, exact-file scope, and requested mode are used.
-- **Authorized cross-system access:** supply another EWL system directory,
-  relative source-file paths, mode, commit authorization, and relevant target
-  conventions checked by the parent. Verify dedicated reads and edits reach
-  only the intended source files without unintended approval prompts.
-- **Remembered approval:** use a harmless directory without a configured
-  allowance; approve it in the primary with the reusable approval choice,
-  then check the child can access it. A one-request approval is not a reusable
-  grant. Keep this interactive experiment separate from unattended runs.
-- **Genuine denial:** configure a narrowly scoped denied fixture path and
-  verify cleanup reports the path and operation, with no shell or other-tool
-  retry. Also reject source paths outside the supplied target system directory.
-  A configured rule alone is not proof of denial: confirm a dedicated tool
-  returns a permission error. Check the actual matched resource representation
-  on Windows; an absolute forward-slash read pattern did not match the tested
-  v1.18.33 path. A uniquely named fixture with a narrow suffix pattern such as
-  `*Blocked.cs` can avoid separator ambiguity. Do not count a successful read
-  as a passed denial test, and inspect the child for subsequent access attempts.
-- **Maintained standalone template:** explicitly authorize a disposable
-  formatter solution and workspace. Verify linked source inclusion, the
-  system’s `Main` profile and settings layers, meaningful formatting, and
-  removal of owned scaffolding. No build artifacts belong in the maintained
-  template directory. Authorize workspace access before the unattended run;
-  do not add permanent machine grants solely for a test.
-- **Nested repository / enclosing repository:** verify the innermost VCS and
-  the existing ignore-file fallback when the system solution is below its
-  repository root. Metadata discovery must not probe above the target system
-  directory, even when broader filesystem access is allowed.
-- **Exact-file commit:** use disposable repositories and verify only clean,
-  explicitly authorized input files enter `Formatted code` commits. Preserve
-  unrelated modified files and, for Git, unrelated staged changes. Reject
-  modified inputs when a formatting-only commit is requested.
-
-Record unexecuted approval experiments as unverified rather than inferring
-success from the primary’s access or from a different session root. Dispose
-only test-owned files, repositories, processes, and sessions.
-
-## End-to-end workflow summary
-
-1. Edit the source in `Library\Files\...` of the EWL source repo.
-2. From the target system directory, run `dotnet run --project "<ewl-source>\Development Utility\Development Utility.csproj" -- sync`.
-3. Snapshot tool-output dir before testing (optional).
-4. For each test scenario:
-   a. Verify the target repo is clean except for known pre-existing files; revert previous test edits and strip only test-created commits before continuing.
-   b. Stage any pre-existing setup (e.g. make a deliberate prior edit, if the scenario calls for it).
-   c. `opencode run --format json --model <m> --agent build --title <scenario> <prompt>` in the target dir; capture stdout to a JSONL file.
-   d. Extract the session ID from the JSONL.
-   e. Record `<scenario>|<target-dir>|<session-id>` to a session-list file.
-   f. Inspect the transcript via flat-file storage; note tool calls and responses.
-   g. Check the debug log for `external_directory` asks and destructive VCS commands.
-   h. Revert any repository changes produced during the scenario.
-5. Write the test report: pass/fail per scenario with evidence.
-6. Clean up (ALWAYS -- wrap in try/finally):
-   a. Enumerate child session IDs from flat files before deletion.
-   b. Start `opencode serve`, issue `DELETE /session/{id}?directory=<dir>` for each primary.
-   c. Remove orphan `message\ses_*\` and `part\msg_*\` directories for the full ID set (primary + children).
-   d. Verify with `opencode session list` -- expect no test titles.
-   e. Kill the local `opencode serve` process.
-   f. Remove the local test-output workspace (`$env:TEMP\ewl-agent-tests\`).
+These tests use a disposable fake API. They do not establish compatibility with the
+real server: also exercise a fresh authenticated session, inspect its transcript,
+and verify cleanup when changing runner/API behavior.
+
+## Workflow coverage
+
+For changes to agent rules, subagents, skills, or plugins, select relevant cases:
+
+| Area | Evidence |
+|---|---|
+| Primary-agent workflow | A realistic request discovers and follows the required workflow. |
+| Subagent scope | Exact-file scope and target-system boundaries are respected. |
+| Permissions | Existing grants work; new requests and genuine denials behave as intended. |
+| VCS safety | No unauthorized commits, destructive recovery, or pushes. |
+| Repository detection | Innermost repository is selected without probing above the target ceiling. |
+| Plugin behavior | Active registration plus actual hook effects, not just source inspection. |
+
+For cleanup scope/permission changes, additionally cover normal same-system work,
+authorized cross-system work, remembered approvals, a genuine denied fixture,
+standalone formatter scaffolding, nested/enclosing repositories, and exact-file
+commits when that behavior changes. Supply the target directory, exact file list,
+cleanup mode, applicable rules, and explicit commit authorization to the child.
+Use disposable repositories for commit/recovery scenarios.
+
+Interactive remembered-approval tests require the human to grant access through
+the client. Keep them separate from unattended tests. Record unexecuted scenarios
+as unverified rather than inferring success from parent access.
+
+## Practical notes
+
+- Use `-LiteralPath` for PowerShell file operations on paths containing apostrophes.
+- Post-edit normalization can change modification times. Re-read after a tool
+  reports that a file changed, and preserve the formatter’s trailing-newline state.
+- Avoid shell-specific redirection such as `2>nul` under an incompatible shell;
+  it can create a literal file rather than discard output.
+- If an assertion fails, report the actual result and retain diagnostic evidence.
+  Do not turn a workaround into a claimed pass of the original scenario.
