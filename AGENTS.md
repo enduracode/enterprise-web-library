@@ -120,7 +120,7 @@ In standard mode, check for relevant running applications when needed before ove
 When invoking `ewl-cleanup` on another system, supply its **target system directory** (the EWL system directory containing its solution), the exact source-file list, cleanup mode, and explicit formatting-only commit authorization when applicable. Resolve relative source paths against that directory. The parent agent must check the target system’s applicable agent rules and relay relevant cleanup constraints or conventions. Cleanup defaults to the session working directory for same-system invocations and discovers the solution itself; a solution path is only an optional exceptional override. For maintained templates outside the main solution, explicitly authorize disposable formatter scaffolding and specify its workspace. Command working directories do not grant filesystem access; resolve reported permission denials before reinvoking cleanup.
 
 - Prefer dedicated tools for file reads, searches, and edits.
-- Use `ewl-powershell` for PowerShell commands; do not invoke PowerShell through another shell tool.
+- In OpenCode, use the native `shell` tool configured to PowerShell 7. The EWL plugin initializes UTF-8 before command output; do not wrap commands in another shell.
 - Follow the actual shell tool's description rather than assuming Bash or PowerShell syntax. Quote paths containing spaces or non-ASCII characters.
 ---
 
@@ -136,11 +136,10 @@ When invoking `ewl-cleanup` on another system, supply its **target system direct
 
 | Generated output | Source |
 |---|---|
-| `opencode.jsonc`, `.mcp.json`, `.claude\settings.json` | `updateOpenCodeConfig` |
+| `opencode.jsonc`, `.claude\settings.json` | `updateOpenCodeConfig` |
 | EWL-prefixed agents in `.opencode\agents\` and `.claude\agents\` | `Library\Files\Agents\`, including Claude Code preambles |
 | EWL-prefixed skills in `.agents\skills\` and `.claude\skills\` | `Library\Files\Agent Skills\` |
-| EWL-prefixed `.opencode\tools\` files; `.claude\ewl\` server files | `Library\Files\OpenCode Tools\` |
-| `.opencode\plugins\ewl\`, `.opencode\plugins\ewl.js`, `.claude\hooks\` | `Library\Files\OpenCode Plugins\` |
+| `.opencode\plugins\ewl\` package | `Library\Files\OpenCode Plugins\` |
 
 Non-EWL agents, skills, tools, and system-specific commands outside these owned locations may be edited directly. This repository's `AGENTS.md` is hand-maintained.
 
@@ -170,7 +169,7 @@ Non-EWL agents, skills, tools, and system-specific commands outside these owned 
 
 ### Formatting
 
-- Preserve non-ASCII typography in prose; use the typography tool when needed. Preserve code syntax and literal data.
+- Preserve non-ASCII typography in prose; use ordinary targeted edits with literal Unicode characters when needed. Preserve code syntax and literal data.
 - **Tabs** for indentation
 - **Spaces inside parentheses**: `( value )`, `( "text" )`, `( state )`
 - **Spaces inside attribute brackets**: `[ Test ]`, `[ TestFixture ]`, `[ DllImport( "kernel32" ) ]`

@@ -62,7 +62,7 @@ Restore tools only when needed. Use the system's installed DU for normal develop
 
 - Preserve existing work. If a `.hg` directory is present, load `ewl-mercurial` before version-control commands and use Mercurial. Otherwise determine the actual VCS rather than assuming Git.
 - **Edit sources, not generated output.** Do not edit `Generated Code\`, `.ewlt.cs`, or other files marked as generated. Reading generated output is encouraged when needed to understand or verify behavior.
-- Prefer dedicated tools for file reads, searches, and edits. Use `ewl-powershell` for PowerShell commands; do not invoke PowerShell through another shell tool. Follow the actual shell tool's description and quote paths containing spaces or non-ASCII characters.
+- Prefer dedicated tools for file reads, searches, and edits. In OpenCode, use the native `shell` tool configured to PowerShell 7. The EWL plugin initializes UTF-8 before command output; do not wrap commands in another shell. Follow the actual shell tool's description and quote paths containing spaces or non-ASCII characters.
 
 ### Agent Configuration Ownership
 
@@ -70,12 +70,11 @@ The generator is `updateOpenCodeConfig` in `Development Utility\Operations\Updat
 
 | Generated output in this system | Source in EWL |
 |---|---|
-| `opencode.jsonc`, `.mcp.json`, `.claude\settings.json`, `.claude\CLAUDE.md` | `updateOpenCodeConfig` |
+| `opencode.jsonc`, `.claude\settings.json`, `.claude\CLAUDE.md` | `updateOpenCodeConfig` |
 | `Library\Generated Code\EWL Agent Rules.md` | `Library\Files\Agent Rules.md` |
 | EWL-prefixed agents in `.opencode\agents\` and `.claude\agents\` | `Library\Files\Agents\`, including Claude Code preambles |
 | EWL-prefixed skills in `.agents\skills\` and `.claude\skills\` | `Library\Files\Agent Skills\` |
-| EWL-prefixed `.opencode\tools\` files; `.claude\ewl\` server files | `Library\Files\OpenCode Tools\` |
-| `.opencode\plugins\ewl\`, `.opencode\plugins\ewl.js`, `.claude\hooks\` | `Library\Files\OpenCode Plugins\` |
+| `.opencode\plugins\ewl\` package | `Library\Files\OpenCode Plugins\` |
 
 Do not edit these generated outputs directly. Edit the source, then regenerate with a DU containing the changes. Non-EWL agents, skills, tools, and system-specific commands outside these owned locations may be edited directly. This system's own `AGENTS.md` is hand-maintained.
 
@@ -106,7 +105,7 @@ Follow surrounding code and system-specific conventions, with these EWL defaults
 - At a necessary synchronous boundary (such as `SystemInitializer.CleanUpStatics`), bridge async operations with `Task.Run( async () => await operation() ).Wait()` for no result, or `.Result` for a returned value. Do not use `.GetAwaiter().GetResult()` for this bridge. Keep async callers async; use the bridge only where the calling contract is synchronous.
 - Tabs for indentation. Spaces inside parentheses and attribute brackets: `( value )`, `[ Test ]`. No spaces inside generic angle brackets: `Func<Instant>`.
 - Opening braces on the declaration line. Prefer expression-bodied members for single expressions.
-- Preserve non-ASCII typography in prose; do not convert curly quotes to straight quotes. Use the typography tool when needed, and preserve code syntax and literal data.
+- Preserve non-ASCII typography in prose; do not convert curly quotes to straight quotes. Use ordinary targeted edits with literal Unicode characters when needed, and preserve code syntax and literal data.
 - Strings should be nullable only when `null` means something distinct from empty. Optional string parameters normally default to `""`.
 - Prefer applicable EWL/TEWL helpers such as `.ToCollection()`, `.Materialize()`, and `.ToComponents()`. Consult the abstraction inventory when implementing utility-like behavior; do not replace existing helpers with manual equivalents.
 - When adding individual items to a sequence, prefer chained `.Append(...)` calls over introducing `.ConcatItems(...)` or `.Concat( [ a, b ] )`. Preserve existing `ConcatItems` usages. Use `Concat` for another sequence, including collection expressions containing spreads; preserve mixed `Append`/`Concat` chains. This preference does not apply to standalone collection expressions.
