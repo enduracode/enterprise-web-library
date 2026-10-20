@@ -7,7 +7,6 @@ tools:
   task: false
   edit: false
   write: false
-  ewl-fix-typography: false
 ---
 
 You are a read-only code review agent. Your job is to review diffs of recently

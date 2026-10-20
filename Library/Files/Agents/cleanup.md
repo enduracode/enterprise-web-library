@@ -24,7 +24,7 @@ and others, but this subagent operates only on C# and XML/XSD files.
 
 - **Use the available dedicated file-editing tool for targeted changes.**
   Change only the necessary regions rather than rewriting whole files. Use
-  `ewl-fix-typography` for supported typographic corrections. Do not substitute
+  ordinary targeted edits with literal Unicode characters for typographic corrections. Do not substitute
   shell-based content editing except for the explicitly permitted EOF-only
   restoration in Step 3a.
 - **Only fix what ReSharper reports** in the inspection step.
@@ -47,6 +47,10 @@ and others, but this subagent operates only on C# and XML/XSD files.
   through shell commands or another tool. Report the denied path and operation
   so the caller can resolve the permission issue and reinvoke cleanup. A
   command’s working directory does not change the session root or grant access.
+- **OpenCode v2 permissions:** the EWL plugin preserves existing grants and denies
+  new permission requests before prompting. Report the denied action to the parent.
+  Use the server's managed temporary workspace for authorized disposable scaffolding
+  and reports; discover its path rather than assuming the personal account's temp path.
 
 ## Invocation Scope
 
@@ -222,7 +226,7 @@ following hold:
 **If anything goes wrong** (a typography fix produced the wrong character,
 the formatter modified files you did not expect, the inspector returned
 surprising issues, etc.), **stop and report**. Do NOT clean up via VCS.
-Do NOT retry `ewl-fix-typography` to "correct" a prior call. Do NOT use
+Do NOT retry a failed typography correction to undo a prior call. Do NOT use
 the `edit` tool to bulk-undo. The primary agent or user owns the recovery
 decision.
 
@@ -363,7 +367,7 @@ stay removed. Capture a fresh baseline each time this step runs, including
 after the final formatter pass in Step 5e.
 
 BOM and line-ending style belong to the existing editor/plugins:
-`ensure-utf8-bom` adds the BOM and `normalize-line-endings` normalizes to CRLF.
+OpenCode’s `normalize-files.js` adds the BOM and normalizes to CRLF.
 Do not audit, normalize, or undo their work. The latter does not remove an
 extra trailing newline; checking its count is still needed.
 
@@ -402,7 +406,7 @@ current newline style, without trimming
 other whitespace. This EOF-only restoration is an explicit exception to the
 dedicated-file-editing-tool rule: when that tool cannot preserve EOF, use a
 narrowly scoped, encoding-preserving file operation (for example, .NET byte APIs through
-`ewl-powershell`). Do not use `Set-Content` or `WriteAllLines`, which can add
+the native PowerShell `shell` tool). Do not use `Set-Content` or `WriteAllLines`, which can add
 a newline or change encoding. Preserve all bytes before the trailing newline
 sequence, including any BOM the plugin added. Verify the resulting bytes and diff. If safe
 restoration is unavailable, stop and report before committing.
@@ -578,7 +582,7 @@ to get either a set of modified line numbers or **whole file**.
 
 If every file's modified region is empty (all clean tracked files), report
 "Typography: skipped (no modified regions)" and continue to Step 5e. Do NOT
-read those files and do NOT call `ewl-fix-typography`.
+read or edit those files for typography.
 
 For files whose result is **whole file**, scan the entire file's
 human-language regions. For files with a specific set of modified line
@@ -593,13 +597,14 @@ Human-language text includes:
 
 For each file, read the file content and identify every occurrence where a
 straight ASCII character should be replaced with its Unicode typographic
-equivalent. Then call the `ewl-fix-typography` tool with all corrections for
-that file in a single call.
+equivalent. Apply targeted changes with the ordinary file-editing tool, emitting
+literal Unicode characters. Preserve code delimiters and unrelated content.
+Re-read the edited regions to verify the resulting characters.
 
-**Failure handling.** If `ewl-fix-typography` returns an error, or if a
+**Failure handling.** If a typography edit returns an error, or if a
 re-read of the file shows output inconsistent with the corrections you
-requested, **stop and report**. Do NOT call `ewl-fix-typography` a second
-time to try to correct the first call. Do NOT use the `edit` tool to undo.
+requested, **stop and report**. Do NOT make another edit to try to correct
+the failed call or undo its changes.
 Do NOT use VCS to revert. Just stop and include the error details in your
 summary.
 
