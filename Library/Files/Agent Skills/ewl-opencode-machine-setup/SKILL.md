@@ -48,6 +48,52 @@ administrator assistance as needed. Preserve existing ACLs and the developer’s
 access to agent-created files. Do not grant the entire personal profile. Windows
 ACLs and OpenCode tool permissions are separate concerns.
 
+### NUnit access to checkout ancestors
+
+For checkouts under the developer’s profile, NUnit engine extension discovery
+walks ancestor directories up to the drive root. Verify listing access as the
+dedicated account; if the profile root is blocked, have the human administrator
+grant **ListDirectory on that folder only**, with no inheritance. This exposes
+immediate entry names, not file contents or access to personal subfolders. Check
+other ancestors before granting anything else; do not relocate tests as the
+default fix because EWL initialization and test fixtures use assembly-relative paths.
+
+**Do not use Explorer’s Security GUI:** even “This folder only” can trigger a
+profile-wide inheritance walk and access-denied prompts. `Set-Acl` and `icacls`
+can also process child ACLs; omitting `/T` is not sufficient assurance. For this
+specific non-propagating change, use the following in the human’s elevated
+PowerShell 7, substituting the confirmed profile path and dedicated account:
+
+```powershell
+$path = 'C:\Users\<developer>'
+$account = "$env:COMPUTERNAME\agents"
+Add-Type @'
+using System.Runtime.InteropServices;
+public static class FolderOnlyAcl {
+    [DllImport("advapi32.dll", EntryPoint = "SetFileSecurityW", CharSet = CharSet.Unicode, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool SetDacl(string path, uint information, byte[] descriptor);
+}
+'@
+$acl = Get-Acl -LiteralPath $path
+$acl.AddAccessRule([System.Security.AccessControl.FileSystemAccessRule]::new(
+    $account, 'ListDirectory', 'None', 'None', 'Allow'))
+if (-not [FolderOnlyAcl]::SetDacl($path, 4, $acl.GetSecurityDescriptorBinaryForm())) {
+    throw [System.ComponentModel.Win32Exception]::new(
+        [Runtime.InteropServices.Marshal]::GetLastWin32Error())
+}
+(Get-Acl -LiteralPath $path).Access |
+    Where-Object IdentityReference -eq $account | Format-List *
+```
+
+`4` selects only the DACL. The obsolete
+[`SetFileSecurityW`](https://learn.microsoft.com/en-us/windows/win32/api/securitybaseapi/nf-securitybaseapi-setfilesecurityw)
+API is intentional here: unlike its replacement, it does not propagate directory
+security to children. Preserve existing entries, ownership, and inheritance
+protection; never reset ACLs or take ownership to suppress errors. Verify the
+grant has `InheritanceFlags: None` and `PropagationFlags: None`, inspect an
+unrelated child for unintended access, and run NUnit as the dedicated account.
+
 ## 2. Complete global configuration and agent rules
 
 Resolve the dedicated account’s config directory with `opencode debug paths config`.
