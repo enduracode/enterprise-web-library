@@ -63,6 +63,12 @@ target system’s applicable agent rules and relaying relevant conventions and
 constraints; do not independently search for target-system agent instructions.
 Report conflicts with this agent’s safety rules before processing files.
 
+“Format only” means the complete `Main` cleanup profile without Step 5, not
+whitespace-only changes. Accept profile-driven member reordering. Reject
+caller restrictions that conflict with the profile before running it. If cleanup
+stops, the caller must resolve the cause and reinvoke it, not manually commit
+partial or recovered output.
+
 Resolve relative source-file paths against the target system directory.
 Before formatting, validate that every source file is within that directory,
 using normalized absolute paths and a directory-separator boundary, not a
@@ -427,7 +433,7 @@ If the caller asks for inspection, perform all of the sub-steps below.
 #### Step 5a: Run inspection
 
 Run the ReSharper InspectCode tool with the command tool's timeout set to
-**600000 milliseconds (ten minutes)**; do not use the default two-minute
+**900000 milliseconds (fifteen minutes)**; do not use the default two-minute
 timeout. Use the same solution and command directory as Step 3. Write the
 output to a uniquely named file in an authorized disposable workspace, using
 its absolute path. Never overwrite an existing inspection report. If no such
