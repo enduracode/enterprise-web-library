@@ -102,6 +102,8 @@ require a coordinated server restart; an absolute executable path can bridge set
   and verify `node --version`. Ask the human if machine-wide elevation is needed.
 - Ask which source-control commit identity to use; never invent it. Configure Git
   and/or Mercurial authentication and identity independently for this account.
+  Verify the effective identity and a disposable test commit from the dedicated
+  server account; tool availability and a successful status command are insufficient.
   In `Mercurial.ini`, preserve existing settings when adding `[ui] username`.
   EWL uses Evolve and Topics: verify availability using
   `hg --config extensions.evolve= --config extensions.topic= version --verbose`
