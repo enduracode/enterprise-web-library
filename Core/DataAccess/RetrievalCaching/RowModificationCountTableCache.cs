@@ -85,13 +85,12 @@ public class RowModificationCountTableCache<RowType, RowPkType>: PeriodicEvictio
 		cache = new Cache( rows, rowModificationCounts );
 		this.cacheRecreator = () => {
 			Cache? newCache = null;
-			cacheRecreator(
-				( counts, rowGetter ) => {
-					var rowsAndCapacity = GetDataRetriever( counts, rowGetter ).GetRowsAndListCapacity();
-					var rowList = new List<RowType>( rowsAndCapacity.capacity );
-					rowList.AddRange( rowsAndCapacity.rows );
-					newCache = new Cache( rowList, counts );
-				} );
+			cacheRecreator( ( counts, rowGetter ) => {
+				var rowsAndCapacity = GetDataRetriever( counts, rowGetter ).GetRowsAndListCapacity();
+				var rowList = new List<RowType>( rowsAndCapacity.capacity );
+				rowList.AddRange( rowsAndCapacity.rows );
+				newCache = new Cache( rowList, counts );
+			} );
 			return newCache!;
 		};
 	}
