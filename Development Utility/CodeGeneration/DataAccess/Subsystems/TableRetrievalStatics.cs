@@ -65,7 +65,7 @@ static class TableRetrievalStatics {
 			if( columns.HasKeyColumns ) {
 				writer.Write( $"private static readonly IEqualityComparer<{RetrievalStatics.GetColumnTupleTypeName( columns.KeyColumns )}>? __pkComparer" );
 				if( columns.KeyColumns.All( i => i.IsCaseInsensitiveKey!.Value is not true ) )
-					writer.WriteLine( ";" );
+					writer.WriteLine( " = null;" );
 				else if( columns.KeyColumns.Count == 1 )
 					writer.WriteLine( " = StringComparer.OrdinalIgnoreCase;" );
 				else
