@@ -148,6 +148,9 @@ require a coordinated server restart; an absolute executable path can bridge set
   and verify `node --version`. Ask the human if machine-wide elevation is needed.
 - Ask which source-control commit identity to use; never invent it. Configure Git
   and/or Mercurial authentication and identity independently for this account.
+  For Git, set the confirmed `user.name` and `user.email` in the dedicated account’s
+  global configuration, preserving unrelated settings. Do not substitute a made-up
+  agent identity or use per-command identity overrides to bypass incomplete setup.
   Verify the effective identity and a disposable test commit from the dedicated
   server account; tool availability and a successful status command are insufficient.
   In `Mercurial.ini`, preserve existing settings when adding `[ui] username`.
@@ -161,6 +164,45 @@ require a coordinated server restart; an absolute executable path can bridge set
   human to perform interactive sign-ins. Keep secrets out of shared files and
   transcripts. If Azure access is needed, use a separate authorized service
   principal for the dedicated account rather than reusing the personal CLI session.
+
+### Git identity and developer-owned checkout trust
+
+Git normally rejects repositories owned by another Windows account. Filesystem
+access alone does not establish Git trust. Ask the user which checkout paths or
+controlled checkout root the dedicated account may trust, and explain that trusted
+repositories can run configured hooks/helpers with that account’s permissions.
+After approval, add `safe.directory` entries to the dedicated account’s global Git
+configuration. An approved root can use `/*` to cover all repositories beneath it,
+including future checkouts; for example:
+
+```powershell
+git config --global --add safe.directory 'C:/Users/willi/Revision Control/*'
+```
+
+Use the actual approved root, avoid duplicate entries, and never default to `*`,
+which disables ownership protection everywhere. Trust does not grant filesystem
+permissions or change ownership. Do not read the developer’s personal Git profile
+to obtain credentials or silently copy their configuration.
+
+From the dedicated server session, verify in an agreed **developer-owned checkout**:
+
+```powershell
+git config --show-origin --show-scope --get-regexp '^(user\.(name|email)|safe\.directory)$'
+git var GIT_AUTHOR_IDENT
+git var GIT_COMMITTER_IDENT
+git status --short
+```
+
+Check for repository-local identity overrides. If identity or trust fails, inspect
+the effective settings and resolve setup rather than inventing an identity or
+relying on invocation-scoped overrides. Keep diagnostics restricted to these
+non-secret settings; do not dump credential-bearing configuration.
+
+Make the test commit only in a uniquely named disposable repository under the
+dedicated account’s approved temporary workspace. Confirm the recorded author and
+committer match the intended identity, then remove only that owned fixture. Never
+make a setup test commit in a real checkout. A disposable repository tests commits
+but cannot establish cross-account checkout trust, so both checks are required.
 
 ### NuGet sources
 
