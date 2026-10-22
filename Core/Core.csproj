@@ -22,7 +22,7 @@
     <PackageReference Include="Azure.Storage.Blobs" Version="12.30.1" />
     <PackageReference Include="Dapper" Version="2.1.89" />
     <PackageReference Include="Destructurama.JsonNet" Version="4.0.2" />
-    <PackageReference Include="Ewl.Tools" Version="34.0.0" />
+    <PackageReference Include="Ewl.Tools" Version="35.0.0" />
     <PackageReference Include="FluentMigrator.Runner.SqlServer" Version="8.0.1" />
     <PackageReference Include="Imageflow.AllPlatforms" Version="0.15.1" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="7.1.1" />
