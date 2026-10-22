@@ -122,6 +122,9 @@ static class DataAccessOps {
 						if( !modTableColumn.DataTypeName.Equals( column.DataTypeName, StringComparison.Ordinal ) )
 							throw new UserCorrectableException(
 								$"The {column.Name} column in the modification table for {table.QualifiedName} must have the same type as the primary-key column." );
+						if( modTableColumn.IsCaseInsensitiveKey!.Value!.Value != column.IsCaseInsensitiveKey!.Value is true )
+							throw new UserCorrectableException(
+								$"The {column.Name} column in the modification table for {table.QualifiedName} must have the same case-sensitivity as the primary-key column." );
 					}
 				}
 

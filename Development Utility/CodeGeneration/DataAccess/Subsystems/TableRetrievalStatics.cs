@@ -59,6 +59,18 @@ static class TableRetrievalStatics {
 					writer.WriteLine( "}" );
 				} );
 			writeCacheClass( cn, writer, database, table.tableName, columns, table.hasModTable, isRevisionHistoryTable );
+			if( columns.HasKeyColumns && columns.KeyColumns.Any( i => i.IsCaseInsensitiveKey!.Value is true ) && columns.KeyColumns.Count > 1 )
+				writePkComparerClass( writer, columns );
+
+			if( columns.HasKeyColumns ) {
+				writer.Write( $"private static readonly IEqualityComparer<{RetrievalStatics.GetColumnTupleTypeName( columns.KeyColumns )}>? __pkComparer" );
+				if( columns.KeyColumns.All( i => i.IsCaseInsensitiveKey!.Value is not true ) )
+					writer.WriteLine( ";" );
+				else if( columns.KeyColumns.Count == 1 )
+					writer.WriteLine( " = StringComparer.OrdinalIgnoreCase;" );
+				else
+					writer.WriteLine( " = new __PkComparer();" );
+			}
 
 			if( table.hasModTable ) {
 				CodeGenerationStatics.AddGeneratedCodeUseOnlyComment( writer );
@@ -158,12 +170,10 @@ static class TableRetrievalStatics {
 
 				writer.WriteLine( "private static " + "Cache<System.Tuple<" + keyTupleTypeArguments + ">, BasicRow>" + " getRowsByPkAndVersion() {" );
 				writer.WriteLine(
-					"return AppMemoryCache.GetCacheValue<{0}>( \"{1}\", () => new {0}( i => System.Tuple.Create( {2} ) ) ).RowsByPkAndVersion;".FormatWith(
-						"VersionedRowDataCache<System.Tuple<{0}>, System.Tuple<{1}>, BasicRow>".FormatWith( getPkTupleTypeArguments( columns ), keyTupleTypeArguments ),
+					"return AppMemoryCache.GetCacheValue<{0}>( \"{1}\", () => new {0}( i => {2}, __pkComparer ) ).RowsByPkAndVersion;".FormatWith(
+						$"VersionedRowDataCache<{RetrievalStatics.GetColumnTupleTypeName( columns.KeyColumns )}, System.Tuple<{keyTupleTypeArguments}>, BasicRow>",
 						database.SecondaryDatabaseName + table.tableName.QualifiedName + "TableRetrievalRowsByPkAndVersion",
-						StringTools.ConcatenateWithDelimiter(
-							", ",
-							Enumerable.Range( 1, columns.KeyColumns.Count ).Select( i => "i.Item{0}".FormatWith( i ) ).ToArray() ) ) );
+						RetrievalStatics.GetColumnTupleExpression( Enumerable.Range( 1, columns.KeyColumns.Count ).Select( i => $"i.Item{i}" ).Materialize() ) ) );
 				writer.WriteLine( "}" );
 			}
 
@@ -223,12 +233,41 @@ static class TableRetrievalStatics {
 		writer.WriteLine( "internal readonly TableRetrievalQueryCache<Row> Queries = new TableRetrievalQueryCache<Row>();" );
 		if( tableColumns.HasKeyColumns )
 			writer.WriteLine(
-				"internal readonly Dictionary<{0}, Row> RowsByPk = new();".FormatWith( RetrievalStatics.GetColumnTupleTypeName( tableColumns.KeyColumns ) ) );
+				"internal readonly Dictionary<{0}, Row> RowsByPk = new( __pkComparer );".FormatWith(
+					RetrievalStatics.GetColumnTupleTypeName( tableColumns.KeyColumns ) ) );
 		if( isRevisionHistoryTable )
 			writer.WriteLine(
-				"internal readonly Dictionary<{0}, Row> LatestRevisionRowsByPk = new();".FormatWith(
+				"internal readonly Dictionary<{0}, Row> LatestRevisionRowsByPk = new( __pkComparer );".FormatWith(
 					RetrievalStatics.GetColumnTupleTypeName( tableColumns.KeyColumns ) ) );
 		writer.WriteLine( "private Cache() {}" );
+		writer.WriteLine( "}" );
+	}
+
+	private static void writePkComparerClass( TextWriter writer, TableColumns columns ) {
+		var type = RetrievalStatics.GetColumnTupleTypeName( columns.KeyColumns );
+
+		CodeGenerationStatics.AddGeneratedCodeUseOnlyComment( writer );
+		writer.WriteLine( $$"""private sealed class __PkComparer: IEqualityComparer<{{type}}> {""" );
+
+		var equalsExpression = StringTools.ConcatenateWithDelimiter(
+			" && ",
+			columns.KeyColumns.Select( i => {
+				var name = EwlStatics.GetCSharpIdentifier( i.CamelCasedName );
+				return i.IsCaseInsensitiveKey!.Value!.Value
+					       ? $"StringComparer.OrdinalIgnoreCase.Equals( x.{name}, y.{name} )"
+					       : $"EwlStatics.AreEqual( x.{name}, y.{name} )";
+			} ) );
+		writer.WriteLine( $"public bool Equals( {type} x, {type} y ) => {equalsExpression};" );
+
+		writer.WriteLine( $"public int GetHashCode( {type} obj ) {{" );
+		writer.WriteLine( "var hash = new HashCode();" );
+		foreach( var i in columns.KeyColumns ) {
+			var comparerArgument = i.IsCaseInsensitiveKey!.Value!.Value ? ", StringComparer.OrdinalIgnoreCase" : "";
+			writer.WriteLine( $"hash.Add( obj.{EwlStatics.GetCSharpIdentifier( i.CamelCasedName )}{comparerArgument} );" );
+		}
+		writer.WriteLine( "return hash.ToHashCode();" );
+		writer.WriteLine( "}" );
+
 		writer.WriteLine( "}" );
 	}
 
@@ -257,7 +296,7 @@ static class TableRetrievalStatics {
 		writer.WriteLine(
 			"AppMemoryCache.GetCacheValue( \"dataAccess-{0}\", () => {1} );".FormatWith(
 				database.SecondaryDatabaseName + table.QualifiedName + getTableCacheName( excludePreviousRevisions ),
-				"new DataAccessState().ExecuteWithThis( () => {0}.ExecuteWithConnectionOpen( () => {0}.ExecuteInTransaction( () => new {1}( __get{2}Rows( null ), __get{2}RowModificationCounts(), cacheRecreator => new DataAccessState().ExecuteWithThis( () => {0}.ExecuteWithConnectionOpen( () => {0}.ExecuteInTransaction( () => cacheRecreator( __get{2}RowModificationCounts(), __get{2}Rows ) ) ) ) ) ) ) )"
+				"new DataAccessState().ExecuteWithThis( () => {0}.ExecuteWithConnectionOpen( () => {0}.ExecuteInTransaction( () => new {1}( __get{2}Rows( null ), __get{2}RowModificationCounts(), cacheRecreator => new DataAccessState().ExecuteWithThis( () => {0}.ExecuteWithConnectionOpen( () => {0}.ExecuteInTransaction( () => cacheRecreator( __get{2}RowModificationCounts(), __get{2}Rows ) ) ) ), __pkComparer ) ) ) )"
 					.FormatWith(
 						DataAccessStatics.GetConnectionExpression( database ),
 						getTableCacheType( tableColumns ),
@@ -410,8 +449,7 @@ static class TableRetrievalStatics {
 			writer.WriteLine(
 				"var pk = {0};".FormatWith(
 					RetrievalStatics.GetColumnTupleExpression(
-						tableColumns.KeyColumns.Select( i => $"{i.CamelCasedName}Condition!.Value{( i.DataTypeName == "System.String" ? ".EnsureTrimmed()" : "" )}" )
-							.Materialize() ) ) );
+						tableColumns.KeyColumns.Select( i => i.GetValueValidationExpression( $"{i.CamelCasedName}Condition!.Value" ) ).Materialize() ) ) );
 			writer.WriteLine(
 				"if( cache." + ( excludePreviousRevisions ? "LatestRevision" : "" ) + "RowsByPk.TryGetValue( pk, out var row ) ) return row.ToCollection();" );
 			if( hasModTable ) {
@@ -478,8 +516,7 @@ static class TableRetrievalStatics {
 
 				var cacheExpression = "cache.{0}RowsByPk".FormatWith( isRevisionHistoryTable ? "LatestRevision" : "" );
 				var keyExpression = RetrievalStatics.GetColumnTupleExpression(
-					tableColumns.KeyColumns.Select( i =>
-							( pkIsId ? "id" : EwlStatics.GetCSharpIdentifier( i.CamelCasedName ) ) + ( i.DataTypeName == "System.String" ? ".EnsureTrimmed()" : "" ) )
+					tableColumns.KeyColumns.Select( i => i.GetValueValidationExpression( pkIsId ? "id" : EwlStatics.GetCSharpIdentifier( i.CamelCasedName ) ) )
 						.Materialize() );
 				writer.WriteLine( isTry ? $"return {cacheExpression}.TryGetValue( {keyExpression}, out row );" : $"return {cacheExpression}[ {keyExpression} ];" );
 			}
@@ -640,15 +677,13 @@ static class TableRetrievalStatics {
 
 	private static string getPkAndVersionTupleTypeArguments( DatabaseConnection cn, TableColumns tableColumns ) =>
 		"{0}, {1}".FormatWith(
-			getPkTupleTypeArguments( tableColumns ),
+			StringTools.ConcatenateWithDelimiter( ", ", tableColumns.KeyColumns.Select( i => i.DataTypeName ) ),
 			cn.DatabaseInfo is OracleInfo ? oracleRowVersionDataType : tableColumns.RowVersionColumn!.DataTypeName );
-
-	private static string getPkTupleTypeArguments( TableColumns tableColumns ) =>
-		StringTools.ConcatenateWithDelimiter( ", ", tableColumns.KeyColumns.Select( i => i.DataTypeName ).ToArray() );
 
 	private static void writeToIdDictionaryMethod( TextWriter writer, TableColumns tableColumns ) {
 		writer.WriteLine( "public static Dictionary<" + tableColumns.KeyColumns.Single().DataTypeName + ", Row> ToIdDictionary( this IEnumerable<Row> rows ) {" );
-		writer.WriteLine( "return rows.ToDictionary( i => i." + EwlStatics.GetCSharpIdentifier( tableColumns.KeyColumns.Single().PascalCasedName ) + " );" );
+		writer.WriteLine(
+			"return rows.ToDictionary( i => i." + EwlStatics.GetCSharpIdentifier( tableColumns.KeyColumns.Single().PascalCasedName ) + ", __pkComparer );" );
 		writer.WriteLine( "}" );
 	}
 

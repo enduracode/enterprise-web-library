@@ -394,13 +394,12 @@ static class StandardModificationStatics {
 			"Gets " + ( columnIsReadOnly ? "" : "or sets " ) + "the value for the " + column.Name +
 			$" column, which {column.GetNullabilityPhrase()}. Throws an exception if the value has not been initialized." );
 		var setter = columnIsReadOnly ? "private set" : "set";
-		var validValue = column is { DataTypeName: "System.String", IsKey: true } ? "value.EnsureTrimmed()" : "value";
 		writer.WriteLine(
 			StringTools.ConcatenateWithDelimiter(
 				" ",
 				$$"""public {{column.DataTypeName}} {{EwlStatics.GetCSharpIdentifier( column.PascalCasedName )}} {""",
 				$$"""get { return this.{{getColumnDataValueName( column )}}.Value; }""",
-				$$"""{{setter}} { this.{{getColumnDataValueName( column )}}.Value = {{validValue}}; }""",
+				$$"""{{setter}} { this.{{getColumnDataValueName( column )}}.Value = {{column.GetValueValidationExpression( "value" )}}; }""",
 				"}" ) );
 
 		if( !columnIsReadOnly ) {

@@ -19,10 +19,11 @@ public class RowModificationCountTableCache<RowType, RowPkType>: PeriodicEvictio
 		public readonly IReadOnlyDictionary<RowPkType, long> RowModificationCountsByPk;
 
 		[ SuppressMessage( "ReSharper.DPA", "DPA0003: Excessive memory allocations in LOH" ) ]
-		public Cache( IReadOnlyCollection<RowType> rows, IReadOnlyCollection<( RowPkType pk, long count )> rowModificationCounts ) {
+		public Cache(
+			IReadOnlyCollection<RowType> rows, IReadOnlyCollection<( RowPkType pk, long count )> rowModificationCounts, IEqualityComparer<RowPkType>? pkComparer ) {
 			Rows = rows;
-			RowsByPk = rows.ToDictionary( i => i.PrimaryKey );
-			RowModificationCountsByPk = rowModificationCounts.ToDictionary( i => i.pk, i => i.count );
+			RowsByPk = rows.ToDictionary( i => i.PrimaryKey, pkComparer );
+			RowModificationCountsByPk = rowModificationCounts.ToDictionary( i => i.pk, i => i.count, pkComparer );
 		}
 	}
 
@@ -40,7 +41,7 @@ public class RowModificationCountTableCache<RowType, RowPkType>: PeriodicEvictio
 
 		internal DataRetriever(
 			IReadOnlyCollection<RowType> rows, IReadOnlyDictionary<RowPkType, RowType> rowsByPk, HashSet<RowPkType> modifiedRowPks,
-			Func<IReadOnlyCollection<RowPkType>, IReadOnlyCollection<RowType>> modifiedRowGetter ) {
+			Func<IReadOnlyCollection<RowPkType>, IReadOnlyCollection<RowType>> modifiedRowGetter, IEqualityComparer<RowPkType>? pkComparer ) {
 			this.rows = rows;
 			this.rowsByPk = rowsByPk;
 
@@ -49,7 +50,7 @@ public class RowModificationCountTableCache<RowType, RowPkType>: PeriodicEvictio
 				() => modifiedRowPks.Count == 0 ? Enumerable.Empty<RowType>().Materialize() : modifiedRowGetter( modifiedRowPks ),
 				LazyThreadSafetyMode.None );
 			modifiedRowsByPk = new Lazy<IReadOnlyDictionary<RowPkType, RowType>>(
-				() => modifiedRows.Value.ToDictionary( i => i.PrimaryKey ),
+				() => modifiedRows.Value.ToDictionary( i => i.PrimaryKey, pkComparer ),
 				LazyThreadSafetyMode.None );
 		}
 
@@ -74,6 +75,7 @@ public class RowModificationCountTableCache<RowType, RowPkType>: PeriodicEvictio
 
 	private Cache cache;
 	private readonly Func<Cache> cacheRecreator;
+	private readonly IEqualityComparer<RowPkType>? pkComparer;
 
 	/// <summary>
 	/// EWL use only.
@@ -81,18 +83,20 @@ public class RowModificationCountTableCache<RowType, RowPkType>: PeriodicEvictio
 	[ EditorBrowsable( EditorBrowsableState.Never ) ]
 	public RowModificationCountTableCache(
 		IReadOnlyCollection<RowType> rows, IReadOnlyCollection<( RowPkType, long )> rowModificationCounts,
-		Action<Action<IReadOnlyCollection<( RowPkType, long )>, Func<IReadOnlyCollection<RowPkType>, IReadOnlyCollection<RowType>>>> cacheRecreator ) {
-		cache = new Cache( rows, rowModificationCounts );
+		Action<Action<IReadOnlyCollection<( RowPkType, long )>, Func<IReadOnlyCollection<RowPkType>, IReadOnlyCollection<RowType>>>> cacheRecreator,
+		IEqualityComparer<RowPkType>? pkComparer ) {
+		cache = new Cache( rows, rowModificationCounts, pkComparer );
 		this.cacheRecreator = () => {
 			Cache? newCache = null;
 			cacheRecreator( ( counts, rowGetter ) => {
 				var rowsAndCapacity = GetDataRetriever( counts, rowGetter ).GetRowsAndListCapacity();
 				var rowList = new List<RowType>( rowsAndCapacity.capacity );
 				rowList.AddRange( rowsAndCapacity.rows );
-				newCache = new Cache( rowList, counts );
+				newCache = new Cache( rowList, counts, pkComparer );
 			} );
 			return newCache!;
 		};
+		this.pkComparer = pkComparer;
 	}
 
 	/// <summary>
@@ -105,8 +109,8 @@ public class RowModificationCountTableCache<RowType, RowPkType>: PeriodicEvictio
 		var cacheStable = cache;
 		var modifiedRowPks = rowModificationCounts.Where( i => !cacheStable.RowModificationCountsByPk.TryGetValue( i.pk, out var count ) || count != i.count )
 			.Select( i => i.pk )
-			.ToHashSet();
-		return new DataRetriever( cacheStable.Rows, cacheStable.RowsByPk, modifiedRowPks, modifiedRowGetter );
+			.ToHashSet( pkComparer );
+		return new DataRetriever( cacheStable.Rows, cacheStable.RowsByPk, modifiedRowPks, modifiedRowGetter, pkComparer );
 	}
 
 	void PeriodicEvictionCompositeCacheEntry.EvictOldEntries() {

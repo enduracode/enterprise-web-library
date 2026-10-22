@@ -13,13 +13,15 @@ public class VersionedRowDataCache<RowPkType, RowPkAndVersionType, RowType>: Per
 	public readonly Cache<RowPkAndVersionType, RowType> RowsByPkAndVersion = new( true, comparer: new StructuralEqualityComparer<RowPkAndVersionType>() );
 
 	private readonly Func<RowPkAndVersionType, RowPkType> pkSelector;
+	private readonly IEqualityComparer<RowPkType>? pkCrossVersionComparer;
 
-	public VersionedRowDataCache( Func<RowPkAndVersionType, RowPkType> pkSelector ) {
+	public VersionedRowDataCache( Func<RowPkAndVersionType, RowPkType> pkSelector, IEqualityComparer<RowPkType>? pkCrossVersionComparer ) {
 		this.pkSelector = pkSelector;
+		this.pkCrossVersionComparer = pkCrossVersionComparer;
 	}
 
 	void PeriodicEvictionCompositeCacheEntry.EvictOldEntries() {
-		var pkGroups = from key in RowsByPkAndVersion.Keys group key by pkSelector( key ) into pkGroup select new { pk = pkGroup.Key, keys = pkGroup.ToArray() };
+		var pkGroups = RowsByPkAndVersion.Keys.GroupBy( pkSelector, pkCrossVersionComparer ).Select( i => new { pk = i.Key, keys = i.ToArray() } );
 		foreach( var pkAndKeys in pkGroups ) {
 			// When we remove row versions for a primary key, we remove all of them because we don't ever really know which versions to keep. In some cases, the
 			// latest versions of a row could all be from within a transaction that is going to roll back. 

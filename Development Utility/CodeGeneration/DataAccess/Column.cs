@@ -36,7 +36,7 @@ class Column {
 	private readonly string delimitedIdentifier;
 	private readonly bool isIdentity;
 	private readonly bool isRowVersion;
-	private readonly bool? isKey;
+	internal SpecifiedValue<bool?>? IsCaseInsensitiveKey { get; private set; }
 
 	private Column( DatabaseConnection connection, DataRow schemaTableRow, bool? includeKeyInfo, bool validateIfString, List<Action> validationMethods ) {
 		var databaseInfo = connection.DatabaseInfo;
@@ -59,15 +59,16 @@ class Column {
 		isIdentity = ( databaseInfo is SqlServerInfo && (bool)schemaTableRow[ "IsIdentity" ] ) ||
 		             ( databaseInfo is MySqlInfo && (bool)schemaTableRow[ "IsAutoIncrement" ] );
 		isRowVersion = databaseInfo is SqlServerInfo && (bool)schemaTableRow[ "IsRowVersion" ];
-		if( includeKeyInfo is true )
-			isKey = (bool)schemaTableRow[ "IsKey" ];
+		var isKey = includeKeyInfo is true ? (bool)schemaTableRow[ "IsKey" ] : (bool?)null;
 
 		validationMethods.Add( () => {
 			if( validateIfString && !( databaseInfo is OracleInfo ) && valueContainer.DataType == typeof( string ) &&
 			    ( !( databaseInfo is MySqlInfo ) || dbTypeString != "JSON" ) && valueContainer.AllowsNull )
 				throw new UserCorrectableException( "String column {0} allows null, which is not allowed.".FormatWith( valueContainer.Name ) );
 
-			if( isKey is true || includeKeyInfo is null ) {
+			if( isKey is false )
+				IsCaseInsensitiveKey = new SpecifiedValue<bool?>( null );
+			else if( isKey is true || includeKeyInfo is null ) {
 				var error = getKeyError(
 					connection,
 					new DatabaseTable(
@@ -85,8 +86,10 @@ class Column {
 	}
 
 	private string getKeyError( DatabaseConnection connection, DatabaseTable table, string dbTypeString ) {
-		if( valueContainer.DataType != typeof( string ) )
+		if( valueContainer.DataType != typeof( string ) ) {
+			IsCaseInsensitiveKey = new SpecifiedValue<bool?>( false );
 			return "";
+		}
 
 		var command = connection.DatabaseInfo is OracleInfo
 			              ? new InlineSelect( "COLLATION".ToCollection(), table.Schema.Length > 0 ? "FROM ALL_TAB_COLUMNS" : "FROM USER_TAB_COLUMNS", false )
@@ -103,15 +106,24 @@ class Column {
 				if( !reader.Read() )
 					throw new Exception( "no rows exist" );
 
-				( string[] types, string collation, string error ) rules = connection.DatabaseInfo switch
-					{
-						SqlServerInfo => ( [ "VarChar", "NVarChar" ], "Latin1_General_100_BIN2_UTF8", "varchar or nvarchar with collation Latin1_General_100_BIN2_UTF8" ),
-						MySqlInfo => ( [ "VarChar" ], "utf8mb4_0900_bin", "varchar with collation utf8mb4_0900_bin (binary, NO PAD)" ),
-						OracleInfo => ( [ "Varchar2", "NVarchar2" ], "BINARY", "VARCHAR2 or NVARCHAR2 with explicit BINARY column collation" ),
-						_ => throw new UnexpectedValueException( "database info", connection.DatabaseInfo )
-					};
-				if( !rules.types.Contains( dbTypeString, StringComparer.Ordinal ) || !rules.collation.Equals( reader.GetString( 0 ), StringComparison.Ordinal ) )
+				( IReadOnlyCollection<string> types, string collation, IReadOnlyCollection<string> caseInsensitiveCollations, string error ) rules =
+					connection.DatabaseInfo switch
+						{
+							SqlServerInfo => ( [ "VarChar", "NVarChar" ], "Latin1_General_100_BIN2_UTF8",
+									                 [ "SQL_Latin1_General_CP1_CI_AS", "Latin1_General_100_CI_AS", "Latin1_General_100_CI_AS_SC_UTF8" ],
+								                 "varchar or nvarchar with collation Latin1_General_100_BIN2_UTF8, or a case-insensitive collation if values use printable ASCII only" ),
+							MySqlInfo => ( [ "VarChar" ], "utf8mb4_0900_bin", [ ], "varchar with collation utf8mb4_0900_bin (binary, NO PAD)" ),
+							OracleInfo => ( [ "Varchar2", "NVarchar2" ], "BINARY", [ ], "VARCHAR2 or NVARCHAR2 with explicit BINARY column collation" ),
+							_ => throw new UnexpectedValueException( "database info", connection.DatabaseInfo )
+						};
+				var ci = false;
+				if( !rules.types.Contains( dbTypeString, StringComparer.Ordinal ) || !( rules.collation.Equals( reader.GetString( 0 ), StringComparison.Ordinal ) ||
+				                                                                        ( ci = rules.caseInsensitiveCollations.Contains(
+					                                                                          reader.GetString( 0 ),
+					                                                                          StringComparer.Ordinal ) ) ) )
 					error = $"Key column {valueContainer.Name} must use {rules.error}.";
+				else
+					IsCaseInsensitiveKey = new SpecifiedValue<bool?>( ci );
 
 				if( reader.Read() )
 					throw new Exception( "multiple rows exist" );
@@ -147,7 +159,11 @@ class Column {
 	internal bool? AllowsEmpty => valueContainer.AllowsEmpty;
 	internal bool IsIdentity => isIdentity;
 	internal bool IsRowVersion => isRowVersion;
-	internal bool IsKey => isKey!.Value;
+
+	internal string GetValueValidationExpression( string valueExpression ) =>
+		valueContainer.DataType == typeof( string ) && IsCaseInsensitiveKey!.Value is not null
+			? $"{valueExpression}.EnsureTrimmed()" + ( IsCaseInsensitiveKey.Value.Value ? ".EnsurePrintableAscii()" : "" )
+			: valueExpression;
 
 	// NOTE: It would be best to use primary keys here, but unfortunately we don't always have that information.
 	//internal bool UseToUniquelyIdentifyRow { get { return !allowsNull && dataType.IsValueType /*We could use IsPrimitive if not for Oracle resolving to

@@ -30,7 +30,7 @@ class TableColumns {
 			// Identify key, identity, and non identity columns.
 			var nonIdentityColumns = new List<Column>();
 			foreach( var col in AllColumns ) {
-				if( col.IsKey )
+				if( col.IsCaseInsensitiveKey!.Value is not null )
 					keyColumns.Add( col );
 				if( col.IsIdentity ) {
 					if( IdentityColumn != null )
