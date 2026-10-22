@@ -339,7 +339,7 @@ regardless of whether the table uses application-level caching:
 
 | DBMS | String column types | Required column collation |
 |---|---|---|
-| SQL Server 2019+ | `varchar`, `nvarchar` | `Latin1_General_100_BIN2_UTF8` |
+| SQL Server 2019+ | `varchar`, `nvarchar` | `Latin1_General_100_BIN2_UTF8`, or a supported CI collation below |
 | MySQL 8+ | `varchar` | `utf8mb4_0900_bin` |
 | Oracle 19c+ | `VARCHAR2`, `NVARCHAR2` | Explicit `BINARY` |
 
@@ -349,12 +349,25 @@ Fixed-width character types are not supported. MySQL `NVARCHAR`/`NCHAR` select
 `MAX_STRING_SIZE=EXTENDED` and `COMPATIBLE` of at least 12.2. Enabling EXTENDED is
 DBA maintenance, not merely an application migration.
 
+SQL Server also supports `SQL_Latin1_General_CP1_CI_AS`,
+`Latin1_General_100_CI_AS`, and `Latin1_General_100_CI_AS_SC_UTF8` for keys
+restricted to printable ASCII (U+0020 through U+007E). Collation detection selects
+case-insensitive key comparison automatically; generated key caches use
+`StringComparer.OrdinalIgnoreCase` for these components, including within
+composite keys. Binary-collated components retain ordinal comparison.
+
 Generated string-PK setters and direct complete-PK lookups reject values that
 differ from their .NET `Trim()` result. Reject invalid keys rather than trimming
 or normalizing external IDs. Internal whitespace is allowed. Empty string keys
 are allowed on SQL Server and MySQL; Oracle treats empty strings as NULL and
 cannot store them as PK values. General SQL-condition queries retain SQL
 semantics.
+
+For supported CI keys, the same generated setters and complete-PK lookups also
+call TEWL's `EnsurePrintableAscii()` extension method. Validation
+rejects invalid values without normalizing them. Existing rows are not validated;
+handwritten SQL and external writers must honor the same restrictions. These rules
+do not change arbitrary caller predicates or application-written caches.
 
 ## Row constants
 
@@ -658,7 +671,8 @@ cache:
 
 - SQL Server: the current database's default collation must use UTF-8 (code page
   65001), including when the string keys are all `nvarchar`. This does not require
-  a binary database-default collation; binary equality is the separate column rule.
+  a binary database-default collation; key equality is determined separately by the
+  column collations.
 - Oracle: `NLS_CHARACTERSET` must be `AL32UTF8` and `NLS_NCHAR_CHARACTERSET` must be
   `AL16UTF16`, regardless of which supported string types the table uses.
 
