@@ -1,6 +1,6 @@
 ---
 name: ewl-user-management
-description: Set up EWL user management with database schema, roles, identity providers, and the SystemUserManagementProvider
+description: Set up EWL user management with database schema, roles, identity providers, SystemUserManagementProvider, and custom externally validated login
 ---
 
 ## Overview
@@ -8,6 +8,10 @@ description: Set up EWL user management with database schema, roles, identity pr
 EWL provides a built-in user management system with roles, authentication
 (local login codes or SAML), and a framework-provided admin UI. To use it
 you need database schema, a provider implementation, and configuration.
+
+For custom externally validated login (such as Odoo or LDAP), read
+`references/external-login.md`. The schema below is for local authentication;
+do not add password/login-code columns solely to support specified-user login.
 
 ## Database schema
 
