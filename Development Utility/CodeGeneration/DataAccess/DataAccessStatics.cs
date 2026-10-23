@@ -10,7 +10,7 @@ using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess;
 
-internal static class DataAccessStatics {
+static class DataAccessStatics {
 	internal const string CSharpTemplateFileExtension = ".ewlt.cs";
 
 	/// <summary>
