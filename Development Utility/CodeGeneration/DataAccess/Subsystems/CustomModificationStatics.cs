@@ -1,5 +1,4 @@
 ﻿using EnterpriseWebLibrary.DataAccess;
-using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
@@ -7,21 +6,23 @@ using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess.Subsystems;
 
 static class CustomModificationStatics {
-	private static DatabaseInfo info = null!;
+	private sealed record ModificationData(
+		string ModificationName,
+		IReadOnlyCollection<ValueContainer> Parameters,
+		IReadOnlyCollection<( string commandText, IReadOnlyCollection<ValueContainer> parameters )> Commands );
 
 	internal static void Generate(
 		DatabaseConnection cn, TextWriter writer, string baseNamespace, Database database,
 		EnterpriseWebLibrary.Configuration.SystemDevelopment.Database configuration ) {
-		info = cn.DatabaseInfo;
 		if( configuration.customModifications != null ) {
 			writer.WriteLine( "namespace " + baseNamespace + " {" );
 
-			testQueries( cn, configuration.customModifications );
+			var modifications = getModificationData( cn, configuration.customModifications );
 
 			CodeGenerationStatics.AddSummaryDocComment( writer, "Contains custom modification operations." );
 			writer.WriteLine( "public static class " + database.SecondaryDatabaseName + "CustomModifications {" );
 
-			foreach( var mod in configuration.customModifications )
+			foreach( var mod in modifications )
 				writeMethod( writer, database, mod );
 
 			writer.WriteLine( "}" ); // class
@@ -29,39 +30,72 @@ static class CustomModificationStatics {
 		}
 	}
 
-	private static void testQueries( DatabaseConnection cn, EnterpriseWebLibrary.Configuration.SystemDevelopment.CustomModification[] mods ) {
-		// We don't test commands in Oracle because:
-		// 1. There's no good junk value to pass in.
-		// 2. The only way to keep the commands from actually modifying the database is with a transaction rollback, and we don't want to do that unless absolutely
-		// necessary.
-		// And we don't test commands in MySQL because of reason 2 above.
-		if( cn.DatabaseInfo is MySqlInfo || cn.DatabaseInfo is OracleInfo )
-			return;
+	private static IReadOnlyCollection<ModificationData> getModificationData(
+		DatabaseConnection cn, EnterpriseWebLibrary.Configuration.SystemDevelopment.CustomModification[] mods ) =>
+		mods.Select( mod => {
+				try {
+					var commands = mod.commands.Select( commandText => {
+							var parameters = DataAccessStatics.ExecuteWithCommandFromRawQueryText(
+								cn,
+								commandText,
+								cmd => {
+									// We don't test commands in Oracle because:
+									// 1. There's no good junk value to pass in.
+									// 2. The only way to keep the commands from actually modifying the database is with a transaction rollback, and we don't want to do that
+									// unless absolutely necessary.
+									// And we don't test commands in MySQL because of reason 2 above.
+									if( cn.DatabaseInfo is MySqlInfo or OracleInfo )
+										return;
 
-		foreach( var mod in mods )
-		foreach( var command in mod.commands ) {
-			var cmd = DataAccessStatics.GetCommandFromRawQueryText( cn, command );
-			try {
-				cn.ExecuteReaderCommandWithSchemaOnlyBehavior( cmd, _ => {} );
-			}
-			catch( Exception e ) {
-				throw new UserCorrectableException( "Custom modification " + mod.name + " failed.", e );
-			}
-		}
-	}
+									cn.ExecuteReaderCommandWithSchemaOnlyBehavior( cmd, _ => {} );
+								} );
+							return ( commandText, parameters );
+						} )
+						.Materialize();
 
-	private static void writeMethod( TextWriter writer, Database database, EnterpriseWebLibrary.Configuration.SystemDevelopment.CustomModification mod ) {
-		writer.WriteLine(
-			"public static void " + mod.name + "( " +
-			DataAccessStatics.GetMethodParamsFromCommandText( info, StringTools.ConcatenateWithDelimiter( "; ", mod.commands ) ) + " ) {" );
+					var methodParameters = commands.SelectMany( i => i.parameters )
+						.GroupBy( i => i.Name )
+						.Select( grouping => {
+							var firstKnown = grouping.FirstOrDefault( i => i.DataType != typeof( object ) );
+							if( firstKnown is null )
+								return new ValueContainer( grouping.Key, cn.DatabaseInfo );
+
+							// A shared parameter must support every command’s type and value expression.
+							foreach( var parameter in grouping.Where( i => i.DataType != typeof( object ) ) )
+								if( !parameter.DataTypeName.Equals( firstKnown.DataTypeName, StringComparison.Ordinal ) || !parameter
+									    .GetParameterValueExpression( parameter.Name )
+									    .Equals( firstKnown.GetParameterValueExpression( firstKnown.Name ), StringComparison.Ordinal ) )
+									throw new UserCorrectableException(
+										$"Parameter {grouping.Key} has incompatible types: " +
+										$"{firstKnown.DataTypeName} ({firstKnown.GetParameterValueExpression( firstKnown.Name )}) and " +
+										$"{parameter.DataTypeName} ({parameter.GetParameterValueExpression( parameter.Name )})." );
+
+							return firstKnown;
+						} )
+						.Materialize();
+
+					var parametersByName = methodParameters.ToDictionary( i => i.Name );
+					return new ModificationData(
+						mod.name,
+						methodParameters,
+						commands.Select( command => ( command.commandText, command.parameters.Select( i => parametersByName[ i.Name ] ).Materialize() ) ).Materialize() );
+				}
+				catch( Exception e ) {
+					throw new UserCorrectableException( "Custom modification " + mod.name + " failed.", e );
+				}
+			} )
+			.Materialize();
+
+	private static void writeMethod( TextWriter writer, Database database, ModificationData mod ) {
+		writer.WriteLine( "public static void " + mod.ModificationName + "( " + DataAccessStatics.GetMethodParams( mod.Parameters ) + " ) {" );
 
 		writer.WriteLine( DataAccessStatics.GetConnectionExpression( database ) + ".ExecuteInTransaction( delegate {" );
 		var cnt = 0;
-		foreach( var command in mod.commands ) {
+		foreach( var command in mod.Commands ) {
 			var commandVariableName = "cmd" + cnt++;
 			writer.WriteLine( "DbCommand " + commandVariableName + " = " + DataAccessStatics.GetConnectionExpression( database ) + ".DatabaseInfo.CreateCommand();" );
-			writer.WriteLine( commandVariableName + ".CommandText = @\"" + AppStatics.NormalizeLineEndingsFromXml( command ) + "\";" );
-			DataAccessStatics.WriteAddParamBlockFromCommandText( writer, commandVariableName, info, command, database );
+			writer.WriteLine( commandVariableName + ".CommandText = @\"" + AppStatics.NormalizeLineEndingsFromXml( command.commandText ) + "\";" );
+			DataAccessStatics.WriteAddParamBlock( writer, commandVariableName, command.parameters, database );
 			writer.WriteLine( DataAccessStatics.GetConnectionExpression( database ) + ".ExecuteNonQueryCommand( " + commandVariableName + " );" );
 		}
 		writer.WriteLine( "} );" ); // execute in transaction call

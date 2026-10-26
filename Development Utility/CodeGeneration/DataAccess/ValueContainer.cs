@@ -100,6 +100,11 @@ class ValueContainer {
 
 	private bool hasSuffix( string suffix, string contains = "" ) => ModificationField.NameHasSuffix( pascalCasedName, suffix, contains );
 
+	/// <summary>
+	/// Creates a container with an unknown database type.
+	/// </summary>
+	public ValueContainer( string name, DatabaseInfo databaseInfo ): this( name, typeof( object ), "", 0, null, true, databaseInfo ) {}
+
 	public string Name => name;
 	public string PascalCasedName => pascalCasedName;
 	public string CamelCasedName => pascalCasedName.Uncapitalize();
@@ -133,6 +138,9 @@ class ValueContainer {
 	public bool? AllowsEmpty => allowsEmpty;
 
 	public string GetParameterValueExpression( string valueExpression ) {
+		if( dbTypeString.Length == 0 )
+			return $"new DbParameterValue( {valueExpression} )";
+
 		if( valueExpression.Equals( "null", StringComparison.Ordinal ) )
 			return getExpression( valueExpression );
 

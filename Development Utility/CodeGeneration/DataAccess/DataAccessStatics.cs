@@ -17,7 +17,7 @@ static class DataAccessStatics {
 	/// Given a string, returns all instances of @abc in an ordered set containing abc (the token without the @ sign). If a token is used more than once, it
 	/// only appears in the list once. A different prefix may be used for certain databases.
 	/// </summary>
-	internal static ListSet<string> GetNamedParamList( DatabaseInfo info, string statement ) {
+	private static ListSet<string> getNamedParamList( DatabaseInfo info, string statement ) {
 		// We don't want to find parameters in quoted text.
 		statement = statement.RemoveTextBetweenStrings( "'", "'" ).RemoveTextBetweenStrings( "\"", "\"" );
 
@@ -34,19 +34,25 @@ static class DataAccessStatics {
 	}
 
 	/// <summary>
-	/// Given raw query text such as that from Development.xml, returns a command that has had all of its parameters filled in with
-	/// good dummy values and is ready to safely execute using schema only or key info behavior.
+	/// Executes the specified method with a command created from raw query text such as that from Development.xml. All parameters will be filled in with good
+	/// dummy values, and the command can be safely executed using schema only or key info behavior. Returns parameter metadata.
 	/// </summary>
-	internal static DbCommand GetCommandFromRawQueryText( DatabaseConnection cn, string commandText ) {
+	internal static IReadOnlyCollection<ValueContainer> ExecuteWithCommandFromRawQueryText(
+		DatabaseConnection cn, string commandText, Action<DbCommand> method ) {
+		var parameters = getNamedParamList( cn.DatabaseInfo, commandText ).Select( i => new ValueContainer( i, cn.DatabaseInfo ) ).Materialize();
+
 		// This replacement is necessary because SQL Server chooses to care about the type of the parameter passed to TOP.
 		commandText = Regex.Replace( commandText, @"TOP\( *@\w+ *\)", "TOP 0", RegexOptions.IgnoreCase );
 
-		var cmd = cn.DatabaseInfo.CreateCommand();
-		cmd.CommandText = commandText;
-		foreach( var param in GetNamedParamList( cn.DatabaseInfo, cmd.CommandText ) )
-			cmd.Parameters.Add(
-				new DbCommandParameter( param, new DbParameterValue( cn.DatabaseInfo is MySqlInfo ? 0 : "0" ) ).GetAdoDotNetParameter( cn.DatabaseInfo ) );
-		return cmd;
+		using var command = cn.DatabaseInfo.CreateCommand();
+		command.CommandText = commandText;
+
+		foreach( var param in parameters )
+			command.Parameters.Add(
+				new DbCommandParameter( param.Name, new DbParameterValue( cn.DatabaseInfo is MySqlInfo ? 0 : "0" ) ).GetAdoDotNetParameter( cn.DatabaseInfo ) );
+
+		method( command );
+		return parameters;
 	}
 
 	internal static string GetSchemaFolderName( Database database, DatabaseTable table ) =>
@@ -59,16 +65,14 @@ static class DataAccessStatics {
 			? '.' + EwlStatics.GetCSharpIdentifier( table.Schema.Capitalize(), omitAtSignPrefixIfNotRequired: omitAtSignPrefixIfNotRequired )
 			: "";
 
-	internal static string GetMethodParamsFromCommandText( DatabaseInfo info, string commandText ) {
-		return StringTools.ConcatenateWithDelimiter( ", ", GetNamedParamList( info, commandText ).Select( i => "object? " + i ).ToArray() );
-	}
+	internal static string GetMethodParams( IEnumerable<ValueContainer> parameters ) =>
+		StringTools.ConcatenateWithDelimiter( ", ", parameters.Select( i => $"{i.DataTypeName} {i.Name}" ) );
 
-	internal static void WriteAddParamBlockFromCommandText(
-		TextWriter writer, string commandVariable, DatabaseInfo info, string commandText, Database database ) {
-		foreach( var param in GetNamedParamList( info, commandText ) )
+	internal static void WriteAddParamBlock( TextWriter writer, string commandVariable, IEnumerable<ValueContainer> parameters, Database database ) {
+		foreach( var param in parameters )
 			writer.WriteLine(
-				commandVariable + ".Parameters.Add( new DbCommandParameter( \"" + param + "\", new DbParameterValue( " + param + " ) ).GetAdoDotNetParameter( " +
-				GetConnectionExpression( database ) + ".DatabaseInfo ) );" );
+				commandVariable + ".Parameters.Add( new DbCommandParameter( \"" + param.Name + "\", " + param.GetParameterValueExpression( param.Name ) +
+				" ).GetAdoDotNetParameter( " + GetConnectionExpression( database ) + ".DatabaseInfo ) );" );
 	}
 
 	internal static string GetTableConditionInterfaceName( DatabaseConnection cn, Database database, DatabaseTable table ) =>

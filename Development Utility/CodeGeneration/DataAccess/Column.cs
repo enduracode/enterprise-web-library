@@ -15,15 +15,20 @@ class Column {
 		DatabaseConnection cn, string commandText, bool isTableQuery, bool validateAllColumnsAsKeys = false ) {
 		var columns = new List<Column>();
 
-		var cmd = DataAccessStatics.GetCommandFromRawQueryText( cn, commandText );
 		var validationMethods = new List<Action>();
-		var readerMethod = new Action<DbDataReader>( r => columns.AddRange(
-			from DataRow row in r.GetSchemaTable()!.Rows
-			select new Column( cn, row, validateAllColumnsAsKeys ? null : isTableQuery, isTableQuery, validationMethods ) ) );
-		if( isTableQuery )
-			cn.ExecuteReaderCommandWithKeyInfoBehavior( cmd, readerMethod );
-		else
-			cn.ExecuteReaderCommandWithSchemaOnlyBehavior( cmd, readerMethod );
+		DataAccessStatics.ExecuteWithCommandFromRawQueryText(
+			cn,
+			commandText,
+			command => {
+				var readerMethod = new Action<DbDataReader>( r => columns.AddRange(
+					from DataRow row in r.GetSchemaTable()!.Rows
+					select new Column( cn, row, validateAllColumnsAsKeys ? null : isTableQuery, isTableQuery, validationMethods ) ) );
+
+				if( isTableQuery )
+					cn.ExecuteReaderCommandWithKeyInfoBehavior( command, readerMethod );
+				else
+					cn.ExecuteReaderCommandWithSchemaOnlyBehavior( command, readerMethod );
+			} );
 
 		foreach( var i in validationMethods )
 			i();

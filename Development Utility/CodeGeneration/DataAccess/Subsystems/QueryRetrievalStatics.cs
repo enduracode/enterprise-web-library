@@ -1,12 +1,16 @@
 ﻿using EnterpriseWebLibrary.DataAccess;
-using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.InstallationSupportUtility;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess.Subsystems;
 
 static class QueryRetrievalStatics {
-	private static DatabaseInfo info = null!;
+	private sealed record QueryData(
+		string QueryName,
+		string SelectFromClause,
+		IReadOnlyCollection<Column> Columns,
+		IReadOnlyCollection<( EnterpriseWebLibrary.Configuration.SystemDevelopment.QueryPostSelectFromClause clause, IReadOnlyCollection<ValueContainer> parameters
+			)> PostSelectFromClauses );
 
 	internal static void Generate(
 		DatabaseConnection cn, TextWriter writer, string baseNamespace, Database database,
@@ -14,95 +18,86 @@ static class QueryRetrievalStatics {
 		if( configuration.queries == null )
 			return;
 
-		info = cn.DatabaseInfo;
 		writer.WriteLine( "namespace " + baseNamespace + "." + database.SecondaryDatabaseName + "Retrieval {" );
 
 		foreach( var query in configuration.queries ) {
-			IReadOnlyCollection<Column> columns;
+			QueryData data;
 			try {
-				columns = validateQueryAndGetColumns( cn, query );
+				data = getQueryData( cn, query );
 			}
 			catch( Exception e ) {
-				throw new UserCorrectableException( "Column retrieval failed for the " + query.name + " query.", e );
+				throw new UserCorrectableException( "Failed to get columns and parameters for the " + query.name + " query.", e );
 			}
 
-			CodeGenerationStatics.AddSummaryDocComment( writer, "This object holds the values returned from a " + query.name + " query." );
-			var className = "{0}Retrieval".FormatWith( query.name );
+			CodeGenerationStatics.AddSummaryDocComment( writer, "This object holds the values returned from a " + data.QueryName + " query." );
+			var className = "{0}Retrieval".FormatWith( data.QueryName );
 			writer.WriteLine( "public static partial class " + className + " {" );
 
 			// Write nested classes.
-			RetrievalStatics.WriteRowClasses( writer, columns, null, _ => {}, _ => {} );
-			writeCacheClass( writer, database, query );
+			RetrievalStatics.WriteRowClasses( writer, data.Columns, null, _ => {}, _ => {} );
+			writeCacheClass( writer, database, data );
 
-			writer.WriteLine( "private const string selectFromClause = @\"" + AppStatics.NormalizeLineEndingsFromXml( query.selectFromClause ) + " \";" );
-			foreach( var postSelectFromClause in query.postSelectFromClauses )
-				writeQueryMethod( writer, database, query, postSelectFromClause );
+			writer.WriteLine( "private const string selectFromClause = @\"" + AppStatics.NormalizeLineEndingsFromXml( data.SelectFromClause ) + " \";" );
+			foreach( var postSelectFromClause in data.PostSelectFromClauses )
+				writeQueryMethod( writer, database, postSelectFromClause.clause, postSelectFromClause.parameters );
 			writer.WriteLine( "static partial void updateSingleRowCaches( Row row );" );
 
-			DataAccessStatics.WriteRevisionDeltaExtensionMethods( writer, className, columns.Where( i => !i.IsRowVersion ) );
+			DataAccessStatics.WriteRevisionDeltaExtensionMethods( writer, className, data.Columns.Where( i => !i.IsRowVersion ) );
 
 			writer.WriteLine( "}" ); // class
 		}
 		writer.WriteLine( "}" ); // namespace
 	}
 
-	private static IReadOnlyCollection<Column> validateQueryAndGetColumns(
-		DatabaseConnection cn, EnterpriseWebLibrary.Configuration.SystemDevelopment.Query query ) {
-		// Attempt to query with every postSelectFromClause to ensure validity.
-		foreach( var postSelectFromClause in query.postSelectFromClauses )
-			cn.ExecuteReaderCommandWithSchemaOnlyBehavior(
-				DataAccessStatics.GetCommandFromRawQueryText( cn, query.selectFromClause + postSelectFromClause.ValueNonNullable.PrependDelimiter( " " ) ),
-				_ => {} );
+	private static QueryData getQueryData( DatabaseConnection cn, EnterpriseWebLibrary.Configuration.SystemDevelopment.Query query ) {
+		var columns = Column.GetColumnsInQueryResults( cn, query.selectFromClause, false );
 
-		return Column.GetColumnsInQueryResults( cn, query.selectFromClause, false );
+		// Attempt to query with every postSelectFromClause to ensure validity.
+		var clauses = query.postSelectFromClauses.Select( clause => {
+				var parameters = DataAccessStatics.ExecuteWithCommandFromRawQueryText(
+					cn,
+					query.selectFromClause + clause.ValueNonNullable.PrependDelimiter( " " ),
+					command => cn.ExecuteReaderCommandWithSchemaOnlyBehavior( command, _ => {} ) );
+				return ( clause, parameters );
+			} )
+			.Materialize();
+
+		return new QueryData( query.name, query.selectFromClause, columns, clauses );
 	}
 
-	private static void writeCacheClass( TextWriter writer, Database database, EnterpriseWebLibrary.Configuration.SystemDevelopment.Query query ) {
+	private static void writeCacheClass( TextWriter writer, Database database, QueryData data ) {
 		writer.WriteLine( "private partial class Cache {" );
 		writer.WriteLine(
-			"internal static Cache Current { get { return DataAccessState.Current.GetCacheValue( \"" + database.SecondaryDatabaseName + query.name +
+			"internal static Cache Current { get { return DataAccessState.Current.GetCacheValue( \"" + database.SecondaryDatabaseName + data.QueryName +
 			"QueryRetrieval\", () => new Cache() ); } }" );
-		foreach( var i in query.postSelectFromClauses ) {
-			var type = getQueryCacheType( query, i );
-			writer.WriteLine( "internal readonly " + type + " " + getQueryCacheName( query, i ) + " = new " + type + "();" );
+		foreach( var i in data.PostSelectFromClauses ) {
+			var type = getQueryCacheType( i.parameters );
+			writer.WriteLine( "internal readonly " + type + " " + getQueryCacheName( i.clause, i.parameters ) + " = new " + type + "();" );
 		}
 		writer.WriteLine( "private Cache() {}" );
 		writer.WriteLine( "}" );
 	}
 
-	private static string getQueryCacheType(
-		EnterpriseWebLibrary.Configuration.SystemDevelopment.Query query,
-		EnterpriseWebLibrary.Configuration.SystemDevelopment.QueryPostSelectFromClause postSelectFromClause ) {
-		return DataAccessStatics.GetNamedParamList( info, query.selectFromClause + postSelectFromClause.ValueNonNullable.PrependDelimiter( " " ) ).Any()
-			       ? "QueryRetrievalQueryCache<Row>"
-			       : "ParameterlessQueryCache<Row>";
-	}
+	private static string getQueryCacheType( IReadOnlyCollection<ValueContainer> parameters ) =>
+		parameters.Any() ? "QueryRetrievalQueryCache<Row>" : "ParameterlessQueryCache<Row>";
 
 	private static void writeQueryMethod(
-		TextWriter writer, Database database, EnterpriseWebLibrary.Configuration.SystemDevelopment.Query query,
-		EnterpriseWebLibrary.Configuration.SystemDevelopment.QueryPostSelectFromClause postSelectFromClause ) {
+		TextWriter writer, Database database, EnterpriseWebLibrary.Configuration.SystemDevelopment.QueryPostSelectFromClause postSelectFromClause,
+		IReadOnlyCollection<ValueContainer> parameters ) {
 		// header
 		CodeGenerationStatics.AddSummaryDocComment( writer, "Queries the database and returns the full results collection immediately." );
-		writer.WriteLine(
-			"public static IEnumerable<Row> GetRows" + postSelectFromClause.name + "( " + DataAccessStatics.GetMethodParamsFromCommandText(
-				info,
-				query.selectFromClause + postSelectFromClause.ValueNonNullable.PrependDelimiter( " " ) ) + " ) {" );
+		writer.WriteLine( "public static IEnumerable<Row> GetRows" + postSelectFromClause.name + "( " + DataAccessStatics.GetMethodParams( parameters ) + " ) {" );
 
 
 		// body
 
-		var namedParamList = DataAccessStatics.GetNamedParamList( info, query.selectFromClause + postSelectFromClause.ValueNonNullable.PrependDelimiter( " " ) );
-		var getResultSetFirstArg = namedParamList.Any() ? "new[] { " + StringTools.ConcatenateWithDelimiter( ", ", namedParamList.ToArray() ) + " }, " : "";
-		writer.WriteLine( "return Cache.Current." + getQueryCacheName( query, postSelectFromClause ) + ".GetResultSet( " + getResultSetFirstArg + "() => {" );
+		var getResultSetFirstArg =
+			parameters.Any() ? "new object?[] { " + StringTools.ConcatenateWithDelimiter( ", ", parameters.Select( i => i.Name ) ) + " }, " : "";
+		writer.WriteLine( "return Cache.Current." + getQueryCacheName( postSelectFromClause, parameters ) + ".GetResultSet( " + getResultSetFirstArg + "() => {" );
 
 		writer.WriteLine( "var cmd = " + DataAccessStatics.GetConnectionExpression( database ) + ".DatabaseInfo.CreateCommand();" );
 		writer.WriteLine( "cmd.CommandText = selectFromClause + @\"" + AppStatics.NormalizeLineEndingsFromXml( postSelectFromClause.ValueNonNullable ) + "\";" );
-		DataAccessStatics.WriteAddParamBlockFromCommandText(
-			writer,
-			"cmd",
-			info,
-			query.selectFromClause + postSelectFromClause.ValueNonNullable.PrependDelimiter( " " ),
-			database );
+		DataAccessStatics.WriteAddParamBlock( writer, "cmd", parameters, database );
 		writer.WriteLine( "var results = new List<Row>();" );
 		writer.WriteLine(
 			DataAccessStatics.GetConnectionExpression( database ) +
@@ -119,11 +114,6 @@ static class QueryRetrievalStatics {
 	}
 
 	private static string getQueryCacheName(
-		EnterpriseWebLibrary.Configuration.SystemDevelopment.Query query,
-		EnterpriseWebLibrary.Configuration.SystemDevelopment.QueryPostSelectFromClause postSelectFromClause ) {
-		return "Rows" + postSelectFromClause.name +
-		       ( DataAccessStatics.GetNamedParamList( info, query.selectFromClause + postSelectFromClause.ValueNonNullable.PrependDelimiter( " " ) ).Any()
-			         ? "Queries"
-			         : "Query" );
-	}
+		EnterpriseWebLibrary.Configuration.SystemDevelopment.QueryPostSelectFromClause postSelectFromClause, IReadOnlyCollection<ValueContainer> parameters ) =>
+		"Rows" + postSelectFromClause.name + ( parameters.Any() ? "Queries" : "Query" );
 }
