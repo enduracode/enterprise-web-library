@@ -246,9 +246,49 @@ alone does not establish authentication or package access.
 
 ## 4. Database access
 
-Discover relevant SQL Server instances and MySQL/Oracle endpoints from EWL
+Discover relevant SQL Server/PostgreSQL instances and MySQL/Oracle endpoints from EWL
 configuration without printing credentials. Ask what access is authorized; full
 administration is not implicit in workstation setup.
+
+### PostgreSQL integrated authentication
+
+An installed, initialized PostgreSQL instance is a prerequisite. If it is missing,
+follow [PostgreSQL workstation installation](PostgreSQL%20Workstation%20Installation.md)
+with the human administrator before granting agent access. Reuse existing instances;
+do not run `initdb` on an existing data directory or rerun `configure-workstation`.
+
+Confirm the dedicated server's actual Windows identity with `whoami /user` and its
+separate PostgreSQL role. When full administration is authorized, have an existing
+PostgreSQL administrator execute the following through their own SSPI connection,
+substituting the approved role (SQL identifier):
+
+```sql
+CREATE ROLE agent_role LOGIN SUPERUSER PASSWORD NULL;
+```
+
+For an existing role, inspect its identity and attributes before applying authorized
+changes with `ALTER ROLE`; do not treat a duplicate-role error as success. Without
+SUPERUSER authorization, grant only the approved privileges.
+
+Add the exact realm-qualified principal to the instance's existing identity map
+(`main` in the installation guide), preserving other entries and HBA rules:
+
+```text
+# pg_ident.conf: MAP SYSTEM-USERNAME DATABASE-USERNAME
+main dedicated_account@MACHINE agent_role
+```
+
+Use the confirmed account/realm spelling, quote configuration tokens when needed,
+and retain SSPI; do not substitute `trust` or database passwords. Have the existing
+administrator execute `SELECT pg_reload_conf();` and inspect map/HBA parsing errors.
+
+From the actual agent server session, verify explicit/default usernames with
+`psql -X -w` and Npgsql, `session_user`, `current_user`, `rolsuper`, and `rolcanlogin`.
+Confirm `method=sspi` in server authentication logs, not the GSSAPI view's flag.
+Reuse the installation guide's client-verification procedure under the dedicated
+identity. Record results and distinguish raw client checks from EWL integration.
+Instance roles and mappings survive database refreshes; recheck after the next
+authorized refresh and reprovision after an instance rebuild.
 
 ### SQL Server integrated authentication
 
