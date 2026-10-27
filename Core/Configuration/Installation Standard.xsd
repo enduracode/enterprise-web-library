@@ -46,6 +46,17 @@
 		</sequence>
 	</complexType>
 	<complexType name="Database" abstract="true" />
+	<complexType name="PostgresDatabase">
+		<complexContent>
+			<extension base="rs:Database">
+				<sequence>
+					<element name="Host" type="string" minOccurs="0" />
+					<element name="Port" type="unsignedShort" minOccurs="0" />
+					<element name="Database" type="string" minOccurs="0" />
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
 	<complexType name="SqlServerDatabase">
 		<complexContent>
 			<extension base="rs:Database">

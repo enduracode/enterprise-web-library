@@ -335,6 +335,13 @@ public class InstallationConfiguration {
 	}
 
 	private DatabaseInfo getDatabaseInfo( string secondaryDatabaseName, InstallationStandard.Database database ) {
+		if( database is PostgresDatabase postgresDatabase )
+			return new PostgresInfo(
+				secondaryDatabaseName,
+				postgresDatabase.Host ?? "",
+				postgresDatabase.PortSpecified ? postgresDatabase.Port : null,
+				postgresDatabase.Database1 ?? FullShortName.CamelToEnglish().EnglishToOracle(),
+				true );
 		if( database is SqlServerDatabase sqlServerDatabase )
 			return new SqlServerInfo(
 				secondaryDatabaseName,
