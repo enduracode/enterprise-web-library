@@ -15,7 +15,7 @@ using Tewl.IO;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.Operations;
 
-internal class ExportLogic: Operation {
+class ExportLogic: Operation {
 	private const string nuGetTargetFramework = "net10.0";
 	private const string sqlitePackageSuffix = "Sqlite";
 	private static readonly Operation instance = new ExportLogic();

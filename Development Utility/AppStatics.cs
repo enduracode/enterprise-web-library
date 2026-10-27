@@ -8,7 +8,7 @@ using Tewl.IO;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility;
 
-internal static class AppStatics {
+static class AppStatics {
 	internal const string MercurialRepositoryFolderName = ".hg";
 	internal const string GitRepositoryFolderName = ".git";
 	internal const string TewlProjectPath = "Shared/TEWL";
