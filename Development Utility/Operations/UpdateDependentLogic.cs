@@ -286,6 +286,12 @@ class UpdateDependentLogic: Operation {
 				runtimeIdentifier: "win-x64" );
 			generateCodeForProject(
 				installation,
+				"PostgreSQL Provider",
+				EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.ProviderProjectFolderName, AppStatics.PostgresProviderProjectName ),
+				"EnterpriseWebLibrary.Postgres",
+				_ => {} );
+			generateCodeForProject(
+				installation,
 				"MySQL Provider",
 				EwlStatics.CombinePaths( installation.GeneralLogic.Path, AppStatics.ProviderProjectFolderName, AppStatics.MySqlProviderProjectName ),
 				"EnterpriseWebLibrary.MySql",

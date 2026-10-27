@@ -14,6 +14,7 @@ static class AppStatics {
 	internal const string TewlProjectPath = "Shared/TEWL";
 	internal const string StaticFileLogicFolderName = "Logic";
 	internal const string ProviderProjectFolderName = "Providers";
+	internal const string PostgresProviderProjectName = "PostgreSQL";
 	internal const string MySqlProviderProjectName = "MySQL";
 	internal const string OracleDatabaseProviderProjectName = "Oracle Database";
 	internal const string SqliteProviderProjectName = "SQLite";

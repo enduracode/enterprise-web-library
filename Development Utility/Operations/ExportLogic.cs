@@ -185,6 +185,20 @@ class ExportLogic: Operation {
 				.MaterializeAsList();
 			packages.Add( ( duId, duPackages ) );
 
+			var postgresId = mainId + ".Postgres";
+			packages.Add(
+				( postgresId,
+					createProviderNuGetPackages(
+						installation,
+						mainId,
+						AppStatics.PostgresProviderProjectName,
+						"EnterpriseWebLibrary.Postgres",
+						postgresId,
+						now,
+						useDebugAssembly,
+						outputFolderPath,
+						prereleaseValues ) ) );
+
 			var mySqlId = mainId + ".MySql";
 			packages.Add(
 				( mySqlId,
