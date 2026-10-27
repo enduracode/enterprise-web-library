@@ -7,6 +7,7 @@
     <Build Solution="Release|*" Project="false" />
   </Project>
   <Folder Name="/Providers/">
+    <Project Path="Providers/PostgreSQL/PostgreSQL.csproj" />
     <Project Path="Providers/MySQL/MySQL.csproj" />
     <Project Path="Providers/Oracle Database/Oracle Database.csproj" />
     <Project Path="Providers/SQLite/SQLite.csproj" />

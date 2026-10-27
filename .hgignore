@@ -60,6 +60,11 @@ Tests/obj/
 Tests/Directory.Build.props
 Tests/Generated Code/
 
+Providers/PostgreSQL/bin/
+Providers/PostgreSQL/obj/
+Providers/PostgreSQL/Directory.Build.props
+Providers/PostgreSQL/Generated Code/
+
 Providers/MySQL/bin/
 Providers/MySQL/obj/
 Providers/MySQL/Directory.Build.props
