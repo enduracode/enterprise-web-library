@@ -47,7 +47,7 @@ public class InlineUpdate: InlineDbModificationCommand, InlineDbCommandWithCondi
 		if( conditions.Count == 0 )
 			throw new ApplicationException( "Executing an inline update command with no parameters in the where clause is not allowed." );
 
-		var command = cn.DatabaseInfo.CreateCommand();
+		using var command = cn.DatabaseInfo.CreateCommand();
 		command.CommandText = "UPDATE " + tableName + " SET ";
 		var paramNumber = 0;
 		foreach( var columnMod in columnModifications ) {

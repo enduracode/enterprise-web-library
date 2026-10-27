@@ -38,6 +38,7 @@ public interface Database {
 	IEnumerable<DataRow> GetDataTypes();
 	string GetDefaultSchema() => "";
 	IEnumerable<DatabaseTable> GetTables();
+	IReadOnlyCollection<InferredParameter> InferStatementParameterTypes( DatabaseConnection connection, string statement ) => [ ];
 	IEnumerable<string> GetProcedures();
 	IEnumerable<DataRow> GetProcedureParameters( string procedure );
 	void PerformMaintenance();

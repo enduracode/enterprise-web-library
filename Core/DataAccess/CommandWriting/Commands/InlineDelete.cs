@@ -31,7 +31,7 @@ public class InlineDelete: InlineDbCommandWithConditions {
 	/// <param name="cn"></param>
 	/// <param name="isLongRunning">Pass true to give the command as much time as it needs.</param>
 	public int Execute( DatabaseConnection cn, bool isLongRunning = false ) {
-		var command = cn.DatabaseInfo.CreateCommand();
+		using var command = cn.DatabaseInfo.CreateCommand();
 		command.CommandText = "DELETE FROM " + tableName;
 
 		var first = true;

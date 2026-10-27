@@ -30,25 +30,27 @@ public class InlineInsert: InlineDbModificationCommand {
 	/// <param name="cn"></param>
 	/// <param name="isLongRunning">Pass true to give the command as much time as it needs.</param>
 	public object? Execute( DatabaseConnection cn, bool isLongRunning = false ) {
-		var cmd = cn.DatabaseInfo.CreateCommand();
-		cmd.CommandText = "INSERT INTO " + table;
-		if( columnModifications.Count is 0 && cn.DatabaseInfo is not MySqlInfo )
-			cmd.CommandText += " DEFAULT VALUES";
-		else {
-			var parameterNames = new List<string>( columnModifications.Count );
-			foreach( var parameter in columnModifications.Select( i => i.GetParameter() ) ) {
-				cmd.Parameters.Add( parameter.GetAdoDotNetParameter( cn.DatabaseInfo ) );
-				parameterNames.Add( parameter.GetNameForCommandText( cn.DatabaseInfo ) );
-			}
+		using( var cmd = cn.DatabaseInfo.CreateCommand() ) {
+			cmd.CommandText = "INSERT INTO " + table;
+			if( columnModifications.Count is 0 && cn.DatabaseInfo is not MySqlInfo )
+				cmd.CommandText += " DEFAULT VALUES";
+			else {
+				var parameterNames = new List<string>( columnModifications.Count );
+				foreach( var parameter in columnModifications.Select( i => i.GetParameter() ) ) {
+					cmd.Parameters.Add( parameter.GetAdoDotNetParameter( cn.DatabaseInfo ) );
+					parameterNames.Add( parameter.GetNameForCommandText( cn.DatabaseInfo ) );
+				}
 
-			cmd.CommandText += " ( " + StringTools.ConcatenateWithDelimiter( ", ", columnModifications.Select( i => i.GetColumnIdentifier( cn.DatabaseInfo ) ) ) +
-			                   " ) VALUES( " + StringTools.ConcatenateWithDelimiter( ", ", parameterNames ) + " )";
+				cmd.CommandText += " ( " + StringTools.ConcatenateWithDelimiter( ", ", columnModifications.Select( i => i.GetColumnIdentifier( cn.DatabaseInfo ) ) ) +
+				                   " ) VALUES( " + StringTools.ConcatenateWithDelimiter( ", ", parameterNames ) + " )";
+			}
+			cn.ExecuteNonQueryCommand( cmd, isLongRunning: isLongRunning );
 		}
-		cn.ExecuteNonQueryCommand( cmd, isLongRunning: isLongRunning );
 
 		if( !cn.DatabaseInfo.LastAutoIncrementValueExpression.Any() )
 			return null;
-		var autoIncrementRetriever = cn.DatabaseInfo.CreateCommand();
+
+		using var autoIncrementRetriever = cn.DatabaseInfo.CreateCommand();
 		autoIncrementRetriever.CommandText = "SELECT {0}".FormatWith( cn.DatabaseInfo.LastAutoIncrementValueExpression );
 		var autoIncrementValue = cn.ExecuteScalarCommand( autoIncrementRetriever );
 		return autoIncrementValue != DBNull.Value ? autoIncrementValue : null;

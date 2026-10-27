@@ -57,7 +57,7 @@ public class InlineInsertWithSelect {
 		if( conditions.Count == 0 )
 			throw new ApplicationException( "Executing an inline-insert-with-select command with no parameters in the where clause is not allowed." );
 
-		var command = cn.DatabaseInfo.CreateCommand();
+		using var command = cn.DatabaseInfo.CreateCommand();
 		command.CommandText = "INSERT INTO {0} ( {1} ) SELECT {2} FROM {3} WHERE ".FormatWith(
 			insertTable,
 			StringTools.ConcatenateWithDelimiter( ", ", insertColumns.Select( cn.DatabaseInfo.GetDelimitedIdentifier ) ),

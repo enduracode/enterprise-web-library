@@ -7,6 +7,7 @@ using EnterpriseWebLibrary.DataAccess.CommandWriting.Commands;
 using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction.Conditions;
 using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
+using Microsoft.Data.SqlClient;
 using Serilog;
 using Tewl.IO;
 
@@ -304,7 +305,11 @@ LOG ON (
 			executeLongRunningCommand( cn, $"GRANT EXECUTE TO [{user}]" );
 	}
 
-	IEnumerable<DataRow> Database.GetDataTypes() => throw new NotSupportedException();
+	IEnumerable<DataRow> Database.GetDataTypes() {
+		IEnumerable<DataRow> rows = null!;
+		ExecuteDbMethod( cn => rows = getDataTypes( cn ) );
+		return rows;
+	}
 
 	string Database.GetDefaultSchema() => "dbo";
 
@@ -323,6 +328,49 @@ LOG ON (
 			} );
 		return tables;
 	}
+
+	IReadOnlyCollection<InferredParameter> Database.InferStatementParameterTypes( DatabaseConnection connection, string statement ) {
+		var parameters = new List<InferredParameter>();
+		var typesByName = getDataTypes( connection ).ToDictionary( i => (string)i[ "TypeName" ], StringComparer.Ordinal );
+
+		var inferenceCall = new SprocExecution( "sys.sp_describe_undeclared_parameters" );
+		inferenceCall.AddParameter( new DbCommandParameter( "tsql", new DbParameterValue( statement, nameof(SqlDbType.NVarChar) ) ) );
+		try {
+			inferenceCall.ExecuteReader(
+				connection,
+				reader => {
+					while( reader.Read() ) {
+						var name = ( (string)reader[ "name" ] )[ connection.DatabaseInfo.ParameterPrefix.Length.. ];
+						if( reader[ "suggested_user_type_id" ] is not DBNull )
+							continue;
+
+						var dataTypeRow = typesByName[ ( (string)reader[ "suggested_system_type_name" ] ).Separate( "(", false ).First() ];
+						var dbType = (SqlDbType)(int)dataTypeRow[ "ProviderDbType" ];
+
+						var size = (int)(short)reader[ "suggested_max_length" ];
+						if( size == -1 )
+							size = int.MaxValue;
+						if( dbType is SqlDbType.NChar or SqlDbType.NVarChar )
+							size /= 2;
+
+						parameters.Add(
+							new InferredParameter(
+								name,
+								Type.GetType( (string)dataTypeRow[ "DataType" ], true )!,
+								connection.DatabaseInfo.GetDbTypeString( dbType ),
+								size,
+								(byte)reader[ "suggested_scale" ] ) );
+					}
+				} );
+		}
+		catch( Exception e ) when( e.InnerException is SqlException ) {
+			return [ ]; // SQL Server cannot describe every valid statement, including many that repeat a parameter.
+		}
+
+		return parameters;
+	}
+
+	private IReadOnlyCollection<DataRow> getDataTypes( DatabaseConnection connection ) => connection.GetSchema( "DataTypes" ).Rows.Cast<DataRow>().Materialize();
 
 	IEnumerable<string> Database.GetProcedures() => throw new NotSupportedException();
 

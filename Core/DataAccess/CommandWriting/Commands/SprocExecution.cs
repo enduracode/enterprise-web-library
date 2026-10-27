@@ -29,7 +29,7 @@ public class SprocExecution {
 	/// Executes this procedure against the specified database connection to get a data reader and then executes the specified method with the reader.
 	/// </summary>
 	public void ExecuteReader( DatabaseConnection cn, Action<DbDataReader> readerMethod ) {
-		var cmd = cn.DatabaseInfo.CreateCommand();
+		using var cmd = cn.DatabaseInfo.CreateCommand();
 		setupDbCommand( cmd, cn.DatabaseInfo );
 		cn.ExecuteReaderCommand( cmd, readerMethod );
 	}
@@ -38,7 +38,7 @@ public class SprocExecution {
 	/// Executes this sproc against the specified database connection and returns the number of rows affected.
 	/// </summary>
 	public int ExecuteNonQuery( DatabaseConnection cn ) {
-		var cmd = cn.DatabaseInfo.CreateCommand();
+		using var cmd = cn.DatabaseInfo.CreateCommand();
 		setupDbCommand( cmd, cn.DatabaseInfo );
 		return cn.ExecuteNonQueryCommand( cmd );
 	}
@@ -47,7 +47,7 @@ public class SprocExecution {
 	/// Executes this sproc against the specified database connection and returns a single value.
 	/// </summary>
 	public object? ExecuteScalar( DatabaseConnection cn ) {
-		var cmd = cn.DatabaseInfo.CreateCommand();
+		using var cmd = cn.DatabaseInfo.CreateCommand();
 		setupDbCommand( cmd, cn.DatabaseInfo );
 		return cn.ExecuteScalarCommand( cmd );
 	}
