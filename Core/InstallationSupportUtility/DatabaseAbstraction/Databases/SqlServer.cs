@@ -350,7 +350,7 @@ LOG ON (
 						var size = (int)(short)reader[ "suggested_max_length" ];
 						if( size == -1 )
 							size = int.MaxValue;
-						if( dbType is SqlDbType.NChar or SqlDbType.NVarChar )
+						else if( dbType is SqlDbType.NChar or SqlDbType.NVarChar )
 							size /= 2;
 
 						parameters.Add(
