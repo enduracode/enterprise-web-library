@@ -30,7 +30,7 @@ static class TableRetrievalStatics {
 			writer.WriteLine( "public static partial class " + GetClassName( cn, table.tableName.Name ) + " {" );
 
 			var isRevisionHistoryTable = table.isRevisionHistoryTable;
-			var columns = new TableColumns( cn, table.tableName, isRevisionHistoryTable );
+			var columns = new TableColumns( cn, database, table.tableName, isRevisionHistoryTable );
 
 			// Write nested classes.
 			RetrievalStatics.WriteRowClasses(

@@ -3,7 +3,7 @@ using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess.Subsystems;
 
-internal static class CommandConditionStatics {
+static class CommandConditionStatics {
 	internal static void Generate( DatabaseConnection cn, TextWriter writer, string baseNamespace, Database database, IEnumerable<DatabaseTable> tables ) {
 		foreach( var table in tables ) {
 			writer.WriteLine(
@@ -12,18 +12,18 @@ internal static class CommandConditionStatics {
 			// Write the interface for all of the table's conditions.
 			writer.WriteLine( "public interface " + GetTableConditionInterfaceName( cn, table.Name ) + ": TableCondition {}" );
 
-			writeEqualityConditionClasses( cn, writer, table );
-			writeInequalityConditionClasses( cn, writer, table );
-			writeInConditionClasses( cn, writer, table );
-			writeLikeConditionClasses( cn, writer, table );
+			writeEqualityConditionClasses( writer, cn, database, table );
+			writeInequalityConditionClasses( writer, cn, database, table );
+			writeInConditionClasses( writer, cn, database, table );
+			writeLikeConditionClasses( writer, cn, database, table );
 
 			writer.WriteLine( "}" ); // namespace
 		}
 	}
 
-	private static void writeEqualityConditionClasses( DatabaseConnection cn, TextWriter writer, DatabaseTable table ) {
+	private static void writeEqualityConditionClasses( TextWriter writer, DatabaseConnection cn, Database database, DatabaseTable table ) {
 		writer.WriteLine( "public static class " + GetTableEqualityConditionsClassName( cn, table.Name ) + " {" );
-		foreach( var column in new TableColumns( cn, table, false ).AllColumnsExceptRowVersion ) {
+		foreach( var column in new TableColumns( cn, database, table, false ).AllColumnsExceptRowVersion ) {
 			CodeGenerationStatics.AddSummaryDocComment( writer, "A condition that narrows the scope of a command." );
 			writer.WriteLine( "public class " + GetConditionClassName( column ) + ": " + GetTableConditionInterfaceName( cn, table.Name ) + " {" );
 			writer.WriteLine( "private readonly " + column.DataTypeName + " value;" );
@@ -45,10 +45,10 @@ internal static class CommandConditionStatics {
 		return EwlStatics.GetCSharpIdentifier( table.TableNameToPascal( cn ) + "TableEqualityConditions" );
 	}
 
-	private static void writeInequalityConditionClasses( DatabaseConnection cn, TextWriter writer, DatabaseTable table ) {
+	private static void writeInequalityConditionClasses( TextWriter writer, DatabaseConnection cn, Database database, DatabaseTable table ) {
 		// NOTE: This kind of sucks. It seems like we could use generics to not have to write N of these methods into ISU.cs.
 		writer.WriteLine( "public static class " + EwlStatics.GetCSharpIdentifier( table.Name.TableNameToPascal( cn ) + "TableInequalityConditions" ) + " {" );
-		foreach( var column in new TableColumns( cn, table, false ).AllColumnsExceptRowVersion ) {
+		foreach( var column in new TableColumns( cn, database, table, false ).AllColumnsExceptRowVersion ) {
 			CodeGenerationStatics.AddSummaryDocComment( writer, "A condition that narrows the scope of a command." );
 			writer.WriteLine( "public class " + GetConditionClassName( column ) + ": " + GetTableConditionInterfaceName( cn, table.Name ) + " {" );
 			writer.WriteLine( "private readonly InequalityCondition.Operator op; " );
@@ -69,9 +69,9 @@ internal static class CommandConditionStatics {
 		writer.WriteLine( "}" ); // class
 	}
 
-	private static void writeInConditionClasses( DatabaseConnection cn, TextWriter writer, DatabaseTable table ) {
+	private static void writeInConditionClasses( TextWriter writer, DatabaseConnection cn, Database database, DatabaseTable table ) {
 		writer.WriteLine( "public static class " + EwlStatics.GetCSharpIdentifier( table.Name.TableNameToPascal( cn ) + "TableInConditions" ) + " {" );
-		foreach( var column in new TableColumns( cn, table, false ).AllColumnsExceptRowVersion ) {
+		foreach( var column in new TableColumns( cn, database, table, false ).AllColumnsExceptRowVersion ) {
 			CodeGenerationStatics.AddSummaryDocComment( writer, "A condition that narrows the scope of a command." );
 			writer.WriteLine( "public class " + GetConditionClassName( column ) + ": " + GetTableConditionInterfaceName( cn, table.Name ) + " {" );
 			writer.WriteLine( "private readonly string subQuery;" );
@@ -88,9 +88,9 @@ internal static class CommandConditionStatics {
 		writer.WriteLine( "}" );
 	}
 
-	private static void writeLikeConditionClasses( DatabaseConnection cn, TextWriter writer, DatabaseTable table ) {
+	private static void writeLikeConditionClasses( TextWriter writer, DatabaseConnection cn, Database database, DatabaseTable table ) {
 		writer.WriteLine( "public static class " + EwlStatics.GetCSharpIdentifier( table.Name.TableNameToPascal( cn ) + "TableLikeConditions" ) + " {" );
-		foreach( var column in new TableColumns( cn, table, false ).AllColumnsExceptRowVersion ) {
+		foreach( var column in new TableColumns( cn, database, table, false ).AllColumnsExceptRowVersion ) {
 			CodeGenerationStatics.AddSummaryDocComment( writer, "A condition that narrows the scope of a command." );
 			writer.WriteLine( "public class " + GetConditionClassName( column ) + ": " + GetTableConditionInterfaceName( cn, table.Name ) + " {" );
 			writer.WriteLine( "private readonly LikeCondition.Behavior behavior; " );

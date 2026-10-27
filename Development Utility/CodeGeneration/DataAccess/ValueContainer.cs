@@ -1,4 +1,5 @@
-﻿using EnterpriseWebLibrary.DatabaseSpecification;
+﻿using EnterpriseWebLibrary.DataAccess.CommandWriting;
+using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using NodaTime;
 
@@ -169,6 +170,9 @@ class ValueContainer {
 
 		throw new UnexpectedValueException( "data type", dataType );
 	}
+
+	public DbParameterValue GetDummyParameterValue( DatabaseInfo databaseInfo ) =>
+		dbTypeString.Length == 0 ? new DbParameterValue( databaseInfo is MySqlInfo ? 0 : "0" ) : new DbParameterValue( null, dbTypeString );
 
 	public string GetNullabilityPhrase() =>
 		!allowsEmpty.HasValue ? allowsNull ? "can be null" : "cannot be null" :

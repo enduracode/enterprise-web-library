@@ -87,7 +87,7 @@ static class DataAccessOps {
 		database.ExecuteDbMethod(
 			delegate( DatabaseConnection cn ) {
 				foreach( var table in tables.Where( i => i.hasModTable ).Select( i => i.tableName ) ) {
-					var columns = new TableColumns( cn, table, false );
+					var columns = new TableColumns( cn, database, table, false );
 
 					if( !columns.HasKeyColumns )
 						throw new UserCorrectableException( $"Table {table.QualifiedName} is cached using a modification table but does not have a primary key." );
@@ -107,6 +107,7 @@ static class DataAccessOps {
 
 					var modTableColumns = Column.GetColumnsInQueryResults(
 						cn,
+						database,
 						"SELECT * FROM {0}".FormatWith( DatabaseOps.GetModificationTableQualifiedName( database, table ) ),
 						true,
 						validateAllColumnsAsKeys: true );

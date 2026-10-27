@@ -63,7 +63,7 @@ static class StandardModificationStatics {
 	}
 
 	private static void writeClass( DatabaseConnection cn, DatabaseTable table, bool isRevisionHistoryTable, bool hasModTable, bool isRevisionHistoryClass ) {
-		columns = new TableColumns( cn, table, isRevisionHistoryClass );
+		columns = new TableColumns( cn, database, table, isRevisionHistoryClass );
 
 		writer.WriteLine( "public partial class " + GetClassName( cn, table.Name, isRevisionHistoryTable, isRevisionHistoryClass ) + " {" );
 

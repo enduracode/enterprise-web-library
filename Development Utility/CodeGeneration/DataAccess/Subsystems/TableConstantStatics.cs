@@ -3,7 +3,7 @@ using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess.Subsystems;
 
-internal static class TableConstantStatics {
+static class TableConstantStatics {
 	internal static void Generate( DatabaseConnection cn, TextWriter writer, string baseNamespace, Database database, IEnumerable<DatabaseTable> tables ) {
 		foreach( var table in tables ) {
 			writer.WriteLine(
@@ -15,7 +15,7 @@ internal static class TableConstantStatics {
 			CodeGenerationStatics.AddSummaryDocComment( writer, "The name of this table." );
 			writer.WriteLine( "public const string Name = \"" + table.QualifiedName + "\";" );
 
-			foreach( var column in new TableColumns( cn, table, false ).AllColumnsExceptRowVersion ) {
+			foreach( var column in new TableColumns( cn, database, table, false ).AllColumnsExceptRowVersion ) {
 				CodeGenerationStatics.AddSummaryDocComment( writer, "Contains schema information about this column." );
 				writer.WriteLine( "public class " + EwlStatics.GetCSharpIdentifier( column.PascalCasedName + "Column" ) + " {" );
 

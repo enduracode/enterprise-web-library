@@ -17,7 +17,7 @@ static class CustomModificationStatics {
 		if( configuration.customModifications != null ) {
 			writer.WriteLine( "namespace " + baseNamespace + " {" );
 
-			var modifications = getModificationData( cn, configuration.customModifications );
+			var modifications = getModificationData( cn, database, configuration.customModifications );
 
 			CodeGenerationStatics.AddSummaryDocComment( writer, "Contains custom modification operations." );
 			writer.WriteLine( "public static class " + database.SecondaryDatabaseName + "CustomModifications {" );
@@ -31,12 +31,13 @@ static class CustomModificationStatics {
 	}
 
 	private static IReadOnlyCollection<ModificationData> getModificationData(
-		DatabaseConnection cn, EnterpriseWebLibrary.Configuration.SystemDevelopment.CustomModification[] mods ) =>
+		DatabaseConnection cn, Database database, EnterpriseWebLibrary.Configuration.SystemDevelopment.CustomModification[] mods ) =>
 		mods.Select( mod => {
 				try {
 					var commands = mod.commands.Select( commandText => {
 							var parameters = DataAccessStatics.ExecuteWithCommandFromRawQueryText(
 								cn,
+								database,
 								commandText,
 								cmd => {
 									// We don't test commands in Oracle because:

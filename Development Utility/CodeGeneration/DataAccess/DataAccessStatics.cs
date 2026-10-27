@@ -38,8 +38,21 @@ static class DataAccessStatics {
 	/// dummy values, and the command can be safely executed using schema only or key info behavior. Returns parameter metadata.
 	/// </summary>
 	internal static IReadOnlyCollection<ValueContainer> ExecuteWithCommandFromRawQueryText(
-		DatabaseConnection cn, string commandText, Action<DbCommand> method ) {
-		var parameters = getNamedParamList( cn.DatabaseInfo, commandText ).Select( i => new ValueContainer( i, cn.DatabaseInfo ) ).Materialize();
+		DatabaseConnection cn, Database database, string commandText, Action<DbCommand> method ) {
+		var parameterNames = getNamedParamList( cn.DatabaseInfo, commandText );
+		var inferredParametersByName =
+			( parameterNames.Any() ? database.InferStatementParameterTypes( cn, commandText ) : [ ] ).ToDictionary( i => i.Name, StringComparer.Ordinal );
+		var parameters = parameterNames.Select( name => inferredParametersByName.TryGetValue( name, out var parameter )
+			                                                ? new ValueContainer(
+				                                                name,
+				                                                parameter.DataType,
+				                                                parameter.DbTypeString,
+				                                                parameter.Size,
+				                                                parameter.NumericScale,
+				                                                true,
+				                                                cn.DatabaseInfo )
+			                                                : new ValueContainer( name, cn.DatabaseInfo ) )
+			.Materialize();
 
 		// This replacement is necessary because SQL Server chooses to care about the type of the parameter passed to TOP.
 		commandText = Regex.Replace( commandText, @"TOP\( *@\w+ *\)", "TOP 0", RegexOptions.IgnoreCase );
@@ -48,8 +61,7 @@ static class DataAccessStatics {
 		command.CommandText = commandText;
 
 		foreach( var param in parameters )
-			command.Parameters.Add(
-				new DbCommandParameter( param.Name, new DbParameterValue( cn.DatabaseInfo is MySqlInfo ? 0 : "0" ) ).GetAdoDotNetParameter( cn.DatabaseInfo ) );
+			command.Parameters.Add( new DbCommandParameter( param.Name, param.GetDummyParameterValue( cn.DatabaseInfo ) ).GetAdoDotNetParameter( cn.DatabaseInfo ) );
 
 		method( command );
 		return parameters;

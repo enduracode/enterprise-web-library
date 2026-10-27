@@ -12,12 +12,13 @@ namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess;
 
 class Column {
 	internal static IReadOnlyCollection<Column> GetColumnsInQueryResults(
-		DatabaseConnection cn, string commandText, bool isTableQuery, bool validateAllColumnsAsKeys = false ) {
+		DatabaseConnection cn, Database database, string commandText, bool isTableQuery, bool validateAllColumnsAsKeys = false ) {
 		var columns = new List<Column>();
 
 		var validationMethods = new List<Action>();
 		DataAccessStatics.ExecuteWithCommandFromRawQueryText(
 			cn,
+			database,
 			commandText,
 			command => {
 				var readerMethod = new Action<DbDataReader>( r => columns.AddRange(

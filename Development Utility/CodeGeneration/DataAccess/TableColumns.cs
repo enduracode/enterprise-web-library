@@ -22,10 +22,10 @@ class TableColumns {
 	/// </summary>
 	internal IEnumerable<Column> DataColumns { get; }
 
-	internal TableColumns( DatabaseConnection cn, DatabaseTable table, bool forRevisionHistoryLogic ) {
+	internal TableColumns( DatabaseConnection cn, Database database, DatabaseTable table, bool forRevisionHistoryLogic ) {
 		try {
 			// NOTE: Cache this result.
-			AllColumns = Column.GetColumnsInQueryResults( cn, "SELECT * FROM " + table.QualifiedName, true );
+			AllColumns = Column.GetColumnsInQueryResults( cn, database, "SELECT * FROM " + table.QualifiedName, true );
 
 			// Identify key, identity, and non identity columns.
 			var nonIdentityColumns = new List<Column>();

@@ -23,7 +23,7 @@ static class QueryRetrievalStatics {
 		foreach( var query in configuration.queries ) {
 			QueryData data;
 			try {
-				data = getQueryData( cn, query );
+				data = getQueryData( cn, database, query );
 			}
 			catch( Exception e ) {
 				throw new UserCorrectableException( "Failed to get columns and parameters for the " + query.name + " query.", e );
@@ -49,13 +49,14 @@ static class QueryRetrievalStatics {
 		writer.WriteLine( "}" ); // namespace
 	}
 
-	private static QueryData getQueryData( DatabaseConnection cn, EnterpriseWebLibrary.Configuration.SystemDevelopment.Query query ) {
-		var columns = Column.GetColumnsInQueryResults( cn, query.selectFromClause, false );
+	private static QueryData getQueryData( DatabaseConnection cn, Database database, EnterpriseWebLibrary.Configuration.SystemDevelopment.Query query ) {
+		var columns = Column.GetColumnsInQueryResults( cn, database, query.selectFromClause, false );
 
 		// Attempt to query with every postSelectFromClause to ensure validity.
 		var clauses = query.postSelectFromClauses.Select( clause => {
 				var parameters = DataAccessStatics.ExecuteWithCommandFromRawQueryText(
 					cn,
+					database,
 					query.selectFromClause + clause.ValueNonNullable.PrependDelimiter( " " ),
 					command => cn.ExecuteReaderCommandWithSchemaOnlyBehavior( command, _ => {} ) );
 				return ( clause, parameters );

@@ -6,7 +6,7 @@ using Humanizer;
 
 namespace EnterpriseWebLibrary.DevelopmentUtility.CodeGeneration.DataAccess.Subsystems;
 
-internal static class RowConstantStatics {
+static class RowConstantStatics {
 	private const string dictionaryName = "valuesAndNames";
 
 	private record Row( string Value, string Name, string Identifier );
@@ -25,7 +25,7 @@ internal static class RowConstantStatics {
 			var duplicatesExist = false;
 			try {
 				table = tableGetter( rowConstantTable.tableName );
-				var columns = new TableColumns( cn, table, false );
+				var columns = new TableColumns( cn, database, table, false );
 				valueColumn = columns.AllColumnsExceptRowVersion.Single( column => column.Name.ToLower() == rowConstantTable.valueColumn.ToLower() );
 				var nameColumn = columns.AllColumnsExceptRowVersion.Single( column => column.Name.ToLower() == rowConstantTable.nameColumn.ToLower() );
 
