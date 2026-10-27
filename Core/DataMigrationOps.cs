@@ -46,6 +46,7 @@ public static class DataMigrationOps {
 		ConfigurationStatics.Init( "", "Data Migrator", false, ref initializationLog );
 
 		ExternalFunctionalityStatics.Init( new SpecifiedValue<SystemExternalFunctionalityProvider?>( externalFunctionalityProvider ) );
+		PostgresInfo.Init( () => ExternalFunctionalityStatics.ExternalPostgresProvider );
 		MySqlInfo.Init( () => ExternalFunctionalityStatics.ExternalMySqlProvider );
 		OracleInfo.Init( () => ExternalFunctionalityStatics.ExternalOracleDatabaseProvider );
 		SqliteInfo.Init( () => ExternalFunctionalityStatics.ExternalSqliteProvider );

@@ -8,6 +8,11 @@ namespace EnterpriseWebLibrary.ExternalFunctionality;
 [ UsedImplicitly( ImplicitUseTargetFlags.WithInheritors ) ]
 public abstract class SystemExternalFunctionalityProvider {
 	/// <summary>
+	/// Returns the external PostgreSQL provider for the system. This should be a simple constructor expression with no other logic.
+	/// </summary>
+	protected internal virtual ExternalPostgresProvider? GetPostgresProvider() => null;
+
+	/// <summary>
 	/// Returns the external MySQL provider for the system. This should be a simple constructor expression with no other logic.
 	/// </summary>
 	protected internal virtual ExternalMySqlProvider? GetMySqlProvider() => null;

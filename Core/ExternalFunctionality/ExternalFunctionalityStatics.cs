@@ -12,6 +12,7 @@ public static class ExternalFunctionalityStatics {
 
 	private static SystemProviderReference<SystemExternalFunctionalityProvider>? provider;
 
+	private static ExternalPostgresProvider? postgresProvider;
 	private static ExternalMySqlProvider? mySqlProvider;
 	private static ExternalOracleDatabaseProvider? oracleDatabaseProvider;
 	private static ExternalSqliteProvider? sqliteProvider;
@@ -22,6 +23,9 @@ public static class ExternalFunctionalityStatics {
 
 	internal static void Init( SpecifiedValue<SystemExternalFunctionalityProvider?>? specifiedProvider ) {
 		provider = SystemSpecificLogicStatics.GetLibraryProvider( ProviderName, specifiedProvider: specifiedProvider );
+
+		postgresProvider = provider.GetProvider( returnNullIfNotFound: true )?.GetPostgresProvider();
+		postgresProvider?.InitStatics();
 
 		mySqlProvider = provider.GetProvider( returnNullIfNotFound: true )?.GetMySqlProvider();
 
@@ -44,6 +48,18 @@ public static class ExternalFunctionalityStatics {
 		var asposeWordsLicensePath = EwlStatics.CombinePaths( ConfigurationStatics.InstallationConfiguration.AsposeLicenseFolderPath, "Aspose.Words.lic" );
 		if( File.Exists( asposeWordsLicensePath ) )
 			wordProvider?.InitStatics( asposeWordsLicensePath );
+	}
+
+	internal static void CleanUp() {
+		postgresProvider?.CleanUpStatics();
+		postgresProvider = null;
+	}
+
+	internal static ExternalPostgresProvider ExternalPostgresProvider {
+		get {
+			ensureProviderExists();
+			return postgresProvider ?? throw new Exception( "External PostgreSQL provider not available." );
+		}
 	}
 
 	internal static ExternalMySqlProvider ExternalMySqlProvider {

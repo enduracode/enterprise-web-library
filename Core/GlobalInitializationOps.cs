@@ -22,7 +22,7 @@ public static class GlobalInitializationOps {
 
 	private static bool initialized;
 	private static SystemInitializer? globalInitializer;
-	private static bool secondaryInitFailed;
+	internal static bool SecondaryInitFailed { get; private set; }
 
 	/// <summary>
 	/// Initializes the system. This includes loading application settings from the configuration file. The application name should be scoped within the system.
@@ -102,6 +102,7 @@ public static class GlobalInitializationOps {
 			ExternalFunctionalityStatics.Init( null );
 
 			// data access
+			PostgresInfo.Init( () => ExternalFunctionalityStatics.ExternalPostgresProvider );
 			MySqlInfo.Init( () => ExternalFunctionalityStatics.ExternalMySqlProvider );
 			OracleInfo.Init( () => ExternalFunctionalityStatics.ExternalOracleDatabaseProvider );
 			SqliteInfo.Init( () => ExternalFunctionalityStatics.ExternalSqliteProvider );
@@ -130,7 +131,7 @@ public static class GlobalInitializationOps {
 				AutomaticDatabaseConnectionManager.ExecuteWithAutomaticDatabaseConnections( UserManagementStatics.InitSystemSpecificLogicDependencies );
 		}
 		catch( Exception e ) {
-			secondaryInitFailed = true;
+			SecondaryInitFailed = true;
 
 			// Suppress all exceptions since they would prevent apps from knowing that primary initialization succeeded. EWF apps need to know this in order to
 			// automatically restart themselves. Other apps could find this knowledge useful as well.
@@ -141,8 +142,6 @@ public static class GlobalInitializationOps {
 		}
 	}
 
-	internal static bool SecondaryInitFailed => secondaryInitFailed;
-
 	/// <summary>
 	/// Performs cleanup activities so the application can be shut down.
 	/// </summary>
@@ -150,6 +149,7 @@ public static class GlobalInitializationOps {
 		try {
 			globalInitializer?.CleanUpStatics();
 
+			ExternalFunctionalityStatics.CleanUp();
 			AppMemoryCache.CleanUp();
 		}
 		catch( Exception e ) {
@@ -164,7 +164,7 @@ public static class GlobalInitializationOps {
 	/// cause this method to return 1 without emailing or logging the exception.
 	/// </summary>
 	public static int ExecuteAppWithStandardExceptionHandling( Action method ) {
-		if( secondaryInitFailed )
+		if( SecondaryInitFailed )
 			return 1;
 		try {
 			method();
