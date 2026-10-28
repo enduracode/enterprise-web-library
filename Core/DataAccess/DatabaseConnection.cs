@@ -439,6 +439,18 @@ public class DatabaseConnection {
 		}
 	}
 
+	internal void ExecuteCommandOperation( DbCommand command, Action method ) {
+		assertCurrentTransactionUsable();
+
+		try {
+			prepareCommandForExecution( command, false );
+			method();
+		}
+		catch( Exception e ) {
+			throw createCommandException( command, e );
+		}
+	}
+
 	private void prepareCommandForExecution( DbCommand command, bool isLongRunning ) {
 		command.Connection = cn;
 		if( tx is not null )
@@ -447,6 +459,11 @@ public class DatabaseConnection {
 	}
 
 	private Exception createCommandException( DbCommand command, Exception innerException ) {
+		if( databaseInfo is PostgresInfo )
+			return ExternalFunctionalityStatics.ExternalPostgresProvider.CreateCommandException(
+				innerException,
+				message => getCommandExceptionMessage( command, message ) );
+
 		if( databaseInfo is SqlServerInfo && innerException is SqlException sqlException ) {
 			var errorNumber = sqlException.Number;
 

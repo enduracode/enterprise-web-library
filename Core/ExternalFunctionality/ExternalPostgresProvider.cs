@@ -1,5 +1,5 @@
-﻿using System.Data;
-using System.Data.Common;
+﻿using System.Data.Common;
+using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 using FluentMigrator.Runner;
 
@@ -25,9 +25,7 @@ public interface ExternalPostgresProvider {
 
 	string GetDbTypeString( object databaseSpecificType );
 
-	DataTable GetSchemaTable( DbDataReader reader );
-
-	IReadOnlyCollection<InferredParameter> InferStatementParameterTypes( DbCommand command );
+	IReadOnlyCollection<InferredParameter> InferStatementParameterTypes( DatabaseConnection connection, string statement );
 
 	Exception CreateCommandException( Exception originalException, Func<string, string> messageGetter );
 

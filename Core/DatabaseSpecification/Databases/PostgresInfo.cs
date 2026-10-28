@@ -1,5 +1,5 @@
-﻿using System.Data;
-using System.Data.Common;
+﻿using System.Data.Common;
+using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.ExternalFunctionality;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 using FluentMigrator.Runner;
@@ -62,9 +62,8 @@ public class PostgresInfo: DatabaseInfo {
 
 	string DatabaseInfo.GetDbTypeString( object databaseSpecificType ) => provider!.Value.GetDbTypeString( databaseSpecificType );
 
-	public DataTable GetSchemaTable( DbDataReader reader ) => provider!.Value.GetSchemaTable( reader );
-
-	public IReadOnlyCollection<InferredParameter> InferStatementParameterTypes( DbCommand command ) => provider!.Value.InferStatementParameterTypes( command );
+	public IReadOnlyCollection<InferredParameter> InferStatementParameterTypes( DatabaseConnection connection, string statement ) =>
+		provider!.Value.InferStatementParameterTypes( connection, statement );
 
 	void DatabaseInfo.RegisterDependencyInjectionServicesForMigration( IMigrationRunnerBuilder builder ) =>
 		provider!.Value.RegisterDependencyInjectionServicesForMigration( builder );
