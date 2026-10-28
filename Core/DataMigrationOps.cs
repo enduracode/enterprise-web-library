@@ -26,11 +26,12 @@ public static class DataMigrationOps {
 		bool IVersionTableMetaData.OwnsSchema => true;
 		string IVersionTableMetaData.SchemaName => "";
 		public string TableName => GetMigrationTableName( ConfigurationStatics.InstallationConfiguration.PrimaryDatabaseInfo! );
-		string IVersionTableMetaData.ColumnName => isOracle ? "VERSION" : "Version";
-		string IVersionTableMetaData.AppliedOnColumnName => isOracle ? "APPLIED_TIME" : "AppliedTime";
-		string IVersionTableMetaData.DescriptionColumnName => isOracle ? "DESCRIPTION" : "Description";
-		string IVersionTableMetaData.UniqueIndexName => TableName + ( isOracle ? "_VERSION_INDEX" : "VersionIndex" );
+		string IVersionTableMetaData.ColumnName => isPostgres ? "version" : isOracle ? "VERSION" : "Version";
+		string IVersionTableMetaData.AppliedOnColumnName => isPostgres ? "applied_time" : isOracle ? "APPLIED_TIME" : "AppliedTime";
+		string IVersionTableMetaData.DescriptionColumnName => isPostgres ? "description" : isOracle ? "DESCRIPTION" : "Description";
+		string IVersionTableMetaData.UniqueIndexName => TableName + ( isPostgres ? "_version_index" : isOracle ? "_VERSION_INDEX" : "VersionIndex" );
 
+		private bool isPostgres => ConfigurationStatics.InstallationConfiguration.PrimaryDatabaseInfo is PostgresInfo;
 		private bool isOracle => ConfigurationStatics.InstallationConfiguration.PrimaryDatabaseInfo is OracleInfo;
 
 		// As of April 2025, returning true causes exceptions because FluentMigrator tries to create both a PK and index with the same name.
@@ -99,7 +100,7 @@ public static class DataMigrationOps {
 	public static string GetMigrationTableName( DatabaseInfo databaseInfo ) =>
 		databaseInfo switch
 			{
-				MySqlInfo => "{0}_migrations".FormatWith( EwlStatics.EwlInitialism.ToLowerInvariant() ),
+				PostgresInfo or MySqlInfo => "{0}_migrations".FormatWith( EwlStatics.EwlInitialism.ToLowerInvariant() ),
 				OracleInfo => "{0}_MIGRATIONS".FormatWith( EwlStatics.EwlInitialism.ToUpperInvariant() ),
 				_ => "{0}Migrations".FormatWith( EwlStatics.EwlInitialism.EnglishToPascal() )
 			};
