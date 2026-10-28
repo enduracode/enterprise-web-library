@@ -198,8 +198,8 @@ public class DatabaseConnection {
 				tx = (ProfiledDbTransaction)cn.BeginTransaction(
 					databaseInfo switch
 						{
+							PostgresInfo or OracleInfo => IsolationLevel.Serializable,
 							SqlServerInfo => IsolationLevel.Snapshot,
-							OracleInfo => IsolationLevel.Serializable,
 							_ => IsolationLevel.Unspecified
 						} );
 			else if( savepoint.Length > 0 )
@@ -246,8 +246,10 @@ public class DatabaseConnection {
 				try {
 					if( savepoint is null )
 						tx!.Rollback();
-					else if( savepoint.Length > 0 )
+					else if( savepoint.Length > 0 ) {
 						tx!.WrappedTransaction.Rollback( savepoint );
+						releaseSavepoint( savepoint );
+					}
 				}
 
 				// We need this catch block because databases will sometimes roll back a transaction on their own when they encounter a “serious” error. In SQL Server,
@@ -259,6 +261,8 @@ public class DatabaseConnection {
 				//
 				// We set rollbackWasToLastSavepoint to false so that we do not accumulate additional exceptions while the client attempts to roll back all nest levels.
 				catch( Exception exception ) when( exception is InvalidOperationException or SqlException { Number: 3903 } ||
+				                                   ( databaseInfo is PostgresInfo &&
+				                                     ExternalFunctionalityStatics.ExternalPostgresProvider.RollbackExceptionIsLostTransaction( exception ) ) ||
 				                                   ( databaseInfo is MySqlInfo &&
 				                                     ExternalFunctionalityStatics.ExternalMySqlProvider.RollbackExceptionIsLostTransaction( exception ) ) ) {
 					if( savepoints is not null ) {
@@ -349,8 +353,7 @@ public class DatabaseConnection {
 	}
 
 	private void releaseSavepoint( string name ) {
-		if( databaseInfo is MySqlInfo )
-			tx!.WrappedTransaction.Release( name );
+		tx!.WrappedTransaction.Release( name );
 	}
 
 	private Exception createConnectionException( string action, Exception innerException ) =>

@@ -2,6 +2,7 @@
 using EnterpriseWebLibrary.DataAccess.CommandWriting.InlineConditionAbstraction;
 using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
+using EnterpriseWebLibrary.ExternalFunctionality;
 using Microsoft.Data.SqlClient;
 
 namespace EnterpriseWebLibrary.DataAccess;
@@ -33,10 +34,15 @@ public static class DataAccessMethods {
 
 	internal static Exception CreateDbConnectionException( DatabaseInfo databaseInfo, string action, Exception innerException ) {
 		var generalMessage = "An exception occurred while " + action + " the " + GetDbName( databaseInfo ) + " database.";
+
+		if( databaseInfo is PostgresInfo )
+			return ExternalFunctionalityStatics.ExternalPostgresProvider.CreateConnectionException(
+				innerException,
+				message => generalMessage + message.PrependDelimiter( " " ) );
+
 		var customMessage = "";
 
-		var sqlServerInfo = databaseInfo as SqlServerInfo;
-		if( sqlServerInfo != null ) {
+		if( databaseInfo is SqlServerInfo sqlServerInfo ) {
 			var sqlException = innerException as SqlException;
 			int? errorNumber = null;
 			if( sqlException != null )
@@ -88,8 +94,7 @@ public static class DataAccessMethods {
 				customMessage = "Failed to connect to MySQL because of a connection timeout.";
 		}
 
-		var oracleInfo = databaseInfo as OracleInfo;
-		if( oracleInfo != null ) {
+		if( databaseInfo is OracleInfo oracleInfo ) {
 			if( innerException.Message.Contains( "ORA-12154" ) )
 				customMessage = "Failed to connect to Oracle. There may be a problem with your network connection to the server.";
 			if( innerException.Message.Contains( "ORA-12541" ) )

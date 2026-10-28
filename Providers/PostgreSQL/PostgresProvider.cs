@@ -124,6 +124,25 @@ public sealed class PostgresProvider: ExternalPostgresProvider {
 
 	private string getDbTypeString( NpgsqlDbType dbType ) => dbType.ToString();
 
+	Exception ExternalPostgresProvider.CreateConnectionException( Exception originalException, Func<string, string> messageGetter ) {
+		if( originalException is not NpgsqlException original )
+			return new Exception( messageGetter( "" ), originalException );
+
+		if( original is PostgresException { SqlState: PostgresErrorCodes.SerializationFailure or PostgresErrorCodes.DeadlockDetected } )
+			return new DbConcurrencyException( messageGetter( "A concurrency error occurred." ), original );
+
+		if( original is { InnerException: TimeoutException } )
+			return new DbConnectionFailureException( messageGetter( "A connection or command timeout occurred." ), original );
+		if( original is { InnerException: IOException or System.Net.Sockets.SocketException } )
+			return new DbConnectionFailureException( messageGetter( "Communication with PostgreSQL failed." ), original );
+
+		var message = messageGetter( original is PostgresException e ? $"SQLSTATE: {e.SqlState}." + ( e.ConstraintName is {} c ? $" Constraint: {c}." : "" ) : "" );
+		if( original is PostgresException { SqlState: var sqlState } && sqlState.StartsWith( "08", StringComparison.Ordinal ) )
+			return new DbConnectionFailureException( message, original );
+
+		return new Exception( message, original );
+	}
+
 	Exception ExternalPostgresProvider.CreateCommandException( Exception originalException, Func<string, string> messageGetter ) {
 		if( originalException is not NpgsqlException original )
 			return new Exception( messageGetter( "" ), originalException );

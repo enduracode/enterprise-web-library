@@ -27,6 +27,8 @@ public interface ExternalPostgresProvider {
 
 	IReadOnlyCollection<InferredParameter> InferStatementParameterTypes( DatabaseConnection connection, string statement );
 
+	Exception CreateConnectionException( Exception originalException, Func<string, string> messageGetter );
+
 	Exception CreateCommandException( Exception originalException, Func<string, string> messageGetter );
 
 	bool RollbackExceptionIsLostTransaction( Exception exception );
