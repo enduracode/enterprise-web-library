@@ -5,6 +5,13 @@ using System.Threading.Tasks;
 namespace EnterpriseWebLibrary.TewlContrib;
 
 public static class ProcessTools {
+	/// <summary>
+	/// An exception thrown when a program exits with a nonzero code.
+	/// </summary>
+	public class ProgramFailureException: Exception {
+		internal ProgramFailureException( string message ): base( message ) {}
+	}
+
 	internal static void RunProgram(
 		string program, string arguments, Stream? input, Stream? output, IReadOnlyDictionary<string, string>? environmentVariables = null ) {
 		using var p = new Process();
@@ -70,7 +77,7 @@ public static class ProcessTools {
 			writer.WriteLine();
 			writer.WriteLine( "Error output:" );
 			writer.WriteLine( errorOutput );
-			throw new Exception( writer.ToString() );
+			throw new ProgramFailureException( writer.ToString() );
 		}
 	}
 
@@ -131,7 +138,7 @@ public static class ProcessTools {
 				sw.WriteLine();
 				sw.WriteLine( "Error output:" );
 				sw.WriteLine( errorOutput.ToString() );
-				throw new ApplicationException( sw.ToString() );
+				throw new ProgramFailureException( sw.ToString() );
 			}
 		}
 		else {
