@@ -270,17 +270,8 @@ For an existing role, inspect its identity and attributes before applying author
 changes with `ALTER ROLE`; do not treat a duplicate-role error as success. Without
 SUPERUSER authorization, grant only the approved privileges.
 
-Add the exact realm-qualified principal to the instance's existing identity map
-(`main` in the installation guide), preserving other entries and HBA rules:
-
-```text
-# pg_ident.conf: MAP SYSTEM-USERNAME DATABASE-USERNAME
-main dedicated_account@MACHINE agent_role
-```
-
-Use the confirmed account/realm spelling, quote configuration tokens when needed,
-and retain SSPI; do not substitute `trust` or database passwords. Have the existing
-administrator execute `SELECT pg_reload_conf();` and inspect map/HBA parsing errors.
+Create the PostgreSQL login role using the dedicated account’s unqualified Windows
+username. The installation guide’s identity map already covers it.
 
 From the actual agent server session, verify explicit/default usernames with
 `psql -X -w` and Npgsql, `session_user`, `current_user`, `rolsuper`, and `rolcanlogin`.

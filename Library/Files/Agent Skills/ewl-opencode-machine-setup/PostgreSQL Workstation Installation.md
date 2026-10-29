@@ -55,7 +55,7 @@ $service = 'ewl-postgresql-18'
 $displayName = 'EWL PostgreSQL 18'
 $port = 5432
 $developerAccount = '<confirmed MACHINE\developer>'
-$developerRole = '<confirmed-lowercase-role>'
+$developerRole = '<confirmed-unqualified-Windows-account-name>'
 ```
 
 In the administrator terminal, enumerate services with `Get-CimInstance Win32_Service`
@@ -177,7 +177,7 @@ The relative log directory is inside the cluster. Validate main settings without
 starting a server using `postgres.exe -D $data -C <setting>`. This does not validate
 HBA/maps; inspect those through the running server after startup.
 
-## 4. Configure exact SSPI mappings before first connection
+## 4. Configure realm-restricted SSPI mappings before first connection
 
 For a **new** cluster, replace initdb's initial host rules with reviewed loopback
 rules; for an existing cluster, preserve unrelated rules and account for first-match
@@ -193,7 +193,7 @@ host replication all 127.0.0.1/32 reject
 host replication all ::1/128 reject
 ```
 
-`all` here still requires an explicit mapping to the requested database role; it
+`all` here still requires an authorized mapping to the requested database role; it
 does not grant every Windows user access. Omitted remote/replication rules are not
 needed for this local-only development setup. Do not retain an earlier matching
 `trust` or password-auth rule that bypasses the intended SSPI path.
@@ -203,13 +203,29 @@ the form `username@MACHINE` (or `username@DOMAIN`), **not** `MACHINE\username`:
 
 ```text
 # pg_ident.conf: MAP SYSTEM-USERNAME DATABASE-USERNAME
-main developer@MACHINE developer_role
+main /(?i)^([^@]+)@MACHINE$ \1
+main "/(?i)^([^@]+)@NT AUTHORITY$" \1
 ```
 
-Substitute the observed/confirmed principal; case and account naming must match
-what SSPI actually supplies. Quote tokens containing whitespace. Prefer exact
-entries, not broad regular expressions or stripping realms. If authentication fails,
-inspect the PostgreSQL log for the authenticated principal; do not weaken the method.
+For standalone Windows machines, substitute the confirmed local machine realm,
+escaping any regular-expression metacharacters in it. The `(?i)` flag preserves
+case-insensitive Windows identity matching, including lowercase SSPI realm names.
+These rules authorize each
+local account and NT AUTHORITY account to connect as its unqualified account name.
+Use that name for its PostgreSQL login role, including the developer role passed to
+initdb; preserve explicit mappings when existing role names differ. Quote tokens
+containing whitespace. Do not accept arbitrary realms: an unrestricted realm pattern
+would allow same-named identities from different realms to request the same role.
+
+Mappings do not create roles or grant database access. Network Service requires a
+separately provisioned login role named "NETWORK SERVICE" and appropriate database
+permissions. A local SSPI probe confirmed its mapping principal as
+`NETWORK SERVICE@NT AUTHORITY`. IIS ApplicationPoolIdentity uses a different identity
+and is not covered by these rules. Keep this setup loopback-only; remote Network
+Service authentication can present the computer account instead. If authentication
+fails, inspect the PostgreSQL log for the authenticated principal; do not weaken the
+method. After editing an existing instance, reload configuration and verify mapping
+parsing and fresh connections under the affected identities.
 
 ## 5. Register and start the service (human administrator)
 
