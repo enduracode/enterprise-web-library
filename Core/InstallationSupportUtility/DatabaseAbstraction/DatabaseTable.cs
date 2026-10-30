@@ -1,4 +1,6 @@
-﻿namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
+﻿using EnterpriseWebLibrary.DatabaseSpecification;
+
+namespace EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 
 /// <summary>
 /// A database table, including the schema name if the database supports multiple schemas.
@@ -7,4 +9,7 @@
 /// <param name="Name">The table name.</param>
 public record DatabaseTable( string Schema, string Name ) {
 	public string QualifiedName => Schema.AppendDelimiter( "." ) + Name;
+
+	public string GetSqlName( DatabaseInfo info ) =>
+		( Schema.Length > 0 ? info.GetDelimitedIdentifier( Schema ) + '.' : "" ) + info.GetDelimitedIdentifier( Name );
 }
