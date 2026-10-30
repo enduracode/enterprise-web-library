@@ -13,6 +13,7 @@ public static class DatabaseOps {
 		databaseInfo switch
 			{
 				null => new NoDatabase(),
+				PostgresInfo info => new Postgres( info ),
 				SqlServerInfo info => new SqlServer( info, "Data", "Log" ),
 				MySqlInfo info => new MySql( info ),
 				OracleInfo info => new Oracle( info ),
@@ -59,13 +60,13 @@ public static class DatabaseOps {
 			.Select( i => ( i, modTables.Contains( ( i with { Name = i.Name + modTableSuffix } ).QualifiedName ) ) );
 	}
 
-	public static string GetModificationTableQualifiedName( Database database, DatabaseTable table ) =>
-		( table with { Name = table.Name + getModificationTableSuffix( database ) } ).QualifiedName;
+	public static string GetModificationTableSqlName( Database database, DatabaseTable table ) =>
+		( table with { Name = table.Name + getModificationTableSuffix( database ) } ).GetSqlName( database.Info! );
 
 	private static string getModificationTableSuffix( Database database ) =>
 		database switch
 			{
-				MySql => "_table_{0}_modifications".FormatWith( EwlStatics.EwlInitialism.ToLowerInvariant() ),
+				Postgres or MySql => "_table_{0}_modifications".FormatWith( EwlStatics.EwlInitialism.ToLowerInvariant() ),
 				Oracle => "_TABLE_{0}_MODIFICATIONS".FormatWith( EwlStatics.EwlInitialism.ToUpperInvariant() ),
 				_ => "Table{0}Modifications".FormatWith( EwlStatics.EwlInitialism.EnglishToPascal() )
 			};
@@ -74,7 +75,7 @@ public static class DatabaseOps {
 		foreach( var table in GetDatabaseTables( database ).Where( i => i.hasModTable ).Select( i => i.tableName ) )
 			database.ExecuteDbMethod( connection => {
 				var command = connection.DatabaseInfo.CreateCommand();
-				command.CommandText = "DELETE FROM {0}".FormatWith( GetModificationTableQualifiedName( database, table ) );
+				command.CommandText = "DELETE FROM {0}".FormatWith( GetModificationTableSqlName( database, table ) );
 				connection.ExecuteNonQueryCommand( command );
 			} );
 	}
