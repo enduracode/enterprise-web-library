@@ -1,4 +1,5 @@
 ﻿using System.Data.Common;
+using System.Text;
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.ExternalFunctionality;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
@@ -16,6 +17,18 @@ public class PostgresInfo: DatabaseInfo {
 
 	internal static void Init( Func<ExternalPostgresProvider> providerGetter ) {
 		provider = new Lazy<ExternalPostgresProvider>( providerGetter );
+	}
+
+	/// <summary>
+	/// Returns the owner role name for the specified database. This role is necessary so that both the data migrator and ISU can share ownership of database
+	/// objects, mainly to be able to ALTER and DROP them.
+	/// </summary>
+	internal static string GetOwnerRoleName( string database ) {
+		const string suffix = "_owner";
+		var maxBytes = 63 - Encoding.UTF8.GetByteCount( suffix );
+		if( Encoding.UTF8.GetByteCount( database ) > maxBytes )
+			throw new Exception( $"The database name must not exceed {maxBytes} UTF-8 bytes." );
+		return database + suffix;
 	}
 
 	private readonly string secondaryDatabaseName;

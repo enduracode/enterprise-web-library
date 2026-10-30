@@ -4,6 +4,7 @@ using System.Runtime.Loader;
 using System.Threading;
 using EnterpriseWebLibrary.Configuration;
 using EnterpriseWebLibrary.DataAccess;
+using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using EnterpriseWebLibrary.ExternalFunctionality;
 using EnterpriseWebLibrary.InstallationSupportUtility.DatabaseAbstraction;
 using FluentMigrator.Expressions;
@@ -35,6 +36,22 @@ public sealed class PostgresProvider: ExternalPostgresProvider {
 			accessor,
 			postgresOptions ) {
 			Connection = source.CreateConnection();
+		}
+
+		protected override void EnsureConnectionIsOpen() {
+			if( Connection.State == ConnectionState.Open )
+				return;
+
+			base.EnsureConnectionIsOpen();
+
+			try {
+				using var command = CreateCommand( "SET ROLE " + new Quoter().Quote( PostgresInfo.GetOwnerRoleName( Connection.Database ) ) );
+				command.ExecuteNonQuery();
+			}
+			catch {
+				Connection.Close();
+				throw;
+			}
 		}
 
 		protected override void Process( string sql ) => executeWithIdentifierTruncationCheck( () => base.Process( sql ) );
