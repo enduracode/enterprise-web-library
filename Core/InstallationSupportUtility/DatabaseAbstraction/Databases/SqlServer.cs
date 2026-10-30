@@ -135,13 +135,13 @@ public class SqlServer: Database {
 					grantExecuteIfStoredProceduresExist( cn, user );
 				}
 			}
-			else if( !fileExisted.Value ) {
-				const string userName = @"NT AUTHORITY\NETWORK SERVICE";
-				executeLongRunningCommand( cn, "CREATE USER [{0}]".FormatWith( userName ) );
-				executeLongRunningCommand( cn, "ALTER ROLE db_datareader ADD MEMBER [{0}]".FormatWith( userName ) );
-				executeLongRunningCommand( cn, "ALTER ROLE db_datawriter ADD MEMBER [{0}]".FormatWith( userName ) );
-				grantExecuteIfStoredProceduresExist( cn, userName );
-			}
+			else if( !fileExisted.Value )
+				foreach( var user in dataModificationUsers ) {
+					executeLongRunningCommand( cn, "CREATE USER [{0}]".FormatWith( user ) );
+					executeLongRunningCommand( cn, "ALTER ROLE db_datareader ADD MEMBER [{0}]".FormatWith( user ) );
+					executeLongRunningCommand( cn, "ALTER ROLE db_datawriter ADD MEMBER [{0}]".FormatWith( user ) );
+					grantExecuteIfStoredProceduresExist( cn, user );
+				}
 		} );
 	}
 

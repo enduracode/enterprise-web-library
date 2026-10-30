@@ -58,7 +58,7 @@ public static class DataStatics {
 				}
 
 				IReadOnlyCollection<string> dataMigrationUsers = [ ];
-				IReadOnlyCollection<string> dataModificationUsers = [ ];
+				IReadOnlyCollection<string> dataModificationUsers;
 				if( installation.ExistingInstallationLogic.InstallationInAzure ) {
 					dataMigrationUsers = AzureStatics.GetDataMigratorIdentityName(
 							installation.ExistingInstallationLogic.RuntimeConfiguration,
@@ -75,6 +75,8 @@ public static class DataStatics {
 								installation.ExistingInstallationLogic.RuntimeConfiguration.InstallationShortName ) )
 						.Materialize();
 				}
+				else
+					dataModificationUsers = [ @"NT AUTHORITY\NETWORK SERVICE" ];
 
 				// Delete and re-create databases.
 				deleteAndReCreateDatabase(
