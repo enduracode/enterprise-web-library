@@ -124,16 +124,16 @@ public sealed class PostgresProvider: ExternalPostgresProvider {
 
 	private string getDbTypeString( NpgsqlDbType dbType ) => dbType.ToString();
 
-	Exception ExternalPostgresProvider.CreateConnectionException( Exception originalException, Func<string, string> messageGetter ) {
-		if( originalException is not NpgsqlException original )
-			return new Exception( messageGetter( "" ), originalException );
-
+	Exception ExternalPostgresProvider.CreateConnectionException( Exception original, Func<string, string> messageGetter ) {
 		if( original is PostgresException { SqlState: PostgresErrorCodes.SerializationFailure or PostgresErrorCodes.DeadlockDetected } )
 			return new DbConcurrencyException( messageGetter( "A concurrency error occurred." ), original );
 
-		if( original is { InnerException: TimeoutException } )
+		if( original is NpgsqlException { InnerException: TimeoutException } )
 			return new DbConnectionFailureException( messageGetter( "A connection or command timeout occurred." ), original );
-		if( original is { InnerException: IOException or System.Net.Sockets.SocketException } )
+		if( original is NpgsqlException { InnerException: IOException or System.Net.Sockets.SocketException } ||
+		    ( original is TewlContrib.ProcessTools.ProgramFailureException programFailure &&
+		      programFailure.Message.Contains( "connection to server", StringComparison.Ordinal ) &&
+		      programFailure.Message.Contains( "failed:", StringComparison.Ordinal ) ) )
 			return new DbConnectionFailureException( messageGetter( "Communication with PostgreSQL failed." ), original );
 
 		var message = messageGetter( original is PostgresException e ? $"SQLSTATE: {e.SqlState}." + ( e.ConstraintName is {} c ? $" Constraint: {c}." : "" ) : "" );
