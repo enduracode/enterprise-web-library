@@ -31,9 +31,9 @@ static class RowConstantStatics {
 
 				var cmd = new InlineSelect(
 						[ "*" ],
-					$"FROM {table.QualifiedName}",
+					$"FROM {table.GetSqlName( cn.DatabaseInfo )}",
 					false,
-					orderByClause: orderIsSpecified ? $"ORDER BY {rowConstantTable.orderByColumn}" : "" );
+					orderByClause: orderIsSpecified ? $"ORDER BY {cn.DatabaseInfo.GetDelimitedIdentifier( rowConstantTable.orderByColumn )}" : "" );
 				cmd.Execute(
 					cn,
 					reader => {

@@ -108,7 +108,7 @@ static class DataAccessOps {
 					var modTableColumns = Column.GetColumnsInQueryResults(
 						cn,
 						database,
-						"SELECT * FROM {0}".FormatWith( DatabaseOps.GetModificationTableQualifiedName( database, table ) ),
+						"SELECT * FROM {0}".FormatWith( DatabaseOps.GetModificationTableSqlName( database, table ) ),
 						true,
 						validateAllColumnsAsKeys: true );
 
@@ -182,13 +182,16 @@ static class DataAccessOps {
 				CustomModificationStatics.Generate( cn, writer, baseNamespace, database, configuration );
 
 				// other commands
-				if( cn.DatabaseInfo is SqlServerInfo ) {
+				if( cn.DatabaseInfo is PostgresInfo or SqlServerInfo ) {
 					writer.WriteLine();
 					writer.WriteLine( "namespace {0} {{".FormatWith( baseNamespace ) );
 					writer.WriteLine( "public static class {0}MainSequence {{".FormatWith( database.SecondaryDatabaseName ) );
 					writer.WriteLine( "public static int GetNextValue() {" );
 					writer.WriteLine( "var command = " + DataAccessStatics.GetConnectionExpression( database ) + ".DatabaseInfo.CreateCommand();" );
-					writer.WriteLine( "command.CommandText = \"SELECT NEXT VALUE FOR MainSequence\";" );
+					writer.WriteLine(
+						cn.DatabaseInfo is PostgresInfo
+							? """command.CommandText = "SELECT nextval('main_sequence')::integer";"""
+							: """command.CommandText = "SELECT NEXT VALUE FOR MainSequence";""" );
 					writer.WriteLine( "return (int)" + DataAccessStatics.GetConnectionExpression( database ) + ".ExecuteScalarCommand( command )!;" );
 					writer.WriteLine( "}" );
 					writer.WriteLine( "}" );

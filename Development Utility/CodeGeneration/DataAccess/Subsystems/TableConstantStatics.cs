@@ -13,7 +13,7 @@ static class TableConstantStatics {
 			writer.WriteLine( "public class " + EwlStatics.GetCSharpIdentifier( table.Name.TableNameToPascal( cn ) + "Table" ) + " {" );
 
 			CodeGenerationStatics.AddSummaryDocComment( writer, "The name of this table." );
-			writer.WriteLine( "public const string Name = \"" + table.QualifiedName + "\";" );
+			writer.WriteLine( $"""public const string Name = "{table.QualifiedName.EscapeForLiteral()}";""" );
 
 			foreach( var column in new TableColumns( cn, database, table, false ).AllColumnsExceptRowVersion ) {
 				CodeGenerationStatics.AddSummaryDocComment( writer, "Contains schema information about this column." );

@@ -55,7 +55,8 @@ static class DataAccessStatics {
 			.Materialize();
 
 		// This replacement is necessary because SQL Server chooses to care about the type of the parameter passed to TOP.
-		commandText = Regex.Replace( commandText, @"TOP\( *@\w+ *\)", "TOP 0", RegexOptions.IgnoreCase );
+		if( cn.DatabaseInfo is SqlServerInfo )
+			commandText = Regex.Replace( commandText, @"TOP\( *@\w+ *\)", "TOP 0", RegexOptions.IgnoreCase );
 
 		using var command = cn.DatabaseInfo.CreateCommand();
 		command.CommandText = commandText;
@@ -69,12 +70,14 @@ static class DataAccessStatics {
 
 	internal static string GetSchemaFolderName( Database database, DatabaseTable table ) =>
 		database.GetDefaultSchema() is { Length: > 0 } defaultSchema && !table.Schema.Equals( defaultSchema, StringComparison.Ordinal )
-			? table.Schema.Capitalize()
+			? database.Info is PostgresInfo ? table.Schema.OracleToEnglish().EnglishToPascal() : table.Schema.Capitalize()
 			: "";
 
 	internal static string GetSchemaNamespaceSuffix( Database database, DatabaseTable table, bool omitAtSignPrefixIfNotRequired = false ) =>
 		database.GetDefaultSchema() is { Length: > 0 } defaultSchema && !table.Schema.Equals( defaultSchema, StringComparison.Ordinal )
-			? '.' + EwlStatics.GetCSharpIdentifier( table.Schema.Capitalize(), omitAtSignPrefixIfNotRequired: omitAtSignPrefixIfNotRequired )
+			? '.' + EwlStatics.GetCSharpIdentifier(
+				  database.Info is PostgresInfo ? table.Schema.OracleToEnglish().EnglishToPascal() : table.Schema.Capitalize(),
+				  omitAtSignPrefixIfNotRequired: omitAtSignPrefixIfNotRequired )
 			: "";
 
 	internal static string GetMethodParams( IEnumerable<ValueContainer> parameters ) =>
@@ -101,7 +104,7 @@ static class DataAccessStatics {
 	}
 
 	internal static string TableNameToPascal( this string tableName, DatabaseConnection cn ) =>
-		cn.DatabaseInfo is MySqlInfo or OracleInfo ? tableName.OracleToEnglish().EnglishToPascal() : tableName;
+		cn.DatabaseInfo is PostgresInfo or MySqlInfo or OracleInfo ? tableName.OracleToEnglish().EnglishToPascal() : tableName;
 
 	internal static string GetConnectionExpression( Database database ) {
 		return "DataAccessState.Current.{0}".FormatWith(
