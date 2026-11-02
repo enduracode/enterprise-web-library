@@ -351,8 +351,10 @@ or change cleanup profiles based on stdout/stderr diagnostic text, even when
 it contains errors or exception stack traces. Keep the output available for
 diagnosis, but do not treat it as an additional success/failure signal.
 
-On a nonzero exit code, timeout, or failure to launch, stop and report; do not
-commit partial output. CleanupCode 2026.2.2 returns 1 for a missing profile
+On a nonzero exit code, timeout, or failure to launch, stop and report the failed
+stage, exact command, exit code, and available diagnostics; do not commit partial
+output. Run CleanupCode separately from helper checks so their failures remain
+distinguishable. CleanupCode 2026.2.2 returns 1 for a missing profile
 and 3 when no items match. It can emit `Cannot get PsiServices. Likely invalid
 element.` with exit code 0; an identical-input test produced byte-identical
 output to Visual Studio ReSharper despite that diagnostic. This policy does
@@ -371,6 +373,16 @@ newline). This post-ReSharper result is the baseline for this pass. Never
 restore the pre-format state: if ReSharper removed a final newline, it must
 stay removed. Capture a fresh baseline each time this step runs, including
 after the final formatter pass in Step 5e.
+
+Calculate regex results before interpolating them: PowerShell bug #4543 can
+misparse quoted parentheses inside a string’s `$()` expression. For example:
+
+```powershell
+$text = [IO.File]::ReadAllText($path)
+$trailing = [regex]::Match($text, '(?:\r\n|\n|\r)*\z').Value
+$count = [regex]::Matches($trailing, '\r\n|\n|\r').Count
+Write-Output ('{0} EOF={1}' -f $path, $count)
+```
 
 BOM and line-ending style belong to the existing editor/plugins:
 OpenCode’s `normalize-files.js` adds the BOM and normalizes to CRLF.
