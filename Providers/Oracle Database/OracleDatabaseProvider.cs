@@ -31,11 +31,11 @@ public class OracleDatabaseProvider: ExternalOracleDatabaseProvider {
 
 	DbParameter ExternalOracleDatabaseProvider.CreateParameter() => new OracleParameter();
 
-	string ExternalOracleDatabaseProvider.GetDbTypeString( object databaseSpecificType ) => ( (OracleDbType)databaseSpecificType ).ToString();
-
 	void ExternalOracleDatabaseProvider.SetParameterType( DbParameter parameter, string dbTypeString ) {
 		( (OracleParameter)parameter ).OracleDbType = dbTypeString.ToEnum<OracleDbType>();
 	}
+
+	string ExternalOracleDatabaseProvider.GetDbTypeString( object databaseSpecificType ) => ( (OracleDbType)databaseSpecificType ).ToString();
 
 	Exception ExternalOracleDatabaseProvider.CreateCommandException( Exception originalException, Func<string, string> messageGetter ) {
 		if( originalException is not OracleException original )

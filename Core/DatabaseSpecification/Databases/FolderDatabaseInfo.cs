@@ -33,11 +33,12 @@ public class FolderDatabaseInfo: DatabaseInfo {
 	DbConnection DatabaseInfo.CreateConnection( string connectionString ) => throw new NotSupportedException();
 	DbCommand DatabaseInfo.CreateCommand() => throw new NotSupportedException();
 	DbParameter DatabaseInfo.CreateParameter() => throw new NotSupportedException();
-	string DatabaseInfo.GetDbTypeString( object databaseSpecificType ) => throw new NotSupportedException();
 
 	void DatabaseInfo.SetParameterType( DbParameter parameter, string dbTypeString ) {
 		throw new NotSupportedException();
 	}
+
+	string DatabaseInfo.GetDbTypeString( object databaseSpecificType ) => throw new NotSupportedException();
 
 	void DatabaseInfo.RegisterDependencyInjectionServicesForMigration( IMigrationRunnerBuilder builder ) {}
 }

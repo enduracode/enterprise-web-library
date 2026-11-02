@@ -13,9 +13,9 @@ public interface ExternalOracleDatabaseProvider {
 
 	DbParameter CreateParameter();
 
-	string GetDbTypeString( object databaseSpecificType );
-
 	void SetParameterType( DbParameter parameter, string dbTypeString );
+
+	string GetDbTypeString( object databaseSpecificType );
 
 	Exception CreateCommandException( Exception originalException, Func<string, string> messageGetter );
 

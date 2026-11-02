@@ -86,11 +86,11 @@ public class OracleInfo: DatabaseInfo {
 
 	DbParameter DatabaseInfo.CreateParameter() => provider!.Value.CreateParameter();
 
-	string DatabaseInfo.GetDbTypeString( object databaseSpecificType ) => provider!.Value.GetDbTypeString( databaseSpecificType );
-
 	void DatabaseInfo.SetParameterType( DbParameter parameter, string dbTypeString ) {
 		provider!.Value.SetParameterType( parameter, dbTypeString );
 	}
+
+	string DatabaseInfo.GetDbTypeString( object databaseSpecificType ) => provider!.Value.GetDbTypeString( databaseSpecificType );
 
 	void DatabaseInfo.RegisterDependencyInjectionServicesForMigration( IMigrationRunnerBuilder builder ) {
 		provider!.Value.RegisterDependencyInjectionServicesForMigration( builder );

@@ -49,11 +49,11 @@ public class SqliteInfo: DatabaseInfo {
 
 	DbParameter DatabaseInfo.CreateParameter() => provider.Value.CreateParameter();
 
-	string DatabaseInfo.GetDbTypeString( object databaseSpecificType ) {
+	void DatabaseInfo.SetParameterType( DbParameter parameter, string dbTypeString ) {
 		throw new NotImplementedException();
 	}
 
-	void DatabaseInfo.SetParameterType( DbParameter parameter, string dbTypeString ) {
+	string DatabaseInfo.GetDbTypeString( object databaseSpecificType ) {
 		throw new NotImplementedException();
 	}
 

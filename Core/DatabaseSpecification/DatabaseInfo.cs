@@ -53,14 +53,14 @@ public interface DatabaseInfo {
 	DbParameter CreateParameter();
 
 	/// <summary>
+	/// Sets the specified parameter’s database-specific type to the type represented by the specified string.
+	/// </summary>
+	void SetParameterType( DbParameter parameter, string dbTypeString );
+
+	/// <summary>
 	/// Gets the string that represents the specified database-specific type.
 	/// </summary>
 	string GetDbTypeString( object databaseSpecificType );
-
-	/// <summary>
-	/// Sets the specified parameter's database-specific type to the type represented by the specified string.
-	/// </summary>
-	void SetParameterType( DbParameter parameter, string dbTypeString );
 
 	/// <summary>
 	/// Registers the dependency-injection services needed by the database for data migration.

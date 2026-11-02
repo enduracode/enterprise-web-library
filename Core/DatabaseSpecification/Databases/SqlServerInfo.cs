@@ -107,11 +107,11 @@ public class SqlServerInfo: DatabaseInfo {
 
 	DbParameter DatabaseInfo.CreateParameter() => new SqlParameter();
 
-	string DatabaseInfo.GetDbTypeString( object databaseSpecificType ) => ( (SqlDbType)databaseSpecificType ).ToString();
-
 	void DatabaseInfo.SetParameterType( DbParameter parameter, string dbTypeString ) {
 		( (SqlParameter)parameter ).SqlDbType = dbTypeString.ToEnum<SqlDbType>();
 	}
+
+	string DatabaseInfo.GetDbTypeString( object databaseSpecificType ) => ( (SqlDbType)databaseSpecificType ).ToString();
 
 	void DatabaseInfo.RegisterDependencyInjectionServicesForMigration( IMigrationRunnerBuilder builder ) {
 		builder.AddSqlServer2016();
