@@ -23,11 +23,11 @@ class ValueContainer {
 
 	public ValueContainer( string name, Type dataType, string dbTypeString, int size, short? numericScale, bool allowsNull, DatabaseInfo databaseInfo ) {
 		this.name = name;
-		pascalCasedName = databaseInfo is OracleInfo ? name.OracleToEnglish().EnglishToPascal() : name;
+		pascalCasedName = databaseInfo is PostgresInfo or OracleInfo ? name.OracleToEnglish().EnglishToPascal() : name;
 		unconvertedDataType = dataType;
 
-		// MySQL LONGTEXT returns -1 for size.
-		if( databaseInfo is MySqlInfo && dbTypeString == "Text" && size == -1 )
+		// PostgreSQL reports -1 when string size metadata is unavailable; MySQL LONGTEXT also reports -1.
+		if( ( databaseInfo is PostgresInfo && dataType == typeof( string ) || databaseInfo is MySqlInfo && dbTypeString == "Text" ) && size == -1 )
 			size = int.MaxValue;
 
 		if( databaseInfo is MySqlInfo && dbTypeString == "Bit" && size == 1 ) {
@@ -158,7 +158,7 @@ class ValueContainer {
 	public string GetSqlLiteralExpression( string valueExpression ) {
 		if( dataType == typeof( string ) ) {
 			var prefix = dbTypeString.StartsWith( "nvarchar", StringComparison.OrdinalIgnoreCase ) ? "N" :
-			             dbTypeString.StartsWith( "varchar", StringComparison.OrdinalIgnoreCase ) ? "" :
+			             dbTypeString.StartsWith( "varchar", StringComparison.OrdinalIgnoreCase ) || dbTypeString.Equals( "Text", StringComparison.Ordinal ) ? "" :
 			             throw new UnexpectedValueException( "database type", dbTypeString );
 			return $"""
 			        "{prefix}'" + {valueExpression}.Replace( "'", "''", StringComparison.Ordinal ) + "'"

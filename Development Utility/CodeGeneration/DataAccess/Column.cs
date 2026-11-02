@@ -55,15 +55,16 @@ class Column {
 			(Type)schemaTableRow[ "DataType" ],
 			dbTypeString,
 			(int)schemaTableRow[ "ColumnSize" ],
+			databaseInfo is PostgresInfo && dbTypeString == "Numeric" ? (short)(int)schemaTableRow[ "NumericScale" ] :
 			databaseInfo is SqlServerInfo && dbTypeString == "Decimal" ? (short)schemaTableRow[ "NumericScale" ] :
 			databaseInfo is MySqlInfo && dbTypeString == "NewDecimal" ? (short)(int)schemaTableRow[ "NumericScale" ] :
 			databaseInfo is OracleInfo && dbTypeString == "Decimal" ? (short)schemaTableRow[ "NumericScale" ] : null,
-			(bool)schemaTableRow[ "AllowDBNull" ],
+			schemaTableRow[ "AllowDBNull" ] is not bool allowsNull || allowsNull,
 			databaseInfo );
 
 		delimitedIdentifier = databaseInfo.GetDelimitedIdentifier( valueContainer.Name );
-		isIdentity = ( databaseInfo is SqlServerInfo && (bool)schemaTableRow[ "IsIdentity" ] ) ||
-		             ( databaseInfo is MySqlInfo && (bool)schemaTableRow[ "IsAutoIncrement" ] );
+		isIdentity = ( databaseInfo is PostgresInfo or MySqlInfo && schemaTableRow[ "IsAutoIncrement" ] is true ) ||
+		             ( databaseInfo is SqlServerInfo && (bool)schemaTableRow[ "IsIdentity" ] );
 		isRowVersion = databaseInfo is SqlServerInfo && (bool)schemaTableRow[ "IsRowVersion" ];
 		var isKey = includeKeyInfo is true ? (bool)schemaTableRow[ "IsKey" ] : (bool?)null;
 
@@ -71,6 +72,10 @@ class Column {
 			if( validateIfString && !( databaseInfo is OracleInfo ) && valueContainer.DataType == typeof( string ) &&
 			    ( !( databaseInfo is MySqlInfo ) || dbTypeString != "JSON" ) && valueContainer.AllowsNull )
 				throw new UserCorrectableException( "String column {0} allows null, which is not allowed.".FormatWith( valueContainer.Name ) );
+
+			if( isIdentity && databaseInfo is PostgresInfo )
+				throw new UserCorrectableException(
+					$"Column {valueContainer.Name} uses identity generation. {EwlStatics.EwlInitialism} currently requires explicit sequence-assigned IDs." );
 
 			if( isKey is false )
 				IsCaseInsensitiveKey = new SpecifiedValue<bool?>( null );
@@ -97,13 +102,25 @@ class Column {
 			return "";
 		}
 
-		var command = connection.DatabaseInfo is OracleInfo
-			              ? new InlineSelect( "COLLATION".ToCollection(), table.Schema.Length > 0 ? "FROM ALL_TAB_COLUMNS" : "FROM USER_TAB_COLUMNS", false )
-			              : new InlineSelect( "COLLATION_NAME".ToCollection(), "FROM INFORMATION_SCHEMA.COLUMNS", false );
-		command.AddConditions(
-			( table.Schema.Length > 0 ? getCondition( connection.DatabaseInfo is OracleInfo ? "OWNER" : "TABLE_SCHEMA", table.Schema ).ToCollection() : [ ] )
-			.Append( getCondition( "TABLE_NAME", table.Name ) )
-			.Append( getCondition( "COLUMN_NAME", valueContainer.Name ) ) );
+		InlineSelect command;
+		if( connection.DatabaseInfo is PostgresInfo ) {
+			command = new InlineSelect(
+				"CASE WHEN collation_schema = 'pg_catalog' THEN collation_name ELSE '' END".ToCollection(),
+				"FROM information_schema.columns",
+				false );
+			command.AddConditions(
+				( table.Schema.Length > 0 ? getCondition( "table_schema", table.Schema ).ToCollection() : [ ] ).Append( getCondition( "table_name", table.Name ) )
+				.Append( getCondition( "column_name", valueContainer.Name ) ) );
+		}
+		else {
+			command = connection.DatabaseInfo is OracleInfo
+				          ? new InlineSelect( "COLLATION".ToCollection(), table.Schema.Length > 0 ? "FROM ALL_TAB_COLUMNS" : "FROM USER_TAB_COLUMNS", false )
+				          : new InlineSelect( "COLLATION_NAME".ToCollection(), "FROM INFORMATION_SCHEMA.COLUMNS", false );
+			command.AddConditions(
+				( table.Schema.Length > 0 ? getCondition( connection.DatabaseInfo is OracleInfo ? "OWNER" : "TABLE_SCHEMA", table.Schema ).ToCollection() : [ ] )
+				.Append( getCondition( "TABLE_NAME", table.Name ) )
+				.Append( getCondition( "COLUMN_NAME", valueContainer.Name ) ) );
+		}
 
 		var error = "";
 		command.Execute(
@@ -115,6 +132,7 @@ class Column {
 				( IReadOnlyCollection<string> types, string collation, IReadOnlyCollection<string> caseInsensitiveCollations, string error ) rules =
 					connection.DatabaseInfo switch
 						{
+							PostgresInfo => ( [ "Varchar", "Text" ], "C", [ ], "varchar or text with explicit C collation" ),
 							SqlServerInfo => ( [ "VarChar", "NVarChar" ], "Latin1_General_100_BIN2_UTF8",
 									                 [ "SQL_Latin1_General_CP1_CI_AS", "Latin1_General_100_CI_AS", "Latin1_General_100_CI_AS_SC_UTF8" ],
 								                 "varchar or nvarchar with collation Latin1_General_100_BIN2_UTF8, or a case-insensitive collation if values use printable ASCII only" ),
