@@ -37,7 +37,8 @@ static class QueryRetrievalStatics {
 			RetrievalStatics.WriteRowClasses( writer, data.Columns, null, _ => {}, _ => {} );
 			writeCacheClass( writer, database, data );
 
-			writer.WriteLine( "private const string selectFromClause = @\"" + AppStatics.NormalizeLineEndingsFromXml( data.SelectFromClause ) + " \";" );
+			writer.WriteLine(
+				$"""private const string selectFromClause = "{AppStatics.NormalizeLineEndingsFromXml( data.SelectFromClause ).EscapeForLiteral()} ";""" );
 			foreach( var postSelectFromClause in data.PostSelectFromClauses )
 				writeQueryMethod( writer, database, postSelectFromClause.clause, postSelectFromClause.parameters );
 			writer.WriteLine( "static partial void updateSingleRowCaches( Row row );" );
@@ -97,7 +98,8 @@ static class QueryRetrievalStatics {
 		writer.WriteLine( "return Cache.Current." + getQueryCacheName( postSelectFromClause, parameters ) + ".GetResultSet( " + getResultSetFirstArg + "() => {" );
 
 		writer.WriteLine( "var cmd = " + DataAccessStatics.GetConnectionExpression( database ) + ".DatabaseInfo.CreateCommand();" );
-		writer.WriteLine( "cmd.CommandText = selectFromClause + @\"" + AppStatics.NormalizeLineEndingsFromXml( postSelectFromClause.ValueNonNullable ) + "\";" );
+		writer.WriteLine(
+			$"""cmd.CommandText = selectFromClause + "{AppStatics.NormalizeLineEndingsFromXml( postSelectFromClause.ValueNonNullable ).EscapeForLiteral()}";""" );
 		DataAccessStatics.WriteAddParamBlock( writer, "cmd", parameters, database );
 		writer.WriteLine( "var results = new List<Row>();" );
 		writer.WriteLine(

@@ -95,7 +95,7 @@ static class CustomModificationStatics {
 		foreach( var command in mod.Commands ) {
 			var commandVariableName = "cmd" + cnt++;
 			writer.WriteLine( "DbCommand " + commandVariableName + " = " + DataAccessStatics.GetConnectionExpression( database ) + ".DatabaseInfo.CreateCommand();" );
-			writer.WriteLine( commandVariableName + ".CommandText = @\"" + AppStatics.NormalizeLineEndingsFromXml( command.commandText ) + "\";" );
+			writer.WriteLine( $"""{commandVariableName}.CommandText = "{AppStatics.NormalizeLineEndingsFromXml( command.commandText ).EscapeForLiteral()}";""" );
 			DataAccessStatics.WriteAddParamBlock( writer, commandVariableName, command.parameters, database );
 			writer.WriteLine( DataAccessStatics.GetConnectionExpression( database ) + ".ExecuteNonQueryCommand( " + commandVariableName + " );" );
 		}
