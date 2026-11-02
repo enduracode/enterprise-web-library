@@ -612,7 +612,7 @@ static class TableRetrievalStatics {
 						cn,
 						table,
 						tableColumns,
-						cn.DatabaseInfo is OracleInfo ? "\"{0}.*\", \"ORA_ROWSCN\"".FormatWith( table.QualifiedName ) : "\"*\"",
+						cn.DatabaseInfo is OracleInfo ? "\"{0}.*\", \"ORA_ROWSCN\"".FormatWith( table.GetSqlName( cn.DatabaseInfo ).EscapeForLiteral() ) : "\"*\"",
 						cacheQueryInDbExpression ) ) );
 			writer.WriteLine( getCommandConditionAddingStatement( "command" ) );
 			writer.WriteLine( "command.Execute( " + DataAccessStatics.GetConnectionExpression( database ) + ", r => {" );

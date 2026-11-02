@@ -33,7 +33,7 @@ public class SqliteInfo: DatabaseInfo {
 
 	string DatabaseInfo.GetDelimitedIdentifier( string databaseObject ) =>
 		$"""
-		 "{databaseObject}"
+		 "{databaseObject.Replace( "\"", "\"\"", StringComparison.Ordinal )}"
 		 """;
 
 	string DatabaseInfo.ParameterPrefix => ":";

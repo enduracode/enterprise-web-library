@@ -289,7 +289,7 @@ public class Oracle: Database {
 						indexes.Add( reader.GetString( 0 ) );
 				} );
 			foreach( var index in indexes )
-				executeLongRunningCommand( cn, "ALTER INDEX {0} REBUILD ONLINE".FormatWith( index ) );
+				executeLongRunningCommand( cn, "ALTER INDEX {0} REBUILD ONLINE".FormatWith( cn.DatabaseInfo.GetDelimitedIdentifier( index ) ) );
 		} );
 	}
 

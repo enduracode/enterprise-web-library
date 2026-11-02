@@ -380,8 +380,8 @@ LOG ON (
 		ExecuteDbMethod(
 			delegate( DatabaseConnection cn ) {
 				foreach( var i in DatabaseOps.GetDatabaseTables( this ) ) {
-					executeLongRunningCommand( cn, "ALTER INDEX ALL ON " + i.tableName.QualifiedName + " REBUILD" );
-					executeLongRunningCommand( cn, "UPDATE STATISTICS " + i.tableName.QualifiedName );
+					executeLongRunningCommand( cn, "ALTER INDEX ALL ON " + i.tableName.GetSqlName( cn.DatabaseInfo ) + " REBUILD" );
+					executeLongRunningCommand( cn, "UPDATE STATISTICS " + i.tableName.GetSqlName( cn.DatabaseInfo ) );
 				}
 			} );
 	}
