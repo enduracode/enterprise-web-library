@@ -57,6 +57,27 @@ public class CreateRooms: ForwardOnlyMigration {
 }
 ```
 
+## Identifier names
+
+Pass raw, unquoted names to fluent APIs: `.Table( "Orders" )`, not
+`.Table( "[Orders]" )`. EWL's migration quoters add delimiters and escape embedded
+delimiter characters. SQL Server, MySQL, PostgreSQL, and SQLite preserve the
+supplied spelling; Oracle uppercases names before quoting. Oracle does not support
+identifier names containing double quotes or case-sensitive lowercase/mixed-case
+names under this convention. Preserve each system's naming conventions; MySQL
+table-name case sensitivity depends on the server and platform.
+
+Supply schema names separately using `.InSchema(...)` or the appropriate schema
+argument, not as part of a dotted table name. SQL Server and PostgreSQL support
+separate schemas. FluentMigrator's MySQL provider ignores schema arguments; use
+the configured database. SQLite schema names refer to attached-database aliases,
+not independently created schemas.
+
+These rules apply to fluent identifier arguments, not SQL text or data values.
+In `Execute.Sql`, scripts, and Dapper queries, quote identifiers yourself using the
+database's SQL syntax and keep parameter binding for data values. PostgreSQL has
+an additional identifier-name limitation described in [PostgreSQL migrations](PostgreSQL.md).
+
 ## Constraint naming conventions
 
 | Constraint | Pattern | Example |

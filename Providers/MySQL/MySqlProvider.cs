@@ -41,6 +41,8 @@ public class MySqlProvider: ExternalMySqlProvider {
 	}
 
 	private class Quoter: MySqlQuoter {
+		public override bool IsQuoted( string name ) => false;
+
 		// Mirrors GenericQuoter.QuoteValue in FluentMigrator 8.0.1, bypassing MySqlQuoter’s backslash doubling. Compare dispatch when upgrading FM.
 		public override string QuoteValue( object value ) =>
 			value switch

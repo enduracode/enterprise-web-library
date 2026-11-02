@@ -2,7 +2,10 @@
 using EnterpriseWebLibrary.ExternalFunctionality;
 using EnterpriseWebLibrary.Sqlite.Serilog;
 using FluentMigrator.Runner;
+using FluentMigrator.Runner.Generators.SQLite;
+using FluentMigrator.Runner.Processors.SQLite;
 using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Events;
 using Tewl.IO;
@@ -10,6 +13,10 @@ using Tewl.IO;
 namespace EnterpriseWebLibrary.Sqlite;
 
 public class SqliteProvider: ExternalSqliteProvider {
+	private class Quoter: SQLiteQuoter {
+		public override bool IsQuoted( string name ) => false;
+	}
+
 	void ExternalSqliteProvider.InitStatics( string debugLogTimeFormat ) {
 		Sink.Init( debugLogTimeFormat );
 	}
@@ -52,5 +59,10 @@ public class SqliteProvider: ExternalSqliteProvider {
 
 	void ExternalSqliteProvider.RegisterDependencyInjectionServicesForMigration( IMigrationRunnerBuilder builder ) {
 		builder.AddSQLite();
+		builder.Services.AddScoped<SQLiteQuoter, Quoter>();
+
+		// AddSQLite constructs its own quoters; replace both factories to use the registered quoter.
+		builder.Services.AddScoped<SQLiteGenerator>();
+		builder.Services.AddScoped<SQLiteProcessor>();
 	}
 }

@@ -1,7 +1,14 @@
 ﻿using System.Data;
 using System.Data.Common;
 using FluentMigrator.Runner;
+using FluentMigrator.Runner.Generators.SqlServer;
+using FluentMigrator.Runner.Initialization;
+using FluentMigrator.Runner.Processors;
+using FluentMigrator.Runner.Processors.SqlServer;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using StackExchange.Profiling;
 using StackExchange.Profiling.Data;
 
@@ -11,6 +18,29 @@ namespace EnterpriseWebLibrary.DatabaseSpecification.Databases;
 /// Contains information about a SQL Server database.
 /// </summary>
 public class SqlServerInfo: DatabaseInfo {
+	private class Processor(
+		ILogger<SqlServer2016Processor> logger,
+		SqlServer2008Quoter quoter,
+		SqlServer2016Generator generator,
+		IOptionsSnapshot<ProcessorOptions> options,
+		IConnectionStringAccessor connectionStringAccessor,
+		IServiceProvider serviceProvider ): SqlServer2016Processor( logger, quoter, generator, options, connectionStringAccessor, serviceProvider ) {
+		// The base implementation brackets names directly without escaping them.
+		public override DataSet ReadTableData( string schemaName, string tableName ) =>
+			Read( "SELECT * FROM {0}", Quoter.QuoteTableName( tableName, schemaName: schemaName ) );
+
+		// OBJECT_ID takes a qualified SQL name, not raw schema/table names joined with a dot.
+		public override bool IndexExists( string schemaName, string tableName, string indexName ) =>
+			Exists(
+				"SELECT 1 WHERE EXISTS (SELECT * FROM sys.indexes WHERE name = {0} AND object_id = OBJECT_ID({1}))",
+				Quoter.QuoteValue( indexName ),
+				Quoter.QuoteValue( Quoter.QuoteTableName( tableName, schemaName: schemaName ) ) );
+	}
+
+	private class Quoter: SqlServer2008Quoter {
+		public override bool IsQuoted( string name ) => false;
+	}
+
 	private readonly string secondaryDatabaseName;
 	private readonly string? server;
 	private readonly string? loginName;
@@ -115,5 +145,7 @@ public class SqlServerInfo: DatabaseInfo {
 
 	void DatabaseInfo.RegisterDependencyInjectionServicesForMigration( IMigrationRunnerBuilder builder ) {
 		builder.AddSqlServer2016();
+		builder.Services.AddScoped<SqlServer2016Processor, Processor>();
+		builder.Services.AddScoped<SqlServer2008Quoter, Quoter>();
 	}
 }

@@ -2,11 +2,19 @@
 using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.ExternalFunctionality;
 using FluentMigrator.Runner;
+using FluentMigrator.Runner.Generators.Oracle;
+using Microsoft.Extensions.DependencyInjection;
 using Oracle.ManagedDataAccess.Client;
 
 namespace EnterpriseWebLibrary.OracleDatabase;
 
 public class OracleDatabaseProvider: ExternalOracleDatabaseProvider {
+	private class Quoter: OracleQuoterBase {
+		public override bool IsQuoted( string name ) => false;
+
+		public override string Quote( string? name ) => base.Quote( name?.ToUpperInvariant() );
+	}
+
 	DbConnection ExternalOracleDatabaseProvider.CreateConnection( string connectionString, bool allowVersion11Authentication ) {
 		var connection = new OracleConnection( connectionString );
 		if( allowVersion11Authentication )
@@ -64,5 +72,6 @@ public class OracleDatabaseProvider: ExternalOracleDatabaseProvider {
 
 	void ExternalOracleDatabaseProvider.RegisterDependencyInjectionServicesForMigration( IMigrationRunnerBuilder builder ) {
 		builder.AddOracleManaged();
+		builder.Services.AddScoped<OracleQuoterBase, Quoter>();
 	}
 }

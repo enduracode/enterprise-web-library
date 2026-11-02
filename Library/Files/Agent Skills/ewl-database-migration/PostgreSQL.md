@@ -12,6 +12,12 @@ Use the main skill's FluentMigrator workflow and forward-only migration rules.
   constraints and indexes. The limit is bytes, not characters.
 - Preserve the existing system's naming conventions when modifying its schema.
 
+Avoid identifier names that themselves begin and end with double quotes.
+FluentMigrator's PostgreSQL existence checks and table reads can interpret those
+quotes as SQL delimiters, while EWL's migration SQL generation treats them as part
+of the name. Ordinary lowercase snake_case names are unaffected; continue passing
+raw, unquoted names to fluent APIs.
+
 ## IDs and column definitions
 
 - Use ordinary integer ID columns, not `.Identity()`, `serial`, or a `nextval(...)`
