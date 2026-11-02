@@ -115,6 +115,7 @@ static class TableRetrievalStatics {
 				throw new UserCorrectableException(
 					cn.DatabaseInfo switch
 						{
+							PostgresInfo => "Row-versioned data caching cannot currently be used with PostgreSQL databases.",
 							MySqlInfo => "Row-versioned data caching cannot currently be used with MySQL databases.",
 							OracleInfo => $"Row-versioned data caching can only be used with the {table.tableName.QualifiedName} table if it has a primary key.",
 							_ =>
@@ -311,12 +312,14 @@ static class TableRetrievalStatics {
 		writer.WriteLine( "if( primaryKeys is null ) {" );
 		writer.WriteLine( "var countCommand = {0}.DatabaseInfo.CreateCommand();".FormatWith( DataAccessStatics.GetConnectionExpression( database ) ) );
 		writer.WriteLine(
-			"countCommand.CommandText = \"SELECT {0} FROM {1}\";".FormatWith( cn.DatabaseInfo is SqlServerInfo ? "COUNT_BIG(*)" : "COUNT(*)", table.QualifiedName ) );
+			"countCommand.CommandText = \"SELECT {0} FROM {1}\";".FormatWith(
+				cn.DatabaseInfo is SqlServerInfo ? "COUNT_BIG(*)" : "COUNT(*)",
+				table.GetSqlName( cn.DatabaseInfo ).EscapeForLiteral() ) );
 		writer.WriteLine(
 			"results = new List<BasicRow>( (int)({0}){1}.ExecuteScalarCommand( countCommand )! );".FormatWith(
 				cn.DatabaseInfo is OracleInfo ? "decimal" : "long",
 				DataAccessStatics.GetConnectionExpression( database ) ) );
-		writer.WriteLine( "var command = {0};".FormatWith( getInlineSelectExpression( table, tableColumns, "\"*\"", "true" ) ) );
+		writer.WriteLine( "var command = {0};".FormatWith( getInlineSelectExpression( cn, table, tableColumns, "\"*\"", "true" ) ) );
 		if( excludePreviousRevisions )
 			writer.WriteLine( "{0}.AddConditions( getLatestRevisionsCondition().ToCollection() );".FormatWith( "command" ) );
 		writer.WriteLine(
@@ -329,7 +332,7 @@ static class TableRetrievalStatics {
 		writer.WriteLine(
 			"command.CommandText = \"SELECT * FROM {0} WHERE \" + StringTools.ConcatenateWithDelimiter( \" OR \", primaryKeys.Select( i => $\"( {1} )\" ) );"
 				.FormatWith(
-					table.QualifiedName,
+					table.GetSqlName( cn.DatabaseInfo ).EscapeForLiteral(),
 					tableColumns.KeyColumns.Count < 2
 						? $$"""{{tableColumns.KeyColumns.Single().DelimitedIdentifier.EscapeForLiteral()}} = {{{tableColumns.KeyColumns.Single().GetSqlLiteralExpression( "i" )}}}"""
 						: StringTools.ConcatenateWithDelimiter(
@@ -353,7 +356,7 @@ static class TableRetrievalStatics {
 			"command.CommandText = \"SELECT {0}, {1} FROM {2}\";".FormatWith(
 				StringTools.ConcatenateWithDelimiter( ", ", tableColumns.KeyColumns.Select( i => i.DelimitedIdentifier.EscapeForLiteral() ) ),
 				cn.DatabaseInfo is SqlServerInfo ? "COUNT_BIG(*)" : "COUNT(*)",
-				DatabaseOps.GetModificationTableQualifiedName( database, table ) ) );
+				DatabaseOps.GetModificationTableSqlName( database, table ).EscapeForLiteral() ) );
 		if( excludePreviousRevisions ) {
 			writer.WriteLine( "command.CommandText += \" WHERE \";" );
 			writer.WriteLine(
@@ -555,6 +558,7 @@ static class TableRetrievalStatics {
 			writer.WriteLine(
 				"var keyCommand = {0};".FormatWith(
 					getInlineSelectExpression(
+						cn,
 						table,
 						tableColumns,
 						"{0}, \"{1}\"".FormatWith(
@@ -582,7 +586,7 @@ static class TableRetrievalStatics {
 			writer.WriteLine( "if( cachedKeyCount >= keys.Count() - 1 || cachedKeyCount >= keys.Count() * .99 ) {" );
 			writer.WriteLine( "foreach( var key in keys ) {" );
 			writer.WriteLine( "results.Add( new Row( rowsByPkAndVersion.GetOrAdd( key, () => {" );
-			writer.WriteLine( "var singleRowCommand = {0};".FormatWith( getInlineSelectExpression( table, tableColumns, "\"*\"", "false" ) ) );
+			writer.WriteLine( "var singleRowCommand = {0};".FormatWith( getInlineSelectExpression( cn, table, tableColumns, "\"*\"", "false" ) ) );
 			writer.WriteLine(
 				"singleRowCommand.AddConditions( new[] {{ {0} }} );".FormatWith(
 					StringTools.ConcatenateWithDelimiter(
@@ -605,6 +609,7 @@ static class TableRetrievalStatics {
 			writer.WriteLine(
 				"var command = {0};".FormatWith(
 					getInlineSelectExpression(
+						cn,
 						table,
 						tableColumns,
 						cn.DatabaseInfo is OracleInfo ? "\"{0}.*\", \"ORA_ROWSCN\"".FormatWith( table.QualifiedName ) : "\"*\"",
@@ -633,7 +638,7 @@ static class TableRetrievalStatics {
 				writer.WriteLine( "else {" );
 			}
 
-			writer.WriteLine( "var command = {0};".FormatWith( getInlineSelectExpression( table, tableColumns, "\"*\"", cacheQueryInDbExpression ) ) );
+			writer.WriteLine( "var command = {0};".FormatWith( getInlineSelectExpression( cn, table, tableColumns, "\"*\"", cacheQueryInDbExpression ) ) );
 			writer.WriteLine( getCommandConditionAddingStatement( "command" ) );
 			writer.WriteLine(
 				"command.Execute( " + DataAccessStatics.GetConnectionExpression( database ) +
@@ -664,10 +669,11 @@ static class TableRetrievalStatics {
 	private static string getTableCacheName( bool excludePreviousRevisions ) => excludePreviousRevisions ? "LatestRevisionTableCache" : "TableCache";
 
 	private static string
-		getInlineSelectExpression( DatabaseTable table, TableColumns tableColumns, string selectExpressions, string cacheQueryInDbExpression ) =>
+		getInlineSelectExpression(
+			DatabaseConnection cn, DatabaseTable table, TableColumns tableColumns, string selectExpressions, string cacheQueryInDbExpression ) =>
 		"new InlineSelect( {0}, \"FROM {1}\", {2}, orderByClause: \"{3}\" )".FormatWith(
 			"new[] { " + selectExpressions + " }",
-			table.QualifiedName,
+			table.GetSqlName( cn.DatabaseInfo ).EscapeForLiteral(),
 			cacheQueryInDbExpression,
 			tableColumns.HasKeyColumns
 				? $"ORDER BY {StringTools.ConcatenateWithDelimiter( ", ", tableColumns.KeyColumns.Select( i => i.DelimitedIdentifier.EscapeForLiteral() ) )}"

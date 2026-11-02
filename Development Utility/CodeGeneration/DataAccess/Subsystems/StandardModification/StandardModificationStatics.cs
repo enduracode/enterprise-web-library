@@ -257,9 +257,9 @@ static class StandardModificationStatics {
 		if( hasModTable ) {
 			writer.WriteLine(
 				"var modTableInsert = new InlineInsertWithSelect( \"{0}\", new[] {{ {1} }}, \"{2}\" );".FormatWith(
-					DatabaseOps.GetModificationTableQualifiedName( database, table ),
+					DatabaseOps.GetModificationTableSqlName( database, table ).EscapeForLiteral(),
 					StringTools.ConcatenateWithDelimiter( ", ", columns.KeyColumns.Select( i => "\"{0}\"".FormatWith( i.Name ) ) ),
-					table.QualifiedName ) );
+					table.GetSqlName( cn.DatabaseInfo ).EscapeForLiteral() ) );
 			foreach( var i in columns.KeyColumns )
 				writer.WriteLine( "modTableInsert.AddSelectExpression( \"{0}\" );".FormatWith( i.DelimitedIdentifier.EscapeForLiteral() ) );
 			writer.WriteLine( "modTableInsert.AddConditions( conditions.Select( i => i.CommandCondition ) );" );
@@ -268,7 +268,7 @@ static class StandardModificationStatics {
 			writer.WriteLine( "modTableInsert.Execute( {0}, isLongRunning: isLongRunning );".FormatWith( DataAccessStatics.GetConnectionExpression( database ) ) );
 		}
 
-		writer.WriteLine( "var delete = new InlineDelete( \"" + table.QualifiedName + "\" );" );
+		writer.WriteLine( "var delete = new InlineDelete( \"" + table.GetSqlName( cn.DatabaseInfo ).EscapeForLiteral() + "\" );" );
 		writer.WriteLine( "delete.AddConditions( conditions.Select( i => i.CommandCondition ) );" );
 		if( isRevisionHistoryClass )
 			writer.WriteLine( "delete.AddConditions( getLatestRevisionsCondition().ToCollection() );" );
@@ -512,7 +512,7 @@ static class StandardModificationStatics {
 				revisionIdProperty + " ), " + DataAccessStatics.GetConnectionExpression( database ) + ".GetUserTransactionId() );" );
 		}
 
-		writer.WriteLine( "var insert = new InlineInsert( \"" + table.QualifiedName + "\" );" );
+		writer.WriteLine( "var insert = new InlineInsert( \"" + table.GetSqlName( cn.DatabaseInfo ).EscapeForLiteral() + "\" );" );
 		writer.WriteLine( "insert.AddColumnModifications( getColumnModificationValues() );" );
 		if( identityColumn != null )
 			// One reason the ChangeType call is necessary: SQL Server identities always come back as decimal, and you can’t cast a boxed decimal to an int.
@@ -527,7 +527,8 @@ static class StandardModificationStatics {
 			writer.WriteLine( "insert.Execute( {0}, isLongRunning: isLongRunning );".FormatWith( DataAccessStatics.GetConnectionExpression( database ) ) );
 
 		if( hasModTable ) {
-			writer.WriteLine( "var modTableInsert = new InlineInsert( \"{0}\" );".FormatWith( DatabaseOps.GetModificationTableQualifiedName( database, table ) ) );
+			writer.WriteLine(
+				"var modTableInsert = new InlineInsert( \"{0}\" );".FormatWith( DatabaseOps.GetModificationTableSqlName( database, table ).EscapeForLiteral() ) );
 			writer.WriteLine(
 				"modTableInsert.AddColumnModifications( new[] {{ {0} }} );".FormatWith(
 					StringTools.ConcatenateWithDelimiter(
@@ -561,9 +562,9 @@ static class StandardModificationStatics {
 		if( hasModTable ) {
 			writer.WriteLine(
 				"var modTableInsert = new InlineInsertWithSelect( \"{0}\", new[] {{ {1} }}, \"{2}\" );".FormatWith(
-					DatabaseOps.GetModificationTableQualifiedName( database, table ),
+					DatabaseOps.GetModificationTableSqlName( database, table ).EscapeForLiteral(),
 					StringTools.ConcatenateWithDelimiter( ", ", columns.KeyColumns.Select( i => "\"{0}\"".FormatWith( i.Name ) ) ),
-					table.QualifiedName ) );
+					table.GetSqlName( cn.DatabaseInfo ).EscapeForLiteral() ) );
 			foreach( var i in columns.KeyColumns )
 				writer.WriteLine( "modTableInsert.AddSelectExpression( \"{0}\" );".FormatWith( i.DelimitedIdentifier.EscapeForLiteral() ) );
 			writer.WriteLine( "modTableInsert.AddConditions( conditions!.Select( i => i.CommandCondition ) );" );
@@ -579,9 +580,9 @@ static class StandardModificationStatics {
 						StringTools.ConcatenateWithDelimiter( " || ", nonIdentityKeyColumns.Select( i => "{0}.HasChanged".FormatWith( getColumnFieldName( i ) ) ) ) ) );
 				writer.WriteLine(
 					"var modTableNewKeyInsert = new InlineInsertWithSelect( \"{0}\", new[] {{ {1} }}, \"{2}\" );".FormatWith(
-						DatabaseOps.GetModificationTableQualifiedName( database, table ),
+						DatabaseOps.GetModificationTableSqlName( database, table ).EscapeForLiteral(),
 						StringTools.ConcatenateWithDelimiter( ", ", columns.KeyColumns.Select( i => "\"{0}\"".FormatWith( i.Name ) ) ),
-						table.QualifiedName ) );
+						table.GetSqlName( cn.DatabaseInfo ).EscapeForLiteral() ) );
 				foreach( var column in columns.KeyColumns )
 					if( column.IsIdentity )
 						writer.WriteLine( "modTableNewKeyInsert.AddSelectExpression( \"{0}\" );".FormatWith( column.DelimitedIdentifier.EscapeForLiteral() ) );
@@ -601,7 +602,7 @@ static class StandardModificationStatics {
 			}
 		}
 
-		writer.WriteLine( "var update = new InlineUpdate( \"" + table.QualifiedName + "\" );" );
+		writer.WriteLine( "var update = new InlineUpdate( \"" + table.GetSqlName( cn.DatabaseInfo ).EscapeForLiteral() + "\" );" );
 		writer.WriteLine( "update.AddColumnModifications( modificationValues );" );
 		writer.WriteLine( "update.AddConditions( conditions!.Select( i => i.CommandCondition ) );" );
 		if( isRevisionHistoryClass )
@@ -646,7 +647,7 @@ static class StandardModificationStatics {
 
 		writer.WriteLine(
 			"var command = new InlineSelect( \"" + columns.PrimaryKeyAndRevisionIdColumn!.DelimitedIdentifier.EscapeForLiteral() + "\".ToCollection(), \"FROM " +
-			table.QualifiedName + "\", false );" );
+			table.GetSqlName( cn.DatabaseInfo ).EscapeForLiteral() + "\", false );" );
 		writer.WriteLine( "command.AddConditions( conditions.Select( i => i.CommandCondition ) );" );
 		writer.WriteLine( "command.AddConditions( getLatestRevisionsCondition().ToCollection() );" );
 		writer.WriteLine( "var latestRevisionIds = new List<int>();" );
@@ -675,7 +676,7 @@ static class StandardModificationStatics {
 		// Insert a copy of the data row and make it correspond to the copy of the latest revision.
 		writer.WriteLine(
 			"var copyCommand = new InlineInsertWithSelect( \"{0}\", new[] {{ {1} }}, \"{0}\" );".FormatWith(
-				table.QualifiedName,
+				table.GetSqlName( cn.DatabaseInfo ).EscapeForLiteral(),
 				StringTools.ConcatenateWithDelimiter( ", ", nonIdentityColumns.Select( i => "\"{0}\"".FormatWith( i.Name ) ) ) ) );
 		foreach( var column in nonIdentityColumns )
 			writer.WriteLine(
@@ -688,7 +689,8 @@ static class StandardModificationStatics {
 		writer.WriteLine( "copyCommand.Execute( {0} );".FormatWith( DataAccessStatics.GetConnectionExpression( database ) ) );
 
 		if( hasModTable ) {
-			writer.WriteLine( "var modTableInsert = new InlineInsert( \"{0}\" );".FormatWith( DatabaseOps.GetModificationTableQualifiedName( database, table ) ) );
+			writer.WriteLine(
+				"var modTableInsert = new InlineInsert( \"{0}\" );".FormatWith( DatabaseOps.GetModificationTableSqlName( database, table ).EscapeForLiteral() ) );
 			writer.WriteLine(
 				"modTableInsert.AddColumnModifications( {0}.ToCollection() );".FormatWith(
 					columns.PrimaryKeyAndRevisionIdColumn.GetCommandColumnValueExpression( "copiedRevisionId" ) ) );
