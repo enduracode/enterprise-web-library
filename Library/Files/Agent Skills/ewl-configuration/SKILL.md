@@ -3,6 +3,9 @@ name: ewl-configuration
 description: Installation custom/shared configuration, Custom.xsd, GlobalStatics initialization, and Configuration/CustomSyncLogic.cs. Use when adding or consuming installation settings, centralizing configuration loading, or adding system-specific sync steps and dependency acquisition through Custom Sync Runner.
 ---
 
+For PostgreSQL client systems, see [PostgreSQL configuration](PostgreSQL.md) for
+provider registration and installation database settings.
+
 ## Centralized installation configuration
 
 Load installation configuration once during system initialization. The established

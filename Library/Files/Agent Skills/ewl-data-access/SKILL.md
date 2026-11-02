@@ -5,6 +5,8 @@ description: EWL data access including generated table and custom retrievals, mo
 
 ## Overview
 
+For PostgreSQL client systems, also read [PostgreSQL data access](PostgreSQL.md).
+
 The Development Utility generates data-access classes from your database
 schema. These live in `Generated Code\` folders and must never be edited
 directly. You can extend them with hand-written `partial class` files.

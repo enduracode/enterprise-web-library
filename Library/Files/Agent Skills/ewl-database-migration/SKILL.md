@@ -5,6 +5,8 @@ description: Database schema migration using FluentMigrator with the EWL Data Mi
 
 ## Overview
 
+For PostgreSQL client systems, also read [PostgreSQL migrations](PostgreSQL.md).
+
 EWL uses FluentMigrator for database schema and reference data migrations.
 Migrations run automatically during `sync` (for local
 development) and during deployment via `DataMigrator.exe`.
