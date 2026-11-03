@@ -123,11 +123,13 @@ public sealed class PostgresProvider: ExternalPostgresProvider {
 	string ExternalPostgresProvider.GetDbTypeString( object databaseSpecificType ) => getDbTypeString( (NpgsqlDbType)databaseSpecificType );
 
 	IReadOnlyCollection<InferredParameter> ExternalPostgresProvider.InferStatementParameterTypes( DatabaseConnection connection, string statement ) {
-		using var command = new NpgsqlCommand( statement );
-		connection.ExecuteCommandOperation( command, () => NpgsqlCommandBuilder.DeriveParameters( command ) );
+		using var command = connection.DatabaseInfo.CreateCommand();
+		command.CommandText = statement;
+		connection.ExecuteCommandOperation( command, providerCommand => NpgsqlCommandBuilder.DeriveParameters( (NpgsqlCommand)providerCommand ) );
 
-		var typesByName = command.Connection!.GetSchema( "DataTypes" ).Rows.Cast<DataRow>().ToDictionary( i => (string)i[ "TypeName" ], StringComparer.Ordinal );
-		return command.Parameters.Select( parameter => {
+		var typesByName = connection.GetSchema( "DataTypes" ).Rows.Cast<DataRow>().ToDictionary( i => (string)i[ "TypeName" ], StringComparer.Ordinal );
+		return command.Parameters.Cast<NpgsqlParameter>()
+			.Select( parameter => {
 				var typeName = (string)typesByName[ parameter.DataTypeName! ][ "DataType" ];
 				return new InferredParameter(
 					parameter.ParameterName,

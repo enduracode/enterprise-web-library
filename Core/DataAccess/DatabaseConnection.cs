@@ -442,12 +442,12 @@ public class DatabaseConnection {
 		}
 	}
 
-	internal void ExecuteCommandOperation( DbCommand command, Action method ) {
+	internal void ExecuteCommandOperation( DbCommand command, Action<DbCommand> method ) {
 		assertCurrentTransactionUsable();
 
 		try {
 			prepareCommandForExecution( command, false );
-			method();
+			method( ( (ProfiledDbCommand)command ).WrappedCommand );
 		}
 		catch( Exception e ) {
 			throw createCommandException( command, e );
