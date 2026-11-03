@@ -98,7 +98,7 @@ public static class DataStatics {
 							sourceInstallationType,
 							packageFolderPath,
 								[ ],
-								[ ] );
+							dataModificationUsers );
 				else {
 					var unrecognizedInstallation = (UnrecognizedInstallation)installation;
 					foreach( var secondaryDatabase in unrecognizedInstallation.UnrecognizedInstallationLogic.AllSecondaryDatabases )
@@ -111,7 +111,7 @@ public static class DataStatics {
 							sourceInstallationType,
 							packageFolderPath,
 								[ ],
-								[ ] );
+							dataModificationUsers );
 				}
 			} );
 
