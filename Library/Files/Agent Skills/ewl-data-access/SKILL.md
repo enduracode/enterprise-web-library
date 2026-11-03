@@ -128,8 +128,9 @@ After generation, this produces `DataAccess.Retrieval.OrdersRetrieval`
 with a typed nested `Row`, `GetRowsLinkedToCustomerOrderedById(...)`, and
 `GetRowsMatchingId(...)`. Named parameters are
 bound by generated code; inspect their generated order and signatures. The
-current generator declares query parameters as `object?`, not schema-inferred
-strongly typed parameters. Use explicit aliases for expressions and duplicate
+generator uses inferred parameter types when the database supplies metadata
+(including PostgreSQL), and `object?` when metadata is unavailable. Use explicit
+aliases for expressions and duplicate
 column names. Preserve authorization and relational semantics, null/default behavior,
 trimming, ordering, and duplicate/single-row expectations.
 

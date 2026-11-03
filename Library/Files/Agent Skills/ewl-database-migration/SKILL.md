@@ -89,8 +89,11 @@ When a fluent migration omits a name, EWL uses these conventions:
 | Unique constraint/index | `rooms_room_name_unique` | `RoomsRoomNameUnique` |
 | Nonunique index | `rooms_building_id_index` | `RoomsBuildingIdIndex` |
 
-PostgreSQL/Oracle use snake_case; the other providers concatenate original
-table/column spelling with the suffix. Oracle's quoter uppercases names.
+The examples assume snake_case table/column inputs for PostgreSQL/Oracle and
+PascalCase inputs for the other providers. PostgreSQL/Oracle join components with
+underscores and lowercase them; they do not split words or acronyms (`APIKeys`
+produces `apikeys_pk`). The other providers concatenate original table/column
+spelling with the suffix. Oracle's quoter uppercases names.
 Composite columns retain declaration order; foreign keys use the referencing
 table/columns. Schema names are excluded. Inline `.Unique()` uses the unique-index
 convention. Explicit names bypass automatic naming but still pass through quoting.
