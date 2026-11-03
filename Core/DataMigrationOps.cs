@@ -6,7 +6,9 @@ using EnterpriseWebLibrary.DataAccess;
 using EnterpriseWebLibrary.DatabaseSpecification;
 using EnterpriseWebLibrary.DatabaseSpecification.Databases;
 using EnterpriseWebLibrary.ExternalFunctionality;
+using FluentMigrator.Expressions;
 using FluentMigrator.Runner;
+using FluentMigrator.Runner.Conventions;
 using FluentMigrator.Runner.VersionTableInfo;
 using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,6 +23,51 @@ namespace EnterpriseWebLibrary;
 [ EditorBrowsable( EditorBrowsableState.Never ) ]
 public static class DataMigrationOps {
 	private static readonly Duration commandTimeout = Duration.FromMinutes( 60 );
+
+	private sealed class ConventionSet: DefaultConventionSet, IColumnsConvention, IConstraintConvention, IForeignKeyConvention, IIndexConvention {
+		private readonly bool namesUseSnakeCase;
+
+		public ConventionSet( bool namesUseSnakeCase ) {
+			this.namesUseSnakeCase = namesUseSnakeCase;
+
+			ColumnsConventions[ 0 ] = this;
+			ConstraintConventions[ 0 ] = this;
+			ForeignKeyConventions[ 0 ] = this;
+			IndexConventions[ 0 ] = this;
+		}
+
+		IColumnsExpression IColumnsConvention.Apply( IColumnsExpression expression ) {
+			foreach( var column in expression.Columns )
+				if( column.IsPrimaryKey && string.IsNullOrEmpty( column.PrimaryKeyName ) )
+					column.PrimaryKeyName = getName( [ string.IsNullOrEmpty( column.TableName ) ? expression.TableName : column.TableName, "Pk" ] );
+			return expression;
+		}
+
+		IConstraintExpression IConstraintConvention.Apply( IConstraintExpression expression ) {
+			var constraint = expression.Constraint;
+			if( string.IsNullOrEmpty( constraint.ConstraintName ) )
+				constraint.ConstraintName = getName(
+					constraint.IsPrimaryKeyConstraint ? [ constraint.TableName, "Pk" ] : [ constraint.TableName, .. constraint.Columns, "Unique" ] );
+			return expression;
+		}
+
+		IForeignKeyExpression IForeignKeyConvention.Apply( IForeignKeyExpression expression ) {
+			var foreignKey = expression.ForeignKey;
+			if( string.IsNullOrEmpty( foreignKey.Name ) )
+				foreignKey.Name = getName( [ foreignKey.ForeignTable, .. foreignKey.ForeignColumns, "Fk" ] );
+			return expression;
+		}
+
+		IIndexExpression IIndexConvention.Apply( IIndexExpression expression ) {
+			var index = expression.Index;
+			if( string.IsNullOrEmpty( index.Name ) )
+				index.Name = getName( [ index.TableName, .. index.Columns.Select( i => i.Name ), index.IsUnique ? "Unique" : "Index" ] );
+			return expression;
+		}
+
+		private string getName( IEnumerable<string> components ) =>
+			namesUseSnakeCase ? StringTools.ConcatenateWithDelimiter( "_", components ).ToLowerInvariant() : string.Concat( components );
+	}
 
 	private class TableConfiguration: IVersionTableMetaData {
 		bool IVersionTableMetaData.OwnsSchema => true;
@@ -68,6 +115,7 @@ public static class DataMigrationOps {
 				.WithGlobalCommandTimeout( commandTimeout.ToTimeSpan() )
 				.ScanIn( appAssembly )
 				.For.Migrations() )
+			.AddScoped<IConventionSet>( _ => new ConventionSet( ConfigurationStatics.InstallationConfiguration.PrimaryDatabaseInfo is PostgresInfo or OracleInfo ) )
 			.AddScoped( typeof( IVersionTableMetaData ), typeof( TableConfiguration ) )
 			.AddLogging( builder => builder.AddFluentMigratorConsole() )
 			.BuildServiceProvider();

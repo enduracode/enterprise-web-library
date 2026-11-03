@@ -78,13 +78,27 @@ In `Execute.Sql`, scripts, and Dapper queries, quote identifiers yourself using 
 database's SQL syntax and keep parameter binding for data values. PostgreSQL has
 an additional identifier-name limitation described in [PostgreSQL migrations](PostgreSQL.md).
 
-## Constraint naming conventions
+## Automatic constraint and index naming conventions
 
-| Constraint | Pattern | Example |
+When a fluent migration omits a name, EWL uses these conventions:
+
+| Object | PostgreSQL/Oracle | SQL Server/MySQL/SQLite |
 |---|---|---|
-| Primary key | `<TableName>Pk` | `RoomsPk` |
-| Foreign key | `<TableName><ColumnName>Fk` | `RoomsBuildingIdFk` |
-| Unique | `<TableName><ColumnName>Unique` | `RoomsRoomNameUnique` |
+| Primary key (inline or separate) | `rooms_pk` | `RoomsPk` |
+| Foreign key | `rooms_building_id_fk` | `RoomsBuildingIdFk` |
+| Unique constraint/index | `rooms_room_name_unique` | `RoomsRoomNameUnique` |
+| Nonunique index | `rooms_building_id_index` | `RoomsBuildingIdIndex` |
+
+PostgreSQL/Oracle use snake_case; the other providers concatenate original
+table/column spelling with the suffix. Oracle's quoter uppercases names.
+Composite columns retain declaration order; foreign keys use the referencing
+table/columns. Schema names are excluded. Inline `.Unique()` uses the unique-index
+convention. Explicit names bypass automatic naming but still pass through quoting.
+
+Use explicit names for collisions, identifier-length limits, unique-index deletion,
+and existing objects with older names. Unnamed `Delete.Index()` cannot identify
+uniqueness and generates the nonunique index name. Existence checks and raw SQL
+require actual names; existing objects are not renamed.
 
 For inline foreign keys on a column definition, use:
 
