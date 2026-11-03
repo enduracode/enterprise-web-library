@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using EnterpriseWebLibrary.Caching;
 using EnterpriseWebLibrary.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -11,7 +12,7 @@ namespace EnterpriseWebLibrary.BackgroundServiceFramework;
 /// <summary>
 /// A .NET hosted service that uses an EWL background service for its implementation.
 /// </summary>
-internal sealed class HostedServiceAdapter: BackgroundService {
+sealed class HostedServiceAdapter: BackgroundService {
 	private const int tickInterval = 10000;
 
 	private Instant lastTickInstant;
@@ -30,6 +31,7 @@ internal sealed class HostedServiceAdapter: BackgroundService {
 		void init() {
 			lastTickInstant = Clock.GetCurrentTime();
 			service.Init();
+			AppMemoryCache.StartBackgroundMaintenance();
 		}
 		if( !TelemetryStatics.ExecuteBlockWithStandardExceptionHandling( init ) ) {
 			abortStartup( 1, 0x428 ); // Win32 error code; see http://msdn.microsoft.com/en-us/library/cc231199.aspx.
@@ -42,7 +44,10 @@ internal sealed class HostedServiceAdapter: BackgroundService {
 	public override async Task StopAsync( CancellationToken cancellationToken ) {
 		await base.StopAsync( cancellationToken );
 
-		TelemetryStatics.ExecuteBlockWithStandardExceptionHandling( service.CleanUp );
+		TelemetryStatics.ExecuteBlockWithStandardExceptionHandling( () => {
+			AppMemoryCache.StopBackgroundMaintenance();
+			service.CleanUp();
+		} );
 	}
 
 	protected override async Task ExecuteAsync( CancellationToken stoppingToken ) {

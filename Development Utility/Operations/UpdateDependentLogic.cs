@@ -1516,6 +1516,7 @@ class UpdateDependentLogic: Operation {
 			project.NamespaceAndAssemblyName,
 			writer => {
 				writer.WriteLine( "using System.Collections.Immutable;" );
+				writer.WriteLine( "using EnterpriseWebLibrary.Caching;" );
 				writer.WriteLine( "using EnterpriseWebLibrary.DataAccess;" );
 				writer.WriteLine( $"using {installation.DevelopmentInstallationLogic.DevelopmentConfiguration.LibraryNamespaceAndAssemblyName};" );
 				writer.WriteLine();
@@ -1530,6 +1531,8 @@ class UpdateDependentLogic: Operation {
 					$"""GlobalInitializationOps.InitStatics( new GlobalInitializer(), "{project.Name}", {isClientSideApp}, mainDataAccessStateGetter: () => dataAccessState.Value! );""" );
 				writer.WriteLine( "try {" );
 				writer.WriteLine( "return GlobalInitializationOps.ExecuteAppWithStandardExceptionHandling( () => {" );
+				writer.WriteLine( "try {" );
+				writer.WriteLine( "AppMemoryCache.StartBackgroundMaintenance();" );
 
 				// See https://stackoverflow.com/a/44135529/35349.
 				writer.WriteLine( "Console.SetIn( new StreamReader( Console.OpenStandardInput(), Console.InputEncoding, false, 4096 ) );" );
@@ -1537,6 +1540,10 @@ class UpdateDependentLogic: Operation {
 				writer.WriteLine(
 					"ewlMain( args.Length > 0 && string.Equals( args[ 0 ], \"{0}\", StringComparison.Ordinal ) ? Newtonsoft.Json.JsonConvert.DeserializeObject<ImmutableArray<string>>( Console.ReadLine()! ) : args );"
 						.FormatWith( InstallationConfiguration.ServerSideConsoleAppJsonArgument ) );
+				writer.WriteLine( "}" );
+				writer.WriteLine( "finally {" );
+				writer.WriteLine( "AppMemoryCache.StopBackgroundMaintenance();" );
+				writer.WriteLine( "}" );
 				writer.WriteLine( "} );" );
 				writer.WriteLine( "}" );
 				writer.WriteLine( "finally {" );

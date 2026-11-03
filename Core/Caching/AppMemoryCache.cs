@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.ComponentModel;
 using System.Runtime;
 using System.Threading;
 using JetBrains.Annotations;
@@ -16,24 +17,37 @@ public static class AppMemoryCache {
 	private const int tickInterval = 10000;
 
 	private static IMemoryCache? cacheField;
-	private static Timer? timer;
 	private static ConcurrentBag<string>? periodicEvictionKeys;
+	private static Timer? timer;
 
 	internal static void Init() {
 		cacheField = new MemoryCache( new MemoryCacheOptions() );
-
-		timer = new Timer( tick, null, tickInterval, Timeout.Infinite );
-		periodicEvictionKeys = new ConcurrentBag<string>();
+		periodicEvictionKeys = [ ];
 	}
 
 	internal static void CleanUp() {
-		if( timer is not null ) {
-			var waitHandle = new ManualResetEvent( false );
-			timer.Dispose( waitHandle );
-			waitHandle.WaitOne();
-		}
-
 		cacheField?.Dispose();
+	}
+
+	/// <summary>
+	/// Generated code and internal use only.
+	/// </summary>
+	[ EditorBrowsable( EditorBrowsableState.Never ) ]
+	public static void StartBackgroundMaintenance() {
+		timer = new Timer( tick, null, tickInterval, Timeout.Infinite );
+	}
+
+	/// <summary>
+	/// Generated code and internal use only.
+	/// </summary>
+	[ EditorBrowsable( EditorBrowsableState.Never ) ]
+	public static void StopBackgroundMaintenance() {
+		if( timer is null )
+			return;
+		using var waitHandle = new ManualResetEvent( false );
+		timer.Dispose( waitHandle );
+		waitHandle.WaitOne();
+		timer = null;
 	}
 
 	private static void tick( object? state ) {

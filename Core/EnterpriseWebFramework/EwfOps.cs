@@ -578,6 +578,8 @@ public static class EwfOps {
 							executeWithAutomaticDatabaseConnections( ExternalFunctionalityStatics.ExternalOpenIdConnectProvider.InitAppSpecificLogicDependencies );
 						if( AuthenticationStatics.SamlIdentityProviders.Any() || ExternalFunctionalityStatics.SamlFunctionalityEnabled )
 							executeWithAutomaticDatabaseConnections( ExternalFunctionalityStatics.ExternalSamlProvider.InitAppSpecificLogicDependencies );
+
+						AppMemoryCache.StartBackgroundMaintenance();
 					}
 
 					initTimeDataAccessState = null;
@@ -617,6 +619,7 @@ public static class EwfOps {
 					app.Run();
 				}
 				finally {
+					AppMemoryCache.StopBackgroundMaintenance();
 					appInitializer?.CleanUpStatics();
 					Log.CloseAndFlush();
 				}
