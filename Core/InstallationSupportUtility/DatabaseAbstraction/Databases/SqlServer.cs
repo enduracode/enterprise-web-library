@@ -36,7 +36,7 @@ public class SqlServer: Database {
 				try {
 					TewlContrib.ProcessTools.RunProgram(
 						"sqlcmd",
-						( info.Server != null ? "-S " + info.Server + " " : "" ) + "-d " + info.Database + " -e -b",
+						( info.Server is null ? "" : $"-S {info.Server} " ) + $"""-d "{info.Database}" -e -b""",
 						"BEGIN TRAN" + Environment.NewLine + "GO" + Environment.NewLine + script + "COMMIT TRAN" + Environment.NewLine + "GO" + Environment.NewLine +
 						"EXIT" + Environment.NewLine,
 						true );

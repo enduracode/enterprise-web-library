@@ -36,7 +36,7 @@ public class MySql: Database {
 				try {
 					TewlContrib.ProcessTools.RunProgram(
 						getMySqlProgram( "mysql" ),
-						getHostAndAuthenticationArguments() + " " + info.Database + " --disable-reconnect --batch --disable-auto-rehash",
+						$"""{getHostAndAuthenticationArguments()} "{info.Database}" --disable-reconnect --batch --disable-auto-rehash""",
 						sw.ToString(),
 						true );
 				}
@@ -90,8 +90,9 @@ public class MySql: Database {
 						// The --hex-blob option prevents certain BLOBs from causing errors during database re-creation.
 						TewlContrib.ProcessTools.RunProgram(
 							getMySqlProgram( "mysqldump" ),
-							getHostAndAuthenticationArguments() + " --single-transaction --hex-blob --set-gtid-purged=OFF --result-file=\"{0}\" ".FormatWith( filePath ) +
-							info.Database,
+							$"""
+							 {getHostAndAuthenticationArguments()} --single-transaction --hex-blob --set-gtid-purged=OFF --result-file="{filePath}" "{info.Database}"
+							 """,
 							"",
 							true );
 					}
